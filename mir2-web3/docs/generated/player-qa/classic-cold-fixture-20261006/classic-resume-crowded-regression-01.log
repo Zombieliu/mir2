@@ -1,0 +1,10 @@
+
+running 5 tests
+test routing::tests::crowded_escape_tests::crowded_blindness_does_not_become_a_native_spell_lock ... ok
+test routing::tests::crowded_escape_tests::crowded_dazed_owner_cannot_bypass_physical_admission_with_normal_packet ... ok
+test routing::tests::crowded_escape_tests::crowded_status_owner_cannot_bypass_cast_lock_or_spend_with_normal_magic_packet ... ok
+test routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet ... ok
+test routing::tests::crowded_escape_tests::crowded_uncontrolled_owner_can_cast_normal_magic_packet ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 916 filtered out; finished in 7.16s
+

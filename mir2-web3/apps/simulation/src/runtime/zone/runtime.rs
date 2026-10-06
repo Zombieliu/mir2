@@ -47,6 +47,8 @@ use crate::runtime::map_events::{
 
 pub(super) mod armadillo_ai;
 mod checkpoint;
+#[cfg(any(test, feature = "test-support"))]
+mod crowded_fixture;
 mod experience_ownership;
 mod ground_ownership;
 use super::online_identity::{OnlineIdentityBook, OnlineOwner, OnlinePresence, OnlinePresenceSnapshot};

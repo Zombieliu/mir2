@@ -1,0 +1,12 @@
+{
+  "autonomousCadenceTicks": 50,
+  "fullP1Accepted": false,
+  "liveOutbounds": 0,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "ordinaryLogoutAndSocketClose": true,
+  "ownedTokioListenerStopped": true,
+  "players": 0,
+  "productionProcessUsed": false,
+  "zoneSessions": 0
+}

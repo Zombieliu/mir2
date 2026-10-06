@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-10-06 root adds only opt-in cold-seven test preparation, preserving
+> all151 original D021 slots and non-position native/respawn fields. Six fixture
+> checks and default libraries pass. Owned network06 Wizard/Taoist real attack
+> escape531/496ms and5s quiet pass; Warrior is unqualified, all fullP1/native/
+> progression/capacity gates stay false. Five Gateway and fourteen shared checks
+> pass after the unrelated cold-recovery assertion explicitly allows cleared
+> online authority/root and still rejects tampered original HP. Original failures
+> remain. Point-card online-time billing is absent; Credit is shop currency.
+> No production runtime/schema/auth change or gameR17/feed14 rollout occurred.
+> [Execution](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md).
+
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
 > after P3/source513eb83, applying only two Gateway terminal hunks. Source7
 > merges its actual nested rank, retires exact current editor context, and is

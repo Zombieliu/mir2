@@ -1,0 +1,293 @@
+{
+  "afterRoot": "c2944d1b8f077b4aca725590013fc1adda988d50ed68e66d0c9e53954c4733bd",
+  "beforeRoot": "9011853bccc927a701e1f0dcf0b573ab115e83a3479bb247db879abefd9fa902",
+  "centre": {
+    "x": 59,
+    "y": 56
+  },
+  "changes": [
+    {
+      "from": {
+        "x": 68,
+        "y": 31
+      },
+      "objectId": 292800,
+      "to": {
+        "x": 58,
+        "y": 55
+      }
+    },
+    {
+      "from": {
+        "x": 28,
+        "y": 43
+      },
+      "objectId": 292801,
+      "to": {
+        "x": 60,
+        "y": 55
+      }
+    },
+    {
+      "from": {
+        "x": 77,
+        "y": 53
+      },
+      "objectId": 292802,
+      "to": {
+        "x": 58,
+        "y": 56
+      }
+    },
+    {
+      "from": {
+        "x": 34,
+        "y": 65
+      },
+      "objectId": 292803,
+      "to": {
+        "x": 60,
+        "y": 56
+      }
+    },
+    {
+      "from": {
+        "x": 46,
+        "y": 13
+      },
+      "objectId": 292804,
+      "to": {
+        "x": 58,
+        "y": 57
+      }
+    },
+    {
+      "from": {
+        "x": 45,
+        "y": 33
+      },
+      "objectId": 292805,
+      "to": {
+        "x": 59,
+        "y": 57
+      }
+    },
+    {
+      "from": {
+        "x": 33,
+        "y": 44
+      },
+      "objectId": 292806,
+      "to": {
+        "x": 60,
+        "y": 57
+      }
+    },
+    {
+      "from": {
+        "x": 52,
+        "y": 49
+      },
+      "objectId": 292831,
+      "to": {
+        "x": 40,
+        "y": 7
+      }
+    },
+    {
+      "from": {
+        "x": 52,
+        "y": 50
+      },
+      "objectId": 292836,
+      "to": {
+        "x": 41,
+        "y": 7
+      }
+    },
+    {
+      "from": {
+        "x": 55,
+        "y": 59
+      },
+      "objectId": 293005,
+      "to": {
+        "x": 39,
+        "y": 8
+      }
+    },
+    {
+      "from": {
+        "x": 58,
+        "y": 53
+      },
+      "objectId": 293202,
+      "to": {
+        "x": 40,
+        "y": 8
+      }
+    },
+    {
+      "from": {
+        "x": 57,
+        "y": 54
+      },
+      "objectId": 293207,
+      "to": {
+        "x": 41,
+        "y": 8
+      }
+    },
+    {
+      "from": {
+        "x": 65,
+        "y": 48
+      },
+      "objectId": 293404,
+      "to": {
+        "x": 42,
+        "y": 8
+      }
+    },
+    {
+      "from": {
+        "x": 52,
+        "y": 55
+      },
+      "objectId": 293701,
+      "to": {
+        "x": 38,
+        "y": 9
+      }
+    },
+    {
+      "from": {
+        "x": 54,
+        "y": 56
+      },
+      "objectId": 293706,
+      "to": {
+        "x": 39,
+        "y": 9
+      }
+    },
+    {
+      "from": {
+        "x": 55,
+        "y": 57
+      },
+      "objectId": 293711,
+      "to": {
+        "x": 40,
+        "y": 9
+      }
+    },
+    {
+      "from": {
+        "x": 62,
+        "y": 58
+      },
+      "objectId": 293716,
+      "to": {
+        "x": 41,
+        "y": 9
+      }
+    },
+    {
+      "from": {
+        "x": 64,
+        "y": 59
+      },
+      "objectId": 293721,
+      "to": {
+        "x": 42,
+        "y": 9
+      }
+    }
+  ],
+  "decompressedMapSha256": "ef8d4d9499d64bc16161abebc2548a3c9a98e99a7f634205ba45a3532db44de3",
+  "exit": [
+    {
+      "x": 59,
+      "y": 55
+    },
+    {
+      "x": 59,
+      "y": 54
+    },
+    {
+      "x": 59,
+      "y": 53
+    }
+  ],
+  "fullP1Accepted": false,
+  "kind": "preparedPositionOnly",
+  "map": "D021",
+  "mapSha256": "5e283984b31ee993c8d1157402f50d7e9d4984d8be92db49388c1e024e257ca2",
+  "monsterCount": 151,
+  "nativeInputAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "personalPreparation": {
+    "gold": 20000,
+    "hp": 239,
+    "level": 30,
+    "mp": 260,
+    "normalRegistrationAndTownBind": true,
+    "skillsOrItemsInjected": false
+  },
+  "pressureQualified": false,
+  "ring": [
+    {
+      "x": 58,
+      "y": 55
+    },
+    {
+      "x": 60,
+      "y": 55
+    },
+    {
+      "x": 58,
+      "y": 56
+    },
+    {
+      "x": 60,
+      "y": 56
+    },
+    {
+      "x": 58,
+      "y": 57
+    },
+    {
+      "x": 59,
+      "y": 57
+    },
+    {
+      "x": 60,
+      "y": 57
+    }
+  ],
+  "selectedIds": [
+    292800,
+    292801,
+    292802,
+    292803,
+    292804,
+    292805,
+    292806
+  ],
+  "sourceCounts": {
+    "CaveBat": 120,
+    "CaveBat0": 1,
+    "CaveMaggot": 30
+  },
+  "sourcePoolActivation": {
+    "extraSpawnSlotsInvented": false,
+    "initiallyActive": 73,
+    "originalDormantSlotsActivated": 78,
+    "sourceMaterializerUsed": true,
+    "totalOriginalSlots": 151
+  },
+  "unchangedNativeFieldsSha256": "de9cb9fbafc776c0ef33f67929a861e22737e94a7dd0fe98b9d607091a83c8a6",
+  "unchangedRespawnPoliciesSha256": "40cec61358e592402fd87f7aa09cc9beb2fefe01f24b74aeeaa37027f40c3a2a",
+  "verifiedCheckpointRoundtrip": true
+}

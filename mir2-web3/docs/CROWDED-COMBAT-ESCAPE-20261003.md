@@ -1,5 +1,14 @@
 # 怪群中右键无法逃跑：源码、复现与修复
 
+> 2026-10-06 原始槽/位置受限编排通过六项检查；新 owned WebSocket network06
+> 法师/道士七怪普通攻击后撤退531/496ms、五秒无漂移通过。战士正伤害资格不足，
+> 不算玩法失败或通过。更早未装备试次的超时保留。源码十五秒入场周期刷新宽限
+> 和专用移动实时包集合解释了被动等待的遗漏，最终驱动继续正常刷新而不改时钟。
+> 五项网关/十四项共享回归及默认编译通过；原13/1冷恢复断言失败保留，修正仅
+> 接受刻意清空的在线身份/根，同时仍严格拒绝原始根被篡改。Windows右键、施法、
+> 持续奔跑、全包围、保存和配套发布仍未验收，没有生产战斗变更。
+> [完整边界和证据](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md)。
+
 > 2026-10-04 source57729 paired CI/native builds pass, but clean actor preparation
 > identifies exactly225 absent Monster049 generated files (224 frames + metadata).
 > Root admits only that source-bound generated library; the action catalog remains

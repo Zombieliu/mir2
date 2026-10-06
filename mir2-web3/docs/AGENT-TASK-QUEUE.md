@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-10-06 bounded P1 cold-geometry network06 now has two qualified normal
+> attack escapes: Wizard531ms/Taoist496ms, actual pending damage and5s quiet.
+> Warrior has no qualifying positive-damage window with ordinary starter gear;
+> no retry or lowered gate is recorded. Next: Warrior eligibility, Magic and
+> held movement, Windows right-button/visuals, save-relogin and paired delivery.
+> Six fixture/five Gateway/fourteen shared checks and default compilation pass;
+> old fixture/network/regression failures remain. Point-card time is absent;
+> this question is an audit, not authorization to alter billing/login rules.
+> Public gameR17/feed14 and protected player installations/saves stay unchanged.
+> [Evidence and scope](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md).
+
 > 2026-10-06 user explicitly resumes the eight-stage classic gameplay delivery.
 > P1 dense movement/combat qualification and actual native/network acceptance
 > lead, then P2 real late-map/Boss/item journeys and P3 ownership closure;

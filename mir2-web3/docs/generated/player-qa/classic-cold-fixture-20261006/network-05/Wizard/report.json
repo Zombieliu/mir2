@@ -1,0 +1,1848 @@
+{
+  "kind": "preparedGeometryNormalWebSocket",
+  "className": "Wizard",
+  "originalSourceMapSha256": "5e283984b31ee993c8d1157402f50d7e9d4984d8be92db49388c1e024e257ca2",
+  "originalDecompressedMapSha256": "ef8d4d9499d64bc16161abebc2548a3c9a98e99a7f634205ba45a3532db44de3",
+  "unchangedClassifierSha256": "f78103fb5ddb1516caac0f0b088bacd01421c5d9ede603a5c75a3c2b2c95dc0d",
+  "declaredFormationBudgetMs": 30000,
+  "trials": 1,
+  "productionR18ElfUsed": false,
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false,
+  "bootstrap": {
+    "source": "ordinaryBootstrap",
+    "hp": 128,
+    "mp": 541,
+    "maxHp": 128,
+    "stats": [
+      {
+        "stat": 0,
+        "value": 0
+      },
+      {
+        "stat": 1,
+        "value": 0
+      },
+      {
+        "stat": 2,
+        "value": 0
+      },
+      {
+        "stat": 3,
+        "value": 0
+      },
+      {
+        "stat": 4,
+        "value": 4
+      },
+      {
+        "stat": 5,
+        "value": 4
+      },
+      {
+        "stat": 6,
+        "value": 4
+      },
+      {
+        "stat": 7,
+        "value": 4
+      },
+      {
+        "stat": 8,
+        "value": 0
+      },
+      {
+        "stat": 9,
+        "value": 0
+      },
+      {
+        "stat": 10,
+        "value": 5
+      },
+      {
+        "stat": 11,
+        "value": 15
+      },
+      {
+        "stat": 12,
+        "value": 128
+      },
+      {
+        "stat": 13,
+        "value": 541
+      },
+      {
+        "stat": 16,
+        "value": 230
+      },
+      {
+        "stat": 17,
+        "value": 22
+      },
+      {
+        "stat": 18,
+        "value": 24
+      },
+      {
+        "stat": 30,
+        "value": 0
+      },
+      {
+        "stat": 31,
+        "value": 0
+      },
+      {
+        "stat": 32,
+        "value": 0
+      },
+      {
+        "stat": 33,
+        "value": 0
+      },
+      {
+        "stat": 34,
+        "value": 0
+      },
+      {
+        "stat": 35,
+        "value": 0
+      },
+      {
+        "stat": 36,
+        "value": 0
+      }
+    ],
+    "location": {
+      "map": "D021",
+      "x": 59,
+      "y": 56,
+      "direction": "Down"
+    }
+  },
+  "formationObservations": [
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 0 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No corresponding exact owner HP decline observed"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263504663,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 128,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263504651
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263504651
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 0,
+      "positiveOwnerDamage": 0,
+      "exactHpDeclineSequences": [],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 0 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No corresponding exact owner HP decline observed"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263504956,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 128,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263504914
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263504914
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 0,
+      "positiveOwnerDamage": 0,
+      "exactHpDeclineSequences": [],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263505250,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263505213
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263505213
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263505556,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263505516
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263505516
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263505864,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263505823
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263505823
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263506159,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263506115
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263506115
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263506453,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263506410
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263506410
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263506748,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263506709
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263506709
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263507043,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507002
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507002
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263507337,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507295
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507295
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [],
+      "aimedAttackCounts": {},
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263507645,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507602
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507602
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [
+        292800,
+        292801,
+        292802,
+        292803,
+        292804,
+        292805,
+        292806
+      ],
+      "aimedAttackCounts": {
+        "292800": 2,
+        "292801": 2,
+        "292802": 2,
+        "292803": 2,
+        "292804": 2,
+        "292805": 2,
+        "292806": 2
+      },
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263507936,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 94,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507894
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263507894
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [
+        292800,
+        292801,
+        292802,
+        292803,
+        292804,
+        292805,
+        292806
+      ],
+      "aimedAttackCounts": {
+        "292800": 2,
+        "292801": 2,
+        "292802": 2,
+        "292803": 2,
+        "292804": 2,
+        "292805": 2,
+        "292806": 2
+      },
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "inconclusive",
+      "reasons": [
+        "Only 7 positive normal owner DamageIndicator receipts; Miss/zero excluded"
+      ],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263508233,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 60,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263508192
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263508192
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [
+        292800,
+        292801,
+        292802,
+        292803,
+        292804,
+        292805,
+        292806
+      ],
+      "aimedAttackCounts": {
+        "292800": 2,
+        "292801": 2,
+        "292802": 2,
+        "292803": 2,
+        "292804": 2,
+        "292805": 2,
+        "292806": 2
+      },
+      "positiveOwnerHitCount": 7,
+      "positiveOwnerDamage": 34,
+      "exactHpDeclineSequences": [
+        667,
+        711
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 711,
+          "tsMs": 1791263508193,
+          "hp": 60,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "status": "qualified",
+      "reasons": [],
+      "windowMs": 6200,
+      "evaluatedAtMs": 1791263508539,
+      "owner": {
+        "map": "D021",
+        "x": 59,
+        "y": 56,
+        "direction": "Down",
+        "ownerId": 1000,
+        "hp": 60,
+        "maxHp": 128,
+        "mp": 541,
+        "maxMp": 541,
+        "hpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263508497
+        },
+        "mpProvenance": {
+          "ownerId": 1000,
+          "absolute": true,
+          "source": "worldSnapshot",
+          "observedMs": 1791263508497
+        },
+        "exactHp": true,
+        "exactMp": true,
+        "dead": false,
+        "poison": 0,
+        "inSafeZone": false,
+        "actor": null
+      },
+      "attackerIds": [
+        292800,
+        292801,
+        292802,
+        292803,
+        292804,
+        292805,
+        292806
+      ],
+      "aimedAttackCounts": {
+        "292800": 2,
+        "292801": 2,
+        "292802": 2,
+        "292803": 2,
+        "292804": 2,
+        "292805": 2,
+        "292806": 2
+      },
+      "positiveOwnerHitCount": 14,
+      "positiveOwnerDamage": 68,
+      "exactHpDeclineSequences": [
+        667,
+        711
+      ],
+      "exactHpLedger": [
+        {
+          "sequence": 630,
+          "tsMs": 1791263504421,
+          "hp": 128,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 667,
+          "tsMs": 1791263505214,
+          "hp": 94,
+          "packet": "worldSnapshot"
+        },
+        {
+          "sequence": 711,
+          "tsMs": 1791263508193,
+          "hp": 60,
+          "packet": "worldSnapshot"
+        }
+      ],
+      "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+      "exit": {
+        "type": "walk",
+        "direction": "Up",
+        "target": {
+          "x": 59,
+          "y": 55
+        },
+        "corridor": [
+          {
+            "x": 59,
+            "y": 55
+          },
+          {
+            "x": 59,
+            "y": 54
+          },
+          {
+            "x": 59,
+            "y": 53
+          }
+        ]
+      },
+      "attackReceiptSequences": [
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703
+      ],
+      "positiveOwnerHitSequences": [
+        651,
+        654,
+        656,
+        658,
+        660,
+        662,
+        664,
+        714,
+        717,
+        719,
+        721,
+        723,
+        725,
+        727
+      ],
+      "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    }
+  ],
+  "qualification": {
+    "status": "qualified",
+    "reasons": [],
+    "windowMs": 6200,
+    "evaluatedAtMs": 1791263508539,
+    "owner": {
+      "map": "D021",
+      "x": 59,
+      "y": 56,
+      "direction": "Down",
+      "ownerId": 1000,
+      "hp": 60,
+      "maxHp": 128,
+      "mp": 541,
+      "maxMp": 541,
+      "hpProvenance": {
+        "ownerId": 1000,
+        "absolute": true,
+        "source": "worldSnapshot",
+        "observedMs": 1791263508497
+      },
+      "mpProvenance": {
+        "ownerId": 1000,
+        "absolute": true,
+        "source": "worldSnapshot",
+        "observedMs": 1791263508497
+      },
+      "exactHp": true,
+      "exactMp": true,
+      "dead": false,
+      "poison": 0,
+      "inSafeZone": false,
+      "actor": null
+    },
+    "attackerIds": [
+      292800,
+      292801,
+      292802,
+      292803,
+      292804,
+      292805,
+      292806
+    ],
+    "aimedAttackCounts": {
+      "292800": 2,
+      "292801": 2,
+      "292802": 2,
+      "292803": 2,
+      "292804": 2,
+      "292805": 2,
+      "292806": 2
+    },
+    "positiveOwnerHitCount": 14,
+    "positiveOwnerDamage": 68,
+    "exactHpDeclineSequences": [
+      667,
+      711
+    ],
+    "exactHpLedger": [
+      {
+        "sequence": 630,
+        "tsMs": 1791263504421,
+        "hp": 128,
+        "packet": "worldSnapshot"
+      },
+      {
+        "sequence": 667,
+        "tsMs": 1791263505214,
+        "hp": 94,
+        "packet": "worldSnapshot"
+      },
+      {
+        "sequence": 711,
+        "tsMs": 1791263508193,
+        "hp": 60,
+        "packet": "worldSnapshot"
+      }
+    ],
+    "healingAndRegenerationNotSubtractedFromDamageReceipts": true,
+    "exit": {
+      "type": "walk",
+      "direction": "Up",
+      "target": {
+        "x": 59,
+        "y": 55
+      },
+      "corridor": [
+        {
+          "x": 59,
+          "y": 55
+        },
+        {
+          "x": 59,
+          "y": 54
+        },
+        {
+          "x": 59,
+          "y": 53
+        }
+      ]
+    },
+    "attackReceiptSequences": [
+      632,
+      633,
+      634,
+      635,
+      636,
+      637,
+      638,
+      697,
+      698,
+      699,
+      700,
+      701,
+      702,
+      703
+    ],
+    "positiveOwnerHitSequences": [
+      651,
+      654,
+      656,
+      658,
+      660,
+      662,
+      664,
+      714,
+      717,
+      719,
+      721,
+      723,
+      725,
+      727
+    ],
+    "attribution": "DamageIndicator has victim ID only; seven actor IDs are independently position/facing qualified, not per-attacker damage attribution",
+    "fullP1Accepted": false,
+    "nativeInputAccepted": false,
+    "nativeVisualAccepted": false,
+    "humanAccepted": false,
+    "ordinaryProgressionAccepted": false,
+    "loadAccepted": false
+  },
+  "executionError": "Timeout waiting for next actual bat windup",
+  "normalLogoutAndClose": true,
+  "logoutAckSequence": 775,
+  "rawEventCount": 776
+}

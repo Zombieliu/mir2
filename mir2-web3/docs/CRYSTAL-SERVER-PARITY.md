@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> 2026-10-06 bounded cold-seven fixture/network verification does not increase
+> production parity. Test-support only activates78 dormant original D021 slots
+> and prepares original actor positions, leaving all native/respawn fields intact.
+> Six checks pass; network06 Wizard/Taoist attack escape531/496ms plus5s quiet
+> pass, Warrior stays unqualified. Five Gateway/fourteen shared regressions and
+> default compilation pass; original timeout and13/1 cold-identity assertion
+> failure remain archived. Cold recovery still verifies the original root first.
+> Native input/Magic/held/save/rollout/fullP1 remain open. Point-card recharge,
+> online deduction, remaining time and expiry restriction are absent; existing
+> GainedCredit/LoseCredit are currency packets, not time billing.
+> [Source and actual evidence](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md).
+
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
 > after P3/source513eb83, applying only two Gateway terminal hunks. Source7
 > merges its actual nested rank, retires exact current editor context, and is

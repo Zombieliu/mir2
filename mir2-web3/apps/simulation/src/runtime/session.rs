@@ -961,6 +961,11 @@ impl SimulationSession {
         reconcile_monster_activation(self.app.world_mut());
     }
 
+    #[cfg(feature = "test-support")]
+    pub fn materialize_cold_source_pool_for_test(&mut self) -> Result<usize, String> {
+        super::map::materialize_cold_source_pool_for_test(self.app.world_mut())
+    }
+
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         if (hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
             return;

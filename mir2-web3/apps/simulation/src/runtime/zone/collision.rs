@@ -124,6 +124,11 @@ impl ZoneCollision {
         self.bounds
     }
 
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) fn transfer_source_cells_for_test(&self) -> &BTreeSet<(i32, i32)> {
+        &self.transfer_source_cells
+    }
+
     pub(crate) fn is_player_movement_blocked(&self, point: &Point) -> bool {
         // A direct-movement transfer source is always steppable by a player:
         // stepping onto it immediately fires the map transfer, so it must bypass

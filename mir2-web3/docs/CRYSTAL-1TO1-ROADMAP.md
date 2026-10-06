@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 prepared P1 network06 qualifies seven genuine attackers for normal
+> Wizard/Taoist melee escape at531/496ms with actual pending damage and5s quiet.
+> Warrior remains unqualified; all native/Magic/held/save/rollout/fullP1 gates
+> remain open. Test-only original-slot activation and position preparation pass
+> six checks; five Gateway/fourteen shared regressions and default builds pass.
+> The historical naked timeout and cold-recovery13/1 mismatch remain documented.
+> No production authority or gameR17/feed14 change. Account point-card remaining
+> time, online deduction, recharge and expiry handling are absent; Credit is
+> shop currency. No billing implementation or completion percentage is claimed.
+> [Scope and evidence](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md).
+
 > 2026-10-06 user resumes classic P1–P8 playability delivery. P1 dense escape /
 > continuous combat and actual Windows/network gates lead, followed by P2
 > late-map/Boss/item journeys and P3 original ownership. P4–P7 feature gaps

@@ -15702,6 +15702,8 @@ mod tests {
     mod dead_experience_chain_tests;
     #[path = "crowded_escape_tests.rs"]
     mod crowded_escape_tests;
+    #[path = "crowded_fixture_transport_tests.rs"]
+    mod crowded_fixture_transport_tests;
     #[path = "guild_kill_source_tests.rs"]
     mod guild_kill_source_tests;
     #[path = "creature_authority_tests.rs"]

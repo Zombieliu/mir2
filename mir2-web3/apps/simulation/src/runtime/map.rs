@@ -947,6 +947,57 @@ fn materialize_monster_slot(
     entity
 }
 
+/// Disclosed test preparation: activate dormant original source slots without
+/// changing their IDs, spawn positions, templates, policies or runtime ticks.
+/// No normal client command calls this; respawning/dead pools are rejected.
+#[cfg(feature = "test-support")]
+pub(super) fn materialize_cold_source_pool_for_test(world: &mut World) -> Result<usize, String> {
+    if !is_in_world(world)
+        || world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .monster_spawn_source
+            != MonsterSpawnSource::CrystalWorld
+    {
+        return Err("cold source pool requires an entered original world".into());
+    }
+    let mut table = world
+        .remove_resource::<MonsterSpawnTable>()
+        .ok_or("missing original spawn pool")?;
+    let unavailable = table
+        .rules
+        .iter()
+        .flat_map(|rule| &rule.slots)
+        .any(|slot| {
+            slot.next_respawn_tick.is_some()
+                || slot.entity.is_some_and(|entity| {
+                    world.get::<MonsterAgent>(entity).is_none_or(|agent| agent.dead)
+                        || world
+                            .get::<MonsterVitals>(entity)
+                            .is_none_or(|vitals| vitals.hp <= 0)
+                })
+        });
+    if unavailable {
+        world.insert_resource(table);
+        return Err("cold source pool cannot resurrect or replace existing actors".into());
+    }
+    let mut activated = 0;
+    for rule_index in 0..table.rules.len() {
+        for slot_index in 0..table.rules[rule_index].slots.len() {
+            if table.rules[rule_index].slots[slot_index].entity.is_some() {
+                continue;
+            }
+            let rule = &table.rules[rule_index];
+            let entity =
+                materialize_monster_slot(world, rule_index, rule, slot_index, &rule.slots[slot_index]);
+            table.rules[rule_index].slots[slot_index].entity = Some(entity);
+            activated += 1;
+        }
+    }
+    world.insert_resource(table);
+    Ok(activated)
+}
+
 /// On-demand monster pool reconciliation for the fully-activated world: keep the
 /// ECS holding only the monsters around the player. Slots within activation
 /// range are materialised (fresh and alive); slots that have drifted beyond the

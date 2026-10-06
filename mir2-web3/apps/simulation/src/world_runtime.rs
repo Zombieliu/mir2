@@ -801,6 +801,11 @@ impl InProcessWorldRuntime {
         self.session.reconcile_current_map_monster_activation();
     }
 
+    #[cfg(feature = "test-support")]
+    pub fn materialize_cold_source_pool_for_test(&mut self) -> Result<usize, String> {
+        self.session.materialize_cold_source_pool_for_test()
+    }
+
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         self.session.force_authoritative_player_vitals(hp, mp);
     }

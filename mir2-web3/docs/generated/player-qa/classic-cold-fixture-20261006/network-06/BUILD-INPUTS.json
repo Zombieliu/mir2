@@ -1,0 +1,51 @@
+{
+  "binarySha256": "db23602173cbda22c68c51fb2ad964d3fd2d4120075b3d17f8ee400f5b5b4c53",
+  "changesFromPriorRun": [
+    "Ordinary original starter EquipItem requests",
+    "Ordinary snapshot refresh while awaiting windup within unchanged 5s",
+    "All three class results retained before aggregate assertion",
+    "Listener shutdown receipt only after task cancellation"
+  ],
+  "kind": "owned-qa-test-binary",
+  "sourceBase": "1f688f303c1d3dd918a5372f87f18c5770497634",
+  "codeFiles": [
+    {
+      "sha256": "847e1081466e0fafb5163706305df2a08c52d1c3197078048063997e18c0bcc3",
+      "relativePath": "apps/gateway/src/routing.rs"
+    },
+    {
+      "sha256": "03bf96f372e1e4df2ac0f1cb8b78877d5912b45385140919a84adb20340a7897",
+      "relativePath": "apps/gateway/src/routing/tests/crowded_fixture_transport_tests.rs"
+    },
+    {
+      "sha256": "cf2a6af82bda88d7f4b6b7114389f709ca41c201017bc276f452ec793429b47a",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime.rs"
+    },
+    {
+      "sha256": "6978dc640c01311f7fc8d59640c32c9a2fcdda2219934c7eda3fcdb866f91718",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/crowded_fixture.rs"
+    },
+    {
+      "sha256": "8605cd33de8abac34e75523c89b3902d9bb82baf45ae11dcf3e7b8da9c22c846",
+      "relativePath": "apps/simulation/src/runtime/zone/collision.rs"
+    },
+    {
+      "sha256": "bd0f4213da65fe9ff3485fd156edd2d757ca4d1913eeaf27256a0451fd9e4612",
+      "relativePath": "apps/simulation/src/runtime/map.rs"
+    },
+    {
+      "sha256": "634fb5d0689afd94ecde8d9a82fc67b52d62d81575ac16d4bcec6aed6c3d70f2",
+      "relativePath": "apps/simulation/src/runtime/session.rs"
+    },
+    {
+      "sha256": "915717a74455d17faef0a8cea80ff2f7ef103c956ed830a00fcfe08690aabeb1",
+      "relativePath": "apps/simulation/src/world_runtime.rs"
+    },
+    {
+      "sha256": "346823f2cfefb7f0ce188f6b21f732aa6b20b5639974bbc163f51338dc3b0618",
+      "relativePath": "scripts/qa/run-cold-crowded-fixture.mjs"
+    }
+  ],
+  "nativePairAcceptance": false,
+  "productionR18BinaryUsed": false
+}

@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-06 root completes the isolated cold-seven test-support slice.
+> Original151 D021 slots and all non-position fields/respawn policies stay
+> intact; six fixture checks pass. Exact owned network06 qualifies Wizard/
+> Taoist normal attack escapes at531/496ms with real pending damage and5s quiet;
+> Warrior positive-hit gate remains unqualified. Earlier naked timeout remains.
+> Five Gateway and fourteen shared regressions pass; the original13/1 cold
+> online-presence assertion mismatch is retained and corrected with strict-root
+> tamper rejection. Default library compilation passes. No production gameplay,
+> release, installation, native input or human acceptance change. Point-card
+> time billing is audited absent, not added to authorized scope.
+> [Execution and next P1 gates](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md).
+
 > 2026-10-06 user resumes classic gameplay delivery in original P1–P8 order.
 > Root owns the isolated 47471920e5 implementation/integration lane and all
 > actual execution/Git. No unsupported Spark model or conflicting writer is

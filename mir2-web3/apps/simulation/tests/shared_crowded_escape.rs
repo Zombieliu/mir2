@@ -692,9 +692,30 @@ fn living_struck_clock_is_optional_in_checkpoints_and_cleared_on_life_transition
         .unwrap()
         .contains("native_struck_ready_at_ms"));
     let restored = ZoneRuntime::restore_checkpoint(&checkpoint).unwrap();
+    let mut before: serde_json::Value = serde_json::from_slice(&checkpoint).unwrap();
+    let after: serde_json::Value =
+        serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
+    // The original root is verified before public cold recovery clears online
+    // authority. That intentional P3 change is independent of the optional
+    // presentation clock; it must not erase or default any other saved field.
+    assert_eq!(before["online_presence"].as_object().unwrap().len(), 2);
+    assert_eq!(after["online_presence"], serde_json::json!({}));
     assert_eq!(
-        restored.checkpoint_bytes().unwrap(),
-        checkpoint,
-        "a genuine no-window checkpoint round-trips without injecting a default field"
+        after["state_root"].as_str().unwrap(),
+        restored.canonical_state_root().unwrap()
+    );
+    let mut tampered = before.clone();
+    tampered["players"][OWNER]["hp"] = serde_json::json!(HP - 1);
+    assert!(
+        ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&tampered).unwrap())
+            .unwrap_err()
+            .contains("state root mismatch"),
+        "cold authority clearing must not bypass the original root verification"
+    );
+    before["online_presence"] = serde_json::json!({});
+    before["state_root"] = after["state_root"].clone();
+    assert_eq!(
+        after, before,
+        "only cold online authority/root change; no presentation clock or unrelated state is injected"
     );
 }
