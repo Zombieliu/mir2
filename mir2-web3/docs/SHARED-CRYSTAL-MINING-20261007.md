@@ -65,6 +65,11 @@ Attack1。只允许当前地图、位置、朝向、序列和期限内的确认�
 或持续挖矿时长证明；原版掉率和时钟未降低。
 
 源码、有界回归和真实D401严格checkpoint恢复已完成；默认生产网关库编译通过。
+独立 Linux [CI 37510943095](https://github.com/Zombieliu/mir2/actions/runs/37510943095)
+对 exact source `e397fdc90404b13e827aa4e5dc89078421d9851a` 全部通过：game-data
+61+5+3、simulation 9+5、Gateway 挖矿/真实 WebSocket 9、完整 live authority
+拒绝恢复 2。原始日志和 source-bound receipt 保存在本轮证据目录；该 Linux
+执行不代替 Windows 实机鼠标和配套发布验收。
 配套候选打包、公开发布、受影响 Windows 实机鼠标按住
 采矿和断线验收尚未执行；不能把现有 R17/feed14 算作新增挖矿已经上线。P6 的
 Windows 精炼、检查、领取和完整 P1–P8 Goal 继续开放。

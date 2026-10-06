@@ -24,6 +24,7 @@ Public Gateway/feed/installation and actual player saves were not changed.
 | Entire unchanged item-icon catalogue closure | 1628 item rows, 924 unique images pass source PNG/RGBA hash and geometry checks | [raw](raw/mining-item-icon-closure-20261007-04.log) |
 | Exact source generator/profile bundle | 23 mines/two sets and 14 dependencies verified | [generator](raw/mining-generator-20261007-final.log), [bundle](raw/mining-profile-bundle-20261007-final.log) |
 | Default production Gateway library | Rust1.89 check passes | [raw](raw/mining-gateway-production-20261007-final.log) |
+| Independent exact-source Linux CI | game-data 61+5+3, simulation 9+5, Gateway mining/real WS 9, rejected cold restore 2 pass; one unrelated game-data test remains ignored | [run](https://github.com/Zombieliu/mir2/actions/runs/37510943095), [raw](raw/mining-linux-ci-37510943095.log), [receipt](linux-ci-37510943095.json) |
 
 Counts are not added into a parity percentage. Related repeated runs overlap.
 Source/docs staged whitespace validation passes with this owned `raw/` directory
@@ -80,8 +81,12 @@ the normal-player Windows/server press-and-hold, movement and disconnect witness
 
 Original D401 strict checkpoint restoration and corrected atomic assertion pass;
 source/generator/profile and default production compilation also pass. Independent
-Linux CI execution is tracked separately from
-packaging/publication/install/human acceptance. Mining audio 10091 is not available
+Linux CI 37510943095 completes successfully on exact source
+`e397fdc90404b13e827aa4e5dc89078421d9851a`. Its original CLI log bytes and SHA-256
+are retained in the source-bound receipt. Gateway's nine-test execution took
+552.49s on that runner, separately from its 2m57s build; this is not a gameplay
+performance result. Packaging/publication/install/human acceptance remain open.
+Mining audio 10091 is not available
 as a real resource in the inspected asset roots and remains open. Full checkpoint
 acceptance does not authorize incremental active/standby replay, whose current
 replay clock changes random mining rolls. Full P6 weapon refining and P1–P8 stay open.
