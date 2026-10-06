@@ -25,7 +25,7 @@ use wgpu::{
 pub mod screenshot;
 
 #[cfg(any(target_os = "android", test))]
-mod android_gpu_probe;
+pub(crate) mod android_gpu_probe;
 
 use screenshot::ScreenshotPlugin;
 

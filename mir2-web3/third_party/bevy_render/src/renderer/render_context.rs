@@ -163,6 +163,8 @@ impl<'w, 's> RenderContext<'w, 's> {
         &'a mut self,
         descriptor: RenderPassDescriptor<'_>,
     ) -> TrackedRenderPass<'a> {
+        #[cfg(target_os = "android")]
+        crate::view::window::android_gpu_probe::render_pass(&descriptor);
         self.ensure_device();
 
         let command_encoder = self.state.0.command_encoder.get_or_insert_with(|| {

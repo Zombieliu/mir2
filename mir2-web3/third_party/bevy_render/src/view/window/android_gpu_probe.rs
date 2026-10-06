@@ -80,6 +80,45 @@ pub(super) fn texture(
     });
 }
 
+#[cfg(target_os = "android")]
+pub(crate) fn render_pass(descriptor: &wgpu::RenderPassDescriptor<'_>) {
+    for (slot, attachment) in descriptor.color_attachments.iter().enumerate() {
+        let Some(attachment) = attachment else {
+            continue;
+        };
+        view("render_pass_color", descriptor.label, slot, attachment.view);
+        if let Some(resolve) = attachment.resolve_target {
+            view("render_pass_resolve", descriptor.label, slot, resolve);
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+fn view(
+    phase: &'static str,
+    pass_label: Option<&str>,
+    slot: usize,
+    view: &wgpu::TextureView,
+) {
+    record(|sequence| {
+        // SAFETY: This only formats the borrowed HAL view's existing Debug
+        // metadata. No resource is changed/destroyed and no GL call is made.
+        // Drop its destruction read-guard before the normal pass is encoded.
+        let hal = unsafe { view.as_hal::<wgpu::hal::api::Gles>() };
+        bevy_log::info!(
+            sequence,
+            phase,
+            pass_label,
+            slot,
+            thread = ?std::thread::current().id(),
+            texture_format = ?view.texture().format(),
+            texture_size = ?view.texture().size(),
+            hal_view = ?hal.as_deref(),
+            "ANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCE"
+        );
+    });
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
