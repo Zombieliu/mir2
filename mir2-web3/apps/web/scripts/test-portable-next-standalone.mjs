@@ -199,7 +199,11 @@ test("NFT dependency copy materializes only the verified physical closure, inclu
     trace: async (entries) => {
       observedEntries = entries;
       return { fileList: new Set(nodeFiles.map((file) => path.relative(path.parse(dependency).root,
-        path.join(dependency, ...file.split("/"))))), warnings: new Set([{ code: "DYNAMIC_OPTIONAL" }]) };
+        path.join(dependency, ...file.split("/"))))), warnings: new Set([
+          { code: "DYNAMIC_OPTIONAL", message: "Synthetic optional branch" },
+          new Error(`Failed to resolve dependency "missing-package" from ${sourceApp}`),
+          Object.assign(new Error("x".repeat(8193)), { code: "__proto__" }),
+        ]) };
     },
   });
   assert.equal(observedEntries.some((entry) => entry.endsWith("route.js")), true);
@@ -211,6 +215,16 @@ test("NFT dependency copy materializes only the verified physical closure, inclu
   assert.equal(stats.nativePackageBytes > 0, true);
   assert.equal(stats.nativePackages[0].destination, `node_modules/${nativeFixture.binaryName}`);
   assert.equal(stats.warningCodes.DYNAMIC_OPTIONAL, 1);
+  assert.equal(stats.warningCount, 3);
+  assert.equal(stats.warningCodes.Error, 1);
+  assert.equal(Object.hasOwn(stats.warningCodes, "__proto__"), true);
+  assert.equal(stats.warningCodes.__proto__, 1);
+  assert.deepEqual(stats.warningDetails, [
+    { code: "DYNAMIC_OPTIONAL", message: "Synthetic optional branch", messageTruncated: false },
+    { code: "Error", message: `Failed to resolve dependency "missing-package" from ${sourceApp}`, messageTruncated: false },
+    { code: "__proto__", message: "x".repeat(8192), messageTruncated: true },
+  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(stats)).warningDetails, stats.warningDetails);
   assert.equal(stats.files >= 17, true);
   const copied = path.join(destinationApp, "node_modules");
   assert.equal((await auditPortableTree(copied)).links, 0);

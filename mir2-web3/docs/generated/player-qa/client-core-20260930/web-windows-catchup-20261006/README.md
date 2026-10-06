@@ -1,27 +1,37 @@
 # Web / Windows 固定基线追赶 QA
 
-比较基线为 `f72e36fb84c3574fff0aeb2abed856454b14289d`。本页记录当前有限代码检查与 build-only / 静态包证据；没有运行服务、HTTP、WASM instance、浏览器、原生客户端、账号、存档或玩家流程。退出 0 和静态闭包均不代表可玩或 Candidate 接受。
+Windows比较基线为`f72e36fb84c3574fff0aeb2abed856454b14289d`，本轮父提交`f1cf96324c7da62e57d5fd0fa4146be010adbba5`。本页记录源码、有限代码检查和静态构建；没有运行服务、HTTP、WASM实例、浏览器、原生窗口、实际账号/存档或玩家流程。Goal仍active，Candidate及可玩性未验收。
 
-Web 静态包根目录：[`.mir2-thin-client-web-windows-catchup-20261006-02`](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261006-02)。Native09 归档 EXE：[mir2-platform-windows.exe](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-native-build09-mir2-platform-windows.exe)（104,694,784 B，SHA `0ab54f647ee618a35b067fafe08e80f4d04df1d47694b323b6c13ff1aaddbd39`，未启动）。
+当前Web包：[.mir2-thin-client-web-windows-catchup-20261006-04](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261006-04)。体积372,478,397 B（355.22 MiB），7,299文件、775目录、0链接，原360 MiB预算余5,008,963 B。新配偶控件所在编译chunk的hash与源码输入绑定已核对。
 
-## 当前源与有限检查
+## 本轮实际结果
 
-- Source09 冻结 405 输入，SHA `a6df3325ae47cada0aacb6245f8175db701e00a187f3b50f94a924b20dde19ae`；八文件审查 SHA `3b4630764cf180aa644a380e4b780c59aa4c08129a072d863933aeba9044e691`，0 P0/P1。12 项新增与 2 项保留 Rust 测试通过。`ChangeAttackmode` / `ChangePetmode` 属 runtime Web host（输出 `changeAMode` / `changePMode`）；共享 Quest getter 为 `getMir2QuestNameTargets`，HUD 接口为 `hpView` / `HPView`。
-- TSC02 `c73c53` exit 0；Stage5-04 `a06b31` exit 0，260 组 / 0 fail；Adjacent04 `802873` 216/216/0（含 Bag 3 组 / 14 cases）；Cross05 `81f434` 114/114/0。Next02 `956ce8` exit 0，builder 83012 closed/disposed，65,268 ms，严格 TypeScript 与 13 个静态页成功。Native09 `2ff6f3` 与 renderer07 `008073` build-only 退出 0，guard/builder 均 closed/disposed。Cross04 `113/114/1` 夹具失败及 Cross03、Adjacent03 更早失败均保留；Cross05 后续通过，未删除原断言。
-- QA 收据：[Native09](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-native-build09-result.json)、[renderer07](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-renderer-build07-result.json)、[Next02](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-next-build02-result.json)、[Stage5-04](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-stage5-04-result.json)、[Adjacent04](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-adjacent04-result.json)、[Cross05](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-cross-page05-result.json).
-- Next02 standalone 输出：19,006 个普通文件共 589,834,498 B，完整 hash manifest SHA `5d952d709e20452160d99f874f5f0bb3a192e371c2526f6138af780430b25046`；61 个 NFT trace / 37,094 路径，16,712 个附加资源与 standalone mirror 字节一致，2 个 node_modules 目录指向冻结的 24,891 项依赖根。required-server-files 中序列化的 Core / renderer manifest 与源一致，client chunk 的两版标识匹配。Next02 result SHA `1ba6326ef29b9e74365f841771b84b219d10328d22094506000f19d7c21035b5`。
-- renderer07 Bevy `e31f4cb651a7b4ef`：GPU 30,866,951 B / gzip 5,997,202 / JS 133,785；lean 17,751,071 / 4,226,708 / 116,615；shared 31,829,091 / 6,338,599 / 131,759。均低于原 cap 32,505,856 / 7,340,032 / 204,800。9 exports 只扫描 WASM section 7 名称，未调用 WASM API。
+| 项目 | 实际证据 | 范围 |
+| --- | --- | --- |
+| 配偶Mail / Whisper与相邻路径 | [finite06](spouse-cross-finite06-result.json)，actual1707a0 exit0，119/119/0 skipped；StoragePageGate 51，其中5项新增 | Page/组件/ExtraWindows源抽取、AST与有限fixture；Mail只打开具名草稿，Whisper只填Native精确`:)`，20类旧owner/window/relationship来源变化被拒绝；不证明真实输入/交付 |
+| 控件与来源审查 | [review01](spouse-communication-source-review01.json)及[当前review02](spouse-communication-source-review02.json)，当前四文件零确认P0/P1 | review01为状态修正前历史，review02为当前map/online一致的代码；静态审查 |
+| 打包诊断 | [16项finite](diagnostics-finite-result01.json)，actual2bc34d exit0 | 原16项名单及断言保留，新增6条断言覆盖bounded messages、截断标志与安全计数；不消除warning |
+| Next03 | [构建结果](next-build03-result.json)，actual1823ad exit0，严格TypeScript及13静态页 | 冻结27,344输入；19,006产物逐文件hash，61 NFT/37,094唯一静态路径/0缺失；不运行服务器 |
+| Thin05 | [构建结果](thin-build05-result.json)，actual475690 exit0，体积/链接/文件hash核对通过 | 冻结63,097输入；3,366公共文件与Thin03字节相同，79 atlas PNG、Core2及renderer6 leaves对应；原始日志和大snapshot保留于结果中指向的本地QA路径 |
 
-## Thin03 静态包审计已闭合
+231 JSON当前source/output逐对与历史Thin03完全相同，原token保持结论仅在这些字节不变的条件下承接；本轮未重新执行JSON parser/lexer。全部构建child已退出并dispose，stderr为空。具体结果指纹和矩阵指纹见[当前证据索引](current-evidence02.json)。仓库QA JSON遵循text eol=lf；原C盘QA字节pins保留，索引分别记录原文件与LF副本；源码冻结pins指当前checkout，固定Git文本证据另列。
 
-Thin03 chunk `82cd65` exit 0；builder 90244 closed/disposed，19,279 ms。包内 7,299 文件、775 目录、0 links，总计 372,474,859 B（355.2197065 MiB），低于原 cap 377,487,360 B，余量 5,012,501 B。最终 SHA-256 清单覆盖全部文件。3366 个 public 文件与源字节相同或属于下述 JSON 空白压缩；79 张 atlas PNG 与源文件及 manifest 字节匹配。231 个压缩 JSON 文件已逐项验证 token、数字、字符串原拼写不变。Core 2 leaves、renderer 6 leaves、immutable/current flat manifests 均相同；打包 required-server-files 与 Next02 原件 hash 相同；所选 Win32-x64 依赖文件已打包，zero links；条件模块解析与服务启动仍待验证。
+## 有界源码矩阵与剩余工作
 
-Thin result SHA `870c145a1e354108cbdebf17c6525f5e53058bf038485dede70a2fbc70d5cdfc`；独立 closure SHA `4f90e8a28b26751087d39146b93b47f52a5a4564269bdab732c1e45eeab09657`；7,299 文件 hash manifest SHA `b173eabbf76ef84c74d85649f49f93775b49042e4b077ea2bc369bf5f87bee78`。
+[可读矩阵](feature-matrix02.md) / [完整JSON](feature-matrix02.json)保留317个稳定ID：103 shared、181 legacy、25 open、8共同限制。这是实现类别与候选动作记录，不是完整验收分母；172条原具名fixture关联/84个声明不是执行次数，也不等于动作通过。配偶两行采用新冻结输入，其余原Web审计指向f1cf。
 
-[Thin03 result](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-thin-build03-result.json) · [Static closure](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-thin-build03-static-closure.json) · [Output hashes](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-thin-build03-output-hashes.json) · [Size report](C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-thin-build03-size-report.json)
+[原F01–F06审计](f01-f06-source-audit01.json)、[原F07–F11审计](f07-f11-source-audit01.json)、[Native入口清单](native-entry-inventory01.json)和[独立矩阵复核](combined-matrix-review01.json)保留原文；Root[46个基线blob核对](native-baseline-object-check01.json)全部匹配。九类更正包含宠物真实UpdateIntelligentCreature及flags、Trade请求发送入口、Guild/Trade item dispatcher与未知control链、HP四标签语义、fixture只覆盖carrier、Git LF与checkout CRLF区别。模型/enum/import/prop存在不闭合控件→host→wire链，Quest放弃确认/取消、分享及九类动作、13 combat modes范围均保留。
 
-## 明确未验收范围
+25只是本记录集剩余已确认缺口，下一轮优先登录侧7条：注册完整资料、修改密码及SafeKey。Root已逐行确认Web把改密raw1误映射成功而Native成功码为6、注册非8原因折叠及banned expiry展示差距，作为已有F01记录的子问题。后续地图/钓鱼3、聊天5、兼容tooltip与Bag→Belt3、Pearl/维修/Cash预览6及Ranking Inspect1继续；输入链、地图/任务/技能变体等未审范围仍存在。
 
-Thin size report 有 44 个 dependency warning records，代码为 `Error`，虽然 build stderr 为空；该计数仍需解释，不能忽略。没有启动 package server，所以 service startup 和远端资源 HTTP 覆盖未验证。省略的原客户端媒体要求通过 `MIR2_R2_PROXY_BASE` 从 immutable asset origin 走 same-origin miss proxy；源 manifest 有 Mount 条目，但没有 Pet / Gate 的完整远端库存，不能声称其资源覆盖完整。
+[共享认证只读方案](auth-shared-plan01.json)及[Root当前执行约束](auth-next-constraints02.json)用于下一轮：无依赖Rust Core复用、物理socket与表单epoch、同socket未决请求屏障、服务器认证和限流保持。当前Core259,539 B/262,144 B仅余2,605 B，保持原预算并测量；原方案提到的真实WASM Node实例测试不在当前授权执行范围内，不能运行。
 
-W4b 七项、F10/Hero/双 SkillBar 的代码候选及其对应 TSC / finite / Next 检查已通过；实际 UI 行为、登录 / 游戏、保存 / 重登、服务 ACK 和两端玩家比较仍未执行。用户暂缓 UI。F11 原 44 项分母未冻结；goal active，不报整体百分比、100% Candidate 或 goal complete。
+## 44条依赖warning及资源边界
+
+Thin04/05均44条Error-code warning，内容和重复次数相同，顺序可不同；全部message保留，无截断。[逐条源码复核](thin04-warning-source-review01.json)和[Root28个pin/消息核对](thin04-warning-root-check01.json)保留原证据，Thin05再核对28个pin及编译config只有distDir/distDirRoot变化。分类包括fallback、build/dev、config-gated和动态路径；Critters依赖受optimizeCss=false门槛、React compiler未启用。不能把全部44条视作optional/无害；直接RSC导入、SWC/Rspack/webpack分支、Sass资源和native binding加载的实际语义仍未验。
+
+包选win32-x64 Sharp。远端原媒体仍要求MIR2_R2_PROXY_BASE，Pet/Gate完整库存与miss覆盖未核验。没有服务或HTTP检查，因此静态闭包不证明部署、启动或玩家资源请求成功。
+
+## 保留的历史与承接范围
+
+Rust Source09 405输入与原review/Native09/renderer07/Core源码未变，仅在有效输入/特征相同条件下承接12项新增+2项保留Rust、原编译及预算证据。Core版本c4952ff102f1fe1a35cc48b456e68adb33ede425f657d75fa25e6b811e6f979e；renderer版本bevy-e31f4cb651a7b4ef，原变体预算不变。Native09归档EXE104,694,784 B、SHA0ab54f647ee618a35b067fafe08e80f4d04df1d47694b323b6c13ff1aaddbd39，未启动。历史Stage5-04 260、Adjacent04 216、Cross05 114保留，不计本轮新执行；Cross04/Cross03/Adjacent03失败日志保留。Thin02超预算旧包、Thin03/04和Source08等旧snapshot继续保留，不能代替本轮新Web输入。真实Windows/Web/移动端交互、登录→任务/战斗→保存重登与最终frontend验收均待验证。

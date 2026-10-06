@@ -2,7 +2,9 @@
 
 ## 新 goal：优先交付 Web 对齐 Windows（2026-10-06）
 
-Source09 输入、Rust新增12+保留2测试、TSC / finite / Next、Native09 / renderer07、Thin03静态打包审计均已按各自冻结输入闭合。Thin 包 7,299文件、372,474,859 B，360 MiB cap余量5,012,501 B；文件hash、231 JSON token和静态依赖闭包均通过。44条依赖warning计为Error仍待解释；无服务、HTTP、runtime或UI验收，MIR2_R2_PROXY_BASE与Pet/Gate覆盖仍有边界。F11原44项分母不冻结，goal active。详见 [QA 索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+Windows固定基线f72与Web父提交f1cf已细分为317条有界源码记录：103 shared、181 legacy、25 open、8共同限制；不是完整验收分母，不报整体百分比。配偶写信/密语复用既有Mail/Chat入口，新增5项回归和相邻四脚本119/119通过；诊断脚本16/16通过。Next03严格TypeScript＋13静态页、Thin05构建与静态审计退出0，独立包7,299文件 / 372,478,397 B / 0链接，原360 MiB cap余5,008,963 B。Rust Source09未改，限定承接Native09、renderer07和Core原有效输入证据。44条warning已逐条保留并做源码分类，直接导入与部分分支运行语义仍未验。实际服务/HTTP/UI/玩家流程及Pet/Gate远端覆盖未验，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix02.md) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
+下一轮登录规则和虚拟键盘尽量放无依赖Rust Core供Native/Web复用，浏览器负责输入、焦点和传输适配；移动端继续承接这些共同规则。Core当前259,539 B，原262,144 B cap仅余2,605 B，保持预算并先测量优化。
 
 ## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
 

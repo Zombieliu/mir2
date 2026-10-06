@@ -15,12 +15,12 @@
 
 | ID | 工作项 | 代码 | 构建 | 实际玩家验证 |
 | --- | --- | --- | --- | --- |
-| W0 | 固定 Windows 功能清单，逐项核对 Web 共享实现、旧入口及差距 | 11 组源码初查完成；F11 行为差距候选已扩展，44 项分母未闭合、不冻结 | 不适用 | 待验证 |
-| W1 | 支持的桌面路径默认请求共享任务/HUD/角色/技能/邮件/仓库/普通商店与背包，保留显式关闭和 readiness 降级 | 默认请求接线完成；Node 22/22、严格 TSC 通过 | 已纳入 Source09 候选包；Native09 / renderer07 / Next02 / Thin03 build-only 闭合，行为待 W6 | 待验证 |
-| W2 | 九类任务动作接入共同 controller / Web host，不新增客户端世界权威 | 九类均有代码候选；Rust Source02 27 distinct 测试和 4 项编译/检查闭合，见本轮状态 | 已纳入 Source09 当前候选包；Native09 / renderer07 / Next02 / Thin03 build-only 闭合，行为待 W6 | 待验证 |
-| W3 | 常规 WebGPU / WebGL2 入口选择共享表现，固定首屏 canvas / ABI / package / 单次启动关系 | Node 155/155、严格 TSC、Rust 启动/画布 10/10 通过；可选依赖修复回归通过，三套 WASM 编译检查退出 0 | 已纳入 Source09 当前候选包；renderer07 / Next02 / Thin03 build-only 闭合，运行时与行为待 W6 | 待验证 |
-| W4 | 对齐剩余功能清单及输入、资源、焦点/场景生命周期 | 七项 W4b 初查差距均有代码候选；对应 TSC / finite / Next 检查已闭合 | 实际 UI 行为仍待验证 | 待验证 |
-| W5 | 重建源码对应的 Core / renderer / Next / 独立包，核对版本和既有大小预算 | Source09 405 输入；12新增+2保留 Rust tests、TSC / finite / Next 与 Native09 / renderer07 / Thin03 静态构建审计均闭合 | Thin03 7,299文件、372,474,859 B，低于360 MiB cap；文件哈希、231 JSON token、manifest与所选依赖文件已完成静态核对。warning解释、服务/HTTP/runtime/UI不验收 | 待验证 |
+| W0 | 固定Windows功能清单，逐项核对共享实现、旧入口及差距 | 317条有界记录与9类更正；46个基线blob实际匹配；仍有25条已确认代码差距和未审范围，分母不冻结 | 源码分类与构建证据分开 | 全部待验证 |
+| W1 | 支持的桌面路径默认请求共享任务/HUD/角色/技能/邮件/仓库/普通商店与背包，保留显式关闭和 readiness 降级 | 默认请求接线完成；Node 22/22、严格 TSC 通过 | 已纳入 Source09 候选包；Native09 / renderer07 / Next03 / Thin05 build-only 闭合，行为待 W6 | 待验证 |
+| W2 | 九类任务动作接入共同 controller / Web host，不新增客户端世界权威 | 九类均有代码候选；Rust Source02 27 distinct 测试和 4 项编译/检查闭合，见本轮状态 | 已纳入 Source09 当前候选包；Native09 / renderer07 / Next03 / Thin05 build-only 闭合，行为待 W6 | 待验证 |
+| W3 | 常规 WebGPU / WebGL2 入口选择共享表现，固定首屏 canvas / ABI / package / 单次启动关系 | Node 155/155、严格 TSC、Rust 启动/画布 10/10 通过；可选依赖修复回归通过，三套 WASM 编译检查退出 0 | 已纳入 Source09 当前候选包；renderer07 / Next03 / Thin05 build-only 闭合，运行时与行为待 W6 | 待验证 |
+| W4 | 对齐功能、输入、资源及生命周期 | 原七项W4b候选保留；配偶Mail/Whisper完成代码与119项有限检查；后续登录、地图、聊天、物品和商店差距继续排队 | 新增Web代码纳入Next03 / Thin05 | 待验证 |
+| W5 | 重建源码对应Core/renderer/Next/独立包并保持预算 | Rust Source09未改；本轮有限119/119与打包诊断16/16；Next03严格TypeScript＋13静态页 | Thin05 7,299文件、372,478,397 B、0链接；原360 MiB cap余5,008,963 B；44 warning静态分类但运行语义未验 | 待验证 |
 | W6 | 登录→任务/战斗→保存→重登及平台间行为比较 | 不以夹具替代 | 不以编译替代 | 用户暂缓界面操作 |
 
 W0 审计闭合前不报告整体百分比。此表是执行阶段，不是功能数量或完成率分母。F11 原 44 项行为分母尚未闭合，不冻结。最终功能矩阵将独立列出当前实现、有限检查、当前构建及实际流程证据；两端源码都有功能不能直接勾选“已可玩”。
@@ -28,11 +28,13 @@ W0 审计闭合前不报告整体百分比。此表是执行阶段，不是功�
 
 ## 当前状态快照（2026-10-06）
 
-Source08 Rust snapshot 为 404 文件，SHA `a399063ef4f5b6fea259c419d8b9cd3cd2c78317ab3daece950e046d55319a0f`。tooltip07 `d51a28` exit 0，18/18（317 filtered），receipt SHA `842f18be767a045a0a27955d9c8e152ff8b7b27d9e0041947d8c3825a0408ced`；skill-bar-tests02 `0755a9` exit 0，6/6（329 filtered），receipt SHA `912d599753b4fef1b3dcad59fa658a0bd49ac60140e6235a9cfd54ecd2622830`。renderer06 `7741f5` exit 0，builder closed/disposed，Bevy `e4f1a16322d9663b`：GPU 30,785,372 B / gzip 5,973,638 / JS 132,111；lean 17,676,675 / 4,206,331 / 114,941；shared 31,747,506 / 6,316,309 / 130,085；三变体通过原预算 32,505,856 / 7,340,032 / 204,800。receipt SHA `b44997ad89992ea2bc2e7a46ae2a3775a68389ffc8638c3c2fc23c37ac268eaf`。Native08 `ed31f7` exit 0，EXE 104,694,784 B，SHA `7163c1055f44a4be058fb5c0c766283fc3a8e6b1dcf87208f1d2a43cee8a6b66`，已归档、未启动；receipt SHA `67201d3202a82b3cfb44a1378785dee5339d9341006dc31993fb6c9d9ee6a6bf`。六组 flat + 六组 immutable leaves 匹配；三套 WASM section、七个静态只读 getter 已核对，未实例化。此前 tooltip06 guard 拒绝因 authority 不是 flat 格式、guard 未转发，不是代码失败；flat 修正未改源码或放宽 guard。
+Windows固定基线f72与Web父提交f1cf已细分为317条有界源码记录：103 shared、181 legacy、25 open、8共同限制；不是完整验收分母，不报整体百分比。配偶写信/密语复用既有Mail/Chat入口，新增5项回归和相邻四脚本119/119通过；诊断脚本16/16通过。Next03严格TypeScript＋13静态页、Thin05构建与静态审计退出0，独立包7,299文件 / 372,478,397 B / 0链接，原360 MiB cap余5,008,963 B。Rust Source09未改，限定承接Native09、renderer07和Core原有效输入证据。44条warning已逐条保留并做源码分类，直接导入与部分分支运行语义仍未验。实际服务/HTTP/UI/玩家流程及Pet/Gate远端覆盖未验，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix02.md) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 
-当前代码候选与静态验证状态：W4b 七项、F10/Hero/双 SkillBar 对应 TSC / finite / Next 检查已在冻结输入上通过；真实 UI 行为仍待验收。Source09 405 输入 SHA a6df3325ae47cada0aacb6245f8175db701e00a187f3b50f94a924b20dde19ae，八文件审查 0 P0/P1；12 项新增 + 2 项保留 Rust tests 全通过。Native09、renderer07、Next02 与 Thin03 静态构建/审计已关闭，Thin 包 7,299 文件、372,474,859 B（355.2197065 MiB），低于 377,487,360 B cap 5,012,501 B；文件哈希、231 个 JSON token、Core 2 leaves、renderer 6 leaves、manifest 与静态资源闭包均核对通过。Thin 仍有 44 dependency warning records 标为 Error，build stderr 为空；warning 含义仍待解释。未启动服务或运行 HTTP/runtime；原客户端媒体需要 MIR2_R2_PROXY_BASE，Pet/Gate 远端资源覆盖未核验。Stage5-04 260组、Adjacent04 216/216/0、Cross05 114/114/0；Next02严格 TypeScript + 13静态页。Cross04 / Cross03 / Adjacent03历史夹具失败均保留。Native / renderer / Next / Thin 都是 build-only，不表示玩家可玩。详见 [QA README](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+配偶Mail仅开启具名本地草稿，Whisper仅填入Native精确文本`:)`；名字/map、物理owner、scene/map、Bonds epoch/open及完整关系投影在捕获与执行时复核，开Mail后再复核，不自动发送。配偶Online/Offline展示与Whisper可用性共用收到的map。当前四文件独立review02零确认P0/P1；这是源码审查，玩家流程仍待验。
 
-此前 Source05 Native04 `df0d29` exit0（104,694,784 B，已归档未启动）、Source06 renderer03 `0b964e` exit0（三变体原预算通过）和 Source06 的 7 scripts / 63 tests、lean Rust14/14结果保留为历史快照。Source07 加入 Hero 属性页共享 `character_stats::lines` 只读 getter 的代码候选；当时 Native05 配置未运行，不代表构建或行为验收。Thin02 385,254,508 B旧包超360 MiB cap 7,767,148 B，不能替代本轮最终 Thin 检查。Source06下Native/Next/Thin当时未验收；旧81/71/10、112/120、c54016及更早失败均保留原时点记录。
+Thin05原样携带Core版本`c4952ff102f1fe1a35cc48b456e68adb33ede425f657d75fa25e6b811e6f979e`及renderer`bevy-e31f4cb651a7b4ef`；全包文件hash核对通过，3,366公共文件与Thin03字节相同，79 atlas PNG相同。231 JSON的原token保持证据只在当前source/output逐对完全相同的条件下限定承接，未新跑parser/lexer。44 warning内容和重复次数与Thin04相同，28源码pin复核相同；编译config仅distDir/distDirRoot变化，不能据此豁免RSC/构建分支/native加载的真实运行检查。
+
+下一轮优先F01共享认证UI/规则：当前Web误把改密raw1当成功而Native成功码为6，注册非8原因被折叠，banned expiry未展示；这些是已有F01行内子问题，不增加/冻结分母。共享Core剩2,605 B预算，需在原cap内实现和测量。当前不允许WASM实例/实际UI或账号请求；计划中的真实WASM Node测试也不执行。历史失败与旧Source/构建回执保留，Thin02超预算旧包不能代替Thin05；原F11 44项分母未恢复、未冻结。
 
 ## 固定源码功能清单：11 组初查
 
@@ -55,7 +57,7 @@ Source08 Rust snapshot 为 404 文件，SHA `a399063ef4f5b6fea259c419d8b9cd3cd2c
 
 ## W4b：初查确认的 Web-only 差距与候选接线（partial，不冻结分母）
 
-下表保留初查核实的七个普通入口差距作为历史对照；当前七项均已有代码候选。候选尚未完成最终 TSC/finite/Next 检查或实际 UI 验收，也不构成 F11 或全项目分母。
+下表保留初查核实的七个普通入口差距作为历史对照；当前七项均已有代码候选。对应 TSC/finite/Next 检查已在 Source09 冻结输入上通过；实际 UI 仍未验收，也不构成 F11 或全项目分母。
 
 | # | 行为差距（初查） | Windows/共享源码入口 | 初查差距与当前 Web 候选状态 |
 |---|---|---|---|
@@ -64,8 +66,8 @@ Source08 Rust snapshot 为 404 文件，SHA `a399063ef4f5b6fea259c419d8b9cd3cd2c
 | 3 | Keyboard 改键、恢复默认与持久化 | `apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs:62-`、`keyboard_dialog_host.rs` | `original-client-hotkey-window.tsx:18-23,51-89,94-111` 初查为只读默认映射且 ALT 标签不符。现已有改键、恢复和持久化的 Web 代码候选；最终映射与持久化行为待验证。 |
 | 4 | Ctrl+I/C/S 关闭当前英雄管理页或切换状态 | `hero_dialog.rs:248` `toggle_page`；Native dialog actions | `apps/web/app/page.tsx:8606-8616` 初查快捷键只打开页面。现已有 Ctrl+I/C/S 与英雄管理开关状态的代码候选；toggle/close 语义待最终验证。 |
 | 5 | Hero belt 键位使用后的 7/8 restock 行为 | `hero_dialog.rs:46,196-225` restock 状态；Native Hero belt action | `apps/web/app/page.tsx:8615-8620` 初查将 7/8 映射为普通 use。现已有 7/8 与英雄 belt restock 的代码候选；库存状态转换待最终验证。 |
-| 6 | Hero Status/State 两个统计页 | `hero_dialog_render.rs:466-467,507-553`；`character_stats::lines` | 初查缺页；现有 `original-client-hero-management-window.tsx` 的 Status/State 页及 `page.tsx` `readHeroStats` 共享只读 getter 接线。代码候选已接，最终 TSC/finite/行为待验证。 |
-| 7 | Floating Hero 2-slot belt 的关闭与旋转 | `hero_dialog_render.rs:315,672-778` (`CloseInventory` / `BeltRotate`)；`hero_dialog.rs:53,61-62` | 初查缺控件；现有 `original-client-hero-management-window.tsx` 已接 belt visibility/orientation，经 `closeWindow("belt")` / `onWindowChange` 更新窗口。代码候选已接，最终 TSC/finite/行为待验证。 |
+| 6 | Hero Status/State 两个统计页 | `hero_dialog_render.rs:466-467,507-553`；`character_stats::lines` | 初查缺页；现有 `original-client-hero-management-window.tsx` 的 Status/State 页及 `page.tsx` `readHeroStats` 共享只读 getter 接线。代码候选已接，对应 TSC/finite/Next 已通过，实际行为待验证。 |
+| 7 | Floating Hero 2-slot belt 的关闭与旋转 | `hero_dialog_render.rs:315,672-778` (`CloseInventory` / `BeltRotate`)；`hero_dialog.rs:53,61-62` | 初查缺控件；现有 `original-client-hero-management-window.tsx` 已接 belt visibility/orientation，经 `closeWindow("belt")` / `onWindowChange` 更新窗口。代码候选已接，对应 TSC/finite/Next 已通过，实际行为待验证。 |
 主要入口：`platform-windows/src/main.rs` 注册 Native Shell/HUD/chat/Quest；`runtime/src/quest_ui_host.rs` 安装 portable Quest/HUD/Bag/Character/Spells/Mail；`runtime/src/lib.rs` 安装 combat/storage/NPC host；Web `page.tsx` 提供相应模型和现有命令适配。旧 Web 功能存在不等于共享界面已覆盖。
 
 ### 行为清单补充与范围核对

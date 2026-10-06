@@ -2,7 +2,14 @@
 
 ## 当前执行：Web 追平 Windows 新 goal（2026-10-06）
 
-Source09 输入、Rust新增12+保留2测试、TSC / finite / Next、Native09 / renderer07、Thin03静态打包审计均已按各自冻结输入闭合。Thin 包 7,299文件、372,474,859 B，360 MiB cap余量5,012,501 B；文件hash、231 JSON token和静态依赖闭包均通过。44条依赖warning计为Error仍待解释；无服务、HTTP、runtime或UI验收，MIR2_R2_PROXY_BASE与Pet/Gate覆盖仍有边界。F11原44项分母不冻结，goal active。详见 [QA 索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+Windows固定基线f72与Web父提交f1cf已细分为317条有界源码记录：103 shared、181 legacy、25 open、8共同限制；不是完整验收分母，不报整体百分比。配偶写信/密语复用既有Mail/Chat入口，新增5项回归和相邻四脚本119/119通过；诊断脚本16/16通过。Next03严格TypeScript＋13静态页、Thin05构建与静态审计退出0，独立包7,299文件 / 372,478,397 B / 0链接，原360 MiB cap余5,008,963 B。Rust Source09未改，限定承接Native09、renderer07和Core原有效输入证据。44条warning已逐条保留并做源码分类，直接导入与部分分支运行语义仍未验。实际服务/HTTP/UI/玩家流程及Pet/Gate远端覆盖未验，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix02.md) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
+本轮闭环：配偶两个本地草稿入口＋打包warning消息记录、317条有界矩阵更正。后续顺序：
+
+1. F01：共享注册全字段、修改密码及SafeKey；先修raw密码返回码1/6、注册结果原因与banned expiry投影。Root frontier主导，维持认证/限流、物理socket及未决请求屏障和Core原预算。
+2. F02：大/小地图图像寻路、世界钓鱼点击；F04：历史拖动、4/7/11行及聊天设置draft。
+3. F05：兼容tooltip和Bag→Belt；F09：Pearl、普通/特殊维修真实目标与报价、Cash sprite预览；F11：Ranking Inspect入口与共同服务限制分开。
+4. W0继续补注册→控件→host→wire链及未知范围；25只是记录集剩余已确认缺口。W6按用户界面暂缓保留，不请求例行确认。
 
 ## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
 

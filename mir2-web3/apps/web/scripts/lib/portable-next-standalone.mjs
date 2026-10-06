@@ -627,14 +627,18 @@ export async function materializeStandaloneDependencies({
     requireInside(destinationDependencyRoot, metadata);
     if (!(await fs.lstat(metadata)).isFile()) throw new Error(`Copied Sharp package metadata missing: ${nativePackage.name}`);
   }
-  const warningCodes = {};
+  const warningCodes = Object.create(null);
+  const warningDetails = [];
   for (const warning of traced.warnings ?? []) {
     const code = String(warning?.code ?? warning?.name ?? "unknown");
+    const message = String(warning?.message ?? "");
     warningCodes[code] = (warningCodes[code] ?? 0) + 1;
+    // Keep trace diagnostics without serializing Error stacks or unbounded messages.
+    warningDetails.push({ code, message: message.slice(0, 8192), messageTruncated: message.length > 8192 });
   }
   return { entries: entries.length, files: files.size, bytes, nativeBindings, directoryRecords,
     targetPlatform: nativeClosure.targetPlatform, nativePackages: nativeClosure.packages,
     nativePackageFiles: nativeClosure.packages.reduce((sum, entry) => sum + entry.files, 0),
     nativePackageBytes: nativeClosure.packages.reduce((sum, entry) => sum + entry.bytes, 0),
-    warningCount: [...(traced.warnings ?? [])].length, warningCodes };
+    warningCount: warningDetails.length, warningCodes, warningDetails };
 }

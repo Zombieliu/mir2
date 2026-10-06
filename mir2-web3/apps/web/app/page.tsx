@@ -115,6 +115,14 @@ import { useBevyNpcShopUi } from "../lib/use-bevy-npc-shop-ui";
 import type { NpcShopRuntime, NpcShopHostInput, NpcShopIntent, NpcShopStatus } from "../lib/bevy-npc-shop-ui";
 type NpcShopSendProof = Readonly<{ intent: NpcShopIntent; currentJson: string; sourceJson: string;
   presentation: NonNullable<NpcShopHostInput["presentation"]> }>;
+type SpouseUiSource = Readonly<{
+  owner: SocialReplyOwner;
+  windowEpoch: number;
+  partnerName: string;
+  partnerMap: string;
+  relationshipKey: string;
+}>;
+
 type SocialTradeSendProof = Readonly<{owner: SocialReplyOwner; incarnation: number;
   partner: string; state: "requested" | "open" | "closed"; body: string}>;
 import { projectBevyStorageModel } from "../lib/bevy-storage-model";
@@ -2628,8 +2636,11 @@ export default function HomePage() {
     socialRosterWindowsRef.current.friends = open; setShowFriendsState(open);
   }
   const [showBonds, setShowBondsState] = useState(false);
+  const bondsWindowLeaseRef = useRef({ open: false, epoch: 0 });
   function setShowBonds(value: boolean | ((prior: boolean) => boolean)) {
     const open = typeof value === "function" ? value(socialReplyWindowsRef.current.bonds) : value;
+    if (bondsWindowLeaseRef.current.open !== open) bondsWindowLeaseRef.current.epoch += 1;
+    bondsWindowLeaseRef.current.open = open;
     socialReplyWindowsRef.current.bonds = open;
     if (!open) for (const kind of ["marriage", "divorce", "mentor"] as const) socialRepliesRef.current.dismiss(kind);
     setShowBondsState(open);
@@ -9302,6 +9313,32 @@ export default function HomePage() {
     send({ type: "marketRefresh" });
   }
 
+  // These callbacks open local compose inputs; they never send a Chat or Mail packet.
+  function captureSpouseUiSource(relationship: ReturnType<typeof adaptRelationship>): SpouseUiSource | null {
+    const owner = currentSocialReplyOwner(), lease = bondsWindowLeaseRef.current;
+    const partnerName = relationship?.partnerName?.trim() ?? "";
+    if (!owner || !lease.open || !socialReplyWindowsRef.current.bonds || !partnerName) return null;
+    const relationshipKey = JSON.stringify(relationship);
+    if (relationshipKey !== JSON.stringify(adaptRelationship(worldRef.current.stage5Systems.relationship))) return null;
+    return { owner, windowEpoch: lease.epoch, partnerName, partnerMap: relationship?.partnerMap ?? "", relationshipKey };
+  }
+  function spouseUiSourceCurrent(source: SpouseUiSource | null, requireMap = false): source is SpouseUiSource {
+    const owner = currentSocialReplyOwner(), lease = bondsWindowLeaseRef.current;
+    if (!source || !owner || !lease.open || !socialReplyWindowsRef.current.bonds || source.windowEpoch !== lease.epoch
+      || !sameSocialPhysicalOwner(source.owner, owner) || source.owner.sceneRevision !== owner.sceneRevision
+      || source.owner.mapFileName !== owner.mapFileName) return false;
+    const relationship = adaptRelationship(worldRef.current.stage5Systems.relationship);
+    return !!source.partnerName && source.partnerName === (relationship?.partnerName?.trim() ?? "")
+      && source.partnerMap === (relationship?.partnerMap ?? "")
+      && source.relationshipKey === JSON.stringify(relationship) && (!requireMap || source.partnerMap.length > 0);
+  }
+  function mailSpouse(source: SpouseUiSource | null) {
+    if (spouseUiSourceCurrent(source)) openMailWindow(source.partnerName, source);
+  }
+  function whisperSpouse(source: SpouseUiSource | null) {
+    if (spouseUiSourceCurrent(source, true)) setChatMessage(":)");
+  }
+
   // Bonds (relationship + mentor). MarriageRequest targets the faced player
   // server-side, so the window's typed name is not part of the packet.
   function proposeMarriage(_name: string) {
@@ -10157,8 +10194,11 @@ export default function HomePage() {
     outcome=sender.finish(proof,outcome);setMailComposeRevision(n=>n+1);return outcome;
   }
   // Friend "mail" affordance just opens the mail window (compose recipient typed there).
-  function openMailWindow(name?: string) {
-    setMailboxOpen(true);if(name?.trim())presentMailCompatibility("compose",null,name.trim());
+  function openMailWindow(name?: string, spouseSource?: SpouseUiSource) {
+    if (spouseSource && !spouseUiSourceCurrent(spouseSource)) return;
+    setMailboxOpen(true);
+    if (name?.trim() && (!spouseSource || spouseUiSourceCurrent(spouseSource)))
+      presentMailCompatibility("compose", null, name.trim());
   }
 
   function transferKeyForTile(x: number, y: number) {
@@ -17150,6 +17190,7 @@ export default function HomePage() {
     world.mapTransfers,
   ]);
 
+  const spouseUiSource = showBonds ? captureSpouseUiSource(extraWindowData.relationship) : null;
   // ── Stable forwarded handlers ─────────────────────────────────────────────
   // The shell/mobile-controls/scene forward these to memoised children (and the two
   // target actions sit in a keydown effect dep list). The underlying logic reads live
@@ -17858,7 +17899,7 @@ export default function HomePage() {
         onMoveItem: (from, to, uid) => submitSocialItem("guild2", from, to, uid, socialGuildRender?.sourceKey ?? ""), playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => closeSocialReplyWindow("group"), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "group") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("group", epoch, accept), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}
       friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo, onRefresh: refreshFriends }}
-      bonds={{ open: showBonds, onClose: () => closeSocialReplyWindow("bonds"), incomingRequests: socialRepliesRef.current.list(currentSocialReplyOwner()).filter((r): r is typeof r & {kind: "marriage" | "divorce" | "mentor"} => r.kind === "marriage" || r.kind === "divorce" || r.kind === "mentor"), onReplyRequest: replySocialRequest, relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
+      bonds={{ open: showBonds, onClose: () => closeSocialReplyWindow("bonds"), incomingRequests: socialRepliesRef.current.list(currentSocialReplyOwner()).filter((r): r is typeof r & {kind: "marriage" | "divorce" | "mentor"} => r.kind === "marriage" || r.kind === "divorce" || r.kind === "mentor"), onReplyRequest: replySocialRequest, relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onMailPartner: spouseUiSource ? () => mailSpouse(spouseUiSource) : undefined, onWhisperPartner: spouseUiSource?.partnerMap ? () => whisperSpouse(spouseUiSource) : undefined, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: rankingTabKey(rankingQueriesRef.current.desired.rankType, rankingQueriesRef.current.desired.onlineOnly),
         page: !rankingQueriesRef.current.pending && extraWindowData.rankingPage?.rankType === rankingQueriesRef.current.desired.rankType && extraWindowData.rankingPage?.onlineOnly === rankingQueriesRef.current.desired.onlineOnly && extraWindowData.rankingPage?.rankIndex === rankingQueriesRef.current.desired.rankIndex ? extraWindowData.rankingPage : null,
         onlineOnly: rankingQueriesRef.current.desired.onlineOnly, requestPending: Boolean(rankingQueriesRef.current.pending), playerName: self?.name ?? null,

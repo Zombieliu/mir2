@@ -73,6 +73,10 @@ export type BondsWindowProps = {
   onAllowMarriage?: (allow: boolean) => void;
   onProposeMarriage?: (name: string) => void;
   onDivorce?: () => void;
+  /** Open a mail draft for the displayed spouse; never sends it. */
+  onMailPartner?: () => void;
+  /** Seed the Native spouse whisper text when the real partner map is known. */
+  onWhisperPartner?: () => void;
   /** Toggle whether the spouse may recall to the viewer. */
   onAllowRecall?: (allow: boolean) => void;
   /** Cast spousal recall (summon spouse to viewer). */
@@ -99,6 +103,8 @@ export function BondsWindow({
   onAllowMarriage,
   onProposeMarriage,
   onDivorce,
+  onMailPartner,
+  onWhisperPartner,
   onAllowRecall,
   onRecallPartner,
   onTeleportToPartner,
@@ -115,7 +121,9 @@ export function BondsWindow({
 
   const partner = relationship?.partnerName?.trim() ?? "";
   const married = partner.length > 0;
-  const partnerOnline = relationship?.partnerOnline ?? false;
+  const partnerOnline = married && Boolean(relationship?.partnerMap?.length);
+  const canMailPartner = married && Boolean(onMailPartner);
+  const canWhisperPartner = partnerOnline && Boolean(onWhisperPartner);
   const allowMarriage = relationship?.allowMarriage ?? true;
   const allowRecall = relationship?.allowRecall ?? false;
 
@@ -247,6 +255,29 @@ export function BondsWindow({
             label={t("ui.bondsRequest", [], "Pending")}
             value={relationship?.pendingRequestFrom?.trim() || t("ui.bondsNoRequest", [], "None")}
           />
+
+          <div style={style.inputRow}>
+            <button
+              type="button"
+              data-bonds-action="mail-spouse"
+              disabled={!canMailPartner}
+              aria-label={t("ui.bondsMailSpouse", [], "Mail Spouse")}
+              onClick={() => onMailPartner?.()}
+              style={{ ...style.actionButton, flex: 1, minHeight: 44, ...(!canMailPartner ? style.actionButtonDisabled : null) }}
+            >
+              {t("ui.mail", [], "Mail")}
+            </button>
+            <button
+              type="button"
+              data-bonds-action="whisper-spouse"
+              disabled={!canWhisperPartner}
+              aria-label={t("ui.bondsWhisperSpouse", [], "Whisper Spouse")}
+              onClick={() => onWhisperPartner?.()}
+              style={{ ...style.actionButton, flex: 1, minHeight: 44, ...(!canWhisperPartner ? style.actionButtonDisabled : null) }}
+            >
+              {t("ui.whisper", [], "Whisper")}
+            </button>
+          </div>
 
           <div style={style.toggleRow}>
             <span style={style.toggleLabel}>{t("ui.bondsAllow", [], "Allow Proposals")}</span>

@@ -262,6 +262,8 @@ export type ExtraWindowsProps = {
       | "onAllowMarriage"
       | "onProposeMarriage"
       | "onDivorce"
+      | "onMailPartner"
+      | "onWhisperPartner"
       | "onAllowMentor"
       | "onAddMentor"
       | "onCancelMentor"
@@ -502,6 +504,8 @@ function ExtraWindowsInner({
           onAllowMarriage={bonds.onAllowMarriage}
           onProposeMarriage={bonds.onProposeMarriage}
           onDivorce={bonds.onDivorce}
+          onMailPartner={bonds.onMailPartner}
+          onWhisperPartner={bonds.onWhisperPartner}
           onAllowMentor={bonds.onAllowMentor}
           onAddMentor={bonds.onAddMentor}
           onCancelMentor={bonds.onCancelMentor}

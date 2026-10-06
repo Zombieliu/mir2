@@ -10,13 +10,13 @@ const sources = { identity: "../lib/world-model/item-identity.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
-  tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
+  stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
 const allow = { identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
   rental: { "./social-incoming-replies": "social" }, bag: { "./world-model/item-identity": "identity" },
-  socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, tooltip:{}, guildBuff:{}, socialActions: {}, extended: {} };
+  socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{}, guildBuff:{}, socialActions: {}, extended: {} };
 const modules = new Map();
 function loadPure(name) {
   assert(Object.hasOwn(sources, name), "module outside pure allowlist");
@@ -55,7 +55,8 @@ const requestId = seq => "st-" + String(seq).padStart(16, "0");
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const pageAst = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const names = ["submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw",
+const names = ["captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
+  "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw",
   "itemCommandRequiresOwner", "retireEquipmentSession", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
@@ -74,8 +75,20 @@ const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
   "TradeItem", "NewItemInfo", "NewRecipeInfo"];
+let spouseRenderInitializer, spouseRenderCallbacks;
 let gatewayGuard, snapshotStatements, snapshotRevision, socialSnapshotFriends, socialWindowRender, rosterRenderInitializer, tradeLeaseInitializer;
 function visit(node) {
+  if (ts.isVariableDeclaration(node) && node.name.getText(pageAst) === "spouseUiSource") {
+    assert.equal(spouseRenderInitializer, undefined, "sole actual spouse render capture");
+    spouseRenderInitializer = node.initializer.getText(pageAst);
+  }
+  if (ts.isJsxAttribute(node) && node.name.text === "bonds" && node.initializer
+    && ts.isJsxExpression(node.initializer) && ts.isObjectLiteralExpression(node.initializer.expression)) {
+    assert.equal(spouseRenderCallbacks, undefined, "sole actual Bonds props binding");
+    spouseRenderCallbacks = node.initializer.expression.properties.filter(p => ts.isPropertyAssignment(p)
+      && ["onMailPartner", "onWhisperPartner"].includes(p.name.getText(pageAst))).map(p => p.getText(pageAst));
+    assert.equal(spouseRenderCallbacks.length, 2, "actual Page binds both spouse callbacks");
+  }
   if (ts.isFunctionDeclaration(node) && node.name && names.includes(node.name.text)) {
     assert(!declarations.has(node.name.text), "ambiguous Page declaration: " + node.name.text);
     declarations.set(node.name.text, node.getText(pageAst));
@@ -132,12 +145,15 @@ const actualFunctions = names.map(name => declarations.get(name)).join("\n")
   + "\nfunction projectSocialSnapshotFriends(snapshot, current, socialOwner) {return " + socialSnapshotFriends + ";}"
   + "\nfunction applySocialWindowRender(showGroup, showBonds, showGuild) {" + socialWindowRender + "}"
   + "\nfunction captureSocialRosterRender(showFriends, showGuild) {return " + rosterRenderInitializer + ";}"
-  + "\nfunction captureSocialTradeUiLease() {return " + tradeLeaseInitializer + ";}";
+  + "\nfunction captureSocialTradeUiLease() {return " + tradeLeaseInitializer + ";}"
+  + "\nfunction captureSpouseRender(showBonds, extraWindowData) { const spouseUiSource = " + spouseRenderInitializer
+  + ";return {" + spouseRenderCallbacks.join(",") + "};}";
 assert.equal(socialCases.size, socialPacketNames.length);
 assert.equal(gatewayGuard, "if (connectionGeneration !== equipmentConnectionGenerationRef.current || socketRef.current !== source) return;",
   "retain the actual source socket and connection admission guard");
 assert.equal(snapshotRevision, "worldSnapshotVersionRef.current += 1;");
 assert.ok(socialSnapshotFriends && socialWindowRender && rosterRenderInitializer && tradeLeaseInitializer);
+assert.ok(spouseRenderInitializer && spouseRenderCallbacks);
 const pageJavaScript = ts.transpileModule(actualFunctions, {
   fileName: "actual-storage-page-gates.ts",
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
@@ -171,7 +187,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     heroOperationsRef: {current: {pending:null}}, mailCollectBarrierRef: {current:null},
     observePreferenceRef:{current:null},observeBootstrapRef:{current:null},combatModeRawRef:{current:null},
     heroWindowEpochsRef:{current:{inventory:1,character:1,belt:1}},skillBarPointerHeldRef:{current:false},skillBarDocumentCacheRef:{current:null},
-    ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
+    ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
     projectEquipmentGatewaySnapshot: pureEquipment.projectEquipmentGatewaySnapshot,
     authoritativeItemUniqueId: pureIdentity.authoritativeItemUniqueId,
     currentEquipmentCommandItem: pureEquipment.currentEquipmentCommandItem,
@@ -207,11 +223,15 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     spellsIngressRef: { current: null }, spellsRawSnapshotRef: { current: null },
     mailParcelRef: { current: null }, mailIngressRef: { current: null },
     mailDispatcherRef: { current: null }, mailRawRef: { current: null },
-    setMailboxOpen: () => {},
+    mailOpenEvents: [], mailComposeEvents: [], chatComposeEvents: [],
+    setMailboxOpen: value => { scope.mailOpenEvents.push(value); scope.onMailOpen?.(); },
+    presentMailCompatibility: (...args) => scope.mailComposeEvents.push(args),
+    setChatMessage: value => scope.chatComposeEvents.push(value),
     syncMailParcel: () => { throw Error("unexpected live Mail projection in idle fixture"); },
     sameMailOwner: () => false,
     socialRepliesRef: {current: new pureSocial.SocialIncomingReplies()}, socialReplyWindowsRef: {current: {group: false, bonds: false, guild: false}},
     socialSceneRevisionRef: {current: 1}, renderSocialRequests: () => {},
+    bondsWindowLeaseRef: {current: {open: false, epoch: 0}},
     setShowGroupState: value => { scope.groupOpen = value; }, setShowBondsState: value => { scope.bondsOpen = value; },
     setShowGuildState: value => { scope.guildOpen = value; }, setShowRankingState: value => { scope.rankingOpen = value; },
     rankingWindowRef: {current: false}, rankingQueriesRef: {current: new pureSocialActions.RankingQueries()}, renderRankingRequests: () => {},
@@ -246,7 +266,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
   scope.updateWorld = updater => { scope.worldRef.current = updater(scope.worldRef.current); };
   const keys = Object.keys(scope);
   const functions = new Function(...keys, pageJavaScript + "\nreturn {"
-    + names.join(",") + ",applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease};")(...keys.map(key => scope[key]));
+    + names.join(",") + ",applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease,captureSpouseRender};")(...keys.map(key => scope[key]));
   return { ...functions, scope, sent, errors, logs, terminations, npcWithdrawals, npcInventoryRetirements, socket, liveOwner,
     get attempts() { return attempts; }, get actions() { return actions; },
     onAction(value) { listener = value; }, throwAtSocket() { socketThrows = true; },
@@ -1140,4 +1160,171 @@ test("actual Page Guild runtime catalog projects an unobserved template while fi
   malformed.receive("GuildStatus",{guildName:"Guild",myOptions:24,typed:true});
   const items=Array(112).fill(null); items[3]=guildRow(); malformed.receive("GuildStorageList",{items,typed:true});
   assert.equal(malformed.readSocialItemSurface("guild"),null); assert.equal(malformed.attempts,0);
+});
+
+
+test("actual Page spouse Mail opens only a named local draft and Whisper uses exact Native text without sending", () => {
+  const page = harness();
+  page.scope.worldRef.current.stage5Systems.relationship = {name: "Spouse", mapName: "D002", marriedDays: 7};
+  page.setShowBonds(true);
+  const relationship = page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship);
+  const callbacks = page.captureSpouseRender(true, {relationship});
+  assert.equal(typeof callbacks.onMailPartner, "function");
+  assert.equal(typeof callbacks.onWhisperPartner, "function");
+  callbacks.onMailPartner(); callbacks.onWhisperPartner();
+  assert.deepEqual(page.scope.mailOpenEvents, [true]);
+  assert.deepEqual(page.scope.mailComposeEvents, [["compose", null, "Spouse"]]);
+  assert.deepEqual(page.scope.chatComposeEvents, [":)"], "spouse flow is not the friend's /name prefix");
+  assert.deepEqual(page.sent, []); assert.equal(page.attempts, 0); assert.equal(page.actions, 0);
+  page.openMailWindow("Friend");
+  assert.deepEqual(page.scope.mailComposeEvents.at(-1), ["compose", null, "Friend"], "existing friend/local compose entry is preserved");
+});
+
+test("actual Page spouse availability uses received mapName while unmarried and stale displayed relationships are rejected", () => {
+  const page = harness(); page.setShowBonds(true);
+  page.scope.worldRef.current.stage5Systems.relationship = {name: "Spouse", mapName: "", partnerOnline: true};
+  const offline = page.captureSpouseRender(true, {relationship: page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship)});
+  assert.equal(typeof offline.onMailPartner, "function"); assert.equal(offline.onWhisperPartner, undefined);
+  offline.onMailPartner();
+  assert.deepEqual(page.scope.mailComposeEvents, [["compose", null, "Spouse"]]);
+  const source = page.captureSpouseUiSource(page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship));
+  page.whisperSpouse(source); assert.deepEqual(page.scope.chatComposeEvents, []);
+  assert.deepEqual(page.captureSpouseRender(false, {relationship: page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship)}),
+    {onMailPartner: undefined, onWhisperPartner: undefined});
+  assert.equal(page.captureSpouseUiSource({partnerName: "Old spouse", partnerMap: ""}), null, "displayed source must equal the live adapter projection");
+  for (const relationship of [null, {}, {name: "", mapName: "D002"}]) {
+    page.scope.worldRef.current.stage5Systems.relationship = relationship;
+    const shown = page.scope.adaptRelationship(relationship);
+    assert.equal(page.captureSpouseUiSource(shown), null);
+    assert.deepEqual(page.captureSpouseRender(true, {relationship: shown}), {onMailPartner: undefined, onWhisperPartner: undefined});
+  }
+  page.mailSpouse(source); page.whisperSpouse(source);
+  assert.equal(page.scope.mailComposeEvents.length, 1); assert.equal(page.attempts, 0);
+});
+
+test("actual Page retained spouse callbacks reject physical owner scene visibility window epoch and relationship changes", () => {
+  const mutations = [
+    ["other socket", p => { p.scope.socketRef.current = {readyState: 1}; }],
+    ["closed socket", p => { p.socket.readyState = 0; }],
+    ["connection", p => { p.scope.equipmentConnectionGenerationRef.current++; }],
+    ["session", p => { p.scope.equipmentSessionGenerationRef.current++; }],
+    ["new coherent session", p => { p.scope.equipmentSessionGenerationRef.current++; p.scope.equipmentStartGameRef.current.sessionGeneration++; }],
+    ["character", p => { p.scope.worldRef.current.playerObjectId = "4"; }],
+    ["scene revision", p => { p.scope.socialSceneRevisionRef.current++; }],
+    ["map", p => { p.scope.worldRef.current.mapFileName = "D003"; }],
+    ["disconnected", p => { p.scope.worldRef.current.connected = false; }],
+    ["not game", p => { p.scope.screenRef.current = "login"; }],
+    ["hidden", p => { p.scope.document.visibilityState = "hidden"; }],
+    ["paused owner", p => { p.scope.equipmentHostSuspendReasonRef.current = "logoutPending"; }],
+    ["window closed", p => { p.setShowBonds(false); }],
+    ["window close/reopen", p => { p.setShowBonds(false); p.setShowBonds(true); }],
+    ["reply close/reopen", p => { p.closeSocialReplyWindow("bonds"); p.setShowBonds(true); }],
+    ["retired requests", p => { p.retireSocialRequests(); }],
+    ["partner", p => { p.scope.worldRef.current.stage5Systems.relationship.name = "Other spouse"; }],
+    ["partner map", p => { p.scope.worldRef.current.stage5Systems.relationship.mapName = "D004"; }],
+    ["projection source", p => { p.scope.worldRef.current.stage5Systems.relationship.marriedDays++; }],
+    ["unmarried", p => { p.scope.worldRef.current.stage5Systems.relationship = null; }],
+  ];
+  for (const [label, mutate] of mutations) {
+    const page = harness();
+    page.scope.worldRef.current.stage5Systems.relationship = {name: "Spouse", mapName: "D002", marriedDays: 7};
+    page.setShowBonds(true);
+    const callbacks = page.captureSpouseRender(true, {relationship: page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship)});
+    assert.equal(typeof callbacks.onMailPartner, "function", label); assert.equal(typeof callbacks.onWhisperPartner, "function", label);
+    mutate(page); callbacks.onMailPartner(); callbacks.onWhisperPartner();
+    assert.deepEqual(page.scope.mailOpenEvents, [], label); assert.deepEqual(page.scope.mailComposeEvents, [], label);
+    assert.deepEqual(page.scope.chatComposeEvents, [], label); assert.equal(page.attempts, 0, label);
+  }
+});
+
+test("actual Page spouse mail rechecks after opening and old window callbacks cannot target a new compose owner", () => {
+  const page = harness();
+  page.scope.worldRef.current.stage5Systems.relationship = {name: "Spouse", mapName: "D002"};
+  page.setShowBonds(true);
+  const callbacks = page.captureSpouseRender(true, {relationship: page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship)});
+  const capturedEpoch = page.scope.bondsWindowLeaseRef.current.epoch;
+  page.scope.onMailOpen = () => { page.setShowBonds(false); page.setShowBonds(true); };
+  callbacks.onMailPartner();
+  assert.ok(page.scope.bondsWindowLeaseRef.current.epoch > capturedEpoch);
+  assert.deepEqual(page.scope.mailOpenEvents, [true]); assert.deepEqual(page.scope.mailComposeEvents, []);
+  callbacks.onMailPartner(); callbacks.onWhisperPartner();
+  assert.deepEqual(page.scope.mailOpenEvents, [true]); assert.deepEqual(page.scope.chatComposeEvents, []);
+  delete page.scope.onMailOpen;
+  const fresh = page.captureSpouseRender(true, {relationship: page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship)});
+  fresh.onMailPartner(); fresh.onWhisperPartner();
+  assert.deepEqual(page.scope.mailComposeEvents, [["compose", null, "Spouse"]]);
+  assert.deepEqual(page.scope.chatComposeEvents, [":)"]); assert.equal(page.attempts, 0);
+});
+
+
+test("actual Bonds spouse buttons derive disabled state from name and map and ExtraWindows forwards their exact callbacks", () => {
+  const url = new URL("../app/components/original-client-bonds-window.tsx", import.meta.url);
+  const ast = ts.createSourceFile(fileURLToPath(url), readFileSync(url, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const component = ast.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === "BondsWindow");
+  assert.ok(component);
+  const selected = new Set(["partner", "married", "partnerOnline", "canMailPartner", "canWhisperPartner"]);
+  const locals = component.body.statements.filter(n => ts.isVariableStatement(n)
+    && n.declarationList.declarations.some(d => selected.has(d.name.getText(ast))));
+  assert.equal(locals.length, 5, "use actual derived component availability and online status");
+  const buttons = [];
+  function visitButton(node) {
+    if (ts.isJsxOpeningElement(node) && node.tagName.getText(ast) === "button") {
+      const fields = new Map(node.attributes.properties.filter(ts.isJsxAttribute).map(a => [a.name.text, a.initializer]));
+      const action = fields.get("data-bonds-action");
+      if (action && ts.isStringLiteral(action) && ["mail-spouse", "whisper-spouse"].includes(action.text)) {
+        const expression = name => { const value = fields.get(name); assert.ok(value, name);
+          if (ts.isStringLiteral(value)) return JSON.stringify(value.text);
+          assert.ok(ts.isJsxExpression(value) && value.expression, name); return value.expression.getText(ast); };
+        buttons.push('{action:'+JSON.stringify(action.text)+',type:'+expression("type")+',disabled:'+expression("disabled")
+          +',label:'+expression("aria-label")+',click:'+expression("onClick")+'}');
+      }
+    }
+    ts.forEachChild(node, visitButton);
+  }
+  visitButton(component); assert.equal(buttons.length, 2);
+  const componentCode = ts.transpileModule(locals.map(n => n.getText(ast)).join("\n")
+    + "\nreturn Object.assign([" + buttons.join(",") + "], {partnerOnline});", {compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+  const controls = new Function("relationship", "onMailPartner", "onWhisperPartner", "t", componentCode);
+  const bridgeUrl = new URL("../app/components/original-client-extra-windows.tsx", import.meta.url);
+  const bridgeAst = ts.createSourceFile(fileURLToPath(bridgeUrl), readFileSync(bridgeUrl, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let bridge;
+  function visitBridge(node) {
+    if (ts.isJsxSelfClosingElement(node) && node.tagName.getText(bridgeAst) === "BondsWindow") {
+      assert.equal(bridge, undefined, "sole actual Bonds component bridge");
+      bridge = node.attributes.properties.filter(a => ts.isJsxAttribute(a)
+        && ["onMailPartner", "onWhisperPartner"].includes(a.name.text)).map(a => {
+          assert.ok(ts.isJsxExpression(a.initializer) && a.initializer.expression);
+          return a.name.text + ":" + a.initializer.expression.getText(bridgeAst);
+        });
+    }
+    ts.forEachChild(node, visitBridge);
+  }
+  visitBridge(bridgeAst); assert.equal(bridge?.length, 2);
+  const forward = new Function("bonds", "return {"+bridge.join(",")+"};");
+  const page = harness(); page.setShowBonds(true);
+  page.scope.worldRef.current.stage5Systems.relationship = {name:"Spouse",mapName:"D002"};
+  const relationship = page.scope.adaptRelationship(page.scope.worldRef.current.stage5Systems.relationship);
+  const callbacks = page.captureSpouseRender(true, {relationship}), props = forward(callbacks);
+  assert.equal(props.onMailPartner, callbacks.onMailPartner); assert.equal(props.onWhisperPartner, callbacks.onWhisperPartner);
+  const t = (_key,_args,fallback) => fallback;
+  const active = controls(relationship,props.onMailPartner,props.onWhisperPartner,t);
+  assert.equal(active.partnerOnline, true, "actual adapter map enables the online label without a separate flag");
+  assert.deepEqual(active.map(b => ({action:b.action,type:b.type,disabled:b.disabled,label:b.label})), [
+    {action:"mail-spouse",type:"button",disabled:false,label:"Mail Spouse"},
+    {action:"whisper-spouse",type:"button",disabled:false,label:"Whisper Spouse"}]);
+  active[0].click(); active[1].click();
+  assert.deepEqual(page.scope.mailComposeEvents, [["compose",null,"Spouse"]]); assert.deepEqual(page.scope.chatComposeEvents,[":)"]);
+  for (const [source, mail, whisper, expected] of [
+    [null,props.onMailPartner,props.onWhisperPartner,[true,true]],
+    [{partnerName:"",partnerMap:"D002"},props.onMailPartner,props.onWhisperPartner,[true,true]],
+    [{partnerName:"Spouse",partnerMap:"",partnerOnline:true},props.onMailPartner,props.onWhisperPartner,[false,true]],
+    [{partnerName:"Spouse",partnerMap:"D002",partnerOnline:false},props.onMailPartner,props.onWhisperPartner,[false,false]],
+    [relationship,undefined,undefined,[true,true]],
+  ]) {
+    const derived = controls(source,mail,whisper,t);
+    assert.deepEqual(derived.map(b => b.disabled),expected);
+    assert.equal(derived.partnerOnline, Boolean(source?.partnerName?.trim() && source?.partnerMap?.length),
+      "status and Whisper use the same authoritative spouse map");
+  }
+  assert.equal(page.attempts,0);
 });
