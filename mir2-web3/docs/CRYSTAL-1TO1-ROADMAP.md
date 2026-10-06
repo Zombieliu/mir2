@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 user resumes classic P1–P8 playability delivery. P1 dense escape /
+> continuous combat and actual Windows/network gates lead, followed by P2
+> late-map/Boss/item journeys and P3 original ownership. P4–P7 feature gaps
+> remain; P8 follows classic completion. Public feed14 keeps gameR17. Frozen
+> R18 and later source integrations are not silently credited as deployed.
+> Packed-resource optimization is deferred; no overall completion percentage
+> or human acceptance is claimed. Root starts an isolated 47471920e5 lane and
+> retains original tests, artifacts, services and player saves.
+> [Resumed Goal checklist](CLASSIC-GAMEPLAY-GOAL-20261004.md).
+
 > 2026-10-06 signed14 updater delivery is published: actual stage37399468079
 > checks36 public hashes/817841942 bytes, origin14 atomic exchange and independent
 > promote37400701902 CAS succeed. b4390ee4 production native HTTPS/CMS/engine SHA/

@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-06 user explicitly resumes the eight-stage classic gameplay delivery.
+> P1 dense movement/combat qualification and actual native/network acceptance
+> lead, then P2 real late-map/Boss/item journeys and P3 ownership closure;
+> P4–P7 and the final P8 expansion follow. Packed-resource work is deferred.
+> Public feed14 still binds gameR17, not frozenR18/source321316 or later P3/P5.
+> Root uses an isolated 47471920e5 lane; E working changes and player saves stay
+> protected. Old Goal cannot be overwritten or falsely completed; recorded
+> blocked status remains while actual work resumes with a fresh blocked audit.
+> First bounded task: explain max-four eligible attackers before rerunning,
+> preserving original clocks/stats, failed evidence and seven-attacker gate.
+> [Updated scope and delivery checklist](CLASSIC-GAMEPLAY-GOAL-20261004.md).
+
 > 2026-10-06 signed14 delivery actually completes: stage37399468079 verifies
 >36 full public hashes, separate promote37400701902 CAS and coherent source/CDN14
 > succeed. Production b4390ee4 Windows discovery/CMS/full engine/TLS206 pass.
