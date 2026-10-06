@@ -78,13 +78,15 @@ test('production integration captures raw before coalescing and final event proo
   'options?.mailProof?.commandType === "collectParcel"',
   'options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)',
   'socketRef.current !== socket || socket.readyState !== WebSocket.OPEN',
-  null, 'authKind',
+  null, 'authKind', 'options?.npcRepairProof',
+  'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
  ]);
 
  // The original ordered parity suffix ends at the two additive Auth nodes.
- // Assert their exact adjacency; do not discard unknown statements.
- const paritySocketIndex=socketIndex-2;
- const authDeclaration=statements[paritySocketIndex],authClaim=statements[paritySocketIndex+1];
+ // Repair adds only a command-scoped proof gate and a local inventory retire
+ // immediately before the transport boundary; retain and inspect both nodes.
+ const authClaimIndex=statements.findIndex(n=>ts.isIfStatement(n)&&normalized(n.expression)==='authKind');
+ const authDeclaration=statements[authClaimIndex-1],authClaim=statements[authClaimIndex];
  assert.ok(ts.isVariableStatement(authDeclaration));
  assert.equal(authDeclaration.declarationList.flags,ts.NodeFlags.Const);
  assert.equal(authDeclaration.declarationList.declarations.length,1);
@@ -105,8 +107,26 @@ test('production integration captures raw before coalescing and final event proo
  assert.equal(normalized(authRefusal.expression),'!active || active.attempt.command !== command || active.proof !== options?.authProof || (!active.attempt.reconnect && !authSurfaceCurrent(active.attempt.epoch)) || !preauthGate().enter(active.proof, socket, equipmentConnectionGenerationRef.current, authKind)');
  assert.ok(ts.isReturnStatement(authRefusal.thenStatement));
  assert.equal(authRefusal.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
- assert.equal(statements[paritySocketIndex-1].getText(sendAst).startsWith('if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN)'),true);
- assert.equal(statements[paritySocketIndex+2],socketTry,'Auth enter is immediately before sole socket send try');
+ assert.equal(statements[authClaimIndex-2].getText(sendAst).startsWith('if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN)'),true);
+ const repairGate=statements[authClaimIndex+1],repairRetire=statements[authClaimIndex+2];
+ assert.ok(ts.isIfStatement(repairGate));assert.equal(normalized(repairGate.expression),'options?.npcRepairProof');
+ assert.equal(repairGate.elseStatement,undefined);assert.ok(ts.isBlock(repairGate.thenStatement));
+ assert.deepEqual(repairGate.thenStatement.statements.map(normalized),[
+  'const repairView = readNpcRepairView();',
+  'if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !npcRepairAuthorityRef.current.enter(options.npcRepairProof, repairView, wireCommand)) return false;'
+ ]);
+ assert.ok(ts.isIfStatement(repairRetire));
+ assert.equal(normalized(repairRetire.expression),'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))');
+ assert.ok(ts.isBlock(repairRetire.thenStatement));assert.equal(repairRetire.thenStatement.statements.length,1);
+ assert.equal(normalized(repairRetire.thenStatement.statements[0]),'npcRepairAuthorityRef.current.invalidateInventory();');
+ assert.equal(statements[authClaimIndex+3],socketTry,'no executable external callback between final proof gates and sole socket send');
+ assert.equal(socketIndex,authClaimIndex+3);
+ // Every pre-send statement after the combat claim is covered by the exact
+ // ordered list above, including the repair gate and its pure local retire.
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-2),[
+  'options?.npcRepairProof',
+  'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))'
+ ]);
  // Execute the actual final Auth fragment with its actual durable gate and
  // Page surface check. Only socket writes and document facts are memory data.
  const authSource=readFileSync(new URL('../lib/client-login-runtime.ts',import.meta.url),'utf8');
@@ -145,6 +165,7 @@ test('production integration captures raw before coalescing and final event proo
   assert.equal(gate.pending(socket),change==='none');
   if(change==='none'){assert.equal(auth.run(command,options,socket),false);assert.deepEqual(calls,['wire']);}
  }
+ const paritySocketIndex=authClaimIndex-1;
  const appendedClaims=statements.slice(paritySocketIndex-7,paritySocketIndex).filter(n=>normalized(n.expression)!=='options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)');
  assert.equal(appendedClaims.length,6,'the original six parity/socket guards remain ordered around the additive mode claim');
  const modeClaim=statements[paritySocketIndex-2];

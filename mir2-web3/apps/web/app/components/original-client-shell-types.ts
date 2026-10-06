@@ -4,6 +4,7 @@ import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import type { BagPointerContext, BagPointerEdge } from "../../lib/bevy-bag-ui";
 import type { BevyHpOrbStatus, BevyMpOrbStatus } from "../../lib/bevy-hp-orb";
 import type { WorldStore } from "../../lib/world-model";
@@ -277,6 +278,9 @@ export type OriginalClientShellProps = {
   storagePasswordOpenVersion?: number;
   npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
+  npcRepairView?: NpcRepairView | null;
+  onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
+  onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;

@@ -1,5 +1,9 @@
 # Web 对齐 Windows：固定基线目标
 
+## Source19当前状态：维修行为仍partial/open（2026-10-07）
+
+Source19 Node有限检查218/218、strict TSC通过；Next01和Thin01静态构建通过。本批未新建/执行Rust、native、Core或renderer构建。维修Page与NpcShopWindow已接真实Bag UID、完整tooltip来源、NPC rate/owner、共享Rust报价、proof和回执屏障，但未接固定Windows流程中的Bag拖拽目标与Hold自动确认；三个F09维修行仍open/partial。矩阵05仍317稳定记录、103 shared/197 legacy/9 open/8共同限制，player全部not-run，不冻结完整分母或整体百分比，不宣称Candidate/goal完成；W6实际UI/玩家操作依用户要求暂缓。见[矩阵05](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.md)和[QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
 用户于 2026-10-06 要求以新的 goal 开始落地。新目标已实际创建为 active；本文件记录本轮范围与交付状态，不把旧目标的 blocked 状态沿用为当前状态。
 
 ## 固定基线与交付范围

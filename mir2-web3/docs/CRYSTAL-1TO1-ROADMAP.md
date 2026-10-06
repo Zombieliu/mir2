@@ -1,6 +1,10 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-## Web 对齐 Windows 新 goal：任务与 Page/Shell 候选已接线（2026-10-06）
+## Source19：维修接线有限通过，输入行为仍partial（2026-10-07）
+
+当前批次实际Node有限检查218/218、strict TSC通过，Next01与Thin01静态构建检查通过；没有新Rust/native/Core/renderer构建。Page与NpcShopWindow已用实际Bag UID和完整来源接入普通/特殊维修的Rust报价与回执屏障，但固定Windows基线的Bag拖拽至目标、Hold连续输入自动确认仍无Web等价闭环。`F09.NPC.REPAIR_BAG`、`F09.NPC.SREPAIR_BAG`、`F09.NPC.REPAIR_QUOTE` 在矩阵05仍partial/open。先补实际输入，再做tooltip兼容、Bag→Belt、Fishing、Pearl及Ranking；317玩家行为全部not-run，完整分母未冻结，用户继续代码暂不操作界面。
+
+## 历史Source18状态（2026-10-06）
 
 Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 

@@ -1,6 +1,10 @@
 # Agent Task Queue
 
-## 当前执行：Web 追平 Windows 新 goal（2026-10-06）
+## Source19：NPC维修为 partial/open（2026-10-07）
+
+当前固定记录类别仍为103 shared、197 legacy、9 open、8共同限制；不作为完整分母。Source19的Node 218/218与strict TSC通过，Next01静态类型/13页和Thin01包检查也已实际通过，均不等同玩家验收，且本批未新编译Rust/native/Core/renderer。NPC普通/特殊维修现有候选已能用实际Bag UID、捕获NPC rate与物理owner、共享报价、单用proof和精确ACK关联，但Windows基线的Bag拖拽目标和Hold自动确认未在Web闭合，三个复合行继续open。优先工作是补齐这两种真实输入；之后处理兼容tooltip、Bag到Belt、钓鱼、Pearl、Ranking Inspect。317行仍player `not-run`，无全局验收百分比；W6按用户要求暂缓。
+
+## 历史Source18执行摘要（2026-10-06）
 
 Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 

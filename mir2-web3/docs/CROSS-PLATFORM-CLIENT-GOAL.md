@@ -1,6 +1,10 @@
 # Shared client convergence goal
 
-## 新 goal：优先交付 Web 对齐 Windows（2026-10-06）
+## Source19：Web NPC维修候选与未闭合动作（2026-10-07）
+
+Source19为Web普通/特殊NPC维修补入真实Bag UID、NPC owner/rate、共享Rust quote、selection/proof及精确回执屏障；11个有限Node脚本218/218和strict TSC实际通过。Next01和Thin01只验证类型及静态构建闭包，本批没有新Rust/native/Core/renderer构建。Native Windows实际拖拽Bag物品到维修目标，并用Hold触发确认；Web当前只有选行/确认，故普通维修Bag、特殊维修Bag和repair quote三个记录仍partial/open。矩阵05保持103 shared/197 legacy/9 open/8共同限制与317 player not-run；这些类别不是完整分母或百分比。优先补Bag drag/Hold，然后推进tooltip、Bag/Belt、Fishing、Pearl和Ranking Inspect；用户暂缓界面操作持续有效。详见[矩阵05](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.md)和[QA](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
+## 历史Source18摘要：优先交付 Web 对齐 Windows（2026-10-06）
 
 Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 

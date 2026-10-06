@@ -1,6 +1,10 @@
 # Agent Orchestration
 
-## 当前新 goal：Web 对齐 Windows 固定基线（2026-10-06）
+## Source19：NPC维修动作链仍部分开放（2026-10-07）
+
+Windows基线 `f72e36fb84c3574fff0aeb2abed856454b14289d` 下，本批为普通/特殊NPC维修接入真实Bag UID、完整库存/tooltip来源、NPC rate、共享Rust报价、selection/proof及精确 `ItemRepaired` ACK屏障；Source19现有11脚本218/218通过，Stage5的282组内断言只计一个Node文件级测试，strict TSC通过。Next01和Thin01的实际构建通过只说明类型/静态包闭合；本批没有新Rust/native/Core/renderer构建。Windows原维修是拖动Bag物品到NPC目标并支持Hold自动确认，Web目前只有列表选择/确认，因此 `F09.NPC.REPAIR_BAG`、`F09.NPC.SREPAIR_BAG`、`F09.NPC.REPAIR_QUOTE` 均仍为partial/open，不能关闭9项记录集缺口。矩阵05保留317稳定ID、103 shared/197 legacy/9 open/8 common limitation；完整分母未冻结，player均not-run，未验UI/实际玩家行为，goal仍active。下一步先补Bag drag/Hold接线，再按队列处理tooltip、Bag/Belt、fishing、Pearl、Ranking；W6界面操作依用户暂缓。见[矩阵05](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.md)与[QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
+## 历史Source18摘要：Web 对齐 Windows 固定基线（2026-10-06）
 
 Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 

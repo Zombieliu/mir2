@@ -2870,7 +2870,7 @@ function parityPageFixture(owner, world = {}) {
     socialReplyWindowsRef:ref({group:false,bonds:false}), socialRosterWindowsRef:ref({friends:false}), rankingWindowRef:ref(false),
     marketOpenRef:ref(false), conquestOpenRef:ref(false), buffsOpenRef:ref(false), mailUiOpenRef:ref(false), worldMapOpenRef:ref(false),
     chatSettingsOpenRef:ref(false), tutorialOpenRef:ref(false), npcShopServiceRef:ref(null), npcRepairServiceRef:ref(null),
-    storageServiceActiveRef:ref(false), npcShopUiIngressRef:ref(null), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
+    storageServiceActiveRef:ref(false), npcShopUiIngressRef:ref(null), npcRepairAuthorityRef:ref({invalidateInventory:()=>{}}), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
     skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()),
     heroWindowEpochsRef:ref({inventory:1,character:1,belt:1}), heroWindowsRef:ref({inventoryOpen:true,characterOpen:false,characterPage:"equipment",beltVisible:true,beltVertical:false}),
     heroWindowActorRef:ref(null), heroRestockScheduledRef:ref(false), setHeroWindows:()=>{}, sameHeroSession:heroUi.sameHeroSession,
@@ -4434,6 +4434,263 @@ check("presentation repair unknown malformed exceptional or nonfinite output nev
   module.npc_repair_quote=()=>"{";assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
   module.npc_repair_quote=()=>"x".repeat(1025);assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
   module.npc_repair_quote=()=>{throw Error("mock ABI failure");};assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
+});
+
+// NPC repair lifetime/authority fixtures load and exercise the real Page
+// adapter. Quote results remain opaque Rust-shaped fixtures; no WASM or socket
+// is created here. The AST assertions below bind the adapter contract to the
+// production Page's final send gate and exact acknowledgement path.
+const npcRepairServiceModule = loadTypeScriptModule(new URL("../lib/npc-repair-service.ts", import.meta.url), {
+  "./equipment-gateway-adapter": equipmentGateway,
+});
+const { NpcRepairService, projectNpcRepairBag } = npcRepairServiceModule;
+function npcRepairItem(uniqueId, slot, container = "bag1", quantity = 2, currentDura = 40, maxDura = 100) {
+  return { uniqueId, slot, container, name: `Repair ${uniqueId}`, icon: uniqueId,
+    quantity, durabilityCurrent: currentDura, durabilityMax: maxDura,
+    tooltipSource: { info: { item_index: 77, price: 1000, durability: maxDura },
+      userItem: { unique_id: uniqueId, item_index: 77, count: quantity, current_dura: currentDura,
+        max_dura: maxDura, added_stats: [{ stat: 5, value: -3 }], rental_information: null } } };
+}
+function npcRepairSnapshot(overrides = {}) {
+  return { playerObjectId: 17, mapFileName: "M001.map", gold: 500, inventoryCapacity: 54,
+    inventoryItems: [npcRepairItem(900, 7), npcRepairItem(901, 3, "bag2", 1, 100, 100)],
+    beltItems: [], equipmentItems: [{ uniqueId: 777, slot: "weapon" }], ...overrides };
+}
+function npcRepairOwner(socket = {}, changes = {}) {
+  return { socket, connectionGeneration: 4, sessionGeneration: 8, ownerRevision: 3,
+    playerObjectId: 17, sceneRevision: 12, mapFileName: "M001.map", ...changes };
+}
+function npcRepairQuote(input) {
+  return { repairPrice: input.uniqueId === 901 ? 0 : 21, displayedTotal: input.uniqueId === 901 ? 0 : 21,
+    totalPrice: input.uniqueId === 901 ? 0 : 21, affordable: true };
+}
+
+check("NPC repair projects complete raw Bag UID and physical bag1/bag2 slot, rejecting tooltip count and durability aliases", () => {
+  const raw=npcRepairSnapshot(), bag=projectNpcRepairBag(raw);
+  assert.deepEqual(bag.map(({uniqueId,slot})=>[uniqueId,slot]),[[900,7],[901,43]]);
+  assert.equal(bag.some(row=>row.uniqueId===777),false); // equipment slot/index never becomes a Bag repair identity
+  assert.deepEqual([bag[0].input.count,bag[0].input.currentDura,bag[0].input.maxDura],[2,40,100]);
+  for(const alter of [
+    item=>{item.tooltipSource.userItem.count=1;},
+    item=>{item.tooltipSource.userItem.current_dura=39;},
+    item=>{item.tooltipSource.userItem.max_dura=99;},
+    item=>{delete item.tooltipSource.userItem.rental_information;},
+    item=>{item.tooltipSource.userItem.added_stats=[{stat:5,value:-3,alias:true}];},
+    item=>{item.tooltipSource.userItem.unique_id=7;},
+  ]){
+    const malformed=npcRepairSnapshot();alter(malformed.inventoryItems[0]);
+    assert.equal(projectNpcRepairBag(malformed)[0].input,null);
+  }
+  const duplicate=npcRepairSnapshot();duplicate.inventoryItems[1].uniqueId=900;
+  duplicate.inventoryItems[1].tooltipSource.userItem.unique_id=900;
+  assert.equal(projectNpcRepairBag(duplicate),null);
+  const duplicateZero=npcRepairSnapshot({inventoryItems:[npcRepairItem(0,4),npcRepairItem(0,5,"bag2",1,100,100)]});
+  assert.equal(projectNpcRepairBag(duplicateZero),null);
+  const nullIdentity=npcRepairSnapshot({inventoryItems:[npcRepairItem(null,6)]}), nullRow=projectNpcRepairBag(nullIdentity)[0];
+  assert.equal(nullRow.uniqueId,null);assert.equal(nullRow.input,null);
+  const nullOwner=npcRepairOwner(), nullService=new NpcRepairService();
+  assert.equal(nullService.open(nullOwner,"repair",0.25,{}),true);
+  assert.equal(nullService.observeSnapshot(nullOwner,nullIdentity),true);
+  let nullQuotes=0;const nullView=nullService.view(nullOwner,()=>{nullQuotes++;return npcRepairQuote({uniqueId:0});},()=>true);
+  assert.equal(nullQuotes,0);assert.equal(nullView.rows[0].reason,"unknown");
+  assert.equal(nullService.select(nullView,null,nullView),null);
+  const zeroIdentity=npcRepairSnapshot({inventoryItems:[npcRepairItem(0,6)]}), zeroRow=projectNpcRepairBag(zeroIdentity)[0];
+  assert.equal(zeroRow.uniqueId,0);assert.equal(zeroRow.input.uniqueId,0);
+});
+
+check("NPC repair quote view binds exact owner rate mode live gold and opaque zero/full quote while unknown locked and unaffordable rows stay disabled", () => {
+  const socket={}, owner=npcRepairOwner(socket), source=Object.freeze({npcObjectId:55,packet:"NPCRepair"});
+  const service=new NpcRepairService();assert.equal(service.open(owner,"repair",0.25,source,"Repair NPC"),true);
+  assert.equal(service.observeSnapshot(owner,npcRepairSnapshot()),true);
+  const inputs=[];
+  const view=service.view(owner,input=>{inputs.push(input);return npcRepairQuote(input);},()=>true);
+  assert.equal(inputs.length,2);
+  assert.deepEqual(inputs.map(({uniqueId,rate,special,gold,count,currentDura,maxDura})=>[uniqueId,rate,special,gold,count,currentDura,maxDura]),
+    [[900,0.25,false,500,2,40,100],[901,0.25,false,500,1,100,100]]);
+  assert.equal(view.source,source);assert.equal(view.mode,"repair");assert.equal(view.name,"Repair NPC");
+  assert.deepEqual(view.rows.map(({uniqueId,reason,disabled,quote})=>[uniqueId,reason,disabled,quote?.totalPrice]),
+    [[900,null,false,21],[901,null,false,0]]); // a known zero price is distinct from unknown
+  assert.equal(service.select(view,900,view)?.uniqueId,900);
+  assert.equal(service.select(view,901,view)?.uniqueId,901);
+  const locked=service.view(owner,npcRepairQuote,id=>id!==901);
+  assert.equal(locked.rows[1].reason,"locked");assert.equal(service.select(locked,901,locked),null);
+  const unknown=service.view(owner,()=>null,()=>true);
+  assert.equal(unknown.rows[0].reason,"unknown");assert.equal(service.select(unknown,900,unknown),null);
+  const unaffordable=service.view(owner,input=>({...npcRepairQuote(input),affordable:false}),()=>true);
+  assert.equal(unaffordable.rows[0].reason,"gold");assert.equal(unaffordable.rows[0].disabled,true);
+});
+
+check("NPC repair selection survives equivalent complete snapshots but explicit unknown and changed owner/source epochs retire old intent", () => {
+  const socket={}, owner=npcRepairOwner(socket), source={}, service=new NpcRepairService();
+  assert.equal(service.open(owner,"repair",0.5,source),true);assert.equal(service.observeSnapshot(owner,npcRepairSnapshot()),true);
+  const first=service.view(owner,npcRepairQuote,()=>true), oldSelection=service.select(first,900,first);
+  assert.ok(oldSelection);
+  // Position/entities/chat can advance in full snapshots without changing the
+  // current repair source. Selection can still be confirmed against that source.
+  const equivalent={...npcRepairSnapshot(),entities:[{objectId:99,x:20,y:30}],chat:["new chat"],playerPosition:{x:8,y:9}};
+  service.prepareSnapshot(owner,equivalent);
+  assert.equal(service.observeSnapshot(owner,equivalent),true);
+  const second=service.view(owner,npcRepairQuote,()=>true);
+  const equivalentProof=service.reserve(oldSelection,second);assert.ok(equivalentProof);
+  assert.equal(service.enter(equivalentProof,second,{...equivalentProof.command}),true);
+  assert.equal(service.acknowledge(socket,"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),true);
+
+  // An unknown interval explicitly retires the epoch. Seeing the byte-equivalent
+  // snapshot later cannot revive a selection captured before that interval.
+  const interrupted=new NpcRepairService();assert.equal(interrupted.open(owner,"repair",0.5,{}),true);
+  const known=npcRepairSnapshot();assert.equal(interrupted.observeSnapshot(owner,known),true);
+  const beforeUnknown=interrupted.view(owner,npcRepairQuote,()=>true);
+  const invalidatedSelection=interrupted.select(beforeUnknown,900,beforeUnknown);assert.ok(invalidatedSelection);
+  interrupted.prepareSnapshot(owner,null);
+  assert.equal(interrupted.observeSnapshot(owner,known),true);
+  const afterUnknown=interrupted.view(owner,npcRepairQuote,()=>true);
+  assert.equal(interrupted.reserve(invalidatedSelection,afterUnknown),null);
+
+  const nextSelection=service.select(second,900,second), nextProof=service.reserve(nextSelection,second);assert.ok(nextProof);
+  const changedOwner=service.view(npcRepairOwner(socket,{sceneRevision:13}),npcRepairQuote,()=>true);
+  assert.equal(changedOwner,null);
+  assert.equal(service.enter(nextProof,changedOwner,{...nextProof?.command}),false);
+
+  for(const changes of [
+    {socket:{}},{connectionGeneration:5},{sessionGeneration:9},{ownerRevision:4},
+    {playerObjectId:18},{sceneRevision:13},{mapFileName:"M002.map"},
+  ]){
+    const physical=npcRepairOwner(), ownerScoped=new NpcRepairService();
+    assert.equal(ownerScoped.open(physical,"repair",0.5,{}),true);
+    assert.equal(ownerScoped.observeSnapshot(physical,npcRepairSnapshot()),true);
+    const captured=ownerScoped.view(physical,npcRepairQuote,()=>true);
+    assert.equal(ownerScoped.view(npcRepairOwner(physical.socket,changes),npcRepairQuote,()=>true),null);
+    assert.equal(ownerScoped.select(captured,900,null),null);
+  }
+
+  // A new repair dialog on the same physical server owner may begin under the
+  // latest Bag renderer revision, but it needs a new full snapshot and intent.
+  const physicalSocket={}, priorOwner=npcRepairOwner(physicalSocket), latestOwner=npcRepairOwner(physicalSocket,{ownerRevision:4});
+  const incoming=new NpcRepairService();assert.equal(incoming.open(latestOwner,"repair",0.4,{npcObjectId:55,packet:"NPCRepair"}),true);
+  assert.equal(incoming.observeSnapshot(latestOwner,npcRepairSnapshot()),true);
+  const incomingView=incoming.view(latestOwner,npcRepairQuote,()=>true);
+  assert.equal(incoming.select(incomingView,900,incomingView)?.uniqueId,900);
+  assert.notEqual(priorOwner.ownerRevision,latestOwner.ownerRevision);
+
+  const leaseService=new NpcRepairService(), leaseOwner=npcRepairOwner(), oldNpcSource={npcObjectId:55};
+  assert.equal(leaseService.open(leaseOwner,"repair",0.5,oldNpcSource),true);
+  assert.equal(leaseService.observeSnapshot(leaseOwner,npcRepairSnapshot()),true);
+  const oldNpcView=leaseService.view(leaseOwner,npcRepairQuote,()=>true);
+  const oldNpcSelection=leaseService.select(oldNpcView,900,oldNpcView);
+  assert.equal(leaseService.open(leaseOwner,"special",0.75,{npcObjectId:56}),true);
+  const newNpcView=leaseService.view(leaseOwner,npcRepairQuote,()=>true);
+  assert.equal(leaseService.reserve(oldNpcSelection,newNpcView),null);
+
+  const switched=new NpcRepairService();assert.equal(switched.open(owner,"special",0.75,{}),true);
+  assert.equal(switched.observeSnapshot(owner,npcRepairSnapshot()),true);
+  const special=switched.view(owner,npcRepairQuote,()=>true), specialSelection=switched.select(special,900,special);
+  const specialProof=switched.reserve(specialSelection,special);
+  assert.deepEqual(specialProof.command,{type:"specialRepairItem",uniqueId:900});
+  assert.equal(switched.enter(specialProof,special,{...specialProof.command}),true);
+});
+
+check("NPC repair entered UID barrier survives transport throw close and service replacement until exact ItemRepaired on its socket", () => {
+  const socket={}, owner=npcRepairOwner(socket), quoteReader=npcRepairQuote;
+  const service=new NpcRepairService();assert.equal(service.open(owner,"repair",0.25,{}),true);
+  assert.equal(service.observeSnapshot(owner,npcRepairSnapshot()),true);
+  const view=service.view(owner,quoteReader,()=>true), selection=service.select(view,900,view), proof=service.reserve(selection,view);
+  let sends=0;
+  assert.equal(service.enter(proof,view,{...proof.command}),true); // ownership is committed before transport
+  try { sends++; throw new Error("transport outcome unknown"); } catch {}
+  assert.equal(sends,1);service.close();
+  const remounted=new NpcRepairService();assert.equal(remounted.open(owner,"special",0.25,{}),true);
+  assert.equal(remounted.observeSnapshot(owner,npcRepairSnapshot()),true);
+  let current=remounted.view(owner,quoteReader,()=>true);
+  assert.equal(current.rows.find(row=>row.uniqueId===900).reason,"busy");
+  assert.equal(remounted.acknowledge(socket,"RepairItem",{uniqueId:900,currentDura:60,maxDura:100}),false);
+  assert.equal(remounted.acknowledge(socket,"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100,extra:1}),false);
+  assert.equal(remounted.acknowledge({},"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),false);
+  assert.equal(remounted.acknowledge(socket,"ItemRepaired",{uniqueId:901,currentDura:60,maxDura:100}),false);
+  assert.equal(remounted.acknowledge(socket,"ItemRepaired",{uniqueId:900,currentDura:101,maxDura:100}),false);
+  assert.equal(remounted.acknowledge(socket,"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),true);
+  current=remounted.view(owner,quoteReader,()=>true);
+  assert.equal(current.rows.find(row=>row.uniqueId===900).reason,null);
+  // A different physical socket has a separate ledger, but still requires a fresh user selection.
+  const newSocket={}, newOwner=npcRepairOwner(newSocket), independent=new NpcRepairService();
+  assert.equal(independent.open(newOwner,"repair",0.25,{}),true);
+  assert.equal(independent.observeSnapshot(newOwner,npcRepairSnapshot()),true);
+  const next=independent.view(newOwner,quoteReader,()=>true), nextSelection=independent.select(next,900,next);
+  const nextProof=independent.reserve(nextSelection,next);assert.equal(independent.enter(nextProof,next,{...nextProof.command}),true);
+  assert.equal(sends,1); // no automatic retransmit occurred during remount/ACK
+});
+
+check("NPC repair Page consumer captures NPC owner and rate, retires invalid sources, and enters exact proof before socket send", () => {
+  const source=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");
+  const ast=ts.createSourceFile("page.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  const declarations=new Map();
+  function collect(node){if(ts.isFunctionDeclaration(node)&&node.name)declarations.set(node.name.text,node);ts.forEachChild(node,collect);}collect(ast);
+  const fn=name=>{const node=declarations.get(name);assert.ok(node,`missing Page function ${name}`);return node;};
+  const callNodes=node=>{const calls=[];function walk(current){if(ts.isCallExpression(current))calls.push(current);ts.forEachChild(current,walk);}walk(node);return calls;};
+  const capture=fn("captureNpcRepairDialog");
+  const captureText=capture.getText(ast);
+  for(const field of ["activeNpcDialog","npcObjectId","sceneRevision","mapFileName"])
+    assert.ok(captureText.includes(field),`dialog capture must bind ${field}`);
+  assert.match(fn("readNpcRepairOwner").getText(ast),/ownerRevision:\s*equipmentBagOwnerRef\.current\.ownerRevision/);
+  assert.match(fn("currentNpcRepairDialogSource").getText(ast),/source\.owner\.sceneRevision\s*===\s*owner\.sceneRevision/);
+  const openCase=source.slice(source.indexOf('case "NPCRepair":'),source.indexOf('case "NPCResponse":'));
+  assert.match(openCase,/payload\.rate/);assert.match(openCase,/currentNpcRepairDialogSource\(owner\)/);
+  assert.match(openCase,/npcRepairAuthorityRef\.current\.open\(owner, mode, payload\.rate/);
+  const confirm=fn("confirmNpcRepair"), confirmCalls=callNodes(confirm).map(call=>call.expression.getText(ast));
+  assert.ok(confirmCalls.some(text=>text.includes("reserve")));
+  assert.ok(confirmCalls.some(text=>text.startsWith("sendRaw")));
+  assert.match(confirm.getText(ast),/npcRepairProof:\s*proof/);
+  const send=fn("sendRaw"), calls=callNodes(send);
+  const enter=calls.find(call=>call.expression.getText(ast).includes("npcRepairAuthorityRef.current.enter"));
+  const socketSend=calls.find(call=>call.expression.getText(ast)==="socket.send");
+  assert.ok(enter&&socketSend&&enter.pos<socketSend.pos,"opaque repair proof must enter its socket gate immediately before transport");
+  const event=fn("handleGatewayEvent").getText(ast);
+  assert.match(event,/event\.packet === "ItemRepaired"/);
+  assert.match(event,/acknowledge\(source, event\.packet, event\.payload\)/);
+  const handlerCalls=callNodes(fn("handleGatewayEvent"));
+  const preflight=handlerCalls.find(call=>call.expression.getText(ast)==="invalidateNpcGoldBuyGatewayPacket");
+  const diagnostic=handlerCalls.find(call=>call.expression.getText(ast)==="captureQuestMapGatewayEvent");
+  assert.ok(preflight&&diagnostic&&preflight.pos<diagnostic.pos,"repair snapshot preflight must run before gateway diagnostics");
+  const viewText=fn("readNpcRepairView").getText(ast);
+  assert.match(viewText,/core\?\.readNpcRepairQuote\(input\)/);
+  assert.match(viewText,/mailMutationAllowed\(wire, mailParcelRef\.current\?\.snapshot \?\? null,/);
+  assert.match(viewText,/mailParcelRef\.current\?\.state\?\.blockedUniqueIds \?\? \[\]/);
+  const snapshot=fn("applyNpcGoldBuyGatewaySnapshot").getText(ast);
+  assert.match(snapshot,/npcRepairAuthorityRef\.current\.observeSnapshot\(owner, snapshot\)/);
+  assert.match(snapshot,/captureNpcRepairDialog\(snapshot, owner\)/);
+  assert.match(fn("invalidateNpcGoldBuyGatewayPacket").getText(ast),/prepareSnapshot\(readNpcRepairOwner\(\), event\.payload\)/);
+  const scene=readFileSync(new URL("../app/components/original-client-game-ui-scene.tsx",import.meta.url),"utf8");
+  const sceneAst=ts.createSourceFile("original-client-game-ui-scene.tsx",scene,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  const sceneText=sceneAst.getText();
+  assert.match(sceneText,/id:\s*item\.uniqueId\s*\?\?\s*`unknown:\$\{item\.slot\}`/);
+  assert.match(sceneText,/disabled:\s*item\.disabled/);
+  const shop=readFileSync(new URL("../app/components/original-client-game-shop.tsx",import.meta.url),"utf8");
+  const shopAst=ts.createSourceFile("original-client-game-shop.tsx",shop,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  const shopFns=[];function walkShop(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="NpcShopWindow")shopFns.push(node);ts.forEachChild(node,walkShop);}walkShop(shopAst);
+  assert.ok(shopFns.length>0);
+  const shopText=shopFns[0].getText(shopAst);
+  assert.match(shopText,/repairView\?\.rows\.find\(item\s*=>\s*item\.uniqueId\s*===\s*row\.id\)/);
+  assert.match(shopText,/onSelectRepair\?\.\(repairView, row\.id\)/);
+  assert.match(shopText,/repairSelectionCurrent/);
+});
+
+check("NPC repair mail locks use Bag UID and optional blocked-cell checks; ordinary and special modes accept real UID zero", () => {
+  const command={type:"repairItem",uniqueId:900};
+  const snapshot={items:[{uniqueId:900,container:0,slot:7}]};
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,snapshot,[900]),false);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,snapshot,[],[{container:0,slot:7}]),false);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,snapshot,[],[{container:0,slot:8}]),true);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,null,[900]),false);
+  for(const mode of ["repair","special"]){
+    const socket={},owner=npcRepairOwner(socket),service=new NpcRepairService();
+    assert.equal(service.open(owner,mode,0.25,{}),true);
+    assert.equal(service.observeSnapshot(owner,npcRepairSnapshot({inventoryItems:[npcRepairItem(0,9)]})),true);
+    const view=service.view(owner,input=>({repairPrice:0,displayedTotal:0,totalPrice:0,affordable:true}),()=>true);
+    const selection=service.select(view,0,view);assert.ok(selection);
+    const proof=service.reserve(selection,view);assert.deepEqual(proof.command,
+      {type:mode==="repair"?"repairItem":"specialRepairItem",uniqueId:0});
+    assert.equal(service.enter(proof,view,{...proof.command}),true);
+    assert.equal(service.acknowledge(socket,"ItemRepaired",{uniqueId:0,currentDura:0,maxDura:0}),true);
+  }
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

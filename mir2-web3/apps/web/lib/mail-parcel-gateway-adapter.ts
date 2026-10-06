@@ -42,7 +42,7 @@ export function mailMutationAllowed(command:Record<string,unknown>,snapshot:Mail
   case 'takeBackItem':case 'takeBackItemV2':return cell(4,command.from,true)&&cell(0,command.to);
   case 'depositTradeItem':return cell(0,command.from,true);
   case 'retrieveTradeItem':return cell(0,command.to);
-  case 'repairItem':case 'specialRepairItem':return cell(2,command.uniqueId,true);
+  case 'repairItem':case 'specialRepairItem':return uid(command.uniqueId,0);
   case 'equipItem':return uid(command.uniqueId,grid(command.grid))&&cell(2,command.to);
   case 'removeItem':return uid(command.uniqueId,2)&&cell(0,command.to);
   case 'mergeItem':return uid(command.idFrom,grid(command.gridFrom))&&uid(command.idTo,grid(command.gridTo));

@@ -52,6 +52,7 @@ import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
 import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
 import { MailDispatcher,MailParcelController,mailContentKey,sameMailOwner,type MailRuntime,type MailOwner,type MailIntent,type MailOutcome,type MailSendProof,type MailCommandType,type MailComposeProof,type MailDraftState,type MailQuoteProof,type MailLockProof } from "../lib/bevy-mail-ui";
 import {projectMailParcelSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
+import { NpcRepairService, type NpcRepairOwner, type NpcRepairView, type NpcRepairSelection, type NpcRepairProof } from "../lib/npc-repair-service";
 import type { MailPresentation } from "./components/original-client-mail-window";
 import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
 import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
@@ -118,6 +119,10 @@ import { useBevyNpcShopUi } from "../lib/use-bevy-npc-shop-ui";
 import type { NpcShopRuntime, NpcShopHostInput, NpcShopIntent, NpcShopStatus } from "../lib/bevy-npc-shop-ui";
 type NpcShopSendProof = Readonly<{ intent: NpcShopIntent; currentJson: string; sourceJson: string;
   presentation: NonNullable<NpcShopHostInput["presentation"]> }>;
+// A dialogue survives renderer Bag ownership handoff. The repair service and
+// its selection/proof separately bind the current full ownerRevision.
+type NpcRepairDialogPhysicalOwner = Omit<NpcRepairOwner, "ownerRevision">;
+type NpcRepairDialogSource = Readonly<{ owner: NpcRepairDialogPhysicalOwner; dialog: GatewayNpcDialog; key: string }>;
 type SpouseUiSource = Readonly<{
   owner: SocialReplyOwner;
   windowEpoch: number;
@@ -2646,6 +2651,9 @@ export default function HomePage() {
     return () => dispatcher.dispose();
   }, []);
   const npcServiceNameRef = useRef("");
+  const npcRepairAuthorityRef = useRef(new NpcRepairService());
+  const npcRepairDialogSourceRef = useRef<NpcRepairDialogSource | null>(null);
+  const npcRepairDialogBindingRef = useRef<NpcRepairDialogSource | null>(null);
   const [npcRepairService, setNpcRepairService, npcRepairServiceRef] = useImmediateUiState<"repair" | "special" | null>(null);
   const [showQuestLog, setShowQuestLogState] = useState(false);
   const questLogOpenRef = useRef(false);
@@ -5942,6 +5950,7 @@ export default function HomePage() {
     if (reason !== "logoutPending") { retireSocialRequests(); retireSocialItemConnection(); }
     else { storageRentalRef.current.retire(); setStorageRentalPrompt(null); }
     npcGoldBuyInventoryRef.current.invalidate();
+    npcRepairAuthorityRef.current.invalidateInventory();
     storageUiIngressRef.current?.withdraw();
     setMailboxOpen(false);mailRawRef.current=null;
     combatIngressRef.current?.withdraw();
@@ -5962,6 +5971,7 @@ export default function HomePage() {
     skillBarPointerHeldRef.current = false; skillBarDocumentCacheRef.current = null;
     retireSocialItemConnection();
     npcGoldBuyInventoryRef.current.invalidate();
+    npcRepairAuthorityRef.current.invalidateInventory();
     retireNpcShopService();
     endStorageService();
     // This is a confirmed session end, not a transient suspension. Old storage
@@ -6024,7 +6034,8 @@ export default function HomePage() {
     // callback, including the last check immediately before socket.send.
     options = { ...options, ownerToken: options?.ownerToken ?? equipmentRenderOwnerToken };
     const type = command.type;
-    if (type === "interact" || type === "selectNpcDialog" || type === "submitNpcInput") retireNpcShopService();
+    if (type === "interact") npcRepairDialogSourceRef.current = null;
+    if (type === "interact" || type === "selectNpcDialog" || type === "submitNpcInput") { closeNpcRepairService(); retireNpcShopService(); }
     if ((type === "storeItemV2" || type === "takeBackItemV2") && !options.storageProof) return false;
     if (itemCommandRequiresOwner(command)
       && (!currentEquipmentOwner(options.ownerToken!)
@@ -6098,11 +6109,13 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
     if (isSpectatorBrowserMode()) return false;
+    if (["repairItem", "specialRepairItem"].includes(String(command.type)) && !options?.npcRepairProof) return false;
+    if (options?.npcRepairProof && !["repairItem", "specialRepairItem"].includes(String(command.type))) return false;
     if (["changeAMode", "changePMode"].includes(String(command.type)) && !options?.modeProof) return false;
     if (options?.modeProof && !combatModeHostRef.current?.allows(options.modeProof, command)) return false;
     if ((command.type === "gameShopBuy" && !options?.cashProof) || (command.type === "updateIntelligentCreature" && !options?.creatureProof)
@@ -6304,6 +6317,16 @@ export default function HomePage() {
       if (!active || active.attempt.command !== command || active.proof !== options?.authProof
         || (!active.attempt.reconnect && !authSurfaceCurrent(active.attempt.epoch))
         || !preauthGate().enter(active.proof, socket, equipmentConnectionGenerationRef.current, authKind)) return false;
+    }
+    // Irreversible entry owns this UID before send, including a transport throw.
+    // Re-read complete Bag/source/quote and mail locks after every synchronous listener.
+    if (options?.npcRepairProof) {
+      const repairView = readNpcRepairView();
+      if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+        || !npcRepairAuthorityRef.current.enter(options.npcRepairProof, repairView, wireCommand)) return false;
+    }
+    if (isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))) {
+      npcRepairAuthorityRef.current.invalidateInventory();
     }
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
@@ -8539,6 +8562,7 @@ export default function HomePage() {
   }
 
   function retireNpcShopService() {
+    closeNpcRepairService();
     npcBuyDispatcherRef.current?.withdraw();
     npcShopClockRef.current.service += 1;
     npcBuySelectedRef.current = null;
@@ -8752,18 +8776,74 @@ export default function HomePage() {
     });
   }
 
-  function repairItem(item: EquipmentCommandRef) {
-    send({
-      type: "repairItem",
-      uniqueId: equipmentSlotIndex(item.slot),
+  function readNpcRepairOwner(): NpcRepairOwner | null {
+    const owner = currentSocialReplyOwner(false);
+    return owner ? { ...owner, ownerRevision: equipmentBagOwnerRef.current.ownerRevision } : null;
+  }
+
+  function captureNpcRepairDialog(snapshot: GatewayWorldSnapshot, owner: NpcRepairOwner | null) {
+    const dialog = snapshot.activeNpcDialog;
+    if (!owner || !dialog || !Number.isSafeInteger(dialog.npcObjectId) || dialog.npcObjectId <= 0 || dialog.npcObjectId > 0xffffffff) return;
+    const key = JSON.stringify(dialog), prior = npcRepairDialogSourceRef.current;
+    if (prior && prior.owner.socket === owner.socket && prior.owner.connectionGeneration === owner.connectionGeneration
+      && prior.owner.sessionGeneration === owner.sessionGeneration && prior.owner.playerObjectId === owner.playerObjectId
+      && prior.owner.mapFileName === owner.mapFileName && prior.owner.sceneRevision === owner.sceneRevision && prior.key === key) return;
+    const physicalOwner: NpcRepairDialogPhysicalOwner = { socket: owner.socket, connectionGeneration: owner.connectionGeneration,
+      sessionGeneration: owner.sessionGeneration, playerObjectId: owner.playerObjectId, sceneRevision: owner.sceneRevision, mapFileName: owner.mapFileName };
+    npcRepairDialogSourceRef.current = { owner: physicalOwner, dialog: JSON.parse(key) as GatewayNpcDialog, key };
+  }
+
+  function currentNpcRepairDialogSource(owner: NpcRepairOwner) {
+    const source = npcRepairDialogSourceRef.current;
+    return source && source.owner.socket === owner.socket && source.owner.connectionGeneration === owner.connectionGeneration
+      && source.owner.sessionGeneration === owner.sessionGeneration && source.owner.playerObjectId === owner.playerObjectId
+      && source.owner.sceneRevision === owner.sceneRevision && source.owner.mapFileName === owner.mapFileName ? source : null;
+  }
+
+  function closeNpcRepairService() {
+    npcRepairAuthorityRef.current.close();
+    npcRepairDialogBindingRef.current = null;
+    setNpcRepairService(null);
+  }
+
+  function readNpcRepairView(): NpcRepairView | null {
+    if (!npcRepairServiceRef.current) return null;
+    const owner = readNpcRepairOwner();
+    if (!owner || !npcRepairDialogBindingRef.current || currentNpcRepairDialogSource(owner) !== npcRepairDialogBindingRef.current) {
+      npcRepairAuthorityRef.current.close(); return null;
+    }
+    const core = questCoreRuntimeRef.current, current = worldRef.current;
+    const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+    return npcRepairAuthorityRef.current.view(owner, input => core?.readNpcRepairQuote(input) ?? null, uniqueId => {
+      const wire = { type: npcRepairServiceRef.current === "special" ? "specialRepairItem" : "repairItem", uniqueId };
+      return screenRef.current === "game" && current.connected && !!player && !player.dead && current.playerHp !== 0
+        && equipmentHostSuspendReasonRef.current === null && equipmentControllerRef.current?.status().ready === true
+        && (equipmentControllerRef.current?.status().pending ?? 0) === 0 && pendingStorageRequestsRef.current.size === 0
+        && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending && !npcBuyDispatcherRef.current?.status()?.flight
+        && parityItemMutationAllowed(wire) && mailMutationAllowed(wire, mailParcelRef.current?.snapshot ?? null,
+          mailParcelRef.current?.state?.blockedUniqueIds ?? []);
     });
   }
 
-  function specialRepairItem(item: EquipmentCommandRef) {
-    send({
-      type: "specialRepairItem",
-      uniqueId: equipmentSlotIndex(item.slot),
-    });
+  function selectNpcRepair(view: NpcRepairView, uniqueId: number): NpcRepairSelection | null {
+    return npcRepairAuthorityRef.current.select(view, uniqueId, readNpcRepairView());
+  }
+
+  function confirmNpcRepair(selection: NpcRepairSelection): boolean {
+    const proof = npcRepairAuthorityRef.current.reserve(selection, readNpcRepairView());
+    if (!proof) return false;
+    try { return sendRaw({ ...proof.command }, { npcRepairProof: proof }); }
+    catch (error) { console.error("[mir2] NPC repair send outcome is unknown", error); return false; }
+    finally { renderParityServices(n => n + 1); }
+  }
+
+  // Character equipment menus cannot create the Bag selection proof required by NPC repair.
+  function repairItem(_item: EquipmentCommandRef) {
+    appendLog(t("ui.npcRepairBag", [], "Select a bag item in the NPC repair window."), "system");
+  }
+
+  function specialRepairItem(_item: EquipmentCommandRef) {
+    appendLog(t("ui.npcRepairBag", [], "Select a bag item in the NPC repair window."), "system");
   }
 
   function spellNameForSkill(skill: KnownSkill) {
@@ -11640,10 +11720,14 @@ export default function HomePage() {
   }
   function invalidateNpcGoldBuyGatewayPacket(event: GatewayEvent) {
     if (event.type === "worldSnapshot") {
+      npcRepairAuthorityRef.current.prepareSnapshot(readNpcRepairOwner(), event.payload);
+      const dialog = (event.payload as GatewayWorldSnapshot).activeNpcDialog, binding = npcRepairDialogBindingRef.current;
+      if (dialog && binding && JSON.stringify(dialog) !== binding.key) closeNpcRepairService();
       npcGoldBuyInventoryRef.current.invalidate();
       npcBuyDispatcherRef.current?.withdraw();
     }
     if (event.type === "packet" && typeof event.packet === "string" && npcGoldBuyInventoryMutationPacket(event.packet)) {
+      npcRepairAuthorityRef.current.invalidateInventory();
       // Some handlers only log a receipt. Retire availability before any handler
       // or callback can reuse the previous full inventory and stack evidence.
       npcGoldBuyInventoryRef.current.invalidate();
@@ -11681,12 +11765,23 @@ export default function HomePage() {
       // A packet or session replacement during projection retires this stage.
       npcGoldBuyInventoryRef.current.finish(stage, currentSpellsOwner(Number(worldRef.current.playerObjectId)), complete,
         inventory?.ok ? inventory.model : null);
+      if (complete) {
+        const owner = readNpcRepairOwner();
+        npcRepairAuthorityRef.current.observeSnapshot(owner, snapshot);
+        captureNpcRepairDialog(snapshot, owner);
+      } else npcRepairAuthorityRef.current.invalidateInventory();
       npcBuyDispatcherRef.current?.observe();
     }
   }
 
   function handleGatewayEvent(event: GatewayEvent, connectionGeneration: number, source:WebSocket) {
     if (connectionGeneration !== equipmentConnectionGenerationRef.current || socketRef.current !== source) return;
+    if (event.type === "packet" && event.packet === "ItemRepaired") {
+      npcRepairAuthorityRef.current.acknowledge(source, event.packet, event.payload);
+    }
+    if (event.type === "packet" && (event.packet === "MapChanged" || event.packet === "NPCResponse"
+      || event.packet?.startsWith("NPC") && event.packet !== "NPCRepair" && event.packet !== "NPCSRepair")) closeNpcRepairService();
+    if (event.type === "packet" && event.packet === "MapChanged") npcRepairDialogSourceRef.current = null;
     if (event.type === "packet" && event.packet === "MapChanged") retireSocialRequests();
     invalidateNpcGoldBuyGatewayPacket(event);
     // Keep the complete raw learned/ACK snapshot before diagnostics, React or movement coalescing.
@@ -13551,7 +13646,7 @@ export default function HomePage() {
         setNpcShopService(nextShop);
         npcBuyDispatcherRef.current?.observe();
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
-        setNpcRepairService(null);
+        closeNpcRepairService();
         setShowInventory(false);
         setShowCharacter(false);
         break;
@@ -13574,7 +13669,7 @@ export default function HomePage() {
         setNpcShopService(nextShop);
         npcBuyDispatcherRef.current?.observe();
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
-        setNpcRepairService(null);
+        closeNpcRepairService();
         setShowInventory(false);
         setShowCharacter(false);
         break;
@@ -13585,21 +13680,29 @@ export default function HomePage() {
         retireNpcShopService();
         // Opening an NPC service panel: reuse the inventory surface used by NPCStorage.
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
-        setNpcRepairService(null);
+        closeNpcRepairService();
         requestBagCompatibility("fullInventory");
         setShowInventory(true);
         setActiveInventoryTab("bag1");
         break;
       case "NPCRepair":
-      case "NPCSRepair":
+      case "NPCSRepair": {
+        const mode = event.packet === "NPCSRepair" ? "special" : "repair";
         // Crystal repairs are NPC-driven. Surface the dedicated repair list
         // instead of the generic inventory/character windows.
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
         retireNpcShopService();
-        setNpcRepairService(event.packet === "NPCSRepair" ? "special" : "repair");
+        const owner = readNpcRepairOwner();
+        const npcSource = owner && currentNpcRepairDialogSource(owner);
+        if (owner && npcSource && npcRepairAuthorityRef.current.open(owner, mode, payload.rate,
+          Object.freeze({ packet: event, npc: npcSource }), npcSource.dialog.npcName)) {
+          npcRepairDialogBindingRef.current = npcSource;
+          setNpcRepairService(mode);
+        }
         setShowInventory(false);
         setShowCharacter(false);
         break;
+      }
       case "NPCResponse": {
         // A processed response replaces the service before its Goods/snapshot arrives.
         retireNpcShopService();
@@ -18237,6 +18340,9 @@ export default function HomePage() {
       storagePasswordOpenVersion={storagePasswordOpenVersion}
       npcShopService={npcShopService}
       npcRepairService={npcRepairService}
+      npcRepairView={readNpcRepairView()}
+      onSelectNpcRepair={selectNpcRepair}
+      onConfirmNpcRepair={confirmNpcRepair}
       onAccountIdChange={value => { if (authSurfaceCurrent(authRenderEpoch) && !loginBusyRef.current) { accountIdRef.current = value; setAccountId(value); } }}
       onPasswordChange={value => { if (authSurfaceCurrent(authRenderEpoch) && !loginBusyRef.current) { passwordRef.current = value; setPassword(value); } }}
       onLanguageChange={setLanguage}
@@ -18317,7 +18423,7 @@ export default function HomePage() {
       onCloseNpcShopService={() => {
         if (npcShopServiceRef.current === npcShopService && !npcShopUiIngressRef.current?.blocksInput()) retireNpcShopService();
       }}
-      onCloseNpcRepairService={() => setNpcRepairService(null)}
+      onCloseNpcRepairService={closeNpcRepairService}
       onOpenCharacterTab={openCharacter}
       onOpenInventoryTab={openInventory}
       onViewportTileClick={onViewportTileClick}

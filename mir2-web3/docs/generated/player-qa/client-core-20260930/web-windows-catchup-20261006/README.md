@@ -1,10 +1,29 @@
 # Web / Windows 固定基线追赶 QA
 
+## Source19 当前交付与仍开放的维修动作
+
+固定Windows基线为`f72e36fb84c3574fff0aeb2abed856454b14289d`，Source19父提交为`7567fab152381fc2e98840a73f4462ed61dff668`。Source19 finite receipt：Node 11个脚本218/218、0 fail/skip；Stage5 282个内部组已包含于单个文件级测试；strict nonincremental TSC通过。接线覆盖当前Bag UID/完整tooltip来源、NPC owner/rate、共享Rust真实报价、final proof和精确`ItemRepaired` ACK屏障，但没有新Rust/native/Core/renderer构建。只读 action-chain review 明确普通Bag维修、特殊Bag维修和维修报价三项仍是partial/open：Web列表选行/确认已有，Windows还有Bag拖到真实NPC repair target以及Hold连续选择自动确认；不能将这些源码/fixture结果判成完整行为。
+
+Next01实构建通过：19,007 regular output、308 directories（含root）、61 NFT/37,094 unique refs（37,092 files+2 directories）、0 missing、strict TypeScript与13静态页。Thin01实构建包路径：[Web静态包](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261007-02)，7,301 files、776 directories（含root）、0 links、372,704,701 B，低于377,487,360 B预算4,782,659 B。Source18的Core/PUI、Native和renderer只按有效输入/产物精确指纹承接，本批未重新构建它们；独立只读静态包审查已接受，0个确认blocker。该审查重hash 70,437个声明输入/输出，并核对Next/Thin清单、NFT、Core/PUI四叶、renderer六叶、manifest、231 JSON对及44 warning；审查者未执行产品。44条warning运行语义保持未验证，231 JSON source/output匹配仅承接历史token结论，未新跑parser/lexer。没有启动服务或包、HTTP、WASM instance、真实登录游戏、UI、账号/存档或移动设备行为；所有317玩家行not-run，分母未冻结、无整体百分比，goal active。
+
+| 证据 | Repo文件 / 当前解释 |
+| --- | --- |
+| [Source19有限结果](repair-source19-finite-result01.json) | 19,667 B，SHA256 `54aff998cd9718bf687acecb3f2d38e723564edee0ba0887ac590f7d8d208903`；218/218 Node与TSC证据 |
+| [Source19动作链复核](repair-source19-action-chain-review01.json) | 6,981 B，SHA256 `a198189c5e6cae1d87e428abc9b68ea68946dc547bf14bc3011424708d720855`；确认三条维修复合行仍缺目标拖放/Hold动作 |
+| [Source19组合构建](repair-source19-combined-build-result01.json) | 52,526 B，SHA256 `14b732c460ce14cbb77de15fc0cc4578e23ad11661142508a5fd3506ddad684d`；Next01/Thin01实构建；独立静态包复核通过，0确认blocker，未执行 |
+| [矩阵05](feature-matrix05.md) / [完整JSON](feature-matrix05.json) | 317稳定ID、103 shared/197 legacy/9 open/8 common limitation；206个具名行/声明关联、110个声明；维护三条维修行partial/open，不视为完整分母 |
+
+当前六份goal文档、矩阵、有限结果及package状态索引见[Current Evidence 05](current-evidence05.json)。
+
+Thin静态包根目录：`E:\mir2-player-journey\mir2-web3\apps\web\.mir2-thin-client-web-windows-catchup-20261007-02`。下一优先项是接通准确的Bag drag/drop target和Hold生命周期；之后做tooltip、Bag→Belt、fishing、Pearl与Ranking Inspect。W6 UI操作继续按用户要求暂缓。
+
+## Source18历史包与阶段摘要
+
 Windows比较基线为`f72e36fb84c3574fff0aeb2abed856454b14289d`，原Web审计父提交`f1cf96324c7da62e57d5fd0fa4146be010adbba5`；本轮Source18父提交`2e574054a7734fa75efea9378e831a8ee476cc8a`。本页区分源码、有限代码检查、静态构建和玩家行为；没有运行服务、HTTP、WASM实例、浏览器、原生窗口、真实账号或存档。Goal仍active，Candidate及可玩性未验收。
 
-当前Web包：[.mir2-thin-client-web-windows-catchup-20261007-01](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261007-01)。体积372,680,891 B（355.42 MiB），7,301文件、776目录（含根目录；不含根为775）、0链接，原360 MiB预算余4,806,469 B。对应Source18，Core/PUI四个和renderer六个发布文件与Next编译manifest精确匹配，未启动。
+Source18历史包：[.mir2-thin-client-web-windows-catchup-20261007-01](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261007-01)。体积372,680,891 B（355.42 MiB），7,301文件、776目录（含根目录；不含根为775）、0链接，原360 MiB预算余4,806,469 B。该阶段Core/PUI四个和renderer六个发布文件与Next编译manifest匹配，未启动。
 
-## 当前Source18地图、聊天与Cash批次
+## 历史Source18地图、聊天与Cash批次
 
 [有限检查](presentation-source18-finite-result01.json)与[五阶段组合构建](presentation-source18-combined-build-result01.json)分别保存实际结果和产物闭包。大/小地图图像寻路、聊天历史拖动、4/7/11行、settings Apply/Cancel/Defaults和Cash sprite预览/转向九条已成为源码候选。Native/Web共用Rust规则与控制器；Web继续使用DOM绘制，未计为共享painter。纯修理报价已提取，普通/特殊维修的真实Bag UID及NPC rate接线仍未闭合。移动端可复用独立presentation-ui轻量包，无需依赖Bevy renderer；移动真机行为未验证。
 
@@ -14,7 +33,7 @@ Core05、Native01、Renderer01、Next01与Thin01五阶段实际构建通过，�
 
 Next01严格TypeScript与13静态页通过：19,007 regular产物、61 NFT/37,094 unique引用（37,092文件＋2目录）且0缺失。原source node_modules junction只作为声明来源，不遍历链接；Thin包完整7,301个文件hash已核对、0链接，四个Core/PUI和六个renderer叶文件与编译manifest一致。独立只读源码及静态产物复核零确认P0/P1，不证明启动、资源请求、玩家或移动设备行为。44条warning内容及重复次数和Source12上一包相同，实际运行语义仍未验；231份JSON当前source/output全部逐对字节相同，仅在此条件下承接旧token保持结论，本轮未新跑parser/lexer。远端资源miss仍需配置immutable origin，Pet/Gate完整库存和覆盖未验。
 
-[当前矩阵04](feature-matrix04.md) / [完整JSON](feature-matrix04.json)保留317稳定ID、原始审计、Native证据、overlap与unknown：103 shared、197 legacy、9 open、8共同限制。九条新增候选从open转为legacy，不以共用规则代替共同绘制或行为验收；190具名fixture行关联/104独立声明不等于实际执行或玩家行为。全部317行player为not-run，整体验收分母和百分比仍为null。当前指纹见[索引04](current-evidence04.json)。下一轮真实普通/特殊修理与报价，其后Bag/Belt tooltip与Bag→Belt、钓鱼、Pearl和Ranking Inspect；未审范围和共同限制继续保留。
+[Source18历史矩阵04](feature-matrix04.md) / [完整JSON](feature-matrix04.json)保留当时317稳定ID、原始审计、Native证据、overlap与unknown。Source19后续三条repair composite仍open/partial，最新状态见矩阵05与current-evidence05。
 
 ## 历史Source12认证批次
 

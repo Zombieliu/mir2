@@ -26,6 +26,7 @@ import { ObjectiveTracker } from "./original-client-objective-tracker";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
 import { GameShopWindow, NpcShopWindow } from "./original-client-game-shop";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
@@ -81,6 +82,9 @@ type GameUiSceneProps = {
   storagePasswordOpenVersion?: number;
   npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
+  npcRepairView?: NpcRepairView | null;
+  onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
+  onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
   defaultChatExpanded?: boolean;
   chatUi?: ChatUiControls;
   mapImageRouteSource?: MapImageRouteSource | null;
@@ -182,6 +186,7 @@ function GameUiSceneInner({
   storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
+  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
   defaultChatExpanded = true,
   chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
   onChatMessageChange,
@@ -621,46 +626,47 @@ function GameUiSceneInner({
         <NpcShopWindow
           key={npcRepairService}
           t={t}
-          npcName={npcRepairService === "special" ? t("ui.shopSpecialRepair", [], "Special Repair") : t("ui.shopRepair", [], "Repair")}
-          gold={world.gold}
+          npcName={npcRepairView?.name || (npcRepairService === "special" ? t("ui.shopSpecialRepair", [], "Special Repair") : t("ui.shopRepair", [], "Repair"))}
+          gold={npcRepairView?.gold}
+          repairView={npcRepairView}
+          onSelectRepair={onSelectNpcRepair}
+          onConfirmRepair={onConfirmNpcRepair}
           initialTab={npcRepairService}
           availableTabs={[npcRepairService]}
           repairItems={
             npcRepairService === "repair"
-              ? world.equipmentItems.map((item) => ({
-                  id: item.slot,
+              ? npcRepairView?.rows.map((item) => ({
+                  id: item.uniqueId ?? `unknown:${item.slot}`,
                   name: item.name,
                   icon: item.icon,
-                  price: 0,
-                  description: item.description,
-                  durabilityCurrent: item.durabilityCurrent,
-                  durabilityMax: item.durabilityMax,
-                  disabled: item.durabilityMax <= 0 || item.durabilityCurrent >= item.durabilityMax,
+                  price: item.quote?.displayedTotal ?? 0,
+                  description: item.reason === "gold" ? t("client.LowGold", [], "Not enough gold.")
+                    : item.reason === "unknown" ? t("ui.itemStateSync", [], "Item state is not ready. Wait for it to sync, then try again.")
+                    : item.reason === "busy" ? t("ui.itemBusy", [], "Waiting for the previous repair result.")
+                    : item.reason === "locked" ? t("ui.itemLocked", [], "This item is reserved by another operation.") : undefined,
+                  durabilityCurrent: item.input?.currentDura,
+                  durabilityMax: item.input?.maxDura,
+                  disabled: item.disabled,
                 }))
               : undefined
           }
           specialRepairItems={
             npcRepairService === "special"
-              ? world.equipmentItems.map((item) => ({
-                  id: item.slot,
+              ? npcRepairView?.rows.map((item) => ({
+                  id: item.uniqueId ?? `unknown:${item.slot}`,
                   name: item.name,
                   icon: item.icon,
-                  price: 0,
-                  description: item.description,
-                  durabilityCurrent: item.durabilityCurrent,
-                  durabilityMax: item.durabilityMax,
-                  disabled: item.durabilityMax <= 0 || item.durabilityCurrent >= item.durabilityMax,
+                  price: item.quote?.displayedTotal ?? 0,
+                  description: item.reason === "gold" ? t("client.LowGold", [], "Not enough gold.")
+                    : item.reason === "unknown" ? t("ui.itemStateSync", [], "Item state is not ready. Wait for it to sync, then try again.")
+                    : item.reason === "busy" ? t("ui.itemBusy", [], "Waiting for the previous repair result.")
+                    : item.reason === "locked" ? t("ui.itemLocked", [], "This item is reserved by another operation.") : undefined,
+                  durabilityCurrent: item.input?.currentDura,
+                  durabilityMax: item.input?.maxDura,
+                  disabled: item.disabled,
                 }))
               : undefined
           }
-          onRepair={(id) => {
-            const item = world.equipmentItems.find((entry) => entry.slot === id);
-            if (item) onRepairItem({ slot: item.slot });
-          }}
-          onSpecialRepair={(id) => {
-            const item = world.equipmentItems.find((entry) => entry.slot === id);
-            if (item) onSpecialRepairItem({ slot: item.slot });
-          }}
           onClose={onCloseNpcRepairService}
         />
       ) : null}

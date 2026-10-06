@@ -14,6 +14,7 @@ import type { ItemTooltipGrade } from "./original-client-item-tooltip";
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -636,6 +637,9 @@ export type NpcShopWindowProps = {
   sellItems?: NpcShopOwnedItem[];
   repairItems?: NpcShopOwnedItem[];
   specialRepairItems?: NpcShopOwnedItem[];
+  repairView?: NpcRepairView | null;
+  onSelectRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
+  onConfirmRepair?: (selection: NpcRepairSelection) => boolean;
 
   onBuy?: (id: number | string, quantity: number) => void;
   onBuyBack?: (id: number | string, quantity: number) => void;
@@ -684,11 +688,10 @@ export function NpcShopWindow({
   sellItems,
   repairItems,
   specialRepairItems,
+  repairView, onSelectRepair, onConfirmRepair,
   onBuy,
   onBuyBack, onQuoteBuy,
   onSell,
-  onRepair,
-  onSpecialRepair,
   onClose,
 }: NpcShopWindowProps) {
   const tabs = availableTabs.length ? availableTabs : (["buy"] as NpcShopTab[]);
@@ -698,6 +701,11 @@ export function NpcShopWindow({
   const [showBuyBack, setShowBuyBack] = useState(false);
   const [selectedId, setSelectedId] = useState<number | string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [repairSelection, setRepairSelection] = useState<NpcRepairSelection | null>(null);
+  const repairTab = tab === "repair" || tab === "special";
+  const repairSelectionCurrent = repairSelection !== null && repairSelection.stamp === repairView?.stamp
+    && repairSelection.uniqueId === selectedId;
+  useEffect(() => { setRepairSelection(null); setSelectedId(null); }, [repairView?.stamp]);
 
   const rows: Array<NpcShopGood | NpcShopOwnedItem> = useMemo(() => {
     if (tab === "buy") return showBuyBack ? buyBackItems ?? [] : buyItems ?? [];
@@ -719,13 +727,20 @@ export function NpcShopWindow({
   const effectiveQuantity = Math.max(1, Math.min(maxQuantity, quantity));
   const supportsQuantity = tab === "buy" || tab === "sell";
   const buyQuote = sharedBuy && selected && !blocked() ? onQuoteBuy?.(selected.id, effectiveQuantity) : null;
-  const total = sharedBuy ? buyQuote?.totalGold ?? null
+  const selectedRepairQuote = repairTab ? repairView?.rows.find(row => row.uniqueId === selectedId)?.quote ?? null : null;
+  const total = repairTab ? selectedRepairQuote?.displayedTotal ?? null : sharedBuy ? buyQuote?.totalGold ?? null
     : selected ? Math.max(0, Math.trunc(selected.price)) * (supportsQuantity ? effectiveQuantity : 1) : 0;
   const goldKnown = typeof gold === "number";
-  const affordable = !goldKnown || tab !== "buy" || total !== null && total <= gold!;
+  const affordable = repairTab ? selectedRepairQuote?.affordable === true : !goldKnown || tab !== "buy" || total !== null && total <= gold!;
 
   function confirm() {
     if (blocked() || !selected || sharedBuy && !buyQuote?.canBuy) return;
+    if (repairTab) {
+      if (!selected.disabled && repairSelectionCurrent && repairSelection && selectedRepairQuote?.affordable) {
+        onConfirmRepair?.(repairSelection); setRepairSelection(null); setSelectedId(null);
+      }
+      return;
+    }
     switch (tab) {
       case "buy":
         if (showBuyBack) onBuyBack?.(selected.id, effectiveQuantity);
@@ -733,12 +748,6 @@ export function NpcShopWindow({
         break;
       case "sell":
         onSell?.(selected.id, effectiveQuantity);
-        break;
-      case "repair":
-        onRepair?.(selected.id);
-        break;
-      case "special":
-        onSpecialRepair?.(selected.id);
         break;
     }
   }
@@ -750,9 +759,7 @@ export function NpcShopWindow({
         : onBuy
       : tab === "sell"
         ? onSell
-        : tab === "repair"
-          ? onRepair
-          : onSpecialRepair;
+        : onConfirmRepair;
   const actionLabel =
     tab === "buy"
       ? showBuyBack
@@ -764,7 +771,7 @@ export function NpcShopWindow({
           ? t("ui.shopRepair", [], "Repair")
           : t("ui.shopSpecialRepair", [], "Special Repair");
   const confirmEnabled = !inputBlocked && Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable
-    && (!sharedBuy || buyQuote?.canBuy === true);
+    && (!sharedBuy || buyQuote?.canBuy === true) && (!repairTab || repairSelectionCurrent);
 
   return (
     <section className="npc-shop-window" aria-label={t("ui.shopTitle", [], "Shop")} data-shop-tab={tab} aria-disabled={inputBlocked} inert={inputBlocked || undefined} style={shopStyle.window}>
@@ -788,6 +795,7 @@ export function NpcShopWindow({
               if (blocked()) return;
               if (controlledTab !== undefined) onTabChange?.(entry); else setLocalTab(entry);
               setSelectedId(null);
+              setRepairSelection(null);
               setQuantity(1);
               if (entry !== "buy") setShowBuyBack(false);
             }}
@@ -839,6 +847,7 @@ export function NpcShopWindow({
             const colour = row.grade ? NPC_SHOP_GRADE_COLOUR[row.grade] : "#f4ecd6";
             const unaffordable = goldKnown && tab === "buy" && !showBuyBack && Math.trunc(row.price) > gold!;
             const rowDisabled = Boolean(row.disabled);
+            const repairRow = repairTab ? repairView?.rows.find(item => item.uniqueId === row.id) : null;
             return (
               <button
                 key={`shop-row-${row.id}`}
@@ -848,6 +857,7 @@ export function NpcShopWindow({
                 data-item-name={row.name}
                 data-unit-price={Math.max(0, Math.trunc(row.price))}
                 aria-label={row.name}
+                title={repairTab ? row.description : undefined}
                 style={{
                   ...shopStyle.row,
                   ...(isSelected ? shopStyle.rowSelected : null),
@@ -857,17 +867,24 @@ export function NpcShopWindow({
                 disabled={inputBlocked || rowDisabled}
                 onClick={() => {
                   if (blocked()) return;
+                  if (repairTab) {
+                    const selection = repairView && typeof row.id === "number" ? onSelectRepair?.(repairView, row.id) ?? null : null;
+                    setRepairSelection(selection); setSelectedId(selection ? row.id : null); return;
+                  }
                   setSelectedId(row.id);
                   setQuantity(1);
                 }}
                 onDoubleClick={() => {
                   if (blocked()) return;
+                  if (repairTab) {
+                    const selection = repairView && typeof row.id === "number" ? onSelectRepair?.(repairView, row.id) ?? null : null;
+                    if (selection) onConfirmRepair?.(selection);
+                    setRepairSelection(null); setSelectedId(null); return;
+                  }
                   setSelectedId(row.id);
                   if (confirmEnabledFor(row, tab, showBuyBack, gold)) {
                     if (tab === "buy") (showBuyBack ? onBuyBack : onBuy)?.(row.id, 1);
                     else if (tab === "sell") onSell?.(row.id, 1);
-                    else if (tab === "repair") onRepair?.(row.id);
-                    else onSpecialRepair?.(row.id);
                   }
                 }}
               >
@@ -882,13 +899,15 @@ export function NpcShopWindow({
                   ) : null}
                 </span>
                 <span style={{ ...shopStyle.rowPrice, ...(unaffordable ? shopStyle.rowPriceBad : null) }}>
-                  {formatGold(row.price)}
+                  {repairTab ? repairRow?.quote ? repairRow.quote.displayedTotal.toLocaleString("en-US") : "—" : formatGold(row.price)}
                 </span>
               </button>
             );
           })
         ) : (
-          <div style={shopStyle.empty}>{t("ui.shopEmpty", [], "Nothing available.")}</div>
+          <div style={shopStyle.empty}>{repairTab && !repairView
+            ? t("ui.itemStateSync", [], "Item state is not ready. Wait for it to sync, then try again.")
+            : t("ui.shopEmpty", [], "Nothing available.")}</div>
         )}
       </div>
 
@@ -962,7 +981,7 @@ export function NpcShopWindow({
 
       <div style={shopStyle.footer}>
         <span style={shopStyle.footerLabel}>{t("ui.shopTotal", [], "Total")}</span>
-        <span style={{ ...shopStyle.footerValue, ...(!affordable ? shopStyle.rowPriceBad : null) }}>{total === null ? "—" : formatGold(total)}</span>
+        <span style={{ ...shopStyle.footerValue, ...(!affordable ? shopStyle.rowPriceBad : null) }}>{total === null ? "—" : repairTab ? total.toLocaleString("en-US") : formatGold(total)}</span>
         <span style={shopStyle.footerSpacer} />
         <span style={shopStyle.footerLabel}>{t("client.Gold", [], "Gold")}</span>
         <span style={shopStyle.footerValue}>{goldKnown ? formatGold(gold!) : "—"}</span>

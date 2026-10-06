@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "id": "repair-source19-action-chain-review01",
+  "generatedAtUtc": "2026-10-06T18:10:46.030Z",
+  "parentCommit": "7567fab152381fc2e98840a73f4462ed61dff668",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "finiteResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\repair-source19-finite-result01.json",
+    "bytes": 19667,
+    "sha256": "54aff998cd9718bf687acecb3f2d38e723564edee0ba0887ac590f7d8d208903"
+  },
+  "products": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-shop.tsx",
+      "bytes": 50755,
+      "sha256": "8897984122029a0cac6ab5722c08be9d1d01b4e796ac3756eaf151ce4e3abd83",
+      "relativePath": "apps/web/app/components/original-client-game-shop.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+      "bytes": 33626,
+      "sha256": "74dd6d5a3fd0ce3f11627464b67ce04f638efd344d837e9ac302ab2623eee411",
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 17323,
+      "sha256": "5459ee5616c32b782e72c28fe221c6555b29d3af5ff834b8c41a604cff1e0ad5",
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 273860,
+      "sha256": "8e67ec3820cf7160742236aa009abaa313e3634053dbddad3880dde4fe600ef8",
+      "relativePath": "apps/web/app/original-client-shell.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 933636,
+      "sha256": "37e5bda0df8347dd2deb39347d058e92cb27eda12b1b9bcfbe38f0f8545b9b86",
+      "relativePath": "apps/web/app/page.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\mail-parcel-gateway-adapter.ts",
+      "bytes": 6380,
+      "sha256": "1e75b7aa471836e5198b87e96adf4803d3ac60cd7db2d46b199affc147e9678c",
+      "relativePath": "apps/web/lib/mail-parcel-gateway-adapter.ts"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\npc-repair-service.ts",
+      "bytes": 15134,
+      "sha256": "4f10045c48deaf728f379ae8d767fe3ec20ddc11a61f5675dcf0ace429a0f22f",
+      "relativePath": "apps/web/lib/npc-repair-service.ts"
+    }
+  ],
+  "reviewer": "w2b_final_source_review",
+  "readOnly": true,
+  "executionsByReviewer": 0,
+  "conclusion": "Partial implementation facets accepted; all three original composite repair records remain open. Exact Bag-to-NPC target drop and Hold continuous selection are confirmed missing source routes, not merely untested player behavior.",
+  "originalRecords": [
+    {
+      "id": "F09.NPC.REPAIR_BAG",
+      "status": "open",
+      "completedFacets": [
+        "actual current Bag UID and complete source, ordinary repair list select/confirm, two-key final socket proof"
+      ],
+      "remainingSourceFacets": [
+        "captured current Bag gesture dropped on actual NPC repair target"
+      ]
+    },
+    {
+      "id": "F09.NPC.SREPAIR_BAG",
+      "status": "open",
+      "completedFacets": [
+        "actual current Bag UID and complete source, special repair list select/confirm, two-key final socket proof"
+      ],
+      "remainingSourceFacets": [
+        "captured current Bag gesture dropped on actual special repair target"
+      ]
+    },
+    {
+      "id": "F09.NPC.REPAIR_QUOTE",
+      "status": "open",
+      "completedFacets": [
+        "shared Rust genuine float/rate/rental/affordability quote, current known zero preserved and unknown remains disabled"
+      ],
+      "remainingSourceFacets": [
+        "explicit Hold toggle and each fresh continuous Bag selection auto-confirm through final proof entry"
+      ]
+    }
+  ],
+  "nativeEvidence": {
+    "overlays": {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "fixedGitBlobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+      "actualCurrent": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\overlays.rs",
+        "bytes": 895205,
+        "sha256": "e858e5c466977df354d2793e1e86c02ac3a8f03eabbe3d9cebbeb7399174f232"
+      },
+      "currentLfNormalizedBlobEqualsFixedBaseline": true,
+      "anchors": [
+        {
+          "line": 5995,
+          "role": "Bag drag to real npc_item_service through6014"
+        },
+        {
+          "line": 10130,
+          "role": "Hold reducer through10137"
+        },
+        {
+          "line": 10245,
+          "role": "Hold auto-submit selected Bag source through10254"
+        }
+      ]
+    },
+    "currentNpcItemService": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\npc_item_service.rs",
+      "bytes": 41905,
+      "sha256": "ad062fb91777e2449c03d5d3b99fd5d829712c46648576bbca2a9b36eabc3038",
+      "anchors": [
+        {
+          "line": 28,
+          "role": "real repair drop target rectangle through43"
+        },
+        {
+          "line": 49,
+          "role": "captured actual BagUID source and Hold auto-submit through89"
+        },
+        {
+          "line": 358,
+          "role": "real Hold button, Title293/294/295 fallback through378"
+        }
+      ],
+      "qualification": "Source18 shared quote implementation current source; historical baseline action anchors remain preserved separately."
+    }
+  },
+  "webEvidence": [
+    {
+      "path": "apps/web/app/components/original-client-game-shop.tsx",
+      "line": 868,
+      "role": "list row select/doubleClick through882, Confirm at970; no repair drop target or Hold route"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "line": 13702,
+      "role": "NPCRepair/SRepair close inventory; repair modal withdraws shared Bag at17877–17888"
+    },
+    {
+      "path": "apps/web/lib/bevy-bag-ui.ts",
+      "line": 35,
+      "role": "existing intent set has no NPC repair target route; Page handler10956–10983"
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "line": 687,
+      "role": "Inventory props through712 lack repair target bridge"
+    }
+  ],
+  "matrixQualification": "Keep stable317 IDs, originalAudit/native untouched, counts103shared/197legacy/9open/8common; all player not-run. No full acceptance denominator or overall percentage.",
+  "nextWork": "Complete exact captured Bag target drop and Hold lifecycle in existing Web gesture routes; then lightweight shared tooltip, Bag-to-Belt, fishing, Pearl, Ranking Inspect.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}
