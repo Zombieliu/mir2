@@ -29,3 +29,8 @@ pub mod npc_repair_quote;
 #[cfg(feature = "presentation-ui")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn client_presentation_abi_version() -> u32 { 1 }
+
+#[cfg(feature = "presentation-ui")]
+pub mod item_tooltip;
+#[cfg(feature = "presentation-ui")]
+pub use item_tooltip::{item_tooltip_abi_version, item_tooltip_document};

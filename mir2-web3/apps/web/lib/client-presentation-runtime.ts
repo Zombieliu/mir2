@@ -1,3 +1,5 @@
+import { readSharedItemTooltip, type CrystalTooltipItem, type CrystalTooltipDocument, type CrystalTooltipRuntime } from "./shared-item-tooltip";
+
 /** Thin, data-only adapters for optional shared Rust presentation policies. */
 export type MapRouteInput = Readonly<{ width: number; height: number;
   origin: Readonly<{ x: number; y: number }>; goal: Readonly<{ x: number; y: number }>;
@@ -49,6 +51,8 @@ export type MapRouteWasmModule = {
     edges: Uint8Array) => Int32Array;
 };
 export type PresentationWasmModule = {
+  item_tooltip_abi_version?: () => number;
+  item_tooltip_document?: (json: string, nowDotnetTicks: string) => string;
   chat_ui_abi_version?: () => number; ChatUiBridge?: new (mask: number) => RawChatUi;
   cash_preview_abi_version?: () => number;
   cash_preview_layers?: (kind: number, shape: number, gender: number, armour: number,
@@ -213,5 +217,33 @@ export function readSharedNpcRepairQuote(module: PresentationWasmModule, input: 
       || typeof quote.displayedTotal !== "number" || !Number.isFinite(quote.displayedTotal) || quote.displayedTotal < 0
       || quote.displayedTotal > Math.fround(4294967295) || typeof quote.affordable !== "boolean") return null;
     return Object.freeze(quote) as NpcRepairQuote;
+  } catch { return null; }
+}
+
+const itemTooltipAdapters = new WeakMap<PresentationWasmModule, {
+  abi: NonNullable<PresentationWasmModule["item_tooltip_abi_version"]>;
+  getter: NonNullable<PresentationWasmModule["item_tooltip_document"]>;
+  runtime: CrystalTooltipRuntime;
+}>();
+
+/** Optional data-only formatter. Catalogue previews stay on the renderer ABI. */
+export function readSharedPresentationItemTooltip(module: PresentationWasmModule, item: CrystalTooltipItem,
+  player: Readonly<Record<string, unknown>>, nowMs = Date.now()): CrystalTooltipDocument | null {
+  try {
+    const abi = module.item_tooltip_abi_version, getter = module.item_tooltip_document;
+    if (typeof abi !== "function" || typeof getter !== "function" || abi.call(module) !== 1
+      || item.sourceKind !== undefined && item.sourceKind !== "instance") return null;
+    let adapter = itemTooltipAdapters.get(module);
+    if (!adapter || adapter.abi !== abi || adapter.getter !== getter) {
+      adapter = {abi, getter, runtime: {getMir2ItemTooltipDocument(json, clock) {
+        if (module.item_tooltip_abi_version !== abi || module.item_tooltip_document !== getter || abi.call(module) !== 1) {
+          throw Error("Item tooltip formatter changed");
+        }
+        return getter.call(module, json, clock);
+      }}};
+      itemTooltipAdapters.set(module, adapter);
+    }
+    const document = readSharedItemTooltip(adapter.runtime, item, player, nowMs);
+    return module.item_tooltip_abi_version === abi && module.item_tooltip_document === getter && abi.call(module) === 1 ? document : null;
   } catch { return null; }
 }

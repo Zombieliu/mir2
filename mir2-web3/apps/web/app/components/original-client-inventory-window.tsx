@@ -21,6 +21,9 @@ import {
   formatBinaryDateTimeLabel,
   originalItemIconPath,
 } from "./original-client-inventory-utils";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+import { useActiveItemTooltip } from "./original-client-panels";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 import { StoragePasswordPanel, type StoragePasswordPanelMode } from "./original-client-storage-password-panel";
@@ -50,6 +53,7 @@ type InventoryWindowProps = {
   onCloseStorage?: () => void;
   onTabChange: (tab: InventoryTabKey) => void;
   onUseItem: (item: ItemActionRef) => void;
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
   onMoveItem: (item: MoveItemRef, toSlot: number, toContainer?: ItemContainer) => boolean;
@@ -85,7 +89,7 @@ export function InventoryWindow({
   onClose,
   onCloseStorage,
   onTabChange,
-  onUseItem,
+  onUseItem, onReadItemTooltip,
   onDropItem,
   onEquipItem,
   onMoveItem,
@@ -118,6 +122,7 @@ export function InventoryWindow({
   const storageProtectionEnabled = world.requireStoragePassword || world.hasStoragePassword;
   const storageLocked = storageProtectionEnabled && !world.storageSessionUnlocked;
   const visibleItems = world.inventoryItems.filter((item) => item.container === activeTab);
+  const tooltip = useActiveItemTooltip(visibleItems, onReadItemTooltip);
   const mailLocks=(world as DisplayWorld&{mailLockedUniqueIds?:number[]}).mailLockedUniqueIds??[];
   function mailItemLocked(item:DisplayItem){return mailLocks.length>0&&(item.authoritativeUniqueId===undefined||mailLocks.includes(item.authoritativeUniqueId));}
   const storagePageStart = storagePageIndex * 80;
@@ -747,6 +752,7 @@ export function InventoryWindow({
           const slot = ORIGINAL_UI.inventory.slots[item.slot];
           if (!slot) return null;
           const dimmed = activeTab !== "quest" && !inventoryItemMatchesFilter(item, itemFilter);
+          const tooltipDocument = tooltip.document(item);
 
           return (
             <button
@@ -757,7 +763,13 @@ export function InventoryWindow({
               style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null) }}
               data-filtered-out={dimmed ? "true" : undefined}
               aria-label={item.name}
+              onPointerEnter={event => { if (event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
+              onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
+              onFocus={event => tooltip.activate(item, event.currentTarget)}
+              onBlur={event => { if (!event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
+              onPointerCancel={event => tooltip.release(item, event.currentTarget)}
               onPointerDown={(event) => {
+                if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); }
                 if (repairMode) {
                   consumedRepairPointerRef.current.add(event.currentTarget);
                   onRepairPointerDown?.(event, item);
@@ -813,6 +825,7 @@ export function InventoryWindow({
                 onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
               />
               {item.quantity > 1 ? <span className="item-stack-count inventory-item-count">{item.quantity}</span> : null}
+              {tooltipDocument ? <OriginalCrystalItemTooltip document={tooltipDocument} align={slot.x > 210 ? "left" : "right"} /> : (
               <OriginalItemTooltip
                 t={t}
                 name={item.name}
@@ -822,6 +835,7 @@ export function InventoryWindow({
                 durabilityMax={item.durabilityMax}
                 align={slot.x > 210 ? "left" : "right"}
               />
+              )}
             </button>
           );
         })}

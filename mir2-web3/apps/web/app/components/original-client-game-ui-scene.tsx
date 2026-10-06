@@ -39,6 +39,8 @@ import {
 } from "./original-client-system-menu";
 import type {
   DisplayEntity,
+  DisplayItem,
+  DisplayEquipmentItem,
   DisplayLogLine,
   DisplayNpcShopService,
   DisplayWorld,
@@ -122,6 +124,8 @@ type GameUiSceneProps = {
   onSelectNpcDialogTarget: (target: string) => void;
   onSubmitNpcInput: (value: string) => void;
   onUseItem: (item: ItemActionRef) => void;
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
+  onReadEquipmentItemTooltip?: (item: Readonly<DisplayEquipmentItem>) => CrystalTooltipDocument | null;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
   onRemoveItem: (item: EquipmentActionRef) => void;
@@ -214,7 +218,7 @@ function GameUiSceneInner({
   onOpenInventoryTab,
   onSelectNpcDialogTarget,
   onSubmitNpcInput,
-  onUseItem,
+  onUseItem, onReadItemTooltip, onReadEquipmentItemTooltip,
   onDropItem,
   onEquipItem,
   onRemoveItem,
@@ -463,6 +467,7 @@ function GameUiSceneInner({
           onClose={() => setShowBelt(false)}
           onRotate={() => setBeltVertical((current) => !current)}
           onUseItem={onUseItem}
+          onReadItemTooltip={onReadItemTooltip}
         />
       ) : null}
       <ChatFilterBar
@@ -707,6 +712,7 @@ function GameUiSceneInner({
           onCloseStorage={onCloseStorage}
           onTabChange={onOpenInventoryTab}
           onUseItem={onUseItem}
+          onReadItemTooltip={onReadItemTooltip}
           onDropItem={onDropItem}
           onEquipItem={onEquipItem}
           onMoveItem={onMoveItem}
@@ -731,6 +737,7 @@ function GameUiSceneInner({
           player={player}
           world={world}
           onRemoveItem={onRemoveItem}
+          onReadEquipmentItemTooltip={onReadEquipmentItemTooltip}
           onRepairItem={onRepairItem}
           onSpecialRepairItem={onSpecialRepairItem}
           onCastSkill={onCastSkill}

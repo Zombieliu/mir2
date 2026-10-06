@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import type { DisplayItem } from "./original-client-types";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+
 import type { ChatUiControls } from "../../lib/client-core-runtime";
 
 import {
@@ -54,21 +58,7 @@ type DisplayLogLineLike = {
     | "network";
 };
 
-type ItemContainer = "bag1" | "bag2" | "quest" | "belt" | "storage";
-
-type DisplayItemLike = {
-  key: string;
-  uniqueId: number;
-  authoritativeUniqueId?: number;
-  name: string;
-  icon: number;
-  slot: number;
-  quantity: number;
-  container: ItemContainer;
-  description?: string;
-  durabilityCurrent?: number;
-  durabilityMax?: number;
-};
+type DisplayItemLike = DisplayItem;
 
 type ItemActionRef = Pick<DisplayItemLike, "key" | "uniqueId" | "authoritativeUniqueId" | "slot" | "container">;
 
@@ -486,16 +476,72 @@ export function ChatFilterBar({
   );
 }
 
+
+type ActiveItemTooltipLease<Item> = Readonly<{item: Item; node: HTMLElement;
+  reader: (item: Readonly<Item>) => CrystalTooltipDocument | null}>;
+
+/** One displayed item owns one read-only refresh timer; old sources never borrow a new reader. */
+export function useActiveItemTooltip<Item>(items: readonly Item[],
+  reader?: (item: Readonly<Item>) => CrystalTooltipDocument | null, visible = true) {
+  const latest = useRef({items, reader, visible}); latest.current = {items, reader, visible};
+  const active = useRef<ActiveItemTooltipLease<Item> | null>(null);
+  const [lease, setLease] = useState<ActiveItemTooltipLease<Item> | null>(null);
+  const [result, setResult] = useState<{lease: ActiveItemTooltipLease<Item>; document: CrystalTooltipDocument | null} | null>(null);
+  function current(capture: ActiveItemTooltipLease<Item>) {
+    const live = latest.current;
+    return active.current === capture && live.visible && live.reader === capture.reader && live.items.includes(capture.item)
+      && capture.node.isConnected && document.visibilityState !== "hidden";
+  }
+  function clear(capture: ActiveItemTooltipLease<Item> | null) {
+    if (!capture || active.current !== capture) return;
+    active.current = null; setLease(null); setResult(null);
+  }
+  function refresh(capture: ActiveItemTooltipLease<Item>) {
+    if (!current(capture)) return;
+    let document: CrystalTooltipDocument | null = null;
+    try { document = capture.reader(capture.item); } catch { /* Missing/retired source retains the basic label. */ }
+    if (current(capture)) setResult({lease: capture, document});
+  }
+  function activate(item: Item, node: HTMLElement) {
+    if (!reader || latest.current.reader !== reader || !latest.current.visible || !latest.current.items.includes(item) || !node.isConnected) return;
+    const capture = {item, node, reader}; active.current = capture; setLease(capture); refresh(capture);
+  }
+  function release(item: Item, node: HTMLElement) {
+    const capture = active.current;
+    if (capture && capture.item === item && capture.node === node && capture.reader === reader) clear(capture);
+  }
+  const present = !!lease && visible && reader === lease.reader && items.includes(lease.item);
+  useEffect(() => {
+    if (!lease || !present || !current(lease)) return;
+    const timer = window.setInterval(() => refresh(lease), 1000);
+    const cancel = () => clear(lease), hidden = () => { if (document.visibilityState === "hidden") cancel(); };
+    window.addEventListener("blur", cancel); window.addEventListener("resize", cancel);
+    window.addEventListener("pointercancel", cancel); window.addEventListener("pagehide", cancel);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.clearInterval(timer); window.removeEventListener("blur", cancel); window.removeEventListener("resize", cancel);
+      window.removeEventListener("pointercancel", cancel); window.removeEventListener("pagehide", cancel);
+      document.removeEventListener("visibilitychange", hidden);
+      if (active.current === lease) active.current = null;
+    };
+  }, [lease, reader, visible, present]);
+  return {activate, release, document(item: Item) {
+    return lease && result && lease.item === item && result.lease === lease && current(lease) ? result.document : null;
+  }};
+}
+
 export type BeltDialogProps = {
   t: TranslateFn;
   items: DisplayItemLike[];
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
   vertical: boolean;
   onClose: () => void;
   onRotate: () => void;
   onUseItem: (item: ItemActionRef) => void;
 };
 
-export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }: BeltDialogProps) {
+export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem, onReadItemTooltip }: BeltDialogProps) {
+  const tooltip = useActiveItemTooltip(items, onReadItemTooltip);
   const itemBySlot = new Map(items.map((item) => [item.slot, item]));
   const useBeltItem = (item: DisplayItemLike) => {
     (window as typeof window & { __mir2LastBeltActivation?: Record<string, unknown> }).__mir2LastBeltActivation = {
@@ -543,6 +589,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
       ))}
       {ORIGINAL_UI.game.belt.slots.map((slot, index) => {
         const item = itemBySlot.get(index) ?? null;
+        const tooltipDocument = item ? tooltip.document(item) : null;
 
         return (
           <div
@@ -558,6 +605,12 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
                 type="button"
                 className={`belt-item ${vertical ? "vertical" : "horizontal"}`}
                 aria-label={item.name}
+                onPointerEnter={event => { if (event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
+                onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
+                onFocus={event => tooltip.activate(item, event.currentTarget)}
+                onBlur={event => { if (!event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
+                onPointerCancel={event => tooltip.release(item, event.currentTarget)}
+                onPointerDown={event => { if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); } }}
                 onMouseDown={(event) => {
                   if (event.button !== 0) return;
                   event.preventDefault();
@@ -575,6 +628,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
                   draggable={false}
                 />
                 {item.quantity > 0 ? <span className="item-stack-count belt-item-count">{item.quantity}</span> : null}
+                {tooltipDocument ? <OriginalCrystalItemTooltip document={tooltipDocument} align={vertical ? "right" : "top"} /> : (
                 <OriginalItemTooltip
                   t={t}
                   name={item.name}
@@ -584,6 +638,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
                   durabilityMax={item.durabilityMax}
                   align={vertical ? "right" : "top"}
                 />
+                )}
               </button>
             ) : null}
           </div>

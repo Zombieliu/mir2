@@ -54,7 +54,7 @@ import { MailDispatcher,MailParcelController,mailContentKey,sameMailOwner,type M
 import {projectMailParcelSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
 import { NpcRepairService, type NpcRepairOwner, type NpcRepairView, type NpcRepairSelection, type NpcRepairProof,
   type NpcRepairDrag, type NpcRepairDragGeometry, type NpcRepairDrop } from "../lib/npc-repair-service";
-import type { ItemActionRef } from "./components/original-client-types";
+import type { ItemActionRef, DisplayItem, DisplayEquipmentItem } from "./components/original-client-types";
 import type { MailPresentation } from "./components/original-client-mail-window";
 import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
 import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
@@ -978,6 +978,7 @@ type WorldItem = ItemPresentationMetadata & {
   description: string;
   durabilityCurrent?: number;
   durabilityMax?: number;
+  sellValue?: number;
   equipSlot?: EquipmentSlot | null;
   attack?: number;
   defence?: number;
@@ -2592,8 +2593,10 @@ export default function HomePage() {
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventoryState] = useState(false);
   const bagOpenRef = useRef(false);
+  const ownedTooltipEpochRef = useRef({ bag: {}, character: {} });
   const bagYieldRef = useRef<() => void>(() => undefined);
   function setShowInventory(open: boolean) {
+    if (bagOpenRef.current !== open) ownedTooltipEpochRef.current.bag = {};
     bagOpenRef.current = open;
     if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "openBag" : "closeBag" }); return; }
     if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
@@ -2614,6 +2617,7 @@ export default function HomePage() {
   const hudProjectionRef = useRef(false);
   const fallbackHudNavigationRevisionRef = useRef(0);
   function setShowCharacter(open: boolean) {
+    if (characterOpenRef.current !== open) ownedTooltipEpochRef.current.character = {};
     characterOpenRef.current = open;
     if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "selectCharacterPage" : "closeCharacter", ...(open ? { page: activeCharacterTab === "char" ? "character" : activeCharacterTab } : {}) } as HudAction); return; }
     if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
@@ -2624,9 +2628,17 @@ export default function HomePage() {
     if (!sharedHudNavigationRef.current.ready) return false;
     const accepted = sharedHudNavigationRef.current.dispatch(action);
     if (accepted) {
-      if (["bag", "openBag", "closeBag"].includes(action.type)) bagOpenRef.current = action.type === "bag" ? !bagOpenRef.current : action.type === "openBag";
+      if (["bag", "openBag", "closeBag"].includes(action.type)) {
+        const open = action.type === "bag" ? !bagOpenRef.current : action.type === "openBag";
+        if (bagOpenRef.current !== open) ownedTooltipEpochRef.current.bag = {};
+        bagOpenRef.current = open;
+      }
       if (["quest", "openQuest", "closeQuest"].includes(action.type)) questLogOpenRef.current = action.type === "quest" ? !questLogOpenRef.current : action.type === "openQuest";
-      if (["character", "closeCharacter", "selectCharacterPage"].includes(action.type)) characterOpenRef.current = action.type === "character" ? !characterOpenRef.current : action.type === "selectCharacterPage";
+      if (["character", "closeCharacter", "selectCharacterPage"].includes(action.type)) {
+        const open = action.type === "character" ? !characterOpenRef.current : action.type === "selectCharacterPage";
+        if (characterOpenRef.current !== open) ownedTooltipEpochRef.current.character = {};
+        characterOpenRef.current = open;
+      }
     }
     return true;
   };
@@ -2960,8 +2972,16 @@ export default function HomePage() {
     // `send` is a stable hoisted closure over refs; intentionally excluded.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHeroPet]);
-  const [activeInventoryTab, setActiveInventoryTab, activeInventoryTabRef] = useImmediateUiState<"bag1" | "bag2" | "quest">("bag1");
-  const [activeCharacterTab, setActiveCharacterTab] = useState<"char" | "stats1" | "stats2" | "spells">("char");
+  const [activeInventoryTab, setActiveInventoryTabState, activeInventoryTabRef] = useImmediateUiState<"bag1" | "bag2" | "quest">("bag1");
+  function setActiveInventoryTab(tab: "bag1" | "bag2" | "quest") {
+    if (activeInventoryTabRef.current !== tab) ownedTooltipEpochRef.current.bag = {};
+    setActiveInventoryTabState(tab);
+  }
+  const [activeCharacterTab, setActiveCharacterTabState, activeCharacterTabRef] = useImmediateUiState<"char" | "stats1" | "stats2" | "spells">("char");
+  function setActiveCharacterTab(tab: "char" | "stats1" | "stats2" | "spells") {
+    if (activeCharacterTabRef.current !== tab) ownedTooltipEpochRef.current.character = {};
+    setActiveCharacterTabState(tab);
+  }
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
   const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<PredictedPlayerMotion | null>(null);
   const [initialSceneAssetsReady, setInitialSceneAssetsReady] = useState(false);
@@ -9587,6 +9607,102 @@ export default function HomePage() {
       {level:player?.level, className:player?.classKey ?? null, gender:player?.genderKey ?? null, crystalStats:current.playerCrystalStats ?? null,
         weights:current.playerWeights ?? null, currentWeightKnown:current.playerWeights != null, currentWeight:current.currentWeight, maxWeight:current.maxWeight});
   }
+
+  // These readers are tied to the objects actually rendered in our own three
+  // windows. No catalogue, label or display-slot alias supplies instance data.
+  function ownedItemTooltipRequest(raw: WorldItem | EquipmentItem): CrystalTooltipItem | null {
+    const record = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value);
+    const uid = raw.authoritativeUniqueId;
+    if (typeof uid !== "number" || !Number.isSafeInteger(uid) || uid < 0
+      || raw.uniqueId !== undefined && raw.uniqueId !== uid || !record(raw.tooltipSource)) return null;
+    try {
+      const tooltipSource: unknown = JSON.parse(JSON.stringify(raw.tooltipSource));
+      if (!record(tooltipSource)) return null;
+      const user = tooltipSource.userItem, info = tooltipSource.info;
+      if (user !== undefined && user !== null && !record(user) || info !== undefined && info !== null && !record(info)) return null;
+      const count = raw.quantity ?? (record(user) ? user.count : undefined);
+      const itemIndex = record(user) ? user.item_index : record(info) ? info.item_index : undefined;
+      if (typeof count !== "number" || !Number.isSafeInteger(count) || count <= 0 || count > 65535
+        || typeof itemIndex !== "number" || !Number.isSafeInteger(itemIndex) || itemIndex < -2147483648 || itemIndex > 2147483647
+        || record(user) && (user.unique_id !== uid || user.count !== count || user.item_index !== itemIndex)
+        || record(info) && info.item_index !== itemIndex
+        || record(user) && (raw.durabilityCurrent !== undefined && user.current_dura !== raw.durabilityCurrent
+          || raw.durabilityMax !== undefined && user.max_dura !== raw.durabilityMax)) return null;
+      return {uniqueId:uid, itemIndex, name:raw.name, icon:raw.icon, count, tooltipSource,
+        legacy:{key:raw.key, grade:raw.grade, description:raw.description,
+          ...("sellValue" in raw ? {sellValue:raw.sellValue} : {}),
+          durabilityCurrent:raw.durabilityCurrent, durabilityMax:raw.durabilityMax,
+          attack:raw.attack, defence:raw.defence, addedAttack:raw.addedAttack, addedDefence:raw.addedDefence,
+          ...("addedLuck" in raw ? {addedLuck:raw.addedLuck} : {}),
+          ...("socketSlots" in raw ? {socketSlots:raw.socketSlots} : {})}};
+    } catch { return null; }
+  }
+  const ownedTooltipReaderRef = useRef<object | null>(null);
+  const ownedTooltipOwner = currentSocialReplyOwner(false);
+  const ownedTooltipCore = questCoreRuntimeRef.current;
+  const ownedTooltipOwnerRevision = equipmentBagOwnerRef.current.ownerRevision;
+  const ownedTooltipBagEpoch = ownedTooltipEpochRef.current.bag;
+  const ownedTooltipCharacterEpoch = ownedTooltipEpochRef.current.character;
+  const ownedItemTooltipReaders = useMemo(() => {
+    const inventory = presentationWorld.inventoryItems, belt = presentationWorld.beltItems, equipment = presentationWorld.equipmentItems;
+    const signatures = new Map<WorldItem | EquipmentItem, string>();
+    for (const raw of [...inventory, ...belt, ...equipment]) {
+      try { const signature = JSON.stringify(raw); if (signature.length <= 262144) signatures.set(raw, signature); }
+      catch { /* An ambiguous source keeps its basic display. */ }
+    }
+    function viewer() {
+      const current = worldRef.current, player = current.entities.find(e => e.objectId === current.playerObjectId);
+      return {level:player?.level, className:player?.classKey ?? null, gender:player?.genderKey ?? null,
+        crystalStats:current.playerCrystalStats ?? null, weights:current.playerWeights ?? null,
+        currentWeightKnown:current.playerWeights != null, currentWeight:current.currentWeight, maxWeight:current.maxWeight};
+    }
+    function current(raw: WorldItem | EquipmentItem, equipped: boolean) {
+      const owner = currentSocialReplyOwner(), live = worldRef.current;
+      if (ownedTooltipReaderRef.current !== binding || !ownedTooltipOwner || !owner || !ownedTooltipCore
+        || questCoreRuntimeRef.current !== ownedTooltipCore || !sameSocialPhysicalOwner(ownedTooltipOwner, owner)
+        || owner?.sceneRevision !== ownedTooltipOwner.sceneRevision || owner.mapFileName !== ownedTooltipOwner.mapFileName
+        || equipmentBagOwnerRef.current.ownerRevision !== ownedTooltipOwnerRevision) return false;
+      if (equipped) {
+        if (ownedTooltipEpochRef.current.character !== ownedTooltipCharacterEpoch || !characterOpenRef.current
+          || activeCharacterTabRef.current !== "char" || !live.equipmentItems.includes(raw as EquipmentItem)) return false;
+        if (live.equipmentItems.filter(row => row.slot === raw.slot).length !== 1) return false;
+      } else {
+        if (!("container" in raw)) return false;
+        const rows = raw.container === "belt" ? live.beltItems : live.inventoryItems;
+        if (!rows.includes(raw) || rows.filter(row => row.container === raw.container && row.slot === raw.slot).length !== 1) return false;
+        if (raw.container !== "belt" && (ownedTooltipEpochRef.current.bag !== ownedTooltipBagEpoch
+          || !bagOpenRef.current || activeInventoryTabRef.current !== raw.container)) return false;
+      }
+      const own = [...live.inventoryItems, ...live.beltItems, ...live.equipmentItems];
+      return own.filter(row => row.authoritativeUniqueId === raw.authoritativeUniqueId).length === 1
+        && signatures.get(raw) === JSON.stringify(raw);
+    }
+    function read(item: Readonly<DisplayItem> | Readonly<DisplayEquipmentItem>, equipped: boolean): CrystalTooltipDocument | null {
+      const raw = (equipped ? equipment : [...inventory, ...belt]).find(row => row === item);
+      if (!raw) return null;
+      try {
+        if (!current(raw, equipped)) return null;
+        const request = ownedItemTooltipRequest(raw), player = viewer(), playerKey = JSON.stringify(player);
+        if (!request || !ownedTooltipCore) return null;
+        const document = ownedTooltipCore.readItemTooltip(request, player);
+        return current(raw, equipped) && JSON.stringify(viewer()) === playerKey ? document : null;
+      } catch { return null; }
+    }
+    const binding = {readItem:(item:Readonly<DisplayItem>) => read(item, false),
+      readEquipment:(item:Readonly<DisplayEquipmentItem>) => read(item, true)};
+    return binding;
+    // Movement does not retire an unchanged item. Source/physical-owner changes do.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presentationWorld.inventoryItems, presentationWorld.beltItems, presentationWorld.equipmentItems,
+    ownedTooltipOwner?.socket, ownedTooltipOwner?.connectionGeneration, ownedTooltipOwner?.sessionGeneration,
+    ownedTooltipOwner?.playerObjectId, ownedTooltipOwner?.sceneRevision, ownedTooltipOwner?.mapFileName,
+    ownedTooltipCore, ownedTooltipOwnerRevision, ownedTooltipBagEpoch, ownedTooltipCharacterEpoch,
+    showInventory, activeInventoryTab, showCharacter, activeCharacterTab]);
+  useLayoutEffect(() => {
+    ownedTooltipReaderRef.current = ownedItemTooltipReaders;
+    return () => { if (ownedTooltipReaderRef.current === ownedItemTooltipReaders) ownedTooltipReaderRef.current = null; };
+  }, [ownedItemTooltipReaders]);
+
   function readHeroItemTooltip(item: HeroItem): CrystalTooltipDocument | null {
     const model = currentHeroModel();
     if (!model || !(heroManagementOpenRef.current || heroWindowsRef.current.beltVisible && item.slot <= 1)) return null;
@@ -16041,6 +16157,7 @@ export default function HomePage() {
         icon: item.icon ?? null,
         durabilityCurrent: item.durabilityCurrent ?? null,
         durabilityMax: item.durabilityMax ?? null,
+        sellValue: item.sellValue ?? 0,
       });
       const equipmentIdentity = (item: Record<string, unknown>) => ({
         ...projectItemPresentation(item as GatewayItemPresentationSource),
@@ -18409,6 +18526,8 @@ export default function HomePage() {
       onCreateCharacter={createCharacter}
       onDeleteCharacter={deleteSelectedCharacter}
       onExitSelect={() => setScreen("login")}
+      onReadItemTooltip={ownedItemTooltipReaders.readItem}
+      onReadEquipmentItemTooltip={ownedItemTooltipReaders.readEquipment}
       onUseItem={useItem}
       onDropItem={dropItem}
       onEquipItem={equipItem}

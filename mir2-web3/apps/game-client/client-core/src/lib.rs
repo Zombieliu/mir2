@@ -21,3 +21,7 @@ pub mod motion;
 pub mod npc_gold_buy_attempt;
 pub mod quest;
 pub mod reconciliation;
+
+pub mod item_names;
+pub mod item_tooltip;
+pub mod item_tooltip_types;

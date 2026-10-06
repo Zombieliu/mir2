@@ -2787,9 +2787,10 @@ const parityPageNames = ["currentSpellsOwner", "currentSocialReplyOwner", "curre
   "referenceWindowsBlockGameplay", "heroUiLeaseCurrent", "advanceHeroWindowEpochs", "changeHeroWindows", "syncHeroWindowActor", "scheduleHeroRestock", "syncObservePreference", "currentCreatureSource", "currentCashGameShopSource",
   "currentQuestWorldIdentity", "currentCombatModeOwner", "sameCombatModeOwner", "nextCombatModeRevision",
   "captureCombatModeSnapshot", "captureCombatModeReceipt", "readCombatModeSource",
-  "currentGuildBuffSource", "captureParityPacket", "captureParitySnapshot", "readPlayerItemTooltip", "readHeroItemTooltip",
+  "currentGuildBuffSource", "captureParityPacket", "captureParitySnapshot", "ownedItemTooltipRequest", "readPlayerItemTooltip", "readHeroItemTooltip",
   "readCashGameShopItemTooltip", "guildStorageTooltipItem", "readGuildStorageItemTooltip", "readSocialItemSurface", "readNpcRepairOwner", "captureNpcRepairDialog", "currentNpcRepairDialogSource", "readNpcRepairView", "selectNpcRepair", "toggleNpcRepairHold", "beginNpcRepairDrag", "cancelNpcRepairDrag", "dropNpcRepairDrag", "confirmNpcRepair"];
 const parityDeclarations = new Map();
+const ownedTooltipCaptures = new Map(); let ownedTooltipMemo, ownedTooltipCommit;
 let paritySendRawNode, parityReceiptNode, parityReceiveGuard;
 function visitParityPage(node) {
   if (ts.isFunctionDeclaration(node) && node.name) {
@@ -2805,6 +2806,19 @@ function visitParityPage(node) {
         && statement.expression.getText(parityPageAst) === '(event as {type:string}).type === "gameShopReceipt"');
       assert.equal(receipts.length, 1, "sole actual cash receipt entry"); parityReceiptNode = receipts[0];
     }
+  }
+  if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+    if (["ownedTooltipOwner","ownedTooltipCore","ownedTooltipOwnerRevision","ownedTooltipBagEpoch","ownedTooltipCharacterEpoch"].includes(node.name.text)) {
+      assert.equal(ownedTooltipCaptures.has(node.name.text),false); ownedTooltipCaptures.set(node.name.text,"const "+node.getText(parityPageAst)+";");
+    }
+    if (node.name.text === "ownedItemTooltipReaders") {
+      assert.ok(ts.isCallExpression(node.initializer) && node.initializer.expression.getText(parityPageAst)==="useMemo");
+      assert.ok(ts.isArrowFunction(node.initializer.arguments[0])); ownedTooltipMemo=node.initializer;
+    }
+  }
+  if (ts.isCallExpression(node) && node.expression.getText(parityPageAst)==="useLayoutEffect" && ts.isArrowFunction(node.arguments[0])
+    && node.arguments[0].body.getText(parityPageAst).includes("ownedTooltipReaderRef.current = ownedItemTooltipReaders")) {
+    assert.equal(ownedTooltipCommit,undefined); ownedTooltipCommit=node.arguments[0].body;
   }
   ts.forEachChild(node, visitParityPage);
 }
@@ -2844,7 +2858,12 @@ assert.equal(parityAuthClassifiers.length, 1, "sole actual preauth command class
 const parityAuthClassifierText = parityAuthClassifiers[0].getText(parityAuthAst);
 assert.match(parityAuthClassifierText, /^export function preauthCommandKind\(/);
 parityDeclarations.set("preauthCommandKind", parityAuthClassifierText.replace(/^export /, ""));
+assert.equal(ownedTooltipCaptures.size,5); assert.ok(ownedTooltipMemo && ownedTooltipCommit);
+const ownedTooltipCaptureText=[...ownedTooltipCaptures.values()].join("\n")
+  + "\nconst ownedItemTooltipReaders=("+ownedTooltipMemo.arguments[0].getText(parityPageAst)+")();\nreturn ownedItemTooltipReaders;";
 const parityPageJs = ts.transpileModule([...parityDeclarations.values()].join("\n")
+  + "\nfunction captureOwnedItemTooltipReaders(presentationWorld){"+ownedTooltipCaptureText+"\n}"
+  + "\nfunction commitOwnedItemTooltipReaders(ownedItemTooltipReaders)"+ownedTooltipCommit.getText(parityPageAst)
   + "\nfunction parityIngress(command, options) {\n"
   + paritySendStatements.slice(parityPreflightStart, parityPreflightEnd).map(n => n.getText(parityPageAst)).join("\n")
   + "\nreturn true;}\nfunction parityFinal(command, options, socket, beforeFinal) {\n"
@@ -2902,11 +2921,12 @@ function parityPageFixture(owner, world = {}) {
     makeCashGameShopSource:cashShopUi.makeCashGameShopSource, emptyCashGameShopCatalog:cashShopUi.emptyCashGameShopCatalog,
     upsertCashGameShopInfo:cashShopUi.upsertCashGameShopInfo, applyCashGameShopStock:cashShopUi.applyCashGameShopStock,
     parseMailList:extendedPackets.parseMailList,
+    ownedTooltipReaderRef:ref(null), ownedTooltipEpochRef:ref({bag:1,character:1}), activeCharacterTabRef:ref("char"),
     runtimeRef:ref(null), readSharedItemTooltip:sharedTooltip.readSharedItemTooltip, readSharedItemCatalogInfo:sharedTooltip.readSharedItemCatalogInfo,
     ...socialItems, socialCatalogRef:ref(new Map()), guildStorageRawRef:ref(null), guildPermissionsRef:ref(null),
     socialOwnTradeRef:ref(null), tradeLifecycleRef:ref({state:"closed",partner:""}), tradeIncarnationRef:ref(1),
   };
-  const keys = Object.keys(scope), api = new Function(...keys, parityPageJs + "\nreturn {currentCombatModeOwner,readCombatModeSource,captureCombatModeSnapshot,captureCombatModeReceipt,parityIngress,parityFinal,parityReceipt,parityCollectClaim,heroProofCurrent,heroInputAllowed,heroUiLeaseCurrent,changeHeroWindows,parityItemMutationAllowed,currentHeroModel,currentCreatureSource,currentCashGameShopSource,currentGuildBuffSource,captureParityPacket,captureParitySnapshot,readPlayerItemTooltip,readHeroItemTooltip,readCashGameShopItemTooltip,guildStorageTooltipItem,readGuildStorageItemTooltip,readSocialItemSurface,readNpcRepairView,captureNpcRepairDialog,toggleNpcRepairHold,beginNpcRepairDrag,dropNpcRepairDrag,confirmNpcRepair};")(...keys.map(k=>scope[k]));
+  const keys = Object.keys(scope), api = new Function(...keys, parityPageJs + "\nreturn {currentCombatModeOwner,readCombatModeSource,captureCombatModeSnapshot,captureCombatModeReceipt,parityIngress,parityFinal,parityReceipt,parityCollectClaim,heroProofCurrent,heroInputAllowed,heroUiLeaseCurrent,changeHeroWindows,parityItemMutationAllowed,currentHeroModel,currentCreatureSource,currentCashGameShopSource,currentGuildBuffSource,captureParityPacket,captureParitySnapshot,ownedItemTooltipRequest,captureOwnedItemTooltipReaders,commitOwnedItemTooltipReaders,readPlayerItemTooltip,readHeroItemTooltip,readCashGameShopItemTooltip,guildStorageTooltipItem,readGuildStorageItemTooltip,readSocialItemSurface,readNpcRepairView,captureNpcRepairDialog,toggleNpcRepairHold,beginNpcRepairDrag,dropNpcRepairDrag,confirmNpcRepair};")(...keys.map(k=>scope[k]));
   return {scope,api,socket,sent,sentBodies,microtasks};
 }
 function heroPageFixture() {
@@ -3086,13 +3106,16 @@ check("Shared tooltip actual parser rejects malformed ordered sections colours t
     {...valid,sections:[{kind:"name",lines:Array(513).fill({text:"x",colour:"white"})}]}])
     assert.equal(sharedTooltip.parseCrystalTooltipDocument(value),null);
 });
-check("Shared tooltip JS memory getter caches exact request per second and never caches malformed ABI responses", () => {
+check("Shared tooltip JS memory getter caches exact formatter clock and request and never caches malformed ABI responses", () => {
   let calls=0; const document={broken:false,sourceComplete:true,sections:[{kind:"name",lines:[{text:"Actual",colour:"white"}]}]};
-  const runtime={getMir2ItemTooltipDocument(json){calls++; assert.equal(JSON.parse(json).version,1); return JSON.stringify({version:1,ok:true,document});}};
+  const clocks=[]; const runtime={getMir2ItemTooltipDocument(json,clock){calls++; clocks.push(clock); assert.equal(JSON.parse(json).version,1); return JSON.stringify({version:1,ok:true,document});}};
   const item={uniqueId:501,itemIndex:10,name:"Actual",icon:1,count:1,tooltipSource:{userItem:heroItemFixture(501)}}, player={level:20};
   const first=sharedTooltip.readSharedItemTooltip(runtime,item,player,1000); assert.ok(first);
-  assert.strictEqual(sharedTooltip.readSharedItemTooltip(runtime,item,player,1999),first); assert.equal(calls,1);
-  sharedTooltip.readSharedItemTooltip(runtime,{...item,count:2},player,1999); sharedTooltip.readSharedItemTooltip(runtime,item,player,2000); assert.equal(calls,3);
+  assert.strictEqual(sharedTooltip.readSharedItemTooltip(runtime,item,player,1000),first); assert.equal(calls,1);
+  const later=sharedTooltip.readSharedItemTooltip(runtime,item,player,1999); assert.deepEqual(later,first); assert.notStrictEqual(later,first); assert.equal(calls,2);
+  assert.deepEqual(clocks,["621355968010000000","621355968019990000"]);
+  sharedTooltip.readSharedItemTooltip(runtime,{...item,count:2},player,1999); sharedTooltip.readSharedItemTooltip(runtime,item,player,2000); assert.equal(calls,4);
+  assert.deepEqual(clocks,["621355968010000000","621355968019990000","621355968019990000","621355968020000000"]);
   for (const result of ["not json",JSON.stringify({version:2,ok:true,document}),JSON.stringify({version:1,ok:false,document}),
     JSON.stringify({version:1,ok:true,document:{...document,broken:"false"}})]) {
     let reads=0; const bad={getMir2ItemTooltipDocument:()=>{reads++; return result;}};
@@ -3101,7 +3124,7 @@ check("Shared tooltip JS memory getter caches exact request per second and never
   }
   assert.equal(sharedTooltip.readSharedItemTooltip({getMir2ItemTooltipDocument:()=>{throw Error("fake getter");}},item,player,1000),null);
   assert.equal(sharedTooltip.readSharedItemTooltip(runtime,{...item,uniqueId:Number.MAX_SAFE_INTEGER+1},player,1000),null);
-  assert.equal(sharedTooltip.readSharedItemTooltip(runtime,item,{level:NaN},1000),null); assert.equal(calls,3);
+  assert.equal(sharedTooltip.readSharedItemTooltip(runtime,item,{level:NaN},1000),null); assert.equal(calls,4);
 });
 
 function reserveCollectBlockingSocial(page, owner) {
@@ -3181,7 +3204,7 @@ check("Shared catalog malformed index schema protocol unsafe stats getter throw 
     assert.equal(sharedTooltip.readSharedItemCatalogInfo({getMir2ItemCatalogInfo:()=>response},6),null);
   assert.equal(sharedTooltip.readSharedItemCatalogInfo({getMir2ItemCatalogInfo:()=>{throw Error("fake getter");}},6),null);
   let calls=0; const runtime={getMir2ItemCatalogInfo:()=>{calls++;return "";}};
-  for (const index of [-1,1.5,2147483648,NaN,"6"]) assert.equal(sharedTooltip.readSharedItemCatalogInfo(runtime,index),null);
+  for (const index of [-2147483649,1.5,2147483648,NaN,"6"]) assert.equal(sharedTooltip.readSharedItemCatalogInfo(runtime,index),null);
   assert.equal(calls,0);
 });
 function captureTooltipRequests(page) {
@@ -4175,7 +4198,7 @@ check("Quest name getter rejects stale full stamp foreign or dead entities dupli
 // through the existing transpiler. WASM methods below are data mocks, not Rust
 // execution, route-search coverage, pricing proof, or player/UI acceptance.
 // ---------------------------------------------------------------------------
-const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url));
+const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url), {"./shared-item-tooltip":sharedTooltip});
 const presentationChatDocument = {
   version:1, epoch:7, open:false, size:0, lineCount:4, frameIndex:0, countBarIndex:0,
   top:500, height:100, controlTop:600, inputTop:650, track:80, knobTop:0, index:0,
@@ -4898,6 +4921,14 @@ const repairShellJs=ts.transpileModule([...repairShellDeclarations.values()].joi
   ";\nfunction installRepairPointerListeners(){return ("+repairListenerEffect+")();}",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 
 
+const tooltipPanelsUrl=new URL("../app/components/original-client-panels.tsx",import.meta.url);
+const tooltipPanelsText=readFileSync(tooltipPanelsUrl,"utf8");
+const tooltipPanelsAst=ts.createSourceFile(fileURLToPath(tooltipPanelsUrl),tooltipPanelsText,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const tooltipHookNodes=tooltipPanelsAst.statements.filter(node=>ts.isFunctionDeclaration(node)&&node.name?.text==="useActiveItemTooltip");
+assert.equal(tooltipHookNodes.length,1,"sole production active tooltip hook");
+const tooltipHookJs=ts.transpileModule(tooltipHookNodes[0].getText(tooltipPanelsAst).replace(/^export /,""),
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+
 const repairInventorySource=readFileSync(new URL("../app/components/original-client-inventory-window.tsx",import.meta.url),"utf8");
 const repairInventoryAst=ts.createSourceFile("original-client-inventory-window.tsx",repairInventorySource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const repairInventoryDeclarations=new Map(),repairInventoryHandlers=new Map();let repairConsumedInitializer=null;
@@ -5030,7 +5061,11 @@ check("NPC repair actual capture listeners quarantine second pointer through com
   // Exercise the actual Inventory JSX handlers and activation function across a
   // synchronous repair close, rather than assuming preventDefault kills mouse.
   const activated=[],repairDowns=[],inventoryItem={key:"HealthPotion",name:"Health Potion",slot:7,container:"bag1",uniqueId:900,authoritativeUniqueId:900};
-  const inventoryScope={repairMode:true,item:inventoryItem,window:{},mailLocks:[],storageMode:null,deleteMode:false,sellMode:false,pendingMoveItem:null,
+  // The existing action fixture has no optional tooltip reader. Install the
+  // genuine production hook, so its new touch branch never borrows a stub gate.
+  const inventoryTooltipScope={useRef:current=>({current}),useState:initial=>[initial,()=>{}],useEffect:callback=>{assert.equal(callback(),undefined);},window:{},document:{visibilityState:"visible"}};
+  const inventoryTooltipKeys=Object.keys(inventoryTooltipScope),inventoryTooltip=new Function(...inventoryTooltipKeys,tooltipHookJs+"\nreturn useActiveItemTooltip;")(...inventoryTooltipKeys.map(key=>inventoryTooltipScope[key]))([inventoryItem]);
+  const inventoryScope={repairMode:true,item:inventoryItem,tooltip:inventoryTooltip,window:{},mailLocks:[],storageMode:null,deleteMode:false,sellMode:false,pendingMoveItem:null,
     equipmentSlotForItem:repairInventoryEquipment.equipmentSlotForItem,onRepairPointerDown:event=>repairDowns.push(event.pointerId),onUseItem:value=>activated.push(value)};
   const inventoryKeys=Object.keys(inventoryScope),inventoryApi=new Function(...inventoryKeys,repairInventoryJs+
     "\nreturn {onPointerDown,onMouseDown,onClick,setRepair:value=>repairMode=value,consumedRepairPointerRef};")(...inventoryKeys.map(key=>inventoryScope[key]));
@@ -5046,6 +5081,256 @@ check("NPC repair actual capture listeners quarantine second pointer through com
   inventoryApi.onPointerDown({...inventoryEvent,pointerId:71});inventoryApi.onMouseDown({...inventoryEvent});assert.equal(activated.length,2,"a valid fresh pointer gesture restores ordinary activation");
   assert.deepEqual(activated[1],{key:"HealthPotion",uniqueId:900,authoritativeUniqueId:900,slot:7,container:"bag1"});
   inventoryApi.setRepair(true);inventoryApi.onClick({...inventoryEvent,detail:0});assert.equal(activated.length,2,"repair mode cannot borrow ordinary keyboard item use");
+});
+
+
+
+// Source21 optional tooltip ABI: actual production modules and actual Page/DOM
+// functions, with memory getters and event/timer records only. No WASM instance.
+const tooltipDocumentFixture={broken:false,sourceComplete:true,sections:[{kind:"name",lines:[{text:"Owned",colour:"white"}]}]};
+const tooltipCoreUrl=new URL("../lib/client-core-runtime.ts",import.meta.url);
+const tooltipCoreAst=ts.createSourceFile(fileURLToPath(tooltipCoreUrl),readFileSync(tooltipCoreUrl,"utf8"),ts.ScriptTarget.Latest,true);
+const tooltipFacadeNodes=[];
+(function visit(node){if(ts.isMethodDeclaration(node)&&node.name.getText(tooltipCoreAst)==="readItemTooltip")tooltipFacadeNodes.push(node);ts.forEachChild(node,visit);})(tooltipCoreAst);
+assert.equal(tooltipFacadeNodes.length,1,"sole actual Core presentation reader proxy");
+const tooltipFacadeJs=ts.transpileModule("const facade={"+tooltipFacadeNodes[0].getText(tooltipCoreAst)+"};",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+
+check("PUI optional item formatter preserves capability independence exact clock cache and ABI getter custody",()=>{
+  const item={uniqueId:0,itemIndex:-2147483648,name:"Owned",icon:1,count:2,tooltipSource:{userItem:heroItemFixture(0,-2147483648,2)}},player={level:20};
+  let calls=0;const args=[];
+  const module={item_tooltip_abi_version:()=>1,item_tooltip_document(json,clock){calls++;args.push([JSON.parse(json),clock]);return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});}};
+  for(const absent of [{},{item_tooltip_abi_version:()=>1},{item_tooltip_document:module.item_tooltip_document},{...module,item_tooltip_abi_version:()=>0}])
+    assert.equal(presentationRuntime.readSharedPresentationItemTooltip(absent,item,player,1000),null);
+  assert.equal(calls,0);
+  assert.deepEqual(presentationRuntime.searchSharedMapRoute({getMir2MapRouteVersion:()=>1,getMir2MapRoutePlan:()=>Int32Array.of(0)},
+    {width:1,height:1,origin:{x:0,y:0},goal:{x:0,y:0},edges:new Uint8Array(1)}),{status:"ok",steps:[]},"an older module without item formatting still exposes its existing map capability");
+  const first=presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1000);assert.ok(first);
+  assert.strictEqual(presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1000),first);assert.equal(calls,1,"stable module adapter preserves shared cache");
+  assert.deepEqual(Object.keys(args[0][0]).sort(),["item","player","version"]);assert.equal(args[0][0].item.uniqueId,0);assert.equal(args[0][0].item.itemIndex,-2147483648);
+  assert.equal(args[0][1],"621355968010000000");
+  presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1001);assert.equal(calls,2);assert.equal(args[1][1],"621355968010010000");
+  for(const sourceKind of ["catalogInstance","catalogPreview","preview",null])assert.equal(presentationRuntime.readSharedPresentationItemTooltip(module,{...item,sourceKind},player,1000),null);
+  assert.equal(calls,2);
+  assert.ok(presentationRuntime.readSharedPresentationItemTooltip(module,{...item,sourceKind:"instance"},player,1000));assert.equal(calls,3);
+  const getter=module.item_tooltip_document,abi=module.item_tooltip_abi_version;
+  module.item_tooltip_document=function(json,clock){calls++;return JSON.stringify({version:1,ok:true,document:{...tooltipDocumentFixture,sourceComplete:false}});};
+  assert.equal(presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1000).sourceComplete,false);assert.equal(calls,4);
+  module.item_tooltip_abi_version=()=>1;assert.ok(presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1000));assert.equal(calls,5,"ABI function identity also retires adapter cache");
+  assert.ok(presentationRuntime.readSharedPresentationItemTooltip({...module},item,player,1000));assert.equal(calls,6,"a different module never inherits another module cache");
+  module.item_tooltip_document=function(){module.item_tooltip_document=getter;return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});};
+  assert.equal(presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1000),null,"getter reentry cannot publish through changed module");
+  module.item_tooltip_abi_version=abi;module.item_tooltip_document=function(){module.item_tooltip_abi_version=()=>0;return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});};
+  assert.equal(presentationRuntime.readSharedPresentationItemTooltip(module,item,player,1000),null);
+});
+check("Shared item clock uses exact canonical i64 ticks and bounded caches while signed catalog indexes remain real",()=>{
+  assert.equal(sharedTooltip.crystalTooltipDotnetTicks(0),"621355968000000000");assert.equal(sharedTooltip.crystalTooltipDotnetTicks(-1),"621355967999990000");
+  for(const clock of [NaN,Infinity,0.5,Number.MAX_SAFE_INTEGER,Number.MIN_SAFE_INTEGER])assert.equal(sharedTooltip.crystalTooltipDotnetTicks(clock),null);
+  const item={uniqueId:0,itemIndex:-1,name:"Owned",icon:1,count:1},player={level:1};let reads=0;
+  const runtime={getMir2ItemTooltipDocument(json,clock){reads++;assert.match(clock,/^-?(0|[1-9][0-9]*)$/);return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});}};
+  for(let clock=0;clock<17;clock++)assert.ok(sharedTooltip.readSharedItemTooltip(runtime,item,player,clock));
+  assert.equal(reads,17);sharedTooltip.readSharedItemTooltip(runtime,item,player,16);assert.equal(reads,17);sharedTooltip.readSharedItemTooltip(runtime,item,player,0);assert.equal(reads,18,"only sixteen exact clocks are retained");
+  for(const index of [-2147483649,2147483648,NaN,0.5])assert.equal(sharedTooltip.readSharedItemTooltip(runtime,{...item,itemIndex:index},player,0),null);
+  let catalogReads=0;const catalog={getMir2ItemCatalogInfo(json){catalogReads++;const request=JSON.parse(json);assert.equal(request.itemIndex,-1);return JSON.stringify({version:1,ok:true,itemInfo:heroInfoFixture(-1)});}};
+  assert.equal(sharedTooltip.readSharedItemCatalogInfo(catalog,-1).itemIndex,-1);assert.equal(catalogReads,1);
+  for(const length of [257,512])assert.ok(sharedTooltip.readSharedItemTooltip(runtime,{...item,name:"a".repeat(length)},player,40+length));
+  assert.equal(sharedTooltip.readSharedItemTooltip(runtime,{...item,name:"a".repeat(513)},player,1000),null);
+  const changed={...item};const reentrant={getMir2ItemTooltipDocument(){changed.count=2;return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});}};
+  assert.equal(sharedTooltip.readSharedItemTooltip(reentrant,changed,player,0),null,"mutable input is checked after getter entry");
+});
+check("Core actual item reader facade proxies only presentation and leaves missing optional capabilities usable",()=>{
+  let calls=0;const presentation={item_tooltip_abi_version:()=>1,item_tooltip_document(json,clock){calls++;assert.equal(clock,"621355968010000000");assert.equal(JSON.parse(json).item.itemIndex,-2);return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});}};
+  const facade=new Function("presentation","readSharedPresentationItemTooltip",tooltipFacadeJs+"\nreturn facade;")(presentation,presentationRuntime.readSharedPresentationItemTooltip);
+  assert.ok(facade.readItemTooltip({uniqueId:0,itemIndex:-2,name:"Owned",icon:0,count:1},{level:1},1000));assert.equal(calls,1);
+  delete presentation.item_tooltip_document;assert.equal(facade.readItemTooltip({uniqueId:0,itemIndex:-2,name:"Owned",icon:0,count:1},{level:1},1000),null);assert.equal(calls,1);
+  const missing=new Function("presentation","readSharedPresentationItemTooltip",tooltipFacadeJs+"\nreturn facade;")({},presentationRuntime.readSharedPresentationItemTooltip);
+  assert.equal(missing.readItemTooltip({uniqueId:0,itemIndex:0,name:"Owned",icon:0,count:1},{level:1},1000),null);
+});
+check("Page owned instance request preserves UID zero signed index unit sale value count and independent raw carrier",()=>{
+  const owner=npcRepairOwner(),page=parityPageFixture(owner);
+  const raw={...heroWorldRowFixture(heroItemFixture(0,-1,3),2),authoritativeUniqueId:0,key:"Owned",grade:"rare",description:"Raw",sellValue:7,
+    durabilityCurrent:10,durabilityMax:10,attack:2,defence:3,addedAttack:4,addedDefence:5,addedLuck:6,socketSlots:1};
+  const request=page.api.ownedItemTooltipRequest(raw);assert.ok(request);assert.equal(request.uniqueId,0);assert.equal(request.itemIndex,-1);assert.equal(request.count,3);
+  assert.equal(request.legacy.sellValue,7,"unit sale value is not multiplied in TS");assert.equal(request.legacy.addedLuck,6);assert.equal(request.legacy.socketSlots,1);
+  assert.deepEqual(request.tooltipSource,raw.tooltipSource);assert.notStrictEqual(request.tooltipSource,raw.tooltipSource);assert.notStrictEqual(request.tooltipSource.userItem,raw.tooltipSource.userItem);
+  for(const alter of [row=>delete row.authoritativeUniqueId,row=>row.authoritativeUniqueId=Number.MAX_SAFE_INTEGER+1,row=>row.uniqueId=9,
+    row=>{delete row.tooltipSource.userItem.item_index;},row=>row.tooltipSource.userItem.unique_id=9,row=>{delete row.tooltipSource.userItem.unique_id;},row=>row.tooltipSource.info.item_index=2,
+    row=>row.quantity=0,row=>row.quantity=65536,row=>row.quantity=2,row=>row.durabilityCurrent=9,row=>row.durabilityMax=11,
+    row=>row.tooltipSource.userItem=[],row=>row.tooltipSource.info=[]]){
+    const changed=structuredClone(raw);alter(changed);assert.equal(page.api.ownedItemTooltipRequest(changed),null);
+  }
+  const legacy=structuredClone(raw);delete legacy.sellValue;assert.equal(Object.hasOwn(page.api.ownedItemTooltipRequest(legacy).legacy,"sellValue"),false);
+  raw.tooltipSource.userItem.count=4;assert.equal(request.tooltipSource.userItem.count,3,"formatter request owns an independent source copy");
+});
+check("Page actual owned readers bind displayed Bag Belt Equipment objects and commit source before any format read",()=>{
+  const owner=npcRepairOwner(),bag={...heroWorldRowFixture(heroItemFixture(0,-1,3),2),authoritativeUniqueId:0,sellValue:7,durabilityCurrent:10,durabilityMax:10},
+    belt={...heroWorldRowFixture(heroItemFixture(4,5),0,"belt"),authoritativeUniqueId:4},equipment={...heroWorldRowFixture(heroItemFixture(5,6),"weapon"),authoritativeUniqueId:5};delete equipment.container;
+  const page=parityPageFixture(owner,{inventoryItems:[bag],beltItems:[belt],equipmentItems:[equipment],entities:[{objectId:owner.playerObjectId,level:33,classKey:"Wizard",genderKey:"Female"}],playerCrystalStats:[{stat:5,value:9}],playerWeights:[1,2,3],currentWeight:1,maxWeight:2});
+  page.scope.bagOpenRef.current=true;page.scope.characterOpenRef.current=true;let calls=0;const requests=[];
+  page.scope.questCoreRuntimeRef.current={readItemTooltip(item,player){calls++;requests.push({item,player});return tooltipDocumentFixture;}};
+  const readers=page.api.captureOwnedItemTooltipReaders(page.scope.worldRef.current);
+  assert.equal(readers.readItem(bag),null,"uncommitted render callback cannot read");const cleanup=page.api.commitOwnedItemTooltipReaders(readers);
+  assert.strictEqual(readers.readItem(bag),tooltipDocumentFixture);assert.strictEqual(readers.readItem(belt),tooltipDocumentFixture);assert.strictEqual(readers.readEquipment(equipment),tooltipDocumentFixture);assert.equal(calls,3);
+  assert.equal(requests[0].item.uniqueId,0);assert.equal(requests[0].item.itemIndex,-1);assert.equal(requests[0].item.count,3);assert.equal(requests[0].item.legacy.sellValue,7);
+  assert.deepEqual(requests[0].player,{level:33,className:"Wizard",gender:"Female",crystalStats:[{stat:5,value:9}],weights:[1,2,3],currentWeightKnown:true,currentWeight:1,maxWeight:2});
+  assert.equal(readers.readItem({...bag}),null);assert.equal(readers.readEquipment({...equipment}),null);assert.equal(readers.readEquipment(bag),null);
+  page.scope.worldRef.current.position=[9,9];assert.ok(readers.readItem(bag),"movement alone does not retire an unchanged source");
+  page.scope.bagOpenRef.current=false;assert.equal(readers.readItem(bag),null);assert.ok(readers.readItem(belt),"belt reader is independent of Bag visibility");
+  page.scope.bagOpenRef.current=true;page.scope.ownedTooltipEpochRef.current.bag++;assert.equal(readers.readItem(bag),null,"close reopen never revives old window callback");
+  const successor=page.api.captureOwnedItemTooltipReaders(page.scope.worldRef.current),successorCleanup=page.api.commitOwnedItemTooltipReaders(successor);
+  cleanup();assert.strictEqual(page.scope.ownedTooltipReaderRef.current,successor,"old layout cleanup cannot erase successor commit");assert.ok(successor.readItem(bag));assert.equal(readers.readItem(belt),null);
+  successorCleanup();assert.equal(successor.readItem(bag),null);assert.equal(page.sent.length,0,"tooltip paths never send actions");
+});
+check("Page actual owned readers reject physical owner source visibility and reentrant changes before and after Core",()=>{
+  const variants=["socket","connection","session","player","scene","map","screen","hidden","suspend","core","bagOwner","bagEpoch","characterEpoch","bagClosed","characterClosed","bagTab","characterTab","rawCount","rawDura","rawSource","rawSlot","duplicateUid","duplicateSlot","liveReplacement","viewer","committed"];
+  for(const timing of ["before","during"])for(const variant of variants){
+    const owner=npcRepairOwner(),bag={...heroWorldRowFixture(heroItemFixture(0,-3,2),2),authoritativeUniqueId:0,durabilityCurrent:10,durabilityMax:10},
+      equipment={...heroWorldRowFixture(heroItemFixture(5,6),"weapon"),authoritativeUniqueId:5};delete equipment.container;
+    const page=parityPageFixture(owner,{inventoryItems:[bag],beltItems:[],equipmentItems:[equipment],entities:[{objectId:owner.playerObjectId,level:30,classKey:"Warrior",genderKey:"Male"}]});
+    page.scope.bagOpenRef.current=true;page.scope.characterOpenRef.current=true;let calls=0;
+    const equipped=["characterEpoch","characterClosed","characterTab"].includes(variant),row=equipped?equipment:bag;
+    const mutate=()=>{
+      if(variant==="socket")page.scope.socketRef.current={readyState:1};if(variant==="connection")page.scope.equipmentConnectionGenerationRef.current++;
+      if(variant==="session")page.scope.equipmentSessionGenerationRef.current++;if(variant==="player")page.scope.worldRef.current.playerObjectId++;
+      if(variant==="scene")page.scope.socialSceneRevisionRef.current++;if(variant==="map")page.scope.worldRef.current.mapFileName="other";
+      if(variant==="screen")page.scope.screenRef.current="login";if(variant==="hidden")page.scope.document.visibilityState="hidden";
+      if(variant==="suspend")page.scope.equipmentHostSuspendReasonRef.current="blur";
+      if(variant==="core")page.scope.questCoreRuntimeRef.current={readItemTooltip:()=>tooltipDocumentFixture};if(variant==="bagOwner")page.scope.equipmentBagOwnerRef.current.ownerRevision++;
+      if(variant==="bagEpoch")page.scope.ownedTooltipEpochRef.current.bag++;if(variant==="characterEpoch")page.scope.ownedTooltipEpochRef.current.character++;
+      if(variant==="bagClosed")page.scope.bagOpenRef.current=false;if(variant==="characterClosed")page.scope.characterOpenRef.current=false;
+      if(variant==="bagTab")page.scope.activeInventoryTabRef.current="bag2";if(variant==="characterTab")page.scope.activeCharacterTabRef.current="state";
+      if(variant==="rawCount")row.quantity++;if(variant==="rawDura")row.durabilityCurrent=9;if(variant==="rawSource")row.tooltipSource.userItem.current_dura=9;
+      if(variant==="rawSlot")row.slot=7;if(variant==="duplicateUid")page.scope.worldRef.current.beltItems.push({...bag,container:"belt",slot:0});
+      if(variant==="duplicateSlot")page.scope.worldRef.current.inventoryItems.push({...bag,authoritativeUniqueId:9});
+      if(variant==="liveReplacement")page.scope.worldRef.current.inventoryItems=[{...bag}];if(variant==="viewer")page.scope.worldRef.current.entities[0].level++;
+      if(variant==="committed")page.scope.ownedTooltipReaderRef.current={};
+    };
+    page.scope.questCoreRuntimeRef.current={readItemTooltip(){calls++;if(timing==="during")mutate();return tooltipDocumentFixture;}};
+    const readers=page.api.captureOwnedItemTooltipReaders(page.scope.worldRef.current);page.api.commitOwnedItemTooltipReaders(readers);
+    // Viewer values are intentionally captured at each click, rather than bound
+    // to render. Only a change during Core entry invalidates their exact request.
+    if(timing==="before"&&variant==="viewer"){mutate();assert.ok(readers.readItem(bag));assert.equal(calls,1);continue;}
+    if(timing==="before")mutate();assert.equal((equipped?readers.readEquipment:readers.readItem)(row),null,variant+" "+timing);
+    assert.equal(calls,timing==="before"?0:1,variant+" exact entry count");assert.equal(page.sent.length,0);
+  }
+});
+
+const tooltipSurfaceNodes=new Map();
+for(const [surface,url,componentName,className] of [
+  ["bag",new URL("../app/components/original-client-inventory-window.tsx",import.meta.url),"InventoryWindow","inventory-item-card"],
+  ["belt",tooltipPanelsUrl,"BeltDialog","belt-item"],
+  ["equipment",new URL("../app/components/original-client-character-window.tsx",import.meta.url),"CharacterWindow","character-slot-card"]]){
+  const text=readFileSync(url,"utf8"),ast=ts.createSourceFile(fileURLToPath(url),text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),cards=[];
+  const components=ast.statements.filter(node=>ts.isFunctionDeclaration(node)&&node.name?.text===componentName);
+  assert.equal(components.length,1,surface+" sole actual component declaration");
+  assert.ok(components[0].body);
+  (function visit(node){if(ts.isJsxOpeningElement(node)&&node.tagName.getText(ast)==="button"){
+    const attr=node.attributes.properties.find(a=>ts.isJsxAttribute(a)&&a.name.getText(ast)==="className");
+    const initializer=attr?.initializer;
+    const expression=initializer&&ts.isJsxExpression(initializer)?initializer.expression:initializer;
+    const classPrefix=expression&&(ts.isStringLiteral(expression)||ts.isNoSubstitutionTemplateLiteral(expression))?expression.text
+      :expression&&ts.isTemplateExpression(expression)?expression.head.text:null;
+    if(classPrefix?.trim().split(/\s+/).includes(className))cards.push(node);
+  }ts.forEachChild(node,visit);})(components[0].body);
+  assert.equal(cards.length,1,surface+" sole actual item card");const handlers=new Map();
+  for(const name of ["onPointerEnter","onPointerLeave","onFocus","onBlur","onPointerCancel","onPointerDown"]){
+    const attr=cards[0].attributes.properties.find(a=>ts.isJsxAttribute(a)&&a.name.getText(ast)===name);
+    assert.ok(attr?.initializer&&ts.isJsxExpression(attr.initializer)&&ts.isArrowFunction(attr.initializer.expression),surface+" "+name);
+    handlers.set(name,attr.initializer.expression.getText(ast));
+  }
+  const js=ts.transpileModule([...handlers].map(([name,text])=>"const "+name+"="+text+";").join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+  tooltipSurfaceNodes.set(surface,{ast,cards,handlers,js});
+}
+check("Actual Bag Belt Equipment tooltip events are read only and active timer cleans stale source and successor safely",()=>{
+  let currentItems=[],reader,visible=true,clock=1000,reads=0,actions=0,nowApi;
+  const slots=[],effects=[],pendingEffects=[],timers=new Map(),windowHandlers=new Map(),documentHandlers=new Map();let cursor=0,nextTimer=0;
+  const scope={
+    useRef(initial){const index=cursor++;return slots[index]??(slots[index]={current:initial});},
+    useState(initial){const index=cursor++;if(!(index in slots))slots[index]=initial;return[slots[index],value=>{slots[index]=typeof value==="function"?value(slots[index]):value;}];},
+    useEffect(callback,deps){const index=cursor++,old=effects[index];if(!old||deps.some((value,i)=>!Object.is(value,old.deps[i])))pendingEffects.push({index,callback,deps});},
+    window:{setInterval(callback,delay){assert.equal(delay,1000);const id=++nextTimer;timers.set(id,callback);return id;},clearInterval:id=>timers.delete(id),
+      addEventListener:(name,fn)=>windowHandlers.set(name,fn),removeEventListener:(name,fn)=>{if(windowHandlers.get(name)===fn)windowHandlers.delete(name);}},
+    document:{visibilityState:"visible",activeElement:null,addEventListener:(name,fn)=>documentHandlers.set(name,fn),removeEventListener:(name,fn)=>{if(documentHandlers.get(name)===fn)documentHandlers.delete(name);}},
+  };
+  const keys=Object.keys(scope),hook=new Function(...keys,tooltipHookJs+"\nreturn useActiveItemTooltip;")(...keys.map(key=>scope[key]));
+  const render=()=>{cursor=0;nowApi=hook(currentItems,reader,visible);for(const effect of pendingEffects.splice(0)){effects[effect.index]?.cleanup?.();effects[effect.index]={deps:effect.deps,cleanup:effect.callback()};}return nowApi;};
+  const module={item_tooltip_abi_version:()=>1,item_tooltip_document(_json,ticks){reads++;assert.equal(ticks,sharedTooltip.crystalTooltipDotnetTicks(clock));return JSON.stringify({version:1,ok:true,document:tooltipDocumentFixture});}};
+  reader=item=>presentationRuntime.readSharedPresentationItemTooltip(module,item,{level:1},clock);
+  const originalReader=reader;
+  for(const surface of ["bag","belt","equipment"]){
+    const item={uniqueId:0,itemIndex:-1,name:"Owned",icon:1,count:1},node={isConnected:true,matches:()=>false};currentItems=[item];visible=true;reader=originalReader;render();
+    const eventScope={item,tooltip:nowApi,document:scope.document,repairMode:false,consumedRepairPointerRef:{current:new WeakSet()},onRepairPointerDown:()=>{actions++;}};
+    const eventKeys=Object.keys(eventScope),handlers=new Function(...eventKeys,tooltipSurfaceNodes.get(surface).js+"\nreturn {onPointerEnter,onPointerLeave,onFocus,onBlur,onPointerCancel,onPointerDown};")(...eventKeys.map(key=>eventScope[key]));
+    const event={pointerType:"mouse",isPrimary:true,button:0,currentTarget:node,defaultPrevented:false,stopped:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}};
+    const before=reads;handlers.onPointerEnter({...event,pointerType:"touch"});render();assert.equal(reads,before,"touch enter alone is not an item read");
+    handlers.onPointerEnter(event);render();assert.equal(reads,before+1);assert.ok(nowApi.document(item));assert.equal(timers.size,1);
+    clock++;[...timers.values()][0]();render();assert.equal(reads,before+2);assert.ok(nowApi.document(item));
+    scope.document.activeElement=node;handlers.onPointerLeave(event);render();assert.ok(nowApi.document(item),"focus keeps current item after mouse leave");
+    handlers.onFocus(event);render();assert.equal(timers.size,1,"successor activity keeps one timer");
+    const staleTimer=[...timers.values()][0];scope.document.activeElement=null;handlers.onBlur(event);render();assert.equal(timers.size,0);assert.equal(nowApi.document(item),null);
+    staleTimer();render();assert.equal(nowApi.document(item),null,"retired timer cannot recreate a document");
+    const touch={...event,pointerType:"touch"};handlers.onPointerDown(touch);render();assert.equal(touch.stopped,true);assert.ok(nowApi.document(item));assert.equal(actions,0,"hover focus touch tooltip path does not use equip repair or send");
+    handlers.onPointerLeave(touch);render();assert.equal(timers.size,0);assert.equal(nowApi.document(item),null);
+    handlers.onFocus(event);render();handlers.onPointerCancel(event);render();assert.equal(nowApi.document(item),null);
+    for(const terminal of ["blur","resize","pointercancel","pagehide","hidden"]){
+      handlers.onFocus(event);render();assert.equal(timers.size,1);
+      if(terminal==="hidden"){scope.document.visibilityState="hidden";documentHandlers.get("visibilitychange")();}
+      else windowHandlers.get(terminal)();render();assert.equal(timers.size,0);assert.equal(nowApi.document(item),null);scope.document.visibilityState="visible";
+    }
+    handlers.onFocus(event);render();const oldTimer=[...timers.values()][0];reader=value=>originalReader(value);render();
+    assert.equal(nowApi.document(item),null);assert.equal(timers.size,0);const retiredReads=reads;oldTimer();render();assert.equal(reads,retiredReads,"old captured reader cannot borrow new callback");
+    nowApi.activate(item,node);render();assert.ok(nowApi.document(item));currentItems=[{...item}];render();assert.equal(nowApi.document(item),null);assert.equal(timers.size,0);
+    currentItems=[item];render();assert.equal(nowApi.document(item),null,"same item returned after retirement does not resume itself");
+    nowApi.activate(item,node);render();node.isConnected=false;clock++;const disconnectedReads=reads;[...timers.values()][0]();render();assert.equal(reads,disconnectedReads);assert.equal(nowApi.document(item),null);
+    visible=false;render();assert.equal(timers.size,0);assert.equal(windowHandlers.size,0);assert.equal(documentHandlers.size,0);
+  }
+  for(const effect of effects)effect?.cleanup?.();assert.equal(timers.size,0);assert.equal(actions,0);
+});
+check("Three actual tooltip mounts carry exact reader props document and original fallback without raw bulk actions",()=>{
+  const sceneUrl=new URL("../app/components/original-client-game-ui-scene.tsx",import.meta.url),sceneAst=ts.createSourceFile(fileURLToPath(sceneUrl),readFileSync(sceneUrl,"utf8"),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),mounts=[];
+  (function visit(node){if(ts.isJsxSelfClosingElement(node)&&["InventoryWindow","BeltDialog","CharacterWindow"].includes(node.tagName.getText(sceneAst)))mounts.push(node);ts.forEachChild(node,visit);})(sceneAst);
+  const expected=new Map([["InventoryWindow",["onReadItemTooltip","onReadItemTooltip"]],["BeltDialog",["onReadItemTooltip","onReadItemTooltip"]],["CharacterWindow",["onReadEquipmentItemTooltip","onReadEquipmentItemTooltip"]]]);
+  for(const [component,[prop,reader]]of expected){
+    const matches=mounts.filter(node=>node.tagName.getText(sceneAst)===component);assert.equal(matches.length,1,component+" actual mount");
+    const attr=matches[0].attributes.properties.find(a=>ts.isJsxAttribute(a)&&a.name.getText(sceneAst)===prop);
+    assert.ok(attr?.initializer&&ts.isJsxExpression(attr.initializer));assert.equal(attr.initializer.expression.getText(sceneAst),reader);
+  }
+  const shellTooltipUrl=new URL("../app/original-client-shell.tsx",import.meta.url),shellAst=ts.createSourceFile(fileURLToPath(shellTooltipUrl),readFileSync(shellTooltipUrl,"utf8"),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),sceneMounts=[];let sharedProps;
+  (function visit(node){if(ts.isJsxSelfClosingElement(node)&&["GameUiScene","GameUiSceneStoreBound"].includes(node.tagName.getText(shellAst)))sceneMounts.push(node);
+    if(ts.isVariableDeclaration(node)&&node.name.getText(shellAst)==="gameUiSharedProps")sharedProps=node.initializer;ts.forEachChild(node,visit);})(shellAst);
+  assert.equal(sceneMounts.length,2);assert.ok(sharedProps&&ts.isObjectLiteralExpression(sharedProps));
+  for(const mount of sceneMounts){const spread=mount.attributes.properties.find(ts.isJsxSpreadAttribute);assert.ok(spread);assert.equal(spread.expression.getText(shellAst),"gameUiSharedProps");}
+  for(const prop of ["onReadItemTooltip","onReadEquipmentItemTooltip"]){const member=sharedProps.properties.find(p=>p.name?.getText(shellAst)===prop);assert.ok(member&&ts.isShorthandPropertyAssignment(member));}
+  for(const {ast,cards}of tooltipSurfaceNodes.values()){
+    const card=cards[0].parent;assert.ok(ts.isJsxElement(card));const renderer=[],fallback=[];
+    (function visit(node){if(ts.isJsxSelfClosingElement(node)){if(node.tagName.getText(ast)==="OriginalCrystalItemTooltip")renderer.push(node);if(node.tagName.getText(ast)==="OriginalItemTooltip")fallback.push(node);}ts.forEachChild(node,visit);})(card);
+    assert.equal(renderer.length,1);assert.equal(fallback.length,1,"original basic label remains available");
+    const documentProp=renderer[0].attributes.properties.find(a=>ts.isJsxAttribute(a)&&a.name.getText(ast)==="document");assert.equal(documentProp.initializer.expression.getText(ast),"tooltipDocument");
+  }
+  const pageReaderProps=[];(function visit(node){if(ts.isJsxAttribute(node)&&["onReadItemTooltip","onReadEquipmentItemTooltip"].includes(node.name.getText(parityPageAst)))pageReaderProps.push(node);ts.forEachChild(node,visit);})(parityPageAst);
+  for(const [prop,reader]of [["onReadItemTooltip","ownedItemTooltipReaders.readItem"],["onReadEquipmentItemTooltip","ownedItemTooltipReaders.readEquipment"]]){
+    const matches=pageReaderProps.filter(node=>node.name.getText(parityPageAst)===prop&&node.initializer?.expression?.getText(parityPageAst)===reader);assert.equal(matches.length,1,prop+" actual Page binding");
+  }
+  assert.ok(ts.isArrayLiteralExpression(ownedTooltipMemo.arguments[1]));const dependencies=ownedTooltipMemo.arguments[1].elements.map(node=>node.getText(parityPageAst));
+  for(const dep of ["presentationWorld.inventoryItems","presentationWorld.beltItems","presentationWorld.equipmentItems","ownedTooltipOwner?.socket","ownedTooltipOwner?.connectionGeneration","ownedTooltipOwner?.sessionGeneration","ownedTooltipOwner?.playerObjectId","ownedTooltipOwner?.sceneRevision","ownedTooltipOwner?.mapFileName","ownedTooltipCore","ownedTooltipOwnerRevision","ownedTooltipBagEpoch","ownedTooltipCharacterEpoch","showInventory","activeInventoryTab","showCharacter","activeCharacterTab"])assert.ok(dependencies.includes(dep),"memo retires "+dep);
+});
+
+const ownedItemProjection=loadTypeScriptModule(new URL("../lib/world-model/item-presentation.ts",import.meta.url));
+const tooltipMovementDeclarations=new Map();
+(function visit(node){if(ts.isVariableDeclaration(node)&&["sameProjectedList","itemIdentity"].includes(node.name.getText(parityPageAst)))tooltipMovementDeclarations.set(node.name.getText(parityPageAst),"const "+node.getText(parityPageAst)+";");ts.forEachChild(node,visit);})(parityPageAst);
+assert.equal(tooltipMovementDeclarations.size,2);
+const tooltipMovementJs=ts.transpileModule([...tooltipMovementDeclarations.values()].join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+check("Actual movement snapshot item projection keeps sale value changes out of confirmed movement fast path",()=>{
+  const {sameProjectedList,itemIdentity}=new Function("projectItemPresentation",tooltipMovementJs+"\nreturn {sameProjectedList,itemIdentity};")(ownedItemProjection.projectItemPresentation);
+  const row={...heroWorldRowFixture(heroItemFixture(0,-1,3),2),sellValue:7};
+  assert.equal(sameProjectedList([row],[{...row,sellValue:8}],itemIdentity),false,"same UID/source with different unit sale value must replace tooltip source");
+  assert.equal(sameProjectedList([{...row,sellValue:undefined}],[{...row,sellValue:0}],itemIdentity),true,"omitted and zero retain the actual projection default");
+  assert.equal(sameProjectedList([row],[{...row,position:[8,9]}],itemIdentity),true,"unchanged price and item metadata survive unrelated movement");
+  assert.equal(sameProjectedList([row],[{...row,tooltipSource:{...row.tooltipSource,userItem:{...row.tooltipSource.userItem,current_dura:9}}}],itemIdentity),false);
+  const snapshots=[];(function visit(node){if(ts.isVariableDeclaration(node)&&node.name.getText(parityPageAst)==="staticStateMatches")snapshots.push(node);ts.forEachChild(node,visit);})(parityPageAst);
+  assert.equal(snapshots.length,1);assert.ok(ts.isBinaryExpression(snapshots[0].initializer));
+  const comparisonCalls=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="sameProjectedList")comparisonCalls.push(node.arguments.map(arg=>arg.getText(parityPageAst)));ts.forEachChild(node,visit);})(snapshots[0]);
+  for(const source of ["inventoryItems","beltItems","storageItems"])assert.ok(comparisonCalls.some(args=>args[0]==="snapshot."+source&&args[1]==="currentWorldFast."+source&&args[2]==="itemIdentity"),source+" actual fast-path predicate");
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

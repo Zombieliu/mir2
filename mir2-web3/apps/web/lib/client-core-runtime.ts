@@ -1,6 +1,7 @@
+import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
-import { createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote,
+import { createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip,
   type PresentationWasmModule, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
   type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote } from "./client-presentation-runtime";
 export type { ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
@@ -154,6 +155,7 @@ export type ClientCoreRuntime = {
   readCashPreviewLayers(input: CashPreviewInput): CashPreviewLayerDocument | null;
   turnCashPreview(direction: number, right: boolean): number | null;
   readNpcRepairQuote(input: NpcRepairQuoteInput): NpcRepairQuote | null;
+  readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number): CrystalTooltipDocument | null;
   resolveQuestAction(input: QuestActionInput): QuestActionDecision;
   /** Additive capability; old Quest-only bundles throw only when requested. */
   createEquipmentPendingLedger(): EquipmentPendingRuntime;
@@ -498,6 +500,9 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       readCashPreviewLayers(input: CashPreviewInput) { return readSharedCashPreview(presentation, input); },
       turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(presentation, direction, right); },
       readNpcRepairQuote(input: NpcRepairQuoteInput) { return readSharedNpcRepairQuote(presentation, input); },
+      readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number) {
+        return readSharedPresentationItemTooltip(presentation, item, player, nowMs);
+      },
       getMailSendSlot():MailSendSlotRuntime {return mailSendSlot??=createMailSendSlotRuntime(module);},
       getNpcGoldBuyAttemptSlot():NpcGoldBuyAttemptSlotRuntime {return persistentNpcGoldBuyAttemptSlot(module,document,manifest.version);},
       resolveQuestAction(input: QuestActionInput): QuestActionDecision {

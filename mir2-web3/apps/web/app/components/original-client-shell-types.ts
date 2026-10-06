@@ -19,6 +19,8 @@ import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
 import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import type {
   DisplayEntity,
+  DisplayItem,
+  DisplayEquipmentItem,
   DisplayLogLine,
   DisplayNpcShopService,
   DisplayWorld,
@@ -309,6 +311,8 @@ export type OriginalClientShellProps = {
   onCreateCharacter: (draft: CreateCharacterDraft) => void;
   onDeleteCharacter: () => void;
   onUseItem: (item: ItemActionRef) => void;
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
+  onReadEquipmentItemTooltip?: (item: Readonly<DisplayEquipmentItem>) => CrystalTooltipDocument | null;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
   onRemoveItem: (item: EquipmentActionRef) => void;
