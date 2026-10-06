@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 pub mod equipment_pending;
+pub mod auth_ui;
 pub mod mail_compose;
 pub mod mail_parcel;
 pub mod npc_gold_buy_attempt;

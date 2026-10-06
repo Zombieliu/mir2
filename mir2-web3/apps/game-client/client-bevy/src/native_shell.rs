@@ -11,6 +11,15 @@ use std::collections::VecDeque;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::Resource;
+use mir2_client_core::auth_ui::{
+    safe_key_edit, validate_change_password_fields as validate_shared_change_password_fields,
+    parse_registration_birth_date as parse_shared_registration_birth_date,
+    validate_registration_fields as validate_shared_registration_fields,
+    valid_registration_email as shared_valid_registration_email, AuthUiError,
+};
+pub use mir2_client_core::auth_ui::{
+    safe_key_permutation, SafeKeyState, SAFE_KEY_ALPHABET, SAFE_KEY_DEFAULT_SEED,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NativeShellScreen {
@@ -213,83 +222,11 @@ impl ChangePasswordForm {
     }
 }
 
-const MIN_ACCOUNT_ID_LENGTH: usize = 3;
-const MAX_ACCOUNT_ID_LENGTH: usize = 15;
-const MIN_PASSWORD_LENGTH: usize = 5;
-const MAX_PASSWORD_LENGTH: usize = 15;
-const SAFE_KEY_DEFAULT_SEED: u64 = 0x4D49_5232_5341_4645;
-const SAFE_KEY_ALPHABET: [char; 36] = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-    'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-];
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SafeKeyState {
-    pub keys: Vec<char>,
-    seed: u64,
-}
-
-impl Default for SafeKeyState {
-    fn default() -> Self {
-        Self::from_seed(SAFE_KEY_DEFAULT_SEED)
-    }
-}
-
-impl SafeKeyState {
-    pub fn from_seed(seed: u64) -> Self {
-        Self {
-            keys: safe_key_permutation(seed),
-            seed,
-        }
-    }
-
-    fn reshuffle(&mut self) {
-        self.seed = next_safe_key_seed(self.seed);
-        self.keys = safe_key_permutation(self.seed);
-    }
-}
-
-pub fn safe_key_permutation(seed: u64) -> Vec<char> {
-    let mut keys = SAFE_KEY_ALPHABET.to_vec();
-    let mut state = if seed == 0 {
-        SAFE_KEY_DEFAULT_SEED
-    } else {
-        seed
-    };
-
-    for i in (1..keys.len()).rev() {
-        state = splitmix64(state);
-        let j = (state % (i as u64 + 1)) as usize;
-        keys.swap(i, j);
-    }
-    keys
-}
-
-fn splitmix64(mut state: u64) -> u64 {
-    state = state.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    let mut z = state;
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^ (z >> 31)
-}
-
-fn next_safe_key_seed(seed: u64) -> u64 {
-    splitmix64(seed)
-}
-
 fn random_safe_key_seed() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_nanos() as u64)
         .unwrap_or(SAFE_KEY_DEFAULT_SEED)
-}
-
-fn valid_alphanumeric(value: &str, min: usize, max: usize) -> bool {
-    let length = value.chars().count();
-    (min..=max).contains(&length)
-        && value
-            .chars()
-            .all(|character| character.is_ascii_alphanumeric())
 }
 
 pub fn validate_change_password_fields(
@@ -298,158 +235,36 @@ pub fn validate_change_password_fields(
     new_password: &str,
     confirm_password: &str,
 ) -> Result<(), &'static str> {
-    if !valid_alphanumeric(account_id, MIN_ACCOUNT_ID_LENGTH, MAX_ACCOUNT_ID_LENGTH) {
-        return Err("account ID must be 3-15 alphanumeric characters");
-    }
-    if !valid_alphanumeric(old_password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("current password must be 5-15 alphanumeric characters");
-    }
-    if !valid_alphanumeric(new_password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("new password must be 5-15 alphanumeric characters");
-    }
-    if new_password != confirm_password {
-        return Err("new password confirmation does not match");
-    }
-    if !valid_alphanumeric(confirm_password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("new password confirmation must be 5-15 alphanumeric characters");
-    }
-    Ok(())
+    validate_shared_change_password_fields(
+        account_id,
+        old_password,
+        new_password,
+        confirm_password,
+    )
+    .map_err(AuthUiError::message)
 }
 
-const DOTNET_TICKS_PER_DAY: i64 = 864_000_000_000;
-
-/// Converts the documented native ISO date entry to `DateTime.ToBinary()` for
-/// an unspecified .NET date. Crystal sends zero when the optional field is
-/// empty. The local UI intentionally accepts only an unambiguous, portable
-/// `YYYY-MM-DD` form instead of guessing a Windows locale.
+/// Converts the documented native ISO date entry to unspecified .NET DateTime ticks.
 pub fn parse_registration_birth_date(value: &str) -> Result<i64, &'static str> {
-    use chrono::{Datelike, NaiveDate};
-
-    if value.is_empty() {
-        return Ok(0);
-    }
-    let bytes = value.as_bytes();
-    if bytes.len() != 10
-        || bytes[4] != b'-'
-        || bytes[7] != b'-'
-        || bytes
-            .iter()
-            .enumerate()
-            .any(|(index, byte)| index != 4 && index != 7 && !byte.is_ascii_digit())
-    {
-        return Err("birth date must use YYYY-MM-DD");
-    }
-    let date = NaiveDate::parse_from_str(value, "%Y-%m-%d")
-        .map_err(|_| "birth date must use YYYY-MM-DD")?;
-    if !(1..=9999).contains(&date.year()) {
-        return Err("birth date must use YYYY-MM-DD");
-    }
-    Ok((i64::from(date.num_days_from_ce()) - 1) * DOTNET_TICKS_PER_DAY)
+    parse_shared_registration_birth_date(value).map_err(AuthUiError::message)
 }
 
 pub(crate) fn valid_registration_email(value: &str) -> bool {
-    if value.is_empty() {
-        return true;
-    }
-
-    // This mirrors Crystal's unanchored EMailReg expression:
-    // `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`.
-    // Its server uses the same expression, so preserve its IsMatch semantics
-    // rather than inventing a stricter modern email policy.
-    let characters = value.chars().collect::<Vec<_>>();
-    (0..characters.len()).any(|start| source_email_match_from(&characters, start))
-}
-
-fn source_email_match_from(characters: &[char], start: usize) -> bool {
-    let local_ends = source_email_group_ends(characters, source_word_ends(characters, start), &['-', '+', '.']);
-    local_ends.into_iter().any(|local_end| {
-        if characters.get(local_end) != Some(&'@') {
-            return false;
-        }
-        let domain_ends = source_email_group_ends(
-            characters,
-            source_word_ends(characters, local_end + 1),
-            &['-', '.'],
-        );
-        domain_ends.into_iter().any(|domain_end| {
-            characters.get(domain_end) == Some(&'.')
-                && !source_email_group_ends(
-                    characters,
-                    source_word_ends(characters, domain_end + 1),
-                    &['-', '.'],
-                )
-                .is_empty()
-        })
-    })
-}
-
-fn source_word_ends(characters: &[char], start: usize) -> Vec<usize> {
-    let mut ends = Vec::new();
-    let mut end = start;
-    while characters
-        .get(end)
-        .is_some_and(|character| character.is_alphanumeric() || *character == '_')
-    {
-        end += 1;
-        ends.push(end);
-    }
-    ends
-}
-
-fn source_email_group_ends(
-    characters: &[char],
-    initial_ends: Vec<usize>,
-    separators: &[char],
-) -> Vec<usize> {
-    let mut ends = initial_ends;
-    let mut next_index = 0;
-    while next_index < ends.len() {
-        let end = ends[next_index];
-        if characters
-            .get(end)
-            .is_some_and(|character| separators.contains(character))
-        {
-            for next_end in source_word_ends(characters, end + 1) {
-                if !ends.contains(&next_end) {
-                    ends.push(next_end);
-                }
-            }
-        }
-        next_index += 1;
-    }
-    ends
+    shared_valid_registration_email(value)
 }
 
 pub fn validate_registration_fields(form: &RegistrationForm) -> Result<i64, &'static str> {
-    if !valid_alphanumeric(&form.account_id, MIN_ACCOUNT_ID_LENGTH, MAX_ACCOUNT_ID_LENGTH) {
-        return Err("account ID must be 3-15 alphanumeric characters");
-    }
-    if !valid_alphanumeric(&form.password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("password must be 5-15 alphanumeric characters");
-    }
-    if form.password != form.confirm_password {
-        return Err("password confirmation does not match");
-    }
-    if !valid_alphanumeric(
+    validate_shared_registration_fields(
+        &form.account_id,
+        &form.password,
         &form.confirm_password,
-        MIN_PASSWORD_LENGTH,
-        MAX_PASSWORD_LENGTH,
-    ) {
-        return Err("password confirmation must be 5-15 alphanumeric characters");
-    }
-    if form.user_name.chars().count() > 20 {
-        return Err("user name must be at most 20 characters");
-    }
-    if form.secret_question.chars().count() > 30 {
-        return Err("secret question must be at most 30 characters");
-    }
-    if form.secret_answer.chars().count() > 30 {
-        return Err("secret answer must be at most 30 characters");
-    }
-    if form.email_address.chars().count() > 50 || !valid_registration_email(&form.email_address) {
-        return Err("email address is not acceptable");
-    }
-    parse_registration_birth_date(&form.birth_date)
+        &form.user_name,
+        &form.birth_date,
+        &form.secret_question,
+        &form.secret_answer,
+        &form.email_address,
+    )
+    .map_err(AuthUiError::message)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1174,14 +989,20 @@ impl NativeShellModel {
                 }
                 match self.login.focus {
                     LoginFocus::Account => {
-                        if self.login.account.chars().count() < 24 {
-                            self.login.account.push(key.to_ascii_lowercase());
-                        }
+                        self.login.account = safe_key_edit(
+                            &self.login.account,
+                            &key.to_string(),
+                            true,
+                            false,
+                        );
                     }
                     LoginFocus::Password => {
-                        if self.login.password.chars().count() < 32 {
-                            self.login.password.push(key.to_ascii_lowercase());
-                        }
+                        self.login.password = safe_key_edit(
+                            &self.login.password,
+                            &key.to_string(),
+                            false,
+                            false,
+                        );
                     }
                     LoginFocus::LoginButton | LoginFocus::NewAccountButton => {
                         self.login.focus = LoginFocus::Account;
@@ -1193,10 +1014,10 @@ impl NativeShellModel {
             (NativeShellScreen::SafeKey, NativeUiIntent::SafeKeyDelete) => {
                 match self.login.focus {
                     LoginFocus::Account => {
-                        self.login.account.pop();
+                        self.login.account = safe_key_edit(&self.login.account, "", true, true);
                     }
                     LoginFocus::Password => {
-                        self.login.password.pop();
+                        self.login.password = safe_key_edit(&self.login.password, "", false, true);
                     }
                     LoginFocus::LoginButton | LoginFocus::NewAccountButton => {
                         self.login.focus = LoginFocus::Account;

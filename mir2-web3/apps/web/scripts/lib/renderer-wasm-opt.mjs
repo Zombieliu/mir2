@@ -56,11 +56,13 @@ export function assertClientCoreStagingRoot(stagingRoot, temporaryRoot) {
 // These profiles are private and fixed. A caller cannot select different
 // basenames, limits, arguments or a cleanup prefix through its options.
 const RENDERER_PROFILE = Object.freeze({ label: "renderer", subject: "Renderer",
+  optimizationFlag: "-O1",
   wasmName: "mir2_bevy_runtime_bg.wasm", jsName: "mir2_bevy_runtime.js",
   temporaryPrefix: ".mir2-bevy-opt-", temporaryPattern: /^\.mir2-bevy-opt-\d+-[a-f0-9]{12}\.wasm$/,
   resolveConfig: tool => resolveRendererWasmOptConfig({ MIR2_BEVY_WASM_OPT_BIN: tool?.bin, MIR2_BEVY_WASM_OPT_SHA256: tool?.sha256 }),
   assertBudget: assertRendererReleaseBudget });
 const CLIENT_CORE_PROFILE = Object.freeze({ label: "client-core", subject: "Client-core",
+  optimizationFlag: "-Oz",
   wasmName: "mir2_platform_web_bg.wasm", jsName: "mir2_platform_web.js",
   temporaryPrefix: ".mir2-client-core-opt-", temporaryPattern: /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/,
   resolveConfig: tool => resolveClientCoreWasmOptConfig({ MIR2_CLIENT_CORE_WASM_OPT_BIN: tool?.bin, MIR2_CLIENT_CORE_WASM_OPT_SHA256: tool?.sha256 }),
@@ -234,7 +236,7 @@ function optimizeReleaseWasm(profile, { wasmPath, jsPath, stagingRoot, toolConfi
     const version = runPinned(["--version"], "version");
     if (!/^wasm-opt version 131(?:[ \t].*)?$/.test(version.stdout.trim())) throw new Error("Expected Binaryen wasm-opt version131");
     assertRendererOutputAbsent(output);
-    const optimization = runPinned([input, "-O1", "--strip-debug", "-o", output], "optimization");
+    const optimization = runPinned([input, profile.optimizationFlag, "--strip-debug", "-o", output], "optimization");
     const optimizedBytes = regularBytes(output);
     const optimizedMetadata = moduleMetadata(optimizedBytes, "Optimized " + label);
     if (JSON.stringify(optimizedMetadata) !== JSON.stringify(originalMetadata)) {

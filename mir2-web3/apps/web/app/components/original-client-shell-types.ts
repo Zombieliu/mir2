@@ -10,7 +10,7 @@ import type { CrystalKeyBinding, PlayerUiPreferences } from "../../lib/player-ui
 import type { CrystalWindowShortcut } from "../../lib/crystal-shortcut-actions";
 import type { SkillBarsProps, SkillBarLease } from "./original-client-skill-bars";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
-import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import type { SuiWalletSummary, LoginAuthControls } from "../../lib/client-login-runtime";
 import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
 import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
@@ -252,6 +252,7 @@ export type OriginalClientShellProps = {
   chatMessage: string;
   loginBusy: boolean;
   loginError: string | null;
+  loginAuth: LoginAuthControls;
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheWalletUrl: string;

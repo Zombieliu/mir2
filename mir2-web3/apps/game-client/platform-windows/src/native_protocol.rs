@@ -1107,8 +1107,9 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
                     .and_then(Value::as_str)
                     .map(str::to_owned),
                 expiry: payload
-                    .get("expiry")
+                    .get("expiryBinaryDatetime")
                     .cloned()
+                    .or_else(|| payload.get("expiry").cloned())
                     .or_else(|| payload.get("expiryDate").cloned()),
                 payload,
             },
@@ -2252,6 +2253,16 @@ mod tests {
                 assert_eq!(result.result, Some(5));
             }
             other => panic!("expected change password result, got: {other:?}"),
+        }
+
+        let canonical = parse_inbound_event(
+            r#"{"type":"packet","packet":"ChangePasswordBanned","payload":{"reason":"manual review","expiryBinaryDatetime":630822816000000001}}"#,
+        ).expect("parse canonical gateway expiry without floating-point conversion");
+        match canonical {
+            InboundEvent::Packet(PacketEvent::ChangePasswordBanned(banned)) => {
+                assert_eq!(banned.expiry.as_ref().and_then(Value::as_i64), Some(630822816000000001));
+            }
+            other => panic!("expected canonical change password banned result, got: {other:?}"),
         }
 
         let banned = parse_inbound_event(

@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 pub mod clock;
+pub mod auth_ui;
 pub mod equipment_pending;
 pub mod intent;
 pub mod interpolation;

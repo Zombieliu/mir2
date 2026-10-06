@@ -41,10 +41,10 @@ function fixture(t) {
   return { root, stagingRoot, packageDir, wasmPath, jsPath, bin, canonical, sourceEnv: {},
     toolConfig: { bin, sha256: sha(fs.readFileSync(bin)) } };
 }
-function runner(bytes = EMPTY, onOptimize = null) {
+function runner(bytes = EMPTY, onOptimize = null, optimizationFlag = "-O1") {
   return (bin, args, options) => {
     if (args.length === 1 && args[0] === "--version") return ok("wasm-opt version 131 (version_131)\n");
-    assert.equal(args[1], "-O1"); assert.equal(args[2], "--strip-debug"); assert.equal(args[3], "-o");
+    assert.equal(args[1], optimizationFlag); assert.equal(args[2], "--strip-debug"); assert.equal(args[3], "-o");
     fs.writeFileSync(args[4], bytes, { flag: "wx" });
     return onOptimize ? onOptimize(bin, args, options) : ok();
   };
@@ -98,7 +98,7 @@ test("renderer optimizer refuses version command status signal and error failure
 
 test("renderer optimization uses only fixed conservative arguments and bounded hidden child options", (t) => {
   const f = fixture(t), calls = [], injected = runner();
-  const result = optimizeRendererReleaseWasm({ ...f, sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "forbidden", PATH: "untrusted", BINARYEN_CORES: "9" },
+  const result = optimizeRendererReleaseWasm({ ...f, optimizationFlag: "-Oz", sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "forbidden", PATH: "untrusted", BINARYEN_CORES: "9" },
     run: (bin, args, options) => { calls.push({ bin, args, options }); return injected(bin, args, options); } });
   assert.equal(calls.length, 2);
   assert.equal(calls[0].bin, f.bin); assert.deepEqual(calls[0].args, ["--version"]);
@@ -363,6 +363,9 @@ test("renderer diagnostic formatter preserves nested tool failures without seria
 
 // Core uses the same private lifecycle machinery with a fixed pair/profile;
 // these runners write only owned test fixtures and never execute a real tool.
+function coreRunner(bytes = EMPTY, onOptimize = null) {
+  return runner(bytes, onOptimize, "-Oz");
+}
 function coreFixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mir2-core-opt-test-"));
   const stagingRoot = fs.mkdtempSync(path.join(root, "mir2-client-core-")), packageDir = stagingRoot;
@@ -415,12 +418,12 @@ test("Core budget measures whole actual pair and never applies the larger render
   coreUnchanged(f);
 });
 
-test("Core optimizer uses fixed131 O1 strip-debug hidden single-core commands and pins final actual bytes", (t) => {
-  const f = coreFixture(t), calls = [], injected = runner();
-  const result = optimizeClientCoreReleaseWasm({ ...f, sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "not-forwarded", PATH: "untrusted", BINARYEN_CORES: "9" },
+test("Core optimizer uses fixed131 Oz strip-debug hidden single-core commands and pins final actual bytes", (t) => {
+  const f = coreFixture(t), calls = [], injected = coreRunner();
+  const result = optimizeClientCoreReleaseWasm({ ...f, optimizationFlag: "-O1", sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "not-forwarded", PATH: "untrusted", BINARYEN_CORES: "9" },
     run: (bin, args, options) => { calls.push({ bin, args, options }); return injected(bin, args, options); } });
   assert.equal(calls.length, 2); assert.deepEqual(calls[0].args, ["--version"]);
-  assert.deepEqual(calls[1].args.slice(0, 4), [f.wasmPath, "-O1", "--strip-debug", "-o"]);
+  assert.deepEqual(calls[1].args.slice(0, 4), [f.wasmPath, "-Oz", "--strip-debug", "-o"]);
   assert.match(path.basename(calls[1].args[4]), /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/);
   assert.equal(path.dirname(calls[1].args[4]), f.stagingRoot);
   for (const call of calls) {
@@ -453,7 +456,7 @@ test("Core version and optimization failures never replace staged input or a pub
     { ...ok(), status: 1 }, { ...ok(), signal: "SIGTERM" },
     { ...ok(), status: null, error: Object.assign(Error("controlled timeout"), { code: "ETIMEDOUT" }), stderr: "controlled stderr" },
   ]) {
-    const f = coreFixture(t), optimize = runner(EMPTY, () => failure);
+    const f = coreFixture(t), optimize = coreRunner(EMPTY, () => failure);
     assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: (bin, args, options) => {
       if (stage === "version") return failure;
       return optimize(bin, args, options);
@@ -465,7 +468,7 @@ test("Core version and optimization failures never replace staged input or a pub
 test("Core command postpins detect version drift before optimization and optimization drift before rename", (t) => {
   for (const stage of ["version", "optimization"]) for (const key of ["bin", "wasmPath", "jsPath"]) {
     const f = coreFixture(t), calls = [];
-    const injected = runner(EMPTY, () => { fs.writeFileSync(f[key], key === "wasmPath" ? NAMED : "drift"); return ok(); });
+    const injected = coreRunner(EMPTY, () => { fs.writeFileSync(f[key], key === "wasmPath" ? NAMED : "drift"); return ok(); });
     assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: (bin, args, options) => {
       calls.push(args);
       if (stage === "version") { fs.writeFileSync(f[key], key === "wasmPath" ? NAMED : "drift"); return ok("wasm-opt version 131\n"); }
@@ -484,12 +487,12 @@ test("Core refuses metadata drift debugging names invalid output and fixed-cap o
   assert.equal(atWasmCap.length, 262144);
   for (const output of [IMPORTED, EXPORTED, NAMED, Buffer.from("not wasm"), atWasmCap]) {
     const f = coreFixture(t);
-    if (output === atWasmCap) assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: runner(output) }), /wasmBytes/);
-    else assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: runner(output) }));
+    if (output === atWasmCap) assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: coreRunner(output) }), /wasmBytes/);
+    else assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: coreRunner(output) }));
     coreUnchanged(f);
   }
   const overJs = coreFixture(t); fs.writeFileSync(overJs.jsPath, Buffer.alloc(204801));
-  assert.throws(() => optimizeClientCoreReleaseWasm({ ...overJs, run: runner() }), /jsBytes/); coreUnchanged(overJs);
+  assert.throws(() => optimizeClientCoreReleaseWasm({ ...overJs, run: coreRunner() }), /jsBytes/); coreUnchanged(overJs);
 });
 
 test("Core and renderer wrappers cannot be broadened by caller profile or basename options", (t) => {
@@ -499,7 +502,7 @@ test("Core and renderer wrappers cannot be broadened by caller profile or basena
   assert.throws(() => optimizeRendererReleaseWasm({ ...core, run }), /staged package pair/);
   assert.equal(calls, 0); coreUnchanged(core); unchanged(renderer);
   fs.writeFileSync(core.jsPath, Buffer.alloc(204801));
-  assert.throws(() => optimizeClientCoreReleaseWasm({ ...core, profile: "renderer", limits: RENDERER_RELEASE_LIMITS, run: runner() }), /jsBytes/);
+  assert.throws(() => optimizeClientCoreReleaseWasm({ ...core, profile: "renderer", limits: RENDERER_RELEASE_LIMITS, run: coreRunner() }), /jsBytes/);
   coreUnchanged(core);
 });
 

@@ -1,4 +1,83 @@
 import manifest from "./generated/client_core_runtime.json";
+import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
+
+export type AuthValidation = { ok: true; birthDateBinary?: string } |
+  { ok: false; code: number; field: string; error: string };
+export type AuthUiRuntime = {
+  validateRegistration(fields: RegistrationDraft): AuthValidation;
+  validatePassword(fields: ChangePasswordDraft): AuthValidation;
+  keys(): string; reshuffle(): string;
+  edit(value: string, key: string, account: boolean, deleting: boolean): string;
+  dispose(): void;
+};
+
+// These are UI labels for the shared Rust error codes, not local validators.
+const authErrors: ReadonlyArray<readonly [string, string]> = [
+  ["", ""], ["accountId", "account ID must be 3-15 alphanumeric characters"],
+  ["password", "password must be 5-15 alphanumeric characters"],
+  ["confirmPassword", "password confirmation does not match"],
+  ["confirmPassword", "password confirmation must be 5-15 alphanumeric characters"],
+  ["userName", "user name must be at most 20 characters"],
+  ["secretQuestion", "secret question must be at most 30 characters"],
+  ["secretAnswer", "secret answer must be at most 30 characters"],
+  ["emailAddress", "email address is not acceptable"],
+  ["birthDate", "birth date must use YYYY-MM-DD"],
+  ["oldPassword", "current password must be 5-15 alphanumeric characters"],
+  ["newPassword", "new password must be 5-15 alphanumeric characters"],
+  ["confirmPassword", "new password confirmation does not match"],
+  ["confirmPassword", "new password confirmation must be 5-15 alphanumeric characters"],
+];
+function authValidationError(code: number): AuthValidation {
+  if (!Number.isInteger(code) || code < 1 || code >= authErrors.length) {
+    throw Error("Invalid shared authentication response");
+  }
+  return { ok: false, code, field: authErrors[code][0], error: authErrors[code][1] };
+}
+function createAuthUiRuntime(module: WasmModule, seed: bigint): AuthUiRuntime {
+  if (module.auth_ui_abi_version?.() !== 1 || !module.AuthUiBridge
+    || !module.auth_ui_validate_registration || !module.auth_ui_validate_password) {
+    throw Error("Shared account controls are unavailable; reload the client");
+  }
+  const bridge = new module.AuthUiBridge(seed);
+  let disposed = false;
+  function live() { if (disposed) throw Error("Account controls were retired"); }
+  function fields(values: string[]) {
+    live();
+    if (!values.every(value => slotUtf8(value, 4096))) throw Error("Invalid account field encoding");
+  }
+  function keys(value: unknown): string {
+    if (typeof value !== "string" || value.length !== 36 || new Set(value).size !== 36
+      || !/^[A-Z0-9]+$/.test(value)) throw Error("Invalid shared keyboard response");
+    return value;
+  }
+  return {
+    validateRegistration(f) {
+      const values = [f.accountId, f.password, f.confirmPassword, f.userName,
+        f.birthDate, f.secretQuestion, f.secretAnswer, f.emailAddress];
+      fields(values);
+      const result = module.auth_ui_validate_registration!(...values as [string,string,string,string,string,string,string,string]);
+      if (/^e(?:[1-9]|1[0-3])$/.test(result)) return authValidationError(Number(result.slice(1)));
+      if (!/^(?:0|[1-9][0-9]{0,18})$/.test(result) || BigInt(result) > 3155378975999999999n) {
+        throw Error("Invalid shared birth date response");
+      }
+      return { ok: true, birthDateBinary: result };
+    },
+    validatePassword(f) {
+      fields([f.accountId, f.oldPassword, f.newPassword, f.confirmPassword]);
+      const code = module.auth_ui_validate_password!(f.accountId, f.oldPassword, f.newPassword, f.confirmPassword);
+      return code === 0 ? { ok: true } : authValidationError(code);
+    },
+    keys() { live(); return keys(bridge.keys()); },
+    reshuffle() { live(); return keys(bridge.reshuffle()); },
+    edit(value, key, account, deleting) {
+      fields([value, key]);
+      const result = bridge.edit(value, key, account, deleting);
+      if (!slotUtf8(result, 4096)) throw Error("Invalid shared keyboard edit response");
+      return result;
+    },
+    dispose() { if (!disposed) { disposed = true; bridge.free(); } },
+  };
+}
 
 export type QuestActionInput = {
   action: "accept" | "finish";
@@ -63,6 +142,8 @@ export type EquipmentPendingRuntime = {
 };
 
 export type ClientCoreRuntime = {
+  /** Optional ABI; older bundles keep their existing capabilities. */
+  createAuthUi(seed: bigint): AuthUiRuntime;
   resolveQuestAction(input: QuestActionInput): QuestActionDecision;
   /** Additive capability; old Quest-only bundles throw only when requested. */
   createEquipmentPendingLedger(): EquipmentPendingRuntime;
@@ -123,6 +204,12 @@ type WasmEquipmentPendingBridge = {
 type WasmModule = {
   default(options: { module_or_path: URL }): Promise<unknown>;
   client_core_abi_version(): number;
+  auth_ui_abi_version?: () => number;
+  auth_ui_validate_registration?: (account: string, password: string, confirm: string,
+    name: string, birthDate: string, question: string, answer: string, email: string) => string;
+  auth_ui_validate_password?: (account: string, oldPassword: string, newPassword: string, confirm: string) => number;
+  AuthUiBridge?: new (seed: bigint) => { keys(): string; reshuffle(): string;
+    edit(value: string, key: string, account: boolean, deleting: boolean): string; free(): void };
   resolve_quest_action(input: string): string;
   equipment_pending_abi_version?: () => number;
   EquipmentPendingBridge?: new () => WasmEquipmentPendingBridge;
@@ -376,6 +463,7 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
     }
     let mailSendSlot:MailSendSlotRuntime|null=null;
     return {
+      createAuthUi(seed: bigint) { return createAuthUiRuntime(module, seed); },
       getMailSendSlot():MailSendSlotRuntime {return mailSendSlot??=createMailSendSlotRuntime(module);},
       getNpcGoldBuyAttemptSlot():NpcGoldBuyAttemptSlotRuntime {return persistentNpcGoldBuyAttemptSlot(module,document,manifest.version);},
       resolveQuestAction(input: QuestActionInput): QuestActionDecision {

@@ -2,7 +2,7 @@
 
 ## Web 对齐 Windows 新 goal：任务与 Page/Shell 候选已接线（2026-10-06）
 
-Windows固定基线f72与Web父提交f1cf已细分为317条有界源码记录：103 shared、181 legacy、25 open、8共同限制；不是完整验收分母，不报整体百分比。配偶写信/密语复用既有Mail/Chat入口，新增5项回归和相邻四脚本119/119通过；诊断脚本16/16通过。Next03严格TypeScript＋13静态页、Thin05构建与静态审计退出0，独立包7,299文件 / 372,478,397 B / 0链接，原360 MiB cap余5,008,963 B。Rust Source09未改，限定承接Native09、renderer07和Core原有效输入证据。44条warning已逐条保留并做源码分类，直接导入与部分分支运行语义仍未验。实际服务/HTTP/UI/玩家流程及Pet/Gate远端覆盖未验，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix02.md) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、188 legacy、18 open、8共同限制；不是完整验收分母，不报整体百分比。F01完整注册、改密与SafeKey七条代码候选已接入共享Rust规则；Rust四目标39次执行、有限Node171/171/0 skip及严格非增量TSC通过。Source12新Core WASM252,167 B/JS24,393 B、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin独立包均已实际构建；包7,299文件/372,506,754 B/0链接，原360 MiB cap余4,980,606 B。独立源码、输入及静态产物复核零确认P0/P1。44条warning与上一包的内容和重复次数相同，运行语义及Pet/Gate远端覆盖仍未验。实际服务/HTTP/UI/账号与玩家流程、移动真机验收均未进行，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix03.md)、[认证组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/auth-source12-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 
 ## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
 

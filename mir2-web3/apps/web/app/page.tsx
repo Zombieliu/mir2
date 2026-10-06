@@ -128,7 +128,7 @@ type SocialTradeSendProof = Readonly<{owner: SocialReplyOwner; incarnation: numb
 import { projectBevyStorageModel } from "../lib/bevy-storage-model";
 import { type StorageRuntime, type StorageIntent, type StorageCommandProof } from "../lib/bevy-storage-ui";
 type EquipmentOwnerProof = SharedEquipmentOwnerProof | StorageCommandProof;
-import { loadClientCoreRuntime, type ClientCoreRuntime, type QuestActionDecision } from "../lib/client-core-runtime";
+import { loadClientCoreRuntime, type AuthUiRuntime, type ClientCoreRuntime, type QuestActionDecision } from "../lib/client-core-runtime";
 import { EquipmentSessionController, type EquipmentSessionStatus } from "../lib/equipment-session-controller";
 import {
   classifyEquipmentUse, currentEquipmentCommandItem, equipmentGatewayOperation,
@@ -220,15 +220,23 @@ import {
   requestGuestChannelSessionToken,
   requestSuiLoginToken,
   requestWalletIdentityCredential,
-  sendBootstrapSequence as sendGatewayBootstrapSequence,
-  sendNewAccountCommand as sendGatewayNewAccountCommand,
-  sendPasswordLoginCommand,
-  sendSuiLoginCommand,
+  newAccountCommand,
+  persistentPreauthGate,
+  preauthCommandKind,
+  isSensitiveGatewayCommand,
   subscribeToSuiWalletChanges,
   type ActiveSuiWalletSession,
   type SuiLoginKind,
   type SuiLoginToken,
   type SuiWalletSummary,
+  type PreauthFlightGate,
+  type PreauthProof,
+  type PreauthKind,
+  type LoginAuthState,
+  type LoginAuthControls,
+  type LoginAuthSurface,
+  type RegistrationDraft,
+  type ChangePasswordDraft,
 } from "../lib/client-login-runtime";
 import {
   channelGameplayStart,
@@ -613,11 +621,17 @@ type GatewayWorldEntity = {
   canTeleportTo?: boolean | null;
 };
 
-type PendingGatewayProtocolAction =
-  | { kind: "bootstrap" }
-  | { kind: "newAccount" }
-  | { kind: "passwordLogin" }
-  | { kind: "suiLogin"; login: SuiLoginToken };
+type PendingGatewayProtocolAction = { kind: "auth"; attempt: PreauthAttempt };
+
+type PreauthAttempt = Readonly<{ epoch: number; kind: PreauthKind;
+  command: Readonly<Record<string, unknown>>; reconnect?: boolean; bootstrap?: boolean }>;
+
+function emptyLoginAuthState(epoch: number, accountId = ""): LoginAuthState {
+  return { surface: "login", epoch, notice: null, focusField: null, safeKeys: "", safeFocus: "account",
+    registration: { accountId, password: "", confirmPassword: "", userName: "", birthDate: "",
+      secretQuestion: "", secretAnswer: "", emailAddress: "" },
+    changePassword: { accountId, oldPassword: "", newPassword: "", confirmPassword: "" } };
+}
 
 type GatewayGroundDrop = {
   objectId: number;
@@ -2332,8 +2346,8 @@ export default function HomePage() {
   const reconnectSnapshotRef = useRef<ReconnectSnapshot | null>(null);
   const reconnectStatusRef = useRef<ReconnectStatus>(createIdleReconnectStatus());
   const activeReconnectAuthRef = useRef<ReconnectAuthSnapshot | null>(null);
-  const accountIdRef = useRef("demo");
-  const passwordRef = useRef("demo");
+  const accountIdRef = useRef("");
+  const passwordRef = useRef("");
   const charactersRef = useRef<SelectCharacterEntry[]>([]);
   const selectedCharacterIndexRef = useRef(0);
   const uploadedBevyEntityAtlasKeysRef = useRef<Set<string>>(new Set());
@@ -2465,15 +2479,27 @@ export default function HomePage() {
     [],
   );
   const [logs, setLogs] = useState<UiLogLine[]>([]);
-  const [accountId, setAccountId] = useState("demo");
-  const [password, setPassword] = useState("demo");
+  const [accountId, setAccountId] = useState("");
+  const [password, setPassword] = useState("");
   const [chatMessage, setChatMessage] = useState("");
-  const [loginBusy, setLoginBusy] = useState(false);
+  const [loginBusy, setLoginBusyState] = useState(false);
+  const loginBusyRef = useRef(false);
+  function setLoginBusy(value: boolean) { loginBusyRef.current = value; setLoginBusyState(value); }
+  const [loginAuthState, setLoginAuthState] = useState(() => emptyLoginAuthState(1));
+  const loginAuthRef = useRef(loginAuthState);
+  const authCoreRef = useRef<AuthUiRuntime | null>(null);
+  const [authCoreReady, setAuthCoreReady] = useState(false);
+  const preauthGateRef = useRef<PreauthFlightGate | null>(null);
+  const authSendRef = useRef<{ proof: PreauthProof; attempt: PreauthAttempt } | null>(null);
+  const oauthIntentRef = useRef(0);
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
   const [identityProvider, setIdentityProvider] = useState<string | null>(null);
-  const [identityLinkBusy, setIdentityLinkBusy] = useState(false);
+  const [identityLinkBusy, setIdentityLinkBusyState] = useState(false);
+  const identityLinkBusyRef = useRef(false);
+  const identityLinkIntentRef = useRef(0);
+  function setIdentityLinkBusy(value: boolean) { identityLinkBusyRef.current = value; setIdentityLinkBusyState(value); }
   const [identityLinkStatus, setIdentityLinkStatus] = useState<string | null>(null);
   // Commercial identity bearer stays in React memory only. It is never written
   // to localStorage/sessionStorage, so closing or reloading the tab discards it.
@@ -2511,10 +2537,14 @@ export default function HomePage() {
     npcBuyDispatcherRef.current?.withdraw();
     questCoreRuntimeRef.current = null;
     setQuestCoreStatus("loading");
+    authCoreRef.current?.dispose(); authCoreRef.current = null; setAuthCoreReady(false);
     loadClientCoreRuntime().then((runtime) => {
       if (!active) return;
       questCoreRuntimeRef.current = runtime;
       setQuestCoreStatus("ready");
+      authCoreRef.current?.dispose();
+      try { authCoreRef.current = runtime.createAuthUi(BigInt(Date.now()) * 1_000_000n); setAuthCoreReady(true); }
+      catch { authCoreRef.current = null; setAuthCoreReady(false); }
       // Renderer changes and Quest retries must not replace a live equipment
       // ledger. If WASM arrived late, replay only this session's raw snapshot.
       equipmentControllerRef.current ??= new EquipmentSessionController(runtime);
@@ -2532,7 +2562,7 @@ export default function HomePage() {
       console.error("[mir2] shared quest client unavailable", error);
       appendLog(t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry."), "system");
     });
-    return () => { active = false; };
+    return () => { active = false; authCoreRef.current?.dispose(); authCoreRef.current = null; };
   }, [questCoreLoadAttempt]);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventoryState] = useState(false);
@@ -5947,7 +5977,7 @@ export default function HomePage() {
   }
 
   /** Every UI and compatibility command enters this session-owned send gate. */
-  function send(command: Record<string, unknown>, options?: { guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof }): boolean {
+  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof }): boolean {
     // Supported ordinary combat enters through Rust outputs with a live local proof.
     if(combatIngressRef.current?.supported()&&["attack","rangeAttack","magic","spellToggle"].includes(String(command.type)))return false;
     // Preserve the original callback/intent token through every synchronous
@@ -6028,7 +6058,7 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
@@ -6069,7 +6099,8 @@ export default function HomePage() {
       if (options?.npcBuyProof && !npcBuyDispatcher?.allows(options.npcBuyProof, command)) return false;
       if (options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, command)) return false;
     }
-    lastCommandRef.current = command;
+    const diagnosticCommand = isSensitiveGatewayCommand(command) ? { type: command.type } : command;
+    lastCommandRef.current = diagnosticCommand;
     const commandNow = Date.now();
     if (isMovementPredictionBlockingCommand(command)) {
       movementPredictionBlockedUntilRef.current = Math.max(
@@ -6084,8 +6115,8 @@ export default function HomePage() {
     };
     const debugCommand = isMovementConsoleCommand(command)
       ? assignMovementConsoleSequence({ ...command, at: commandNow })
-      : { ...command, at: commandNow };
-    debugWindow.__mir2LastCommand = command;
+      : { ...diagnosticCommand, at: commandNow };
+    debugWindow.__mir2LastCommand = diagnosticCommand;
     debugWindow.__mir2CommandHistory = [debugCommand, ...(debugWindow.__mir2CommandHistory ?? [])].slice(0, 50);
     if (command.type === "startGame") {
       markMir2CacheMilestone("startGameSubmit", {
@@ -6227,6 +6258,13 @@ export default function HomePage() {
       if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof);
       return false;
     }
+    const authKind = preauthCommandKind(command);
+    if (authKind) {
+      const active = authSendRef.current;
+      if (!active || active.attempt.command !== command || active.proof !== options?.authProof
+        || (!active.attempt.reconnect && !authSurfaceCurrent(active.attempt.epoch))
+        || !preauthGate().enter(active.proof, socket, equipmentConnectionGenerationRef.current, authKind)) return false;
+    }
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
@@ -6245,7 +6283,7 @@ export default function HomePage() {
     if (isCombatResolutionCommand(command)) {
       scheduleCombatConfirmTick();
     }
-    if (!options?.quiet) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
+    if (!options?.quiet && !isSensitiveGatewayCommand(command)) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
   }
 
@@ -6709,16 +6747,12 @@ export default function HomePage() {
   }
 
   function sendGatewayReconnectSequence(snapshot: ReconnectSnapshot) {
-    if (snapshot.auth.kind === "sui") {
-      sendSuiLoginCommand(send, snapshot.auth.accountId, snapshot.auth.token);
-    } else {
-      send({ type: "clientVersion" }, { quiet: true });
-      send(
-        { type: "login", accountId: snapshot.auth.accountId, password: snapshot.auth.password },
-        { quiet: true },
-      );
+    const command = snapshot.auth.kind === "sui"
+      ? { type: "passkeyLogin", accountId: snapshot.auth.accountId, token: snapshot.auth.token }
+      : { type: "login", accountId: snapshot.auth.accountId, password: snapshot.auth.password };
+    if (sendPreauthAttempt({ epoch: loginAuthRef.current.epoch, kind: "login", command: Object.freeze(command), reconnect: true })) {
+      send({ type: "startGame", characterIndex: snapshot.characterIndex }, { quiet: true });
     }
-    send({ type: "startGame", characterIndex: snapshot.characterIndex }, { quiet: true });
   }
 
   function completeGatewayReconnect() {
@@ -6810,26 +6844,19 @@ export default function HomePage() {
       return;
     }
     switch (pendingAction?.kind) {
-      case "suiLogin":
-        sendSuiLoginCommand(send, pendingAction.login.accountId, pendingAction.login.token);
-        break;
-      case "newAccount":
-        sendGatewayNewAccountCommand(send, accountIdRef.current, passwordRef.current);
-        break;
-      case "passwordLogin":
-        sendPasswordLoginCommand(send, accountIdRef.current, passwordRef.current, {
-          quietClientVersion: true,
-        });
-        break;
-      case "bootstrap":
-        sendGatewayBootstrapSequence(send, accountIdRef.current, passwordRef.current);
+      case "auth":
+        sendPreauthAttempt(pendingAction.attempt);
         break;
     }
   }
 
-  function connectGateway(bootstrapAfterOpen = false) {
-    if (bootstrapAfterOpen) {
-      pendingGatewayProtocolActionRef.current = { kind: "bootstrap" };
+  function connectGateway(_bootstrapAfterOpen = false, freshAuthSocket = false) {
+    if (freshAuthSocket && socketRef.current) {
+      const previous = socketRef.current;
+      // Drop the old physical identity before its close callback can reconnect.
+      socketRef.current = null;
+      gatewayProtocolReadyRef.current = false;
+      previous.close();
     }
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       if (gatewayProtocolReadyRef.current) flushGatewayProtocolQueue();
@@ -6842,7 +6869,7 @@ export default function HomePage() {
     const gatewayUrl = resolveGatewayWebSocketUrl();
     markMir2CacheMilestone("gatewayConnectStart", {
       url: safeGatewayUrlForDiagnostics(gatewayUrl),
-      bootstrapAfterOpen,
+      bootstrapAfterOpen: false,
     });
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
@@ -6850,6 +6877,7 @@ export default function HomePage() {
     suspendEquipmentConnection("connectionUnavailable");
     pendingStorageRequestsRef.current.clear();
     const connectionGeneration = ++equipmentConnectionGenerationRef.current;
+    identityLinkIntentRef.current += 1; setIdentityLinkBusy(false);
     equipmentStartGameRef.current = null;
     equipmentSnapshotRef.current = null;
     socketRef.current = socket;
@@ -6884,9 +6912,10 @@ export default function HomePage() {
       clearPendingQuestActions();
       questAuthoritativeStageByIdRef.current.clear();
       questDefinitionByIdRef.current.clear();
-      if (closedManually) {
-        pendingGatewayProtocolActionRef.current = null;
-      }
+      pendingGatewayProtocolActionRef.current = null;
+      oauthIntentRef.current += 1;
+      identityLinkIntentRef.current += 1; setIdentityLinkBusy(false);
+      if (screenRef.current === "login") updateLoginAuth({ ...emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current), notice: "Connection closed. Start a new login attempt." });
       gatewayProtocolReadyRef.current = false;
       setLoginBusy(false);
       setWsState("closed");
@@ -6942,6 +6971,7 @@ export default function HomePage() {
     let cancelled = false;
     let unsubscribeIdentity = () => {};
     let identityChangeInFlight = false;
+    const bootstrapLease = captureIdentityIntent();
     void (async () => {
       try {
         const context = await initializeChannelBridge();
@@ -6953,22 +6983,23 @@ export default function HomePage() {
           identity.kind === "authenticated"
             ? await requestChannelSessionToken(identity.provider, identity.credential)
             : await requestGuestChannelSessionToken(identity.provider);
-        if (cancelled) return;
+        if (cancelled || !identityIntentCurrent(bootstrapLease)) return;
         submitIdentitySession(login, context.channel === "crazyGames" ? "crazyGames" : "itch");
         if (context.channel === "crazyGames") {
           unsubscribeIdentity = await subscribeChannelIdentityChanges(() => {
             if (identityChangeInFlight) return;
             identityChangeInFlight = true;
+            const changeLease = captureIdentityIntent();
             void (async () => {
               try {
                 const changed = await channelIdentity();
-                const currentAuth = activeReconnectAuthRef.current;
-                if (cancelled) return;
+                const currentAuth = changeLease.auth;
+                if (cancelled || !identityIntentCurrent(changeLease)) return;
                 if (changed.kind === "guest") {
                   const guestLogin = await requestGuestChannelSessionToken(changed.provider);
-                  if (!cancelled) {
-                    submitIdentitySession(guestLogin, "crazyGames");
-                    setIdentityLinkStatus("CrazyGames 已退出，已切换到游客角色归属。");
+                  if (!cancelled && identityIntentCurrent(changeLease)) {
+                    const accepted = submitIdentitySession(guestLogin, "crazyGames");
+                    setIdentityLinkStatus(accepted ? "CrazyGames 已退出，正在登录游客身份。" : "CrazyGames 身份已退出，请退出游戏后重新登录。");
                   }
                   return;
                 }
@@ -6984,7 +7015,7 @@ export default function HomePage() {
                       changed.provider,
                       changed.credential,
                     );
-                    if (cancelled) return;
+                    if (cancelled || !identityIntentCurrent(changeLease)) return;
                     setIdentityProvider(changed.provider);
                     setIdentityLinkStatus(
                       `CrazyGames 已绑定（共 ${linked.identityCount ?? 1} 个身份）`,
@@ -7001,16 +7032,12 @@ export default function HomePage() {
                   changed.provider,
                   changed.credential,
                 );
-                if (!cancelled) {
-                  submitIdentitySession(authenticatedLogin, "crazyGames");
-                  setIdentityLinkStatus("CrazyGames 身份已切换。");
+                if (!cancelled && identityIntentCurrent(changeLease)) {
+                  const accepted = submitIdentitySession(authenticatedLogin, "crazyGames");
+                  setIdentityLinkStatus(accepted ? "CrazyGames 身份已变更，正在登录。" : "CrazyGames 身份已变更，请退出游戏后重新登录。");
                 }
               } catch (error) {
-                if (!cancelled) {
-                  setIdentityLinkStatus(
-                    `CrazyGames 账号切换失败：${error instanceof Error ? error.message : String(error)}`,
-                  );
-                }
+                if (!cancelled && identityIntentCurrent(changeLease)) setIdentityLinkStatus("CrazyGames 账号切换失败，请重试。");
               } finally {
                 identityChangeInFlight = false;
               }
@@ -7018,11 +7045,8 @@ export default function HomePage() {
           });
         }
       } catch (error) {
-        if (!cancelled) {
-          setLoginBusy(false);
-          setLoginErrorKey(
-            `Channel login failed: ${error instanceof Error ? error.message : String(error)}`,
-          );
+        if (!cancelled && identityIntentCurrent(bootstrapLease)) {
+          setLoginBusy(false); setLoginErrorKey("Channel login failed. Please try again.");
         }
       }
     })();
@@ -7077,91 +7101,240 @@ export default function HomePage() {
     }
   }, [language]);
 
-  function createAccount() {
-    resetGatewayReconnectState();
-    setLoginBusy(false);
-    setLoginErrorKey(null);
+  function preauthGate() {
+    return preauthGateRef.current ??= persistentPreauthGate(document);
+  }
 
-    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
-      pendingGatewayProtocolActionRef.current = { kind: "newAccount" };
-      connectGateway();
-      return;
+  function updateLoginAuth(next: LoginAuthState) {
+    loginAuthRef.current = next;
+    setLoginAuthState(next);
+  }
+
+  function authSurfaceCurrent(epoch: number, surface?: LoginAuthSurface) {
+    return screenRef.current === "login" && document.visibilityState === "visible"
+      && loginAuthRef.current.epoch === epoch && (!surface || loginAuthRef.current.surface === surface);
+  }
+
+  function openLoginAuth(surface: Exclude<LoginAuthSurface, "login">, epoch: number) {
+    if (!authSurfaceCurrent(epoch) || loginBusyRef.current) return;
+    const next = emptyLoginAuthState(epoch + 1, accountIdRef.current);
+    next.surface = surface;
+    next.focusField = "accountId";
+    next.safeFocus = loginAuthRef.current.safeFocus;
+    if (surface === "safeKey") {
+      try {
+        authCoreRef.current?.dispose();
+        authCoreRef.current = questCoreRuntimeRef.current?.createAuthUi(BigInt(Date.now()) * 1_000_000n) ?? null;
+        if (!authCoreRef.current) return;
+        next.safeKeys = authCoreRef.current.keys();
+        next.focusField = next.safeFocus === "password" ? "password" : "accountId";
+      } catch { setAuthCoreReady(false); return; }
     }
+    updateLoginAuth(next);
+    setLoginErrorKey(null);
+  }
 
-    sendGatewayNewAccountCommand(send, accountId, password);
+  function closeLoginAuth(epoch: number) {
+    if (!authSurfaceCurrent(epoch)) return;
+    // Presentation retirement never clears an entered socket lane.
+    oauthIntentRef.current += 1;
+    if (pendingGatewayProtocolActionRef.current?.kind === "auth") pendingGatewayProtocolActionRef.current = null;
+    updateLoginAuth(emptyLoginAuthState(epoch + 1, accountIdRef.current));
+    setLoginBusy(false);
+  }
+
+  function changeRegistrationField(epoch: number, field: keyof RegistrationDraft, value: string) {
+    if (!authSurfaceCurrent(epoch, "registration") || loginBusyRef.current
+      || !Object.hasOwn(loginAuthRef.current.registration, field)) return;
+    updateLoginAuth({ ...loginAuthRef.current, focusField: null, notice: null,
+      registration: { ...loginAuthRef.current.registration, [field]: value } });
+  }
+
+  function changePasswordField(epoch: number, field: keyof ChangePasswordDraft, value: string) {
+    if (!authSurfaceCurrent(epoch, "changePassword") || loginBusyRef.current
+      || !Object.hasOwn(loginAuthRef.current.changePassword, field)) return;
+    updateLoginAuth({ ...loginAuthRef.current, focusField: null, notice: null,
+      changePassword: { ...loginAuthRef.current.changePassword, [field]: value } });
+  }
+
+  function submitRegistration(epoch: number) {
+    if (!authSurfaceCurrent(epoch, "registration") || loginBusyRef.current) return;
+    const fields = { ...loginAuthRef.current.registration };
+    try {
+      const validation = authCoreRef.current?.validateRegistration(fields);
+      if (!validation) throw Error("unavailable");
+      if (!validation.ok) {
+        updateLoginAuth({ ...loginAuthRef.current, notice: validation.error, focusField: validation.field });
+        return;
+      }
+      const command = newAccountCommand(fields, validation.birthDateBinary!);
+      resetGatewayReconnectState();
+      queuePreauthAttempt({ epoch, kind: "newAccount", command });
+    } catch {
+      updateLoginAuth({ ...loginAuthRef.current, notice: "Shared account controls are unavailable. Reload or retry loading the client." });
+    }
+  }
+
+  function submitChangePassword(epoch: number) {
+    if (!authSurfaceCurrent(epoch, "changePassword") || loginBusyRef.current) return;
+    const fields = { ...loginAuthRef.current.changePassword };
+    try {
+      const validation = authCoreRef.current?.validatePassword(fields);
+      if (!validation) throw Error("unavailable");
+      if (!validation.ok) {
+        updateLoginAuth({ ...loginAuthRef.current, notice: validation.error, focusField: validation.field });
+        return;
+      }
+      resetGatewayReconnectState();
+      queuePreauthAttempt({ epoch, kind: "changePassword", command: Object.freeze({
+        type: "changePassword", accountId: fields.accountId, currentPassword: fields.oldPassword,
+        newPassword: fields.newPassword }) });
+    } catch {
+      updateLoginAuth({ ...loginAuthRef.current, notice: "Shared account controls are unavailable. Reload or retry loading the client." });
+    }
+  }
+
+  function setSafeKeyFocus(epoch: number, field: "account" | "password") {
+    if (!authSurfaceCurrent(epoch) || loginBusyRef.current || loginAuthRef.current.safeFocus === field) return;
+    updateLoginAuth({ ...loginAuthRef.current, safeFocus: field, focusField: null });
+  }
+
+  function editSafeKey(epoch: number, key: string, deleting: boolean) {
+    if (!authSurfaceCurrent(epoch, "safeKey") || loginBusyRef.current) return;
+    const account = loginAuthRef.current.safeFocus === "account";
+    try {
+      const core = authCoreRef.current;
+      if (!core) return;
+      const next = core.edit(account ? accountIdRef.current : passwordRef.current, key, account, deleting);
+      if (account) { accountIdRef.current = next; setAccountId(next); }
+      else { passwordRef.current = next; setPassword(next); }
+      updateLoginAuth({ ...loginAuthRef.current, focusField: account ? "accountId" : "password", notice: null });
+    } catch { updateLoginAuth({ ...loginAuthRef.current, notice: "Shared keyboard is unavailable. Reload the client." }); }
+  }
+
+  function randomSafeKeys(epoch: number) {
+    if (!authSurfaceCurrent(epoch, "safeKey") || loginBusyRef.current) return;
+    try {
+      const keys = authCoreRef.current?.reshuffle();
+      if (keys) updateLoginAuth({ ...loginAuthRef.current, safeKeys: keys, notice: null });
+    } catch { updateLoginAuth({ ...loginAuthRef.current, notice: "Shared keyboard is unavailable. Reload the client." }); }
+  }
+
+  function queuePreauthAttempt(attempt: PreauthAttempt) {
+    if (!authSurfaceCurrent(attempt.epoch) || loginBusyRef.current) return false;
+    oauthIntentRef.current += 1;
+    setLoginBusy(true);
+    setLoginErrorKey(null);
+    const socket = socketRef.current;
+    if (socket?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current && !preauthGate().used(socket)) {
+      return sendPreauthAttempt(attempt);
+    }
+    pendingGatewayProtocolActionRef.current = { kind: "auth", attempt };
+    connectGateway(false, !!socket && preauthGate().used(socket));
+    return true;
+  }
+
+  function sendPreauthAttempt(attempt: PreauthAttempt) {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current
+      || (!attempt.reconnect && !authSurfaceCurrent(attempt.epoch))) {
+      setLoginBusy(false);
+      return false;
+    }
+    const proof = preauthGate().reserve(socket, equipmentConnectionGenerationRef.current, attempt.epoch, attempt.kind);
+    if (!proof) { setLoginBusy(false); return false; }
+    let sent = false;
+    authSendRef.current = { proof, attempt };
+    try {
+      if (!send({ type: "clientVersion" }, { quiet: true })) return false;
+      sent = send(attempt.command, { quiet: true, authProof: proof });
+      if (sent && attempt.bootstrap) send({ type: "startGame", characterIndex: 0 }, { quiet: true });
+      return sent;
+    } catch {
+      // The send may have entered. Keep its lane and do not replay credentials.
+      setLoginErrorKey("Authentication send outcome is unknown. Please start a new login attempt.");
+      return false;
+    } finally {
+      authSendRef.current = null;
+      if (!sent) { preauthGate().cancelUnsent(proof); setLoginBusy(false); }
+    }
+  }
+
+  function consumePreauthReply(kind: PreauthKind, source: WebSocket, generation: number) {
+    const proof = preauthGate().complete(source, generation, kind);
+    if (!proof || proof.epoch !== loginAuthRef.current.epoch) return null;
+    setLoginBusy(false);
+    return proof;
+  }
+
+  function captureIdentityIntent() {
+    return { epoch: loginAuthRef.current.epoch, intent: oauthIntentRef.current,
+      socket: socketRef.current, generation: equipmentConnectionGenerationRef.current,
+      auth: activeReconnectAuthRef.current, screen: screenRef.current };
+  }
+
+  function identityIntentCurrent(lease: ReturnType<typeof captureIdentityIntent>) {
+    return lease.epoch === loginAuthRef.current.epoch && lease.intent === oauthIntentRef.current
+      && lease.socket === socketRef.current && lease.generation === equipmentConnectionGenerationRef.current
+      && lease.auth === activeReconnectAuthRef.current && lease.screen === screenRef.current;
+  }
+
+  function createAccount() {
+    openLoginAuth("registration", loginAuthRef.current.epoch);
   }
 
   function submitPasswordLoginWithCredentials(nextAccountId: string, nextPassword: string) {
+    const epoch = loginAuthRef.current.epoch;
+    if (!authSurfaceCurrent(epoch) || !["login", "safeKey"].includes(loginAuthRef.current.surface)
+      || loginBusyRef.current) return;
     const normalizedAccountId = nextAccountId.trim();
-    if (!normalizedAccountId) {
-      return;
-    }
+    if (!normalizedAccountId || !nextPassword) return;
     resetGatewayReconnectState();
     accountIdRef.current = normalizedAccountId;
     passwordRef.current = nextPassword;
     setAccountId(normalizedAccountId);
     setPassword(nextPassword);
     setIdentityProvider(null);
-    activeReconnectAuthRef.current = {
-      kind: "password",
-      accountId: normalizedAccountId,
-      password: nextPassword,
-    };
-    setLoginBusy(true);
-    setLoginErrorKey(null);
+    activeReconnectAuthRef.current = { kind: "password", accountId: normalizedAccountId, password: nextPassword };
     markMir2CacheMilestone("loginSubmit", { method: "password" });
-
-    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
-      pendingGatewayProtocolActionRef.current = { kind: "passwordLogin" };
-      connectGateway();
-      return;
-    }
-
-    sendPasswordLoginCommand(send, normalizedAccountId, nextPassword);
+    queuePreauthAttempt({ epoch, kind: "login", command: Object.freeze({ type: "login", accountId: normalizedAccountId, password: nextPassword }) });
   }
 
   function submitLogin() {
-    submitPasswordLoginWithCredentials(accountId, password);
+    submitPasswordLoginWithCredentials(accountIdRef.current, passwordRef.current);
   }
 
   async function submitSuiLogin(kind: SuiLoginKind, walletId?: string) {
+    const epoch = loginAuthRef.current.epoch;
+    if (!authSurfaceCurrent(epoch, "login") || loginBusyRef.current) return;
+    const intent = ++oauthIntentRef.current;
+    const lease = captureIdentityIntent();
     resetGatewayReconnectState();
     setWalletPickerOpen(false);
     setLoginBusy(true);
     setLoginErrorKey(null);
-
     try {
       const login = await requestSuiLoginToken(kind, walletId);
-      submitIdentitySession(login, kind);
-    } catch (error) {
+      if (intent !== oauthIntentRef.current || !identityIntentCurrent(lease) || !authSurfaceCurrent(epoch, "login")) return;
       setLoginBusy(false);
-      const label = kind === "passkey" ? "Passkey" : "Wallet";
-      setLoginErrorKey(`${label} login failed: ${error instanceof Error ? error.message : String(error)}`);
+      submitIdentitySession(login, kind);
+    } catch {
+      if (intent !== oauthIntentRef.current || !identityIntentCurrent(lease) || !authSurfaceCurrent(epoch, "login")) return;
+      setLoginBusy(false);
+      setLoginErrorKey((kind === "passkey" ? "Passkey" : "Wallet") + " login failed. Please try again.");
     }
   }
 
-  function submitIdentitySession(
-    login: SuiLoginToken,
-    method: SuiLoginKind | "crazyGames" | "itch",
-  ) {
+  function submitIdentitySession(login: SuiLoginToken, method: SuiLoginKind | "crazyGames" | "itch") {
+    const epoch = loginAuthRef.current.epoch;
+    if (!authSurfaceCurrent(epoch, "login") || loginBusyRef.current) return false;
     resetGatewayReconnectState();
-    activeReconnectAuthRef.current = {
-      kind: "sui",
-      accountId: login.accountId,
-      token: login.token,
-      expiresAt: login.expiresAt,
-    };
+    activeReconnectAuthRef.current = { kind: "sui", accountId: login.accountId, token: login.token, expiresAt: login.expiresAt };
+    accountIdRef.current = login.accountId;
     setAccountId(login.accountId);
     setIdentityProvider(login.provider ?? method);
-    setLoginBusy(true);
-    setLoginErrorKey(null);
     markMir2CacheMilestone("loginSubmit", { method });
-    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
-      pendingGatewayProtocolActionRef.current = { kind: "suiLogin", login };
-      connectGateway();
-      return;
-    }
-    sendSuiLoginCommand(send, login.accountId, login.token);
+    return queuePreauthAttempt({ epoch, kind: "login", command: Object.freeze({ type: "passkeyLogin", accountId: login.accountId, token: login.token }) });
   }
 
   function submitPasskeyLogin() {
@@ -7179,37 +7352,28 @@ export default function HomePage() {
   }
 
   async function linkCurrentSuiIdentity(kind: SuiLoginKind, walletId?: string) {
-    const currentAuth = activeReconnectAuthRef.current;
-    if (
-      !accountId.startsWith("obl_") ||
-      currentAuth?.kind !== "sui" ||
-      currentAuth.accountId !== accountId
-    ) {
-      setIdentityLinkStatus("当前会话不能绑定身份，请重新通过渠道进入。");
+    if (identityLinkBusyRef.current) return;
+    const lease = captureIdentityIntent();
+    const currentAuth = lease.auth;
+    if (currentAuth?.kind !== "sui" || currentAuth.expiresAt <= Date.now()) {
+      setIdentityLinkStatus("当前绑定授权不可用，请重新登录。");
       return;
     }
-    if (currentAuth.expiresAt <= Date.now()) {
-      setIdentityLinkStatus("绑定授权已过期，请退出后重新进入再绑定。");
-      return;
-    }
+    const intent = ++identityLinkIntentRef.current;
     setIdentityLinkBusy(true);
     setIdentityLinkStatus(null);
     try {
-      const identity =
-        kind === "passkey"
-          ? await requestPasskeyIdentityCredential()
-          : await requestWalletIdentityCredential(walletId);
-      const linked = await linkSuiIdentity(accountId, currentAuth.token, identity);
-      setIdentityLinkStatus(
-        `${identity.provider === "suiPasskey" ? "Sui Passkey" : "Dubhe / Sui Wallet"} 已绑定（共 ${linked.identityCount ?? 1} 个身份）`,
-      );
+      const identity = kind === "passkey" ? await requestPasskeyIdentityCredential() : await requestWalletIdentityCredential(walletId);
+      if (!identityIntentCurrent(lease) || identityLinkIntentRef.current !== intent) return;
+      const linked = await linkSuiIdentity(currentAuth.accountId, currentAuth.token, identity);
+      if (!identityIntentCurrent(lease) || identityLinkIntentRef.current !== intent) return;
+      setIdentityLinkStatus((identity.provider === "suiPasskey" ? "Sui Passkey" : "Dubhe / Sui Wallet") + " 已绑定（共 " + (linked.identityCount ?? 1) + " 个身份）");
       setIdentityProvider(identity.provider);
-    } catch (error) {
-      setIdentityLinkStatus(
-        `绑定失败：${error instanceof Error ? error.message : String(error)}`,
-      );
+    } catch {
+      if (identityIntentCurrent(lease) && identityLinkIntentRef.current === intent) setIdentityLinkStatus("绑定失败，请重试。");
     } finally {
-      setIdentityLinkBusy(false);
+      // Clear only this operation's busy flag. A newer owner or operation wins.
+      if (identityLinkIntentRef.current === intent) setIdentityLinkBusy(false);
     }
   }
 
@@ -7222,18 +7386,15 @@ export default function HomePage() {
   }
 
   function quickEnterWorld() {
+    const epoch = loginAuthRef.current.epoch;
+    if (!authSurfaceCurrent(epoch, "login") || loginBusyRef.current) return;
+    const nextAccount = accountIdRef.current.trim(), nextPassword = passwordRef.current;
+    if (!nextAccount || !nextPassword) return;
     resetGatewayReconnectState();
-    activeReconnectAuthRef.current = {
-      kind: "password",
-      accountId: accountId.trim(),
-      password,
-    };
+    activeReconnectAuthRef.current = { kind: "password", accountId: nextAccount, password: nextPassword };
     markMir2CacheMilestone("quickEnterSubmit");
-    if (socketRef.current?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) {
-      connectGateway(true);
-      return;
-    }
-    sendGatewayBootstrapSequence(send, accountId, password);
+    queuePreauthAttempt({ epoch, kind: "login", bootstrap: true,
+      command: Object.freeze({ type: "login", accountId: nextAccount, password: nextPassword }) });
   }
 
   function resetClient() {
@@ -7295,6 +7456,10 @@ export default function HomePage() {
     }
     setWsState("closed");
     setScreen("login");
+    screenRef.current = "login";
+    oauthIntentRef.current += 1;
+    identityLinkIntentRef.current += 1; setIdentityLinkBusy(false);
+    updateLoginAuth(emptyLoginAuthState(loginAuthRef.current.epoch + 1));
     setLoginBusy(false);
     setLoginErrorKey(null);
     setChatMessage("");
@@ -11269,7 +11434,7 @@ export default function HomePage() {
         event.type === "worldSnapshot"
           ? summarizeDebugWorldSnapshot(event.payload as GatewayWorldSnapshot)
           : "payload" in event
-            ? event.payload ?? null
+            ? event.type === "packet" && ["Login", "LoginSuccess", "LoginBanned", "NewAccount", "ChangePassword", "ChangePasswordBanned"].includes(event.packet ?? "") ? null : event.payload ?? null
             : null,
       at: Date.now(),
     };
@@ -11314,7 +11479,7 @@ export default function HomePage() {
       return;
     }
     if (event.type === "error") {
-      const message = event.message ?? t("error.unknown");
+      const message = screenRef.current === "login" ? "Authentication request failed. Start a new attempt." : event.message ?? t("error.unknown");
       pendingGatewayProtocolActionRef.current = null;
       setLoginBusy(false);
       if (reconnectSnapshotRef.current) {
@@ -11447,42 +11612,42 @@ export default function HomePage() {
         break;
       case "KeepAlive":
         break;
-      case "NewAccount":
-        appendLog(
-          numberOrZero(payload.result) === 8
-            ? t("client.AccountCreatedSuccessfully", [], "Your account was created successfully.")
-            : t("client.AccountCreationDisabled", [], "Account creation is currently disabled."),
-          "system",
-        );
+      case "NewAccount": {
+        if (!Number.isInteger(payload.result) || Number(payload.result) < 0 || Number(payload.result) > 255
+          || !consumePreauthReply("newAccount", source, connectionGeneration)) break;
+        const result = Number(payload.result);
+        const message = result === 8 ? t("client.AccountCreatedSuccessfully", [], "Your account was created successfully.")
+          : result === 7 ? "An account with that ID already exists." : "Account creation failed (result " + result + ").";
+        if (result === 8) {
+          const createdAccount = loginAuthRef.current.registration.accountId;
+          accountIdRef.current = createdAccount;
+          setAccountId(createdAccount);
+          updateLoginAuth({ ...emptyLoginAuthState(loginAuthRef.current.epoch + 1, createdAccount), notice: message });
+        } else updateLoginAuth({ ...loginAuthRef.current, notice: message, focusField: "accountId" });
+        appendLog(message, "system");
         break;
+      }
       case "Login":
-        if (reconnectSnapshotRef.current) {
-          failGatewayReconnect();
-        }
+        if (!Number.isInteger(payload.result) || Number(payload.result) < 0 || Number(payload.result) > 255
+          || !consumePreauthReply("login", source, connectionGeneration)) break;
+        if (reconnectSnapshotRef.current) failGatewayReconnect();
         activeReconnectAuthRef.current = null;
-        setLoginBusy(false);
         setLoginErrorKey("error.loginFailedCheckAccountPassword");
         screenRef.current = "login";
         setScreen("login");
+        updateLoginAuth(emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current));
         break;
-      case "LoginBanned":
-        if (reconnectSnapshotRef.current) {
-          failGatewayReconnect();
-        }
+      case "LoginBanned": {
+        if (typeof payload.reason !== "string" || !consumePreauthReply("login", source, connectionGeneration)) break;
+        if (reconnectSnapshotRef.current) failGatewayReconnect();
         activeReconnectAuthRef.current = null;
-        setLoginBusy(false);
         setLoginErrorKey("error.loginFailedCheckAccountPassword");
-        appendLog(
-          t(
-            "ui.loginBanned",
-            [stringOrFallback(payload.reason, t("error.unknown"))],
-            `Login banned: ${stringOrFallback(payload.reason, t("error.unknown"))}.`,
-          ),
-          "system",
-        );
+        appendLog(t("ui.loginBanned", [payload.reason], "Login banned: " + payload.reason + "."), "system");
         screenRef.current = "login";
         setScreen("login");
+        updateLoginAuth(emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current));
         break;
+      }
       case "NewCharacterSuccess":
         setCharacters((current) => {
           // Drop the synthesized placeholder before appending the real character,
@@ -11519,10 +11684,12 @@ export default function HomePage() {
         appendLog(t("ui.characterDeleteFailed", [], "Character deletion failed."), "system");
         break;
       case "LoginSuccess":
+        if (!Array.isArray(payload.characters) || !consumePreauthReply("login", source, connectionGeneration)) break;
+        updateLoginAuth(emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current));
         setLoginBusy(false);
         setLoginErrorKey(null);
         {
-          const nextCharacters = parseCharacters(payload, accountId, language);
+          const nextCharacters = parseCharacters(payload, accountIdRef.current, language);
           const reconnectSnapshot = reconnectSnapshotRef.current;
           setCharacters(nextCharacters);
           if (reconnectSnapshot) {
@@ -13915,24 +14082,34 @@ export default function HomePage() {
         break;
 
       // Account security -------------------------------------------------------
-      case "ChangePassword":
-        appendLog(
-          numberOrZero(payload.result) === 1
-            ? t("ui.passwordChanged", [], "Password changed successfully.")
-            : t("ui.passwordChangeFailed", [], "Password change failed."),
-          "system",
-        );
+      case "ChangePassword": {
+        if (!Number.isInteger(payload.result) || Number(payload.result) < 0 || Number(payload.result) > 255
+          || !consumePreauthReply("changePassword", source, connectionGeneration)) break;
+        const result = Number(payload.result);
+        const messages = ["Password change is currently disabled.", "Invalid account ID.", "Invalid current password.",
+          "Invalid new password.", "Account does not exist.", "Current password is incorrect.", "Password changed successfully."];
+        const message = messages[result] ?? "Password change failed (result " + result + ").";
+        if (result === 0 || result === 6) {
+          updateLoginAuth({ ...emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current), notice: message });
+        } else {
+          const field = result === 1 || result === 4 ? "accountId" : result === 2 || result === 5 ? "oldPassword" : result === 3 ? "newPassword" : null;
+          updateLoginAuth({ ...loginAuthRef.current, notice: message, focusField: field,
+            changePassword: result === 5 ? { ...loginAuthRef.current.changePassword, oldPassword: "" } : loginAuthRef.current.changePassword });
+        }
+        appendLog(message, "system");
         break;
-      case "ChangePasswordBanned":
-        appendLog(
-          t(
-            "ui.passwordChangeBanned",
-            [stringOrFallback(payload.reason, "")],
-            "Password change is temporarily blocked.",
-          ),
-          "system",
-        );
+      }
+      case "ChangePasswordBanned": {
+        if (typeof payload.reason !== "string" || !consumePreauthReply("changePassword", source, connectionGeneration)) break;
+        const rawExpiry = payload.expiryBinaryDatetime;
+        const expiry = typeof rawExpiry === "string" && /^(?:0|[1-9][0-9]{0,18}|-[1-9][0-9]{0,18})$/.test(rawExpiry)
+          || typeof rawExpiry === "number" && Number.isSafeInteger(rawExpiry)
+          ? formatCrystalBinaryDateTime(rawExpiry, "Never") : null;
+        const message = "Password change is temporarily blocked: " + payload.reason + (expiry ? " (expiry: " + expiry + ")." : " (expiry unavailable).");
+        updateLoginAuth({ ...emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current), notice: message });
+        appendLog(message, "system");
         break;
+      }
 
       // Item rental lock / confirmation flow -----------------------------------
       case "GetRentedItems": {
@@ -17607,6 +17784,17 @@ export default function HomePage() {
     worldRef.current.currentWeight, worldRef.current.maxWeight);
 
   const currentSkillBarDocument = readCurrentSkillBarDocument();
+  const authRenderEpoch = loginAuthState.epoch;
+  const loginAuthControls: LoginAuthControls = {
+    state: loginAuthState, ready: authCoreReady, pending: loginBusy,
+    open: surface => openLoginAuth(surface, authRenderEpoch), close: () => closeLoginAuth(authRenderEpoch),
+    registrationChange: (field, value) => changeRegistrationField(authRenderEpoch, field, value),
+    passwordChange: (field, value) => changePasswordField(authRenderEpoch, field, value),
+    submitRegistration: () => submitRegistration(authRenderEpoch), submitChangePassword: () => submitChangePassword(authRenderEpoch),
+    safeFocus: field => setSafeKeyFocus(authRenderEpoch, field), safePress: key => editSafeKey(authRenderEpoch, key, false),
+    safeDelete: () => editSafeKey(authRenderEpoch, "", true), safeRandom: () => randomSafeKeys(authRenderEpoch),
+    safeEnter: () => { if (authSurfaceCurrent(authRenderEpoch, "safeKey")) submitLogin(); },
+  };
   return (
     !isClientReady ? null :
     <>
@@ -17746,6 +17934,7 @@ export default function HomePage() {
       password={password}
       chatMessage={chatMessage}
       loginBusy={loginBusy}
+      loginAuth={loginAuthControls}
       loginError={loginErrorKey ? t(loginErrorKey) : null}
       suiWallets={suiWallets}
       walletPickerOpen={walletPickerOpen}
@@ -17764,8 +17953,8 @@ export default function HomePage() {
       storagePasswordOpenVersion={storagePasswordOpenVersion}
       npcShopService={npcShopService}
       npcRepairService={npcRepairService}
-      onAccountIdChange={setAccountId}
-      onPasswordChange={setPassword}
+      onAccountIdChange={value => { if (authSurfaceCurrent(authRenderEpoch) && !loginBusyRef.current) { accountIdRef.current = value; setAccountId(value); } }}
+      onPasswordChange={value => { if (authSurfaceCurrent(authRenderEpoch) && !loginBusyRef.current) { passwordRef.current = value; setPassword(value); } }}
       onLanguageChange={setLanguage}
       onChatMessageChange={setChatMessage}
       onCreateAccount={createAccount}

@@ -281,6 +281,17 @@ export function parseGatewayMailDates(text:string):unknown {
   const parsed:unknown=parse(text,function(key,value,context){
     return gatewayItemExpiryReviver.call(this,key,gatewayCreatureTimeReviver.call(this,key,gatewayGameShopDateReviver.call(this,key,value,context),context),context);
   });
+  if(mailObject(parsed)&&parsed.type==="packet"&&parsed.packet==="ChangePasswordBanned") {
+    return parse(text,function(key,value,context){
+      if(key!=="expiryBinaryDatetime"||!mailObject(this)||typeof this.reason!=="string"
+        ||Object.keys(this).sort().join()!=="expiryBinaryDatetime,reason") return value;
+      const source=typeof value==="string"?value:typeof value==="number"
+        ? Number.isSafeInteger(value)?String(value):context?.source : undefined;
+      if(typeof source!=="string"||!/^(?:0|[1-9][0-9]{0,18}|-[1-9][0-9]{0,18})$/.test(source))return null;
+      try { const n=BigInt(source); return n>=-9223372036854775808n&&n<=9223372036854775807n?source:null; }
+      catch { return null; }
+    });
+  }
   if(!mailObject(parsed)||parsed.type!=="packet"||parsed.packet!=="ReceiveMail")return parsed;
   return parse(text,function(key,value,context){
     if((key==="dateSentBinaryDatetime"||key==="date_sent_binary_datetime")&&typeof value==="number"&&mailInt(this.mailId??this.mail_id,1,Number.MAX_SAFE_INTEGER)&&typeof context?.source==="string"&&/^-?\d{1,19}$/.test(context.source)){

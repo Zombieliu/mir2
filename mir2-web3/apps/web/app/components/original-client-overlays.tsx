@@ -19,7 +19,7 @@ import {
   SUPPORTED_LANGUAGES,
   type Mir2Language,
 } from "../../lib/localization";
-import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import type { SuiWalletSummary, LoginAuthControls, RegistrationDraft, ChangePasswordDraft } from "../../lib/client-login-runtime";
 import { crystalMainHudExperienceBarFillWidth } from "../../lib/crystal-hud-metrics";
 import { formatCrystalExperiencePercent } from "../../lib/extended-server-packets";
 import { playOriginalSoundId } from "../../lib/original-audio";
@@ -165,6 +165,7 @@ export type LoginOverlayProps = {
   password: string;
   loginBusy: boolean;
   loginError: string | null;
+  loginAuth: LoginAuthControls;
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheWalletUrl: string;
@@ -190,13 +191,13 @@ export function LoginOverlay({
   password,
   loginBusy,
   loginError,
+  loginAuth,
   suiWallets,
   walletPickerOpen,
   dubheWalletUrl,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
-  onCreateAccount,
   onSubmitLogin,
   onPasskeyLogin,
   onWalletPickerToggle,
@@ -204,12 +205,28 @@ export function LoginOverlay({
   onQuickEnter,
   onResetClient,
 }: LoginOverlayProps) {
-  const loginNotice = loginError ?? (loginBusy ? t("ui.loggingIn") : null);
+  const loginNotice = loginError ?? (loginBusy ? t("ui.loggingIn") : loginAuth.state.surface === "login" ? loginAuth.state.notice : null);
+  const authBlocked = !loginAuth.ready || loginAuth.pending || loginBusy;
+  const loginBlocked = loginAuth.pending || loginBusy || loginAuth.state.surface !== "login";
+  const overlayRef = useRef<HTMLElement>(null);
+  const authSafeFocusRef = useRef(loginAuth.state.safeFocus);
+  authSafeFocusRef.current = loginAuth.state.safeFocus;
+  const { surface: authSurface, epoch: authEpoch, focusField: authFocusField } = loginAuth.state;
+  useEffect(() => {
+    const root = overlayRef.current?.querySelector<HTMLElement>(`[data-login-auth-surface="${authSurface}"]`);
+    if (!root || !authFocusField && root.contains(document.activeElement)) return;
+    const requested = authFocusField?.split(".").at(-1);
+    const field = requested === "account" ? "accountId" : requested
+      ?? (authSurface === "safeKey" && authSafeFocusRef.current === "password" ? "password" : "accountId");
+    const target = Array.from(root.querySelectorAll<HTMLInputElement>("[data-login-auth-field]")).find(input => input.dataset.loginAuthField === field && !input.disabled)
+      ?? root.querySelector<HTMLButtonElement>("[data-login-auth-close]");
+    if (target && document.activeElement !== target) target.focus({ preventScroll: true });
+  }, [authSurface, authEpoch, authFocusField, loginAuth.ready, loginAuth.pending]);
   const [showAccountPanel, setShowAccountPanel] = useState(false);
   const dubheWalletDetected = suiWallets.some((wallet) => wallet.isDubhe);
 
   return (
-    <section className="login-overlay">
+    <section className="login-overlay" ref={overlayRef}>
       <LanguageSelector
         language={language}
         t={t}
@@ -220,9 +237,11 @@ export function LoginOverlay({
       <OriginalAudioSettingsControls t={t} compact className="login-audio-settings" />
       <form
         className="login-dialog"
+        data-login-auth-surface="login"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmitLogin();
+          if (!loginBlocked) onSubmitLogin();
         }}
       >
         <img className="login-panel" src={ORIGINAL_UI.login.dialog} alt="" draggable={false} />
@@ -232,12 +251,17 @@ export function LoginOverlay({
         <input
           className="login-input account"
           data-gamepad-initial="true"
+          data-login-auth-field="accountId"
+          aria-label={t("ui.accountId", [], "Account ID")}
+          maxLength={24}
+          disabled={loginBlocked}
+          onFocus={() => { if (loginAuth.state.safeFocus !== "account") loginAuth.safeFocus("account"); }}
           value={accountId}
           onChange={(event) => onAccountIdChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
-              onSubmitLogin();
+              if (!loginBlocked) onSubmitLogin();
             }
           }}
           autoComplete="off"
@@ -245,47 +269,55 @@ export function LoginOverlay({
         <input
           className="login-input password"
           type="password"
+          data-login-auth-field="password"
+          aria-label={t("ui.password", [], "Password")}
+          maxLength={32}
+          disabled={loginBlocked}
+          onFocus={() => { if (loginAuth.state.safeFocus !== "password") loginAuth.safeFocus("password"); }}
           value={password}
           onChange={(event) => onPasswordChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
-              onSubmitLogin();
+              if (!loginBlocked) onSubmitLogin();
             }
           }}
           autoComplete="off"
         />
         <div className="login-button ok">
-          <SpriteButton sprite={ORIGINAL_UI.login.buttons.ok} label={t("ui.login")} onClick={onSubmitLogin} />
+          <SpriteButton sprite={ORIGINAL_UI.login.buttons.ok} label={t("ui.login")} disabled={loginBlocked} onClick={onSubmitLogin} />
         </div>
         <div className="login-button account">
           <SpriteButton
             sprite={ORIGINAL_UI.login.buttons.newAccount}
             label={t("client.NewAccount", [], "New Account")}
-            onClick={onCreateAccount}
+            disabled={loginBlocked}
+            onClick={() => loginAuth.open("registration")}
           />
         </div>
         <div className="login-button password">
-          <SpriteButton sprite={ORIGINAL_UI.login.buttons.changePassword} label={t("ui.quickEnter")} onClick={onQuickEnter} />
+          <SpriteButton sprite={ORIGINAL_UI.login.buttons.changePassword} label={t("ui.changePassword", [], "Change Password")}
+            disabled={loginBlocked} onClick={() => loginAuth.open("changePassword")} />
         </div>
         <div className="login-button view">
           <SpriteButton
             sprite={ORIGINAL_UI.login.buttons.viewKey}
             label={t("ui.viewKey")}
-            onClick={() => setShowAccountPanel((current) => !current)}
+            disabled={loginBlocked}
+            onClick={() => loginAuth.open("safeKey")}
           />
         </div>
         <div className="login-button close">
           <SpriteButton sprite={ORIGINAL_UI.login.buttons.close} label={t("ui.close")} onClick={onResetClient} />
         </div>
         <div className="login-web3-actions" aria-label={t("ui.web3Login", [], "Web3 login")}>
-          <button type="button" onClick={onPasskeyLogin} disabled={loginBusy}>
+          <button type="button" onClick={onPasskeyLogin} disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}>
             {t("ui.passkeyLogin", [], "Passkey")}
           </button>
           <button
             type="button"
             onClick={onWalletPickerToggle}
-            disabled={loginBusy}
+            disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
             aria-expanded={walletPickerOpen}
             aria-controls="login-wallet-picker"
           >
@@ -303,7 +335,7 @@ export function LoginOverlay({
                     type="button"
                     className={`login-wallet-option ${wallet.isDubhe ? "dubhe" : ""}`}
                     onClick={() => onWalletLogin(wallet.id)}
-                    disabled={loginBusy}
+                    disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
                   >
                     {wallet.icon ? (
                       <img src={wallet.icon} alt="" aria-hidden="true" />
@@ -330,6 +362,19 @@ export function LoginOverlay({
           </div>
         ) : null}
       </form>
+      <div className="login-utility-actions">
+        <button type="button" disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
+          onClick={() => setShowAccountPanel(current => !current)} aria-expanded={showAccountPanel}>
+          {t("ui.accountInformation", [], "Account Info")}
+        </button>
+        <button type="button" disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"} onClick={onQuickEnter}>
+          {t("ui.quickEnter", [], "Quick Enter")}
+        </button>
+      </div>
+      {loginAuth.state.surface !== "login" ? (
+        <LoginAuthDialog t={t} loginAuth={loginAuth} blocked={authBlocked} accountId={accountId} password={password}
+          onAccountIdChange={onAccountIdChange} onPasswordChange={onPasswordChange} />
+      ) : null}
       {showAccountPanel ? (
         <div className="login-account-panel">
           <strong>{t("ui.viewKey")}</strong>
@@ -344,6 +389,148 @@ export function LoginOverlay({
         <div className="login-runtime-stamp" aria-hidden="true">{`${runtimePhase} / ${wsState} / ${runtimeMessage}`}</div>
       ) : null}
     </section>
+  );
+}
+
+const LOGIN_REGISTRATION_FIELDS: ReadonlyArray<{
+  field: keyof RegistrationDraft; label: string; labelKey: string; type?: "text" | "password" | "date"; maxLength?: number;
+}> = [
+  { field: "accountId", label: "Account ID", labelKey: "ui.accountId", maxLength: 24 },
+  { field: "password", label: "Password", labelKey: "ui.password", type: "password", maxLength: 32 },
+  { field: "confirmPassword", label: "Confirm Password", labelKey: "ui.confirmPassword", type: "password", maxLength: 32 },
+  { field: "userName", label: "Name", labelKey: "ui.userName" },
+  { field: "birthDate", label: "Date of Birth", labelKey: "ui.birthDate", type: "date" },
+  { field: "secretQuestion", label: "Secret Question", labelKey: "ui.secretQuestion" },
+  { field: "secretAnswer", label: "Secret Answer", labelKey: "ui.secretAnswer" },
+  { field: "emailAddress", label: "Email", labelKey: "ui.emailAddress" },
+];
+const LOGIN_PASSWORD_FIELDS: ReadonlyArray<{
+  field: keyof ChangePasswordDraft; label: string; labelKey: string; type?: "text" | "password"; maxLength: number;
+}> = [
+  { field: "accountId", label: "Account ID", labelKey: "ui.accountId", maxLength: 24 },
+  { field: "oldPassword", label: "Current Password", labelKey: "ui.oldPassword", type: "password", maxLength: 32 },
+  { field: "newPassword", label: "New Password", labelKey: "ui.newPassword", type: "password", maxLength: 32 },
+  { field: "confirmPassword", label: "Confirm Password", labelKey: "ui.confirmPassword", type: "password", maxLength: 32 },
+];
+
+function LoginAuthDialog({ t, loginAuth, blocked, accountId, password, onAccountIdChange, onPasswordChange }: {
+  t: TranslateFn; loginAuth: LoginAuthControls; blocked: boolean; accountId: string; password: string;
+  onAccountIdChange: (value: string) => void; onPasswordChange: (value: string) => void;
+}) {
+  const { state } = loginAuth;
+  const title = state.surface === "registration" ? t("client.NewAccount", [], "New Account")
+    : state.surface === "changePassword" ? t("ui.changePassword", [], "Change Password")
+    : t("ui.viewKey", [], "Safe Key");
+  return (
+    <div className="login-auth-backdrop">
+      <form
+        className="login-auth-panel"
+        data-login-auth-surface={state.surface}
+        data-login-auth-epoch={state.epoch}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-auth-title"
+        aria-busy={loginAuth.pending}
+        noValidate
+        autoComplete="off"
+        onSubmit={event => {
+          event.preventDefault();
+          if (blocked) return;
+          if (state.surface === "registration") loginAuth.submitRegistration();
+          else if (state.surface === "changePassword") loginAuth.submitChangePassword();
+          else if (state.surface === "safeKey") loginAuth.safeEnter();
+        }}
+        onKeyDown={event => {
+          if (event.key === "Escape") {
+            event.preventDefault(); event.stopPropagation(); loginAuth.close();
+          } else if (event.key === "Enter" && !event.nativeEvent.isComposing
+            && (state.surface === "registration" || state.surface === "changePassword")) {
+            const fields = Array.from(event.currentTarget.querySelectorAll<HTMLInputElement>("[data-login-auth-field]:not(:disabled)"));
+            const index = fields.indexOf(event.target as HTMLInputElement);
+            if (index >= 0) {
+              event.preventDefault(); event.stopPropagation();
+              const next = fields[index + 1] ?? event.currentTarget.querySelector<HTMLButtonElement>("[data-login-auth-submit]:not(:disabled)");
+              next?.focus();
+            }
+          } else if (event.key === "Tab") {
+            const fields = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("input:not(:disabled), button:not(:disabled)"));
+            const first = fields[0], last = fields.at(-1);
+            if (event.shiftKey && document.activeElement === first && last) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last && first) { event.preventDefault(); first.focus(); }
+          }
+        }}
+      >
+        <img className="login-auth-frame" src={ORIGINAL_UI.login.dialog} alt="" draggable={false} />
+        <header className="login-auth-header">
+          <h2 id="login-auth-title">{title}</h2>
+          <button type="button" className="login-auth-close" data-login-auth-close="true"
+            aria-label={t("ui.close", [], "Close")} onClick={loginAuth.close}>×</button>
+        </header>
+        {state.surface === "registration" ? (
+          <div className="login-auth-fields">
+            {LOGIN_REGISTRATION_FIELDS.map(field => (
+              <label className="login-auth-field" key={field.field}>
+                <span>{t(field.labelKey, [], field.label)}</span>
+                <input data-login-auth-field={field.field} name={field.field}
+                  type={field.type ?? "text"} inputMode={field.field === "emailAddress" ? "email" : undefined}
+                  maxLength={field.maxLength} autoComplete="off" spellCheck={false}
+                  disabled={loginAuth.pending} value={state.registration[field.field]}
+                  onChange={event => loginAuth.registrationChange(field.field, event.target.value)} />
+              </label>
+            ))}
+          </div>
+        ) : state.surface === "changePassword" ? (
+          <div className="login-auth-fields">
+            {LOGIN_PASSWORD_FIELDS.map(field => (
+              <label className="login-auth-field" key={field.field}>
+                <span>{t(field.labelKey, [], field.label)}</span>
+                <input data-login-auth-field={field.field} name={field.field} type={field.type ?? "text"}
+                  maxLength={field.maxLength} autoComplete="off" spellCheck={false}
+                  disabled={loginAuth.pending} value={state.changePassword[field.field]}
+                  onChange={event => loginAuth.passwordChange(field.field, event.target.value)} />
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="login-safe-key">
+            <div className="login-auth-fields">
+              <label className={state.safeFocus === "account" ? "login-auth-field active" : "login-auth-field"}>
+                <span>{t("ui.accountId", [], "Account ID")}</span>
+                <input data-login-auth-field="accountId" name="accountId" aria-label={t("ui.accountId", [], "Account ID")}
+                  maxLength={24} autoComplete="off" spellCheck={false} disabled={loginAuth.pending} value={accountId}
+                  onFocus={() => { if (state.safeFocus !== "account") loginAuth.safeFocus("account"); }}
+                  onChange={event => onAccountIdChange(event.target.value)} />
+              </label>
+              <label className={state.safeFocus === "password" ? "login-auth-field active" : "login-auth-field"}>
+                <span>{t("ui.password", [], "Password")}</span>
+                <input data-login-auth-field="password" name="password" aria-label={t("ui.password", [], "Password")}
+                  type="password" maxLength={32} autoComplete="off" disabled={loginAuth.pending} value={password}
+                  onFocus={() => { if (state.safeFocus !== "password") loginAuth.safeFocus("password"); }}
+                  onChange={event => onPasswordChange(event.target.value)} />
+              </label>
+            </div>
+            <div className="login-safe-key-grid" role="group" aria-label={t("ui.viewKey", [], "Safe Key")}>
+              {Array.from(state.safeKeys).map((key, index) => (
+                <button type="button" key={index + ":" + key} data-login-safe-key={key}
+                  disabled={blocked} onClick={() => loginAuth.safePress(key)}>{key}</button>
+              ))}
+            </div>
+            <div className="login-safe-key-tools">
+              <button type="button" disabled={blocked} onClick={loginAuth.safeDelete}>{t("ui.delete", [], "Delete")}</button>
+              <button type="button" disabled={blocked} onClick={loginAuth.safeRandom}>{t("ui.random", [], "Random")}</button>
+            </div>
+          </div>
+        )}
+        {state.notice ? <div className="login-auth-notice" role="status" aria-live="polite">{state.notice}</div> : null}
+        <div className="login-auth-actions">
+          <button type="submit" disabled={blocked} data-login-auth-submit={state.surface}>
+            {state.surface === "registration" ? t("client.NewAccount", [], "New Account")
+              : state.surface === "changePassword" ? t("ui.changePassword", [], "Change Password") : t("ui.enter", [], "Enter")}
+          </button>
+          <button type="button" data-login-auth-close="true" onClick={loginAuth.close}>{t("ui.close", [], "Close")}</button>
+        </div>
+      </form>
+    </div>
   );
 }
 

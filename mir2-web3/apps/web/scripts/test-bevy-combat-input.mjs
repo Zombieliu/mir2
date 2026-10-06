@@ -78,10 +78,76 @@ test('production integration captures raw before coalescing and final event proo
   'options?.mailProof?.commandType === "collectParcel"',
   'options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)',
   'socketRef.current !== socket || socket.readyState !== WebSocket.OPEN',
+  null, 'authKind',
  ]);
- const appendedClaims=statements.slice(socketIndex-7,socketIndex).filter(n=>normalized(n.expression)!=='options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)');
+
+ // The original ordered parity suffix ends at the two additive Auth nodes.
+ // Assert their exact adjacency; do not discard unknown statements.
+ const paritySocketIndex=socketIndex-2;
+ const authDeclaration=statements[paritySocketIndex],authClaim=statements[paritySocketIndex+1];
+ assert.ok(ts.isVariableStatement(authDeclaration));
+ assert.equal(authDeclaration.declarationList.flags,ts.NodeFlags.Const);
+ assert.equal(authDeclaration.declarationList.declarations.length,1);
+ assert.equal(authDeclaration.modifiers,undefined);
+ assert.equal(normalized(authDeclaration),'const authKind = preauthCommandKind(command);');
+ const authVariable=authDeclaration.declarationList.declarations[0];
+ assert.equal(authVariable.name.getText(sendAst),'authKind');assert.equal(authVariable.type,undefined);
+ assert.ok(ts.isCallExpression(authVariable.initializer));
+ assert.equal(authVariable.initializer.expression.getText(sendAst),'preauthCommandKind');
+ assert.deepEqual(authVariable.initializer.arguments.map(n=>n.getText(sendAst)),['command']);
+ assert.ok(ts.isIfStatement(authClaim));assert.equal(normalized(authClaim.expression),'authKind');
+ assert.equal(authClaim.elseStatement,undefined);assert.ok(ts.isBlock(authClaim.thenStatement));
+ const authStatements=authClaim.thenStatement.statements;
+ assert.equal(authStatements.length,2);
+ assert.equal(normalized(authStatements[0]),'const active = authSendRef.current;');
+ const authRefusal=authStatements[1];
+ assert.ok(ts.isIfStatement(authRefusal));assert.equal(authRefusal.elseStatement,undefined);
+ assert.equal(normalized(authRefusal.expression),'!active || active.attempt.command !== command || active.proof !== options?.authProof || (!active.attempt.reconnect && !authSurfaceCurrent(active.attempt.epoch)) || !preauthGate().enter(active.proof, socket, equipmentConnectionGenerationRef.current, authKind)');
+ assert.ok(ts.isReturnStatement(authRefusal.thenStatement));
+ assert.equal(authRefusal.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
+ assert.equal(statements[paritySocketIndex-1].getText(sendAst).startsWith('if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN)'),true);
+ assert.equal(statements[paritySocketIndex+2],socketTry,'Auth enter is immediately before sole socket send try');
+ // Execute the actual final Auth fragment with its actual durable gate and
+ // Page surface check. Only socket writes and document facts are memory data.
+ const authSource=readFileSync(new URL('../lib/client-login-runtime.ts',import.meta.url),'utf8');
+ const authAst=ts.createSourceFile('pure-auth.ts',authSource,ts.ScriptTarget.Latest,true);
+ const authNames=['PreauthFlightGate','preauthCommandKind','preauthGateKey','persistentPreauthGate'];
+ const authNodes=authAst.statements.filter(n=>(ts.isClassDeclaration(n)||ts.isFunctionDeclaration(n))&&authNames.includes(n.name?.text)
+  ||ts.isVariableStatement(n)&&n.declarationList.declarations.some(d=>authNames.includes(d.name.getText(authAst))));
+ assert.equal(authNodes.length,authNames.length);
+ const pageAst=ts.createSourceFile('auth-page.tsx',p,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),surfaceNodes=[];
+ function findAuth(node){if(ts.isFunctionDeclaration(node)&&['authSurfaceCurrent','preauthGate'].includes(node.name?.text))surfaceNodes.push(node);ts.forEachChild(node,findAuth);}
+ findAuth(pageAst);assert.equal(surfaceNodes.length,2);
+ const authCode=ts.transpileModule(authNodes.map(n=>n.getText(authAst).replace(/^export /,'')).join('\n')+'\n'
+  +surfaceNodes.map(n=>n.getText(pageAst)).join('\n')+'\n'
+  +'return {PreauthFlightGate,run(command,options,socket){'
+  +[authDeclaration,authClaim,actualSocketSend].map(n=>n.getText(sendAst)).join('\n')+'\nreturn true;}};',
+  {compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ const authFactory=new Function('authSendRef','preauthGateRef','equipmentConnectionGenerationRef','loginAuthRef','screenRef','document','serialized',authCode);
+ for(const change of ['none','no-active','command','active-proof','option-proof','epoch','generation','socket','hidden','screen']){
+  const calls=[],socket={send:body=>calls.push(body)},authSendRef={current:null},preauthGateRef={current:null},
+   generation={current:3},ui={current:{epoch:7,surface:'login'}},screen={current:'login'},document={visibilityState:'visible'};
+  const auth=authFactory(authSendRef,preauthGateRef,generation,ui,screen,document,'wire');
+  const gate=new auth.PreauthFlightGate();preauthGateRef.current=gate;
+  const command=Object.freeze({type:'login',accountId:'User',password:'Secret'}),proof=gate.reserve(socket,3,7,'login');
+  authSendRef.current={attempt:{epoch:7,command},proof};let options={authProof:proof},actualSocket=socket;
+  if(change==='no-active')authSendRef.current=null;
+  if(change==='command')authSendRef.current.attempt.command={...command};
+  if(change==='active-proof')authSendRef.current.proof={...proof};
+  if(change==='option-proof')options={authProof:{...proof}};
+  if(change==='epoch')ui.current={epoch:8,surface:'login'};
+  if(change==='generation')generation.current=4;
+  if(change==='socket')actualSocket={send:()=>assert.fail('foreign Auth socket')};
+  if(change==='hidden')document.visibilityState='hidden';
+  if(change==='screen')screen.current='game';
+  assert.equal(auth.run(command,options,actualSocket),change==='none',change);
+  assert.deepEqual(calls,change==='none'?['wire']:[]);
+  assert.equal(gate.pending(socket),change==='none');
+  if(change==='none'){assert.equal(auth.run(command,options,socket),false);assert.deepEqual(calls,['wire']);}
+ }
+ const appendedClaims=statements.slice(paritySocketIndex-7,paritySocketIndex).filter(n=>normalized(n.expression)!=='options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)');
  assert.equal(appendedClaims.length,6,'the original six parity/socket guards remain ordered around the additive mode claim');
- const modeClaim=statements[socketIndex-2];
+ const modeClaim=statements[paritySocketIndex-2];
  assert.equal(normalized(modeClaim.expression),'options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)');
  assert.ok(ts.isReturnStatement(modeClaim.thenStatement));assert.equal(modeClaim.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
  assert.equal(modeClaim.elseStatement,undefined);

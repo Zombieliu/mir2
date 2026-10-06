@@ -586,6 +586,7 @@ export function OriginalClientShell({
   chatMessage,
   loginBusy,
   loginError,
+  loginAuth,
   suiWallets,
   walletPickerOpen,
   dubheWalletUrl,
@@ -4457,6 +4458,7 @@ export function OriginalClientShell({
               password={password}
               loginBusy={loginBusy}
               loginError={loginError}
+              loginAuth={loginAuth}
               suiWallets={suiWallets}
               walletPickerOpen={walletPickerOpen}
               dubheWalletUrl={dubheWalletUrl}

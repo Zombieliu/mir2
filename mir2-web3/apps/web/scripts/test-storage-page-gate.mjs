@@ -32,6 +32,27 @@ function loadPure(name) {
   modules.set(name, module.exports);
   return module.exports;
 }
+
+function extractPureDeclarations(relative, requested) {
+  const url = new URL(relative, import.meta.url), source = readFileSync(url, "utf8");
+  const ast = ts.createSourceFile(fileURLToPath(url), source, ts.ScriptTarget.Latest, true);
+  const selected = new Map();
+  for (const node of ast.statements) {
+    const key = (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) ? node.name?.text
+      : ts.isVariableStatement(node) && node.declarationList.declarations.length === 1
+        ? node.declarationList.declarations[0].name.getText(ast) : null;
+    if (requested.includes(key)) { assert(!selected.has(key)); selected.set(key,node.getText(ast).replace(/^export /,"")); }
+  }
+  assert.deepEqual([...selected.keys()].sort(),requested.slice().sort(),"complete actual pure declarations");
+  const js = ts.transpileModule([...selected.values()].join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+  return new Function(js+"\nreturn {"+requested.join(",")+"};")();
+}
+// Select data-only declarations; neither passkey imports nor the Core loader/manifest run.
+const pureAuth = extractPureDeclarations("../lib/client-login-runtime.ts",["PreauthFlightGate","preauthGateKey",
+  "persistentPreauthGate","preauthCommandKind","isSensitiveGatewayCommand","newAccountCommand",
+  "sendNewAccountCommand","sendChangePasswordCommand","sendPasswordLoginCommand"]);
+const pureAuthCore = extractPureDeclarations("../lib/client-core-runtime.ts",["authErrors","authValidationError","createAuthUiRuntime","slotUtf8"]);
+
 const adapter = loadPure("storage");
 const item = (id, container, slot) => ({ uniqueId: id, authoritativeUniqueId: id, container, slot,
   key: "item-" + id, icon: 1, description: "fixture item", name: "same display name", quantity: 1,
@@ -55,7 +76,12 @@ const requestId = seq => "st-" + String(seq).padStart(16, "0");
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const pageAst = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const names = ["captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
+const names = ["emptyLoginAuthState", "setLoginBusy", "preauthGate", "updateLoginAuth", "authSurfaceCurrent",
+  "openLoginAuth", "closeLoginAuth", "changeRegistrationField", "changePasswordField", "submitRegistration", "submitChangePassword",
+  "setSafeKeyFocus", "editSafeKey", "randomSafeKeys", "queuePreauthAttempt", "sendPreauthAttempt", "consumePreauthReply",
+  "submitPasswordLoginWithCredentials", "submitLogin", "submitSuiLogin", "submitIdentitySession",
+  "quickEnterWorld", "captureIdentityIntent", "identityIntentCurrent", "linkCurrentSuiIdentity", "setIdentityLinkBusy",
+  "clearGatewayReconnectTimer", "setGatewayReconnectStatus", "resetGatewayReconnectState", "createIdleReconnectStatus", "flushGatewayProtocolQueue", "captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
   "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw",
   "itemCommandRequiresOwner", "retireEquipmentSession", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
@@ -74,10 +100,15 @@ const ackCases = [];
 const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
-  "TradeItem", "NewItemInfo", "NewRecipeInfo"];
+  "TradeItem", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword"];
+let authControlsInitializer;
 let spouseRenderInitializer, spouseRenderCallbacks;
 let gatewayGuard, snapshotStatements, snapshotRevision, socialSnapshotFriends, socialWindowRender, rosterRenderInitializer, tradeLeaseInitializer;
 function visit(node) {
+  if (ts.isVariableDeclaration(node) && node.name.getText(pageAst) === "loginAuthControls") {
+    assert.equal(authControlsInitializer, undefined, "sole actual Auth controls lease");
+    authControlsInitializer = node.initializer.getText(pageAst);
+  }
   if (ts.isVariableDeclaration(node) && node.name.getText(pageAst) === "spouseUiSource") {
     assert.equal(spouseRenderInitializer, undefined, "sole actual spouse render capture");
     spouseRenderInitializer = node.initializer.getText(pageAst);
@@ -135,7 +166,28 @@ assert.equal(ackCases.length, 1, "use the sole actual storage receipt case");
 const ackCase = ackCases[0];
 assert.equal(ackCase.parent.clauses[ackCase.parent.clauses.indexOf(ackCase) - 1].expression.text,
   "StoreItemV2", "both real receipt names share this actual case");
+
+let authCloseStatements;
+function visitAuthClose(node) {
+  if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)
+    && node.expression.expression.getText(pageAst)==="socket" && node.expression.name.text==="addEventListener"
+    && ts.isStringLiteral(node.arguments[0]) && node.arguments[0].text==="close") {
+    assert.equal(authCloseStatements,undefined,"sole actual physical-close listener");
+    const statements=node.arguments[1].body.statements;
+    assert.equal(statements[0].getText(pageAst),"if (socketRef.current !== socket) return;");
+    const start=statements.findIndex(n=>n.getText(pageAst)==="pendingGatewayProtocolActionRef.current = null;");
+    const end=statements.findIndex((n,i)=>i>start&&n.getText(pageAst)==="setLoginBusy(false);");
+    assert(start>0&&end>start);
+    const socketClear=statements.find(n=>n.getText(pageAst)==="socketRef.current = null;");
+    assert.ok(socketClear);
+    authCloseStatements=[statements[0],socketClear,...statements.slice(start,end+1)].map(n=>n.getText(pageAst)).join("\n");
+  }
+  ts.forEachChild(node,visitAuthClose);
+}
+visitAuthClose(pageAst);assert.ok(authCloseStatements);
+
 const actualFunctions = names.map(name => declarations.get(name)).join("\n")
+  + "\nfunction applyAuthSocketClose(socket) {" + authCloseStatements + "\n}"
   + '\nfunction applyStorageAck(event) { const payload=event.payload??{}; switch(event.packet) { case "StoreItemV2":\n'
   + ackCase.getText(pageAst) + "\n} }\n"
   + "function applySocialEvent(event, connectionGeneration, source) {" + gatewayGuard
@@ -147,13 +199,15 @@ const actualFunctions = names.map(name => declarations.get(name)).join("\n")
   + "\nfunction captureSocialRosterRender(showFriends, showGuild) {return " + rosterRenderInitializer + ";}"
   + "\nfunction captureSocialTradeUiLease() {return " + tradeLeaseInitializer + ";}"
   + "\nfunction captureSpouseRender(showBonds, extraWindowData) { const spouseUiSource = " + spouseRenderInitializer
-  + ";return {" + spouseRenderCallbacks.join(",") + "};}";
+  + ";return {" + spouseRenderCallbacks.join(",") + "};}"
+  + "\nfunction captureLoginAuthControls(loginAuthState, authCoreReady, loginBusy) { const authRenderEpoch = loginAuthState.epoch; return " + authControlsInitializer + ";}";
 assert.equal(socialCases.size, socialPacketNames.length);
 assert.equal(gatewayGuard, "if (connectionGeneration !== equipmentConnectionGenerationRef.current || socketRef.current !== source) return;",
   "retain the actual source socket and connection admission guard");
 assert.equal(snapshotRevision, "worldSnapshotVersionRef.current += 1;");
 assert.ok(socialSnapshotFriends && socialWindowRender && rosterRenderInitializer && tradeLeaseInitializer);
 assert.ok(spouseRenderInitializer && spouseRenderCallbacks);
+assert.ok(authControlsInitializer);
 const pageJavaScript = ts.transpileModule(actualFunctions, {
   fileName: "actual-storage-page-gates.ts",
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
@@ -175,19 +229,37 @@ const owner = { ...session, runGeneration: 0, ownerRevision: 1, owner: "react" }
 
 function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef = { current: new Map() } } = {}) {
   const sent = [], errors = [], logs = [], terminations = [], npcWithdrawals = [], npcInventoryRetirements = [];
-  let listener = null, socketThrows = false, attempts = 0, actions = 0;
+  let listener = null, socketThrows = false, socketThrowType = null, attempts = 0, actions = 0;
   const socket = { readyState: 1, send(body) {
-    attempts++; if (socketThrows) throw Error("controlled socket.send outcome unknown");
+    attempts++; if (socketThrows && (!socketThrowType || JSON.parse(body).type === socketThrowType)) throw Error("controlled socket.send outcome unknown");
     sent.push(JSON.parse(body));
   } };
   const fixtureOwner = { ...owner, ...identity };
   const liveOwner = { current: { ...fixtureOwner } };
   const scope = {
+    authStateEvents: [], authBusyEvents: [], authErrorEvents: [], authConnections: [], authMilestones: [],
+    loginAuthRef: {current: null}, authCoreRef:{current:null}, preauthGateRef:{current:null}, authSendRef:{current:null},
+    loginBusyRef:{current:false}, gatewayProtocolReadyRef:{current:true}, pendingGatewayProtocolActionRef:{current:null},
+    oauthIntentRef:{current:0}, accountIdRef:{current:"Existing"}, passwordRef:{current:"ExistingSecret"}, activeReconnectAuthRef:{current:null},
+    reconnectTimerRef:{current:null}, reconnectAttemptRef:{current:0}, reconnectSnapshotRef:{current:null}, reconnectStatusRef:{current:{mode:"idle",attempt:0,nextAttemptAt:null}},
+    setLoginAuthState: value => scope.authStateEvents.push(value), setLoginBusyState: value => scope.authBusyEvents.push(value),
+    setLoginErrorKey: value => scope.authErrorEvents.push(value), setAuthCoreReady: value => {scope.authReady=value;},
+    setAccountId: value => {scope.accountDisplay=value;}, setPassword: value => {scope.passwordDisplay=value;}, setIdentityProvider: value => {scope.identityProvider=value;},
+    setWalletPickerOpen: value => {scope.walletPicker=value;}, setReconnectStatus: value => {scope.reconnectStatus=value;},
+    connectGateway: (bootstrap, fresh) => scope.authConnections.push({bootstrap,fresh}),
+    requestSuiLoginToken: (kind, walletId) => scope.oauthProvider(kind,walletId),
+    markMir2CacheMilestone: (...args) => scope.authMilestones.push(args),
+    language:"en", failGatewayReconnect:()=>{scope.reconnectFailed=true;},
+    setScreen:value=>{scope.screenRef.current=value;},questCoreRuntimeRef:{current:null},
+    identityLinkBusyRef:{current:false},identityLinkIntentRef:{current:0},identityLinkEvents:[],
+    setIdentityLinkBusyState:value=>{scope.linkBusy=value;},setIdentityLinkStatus:value=>scope.identityLinkEvents.push(value),
+    requestPasskeyIdentityCredential:()=>scope.credentialProvider(),requestWalletIdentityCredential:()=>scope.credentialProvider(),
+    linkSuiIdentity:(...args)=>scope.linkProvider(...args),
     guildBuffAuthorityRef:{current:new (loadPure("guildBuff").GuildBuffAuthority)()},
     heroOperationsRef: {current: {pending:null}}, mailCollectBarrierRef: {current:null},
     observePreferenceRef:{current:null},observeBootstrapRef:{current:null},combatModeRawRef:{current:null},
     heroWindowEpochsRef:{current:{inventory:1,character:1,belt:1}},skillBarPointerHeldRef:{current:false},skillBarDocumentCacheRef:{current:null},
-    ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
+    ...pureAuth, ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
     projectEquipmentGatewaySnapshot: pureEquipment.projectEquipmentGatewaySnapshot,
     authoritativeItemUniqueId: pureIdentity.authoritativeItemUniqueId,
     currentEquipmentCommandItem: pureEquipment.currentEquipmentCommandItem,
@@ -266,10 +338,11 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
   scope.updateWorld = updater => { scope.worldRef.current = updater(scope.worldRef.current); };
   const keys = Object.keys(scope);
   const functions = new Function(...keys, pageJavaScript + "\nreturn {"
-    + names.join(",") + ",applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease,captureSpouseRender};")(...keys.map(key => scope[key]));
+    + names.join(",") + ",applyAuthSocketClose,applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease,captureSpouseRender,captureLoginAuthControls};")(...keys.map(key => scope[key]));
+  scope.loginAuthRef.current = functions.emptyLoginAuthState(1);
   return { ...functions, scope, sent, errors, logs, terminations, npcWithdrawals, npcInventoryRetirements, socket, liveOwner,
     get attempts() { return attempts; }, get actions() { return actions; },
-    onAction(value) { listener = value; }, throwAtSocket() { socketThrows = true; },
+    onAction(value) { listener = value; }, throwAtSocket(type = null) { socketThrows = true; socketThrowType = type; },
     renderRoster() { Object.assign(scope.socialRosterRenderSources, functions.captureSocialRosterRender(Boolean(scope.friendsOpen), Boolean(scope.guildOpen))); },
     renderTrade() { Object.assign(scope.socialTradeUiLease, functions.captureSocialTradeUiLease()); },
     get pending() { return scope.pendingStorageRequestsRef.current; },
@@ -1327,4 +1400,407 @@ test("actual Bonds spouse buttons derive disabled state from name and map and Ex
       "status and Whisper use the same authoritative spouse map");
   }
   assert.equal(page.attempts,0);
+});
+
+// Auth seams are data-only fake optional ABI responses and transport observations.
+// The validation/admission/focus/error/lease logic remains production extraction.
+const registrationDraft = () => ({accountId:"NewUser",password:"Secret9",confirmPassword:"Secret9",
+  userName:"Player",birthDate:"1970-01-01",secretQuestion:"Question",secretAnswer:"Answer",emailAddress:"u@example.com"});
+function authAbi() {
+  const calls=[], values={registration:"621355968000000000",password:0,keys:"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",edited:"SharedEdit",freed:0};
+  class AuthUiBridge {
+    constructor(seed) { calls.push(["construct",seed]); }
+    keys() {calls.push(["keys"]);return values.keys;}
+    reshuffle() {calls.push(["reshuffle"]);return values.keys.split("").reverse().join("");}
+    edit(...args) {calls.push(["edit",...args]);return values.edited;}
+    free() {values.freed++;}
+  }
+  const module={AuthUiBridge,auth_ui_abi_version:()=>1,
+    auth_ui_validate_registration:(...args)=>{calls.push(["registration",...args]);return values.registration;},
+    auth_ui_validate_password:(...args)=>{calls.push(["password",...args]);return values.password;}};
+  return {module,calls,values};
+}
+function authPage(surface="login",ready=true) {
+  const page=harness(), abi=authAbi();
+  page.scope.screenRef.current="login";
+  if(ready) page.scope.authCoreRef.current=pureAuthCore.createAuthUiRuntime(abi.module,1n);
+  page.scope.questCoreRuntimeRef.current={createAuthUi:seed=>pureAuthCore.createAuthUiRuntime(abi.module,seed)};
+  if(surface!=="login") page.openLoginAuth(surface,page.scope.loginAuthRef.current.epoch);
+  const controls=()=>page.captureLoginAuthControls(page.scope.loginAuthRef.current,ready,page.scope.loginBusyRef.current);
+  return Object.assign(page,{abi,controls});
+}
+function fillRegistration(page, draft=registrationDraft()) {
+  const controls=page.controls();
+  for(const [key,value] of Object.entries(draft)) controls.registrationChange(key,value);
+}
+function fillPassword(page) {
+  const controls=page.controls();
+  for(const [key,value] of Object.entries({accountId:"Existing",oldPassword:"Old9Secret",newPassword:"New9Secret",confirmPassword:"New9Secret"}))
+    controls.passwordChange(key,value);
+}
+function deferred() {let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
+
+test("actual auth persistent physical lane claims once and terminal never reopens the same socket",()=>{
+  const host={},gate=pureAuth.persistentPreauthGate(host),socket={},foreign={};
+  assert.equal(pureAuth.persistentPreauthGate(host),gate);
+  const proof=gate.reserve(socket,3,1,"newAccount"); assert(Object.isFrozen(proof));
+  assert.equal(gate.allows({...proof},socket,3,"newAccount"),false);
+  assert.equal(gate.allows(proof,foreign,3,"newAccount"),false);
+  assert.equal(gate.enter(proof,socket,4,"newAccount"),false);
+  assert.equal(gate.enter(proof,socket,3,"changePassword"),false);
+  assert.equal(gate.enter(proof,socket,3,"newAccount"),true);
+  assert.equal(gate.enter(proof,socket,3,"newAccount"),false);
+  assert.equal(gate.cancelUnsent(proof),false);
+  assert.equal(gate.complete(socket,4,"newAccount"),null);
+  assert.equal(gate.complete(socket,3,"changePassword"),null);
+  assert.equal(gate.complete(socket,3,"newAccount"),proof);
+  assert.equal(gate.complete(socket,3,"newAccount"),null);
+  assert.equal(gate.used(socket),true); assert.equal(gate.pending(socket),false);
+  assert.equal(gate.reserve(socket,4,2,"login"),null);
+  assert.ok(gate.reserve(foreign,4,2,"login"));
+});
+
+test("actual registration command keeps an exact DOB number token and omits confirmation and ISO draft",()=>{
+  const command=pureAuth.newAccountCommand(registrationDraft(),"621355968000000000");
+  assert(Object.isFrozen(command)); const text=JSON.stringify(command);
+  assert.equal(text.match(/"birthDateBinary":([0-9]+)/)[1],"621355968000000000");
+  assert.deepEqual(Object.keys(command).sort(),["type","accountId","password","birthDateBinary","userName","secretQuestion","secretAnswer","emailAddress"].sort());
+  assert.equal(Object.hasOwn(command,"confirmPassword"),false); assert.equal(Object.hasOwn(command,"birthDate"),false);
+  for(const binary of ["-1","01","621355968000000001","621355968000000512","3155378112000000001","9223372036854775807","NaN"])
+    assert.throws(()=>pureAuth.newAccountCommand(registrationDraft(),binary),undefined,binary);
+});
+
+test("actual Page registration queues immutable eight fields before Ready and double click sends once",()=>{
+  const page=authPage("registration");fillRegistration(page);
+  page.scope.gatewayProtocolReadyRef.current=false;
+  const old=page.controls(); old.submitRegistration(); old.submitRegistration();
+  const pending=page.scope.pendingGatewayProtocolActionRef.current;
+  assert.equal(pending.kind,"auth"); assert.equal(pending.attempt.kind,"newAccount");
+  assert(Object.isFrozen(pending.attempt.command));
+  assert.deepEqual(page.abi.calls.find(c=>c[0]==="registration").slice(1),Object.values(registrationDraft()));
+  old.registrationChange("password","Changed9"); // busy draft is immutable
+  assert.equal(page.scope.loginAuthRef.current.registration.password,"Secret9");
+  page.scope.loginAuthRef.current={...page.scope.loginAuthRef.current,registration:{...registrationDraft(),password:"Later9"}};
+  assert.equal(pending.attempt.command.password,"Secret9");
+  assert.equal(page.sent.length,0);assert.equal(page.scope.authConnections.length,1);
+  page.receive("Connected",{});
+  assert.deepEqual(page.sent.map(c=>c.type),["setLanguage","clientVersion","newAccount"]);
+  assert.equal(page.sent[2].password,"Secret9");assert.equal(page.sent[2].birthDateBinary,621355968000000000);
+  assert.equal(Object.hasOwn(page.sent[2],"confirmPassword"),false);
+  page.receive("Connected",{}); assert.equal(page.sent.filter(c=>c.type==="newAccount").length,1);
+});
+
+test("actual Page password change never carries confirmation or saves replacement secrets as reconnect credentials",()=>{
+  const page=authPage("changePassword");fillPassword(page);
+  const retained={kind:"password",accountId:"OldActor",password:"OriginalReconnect9"};
+  page.scope.activeReconnectAuthRef.current=retained;
+  page.controls().submitChangePassword();page.controls().submitChangePassword();
+  assert.deepEqual(page.sent.map(c=>c.type),["clientVersion","changePassword"]);
+  assert.deepEqual(page.sent[1],{type:"changePassword",accountId:"Existing",currentPassword:"Old9Secret",newPassword:"New9Secret"});
+  assert.equal(page.scope.activeReconnectAuthRef.current,retained);
+  assert.equal(page.scope.passwordRef.current,"ExistingSecret");
+  page.receive("ChangePassword",{result:0});
+  assert.equal(page.scope.loginAuthRef.current.surface,"login");assert.ok(page.scope.loginAuthRef.current.notice);
+  assert.equal(page.preauthGate().used(page.socket),true);
+  const registration=authPage("registration");fillRegistration(registration);
+  registration.scope.activeReconnectAuthRef.current=retained;registration.controls().submitRegistration();
+  registration.receive("NewAccount",{result:8});
+  assert.equal(registration.scope.activeReconnectAuthRef.current,retained);
+  assert.equal(registration.scope.passwordRef.current,"ExistingSecret");
+});
+
+test("actual Page closing form retains entered lane and late or foreign replies cannot display retired UI",()=>{
+  const page=authPage("registration");fillRegistration(page);
+  const controls=page.controls();controls.submitRegistration();
+  assert.equal(page.preauthGate().pending(page.socket),true);
+  controls.close();const retired=page.scope.loginAuthRef.current;
+  assert.equal(page.preauthGate().pending(page.socket),true);assert.equal(retired.surface,"login");
+  page.receive("NewAccount",{result:8},page.scope.equipmentConnectionGenerationRef.current,{});
+  assert.equal(page.scope.loginAuthRef.current,retired);
+  page.receive("NewAccount",{result:8});
+  assert.equal(page.scope.loginAuthRef.current,retired);assert.equal(page.preauthGate().used(page.socket),true);
+  assert.equal(page.preauthGate().pending(page.socket),false);
+  controls.submitRegistration();assert.equal(page.sent.filter(c=>c.type==="newAccount").length,1);
+  page.controls().open("registration");fillRegistration(page);page.controls().submitRegistration();
+  assert.deepEqual(page.scope.authConnections.at(-1),{bootstrap:false,fresh:true});
+  const oldSocket=page.socket,newSocket={readyState:1,send:body=>page.sent.push(JSON.parse(body))};
+  page.scope.socketRef.current=newSocket;page.scope.equipmentConnectionGenerationRef.current++;
+  page.scope.gatewayProtocolReadyRef.current=false;page.receive("Connected",{});
+  assert.equal(page.sent.filter(c=>c.type==="newAccount").length,2);assert.equal(page.preauthGate().used(oldSocket),true);
+});
+
+test("actual auth send final lease rejects synchronous UI and physical generation changes plus legacy proofless sends",()=>{
+  for(const mutate of [
+    p=>p.scope.document.visibilityState="hidden",
+    p=>p.scope.screenRef.current="game",
+    p=>p.controls().close(),
+    p=>p.scope.equipmentConnectionGenerationRef.current++,
+    p=>p.scope.socketRef.current={readyState:1,send:()=>assert.fail("foreign socket")},
+  ]) {
+    const page=authPage("registration");fillRegistration(page);
+    page.onAction(event=>{if(event.detail.type==="newAccount")mutate(page);});
+    page.controls().submitRegistration();
+    assert.equal(page.sent.some(c=>c.type==="newAccount"),false);
+    assert.equal(page.preauthGate().used(page.socket),false,"definitely-unsent lane can retire");
+  }
+  const page=authPage();
+  for(const command of [{type:"login",accountId:"User",password:"Secret"},{type:"passkeyLogin",accountId:"User",token:"Token"},
+    pureAuth.newAccountCommand(registrationDraft(),"621355968000000000"),{type:"changePassword",accountId:"User",currentPassword:"Old",newPassword:"New"}])
+    assert.equal(page.send(command),false);
+  assert.equal(page.attempts,0);
+});
+
+test("actual auth entered socket exception stays unknown and cannot replay on the same physical connection",()=>{
+  const page=authPage("registration");fillRegistration(page);page.throwAtSocket("newAccount");
+  page.controls().submitRegistration();
+  assert.equal(page.preauthGate().pending(page.socket),true);assert.equal(page.preauthGate().used(page.socket),true);
+  assert.equal(page.scope.authSendRef.current,null);assert.equal(page.scope.loginBusyRef.current,false);
+  assert.match(page.scope.authErrorEvents.at(-1),/outcome is unknown/);
+  const actions=page.actions;page.controls().submitRegistration();
+  assert.equal(page.actions,actions);assert.deepEqual(page.scope.authConnections.at(-1),{bootstrap:false,fresh:true});
+  assert.equal(page.sent.some(c=>c.type==="newAccount"),false);
+  assert.deepEqual(page.scope.window.__mir2CommandHistory.filter(c=>c.type==="newAccount").map(c=>Object.keys(c).sort()),[["at","type"]]);
+});
+
+test("actual optional Core wrapper delegates ordered fields errors focus and SafeKey edits without JS validation",()=>{
+  const abi=authAbi(),core=pureAuthCore.createAuthUiRuntime(abi.module,7n),draft=registrationDraft();
+  assert.deepEqual(core.validateRegistration(draft),{ok:true,birthDateBinary:"621355968000000000"});
+  assert.deepEqual(abi.calls.find(c=>c[0]==="registration"),["registration",...Object.values(draft)]);
+  abi.values.registration="e9";
+  const failure=core.validateRegistration(draft);
+  assert.deepEqual(failure,pureAuthCore.authValidationError(9));assert.equal(failure.field,"birthDate");
+  abi.values.password=12;
+  assert.deepEqual(core.validatePassword({accountId:"User",oldPassword:"Old",newPassword:"New",confirmPassword:"Mismatch"}),
+    pureAuthCore.authValidationError(12));
+  assert.equal(core.keys(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+  assert.equal(core.reshuffle(),"9876543210ZYXWVUTSRQPONMLKJIHGFEDCBA");
+  assert.equal(core.edit("Existing","Q",true,false),"SharedEdit");
+  assert.deepEqual(abi.calls.at(-1),["edit","Existing","Q",true,false]);
+  assert.throws(()=>core.validateRegistration({...draft,userName:"\ud800"}),/encoding/);
+  abi.values.registration="e14";assert.throws(()=>core.validateRegistration(draft),/birth date/);
+  abi.values.registration="3155378976000000000";assert.throws(()=>core.validateRegistration(draft),/birth date/);
+  abi.values.keys="A".repeat(36);assert.throws(()=>core.keys(),/keyboard/);
+  core.dispose();core.dispose();assert.equal(abi.values.freed,1);assert.throws(()=>core.edit("x","Q",false,false),/retired/);
+  const page=authPage("registration");fillRegistration(page);page.abi.values.registration="e9";page.controls().submitRegistration();
+  assert.equal(page.scope.loginAuthRef.current.focusField,"birthDate");assert.equal(page.sent.length,0);
+  const dom=actualAuthDom(),view=dom.render(page);view.focus();assert.equal(dom.doc.activeElement,view.fields.find(n=>n.props.name==="birthDate"));
+  let repeated=0;dom.doc.activeElement.focus=()=>repeated++;view.focus();assert.equal(repeated,0,"actual focus effect does not refocus the already active field");
+  for(const module of [{},{...abi.module,auth_ui_abi_version:()=>0},{...abi.module,auth_ui_validate_registration:undefined}])
+    assert.throws(()=>pureAuthCore.createAuthUiRuntime(module,1n),/unavailable/);
+});
+
+test("actual missing optional auth Core preserves ordinary login while disabling new form submission",()=>{
+  const page=authPage("registration",false);fillRegistration(page);page.controls().submitRegistration();assert.equal(page.sent.length,0);
+  page.controls().close();page.controls().safeEnter();assert.equal(page.sent.length,0);
+  page.submitLogin();assert.deepEqual(page.sent.map(c=>c.type),["clientVersion","login"]);
+  assert.equal(page.sent[1].accountId,"Existing");assert.equal(page.sent[1].password,"ExistingSecret");
+});
+
+test("actual quick-enter captures one immutable pre-Ready attempt and complete identity leases reject stale sources",()=>{
+  const page=authPage();page.scope.gatewayProtocolReadyRef.current=false;
+  page.quickEnterWorld();page.quickEnterWorld();
+  const attempt=page.scope.pendingGatewayProtocolActionRef.current.attempt;
+  assert.equal(attempt.bootstrap,true);assert.equal(attempt.kind,"login");assert(Object.isFrozen(attempt.command));
+  page.scope.accountIdRef.current="Changed";page.scope.passwordRef.current="ChangedSecret";
+  page.receive("Connected",{});
+  assert.deepEqual(page.sent.map(c=>c.type),["setLanguage","clientVersion","login","startGame"]);
+  assert.deepEqual(page.sent[2],{type:"login",accountId:"Existing",password:"ExistingSecret"});
+  for(const mutate of [
+    p=>p.scope.loginAuthRef.current={...p.scope.loginAuthRef.current,epoch:2},
+    p=>p.scope.oauthIntentRef.current++,
+    p=>p.scope.socketRef.current={},
+    p=>p.scope.equipmentConnectionGenerationRef.current++,
+    p=>p.scope.activeReconnectAuthRef.current={kind:"sui"},
+    p=>p.scope.screenRef.current="game",
+  ]) {
+    const next=authPage(),lease=next.captureIdentityIntent();
+    assert.equal(next.identityIntentCurrent({...lease}),true);mutate(next);assert.equal(next.identityIntentCurrent(lease),false);
+  }
+});
+
+test("actual OAuth and identity linking ignore retired owner results at both awaited boundaries",async()=>{
+  for(const mutate of [p=>p.controls().close(),p=>p.scope.socketRef.current={},p=>p.scope.equipmentConnectionGenerationRef.current++]) {
+    const page=authPage(),response=deferred();page.scope.oauthProvider=()=>response.promise;
+    const work=page.submitSuiLogin("passkey");mutate(page);
+    response.resolve({accountId:"obl_old",token:"OldToken",expiresAt:Date.now()+10000});await work;
+    assert.equal(page.sent.length,0);assert.equal(page.scope.activeReconnectAuthRef.current,null);
+  }
+  for(const boundary of ["credential","link"]) {
+    const page=authPage(),credential=deferred(),linked=deferred(),calls=[];
+    page.scope.activeReconnectAuthRef.current={kind:"sui",accountId:"obl_old",token:"OldToken",expiresAt:Date.now()+10000};
+    page.scope.credentialProvider=()=>credential.promise;
+    page.scope.linkProvider=(...args)=>{calls.push(args);return linked.promise;};
+    const work=page.linkCurrentSuiIdentity("passkey");
+    page.linkCurrentSuiIdentity("passkey");assert.equal(page.scope.identityLinkIntentRef.current,1);
+    if(boundary==="link"){credential.resolve({provider:"suiPasskey"});await Promise.resolve();assert.equal(calls.length,1);}
+    page.scope.activeReconnectAuthRef.current={kind:"sui",accountId:"obl_new",token:"NewToken",expiresAt:Date.now()+10000};
+    page.scope.identityLinkIntentRef.current++;page.scope.identityLinkEvents.push("NewActorStatus");
+    credential.resolve({provider:"suiPasskey"});linked.resolve({identityCount:2});await work;
+    assert.equal(calls.length,boundary==="credential"?0:1);
+    if(calls.length)assert.deepEqual(calls[0],["obl_old","OldToken",{provider:"suiPasskey"}]);
+    assert.equal(page.scope.identityLinkEvents.at(-1),"NewActorStatus");
+    assert.equal(page.scope.identityProvider,undefined);
+  }
+});
+
+function actualAuthDom() {
+  const source=readFileSync(new URL("../app/components/original-client-overlays.tsx",import.meta.url),"utf8");
+  const ast=ts.createSourceFile("auth-overlays.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  const selected=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&n.name?.text==="LoginAuthDialog"
+    ||ts.isVariableStatement(n)&&n.declarationList.declarations.some(d=>["LOGIN_REGISTRATION_FIELDS","LOGIN_PASSWORD_FIELDS"].includes(d.name.getText(ast))));
+  assert.equal(selected.length,3);
+  const Login=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==="LoginOverlay");assert.ok(Login);
+  const gates=Login.body.statements.filter(n=>ts.isVariableStatement(n)&&n.declarationList.declarations.some(d=>["authBlocked","loginBlocked"].includes(d.name.getText(ast))));
+  assert.equal(gates.length,2);
+  const focusEffects=Login.body.statements.filter(n=>ts.isExpressionStatement(n)&&ts.isCallExpression(n.expression)&&n.expression.expression.getText(ast)==="useEffect");
+  assert.equal(focusEffects.length,1);const focusBody=focusEffects[0].expression.arguments[0].body.getText(ast);
+  const nodes=[],normalEnter=[];
+  function visit(n) {
+    if(ts.isJsxSelfClosingElement(n)&&n.tagName.getText(ast)==="input") {
+      const cls=n.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.text==="className");
+      if(cls?.initializer&&ts.isStringLiteral(cls.initializer)&&["login-input account","login-input password"].includes(cls.initializer.text)) {
+        const handler=n.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.text==="onKeyDown");
+        normalEnter.push(handler.initializer.expression.getText(ast));
+      }
+    }
+    if(ts.isJsxElement(n)&&n.openingElement.tagName.getText(ast)==="div") {
+      const cls=n.openingElement.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.text==="className");
+      if(cls?.initializer&&ts.isStringLiteral(cls.initializer)&&["login-button account","login-button password","login-button view"].includes(cls.initializer.text))
+        nodes.push(n);
+    }
+    if(ts.isJsxElement(n)&&n.openingElement.tagName.getText(ast)==="form") {
+      const cls=n.openingElement.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.text==="className");
+      if(cls?.initializer&&ts.isStringLiteral(cls.initializer)&&cls.initializer.text==="login-dialog") {
+        const onSubmit=n.openingElement.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.text==="onSubmit");
+        nodes.normalSubmit=onSubmit.initializer.expression.getText(ast);
+      }
+    }
+    ts.forEachChild(n,visit);
+  }
+  visit(Login);assert.equal(nodes.length,3);assert.equal(normalEnter.length,2);assert.ok(nodes.normalSubmit);
+  const doc={activeElement:null};
+  const React={createElement:(type,props,...children)=>({type,props:props??{},children:children.flat(Infinity).filter(c=>c!=null&&c!==false)})};
+  const js=ts.transpileModule(selected.map(n=>n.getText(ast)).join("\n")
+    +"\nfunction actualFocus(authSurface,authEpoch,authFocusField,authSafeFocusRef,overlayRef)"+focusBody
+    +"\nfunction actualOpenButtons(loginAuth,loginBusy,t){"+gates.map(n=>n.getText(ast)).join("\n")+";return ["
+    +nodes.map(n=>n.getText(ast)).join(",")+"];}"
+    +"\nfunction actualNormalGate(loginAuth,loginBusy,onSubmitLogin){"+gates.map(n=>n.getText(ast)).join("\n")
+    +";return {loginBlocked,authBlocked,onSubmit:"+nodes.normalSubmit+",onEnter:["+normalEnter.join(",")+"]};}",
+    {compilerOptions:{target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.React}}).outputText;
+  const compiled=new Function("React","document","ORIGINAL_UI","SpriteButton",js+"\nreturn {LoginAuthDialog,actualOpenButtons,actualNormalGate,actualFocus};")(
+    React,doc,{login:{dialog:"fixture-asset",buttons:{}}},"SpriteButton");
+  const flatten=node=>node&&typeof node==="object"?[node,...node.children.flatMap(flatten)]:[];
+  function render(page) {
+    const controls=page.controls(),gates=compiled.actualNormalGate(controls,page.scope.loginBusyRef.current,()=>page.submitLogin());
+    const root=compiled.LoginAuthDialog({t:(_k,_a,f)=>f,loginAuth:controls,blocked:gates.authBlocked,
+      accountId:page.scope.accountIdRef.current,password:page.scope.passwordRef.current,
+      onAccountIdChange:v=>{page.scope.accountIdRef.current=v;},onPasswordChange:v=>{page.scope.passwordRef.current=v;}});
+    const all=flatten(root);
+    for(const node of all) {
+      node.focus=()=>{doc.activeElement=node;node.props.onFocus?.();};
+      node.disabled=!!node.props.disabled;node.dataset={loginAuthField:node.props["data-login-auth-field"]};
+    }
+    const form=all.find(n=>n.type==="form"),fields=all.filter(n=>n.type==="input"),submit=all.find(n=>n.props["data-login-auth-submit"]);
+    form.querySelectorAll=selector=>selector.startsWith("[data-login-auth-field]")
+      ?fields.filter(n=>!n.disabled):all.filter(n=>["input","button"].includes(n.type)&&!n.disabled);
+    form.querySelector=selector=>selector.includes("data-login-auth-close")?all.find(n=>n.props["data-login-auth-close"]):submit.disabled?null:submit;
+    form.contains=node=>all.includes(node);
+    function focus(){compiled.actualFocus(controls.state.surface,controls.state.epoch,controls.state.focusField,
+      {current:controls.state.safeFocus},{current:{querySelector:()=>form}});}
+    return {all,form,fields,submit,controls,gates,focus};
+  }
+  return {...compiled,doc,flatten,render};
+}
+function actualAuthBridgeValue(source,name,tag) {
+  const ast=ts.createSourceFile("auth-props.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),found=[];
+  function visit(n) {
+    if((ts.isJsxOpeningElement(n)||ts.isJsxSelfClosingElement(n))&&n.tagName.getText(ast)===tag) {
+      const attr=n.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.text==="loginAuth");
+      if(attr?.initializer&&ts.isJsxExpression(attr.initializer))found.push(attr.initializer.expression.getText(ast));
+    }
+    ts.forEachChild(n,visit);
+  }
+  visit(ast);assert.equal(found.length,1,"one actual Auth prop bridge: "+tag);
+  return new Function(name,"return "+ts.transpileModule("("+found[0]+")",{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText.replace(/;\s*$/,"")+";");
+}
+test("actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields",()=>{
+  const dom=actualAuthDom(),page=authPage();
+  const pageBridge=actualAuthBridgeValue(pageSource,"loginAuthControls","OriginalClientShell");
+  const shellSource=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8");
+  const shellBridge=actualAuthBridgeValue(shellSource,"loginAuth","LoginOverlay");
+  const controls=page.controls();assert.equal(shellBridge(pageBridge(controls)),controls);
+  for(const surface of ["registration","changePassword","safeKey"]) {
+    const next=authPage(),buttons=dom.flatten({type:"root",props:{},children:dom.actualOpenButtons(next.controls(),false,(_k,_a,f)=>f)});
+    const button=buttons.filter(n=>n.type==="SpriteButton")[["registration","changePassword","safeKey"].indexOf(surface)];
+    assert.equal(button.props.disabled,false);button.props.onClick();
+    assert.equal(next.scope.loginAuthRef.current.surface,surface);
+    const view=dom.render(next);assert.equal(view.form.props.role,"dialog");assert.equal(view.form.props.autoComplete,"off");
+    assert.equal(view.fields.length,surface==="registration"?8:surface==="changePassword"?4:2);
+    if(surface==="safeKey") {
+      const keys=view.all.filter(n=>n.props["data-login-safe-key"]);
+      assert.deepEqual(keys.map(n=>n.props["data-login-safe-key"]),Array.from(next.scope.loginAuthRef.current.safeKeys));
+      assert.equal(keys.length,36);keys[0].props.onClick();assert.equal(next.scope.accountIdRef.current,"SharedEdit");
+      assert.deepEqual(next.abi.calls.at(-1),["edit","Existing","A",true,false]);
+      const deleteButton=view.all.find(n=>n.type==="button"&&n.children.includes("Delete"));deleteButton.props.onClick();
+      assert.deepEqual(next.abi.calls.at(-1),["edit","SharedEdit","",true,true]);
+      const randomButton=view.all.find(n=>n.type==="button"&&n.children.includes("Random"));randomButton.props.onClick();
+      assert.equal(next.scope.loginAuthRef.current.safeKeys,"9876543210ZYXWVUTSRQPONMLKJIHGFEDCBA");
+      view.fields[1].focus();assert.equal(next.scope.loginAuthRef.current.safeFocus,"password");
+      const fresh=dom.render(next);fresh.form.props.onSubmit({preventDefault(){}});
+      assert.equal(next.sent.at(-1).type,"login");
+    } else {
+      const draft=surface==="registration"?registrationDraft():{accountId:"User",oldPassword:"Old",newPassword:"New",confirmPassword:"New"};
+      for(const field of view.fields)field.props.onChange({target:{value:draft[field.props.name]}});
+      assert.deepEqual(next.scope.loginAuthRef.current[surface==="registration"?"registration":"changePassword"],draft);
+    }
+    const account=view.fields.find(n=>n.props.name==="accountId");assert.equal(account.props.maxLength,24);
+    for(const field of view.fields.filter(n=>n.props.type==="password"))assert.equal(field.props.maxLength,32);
+  }
+});
+test("actual auth DOM field Enter advances to Submit without sending and pending normal login ignores optional ready",()=>{
+  const dom=actualAuthDom();
+  for(const surface of ["registration","changePassword"]) {
+    const page=authPage(surface);if(surface==="registration")fillRegistration(page);else fillPassword(page);
+    const view=dom.render(page);
+    for(let i=0;i<view.fields.length;i++) {
+      let prevented=0;
+      view.form.props.onKeyDown({key:"Enter",nativeEvent:{isComposing:false},currentTarget:view.form,target:view.fields[i],
+        preventDefault(){prevented++;},stopPropagation(){}});
+      assert.equal(prevented,1);assert.equal(dom.doc.activeElement,view.fields[i+1]??view.submit);assert.equal(page.sent.length,0);
+    }
+    view.form.props.onSubmit({preventDefault(){}});
+    assert.equal(page.sent.at(-1).type,surface==="registration"?"newAccount":"changePassword");
+    const pending=dom.render(page);assert(pending.fields.every(n=>n.disabled));assert.equal(pending.submit.disabled,true);
+    pending.form.props.onSubmit({preventDefault(){}});assert.equal(page.sent.length,2);
+    pending.form.props.onKeyDown({key:"Escape",preventDefault(){},stopPropagation(){}});
+    assert.equal(page.scope.loginAuthRef.current.surface,"login");
+  }
+  const page=authPage("login",false),gate=dom.actualNormalGate(page.controls(),false,()=>page.submitLogin());
+  assert.equal(gate.authBlocked,true);assert.equal(gate.loginBlocked,false);
+  gate.onSubmit({preventDefault(){}});assert.equal(page.sent.at(-1).type,"login");
+  const blocked=dom.actualNormalGate(page.controls(),true,()=>assert.fail("duplicate normal login"));
+  assert.equal(blocked.loginBlocked,true);blocked.onSubmit({preventDefault(){}});
+  for(const onEnter of blocked.onEnter)onEnter({key:"Enter",preventDefault(){}});
+  assert.equal(page.sent.length,2);
+});
+
+test("actual physical socket-close Auth retirement clears queued secrets and epochs without clearing entered lane",()=>{
+  const page=authPage("registration");fillRegistration(page);page.controls().submitRegistration();
+  const oldEpoch=page.scope.loginAuthRef.current.epoch,oldIntent=page.scope.oauthIntentRef.current;
+  page.scope.pendingGatewayProtocolActionRef.current={kind:"auth",attempt:{command:{type:"login",password:"QueuedSecret"}}};
+  const oldLink=page.scope.identityLinkIntentRef.current;
+  page.applyAuthSocketClose({});assert.equal(page.scope.socketRef.current,page.socket);
+  page.applyAuthSocketClose(page.socket);
+  assert.equal(page.scope.socketRef.current,null);
+  assert.equal(page.scope.pendingGatewayProtocolActionRef.current,null);
+  assert.equal(page.scope.loginAuthRef.current.epoch,oldEpoch+1);
+  assert.equal(page.scope.loginAuthRef.current.surface,"login");
+  assert.equal(page.scope.oauthIntentRef.current,oldIntent+1);
+  assert.equal(page.scope.identityLinkIntentRef.current,oldLink+1);
+  assert.equal(page.scope.gatewayProtocolReadyRef.current,false);
+  assert.equal(page.scope.loginBusyRef.current,false);
+  assert.equal(page.preauthGate().pending(page.socket),true);assert.equal(page.preauthGate().used(page.socket),true);
+  const retired=page.scope.loginAuthRef.current;
+  page.receive("NewAccount",{result:8},page.scope.equipmentConnectionGenerationRef.current,page.socket);
+  assert.equal(page.scope.loginAuthRef.current,retired);
 });
