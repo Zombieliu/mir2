@@ -204,6 +204,15 @@ public final class MainActivity extends GameActivity {
                     switch (command.getString("type")) {
                         case "connect": connect(); break;
                         case "login": if (!BuildConfig.UI_PREVIEW) session.login(command.getString("account"), command.getString("password")); break;
+                        case "register":
+                            if (BuildConfig.UI_PREVIEW) {
+                                nativeEvent(GatewaySession.object("phase", "READY", "accountEvent",
+                                        GatewaySession.object("type", "operationFailure", "message",
+                                                "Account registration is unavailable in offline UI preview.")).toString());
+                            } else if (!session.register(command)) {
+                                session.disconnect("Registration unavailable; reconnect and try again.");
+                            }
+                            break;
                         case "createCharacter": if (!BuildConfig.UI_PREVIEW) session.createCharacter(
                                 command.getString("name"), command.getString("className"),
                                 command.getString("genderName")); break;

@@ -118,6 +118,300 @@ public class GatewaySessionTest {
         assertFalse(command.toString().contains("nativeResumeV1"));
     }
 
+    // Reflection keeps these contract tests compiled against the pre-host baseline
+    // as well: a missing real transport entry point is a runtime red, not a build error.
+    private boolean register(JSONObject form) throws Exception {
+        return (Boolean)GatewaySession.class.getDeclaredMethod("register", JSONObject.class)
+                .invoke(session, form);
+    }
+
+    private JSONObject registration() {
+        return GatewaySession.object("type", "register", "accountId", "newhero",
+                "password", "ValidPass42", "birthDateBinary", 630822816000000000L,
+                "userName", "新玩家", "secretQuestion", "first pet?",
+                "secretAnswer", "cat", "emailAddress", "hero@example.test");
+    }
+
+    private void registrationReply(Object result) {
+        peer.send(GatewaySession.object("type", "packet", "packet", "NewAccount",
+                "payload", GatewaySession.object("result", result)).toString());
+    }
+
+    @Test public void nativeRegistrationFullWirePreservesExactTicksAndUnicode() throws Exception {
+        connect();
+        JSONObject form = WireJson.decode(registration().toString());
+        assertTrue(register(form));
+        JSONObject wire = commands.poll(2, TimeUnit.SECONDS);
+        assertNotNull(wire);
+        assertEquals(8, wire.length());
+        assertEquals("newAccount", wire.getString("type"));
+        for (String key : new String[]{"accountId", "password", "birthDateBinary", "userName",
+                "secretQuestion", "secretAnswer", "emailAddress"}) {
+            assertEquals(form.get(key), wire.get(key));
+        }
+        assertEquals(630822816000000000L, wire.getLong("birthDateBinary"));
+        assertFalse(wire.has("confirmPassword"));
+        assertFalse(wire.has("birthDate"));
+        assertFalse(wire.has("account_id"));
+        GatewaySession.View progress = views.poll(2, TimeUnit.SECONDS);
+        assertNotNull(progress);
+        assertEquals("REGISTERING", progress.phase.name());
+        assertNull(progress.accountEvent);
+        assertNull(progress.world);
+        assertTrue(progress.characters.isEmpty());
+        assertFalse(progress.message.contains("ValidPass42"));
+        assertFalse(progress.message.contains("cat"));
+    }
+
+    @Test public void nativeRegistrationOptionalFieldsMayBeEmpty() throws Exception {
+        connect();
+        JSONObject form = registration();
+        for (String key : new String[]{"userName", "secretQuestion", "secretAnswer", "emailAddress"}) {
+            form.put(key, "");
+        }
+        form.put("birthDateBinary", 0L);
+        assertTrue(register(form));
+        JSONObject wire = commands.poll(2, TimeUnit.SECONDS);
+        assertNotNull(wire);
+        assertEquals(8, wire.length());
+        assertEquals(0L, wire.getLong("birthDateBinary"));
+        assertEquals("", wire.getString("secretAnswer"));
+    }
+
+    @Test public void nativeRegistrationPendingBlocksDuplicatesLoginAndStart() throws Exception {
+        connect();
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        assertFalse(register(registration()));
+        session.login("fixture", "fixture-secret");
+        session.start(7);
+        session.createCharacter("Fixture", "Warrior", "Male");
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "newAccount")));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "attack", "objectId", 99)));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeRegistrationRequiresReadyUnauthenticatedConnection() throws Exception {
+        assertFalse(register(registration()));
+        connect();
+        roster();
+        assertFalse(register(registration()));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeRegistrationSuccessReturnsReadyWithoutAuthenticationOrReplay() throws Exception {
+        connect();
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        registrationReply(8);
+        GatewaySession.View result = accountEvent("registrationResult");
+        assertEquals(GatewaySession.Phase.READY, result.phase);
+        assertEquals(8, result.accountEvent.getInt("result"));
+        assertEquals(2, result.accountEvent.length());
+        assertTrue(result.characters.isEmpty());
+        assertNull(result.world);
+        assertNull(result.worldSnapshot);
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "attack", "objectId", 99)));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeRegistrationRejectCodesReleaseRequestAndPermitRetry() throws Exception {
+        connect();
+        for (int code : new int[]{0, 1, 2, 7, 99, -1}) {
+            assertTrue(register(registration()));
+            assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+            registrationReply(code);
+            GatewaySession.View result = accountEvent("registrationResult");
+            assertEquals(GatewaySession.Phase.READY, result.phase);
+            assertEquals(code, result.accountEvent.getInt("result"));
+            assertTrue(result.characters.isEmpty());
+            assertNull(result.world);
+            assertNull(commands.poll(20, TimeUnit.MILLISECONDS));
+        }
+    }
+
+    @Test public void nativeRegistrationNumericStringMatchesFrozenWindowsParser() throws Exception {
+        connect();
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        registrationReply("+8");
+        assertEquals(8, accountEvent("registrationResult").accountEvent.getInt("result"));
+        assertNull(commands.poll(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeRegistrationMalformedResultCannotBecomeSuccessOrEchoPayload() throws Exception {
+        connect();
+        for (Object raw : new Object[]{8.5, 8.0, "8.0", " 8", "８", "٨", 2147483648L, true,
+                JSONObject.NULL, GatewaySession.object("password", "fixture-secret")}) {
+            assertTrue(register(registration()));
+            assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+            JSONObject payload = GatewaySession.object("result", raw, "password", "fixture-secret",
+                    "secretAnswer", "private-answer", "message", "private-server-text");
+            // Keep the decimal token: JSONObject's writer would normalize 8.0 to 8.
+            String frame = raw instanceof Double && ((Double)raw) == 8.0
+                    ? "{\"type\":\"packet\",\"packet\":\"NewAccount\",\"payload\":{\"result\":8.0}}"
+                    : GatewaySession.object("type", "packet", "packet", "NewAccount", "payload", payload).toString();
+            peer.send(frame);
+            GatewaySession.View result = accountEvent("registrationResult");
+            assertEquals(GatewaySession.Phase.READY, result.phase);
+            assertTrue(result.accountEvent.isNull("result"));
+            assertEquals(2, result.accountEvent.length());
+            assertFalse(result.accountEvent.toString().contains("fixture-secret"));
+            assertFalse(result.message.contains("private"));
+        }
+    }
+
+    @Test public void nativeRegistrationMissingResultReleasesPendingWithoutSuccess() throws Exception {
+        connect();
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"NewAccount\",\"payload\":{}}");
+        GatewaySession.View result = accountEvent("registrationResult");
+        assertEquals(GatewaySession.Phase.READY, result.phase);
+        assertTrue(result.accountEvent.isNull("result"));
+    }
+
+    @Test public void nativeRegistrationUnsolicitedAndDuplicateRepliesAreIgnored() throws Exception {
+        connect();
+        registrationReply(8);
+        assertNull(views.poll(200, TimeUnit.MILLISECONDS));
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        registrationReply(7);
+        assertEquals(7, accountEvent("registrationResult").accountEvent.getInt("result"));
+        registrationReply(8);
+        assertNull(views.poll(200, TimeUnit.MILLISECONDS));
+        assertNull(commands.poll(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeRegistrationMalformedHostFormIsRejectedWithoutWrites() throws Exception {
+        connect();
+        for (String key : new String[]{"accountId", "password", "birthDateBinary", "userName",
+                "secretQuestion", "secretAnswer", "emailAddress"}) {
+            JSONObject missing = registration(); missing.remove(key);
+            assertFalse(register(missing));
+            JSONObject nullField = registration(); nullField.put(key, JSONObject.NULL);
+            assertFalse(register(nullField));
+        }
+        for (String key : new String[]{"confirmPassword", "birthDate", "account_id", "ownerObjectId"}) {
+            JSONObject extra = registration(); extra.put(key, "unexpected");
+            assertFalse(register(extra));
+        }
+        for (Object raw : new Object[]{0.5, 0.0, "630822816000000000", true}) {
+            JSONObject form = registration(); form.put("birthDateBinary", raw);
+            assertFalse(register(form));
+        }
+        JSONObject wrongType = registration(); wrongType.put("password", 42);
+        assertFalse(register(wrongType));
+        JSONObject oversized = registration(); oversized.put("secretAnswer", "x".repeat(129));
+        assertFalse(register(oversized));
+        JSONObject wrongCommand = registration(); wrongCommand.put("type", "newAccount");
+        assertFalse(register(wrongCommand));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        assertNull(views.poll(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeRegistrationDisconnectCancelsAndDoesNotReplayOnReconnect() throws Exception {
+        connect();
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        java.lang.reflect.Field socketField = GatewaySession.class.getDeclaredField("socket");
+        socketField.setAccessible(true);
+        WebSocket oldSocket = (WebSocket)socketField.get(session);
+        WebSocketListener oldListener = null;
+        for (java.lang.reflect.Field field : oldSocket.getClass().getDeclaredFields()) {
+            if (WebSocketListener.class.isAssignableFrom(field.getType())) {
+                field.setAccessible(true); oldListener = (WebSocketListener)field.get(oldSocket); break;
+            }
+        }
+        assertNotNull("Exercise the actual production callback's generation fence", oldListener);
+        WebSocket oldPeer = peer;
+        session.disconnect("Local registration reconnect fixture");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        oldPeer.send("{\"type\":\"packet\",\"packet\":\"NewAccount\",\"payload\":{\"result\":8}}");
+        server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+            @Override public void onOpen(WebSocket socket, Response response) { peer = socket; }
+            @Override public void onMessage(WebSocket socket, String text) {
+                try {
+                    JSONObject value = new JSONObject(text); commands.add(value);
+                    if ("clientVersion".equals(value.getString("type"))) {
+                        socket.send("{\"type\":\"packet\",\"packet\":\"Connected\",\"payload\":{}}");
+                    }
+                } catch (Exception error) { throw new AssertionError(error); }
+            }
+        }));
+        connect();
+        assertNull(views.poll(200, TimeUnit.MILLISECONDS));
+        assertNull(commands.poll(100, TimeUnit.MILLISECONDS));
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        assertEquals("REGISTERING", views.poll(2, TimeUnit.SECONDS).phase.name());
+        oldListener.onMessage(oldSocket,
+                "{\"type\":\"packet\",\"packet\":\"NewAccount\",\"payload\":{\"result\":8}}");
+        assertNull("An old callback cannot complete the new pending request", views.poll(100, TimeUnit.MILLISECONDS));
+        registrationReply(8);
+        assertEquals(8, accountEvent("registrationResult").accountEvent.getInt("result"));
+    }
+
+    @Test public void nativeRegistrationClosedSocketSendFailureIsTerminal() throws Exception {
+        connect();
+        java.lang.reflect.Field field = GatewaySession.class.getDeclaredField("socket");
+        field.setAccessible(true);
+        WebSocket local = (WebSocket)field.get(session);
+        local.cancel();
+        // The callback and write race share the same production terminal bound.
+        register(registration());
+        GatewaySession.View result = phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(result.accountEvent);
+        assertTrue(result.characters.isEmpty());
+        assertNull(result.world);
+    }
+
+    @Test public void nativeRegistrationDeadlineIsArmedAndSuccessCancelsIt() throws Exception {
+        connect();
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        java.lang.reflect.Field field = GatewaySession.class.getDeclaredField("deadline");
+        field.setAccessible(true);
+        java.util.concurrent.ScheduledFuture<?> pending =
+                (java.util.concurrent.ScheduledFuture<?>)field.get(session);
+        assertNotNull(pending);
+        assertFalse(pending.isCancelled());
+        assertTrue(pending.getDelay(TimeUnit.SECONDS) <= 20);
+        registrationReply(8);
+        accountEvent("registrationResult");
+        assertTrue(pending.isCancelled());
+        assertNull(field.get(session));
+    }
+
+    @Test public void nativeRegistrationActualDeadlineCallbackEndsPendingButCancelledOneDoesNot() throws Exception {
+        connect();
+        java.lang.reflect.Field field = GatewaySession.class.getDeclaredField("deadline");
+        field.setAccessible(true);
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        java.util.concurrent.ScheduledFuture<?> old =
+                (java.util.concurrent.ScheduledFuture<?>)field.get(session);
+        registrationReply(7);
+        accountEvent("registrationResult");
+        assertTrue(register(registration()));
+        assertEquals("newAccount", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+        assertEquals("REGISTERING", views.poll(2, TimeUnit.SECONDS).phase.name());
+        ((Runnable)old).run();
+        assertNull(views.poll(100, TimeUnit.MILLISECONDS));
+        java.util.concurrent.ScheduledFuture<?> current =
+                (java.util.concurrent.ScheduledFuture<?>)field.get(session);
+        // Invoke the real scheduled callback without claiming 20 seconds elapsed.
+        ((Runnable)current).run();
+        GatewaySession.View ended = phase(GatewaySession.Phase.DISCONNECTED);
+        assertTrue(ended.message.contains("timed out"));
+        assertNull(ended.accountEvent);
+        assertNull(ended.world);
+        assertTrue(ended.characters.isEmpty());
+        assertNull(field.get(session));
+        assertFalse(register(registration()));
+    }
+
     @Test public void nativeCapabilitySocketNegotiatesAfterVersionWithoutUnimplementedResume() throws Exception {
         session.connect(server.url("/ws").toString().replace("https://", "wss://"));
         phase(GatewaySession.Phase.READY);

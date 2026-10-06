@@ -21,7 +21,7 @@ import org.json.JSONObject;
 
 /** Android transport for the existing BrowserCommand protocol. No gameplay rules. */
 final class GatewaySession implements AutoCloseable {
-    enum Phase { DISCONNECTED, CONNECTING, READY, LOGIN, CHARACTERS, STARTING, IN_GAME }
+    enum Phase { DISCONNECTED, CONNECTING, READY, REGISTERING, LOGIN, CHARACTERS, STARTING, IN_GAME }
     private enum AccountOperation { NONE, CREATE, DELETE }
     private enum MailOperation { NONE, SEND, COLLECT, WAITING_REFRESH }
 
@@ -184,6 +184,33 @@ final class GatewaySession implements AutoCloseable {
         });
     }
 
+    /** Full shared-shell registration, never an authenticated gameplay command. */
+    synchronized boolean register(JSONObject form) {
+        if (phase != Phase.READY || socket == null || form == null || form.length() != 8
+                || !"register".equals(form.opt("type"))) return false;
+        // Transport shape/size only. The shared Crystal form and server own
+        // field validation; do not invent a second Android password/date policy.
+        for (String key : new String[]{"accountId", "password", "userName",
+                "secretQuestion", "secretAnswer", "emailAddress"}) {
+            Object raw = form.opt(key);
+            if (!(raw instanceof String) || ((String)raw).length() > 128) return false;
+        }
+        if (form.optString("accountId").isEmpty() || form.optString("password").isEmpty()) return false;
+        Object birth = form.opt("birthDateBinary");
+        if (!(birth instanceof Integer) && !(birth instanceof Long)) return false;
+        JSONObject command = object("type", "newAccount", "accountId", form.opt("accountId"),
+                "password", form.opt("password"), "birthDateBinary", ((Number)birth).longValue(),
+                "userName", form.opt("userName"), "secretQuestion", form.opt("secretQuestion"),
+                "secretAnswer", form.opt("secretAnswer"), "emailAddress", form.opt("emailAddress"));
+        phase = Phase.REGISTERING;
+        armDeadline(generation);
+        if (!send(command)) return false;
+        publish("Creating account…");
+        // Credentials are scoped to this write; never retained in View, fields,
+        // preferences, saved state or logs. Socket callbacks use this monitor.
+        return true;
+    }
+
     synchronized void login(String account, String password) {
         if (phase != Phase.READY) return;
         if (account.isBlank() || account.length() > 32 || password.isEmpty() || password.length() > 128) {
@@ -340,6 +367,20 @@ final class GatewaySession implements AutoCloseable {
                     cancelDeadline();
                     publish("Connected. Enter your test account.");
                 }
+                break;
+            case "NewAccount":
+                if (phase != Phase.REGISTERING) return;
+                // Legacy S.NewAccount has no request ID. One pending operation
+                // and the socket generation fence cannot correlate a delayed
+                // duplicate after a later retry on this same connection.
+                Integer registrationResult = registrationResult(payload.opt("result"));
+                phase = Phase.READY;
+                cancelDeadline();
+                pendingAccountEvent = object("type", "registrationResult", "result",
+                        registrationResult == null ? JSONObject.NULL : registrationResult);
+                // Only bounded numeric feedback reaches JNI. No echoed payload,
+                // implicit login, roster, owner projection or gameplay permission.
+                publish("Account registration response received.");
                 break;
             case "LoginSuccess":
                 if (phase != Phase.LOGIN) return;
@@ -841,6 +882,25 @@ final class GatewaySession implements AutoCloseable {
     private static String bounded(String value) {
         if (value.isBlank() || value.length() > 128) throw new IllegalArgumentException("text limit");
         return value;
+    }
+    private static Integer registrationResult(Object raw) {
+        // Match frozen Windows coerce_i32: integer token or integer string,
+        // signed i32 range. In particular 8.0 must not become success 8.
+        try {
+            long result;
+            if (raw instanceof Integer || raw instanceof Long) result = ((Number)raw).longValue();
+            else if (raw instanceof String) {
+                String text = (String)raw;
+                int first = !text.isEmpty() && (text.charAt(0) == '+' || text.charAt(0) == '-') ? 1 : 0;
+                if (first == text.length()) return null;
+                for (int i = first; i < text.length(); i++) {
+                    if (text.charAt(i) < '0' || text.charAt(i) > '9') return null;
+                }
+                result = Long.parseLong(text);
+            }
+            else return null;
+            return result >= Integer.MIN_VALUE && result <= Integer.MAX_VALUE ? (int)result : null;
+        } catch (NumberFormatException invalid) { return null; }
     }
     private static int integer(JSONObject value, String key) throws JSONException {
         Object raw = value.get(key);

@@ -168,11 +168,17 @@ pub extern "system" fn Java_com_mir2_web3_MainActivity_nativePoll<'a>(
     .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-fn send(value: Value) {
+fn try_send(value: Value) -> bool {
     let mut queue = OUTBOX.lock().unwrap_or_else(|e| e.into_inner());
-    if queue.len() < 16 {
-        queue.push_back(value.to_string());
+    if queue.len() >= 16 {
+        return false;
     }
+    queue.push_back(value.to_string());
+    true
+}
+
+fn send(value: Value) {
+    let _ = try_send(value);
 }
 
 #[derive(Resource, Default)]
@@ -532,6 +538,19 @@ fn host_world_position(value: &Value, screen: Screen) -> Option<HostWorldPositio
 fn host_account_event(value: &Value) -> Option<Event> {
     let event = value.get("accountEvent")?.as_object()?;
     match event.get("type")?.as_str()? {
+        "registrationResult" => {
+            let result = event
+                .get("result")
+                .and_then(Value::as_i64)
+                .and_then(|value| i32::try_from(value).ok());
+            Some(if result == Some(8) {
+                Event::AccountCreated
+            } else {
+                Event::AccountCreationFailed {
+                    message: registration_failure_message(result),
+                }
+            })
+        }
         "characterCreated" => {
             let character = event.get("character")?.as_object()?;
             let index = i32::try_from(character.get("index")?.as_i64()?).ok()?;
@@ -569,6 +588,19 @@ fn host_account_event(value: &Value) -> Option<Event> {
             })
         }
         _ => None,
+    }
+}
+
+// Player-facing feedback from frozen platform-windows/gateway_account_feedback.rs.
+// These strings describe server decisions; no authentication rule is executed here.
+fn registration_failure_message(result: Option<i32>) -> String {
+    match result {
+        Some(0) => "暂时无法创建账号，请稍后重试".to_owned(),
+        Some(1) => "账号格式无效，请使用3–15位字母或数字".to_owned(),
+        Some(2) => "密码不符合要求：请用10–15位字母或数字，避开账号同名和常见弱密码".to_owned(),
+        Some(7) => "账号已存在，请登录或选择其他账号".to_owned(),
+        Some(code) => format!("创建账号失败（错误码 {code}）"),
+        None => "服务器未返回注册结果，请稍后确认".to_owned(),
     }
 }
 
@@ -2203,7 +2235,13 @@ fn receive(
             .unwrap_or("Connection unavailable")
             .to_owned();
         if let Some(event) = host_account_event(&value) {
-            model.apply_gateway_event(event);
+            let registration = matches!(
+                &event,
+                Event::AccountCreated | Event::AccountCreationFailed { .. }
+            );
+            if !registration || model.register_request_in_flight {
+                model.apply_gateway_event(event);
+            }
         }
         match phase {
             "UNCONFIGURED" => {
@@ -2217,7 +2255,7 @@ fn receive(
             "READY" if model.login_request_in_flight => {
                 model.apply_gateway_event(Event::LoginFailure { message });
             }
-            "READY" => {
+            "READY" if model.screen == Screen::Connecting => {
                 model.apply_gateway_event(Event::Connected);
             }
             "CHARACTERS" if model.login_request_in_flight => {
@@ -2561,8 +2599,10 @@ fn forward_intents(
     mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
 ) {
     let mut create_character_command_sent = false;
+    let mut registration_command_sent = false;
     for intent in intents.drain() {
         match intent {
+            Intent::Login | Intent::SafeKeyEnter if model.register_request_in_flight => {}
             Intent::Login | Intent::SafeKeyEnter if host.phase == "READY" => {
                 send(
                     json!({"type":"login","account":model.login.account,"password":model.login.password}),
@@ -2609,13 +2649,55 @@ fn forward_intents(
                 }
                 send(json!({"type":"disconnect"}));
             }
-            Intent::SubmitRegistration { .. } => {
-                // The legacy Android transport has no full Crystal NewAccount
-                // exchange. Never send a reduced account/password surrogate or
-                // leave the shared modal locked waiting for a nonexistent reply.
-                model.apply_gateway_event(Event::AccountCreationFailed {
-                    message: "Account registration is not yet wired in the Android host.".into(),
-                });
+            Intent::SubmitRegistration {
+                account_id,
+                password,
+                confirm_password,
+                birth_date,
+                birth_date_binary,
+                user_name,
+                secret_question,
+                secret_answer,
+                email_address,
+            } => {
+                if registration_command_sent {
+                    continue;
+                }
+                registration_command_sent = true;
+                // The shared reducer has already validated the form. Reject a
+                // stale/forged queued draft using that same validator, not a
+                // reduced account/password surrogate or Android-only rules.
+                let form = &model.registration;
+                let valid = host.phase == "READY"
+                    && model.screen == Screen::Registration
+                    && model.register_request_in_flight
+                    && form.account_id == account_id
+                    && form.password == password
+                    && form.confirm_password == confirm_password
+                    && form.birth_date == birth_date
+                    && form.user_name == user_name
+                    && form.secret_question == secret_question
+                    && form.secret_answer == secret_answer
+                    && form.email_address == email_address
+                    && mir2_client_bevy::native_shell::validate_registration_fields(form)
+                        == Ok(birth_date_binary);
+                if !valid {
+                    model.apply_gateway_event(Event::AccountCreationFailed {
+                        message:
+                            "Registration context changed; check the form and reconnect if needed."
+                                .into(),
+                    });
+                } else if !try_send(json!({"type":"register", "accountId":account_id,
+                    "password":password, "birthDateBinary":birth_date_binary, "userName":user_name,
+                    "secretQuestion":secret_question, "secretAnswer":secret_answer,
+                    "emailAddress":email_address}))
+                {
+                    model.apply_gateway_event(Event::AccountCreationFailed {
+                        message:
+                            "Registration host queue is full; retry after pending input clears."
+                                .into(),
+                    });
+                }
                 model.registration.password.clear();
                 model.registration.confirm_password.clear();
                 model.registration.secret_question.clear();
@@ -5618,6 +5700,289 @@ mod tests {
         *app.world_mut().get_mut::<Interaction>(field).unwrap() = Interaction::Pressed;
         app.update();
         assert!(app.world().resource::<EditorTouch>().0);
+    }
+
+    fn registration_host_app() -> App {
+        INBOX.lock().unwrap().clear();
+        OUTBOX.lock().unwrap().clear();
+        let mut app = App::new();
+        #[cfg(feature = "ui-preview")]
+        app.init_resource::<crate::ui_preview::PreviewRequest>();
+        app.init_resource::<NativeShellModel>()
+            .init_resource::<HostState>()
+            .init_resource::<NativeUiIntentQueue>()
+            .add_systems(Update, (receive, forward_intents).chain());
+        INBOX.lock().unwrap().push_back(json!({"phase":"READY"}));
+        app.update();
+        assert!(
+            app.world_mut()
+                .resource_mut::<NativeShellModel>()
+                .apply_ui_intent(Intent::OpenRegistration)
+        );
+        app
+    }
+
+    fn registration_host_intent() -> Intent {
+        let mut form = mir2_client_bevy::native_shell::RegistrationForm::default();
+        form.account_id = "newhero".into();
+        form.password = "ValidPass42".into();
+        form.confirm_password = form.password.clone();
+        form.birth_date = "2001-02-03".into();
+        form.user_name = "新玩家".into();
+        form.secret_question = "first pet?".into();
+        form.secret_answer = "cat".into();
+        form.email_address = "hero@example.test".into();
+        Intent::SubmitRegistration {
+            birth_date_binary: mir2_client_bevy::native_shell::validate_registration_fields(&form)
+                .unwrap(),
+            account_id: form.account_id,
+            password: form.password,
+            confirm_password: form.confirm_password,
+            birth_date: form.birth_date,
+            user_name: form.user_name,
+            secret_question: form.secret_question,
+            secret_answer: form.secret_answer,
+            email_address: form.email_address,
+        }
+    }
+
+    fn submit_registration_host(app: &mut App) {
+        let intent = registration_host_intent();
+        assert!(
+            app.world_mut()
+                .resource_mut::<NativeShellModel>()
+                .apply_ui_intent(intent.clone())
+        );
+        app.world_mut()
+            .resource_mut::<NativeUiIntentQueue>()
+            .push(intent);
+        app.update();
+    }
+
+    fn assert_registration_host_secrets_cleared(model: &NativeShellModel) {
+        assert!(model.registration.password.is_empty());
+        assert!(model.registration.confirm_password.is_empty());
+        assert!(model.registration.secret_question.is_empty());
+        assert!(model.registration.secret_answer.is_empty());
+    }
+
+    #[test]
+    fn native_registration_host_full_wire_uses_shared_validation_and_clears_secrets() {
+        let mut app = registration_host_app();
+        submit_registration_host(&mut app);
+        let command: Value = serde_json::from_str(
+            &OUTBOX
+                .lock()
+                .unwrap()
+                .pop_front()
+                .expect("shared registration must reach the actual Android host"),
+        )
+        .unwrap();
+        let Intent::SubmitRegistration {
+            birth_date_binary, ..
+        } = registration_host_intent()
+        else {
+            unreachable!()
+        };
+        assert_eq!(
+            command,
+            json!({"type":"register", "accountId":"newhero",
+            "password":"ValidPass42", "birthDateBinary":birth_date_binary, "userName":"新玩家",
+            "secretQuestion":"first pet?", "secretAnswer":"cat", "emailAddress":"hero@example.test"})
+        );
+        assert!(birth_date_binary > (1_i64 << 53));
+        let model = app.world().resource::<NativeShellModel>();
+        assert_eq!(model.screen, Screen::Registration);
+        assert!(model.register_request_in_flight);
+        assert_registration_host_secrets_cleared(model);
+    }
+
+    #[test]
+    fn native_registration_host_ready_and_progress_keep_pending_notice() {
+        let mut app = registration_host_app();
+        submit_registration_host(&mut app);
+        for phase in ["REGISTERING", "READY"] {
+            INBOX
+                .lock()
+                .unwrap()
+                .push_back(json!({"phase":phase, "message":"public progress"}));
+            app.update();
+            let model = app.world().resource::<NativeShellModel>();
+            assert_eq!(model.screen, Screen::Registration);
+            assert!(model.register_request_in_flight);
+            assert!(model.notice.is_none());
+        }
+    }
+
+    #[test]
+    fn native_registration_host_success_returns_login_without_auto_auth_and_keeps_notice() {
+        let mut app = registration_host_app();
+        submit_registration_host(&mut app);
+        OUTBOX.lock().unwrap().clear();
+        INBOX.lock().unwrap().push_back(json!({"phase":"READY",
+            "accountEvent":{"type":"registrationResult", "result":8}}));
+        app.update();
+        let model = app.world().resource::<NativeShellModel>();
+        assert_eq!(model.screen, Screen::Login);
+        assert!(!model.register_request_in_flight);
+        assert!(!model.login_request_in_flight);
+        assert!(model.characters.is_empty());
+        assert!(
+            model
+                .notice
+                .as_ref()
+                .unwrap()
+                .message
+                .contains("account created")
+        );
+        assert_registration_host_secrets_cleared(model);
+        assert!(OUTBOX.lock().unwrap().is_empty());
+        INBOX.lock().unwrap().push_back(json!({"phase":"READY",
+            "accountEvent":{"type":"registrationResult", "result":7}}));
+        app.update();
+        assert!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .notice
+                .as_ref()
+                .unwrap()
+                .message
+                .contains("account created")
+        );
+    }
+
+    #[test]
+    fn native_registration_host_failures_match_frozen_feedback_and_release_pending() {
+        for (result, expected) in [
+            (json!(0), "暂时无法"),
+            (json!(1), "账号格式"),
+            (json!(2), "10–15"),
+            (json!(7), "已存在"),
+            (json!(99), "99"),
+            (Value::Null, "未返回"),
+            (json!(8.0), "未返回"),
+            (json!("8"), "未返回"),
+        ] {
+            let mut app = registration_host_app();
+            submit_registration_host(&mut app);
+            OUTBOX.lock().unwrap().clear();
+            INBOX.lock().unwrap().push_back(json!({"phase":"READY",
+                "accountEvent":{"type":"registrationResult", "result":result}}));
+            app.update();
+            let model = app.world().resource::<NativeShellModel>();
+            assert_eq!(model.screen, Screen::Registration);
+            assert!(!model.register_request_in_flight);
+            assert!(model.notice.as_ref().unwrap().message.contains(expected));
+            assert_registration_host_secrets_cleared(model);
+            assert!(OUTBOX.lock().unwrap().is_empty());
+        }
+    }
+
+    #[test]
+    fn native_registration_host_duplicate_intents_send_once_without_cancelling_pending() {
+        let mut app = registration_host_app();
+        let intent = registration_host_intent();
+        assert!(
+            app.world_mut()
+                .resource_mut::<NativeShellModel>()
+                .apply_ui_intent(intent.clone())
+        );
+        let mut queue = app.world_mut().resource_mut::<NativeUiIntentQueue>();
+        queue.push(intent.clone());
+        queue.push(intent);
+        app.update();
+        assert_eq!(OUTBOX.lock().unwrap().len(), 1);
+        assert!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .register_request_in_flight
+        );
+    }
+
+    #[test]
+    fn native_registration_host_full_outbox_releases_pending_without_evicting_commands() {
+        let mut app = registration_host_app();
+        let old: Vec<_> = (0..16)
+            .map(|n| json!({"type":"fixture", "id":n}).to_string())
+            .collect();
+        OUTBOX.lock().unwrap().extend(old.clone());
+        submit_registration_host(&mut app);
+        assert_eq!(
+            OUTBOX.lock().unwrap().iter().cloned().collect::<Vec<_>>(),
+            old
+        );
+        let model = app.world().resource::<NativeShellModel>();
+        assert!(!model.register_request_in_flight);
+        assert!(model.notice.as_ref().unwrap().message.contains("queue"));
+        assert_registration_host_secrets_cleared(model);
+    }
+
+    #[test]
+    fn native_registration_host_unready_or_stale_form_cannot_send() {
+        for unready in [false, true] {
+            let mut app = registration_host_app();
+            let intent = registration_host_intent();
+            assert!(
+                app.world_mut()
+                    .resource_mut::<NativeShellModel>()
+                    .apply_ui_intent(intent.clone())
+            );
+            if unready {
+                app.world_mut().resource_mut::<HostState>().phase = "CHARACTERS".into();
+            } else {
+                app.world_mut()
+                    .resource_mut::<NativeShellModel>()
+                    .registration
+                    .account_id = "different".into();
+            }
+            app.world_mut()
+                .resource_mut::<NativeUiIntentQueue>()
+                .push(intent);
+            app.update();
+            let model = app.world().resource::<NativeShellModel>();
+            assert!(!model.register_request_in_flight);
+            assert_registration_host_secrets_cleared(model);
+            assert!(OUTBOX.lock().unwrap().is_empty());
+        }
+    }
+
+    #[test]
+    fn native_registration_host_shared_invalid_form_and_tick_mismatch_never_send() {
+        for case in 0..3 {
+            let mut app = registration_host_app();
+            let mut intent = registration_host_intent();
+            if let Intent::SubmitRegistration {
+                password,
+                confirm_password,
+                birth_date_binary,
+                ..
+            } = &mut intent
+            {
+                match case {
+                    0 => {
+                        *password = "weak".into();
+                        *confirm_password = password.clone();
+                    }
+                    1 => *confirm_password = "different".into(),
+                    _ => *birth_date_binary += 1,
+                }
+            }
+            assert!(
+                !app.world_mut()
+                    .resource_mut::<NativeShellModel>()
+                    .apply_ui_intent(intent.clone())
+            );
+            app.world_mut()
+                .resource_mut::<NativeUiIntentQueue>()
+                .push(intent);
+            app.update();
+            assert!(
+                !app.world()
+                    .resource::<NativeShellModel>()
+                    .register_request_in_flight
+            );
+            assert!(OUTBOX.lock().unwrap().is_empty());
+        }
     }
 
     #[test]
