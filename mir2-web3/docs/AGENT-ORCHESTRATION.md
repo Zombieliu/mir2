@@ -1,5 +1,18 @@
 # Agent Orchestration
 
+> 2026-10-06 root completes updater-only signed14 publication. Exact upload
+> worker45a80245 deploy/readback passes; CLI756c0135 actual stage37399468079
+> verifies all36 public objects/817841942 bytes. Source14 atomic exchange retains
+>13 fingerprints; separate CI37400701902 CAS and aliases pass. Production Windows
+> b4390ee4 native HTTPS/CMS/new-engine full SHA/TLS206 checks pass. First failed
+> stage37397822852 and real repeated Server-Timing headers are retained; only
+> that non-authorizing statistic is combined, all integrity fields stay strict.
+> Full local installation19m1.646s excludes public network. PC60.6MB426.237s
+> contrasts with CI47.724s for all objects, not a controlled speed comparison.
+> Next packed-resource document is design only; laptop/human acceptance and
+> broader blocked Goal stay open. No game launch/Gateway restart/D/F/save change.
+> [Published delivery and limits](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 root final b4390ee4 signed first-install/rollback passes1/1;
 > all125,965 target hashes and four synthetic personal witnesses pass, no game
 > launch. Production check_update1,141,646ms on owned C scratch is not a controlled

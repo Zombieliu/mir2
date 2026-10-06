@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 signed14 updater delivery is published: actual stage37399468079
+> checks36 public hashes/817841942 bytes, origin14 atomic exchange and independent
+> promote37400701902 CAS succeed. b4390ee4 production native HTTPS/CMS/engine SHA/
+> TLS206 pass. Original failed stage and diagnostic-header compatibility fix remain.
+> Game6032/R17 unchanged; no Gateway restart/D/F/save mutation or game launch.
+> Full local19m1.646s excludes public network, and laptop/user end-to-end upgrade
+> is not credited. Packed-resource plan is design only; human acceptance and the
+> broader parity/blocked Goal remain open.
+> [Actual publication](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 final b4390ee4 signed first-install/rollback passes all125,965
 > target hashes; owned C scratch check_update19m1.646s is not a controlled D
 > comparison or laptop acceptance. Signed14 updater/bootstrap built,29 installed

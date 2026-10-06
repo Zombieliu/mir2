@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-10-06 signed14 delivery actually completes: stage37399468079 verifies
+>36 full public hashes, separate promote37400701902 CAS and coherent source/CDN14
+> succeed. Production b4390ee4 Windows discovery/CMS/full engine/TLS206 pass.
+> Original stage failure from repeated diagnostic Server-Timing remains; corrected
+> CLI66 passes with all critical duplicate/framing/hash checks kept. Old R17 game
+> objects unchanged. Current local19m1.646s excludes public network; affected laptop
+> and actual user automatic upgrade remain unexecuted. Packed-resource/first-play
+> plan is documented, not implemented. WASD/dialog/frame and broader parity queue
+> are not silently closed; no Gateway restart/game launch/D/F/save mutation.
+> [Publication proof and next design](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 final signed first-install/rollback b4390ee4 passes all125,965
 > target hashes; production check_update19m1.646s in owned C scratch. This is
 > not a controlled full-install speed comparison or laptop acceptance. Signed14
