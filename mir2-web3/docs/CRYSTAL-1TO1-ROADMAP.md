@@ -1,6 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-2026-10-06 当前原生 Android 光照环境元数据源码：`8d4fd2ad9920981947256e291b34f0816f62f805`；不是完整光照完成。
+2026-10-06 当前原生 Android 光照源码：共享灯源 `c57a3cf06` + 贴图兼容修补 `1f01c1351`。
+复用原 Windows 地图/对象/效果灯源，匹配资源请求/render-ready/同帧 pose 后发布；Windows 仅薄委托。
+实际 API31 缺少 VIEW_FORMATS 导致首版渲染退出；修补保留原 sRGB 视图，未改 shader/颜色/游戏规则。
+精确源码十四门：Android529/preview577、shared1324+10原ignored、runtime301+1原ignored、
+fresh Java103+103、API31双检查/Mac-host Windows14+4+2+21+1+1及真实本地资源门通过；不是 Windows OS 全量验收。
+双同源诊断APK已保留数据安装/回读SHA，445输入绑定；选定6647PNG+3metadata+10Lighting逐字节匹配。
+5次新冷启动均在前台且无渲染退出；12张原图已复核，夜间/黎明/地图黑暗离线画面有地图、角色及灯光。
+新5 PID仍8条GL506，零错误GPU门FAIL；全图仍2969缺失引用，非完整资源/全手机UI/联网或真机验收。
+只读Windows56ee063fb仍较冻结3d735745f +1提交/83文档证据/0功能路径；NI-17 PARTIAL、AP-01–21完整分母与 goal Active 不变。
+[当前同源APK、十四门、原始失败及实际画面边界](generated/player-qa/native-android-lighting-sources-20261006/README.md)。
+
+下文环境元数据为历史叶；不将旧 APK 或旧实测重绑到上述两个源码提交。
+
+2026-10-06 历史原生 Android 光照环境元数据源码：`8d4fd2ad9920981947256e291b34f0816f62f805`；不是完整光照完成。
 抽取原 Windows 四个环境方法/五个 helper，Windows 仅薄委托；原14光照测试及旧测试字节不变。
 四公共名字 TimeOfDay/MapInformation/MapChanged/NewMapInfo 经独立 Java observer→原 MainActivity/nativeEvent；
 旧个人/实体 callback、认证/会话/宿主旧断言未改。只由已核验 player owner/name/map snapshot 绑定，
