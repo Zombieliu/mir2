@@ -381,7 +381,7 @@ function shellStorageFixture() {
   const f = fixture(); f.activate(); let hook = null, stops = 0;
   class Element { constructor() { this.id = "canvas"; } setPointerCapture() {} }
   const holds = new Map(), router = new storage.StoragePointerRouter();
-  const scope = { storagePointerRouterRef: { current: router }, combatUiHoldRef: { current: new Map() },
+  const scope = { parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, storagePointerRouterRef: { current: router }, combatUiHoldRef: { current: new Map() },
     onCombatUiHeld(channel, token, held) { if (held) holds.set(channel, token); else if (holds.get(channel) === token) holds.delete(channel); },
     storagePointerCallbacksRef: { current: { getBevyStoragePointerContext: () => f.host.pointerContext(),
       onBevyStoragePointer(edge) { const accepted = f.host.pointer(edge); hook?.(edge); return accepted; } } },

@@ -1,194 +1,133 @@
 "use client";
 
-import { type CSSProperties } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { captureCrystalKeyBinding, clearCrystalKeyBinding, crystalKeyNameFromBrowserEvent,
+  defaultCrystalKeyBindings, displayCrystalKeyBinding, type CrystalKeyBinding } from "../../lib/player-ui-preferences";
 import { SpriteButton } from "./original-client-overlays";
 
-type TranslateFn = (
-  key: string,
-  params?: Array<string | number>,
-  fallback?: string,
-) => string;
-
-/** A single key binding row. */
-export type HotkeyBinding = {
-  /** Stable id (also used as the React key). */
-  id: string;
-  /** The key combination, e.g. "Alt+C" or "F1". */
-  keys: string;
-  /** Localization key for the action label. */
-  labelKey: string;
-  /** English fallback for the action label. */
-  labelFallback: string;
-};
-
-/** A labelled group of bindings. */
-export type HotkeyGroup = {
-  titleKey: string;
-  titleFallback: string;
-  bindings: HotkeyBinding[];
-};
-
+type TranslateFn = (key: string, params?: Array<string | number>, fallback?: string) => string;
+/** Retained for callers supplying explanatory groups; action identity is always Native function. */
+export type HotkeyBinding = { id: string; keys: string; labelKey: string; labelFallback: string };
+export type HotkeyGroup = { titleKey: string; titleFallback: string; bindings: HotkeyBinding[] };
 export type HotkeyWindowProps = {
-  t: TranslateFn;
-  /** Optional override; when omitted the built-in default layout is shown. */
-  groups?: HotkeyGroup[];
-  onClose: () => void;
+  t: TranslateFn; groups?: HotkeyGroup[]; onClose: () => void;
+  bindings?: readonly CrystalKeyBinding[];
+  onBindingsChange?: (bindings: CrystalKeyBinding[]) => void;
+  /** Root saves atomically on Close and reports failures in notice. */
+  onPersist?: (bindings: readonly CrystalKeyBinding[]) => void;
+  /** Host skips gameplay dispatch while active; this listener still receives the event. */
+  onCaptureChange?: (active: boolean) => void;
+  /** Host held-code state covers Backquote pressed before this window opened. */
+  tildePressed?: boolean;
+  enforce?: boolean; onEnforceChange?: (enforce: boolean) => void;
+  disabled?: boolean; notice?: string;
+  /** Omit only when the host really dispatches all Native functions. */
+  supportedFunctions?: readonly string[];
 };
-
-const FRAME = ORIGINAL_UI.gameShop;
-
-/**
- * The default Crystal / Legend of Mir 2 key layout. Kept as data so a host can
- * swap in user-rebound keys later without touching the presentation.
- */
-export const DEFAULT_HOTKEY_GROUPS: HotkeyGroup[] = [
-  {
-    titleKey: "ui.hotkeyGroupWindows",
-    titleFallback: "Windows",
-    bindings: [
-      { id: "character", keys: "Alt + C", labelKey: "ui.character", labelFallback: "Character" },
-      { id: "inventory", keys: "Alt + E", labelKey: "ui.inventory", labelFallback: "Inventory" },
-      { id: "skills", keys: "Alt + S", labelKey: "ui.skills", labelFallback: "Skills" },
-      { id: "quest", keys: "Alt + Q", labelKey: "ui.quest", labelFallback: "Quest Log" },
-      { id: "friends", keys: "Alt + F", labelKey: "ui.friend", labelFallback: "Friends" },
-      { id: "group", keys: "Alt + G", labelKey: "ui.group", labelFallback: "Group" },
-      { id: "guild", keys: "Alt + L", labelKey: "ui.guild", labelFallback: "Guild" },
-      { id: "ranking", keys: "Alt + R", labelKey: "ui.ranking", labelFallback: "Ranking" },
-    ],
-  },
-  {
-    titleKey: "ui.hotkeyGroupGameplay",
-    titleFallback: "Gameplay",
-    bindings: [
-      { id: "pickup", keys: "Space", labelKey: "ui.hotkeyPickup", labelFallback: "Pick Up Item" },
-      { id: "attack", keys: "Ctrl", labelKey: "ui.hotkeyAttack", labelFallback: "Attack In Place" },
-      { id: "run", keys: "Shift", labelKey: "ui.hotkeyRun", labelFallback: "Run / Walk Toggle" },
-      { id: "sit", keys: "Alt + Z", labelKey: "ui.hotkeySit", labelFallback: "Sit / Rest" },
-      { id: "map", keys: "Tab", labelKey: "ui.hotkeyMap", labelFallback: "World Map" },
-      { id: "target", keys: "Alt + A", labelKey: "ui.hotkeyTarget", labelFallback: "Target Nearest" },
-    ],
-  },
-  {
-    titleKey: "ui.hotkeyGroupBelt",
-    titleFallback: "Belt & Skills",
-    bindings: [
-      { id: "belt1", keys: "F1 - F8", labelKey: "ui.hotkeyBeltSkills", labelFallback: "Skill Belt 1-8" },
-      { id: "potions", keys: "1 - 6", labelKey: "ui.hotkeyBeltItems", labelFallback: "Item Belt 1-6" },
-      { id: "rotate", keys: "F9", labelKey: "ui.hotkeyBeltRotate", labelFallback: "Rotate Belt" },
-    ],
-  },
-  {
-    titleKey: "ui.hotkeyGroupChat",
-    titleFallback: "Chat & System",
-    bindings: [
-      { id: "chat", keys: "Enter", labelKey: "ui.hotkeyChat", labelFallback: "Open Chat" },
-      { id: "whisper", keys: "Ctrl + W", labelKey: "ui.hotkeyWhisper", labelFallback: "Reply Whisper" },
-      { id: "menu", keys: "Esc", labelKey: "ui.hotkeyMenu", labelFallback: "System Menu" },
-      { id: "screenshot", keys: "F12", labelKey: "ui.hotkeyScreenshot", labelFallback: "Screenshot" },
-    ],
-  },
-];
-
-export function HotkeyWindow({ t, groups = DEFAULT_HOTKEY_GROUPS, onClose }: HotkeyWindowProps) {
-  return (
-    <section aria-label={t("ui.hotkeys", [], "Hotkeys")} style={style.window}>
-      <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
-      <div style={style.titleText}>{t("ui.hotkeys", [], "Hotkeys")}</div>
-      <div style={style.subtitle}>{t("ui.hotkeySubtitle", [], "Default keyboard layout")}</div>
-      <div style={style.close}>
-        <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
-      </div>
-
-      <div style={style.columns}>
-        {groups.map((group) => (
-          <section key={group.titleKey} style={style.group}>
-            <h3 style={style.groupTitle}>{t(group.titleKey, [], group.titleFallback)}</h3>
-            <div style={style.bindings}>
-              {group.bindings.map((binding) => (
-                <div key={binding.id} style={style.bindingRow} data-hotkey-id={binding.id}>
-                  <span style={style.bindingLabel}>{t(binding.labelKey, [], binding.labelFallback)}</span>
-                  <kbd style={style.keycap}>{binding.keys}</kbd>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </section>
-  );
+const DEFAULT_BINDINGS = defaultCrystalKeyBindings();
+/** Compatibility reference uses the same Native defaults as the editable table. */
+export const DEFAULT_HOTKEY_GROUPS = DEFAULT_BINDINGS.reduce<HotkeyGroup[]>((groups, binding) => {
+  let group = groups.find(entry => entry.titleFallback === binding.group);
+  if (!group) {
+    group = { titleKey: `ui.hotkeyGroup.${binding.group}`, titleFallback: binding.group, bindings: [] };
+    groups.push(group);
+  }
+  group.bindings.push({ id: binding.function, keys: displayCrystalKeyBinding(binding) || "Unbound",
+    labelKey: `ui.hotkey.${binding.function}`, labelFallback: binding.description });
+  return groups;
+}, []);
+export function HotkeyWindow({ t, groups, onClose, bindings = DEFAULT_BINDINGS, onBindingsChange, onPersist,
+  onCaptureChange, tildePressed, enforce, onEnforceChange, disabled = false, notice, supportedFunctions }: HotkeyWindowProps) {
+  const [waiting, setWaiting] = useState<string | null>(null);
+  const [localEnforce, setLocalEnforce] = useState(true);
+  const shownEnforce = enforce ?? localEnforce;
+  const currentRef = useRef({ bindings, onBindingsChange, onCaptureChange, disabled, shownEnforce, tildePressed });
+  currentRef.current = { bindings, onBindingsChange, onCaptureChange, disabled, shownEnforce, tildePressed };
+  const waitingRef = useRef<string | null>(null);
+  const tildeRef = useRef(false);
+  const changeWaiting = (functionId: string | null) => {
+    waitingRef.current = functionId; setWaiting(functionId);
+    currentRef.current.onCaptureChange?.(functionId !== null);
+  };
+  useEffect(() => {
+    const down = (event: KeyboardEvent) => {
+      if (event.code === "Backquote") tildeRef.current = true;
+      const functionId = waitingRef.current;
+      if (!functionId) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+      if (event.repeat || event.isComposing) return;
+      const current = currentRef.current;
+      if (current.disabled || !current.onBindingsChange) { changeWaiting(null); return; }
+      const key = crystalKeyNameFromBrowserEvent(event);
+      if (!key) return;
+      const next = captureCrystalKeyBinding(current.bindings, functionId, key,
+        { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: current.tildePressed ?? tildeRef.current }, current.shownEnforce);
+      if (!next) return; // Modifier-only input stays in capture, as Native does.
+      current.onBindingsChange(next); changeWaiting(null);
+    };
+    const up = (event: KeyboardEvent) => {
+      if (event.code === "Backquote") tildeRef.current = false;
+      if (waitingRef.current) { event.preventDefault(); event.stopImmediatePropagation(); }
+    };
+    const blur = () => { tildeRef.current = false; changeWaiting(null); };
+    window.addEventListener("keydown", down, true); window.addEventListener("keyup", up, true); window.addEventListener("blur", blur);
+    return () => { window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true);
+      window.removeEventListener("blur", blur); waitingRef.current = null; currentRef.current.onCaptureChange?.(false); };
+    // Stable listeners read the current controlled bindings and callbacks through currentRef.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => { if (disabled && waitingRef.current) changeWaiting(null); }, [disabled]);
+  const rows = [...bindings].sort((a, b) => a.group.localeCompare(b.group) || a.description.toLowerCase().localeCompare(b.description.toLowerCase()));
+  const defaultKey = (functionId: string) => { const row = DEFAULT_BINDINGS.find(binding => binding.function === functionId); return row ? displayCrystalKeyBinding(row) : ""; };
+  const canEdit = !disabled && Boolean(onBindingsChange);
+  const clear = (functionId: string) => {
+    if (!canEdit) return;
+    const next = clearCrystalKeyBinding(bindings, functionId);
+    if (next) { onBindingsChange?.(next); changeWaiting(null); }
+  };
+  const close = () => { changeWaiting(null); onPersist?.(bindings); onClose(); };
+  const legacyLabel = (functionId: string, fallback: string) => {
+    const row = groups?.flatMap(group => group.bindings).find(binding => binding.id === functionId);
+    return row ? t(row.labelKey, undefined, row.labelFallback) : fallback;
+  };
+  return <div className="original-hotkey-window" role="dialog" aria-label={t("ui.hotkey", undefined, "Keyboard Settings")}
+    data-ui-interactive="true" data-keybinding-capture={waiting ? "true" : "false"}
+    style={{ position: "absolute", left: 256, top: 169, width: 512, height: 430, zIndex: 45 }}>
+    <img src="/original-ui/Title/119.png" alt="" draggable={false} style={{ position: "absolute", inset: 0, width: 512, height: 430, pointerEvents: "none" }} />
+    <div style={{ position: "absolute", left: 135, top: 34, width: 242, textAlign: "center", color: "#eee", fontSize: 13 }}>{t("ui.hotkey", undefined, "Keyboard Settings")}</div>
+    <div style={{ position: "absolute", left: 489, top: 3 }}><SpriteButton sprite={ORIGINAL_UI.gameShop.closeButton} label={t("ui.close", undefined, "Close")} onClick={close} /></div>
+    <div style={{ position: "absolute", left: 18, top: 73, width: 465, display: "flex", color: "#d8c47c", fontSize: 10 }}>
+      <span style={{ width: 230 }}>{t("ui.function", undefined, "Function")}</span><span style={{ width: 110 }}>{t("ui.default", undefined, "Default")}</span><span>{t("ui.binding", undefined, "Binding")}</span>
+    </div>
+    <div style={{ position: "absolute", left: 18, top: 90, width: 470, height: 290, overflowY: "auto", overscrollBehavior: "contain" }}>
+      {rows.map((row, index) => {
+        const supported = !supportedFunctions || supportedFunctions.includes(row.function);
+        const groupChanged = index === 0 || row.group !== rows[index - 1].group;
+        return <div key={row.function}>
+          {groupChanged ? <div style={{ height: 30, lineHeight: "30px", color: "#d8c47c", fontSize: 12 }}>{row.group}</div> : null}
+          <div style={{ minHeight: 22, display: "flex", alignItems: "center", color: supported ? "#eee" : "#aaa", fontSize: 10 }}>
+            <span style={{ width: 230, flexShrink: 0 }} title={supported ? row.description : t("ui.unavailable", undefined, "Unavailable in this client")}>{legacyLabel(row.function, row.description)}</span>
+            <span style={{ width: 110, flexShrink: 0 }}>{defaultKey(row.function)}</span>
+            <button type="button" disabled={!canEdit || !supported} aria-label={t("ui.rebind", undefined, "Rebind") + " " + row.description}
+              aria-pressed={waiting === row.function} onClick={() => changeWaiting(waitingRef.current ? null : row.function)}
+              style={{ width: 90, minHeight: 22, padding: "0 2px", fontSize: 10, color: "#eee", background: waiting === row.function ? "#5c4924" : "#231d15", border: "1px solid #66533a" }}>
+              {waiting === row.function ? t("ui.pressKey", undefined, "Press a key…") : displayCrystalKeyBinding(row) || t("ui.unbound", undefined, "Unbound")}
+            </button>
+            <button type="button" disabled={!canEdit || !supported} aria-label={t("ui.clear", undefined, "Clear") + " " + row.description}
+              onClick={() => clear(row.function)} style={{ width: 22, minHeight: 22, padding: 0, marginLeft: 2 }}>×</button>
+          </div>
+        </div>;
+      })}
+    </div>
+    <div style={{ position: "absolute", left: 30, top: 400 }}><SpriteButton sprite={{ base: "/original-ui/Title/120.png", hover: "/original-ui/Title/121.png", pressed: "/original-ui/Title/122.png" }}
+      label={t("ui.resetDefaults", undefined, "Reset defaults")} disabled={!canEdit} onClick={() => { onBindingsChange?.(defaultCrystalKeyBindings()); changeWaiting(null); }} /></div>
+    <label style={{ position: "absolute", left: 105, top: 402, color: "#eee", fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
+      <input type="checkbox" checked={shownEnforce} disabled={!canEdit} onChange={event => { setLocalEnforce(event.target.checked); onEnforceChange?.(event.target.checked); }} />
+      {t("ui.enforceModifiers", undefined, "Enforce modifiers")}
+    </label>
+    <div role="status" style={{ position: "absolute", left: 260, top: 390, width: 230, fontSize: 9, color: "#d8c47c" }}>
+      {notice || (waiting ? t("ui.keyCaptureHelp", undefined, "Delete clears; Escape can be assigned.") : "")}
+    </div>
+  </div>;
 }
-
-const style: Record<string, CSSProperties> = {
-  window: {
-    position: "absolute",
-    left: 164,
-    top: 146,
-    width: FRAME.width,
-    height: FRAME.height,
-    zIndex: 33,
-    color: "#f0eee8",
-    fontSize: 12,
-    textShadow: "1px 1px 0 #000",
-    fontFamily: "inherit",
-  },
-  frame: { position: "absolute", inset: 0, width: FRAME.width, height: FRAME.height, pointerEvents: "none" },
-  titleText: {
-    position: "absolute",
-    left: 22,
-    top: 10,
-    fontSize: 14,
-    fontWeight: 700,
-    color: "#f4dcaf",
-    letterSpacing: 0.5,
-  },
-  subtitle: { position: "absolute", left: 22, top: 30, fontSize: 11, color: "#cbb38a" },
-  close: { position: "absolute", left: 666, top: 6 },
-  columns: {
-    position: "absolute",
-    left: 22,
-    top: 52,
-    width: 652,
-    height: 400,
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 12,
-    overflowY: "auto",
-    alignContent: "start",
-  },
-  group: {
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(11, 8, 5, 0.45)",
-    padding: "8px 10px",
-  },
-  groupTitle: {
-    margin: "0 0 6px",
-    fontSize: 12,
-    fontWeight: 700,
-    color: "#f4dcaf",
-    borderBottom: "1px solid rgba(190, 157, 99, 0.24)",
-    paddingBottom: 4,
-  },
-  bindings: { display: "flex", flexDirection: "column", gap: 4 },
-  bindingRow: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-    fontSize: 12,
-  },
-  bindingLabel: { color: "#d6c6a5", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  keycap: {
-    flex: "0 0 auto",
-    fontFamily: "inherit",
-    fontSize: 11,
-    color: "#f8e6bb",
-    background: "linear-gradient(180deg, rgba(52, 32, 18, 0.95), rgba(28, 17, 9, 0.95))",
-    border: "1px solid rgba(214, 180, 110, 0.6)",
-    borderRadius: 3,
-    padding: "1px 7px",
-    minWidth: 48,
-    textAlign: "center",
-  },
-};

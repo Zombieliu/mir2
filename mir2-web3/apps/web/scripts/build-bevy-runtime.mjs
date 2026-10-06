@@ -34,23 +34,28 @@ const pkgParentDir = path.resolve(webRoot, "public", "bevy-runtime");
 // Candidate capability is explicit in each complete versioned package.
 const questUiFeature = process.env.MIR2_BEVY_QUEST_UI === "1" ? ",web-quest-ui" : "";
 const uiAbiVersion = questUiFeature ? 1 : 0;
+// The compatibility GL2 package keeps pure item queries without the Bevy UI tree.
+const itemTooltipFeature = questUiFeature ? ",web-item-tooltip" : "";
 const runtimePackages = [
   {
     id: "webgpu",
     backend: "webgpu",
     packageDirName: "pkg-webgpu",
+    uiAbiVersion,
     cargoFeatureFlags: ["--no-default-features", "--features", `webgpu${questUiFeature}`],
   },
   {
     id: "webgl2",
     backend: "webgl2",
     packageDirName: "pkg-webgl2",
-    cargoFeatureFlags: ["--no-default-features", "--features", `webgl2${questUiFeature}`],
+    uiAbiVersion: 0,
+    cargoFeatureFlags: ["--no-default-features", "--features", `webgl2${itemTooltipFeature}`],
   },
   ...(questUiFeature ? [{
     id: "webgl2-shared",
     backend: "webgl2",
     packageDirName: "pkg-webgl2-shared",
+    uiAbiVersion: 1,
     cargoFeatureFlags: ["--no-default-features", "--features", "webgl2,web-quest-ui,webgl2-shared-ui"],
   }] : []),
 ];
@@ -276,8 +281,8 @@ function createRuntimeVersionManifest(records) {
       id: entry.id,
       backend: entry.backend,
       packageDir: entry.packageDirName,
-      questUiAbiVersion: uiAbiVersion,
-      bagUiAbiVersion: uiAbiVersion,
+      questUiAbiVersion: entry.uiAbiVersion,
+      bagUiAbiVersion: entry.uiAbiVersion,
       primarySharedUiCompiled: entry.id === "webgl2-shared",
     })),
     files,

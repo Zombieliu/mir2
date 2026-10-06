@@ -17,10 +17,10 @@ export type HudPlayer = { hp: number; maxHp: number; mp: number; maxMp: number; 
   name?: string; className?: string; gender?: string; hair?: number; wingEffect?: number; guildName?: string; guildRankName?: string; experience: number; maxExperience: number;
   currentWeight: number; currentWeightKnown: boolean; maxWeight: number; crystalStats?: CrystalPlayerStat[]; weights?: PlayerWeights };
 export type HudSnapshot = { generation: number; revision: number; inGame: boolean; hostVisible: boolean;
-  player: HudPlayer | null; navigation: HudNavigation; navigationRevision?: number; logicalWidth: number; logicalHeight: number; stageCssScale: number; touch: boolean };
+  player: HudPlayer | null; navigation: HudNavigation; navigationRevision?: number; logicalWidth: number; logicalHeight: number; stageCssScale: number; touch: boolean; hpView?: boolean };
 export type HudStatus = { version: 1; frame: number; ready: boolean; characterStatsReady: boolean; generation: number; revision: number;
   navigation: HudNavigation; plan: MainHudPlan | null; error: string | null; foregroundRects: HudRect[]; modal: boolean };
-export type HudRuntime = { getMir2HudUiCapabilities?: () => string; getMir2HudSourceGeometry?: () => string; setMir2HudUiSnapshot?: (json: string) => boolean;
+export type HudRuntime = { getMir2HudPreferencesVersion?: () => number; getMir2HudUiCapabilities?: () => string; getMir2HudSourceGeometry?: () => string; setMir2HudUiSnapshot?: (json: string) => boolean;
   getMir2HudUiStatus?: () => string; dispatchMir2HudNavigation?: (json: string) => boolean };
 const unsigned = (value: unknown, max = 0xffff_ffff): value is number => Number.isSafeInteger(value) && Number(value) >= 0 && Number(value) <= max;
 /** Explicit compatibility navigation edits share the page lifetime across HMR. */

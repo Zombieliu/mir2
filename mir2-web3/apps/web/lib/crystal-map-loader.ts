@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
 import { closeSync, existsSync, openSync, readFileSync, readSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -77,14 +78,19 @@ type CrystalMapManifest = {
 };
 
 type CrystalMapManifestEntry = {
+  map_index?: number;
   light?: number;
   map_file_name?: string;
   map_title?: string;
   mini_map?: number;
   big_map?: number;
   movements?: Array<{
+    map_index?: number;
     source?: { x?: number; y?: number };
     destination?: { x?: number; y?: number };
+    need_hole?: boolean;
+    need_move?: boolean;
+    conquest_index?: number;
   }>;
   respawns?: Array<{ location?: { x?: number; y?: number } }>;
   safe_zones?: Array<{ location?: { x?: number; y?: number } }>;
@@ -101,6 +107,8 @@ type ParsedMap = {
   height: number;
   type: number;
   cells: ParsedMapCell[] | null;
+  /** Hash of the exact immutable bytes which produced these cells. */
+  geometrySourceFingerprint?: string;
   fallbackOriginalMapRegion?: OriginalMapRegion | null;
   // Set when this map could not be loaded and a synthetic empty map is standing in for it, so
   // the scene degrades gracefully instead of failing. The path is recorded in the region's
@@ -422,6 +430,114 @@ export function loadCrystalCollisionRegion(options: {
   };
 }
 
+export class QuestCollisionError extends Error {
+  constructor(readonly code: "invalidInput" | "collisionUnavailable") {
+    super(code);
+  }
+}
+
+const MAX_QUEST_COLLISION_CELLS = 16_777_216;
+const completeQuestCollisionMaps = new WeakSet<ParsedMap>();
+
+function questMapFileName(file: string): string {
+  if (file.length === 0 || file.length > 128 || file.includes("..")
+    || !/^[a-z0-9][a-z0-9_.-]*$/.test(file)) {
+    throw new QuestCollisionError("invalidInput");
+  }
+  const canonical = file.replace(/\.map$/, "");
+  if (!canonical || canonical.endsWith(".map") || canonical.endsWith(".")
+    || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/.test(canonical)) throw new QuestCollisionError("invalidInput");
+  return canonical;
+}
+
+function completeQuestCollisionMap(map: ParsedMap): map is ParsedMap & { cells: ParsedMapCell[]; geometrySourceFingerprint: string } {
+  if (completeQuestCollisionMaps.has(map)) return true;
+  const count = map.width * map.height;
+  const complete = !map.syntheticResourcePath && Number.isInteger(map.width) && Number.isInteger(map.height)
+    && map.width > 0 && map.height > 0 && map.width <= 65535 && map.height <= 65535
+    && count <= MAX_QUEST_COLLISION_CELLS && Array.isArray(map.cells) && map.cells.length === count
+    && typeof map.geometrySourceFingerprint === "string";
+  if (!complete || !map.cells) return false;
+  for (let index = 0; index < count; index++) {
+    const cell = map.cells[index];
+    if (!cell || cell.x !== Math.floor(index / map.height) || cell.y !== index % map.height) return false;
+  }
+  completeQuestCollisionMaps.add(map);
+  return true;
+}
+
+function strictQuestGeometry(map: ParsedMap, canonical: string) {
+  if (!completeQuestCollisionMap(map)) throw new QuestCollisionError("collisionUnavailable");
+  const manifestBytes = readFileSync(RESPAWN_MANIFEST_PATH);
+  const manifestFingerprint = createHash("sha256").update(manifestBytes).digest("hex");
+  // Recheck the small entrance set on every chunk: a replaced landing map must
+  // change both its source-cell exception and the cross-chunk fingerprint.
+  const manifest = JSON.parse(manifestBytes.toString("utf8")) as CrystalMapManifest;
+  if (!Array.isArray(manifest.maps)) throw new QuestCollisionError("collisionUnavailable");
+  const source = manifest.maps.find((entry) => {
+    try { return questMapFileName((entry.map_file_name ?? "").toLowerCase()) === canonical; } catch { return false; }
+  });
+  if (!source) throw new QuestCollisionError("collisionUnavailable");
+  const byIndex = new Map(manifest.maps.map((entry) => [entry.map_index, entry]));
+  const entrances = new Set<string>();
+  const fingerprint = createHash("sha256").update("mir2-quest-player-collision-v1\0")
+    .update(map.geometrySourceFingerprint).update("\0").update(manifestFingerprint);
+  for (const movement of source.movements ?? []) {
+    // Mirror Native's ordinary player source-cell exception, never conditional transfer.
+    if (movement.need_hole !== false || movement.need_move !== false || movement.conquest_index !== 0
+      || !Number.isInteger(movement.map_index)) continue;
+    const sx = movement.source?.x, sy = movement.source?.y;
+    const dx = movement.destination?.x, dy = movement.destination?.y;
+    if (typeof sx !== "number" || typeof sy !== "number" || typeof dx !== "number" || typeof dy !== "number"
+      || ![sx, sy, dx, dy].every(Number.isInteger) || sx < 0 || sy < 0 || sx >= map.width || sy >= map.height
+      || (dx === 0 && dy === 0)) continue;
+    const target = byIndex.get(movement.map_index);
+    let targetFile: string;
+    try { targetFile = questMapFileName((target?.map_file_name ?? "").toLowerCase()); } catch { continue; }
+    let landingMap: ParsedMap;
+    try { landingMap = loadParsedMap(targetFile); } catch {
+      fingerprint.update(JSON.stringify([sx, sy, targetFile, dx, dy, "unavailable"]));
+      continue;
+    }
+    if (!completeQuestCollisionMap(landingMap)) {
+      fingerprint.update(JSON.stringify([sx, sy, targetFile, dx, dy, "incomplete"]));
+      continue;
+    }
+    const landing = parsedCellAt(landingMap, dx, dy);
+    const valid = landing !== null && !parsedCellBlocksMovement(landing);
+    fingerprint.update(JSON.stringify([sx, sy, targetFile, dx, dy, landingMap.geometrySourceFingerprint, valid]));
+    if (valid) entrances.add(`${sx}:${sy}`);
+  }
+  const geometry = { manifestFingerprint, fingerprint: fingerprint.digest("hex"), entrances };
+  return geometry;
+}
+
+/** Strict static geometry for a complete Quest search; ordinary scene fallbacks stay separate. */
+export function loadCrystalQuestCollisionRegion(options: {
+  mapFileName: string;
+  minX: number; maxX: number; minY: number; maxY: number;
+}) {
+  const canonical = questMapFileName(options.mapFileName);
+  const { minX, maxX, minY, maxY } = options;
+  if (![minX, maxX, minY, maxY].every(Number.isSafeInteger)
+    || minX < 0 || minY < 0 || maxX < minX || maxY < minY
+    || maxX - minX >= 256 || maxY - minY >= 256) throw new QuestCollisionError("invalidInput");
+  const map = loadParsedMap(canonical);
+  const geometry = strictQuestGeometry(map, canonical);
+  if (minX >= map.width || minY >= map.height) throw new QuestCollisionError("invalidInput");
+  const bounds = { minX, maxX: Math.min(maxX, map.width - 1), minY, maxY: Math.min(maxY, map.height - 1) };
+  const blockedCells: Array<{ x: number; y: number }> = [];
+  for (let x = bounds.minX; x <= bounds.maxX; x++) {
+    for (let y = bounds.minY; y <= bounds.maxY; y++) {
+      const cell = parsedCellAt(map, x, y);
+      if (!cell) throw new QuestCollisionError("collisionUnavailable");
+      if (parsedCellBlocksMovement(cell) && !geometry.entrances.has(`${x}:${y}`)) blockedCells.push({ x, y });
+    }
+  }
+  return { schemaVersion: 1 as const, source: "crystalMap" as const, mapFileName: canonical,
+    mapWidth: map.width, mapHeight: map.height, bounds, blockedCells, geometryFingerprint: geometry.fingerprint };
+}
+
 function loadParsedMap(mapFileName: string): ParsedMap {
   const normalized = normalizeMapFileName(mapFileName);
   const cached = mapCache.get(normalized);
@@ -465,6 +581,12 @@ function loadParsedMap(mapFileName: string): ParsedMap {
 }
 
 function parseMapBytes(fileName: string, bytes: Buffer): ParsedMap {
+  const map = parseMapGeometry(fileName, bytes);
+  map.geometrySourceFingerprint = createHash("sha256").update(bytes).digest("hex");
+  return map;
+}
+
+function parseMapGeometry(fileName: string, bytes: Buffer): ParsedMap {
   const type = detectMapType(bytes);
   switch (type) {
     case 100:

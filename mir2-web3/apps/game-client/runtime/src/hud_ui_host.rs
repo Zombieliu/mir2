@@ -10,6 +10,8 @@ pub struct HudUiSnapshot {
     pub revision: u64,
     pub in_game: bool,
     pub host_visible: bool,
+    #[serde(default = "default_hp_view")]
+    pub hp_view: bool,
     #[serde(default, deserialize_with = "deserialize_hud_player")]
     pub player: Option<PlayerStats>,
     pub navigation: PanelNavigation,
@@ -20,6 +22,8 @@ pub struct HudUiSnapshot {
     pub stage_css_scale: f32,
     pub touch: bool,
 }
+fn default_hp_view() -> bool { true }
+
 fn deserialize_hud_player<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
 ) -> Result<Option<PlayerStats>, D::Error> {
@@ -175,6 +179,13 @@ impl HudUiSnapshot {
         ingress.navigation_revision = ingress.navigation_revision.max(self.navigation_revision);
         true
     }
+    /// Preference commit shares the exact accepted player/navigation ingress boundary.
+    pub fn apply_with_preferences(&self, ingress: &mut UiReadModelIngress, model: &mut UiReadModel,
+        nav: &mut PanelNavigation, preferences: &mut mir2_client_bevy::crystal_ui::hud::SharedHudPreferences) -> bool {
+        if !self.apply(ingress, model, nav) { return false; }
+        preferences.hp_view = self.hp_view;
+        true
+    }
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -311,6 +322,7 @@ mod web {
         mut ingress: ResMut<UiReadModelIngress>,
         mut model: ResMut<UiReadModel>,
         mut nav: ResMut<PanelNavigation>,
+        mut preferences: ResMut<mir2_client_bevy::crystal_ui::hud::SharedHudPreferences>,
         server: Res<AssetServer>,
         windows: Query<&Window>,
         mut quest: ResMut<mir2_client_bevy::portable_quest_ui::QuestUiHostContext>,
@@ -320,7 +332,7 @@ mod web {
             let generation = snapshot.generation;
             let revision = snapshot.revision;
             let new_generation = !ingress.has_complete_generation(generation);
-            if snapshot.apply(&mut ingress, &mut model, &mut nav) {
+            if snapshot.apply_with_preferences(&mut ingress, &mut model, &mut nav, &mut preferences) {
                 if new_generation || !snapshot.in_game || snapshot.player.is_none() {
                     ACTIONS.with(|a| a.borrow_mut().clear());
                 }
@@ -490,3 +502,34 @@ mod web {
 }
 #[cfg(target_arch = "wasm32")]
 pub(crate) use web::install;
+
+#[cfg(test)]
+mod hud_hp_preferences_tests {
+    use super::*;
+    fn raw() -> serde_json::Value { serde_json::json!({
+        "generation":1,"revision":1,"inGame":true,"hostVisible":true,
+        "logicalWidth":1024,"logicalHeight":768,"stageCssScale":1,"touch":false,
+        "navigation":{"characterOpen":false,"characterPage":"character","bagOpen":false,"questOpen":false} }) }
+    #[test]
+    fn hud_hp_view_optional_is_strict_and_old_snapshot_defaults_to_native_compact() {
+        assert!(serde_json::from_value::<HudUiSnapshot>(raw()).unwrap().hp_view);
+        let mut input=raw(); input["hpView"]=serde_json::json!(false);
+        assert!(!serde_json::from_value::<HudUiSnapshot>(input).unwrap().hp_view);
+        for value in [serde_json::Value::Null,serde_json::json!(0),serde_json::json!("false")] {
+            let mut input=raw(); input["hpView"]=value; assert!(serde_json::from_value::<HudUiSnapshot>(input).is_err());
+        }
+        let mut input=raw(); input["hp_view"]=serde_json::json!(false);
+        assert!(serde_json::from_value::<HudUiSnapshot>(input).is_err());
+    }
+    #[test]
+    fn hud_hp_view_stale_snapshot_never_relabels_current_preferences() {
+        let mut ingress=UiReadModelIngress::default(); let mut model=UiReadModel::default();
+        let mut nav=PanelNavigation::default(); let mut prefs=mir2_client_bevy::crystal_ui::hud::SharedHudPreferences::default();
+        let mut input=raw(); input["hpView"]=serde_json::json!(false);
+        let snapshot=serde_json::from_value::<HudUiSnapshot>(input).unwrap();
+        assert!(snapshot.apply_with_preferences(&mut ingress,&mut model,&mut nav,&mut prefs)); assert!(!prefs.hp_view);
+        let mut old=raw(); old["revision"]=serde_json::json!(0); old["hpView"]=serde_json::json!(true);
+        let old=serde_json::from_value::<HudUiSnapshot>(old).unwrap();
+        assert!(!old.apply_with_preferences(&mut ingress,&mut model,&mut nav,&mut prefs)); assert!(!prefs.hp_view);
+    }
+}

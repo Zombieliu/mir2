@@ -219,6 +219,10 @@ fn place_mobile_sheet(node: &mut Node, layout: MobileQuestLayout) {
 }
 
 impl QuestUiPresentation {
+    pub fn supports_world_tracker(self) -> bool {
+        [self.logical_width, self.logical_height, self.stage_css_scale].into_iter()
+            .all(|value| value.is_finite() && value > 0.0) && self.mobile_layout().is_none()
+    }
     /// Whether this touch viewport can use the readable single-sheet layout.
     /// Hosts can reject smaller viewports instead of showing desktop geometry.
     pub fn supports_mobile_layout(self) -> bool { self.mobile_layout().is_some() }
@@ -550,7 +554,7 @@ impl QuestRouteNavigationIntentQueue {
     }
 }
 
-fn quest_route_intent_is_current(
+pub fn quest_route_intent_is_current(
     intent: QuestRouteNavigationIntent,
     tracker: &QuestTracker,
     state: &QuestUiState,
@@ -1040,7 +1044,9 @@ pub enum QuestCompactObservationSet { Observe }
 
 #[cfg(not(feature = "native-ui"))]
 #[derive(Resource, Default)]
-struct QuestCompactLastBuild(Option<QuestCompactStamp>);
+// Host resources may be written with the same values on every renderer frame.
+// Compare the authority and visibility values instead of their ECS dirty flag.
+struct QuestCompactLastBuild(Option<QuestCompactStamp>, Option<(u64, u64, bool, bool, bool)>);
 
 #[cfg(not(feature = "native-ui"))]
 fn compact_expected_stamp(
@@ -1981,6 +1987,12 @@ pub(crate) struct QuestInputModels<'w> {
     #[cfg(not(feature = "native-ui"))]
     host_context: Option<Res<'w, crate::portable_quest_ui::QuestUiHostContext>>,
     #[cfg(not(feature = "native-ui"))]
+    world_context: Option<Res<'w, crate::portable_quest_ui::QuestWorldContext>>,
+    #[cfg(not(feature = "native-ui"))]
+    presentation_actions: Option<ResMut<'w, crate::portable_quest_ui::QuestPresentationActionQueue>>,
+    #[cfg(not(feature = "native-ui"))]
+    route_stamp: Option<ResMut<'w, crate::portable_quest_ui::QuestRouteWorldStamp>>,
+    #[cfg(not(feature = "native-ui"))]
     compact_readiness: Option<Res<'w, QuestCompactReadiness>>,
     presentation: Option<Res<'w, QuestUiPresentation>>,
     map: Option<Res<'w, MapModel>>,
@@ -2001,6 +2013,8 @@ struct JourneyRenderModels<'w> {
     #[cfg(not(feature = "native-ui"))]
     host_context: Option<Res<'w, crate::portable_quest_ui::QuestUiHostContext>>,
     #[cfg(not(feature = "native-ui"))]
+    world_context: Option<Res<'w, crate::portable_quest_ui::QuestWorldContext>>,
+    #[cfg(not(feature = "native-ui"))]
     compact_last_build: ResMut<'w, QuestCompactLastBuild>,
     presentation: Option<Res<'w, QuestUiPresentation>>,
     completed: Res<'w, CompletedQuestTracker>,
@@ -2016,16 +2030,52 @@ fn portable_unsupported_action(action: &QuestUiButton) -> bool {
     !cfg!(feature = "native-ui")
         && matches!(
             action,
-            QuestUiButton::ToggleSupplies
-                | QuestUiButton::SelectSupplyVendor(_)
-                | QuestUiButton::ShowSupplyInventory
-                | QuestUiButton::OpenDestinationMap
-                | QuestUiButton::NavigateQuestRoute(_)
+            QuestUiButton::NavigateQuestRoute(_)
                 | QuestUiButton::AttackTarget { .. }
                 | QuestUiButton::AttackQuestTarget { .. }
                 | QuestUiButton::PickUpObject { .. }
                 | QuestUiButton::PickUpTile
         )
+}
+
+/// One current view for portable actions and their compact/render consumers.
+/// Missing Quest authority never falls back to Bag/HUD/world-render resources.
+#[cfg(not(feature = "native-ui"))]
+struct CompactActionReadModel<'a> {
+    world: Option<&'a crate::portable_quest_ui::QuestWorldContext>,
+}
+
+#[cfg(not(feature = "native-ui"))]
+impl<'a> CompactActionReadModel<'a> {
+    fn new(host: Option<&crate::portable_quest_ui::QuestUiHostContext>,
+        world: Option<&'a crate::portable_quest_ui::QuestWorldContext>) -> Self {
+        Self { world: host.zip(world).filter(|(host, world)| world.current(host)).map(|(_, world)| world) }
+    }
+    fn map(&self) -> Option<&'a MapModel> { self.world.and_then(|world| world.map.as_ref()) }
+    fn big_map(&self) -> Option<&'a crate::big_map::BigMapModel> { self.world.and_then(|world| world.big_map.as_ref()) }
+    fn entities(&self) -> Option<&'a EntityModelSet> { self.world.map(|world| &world.entities) }
+}
+
+#[cfg(not(feature = "native-ui"))]
+pub(crate) fn portable_world_action(action: &QuestUiButton,
+    world: &crate::portable_quest_ui::QuestWorldContext, tracker: &QuestTracker,
+) -> Option<crate::portable_quest_ui::QuestPresentationAction> {
+    use crate::portable_quest_ui::QuestPresentationAction as Action;
+    let stamp = world.stamp.clone()?;
+    let action = match *action {
+        QuestUiButton::AttackTarget { object_id } => Action::AttackTarget { stamp, object_id },
+        QuestUiButton::AttackQuestTarget { object_id } => Action::AttackQuestTarget { stamp, object_id },
+        QuestUiButton::PickUpObject { object_id } => {
+            let row = world.ground_drops.iter().find(|row| row.object_id == object_id)?;
+            Action::PickUpObject { stamp, object_id, x: row.x, y: row.y }
+        }
+        QuestUiButton::PickUpTile => {
+            let (x, y) = world.self_tile()?;
+            Action::PickUpTile { stamp, x, y }
+        }
+        _ => return None,
+    };
+    action.current(world, tracker).then_some(action)
 }
 
 #[cfg(not(feature = "native-ui"))]
@@ -2163,8 +2213,15 @@ pub(crate) fn process_quest_ui_input(
         return;
     }
 
+    #[cfg(not(feature = "native-ui"))]
+    let action_models = CompactActionReadModel::new(models.host_context.as_deref(), models.world_context.as_deref());
+    #[cfg(not(feature = "native-ui"))]
+    let (world_map, world_entities, world_big_map) = (action_models.map(), action_models.entities(), action_models.big_map());
+    #[cfg(feature = "native-ui")]
+    let (world_map, world_entities, world_big_map) = (models.map.as_deref(), models.entities.as_deref(), models.big_map.as_deref());
+
     if quest_state.supply_open {
-        let epoch = models.big_map.as_deref().map(|map| map.reset_epoch);
+        let epoch = world_big_map.map(|map| map.reset_epoch);
         if quest_state.supply_epoch != epoch {
             quest_state.supply_epoch = epoch;
             quest_state.clear_feedback();
@@ -2200,7 +2257,7 @@ pub(crate) fn process_quest_ui_input(
         });
     if let Some(navigation) = route_navigation.as_deref_mut() {
         if navigation.pending.is_some_and(|intent| !quest_route_intent_is_current(
-            intent, tracker, &quest_state, journey.as_ref(), models.big_map.as_deref(),
+            intent, tracker, &quest_state, journey.as_ref(), world_big_map,
         )) {
             navigation.clear();
             quest_state.set_feedback("任务导航已更新，请重新选择目标", true);
@@ -2245,9 +2302,22 @@ pub(crate) fn process_quest_ui_input(
         if *interaction != Interaction::Pressed {
             continue;
         }
-        if portable_unsupported_action(action) {
+        #[cfg(not(feature = "native-ui"))]
+        let has_world = action_models.world.is_some();
+        #[cfg(feature = "native-ui")]
+        let has_world = true;
+        if portable_unsupported_action(action) && !has_world {
             quest_state.set_feedback("This Quest action needs the native world host", true);
             continue;
+        }
+        #[cfg(not(feature = "native-ui"))]
+        if matches!(action, QuestUiButton::SelectSupplyVendor(_) | QuestUiButton::OpenDestinationMap)
+            || matches!(action, QuestUiButton::ToggleSupplies) && !quest_state.supply_open {
+            if !models.host_context.as_deref().zip(models.world_context.as_deref())
+                .is_some_and(|(host, world)| world.current(host)) {
+                quest_state.set_feedback("Quest supplies are waiting for current world data", true);
+                continue;
+            }
         }
         if !matches!(action, QuestUiButton::PrepareQuestFinish { .. }
             | QuestUiButton::CompactDetailPage(_) | QuestUiButton::CompactNpcPage(_)
@@ -2255,6 +2325,18 @@ pub(crate) fn process_quest_ui_input(
             | QuestUiButton::CompactNpcRewardPrevious | QuestUiButton::CompactNpcRewardNext
             | QuestUiButton::CompactConfirmationPrevious | QuestUiButton::CompactConfirmationNext) {
             quest_state.pending_turn_in = None;
+        }
+        #[cfg(not(feature = "native-ui"))]
+        if matches!(action, QuestUiButton::AttackTarget { .. } | QuestUiButton::AttackQuestTarget { .. }
+            | QuestUiButton::PickUpObject { .. } | QuestUiButton::PickUpTile) {
+            let candidate = action_models.world.and_then(|world| portable_world_action(action, world, tracker));
+            if candidate.is_some_and(|action| models.presentation_actions.as_deref_mut()
+                .is_some_and(|queue| queue.push(action))) {
+                quest_state.set_feedback("Quest world action is waiting for the current host", false);
+            } else {
+                quest_state.set_feedback("Quest world action is unavailable or already pending", true);
+            }
+            continue;
         }
         match action.clone() {
             QuestUiButton::ToggleSupplies => {
@@ -2280,8 +2362,8 @@ pub(crate) fn process_quest_ui_input(
                     continue;
                 }
                 turn_in::begin(quest_index, &turn_in::TurnInContext {
-                    tracker, dialog: &dialog, map: models.map.as_deref(),
-                    entities: models.entities.as_deref(), big_map: models.big_map.as_deref(),
+                    tracker, dialog: &dialog, map: world_map,
+                    entities: world_entities, big_map: world_big_map,
                 }, &mut quest_state, &mut queue, &mut pending);
             }
             QuestUiButton::ToggleQuestGroup { group } => {
@@ -2869,22 +2951,40 @@ pub(crate) fn process_quest_ui_input(
                 // Keep feedback about close? Clear to avoid stale message.
             }
             QuestUiButton::OpenDestinationMap => {
+                #[cfg(feature = "native-ui")]
                 dispatch_quest_panel_action(
                     &mut player_ui, &mut effects,
                     mir2_ui_core::action::UiAction::OpenBigMap,
                 );
+                #[cfg(not(feature = "native-ui"))]
+                if let Some(stamp) = models.world_context.as_deref().and_then(|world| world.stamp.clone()) {
+                    if !models.presentation_actions.as_deref_mut().is_some_and(|actions|
+                        actions.push(crate::portable_quest_ui::QuestPresentationAction::OpenDestinationMap(stamp))) {
+                        quest_state.set_feedback("The map action is already pending", true);
+                    }
+                }
             }
             QuestUiButton::NavigateQuestRoute(intent) => {
+                #[cfg(not(feature = "native-ui"))]
+                let portable_stamp = action_models.world.filter(|world| world.self_tile().is_some())
+                    .and_then(|world| world.stamp.clone());
+                #[cfg(not(feature = "native-ui"))]
+                if portable_stamp.is_none() || models.route_stamp.is_none() {
+                    quest_state.set_feedback("Quest navigation is waiting for current world data", true);
+                    continue;
+                }
                 if !quest_route_intent_is_current(
                     intent,
                     tracker,
                     &quest_state,
                     journey.as_ref(),
-                    models.big_map.as_deref(),
+                    world_big_map,
                 ) {
                     quest_state.set_feedback(format!("{}引导已更新，请使用当前任务路线", intent.target.label()), true);
                 } else if let Some(route_navigation) = route_navigation.as_deref_mut() {
                     if route_navigation.push(intent) {
+                        #[cfg(not(feature = "native-ui"))]
+                        if let Some(stamp) = models.route_stamp.as_deref_mut() { stamp.0 = portable_stamp; }
                         quest_state.set_feedback(
                             format!("前往{} ({},{})", intent.target.label(), intent.x, intent.y),
                             false,
@@ -2970,8 +3070,8 @@ pub(crate) fn process_quest_ui_input(
         // immediately returns. That marks the resource changed and rebuilds
         // an otherwise idle compact Diary's measured text subtree.
         turn_in::advance(&turn_in::TurnInContext {
-            tracker, dialog: &dialog, map: models.map.as_deref(),
-            entities: models.entities.as_deref(), big_map: models.big_map.as_deref(),
+            tracker, dialog: &dialog, map: world_map,
+            entities: world_entities, big_map: world_big_map,
         }, &mut quest_state, &mut queue, &mut pending);
     }
 
@@ -3042,7 +3142,13 @@ pub(crate) fn process_quest_ui_input(
     // Native Crystal binding owns pickup; historical T/F/R prototype aliases
     // conflict with Trade/Friends/Skillbar and must not emit unrelated actions.
     if crate::crystal_ui::quest_key_triggered(&player_ui, &keys, "Pickup") {
+        #[cfg(feature = "native-ui")]
         queue.push_intent(QuestUiIntent::PickUpTile);
+        #[cfg(not(feature = "native-ui"))]
+        if let Some(action) = action_models.world.and_then(|world|
+            portable_world_action(&QuestUiButton::PickUpTile, world, tracker)) {
+            if let Some(actions) = models.presentation_actions.as_deref_mut() { actions.push(action); }
+        }
     }
 
     // Toggle quest log with Q when not blocked by other modals.
@@ -3178,6 +3284,16 @@ fn render_quest_ui(
     let compact_stamp_changed = compact_stamp != journey_models.compact_last_build.0;
     #[cfg(feature = "native-ui")]
     let compact_stamp_changed = false;
+    #[cfg(not(feature = "native-ui"))]
+    let host_stamp = journey_models.host_context.as_deref().map(|host|
+        (host.generation, host.revision, host.in_game, host.host_visible, host.layout_preparing));
+    #[cfg(not(feature = "native-ui"))]
+    let host_stamp_changed = host_stamp != journey_models.compact_last_build.1;
+    #[cfg(not(feature = "native-ui"))]
+    let world_context_changed = journey_models.world_context.as_ref().is_some_and(|model| model.is_changed())
+        || host_stamp_changed;
+    #[cfg(feature = "native-ui")]
+    let world_context_changed = false;
 
     // Avoid churn: only re-render when relevant state changed or quest log toggled.
     if !became_visible
@@ -3193,6 +3309,7 @@ fn render_quest_ui(
         && !journey_models.map.is_changed()
         && !journey_models.big_map.as_ref().is_some_and(|model| model.is_changed())
         && !journey_models.skills.as_ref().is_some_and(|model| model.is_changed())
+        && !world_context_changed
         && !pickups.is_changed()
         && !ui_model.is_changed()
         && !inventory.is_changed()
@@ -3209,6 +3326,8 @@ fn render_quest_ui(
 
     #[cfg(not(feature = "native-ui"))]
     if compact_stamp_changed { journey_models.compact_last_build.0 = compact_stamp; }
+    #[cfg(not(feature = "native-ui"))]
+    if host_stamp_changed { journey_models.compact_last_build.1 = host_stamp; }
 
     let has_dialog_content = dialog.is_open;
     let journey = journey_models.catalog.derive(
@@ -3217,8 +3336,35 @@ fn render_quest_ui(
         &journey_models.completed,
         &ui_model.player,
     );
-    let supply_plan = crate::quest_supplies::plan(&ui_model.player, &inventory,
-        journey_models.skills.as_deref(), primary_quest_index(&tracker, &quest_state, journey.as_ref()));
+    #[cfg(feature = "native-ui")]
+    let supply_plan = Some(crate::quest_supplies::plan(&ui_model.player, &inventory,
+        journey_models.skills.as_deref(), primary_quest_index(&tracker, &quest_state, journey.as_ref())));
+    #[cfg(not(feature = "native-ui"))]
+    let supply_plan = journey_models.host_context.as_deref()
+        .zip(journey_models.world_context.as_deref())
+        .filter(|(host, world)| world.current(host))
+        .and_then(|(_, world)| world.player.as_ref().zip(world.inventory.as_ref()).map(|(player, inventory)|
+            crate::quest_supplies::plan(player, inventory, world.skills.as_ref(),
+                primary_quest_index(&tracker, &quest_state, journey.as_ref()))));
+    #[cfg(not(feature = "native-ui"))]
+    let action_models = CompactActionReadModel::new(journey_models.host_context.as_deref(), journey_models.world_context.as_deref());
+    #[cfg(not(feature = "native-ui"))]
+    let empty_entities = EntityModelSet::default();
+    #[cfg(not(feature = "native-ui"))]
+    let empty_map = MapModel::default();
+    #[cfg(not(feature = "native-ui"))]
+    let empty_target = CombatTargetModel::default();
+    #[cfg(not(feature = "native-ui"))]
+    let empty_pickups = GroundPickupModel::default();
+    #[cfg(not(feature = "native-ui"))]
+    let (world_entities, world_map, world_big_map, world_target, world_pickups) = (
+        action_models.world.map(|world| &world.guidance_entities).unwrap_or(&empty_entities),
+        action_models.map().unwrap_or(&empty_map), action_models.big_map(),
+        action_models.world.map(|world| &world.target).unwrap_or(&empty_target),
+        action_models.world.map(|world| &world.pickups).unwrap_or(&empty_pickups));
+    #[cfg(feature = "native-ui")]
+    let (world_entities, world_map, world_big_map, world_target, world_pickups) = (
+        &*journey_models.entities, &*journey_models.map, journey_models.big_map.as_deref(), &*target, &*pickups);
     let available_npc_quests =
         npc_available_quests(&dialog, &tracker, Some(&journey_models.guidance));
     let has_npc_quests = !available_npc_quests.is_empty();
@@ -3251,11 +3397,15 @@ fn render_quest_ui(
         } else if is_dialog.is_some() {
             mobile_sheet.map_or(has_dialog_content, |sheet| sheet == MobileQuestSheet::Dialog)
         } else if is_tracker.is_some() {
-            mobile.is_none() && cfg!(feature = "native-ui") && journey_tracker_visible(journey.is_some(), player_ui.core.panel)
+            #[cfg(not(feature = "native-ui"))]
+            let current_world = action_models.world.is_some_and(|world| world.self_tile().is_some());
+            #[cfg(feature = "native-ui")]
+            let current_world = true;
+            mobile.is_none() && current_world && journey_tracker_visible(journey.is_some(), player_ui.core.panel)
         } else if is_target.is_some() {
-            mobile.is_none() && CRYSTAL_TARGET_PANEL_VISIBLE && target.target.is_some()
+            mobile.is_none() && CRYSTAL_TARGET_PANEL_VISIBLE && world_target.target.is_some()
         } else if is_pickup.is_some() {
-            SHOW_PICKUP_FEEDBACK_PANEL && !pickups.recent.is_empty()
+            SHOW_PICKUP_FEEDBACK_PANEL && !world_pickups.recent.is_empty()
         } else if is_player_hud.is_some() || is_control_hint.is_some() || is_quick_bag.is_some() {
             false
         } else {
@@ -3283,11 +3433,11 @@ fn render_quest_ui(
                     &tracker,
                     &quest_state,
                     journey.as_ref(),
-                    &journey_models.entities,
-                    &journey_models.map,
-                    journey_models.big_map.as_deref(),
+                    world_entities,
+                    world_map,
+                    world_big_map,
                     ui_model.player.class_name.as_deref().unwrap_or(""),
-                    &supply_plan, render_text);
+                    supply_plan.as_ref(), render_text);
             } else if is_dialog.is_some() {
                 if let Some(layout) = mobile {
                     render_mobile_dialog_panel(panel, layout, &dialog, &npc_nav, &quest_state, has_npc_quests, render_text);
@@ -3297,9 +3447,9 @@ fn render_quest_ui(
                         asset_server.as_ref().map(|server| &**server), render_text);
                 }
             } else if is_target.is_some() {
-                render_combat_target_panel(panel, target.target.as_ref());
+                render_combat_target_panel(panel, world_target.target.as_ref());
             } else if is_pickup.is_some() {
-                render_pickup_panel(panel, &pickups, &quest_state);
+                render_pickup_panel(panel, world_pickups, &quest_state);
             } else if is_player_hud.is_some() {
                 render_player_hud_panel(panel, &ui_model);
             } else if is_control_hint.is_some() {
@@ -3696,7 +3846,7 @@ fn render_quest_tracker_panel(
     map_model: &MapModel,
     big_map: Option<&crate::big_map::BigMapModel>,
     class_name: &str,
-    supplies: &crate::quest_supplies::SupplyPlan,
+    supplies: Option<&crate::quest_supplies::SupplyPlan>,
     render_text: QuestRenderText,
 ) {
     if journey.is_some() && state.supply_open {
@@ -7510,7 +7660,7 @@ fn pickup_tile_is_current(pickups: Option<&GroundPickupModel>) -> bool {
     })
 }
 
-fn target_is_attackable(target: Option<&CombatTargetModel>, object_id: u32) -> bool {
+pub fn target_is_attackable(target: Option<&CombatTargetModel>, object_id: u32) -> bool {
     target
         .and_then(|model| model.target.as_ref())
         .is_some_and(|target| {
@@ -7518,7 +7668,7 @@ fn target_is_attackable(target: Option<&CombatTargetModel>, object_id: u32) -> b
         })
 }
 
-fn quest_target_is_visible(
+pub fn quest_target_is_visible(
     tracker: &QuestTracker,
     entities: &EntityModelSet,
     object_id: u32,
@@ -8118,6 +8268,26 @@ mod tests {
             assert_eq!(font.font, FontSource::Family("Microsoft YaHei".into()));
         }
         assert_eq!(intent_from_button(&QuestUiButton::OpenDestinationMap), None);
+    }
+
+    #[cfg(not(feature = "native-ui"))]
+    #[test]
+    fn portable_quest_supplies_and_map_are_local_while_five_world_actions_stay_guarded() {
+        use super::*;
+        use crate::quest_supplies::SupplyVendor;
+        for action in [QuestUiButton::ToggleSupplies, QuestUiButton::ShowSupplyInventory,
+            QuestUiButton::SelectSupplyVendor(SupplyVendor::Potions), QuestUiButton::OpenDestinationMap] {
+            assert!(!portable_unsupported_action(&action));
+            assert!(intent_from_button(&action).is_none());
+        }
+        for action in [QuestUiButton::NavigateQuestRoute(QuestRouteNavigationIntent {
+                target: QuestRouteTarget::Entrance, quest_index: 1, reset_epoch: 1,
+                map_index: 0, x: 1, y: 1 }),
+            QuestUiButton::AttackTarget { object_id: 1 },
+            QuestUiButton::AttackQuestTarget { object_id: 1 },
+            QuestUiButton::PickUpObject { object_id: 1 }, QuestUiButton::PickUpTile] {
+            assert!(portable_unsupported_action(&action));
+        }
     }
 
     use super::*;

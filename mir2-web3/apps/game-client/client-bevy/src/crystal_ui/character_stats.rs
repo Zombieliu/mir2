@@ -25,6 +25,7 @@ pub fn guild_label(player: &PlayerStats) -> String {
     .collect::<Vec<_>>()
     .join(" ")
 }
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub fn spawn_character_header(
     parent: &mut bevy::prelude::ChildSpawnerCommands,
     server: Option<&bevy::prelude::AssetServer>,
@@ -85,6 +86,7 @@ pub fn authoritative_lines(player: &PlayerStats, state_page: bool) -> Vec<(Strin
 }
 
 /// The native overlay and the portable sheet call this exact row painter.
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub fn spawn_authoritative_rows(
     parent: &mut bevy::prelude::ChildSpawnerCommands,
     player: &PlayerStats,

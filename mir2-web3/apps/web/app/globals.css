@@ -3789,6 +3789,9 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   bottom: calc(100% + 6px);
 }
 
+.trade-item-card:hover .original-item-tooltip,
+.trade-item-card:focus .original-item-tooltip,
+.trade-item-card:focus-visible .original-item-tooltip,
 .inventory-item-card:hover .original-item-tooltip,
 .inventory-item-card:focus .original-item-tooltip,
 .inventory-item-card:focus-visible .original-item-tooltip,

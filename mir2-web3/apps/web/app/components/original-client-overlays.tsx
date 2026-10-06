@@ -700,6 +700,7 @@ export type MainHudProps = {
   mapTitle: string | null;
   player: HudPlayerLike;
   world: HudWorldLike;
+  hpView?: boolean;
   showCharacter: boolean;
   showInventory: boolean;
   showQuestLog: boolean;
@@ -708,6 +709,7 @@ export type MainHudProps = {
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
   onToggleQuestLog: () => void;
+  onToggleOptions?: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onDropGold: () => void;
@@ -741,12 +743,39 @@ export function MainHudStatus({ t, mapTitle, world }: Pick<MainHudProps, "t" | "
   </div>;
 }
 
+/** Native shared_hud.rs HPView labels; coordinates are in the 1024x768 stage. */
+export function crystalMainHudHealthLabels({ player, world, hpView = true }: Pick<MainHudProps, "player" | "world" | "hpView">) {
+  const hpOnly = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+  const hp = world.playerHp ?? 0, maxHp = world.playerMaxHp ?? 0;
+  const mp = world.playerMp ?? 0, maxMp = world.playerMaxMp ?? 0;
+  if (hpView) return [
+    { kind: "compactHp", text: `HP ${hp}/${maxHp}`, left: 0, top: 673, width: 100, height: 14, compact: true },
+    ...(!hpOnly ? [{ kind: "compactMp", text: `MP ${mp}/${maxMp} `, left: 0, top: 688, width: 100, height: 14, compact: true }] : []),
+  ];
+  return [
+    { kind: "alternateTop", text: hpOnly ? `${hp}\n--` : ` ${hp}    ${mp} \n---------------`, left: 9, top: 666, width: 85, height: 30, compact: false },
+    { kind: "alternateBottom", text: hpOnly ? String(maxHp) : ` ${maxHp}    ${maxMp} `, left: 9, top: 696, width: 85, height: 30, compact: false },
+  ];
+}
+
+/** Passive labels only. Shared renderer hosts must retire their own labels before opting in. */
+export function MainHudHealthLabels({ player, world, hpView = true, originTop = 618 }: Pick<MainHudProps, "player" | "world" | "hpView"> & { originTop?: number }) {
+  return <>{crystalMainHudHealthLabels({ player, world, hpView }).map(label =>
+    <div key={label.kind} data-hud-health-label={label.kind}
+      style={{ position: "absolute", left: label.left, top: label.top - originTop, width: label.width, height: label.height,
+        display: label.compact ? "flex" : "block", alignItems: "center", justifyContent: "center",
+        overflow: "hidden", pointerEvents: "none", whiteSpace: "pre", textAlign: "center",
+        fontFamily: "Arial, Helvetica, sans-serif", fontSize: 32 / 3, fontWeight: 400, color: "#fff",
+        textShadow: "1px 1px 0 #000" }}>{label.text}</div>)}</>;
+}
+
 export function MainHud({
   t,
   connected,
   mapTitle,
   player,
   world,
+  hpView = true,
   showCharacter,
   showInventory,
   showQuestLog,
@@ -755,6 +784,7 @@ export function MainHud({
   onToggleCharacter,
   onToggleInventory,
   onToggleQuestLog,
+  onToggleOptions,
   onOpenCharacterTab,
   onOpenInventoryTab,
   showGameShop,
@@ -766,17 +796,7 @@ export function MainHud({
   const healthRatio = ratio(world.playerHp, world.playerMaxHp);
   const manaRatio = ratio(world.playerMp, world.playerMaxMp);
   const experienceRatio = ratio(world.playerExperience, world.playerMaxExperience);
-  const currentHp = world.playerHp ?? 0;
-  const maxHp = world.playerMaxHp ?? 0;
-  const currentMp = world.playerMp ?? 0;
-  const maxMp = world.playerMaxMp ?? 0;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
-  const hpOnlyText = `HP ${currentHp}/${maxHp}`;
-  const hpOnlyGdiText = findCrystalGdiTextAsset({
-    text: hpOnlyText,
-    foreground: "#ffffff",
-    outline: true,
-  });
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs
     .slice(0, 2)
@@ -838,18 +858,7 @@ export function MainHud({
           <img src={ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
         </div>
 
-        {hpOnlyOrb ? (
-          <div className="hud-health-only-label">
-            {hpOnlyGdiText ? (
-              <CrystalGdiTextImage asset={hpOnlyGdiText} accessibleText={hpOnlyText} />
-            ) : hpOnlyText}
-          </div>
-        ) : (
-          <>
-            <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>
-            <div className="hud-bottom-label">{`${maxHp}    ${maxMp}`}</div>
-          </>
-        )}
+        <MainHudHealthLabels player={player} world={world} hpView={hpView} />
         <div className="hud-level-label">{player?.level ?? 1}</div>
         <div className="hud-name-label">{player?.name ?? ""}</div>
         <div className="hud-map-label">
@@ -883,9 +892,7 @@ export function MainHud({
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.quest} label={t("ui.quest")} onClick={onToggleQuestLog} active={showQuestLog} />
         </div>
         <div className="hud-button option">
-          {/* The Crystal button opens OptionDialog, not Character/stats2. Keep
-              it truthfully disabled until that distinct dialog is wired. */}
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} disabled />
+          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} onClick={onToggleOptions} disabled={!onToggleOptions} />
         </div>
       </div>
     </div>

@@ -118,7 +118,7 @@ export function removeItemByUniqueId<
 
 /** Normalised friend record for the social panel. */
 export type NormalizedFriend = {
-  index: number;
+  index?: number;
   name: string;
   memo: string;
   blocked: boolean;
@@ -140,7 +140,7 @@ export function normalizeFriendList(raw: unknown): NormalizedFriend[] {
     }
     return [
       {
-        index: packetNumber(record.index) ?? 0,
+        ...(typeof record.index === "number" && Number.isSafeInteger(record.index) && record.index >= 0 && record.index <= 0x7fff_ffff ? {index: record.index} : {}),
         name,
         memo: packetString(record.memo) ?? "",
         blocked: packetBool(record.blocked) ?? false,
@@ -253,11 +253,34 @@ function gatewayItemExpiryReviver(this:Record<string,unknown>,key:string,value:u
   try{const n=BigInt(source);return n>=-9223372036854775808n&&n<=9223372036854775807n?source:null;}catch{return null;}
 }
 
+/** Preserve only the three i64 values in a complete creature-shaped carrier.
+ * An unsafe identity elsewhere remains a Number and fails its normal validator. */
+function gatewayCreatureTimeReviver(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string}):unknown {
+  if(!["expireBinaryDatetime","blackstoneTime","maintainFoodTime"].includes(key)
+    ||!mailObject(this)||!mailInt(this.petType,0,255)||!mailInt(this.slotIndex,0,9)
+    ||typeof this.customName!=="string"||!mailObject(this.creatureRules)||!mailObject(this.filter)
+    ||typeof value!=="number"||Number.isSafeInteger(value))return value;
+  const source=context?.source;
+  if(typeof source!=="string"||!/^(?:0|[1-9]\d{0,18}|-[1-9]\d{0,18})$/.test(source))return null;
+  try{const n=BigInt(source);return n>=-9223372036854775808n&&n<=9223372036854775807n?source:null;}catch{return null;}
+}
+
+function gatewayGameShopDateReviver(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string}):unknown {
+  if(key!=="date_binary_datetime"||!mailObject(this)||!mailInt(this.g_index,0,2147483647)
+    ||!mailInt(this.item_index,0,2147483647)||!mailObject(this.info)||typeof this.can_buy_gold!=="boolean"
+    ||typeof this.can_buy_credit!=="boolean"||typeof value!=="number"||Number.isSafeInteger(value))return value;
+  const source=context?.source;
+  if(typeof source!=="string"||!/^(?:0|[1-9]\d{0,18}|-[1-9]\d{0,18})$/.test(source))return null;
+  try{const n=BigInt(source);return n>=-9223372036854775808n&&n<=9223372036854775807n?source:null;}catch{return null;}
+}
+
 /** Preserve plain item expiry on every packet and the existing ReceiveMail date.
  * Without reviver source support, an unsafe plain expiry becomes unknown. */
 export function parseGatewayMailDates(text:string):unknown {
   const parse=JSON.parse as (text:string,reviver:(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string})=>unknown)=>unknown;
-  const parsed:unknown=parse(text,gatewayItemExpiryReviver);
+  const parsed:unknown=parse(text,function(key,value,context){
+    return gatewayItemExpiryReviver.call(this,key,gatewayCreatureTimeReviver.call(this,key,gatewayGameShopDateReviver.call(this,key,value,context),context),context);
+  });
   if(!mailObject(parsed)||parsed.type!=="packet"||parsed.packet!=="ReceiveMail")return parsed;
   return parse(text,function(key,value,context){
     if((key==="dateSentBinaryDatetime"||key==="date_sent_binary_datetime")&&typeof value==="number"&&mailInt(this.mailId??this.mail_id,1,Number.MAX_SAFE_INTEGER)&&typeof context?.source==="string"&&/^-?\d{1,19}$/.test(context.source)){

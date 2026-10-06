@@ -246,7 +246,7 @@ fn button(parent: &mut ChildSpawnerCommands, text: &str, action: QuestUiButton) 
 
 pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, state: &QuestUiState,
     journey: Option<&JourneyView>, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>, class_name: &str,
-    supplies: &crate::quest_supplies::SupplyPlan) -> bool {
+    supplies: Option<&crate::quest_supplies::SupplyPlan>) -> bool {
     let Some(primary) = primary_quest_index(tracker, state, journey) else { return false; };
     let Some(quest) = tracker.active_quests.iter().find(|q| q.quest_index == primary) else { return false; };
     let nearby = nearby_indices(primary, tracker, entities, map, big_map);
@@ -320,7 +320,11 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
         }
         button(card, "查看任务详情", QuestUiButton::SelectQuest { quest_index: primary });
         button(card, "打开大地图", QuestUiButton::OpenDestinationMap);
-        button(card, &supplies.summary(), QuestUiButton::ToggleSupplies);
+        if let Some(supplies) = supplies {
+            button(card, &supplies.summary(), QuestUiButton::ToggleSupplies);
+        } else {
+            line(card, "补给未就绪 · 等待当前角色库存", PANEL_TEXT);
+        }
         if !nearby.is_empty() { line(card, "附近可顺便完成", PANEL_HIGHLIGHT); }
         for id in &nearby {
             let other = tracker.active_quests.iter().find(|q| q.quest_index == *id).unwrap();
@@ -347,7 +351,15 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
 /// Supplies replace the tracker while expanded, so the six inventory rows and
 /// route guidance cannot push quest text into the bottom HUD.
 pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUiState,
-    big_map: Option<&BigMapModel>, supplies: &crate::quest_supplies::SupplyPlan) {
+    big_map: Option<&BigMapModel>, supplies: Option<&crate::quest_supplies::SupplyPlan>) {
+    let Some(supplies) = supplies else {
+        parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(8.0), top: Val::Px(16.0),
+            ..default() },)).with_children(|card| {
+            line(card, "补给未就绪 · 等待当前角色库存", PANEL_TEXT);
+            button(card, "返回任务引导", QuestUiButton::ToggleSupplies);
+        });
+        return;
+    };
     let displayed_cost = supplies.rows.iter()
         .filter(|row| state.supply_vendor.is_none_or(|vendor| row.vendor == vendor))
         .map(|row| row.shortage().saturating_mul(row.unit_price)).fold(0_u32, u32::saturating_add);
@@ -462,7 +474,7 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &MapModel::default(), None, "Warrior", &test_supplies()));
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &MapModel::default(), None, "Warrior", Some(&test_supplies())));
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|t| t.0.as_str()).collect::<Vec<_>>().join("\n");
@@ -575,7 +587,7 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior", &test_supplies()));
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior", Some(&test_supplies())));
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str())
@@ -613,7 +625,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior", &test_supplies()));
+                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior", Some(&test_supplies())));
             });
             queue.apply(&mut world);
             assert!(world.query::<(&Text, &TextColor)>().iter(&world)
@@ -700,7 +712,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior", &test_supplies()));
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior", Some(&test_supplies())));
             });
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
@@ -758,7 +770,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior", &test_supplies()));
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior", Some(&test_supplies())));
             });
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,

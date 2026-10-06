@@ -94,7 +94,7 @@ test("actual shell handler keeps uncovered HUD available with Bag/Quest open and
   class Element { constructor(id) { this.id = id; } setPointerCapture() {} }
   const router = new hud.HudPointerRouter(), held = { current: null }, bag = { current: { held: null } }, actions = [], moves = [];
   let foreground = [], current = status({ navigation: { ...navigation, bagOpen: true } });
-  const scope = { HTMLElement: Element, sharedUiCanvasId: () => "shared", webGl2SharedCanvasPrototype: true, bevyHudUiReady: true,
+  const scope = { parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, HTMLElement: Element, sharedUiCanvasId: () => "shared", webGl2SharedCanvasPrototype: true, bevyHudUiReady: true,
     hudPointerRouterRef: { current: router }, bagPointerRouterRef: bag, heldScenePointerRef: held,
     characterPointerCallbacksRef: { current: { getBevyCharacterPointerContext: () => null } },
     spellsPointerCallbacksRef: { current: { getBevySpellsPointerContext: () => null } },
@@ -115,6 +115,6 @@ test("actual shell handler keeps uncovered HUD available with Bag/Quest open and
   handler(edge(400, 400), "down"); handler(edge(930, 694), "move"); handler(edge(930, 694), "up");
   assert.equal(moves.length, 1); assert.equal(moves[0].sceneX, 930, "world origin retains the existing world release path");
   handler(edge(400, 400), "down"); current = status({ generation: 8 }); handler(edge(930, 694), "up"); assert.equal(moves.length, 1);
-  assert.match(file.text, /\[bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player\?\.objectId/);
-  assert.match(file.text, /const blur = \(\) => \{ cancelSharedSpellsPointer\(\);\s*cancelSharedCharacterPointer\(\); cancelSharedBagPointer\("blur"\); cancelSharedHudPointer\(\); \}/);
+  assert.match(file.text, /\[bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player\?\.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning,/);
+  assert.match(file.text, /const blur = \(\) => \{ heldQuestControlPointersRef\.current\.clear\(\); cancelSharedNpcShopPointer\("blur"\); cancelSharedStoragePointer\("blur"\); cancelSharedComposePointer\(\);cancelSharedMailPointer\(\);cancelSharedSpellsPointer\(\);cancelSharedCharacterPointer\(\); cancelSharedBagPointer\("blur"\); cancelSharedHudPointer\(\); \}/);
 });

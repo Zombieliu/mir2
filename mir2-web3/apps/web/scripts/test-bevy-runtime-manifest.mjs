@@ -78,4 +78,29 @@ test("schema2 enforces IDs, backends, strict booleans, and ABI pairing", () => {
     packages: [pkg("webgpu", 0), pkg("webgl2", 0)] }).packages[0].questUiAbiVersion, 0);
 });
 
+test("schema2 allows truthful lean ABI0 only beside GPU ABI1 and shared ABI1", () => {
+  const mixed = { ...schema2(), packages: [pkg("webgpu", 1), pkg("webgl2", 0), pkg("webgl2-shared", 1)] };
+  const normalized = validateBevyRuntimeManifest(mixed);
+  assert.deepEqual(normalized.packages.map(({ questUiAbiVersion, bagUiAbiVersion, primarySharedUiCompiled }) =>
+    [questUiAbiVersion, bagUiAbiVersion, primarySharedUiCompiled]), [[1, 1, false], [0, 0, false], [1, 1, true]]);
+  assert.deepEqual(normalized.files, mixed.files);
+  assert.ok(normalized.packages.every(Object.isFrozen));
+  assert.deepEqual(validateBevyRuntimeManifest(schema2()).packages.map((item) => item.questUiAbiVersion), [1, 1, 1]);
+  for (const abi of [0, 1]) assert.deepEqual(validateBevyRuntimeManifest({ ...schema2(false),
+    packages: [pkg("webgpu", abi), pkg("webgl2", abi)] }).packages.map((item) => item.bagUiAbiVersion), [abi, abi]);
+  for (const packages of [[pkg("webgpu", 1), pkg("webgl2", 0)], [pkg("webgpu", 0), pkg("webgl2", 1)]]) {
+    assert.throws(() => validateBevyRuntimeManifest({ ...schema2(false), packages }));
+  }
+  for (const candidate of [
+    { ...pkg("webgl2", 0), questUiAbiVersion: "0" },
+    { ...pkg("webgl2", 0), bagUiAbiVersion: 1 },
+    { ...pkg("webgl2", 0), primarySharedUiCompiled: true },
+    { ...pkg("webgl2", 0), primarySharedUiCompiled: 0 },
+    { ...pkg("webgl2", 0), extra: true },
+  ]) assert.throws(() => validateBevyRuntimeManifest({ ...mixed,
+    packages: [pkg("webgpu", 1), candidate, pkg("webgl2-shared", 1)] }));
+  assert.throws(() => validateBevyRuntimeManifest({ ...mixed,
+    packages: [pkg("webgpu", 0), pkg("webgl2", 0), pkg("webgl2-shared", 1)] }));
+});
+
 export { schema2, legacy };

@@ -1,5 +1,9 @@
 # Shared client convergence goal
 
+## 新 goal：优先交付 Web 对齐 Windows（2026-10-06）
+
+Source09 输入、Rust新增12+保留2测试、TSC / finite / Next、Native09 / renderer07、Thin03静态打包审计均已按各自冻结输入闭合。Thin 包 7,299文件、372,474,859 B，360 MiB cap余量5,012,501 B；文件hash、231 JSON token和静态依赖闭包均通过。44条依赖warning计为Error仍待解释；无服务、HTTP、runtime或UI验收，MIR2_R2_PROXY_BASE与Pet/Gate覆盖仍有边界。F11原44项分母不冻结，goal active。详见 [QA 索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
 ## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
 
 本批 Source03 已通过独立源代码与实际结果审查，0 blocker；现有串行 CargoGuard 下 **3/3 组、53/53 项执行通过**（购买 18、会话 34、商城 1），其中 **16 项新增测试**。两轮历史测试失败保留，不计入 53 项通过数；修正仅涉及新增测试夹具和预期，产品代码保持一致。

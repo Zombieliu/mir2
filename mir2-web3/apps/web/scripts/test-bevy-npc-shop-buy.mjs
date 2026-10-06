@@ -381,6 +381,7 @@ const pagePureSources = {
   parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts",
   bag: "../lib/bevy-bag-model.ts",
+  operations: "../lib/social-window-operations.ts",
 };
 const pagePureRequires = {
   identity: {}, equipment: { "./world-model/item-identity": "identity" },
@@ -388,6 +389,7 @@ const pagePureRequires = {
   storage: { "./equipment-gateway-adapter": "equipment",
     "./world-model/item-identity": "identity", "./mail-parcel-gateway-adapter": "parcel" },
   bag: { "./world-model/item-identity": "identity" },
+  operations: {},
 };
 const pagePureModules = new Map();
 function loadPagePure(name) {
@@ -409,7 +411,7 @@ const actualPageAst = ts.createSourceFile("actual-npc-buy-page.tsx", actualPageS
   ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcShopItem",
   "legacyNpcBuyAllowed", "buyNpcShopItem", "retireNpcShopService", "send", "sendRaw",
-  "itemCommandRequiresOwner"];
+  "itemCommandRequiresOwner", "socialItemMutationAllowed", "parityItemMutationAllowed"];
 const npcPageDeclarations = new Map();
 const npcPageDispatcherCreations = [];
 const npcResponseClauses = [];
@@ -483,11 +485,13 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   const legacyMap = new WeakMap(), realSet = legacyMap.set.bind(legacyMap);
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
+    heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
     NpcGoldBuyDispatcher, projectBevyBagModel: npcPureBag.projectBevyBagModel,
     npcGoldBuyInventoryRef: { current: new module.exports.NpcGoldBuyInventoryReadiness() },
     mailMutationAllowed: npcPureParcel.mailMutationAllowed,
     isMailItemMutation: npcPureParcel.isMailItemMutation,
     storageMutationAllowed: npcPureStorage.storageMutationAllowed,
+    socialItemOperationsRef: { current: new (loadPagePure("operations").SocialWindowOperations)() },
     npcShopService: service, npcShopServiceRef: { current: service }, world, worldRef: { current: world },
     runtimeRef: { current: runtime }, questCoreRuntimeRef: { current: { getNpcGoldBuyAttemptSlot: () => slot } },
     console: { error: (...args) => errors.push(args) }, npcBuyDispatcherRef: { current: null },

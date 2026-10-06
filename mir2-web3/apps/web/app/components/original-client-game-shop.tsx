@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
-import {
-  CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX,
-  CRYSTAL_GAME_SHOP_ITEMS,
-} from "../../lib/generated/crystal-game-shop-data";
+import { cashGameShopConfirmationCurrent, cashGameShopQuantityLimit, makeCashGameShopConfirmation,
+  type CashGameShopConfirmation, type CashGameShopEntry, type CashGameShopSource } from "../../lib/cash-game-shop-ui";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import type { ItemTooltipGrade } from "./original-client-item-tooltip";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -20,26 +20,7 @@ type TranslateFn = (
 
 type EntityClassKey = "warrior" | "wizard" | "taoist" | "assassin" | "archer";
 
-type CrystalGameShopEntry = {
-  item_index: number;
-  game_shop_index: number;
-  item_name: string;
-  gold_price: number;
-  credit_price: number;
-  count: number;
-  item_shape: number;
-  item_stack_size: number;
-  class: string;
-  category: string;
-  stock: number;
-  stock_level: number;
-  individual_stock: boolean;
-  deal: boolean;
-  top_item: boolean;
-  date_binary_datetime: string;
-  can_buy_credit: boolean;
-  can_buy_gold: boolean;
-};
+type CrystalGameShopEntry = CashGameShopEntry;
 
 type CrystalItemEntry = {
   image: number;
@@ -59,14 +40,22 @@ export function GameShopWindow({
   gold,
   credits,
   playerClass,
-  onBuy,
+  source = null,
+  purchasePending = false,
+  onConfirmPurchase,
+  onReadItemTooltip,
   onClose,
 }: {
   t: TranslateFn;
   gold: number;
   credits: number;
   playerClass: EntityClassKey;
-  onBuy: (gameShopIndex: number, quantity: number, paymentType: GameShopPaymentType) => void;
+  /** Retained for caller compatibility; authoritative purchases use the captured confirmation. */
+  onBuy?: (gameShopIndex: number, quantity: number, paymentType: GameShopPaymentType) => void;
+  source?: CashGameShopSource | null;
+  purchasePending?: boolean;
+  onConfirmPurchase?: (confirmation: CashGameShopConfirmation) => void;
+  onReadItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
   onClose: () => void;
 }) {
   const [sectionFilter, setSectionFilter] = useState<GameShopSectionFilter>("all");
@@ -77,10 +66,15 @@ export function GameShopWindow({
   const [paymentType, setPaymentType] = useState<GameShopPaymentType>("gold");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [preview, setPreview] = useState<{ item: CrystalGameShopEntry; cellLeft: number } | null>(null);
+  const [activeTooltip, setActiveTooltip] = useState<CrystalGameShopEntry | null>(null);
+  const [confirmation, setConfirmation] = useState<CashGameShopConfirmation | null>(null);
+  const submittedConfirmation = useRef<CashGameShopConfirmation | null>(null);
+  const catalog = source?.entries ?? [];
+  const confirmationCurrent = confirmation !== null && cashGameShopConfirmationCurrent(confirmation, source);
 
   const sectionItems = useMemo(
-    () => applyGameShopSectionFilter(CRYSTAL_GAME_SHOP_ITEMS, sectionFilter),
-    [sectionFilter],
+    () => applyGameShopSectionFilter(catalog, sectionFilter),
+    [catalog, sectionFilter],
   );
   const classItems = useMemo(
     () => sectionItems.filter((item) => gameShopClassMatches(item.class, classFilter)),
@@ -132,9 +126,10 @@ export function GameShopWindow({
       setPage(pageCount - 1);
     }
   }, [page, pageCount]);
+  useEffect(() => { setActiveTooltip(null); }, [source?.entries, sectionFilter, classFilter, categoryFilter, currentPage, search]);
 
   const setQuantity = (gameShopIndex: number, nextQuantity: number) => {
-    const item = CRYSTAL_GAME_SHOP_ITEMS.find((candidate) => candidate.game_shop_index === gameShopIndex);
+    const item = catalog.find((candidate) => candidate.game_shop_index === gameShopIndex);
     setQuantities((current) => ({
       ...current,
       [gameShopIndex]: item ? clampGameShopQuantity(item, nextQuantity) : Math.max(1, Math.min(99, nextQuantity)),
@@ -144,9 +139,18 @@ export function GameShopWindow({
   const showPreview = (item: CrystalGameShopEntry, cellLeft: number) => {
     setPreview({ item, cellLeft });
   };
+  const requestConfirmation = (item: CrystalGameShopEntry) => {
+    if (purchasePending || !onConfirmPurchase) return;
+    const captured = makeCashGameShopConfirmation(source, item.game_shop_index,
+      clampGameShopQuantity(item, quantities[item.game_shop_index] ?? 1), paymentType);
+    if (captured) setConfirmation(captured);
+  };
 
   return (
-    <section className="game-shop-window" aria-label={t("ui.gameShop")}>
+    <section className="game-shop-window" aria-label={t("ui.gameShop")} onKeyDown={event => {
+      if (event.key === "Escape" && confirmation) { event.stopPropagation(); setConfirmation(null); }
+    }}>
+      <style>{'.game-shop-cell-frame > .original-item-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }'}</style>
       <img className="game-shop-frame" src={ORIGINAL_UI.gameShop.frame} alt="" draggable={false} />
       <img className="game-shop-title" src={ORIGINAL_UI.gameShop.title} alt="GAMESHOP" draggable={false} />
       <div className="game-shop-close">
@@ -213,12 +217,21 @@ export function GameShopWindow({
             index={index}
             quantity={clampGameShopQuantity(item, quantities[item.game_shop_index] ?? 1)}
             onQuantityChange={(nextQuantity) => setQuantity(item.game_shop_index, nextQuantity)}
-            onBuy={() => onBuy(item.game_shop_index, clampGameShopQuantity(item, quantities[item.game_shop_index] ?? 1), paymentType)}
+             onBuy={() => requestConfirmation(item)}
+             buyDisabled={purchasePending || !onConfirmPurchase || !makeCashGameShopConfirmation(source,
+               item.game_shop_index, clampGameShopQuantity(item, quantities[item.game_shop_index] ?? 1), paymentType)}
+             inputPending={purchasePending || confirmation !== null}
             onPreview={(cellLeft) => showPreview(item, cellLeft)}
+            onReadItemTooltip={onReadItemTooltip}
+            tooltipActive={activeTooltip === item}
+            onTooltipActiveChange={active => setActiveTooltip(current => active ? item : current === item ? null : current)}
             t={t}
           />
         ))}
       </div>
+      {catalog.length === 0 ? <div role="status" style={{ position: "absolute", left: 160, top: 160, width: 500, color: "#e7d9b0" }}>
+        {t("ui.gameShopCatalogUnknown", [], "Waiting for the current shop catalogue.")}
+      </div> : null}
       {preview ? (
         <GameShopViewer
           item={preview.item}
@@ -228,8 +241,8 @@ export function GameShopWindow({
           onClose={() => setPreview(null)}
         />
       ) : null}
-      <div className="game-shop-total credits">{formatGameShopPrice(credits)}</div>
-      <div className="game-shop-total gold">{formatGameShopPrice(gold)}</div>
+      <div className="game-shop-total credits">{formatGameShopPrice(source?.wallet.credit ?? credits)}</div>
+      <div className="game-shop-total gold">{formatGameShopPrice(source?.wallet.gold ?? gold)}</div>
       <button type="button" className="game-shop-payment gold" onClick={() => setPaymentType("gold")}>
         <img src={paymentType === "gold" ? ORIGINAL_UI.gameShop.paymentBox.checked : ORIGINAL_UI.gameShop.paymentBox.unchecked} alt="" draggable={false} />
         <span>Gold</span>
@@ -255,6 +268,31 @@ export function GameShopWindow({
           disabled={currentPage >= pageCount - 1}
         />
       </div>
+      {purchasePending ? <div role="status" style={{ position: "absolute", left: 160, bottom: 12, color: "#e7d9b0" }}>
+        {t("ui.gameShopPurchasePending", [], "Purchase pending. Waiting for its receipt.")}
+      </div> : null}
+      {confirmation ? <div role="dialog" aria-modal="true" aria-label={t("ui.gameShopConfirm", [], "Confirm purchase")}
+        style={{ position: "absolute", inset: 0, zIndex: 1000, background: "rgba(0,0,0,.75)", display: "grid", placeItems: "center" }}>
+        <div style={{ width: 340, background: "#21170e", border: "1px solid #96743b", padding: 18, color: "#f0dfb5" }}>
+          <p>{confirmation.itemName} × {confirmation.count * confirmation.quantity}</p>
+          <p>{formatGameShopPrice(confirmation.total)} {confirmation.payment === "gold" ? "Gold" : "Credits"}</p>
+          {!confirmationCurrent ? <p role="status">{t("ui.gameShopChanged", [], "The shop or balance changed. Review the purchase again.")}</p> : null}
+          <div style={{ display: "flex", gap: 12 }}>
+            <button type="button" autoFocus style={{ minHeight: 44, minWidth: 100 }} onClick={() => setConfirmation(null)}>
+              {t("ui.cancel", [], "Cancel")}</button>
+            <button type="button" style={{ minHeight: 44, minWidth: 100 }}
+              disabled={purchasePending || !confirmationCurrent || !onConfirmPurchase}
+              onClick={() => {
+                const captured = confirmation;
+                if (!captured || purchasePending || !onConfirmPurchase || submittedConfirmation.current === captured
+                  || !cashGameShopConfirmationCurrent(captured, source)) return;
+                submittedConfirmation.current = captured;
+                setConfirmation(null);
+                onConfirmPurchase(captured);
+              }}>{t("ui.confirm", [], "Confirm")}</button>
+          </div>
+        </div>
+      </div> : null}
     </section>
   );
 }
@@ -265,7 +303,12 @@ function GameShopCell({
   quantity,
   onQuantityChange,
   onBuy,
+  buyDisabled,
+  inputPending,
   onPreview,
+  onReadItemTooltip,
+  tooltipActive,
+  onTooltipActiveChange,
   t,
 }: {
   item: CrystalGameShopEntry;
@@ -273,17 +316,25 @@ function GameShopCell({
   quantity: number;
   onQuantityChange: (quantity: number) => void;
   onBuy: () => void;
+  buyDisabled: boolean;
+  inputPending: boolean;
   onPreview: (cellLeft: number) => void;
+  onReadItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  tooltipActive: boolean;
+  onTooltipActiveChange: (active: boolean) => void;
   t: TranslateFn;
 }) {
-  const info = gameShopItemInfo(item.item_index);
+  const info = gameShopItemInfo(item);
   const left = index < 4 ? 152 + index * 132 : 152 + (index - 4) * 132;
   const top = index < 4 ? 115 : 275;
   const hasPreview = Boolean(info && GAME_SHOP_PREVIEW_ITEM_TYPES.has(info.item_type));
   const displayName = truncateGameShopName(item.item_name);
+  const document = tooltipActive ? onReadItemTooltip?.(item) : null;
 
   return (
-    <div className="game-shop-cell-frame" style={{ left, top }}>
+    <div className="game-shop-cell-frame" style={{ left, top }} tabIndex={0} role="group" aria-label={item.item_name}
+      onMouseEnter={() => onTooltipActiveChange(true)} onMouseLeave={() => onTooltipActiveChange(false)}
+      onFocus={() => onTooltipActiveChange(true)} onBlur={event => {if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onTooltipActiveChange(false);}}>
       <img className="game-shop-cell-bg" src={ORIGINAL_UI.gameShop.cellFrame} alt="" draggable={false} />
       <div className="game-shop-cell-name" title={item.item_name}>{displayName}</div>
       {info ? (
@@ -298,11 +349,11 @@ function GameShopCell({
       <div className="game-shop-cell-stock-value">{formatGameShopStock(item.stock, item.stock_level)}</div>
       <div className="game-shop-cell-count">{item.count}</div>
       <div className="game-shop-cell-quantity-down">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.down", [], "Down")} onClick={() => onQuantityChange(quantity - 1)} />
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.down", [], "Down")} disabled={inputPending || quantity <= 1} onClick={() => onQuantityChange(quantity - 1)} />
       </div>
       <div className="game-shop-cell-quantity">{quantity}</div>
       <div className="game-shop-cell-quantity-up">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.up", [], "Up")} onClick={() => onQuantityChange(quantity + 1)} />
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.up", [], "Up")} disabled={inputPending || quantity >= gameShopMaxQuantity(item)} onClick={() => onQuantityChange(quantity + 1)} />
       </div>
       <div className="game-shop-cell-credit-price">{item.can_buy_credit ? formatGameShopPrice(item.credit_price * quantity) : ""}</div>
       <div className="game-shop-cell-gold-price">{item.can_buy_gold ? formatGameShopPrice(item.gold_price * quantity) : ""}</div>
@@ -312,8 +363,9 @@ function GameShopCell({
         </div>
       ) : null}
       <div className={hasPreview ? "game-shop-cell-buy with-preview" : "game-shop-cell-buy"}>
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.buyButton} label={t("ui.buy", [], "Buy")} onClick={onBuy} />
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.buyButton} label={t("ui.buy", [], "Buy")} disabled={buyDisabled} onClick={onBuy} />
       </div>
+      {document ? <OriginalCrystalItemTooltip document={document} align={index % 4 > 1 ? "left" : "right"} /> : null}
     </div>
   );
 }
@@ -332,7 +384,7 @@ function GameShopViewer({
   onClose: () => void;
 }) {
   const [direction, setDirection] = useState(6);
-  const info = gameShopItemInfo(item.item_index);
+  const info = gameShopItemInfo(item);
 
   return (
     <div
@@ -396,11 +448,12 @@ function applyGameShopSectionFilter(items: readonly CrystalGameShopEntry[], sect
 }
 
 function gameShopClassMatches(itemClass: string, classFilter: GameShopClassFilter) {
-  return classFilter === "all" || itemClass.toLowerCase() === "all" || itemClass.toLowerCase() === classFilter;
+  const name = itemClass.trim().toLowerCase();
+  return classFilter === "all" || !name || name === "all" || name === "show all" || name === classFilter;
 }
 
-function gameShopItemInfo(itemIndex: number): CrystalItemEntry | undefined {
-  return CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX[String(itemIndex) as keyof typeof CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX];
+function gameShopItemInfo(item: CrystalGameShopEntry): CrystalItemEntry {
+  return { image: item.info.image, item_type: item.info.item_type };
 }
 
 function compareGameShopItems(left: CrystalGameShopEntry, right: CrystalGameShopEntry) {
@@ -415,11 +468,11 @@ function formatGameShopPrice(value: number) {
   return value.toLocaleString("en-US");
 }
 
-function gameShopMaxQuantity(item: Pick<CrystalGameShopEntry, "count" | "item_stack_size">) {
-  return Math.max(1, Math.min(99, Math.floor((5 * Math.max(1, item.item_stack_size)) / Math.max(1, item.count))));
+function gameShopMaxQuantity(item: CrystalGameShopEntry) {
+  return cashGameShopQuantityLimit(item);
 }
 
-function clampGameShopQuantity(item: Pick<CrystalGameShopEntry, "count" | "item_stack_size">, quantity: number) {
+function clampGameShopQuantity(item: CrystalGameShopEntry, quantity: number) {
   return Math.max(1, Math.min(gameShopMaxQuantity(item), Math.floor(quantity)));
 }
 

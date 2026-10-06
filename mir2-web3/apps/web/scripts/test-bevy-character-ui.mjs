@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";import test from "node:test";import {readFileSync,writeFileSync} from "node:fs";import ts from "typescript";
 function load(url){const m={exports:{}};new Function("exports","module","require",ts.transpileModule(readFileSync(url,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,p=>load(new URL(`${p}.ts`,url)));return m.exports;}
 const ui=load(new URL("../lib/bevy-character-ui.ts",import.meta.url));
+const {questWorldControlAt}=load(new URL("../lib/bevy-quest-world-controls.ts",import.meta.url));
 const caps={schemaVersion:1,characterPageAbiVersion:1,characterEquipmentIntentAbiVersion:1,compiled:true,startup:true};
 const item={uniqueId:0,key:"a",name:"a",quantity:1,container:2,slot:0,icon:1,description:"",stateImageX:0,stateImageY:0,stateImageWidth:0,stateImageHeight:0};
 function fixture(){let sent=null,sink=null,frame=1,now=0,current=true,cleared=0;const outcomes=[];
@@ -64,13 +65,15 @@ test("HMR late old cleanup cannot replace new pending snapshot or clear new sink
 });
 test("actual shell gives foreground Bag/modal priority and consumes Character clicks before HUD/world",()=>{
  const source=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8");
- const ast=ts.createSourceFile("shell.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),names=["cancelSharedCharacterPointer","handleSharedCharacterPointer","handleSharedBagPointer"],decl=[];
- function visit(node){if(ts.isFunctionDeclaration(node)&&node.name&&names.includes(node.name.text))decl.push(node.getText(ast));ts.forEachChild(node,visit);}visit(ast);assert.equal(decl.length,3);
+ const ast=ts.createSourceFile("shell.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),names=["cancelSharedCharacterPointer","handleSharedCharacterPointer","handleSharedBagPointer","handleSharedQuestWorldPointer"],decl=[];
+ function visit(node){if(ts.isFunctionDeclaration(node)&&node.name&&names.includes(node.name.text))decl.push(node.getText(ast));ts.forEachChild(node,visit);}visit(ast);assert.equal(decl.length,names.length);
  const f=fixture(),context=f.host.pointerContext(),edges=[];let hudCalls=0,stops=0,bag=null;
  class Element {constructor(){this.id="canvas";}setPointerCapture(){}}
- const scope={characterPointerRouterRef:{current:new ui.CharacterPointerRouter()},characterPointerCallbacksRef:{current:{getBevyCharacterPointerContext:()=>context,onBevyCharacterPointer:e=>{edges.push(e);return true;}}},
+ const scope={parityUiBlocksGameplay:undefined,onHeroShortcut:undefined,characterPointerRouterRef:{current:new ui.CharacterPointerRouter()},characterPointerCallbacksRef:{current:{getBevyCharacterPointerContext:()=>context,onBevyCharacterPointer:e=>{edges.push(e);return true;}}},
   bagPointerCallbacksRef:{current:{getBevyBagPointerContext:()=>bag}},bagPointerRouterRef:{current:{held:null}},hudPointerRouterRef:{current:{held:null}},
-  stageFrameRef:{current:{focus(){}}},heldScenePointerRef:{current:null},onViewportDirectionStop:()=>{stops++;},
+  stageFrameRef:{current:{dataset:{viewportSceneWidth:"1024",viewportSceneHeight:"768"},focus(){}}},heldScenePointerRef:{current:null},onViewportDirectionStop:()=>{stops++;},
+  heldQuestControlPointersRef:{current:new Set()},screen:"game",bevyBagUiActive:true,
+  readBevyQuestWorldControls:()=>null,readBevyQuestWorldControlBlockers:()=>null,questWorldControlAt,readBevyHudStatus:()=>null,
   sceneInteractionReady:true,questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,bevyCharacterPageReady:true,
   HTMLElement:Element,sharedUiCanvasId:()=>"canvas",webGl2SharedCanvasPrototype:false,
   scenePointFromMouseEvent:e=>({sceneX:e.clientX,sceneY:e.clientY}),handleSharedHudPointer:()=>{hudCalls++;return true;}};
@@ -81,15 +84,21 @@ test("actual shell gives foreground Bag/modal priority and consumes Character cl
  bag={inputRegions:context.inputRegions};api.handleSharedBagPointer(event,"down");assert.equal(hudCalls,1);assert.equal(edges.length,2);
  bag=null;api.handleSharedBagPointer(event,"down");api.handleSharedBagPointer({...event,pointerId:8},"down");assert.equal(edges.at(-1).phase,"cancel");assert.equal(hudCalls,1);
 });
-test("both actual shell canvas gates keep Character visible and interactive when all other owners are false",()=>{
+test("fixed stage UI canvas keeps Character visible and interactive for GPU and shared GL2",()=>{
  const text=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8"),ast=ts.createSourceFile("shell.tsx",text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),canvases=[];
  function visit(n){if(ts.isJsxSelfClosingElement(n)&&n.tagName.getText(ast)==="canvas"){
    const id=n.attributes.properties.find(a=>ts.isJsxAttribute(a)&&a.name.getText(ast)==="id");
-   if(id?.initializer&&["mir2-web3-canvas","mir2-quest-ui-canvas"].includes(id.initializer.text)&&n.attributes.properties.some(a=>a.name?.getText(ast)==="data-ui-interactive"))canvases.push(n);
+   if(id?.initializer&&["mir2-web3-canvas","mir2-quest-ui-canvas"].includes(id.initializer.text))canvases.push(n);
  }ts.forEachChild(n,visit);}visit(ast);assert.equal(canvases.length,2);
- for(const node of canvases){const id=node.attributes.properties.find(a=>a.name?.getText(ast)==="id").initializer.text;
-   const scope={screen:"game",webGl2SharedCanvasPrototype:id==="mir2-web3-canvas",bevyCharacterPageReady:true,bevyMailPageReady:false,bevySpellsPageReady:false,bevyQuestUiCapturesPointer:false,bevyQuestUiReady:false,bevyBagUiActive:false,bevyHudUiReady:false,hpOrbOwner:false,mpOrbOwner:false,experienceBarOwner:false,weightBarOwner:false};
-   const value=name=>{const attribute=node.attributes.properties.find(a=>a.name?.getText(ast)===name);return new Function(...Object.keys(scope),`return (${attribute.initializer.expression.getText(ast)});`)(...Object.values(scope));};
+ const world=canvases.find(n=>n.attributes.properties.some(a=>a.name?.getText(ast)==="id"&&a.initializer?.text==="mir2-web3-canvas"));
+ const stage=canvases.find(n=>n.attributes.properties.some(a=>a.name?.getText(ast)==="id"&&a.initializer?.text==="mir2-quest-ui-canvas"));
+ assert.ok(world&&stage);assert.ok(ts.isJsxElement(world.parent));
+ assert.match(world.parent.openingElement.getText(ast),/game-world-composite/);
+ assert.equal(world.attributes.properties.some(a=>a.name?.getText(ast)==="data-ui-interactive"),false);
+ assert.equal(stage.attributes.properties.some(a=>a.name?.getText(ast)==="data-ui-interactive"),true);
+ for(const webGl2SharedCanvasPrototype of [false,true]){
+   const scope={screen:"game",webGl2SharedCanvasPrototype,bevyCharacterPageReady:true,bevyMailPageReady:false,bevySpellsPageReady:false,bevyQuestUiCapturesPointer:false,bevyQuestWorldUiReady:false,bevyQuestUiReady:false,bevyBagUiActive:false,bevyHudUiReady:false,bevyNpcShopUiActive:false,bevyNpcShopUiTransitioning:false,bevyStorageUiActive:false,bevyStorageUiTransitioning:false,hpOrbOwner:false,mpOrbOwner:false,experienceBarOwner:false,weightBarOwner:false};
+   const value=name=>{const attribute=stage.attributes.properties.find(a=>a.name?.getText(ast)===name);return new Function(...Object.keys(scope),`return (${attribute.initializer.expression.getText(ast)});`)(...Object.values(scope));};
    assert.match(value("className"),/shared-quest-ui-visible/);assert.equal(value("data-ui-interactive"),"true");assert.equal(value("style").pointerEvents,"auto");
  }
  const page=readFileSync(new URL("../app/page.tsx",import.meta.url),"utf8");

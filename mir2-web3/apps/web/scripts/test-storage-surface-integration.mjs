@@ -5,7 +5,7 @@ import ts from "typescript";
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
-const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "equipment-gateway-adapter", "mail-parcel-gateway-adapter", "storage-gateway-adapter"]);
+const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "equipment-gateway-adapter", "mail-parcel-gateway-adapter", "storage-gateway-adapter", "social-window-operations", "social-incoming-replies", "storage-rental-confirmation"]);
 function load(name, fresh = false) {
   assert.ok(pureModules.has(name), "unexpected non-pure import: " + name);
   if (!fresh && cache.has(name)) return cache.get(name);
@@ -129,10 +129,17 @@ function pageFixture() {
   let listener = null, sendError = null; const sent = [], values = {}, logs = [], yields = [];
   const owner = f.owners.at(-1);
   const scope = {
-    worldRef: { current: { ...world(), requireStoragePassword: false } },
+    heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
+    worldRef: { current: { ...world(), connected: true, playerObjectId: "3", mapFileName: "D001", requireStoragePassword: false } },
     equipmentBagOwnerRef: { current: { ...owner, connectionGeneration: 3, sessionGeneration: 5 } },
     equipmentConnectionGenerationRef: { current: 3 }, equipmentSessionGenerationRef: { current: 5 },
     equipmentHostSuspendReasonRef: { current: null }, equipmentControllerRef: { current: null },
+    equipmentStartGameRef: { current: { connectionGeneration: 3, sessionGeneration: 5 } },
+    equipmentSnapshotRef: { current: { connectionGeneration: 3, sessionGeneration: 5 } },
+    socialSceneRevisionRef: { current: 1 }, screenRef: { current: "game" }, document: { visibilityState: "visible" },
+    socialItemOperationsRef: { current: new (load("social-window-operations").SocialWindowOperations)() },
+    storageRentalRef: { current: new (load("storage-rental-confirmation").StorageRentalConfirmation)() },
+    setStorageRentalPrompt(value) { values.rentalPrompt = typeof value === "function" ? value(values.rentalPrompt ?? null) : value; },
     equipmentRenderOwnerToken: { ...owner, connectionGeneration: 3, sessionGeneration: 5 },
     bevyCharacterSendGateRef: { current: () => false }, bevyBagSendGateRef: { current: () => false },
     storageUiIngressRef: { current: f.host }, storageServiceActiveRef: { current: true },
@@ -157,6 +164,8 @@ function pageFixture() {
   };
   const names = ["currentEquipmentOwner", "itemCommandRequiresOwner", "send", "sendRaw", "submitStorageTransfer",
     "endStorageService", "requestBagCompatibility", "storageIntentMatchesCommand", "dispatchBevyStorageIntent",
+    "socialItemMutationAllowed", "parityItemMutationAllowed", "currentSpellsOwner", "currentSocialReplyOwner", "currentStorageRentalFacts",
+    "closeStorageRentalUi", "cancelStorageRental", "confirmStorageRental",
     "isMovementCommand", "isCombatResolutionCommand", "isMovementPredictionBlockingCommand"];
   const api = functions("app/page.tsx", names, scope);
   f.behavior = api.dispatchBevyStorageIntent;
@@ -212,15 +221,33 @@ test("actual Page password handoff invokes the existing set/change/unlock panel 
   }
 });
 
-test("actual Page rent sends exactly one existing command then hands off; retired owner sends none", () => {
+test("actual Page rent confirms exactly one existing command after handoff; retired owner sends none", () => {
   const p = pageFixture(), i = p.f.intent({ type: "rent" });
+  p.scope.worldRef.current.gold = 1_000_000;
   assert.equal(p.f.emit(i), true); assert.equal(p.f.emit(i), false);
-  assert.deepEqual(p.sent, [{ type: "chat", message: "@ADDSTORAGE" }]);
+  assert.deepEqual(p.sent, [], "opening the confirmation cannot send the rental command");
   assert.equal(p.scope.storageCompatibilityRef.current, true); assert.equal(p.f.state.active, false);
   assert.equal(p.f.host.claim(i), false);
-  const retired = pageFixture(); retired.listener = () => retired.f.host.withdraw();
-  assert.equal(retired.f.emit(retired.f.intent({ type: "rent" })), false);
+  const id = p.values.rentalPrompt.id;
+  p.api.confirmStorageRental(id); p.api.confirmStorageRental(id);
+  assert.deepEqual(p.sent, [{ type: "chat", message: "@ADDSTORAGE" }]);
+  assert.equal(p.values.rentalPrompt, null); assert.equal(p.scope.storageCompatibilityRef.current, false);
+  assert.equal(p.scope.bagCompatibilityModeRef.current, null);
+  const retired = pageFixture(); retired.scope.worldRef.current.gold = 1_000_000;
+  assert.equal(retired.f.emit(retired.f.intent({ type: "rent" })), true);
+  retired.listener = () => retired.api.endStorageService();
+  retired.api.confirmStorageRental(retired.values.rentalPrompt.id);
   assert.equal(retired.sent.length, 0); assert.equal(retired.scope.storageCompatibilityRef.current, false);
+  assert.equal(retired.scope.storageServiceActiveRef.current, false); assert.equal(retired.values.rentalPrompt, null);
+  assert.equal(retired.f.emit(retired.f.intent({ type: "rent" })), false, "retired storage owner cannot open or send another rental");
+  const ownerChanged = pageFixture(); ownerChanged.scope.worldRef.current.gold = 1_000_000;
+  assert.equal(ownerChanged.f.emit(ownerChanged.f.intent({ type: "rent" })), true);
+  const ownerPrompt = ownerChanged.values.rentalPrompt.id;
+  ownerChanged.listener = () => { ownerChanged.scope.equipmentSessionGenerationRef.current++; };
+  ownerChanged.api.confirmStorageRental(ownerPrompt);
+  assert.equal(ownerChanged.sent.length, 0, "the final rental claim must reject the listener's replacement owner");
+  ownerChanged.api.cancelStorageRental(ownerPrompt);
+  assert.equal(ownerChanged.values.rentalPrompt, null); assert.equal(ownerChanged.scope.storageCompatibilityRef.current, false);
 });
 
 test("actual Page source Bag2 mapping and its own reserved empty target pass the final fence once", () => {
@@ -356,7 +383,7 @@ function shellStorageFixture() {
   const f = fixture(); f.activate(); let hook = null, stops = 0;
   class Element { constructor() { this.id = "canvas"; } setPointerCapture() {} }
   const holds = new Map(), router = new storage.StoragePointerRouter();
-  const scope = { storagePointerRouterRef: { current: router }, combatUiHoldRef: { current: new Map() },
+  const scope = { parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, storagePointerRouterRef: { current: router }, combatUiHoldRef: { current: new Map() },
     onCombatUiHeld(channel, token, held) { if (held) holds.set(channel, token); else if (holds.get(channel) === token) holds.delete(channel); },
     storagePointerCallbacksRef: { current: { getBevyStoragePointerContext: () => f.host.pointerContext(),
       onBevyStoragePointer(edge) { const accepted = f.host.pointer(edge); hook?.(edge); return accepted; } } },
@@ -424,7 +451,7 @@ test("actual Shell old cancel or up cannot clear a synchronously established rep
 test("actual Shell active or arming storage stops held keyboard movement even without a ready pointer context", () => {
   for (const [active, transitioning] of [[true, false], [false, true]]) {
     let stops = 0;
-    const scope = { bevyStorageUiActive: active, bevyStorageUiTransitioning: transitioning,
+    const scope = { parityUiBlocksGameplay: undefined, bevyStorageUiActive: active, bevyStorageUiTransitioning: transitioning,
       storagePointerCallbacksRef: { current: { getBevyStoragePointerContext: () => null } },
       heldKeyboardMoveKeysRef: { current: new Set(["right"]) }, heldKeyboardRunModeRef: { current: true },
       onViewportDirectionStop: () => { stops++; }, onViewportDirectionIntent() { assert.fail("storage cannot move the world"); } };
@@ -462,7 +489,8 @@ test("actual Shell window blur/resize/unmount withdraw Storage and remove its ow
     addEventListener(type, fn, capture) { assert.equal(listeners.has(type), false); listeners.set(type, { fn, capture }); },
     removeEventListener(type, fn, capture) { assert.equal(listeners.get(type)?.fn, fn); assert.equal(listeners.get(type)?.capture, capture); listeners.delete(type); },
   }, sharedBagPointerHandlerRef: { current: (event, phase) => calls.push(["terminal", phase, event]) },
-    cancelSharedStoragePointer: phase => calls.push(["storage", phase ?? "cancel"]) };
+    cancelSharedStoragePointer: phase => calls.push(["storage", phase ?? "cancel"]),
+    heldQuestControlPointersRef: { current: new Set() } };
   scope.npcShopPointerRouterRef = { current: { held: null, cancel: () => null } };
   scope.npcShopPointerCallbacksRef = { current: {} };
   scope.combatUiHoldRef = { current: new Map() };
@@ -544,6 +572,7 @@ test("actual Shell arming shortcut listener swallows combat/item keys before the
   for (const [active, transitioning] of [[true, false], [false, true]]) {
     let listener, prevented = 0;
     const scope = { screen: "game", bevyStorageUiActive: active, bevyStorageUiTransitioning: transitioning,
+      getKeybindCaptureActive: undefined, parityUiBlocksGameplay: undefined, document: {visibilityState:"visible",hasFocus:()=>true},
       window: { addEventListener(type, callback) { assert.equal(type, "keydown"); listener = callback; },
         removeEventListener(type, callback) { assert.equal(type, "keydown"); assert.equal(callback, listener); listener = null; } },
       onCombatKey() { assert.fail("no combat callback while Storage owns/arms"); },

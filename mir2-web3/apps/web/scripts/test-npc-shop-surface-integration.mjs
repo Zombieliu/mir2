@@ -22,8 +22,15 @@ function actualFunctions(ast, names, scope) {
   const code = ts.transpileModule(input, { compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 } }).outputText;
   return new Function(...Object.keys(scope), code + "\nreturn {" + names.join(",") + "};")(...Object.values(scope));
 }
-const modules = new Map(), pureFiles = { spells:"../lib/bevy-spells-ui.ts", combat:"../lib/bevy-combat-input.ts", npcBuy:"../lib/bevy-npc-shop-buy.ts" };
-const pureRequires = { spells:{}, combat:{"./bevy-spells-ui":"spells"}, npcBuy:{} };
+const modules = new Map(), pureFiles = { spells:"../lib/bevy-spells-ui.ts", combat:"../lib/bevy-combat-input.ts", npcBuy:"../lib/bevy-npc-shop-buy.ts",
+  modeKeys:"../lib/shared-combat-mode-keys.ts", hero:"../lib/hero-player-ui.ts", operations:"../lib/social-window-operations.ts", equipment:"../lib/equipment-gateway-adapter.ts",
+  parcel:"../lib/mail-parcel-gateway-adapter.ts", storage:"../lib/storage-gateway-adapter.ts",
+  questWorld:"../lib/bevy-quest-world-context.ts", questControls:"../lib/bevy-quest-world-controls.ts", bagModel:"../lib/bevy-bag-model.ts" };
+const pureRequires = { modeKeys:{}, hero:{}, spells:{}, combat:{"./bevy-spells-ui":"spells"}, npcBuy:{}, operations:{},
+  equipment:{"./world-model/item-identity":"identity"}, parcel:{"./equipment-gateway-adapter":"equipment"},
+  storage:{"./equipment-gateway-adapter":"equipment","./world-model/item-identity":"identity","./mail-parcel-gateway-adapter":"parcel"},
+  questWorld:{"./bevy-bag-model":"bagModel"}, questControls:{"./bevy-quest-world-context":"questWorld"},
+  bagModel:{"./world-model/item-identity":"identity"} };
 function loadPure(name) {
   assert(Object.hasOwn(pureFiles,name), "source outside finite pure allowlist");
   if (modules.has(name)) return modules.get(name);
@@ -73,10 +80,15 @@ const bagProjection = (() => {
     assert.equal(id,"./world-model/item-identity");return identityModule;
   });return module.exports.projectBevyBagModel;
 })();
+pureFiles.identity="../lib/world-model/item-identity.ts";pureRequires.identity={};modules.set("identity",identityModule);
+pureFiles.bag="../lib/bevy-bag-ui.ts";pureRequires.bag={"./world-model/item-identity":"identity"};
 const pageNames=["npcGoldBuyCurrent","readNpcGoldBuyCurrent","currentNpcShopTab","setNpcShopCompatibilityTab",
   "readNpcShopUiInput","npcShopIntentMatchesStatus","npcShopIntentMatchesCommand","npcShopUiSendCurrent",
   "dispatchBevyNpcShopIntent","retireNpcShopService","sendRaw","itemCommandRequiresOwner",
-  "invalidateNpcGoldBuyGatewayPacket","applyNpcGoldBuyGatewaySnapshot"];
+  "invalidateNpcGoldBuyGatewayPacket","applyNpcGoldBuyGatewaySnapshot","socialItemMutationAllowed", "parityItemMutationAllowed",
+  "currentSpellsOwner","currentEquipmentOwner","currentSocialReplyOwner","currentSocialReceiveOwner","sameSocialPhysicalOwner","captureParitySnapshot",
+  "referenceWindowsBlockGameplay","syncObservePreference","currentQuestWorldIdentity","currentCombatModeOwner",
+  "nextCombatModeRevision","captureCombatModeSnapshot"];
 const clone=v=>JSON.parse(JSON.stringify(v));
 function pageFixture() {
   const trace=[],sent=[],receipts=[],prepared=[],tabs=[],closed=[],errors=[];let listener=null,throws=false,allow=true,claimed=false,withdrawResult=true,finalUiCurrent=true,beforeLast=null;
@@ -124,19 +136,28 @@ function pageFixture() {
   const inventoryOwner = { connectionGeneration:1, sessionGeneration:2, playerObjectId:1 };
   inventoryReadiness.finish(inventoryReadiness.begin(inventoryOwner), inventoryOwner, true, bagProjection(world).model);
   const scope={projectBevyBagModel:bagProjection,npcGoldBuyInventoryMutationPacket,
+    playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},
+    observeBootstrapRef:{current:null},observePreferenceRef:{current:null},
+    combatModePhysicalRef:{current:null},combatModeRawRef:{current:null},combatModeRevisionRef:{current:0},
+    nextCombatModePhysicalGeneration:loadPure("modeKeys").nextCombatModePhysicalGeneration,
     npcGoldBuyInventoryRef:{current:inventoryReadiness},
     equipmentSnapshotRef:{current:{connectionGeneration:1,sessionGeneration:2}},
-    currentSpellsOwner:()=>({connectionGeneration:scope.equipmentConnectionGenerationRef.current,
-      sessionGeneration:scope.equipmentSessionGenerationRef.current,playerObjectId:Number(world.playerObjectId)}),
+    normalizeQuestMapFileName:loadPure("questWorld").normalizeQuestMapFileName,
+    questCapturedWorldRef:{current:null},questSceneRevisionRef:{current:1},questSkillsBaselineCurrentRef:{current:false},
+    socialItemOperationsRef:{current:new (loadPure("operations").SocialWindowOperations)()},
     applyGatewayWorldSnapshot(snapshot, connectionGeneration) {
       scope.worldRef.current = { ...scope.worldRef.current, ...snapshot, playerObjectId:String(snapshot.playerObjectId) };
       scope.equipmentSnapshotRef.current = { connectionGeneration, sessionGeneration:scope.equipmentSessionGenerationRef.current };
     },
+    heroAuthorityRef:{current:new (loadPure("hero").HeroPlayerAuthority)()}, heroOperationsRef:{current:new (loadPure("hero").HeroPlayerOperations)()},
+    heroManagementOpenRef:{current:false}, heroManagementPage:null, cashShopOpenRef:{current:false}, mailCollectBarrierRef:{current:null},
+    socialSceneRevisionRef:{current:1}, worldSnapshotVersionRef:{current:1}, renderParityServices:()=>{},
     worldRef:{current:world},npcShopServiceRef:{current:service},npcShopTabBindingRef:{current:null},
     npcBuySelectedRef:{current:null},npcBuyDispatcherRef:{current:dispatcher},npcShopUiIngressRef:{current:ui},
     npcShopClockRef:{current:{service:1,catalog:1}},setNpcShopService:v=>closed.push(v),setNpcShopTabBinding:v=>tabs.push(v),
     equipmentConnectionGenerationRef:{current:1},equipmentSessionGenerationRef:{current:2},equipmentBagOwnerRef:{current:{ownerRevision:0}},
-    equipmentControllerRef:{current:{status:()=>({ready:true,pending:0})}},equipmentHostSuspendReasonRef:{current:null},equipmentStartGameRef:{current:{}},
+    equipmentControllerRef:{current:{status:()=>({ready:true,pending:0})}},equipmentHostSuspendReasonRef:{current:null},equipmentStartGameRef:{current:{connectionGeneration:1,sessionGeneration:2}},
+    sameBagOwner:loadPure("bag").sameBagOwner,bevyCharacterSendGateRef:{current:()=>false},bevyBagSendGateRef:{current:()=>false},
     pendingStorageRequestsRef:{current:new Map()},mailParcelRef:{current:null},screenRef:{current:"game"},socketRef:{current:socket},WebSocket:{OPEN:1},
     bevyQuestReactModalOpen:false,showQuestLog:false,showCharacter:false,showHeroPet:false,showGuild:false,showGroup:false,showFriends:false,
     showBonds:false,showRanking:false,showMarket:false,showConquest:false,showTrade:false,showBuffs:false,showMail:false,showWorldMap:false,
@@ -150,9 +171,10 @@ function pageFixture() {
     window:{dispatchEvent(event){assert.equal(event.type,"mir2:action");trace.push("action");listener?.(event);}},
     CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail;}},
     combatIngressRef:{current:null},mailDispatcherRef:{current:null},mailIngressRef:{current:null},storageUiIngressRef:{current:null},
-    mailMutationAllowed:()=>true,isMailItemMutation:()=>false,storageMutationAllowed:()=>true,
+    mailMutationAllowed:loadPure("parcel").mailMutationAllowed,isMailItemMutation:loadPure("parcel").isMailItemMutation,
+    storageMutationAllowed:loadPure("storage").storageMutationAllowed,
     console:{error:(...args)=>errors.push(args)},equipmentRenderOwnerToken:{connectionGeneration:1,sessionGeneration:2,ownerRevision:0},
-    currentEquipmentOwner:()=>true,legacyNpcBuyAllowed:()=>assert.fail("ordinary shared UI cannot use legacy proof")};
+    legacyNpcBuyAllowed:()=>assert.fail("ordinary shared UI cannot use legacy proof")};
   const api=actualFunctions(pageTree,pageNames,{...scope,
     applyGatewayWorldSnapshot:(...args)=>scope.applyGatewayWorldSnapshot(...args)});
   return{api,scope,world,service,proof,status,intent,socket,ui,dispatcher,trace,sent,receipts,prepared,tabs,closed,errors,
@@ -266,12 +288,10 @@ test("actual shared Page denies naked legacy mixed DTO and stale current status 
 });
 
 
-pureFiles.identity="../lib/world-model/item-identity.ts";pureRequires.identity={};modules.set("identity",identityModule);
-pureFiles.bag="../lib/bevy-bag-ui.ts";pureRequires.bag={"./world-model/item-identity":"identity"};
 pureFiles.npc="../lib/bevy-npc-shop-ui.ts";pureRequires.npc={"./bevy-bag-ui":"bag"};
 const {NpcShopPointerRouter}=loadPure("npc");
 const shellNames=["npcShopBlocksWorldInput","stopNpcShopWorldInput","guardNpcShopGameplay","dispatchKeyboardMoveInput",
-  "beginCombatUiHold","endCombatUiHold","cancelSharedNpcShopPointer","handleSharedNpcShopPointer","handleSharedUiPointer"];
+  "beginCombatUiHold","endCombatUiHold","cancelSharedNpcShopPointer","handleSharedNpcShopPointer","handleSharedQuestWorldPointer","handleSharedUiPointer","updateSceneCombatPointer"];
 function shellFixture() {
   let blocked=true,context=null,behavior=()=>true,stops=0,focus=0,downstream=0;const edges=[],holds=[],combatPointers=[];
   const router=new NpcShopPointerRouter();
@@ -280,10 +300,15 @@ function shellFixture() {
     coreAuthorityRevision:"9007199254740993",controlRevision:"9007199254740995"};
   context={proof,presentation:{logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false},
     inputRegions:[{left:220,top:217,width:244,height:334},{left:474,top:251,width:330,height:80}]};
-  class Element {constructor(id){this.id=id;}setPointerCapture(id){this.capture=id;}}
+  class Element {constructor(id){this.id=id;}setPointerCapture(id){this.capture=id;}closest(){return null;}}
   const callbacks={getBevyNpcShopInputBlocked:()=>blocked,getBevyNpcShopPointerContext:()=>context,
     onBevyNpcShopPointer:edge=>{edges.push(edge);return behavior(edge);}};
-  const scope={npcShopPointerRouterRef:{current:router},npcShopPointerCallbacksRef:{current:callbacks},
+  const scope={parityUiBlocksGameplay:undefined,onHeroShortcut:undefined,npcShopPointerRouterRef:{current:router},npcShopPointerCallbacksRef:{current:callbacks},
+    sceneHoveredObjectIdRef:{current:null},setSceneHoveredObjectId:()=>{},
+    heldQuestControlPointersRef:{current:new Set()},screen:"game",bevyBagUiActive:false,
+    bagPointerCallbacksRef:{current:{getBevyBagPointerContext:()=>null}},readBevyHudStatus:()=>null,
+    readBevyQuestWorldControlBlockers:()=>null,readBevyQuestWorldControls:()=>null,
+    questWorldControlAt:loadPure("questControls").questWorldControlAt,
     heldKeyboardMoveKeysRef:{current:new Set(["right"])},heldKeyboardRunModeRef:{current:true},heldScenePointerRef:{current:{button:0}},
     onViewportDirectionStop:()=>stops++,onCombatPointer:(...args)=>combatPointers.push(args),
     combatUiHoldRef:{current:new Map()},onCombatUiHeld:(...args)=>holds.push(args),
@@ -533,4 +558,19 @@ test("a successful nested full snapshot cannot authorize an older outer inventor
   f.api.applyNpcGoldBuyGatewaySnapshot(outer,1);
   assert(checkedNew&&checkedOld);assert.equal(f.scope.worldRef.current.gold,100);
   assert.equal(f.api.readNpcGoldBuyCurrent().blocked,true);assert.equal(f.sent.length,0);
+});
+
+
+test("actual Page collected mail barrier needs same physical receiver and a strictly later valid full snapshot",()=>{
+  const f=pageFixture(),owner=f.api.currentSocialReceiveOwner();assert.ok(owner);
+  const snapshot={...f.scope.worldRef.current,playerObjectId:owner.playerObjectId,mapFileName:owner.mapFileName};
+  const barrier={owner,mailId:1,observedSnapshot:1};f.scope.mailCollectBarrierRef.current=barrier;
+  f.api.captureParitySnapshot(snapshot);assert.strictEqual(f.scope.mailCollectBarrierRef.current,barrier,"same version is not post-receipt inventory authority");
+  f.scope.worldSnapshotVersionRef.current=2;f.scope.equipmentSnapshotRef.current=null;
+  f.api.captureParitySnapshot(snapshot);assert.strictEqual(f.scope.mailCollectBarrierRef.current,barrier,"incomplete equipment layout cannot release custody");
+  f.scope.equipmentSnapshotRef.current={connectionGeneration:owner.connectionGeneration,sessionGeneration:owner.sessionGeneration};
+  f.scope.mailCollectBarrierRef.current={...barrier,owner:{...owner,socket:{}}};const oldPhysical=f.scope.mailCollectBarrierRef.current;
+  f.api.captureParitySnapshot(snapshot);assert.strictEqual(f.scope.mailCollectBarrierRef.current,oldPhysical,"another physical sender cannot retire old custody");
+  f.scope.mailCollectBarrierRef.current=barrier;f.api.captureParitySnapshot(snapshot);
+  assert.equal(f.scope.mailCollectBarrierRef.current,null,"only the actual same-owner later full snapshot releases the confirmed collection");
 });

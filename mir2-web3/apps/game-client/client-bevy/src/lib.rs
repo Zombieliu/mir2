@@ -25,8 +25,21 @@ pub mod chat;
 #[cfg(feature = "native-ui")]
 pub mod chat_settings_effects;
 pub mod combat_input;
+#[cfg(feature = "native-ui")]
+pub use crystal_ui::overlays::combat_mode_keys;
+#[cfg(all(any(feature = "portable-quest-ui", feature = "item-tooltip"), not(feature = "native-ui")))]
+#[path = "crystal_ui/combat_mode_keys.rs"]
+pub mod combat_mode_keys;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod crystal_ui;
+#[cfg(all(feature = "item-tooltip", not(any(feature = "native-ui", feature = "portable-quest-ui"))))]
+pub mod crystal_ui {
+    // Reuse the same read-only Native algorithm without enabling Bevy UI.
+    #[path = "item_tooltip.rs"]
+    pub mod item_tooltip;
+    #[path = "character_stats.rs"]
+    pub mod character_stats;
+}
 pub mod entities;
 pub mod game_shop;
 pub mod hero_model;
@@ -43,7 +56,7 @@ pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
 pub mod options_effects;
 pub mod pending_operations;
-#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui", feature = "item-tooltip"))]
 pub mod player_text;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_bag_ui;
@@ -83,6 +96,8 @@ pub mod quest_model;
 pub mod quest_practice;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod quest_presentation_text;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_route_search;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod quest_supplies;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]

@@ -465,13 +465,27 @@ test("two selected public sources must agree and retain effects, fonts, GDI and 
   const output = path.join(base, "output");
   const rootManifest = "original-asset-manifest.generated.json";
   const manifestSource = String.raw`{ "assetHash" : "a b\\u0041" , "n" : 1e+03 , "ordered" : [ true , null ] }` + "\n";
+  const atlasManifest = "bevy-entity-atlases/manifest.json";
+  const atlasSource = String.raw`{
+    "version" : 1, "assetHash" : "atlas hash \u0041",
+    "u64" : 18446744073709551615, "i64" : -9223372036854775808,
+    "scale" : 1e+03, "signed" : -0.00,
+    "pages" : [ { "path" : "pages/a b.png", "sha256" : "0123456789abcdef" } ],
+    "escaped" : " quote \" slash \\ newline \n "
+  }` + "\n";
+  const compactAtlas = String.raw`{"version":1,"assetHash":"atlas hash \u0041","u64":18446744073709551615,"i64":-9223372036854775808,"scale":1e+03,"signed":-0.00,"pages":[{"path":"pages/a b.png","sha256":"0123456789abcdef"}],"escaped":" quote \" slash \\ newline \n "}`;
+  const atlasImage = Buffer.from([0, 255, 13, 10, 32, 34, 92, 128]);
+  const unchangedAtlasJson = '{ "n": 18446744073709551615, "s": "a b" }\r\n';
   const entries = [rootManifest, "original-effects/a.png", "original-ui/fonts/font.otf", "original-ui/fonts/LICENSE.txt",
     "original-ui/gdi-text/glyph.png", "original-ui/Items/meta.json",
     "original-ui/Mount/meta.json", "original-ui/Pet/meta.json", "original-ui/Gate/meta.json",
-    "generated/original-map-blend/meta.json",
+    "generated/original-map-blend/meta.json", atlasManifest, "bevy-entity-atlases/pages/a b.png",
+    "bevy-entity-atlases/metadata.json",
     "original-ui/Prguse/2092.png", "original-ui/Prguse/2094.png", "original-ui/Prguse/2095.png"];
   for (const relative of entries) {
-    const contents = relative === rootManifest ? manifestSource :
+    const contents = relative === rootManifest ? manifestSource : relative === atlasManifest ? atlasSource :
+      relative === "bevy-entity-atlases/pages/a b.png" ? atlasImage :
+      relative === "bevy-entity-atlases/metadata.json" ? unchangedAtlasJson :
       relative.endsWith(".json") ? '{ "n": 1e+03, "s": "a b" }\n' : relative;
     await write(path.join(app, "public", relative), contents);
     await write(path.join(source, relative), contents);
@@ -486,8 +500,8 @@ test("two selected public sources must agree and retain effects, fonts, GDI and 
   const selected = await copySelectedPublic({ sourceRoot: source, destinationRoot: path.join(output, "apps/web/public"),
     selection: selectPublic });
   assert.equal(selected.collisions, entries.length);
-  assert.equal(copied.jsonCompactions.length, 5);
-  assert.equal(selected.jsonCompactions.length, 5);
+  assert.equal(copied.jsonCompactions.length, 6);
+  assert.equal(selected.jsonCompactions.length, 6);
   for (const relative of entries) assert.equal(await exists(path.join(output, "apps/web/public", relative)), true);
   for (const remote of ["Mount", "Pet", "Gate"]) {
     assert.equal(await exists(path.join(output, "apps/web/public/original-ui", remote, "media.png")), false);
@@ -502,6 +516,24 @@ test("two selected public sources must agree and retain effects, fonts, GDI and 
   assert.deepEqual(JSON.parse(compactManifest), JSON.parse(manifestSource));
   assert.equal(await fs.readFile(path.join(source, rootManifest), "utf8"), manifestSource);
   assert.equal(await fs.readFile(path.join(app, "public", rootManifest), "utf8"), manifestSource);
+  assert.equal(await fs.readFile(path.join(output, "apps/web/public", atlasManifest), "utf8"), compactAtlas);
+  assert.deepEqual(JSON.parse(compactAtlas), JSON.parse(atlasSource));
+  for (const originalRoot of [source, path.join(app, "public")]) {
+    assert.equal(await fs.readFile(path.join(originalRoot, atlasManifest), "utf8"), atlasSource);
+    assert.deepEqual(await fs.readFile(path.join(originalRoot, "bevy-entity-atlases/pages/a b.png")), atlasImage);
+    assert.equal(await fs.readFile(path.join(originalRoot, "bevy-entity-atlases/metadata.json"), "utf8"), unchangedAtlasJson);
+  }
+  assert.deepEqual(await fs.readFile(path.join(output, "apps/web/public/bevy-entity-atlases/pages/a b.png")), atlasImage);
+  assert.equal(await fs.readFile(path.join(output, "apps/web/public/bevy-entity-atlases/metadata.json"), "utf8"), unchangedAtlasJson);
+  const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+  for (const result of [copied, selected]) {
+    assert.deepEqual(result.jsonCompactions.find((row) => row.path === atlasManifest), {
+      path: atlasManifest,
+      sourceBytes: Buffer.byteLength(atlasSource), outputBytes: Buffer.byteLength(compactAtlas),
+      sourceSha256: sha256(atlasSource), outputSha256: sha256(compactAtlas),
+    });
+    assert.equal(result.jsonCompactions.some((row) => row.path === "bevy-entity-atlases/metadata.json"), false);
+  }
   assert.equal(await fs.readFile(path.join(output, "apps/web/public/generated/original-map-blend/meta.json"), "utf8"),
     '{ "n": 1e+03, "s": "a b" }\n');
   assert.equal((await fs.readFile(path.join(output, "apps/web/public/original-ui/Items/meta.json"), "utf8")),
@@ -510,6 +542,19 @@ test("two selected public sources must agree and retain effects, fonts, GDI and 
   await assert.rejects(copySelectedPublic({ sourceRoot: source,
     destinationRoot: path.join(output, "apps/web/public"), selection: selectPublic }), /collision differs/);
   await fs.writeFile(path.join(source, rootManifest), manifestSource);
+  // Whitespace-only source changes collide safely; equivalent numeric values with different tokens do not.
+  await fs.writeFile(path.join(source, atlasManifest), "\t" + atlasSource + "\r\n");
+  const whitespaceCollision = await copySelectedPublic({ sourceRoot: source,
+    destinationRoot: path.join(output, "apps/web/public"), selection: selectPublic });
+  assert.equal(whitespaceCollision.collisions, entries.length);
+  assert.equal(whitespaceCollision.jsonCompactions.length, 6);
+  assert.equal(await fs.readFile(path.join(output, "apps/web/public", atlasManifest), "utf8"), compactAtlas);
+  await fs.writeFile(path.join(source, atlasManifest), atlasSource.replace("1e+03", "1000"));
+  await assert.rejects(copySelectedPublic({ sourceRoot: source,
+    destinationRoot: path.join(output, "apps/web/public"), selection: selectPublic }), /collision differs/);
+  assert.equal(await fs.readFile(path.join(output, "apps/web/public", atlasManifest), "utf8"), compactAtlas);
+  await fs.writeFile(path.join(source, atlasManifest), atlasSource);
+  assert.equal(await fs.readFile(path.join(app, "public", atlasManifest), "utf8"), atlasSource);
   await fs.writeFile(path.join(source, "original-ui/Prguse/2092.png"), "different");
   await assert.rejects(copySelectedPublic({ sourceRoot: source,
     destinationRoot: path.join(output, "apps/web/public"), selection: selectPublic }), /collision differs/);

@@ -272,7 +272,7 @@ mod tests {
             multi_guidance::render(parent, &QuestTracker { active_quests: vec![quest.clone()] },
                 &state, None, &EntityModelSet::default(), &MapModel::default(),
                 Some(&BigMapModel { current_map_index: Some(1), ..default() }), "Warrior",
-                &crate::quest_supplies::plan(&crate::read_model::PlayerStats::default(), &crate::inventory::InventoryModel::default(), None, None));
+                Some(&crate::quest_supplies::plan(&crate::read_model::PlayerStats::default(), &crate::inventory::InventoryModel::default(), None, None)));
         });
         queue.apply(&mut world);
         assert!(world.query::<&QuestUiButton>().iter(&world).any(|button|

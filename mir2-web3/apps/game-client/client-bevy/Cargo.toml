@@ -16,6 +16,7 @@ path = "src/lib.rs"
 
 [features]
 default = []
+item-tooltip = ["dep:mir2-game-data"]
 portable-quest-ui = [
   "dep:mir2-game-data",
   "bevy/bevy_ui",

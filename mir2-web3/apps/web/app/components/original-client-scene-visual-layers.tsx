@@ -121,6 +121,7 @@ type ViewportMapLight = {
 
 type EntitySpriteLayersProps = {
   useBevyEntityRenderer: boolean;
+  effectsEnabled: boolean;
   sprite: ViewportEntitySprite | null;
   objectId: number | string;
 };
@@ -133,6 +134,7 @@ type EntitySpriteLayersProps = {
 // (a single static frame, redrawn 60×/sec for nothing) visibly flicker.
 const EntitySpriteLayers = memo(function EntitySpriteLayers({
   useBevyEntityRenderer,
+  effectsEnabled,
   sprite,
   objectId,
 }: EntitySpriteLayersProps) {
@@ -217,7 +219,7 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
             style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
           />
         ))}
-      {sprite?.effect ? (
+      {effectsEnabled && sprite?.effect ? (
         <>
           <img
             className="entity-sprite-layer action-effect"
@@ -520,6 +522,8 @@ function OriginalClientSceneVisualLayersInner({
   registerEntityEl,
   sceneSpriteFrameIndex,
   useBevyEntityRenderer,
+  nameView = true, dropView = true, effectsEnabled = true,
+  hoveredObjectId = null, questTargetObjectIds,
   entityKindClassName,
   onPickGroundDrop,
   onActivateEntity,
@@ -543,6 +547,10 @@ function OriginalClientSceneVisualLayersInner({
   registerEntityEl: (key: string, objectId: string) => (el: HTMLElement | null) => void;
   sceneSpriteFrameIndex: number;
   useBevyEntityRenderer: boolean;
+  nameView?: boolean; dropView?: boolean; hpView?: boolean; effectsEnabled?: boolean;
+  /** Current world hover and Native tracker targets; selected entity is not hover authority. */
+  hoveredObjectId?: string | null;
+  questTargetObjectIds?: ReadonlySet<string>;
   entityKindClassName: (kind: EntityKind) => string;
   onPickGroundDrop: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
@@ -759,7 +767,7 @@ function OriginalClientSceneVisualLayersInner({
               ) : (
                 <span className="drop-dot" />
               )}
-              <span className="drop-label" style={{ color: argbToCssColor(drop.nameColourArgb) }}>
+              <span className="drop-label" style={{ color: argbToCssColor(drop.nameColourArgb), visibility: dropView ? "visible" : "hidden" }}>
                 {drop.quantity > 1 ? `${drop.name} x${drop.quantity}` : drop.name}
               </span>
             </button>
@@ -870,13 +878,14 @@ function OriginalClientSceneVisualLayersInner({
               ) : null}
               <EntitySpriteLayers
                 useBevyEntityRenderer={useBevyEntityRenderer}
+                effectsEnabled={effectsEnabled}
                 sprite={sprite}
                 objectId={entity.objectId}
               />
             </div>
           );
         })}
-        {viewportProjectiles.map((projectile) => {
+        {(effectsEnabled ? viewportProjectiles : []).map((projectile) => {
           const travelEndsAt = projectile.travelEndsAt ?? projectile.expiresAt;
           const exact = exactProjectileEffects.get(projectile.key);
           const exactSpell = exact?.spell ?? "";
@@ -999,7 +1008,7 @@ function OriginalClientSceneVisualLayersInner({
           );
         })}
         {/* Procedural magic / map VFX fallback nodes (atlas-free; see FallbackVfxNode). */}
-        {fallbackVfx.map((effect) => (
+        {(effectsEnabled ? fallbackVfx : []).map((effect) => (
           <FallbackVfxNode
             key={effect.key}
             effect={effect}
@@ -1015,7 +1024,7 @@ function OriginalClientSceneVisualLayersInner({
         className={`viewport-effect-overlay ${screen !== "game" ? "hidden" : ""}`}
         aria-hidden="true"
       >
-        {displayResolvedEffectFrames.map(({ effect, animation, frame }) => {
+        {(effectsEnabled ? displayResolvedEffectFrames : []).map(({ effect, animation, frame }) => {
           const anchor = effect.objectId
             ? viewportEntitySprites.find(({ entity }) => entity.objectId === effect.objectId)?.entity
             : undefined;
@@ -1331,6 +1340,9 @@ function OriginalClientSceneVisualLayersInner({
                       left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityNameplateLeftOffset(entity, sprite)}px`,
                       top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
                       "--entity-name-color": labelColour,
+                      visibility: nameView || hoveredObjectId === entity.objectId
+                        || (entity.kind === "monster" && !entity.dead && questTargetObjectIds?.has(entity.objectId))
+                        ? "visible" : "hidden",
                     } as CSSProperties}
                     data-ui-interactive={isInteractiveEntity ? "true" : "false"}
                     data-object-id={entity.objectId}

@@ -84,7 +84,11 @@
     ".next-shared-npc-shop-combined-01/types/**/*.ts",
     ".next-shared-npc-shop-combined-01/dev/types/**/*.ts",
     ".next-shared-npc-gold-capacity-combined-01/types/**/*.ts",
-    ".next-shared-npc-gold-capacity-combined-01/dev/types/**/*.ts"
+    ".next-shared-npc-gold-capacity-combined-01/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261006-01/types/**/*.ts",
+    ".next-web-windows-catchup-20261006-01/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261006-02/types/**/*.ts",
+    ".next-web-windows-catchup-20261006-02/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

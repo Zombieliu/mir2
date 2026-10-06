@@ -69,11 +69,13 @@ export function validateBevyRuntimeManifest(manifest, label = "Bevy runtime mani
       found.set(id, expected);
     }
     if (!found.has("webgpu") || !found.has("webgl2")) invalid(label, "missing required package");
-    if (found.get("webgpu").questUiAbiVersion !== found.get("webgl2").questUiAbiVersion) {
-      invalid(label, "GPU and lean GL2 UI ABI mismatch");
+    const gpuAbi = found.get("webgpu").questUiAbiVersion;
+    const leanAbi = found.get("webgl2").questUiAbiVersion;
+    if (gpuAbi !== leanAbi && !(found.has("webgl2-shared") && gpuAbi === 1 && leanAbi === 0)) {
+      invalid(label, "unsupported GPU and lean GL2 UI ABI combination");
     }
-    if (found.has("webgl2-shared") && found.get("webgpu").questUiAbiVersion !== 1) {
-      invalid(label, "shared GL2 requires GPU and lean GL2 ABI1");
+    if (found.has("webgl2-shared") && gpuAbi !== 1) {
+      invalid(label, "shared GL2 requires GPU ABI1");
     }
     packages = IDS.filter((id) => found.has(id)).map((id) => found.get(id));
   }

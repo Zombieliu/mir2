@@ -1,5 +1,10 @@
 //! Crystal GameScene direct modes and source cycle throttles.
-use std::time::{Duration, Instant};
+use std::time::Duration;
+#[cfg(not(target_arch = "wasm32"))]
+pub use std::time::Instant as CombatModeInstant;
+#[cfg(target_arch = "wasm32")]
+pub use web_time::Instant as CombatModeInstant;
+use self::CombatModeInstant as Instant;
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct CombatModes {
     pub attack: u8,

@@ -28,6 +28,14 @@ mod native_ingest;
 mod presentation_pose;
 #[cfg(feature = "web-quest-ui")]
 mod quest_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod quest_route_plan;
+#[cfg(feature = "web-item-tooltip")]
+mod item_tooltip_query;
+#[cfg(feature = "web-item-tooltip")]
+mod skill_bar_query;
+#[cfg(feature = "web-item-tooltip")]
+mod combat_modes_host;
 mod remote_motion;
 #[cfg(not(target_arch = "wasm32"))]
 mod render_diagnostics;
@@ -40,7 +48,6 @@ mod npc_shop_ui_host;
 mod storage_ui_host;
 #[cfg(feature = "web-quest-ui")]
 pub mod mail_ui_host;
-#[cfg(feature = "web-quest-ui")]
 mod webgl2_shared_ui;
 #[cfg(not(target_arch = "wasm32"))]
 pub use render_diagnostics::{native_render_diagnostics_enabled, record_native_render_marker};
@@ -1339,6 +1346,25 @@ pub fn get_mir2_renderer_backend() -> String {
     COMPILED_RENDER_BACKEND.to_owned()
 }
 
+fn web_startup_ui_mode() -> webgl2_shared_ui::StartupUiMode {
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    {
+        quest_ui_host::startup_mode()
+    }
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    {
+        webgl2_shared_ui::StartupUiMode {
+            requested: false,
+            shared_webgl2: false,
+        }
+    }
+}
+
+#[wasm_bindgen(js_name = getMir2RuntimeCanvasSelector)]
+pub fn get_mir2_runtime_canvas_selector() -> String {
+    webgl2_shared_ui::runtime_canvas_selector(web_startup_ui_mode()).to_owned()
+}
+
 #[wasm_bindgen(js_name = getMir2RuntimeUiCapabilities)]
 pub fn get_mir2_runtime_ui_capabilities() -> String {
     runtime_ui_capabilities::current_json()
@@ -1373,6 +1399,65 @@ pub fn get_mir2_npc_shop_ui_capabilities() -> String {
 #[wasm_bindgen(js_name = getMir2NpcGoldBuyPlan)]
 pub fn get_mir2_npc_gold_buy_plan(input_json: &str) -> String {
     mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy_json(input_json)
+}
+
+/// Pure ordinary Quest route selection; the host retains movement authority.
+#[cfg(feature = "web-quest-ui")]
+#[wasm_bindgen(js_name = getMir2QuestRoutePlan)]
+pub fn get_mir2_quest_route_plan(query_json: &str, blocked_bits: &[u8]) -> String {
+    quest_route_plan::plan(query_json, blocked_bits)
+}
+
+/// Additive local HUD preference support; the existing strict capabilities JSON is unchanged.
+#[wasm_bindgen(js_name = getMir2HudPreferencesVersion)]
+pub fn get_mir2_hud_preferences_version() -> u32 { if cfg!(feature = "web-quest-ui") { 1 } else { 0 } }
+
+#[wasm_bindgen(js_name = getMir2QuestNameTargetsVersion)]
+pub fn get_mir2_quest_name_targets_version() -> u32 { if cfg!(feature = "web-quest-ui") { 1 } else { 0 } }
+
+/// Read-only identities from the current shared Quest tracker. Thin ABI0 remains explicitly unknown.
+#[wasm_bindgen(js_name = getMir2QuestNameTargets)]
+pub fn get_mir2_quest_name_targets() -> String {
+    #[cfg(all(feature = "web-quest-ui", target_arch = "wasm32"))]
+    { return quest_ui_host::quest_name_targets_json(); }
+    #[cfg(not(all(feature = "web-quest-ui", target_arch = "wasm32")))]
+    { "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into() }
+}
+
+#[wasm_bindgen(js_name = getMir2CombatModeKeysVersion)]
+pub fn get_mir2_combat_mode_keys_version() -> u32 { if cfg!(feature = "web-item-tooltip") { 1 } else { 0 } }
+
+/// Local Native reducer only; the browser's final socket gate retains all authority.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = processMir2CombatModeKeys)]
+pub fn process_mir2_combat_mode_keys(input: &str) -> String { combat_modes_host::process_json(input) }
+
+/// Read-only Crystal item document, shared with the Native tooltip painter.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2ItemTooltipDocument)]
+pub fn get_mir2_item_tooltip_document(query_json: &str) -> String {
+    item_tooltip_query::query_item_tooltip_json(query_json)
+}
+
+/// Exact unique Crystal template lookup for readonly browser item labels.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2ItemCatalogInfo)]
+pub fn get_mir2_item_catalog_info(query_json: &str) -> String {
+    item_tooltip_query::query_item_catalog_json(query_json)
+}
+
+/// Read-only character rows from the same Native Status/State rule.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2CharacterStatsDocument)]
+pub fn get_mir2_character_stats_document(query_json: &str) -> String {
+    item_tooltip_query::query_character_stats_json(query_json)
+}
+
+/// Read-only bar metadata from the same Native learned-skill normalization.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2SkillBarDocument)]
+pub fn get_mir2_skill_bar_document(query_json: &str) -> String {
+    skill_bar_query::query_skill_bar_json(query_json)
 }
 
 #[cfg(test)]
@@ -1696,19 +1781,17 @@ pub struct RuntimeWindowSpec {
 }
 
 impl RuntimeWindowSpec {
-    /// Web WASM host: transparent overlay over the DOM map/floor/UI layers.
+    /// Web WASM host: world canvas ordinarily, fixed stage UI canvas for shared GL2.
     pub fn web() -> Self {
         // The ordinary world canvas shares React's mouse routing. Cancelling
         // pointerdown in winit suppresses the compatibility mousedown/up events
-        // that route requires. Only the fixed primary shared-UI surface owns
+        // that route requires. Only the fixed stage shared-UI surface owns
         // those gestures; secondary UI windows keep their own prevention.
-        #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
-        let prevent_default_event_handling = quest_ui_host::startup_mode().shared_webgl2;
-        #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
-        let prevent_default_event_handling = false;
+        let startup = web_startup_ui_mode();
+        let prevent_default_event_handling = startup.shared_webgl2;
 
         Self {
-            canvas_selector: Some("#mir2-web3-canvas".to_owned()),
+            canvas_selector: Some(webgl2_shared_ui::runtime_canvas_selector(startup).to_owned()),
             title: "mir2-web3".to_owned(),
             width: 1280,
             height: 720,
@@ -1986,6 +2069,14 @@ fn setup_scene(
 mod shared_ui_camera_tests {
     use super::*;
 
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn non_wasm_web_spec_uses_the_world_canvas_selector() {
+        let selector = get_mir2_runtime_canvas_selector();
+        assert_eq!(selector, "#mir2-web3-canvas");
+        assert_eq!(RuntimeWindowSpec::web().canvas_selector.as_deref(), Some(selector.as_str()));
+    }
+
     #[test]
     fn ordinary_world_camera_remains_active() {
         let mut app = App::new();
@@ -1998,7 +2089,7 @@ mod shared_ui_camera_tests {
 
     #[cfg(feature = "webgl2-shared-ui")]
     #[test]
-    fn world_camera_is_inactive_for_fixed_shared_prototype() {
+    fn world_camera_is_inactive_for_shared_webgl2() {
         let mut app = App::new();
         app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
         app.add_systems(Startup, setup_scene);

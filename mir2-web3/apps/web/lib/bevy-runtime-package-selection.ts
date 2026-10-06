@@ -4,7 +4,7 @@ import {
   type NormalizedBevyRuntimePackage,
   type BevyRuntimeBackend,
 } from "./bevy-runtime-manifest.mjs";
-import { isWebGl2SharedCanvasPrototype } from "./bevy-shared-canvas-mode";
+import { isWebGl2SharedCanvasPrototype, sharedCanvasQuerySignature, wantsPrimarySharedCanvas } from "./bevy-shared-canvas-mode";
 
 export type BevyRuntimeStartup = Readonly<{
   runtimeAllowed: boolean;
@@ -12,26 +12,32 @@ export type BevyRuntimeStartup = Readonly<{
   manifest: NormalizedBevyRuntimeManifest | null;
   requestedSharedCanvas: boolean;
   sharedCanvasPrototype: boolean;
+  sharedWebGl2: boolean;
+  sharedCanvasQuery: string;
 }>;
 
 /** Decide the immutable canvas/package mode before mounting or importing WASM. */
 export function selectBevyRuntimeStartup(rawManifest: unknown, search: string): BevyRuntimeStartup {
   const requestedSharedCanvas = typeof search === "string" && isWebGl2SharedCanvasPrototype(search);
+  const requestedSharedUiCanvas = typeof search === "string" && wantsPrimarySharedCanvas(search);
+  const sharedCanvasQuery = typeof search === "string" ? sharedCanvasQuerySignature(search) : "[]";
   let manifest: NormalizedBevyRuntimeManifest;
   try {
     if (typeof search !== "string") throw new TypeError("invalid search");
     manifest = validateBevyRuntimeManifest(rawManifest, "runtime manifest");
   } catch {
     return Object.freeze({ runtimeAllowed: false, reason: "invalid-manifest", manifest: null,
-      requestedSharedCanvas, sharedCanvasPrototype: false });
+      requestedSharedCanvas, sharedCanvasPrototype: false, sharedWebGl2: false, sharedCanvasQuery });
   }
   if (manifest.schemaVersion === 1 && requestedSharedCanvas) {
     return Object.freeze({ runtimeAllowed: false, reason: "legacy-shared-unknown", manifest,
-      requestedSharedCanvas, sharedCanvasPrototype: false });
+      requestedSharedCanvas, sharedCanvasPrototype: false, sharedWebGl2: false, sharedCanvasQuery });
   }
   const hasSharedPackage = manifest.packages.some((item) => item.id === "webgl2-shared");
   return Object.freeze({ runtimeAllowed: true, reason: "ready", manifest, requestedSharedCanvas,
-    sharedCanvasPrototype: requestedSharedCanvas && hasSharedPackage });
+    sharedCanvasPrototype: requestedSharedCanvas && hasSharedPackage,
+    sharedWebGl2: manifest.schemaVersion === 2 && hasSharedPackage && requestedSharedUiCanvas,
+    sharedCanvasQuery });
 }
 
 /** Resolve the actual backend to the selected immutable package. */
@@ -44,7 +50,7 @@ export function getBevyRuntimePackageForBackend(
   if (startup.requestedSharedCanvas && backend !== "webgl2") return null;
   if (startup.sharedCanvasPrototype && backend !== "webgl2") return null;
   const id = backend === "webgpu" ? "webgpu"
-    : startup.sharedCanvasPrototype ? "webgl2-shared" : "webgl2";
+    : startup.sharedWebGl2 ? "webgl2-shared" : "webgl2";
   return startup.manifest.packages.find((item) => item.id === id) ?? null;
 }
 
@@ -93,20 +99,32 @@ export function assertBevyRuntimeStartupAgreement(
   backend: BevyRuntimeBackend,
   getter: (() => string) | null | undefined,
   currentSearch: string,
+  canvasSelectorGetter?: (() => string) | null,
 ): BevyRuntimeUiCapabilities | null {
   const selected = getBevyRuntimePackageForBackend(startup, backend);
   if (!selected || typeof currentSearch !== "string"
-      || isWebGl2SharedCanvasPrototype(currentSearch) !== startup.requestedSharedCanvas) {
+      || isWebGl2SharedCanvasPrototype(currentSearch) !== startup.requestedSharedCanvas
+      || sharedCanvasQuerySignature(currentSearch) !== startup.sharedCanvasQuery
+      || (startup.manifest?.schemaVersion === 2
+        && startup.manifest.packages.some((item) => item.id === "webgl2-shared")
+        && wantsPrimarySharedCanvas(currentSearch) !== startup.sharedWebGl2)) {
     throw new Error("runtime startup selection changed or is unavailable");
   }
   if (typeof getter !== "function") {
     if (startup.manifest?.schemaVersion === 1 && !startup.requestedSharedCanvas
-        && !startup.sharedCanvasPrototype && selected.backend === backend) return null;
+        && !startup.sharedWebGl2 && selected.backend === backend) return null;
     throw new Error("runtime UI capability getter missing");
   }
   const actual = readCapabilities(getter);
-  if (actual.backend !== backend || actual.primarySharedUiStartup !== startup.sharedCanvasPrototype) {
+  if (actual.backend !== backend
+      || actual.primarySharedUiStartup !== (backend === "webgl2" && startup.sharedWebGl2)) {
     throw new Error("runtime backend or canvas mode disagreement");
+  }
+  if (actual.primarySharedUiStartup) {
+    let selector: string;
+    try { selector = canvasSelectorGetter?.() ?? ""; }
+    catch { selector = ""; }
+    if (selector !== "#mir2-quest-ui-canvas") throw new Error("runtime primary canvas selector disagreement");
   }
   if (startup.manifest?.schemaVersion === 2) {
     if (actual.questUiAbiVersion !== selected.questUiAbiVersion

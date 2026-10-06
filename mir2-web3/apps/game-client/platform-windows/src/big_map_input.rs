@@ -4,8 +4,6 @@ use mir2_client_bevy::big_map::{BigMapImageGeometry, BigMapModel, BigMapView};
 use mir2_client_bevy::chat::{ChatLine, ChatModel};
 use mir2_client_bevy::crystal_ui::overlays::CRYSTAL_BIGMAP_PANEL_RECT;
 
-const SEARCH_BUDGET: usize = 250_000;
-
 #[derive(Clone, Copy, Debug)]
 pub(super) struct HuntArea {
     pub center: (i32, i32),
@@ -89,93 +87,21 @@ pub(super) fn ui_blocks_except_map(ui: &NativePlayerUiState) -> bool {
     guard.blocks_world_click()
 }
 
-// Eight-way Crystal pathing, bounded by actual map edges rather than the
-// short NewMove click radius. The search budget bounds memory/latency on a
-// pathological maze; exceeding it is reported instead of publishing a route.
+// Collision adapters remain Native; both hosts use the same complete search.
 fn search(
-    width: i32,
-    height: i32,
-    origin: (i32, i32),
-    destination: (i32, i32),
+    width: i32, height: i32, origin: (i32, i32), destination: (i32, i32),
     blocked: impl FnMut((i32, i32), (i32, i32)) -> bool,
 ) -> Result<Vec<(i32, i32)>, &'static str> {
-    search_region(width, height, origin, destination, 0, blocked)
+    mir2_client_bevy::quest_route_search::search(width, height, origin, destination, blocked)
+        .map_err(mir2_client_bevy::quest_route_search::SearchError::native_message)
 }
 
-// A hunting destination is the imported square spawn area, not a monster's
-// occupied tile. One A* search retains the existing total expansion budget.
 fn search_region(
-    width: i32,
-    height: i32,
-    origin: (i32, i32),
-    destination: (i32, i32),
-    radius: i32,
-    mut blocked: impl FnMut((i32, i32), (i32, i32)) -> bool,
+    width: i32, height: i32, origin: (i32, i32), destination: (i32, i32), radius: i32,
+    blocked: impl FnMut((i32, i32), (i32, i32)) -> bool,
 ) -> Result<Vec<(i32, i32)>, &'static str> {
-    let inside = |p: (i32, i32)| p.0 >= 0 && p.1 >= 0 && p.0 < width && p.1 < height;
-    if !inside(origin) || !inside(destination) || radius < 0 || radius > width.max(height) {
-        return Err("目标不在当前地图范围内。");
-    }
-    let distance = |point| chebyshev_distance(point, destination).saturating_sub(radius).max(0);
-    if distance(origin) == 0 {
-        return Ok(Vec::new());
-    }
-    let mut open = BinaryHeap::new();
-    let mut costs = HashMap::from([(origin, 0)]);
-    let mut previous = HashMap::new();
-    open.push(Reverse((
-        distance(origin),
-        0,
-        0_u64,
-        origin,
-    )));
-    let mut expanded = 0;
-    let mut sequence = 0_u64;
-    while let Some(Reverse((_, negative_cost, _, current))) = open.pop() {
-        let cost = -negative_cost;
-        if costs.get(&current) != Some(&cost) {
-            continue;
-        }
-        if distance(current) == 0 {
-            let mut steps = Vec::new();
-            let mut p = current;
-            while p != origin {
-                steps.push(p);
-                p = previous[&p];
-            }
-            steps.reverse();
-            return Ok(steps);
-        }
-        expanded += 1;
-        if expanded > SEARCH_BUDGET {
-            return Err("寻路范围过于复杂，请选择更近的目标。");
-        }
-        let preferred = movement_direction_toward(Some(destination), current).unwrap();
-        for rotation in [0, 1, -1, 2, -2, 3, -3, 4] {
-            let (dx, dy) = direction_to_delta(rotate_direction(preferred, rotation).unwrap());
-            let next = (current.0 + dx, current.1 + dy);
-            let next_cost = cost + 1;
-            if !inside(next)
-                || blocked(current, next)
-                || costs.get(&next).is_some_and(|old| *old <= next_cost)
-            {
-                continue;
-            }
-            costs.insert(next, next_cost);
-            previous.insert(next, current);
-            // Prefer deeper nodes for equal estimates, avoiding a broad
-            // plateau scan on large open maps. Stable direction order keeps
-            // unobstructed routes straight instead of zigzagging on ties.
-            sequence += 1;
-            open.push(Reverse((
-                next_cost + distance(next),
-                -next_cost,
-                sequence,
-                next,
-            )));
-        }
-    }
-    Err("无法找到通往目标的路径。")
+    mir2_client_bevy::quest_route_search::search_region(width, height, origin, destination, radius, blocked)
+        .map_err(mir2_client_bevy::quest_route_search::SearchError::native_message)
 }
 
 pub(super) fn plan(

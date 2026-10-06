@@ -176,7 +176,10 @@ fn m10_raw_catalog_is_absence_only_and_explicit_zero_null_are_retained() {
     assert_eq!(b.icon, Some(0));
     assert_eq!(b.need1, Some(0));
     assert_eq!(b.need2, None);
+    #[cfg(feature = "portable-quest-ui")]
     assert!(b.need3.is_some());
+    #[cfg(not(feature = "portable-quest-ui"))]
+    assert_eq!(b.need3, None);
 }
 #[test]
 fn m10_portable_clock_uses_actual_cast_observation_and_never_delay_as_cast() {
@@ -205,5 +208,38 @@ fn m10_raw_null_name_delay_and_missing_delay_remain_unknown() {
     assert!(s.bindings.iter().all(|b| b.delay_ms.is_none()));
     let s = normalize_raw_skills(&[serde_json::json!({"spell":"FireBall","delayMs":0})]).unwrap();
     assert_eq!(s.binding_for(0).delay_ms, Some(0));
+    #[cfg(feature = "portable-quest-ui")]
     assert!(!s.skills[0].name.is_empty());
+    #[cfg(not(feature = "portable-quest-ui"))]
+    assert!(s.skills[0].name.is_empty());
+}
+
+#[cfg(not(feature = "portable-quest-ui"))]
+#[test]
+fn m10_raw_no_ui_keeps_explicit_fields_without_inventing_catalog_values() {
+    let rows = vec![
+        serde_json::json!({"id":41,"spell":"FireBall","magicName":"Explicit","icon":0,
+            "need1":0,"need2":null,"hotkey":0,"delayMs":0}),
+        serde_json::json!({"spell":"Healing","name":null,"delayMs":null}),
+    ];
+    let model = normalize_raw_skills(&rows).unwrap();
+    assert_eq!(model.skills[0].id, 41);
+    assert_eq!(model.skills[0].name, "Explicit");
+    let explicit = model.binding_for(41);
+    assert_eq!(explicit.spell.as_deref(), Some("FireBall"));
+    assert_eq!(explicit.icon, Some(0));
+    assert_eq!(explicit.need1, Some(0));
+    assert_eq!(explicit.need2, None);
+    assert_eq!(explicit.need3, None);
+    assert_eq!(explicit.hotkey, Some(0));
+    assert_eq!(explicit.delay_ms, Some(0));
+    assert_eq!(model.skills[1].id, 1);
+    assert!(model.skills[1].name.is_empty());
+    let absent = model.binding_for(1);
+    assert_eq!(absent.spell.as_deref(), Some("Healing"));
+    assert_eq!(absent.icon, None);
+    assert_eq!(absent.need1, None);
+    assert_eq!(absent.need2, None);
+    assert_eq!(absent.need3, None);
+    assert_eq!(absent.delay_ms, None);
 }

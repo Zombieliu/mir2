@@ -43,7 +43,7 @@ import {
 } from "../lib/localization";
 import { localizeQuestLog } from "../lib/quest-localization";
 import { withQuestRewardTooltipSources, type QuestRewardsPresentation } from "../lib/quest-reward-presentation";
-import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, projectBevyQuests, readBevyQuestPresentation,
+import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, projectBevyQuests, readBevyQuestPresentation, readBevyQuestUiStatus,
   type BevyQuestUiIntent, type BevyQuestUiIntentResult, type BevyQuestUiRuntime } from "../lib/bevy-quest-ui";
 import { useBevyHudUi } from "../lib/use-bevy-hud-ui";
 import { useBevyCharacterUi } from "../lib/use-bevy-character-ui";
@@ -61,6 +61,14 @@ import { type CharacterRuntime, type CharacterIntent, type CharacterCommandProof
 import { projectSelfAppearance, sameSelfAppearance, type SelfAppearance } from "../lib/world-model/character-appearance";
 import { projectAuthoritativeHudPlayer, supportsHud, readHudGeometry, projectHudSnapshotFields, sameHudSnapshotFields, nextHudNavigationRevision, type HudAction, type HudRuntime } from "../lib/bevy-hud-ui";
 import { useBevyQuestUi } from "../lib/use-bevy-quest-ui";
+import { normalizeQuestMapFileName, projectBevyQuestWorldDraft, sameQuestWorldIdentity,
+  questObjectId, questCoordinate, type QuestWorldIdentity, type QuestWorldDraft, type QuestWorldStamp } from "../lib/bevy-quest-world-context";
+import { isQuestWorldAction, parseQuestWorldAction, type QuestRouteAction } from "../lib/bevy-quest-world-actions";
+import { planBevyQuestRoute, type QuestRouteRuntime, type QuestRoutePlan, type QuestRoutePoint, type QuestRouteEdge } from "../lib/bevy-quest-route-plan";
+import { QuestCollisionCache, type QuestCollisionGeometry } from "../lib/quest-collision-cache";
+import { nextQuestRouteStep } from "../lib/quest-route-execution";
+import { observeQuestMapPacket, currentQuestMapIndex, sameQuestWorldLifetime, questAttackTargetCurrent,
+  type QuestMapAuthority, type QuestWorldLifetime } from "../lib/quest-world-lifecycle";
 import { readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
 import { advanceExperienceAuthority, experienceAuthorityFromPacket, matchingExperienceAuthority,
   readBevyExperienceBarSlot, type ExperienceAuthority } from "../lib/bevy-experience-bar";
@@ -68,8 +76,37 @@ import { matchingWeightAuthority, movementSnapshotWeightMatches, projectSnapshot
   readBevyWeightBarSlot, type WeightAuthority } from "../lib/bevy-weight-bar";
 import { hudBarCommonIdentity } from "../lib/bevy-hud-bar-draw-plan";
 import { useBevyBagUi } from "../lib/use-bevy-bag-ui";
-import { exactFirstRawQueryValue, sharedCanvasUsesWebGl2, sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
+import { resolveSharedUiRequests, sharedCanvasUsesWebGl2, sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
 import { projectBevyBagModel } from "../lib/bevy-bag-model";
+import { SocialIncomingReplies, socialReplyCommand, type SocialReplyOwner, type SocialReplyProof, type SocialRequestKind } from "../lib/social-incoming-replies";
+import { readSharedItemTooltip, readSharedItemCatalogInfo, type CrystalTooltipRuntime, type CrystalTooltipDocument, type CrystalTooltipItem } from "../lib/shared-item-tooltip";
+import { readSharedCharacterStats, type CrystalStatsRuntime } from "../lib/shared-character-stats";
+import { readSharedSkillBarDocument, parseCrystalSkillBarPositions, serializeCrystalSkillBarPositions, CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY, DEFAULT_CRYSTAL_SKILL_BAR_POSITIONS, type CrystalSkillBarRuntime, type CrystalSkillBarRow, type CrystalSkillBarPositions } from "../lib/shared-skill-bar";
+import type { SkillBarLease } from "./components/original-client-skill-bars";
+import { SharedCombatModeKeys, isCrystalCombatModeFunction, nextCombatModePhysicalGeneration, type CombatModeRuntime, type CombatModeOwner, type CombatModeProof } from "../lib/shared-combat-mode-keys";
+import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
+import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, HeroUiOrigin, HeroUiLease } from "./components/original-client-hero-management-window";
+import {
+  DEFAULT_PLAYER_UI_PREFERENCES, PLAYER_UI_PREFERENCES_STORAGE_KEY, CRYSTAL_KEY_BINDINGS_STORAGE_KEY,
+  CRYSTAL_HELP_STATE_STORAGE_KEY, DEFAULT_CRYSTAL_HELP_STATE, defaultCrystalKeyBindings,
+  parsePlayerUiPreferences, serializePlayerUiPreferences, parseCrystalKeyBindings, serializeCrystalKeyBindings,
+  parseCrystalHelpState, serializeCrystalHelpState, applyCrystalSkillMode, playerUiPreferencesAudioSettings,
+  type PlayerUiPreferences, type CrystalKeyBinding, type CrystalHelpWindowState,
+} from "../lib/player-ui-preferences";
+import { setOriginalAudioSettings } from "../lib/original-audio";
+import { crystalBeltShortcutSlot, SUPPORTED_CRYSTAL_BROWSER_FUNCTIONS, type CrystalWindowShortcut } from "../lib/crystal-shortcut-actions";
+import { emptyCashGameShopCatalog, upsertCashGameShopInfo, applyCashGameShopStock, makeCashGameShopSource, CashGameShopPurchases,
+  type CashGameShopEntry, type CashGameShopConfirmation, type CashGameShopProof } from "../lib/cash-game-shop-ui";
+import { makeCreaturePlayerSource, upsertCreaturePlayerRecord, creaturePlayerCommandJson, CreaturePlayerOperations,
+  type CreaturePlayerSource, type CreaturePlayerIntent, type CreaturePlayerProof } from "../lib/creature-player-ui";
+import type { TradeItemSlot } from "./components/original-client-trade-window";
+import type { GuildStorageTooltipItem } from "./components/original-client-guild-window";
+import { GuildBuffAuthority, GuildBuffOperations, type GuildBuffActionDto, type GuildBuffProof } from "../lib/guild-buff-ui";
+import { guildRankSaveCommands, projectGuildRanks, resolveFriendCharacterIndex, RankingQueries, type RankingQuery, type RankingQueryProof, type ProjectedGuildRanks } from "../lib/social-parity-actions";
+import { rankingTabKey } from "../lib/stage5-window-adapters";
+import { StorageRentalConfirmation, type StorageRentalProof, type StorageRentalFacts } from "../lib/storage-rental-confirmation";
+import { projectSocialInventory, projectOwnTradeItems, projectGuildStorageItems, type SocialItemSlot } from "../lib/social-item-window-model";
+import { SocialWindowOperations, socialWindowItemCommand, guildPermissionsFromOptions, applyGuildStorageChange, type SocialWindowOperationKind, type SocialWindowOperationProof } from "../lib/social-window-operations";
 import { NpcGoldBuyDispatcher, NpcGoldBuyInventoryReadiness, npcGoldBuyInventoryMutationPacket, type NpcGoldBuyCurrent, type NpcGoldBuyRuntime,
   type NpcGoldBuyProof, type NpcGoldBuyQuote, type NpcGoldBuyGood } from "../lib/bevy-npc-shop-buy";
 import { sameBagOwner, type BagCommandToken, type BagOwnerToken, type BevyBagUiIntent, type BevyBagUiRuntime } from "../lib/bevy-bag-ui";
@@ -78,6 +115,8 @@ import { useBevyNpcShopUi } from "../lib/use-bevy-npc-shop-ui";
 import type { NpcShopRuntime, NpcShopHostInput, NpcShopIntent, NpcShopStatus } from "../lib/bevy-npc-shop-ui";
 type NpcShopSendProof = Readonly<{ intent: NpcShopIntent; currentJson: string; sourceJson: string;
   presentation: NonNullable<NpcShopHostInput["presentation"]> }>;
+type SocialTradeSendProof = Readonly<{owner: SocialReplyOwner; incarnation: number;
+  partner: string; state: "requested" | "open" | "closed"; body: string}>;
 import { projectBevyStorageModel } from "../lib/bevy-storage-model";
 import { type StorageRuntime, type StorageIntent, type StorageCommandProof } from "../lib/bevy-storage-ui";
 type EquipmentOwnerProof = SharedEquipmentOwnerProof | StorageCommandProof;
@@ -364,11 +403,24 @@ type RuntimeStatus = {
   imageKeys?: string[];
 };
 
-type RuntimeModule = BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
+/** Local window guards update before a synchronous command callback can send. */
+function useImmediateUiState<T>(initial: T) {
+  const [state, setState] = useState(initial);
+  const current = useRef(initial);
+  const set = useCallback((next: T | ((previous: T) => T)) => {
+    const resolved = typeof next === "function" ? (next as (previous: T) => T)(current.current) : next;
+    current.current = resolved;
+    setState(resolved);
+  }, []);
+  return [state, set, current] as const;
+}
+
+type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
   default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
   getMir2RuntimeUiCapabilities?: () => string;
+  getMir2RuntimeCanvasSelector?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
   setMir2EntityRenderState?: (snapshotJson: string) => void;
   resolveMir2EntityAnimationPoses?: (snapshotJson: string) => string;
@@ -660,7 +712,7 @@ type GatewayActiveBuff = {
 type Stage5SystemsState = {
   group?: { allowGroup?: boolean; members?: string[]; memberInfos?: Array<{ name: string; level?: number; class?: number; hp?: number; maxHp?: number; online?: boolean }>; lootMode?: string; leaderName?: string };
   guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
-  social?: { friends?: string[]; blocked?: string[]; friendInfos?: Array<{ name: string; online?: boolean; memo?: string }>; blockedInfos?: Array<{ name: string; memo?: string }> };
+  social?: { friends?: string[]; blocked?: string[]; friendInfos?: Array<{ name: string; index?: number; online?: boolean; memo?: string }>; blockedInfos?: Array<{ name: string; index?: number; memo?: string }> };
   relationship?: Record<string, unknown>;
   mentor?: Record<string, unknown>;
   mail?: Array<Record<string, unknown>>;
@@ -1138,6 +1190,10 @@ type RankingState = {
   entries: RankingEntry[];
   updatedAt: number;
 };
+
+type SocialRosterSendProof = Readonly<{
+  kind: "friend" | "guild"; owner: SocialReplyOwner; sourceKey: string; body: string;
+}>;
 
 type RankingRequestState = {
   rankType: number;
@@ -2002,6 +2058,58 @@ export default function HomePage() {
     movementShadowBridgeRef.current = createBevyMovementShadowBridge(() => runtimeRef.current);
   }
   const socketRef = useRef<WebSocket | null>(null);
+  const socialRepliesRef = useRef(new SocialIncomingReplies());
+  const guildBuffAuthorityRef = useRef(new GuildBuffAuthority());
+  const guildBuffOperationsRef = useRef(new GuildBuffOperations());
+  const heroAuthorityRef = useRef(new HeroPlayerAuthority());
+  const heroOperationsRef = useRef(new HeroPlayerOperations());
+  const heroManagementOpenRef = useRef(false);
+  const heroBeltProofRef = useRef<HeroOperationProof | null>(null);
+  const heroWindowEpochsRef = useRef<Readonly<Record<HeroUiOrigin, number>>>({ inventory: 1, character: 1, belt: 1 });
+  const heroUiProofLeasesRef = useRef(new WeakMap<HeroOperationProof, Readonly<{ kind: "window"; lease: HeroUiLease } | { kind: "keyboardBelt" | "acceptedRestock" }>>());
+  const heroRestockInputWasAllowedRef = useRef(false);
+  const heroWindowsRef = useRef<HeroManagementWindows>({ inventoryOpen: false, characterOpen: false,
+    characterPage: "equipment", beltVisible: true, beltVertical: false });
+  const [heroWindows, setHeroWindows] = useState<HeroManagementWindows>(heroWindowsRef.current);
+  const heroWindowActorRef = useRef<HeroPlayerModel | null>(null);
+  const heroRestockScheduledRef = useRef(false);
+  const heroManagementPage: HeroManagementPage | null = heroWindows.inventoryOpen ? "inventory"
+    : heroWindows.characterOpen ? heroWindows.characterPage : null;
+  const [, renderParityServices] = useState(0);
+  const cashCatalogRef = useRef<{owner: SocialReplyOwner; catalog: ReturnType<typeof emptyCashGameShopCatalog>; revision: number} | null>(null);
+  const cashPurchasesRef = useRef(new CashGameShopPurchases());
+  const cashReceiptSocketRef = useRef<WebSocket | null>(null);
+  const cashShopOpenRef = useRef(false);
+  const cashRequestIdRef = useRef(0);
+  const creatureSourceRef = useRef<CreaturePlayerSource | null>(null);
+  const creatureOperationsRef = useRef(new CreaturePlayerOperations());
+  const creatureRevisionRef = useRef(0);
+  const creatureRenameRef = useRef<{owner:SocialReplyOwner; enabled:boolean} | null>(null);
+  const mailCollectBarrierRef = useRef<{owner:SocialReplyOwner; mailId:number; observedSnapshot:number | null} | null>(null);
+  const socialItemOperationsRef = useRef(new SocialWindowOperations());
+  const socialCharacterIndexRef = useRef<{requested: number | null; current: number | null}>({requested: null, current: null});
+  const socialOwnTradeRef = useRef<{owner: SocialReplyOwner; trade: unknown} | null>(null);
+  const guildStorageRawRef = useRef<{owner: SocialReplyOwner; guildName: string; items: unknown; revision: number} | null>(null);
+  const guildStorageRevisionRef = useRef(0);
+  const tradeIncarnationRef = useRef(0);
+  const socialTradeSendingRef = useRef<SocialTradeSendProof | null>(null);
+  const socialTradeReplySpentRef = useRef<number | null>(null);
+  const tradeLifecycleRef = useRef<{state: "requested" | "open" | "closed"; partner: string}>({state: "closed", partner: ""});
+  const tradePartnerRef = useRef<{owner: SocialReplyOwner; incarnation: number; items?: ReturnType<typeof projectPartnerTradePacket>; itemsKnown?: boolean; gold?: number} | null>(null);
+  const socialCatalogRef = useRef(new Map<number, {name: string; icon?: number; raw?: Readonly<Record<string, unknown>>}>());
+  const guildPermissionsRef = useRef<{owner: SocialReplyOwner; guildName: string; permissions: string[]} | null>(null);
+  const guildRanksRef = useRef<{owner: SocialReplyOwner; guildName: string; value: ProjectedGuildRanks} | null>(null);
+  const socialFriendsRef = useRef<{owner: SocialReplyOwner; entries: ReturnType<typeof normalizeFriendList>} | null>(null);
+  const rankingQueriesRef = useRef(new RankingQueries());
+  const [, renderRankingRequests] = useState(0);
+  const socialItemWindowsRef = useRef({guild: false, trade: false});
+  const [, renderSocialItems] = useState(0);
+  const storageRentalRef = useRef(new StorageRentalConfirmation());
+  const [storageRentalPrompt, setStorageRentalPrompt] = useState<{id: number; renewing: boolean} | null>(null);
+  const socialSceneRevisionRef = useRef(1);
+  const socialReplyWindowsRef = useRef({ group: false, bonds: false, guild: false });
+  const socialRosterWindowsRef = useRef({friends: false});
+  const [, renderSocialRequests] = useState(0);
   const equipmentControllerRef = useRef<EquipmentSessionController | null>(null);
   const equipmentConnectionGenerationRef = useRef(0);
   const equipmentSessionGenerationRef = useRef(0);
@@ -2026,8 +2134,16 @@ export default function HomePage() {
   const spellsRawSnapshotRef = useRef<{snapshot:SpellsRawSnapshot;owner:SpellsOwner}|null>(null);
   const spellsIngressRef = useRef<{observeSnapshot:(s:SpellsRawSnapshot,o:SpellsOwner)=>boolean;observePacket:(p:string,v:Record<string,unknown>,o:SpellsOwner)=>boolean;withdraw:()=>void;pointerContext:()=>{modal:boolean}|null}|null>(null);
   const combatIngressRef=useRef<ReturnType<typeof useBevyCombatInput>|null>(null);
+  const combatApproachIntentRef = useRef<QueuedMoveIntent | null>(null);
   const combatRawRef=useRef<{snapshot:Pick<GatewayWorldSnapshot,"playerObjectId"|"knownSkills"|"entities"|"mapFileName">;owner:CombatOwner}|null>(null);
   const combatPointerRef=useRef<{cursor:[number,number]|null;hovered:string|null;lock:boolean}>({cursor:null,hovered:null,lock:false});
+  const combatModePhysicalRef = useRef<{ socket: WebSocket; connectionGeneration: number; sessionGeneration: number; generation: number } | null>(null);
+  const combatModeRawRef = useRef<{ owner: CombatModeOwner; revision: number; attackMode: number | null; petMode: number | null } | null>(null);
+  const combatModeRevisionRef = useRef(0);
+  const combatModeHostRef = useRef<SharedCombatModeKeys | null>(null);
+  const skillBarPointerHeldRef = useRef(false);
+  const skillBarDocumentCacheRef = useRef<{ runtime: RuntimeModule; getter: NonNullable<CrystalSkillBarRuntime["getMir2SkillBarDocument"]>; sourceKey: string; rows: readonly CrystalSkillBarRow[] } | null>(null);
+  const [skillBarPositions, setSkillBarPositions] = useState<CrystalSkillBarPositions>(DEFAULT_CRYSTAL_SKILL_BAR_POSITIONS);
   const combatMastersRef=useRef(new Map<string,{owner:CombatOwner;master:number}>());
   const combatRouteCacheRef=useRef<{key:string;region:unknown;rows:CombatFacts["neighbours"]}|null>(null);
   const bevyBagSendGateRef = useRef<(token: BagCommandToken) => boolean>(() => false);
@@ -2073,6 +2189,19 @@ export default function HomePage() {
   const bevyQuestRequestGenerationsRef = useRef(new Map<string, number>());
   const completedQuestHistoryRef = useRef<{ known: boolean; ids: number[] }>({ known: false, ids: [] });
   const bevyQuestAuthoritativeRef = useRef(false);
+  const questSceneRevisionRef = useRef(1);
+  const questCapturedWorldRef = useRef<QuestWorldIdentity | null>(null);
+  const questSkillsBaselineCurrentRef = useRef(false);
+  const questMapAuthorityRef = useRef<QuestMapAuthority | null>(null);
+  const questRuntimeLifetimeRef = useRef(0);
+  const questCollisionCacheRef = useRef<QuestCollisionCache | null>(null);
+  if (!questCollisionCacheRef.current) questCollisionCacheRef.current = new QuestCollisionCache();
+  const questRouteRunRef = useRef<{ lifetime: QuestWorldLifetime; action: QuestRouteAction; acceptedAt: number;
+    geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null } | null>(null);
+  const questAttackHandoffRef = useRef<{ lifetime: QuestWorldLifetime; objectId: number;
+    role: "attackTarget" | "attackQuestTarget"; name: string; acceptedAt: number } | null>(null);
+  const questWorldBlockedRef = useRef(true);
+  const questWindowOpenRef = useRef(false);
   // Shared-zone packets address this client with its authoritative zone object
   // id, while the local Crystal-compatible snapshot keeps self at object 1000.
   // Learn that alias from the first struck packet at the self position.
@@ -2118,7 +2247,8 @@ export default function HomePage() {
   const lockedMonsterAttackTickRef = useRef<() => void>(() => undefined);
   // Ground-drop object id we're walking toward; PickUp fires on snapshot arrival once the player
   // is standing on the drop's tile (Crystal requires same-cell pickup). Mirrors pendingNpcInteractRef.
-  const pendingPickupRef = useRef<string | null>(null);
+  const pendingPickupRef = useRef<{ lifetime: QuestWorldLifetime; objectId: string; x: number; y: number;
+    name: string; sourceMonster: string; acceptedAt: number; queued: QueuedMoveIntent | null } | null>(null);
   // Set when the player targets the on-chain vein but is not yet adjacent: the swing
   // fires on arrival (mirrors pendingNpcInteractRef). Only ever set when ONCHAIN_MINE_ENABLED.
   const pendingOnchainMineRef = useRef<boolean>(false);
@@ -2213,16 +2343,22 @@ export default function HomePage() {
   const [bevyEntityRendererReady, setBevyEntityRendererReady] = useState(false);
   const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [bevyRuntimeGeneration, setBevyRuntimeGeneration] = useState(0);
+  questRuntimeLifetimeRef.current = bevyRuntimeGeneration;
   // The primary canvas's DOM parent is fixed before the Shell first mounts.
   const [bevyRuntimeStartup] = useState(() => selectBevyRuntimeStartup(
     bevyRuntimeVersion, typeof window === "undefined" ? "" : window.location.search,
   ));
-  const webGl2SharedCanvasPrototype = bevyRuntimeStartup.sharedCanvasPrototype;
-  const [bevyQuestUiRequested, setBevyQuestUiRequested] = useState(false);
-  const [bevyBagUiRequested, setBevyBagUiRequested] = useState(false);
+  const webGl2SharedCanvasPrototype = sharedCanvasUsesWebGl2(bevyRuntimeStartup.sharedWebGl2, bevyRuntimeBackend);
+  const [bevyQuestUiRequestedByUrl, setBevyQuestUiRequested] = useState(false);
+  const [bevyBagUiRequestedByUrl, setBevyBagUiRequested] = useState(false);
+  const currentUiRequests = typeof window === "undefined"
+    ? { quest: false, bag: false }
+    : resolveSharedUiRequests(window.location.search, webGl2SharedCanvasPrototype);
+  const bevyQuestUiRequested = bevyQuestUiRequestedByUrl && currentUiRequests.quest;
+  const bevyBagUiRequested = bevyBagUiRequestedByUrl && currentUiRequests.bag;
   const [bagCompatibilityMode, setBagCompatibilityMode] = useState<"fullInventory" | "delete" | null>(null);
   const bagCompatibilityModeRef = useRef<"fullInventory" | "delete" | null>(null);
-  const [bevyQuestReactModalOpen, setBevyQuestReactModalOpen] = useState(false);
+  const [bevyQuestReactModalOpen, setBevyQuestReactModalOpen, questReactModalOpenRef] = useImmediateUiState(false);
   const [bevyHpLocalOverlayOpen, setBevyHpLocalOverlayOpen] = useState(false);
   const bevyHpLocalOverlayOpenRef = useRef(false);
   const handleHpOrbLocalOverlayChange = (open: boolean) => {
@@ -2231,13 +2367,9 @@ export default function HomePage() {
     setBevyHpLocalOverlayOpen(open);
   };
   useEffect(() => {
-    const search = window.location.search;
-    setBevyQuestUiRequested(webGl2SharedCanvasPrototype
-      ? exactFirstRawQueryValue(search, "bevyQuestUi", "1")
-      : new URLSearchParams(search).get("bevyQuestUi") === "1");
-    setBevyBagUiRequested(webGl2SharedCanvasPrototype
-      ? exactFirstRawQueryValue(search, "bevyBagUi", "1")
-      : new URLSearchParams(search).get("bevyBagUi") === "1");
+    const requests = resolveSharedUiRequests(window.location.search, webGl2SharedCanvasPrototype);
+    setBevyQuestUiRequested(requests.quest);
+    setBevyBagUiRequested(requests.bag);
   }, [webGl2SharedCanvasPrototype]);
   const [bevyMapImageResidencyVersion, setBevyMapImageResidencyVersion] = useState(0);
   const bevyMapRuntimeReady =
@@ -2298,6 +2430,7 @@ export default function HomePage() {
           ? (updater as (current: WorldState) => WorldState)(worldRef.current)
           : updater;
       worldRef.current = next;
+      observeQuestWorldActions();
       // Observe each authoritative packet before React coalesces A→B→A updates.
       if (npcShopServiceRef.current) npcBuyDispatcherRef.current?.observe();
       worldStoreRef.current?.set(() => next);
@@ -2398,6 +2531,7 @@ export default function HomePage() {
   const bagOpenRef = useRef(false);
   const bagYieldRef = useRef<() => void>(() => undefined);
   function setShowInventory(open: boolean) {
+    bagOpenRef.current = open;
     if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "openBag" : "closeBag" }); return; }
     if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
     bagOpenRef.current = open;
@@ -2413,9 +2547,11 @@ export default function HomePage() {
     setShowInventoryState(open);
   }
   const [showCharacter, setShowCharacterState] = useState(false);
+  const characterOpenRef = useRef(false);
   const hudProjectionRef = useRef(false);
   const fallbackHudNavigationRevisionRef = useRef(0);
   function setShowCharacter(open: boolean) {
+    characterOpenRef.current = open;
     if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "selectCharacterPage" : "closeCharacter", ...(open ? { page: activeCharacterTab === "char" ? "character" : activeCharacterTab } : {}) } as HudAction); return; }
     if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
     setShowCharacterState(open);
@@ -2423,7 +2559,12 @@ export default function HomePage() {
   const sharedHudNavigationRef = useRef<{ ready: boolean; dispatch: (action: HudAction) => boolean }>({ ready: false, dispatch: () => false });
   const navigateSharedHud = (action: HudAction) => {
     if (!sharedHudNavigationRef.current.ready) return false;
-    sharedHudNavigationRef.current.dispatch(action);
+    const accepted = sharedHudNavigationRef.current.dispatch(action);
+    if (accepted) {
+      if (["bag", "openBag", "closeBag"].includes(action.type)) bagOpenRef.current = action.type === "bag" ? !bagOpenRef.current : action.type === "openBag";
+      if (["quest", "openQuest", "closeQuest"].includes(action.type)) questLogOpenRef.current = action.type === "quest" ? !questLogOpenRef.current : action.type === "openQuest";
+      if (["character", "closeCharacter", "selectCharacterPage"].includes(action.type)) characterOpenRef.current = action.type === "character" ? !characterOpenRef.current : action.type === "selectCharacterPage";
+    }
     return true;
   };
   const [npcShopService, setNpcShopService] = useState<DisplayNpcShopService | null>(null);
@@ -2449,31 +2590,70 @@ export default function HomePage() {
     return () => dispatcher.dispose();
   }, []);
   const npcServiceNameRef = useRef("");
-  const [npcRepairService, setNpcRepairService] = useState<"repair" | "special" | null>(null);
+  const [npcRepairService, setNpcRepairService, npcRepairServiceRef] = useImmediateUiState<"repair" | "special" | null>(null);
   const [showQuestLog, setShowQuestLogState] = useState(false);
+  const questLogOpenRef = useRef(false);
   function setShowQuestLog(open: boolean) {
+    questLogOpenRef.current = open;
     if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "openQuest" : "closeQuest" }); return; }
     if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
     setShowQuestLogState(open);
   }
   const toggleQuestLogRef = useRef<() => void>(() => undefined);
   // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [showTutorial, setShowTutorial, tutorialOpenRef] = useImmediateUiState(false);
   const [tutorialInput, setTutorialInput] = useState<TutorialInputProfile>("keyboardMouse");
   const [tutorialGamepadFamily, setTutorialGamepadFamily] =
     useState<TutorialGamepadFamily>("generic");
   const [tutorialRunId, setTutorialRunId] = useState(0);
-  const [showHeroPet, setShowHeroPet] = useState(false);
-  const [showGuild, setShowGuild] = useState(false);
-  const [showGroup, setShowGroup] = useState(false);
-  const [showFriends, setShowFriends] = useState(false);
-  const [showBonds, setShowBonds] = useState(false);
-  const [showRanking, setShowRanking] = useState(false);
-  const [showMarket, setShowMarket] = useState(false);
-  const [showConquest, setShowConquest] = useState(false);
-  const [showTrade, setShowTrade] = useState(false);
-  const [showBuffs, setShowBuffs] = useState(false);
-  const [showMail, setShowMail] = useState(false);
+  const [showHeroPet, setShowHeroPet, heroPetOpenRef] = useImmediateUiState(false);
+  const [showGuild, setShowGuildState] = useState(false);
+  function setShowGuild(value: boolean | ((prior: boolean) => boolean)) {
+    const open = typeof value === "function" ? value(socialItemWindowsRef.current.guild) : value;
+    socialItemWindowsRef.current.guild = open;
+    socialReplyWindowsRef.current.guild = open;
+    if (!open) socialRepliesRef.current.dismiss("guild");
+    setShowGuildState(open);
+  }
+  const [showGroup, setShowGroupState] = useState(false);
+  function setShowGroup(value: boolean | ((prior: boolean) => boolean)) {
+    const open = typeof value === "function" ? value(socialReplyWindowsRef.current.group) : value;
+    socialReplyWindowsRef.current.group = open;
+    if (!open) socialRepliesRef.current.dismiss("group");
+    setShowGroupState(open);
+  }
+  const [showFriends, setShowFriendsState] = useState(false);
+  function setShowFriends(value: boolean | ((prior: boolean) => boolean)) {
+    const open = typeof value === "function" ? value(socialRosterWindowsRef.current.friends) : value;
+    socialRosterWindowsRef.current.friends = open; setShowFriendsState(open);
+  }
+  const [showBonds, setShowBondsState] = useState(false);
+  function setShowBonds(value: boolean | ((prior: boolean) => boolean)) {
+    const open = typeof value === "function" ? value(socialReplyWindowsRef.current.bonds) : value;
+    socialReplyWindowsRef.current.bonds = open;
+    if (!open) for (const kind of ["marriage", "divorce", "mentor"] as const) socialRepliesRef.current.dismiss(kind);
+    setShowBondsState(open);
+  }
+  socialReplyWindowsRef.current = { group: showGroup, bonds: showBonds, guild: showGuild };
+  const [showRanking, setShowRankingState] = useState(false);
+  const rankingWindowRef = useRef(false);
+  function setShowRanking(value: boolean | ((prior: boolean) => boolean)) {
+    const open = typeof value === "function" ? value(rankingWindowRef.current) : value;
+    const wasOpen = rankingWindowRef.current; rankingWindowRef.current = open;
+    setShowRankingState(open);
+    if (open && !wasOpen) refreshRanking();
+  }
+  const [showMarket, setShowMarket, marketOpenRef] = useImmediateUiState(false);
+  const [showConquest, setShowConquest, conquestOpenRef] = useImmediateUiState(false);
+  const [showTrade, setShowTradeState] = useState(false);
+  function setShowTrade(value: boolean | ((prior: boolean) => boolean)) {
+    const open = typeof value === "function" ? value(socialItemWindowsRef.current.trade) : value;
+    socialItemWindowsRef.current.trade = open;
+    setShowTradeState(open);
+  }
+  socialItemWindowsRef.current = {guild: showGuild, trade: showTrade};
+  const [showBuffs, setShowBuffs, buffsOpenRef] = useImmediateUiState(false);
+  const [showMail, setShowMail, mailUiOpenRef] = useImmediateUiState(false);
   const [mailCompatibility,setMailCompatibility]=useState<(MailPresentation&{owner:MailOwner;sceneRevision:number})|null>(null);
   const [,setMailComposeRevision]=useState(0);
   if(!mailDispatcherRef.current)mailDispatcherRef.current=new MailDispatcher(()=>{
@@ -2483,10 +2663,48 @@ export default function HomePage() {
         &&validMailCompatibility(mailCompatRef.current)};
   },()=>questCoreRuntimeRef.current?.getMailSendSlot()??null);
   useEffect(()=>()=>{mailIngressRef.current?.withdraw();mailDispatcherRef.current?.withdraw();mailRawRef.current=null;mailOpenRef.current=false;mailCompatRef.current=null;},[]);
-  const [showWorldMap, setShowWorldMap] = useState(false);
+  const [showWorldMap, setShowWorldMap, worldMapOpenRef] = useImmediateUiState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHotkeys, setShowHotkeys] = useState(false);
-  const [showChatSettings, setShowChatSettings] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const playerReferenceWindowsRef = useRef({ help: false, hotkeys: false, options: false, capture: false });
+  const [playerUiPreferences, setPlayerUiPreferences] = useState<PlayerUiPreferences>({ ...DEFAULT_PLAYER_UI_PREFERENCES });
+  const playerUiPreferencesRef = useRef(playerUiPreferences); playerUiPreferencesRef.current = playerUiPreferences;
+  const [crystalKeyBindings, setCrystalKeyBindings] = useState<CrystalKeyBinding[]>(defaultCrystalKeyBindings);
+  const crystalKeyBindingsRef = useRef(crystalKeyBindings); crystalKeyBindingsRef.current = crystalKeyBindings;
+  const [crystalHelpState, setCrystalHelpState] = useState<CrystalHelpWindowState>({ ...DEFAULT_CRYSTAL_HELP_STATE });
+  const [keybindEnforce, setKeybindEnforce] = useState(true);
+  const [preferencesNotice, setPreferencesNotice] = useState("");
+  const [tildePressed, setTildePressed] = useState(false);
+  const dropViewHeldRef = useRef(false);
+  const [dropViewHeld, setDropViewHeld] = useState(false);
+  const observePreferenceRef = useRef<{ owner: SocialReplyOwner; allow: boolean | null; pending: boolean } | null>(null);
+  const observeBootstrapRef = useRef<{ socket: WebSocket; connectionGeneration: number; sessionGeneration: number; playerObjectId: number; allow: boolean } | null>(null);
+  useEffect(() => {
+    try {
+      const preferences = parsePlayerUiPreferences(localStorage.getItem(PLAYER_UI_PREFERENCES_STORAGE_KEY) ?? "");
+      const bindings = parseCrystalKeyBindings(localStorage.getItem(CRYSTAL_KEY_BINDINGS_STORAGE_KEY) ?? "");
+      const help = parseCrystalHelpState(localStorage.getItem(CRYSTAL_HELP_STATE_STORAGE_KEY) ?? "");
+      const skillPositions = parseCrystalSkillBarPositions(localStorage.getItem(CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY) ?? "");
+      if (preferences) { playerUiPreferencesRef.current = preferences; setPlayerUiPreferences(preferences); }
+      if (bindings) { crystalKeyBindingsRef.current = bindings; setCrystalKeyBindings(bindings); }
+      else if (preferences?.skillMode) {
+        const next = applyCrystalSkillMode(defaultCrystalKeyBindings(), true);
+        crystalKeyBindingsRef.current = next; setCrystalKeyBindings(next);
+      }
+      if (help) setCrystalHelpState(help);
+      if (skillPositions) setSkillBarPositions(skillPositions);
+      setOriginalAudioSettings(playerUiPreferencesAudioSettings(preferences ?? DEFAULT_PLAYER_UI_PREFERENCES));
+    } catch { setPreferencesNotice("Local settings could not be loaded."); }
+    const down = (event: KeyboardEvent) => { if (event.code === "Backquote") setTildePressed(true); };
+    const up = (event: KeyboardEvent) => { if (event.code === "Backquote") setTildePressed(false); };
+    const cancel = () => { setTildePressed(false); };
+    window.addEventListener("keydown", down, true); window.addEventListener("keyup", up, true);
+    window.addEventListener("blur", cancel);
+    return () => { window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true);
+      window.removeEventListener("blur", cancel); };
+  }, []);
+  const [showChatSettings, setShowChatSettings, chatSettingsOpenRef] = useImmediateUiState(false);
   // Death → town-revive prompt: tracks an in-flight request so the button reads
   // "Reviving…" until `Revived` lands. A lost/racing no-op request must not
   // disable the only recovery action forever, so release it after one bounded
@@ -2581,31 +2799,7 @@ export default function HomePage() {
           : null;
       return { ...(summary as Record<string, unknown>), movementGate, mapGpu };
     });
-    const onExtraWindowHotkey = (event: KeyboardEvent) => {
-      if (spellsIngressRef.current?.pointerContext()?.modal) { event.preventDefault(); return; }
-      if (!event.altKey || event.ctrlKey || event.metaKey) return;
-      const key = event.key.toLowerCase();
-      const matchesKey = (letter: string) => key === letter || event.code === `Key${letter.toUpperCase()}`;
-      if (matchesKey("q")) { event.preventDefault(); toggleQuestLogRef.current(); }
-      else if (matchesKey("h")) { event.preventDefault(); setShowHeroPet((value) => !value); }
-      else if (matchesKey("g")) { event.preventDefault(); setShowGuild((value) => !value); }
-      else if (matchesKey("p")) { event.preventDefault(); setShowGroup((value) => !value); }
-      else if (matchesKey("f")) { event.preventDefault(); setShowFriends((value) => !value); }
-      else if (matchesKey("b")) { event.preventDefault(); setShowBonds((value) => !value); }
-      else if (matchesKey("r")) { event.preventDefault(); setShowRanking((value) => !value); }
-      else if (matchesKey("m")) { event.preventDefault(); setShowMarket((value) => !value); }
-      else if (matchesKey("k")) { event.preventDefault(); setShowConquest((value) => !value); }
-      else if (matchesKey("t")) { event.preventDefault(); setShowTrade((value) => !value); }
-      else if (matchesKey("u")) { event.preventDefault(); setShowBuffs((value) => !value); }
-      else if (matchesKey("n")) { event.preventDefault(); setShowWorldMap((value) => !value); }
-      else if (matchesKey("j")) { event.preventDefault(); setShowHelp((value) => !value); }
-      else if (matchesKey("y")) { event.preventDefault(); setShowHotkeys((value) => !value); }
-      else if (matchesKey("c")) { event.preventDefault(); setShowChatSettings((value) => !value); }
-      else if (matchesKey("l")) { event.preventDefault(); setMailboxOpen(!mailOpenRef.current); }
-      else if (matchesKey("d")) { event.preventDefault(); downloadSnapshot("manual"); }
-    };
-    window.addEventListener("keydown", onExtraWindowHotkey);
-    return () => window.removeEventListener("keydown", onExtraWindowHotkey);
+    // Player shortcuts are dispatched by the Shell after its current UI/focus guards.
   }, []);
   const closeTouchSecondaryWindows = useCallback((
     except?: "character" | "inventory",
@@ -2629,6 +2823,9 @@ export default function HomePage() {
     setShowWorldMap(false);
     setShowHelp(false);
     setShowHotkeys(false);
+    setShowOptions(false);
+    playerReferenceWindowsRef.current = { help: false, hotkeys: false, options: false, capture: false };
+    closeHeroManagement();
     setShowChatSettings(false);
   }, [clientProfile.layout]);
 
@@ -4868,7 +5065,8 @@ export default function HomePage() {
           const reusedBackend = runtimeWindow.__mir2BevyRuntimeBackend;
           if (!reusedBackend) throw new Error("Booted runtime has no declared backend");
           assertBevyRuntimeStartupAgreement(bevyRuntimeStartup, reusedBackend,
-            runtimeWindow.__mir2BevyRuntime.getMir2RuntimeUiCapabilities, window.location.search);
+            runtimeWindow.__mir2BevyRuntime.getMir2RuntimeUiCapabilities, window.location.search,
+            runtimeWindow.__mir2BevyRuntime.getMir2RuntimeCanvasSelector);
           runtimeRef.current = runtimeWindow.__mir2BevyRuntime;
           runtimeWindow.__mir2BevyRuntime.setMir2StatusSink?.(handleBevyRuntimeStatus);
           withdrawHudBarDrawPlanOutputs();
@@ -4987,7 +5185,8 @@ export default function HomePage() {
           runBevyRuntimeBootOnce(createBevyRuntimeBootGate(), () => {
             // No await or callback runs between the read-only agreement and boot.
             assertBevyRuntimeStartupAgreement(bevyRuntimeStartup, backend,
-              loadedRuntime.getMir2RuntimeUiCapabilities, window.location.search);
+              loadedRuntime.getMir2RuntimeUiCapabilities, window.location.search,
+              loadedRuntime.getMir2RuntimeCanvasSelector);
             runtimeWindow.__mir2BevyRuntimeBootAttempted = true;
             loadedRuntime.bootMir2Runtime!();
           });
@@ -5510,20 +5709,7 @@ export default function HomePage() {
   // waiting forever for an impossible exact-tile arrival.
   useEffect(() => {
     if (screen !== "game" || wsState !== "open") return;
-    const pendingPickupObjectId = pendingPickupRef.current;
-    if (!pendingPickupObjectId) return;
-
-    const pendingDrop = world.groundDrops.find((drop) => drop.objectId === pendingPickupObjectId);
-    if (!pendingDrop) {
-      // Drop vanished (picked up by someone else, expired, or out of view) — stop chasing it.
-      pendingPickupRef.current = null;
-      return;
-    }
-    const nextSelf = currentAuthoritativeSelf(world);
-    if (nextSelf && pointTileDistance(nextSelf, pendingDrop) <= 1) {
-      pendingPickupRef.current = null;
-      send({ type: "pickUp", objectId: Number(pendingPickupObjectId) });
-    }
+    drainPendingPickup();
   }, [screen, wsState, world.entities, world.playerObjectId, world.groundDrops]);
 
   function appendLog(
@@ -5672,6 +5858,8 @@ export default function HomePage() {
   }
 
   function suspendEquipmentConnection(reason: "socketClosed" | "logoutPending" | "connectionUnavailable") {
+    if (reason !== "logoutPending") { retireSocialRequests(); retireSocialItemConnection(); }
+    else { storageRentalRef.current.retire(); setStorageRentalPrompt(null); }
     npcGoldBuyInventoryRef.current.invalidate();
     storageUiIngressRef.current?.withdraw();
     setMailboxOpen(false);mailRawRef.current=null;
@@ -5686,6 +5874,12 @@ export default function HomePage() {
   }
 
   function retireEquipmentSession() {
+    retireSocialRequests();
+    observePreferenceRef.current = null; observeBootstrapRef.current = null;
+    combatModeRawRef.current = null;
+    advanceHeroWindowEpochs(["inventory", "character", "belt"]);
+    skillBarPointerHeldRef.current = false; skillBarDocumentCacheRef.current = null;
+    retireSocialItemConnection();
     npcGoldBuyInventoryRef.current.invalidate();
     retireNpcShopService();
     endStorageService();
@@ -5742,7 +5936,7 @@ export default function HomePage() {
   }
 
   /** Every UI and compatibility command enters this session-owned send gate. */
-  function send(command: Record<string, unknown>, options?: { quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof }): boolean {
+  function send(command: Record<string, unknown>, options?: { guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof }): boolean {
     // Supported ordinary combat enters through Rust outputs with a live local proof.
     if(combatIngressRef.current?.supported()&&["attack","rangeAttack","magic","spellToggle"].includes(String(command.type)))return false;
     // Preserve the original callback/intent token through every synchronous
@@ -5823,16 +6017,35 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
     if (isSpectatorBrowserMode()) return false;
+    if (["changeAMode", "changePMode"].includes(String(command.type)) && !options?.modeProof) return false;
+    if (options?.modeProof && !combatModeHostRef.current?.allows(options.modeProof, command)) return false;
+    if ((command.type === "gameShopBuy" && !options?.cashProof) || (command.type === "updateIntelligentCreature" && !options?.creatureProof)
+      || ([command.grid, command.gridFrom, command.gridTo].some(grid => typeof grid === "string" && grid.startsWith("Hero"))
+        || ["transferHeroItem","takeBackHeroItem","setAutoPotValue","setAutoPotItem"].includes(String(command.type))) && !options?.heroProof) return false;
+    if (command.type === "guildBuffUpdate" && !options?.guildBuffProof) return false;
+    if (options?.guildBuffProof) {const source = currentGuildBuffSource();
+      if (!socialItemWindowsRef.current.guild || !source || !guildBuffOperationsRef.current.allows(options.guildBuffProof,source,command)) return false;}
+    if (!parityItemMutationAllowed(command, options?.heroProof)) return false;
+    if (options?.heroProof && !heroProofCurrent(options.heroProof, command)) return false;
+    if (options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.allows(options.cashProof, currentCashGameShopSource(), command))) return false;
+    if (options?.creatureProof && (!heroPetOpenRef.current || !creatureOperationsRef.current.allows(options.creatureProof, currentCreatureSource(), command))) return false;
+    if (["removeFriend", "addMemo", "refreshFriends", "editGuildMember"].includes(String(command.type)) && !options?.socialRosterProof) return false;
+    if (command.type === "getRanking" && !options?.rankingProof) return false;
+    if (["groupInvite", "guildInvite", "marriageReply", "divorceReply", "mentorReply"].includes(String(command.type)) && !options?.socialReplyProof) return false;
+    if (command.type === "chat" && command.message === "@ADDSTORAGE" && !options?.storageRentalProof) return false;
+    if (!socialItemMutationAllowed(command, options?.socialItemProof)) return false;
+    if (["tradeReply", "tradeConfirm", "tradeCancel", "tradeGold"].includes(String(command.type)) && !options?.socialTradeProof) return false;
     const npcBuyDispatcher = options?.npcBuyProof ? npcBuyDispatcherRef.current : null;
     const socket = socketRef.current;
     if (socket?.readyState !== WebSocket.OPEN) return false;
     if ((command.type === "storeItemV2" || command.type === "takeBackItemV2") && !options?.storageProof) return false;
-    const serialized=options?.combatBody??JSON.stringify(command);
+    const serialized=options?.creatureProof ? creaturePlayerCommandJson(command) : options?.combatBody??JSON.stringify(command);
+    if (serialized === null) return false;
     if(command.type==='mailCost'&&!options?.mailQuoteProof||command.type==='mailLockedItem'&&!options?.mailLockProof)return false;
     if(["readMail","collectParcel","deleteMail","sendMail","lockMail"].includes(String(command.type))&&(!options?.mailProof||!mailDispatcherRef.current?.allows(options.mailProof)))return false;
     if(options?.combatProof&&(!combatIngressRef.current?.allows(options.combatProof)||JSON.stringify(command)!==serialized))return false;
@@ -5867,13 +6080,6 @@ export default function HomePage() {
       markMir2CacheMilestone("startGameSubmit", {
         characterIndex: command.characterIndex,
       });
-    }
-    if (command.type === "getRanking") {
-      lastRankingRequestRef.current = {
-        rankType: numberOrUndefined(command.rankType) ?? 0,
-        rankIndex: numberOrUndefined(command.rankIndex) ?? 0,
-        onlineOnly: command.onlineOnly === true,
-      };
     }
     if (isMovementCommand(command)) {
       debugWindow.__mir2MovementSentCommands = [
@@ -5912,12 +6118,13 @@ export default function HomePage() {
       && !currentEquipmentOwner(options.ownerToken)) return false;
     // Inspect the exact immutable DTO that will cross the socket. Synchronous
     // listeners may alter type, UID or either cell on the caller's object.
-    const wireCommand=JSON.parse(serialized) as Record<string,unknown>;
-    if(JSON.stringify(command)!==serialized)return false;
+    const wireCommand=options?.creatureProof ? command : JSON.parse(serialized) as Record<string,unknown>;
+    if((options?.creatureProof ? creaturePlayerCommandJson(command) : JSON.stringify(command))!==serialized)return false;
+    if (!parityItemMutationAllowed(wireCommand, options?.heroProof)) return false;
     if(mailParcelRef.current?.state?.blockedUniqueIds.length&&!syncMailParcel())return false;
     if(!mailMutationAllowed(wireCommand,mailParcelRef.current?.snapshot??null,mailParcelRef.current?.state?.blockedUniqueIds??[]))return false;
     if(isMailItemMutation(wireCommand)&&mailParcelRef.current?.state?.blockedUniqueIds.length&&(!currentEquipmentOwner(options?.ownerToken??equipmentRenderOwnerToken,options?.reservedCharacterSource)||equipmentHostSuspendReasonRef.current!==null))return false;
-    if (itemCommandRequiresOwner(command)
+    if (!options?.heroProof && itemCommandRequiresOwner(command)
       && (!currentEquipmentOwner(options?.ownerToken ?? equipmentRenderOwnerToken, options?.reservedCharacterSource)
         || equipmentHostSuspendReasonRef.current !== null)) return false;
     const storageReservation = options?.storageProof
@@ -5960,7 +6167,61 @@ export default function HomePage() {
     if (options?.npcBuyProof && !npcBuyDispatcher?.claim(options.npcBuyProof, wireCommand, serialized, socket,
       options.npcUi ? () => npcShopUiSendCurrent(options.npcUi!, socket)
         : () => !npcShopUiIngressRef.current?.blocksInput() && socketRef.current === socket && socket.readyState === WebSocket.OPEN)) return false;
+    if (options?.socialReplyProof && (!socialReplyWindowOpen(options.socialReplyProof.request.kind)
+      || !socialRepliesRef.current.claim(options.socialReplyProof, currentSocialReplyOwner(), wireCommand))) return false;
+    if (options?.storageRentalProof && !storageRentalRef.current.claim(options.storageRentalProof, currentStorageRentalFacts(), wireCommand)) return false;
+    if (wireCommand.type === "guildStorageItemChange" && wireCommand.changeType === 3) {
+      const p = options?.guildListProof, owner = currentSocialReplyOwner();
+      if (!p || !owner || !sameSocialPhysicalOwner(p.owner, owner) || p.owner.sceneRevision !== owner.sceneRevision
+        || p.owner.mapFileName !== owner.mapFileName || p.guildName !== worldRef.current.stage5Systems.guild?.name
+        || wireCommand.from !== 0 || wireCommand.to !== 0 || Object.keys(wireCommand).length !== 4) return false;
+    }
+    if (!socialItemMutationAllowed(wireCommand, options?.socialItemProof)) return false;
+    if (options?.socialItemProof && (!socialItemProofCurrent(options.socialItemProof)
+      || !socialItemOperationsRef.current.claim(options.socialItemProof, currentSocialReplyOwner(), readSocialItemSurface(options.socialItemProof.surface)?.sourceKey ?? "", wireCommand))) return false;
+    if (options?.socialTradeProof && !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
+    if (options?.socialTradeProof && wireCommand.type === "tradeReply") socialTradeReplySpentRef.current = options.socialTradeProof.incarnation;
+    if (options?.socialRosterProof && !socialRosterProofCurrent(options.socialRosterProof, wireCommand)) return false;
+    if (options?.rankingProof && !rankingQueriesRef.current.claim(options.rankingProof, currentSocialReplyOwner(), wireCommand)) return false;
+    if (options?.rankingProof) lastRankingRequestRef.current = {...options.rankingProof.query};
+    if (wireCommand.type === "startGame") socialCharacterIndexRef.current = {requested: Number.isSafeInteger(wireCommand.characterIndex) ? wireCommand.characterIndex as number : null, current: null};
+    if (options?.guildBuffProof) {const source = currentGuildBuffSource();
+      if (!socialItemWindowsRef.current.guild || !source || !guildBuffOperationsRef.current.claim(options.guildBuffProof,source,wireCommand)) return false;}
+    if (options?.heroProof) {
+      if (!heroProofCurrent(options.heroProof, wireCommand)) return false;
+      const model = currentHeroModel();
+      if (!model || !heroOperationsRef.current.claim(options.heroProof, model, wireCommand)) return false;
+    }
+    if (options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.claim(options.cashProof, currentCashGameShopSource(), wireCommand))) return false;
+    if (options?.creatureProof) {
+      if (!heroPetOpenRef.current || !creatureOperationsRef.current.claim(options.creatureProof, currentCreatureSource(), wireCommand)) return false;
+      if (options.creatureProof.intent.kind === "rename") {
+        const current = creatureSourceRef.current;
+        creatureRenameRef.current = {owner:options.creatureProof.source.owner, enabled:false};
+        if (current) creatureSourceRef.current = makeCreaturePlayerSource(current.records,current.summonedPetType,false,current.owner,++creatureRevisionRef.current,current.fullList);
+      }
+    }
+    if (options?.mailProof?.commandType === "collectParcel") {
+      const owner = currentSocialReplyOwner();
+      if (!owner || !Number.isSafeInteger(wireCommand.mailId) || mailCollectBarrierRef.current
+        || !parityItemMutationAllowed(wireCommand)) return false;
+      mailCollectBarrierRef.current = {owner, mailId:wireCommand.mailId as number, observedSnapshot:null};
+    }
+    if (options?.modeProof && !combatModeHostRef.current?.claim(options.modeProof, wireCommand)) return false;
+    if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) {
+      if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
+      if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof);
+      if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
+      if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof);
+      if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof);
+      return false;
+    }
     try { socket.send(serialized); } catch (error) {
+      if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
+      if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
+      if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof);
+      if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof);
+      if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof);
       if (!options?.npcBuyProof) throw error;
       npcBuyDispatcher?.transportResult(options.npcBuyProof, "unknown");
       console.error("[mir2] NPC purchase send outcome is unknown", error);
@@ -6581,11 +6842,20 @@ export default function HomePage() {
     equipmentStartGameRef.current = null;
     equipmentSnapshotRef.current = null;
     socketRef.current = socket;
+    cashCatalogRef.current = null; creatureSourceRef.current = null; creatureRenameRef.current = null;
+    mailCollectBarrierRef.current = null;
     setWsState("connecting");
 
     socket.addEventListener("open", () => {
       if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return;
       observeMailSocketOpen(socket);
+      cashPurchasesRef.current.retireConnection(socket, connectionGeneration);
+      creatureOperationsRef.current.retireConnection(socket, connectionGeneration);
+      cashReceiptSocketRef.current = null;
+      if (!isSpectatorBrowserMode()) {
+        try { socket.send(JSON.stringify({type:"clientCapabilities", capabilities:["nativeGameShopReceiptV1"]})); cashReceiptSocketRef.current = socket; }
+        catch { cashReceiptSocketRef.current = null; }
+      }
       setWsState("open");
       markMir2CacheMilestone("gatewayConnected");
       updateWorld((current) => ({ ...current, connected: true }));
@@ -7042,6 +7312,9 @@ export default function HomePage() {
   }
 
   function queueCrystalMoveIntent(intent: QueuedMoveIntent) {
+    if (questRouteRunRef.current?.queued !== intent) cancelQuestRoute();
+    if (pendingPickupRef.current?.queued !== intent) cancelPendingPickup();
+    questAttackHandoffRef.current = null;
     queuedMoveIntentRef.current = intent;
     movementPlanRef.current = null;
     queuedDirectionStepRef.current = null;
@@ -7093,6 +7366,15 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return false;
     }
+    observeQuestWorldActions();
+    const ownedQuestRoute = questRouteRunRef.current?.queued === queued ? questRouteRunRef.current : null;
+    if (queuedMoveIntentRef.current !== queued) return false;
+    const ownedPickup = pendingPickupRef.current?.queued === queued ? pendingPickupRef.current : null;
+    if ((ownedQuestRoute || ownedPickup) && (questWindowOpenRef.current
+      || readBevyQuestUiStatus(runtimeRef.current ?? {}, bevyQuestGenerationRef.current)?.questLogOpen)) {
+      scheduleMovementConfirmTick(); return false;
+    }
+    if (ownedQuestRoute && (questWorldBlockedRef.current || document.visibilityState === "hidden" || !document.hasFocus())) { cancelQuestRoute(); return false; }
     const currentWorld = worldRef.current;
     const serverSelf = currentAuthoritativeSelf(currentWorld);
     if (!serverSelf) {
@@ -7126,7 +7408,7 @@ export default function HomePage() {
     const intentAge = now - queued.requestedAt;
     const maxIntentAge =
       queued.kind === "target" ? MOVEMENT_PENDING_ACTION_MAX_AGE_MS * 4 : MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS;
-    if (intentAge > maxIntentAge) {
+    if (!ownedQuestRoute && intentAge > maxIntentAge) {
       queuedMoveIntentRef.current = null;
       return false;
     }
@@ -7140,8 +7422,9 @@ export default function HomePage() {
     // transient bump freeze a held key for the memory's full TTL, then release as a 2-tile
     // run jump (the "stall then teleport" bug). Click-to-target still consults the memory so
     // the router steers around recently-rejected tiles.
-    const nextAction =
-      queued.kind === "direction" && queued.direction
+    const nextAction = ownedQuestRoute
+      ? questRouteMovement(ownedQuestRoute, serverSelf, effectiveMode, now)
+      : queued.kind === "direction" && queued.direction
         ? crystalMovementActionForDirection(serverSelf, queued.direction, effectiveMode, [], currentWorld)
         : queued.kind === "target" &&
             queued.targetX !== undefined &&
@@ -7254,9 +7537,18 @@ export default function HomePage() {
     clearLegacySelfMovementCoordinateSources();
     setPredictedPlayerMotion(alignedPending.to, alignedPending.visualUntil);
 
-    if (queued.consumeAfterSend) {
-      queuedMoveIntentRef.current = null;
+    if (queuedMoveIntentRef.current !== queued) {
+      pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); return false;
     }
+    if (ownedQuestRoute && (questRouteRunRef.current !== ownedQuestRoute
+      || !sameQuestWorldLifetime(ownedQuestRoute.lifetime, currentQuestWorldLifetime()))) {
+      pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); cancelQuestRoute(); return false;
+    }
+    if (ownedPickup && (pendingPickupRef.current !== ownedPickup
+      || !sameQuestWorldLifetime(ownedPickup.lifetime, currentQuestWorldLifetime()))) {
+      pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); cancelPendingPickup(); return false;
+    }
+    if (queued.consumeAfterSend) queuedMoveIntentRef.current = null;
     const sent = send({ type: alignedPending.mode === "run" ? "run" : "walk", direction: alignedPending.direction });
     if (!sent) {
       pendingSelfMoveRef.current = null;
@@ -7388,14 +7680,16 @@ export default function HomePage() {
       // first-click prime the Web route downgraded mouse-run targets into walks.
       crystalRunPrimedUntilRef.current = Math.max(crystalRunPrimedUntilRef.current, requestedAt + CRYSTAL_RUN_PRIME_MS);
     }
-    queueCrystalMoveIntent({
+    const intent: QueuedMoveIntent = {
       kind: "target",
       targetX: x,
       targetY: y,
       requestedMode: mode,
       requestedAt,
       consumeAfterSend: false,
-    });
+    };
+    if (source === "locked-monster") combatApproachIntentRef.current = intent;
+    queueCrystalMoveIntent(intent);
   }
 
   function attackTarget(objectId: string) {
@@ -7966,10 +8260,48 @@ export default function HomePage() {
   }
 
   function rentExpandedStorage() {
-    send({
-      type: "chat",
-      message: "@ADDSTORAGE",
-    });
+    const prompt = storageRentalRef.current.open(currentStorageRentalFacts(), false);
+    if (prompt) setStorageRentalPrompt({ id: prompt.id, renewing: prompt.facts.hasExpandedStorage });
+  }
+
+  function currentStorageRentalFacts(): StorageRentalFacts | null {
+    const current = worldRef.current, owner = currentSocialReplyOwner();
+    const baseline = equipmentSnapshotRef.current;
+    if (!owner || !storageServiceActiveRef.current || !bagOpenRef.current || !baseline
+      || baseline.connectionGeneration !== owner.connectionGeneration || baseline.sessionGeneration !== owner.sessionGeneration) return null;
+    return { owner, serviceRevision: storageServiceRevisionRef.current,
+      hasExpandedStorage: current.hasExpandedStorage,
+      // Preserve the received observation; do not infer a date from rounded i64 JSON values.
+      expiryObservation: current.expandedStorageExpiryTimeBinaryDatetime,
+      storageSize: current.storageSize, gold: current.gold };
+  }
+
+  function closeStorageRentalUi(proof: StorageRentalProof) {
+    // A synchronous action listener can replace this confirmation before send returns.
+    // Only the matching prompt may close or restore the shared storage surface.
+    if (storageRentalRef.current.pending && storageRentalRef.current.pending !== proof) return;
+    setStorageRentalPrompt(current => current?.id === proof.id ? null : current);
+    if (proof.shared && storageServiceActiveRef.current && proof.facts.serviceRevision === storageServiceRevisionRef.current) {
+      storageCompatibilityRef.current = false; setStorageCompatibility(false);
+      bagCompatibilityModeRef.current = null; setBagCompatibilityMode(null);
+    }
+  }
+  function cancelStorageRental(id: number) {
+    const proof = storageRentalRef.current.pending;
+    if (proof?.id === id && storageRentalRef.current.cancel(proof)) closeStorageRentalUi(proof);
+  }
+  function confirmStorageRental(id: number) {
+    const proof = storageRentalRef.current.pending;
+    if (!proof || proof.id !== id) return;
+    if (!storageRentalRef.current.allows(proof, currentStorageRentalFacts())) { cancelStorageRental(id); return; }
+    try {
+      const sent = send({ type: "chat", message: "@ADDSTORAGE" }, { storageRentalProof: proof });
+      if (sent || storageRentalRef.current.pending !== proof) closeStorageRentalUi(proof);
+    } catch (error) {
+      // The confirmation was consumed immediately before socket entry, even when transport throws.
+      if (storageRentalRef.current.pending !== proof) closeStorageRentalUi(proof);
+      console.error("[mir2] storage rental send outcome is unknown", error);
+    }
   }
 
   function sellItem(item: ItemCommandRef, count: number) {
@@ -8049,9 +8381,9 @@ export default function HomePage() {
     const dispatcher = npcBuyDispatcherRef.current;
     // The existing producer observes authority; UI status reads never attach a producer.
     if (observeCore) dispatcher?.observe();
-    const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+    const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
       || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
-      || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcRepairService);
+      || referenceWindowsBlockGameplay() || showChatSettings || Boolean(current.activeNpcDialog || npcRepairService);
     return {
       connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
       ownerRevision: equipmentBagOwnerRef.current.ownerRevision, playerObjectId: buy?.owner.playerObjectId ?? 0,
@@ -8299,6 +8631,578 @@ export default function HomePage() {
     dispatchMailCommand("deleteMail",mailId);
   }
 
+  function currentGuildBuffSource() {
+    const owner = currentSocialReplyOwner(), guildName = worldRef.current.stage5Systems.guild?.name;
+    return owner && guildName ? guildBuffAuthorityRef.current.read(owner,guildName) : null;
+  }
+  function submitGuildBuffAction(dto: GuildBuffActionDto) {
+    const source = currentGuildBuffSource();
+    if (!source || !socialItemWindowsRef.current.guild) return;
+    const proof = guildBuffOperationsRef.current.reserve(dto,source);
+    if (!proof) return;
+    try {if (!sendRaw({...proof.wire},{guildBuffProof:proof})) guildBuffOperationsRef.current.cancelDefinitelyUnsent(proof);}
+    catch (error) {guildBuffOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Guild buff operation outcome is unknown",error);}
+    renderParityServices(n => n + 1);
+  }
+  function otherPlayerUiBlocksInput() {
+    return referenceWindowsBlockGameplay() || bevyHpLocalOverlayOpenRef.current || questReactModalOpenRef.current
+      || bagOpenRef.current || characterOpenRef.current || questLogOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
+      || socialItemWindowsRef.current.guild || socialItemWindowsRef.current.trade || socialReplyWindowsRef.current.group
+      || socialReplyWindowsRef.current.bonds || socialRosterWindowsRef.current.friends || rankingWindowRef.current
+      || marketOpenRef.current || conquestOpenRef.current || buffsOpenRef.current || mailUiOpenRef.current || worldMapOpenRef.current
+      || chatSettingsOpenRef.current || tutorialOpenRef.current || Boolean(worldRef.current.activeNpcDialog || npcShopServiceRef.current || npcRepairServiceRef.current)
+      || storageServiceActiveRef.current || npcShopUiIngressRef.current?.blocksInput() === true
+      || storageUiIngressRef.current?.active === true || storageUiIngressRef.current?.transitioning === true || combatIngressRef.current?.hasUiHeld() === true
+      || spellsIngressRef.current?.pointerContext()?.modal === true;
+  }
+  function currentCombatModeOwner(): CombatModeOwner | null {
+    const identity = currentQuestWorldIdentity(), socket = socketRef.current;
+    if (!identity || !socket || socket.readyState !== WebSocket.OPEN || !worldRef.current.connected) return null;
+    let physical = combatModePhysicalRef.current;
+    if (!physical || physical.socket !== socket || physical.connectionGeneration !== identity.connectionGeneration
+      || physical.sessionGeneration !== identity.sessionGeneration) {
+      let generation: number;
+      try { generation = nextCombatModePhysicalGeneration(); } catch { return null; }
+      physical = { socket, connectionGeneration: identity.connectionGeneration, sessionGeneration: identity.sessionGeneration,
+        generation };
+      combatModePhysicalRef.current = physical;
+    }
+    return { generation: physical.generation, ...identity };
+  }
+  function sameCombatModeOwner(a: CombatModeOwner, b: CombatModeOwner): boolean {
+    return a.generation === b.generation && a.connectionGeneration === b.connectionGeneration
+      && a.sessionGeneration === b.sessionGeneration && a.playerObjectId === b.playerObjectId
+      && a.sceneRevision === b.sceneRevision && a.mapFileName === b.mapFileName;
+  }
+  function readCombatModeSource() {
+    const owner = currentCombatModeOwner(), raw = combatModeRawRef.current;
+    if (!owner || !raw || !sameCombatModeOwner(owner, raw.owner)) return null;
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    const editing = typeof HTMLElement !== "undefined" && active instanceof HTMLElement && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
+    return { ...raw, enabled: typeof document !== "undefined" && screenRef.current === "game" && !isSpectatorBrowserMode()
+      && initialSceneAssetsReadyRef.current && document.hasFocus() && document.visibilityState === "visible" && !editing
+      && !heroManagementOpenRef.current && !skillBarPointerHeldRef.current && !otherPlayerUiBlocksInput() };
+  }
+  function nextCombatModeRevision(): number | null {
+    return Number.isSafeInteger(combatModeRevisionRef.current) && combatModeRevisionRef.current < Number.MAX_SAFE_INTEGER
+      ? ++combatModeRevisionRef.current : null;
+  }
+  function captureCombatModeSnapshot(snapshot: GatewayWorldSnapshot) {
+    const owner = currentCombatModeOwner(), revision = nextCombatModeRevision();
+    if (!owner || revision === null || snapshot.playerObjectId !== owner.playerObjectId
+      || normalizeQuestMapFileName(snapshot.mapFileName ?? null) !== owner.mapFileName) { combatModeRawRef.current = null; return; }
+    const mode = (value: unknown, maximum: number): number | null => Number.isInteger(value)
+      && Number(value) >= 0 && Number(value) <= maximum ? Number(value) : null;
+    combatModeRawRef.current = { owner, revision, attackMode: mode(snapshot.stage5Systems?.attackMode, 5),
+      petMode: mode(snapshot.stage5Systems?.petMode, 4) };
+  }
+  function captureCombatModeReceipt(packet: "ChangeAMode" | "ChangePMode", value: unknown) {
+    if (!Number.isInteger(value) || Number(value) < 0 || Number(value) > (packet === "ChangeAMode" ? 5 : 4)) return;
+    const owner = currentCombatModeOwner(), revision = nextCombatModeRevision();
+    if (!owner || revision === null) return;
+    const previous = combatModeRawRef.current;
+    const modes = previous && sameCombatModeOwner(previous.owner, owner) ? previous : { attackMode: null, petMode: null };
+    combatModeRawRef.current = { owner, revision, attackMode: packet === "ChangeAMode" ? Number(value) : modes.attackMode,
+      petMode: packet === "ChangePMode" ? Number(value) : modes.petMode };
+    combatModeHostRef.current?.observeReceipt(packet, Number(value));
+  }
+  if (!combatModeHostRef.current) combatModeHostRef.current = new SharedCombatModeKeys({
+    runtime: () => runtimeRef.current, read: readCombatModeSource, now: () => performance.now(),
+    onWire: (proof, command) => {
+      try { return sendRaw({ ...command }, { modeProof: proof }) ? "confirmedSend" : "definitelyUnsent"; }
+      catch { return "outcomeUnknown"; }
+    },
+  });
+  function readCurrentSkillBarDocument(): { rows: readonly CrystalSkillBarRow[]; sourceKey: string | null } | null {
+    const current = worldRef.current, raw = combatRawRef.current, runtime = runtimeRef.current;
+    const owner = currentSpellsOwner(Number(current.playerObjectId));
+    if (!current.connected || !owner || !raw || !runtime || !questSkillsBaselineCurrentRef.current
+      || !current.mapFileName || current.mapFileName !== raw.snapshot.mapFileName || !Array.isArray(raw.snapshot.knownSkills)
+      || owner.connectionGeneration !== raw.owner.connectionGeneration || owner.sessionGeneration !== raw.owner.sessionGeneration
+      || owner.ownerRevision !== raw.owner.ownerRevision || owner.playerObjectId !== raw.owner.playerObjectId
+      || raw.snapshot.playerObjectId !== owner.playerObjectId) return null;
+    try {
+      const getter = runtime.getMir2SkillBarDocument;
+      if (typeof getter !== "function") return null;
+      const sourceKey = JSON.stringify([bevyRuntimeGeneration, questSceneRevisionRef.current, owner, current.mapFileName, raw.snapshot.knownSkills]);
+      const cache = skillBarDocumentCacheRef.current;
+      if (cache?.runtime === runtime && cache.getter === getter && cache.sourceKey === sourceKey) return { rows: cache.rows, sourceKey: sourceKey.length <= 65536 ? sourceKey : null };
+      const rows = readSharedSkillBarDocument(runtime, raw.snapshot.knownSkills);
+      if (!rows || runtimeRef.current !== runtime || combatRawRef.current !== raw || !questSkillsBaselineCurrentRef.current
+        || JSON.stringify([bevyRuntimeGeneration, questSceneRevisionRef.current, currentSpellsOwner(Number(worldRef.current.playerObjectId)), worldRef.current.mapFileName, raw.snapshot.knownSkills]) !== sourceKey) return null;
+      skillBarDocumentCacheRef.current = { runtime, getter, sourceKey, rows };
+      return { rows, sourceKey: sourceKey.length <= 65536 ? sourceKey : null };
+    } catch { return null; }
+  }
+  function skillBarInputBlocked() {
+    if (typeof document === "undefined") return true;
+    const active = document.activeElement;
+    return screenRef.current !== "game" || isSpectatorBrowserMode() || !worldRef.current.connected
+      || !initialSceneAssetsReadyRef.current || equipmentHostSuspendReasonRef.current !== null
+      || document.visibilityState !== "visible" || !document.hasFocus()
+      || active instanceof HTMLElement && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))
+      || heroManagementOpenRef.current || otherPlayerUiBlocksInput();
+  }
+  function castSkillBarLease(lease: SkillBarLease, worldCursor: readonly [number, number] | null) {
+    if (skillBarPointerHeldRef.current || skillBarInputBlocked() || !playerUiPreferencesRef.current.skillBar
+      || !Number.isInteger(lease.slot) || lease.slot < 1 || lease.slot > 16
+      || worldCursor !== null && (worldCursor.length !== 2 || !worldCursor.every(value => Number.isInteger(value) && value >= -0x80000000 && value <= 0x7fffffff))) return;
+    const document = readCurrentSkillBarDocument();
+    if (!document?.sourceKey || document.sourceKey !== lease.sourceKey
+      || document.rows.filter(row => row.hotkey === lease.slot).length !== 1
+      || !document.rows.some(row => row.hotkey === lease.slot && row.key === lease.skillKey)) return;
+    const raw = combatRawRef.current?.snapshot.knownSkills;
+    if (!Array.isArray(raw) || raw.filter(row => row.hotkey === lease.slot).length !== 1
+      || !raw.some(row => row.hotkey === lease.slot && row.key === lease.skillKey)) return;
+    combatIngressRef.current?.edge({ type: "slot", slot: lease.slot, cursor: worldCursor ? [worldCursor[0], worldCursor[1]] : null });
+  }
+  function changeSkillBarPositions(next: CrystalSkillBarPositions, commit: boolean) {
+    const text = serializeCrystalSkillBarPositions(next); if (!text) return;
+    const parsed = parseCrystalSkillBarPositions(text); if (!parsed) return;
+    setSkillBarPositions(parsed);
+    if (commit) try { localStorage.setItem(CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY, text); }
+    catch { setPreferencesNotice("Skill bar positions could not be saved."); }
+  }
+  function changeSkillBarPointerHeld(held: boolean) {
+    skillBarPointerHeldRef.current = held;
+    if (held) cancelPlayerUiWorldIntent();
+    else scheduleHeroRestock();
+  }
+  function currentHeroModel() {
+    const owner = currentSocialReplyOwner();
+    return owner ? heroAuthorityRef.current.read(owner) : null;
+  }
+  function changeReferenceWindow(kind: "help" | "hotkeys" | "options", open: boolean) {
+    playerReferenceWindowsRef.current[kind] = open;
+    if (kind === "hotkeys" && !open) playerReferenceWindowsRef.current.capture = false;
+    if (kind === "help") setShowHelp(open);
+    else if (kind === "hotkeys") setShowHotkeys(open);
+    else setShowOptions(open);
+    if (open) cancelPlayerUiWorldIntent();
+    else scheduleHeroRestock();
+  }
+  function referenceWindowsBlockGameplay() {
+    const windows = playerReferenceWindowsRef.current;
+    return windows.help || windows.hotkeys || windows.options || windows.capture;
+  }
+  function cancelPlayerUiWorldIntent() {
+    cancelQuestRoute(); cancelPendingPickup(); cancelLockedMonsterAttack();
+    handleViewportDirectionStop();
+    // These are unsent local intents. A sent movement receipt keeps its owner.
+    queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+    pendingNpcInteractRef.current = null;
+    combatIngressRef.current?.edge({ type: "cancel" });
+  }
+  function toggleReferenceWindow(kind: "help" | "hotkeys" | "options") {
+    changeReferenceWindow(kind, !playerReferenceWindowsRef.current[kind]);
+  }
+  function changeKeybindCapture(active: boolean) {
+    playerReferenceWindowsRef.current.capture = active && playerReferenceWindowsRef.current.hotkeys;
+    if (active) cancelPlayerUiWorldIntent();
+  }
+  function syncObservePreference(owner: SocialReplyOwner) {
+    const bootstrap = observeBootstrapRef.current, before = observePreferenceRef.current;
+    if (before && sameSocialPhysicalOwner(before.owner, owner)) return;
+    observePreferenceRef.current = bootstrap && bootstrap.socket === owner.socket
+      && bootstrap.connectionGeneration === owner.connectionGeneration
+      && bootstrap.sessionGeneration === owner.sessionGeneration && bootstrap.playerObjectId === owner.playerObjectId
+      ? { owner, allow: bootstrap.allow, pending: false } : { owner, allow: null, pending: false };
+  }
+  function captureObservePreference(value: unknown, playerObjectId: number, connectionGeneration: number, source: WebSocket) {
+    const session = equipmentStartGameRef.current;
+    if (typeof value !== "boolean" || source !== socketRef.current || !session
+      || connectionGeneration !== equipmentConnectionGenerationRef.current || session.connectionGeneration !== connectionGeneration
+      || session.sessionGeneration !== equipmentSessionGenerationRef.current || !Number.isSafeInteger(playerObjectId)
+      || playerObjectId <= 0 || playerObjectId > 0xffffffff) return;
+    observeBootstrapRef.current = { socket: source, connectionGeneration, sessionGeneration: session.sessionGeneration, playerObjectId, allow: value };
+    const owner = currentSocialReceiveOwner();
+    if (owner && owner.playerObjectId === playerObjectId) observePreferenceRef.current = { owner, allow: value, pending: false };
+    renderParityServices(n => n + 1);
+  }
+  function handleCrystalWindowShortcut(action: CrystalWindowShortcut): boolean {
+    if (screenRef.current !== "game" || isSpectatorBrowserMode() || !currentSocialReplyOwner()
+      || playerReferenceWindowsRef.current.capture) return false;
+    switch (action) {
+      case "inventory": toggleInventoryWindow(); break;
+      case "equipment": toggleCharacterWindow(); break;
+      case "skills":
+        if (showCharacter && activeCharacterTab === "spells") {
+          if (!navigateSharedHud({ type: "closeCharacter" })) setShowCharacter(false);
+        } else openCharacter("spells");
+        break;
+      case "heroInventory": openHeroManagement("inventory", true); break;
+      case "heroEquipment": openHeroManagement("equipment", true); break;
+      case "heroSkills": openHeroManagement("skills", true); break;
+      case "creatures":
+        heroPetOpenRef.current = !heroPetOpenRef.current; setShowHeroPet(heroPetOpenRef.current); break;
+      case "guild": setShowGuild(value => !value); break;
+      case "group": setShowGroup(value => !value); break;
+      case "friends": { const open = !socialRosterWindowsRef.current.friends; setShowFriends(open); if (open) refreshFriends(); break; }
+      case "bonds": setShowBonds(value => !value); break;
+      case "ranking": setShowRanking(value => !value); break;
+      case "quests": toggleQuestLogWindow(); break;
+      case "options": toggleReferenceWindow("options"); break;
+      case "help": toggleReferenceWindow("help"); break;
+      case "keybind": toggleReferenceWindow("hotkeys"); break;
+      case "skillBar": changePlayerUiPreferences({ ...playerUiPreferencesRef.current, skillBar: !playerUiPreferencesRef.current.skillBar }); break;
+      case "closeAll":
+        cancelPlayerUiWorldIntent();
+        if (tradeLifecycleRef.current.state !== "closed") cancelTrade();
+        closeTouchSecondaryWindows(undefined, true);
+        heroPetOpenRef.current = false;
+        window.dispatchEvent(new CustomEvent("mir2:hud-host-action", { detail: "closeAll" }));
+        break;
+      case "gameShop": case "belt": case "beltFlip": case "minimap": case "bigmap":
+        window.dispatchEvent(new CustomEvent("mir2:hud-host-action", { detail: action })); break;
+    }
+    return true;
+  }
+  function handleCrystalGameplayShortcut(functionId: string, repeat: boolean): boolean {
+    if (isCrystalCombatModeFunction(functionId)) {
+      if (!repeat) combatModeHostRef.current?.request(functionId);
+      return true;
+    }
+    if (repeat) return true;
+    if (screenRef.current !== "game" || isSpectatorBrowserMode() || !currentSocialReplyOwner()
+      || referenceWindowsBlockGameplay() || heroManagementOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
+      || equipmentHostSuspendReasonRef.current !== null || !document.hasFocus() || document.visibilityState !== "visible") return false;
+    const beltSlot = crystalBeltShortcutSlot(functionId);
+    if (beltSlot !== null) {
+      if (beltSlot >= 6) {
+        const model = currentHeroModel(), dto = model ? captureHeroAction(model, { kind: "use", slot: beltSlot - 6 }) : null;
+        if (dto) submitHeroAction(dto, true);
+      } else {
+        const item = worldRef.current.beltItems.find(entry => entry.slot === beltSlot);
+        if (item) useItem(item);
+      }
+      return true;
+    }
+    if (functionId === "Logout") { send({ type: "logOut" }); return true; }
+    if (functionId === "Pickup") { pickUpUnderfoot(); return true; }
+    if (functionId === "Trade") { send({ type: "tradeRequest" }); return true; }
+    if (functionId === "AddGroupMember") {
+      const target = worldRef.current.entities.find(entry => entry.objectId === worldRef.current.selectedObjectId && entry.kind === "player" && !entry.dead);
+      if (target?.name) groupInviteMember(target.name);
+      return true;
+    }
+    return false;
+  }
+  function changeDropViewHeld(held: boolean) {
+    if (held === dropViewHeldRef.current) return;
+    dropViewHeldRef.current = held; setDropViewHeld(held);
+  }
+  function persistCrystalBindings(bindings: readonly CrystalKeyBinding[]) {
+    const text = serializeCrystalKeyBindings(bindings); if (!text) return;
+    try { localStorage.setItem(CRYSTAL_KEY_BINDINGS_STORAGE_KEY, text); setPreferencesNotice(""); }
+    catch { setPreferencesNotice("Keyboard settings apply now, but could not be saved."); }
+  }
+  function changeCrystalBindings(bindings: CrystalKeyBinding[]) {
+    const text = serializeCrystalKeyBindings(bindings), next = text ? parseCrystalKeyBindings(text) : null;
+    if (!next) return;
+    crystalKeyBindingsRef.current = next; setCrystalKeyBindings(next);
+    combatIngressRef.current?.edge({ type: "cancel" });
+  }
+  function changePlayerUiPreferences(next: PlayerUiPreferences) {
+    const text = serializePlayerUiPreferences(next); if (!text) return;
+    const before = playerUiPreferencesRef.current;
+    playerUiPreferencesRef.current = next; setPlayerUiPreferences(next);
+    setOriginalAudioSettings(playerUiPreferencesAudioSettings(next));
+    if (before.skillMode !== next.skillMode) {
+      const bindings = applyCrystalSkillMode(crystalKeyBindingsRef.current, next.skillMode);
+      changeCrystalBindings(bindings); persistCrystalBindings(bindings);
+    }
+    try { localStorage.setItem(PLAYER_UI_PREFERENCES_STORAGE_KEY, text); setPreferencesNotice(""); }
+    catch { setPreferencesNotice("Settings apply now, but could not be saved."); }
+  }
+  function changeCrystalHelpState(next: CrystalHelpWindowState) {
+    const text = serializeCrystalHelpState(next), state = parseCrystalHelpState(text); if (!state) return;
+    setCrystalHelpState(state);
+    try { localStorage.setItem(CRYSTAL_HELP_STATE_STORAGE_KEY, text); }
+    catch { setPreferencesNotice("Help position could not be saved."); }
+  }
+  function requestObservePreference(allow: boolean) {
+    const owner = currentSocialReplyOwner(), state = observePreferenceRef.current;
+    if (!owner || !state || !sameSocialPhysicalOwner(state.owner, owner) || state.pending
+      || state.allow === null || state.allow === allow || !playerReferenceWindowsRef.current.options
+      || document.visibilityState !== "visible" || !document.hasFocus() || equipmentHostSuspendReasonRef.current !== null) return;
+    try {
+      if (sendRaw({ type: "chat", message: "@ALLOWOBSERVE" })) {
+        observePreferenceRef.current = { ...state, pending: true }; renderParityServices(n => n + 1);
+      }
+    } catch { observePreferenceRef.current = { ...state, pending: true }; renderParityServices(n => n + 1); }
+  }
+  function parityItemMutationAllowed(command: Record<string, unknown>, ownHeroProof?: HeroOperationProof): boolean {
+    if (command.type === "collectParcel" && (socialItemOperationsRef.current.pending
+      || (equipmentControllerRef.current?.status().pending ?? 0) > 0 || pendingStorageRequestsRef.current.size
+      || storageRentalRef.current.pending || npcBuyDispatcherRef.current?.status()?.flight
+      || (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0
+      || mailDispatcherRef.current?.composer.pending(currentSpellsOwner(Number(worldRef.current.playerObjectId))))) return false;
+    const pending = heroOperationsRef.current.pending;
+    if (!mailCollectBarrierRef.current && (!pending || ownHeroProof && pending.proof === ownHeroProof && pending.state === "reserved")) return true;
+    return !isMailItemMutation(command) && !["useItem", "equipItem", "removeItem", "moveItem", "dropItem", "mergeItem", "splitItem", "transferHeroItem", "takeBackHeroItem", "storeItemV2", "takeBackItemV2", "sellItem", "buyItem", "depositTradeItem", "retrieveTradeItem", "guildStorageItemChange", "tradeConfirm", "collectParcel"].includes(String(command.type));
+  }
+  function heroInputAllowed() {
+    return typeof document !== "undefined" && screenRef.current === "game" && !isSpectatorBrowserMode()
+      && worldRef.current.connected && initialSceneAssetsReadyRef.current && equipmentHostSuspendReasonRef.current === null
+      && document.visibilityState === "visible" && document.hasFocus() && !skillBarPointerHeldRef.current && !otherPlayerUiBlocksInput()
+      && (equipmentControllerRef.current?.status().pending ?? 0) === 0 && pendingStorageRequestsRef.current.size === 0
+      && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending && !mailCollectBarrierRef.current
+      && !mailDispatcherRef.current?.composer.pending(currentSpellsOwner(Number(worldRef.current.playerObjectId)))
+      && (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) === 0 && !npcBuyDispatcherRef.current?.status()?.flight;
+  }
+  function heroUiLeaseCurrent(lease: HeroUiLease) {
+    const windows = heroWindowsRef.current;
+    return ["inventory", "character", "belt"].includes(lease.origin) && Number.isSafeInteger(lease.epoch) && lease.epoch >= 0
+      && heroWindowEpochsRef.current[lease.origin] === lease.epoch
+      && (lease.origin === "inventory" ? windows.inventoryOpen : lease.origin === "character" ? windows.characterOpen : windows.beltVisible);
+  }
+  function advanceHeroWindowEpochs(origins: readonly HeroUiOrigin[]) {
+    const next = { ...heroWindowEpochsRef.current };
+    for (const origin of origins) next[origin] = Number.isSafeInteger(next[origin]) && next[origin] >= 0 && next[origin] < Number.MAX_SAFE_INTEGER ? next[origin] + 1 : -1;
+    heroWindowEpochsRef.current = next;
+  }
+  function heroProofCurrent(proof: HeroOperationProof, command: Record<string, unknown>): boolean {
+    const model = currentHeroModel(), source = heroUiProofLeasesRef.current.get(proof);
+    if (!model || !source || !heroInputAllowed()
+      || (source.kind === "window" ? !heroUiLeaseCurrent(source.lease) : heroBeltProofRef.current !== proof)) return false;
+    if (source.kind === "window" && source.lease.origin === "belt" && (proof.dto.action.kind !== "use" || proof.dto.action.slot > 1)) return false;
+    return heroOperationsRef.current.allows(proof, model, command);
+  }
+  function submitHeroAction(dto: HeroActionDto, beltIntent = false, lease?: HeroUiLease) {
+    const model = currentHeroModel();
+    if (!model || !heroInputAllowed() || (lease ? !heroUiLeaseCurrent(lease) : !beltIntent)
+      || (beltIntent || lease?.origin === "belt") && (dto.action.kind !== "use" || dto.action.slot > 1)) return;
+    const proof = heroOperationsRef.current.reserve(model, dto);
+    if (!proof) return;
+    heroUiProofLeasesRef.current.set(proof, lease ? { kind: "window", lease: Object.freeze({ ...lease }) } : { kind: "keyboardBelt" });
+    if (beltIntent) heroBeltProofRef.current = proof;
+    try {
+      if (!sendRaw({ ...proof.wire }, { heroProof: proof })) heroOperationsRef.current.cancelDefinitelyUnsent(proof);
+    } catch (error) { heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero operation outcome is unknown", error); }
+    finally { if (heroBeltProofRef.current === proof) heroBeltProofRef.current = null; }
+    renderParityServices(n => n + 1);
+  }
+  function changeHeroWindows(next: HeroManagementWindows) {
+    if (!["equipment", "status", "state", "skills"].includes(next.characterPage)
+      || [next.inventoryOpen, next.characterOpen, next.beltVisible, next.beltVertical].some(value => typeof value !== "boolean")) return;
+    const prior = heroWindowsRef.current, changed: HeroUiOrigin[] = [];
+    if (next.inventoryOpen !== prior.inventoryOpen) changed.push("inventory");
+    if (next.characterOpen !== prior.characterOpen || next.characterPage !== prior.characterPage) changed.push("character");
+    if (next.beltVisible !== prior.beltVisible || next.beltVertical !== prior.beltVertical) changed.push("belt");
+    advanceHeroWindowEpochs(changed);
+    heroWindowsRef.current = next;
+    heroManagementOpenRef.current = next.inventoryOpen || next.characterOpen;
+    setHeroWindows(next);
+    if (!next.inventoryOpen && !next.characterOpen) scheduleHeroRestock();
+  }
+  function syncHeroWindowActor(model: HeroPlayerModel) {
+    const before = heroWindowActorRef.current;
+    if (!before || !sameHeroSession(before.owner, model.owner) || before.actor.objectId !== model.actor.objectId
+      || before.actor.generation !== model.actor.generation || before.actor.name !== model.actor.name
+      || before.actor.class !== model.actor.class || before.actor.gender !== model.actor.gender) {
+      advanceHeroWindowEpochs(["inventory", "character", "belt"]);
+      changeHeroWindows({ inventoryOpen: false, characterOpen: false, characterPage: "equipment", beltVisible: true, beltVertical: false });
+    }
+    heroWindowActorRef.current = model;
+  }
+  function openHeroManagement(page: HeroManagementPage, toggle = false) {
+    const model = currentHeroModel(); if (!model) return;
+    syncHeroWindowActor(model);
+    const before = heroWindowsRef.current;
+    if (page === "inventory") changeHeroWindows({ ...before, inventoryOpen: toggle ? !before.inventoryOpen : true });
+    else changeHeroWindows({ ...before, characterOpen: toggle && before.characterOpen && before.characterPage === page ? false : true, characterPage: page });
+  }
+  function closeHeroManagement() {
+    changeHeroWindows({ ...heroWindowsRef.current, inventoryOpen: false, characterOpen: false });
+  }
+  function scheduleHeroRestock() {
+    if (heroRestockScheduledRef.current || !heroOperationsRef.current.restockCandidate) return;
+    heroRestockScheduledRef.current = true;
+    queueMicrotask(() => {
+      heroRestockScheduledRef.current = false;
+      if (!heroInputAllowed()) return;
+      const model = currentHeroModel(); if (!model) return;
+      const proof = heroOperationsRef.current.reserveRestock(model); if (!proof) return;
+      heroUiProofLeasesRef.current.set(proof, { kind: "acceptedRestock" });
+      heroBeltProofRef.current = proof;
+      try { if (!sendRaw({ ...proof.wire }, { heroProof: proof })) heroOperationsRef.current.cancelDefinitelyUnsent(proof); }
+      catch (error) { heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero restock outcome is unknown", error); }
+      finally { if (heroBeltProofRef.current === proof) heroBeltProofRef.current = null; }
+      renderParityServices(n => n + 1);
+    });
+  }
+  function currentCashGameShopSource() {
+    const owner = currentSocialReplyOwner(), raw = cashCatalogRef.current, current = worldRef.current;
+    if (!owner || !raw || !sameSocialPhysicalOwner(raw.owner, owner)) return null;
+    const player = current.entities.find(e => e.objectId === current.playerObjectId);
+    return makeCashGameShopSource(raw.catalog, {gold:current.gold, credit:current.credit, className:player?.classKey}, owner, raw.revision, cashReceiptSocketRef.current === owner.socket);
+  }
+  function confirmCashGameShopPurchase(confirmation: CashGameShopConfirmation) {
+    if (!cashShopOpenRef.current || cashRequestIdRef.current >= Number.MAX_SAFE_INTEGER) return;
+    const requestId = "web-" + equipmentConnectionGenerationRef.current + "-" + equipmentSessionGenerationRef.current + "-" + (++cashRequestIdRef.current);
+    const proof = cashPurchasesRef.current.reserve(confirmation, currentCashGameShopSource(), requestId);
+    if (!proof) return;
+    try { if (!sendRaw({...proof.command}, {cashProof:proof})) cashPurchasesRef.current.cancelDefinitelyUnsent(proof); }
+    catch (error) { cashPurchasesRef.current.markUnknown(proof); console.error("[mir2] Cash purchase outcome is unknown", error); }
+    renderParityServices(n => n + 1);
+  }
+  function currentCreatureSource() {
+    const owner = currentSocialReplyOwner(), raw = creatureSourceRef.current;
+    return owner && raw && sameSocialPhysicalOwner(raw.owner, owner)
+      ? Object.freeze({...raw, owner:Object.freeze({...owner})}) : null;
+  }
+  function submitCreatureAction(intent: CreaturePlayerIntent, rendered: CreaturePlayerSource) {
+    const source = currentCreatureSource();
+    if (!source || !heroPetOpenRef.current || rendered.owner.socket !== source.owner.socket
+      || rendered.owner.connectionGeneration !== source.owner.connectionGeneration
+      || rendered.owner.sessionGeneration !== source.owner.sessionGeneration
+      || rendered.owner.playerObjectId !== source.owner.playerObjectId || rendered.owner.sceneRevision !== source.owner.sceneRevision
+      || rendered.owner.mapFileName !== source.owner.mapFileName || rendered.revision !== source.revision) return;
+    const proof = creatureOperationsRef.current.reserve(intent, source);
+    if (!proof) return;
+    try { if (!sendRaw({...proof.command}, {creatureProof:proof})) creatureOperationsRef.current.cancelDefinitelyUnsent(proof); }
+    catch (error) { creatureOperationsRef.current.markUnknown(proof); console.error("[mir2] Creature operation outcome is unknown", error); }
+    renderParityServices(n => n + 1);
+  }
+  function captureParityPacket(packet: string, payload: Record<string, unknown>) {
+    const owner = currentSocialReceiveOwner();
+    if (!owner) return;
+    heroAuthorityRef.current.retireSession(owner); heroOperationsRef.current.retireSession(owner);
+    guildBuffAuthorityRef.current.retireSession(owner); guildBuffOperationsRef.current.retireSession(owner);
+    if (packet === "GuildStatus") guildBuffAuthorityRef.current.receiveStatus(payload,owner);
+    const guildName = packet === "GuildStatus" ? payload.guildName : worldRef.current.stage5Systems.guild?.name;
+    if (typeof guildName === "string" && guildName) {
+      if (packet === "GuildBuffList") guildBuffAuthorityRef.current.receiveList(payload,owner,guildName);
+      if (packet === "GuildStorageGoldChange") guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
+      const source = guildBuffAuthorityRef.current.read(owner,guildName);
+      if (source) guildBuffOperationsRef.current.observe(source);
+    }
+    if (["GuildStatus","GuildBuffList","GuildStorageGoldChange"].includes(packet)) renderParityServices(n => n + 1);
+    if (packet === "HeroInformation") heroAuthorityRef.current.receiveInformation(payload, owner);
+    else heroAuthorityRef.current.receiveActor(packet, payload, owner);
+    if (heroOperationsRef.current.receipt(packet, payload, owner, heroAuthorityRef.current.authoritySerial)) renderParityServices(n => n + 1);
+    syncObservePreference(owner);
+    const hero = heroAuthorityRef.current.read(owner);
+    if (hero) { syncHeroWindowActor(hero); heroOperationsRef.current.observe(hero); scheduleHeroRestock(); }
+    if (packet === "GameShopInfo" || packet === "GameShopStock") {
+      const before = cashCatalogRef.current;
+      const catalog = before && sameSocialPhysicalOwner(before.owner, owner) ? before.catalog : emptyCashGameShopCatalog();
+      const next = packet === "GameShopInfo" ? upsertCashGameShopInfo(catalog, payload) : applyCashGameShopStock(catalog, payload);
+      cashCatalogRef.current = next ? {owner, catalog:next, revision:(before?.revision ?? 0) + 1} : null;
+      renderParityServices(n => n + 1);
+    }
+    const before = creatureSourceRef.current;
+    const current = before && sameSocialPhysicalOwner(before.owner, owner) ? before : null;
+    let next = current;
+    const rename = creatureRenameRef.current;
+    const renameEnabled = Boolean(rename && sameSocialPhysicalOwner(rename.owner, owner) && rename.enabled);
+    if (packet === "ReceiveMail" && mailCollectBarrierRef.current && sameSocialPhysicalOwner(mailCollectBarrierRef.current.owner, owner)) {
+      const rows = parseMailList(payload.mail), entry = rows?.find(row => row.mailId === mailCollectBarrierRef.current!.mailId);
+      if (entry?.collected === true) mailCollectBarrierRef.current.observedSnapshot = worldSnapshotVersionRef.current;
+    }
+    if (packet === "UpdateIntelligentCreatureList") {
+      const summoned = payload.creatureSummoned === false ? null : payload.creatureSummoned === true ? payload.summonedCreatureType : undefined;
+      next = makeCreaturePlayerSource(payload.creatureList, summoned, renameEnabled, owner, ++creatureRevisionRef.current, true);
+    } else if (packet === "NewIntelligentCreature") {
+      next = current ? upsertCreaturePlayerRecord(current, payload.creature, ++creatureRevisionRef.current) : null;
+    } else if (packet === "IntelligentCreatureEnableRename") {
+      creatureRenameRef.current = {owner, enabled:true};
+      next = current ? makeCreaturePlayerSource(current.records,current.summonedPetType,true,owner,++creatureRevisionRef.current,false) : null;
+    }
+    if (["UpdateIntelligentCreatureList","NewIntelligentCreature","IntelligentCreatureEnableRename"].includes(packet)) {
+      creatureSourceRef.current = next;
+      if (next) creatureOperationsRef.current.observeAuthority(next);
+      renderParityServices(n => n + 1);
+    }
+  }
+  function captureParitySnapshot(snapshot: GatewayWorldSnapshot) {
+    const owner = currentSocialReceiveOwner();
+    if (!owner || snapshot.playerObjectId !== owner.playerObjectId || snapshot.mapFileName !== owner.mapFileName) return;
+    syncObservePreference(owner);
+    captureCombatModeSnapshot(snapshot);
+    heroAuthorityRef.current.retireSession(owner); heroOperationsRef.current.retireSession(owner);
+    heroAuthorityRef.current.receiveSnapshot(snapshot, owner);
+    const collected = mailCollectBarrierRef.current;
+    if (collected && sameSocialPhysicalOwner(collected.owner, owner) && collected.observedSnapshot !== null
+      && worldSnapshotVersionRef.current > collected.observedSnapshot && equipmentSnapshotRef.current?.sessionGeneration === owner.sessionGeneration
+      && equipmentSnapshotRef.current.connectionGeneration === owner.connectionGeneration) mailCollectBarrierRef.current = null;
+    const model = heroAuthorityRef.current.read(owner);
+    if (model) { syncHeroWindowActor(model); heroOperationsRef.current.observe(model); scheduleHeroRestock(); }
+    if (model || heroManagementOpenRef.current || heroOperationsRef.current.pending) renderParityServices(n => n + 1);
+  }
+  function ownTradeTooltipItem(item: import("../lib/social-item-window-model").SocialItemSlot): TradeItemSlot {
+    const matches = worldRef.current.inventoryItems.filter(raw => raw.authoritativeUniqueId === item.uniqueId && raw.quantity === item.count);
+    return {...item, id:item.uniqueId, ...(matches.length === 1 ? {tooltipSource:matches[0].tooltipSource as Readonly<Record<string,unknown>>} : {})};
+  }
+  function readTradeItemTooltip(item: TradeItemSlot): CrystalTooltipDocument | null {
+    const owner = currentSocialReplyOwner();
+    if (!owner || !showTrade || !item.tooltipSource) return null;
+    const source = item.tooltipSource;
+    const raw = (source.userItem ?? source.item) as Readonly<Record<string,unknown>> | undefined;
+    const index = raw?.item_index;
+    if (!raw || raw.unique_id !== item.uniqueId || raw.count !== item.count || typeof index !== "number") return null;
+    const catalog = socialCatalogRef.current.get(index);
+    const icon = item.icon ?? catalog?.icon;
+    if (typeof icon !== "number") return null;
+    const tooltipSource = source.userItem ? source : {info:catalog?.raw, userItem:raw,
+      socketInfos:Array.isArray(raw.slots) ? raw.slots.map(child => child && typeof child === "object" ? socialCatalogRef.current.get((child as Record<string,unknown>).item_index as number)?.raw ?? null : null) : []};
+    const current = worldRef.current, player = current.entities.find(e => e.objectId === current.playerObjectId);
+    return readSharedItemTooltip(runtimeRef.current, {uniqueId:item.uniqueId!, itemIndex:index, name:item.name ?? "", icon, count:item.count ?? 0, tooltipSource},
+      {level:player?.level, className:player?.classKey ?? null, gender:player?.genderKey ?? null, crystalStats:current.playerCrystalStats ?? null,
+        weights:current.playerWeights ?? null, currentWeightKnown:current.playerWeights != null, currentWeight:current.currentWeight, maxWeight:current.maxWeight});
+  }
+
+  function readPlayerItemTooltip(item: CrystalTooltipItem): CrystalTooltipDocument | null {
+    const current = worldRef.current, player = current.entities.find(e => e.objectId === current.playerObjectId);
+    return readSharedItemTooltip(runtimeRef.current, item,
+      {level:player?.level, className:player?.classKey ?? null, gender:player?.genderKey ?? null, crystalStats:current.playerCrystalStats ?? null,
+        weights:current.playerWeights ?? null, currentWeightKnown:current.playerWeights != null, currentWeight:current.currentWeight, maxWeight:current.maxWeight});
+  }
+  function readHeroItemTooltip(item: HeroItem): CrystalTooltipDocument | null {
+    const model = currentHeroModel();
+    if (!model || !(heroManagementOpenRef.current || heroWindowsRef.current.beltVisible && item.slot <= 1)) return null;
+    const matches = [...model.inventory,...model.equipment,...(model.personalInventory ?? [])].filter(candidate => candidate?.uniqueId === item.uniqueId);
+    const live = matches.length === 1 ? matches[0] : null;
+    if (!live || live.slot !== item.slot || live.itemIndex !== item.itemIndex || live.count !== item.count
+      || live.name !== item.name || live.icon !== item.icon || JSON.stringify(live.tooltipSource) !== JSON.stringify(item.tooltipSource)) return null;
+    const tooltipItem = {uniqueId:item.uniqueId, itemIndex:item.itemIndex, name:item.name, icon:item.icon, count:item.count, tooltipSource:item.tooltipSource};
+    if (model.personalInventory?.includes(live)) return readPlayerItemTooltip(tooltipItem);
+    return readSharedItemTooltip(runtimeRef.current, tooltipItem,
+      {level:model.level, className:model.actor.class, gender:model.actor.gender, crystalStats:model.stats});
+  }
+  function readHeroStats(rendered: HeroPlayerModel, page: "status" | "state") {
+    const model = currentHeroModel();
+    if (!model || !heroWindowsRef.current.characterOpen || model.sourceKey !== rendered.sourceKey
+      || !sameHeroSession(model.owner, rendered.owner) || model.owner.sceneRevision !== rendered.owner.sceneRevision
+      || model.owner.mapFileName !== rendered.owner.mapFileName || model.actor.generation !== rendered.actor.generation) return null;
+    return readSharedCharacterStats(runtimeRef.current, { hp: model.hp, mp: model.mp, level: model.level,
+      experience: model.experience, maxExperience: model.maxExperience, crystalStats: model.stats, weights: model.weights }, page === "state");
+  }
+  function readCashGameShopItemTooltip(item: CashGameShopEntry): CrystalTooltipDocument | null {
+    const source = currentCashGameShopSource();
+    if (!cashShopOpenRef.current || !source || !source.entries.includes(item)) return null;
+    return readPlayerItemTooltip({uniqueId:0, itemIndex:item.item_index, name:item.item_name, icon:item.info.image, count:item.count,
+      sourceKind:"catalogPreview", tooltipSource:{info:item.info}});
+  }
+  function guildStorageTooltipItem(item: SocialItemSlot): GuildStorageTooltipItem {
+    const bank = guildStorageRawRef.current, rows = bank?.items;
+    const row = Array.isArray(rows) ? rows[item.slot] : null;
+    const raw = row && typeof row === "object" ? (row as Record<string,unknown>).item : null;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {...item,itemIndex:-1};
+    const user = raw as Readonly<Record<string,unknown>>;
+    if (user.unique_id !== item.uniqueId || user.count !== item.count || typeof user.item_index !== "number"
+      || !Number.isSafeInteger(user.item_index) || user.item_index < 0 || user.item_index > 2147483647) return {...item,itemIndex:-1};
+    return {...item,itemIndex:user.item_index,userItem:user};
+  }
+  function readGuildStorageItemTooltip(item: GuildStorageTooltipItem): CrystalTooltipDocument | null {
+    const source = readSocialItemSurface("guild"), current = source?.slots[item.slot];
+    if (!socialItemWindowsRef.current.guild || !current || current.uniqueId !== item.uniqueId || current.count !== item.count) return null;
+    const live = guildStorageTooltipItem(current);
+    if (!live.userItem || live.itemIndex !== item.itemIndex || live.userItem !== item.userItem || typeof live.icon !== "number") return null;
+    return readPlayerItemTooltip({uniqueId:live.uniqueId, itemIndex:live.itemIndex, name:live.name, icon:live.icon, count:live.count,
+      sourceKind:"catalogInstance", tooltipSource:{userItem:live.userItem}});
+  }
+
   function buyGameShopItem(gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") {
     send({
       type: "gameShopBuy",
@@ -8323,51 +9227,36 @@ export default function HomePage() {
   // mount + the task report for the omitted list).
   // ---------------------------------------------------------------------------
 
-  // Ranking: a window tab maps to a `(rankType, onlineOnly)` pair, matching the
-  // `rankingTabKey` adapter. `getRanking` -> ClientPacket::GetRanking; rankIndex
-  // 0 requests the first page.
-  function rankingRequestForTab(tab: RankingTabKey): { rankType: number; onlineOnly: boolean } {
-    switch (tab) {
-      case "warrior":
-        return { rankType: 1, onlineOnly: false };
-      case "wizard":
-        return { rankType: 2, onlineOnly: false };
-      case "taoist":
-        return { rankType: 3, onlineOnly: false };
-      case "assassin":
-        return { rankType: 4, onlineOnly: false };
-      case "archer":
-        return { rankType: 5, onlineOnly: false };
-      case "online":
-        return { rankType: 0, onlineOnly: true };
-      case "overall":
-      default:
-        return { rankType: 0, onlineOnly: false };
+  function rankingRequestForTab(tab: RankingTabKey): RankingQuery {
+    const desired = rankingQueriesRef.current.desired;
+    const rankType = ({overall: 0, warrior: 1, wizard: 2, taoist: 3, assassin: 4, archer: 5} as Partial<Record<RankingTabKey, number>>)[tab];
+    return {rankType: rankType ?? desired.rankType, rankIndex: 0, onlineOnly: tab === "online" ? true : desired.onlineOnly};
+  }
+  function issueRankingRequest(query: RankingQuery) {
+    const proof = rankingQueriesRef.current.request(query, currentSocialReplyOwner());
+    renderRankingRequests(n => n + 1);
+    if (!proof) return;
+    try {
+      if (!send({type: "getRanking", ...proof.query}, {rankingProof: proof})) rankingQueriesRef.current.cancelDefinitelyUnsent(proof);
+    } catch (error) {
+      rankingQueriesRef.current.cancelDefinitelyUnsent(proof);
+      console.error("[mir2] ranking request outcome is unknown", error);
     }
+    renderRankingRequests(n => n + 1);
   }
-
-  function requestRanking(tab: RankingTabKey) {
-    const { rankType, onlineOnly } = rankingRequestForTab(tab);
-    send({ type: "getRanking", rankType, rankIndex: 0, onlineOnly });
+  function requestRanking(tab: RankingTabKey) { issueRankingRequest(rankingRequestForTab(tab)); }
+  function refreshRanking() { issueRankingRequest(rankingQueriesRef.current.desired); }
+  function moveRankingRows(direction: number) {
+    const query = rankingQueriesRef.current.desired;
+    const page = worldRef.current.rankings[rankingPageKey(query.rankType, query.onlineOnly)];
+    if (rankingQueriesRef.current.pending || !page || page.rankIndex !== query.rankIndex || !Number.isSafeInteger(page.count)) return;
+    const rankIndex = Math.max(0, Math.min(Math.max(0, page.count - 20), query.rankIndex + Math.sign(direction)));
+    if (rankIndex !== query.rankIndex) issueRankingRequest({...query, rankIndex});
   }
-
-  // Friends: the stage-5 social roster carries no character index, so the friend
-  // index that ClientPacket::RemoveFriend expects is derived from the displayed
-  // ordering (`friends` then `blocked`), matching the gateway's
-  // `stage5_friend_entries` enumeration.
+  function refreshFriends() { sendSocialRosterCommand("friend", {type: "refreshFriends"}); }
   function friendCharacterIndex(name: string): number | null {
-    const social = world.stage5Systems.social;
-    const friends = Array.isArray(social?.friends) ? social.friends : [];
-    const blocked = Array.isArray(social?.blocked) ? social.blocked : [];
-    // social entries may be bare names (legacy) or rich objects (B-wave); compare by name.
-    const entryName = (entry: string | { name?: string }) =>
-      (typeof entry === "string" ? entry : entry?.name ?? "").toLowerCase();
-    const target = name.toLowerCase();
-    const friendIdx = friends.findIndex((entry) => entryName(entry) === target);
-    if (friendIdx >= 0) return friendIdx;
-    const blockedIdx = blocked.findIndex((entry) => entryName(entry) === target);
-    if (blockedIdx >= 0) return friends.length + blockedIdx;
-    return null;
+    const roster = socialFriendsRef.current, owner = currentSocialReplyOwner();
+    return roster && sameSocialPhysicalOwner(roster.owner, owner) ? resolveFriendCharacterIndex(roster.entries, name) : null;
   }
 
   function addFriend(name: string) {
@@ -8387,7 +9276,7 @@ export default function HomePage() {
   function removeFriendEntry(name: string) {
     const characterIndex = friendCharacterIndex(name);
     if (characterIndex === null) return;
-    send({ type: "removeFriend", characterIndex });
+    sendSocialRosterCommand("friend", { type: "removeFriend", characterIndex });
   }
 
   // Market: stage-5 auction listing ids are surfaced as strings; the
@@ -8468,13 +9357,13 @@ export default function HomePage() {
   function inviteGuildMember(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
-    send({ type: "editGuildMember", changeType: 0, rankIndex: 0, name: trimmed, rankName: "" });
+    sendSocialRosterCommand("guild", { type: "editGuildMember", changeType: 0, rankIndex: 0, name: trimmed, rankName: "" });
   }
 
   function kickGuildMember(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
-    send({ type: "editGuildMember", changeType: 1, rankIndex: 0, name: trimmed, rankName: "" });
+    sendSocialRosterCommand("guild", { type: "editGuildMember", changeType: 1, rankIndex: 0, name: trimmed, rankName: "" });
   }
 
   // Whisper rides the real Chat packet: a "/name body" message routes to a
@@ -8638,10 +9527,190 @@ export default function HomePage() {
     submitQuestAction(questId, "finish", selectedItemIndex);
   }
 
+  function currentQuestWorldLifetime(): QuestWorldLifetime | null {
+    const identity = currentQuestWorldIdentity(), runtime = runtimeRef.current, socket = socketRef.current;
+    if (!identity || !runtime || !socket || socket.readyState !== WebSocket.OPEN
+      || screenRef.current !== "game" || !worldRef.current.connected
+      || equipmentHostSuspendReasonRef.current !== null || document.visibilityState === "hidden") return null;
+    return { identity, generation: bevyQuestGenerationRef.current, runtime,
+      runtimeGeneration: questRuntimeLifetimeRef.current, socket,
+      questSource: JSON.stringify({ quests: worldRef.current.questLog,
+        stages: [...questAuthoritativeStageByIdRef.current], completed: completedQuestHistoryRef.current,
+        profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE) }) };
+  }
+
+  function cancelQuestRoute() {
+    const route = questRouteRunRef.current;
+    questRouteRunRef.current = null;
+    if (route?.queued && queuedMoveIntentRef.current === route.queued) {
+      queuedMoveIntentRef.current = null;
+      movementPlanRef.current = null;
+    }
+  }
+
+  function cancelPendingPickup() {
+    const pickup = pendingPickupRef.current;
+    pendingPickupRef.current = null;
+    if (pickup?.queued && queuedMoveIntentRef.current === pickup.queued) {
+      queuedMoveIntentRef.current = null;
+      movementPlanRef.current = null;
+    }
+  }
+
+  function retireQuestWorldActions() {
+    cancelQuestRoute(); cancelPendingPickup(); questAttackHandoffRef.current = null;
+  }
+
+  /** Called synchronously for every world projection, before React can coalesce remove/reappear edges. */
+  function observeQuestWorldActions() {
+    const lifetime = currentQuestWorldLifetime(), current = worldRef.current;
+    const route = questRouteRunRef.current;
+    if (route && (!sameQuestWorldLifetime(route.lifetime, lifetime)
+      || currentQuestMapIndex(questMapAuthorityRef.current, lifetime?.identity ?? null) !== route.action.mapIndex)) cancelQuestRoute();
+    const attack = questAttackHandoffRef.current;
+    if (attack && (!sameQuestWorldLifetime(attack.lifetime, lifetime)
+      || !questAttackTargetCurrent(current.entities.find(entity => entity.objectId === String(attack.objectId)),
+        attack.objectId, attack.role, current.selectedObjectId, attack.name))) questAttackHandoffRef.current = null;
+    const pickup = pendingPickupRef.current;
+    const drop = pickup && current.groundDrops.find(row => row.objectId === pickup.objectId);
+    if (pickup && (!sameQuestWorldLifetime(pickup.lifetime, lifetime) || !drop
+      || drop.x !== pickup.x || drop.y !== pickup.y || drop.name !== pickup.name
+      || drop.sourceMonster !== pickup.sourceMonster)) cancelPendingPickup();
+  }
+
+  function questRouteOccupancy(current = worldRef.current): QuestRoutePoint[] {
+    return current.entities.filter(entity => entity.objectId !== current.playerObjectId && entity.dead !== true)
+      .map(entity => ({ x: entity.x, y: entity.y }));
+  }
+
+  function questRouteRejectedEdges(now: number): QuestRouteEdge[] {
+    return recentMovementBlockedSteps(movementBlockedStepsRef.current, now).map(step => ({
+      from: { x: step.fromX, y: step.fromY }, to: pointMoveInDirection({ x: step.fromX, y: step.fromY }, step.direction, 1),
+    }));
+  }
+
+  function questRouteMovement(route: NonNullable<typeof questRouteRunRef.current>, self: WorldEntity,
+    mode: "walk" | "run", now: number) {
+    if (!route.geometry || !route.plan || !sameQuestWorldLifetime(route.lifetime, currentQuestWorldLifetime())
+      || questWorldBlockedRef.current || !document.hasFocus()) { cancelQuestRoute(); return null; }
+    const geometry = route.geometry, occupied = questRouteOccupancy(), edges = questRouteRejectedEdges(now);
+    const blocked = (from: QuestRoutePoint, to: QuestRoutePoint) => {
+      if (to.x < 0 || to.y < 0 || to.x >= geometry.width || to.y >= geometry.height) return true;
+      const bit = to.x * geometry.height + to.y;
+      return Boolean(geometry.blockedBits[bit >>> 3] & 1 << (bit & 7))
+        || occupied.some(tile => tile.x === to.x && tile.y === to.y)
+        || edges.some(edge => edge.from.x === from.x && edge.from.y === from.y && edge.to.x === to.x && edge.to.y === to.y);
+    };
+    const runDistance = mode === "run" ? crystalSelfMovementProfile(worldRef.current, mode).distance : 1;
+    let step = nextQuestRouteStep(route.plan, self, runDistance, blocked);
+    if (step.type === "replan") {
+      // Reuse the original region and radius, never the previously chosen endpoint alone.
+      route.plan = planBevyQuestRoute(route.lifetime.runtime as RuntimeModule, route.action, geometry,
+        { x: self.x, y: self.y }, occupied, edges);
+      if (!route.plan) { cancelQuestRoute(); return null; }
+      step = nextQuestRouteStep(route.plan, self, runDistance, blocked);
+    }
+    if (step.type !== "move") { cancelQuestRoute(); return null; }
+    if (movementStepBlockedByRecentCorrection(self, step.direction, step.mode,
+      recentMovementBlockedSteps(movementBlockedStepsRef.current, now))) {
+      // A rejected multi-tile run still permits a validated one-tile walk.
+      const walk = nextQuestRouteStep(route.plan, self, 1, blocked);
+      if (walk.type !== "move") { cancelQuestRoute(); return null; }
+      return { point: walk.point, direction: walk.direction, mode: walk.mode };
+    }
+    return { point: step.point, direction: step.direction, mode: step.mode };
+  }
+
+  function beginQuestRoute(action: QuestRouteAction, lifetime: QuestWorldLifetime): boolean {
+    if (!runtimeRef.current?.getMir2QuestRoutePlan
+      || currentQuestMapIndex(questMapAuthorityRef.current, lifetime.identity) !== action.mapIndex) return false;
+    retireQuestWorldActions(); cancelLockedMonsterAttack(); stopOnchainMining();
+    queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+    const route = { lifetime, action, acceptedAt: Date.now(), geometry: null as QuestCollisionGeometry | null,
+      plan: null as QuestRoutePlan | null, queued: null as QueuedMoveIntent | null };
+    questRouteRunRef.current = route;
+    if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false);
+    void questCollisionCacheRef.current!.load(action.mapFileName).then(geometry => {
+      // Loading collision cannot resurrect an action that was replaced while awaiting I/O.
+      if (questRouteRunRef.current !== route || !sameQuestWorldLifetime(lifetime, currentQuestWorldLifetime())
+        || Date.now() - route.acceptedAt > 30_000 || questWorldBlockedRef.current) {
+        if (questRouteRunRef.current === route) cancelQuestRoute(); return;
+      }
+      const self = currentAuthoritativeSelf();
+      if (!self) { cancelQuestRoute(); return; }
+      route.geometry = geometry;
+      route.plan = planBevyQuestRoute(lifetime.runtime as RuntimeModule, action, geometry,
+        { x: self.x, y: self.y }, questRouteOccupancy(), questRouteRejectedEdges(Date.now()));
+      if (!route.plan) { cancelQuestRoute(); appendLog(t("ui.questRouteUnavailable", [], "No complete route is available."), "system"); return; }
+      if (route.plan.steps.length === 0) { cancelQuestRoute(); return; }
+      route.queued = { kind: "target", targetX: route.plan.destination.x, targetY: route.plan.destination.y,
+        requestedMode: "run", requestedAt: Date.now(), consumeAfterSend: false };
+      crystalRunPrimedUntilRef.current = Math.max(crystalRunPrimedUntilRef.current, Date.now() + CRYSTAL_RUN_PRIME_MS);
+      queueCrystalMoveIntent(route.queued);
+    }).catch(() => {
+      if (questRouteRunRef.current !== route) return;
+      cancelQuestRoute(); appendLog(t("ui.questRouteUnavailable", [], "No complete route is available."), "system");
+    });
+    return true;
+  }
+
+  function drainQuestAttackHandoff() {
+    observeQuestWorldActions();
+    const attack = questAttackHandoffRef.current;
+    if (!attack) return;
+    if (Date.now() - attack.acceptedAt > 5000 || questWorldBlockedRef.current) {
+      questAttackHandoffRef.current = null; return;
+    }
+    // The modal must first yield, then the common controller must apply fresh live combat facts.
+    if (questWindowOpenRef.current || readBevyQuestUiStatus(runtimeRef.current ?? {}, bevyQuestGenerationRef.current)?.questLogOpen
+      || !combatIngressRef.current?.fresh()) return;
+    questAttackHandoffRef.current = null;
+    updateWorld(current => ({ ...current, selectedObjectId: String(attack.objectId) }));
+    combatIngressRef.current.edge({ type: "select", objectId: attack.objectId });
+  }
+
   function dispatchBevyQuestIntent(intent: BevyQuestUiIntent): BevyQuestUiIntentResult {
     const rejected = (error: string): BevyQuestUiIntentResult => ({ accepted: false, error });
     if (intent.generation !== bevyQuestGenerationRef.current || screenRef.current !== "game") {
       return rejected("The game session changed.");
+    }
+    if (isQuestWorldAction(intent.type)) {
+      const action = parseQuestWorldAction(intent), lifetime = currentQuestWorldLifetime();
+      const draft = currentQuestWorldDraft();
+      if (!action || !lifetime || !draft || !sameQuestWorldIdentity(action, draft)
+        || intent.generation !== draft.generation || !Number.isSafeInteger(intent.revision)
+        || Number(intent.revision) <= 0) return rejected("The quest world changed.");
+      if (action.type === "openDestinationMap") {
+        retireQuestWorldActions();
+        if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false);
+        setShowWorldMap(true); return { accepted: true };
+      }
+      if (action.type === "navigateQuestRoute") return beginQuestRoute(action, lifetime)
+        ? { accepted: true } : rejected("The quest route is unavailable.");
+      if (action.type === "attackTarget" || action.type === "attackQuestTarget") {
+        const target = worldRef.current.entities.find(entity => entity.objectId === String(action.objectId));
+        if (!combatIngressRef.current?.supported()
+          || !questAttackTargetCurrent(target, action.objectId, action.type, worldRef.current.selectedObjectId))
+          return rejected("The quest target changed.");
+        retireQuestWorldActions(); cancelLockedMonsterAttack();
+        queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+        combatIngressRef.current.withdraw();
+        questAttackHandoffRef.current = { lifetime, objectId: action.objectId, role: action.type,
+          name: target!.name, acceptedAt: Date.now() };
+        if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false);
+        return { accepted: true };
+      }
+      if (action.type === "pickUpObject") {
+        const drop = worldRef.current.groundDrops.find(row => row.objectId === String(action.objectId));
+        if (!drop || drop.x !== action.x || drop.y !== action.y) return rejected("The ground item changed.");
+        if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false);
+        return pickGroundDrop(String(action.objectId)) ? { accepted: true } : rejected("The ground item is unavailable.");
+      }
+      const self = currentAuthoritativeSelf();
+      if (action.type !== "pickUpTile") return rejected("Unsupported quest world action.");
+      if (!self || self.x !== action.x || self.y !== action.y) return rejected("The pickup tile changed.");
+      retireQuestWorldActions();
+      return { accepted: send({ type: "pickUpTile" }) };
     }
     if (intent.type === "selectNpcDialog") {
       const dialog = worldRef.current.activeNpcDialog;
@@ -8682,6 +9751,11 @@ export default function HomePage() {
 
   function clearPendingQuestActions() {
     withdrawHudBarDrawPlanOutputs();
+    retireQuestWorldActions();
+    questMapAuthorityRef.current = null;
+    questCapturedWorldRef.current = null;
+    questSkillsBaselineCurrentRef.current = false;
+    if (questSceneRevisionRef.current < Number.MAX_SAFE_INTEGER) ++questSceneRevisionRef.current;
     bevyQuestGenerationRef.current = nextQuestUiGeneration();
     experienceAuthorityRef.current = null;
     weightAuthorityRef.current = null;
@@ -8770,15 +9844,17 @@ export default function HomePage() {
   // (TradeReply), lock in your side (TradeConfirm), or cancel the trade
   // (TradeCancel).
   function acceptTrade() {
-    send({ type: "tradeReply", acceptInvite: true });
+    sendTradeUiCommand({ type: "tradeReply", acceptInvite: true });
   }
 
   function confirmTrade() {
-    send({ type: "tradeConfirm", locked: true });
+    const source = readSocialItemSurface("trade");
+    if (typeof source?.trade?.locked !== "boolean") return;
+    sendTradeUiCommand({ type: "tradeConfirm", locked: !source.trade.locked });
   }
 
   function cancelTrade() {
-    send({ type: "tradeCancel" });
+    return sendTradeUiCommand({ type: "tradeCancel" });
   }
 
   // ---- wave-2: additional window action wiring ----
@@ -8807,66 +9883,36 @@ export default function HomePage() {
     send({ type: "guildStorageGoldChange", changeType: 1, amount: Math.floor(amount) });
   }
 
-  // Assign a member to a rank -> EditGuildMember changeType 4 (carries rankIndex).
+  // Crystal type 2 assigns a member; type 3 renames and type 5 edits each option.
   function changeGuildMemberRank(name: string, rankIndex: number) {
     const trimmed = name.trim();
-    if (!trimmed) return;
-    send({ type: "editGuildMember", changeType: 4, rankIndex, name: trimmed, rankName: "" });
+    if (!trimmed || !Number.isSafeInteger(rankIndex) || rankIndex < 0 || rankIndex > 0x7fff_ffff) return;
+    const rank = guildRanksRef.current?.value.ranks.find(row => row.index === rankIndex);
+    if (!rank) return;
+    sendSocialRosterCommand("guild", {type: "editGuildMember", changeType: 2, rankIndex, name: trimmed, rankName: rank.name});
   }
-
-  // Save a guild rank: rename (changeType 2 carries rankName) then push each
-  // permission flag (changeType 5: rankName = option index 0..7, name = "true"/"false").
-  // permissions is the list of ENABLED permission keys for the rank; each of the
-  // 8 Crystal options is pushed true/false via EditGuildMember changeType 5.
   function saveGuildRank(rankIndex: number, name: string, permissions: string[]) {
-    const trimmed = name.trim();
-    if (trimmed) {
-      send(
-        { type: "editGuildMember", changeType: 2, rankIndex, name: "", rankName: trimmed },
-        { quiet: true },
-      );
-    }
-    const optionByKey: Record<string, number> = {
-      changeRank: 0,
-      recruit: 1,
-      kick: 2,
-      storeItem: 3,
-      retrieveItem: 4,
-      alterAlliance: 5,
-      changeNotice: 6,
-      activateBuff: 7,
-    };
-    const enabled = new Set(permissions);
-    for (const [key, option] of Object.entries(optionByKey)) {
-      send(
-        {
-          type: "editGuildMember",
-          changeType: 5,
-          rankIndex,
-          name: enabled.has(key) ? "true" : "false",
-          rankName: String(option),
-        },
-        { quiet: true },
-      );
-    }
+    const commands = guildRankSaveCommands(rankIndex, name, permissions);
+    if (!commands) return;
+    for (const command of commands) if (!sendSocialRosterCommand("guild", command, true)) break;
   }
 
-  // Friend memo -> AddMemo, keyed by the same derived friend index as RemoveFriend.
+  // Friend memo and removal use the same explicit protocol identity.
   function editFriendMemo(name: string, memo: string) {
     const characterIndex = friendCharacterIndex(name);
     if (characterIndex === null) return;
-    send({ type: "addMemo", characterIndex, memo });
+    sendSocialRosterCommand("friend", { type: "addMemo", characterIndex, memo });
   }
 
   // Ranking online-only toggle: re-request the active board with the flag.
   function setRankingOnlineOnly(onlineOnly: boolean) {
-    send({ type: "getRanking", rankType: 0, rankIndex: 0, onlineOnly });
+    issueRankingRequest({...rankingQueriesRef.current.desired, rankIndex: 0, onlineOnly});
   }
 
   // Trade gold offer -> TradeGold.
   function setTradeGold(amount: number) {
-    if (!Number.isFinite(amount) || amount < 0) return;
-    send({ type: "tradeGold", amount: Math.floor(amount) });
+    if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 0xffff_ffff) return;
+    sendTradeUiCommand({ type: "tradeGold", amount });
   }
 
   // Mail actions (ReadMail / CollectParcel / DeleteMail / SendMail).
@@ -8950,7 +9996,7 @@ export default function HomePage() {
     const cells=ids.map(id=>{const item=current.inventoryItems.find(i=>i.authoritativeUniqueId===id);
       return{uniqueId:id,image:item&&Number.isInteger(item.icon)&&item.icon>=0&&item.icon<=65535?item.icon:null,
         countLabel:item?String(item.quantity):""};});
-    const competing=bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showInventory||showCharacter||showQuestLog||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+    const competing=bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showInventory||showCharacter||showQuestLog||heroManagementPage!==null||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
     return{owner:{...owner,sceneRevision:mailSceneRevisionRef.current,hudGeneration:bevyQuestGenerationRef.current},
       incarnation,draftEpoch:incarnation,draftGeneration:core.generation,open:mailOpenRef.current,kind:ids.length||state?.stamped||core.raw.goldText.trim()?"parcel":"letter",
       presentation,raw:core.raw,gold:core.gold,
@@ -9123,21 +10169,44 @@ export default function HomePage() {
     send({ type: "interact", objectId: Number(objectId) });
   }
 
-  function pickGroundDrop(objectId: string) {
+  function drainPendingPickup() {
+    observeQuestWorldActions();
+    const pickup = pendingPickupRef.current;
+    if (!pickup) return;
+    if (Date.now() - pickup.acceptedAt > MOVEMENT_PENDING_ACTION_MAX_AGE_MS * 4
+      || questWorldBlockedRef.current) { cancelPendingPickup(); return; }
+    const current = worldRef.current, self = currentAuthoritativeSelf(current);
+    const drop = current.groundDrops.find(row => row.objectId === pickup.objectId);
+    if (!questWindowOpenRef.current && self && drop && pointTileDistance(self, drop) <= 1) {
+      // Clear only this gesture's movement; a later manual intent must keep its own lifetime.
+      cancelPendingPickup();
+      if (sameQuestWorldLifetime(pickup.lifetime, currentQuestWorldLifetime()))
+        send({ type: "pickUp", objectId: Number(pickup.objectId) });
+    }
+  }
+
+  function pickGroundDrop(objectId: string): boolean {
     // Targeted shared-zone pickup accepts the player on the drop tile or an
     // adjacent tile. Walk into that range and let the snapshot-arrival hook
     // fire PickUp; requiring an exact tile deadlocks when a corpse occupies it.
     const currentWorld = worldRef.current;
     const drop = currentWorld.groundDrops.find((entry) => entry.objectId === objectId);
     const serverSelf = currentAuthoritativeSelf(currentWorld);
-    if (drop && serverSelf && pointTileDistance(serverSelf, drop) > 1) {
+    const lifetime = currentQuestWorldLifetime();
+    if (!drop || !serverSelf || !lifetime || questObjectId(objectId) === null
+      || !questCoordinate(drop.x) || !questCoordinate(drop.y)) return false;
+    retireQuestWorldActions(); cancelLockedMonsterAttack();
+    if (pointTileDistance(serverSelf, drop) > 1) {
       stopOnchainMining();
-      pendingPickupRef.current = objectId;
-      moveToTile(drop.x, drop.y, "run");
-      return;
+      const queued: QueuedMoveIntent = { kind: "target", targetX: drop.x, targetY: drop.y,
+        requestedMode: "run", requestedAt: Date.now(), consumeAfterSend: false };
+      pendingPickupRef.current = { lifetime, objectId, x: drop.x, y: drop.y, name: drop.name,
+        sourceMonster: drop.sourceMonster, acceptedAt: Date.now(), queued };
+      crystalRunPrimedUntilRef.current = Math.max(crystalRunPrimedUntilRef.current, Date.now() + CRYSTAL_RUN_PRIME_MS);
+      queueCrystalMoveIntent(queued);
+      return true;
     }
-    pendingPickupRef.current = null;
-    send({ type: "pickUp", objectId: Number(objectId) });
+    return send({ type: "pickUp", objectId: Number(objectId) });
   }
 
   function selectEntity(objectId: string) {
@@ -9251,6 +10320,7 @@ export default function HomePage() {
   }
 
   function endStorageService() {
+    storageRentalRef.current.retire(); setStorageRentalPrompt(null);
     storageUiIngressRef.current?.withdraw();
     storageServiceActiveRef.current = false;
     storageCompatibilityRef.current = false;
@@ -9293,9 +10363,14 @@ export default function HomePage() {
       return true;
     }
     if (intent.type === "rent") {
-      const sent = send({ type: "chat", message: "@ADDSTORAGE" }, { ownerToken: token });
-      if (sent) { storageUiIngressRef.current?.withdraw(); storageCompatibilityRef.current = true; setStorageCompatibility(true); }
-      return sent;
+      const prompt = storageRentalRef.current.open(currentStorageRentalFacts(), true);
+      if (!prompt) return false;
+      if (!storageUiIngressRef.current.claim(intent)) { storageRentalRef.current.cancel(prompt); return false; }
+      storageUiIngressRef.current.withdraw();
+      storageCompatibilityRef.current = true; setStorageCompatibility(true);
+      requestBagCompatibility("fullInventory");
+      setStorageRentalPrompt({ id: prompt.id, renewing: prompt.facts.hasExpandedStorage });
+      return true;
     }
     const current = worldRef.current, source = intent.source;
     const location = { container: source.container === 4 ? "storage" as const : source.slot < 40 ? "bag1" as const : "bag2" as const,
@@ -9666,6 +10741,284 @@ export default function HomePage() {
     return confirmedActionReadyAt > 0 && now < confirmedActionReadyAt;
   }
 
+  function sameSocialPhysicalOwner(a: SocialReplyOwner, b: SocialReplyOwner | null): boolean {
+    return !!b && a.socket === b.socket && a.connectionGeneration === b.connectionGeneration
+      && a.sessionGeneration === b.sessionGeneration && a.playerObjectId === b.playerObjectId;
+  }
+  function retireSocialItemConnection() {
+    socialItemOperationsRef.current.retire(); socialOwnTradeRef.current = null;
+    tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
+    guildStorageRawRef.current = null; guildPermissionsRef.current = null; guildRanksRef.current = null;
+    socialFriendsRef.current = null; rankingQueriesRef.current.retire();
+    socialCatalogRef.current.clear();
+    socialCharacterIndexRef.current.current = null;
+    renderSocialItems(n => n + 1);
+  }
+  function readSocialItemSurface(surface: "trade" | "guild") {
+    const current = worldRef.current, owner = currentSocialReplyOwner();
+    const baseline = equipmentSnapshotRef.current;
+    if (!owner || !baseline || baseline.connectionGeneration !== owner.connectionGeneration
+      || baseline.sessionGeneration !== owner.sessionGeneration) return null;
+    const inventory = projectSocialInventory(current);
+    if (!inventory.ok) return null;
+    if (surface === "trade") {
+      const raw = socialOwnTradeRef.current;
+      if (!raw || !sameSocialPhysicalOwner(raw.owner, owner) || !raw.trade || typeof raw.trade !== "object") return null;
+      const trade = raw.trade as Record<string, unknown>, grid = projectOwnTradeItems(trade, inventory);
+      if (!grid.ok || trade.completed === true || tradeLifecycleRef.current.state !== "open"
+        || tradeLifecycleRef.current.partner !== trade.partner || !current.stage5Systems.trade
+        || current.stage5Systems.trade.partner !== trade.partner) return null;
+      const offered = new Set(grid.slots.flatMap(item => item ? [item.uniqueId] : []));
+      return { owner, inventory, slots: grid.slots, trade, permissions: [] as string[],
+        inventoryItems: inventory.items.filter(item => !offered.has(item.uniqueId)),
+        sourceKey: JSON.stringify([owner.connectionGeneration, owner.sessionGeneration, owner.sceneRevision,
+          owner.playerObjectId, owner.mapFileName, tradeIncarnationRef.current, inventory, trade]) };
+    }
+    const bank = guildStorageRawRef.current, rights = guildPermissionsRef.current;
+    const guildName = current.stage5Systems.guild?.name;
+    if (!bank || !rights || !guildName || bank.guildName !== guildName || rights.guildName !== guildName
+      || !sameSocialPhysicalOwner(bank.owner, owner) || !sameSocialPhysicalOwner(rights.owner, owner)) return null;
+    const grid = projectGuildStorageItems(bank.items, index => readSharedItemCatalogInfo(runtimeRef.current, index) ?? socialCatalogRef.current.get(index) ?? null);
+    if (!grid.ok || grid.slots.some(item => item && inventory.items.some(bag => bag.uniqueId === item.uniqueId))) return null;
+    return { owner, inventory, slots: grid.slots, trade: null, permissions: rights.permissions,
+      inventoryItems: inventory.items,
+      sourceKey: JSON.stringify([owner.connectionGeneration, owner.sessionGeneration, owner.sceneRevision,
+        owner.playerObjectId, owner.mapFileName, guildName, bank.revision, inventory, grid.slots, rights.permissions]) };
+  }
+  function socialItemProofCurrent(proof: SocialWindowOperationProof): boolean {
+    const source = readSocialItemSurface(proof.surface);
+    if (!source || source.sourceKey !== proof.localSourceKey || !socialItemWindowsRef.current[proof.surface]
+      || socialCharacterIndexRef.current.current !== proof.ownCharacterIndex
+      || (equipmentControllerRef.current?.status().pending ?? 0) > 0 || pendingStorageRequestsRef.current.size > 0
+      || (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0 || storageRentalRef.current.pending) return false;
+    const {kind, from, to, uniqueId} = proof;
+    if (proof.surface === "trade") {
+      if (!source.trade || tradeLifecycleRef.current.state !== "open" || source.trade.locked !== false
+        || source.trade.escrowPrepared !== false || source.trade.completed !== false
+        || worldRef.current.stage5Systems.trade?.confirmed === true) return false;
+      if (kind === "depositTrade") return source.inventoryItems.some(item => item.slot === from && item.uniqueId === uniqueId)
+        && to >= 0 && to < 10 && source.slots[to] === null;
+      return kind === "retrieveTrade" && source.slots[from]?.uniqueId === uniqueId && source.inventory.emptySlots.includes(to);
+    }
+    const store = source.permissions.includes("CanStoreItem"), retrieve = source.permissions.includes("CanRetrieveItem");
+    if (kind === "guild0") return store && source.inventoryItems.some(item => item.slot === from && item.uniqueId === uniqueId)
+      && to >= 0 && to < 112 && source.slots[to] === null;
+    if (kind === "guild1") return retrieve && source.slots[from]?.uniqueId === uniqueId && source.inventory.emptySlots.includes(to);
+    return kind === "guild2" && store && retrieve && from !== to && source.slots[from]?.uniqueId === uniqueId
+      && to >= 0 && to < 112 && source.slots[to] === null;
+  }
+  function socialItemMutationAllowed(command: Record<string, unknown>, proof?: SocialWindowOperationProof): boolean {
+    const type = String(command.type);
+    if ((type === "depositTradeItem" || type === "retrieveTradeItem" || type === "guildStorageItemChange" && command.changeType !== 3) && !proof) return false;
+    const pending = socialItemOperationsRef.current.pending;
+    if (!pending) return !proof;
+    if (proof) return pending.proof === proof && !pending.entered;
+    return !isMailItemMutation(command) && !["useItem", "equipItem", "removeItem", "moveItem", "dropItem", "mergeItem", "splitItem",
+      "storeItemV2", "takeBackItemV2", "sellItem", "buyItem", "tradeReply", "tradeConfirm", "tradeCancel", "tradeGold"].includes(type);
+  }
+  function submitSocialItem(kind: SocialWindowOperationKind, from: number, to: number, uniqueId: number, capturedSourceKey: string) {
+    const surface = kind.startsWith("guild") ? "guild" : "trade", source = readSocialItemSurface(surface);
+    const characterIndex = socialCharacterIndexRef.current.current;
+    if (!source || source.sourceKey !== capturedSourceKey || characterIndex === null) return;
+    const proof = socialItemOperationsRef.current.reserve({ owner: source.owner, surface, localSourceKey: capturedSourceKey,
+      kind, from, to, uniqueId, ownCharacterIndex: characterIndex, beforeSnapshotRevision: worldSnapshotVersionRef.current });
+    if (!proof) return;
+    try {
+      if (!socialItemProofCurrent(proof) || !send(socialWindowItemCommand(proof), {socialItemProof: proof})) socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);
+    } catch (error) {
+      socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);
+      socialItemOperationsRef.current.outcomeUnknown(proof);
+      console.error("[mir2] social item send outcome is unknown", error);
+    }
+    renderSocialItems(n => n + 1);
+  }
+  function readSocialRosterSource(kind: "friend" | "guild") {
+    const owner = currentSocialReplyOwner();
+    if (!owner) return null;
+    if (kind === "friend") {
+      const roster = socialFriendsRef.current;
+      const entries = roster && sameSocialPhysicalOwner(roster.owner, owner) ? roster.entries : null;
+      return {owner, sourceKey: JSON.stringify({kind, entries}), permissions: [] as string[]};
+    }
+    const rights = guildPermissionsRef.current, ranks = guildRanksRef.current, guildName = worldRef.current.stage5Systems.guild?.name;
+    if (!rights || !guildName || rights.guildName !== guildName || !sameSocialPhysicalOwner(rights.owner, owner)) return null;
+    const value = ranks && ranks.guildName === guildName && sameSocialPhysicalOwner(ranks.owner, owner) ? ranks.value : null;
+    return {owner, sourceKey: JSON.stringify({kind, guildName, permissions: rights.permissions, ranks: value, members: worldRef.current.stage5Systems.guild?.members ?? []}), permissions: rights.permissions};
+  }
+  function socialRosterProofCurrent(proof: SocialRosterSendProof, command: Record<string, unknown>): boolean {
+    const source = readSocialRosterSource(proof.kind);
+    if (!source || !sameSocialPhysicalOwner(proof.owner, source.owner) || proof.owner.sceneRevision !== source.owner.sceneRevision
+      || proof.owner.mapFileName !== source.owner.mapFileName || proof.sourceKey !== source.sourceKey || JSON.stringify(command) !== proof.body) return false;
+    if (proof.kind === "friend") return socialRosterWindowsRef.current.friends
+      && ["removeFriend", "addMemo", "refreshFriends"].includes(String(command.type));
+    const option = command.changeType === 0 ? "CanRecruit" : command.changeType === 1 ? "CanKick" : "CanChangeRank";
+    if (!socialItemWindowsRef.current.guild || command.type !== "editGuildMember" || !source.permissions.includes(option)) return false;
+    if (command.changeType === 0 || command.changeType === 1) return true;
+    const ranks = guildRanksRef.current?.value;
+    if (!ranks || !ranks.ranks.some(rank => rank.index === command.rankIndex)) return false;
+    if (command.changeType === 2) return ranks.members.some(member => member.name === command.name);
+    return command.changeType === 3 || command.changeType === 5;
+  }
+  function sendSocialRosterCommand(kind: "friend" | "guild", command: Record<string, unknown>, quiet = false): boolean {
+    const captured = socialRosterRenderSources[kind], source = readSocialRosterSource(kind);
+    if (!captured || !source || captured.sourceKey !== source.sourceKey || !sameSocialPhysicalOwner(captured.owner, source.owner)) return false;
+    const proof: SocialRosterSendProof = Object.freeze({kind, owner: Object.freeze({...captured.owner}), sourceKey: captured.sourceKey, body: JSON.stringify(command)});
+    return socialRosterProofCurrent(proof, command) && send(command, {quiet, socialRosterProof: proof});
+  }
+  function socialItemReceiptOwner(): SocialReplyOwner | null {
+    const pending = socialItemOperationsRef.current.pending, session = equipmentStartGameRef.current;
+    const current = currentSocialReplyOwner(false);
+    // Map/UI changes withdraw intents, but cannot erase an entered operation. Its same physical
+    // session may still acknowledge and publish a complete layout while hidden or on the next map.
+    if (pending && sameSocialPhysicalOwner(pending.proof.owner, current)) return pending.proof.owner;
+    // Logout failure may resume this exact session. ACKs received during the pending logout
+    // still belong to its entered operation; this exception never grants a new send.
+    if (pending && session && equipmentHostSuspendReasonRef.current === "logoutPending"
+      && pending.proof.owner.socket === socketRef.current
+      && session.connectionGeneration === equipmentConnectionGenerationRef.current
+      && session.sessionGeneration === equipmentSessionGenerationRef.current
+      && pending.proof.owner.connectionGeneration === session.connectionGeneration
+      && pending.proof.owner.sessionGeneration === session.sessionGeneration
+      && pending.proof.owner.playerObjectId === Number(worldRef.current.playerObjectId)) return pending.proof.owner;
+    return null;
+  }
+  function sendTradeUiCommand(command: Record<string, unknown>): boolean {
+    if (!socialTradeUiLease.owner || socialTradeSendingRef.current) return false;
+    const proof: SocialTradeSendProof = Object.freeze({...socialTradeUiLease,
+      owner: Object.freeze({...socialTradeUiLease.owner}), body: JSON.stringify(command)});
+    socialTradeSendingRef.current = proof;
+    try { return socialTradeProofCurrent(proof, command) && send(command, {socialTradeProof: proof}); }
+    catch (error) { console.error("[mir2] trade send outcome is unknown", error); return false; }
+    finally { if (socialTradeSendingRef.current === proof) socialTradeSendingRef.current = null; }
+  }
+  function socialTradeProofCurrent(proof: SocialTradeSendProof, command: Record<string, unknown>): boolean {
+    const owner = currentSocialReplyOwner(), lifecycle = tradeLifecycleRef.current;
+    if (socialTradeSendingRef.current !== proof || !owner || !sameSocialPhysicalOwner(proof.owner, owner)
+      || proof.owner.sceneRevision !== owner.sceneRevision || proof.owner.mapFileName !== owner.mapFileName
+      || proof.incarnation !== tradeIncarnationRef.current || proof.state !== lifecycle.state || proof.partner !== lifecycle.partner
+      || lifecycle.state === "closed" || !socialItemWindowsRef.current.trade || JSON.stringify(command) !== proof.body
+      || socialItemOperationsRef.current.pending) return false;
+    const type = command.type;
+    if (type === "tradeReply") return lifecycle.state === "requested" && command.acceptInvite === true
+      && Object.keys(command).length === 2 && socialTradeReplySpentRef.current !== proof.incarnation;
+    if (type === "tradeCancel") return Object.keys(command).length === 1;
+    const source = readSocialItemSurface("trade");
+    if (!source || lifecycle.state !== "open" || source.trade?.escrowPrepared !== false || source.trade.completed !== false) return false;
+    if (type === "tradeConfirm") return typeof command.locked === "boolean" && command.locked === !source.trade.locked
+      && (command.locked === false || tradePartnerRef.current?.itemsKnown !== false) && Object.keys(command).length === 2;
+    return type === "tradeGold" && Object.keys(command).length === 2 && typeof command.amount === "number"
+      && Number.isSafeInteger(command.amount) && command.amount > 0 && command.amount <= 0xffff_ffff && command.amount <= worldRef.current.gold;
+  }
+  function observeSocialItemReceipt(packet: string, payload: Record<string, unknown>) {
+    const result = socialItemOperationsRef.current.receipt(packet, payload, socialItemReceiptOwner());
+    if (result.matched) renderSocialItems(n => n + 1);
+  }
+  function refreshGuildStorage() {
+    const owner = currentSocialReplyOwner(), guildName = worldRef.current.stage5Systems.guild?.name;
+    if (!owner || !guildName) return;
+    send({type: "guildStorageItemChange", changeType: 3, from: 0, to: 0}, {guildListProof: {owner, guildName}});
+  }
+  function observeGuildPermissions(payload: Record<string, unknown>) {
+    const owner = currentSocialReceiveOwner(), guildName = payload.guildName;
+    const permissions = guildPermissionsFromOptions(payload.myOptions);
+    if (!owner || typeof guildName !== "string" || !guildName || !permissions) {
+      guildPermissionsRef.current = null; guildStorageRawRef.current = null; guildRanksRef.current = null;
+    } else {
+      if (guildPermissionsRef.current?.guildName !== guildName) { guildStorageRawRef.current = null; guildRanksRef.current = null; }
+      guildPermissionsRef.current = {owner, guildName, permissions};
+    }
+    renderSocialItems(n => n + 1);
+  }
+  function observeGuildStorageChange(payload: Record<string, unknown>) {
+    const bank = guildStorageRawRef.current, owner = currentSocialReceiveOwner();
+    if (!bank || !sameSocialPhysicalOwner(bank.owner, owner) || bank.guildName !== worldRef.current.stage5Systems.guild?.name) return;
+    const items = applyGuildStorageChange(bank.items, payload);
+    if (items) guildStorageRawRef.current = {...bank, items, revision: ++guildStorageRevisionRef.current};
+    else guildStorageRawRef.current = null;
+    renderSocialItems(n => n + 1);
+  }
+  function projectPartnerTradePacket(raw: unknown) {
+    if (!Array.isArray(raw) || raw.length > 10) return undefined;
+    const ids = new Set<number>();
+    for (const item of raw) {
+      if (item == null) continue;
+      if (typeof item !== "object" || Array.isArray(item) || !Number.isSafeInteger(item.unique_id) || item.unique_id < 0
+        || ids.has(item.unique_id) || !Number.isSafeInteger(item.item_index) || item.item_index < 0 || item.item_index > 0x7fff_ffff
+        || !Number.isSafeInteger(item.count) || item.count <= 0 || item.count > 65535) return undefined;
+      ids.add(item.unique_id);
+    }
+    return Array.from({length: 10}, (_, slot) => {
+      const item = raw[slot];
+      if (item == null) return null;
+      const info = socialCatalogRef.current.get(item.item_index);
+      return {id: item.unique_id as number, uniqueId: item.unique_id as number, slot,
+        name: info?.name ?? t("ui.unknownItem", [], "Unknown item"), count: item.count as number,
+        tooltipSource: Object.freeze({item: Object.freeze({...item}), ...(info?.raw ? {info: info.raw} : {})}),
+        ...(info?.icon !== undefined ? {icon: info.icon} : {})};
+    });
+  }
+  function currentSocialReplyOwner(requireVisible = true): SocialReplyOwner | null {
+    const current = worldRef.current, socket = socketRef.current;
+    const owner = currentSpellsOwner(Number(current.playerObjectId));
+    if (!owner || !socket || socket.readyState !== WebSocket.OPEN || screenRef.current !== "game"
+      || !current.connected || requireVisible && document.visibilityState === "hidden" || !current.mapFileName) return null;
+    return { connectionGeneration: owner.connectionGeneration, sessionGeneration: owner.sessionGeneration,
+      playerObjectId: owner.playerObjectId, sceneRevision: socialSceneRevisionRef.current,
+      mapFileName: current.mapFileName, socket };
+  }
+  function currentSocialReceiveOwner(): SocialReplyOwner | null {
+    const owner = currentSocialReplyOwner(false);
+    if (owner) return owner;
+    const session = equipmentStartGameRef.current, socket = socketRef.current, current = worldRef.current;
+    const playerObjectId = Number(current.playerObjectId);
+    if (equipmentHostSuspendReasonRef.current !== "logoutPending" || !session || !socket
+      || session.connectionGeneration !== equipmentConnectionGenerationRef.current
+      || session.sessionGeneration !== equipmentSessionGenerationRef.current || !current.connected
+      || screenRef.current !== "game" || !Number.isSafeInteger(playerObjectId) || playerObjectId <= 0
+      || playerObjectId > 0xffff_ffff || !current.mapFileName) return null;
+    // Authentic packets continue updating the paused session. This owner is used only for
+    // receive reducers and post-ACK snapshots; every new send still requires the strict owner.
+    return {connectionGeneration: session.connectionGeneration, sessionGeneration: session.sessionGeneration,
+      playerObjectId, sceneRevision: socialSceneRevisionRef.current, mapFileName: current.mapFileName, socket};
+  }
+  function retireSocialRequests() {
+    socialRepliesRef.current.retire();
+    storageRentalRef.current.retire(); setStorageRentalPrompt(null);
+    socialSceneRevisionRef.current += 1;
+    renderSocialRequests(n => n + 1);
+  }
+  function socialReplyWindowOpen(kind: SocialRequestKind): boolean {
+    return kind === "guild" ? socialReplyWindowsRef.current.guild
+      : kind === "group" ? socialReplyWindowsRef.current.group : socialReplyWindowsRef.current.bonds;
+  }
+  function captureSocialRequest(kind: SocialRequestKind, payload: Record<string, unknown>) {
+    if (!socialRepliesRef.current.receive(kind, payload.name, payload.level, currentSocialReceiveOwner())) return;
+    if (kind === "group") { socialReplyWindowsRef.current.group = true; setShowGroup(true); }
+    else if (kind === "guild") setShowGuild(true);
+    else { socialReplyWindowsRef.current.bonds = true; setShowBonds(true); }
+    renderSocialRequests(n => n + 1);
+  }
+  function closeSocialReplyWindow(kind: "group" | "bonds") {
+    if (kind === "group") { socialRepliesRef.current.dismiss("group"); setShowGroup(false); }
+    else { for (const k of ["marriage", "divorce", "mentor"] as const) socialRepliesRef.current.dismiss(k); setShowBonds(false); }
+    socialReplyWindowsRef.current[kind] = false;
+    renderSocialRequests(n => n + 1);
+  }
+  function replySocialRequest(kind: SocialRequestKind, epoch: number, acceptInvite: boolean) {
+    if (!socialReplyWindowOpen(kind)) return;
+    const proof = socialRepliesRef.current.reserve(kind, epoch, acceptInvite, currentSocialReplyOwner());
+    if (!proof) return;
+    try {
+      if (send(socialReplyCommand(proof), { socialReplyProof: proof })) socialRepliesRef.current.finish(proof);
+      else socialRepliesRef.current.cancelDefinitelyUnsent(proof);
+    } catch (error) {
+      // An entered send may have reached the server. It stays consumed; no automatic replay.
+      socialRepliesRef.current.cancelDefinitelyUnsent(proof);
+      console.error("[mir2] social reply send outcome is unknown", error);
+    }
+    renderSocialRequests(n => n + 1);
+  }
+
   function currentSpellsOwner(playerObjectId:number|null):SpellsOwner|null {
     const session=equipmentStartGameRef.current;
     if(!session||equipmentHostSuspendReasonRef.current!==null||session.connectionGeneration!==equipmentConnectionGenerationRef.current
@@ -9673,8 +11026,58 @@ export default function HomePage() {
     return {connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration,
       ownerRevision:equipmentBagOwnerRef.current.ownerRevision,playerObjectId};
   }
+  function currentQuestWorldIdentity(): QuestWorldIdentity | null {
+    const current = worldRef.current;
+    const owner = currentSpellsOwner(Number(current.playerObjectId));
+    const mapFileName = normalizeQuestMapFileName(current.mapFileName);
+    return owner && mapFileName && Number.isSafeInteger(questSceneRevisionRef.current)
+      ? { connectionGeneration: owner.connectionGeneration, sessionGeneration: owner.sessionGeneration,
+        sceneRevision: questSceneRevisionRef.current, playerObjectId: owner.playerObjectId, mapFileName }
+      : null;
+  }
+  function currentQuestWorldDraft(): QuestWorldDraft | null {
+    const current = worldRef.current;
+    const self = current.entities.find((entity) => entity.objectId === current.playerObjectId);
+    const owner = currentSpellsOwner(Number(current.playerObjectId));
+    const skills = spellsRawSnapshotRef.current;
+    const sameSkillsOwner = questSkillsBaselineCurrentRef.current && owner && skills
+      && owner.connectionGeneration === skills.owner.connectionGeneration
+      && owner.sessionGeneration === skills.owner.sessionGeneration
+      && owner.ownerRevision === skills.owner.ownerRevision
+      && owner.playerObjectId === skills.owner.playerObjectId;
+    return projectBevyQuestWorldDraft(current, questCapturedWorldRef.current, currentQuestWorldIdentity(),
+      bevyQuestGenerationRef.current, projectAuthoritativeHudPlayer(current, self ?? null),
+      sameSkillsOwner ? skills.snapshot.knownSkills : null,
+      currentQuestMapIndex(questMapAuthorityRef.current, currentQuestWorldIdentity()));
+  }
+  function captureQuestMapGatewayEvent(event: GatewayEvent, connectionGeneration: number) {
+    if (connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+    if (event.type === "packet" && (event.packet === "MapInformation" || event.packet === "MapChanged")) {
+      const observed = observeQuestMapPacket(questMapAuthorityRef.current, event.packet, event.payload ?? {},
+        connectionGeneration, equipmentSessionGenerationRef.current, questSceneRevisionRef.current, worldRef.current.mapFileName);
+      questMapAuthorityRef.current = observed.authority;
+      questSceneRevisionRef.current = observed.sceneRevision;
+      if (observed.retired) {
+        questCapturedWorldRef.current = null; questSkillsBaselineCurrentRef.current = false;
+        retireQuestWorldActions();
+      }
+    } else if (event.type === "worldSnapshot"
+      && normalizeQuestMapFileName((event.payload as GatewayWorldSnapshot).mapFileName ?? null)
+        !== normalizeQuestMapFileName(worldRef.current.mapFileName)) {
+      // A complete snapshot without a matching map packet cannot invent a map index.
+      questMapAuthorityRef.current = null; questCapturedWorldRef.current = null;
+      questSkillsBaselineCurrentRef.current = false;
+      questSceneRevisionRef.current = questSceneRevisionRef.current < Number.MAX_SAFE_INTEGER
+        ? questSceneRevisionRef.current + 1 : 0;
+      retireQuestWorldActions();
+    }
+  }
+
   function captureSpellsGatewayEvent(event:GatewayEvent,connectionGeneration:number) {
     if(connectionGeneration!==equipmentConnectionGenerationRef.current)return;
+    if (event.type === "packet" && event.packet === "NewMagic" && event.payload?.hero !== true) {
+      questSkillsBaselineCurrentRef.current = false;
+    }
     if(event.type==="packet"&&event.packet){
       const owner=currentSpellsOwner(combatRawRef.current?.snapshot.playerObjectId??Number(worldRef.current.playerObjectId)),payload=event.payload??{};
       if(owner&&["ObjectMonster","NewMonsterInfo"].includes(event.packet)&&Number.isInteger(payload.objectId)&&Number(payload.objectId)>0&&Number.isInteger(payload.masterObjectId)&&Number(payload.masterObjectId)>=0&&Number(payload.masterObjectId)<=0xffffffff){
@@ -9684,6 +11087,10 @@ export default function HomePage() {
     }
     if(event.type==="worldSnapshot") {
       const snapshot=event.payload as GatewayWorldSnapshot,owner=currentSpellsOwner(snapshot.playerObjectId);
+      // Raw spells may observe a snapshot before world/equipment projection.
+      // Grant Quest's complete-world proof only after that projection succeeds.
+      questCapturedWorldRef.current = null;
+      questSkillsBaselineCurrentRef.current = false;
       if(owner) {
         const raw:SpellsRawSnapshot={playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills,skillKeyAck:snapshot.skillKeyAck};
         // Detach from subsequent projections while retaining absent/null/zero raw fields.
@@ -9696,6 +11103,7 @@ export default function HomePage() {
         }
       }
     } else if(event.type==="packet"&&event.packet&&["Magic","MagicCast","MagicDelay"].includes(event.packet)) {
+      questSkillsBaselineCurrentRef.current = false;
       const owner=currentSpellsOwner(spellsRawSnapshotRef.current?.snapshot.playerObjectId??null);
       if(owner)spellsIngressRef.current?.observePacket(event.packet,event.payload??{},owner);
       const combatOwner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
@@ -9774,6 +11182,7 @@ export default function HomePage() {
     let inventory: ReturnType<typeof projectBevyBagModel> | null = null;
     try {
       applyGatewayWorldSnapshot(snapshot, connectionGeneration);
+      captureParitySnapshot(snapshot);
       const session = equipmentSnapshotRef.current;
       inventory = projectBevyBagModel(worldRef.current, { npcGoldTrade: true });
       complete = connectionGeneration === equipmentConnectionGenerationRef.current
@@ -9782,6 +11191,16 @@ export default function HomePage() {
         && session?.sessionGeneration === equipmentSessionGenerationRef.current
         && worldRef.current.playerObjectId === String(snapshot.playerObjectId)
         && inventory.ok;
+      if (complete) {
+        const owner = currentSpellsOwner(snapshot.playerObjectId);
+        const mapFileName = normalizeQuestMapFileName(snapshot.mapFileName ?? null);
+        if (owner && mapFileName && mapFileName === normalizeQuestMapFileName(worldRef.current.mapFileName)) {
+          questCapturedWorldRef.current = { connectionGeneration: owner.connectionGeneration,
+            sessionGeneration: owner.sessionGeneration, sceneRevision: questSceneRevisionRef.current,
+            playerObjectId: owner.playerObjectId, mapFileName };
+          questSkillsBaselineCurrentRef.current = Array.isArray(snapshot.knownSkills);
+        }
+      }
     } finally {
       // A packet or session replacement during projection retires this stage.
       npcGoldBuyInventoryRef.current.finish(stage, currentSpellsOwner(Number(worldRef.current.playerObjectId)), complete,
@@ -9791,9 +11210,11 @@ export default function HomePage() {
   }
 
   function handleGatewayEvent(event: GatewayEvent, connectionGeneration: number, source:WebSocket) {
-    if (connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+    if (connectionGeneration !== equipmentConnectionGenerationRef.current || socketRef.current !== source) return;
+    if (event.type === "packet" && event.packet === "MapChanged") retireSocialRequests();
     invalidateNpcGoldBuyGatewayPacket(event);
     // Keep the complete raw learned/ACK snapshot before diagnostics, React or movement coalescing.
+    captureQuestMapGatewayEvent(event,connectionGeneration);
     captureSpellsGatewayEvent(event,connectionGeneration);
     captureMailGatewayEvent(event,connectionGeneration,source);
     const debugWindow = window as typeof window & {
@@ -9837,6 +11258,19 @@ export default function HomePage() {
       if (typeof identityToken === "string" && identityToken.length <= 4096) {
         setIdentitySessionToken(identityToken);
     }
+      return;
+    }
+    if ((event as {type:string}).type === "gameShopReceipt") {
+      const result = cashPurchasesRef.current.applyReceipt(event, currentSocialReceiveOwner());
+      if (result.matched && result.receipt) {
+        const receipt = result.receipt, raw = cashCatalogRef.current;
+        if (raw && receipt.newStockLevel !== null) {
+          const catalog = applyCashGameShopStock(raw.catalog, {gIndex:receipt.gIndex, stockLevel:receipt.newStockLevel});
+          if (catalog) cashCatalogRef.current = {...raw, catalog, revision:raw.revision + 1};
+        }
+        appendLog(receipt.success ? t("ui.gameShopPurchaseMailed", [], "Purchase delivered to your mailbox.") : t("ui.gameShopPurchaseRejected", [receipt.code ?? ""], "Purchase rejected: " + (receipt.code ?? "")), "system");
+        renderParityServices(n => n + 1);
+      }
       return;
     }
     if (event.type === "error") {
@@ -9893,6 +11327,11 @@ export default function HomePage() {
     // early-returns for tone === "network" (it is never shown), so the localization
     // lookup+format ran on every inbound packet purely to be discarded.
     const payload = event.payload ?? {};
+    captureParityPacket(event.packet, payload);
+    if (["UseItem","EquipItem","RemoveItem"].includes(event.packet) && String(payload.grid).startsWith("Hero")) {
+      if (payload.success === false) appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+      return;
+    }
     if (isMovementPacketName(event.packet)) {
       // The 50-entry movement-packet history is a diagnostic-only buffer (no harness
       // reads it, unlike __mir2GatewayEventHistory). Only allocate it under
@@ -10089,6 +11528,8 @@ export default function HomePage() {
             sessionGeneration: ++equipmentSessionGenerationRef.current,
             afterSnapshotVersion: worldSnapshotVersionRef.current,
           };
+          socialCharacterIndexRef.current.current = socialCharacterIndexRef.current.requested;
+          socialCharacterIndexRef.current.requested = null;
           equipmentHostSuspendReasonRef.current = null;
           equipmentSnapshotRef.current = null;
           // Unmount old item selections before the next character can act.
@@ -10250,6 +11691,7 @@ export default function HomePage() {
         screenRef.current = "game";
         setScreen("game");
         completeGatewayReconnect();
+        captureObservePreference(payload.allowObserve, Number(objectId), connectionGeneration, source);
         markMir2CacheMilestone("userInformationReady", {
           objectId,
           x: userX,
@@ -11303,6 +12745,7 @@ export default function HomePage() {
         }));
         break;
       case "GroupInvite":
+        captureSocialRequest("group", payload);
         appendLog(
           t(
             "server.GroupInviteFrom",
@@ -11316,32 +12759,27 @@ export default function HomePage() {
 
       // Social: friends / mentor / relationship --------------------------------
       case "FriendUpdate": {
-        // B-wave enrichment: keep the rich friend objects (name/online/memo) so the
-        // friends window shows status, not just names. Blocked entries now arrive
-        // under a separate `blocked` key; fall back to splitting the combined list.
-        const friendsRaw = normalizeFriendList(payload.friends);
-        const hasBlockedKey = payload.blocked !== undefined;
-        const blockedRaw = hasBlockedKey
-          ? normalizeFriendList(payload.blocked)
-          : friendsRaw.filter((friend) => friend.blocked);
-        const friendsList = hasBlockedKey ? friendsRaw : friendsRaw.filter((friend) => !friend.blocked);
-        updateWorld((current) => ({
-          ...current,
-          stage5Systems: {
-            ...current.stage5Systems,
-            social: {
-              ...(current.stage5Systems.social ?? {}),
-              // Names kept for existing consumers (friendCharacterIndex); rich detail
-              // in the *Infos fields the adapter prefers (B-wave enrichment).
-              friends: friendsList.map((friend) => friend.name),
-              blocked: blockedRaw.map((friend) => friend.name),
-              friendInfos: friendsList.map((friend) => ({ name: friend.name, online: friend.online, memo: friend.memo })),
-              blockedInfos: blockedRaw.map((friend) => ({ name: friend.name, memo: friend.memo })),
-            },
-          },
-        }));
-        break;
-      }
+        const owner = currentSocialReceiveOwner();
+        if (!owner) break;
+        // The gateway carries full ClientFriend records alongside display-only split lists.
+        // Only those records can supply removal/memo identity; never infer an index.
+        const records = normalizeFriendList(payload.friendRecords);
+        const hasRecords = Array.isArray(payload.friendRecords);
+        const displayed = normalizeFriendList(payload.friends);
+        const blocked = payload.blocked !== undefined ? normalizeFriendList(payload.blocked) : displayed.filter(friend => friend.blocked);
+        const friends = payload.blocked !== undefined ? displayed : displayed.filter(friend => !friend.blocked);
+        const friendsList = hasRecords ? records.filter(friend => !friend.blocked) : friends;
+        const blockedList = hasRecords ? records.filter(friend => friend.blocked) : blocked;
+        socialFriendsRef.current = {owner, entries: hasRecords ? records : [
+          ...friendsList.map(friend => ({...friend, index: undefined, blocked: false})),
+          ...blockedList.map(friend => ({...friend, index: undefined, blocked: true})),
+        ]};
+        updateWorld(current => ({...current, stage5Systems: {...current.stage5Systems, social: {
+          ...(current.stage5Systems.social ?? {}),
+          friends: friendsList.map(friend => friend.name), blocked: blockedList.map(friend => friend.name),
+          friendInfos: friendsList, blockedInfos: blockedList,
+        }}}));
+        break;      }
       case "MentorUpdate":
         updateWorld((current) => ({
           ...current,
@@ -11374,6 +12812,7 @@ export default function HomePage() {
       case "MarriageRequest":
       case "DivorceRequest":
       case "MentorRequest": {
+        captureSocialRequest(event.packet === "MarriageRequest" ? "marriage" : event.packet === "DivorceRequest" ? "divorce" : "mentor", payload);
         const name = stringOrFallback(payload.name, "?");
         const key =
           event.packet === "MarriageRequest"
@@ -11389,12 +12828,16 @@ export default function HomePage() {
       case "TradeRequest":
       case "TradeAccept": {
         const name = stringOrFallback(payload.name, "?");
+        tradeIncarnationRef.current += 1; socialOwnTradeRef.current = null;
+        tradeLifecycleRef.current = {state: event.packet === "TradeAccept" ? "open" : "requested", partner: name};
+        const tradeOwner = currentSocialReceiveOwner();
+        tradePartnerRef.current = tradeOwner ? {owner: tradeOwner, incarnation: tradeIncarnationRef.current} : null;
+        socialItemWindowsRef.current.trade = true; setShowTrade(true);
         updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
             trade: {
-              ...(current.stage5Systems.trade ?? {}),
               partner: name,
               state: event.packet === "TradeAccept" ? "open" : "requested",
             },
@@ -11408,6 +12851,7 @@ export default function HomePage() {
         break;
       }
       case "TradeGold":
+        if (tradePartnerRef.current) tradePartnerRef.current = {...tradePartnerRef.current, gold: numberOrZero(payload.amount)};
         updateWorld((current) => ({
           ...current,
           stage5Systems: {
@@ -11415,38 +12859,50 @@ export default function HomePage() {
             trade: {
               ...(current.stage5Systems.trade ?? {}),
               partnerGold: numberOrZero(payload.amount),
+              myConfirmed: false,
             },
           },
         }));
         break;
       case "TradeItem":
+        if (tradePartnerRef.current) {
+          const items = projectPartnerTradePacket(payload.tradeItems);
+          tradePartnerRef.current = {...tradePartnerRef.current, items, itemsKnown: items !== undefined};
+        }
         updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
             trade: {
               ...(current.stage5Systems.trade ?? {}),
-              partnerItemCount: Array.isArray(payload.partnerItems)
-                ? payload.partnerItems.length
-                : Array.isArray(payload.tradeItems)
-                  ? payload.tradeItems.length
-                  : 0,
-              // B-wave-2: partner's offered item slots (adaptTrade reads these).
-              ...(Array.isArray(payload.partnerItems) ? { partnerItems: payload.partnerItems } : {}),
+              partnerItemCount: Array.isArray(payload.tradeItems) ? payload.tradeItems.filter(item => item != null).length : 0,
+              partnerItems: projectPartnerTradePacket(payload.tradeItems),
+              myConfirmed: false,
             },
           },
         }));
         break;
       case "TradeConfirm":
+        socialOwnTradeRef.current = null; tradeIncarnationRef.current += 1;
+        tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
+        socialItemWindowsRef.current.trade = false; setShowTrade(false);
         updateWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
-            trade: { ...(current.stage5Systems.trade ?? {}), confirmed: true },
+            trade: null,
           },
         }));
         break;
       case "TradeCancel":
+        if (payload.unlock === true) {
+          updateWorld(current => ({...current, stage5Systems: {...current.stage5Systems,
+            trade: current.stage5Systems.trade ? {...current.stage5Systems.trade, myConfirmed: false} : null}}));
+          break;
+        }
+        socialOwnTradeRef.current = null; tradeIncarnationRef.current += 1;
+        tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
+        socialItemWindowsRef.current.trade = false; setShowTrade(false);
         updateWorld((current) => ({
           ...current,
           stage5Systems: { ...current.stage5Systems, trade: null },
@@ -11715,6 +13171,7 @@ export default function HomePage() {
         break;
       }
       case "ChangeAMode": {
+        captureCombatModeReceipt("ChangeAMode", payload.mode);
         const message = attackModeChatMessage(numberOrUndefined(payload.mode) ?? Number.NaN);
         if (message && !gameEntryChatOverrideActiveRef.current) {
           appendLog(t(message.localizationKey, [], message.fallback), "system", "hint");
@@ -11722,6 +13179,7 @@ export default function HomePage() {
         break;
       }
       case "ChangePMode": {
+        captureCombatModeReceipt("ChangePMode", payload.mode);
         const message = petModeChatMessage(numberOrUndefined(payload.mode) ?? Number.NaN);
         if (message && !gameEntryChatOverrideActiveRef.current) {
           appendLog(t(message.localizationKey, [], message.fallback), "system", "hint");
@@ -11737,6 +13195,7 @@ export default function HomePage() {
 
       // Guild subsystem --------------------------------------------------------
       case "GuildStatus":
+        observeGuildPermissions(payload);
         updateWorld((current) => ({
           ...current,
           stage5Systems: {
@@ -11759,25 +13218,29 @@ export default function HomePage() {
         }));
         break;
       case "GuildMemberChange": {
-        const name = stringOrFallback(payload.name, "");
-        // change_type (status): 0 = add member, 1 = remove/kick member; other
-        // values (2..5) are rank/option/notice edits that do not alter membership.
-        const status = numberOrZero(payload.status);
-        if (name && (status === 0 || status === 1)) {
-          updateWorld((current) => ({
-            ...current,
-            stage5Systems: {
-              ...current.stage5Systems,
-              guild: {
-                ...(current.stage5Systems.guild ?? {}),
-                members: groupMembersAfterChange(
-                  current.stage5Systems.guild?.members,
-                  status === 1 ? { remove: name } : { add: name },
-                ),
-              },
-            },
-          }));
+        const owner = currentSocialReceiveOwner(), guildName = worldRef.current.stage5Systems.guild?.name;
+        if (!owner || !guildName) break;
+        const ranks = projectGuildRanks(payload.ranks);
+        if (!ranks) guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
+        // A full rank roster that omits the current member cannot retain old permissions.
+        guildPermissionsRef.current = null;
+        guildRanksRef.current = ranks ? {owner, guildName, value: ranks} : null;
+        if (ranks) {
+          const selfName = worldRef.current.entities.find(entity => String(entity.objectId) === String(owner.playerObjectId))?.name;
+          const member = ranks.members.find(row => row.id === socialCharacterIndexRef.current.current && row.name === selfName);
+          const ownRank = member && ranks.ranks.find(row => row.index === member.rankIndex);
+          if (ownRank) guildPermissionsRef.current = {owner, guildName, permissions: ownRank.permissions};
+          const buffSource = guildBuffAuthorityRef.current.read(owner,guildName);
+          if (buffSource && (!ownRank || ownRank.index !== buffSource.myRankId
+            || ownRank.permissions.includes("CanActivateBuff") !== Boolean(buffSource.myOptions & 128))) guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
         }
+        const name = stringOrFallback(payload.name, ""), status = numberOrZero(payload.status);
+        updateWorld(current => ({...current, stage5Systems: {...current.stage5Systems, guild: {
+          ...(current.stage5Systems.guild ?? {}),
+          members: ranks ? ranks.members.map(member => member.name)
+            : name && (status === 0 || status === 1) ? groupMembersAfterChange(current.stage5Systems.guild?.members, status === 1 ? {remove: name} : {add: name})
+              : current.stage5Systems.guild?.members,
+        }}}));
         break;
       }
       case "GuildNoticeChange": {
@@ -11796,6 +13259,7 @@ export default function HomePage() {
         break;
       }
       case "GuildInvite":
+        captureSocialRequest("guild", payload);
         appendLog(
           t(
             "server.GuildInviteFrom",
@@ -12070,12 +13534,15 @@ export default function HomePage() {
         if (payload.success === false) appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
         break;
       }
+      case "DepositTradeItem":
+      case "RetrieveTradeItem":
+        observeSocialItemReceipt(event.packet, payload);
+        if (payload.success === false) appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        break;
       case "MoveItem":
       case "RemoveSlotItem":
       case "StoreItem":
       case "TakeBackItem":
-      case "DepositTradeItem":
-      case "RetrieveTradeItem":
       case "DepositRefineItem":
       case "RetrieveRefineItem":
       case "TakeBackHeroItem":
@@ -12373,6 +13840,8 @@ export default function HomePage() {
         );
         break;
       case "AllowObserve":
+        captureObservePreference(payload.allow, Number(worldRef.current.playerObjectId), connectionGeneration, source);
+        if (typeof payload.allow !== "boolean") break;
         appendLog(
           payload.allow === true
             ? t("ui.observeAllowed", [], "Observers are now allowed.")
@@ -12568,6 +14037,17 @@ export default function HomePage() {
       case "NewRecipeInfo": {
         const info = payload.info as Record<string, unknown> | undefined;
         if (info) {
+          if (event.packet === "NewItemInfo" && typeof info.index === "number" && Number.isSafeInteger(info.index)
+            && info.index >= 0 && typeof info.name === "string" && info.name.length > 0 && info.name.length <= 256 && !info.name.includes("\0")
+            && typeof info.image === "number" && Number.isSafeInteger(info.image) && info.image >= 0) {
+            if (!socialCatalogRef.current.has(info.index) && socialCatalogRef.current.size >= 8192) socialCatalogRef.current.delete(socialCatalogRef.current.keys().next().value!);
+            socialCatalogRef.current.set(info.index, {name: info.name, icon: info.image, raw: Object.freeze({...info})});
+            if (tradePartnerRef.current?.items) {
+              const items = projectPartnerTradePacket(tradePartnerRef.current.items.map(item => item?.tooltipSource.item ?? null));
+              tradePartnerRef.current = {...tradePartnerRef.current, items, itemsKnown: items !== undefined};
+            }
+            renderSocialItems(n => n + 1);
+          }
           const name = stringOrFallback(info.name, "") || stringOrFallback(info.itemName, "");
           if (name && event.packet === "NewRecipeInfo") {
             appendLog(t("ui.recipeLearned", [name], `Recipe available: ${name}.`), "system");
@@ -12881,6 +14361,11 @@ export default function HomePage() {
       // Guild storage / territory / war ----------------------------------------
       case "GuildStorageList": {
         const items = Array.isArray(payload.items) ? payload.items : [];
+        const owner = currentSocialReceiveOwner(), guildName = worldRef.current.stage5Systems.guild?.name;
+        if (owner && guildName && items.length === 112) {
+          guildStorageRawRef.current = {owner, guildName, items: JSON.parse(JSON.stringify(items)), revision: ++guildStorageRevisionRef.current};
+        } else guildStorageRawRef.current = null;
+        renderSocialItems(n => n + 1);
         const filled = items.filter((entry) => entry != null).length;
         appendLog(
           t("ui.guildStorageList", [filled], `Guild storage holds ${filled} item(s).`),
@@ -12890,7 +14375,9 @@ export default function HomePage() {
         break;
       }
       case "GuildStorageItemChange":
-        if (payload.success === false) {
+        observeSocialItemReceipt(event.packet, payload);
+        observeGuildStorageChange(payload);
+        if (typeof payload.changeType === "number" && payload.changeType >= 3) {
           appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
         }
         break;
@@ -13784,10 +15271,12 @@ export default function HomePage() {
   }
 
   function applyRankingPacket(payload: Record<string, unknown>) {
-    const request = lastRankingRequestRef.current;
-    const rankType = numberOrUndefined(payload.rankType) ?? request.rankType;
-    const rankIndex = request.rankType === rankType ? request.rankIndex : 0;
-    const onlineOnly = request.rankType === rankType ? request.onlineOnly : false;
+    if (!Number.isSafeInteger(payload.rankType) || !Number.isSafeInteger(payload.count)
+      || Number(payload.count) < 0 || Number(payload.count) > 0x7fff_ffff
+      || !Array.isArray(payload.listingDetails) || payload.listingDetails.length > 20) return;
+    const request = rankingQueriesRef.current.receive(payload.rankType, currentSocialReceiveOwner());
+    if (!request) return;
+    const {rankType, rankIndex, onlineOnly} = request;
     const listingDetails = Array.isArray(payload.listingDetails) ? payload.listingDetails : [];
     const listings = Array.isArray(payload.listings) ? payload.listings : [];
     const entries = listingDetails.flatMap((entry, index): RankingEntry[] => {
@@ -13826,6 +15315,8 @@ export default function HomePage() {
       worldRef.current = nextWorld;
       return nextWorld;
     });
+    renderRankingRequests(n => n + 1);
+    if (rankingQueriesRef.current.wantsAnother(request)) issueRankingRequest(rankingQueriesRef.current.desired);
   }
 
   function applyGatewayWorldSnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number) {
@@ -13835,6 +15326,16 @@ export default function HomePage() {
     // Equipment ACK barriers must observe this raw full layout even when the
     // movement fast path below skips React's ordinary model reconstruction.
     observeEquipmentSnapshot(snapshot, connectionGeneration);
+    const socialOwner = currentSocialReceiveOwner(), socialBaseline = equipmentSnapshotRef.current;
+    if (socialOwner && socialBaseline && socialBaseline.connectionGeneration === connectionGeneration
+      && socialBaseline.sessionGeneration === socialOwner.sessionGeneration && snapshot.playerObjectId === socialOwner.playerObjectId) {
+      socialOwnTradeRef.current = {owner: socialOwner, trade: snapshot.stage5Systems?.trade ?? null};
+      const pending = socialItemOperationsRef.current.pending;
+      if (pending && socialItemOperationsRef.current.markSnapshot(pending.proof, socialItemReceiptOwner(), worldSnapshotVersionRef.current)) {
+        socialItemOperationsRef.current.releaseAfterSnapshot(pending.proof, socialItemReceiptOwner());
+        renderSocialItems(n => n + 1);
+      }
+    } else socialOwnTradeRef.current = null;
     const parcelOwner=currentSpellsOwner(Number(snapshot.playerObjectId));
     const parcelSession=equipmentSnapshotRef.current;
     if(parcelOwner&&parcelSession&&parcelSession.connectionGeneration===connectionGeneration&&parcelSession.sessionGeneration===parcelOwner.sessionGeneration){
@@ -14453,6 +15954,13 @@ export default function HomePage() {
           ? {
               ...snapshot.stage5Systems,
               mail: Object.hasOwn(snapshot.stage5Systems,"mail") ? (mailRawRef.current&&sameMailOwner(mailRawRef.current.owner,currentSpellsOwner(snapshot.playerObjectId))?parseMailList(mailRawRef.current.mail)??[]:[]) : current.stage5Systems.mail,
+              social: socialFriendsRef.current && sameSocialPhysicalOwner(socialFriendsRef.current.owner, socialOwner)
+                ? {...snapshot.stage5Systems.social,
+                    friends: socialFriendsRef.current.entries.filter(friend => !friend.blocked).map(friend => friend.name),
+                    blocked: socialFriendsRef.current.entries.filter(friend => friend.blocked).map(friend => friend.name),
+                    friendInfos: socialFriendsRef.current.entries.filter(friend => !friend.blocked),
+                    blockedInfos: socialFriendsRef.current.entries.filter(friend => friend.blocked)}
+                : snapshot.stage5Systems.social,
               // Social packets are emitted before the following world snapshot.
               // A snapshot captured just before AddMember may therefore carry an
               // empty roster and must not erase the newer packet-authoritative
@@ -15678,7 +17186,8 @@ export default function HomePage() {
   const onViewportTileClick = useCallback((x: number, y: number) => onViewportTileClickRef.current(x, y), []);
 
   const onViewportTileSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
-  onViewportTileSecondaryActionRef.current = (x, y) => handleViewportTileAction(x, y, "run");
+  onViewportTileSecondaryActionRef.current = (x, y) => playerUiPreferencesRef.current.newMove
+    ? handleViewportTileAction(x, y, "run") : handleViewportTileStepAction(x, y, "run");
   const onViewportTileSecondaryAction = useCallback(
     (x: number, y: number) => onViewportTileSecondaryActionRef.current(x, y),
     [],
@@ -15725,9 +17234,9 @@ export default function HomePage() {
           slot: cell.container === "bag2" ? 40 + cell.slot : cell.slot });
         if (cell.uniqueId !== null) blockedUniqueIds.add(cell.uniqueId);
       }
-      const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+      const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
         || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
-        || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+        || referenceWindowsBlockGameplay() || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
       return { connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
         ownerRevision: equipmentBagOwnerRef.current.ownerRevision, serviceRevision: storageServiceRevisionRef.current,
         open: storageServiceActiveRef.current && bagOpenRef.current && !storageCompatibilityRef.current,
@@ -15773,9 +17282,9 @@ export default function HomePage() {
         if (!pending.ok) readable = false;
         if (pending.reserved) blockedUniqueIds.push(item.uniqueId);
       }
-      const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+      const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
         || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail
-        || showWorldMap || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+        || showWorldMap || referenceWindowsBlockGameplay() || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
       return {
         connectionGeneration: equipmentConnectionGenerationRef.current,
         sessionGeneration: equipmentSessionGenerationRef.current,
@@ -15820,9 +17329,9 @@ export default function HomePage() {
         if (!pending.ok) readable = false;
         if (pending.reserved) blockedUniqueIds.push(item.uniqueId);
       }
-      const modal = bevyQuestReactModalOpen || showQuestLog || showHeroPet || showGuild || showGroup || showFriends
+      const modal = bevyQuestReactModalOpen || showQuestLog || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
         || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
-        || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+        || referenceWindowsBlockGameplay() || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
       return { owner: { ...equipmentBagOwnerRef.current, connectionGeneration: equipmentConnectionGenerationRef.current,
           sessionGeneration: equipmentSessionGenerationRef.current }, hudGeneration: bevyQuestGenerationRef.current,
         open: showCharacter && activeCharacterTab === "char",
@@ -15845,7 +17354,7 @@ export default function HomePage() {
     read:metadata=>{
       const current=worldRef.current,player=current.entities.find(e=>e.objectId===current.playerObjectId)??null;
       const owner=currentSpellsOwner(spellsRawSnapshotRef.current?.snapshot.playerObjectId??null)??{connectionGeneration:0,sessionGeneration:0,ownerRevision:0,playerObjectId:0};
-      const modal=bevyQuestReactModalOpen||showQuestLog||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+      const modal=bevyQuestReactModalOpen||showQuestLog||heroManagementPage!==null||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
       return {owner,hudGeneration:bevyQuestGenerationRef.current,open:showCharacter&&activeCharacterTab==="spells",
         eligible:bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend))
           &&screenRef.current==="game"&&current.connected&&Boolean(player)&&Number(current.playerObjectId)===owner.playerObjectId&&initialSceneAssetsReadyRef.current&&equipmentHostSuspendReasonRef.current===null&&!modal
@@ -15856,13 +17365,24 @@ export default function HomePage() {
   });
   bevySpellsSendGateRef.current=bevySpellsUi.allows;
   spellsIngressRef.current=bevySpellsUi;
+  const socialRosterRenderSources = {friend: showFriends ? readSocialRosterSource("friend") : null, guild: showGuild ? readSocialRosterSource("guild") : null};
+  const socialTradeRender = showTrade ? readSocialItemSurface("trade") : null, socialGuildRender = showGuild ? readSocialItemSurface("guild") : null;
+  const socialItemsPending = socialItemOperationsRef.current.pending !== null;
+  const socialTradeUiLease = {owner: currentSocialReplyOwner(), incarnation: tradeIncarnationRef.current,
+    partner: tradeLifecycleRef.current.partner, state: tradeLifecycleRef.current.state};
+  const socialPartnerRender = tradePartnerRef.current && tradePartnerRef.current.incarnation === tradeIncarnationRef.current
+    && sameSocialPhysicalOwner(tradePartnerRef.current.owner, currentSocialReplyOwner()) ? tradePartnerRef.current : null;
+  const socialTradeSummary = extraWindowData.trade ? {...extraWindowData.trade, state: tradeLifecycleRef.current.state,
+    ...(socialPartnerRender?.gold !== undefined ? {partnerGold: socialPartnerRender.gold} : {}),
+    ...(socialPartnerRender?.itemsKnown === false ? {partnerItemsKnown: false, partnerItems: [], partnerItemCount: undefined}
+      : socialPartnerRender?.items !== undefined ? {partnerItemsKnown: true, partnerItems: socialPartnerRender.items, partnerItemCount: socialPartnerRender.items.filter(i => i !== null).length} : {})} : null;
   const mailRenderOwner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
   const mailRenderRows=mailRenderOwner&&mailRawRef.current&&sameMailOwner(mailRenderOwner,mailRawRef.current.owner)?parseMailList(mailRawRef.current.mail):null;
   const currentMailCompatibility=mailCompatibility&&validMailCompatibility(mailCompatibility)?mailCompatibility:null;
   const bevyMailUi=useBevyMailUi({requested:bevyQuestUiRequested,runtimeGeneration:bevyRuntimeGeneration,runtimeRef,
     read:()=>{
       const current=worldRef.current,owner=currentSpellsOwner(Number(current.playerObjectId))??{connectionGeneration:0,sessionGeneration:0,ownerRevision:0,playerObjectId:0};
-      const competing=bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showInventory||showCharacter||showQuestLog||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+      const competing=bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showInventory||showCharacter||showQuestLog||heroManagementPage!==null||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
       return {owner,sceneRevision:mailSceneRevisionRef.current,hudGeneration:bevyQuestGenerationRef.current,
         open:mailOpenRef.current&&mailCompatRef.current===null,rustOwns:mailRustOwnsRef.current&&mailCompatRef.current===null,
         eligible:mailRawRef.current?.catalogResolved===true&&bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend))
@@ -15886,9 +17406,9 @@ export default function HomePage() {
       const actor=(e:WorldEntity):CombatActor=>{const source=sources.get(e.objectId),master=combatMastersRef.current.get(e.objectId);return {objectId:e.objectId,kind:e.kind,x:e.x,y:e.y,direction:e.direction??null,dead:e.dead===true,ai:e.ai??0,masterObjectId:master&&master.owner.connectionGeneration===owner.connectionGeneration&&master.owner.sessionGeneration===owner.sessionGeneration&&master.owner.ownerRevision===owner.ownerRevision&&master.owner.playerObjectId===owner.playerObjectId?master.master:Number.isInteger(source?.masterObjectId)?Number(source!.masterObjectId):0};};
       const source=sources.get(self.objectId),flag=(key:string)=>typeof source?.[key]==="boolean"?source[key] as boolean:null;
       const active=document.activeElement,editing=active instanceof HTMLElement&&(active.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
-      const modal=combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
+      const modal=heroManagementOpenRef.current||skillBarPointerHeldRef.current||otherPlayerUiBlocksInput()||combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||heroManagementPage!==null||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
       // The GPU/lean backend draws its scene on the existing map canvas, independently of shared UI.
-      const visible=Array.from(document.querySelectorAll<HTMLCanvasElement>("#mir2-web3-canvas, .webgl2-map-atlas-canvas")).some(canvas=>{const rect=canvas.getBoundingClientRect(),style=getComputedStyle(canvas);return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden"&&Number(style.opacity)>0;});
+      const visible=Array.from(document.querySelectorAll<HTMLElement>(webGl2SharedCanvasPrototype?".game-world-composite":"#mir2-web3-canvas, .webgl2-map-atlas-canvas")).some(surface=>{const rect=surface.getBoundingClientRect(),style=getComputedStyle(surface);return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden"&&Number(style.opacity)>0;});
       const target=current.entities.find(e=>e.objectId===current.selectedObjectId);
       const routeKey=JSON.stringify({map:current.mapFileName,source:[self.x,self.y],target:target?[target.objectId,target.x,target.y]:null,occupancy:current.entities.map(e=>[e.objectId,e.x,e.y,e.dead]),blocked:movementBlockedStepsRef.current});
       let cache=combatRouteCacheRef.current,neighbours:CombatFacts["neighbours"]=cache?.key===routeKey&&cache.region===current.originalMapRegion?cache.rows:[];
@@ -15903,18 +17423,42 @@ export default function HomePage() {
         clickTargets:current.entities.map(e=>({kind:e.kind,objectId:Number(e.objectId),x:e.x,y:e.y,dead:typeof e.dead==="boolean"?e.dead:null,ai:e.ai??null,harvestable:typeof sources.get(e.objectId)?.harvestable==="boolean"?sources.get(e.objectId)!.harvestable as boolean:null})),
         selectedObjectId:current.selectedObjectId?Number(current.selectedObjectId):null,hoveredObjectId:combatPointerRef.current.hovered,cursor:combatPointerRef.current.cursor,
         class:self.classKey??null,hasClassWeapon:flag("hasClassWeapon"),ridingMount:flag("ridingMount"),fishing:flag("fishing"),dazed:flag("dazed"),
-        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy(),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:"None",pointerSpellLock:combatPointerRef.current.lock,bindings:null};
+        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy(),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:crystalKeyBindingsRef.current.find(binding => binding.function === "TargetSpellLockOn")?.key ?? "None",pointerSpellLock:combatPointerRef.current.lock,bindings:crystalKeyBindingsRef.current.filter(binding => /^Bar[12]Skill[1-8]$/.test(binding.function))};
       return {owner,facts};
-    },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"run","direction","locked-monster"),onClear:()=>{lockedMonsterAttackRef.current=null;if(queuedMoveIntentRef.current?.kind==="target")queuedMoveIntentRef.current=null;}});
+    },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"run","direction","locked-monster"),onClear:()=>{
+      lockedMonsterAttackRef.current=null;
+      if(combatApproachIntentRef.current&&queuedMoveIntentRef.current===combatApproachIntentRef.current)queuedMoveIntentRef.current=null;
+      combatApproachIntentRef.current=null;
+    }});
   combatIngressRef.current=bevyCombatInput;
 
   bevyBagSendGateRef.current = bevyBagUi.allows;
   bagYieldRef.current = bevyBagUi.yieldToReact;
 
   const hpOrbPageBlocked = Boolean(bevyHpLocalOverlayOpen || bevyQuestReactModalOpen || showInventory || showQuestLog
-    || showCharacter || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
-    || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap || showHelp
-    || showHotkeys || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
+    || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
+    || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap || referenceWindowsBlockGameplay() || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
+  questWindowOpenRef.current = showQuestLog;
+  questWorldBlockedRef.current = Boolean(screenRef.current !== "game" || bevyHpLocalOverlayOpen || bevyQuestReactModalOpen
+    || showInventory || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds
+    || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
+    || referenceWindowsBlockGameplay() || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
+  useEffect(() => {
+    const retire = () => retireQuestWorldActions();
+    const tick = () => {
+      observeQuestWorldActions(); drainQuestAttackHandoff(); drainPendingPickup();
+      const allowed = heroInputAllowed();
+      if (allowed && !heroRestockInputWasAllowedRef.current) scheduleHeroRestock();
+      heroRestockInputWasAllowedRef.current = allowed;
+    };
+    const timer = window.setInterval(tick, 50);
+    window.addEventListener("blur", retire); window.addEventListener("resize", retire);
+    document.addEventListener("visibilitychange", retire);
+    return () => {
+      window.clearInterval(timer); window.removeEventListener("blur", retire); window.removeEventListener("resize", retire);
+      document.removeEventListener("visibilitychange", retire); retire();
+    };
+  }, [bevyRuntimeGeneration]);
   const bevyQuestUi = useBevyQuestUi({
     requested: bevyQuestUiRequested,
     runtimeGeneration: bevyRuntimeGeneration,
@@ -15924,9 +17468,9 @@ export default function HomePage() {
       const player = current.entities.find((entity) => entity.objectId === current.playerObjectId);
       const active = typeof document !== "undefined" ? document.activeElement : null;
       const editingText = active instanceof HTMLElement && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
-      const otherModal = bevyQuestReactModalOpen || showInventory || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+      const otherModal = bevyQuestReactModalOpen || showInventory || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
         || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail
-        || showWorldMap || showHelp || showHotkeys || showChatSettings || Boolean(npcShopService || npcRepairService);
+        || showWorldMap || referenceWindowsBlockGameplay() || showChatSettings || Boolean(npcShopService || npcRepairService);
       const inGame = screenRef.current === "game" && current.connected && bevyQuestAuthoritativeRef.current && Boolean(player);
       const frame = document.querySelector<HTMLElement>(".client-stage-frame");
       const presentation = readBevyQuestPresentation(
@@ -15944,11 +17488,12 @@ export default function HomePage() {
       const mainHudSupported = mainHudGeometry !== null;
       return {
         generation: bevyQuestGenerationRef.current,
+        worldDraft: inGame ? currentQuestWorldDraft() : null,
         language,
         hudBarPlayerObjectId: current.playerObjectId,
         hudBarRuntimeLifetime: bevyRuntimeGeneration,
         inGame,
-        hostVisible: bevyQuestUiRequested && initialSceneAssetsReadyRef.current && (!otherModal || mainHudSupported) && questCoreStatus === "ready",
+        hostVisible: document.visibilityState !== "hidden" && bevyQuestUiRequested && initialSceneAssetsReadyRef.current && (!otherModal || mainHudSupported) && questCoreStatus === "ready",
         questLogOpen: showQuestLog,
         blocksGameplayKeys: editingText || otherModal,
         turnInBlocked: !inGame || otherModal,
@@ -15995,6 +17540,7 @@ export default function HomePage() {
       return { generation: bevyQuestGenerationRef.current, inGame: screenRef.current === "game" && current.connected,
         hostVisible: bevyQuestUiRequested && initialSceneAssetsReadyRef.current && document.visibilityState === "visible",
         player: projectAuthoritativeHudPlayer(current, player),
+        ...(runtimeRef.current?.getMir2HudPreferencesVersion?.() === 1 ? { hpView: playerUiPreferencesRef.current.hpView } : {}),
         navigation: { characterOpen: showCharacter, characterPage: activeCharacterTab === "char" ? "character" : activeCharacterTab,
           bagOpen: showInventory, questOpen: showQuestLog }, navigationRevision: fallbackHudNavigationRevisionRef.current, ...presentation };
     },
@@ -16010,7 +17556,7 @@ export default function HomePage() {
   const bevyHudSourceGeometry = useMemo(() => readHudGeometry(runtimeRef.current), [bevyRuntimeGeneration]);
   sharedHudNavigationRef.current = { ready: bevyHudUi.ready, dispatch: bevyHudUi.dispatch };
   useLayoutEffect(() => { bevyHudUi.refresh(); }, [bevyHudUi.refresh, world.playerCrystalStats, world.playerWeights,
-    world.playerHp, world.playerMaxHp, world.playerMp, world.playerMaxMp, world.gold, world.credit, screen]);
+    world.playerHp, world.playerMaxHp, world.playerMp, world.playerMaxMp, world.gold, world.credit, screen, playerUiPreferences.hpView]);
 
   const currentExperienceAuthority = matchingExperienceAuthority(experienceAuthorityRef.current,
     bevyQuestGenerationRef.current, worldRef.current.playerObjectId,
@@ -16019,6 +17565,7 @@ export default function HomePage() {
     bevyQuestGenerationRef.current, worldRef.current.playerObjectId,
     worldRef.current.currentWeight, worldRef.current.maxWeight);
 
+  const currentSkillBarDocument = readCurrentSkillBarDocument();
   return (
     !isClientReady ? null :
     <>
@@ -16066,6 +17613,9 @@ export default function HomePage() {
       dispatchBevyHudNavigation={bevyHudUi.dispatch}
       bevyQuestUiReady={bevyQuestUi.ready && !showInventory}
       bevyQuestUiCapturesPointer={bevyQuestUi.capturesPointer && !showInventory}
+      bevyQuestWorldUiReady={bevyQuestUi.worldControlsReady && !showInventory}
+      readBevyQuestWorldControls={bevyQuestUi.readLiveWorldControls}
+      readBevyQuestWorldControlBlockers={bevyQuestUi.readLiveWorldControlBlockers}
       bevyHpOrb={hpOrbPageBlocked ? null : bevyQuestUi.hpOrb}
       bevyMpOrb={hpOrbPageBlocked ? null : bevyQuestUi.mpOrb}
       bevyExperienceBar={hpOrbPageBlocked || !currentExperienceAuthority ? null : bevyQuestUi.experienceBar}
@@ -16189,6 +17739,9 @@ export default function HomePage() {
       onSendChat={(message) => send({ type: "chat", message })}
       onRequestTrade={() => send({ type: "tradeRequest" })}
       onRentExpandedStorage={rentExpandedStorage}
+      storageRentalPrompt={storageRentalPrompt}
+      onConfirmStorageRental={confirmStorageRental}
+      onCancelStorageRental={cancelStorageRental}
       onLogout={() => send({ type: "logOut" })}
       onCreateCharacter={createCharacter}
       onDeleteCharacter={deleteSelectedCharacter}
@@ -16219,11 +17772,27 @@ export default function HomePage() {
       onClaimMail={claimMail}
       onDeleteMail={deleteMail}
       onBuyGameShopItem={buyGameShopItem}
+      cashGameShopSource={currentCashGameShopSource()}
+      cashGameShopPending={Boolean(cashPurchasesRef.current.pending())}
+      onConfirmCashGameShopPurchase={confirmCashGameShopPurchase}
+      onReadCashGameShopItemTooltip={readCashGameShopItemTooltip}
+      onGameShopVisibilityChange={open => {cashShopOpenRef.current = open; renderParityServices(n => n + 1);}}
+      crystalKeyBindings={crystalKeyBindings}
+      playerUiPreferences={playerUiPreferences}
+      questNameTargetObjectIds={new Set((bevyQuestUi.readLiveQuestNameTargets() ?? []).map(String))}
+      dropViewHeld={dropViewHeld}
+      getKeybindCaptureActive={() => playerReferenceWindowsRef.current.capture}
+      onCrystalWindowShortcut={handleCrystalWindowShortcut}
+      onCrystalGameplayShortcut={handleCrystalGameplayShortcut}
+      onCrystalDropViewHeldChange={changeDropViewHeld}
+      skillBars={{ skills: currentSkillBarDocument?.rows ?? [], bindings: crystalKeyBindings, visible: screen === "game" && playerUiPreferences.skillBar, positions: skillBarPositions, onPositionsChange: changeSkillBarPositions, inputBlocked: skillBarInputBlocked(), sourceKey: currentSkillBarDocument?.sourceKey ?? null, onCastSlot: castSkillBarLease, onPointerHeldChange: changeSkillBarPointerHeld }}
+      parityUiBlocksGameplay={() => skillBarPointerHeldRef.current || heroManagementOpenRef.current || cashShopOpenRef.current || referenceWindowsBlockGameplay()}
       onSendClientCommand={sendClientCommand}
       onStartTutorial={startTutorial}
       onToggleCharacter={toggleCharacterWindow}
       onToggleInventory={toggleInventoryWindow}
       onToggleQuestLog={toggleQuestLogWindow}
+      onToggleOptions={() => toggleReferenceWindow("options")}
       onCloseCharacter={() => { if (!navigateSharedHud({ type: "closeCharacter" })) setShowCharacter(false); }}
       onCloseInventory={() => { if (!navigateSharedHud({ type: "closeBag" })) setShowInventory(false); }}
       onCloseStorage={() => { endStorageService(); bagCompatibilityModeRef.current = null; setBagCompatibilityMode(null); }}
@@ -16272,15 +17841,37 @@ export default function HomePage() {
         canFinishQuest: (questId, selectedItemIndex) =>
           questActionDecision(questId, "finish", selectedItemIndex)?.eligible === true,
       }}
-      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
-      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
-      group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}
-      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
-      bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
-      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: extraWindowData.rankingTab, page: extraWindowData.rankingPage, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
+      heroManagement={{open:screen === "game" && !!currentHeroModel() && (heroManagementPage !== null || heroWindows.beltVisible), onClose:closeHeroManagement, model:currentHeroModel(), pending:heroOperationsRef.current.pending, windows:heroWindows, windowEpochs:heroWindowEpochsRef.current, onWindowChange:changeHeroWindows, onReadStats:readHeroStats, initialPage:heroManagementPage ?? "inventory", onAction:(dto, lease) => submitHeroAction(dto, false, lease), onReadItemTooltip:readHeroItemTooltip}}
+      heroPet={{ open: showHeroPet, onClose: () => {heroPetOpenRef.current = false; setShowHeroPet(false);}, creatureSource:currentCreatureSource(), petActionPending:Boolean(creatureOperationsRef.current.pending()), onPetAction:submitCreatureAction, onOpenHeroManagement:showHeroPet && currentHeroModel() ? openHeroManagement : undefined, hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
+      guild={{ open: showGuild, onClose: () => setShowGuild(false), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "guild") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("guild", epoch, accept),
+        buffSource:currentGuildBuffSource(), buffPending:guildBuffOperationsRef.current.pending, onBuffAction:submitGuildBuffAction,
+        guild: world.stage5Systems?.guild ? {...world.stage5Systems.guild,
+          ...(guildRanksRef.current && guildRanksRef.current.guildName === world.stage5Systems.guild.name && sameSocialPhysicalOwner(guildRanksRef.current.owner, currentSocialReplyOwner())
+            ? {ranks: guildRanksRef.current.value.ranks, members: guildRanksRef.current.value.members} : {}),
+          permissions: guildPermissionsRef.current && guildPermissionsRef.current.guildName === world.stage5Systems.guild.name && sameSocialPhysicalOwner(guildPermissionsRef.current.owner, currentSocialReplyOwner()) ? guildPermissionsRef.current.permissions : undefined,
+          storageSize: 112, storage: socialGuildRender?.slots.filter((i): i is SocialItemSlot => i !== null).map(guildStorageTooltipItem)} : null,
+        inventoryItems: socialGuildRender?.inventoryItems, emptyInventorySlots: socialGuildRender?.inventory.emptySlots, itemsReady: Boolean(socialGuildRender), itemActionPending: socialItemsPending, itemSourceKey: socialGuildRender?.sourceKey,
+        canStoreItem: socialGuildRender?.permissions.includes("CanStoreItem") === true, canRetrieveItem: socialGuildRender?.permissions.includes("CanRetrieveItem") === true,
+        onRefreshStorage: refreshGuildStorage, onReadStorageItemTooltip:readGuildStorageItemTooltip,
+        onDepositItem: (from, to, uid) => submitSocialItem("guild0", from, to, uid, socialGuildRender?.sourceKey ?? ""),
+        onRetrieveItem: (from, to, uid) => submitSocialItem("guild1", from, to, uid, socialGuildRender?.sourceKey ?? ""),
+        onMoveItem: (from, to, uid) => submitSocialItem("guild2", from, to, uid, socialGuildRender?.sourceKey ?? ""), playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
+      group={{ open: showGroup, onClose: () => closeSocialReplyWindow("group"), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "group") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("group", epoch, accept), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}
+      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo, onRefresh: refreshFriends }}
+      bonds={{ open: showBonds, onClose: () => closeSocialReplyWindow("bonds"), incomingRequests: socialRepliesRef.current.list(currentSocialReplyOwner()).filter((r): r is typeof r & {kind: "marriage" | "divorce" | "mentor"} => r.kind === "marriage" || r.kind === "divorce" || r.kind === "mentor"), onReplyRequest: replySocialRequest, relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
+      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: rankingTabKey(rankingQueriesRef.current.desired.rankType, rankingQueriesRef.current.desired.onlineOnly),
+        page: !rankingQueriesRef.current.pending && extraWindowData.rankingPage?.rankType === rankingQueriesRef.current.desired.rankType && extraWindowData.rankingPage?.onlineOnly === rankingQueriesRef.current.desired.onlineOnly && extraWindowData.rankingPage?.rankIndex === rankingQueriesRef.current.desired.rankIndex ? extraWindowData.rankingPage : null,
+        onlineOnly: rankingQueriesRef.current.desired.onlineOnly, requestPending: Boolean(rankingQueriesRef.current.pending), playerName: self?.name ?? null,
+        onSelectTab: requestRanking, onRefresh: refreshRanking, onToggleOnlineOnly: setRankingOnlineOnly, onPrevious: () => moveRankingRows(-1), onNext: () => moveRankingRows(1) }}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
-      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
+      trade={{ open: showTrade, onClose: () => { if (tradeLifecycleRef.current.state === "closed") setShowTrade(false); else cancelTrade(); }, trade: socialTradeSummary,
+        myGold: typeof socialTradeRender?.trade?.offeredGold === "number" ? socialTradeRender.trade.offeredGold : 0, availableGold: world.gold,
+        myItems: socialTradeRender?.slots.map(i => i ? ownTradeTooltipItem(i) : null), onReadItemTooltip: readTradeItemTooltip, myItemCount: socialTradeRender?.slots.filter(i => i !== null).length,
+        myConfirmed: socialTradeRender?.trade?.locked === true, inventoryItems: socialTradeRender?.inventoryItems, emptyInventorySlots: socialTradeRender?.inventory.emptySlots,
+        itemsReady: Boolean(socialTradeRender && tradeLifecycleRef.current.state === "open" && socialTradeRender.trade?.escrowPrepared === false), itemActionPending: socialItemsPending, itemSourceKey: socialTradeRender?.sourceKey,
+        onDepositItem: (from, to, uid) => submitSocialItem("depositTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""),
+        onRetrieveItem: (from, to, uid) => submitSocialItem("retrieveTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""), onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
       mail={{ open: showMail&&!bevyMailUi.composeRequested&&bevyMailUi.composeWithdrawn&&!bevyMailUi.ready&&bevyMailUi.withdrawn, onClose: () => setMailboxOpen(false),
         mail:adaptMailMessages(mailRenderRows??[]),gold:world.gold,onOpen:openMailMessage,onClaimAttachment:claimMailAttachment,onDeleteMail:deleteMailMessage,onSendMail:sendMailMessage,
@@ -16295,8 +17886,18 @@ export default function HomePage() {
           presentMailCompatibility(next.view,next.selectedId,next.recipient,next.readDispatched,next.subject);
         } }}
       worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: localizeCrystalMapTitle(world.mapTitle, t), markers: extraWindowData.worldMapMarkers }}
-      help={{ open: showHelp, onClose: () => setShowHelp(false) }}
-      hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
+      help={{ open: showHelp, onClose: () => changeReferenceWindow("help", false), page: crystalHelpState.page,
+        position: { left: crystalHelpState.left, top: crystalHelpState.top }, bindings: crystalKeyBindings,
+        onPageChange: page => changeCrystalHelpState({ ...crystalHelpState, page }),
+        onPositionChange: position => changeCrystalHelpState({ ...crystalHelpState, ...position }) }}
+      options={{ open: showOptions, onClose: () => changeReferenceWindow("options", false),
+        preferences: playerUiPreferences, onChange: changePlayerUiPreferences,
+        observeAllowed: observePreferenceRef.current?.allow ?? null, observePending: observePreferenceRef.current?.pending ?? false,
+        onRequestObserve: requestObservePreference }}
+      hotkeys={{ open: showHotkeys, onClose: () => changeReferenceWindow("hotkeys", false), bindings: crystalKeyBindings,
+        onBindingsChange: changeCrystalBindings, onPersist: persistCrystalBindings, onCaptureChange: changeKeybindCapture,
+        tildePressed, enforce: keybindEnforce, onEnforceChange: setKeybindEnforce, notice: preferencesNotice,
+        supportedFunctions: SUPPORTED_CRYSTAL_BROWSER_FUNCTIONS }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
     {spectatorMode && !aiLiveBrowserMode ? (
@@ -16735,14 +18336,14 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
 }
 
 /**
- * Resolve once the Bevy canvas (`#mir2-web3-canvas`) is ready to attach to — either it's
+ * Resolve once both fixed Bevy canvases are mounted — either they're
  * already in the DOM, the shell has signalled readiness on mount (`window.__mir2BevyCanvasReady`
  * / the `"mir2:bevy-canvas-ready"` event it dispatches), or a MutationObserver sees it inserted.
  * Rejects after `timeoutMs`.
  *
- * The runtime attaches to an existing `#mir2-web3-canvas` (apps/game-client/runtime/src/lib.rs),
+ * The runtime selects either fixed canvas (apps/game-client/runtime/src/lib.rs),
  * rendered inside the lazily-mounted (dynamic, ssr:false) OriginalClientShell — booting the WASM
- * before it exists makes bevy_winit panic "Cannot find element: #mir2-web3-canvas".
+ * before its selected canvas exists makes bevy_winit panic.
  */
 async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
   if (typeof document === "undefined") return;
@@ -16758,7 +18359,7 @@ async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
       observer.disconnect();
       window.removeEventListener("mir2:bevy-canvas-ready", onSignal);
       if (ok) resolve();
-      else reject(new Error("timed out waiting for #mir2-web3-canvas"));
+      else reject(new Error("timed out waiting for fixed Bevy canvases"));
     };
     const onSignal = () => {
       if (isReady()) finish(true);
@@ -16795,7 +18396,7 @@ async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath:
   )) as RuntimeModule;
 
   if (typeof runtime.default === "function") {
-    // The runtime attaches to #mir2-web3-canvas on boot; make sure it exists first
+    // The runtime attaches to one of the fixed canvases on boot; make sure both exist first
     // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
     await waitForBevyCanvas();
     const controller = new AbortController();

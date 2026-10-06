@@ -1,5 +1,7 @@
 "use client";
 
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { useWorldSelector } from "../../lib/world-model";
@@ -22,6 +24,7 @@ import { ObjectiveTracker } from "./original-client-objective-tracker";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
 import { GameShopWindow, NpcShopWindow } from "./original-client-game-shop";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
@@ -57,9 +60,11 @@ type GameUiSceneProps = {
   showCharacter: boolean;
   showQuestLog: boolean;
   sharedQuestUiActive?: boolean;
+  sharedQuestWorldUiActive?: boolean;
   sharedBagUiActive?: boolean;
   sharedStorageUiActive?: boolean;
   sharedHudUiActive?: boolean;
+  hpView?: boolean;
   sharedHudPlan?: import("../../lib/bevy-hud-ui").MainHudPlan | null;
   experienceSpriteOwned?: boolean;
   weightSpriteOwned?: boolean;
@@ -79,10 +84,14 @@ type GameUiSceneProps = {
   onSendChat: (message: string) => void;
   onRequestTrade: () => void;
   onRentExpandedStorage: () => void;
+  storageRentalPrompt?: { id: number; renewing: boolean } | null;
+  onConfirmStorageRental?: (id: number) => void;
+  onCancelStorageRental?: (id: number) => void;
   onLogout: () => void;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
   onToggleQuestLog: () => void;
+  onToggleOptions?: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
   onCloseStorage?: () => void;
@@ -121,6 +130,11 @@ type GameUiSceneProps = {
   onToggleMail?: () => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
+  cashGameShopSource?: CashGameShopSource | null;
+  cashGameShopPending?: boolean;
+  onConfirmCashGameShopPurchase?: (confirmation: CashGameShopConfirmation) => void;
+  onReadCashGameShopItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  onGameShopVisibilityChange?: (open: boolean) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   inputProfile: Mir2InputProfile;
   gamepadFamily: Mir2GamepadFamily;
@@ -139,9 +153,11 @@ function GameUiSceneInner({
   showCharacter,
   showQuestLog,
   sharedQuestUiActive = false,
+  sharedQuestWorldUiActive = false,
   sharedBagUiActive = false,
   sharedStorageUiActive = false,
   sharedHudUiActive = false,
+  hpView = true,
   sharedHudPlan = null,
   experienceSpriteOwned = false,
   weightSpriteOwned = false,
@@ -161,10 +177,12 @@ function GameUiSceneInner({
   onSendChat,
   onRequestTrade,
   onRentExpandedStorage,
+  storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
   onLogout,
   onToggleCharacter,
   onToggleInventory,
   onToggleQuestLog,
+  onToggleOptions,
   onCloseCharacter,
   onCloseInventory,
   onCloseStorage,
@@ -198,6 +216,7 @@ function GameUiSceneInner({
   onToggleMail,
   onDeleteMail,
   onBuyGameShopItem,
+  cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip, onGameShopVisibilityChange,
   onSendClientCommand,
   inputProfile,
   gamepadFamily,
@@ -213,14 +232,50 @@ function GameUiSceneInner({
   const [showChatSettings, setShowChatSettings] = useState(false);
   const showMailPanel = mailOpen;
   const [showBigMap, setShowBigMap] = useState(false);
+  const [showMinimap, setShowMinimap] = useState(true);
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showGameShop, setShowGameShop] = useState(false);
+  const gameShopOpenRef = useRef(false);
+  const gameShopVisibilityRef = useRef(onGameShopVisibilityChange);
+  gameShopVisibilityRef.current = onGameShopVisibilityChange;
+  function changeGameShopOpen(open: boolean) {
+    gameShopOpenRef.current = open; gameShopVisibilityRef.current?.(open); setShowGameShop(open);
+  }
+  useEffect(() => () => {gameShopOpenRef.current = false; gameShopVisibilityRef.current?.(false);}, []);
+  const storageRentalDialogRef = useRef<HTMLDivElement>(null);
+  const storageRentalCancelRef = useRef(onCancelStorageRental);
+  storageRentalCancelRef.current = onCancelStorageRental;
+  useEffect(() => {
+    if (!storageRentalPrompt) return;
+    const prior = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = storageRentalDialogRef.current;
+    dialog?.querySelector<HTMLButtonElement>("[data-rental-cancel]")?.focus();
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); storageRentalCancelRef.current?.(storageRentalPrompt.id); }
+      if (event.key === "Tab") {
+        const buttons = dialog?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)");
+        if (!buttons?.length) return;
+        const index = Array.from(buttons).indexOf(document.activeElement as HTMLButtonElement);
+        event.preventDefault(); buttons[(index + (event.shiftKey ? buttons.length - 1 : 1)) % buttons.length].focus();
+      }
+    };
+    document.addEventListener("keydown", key, true);
+    return () => { document.removeEventListener("keydown", key, true); if (prior?.isConnected) prior.focus(); };
+  }, [storageRentalPrompt?.id]);
   useEffect(() => {
     const handler = (event: Event) => {
       const action = (event as CustomEvent<string>).detail;
-      if (action === "gameShop") setShowGameShop(current => !current);
+      if (action === "gameShop") changeGameShopOpen(!gameShopOpenRef.current);
       else if (action === "menu") setShowSystemMenu(current => !current);
+      else if (action === "belt") setShowBelt(current => !current);
+      else if (action === "beltFlip") setBeltVertical(current => !current);
+      else if (action === "minimap") setShowMinimap(current => !current);
+      else if (action === "bigmap") setShowBigMap(current => !current);
+      else if (action === "closeAll") {
+        changeGameShopOpen(false); setShowBigMap(false); setShowSystemMenu(false); setShowSystemMenuFeaturePanel(null);
+        setShowReportPanel(false); setShowChatSettings(false); setShowDuraPanel(false);
+      }
     };
     window.addEventListener("mir2:hud-host-action", handler);
     return () => window.removeEventListener("mir2:hud-host-action", handler);
@@ -251,7 +306,7 @@ function GameUiSceneInner({
     !sharedQuestUiActive && world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
   // Mail has one Page-owned presentation; do not report its own-open as a competing modal.
   const questUiModalBlocked = Boolean(showBigMap || showReportPanel || showSystemMenu
-    || showSystemMenuFeaturePanel || showGameShop || showChatSettings);
+    || showSystemMenuFeaturePanel || showGameShop || showChatSettings || storageRentalPrompt);
   const hpOrbModalBlocked = Boolean(questUiModalBlocked || showDuraPanel || visibleDialog);
   useLayoutEffect(() => {
     onHpOrbModalChange?.(hpOrbModalBlocked);
@@ -262,6 +317,7 @@ function GameUiSceneInner({
     return () => onQuestUiModalChange?.(false);
   }, [onQuestUiModalChange, questUiModalBlocked]);
   const gamepadUiOpen = Boolean(
+    storageRentalPrompt ||
     showMailPanel ||
       showBigMap ||
       showReportPanel ||
@@ -326,8 +382,8 @@ function GameUiSceneInner({
       data-gamepad-ui-open={gamepadUiOpen ? "true" : "false"}
       data-chat-expanded={chatExpanded ? "true" : "false"}
     >
-      <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />
-      <MiniMapPanel
+      {!sharedQuestWorldUiActive && <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />}
+      {showMinimap && <MiniMapPanel
         t={t}
         world={world}
         player={player}
@@ -336,7 +392,7 @@ function GameUiSceneInner({
         onToggleMail={() => onToggleMail?.()}
         onToggleBigMap={() => setShowBigMap((current) => !current)}
         showMailAction={!IS_PLATINUM_176_PROFILE}
-      />
+      />}
       <DuraPanel
         t={t}
         visible={showDuraPanel}
@@ -389,6 +445,7 @@ function GameUiSceneInner({
         mapTitle={world.mapTitle}
         player={player}
         world={world}
+        hpView={hpView}
         showCharacter={showCharacter}
         showInventory={showInventory}
         showQuestLog={showQuestLog}
@@ -397,12 +454,13 @@ function GameUiSceneInner({
         onToggleCharacter={onToggleCharacter}
         onToggleInventory={onToggleInventory}
         onToggleQuestLog={onToggleQuestLog}
+        onToggleOptions={onToggleOptions}
         onOpenCharacterTab={onOpenCharacterTab}
         onOpenInventoryTab={onOpenInventoryTab}
         onDropGold={() => onDropGold(100)}
         onLogout={onLogout}
         showGameShop={showGameShop}
-        onToggleGameShop={() => setShowGameShop((current) => !current)}
+        onToggleGameShop={() => changeGameShopOpen(!gameShopOpenRef.current)}
         showGameShopAction={!IS_PLATINUM_176_PROFILE}
         showMenu={showSystemMenu}
         onToggleMenu={() => setShowSystemMenu((current) => !current)}
@@ -463,7 +521,11 @@ function GameUiSceneInner({
           credits={world.credit}
           playerClass={player?.classKey ?? "warrior"}
           onBuy={onBuyGameShopItem}
-          onClose={() => setShowGameShop(false)}
+          source={cashGameShopSource}
+          purchasePending={cashGameShopPending}
+          onConfirmPurchase={onConfirmCashGameShopPurchase}
+          onReadItemTooltip={onReadCashGameShopItemTooltip}
+          onClose={() => changeGameShopOpen(false)}
         />
       ) : null}
       {npcShopService && !(bevyNpcShopUiActive && npcShopTab === "buy") ? (
@@ -603,6 +665,25 @@ function GameUiSceneInner({
           onSpecialRepairItem={onSpecialRepairItem}
           onCastSkill={onCastSkill}
         />
+      ) : null}
+      {storageRentalPrompt ? (
+        <div data-ui-interactive="true" data-storage-rental-confirmation={storageRentalPrompt.id}
+          onPointerDown={event => event.stopPropagation()} onClick={event => event.stopPropagation()}
+          style={{ position: "absolute", inset: 0, zIndex: 1000, background: "rgba(0,0,0,.45)", display: "grid", placeItems: "center", pointerEvents: "auto" }}>
+          <div ref={storageRentalDialogRef} role="dialog" aria-modal="true" aria-labelledby="storage-rental-title"
+            style={{ width: 340, maxWidth: "90%", padding: 20, background: "#201a12", border: "1px solid #967642", color: "#f2dfb6" }}>
+            <strong id="storage-rental-title">{t("client.Storage", [], "Storage")}</strong>
+            <p>{locale.startsWith("zh")
+              ? (storageRentalPrompt.renewing ? "是否支付 1,000,000 金币，将扩展仓库续租 10 天？" : "是否支付 1,000,000 金币，租用扩展仓库 10 天？")
+              : (storageRentalPrompt.renewing ? "Extend your storage rental for 10 days at a cost of 1,000,000 gold?" : "Rent extra storage for 10 days at a cost of 1,000,000 gold?")}</p>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button type="button" style={{ minHeight: 44, flex: 1 }} disabled={!onConfirmStorageRental}
+                onClick={() => onConfirmStorageRental?.(storageRentalPrompt.id)}>{t("client.OK", [], "OK")}</button>
+              <button type="button" data-rental-cancel style={{ minHeight: 44, flex: 1 }}
+                onClick={() => onCancelStorageRental?.(storageRentalPrompt.id)}>{t("client.Cancel", [], "Cancel")}</button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

@@ -58,6 +58,13 @@ export type MentorSummary = {
   graduationExp?: number;
 };
 
+export type BondIncomingRequest = Readonly<{
+  kind: "marriage" | "divorce" | "mentor";
+  name: string;
+  epoch: number;
+  level?: number;
+}>;
+
 export type BondsWindowProps = {
   t: TranslateFn;
   relationship: RelationshipSummary | null;
@@ -76,6 +83,8 @@ export type BondsWindowProps = {
   onAllowMentor?: (allow: boolean) => void;
   onAddMentor?: (name: string) => void;
   onCancelMentor?: () => void;
+  incomingRequests?: readonly BondIncomingRequest[];
+  onReplyRequest?: (kind: BondIncomingRequest["kind"], epoch: number, acceptInvite: boolean) => void;
   onClose: () => void;
 };
 
@@ -96,6 +105,8 @@ export function BondsWindow({
   onAllowMentor,
   onAddMentor,
   onCancelMentor,
+  incomingRequests,
+  onReplyRequest,
   onClose,
 }: BondsWindowProps) {
   const [tab, setTab] = useState<BondsTab>("relationship");
@@ -113,6 +124,7 @@ export function BondsWindow({
   const allowMentor = mentor?.allowMentor ?? true;
   const viewerIsMentor = mentor?.isMentor ?? false;
   const students = mentor?.students ?? [];
+  const hasIncomingRequests = Boolean(incomingRequests?.length);
 
   return (
     <section
@@ -151,8 +163,59 @@ export function BondsWindow({
         </button>
       </div>
 
+      {hasIncomingRequests ? (
+        <div
+          role="region"
+          aria-label={t("ui.bondsRequest", [], "Pending Requests")}
+          aria-live="polite"
+          style={style.incomingRequests}
+        >
+          {incomingRequests?.map((request) => (
+            <div
+              key={`${request.kind}:${request.epoch}`}
+              role="group"
+              aria-label={request.kind === "mentor" ? t("ui.mentor", [], "Mentor")
+                : request.kind === "divorce" ? t("ui.bondsDivorce", [], "Divorce") : t("ui.relationship", [], "Marriage")}
+              data-bond-request-kind={request.kind}
+              data-bond-request-name={request.name}
+              data-bond-request-epoch={request.epoch}
+              style={style.incomingCard}
+            >
+              <div style={style.incomingMessage}>
+                {request.kind === "marriage"
+                  ? t("client.PlayerAskedForMarriage", [request.name], `${request.name} has asked for your hand in marriage.`)
+                  : request.kind === "divorce"
+                    ? t("client.PlayerRequestedDivorce", [request.name], `${request.name} has requested a divorce.`)
+                    : <>{t("server.MentorRequestFrom", [request.name], `${request.name} has requested mentorship.`)}
+                        {request.level !== undefined ? ` · ${t("ui.heroLevel", [request.level], `Level ${request.level}`)}` : ""}</>}
+              </div>
+              <div style={style.incomingActions}>
+                <button
+                  type="button"
+                  data-bond-request-reply="accept"
+                  disabled={!onReplyRequest}
+                  onClick={() => onReplyRequest?.(request.kind, request.epoch, true)}
+                  style={{ ...style.actionButton, ...style.replyButton, ...(!onReplyRequest ? style.actionButtonDisabled : null) }}
+                >
+                  {t("ui.questAccept", [], "Accept")}
+                </button>
+                <button
+                  type="button"
+                  data-bond-request-reply="decline"
+                  disabled={!onReplyRequest}
+                  onClick={() => onReplyRequest?.(request.kind, request.epoch, false)}
+                  style={{ ...style.actionButton, ...style.replyButton, ...(!onReplyRequest ? style.actionButtonDisabled : null) }}
+                >
+                  {t("ui.cancel", [], "Decline")}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {tab === "relationship" ? (
-        <div style={style.body}>
+        <div style={{ ...style.body, ...(hasIncomingRequests ? style.bodyWithRequests : null) }}>
           <div style={style.statusCard} data-relationship-partner={partner}>
             <div style={style.statusName}>{married ? partner : t("ui.bondsSingle", [], "Single")}</div>
             <div style={style.statusMeta}>
@@ -286,7 +349,7 @@ export function BondsWindow({
           </button>
         </div>
       ) : (
-        <div style={style.body}>
+        <div style={{ ...style.body, ...(hasIncomingRequests ? style.bodyWithRequests : null) }}>
           <div style={style.statusCard} data-mentor-name={mentorOf} data-mentor-role={viewerIsMentor ? "mentor" : "mentee"}>
             <div style={style.statusName}>
               {hasMentorLink ? mentorOf : t("ui.bondsNoMentor", [], "No Mentor")}
@@ -491,6 +554,20 @@ const style: Record<string, CSSProperties> = {
     gap: 6,
     overflowY: "auto",
   },
+  bodyWithRequests: { top: 224, height: 144 },
+  incomingRequests: {
+    position: "absolute", left: 12, top: 54, width: 240, height: 162,
+    display: "flex", flexDirection: "column", gap: 6, overflowY: "auto",
+  },
+  incomingCard: {
+    flexShrink: 0, display: "flex", flexDirection: "column", gap: 8,
+    border: "1px solid rgba(214, 180, 110, 0.7)",
+    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(28, 17, 9, 0.95))",
+    padding: 8,
+  },
+  incomingMessage: { color: "#f8e6bb", lineHeight: "16px", overflowWrap: "anywhere" },
+  incomingActions: { display: "flex", gap: 6 },
+  replyButton: { flex: 1, minHeight: 44, touchAction: "manipulation" },
   statusCard: {
     border: "1px solid rgba(190, 157, 99, 0.4)",
     background: "linear-gradient(180deg, rgba(95, 53, 24, 0.45), rgba(28, 17, 9, 0.55))",

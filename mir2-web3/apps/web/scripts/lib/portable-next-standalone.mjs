@@ -233,6 +233,7 @@ export function compactJsonWhitespace(source) {
 
 async function copySelectedFile(source, destination, publicRelative) {
   const compact = publicRelative === "original-asset-manifest.generated.json" ||
+    publicRelative === "bevy-entity-atlases/manifest.json" ||
     (publicRelative?.startsWith("original-ui/") && publicRelative.endsWith(".json"));
   const sourceBytes = compact ? await fs.readFile(source) : null;
   const outputBytes = compact ? compactJsonWhitespace(sourceBytes) : null;

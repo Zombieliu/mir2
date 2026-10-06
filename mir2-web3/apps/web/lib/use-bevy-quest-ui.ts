@@ -11,15 +11,20 @@ import { createHudBarVisualClock, nextHudBarPlanCommit, readHudBarDrawPlan,
   currentHudBarPlans, supportsHudBarDrawPlan, type CurrentHudBarPlans } from "./bevy-hud-bar-draw-plan";
 import {
   currentBevyQuestLocale, supportsBevyQuestLocale, stripUnsupportedQuestLocale,
-  readBevyQuestUiStatus,
+  readBevyQuestUiStatus, readBevyQuestNameTargets,
   type BevyQuestUiIntent,
   type BevyQuestUiIntentResult,
   type BevyQuestUiRuntime,
   type BevyQuestUiSnapshot,
 } from "./bevy-quest-ui";
+import { sameQuestWorldDraft, sameQuestWorldStamp, stampBevyQuestWorldContext,
+  supportsBevyQuestWorldContext, type QuestWorldDraft } from "./bevy-quest-world-context";
+import { isQuestWorldAction, parseQuestWorldAction } from "./bevy-quest-world-actions";
+import { readQuestWorldControls, type QuestWorldControls } from "./bevy-quest-world-controls";
 
-type SnapshotInput = Omit<BevyQuestUiSnapshot, "revision" | "openRevision" | "presentation" | "hudBarPlan"> & {
+type SnapshotInput = Omit<BevyQuestUiSnapshot, "revision" | "openRevision" | "presentation" | "hudBarPlan" | "worldContext"> & {
   presentation: BevyQuestUiSnapshot["presentation"] | null;
+  worldDraft?: QuestWorldDraft | null;
   hudBarPlayerObjectId?: string | null;
   hudBarRuntimeLifetime?: number;
 };
@@ -42,29 +47,44 @@ export function useBevyQuestUi(options: Options) {
   const hudBarClock = useRef(createHudBarVisualClock());
   const refreshRef = useRef<(() => void) | null>(null);
   const refresh = useCallback(() => refreshRef.current?.(), []);
+  const liveWorldControlsReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
+  const worldControlBlockersReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
+  const questNameTargetsReaderRef = useRef<(() => readonly number[] | null) | null>(null);
+  const readLiveQuestNameTargets = useCallback(() => {
+    try { return questNameTargetsReaderRef.current?.() ?? null; } catch { return null; }
+  }, []);
+  const paintedWorldControlsRef = useRef<{ runtime: BevyQuestUiRuntime; runtimeGeneration: number;
+    controls: QuestWorldControls } | null>(null);
+  const readLiveWorldControls = useCallback(() => {
+    try { return liveWorldControlsReaderRef.current?.() ?? null; } catch { return null; }
+  }, []);
+  const readLiveWorldControlBlockers = useCallback(() => {
+    try { return worldControlBlockersReaderRef.current?.() ?? null; } catch { return null; }
+  }, []);
   const liveHudBarReaderRef = useRef<(() => CurrentHudBarPlans | null) | null>(null);
   const readLiveHudBarPlans = useCallback(() => {
     try { return liveHudBarReaderRef.current?.() ?? null; }
     catch { return null; }
   }, []);
-  const [state, setState] = useState({ ready: false, capturesPointer: false, error: null as string | null,
+  const [state, setState] = useState({ ready: false, worldControlsReady: false, capturesPointer: false, error: null as string | null,
     hpOrb: null as BevyHpOrbStatus | null, mpOrb: null as BevyMpOrbStatus | null,
     experienceBar: null as BevyExperienceBarStatus | null, weightBar: null as BevyWeightBarStatus | null,
-    hudBarPlans: null as CurrentHudBarPlans | null });
+    hudBarPlans: null as CurrentHudBarPlans | null, questNameTargetObjectIds: [] as readonly number[] });
   useEffect(() => {
     const runtime = latest.current.runtimeRef.current;
     const publishState = (ready: boolean, capturesPointer: boolean, error: string | null,
       hpOrb: BevyHpOrbStatus | null = null, mpOrb: BevyMpOrbStatus | null = null,
       experienceBar: BevyExperienceBarStatus | null = null,
       weightBar: BevyWeightBarStatus | null = null,
-      hudBarPlans: CurrentHudBarPlans | null = null) => {
-      setState((current) => current.ready === ready && current.capturesPointer === capturesPointer && current.error === error
+      hudBarPlans: CurrentHudBarPlans | null = null, worldControlsReady = false, questNameTargetObjectIds: readonly number[] = []) => {
+      setState((current) => current.ready === ready && current.worldControlsReady === worldControlsReady && current.capturesPointer === capturesPointer && current.error === error
         && JSON.stringify(current.hpOrb) === JSON.stringify(hpOrb)
         && JSON.stringify(current.mpOrb) === JSON.stringify(mpOrb)
         && JSON.stringify(current.experienceBar) === JSON.stringify(experienceBar)
         && JSON.stringify(current.weightBar) === JSON.stringify(weightBar)
         && JSON.stringify(current.hudBarPlans) === JSON.stringify(hudBarPlans)
-        ? current : { ready, capturesPointer, error, hpOrb, mpOrb, experienceBar, weightBar, hudBarPlans });
+        && JSON.stringify(current.questNameTargetObjectIds) === JSON.stringify(questNameTargetObjectIds)
+        ? current : { ready, worldControlsReady, capturesPointer, error, hpOrb, mpOrb, experienceBar, weightBar, hudBarPlans, questNameTargetObjectIds });
     };
     publishState(false, false, null);
     if (!options.requested || !runtime?.setMir2QuestUiSnapshot || !runtime.setMir2QuestUiIntentSink) return;
@@ -76,20 +96,21 @@ export function useBevyQuestUi(options: Options) {
     const nextOpenRevision = () => openRevision = ++clock.current.openRevision;
     let lastRequestedOpen = false;
     let lastSnapshot = "";
-    let currentSnapshot: SnapshotInput | null = null;
-    let lastValidSnapshot: SnapshotInput | null = null;
+    let currentSnapshot: Omit<SnapshotInput, "worldDraft"> | null = null;
+    let lastValidSnapshot: BevyQuestUiSnapshot | null = null;
     let acknowledgedSnapshot: BevyQuestUiSnapshot | null = null;
     let requiredPresentationRevision = 0;
     let lastPresentation = "";
     let lastFrame = -1;
     let lastFrameAt = 0;
     let rendererHealthy = false;
+    const documentVisible = () => typeof document === "undefined" || document.visibilityState !== "hidden";
     const liveHudBarReader = (): CurrentHudBarPlans | null => {
       if (stopped || !latest.current.requested || latest.current.runtimeRef.current !== runtime
         || latest.current.runtimeGeneration !== options.runtimeGeneration
         || !supportsHudBarDrawPlan(runtime) || !acknowledgedSnapshot?.hudBarPlan) return null;
       const live = latest.current.snapshot();
-      if (!live.inGame || !live.hostVisible || !live.presentation || live.dialog.hasInput
+      if (!documentVisible() || !live.inGame || !live.hostVisible || !live.presentation || live.dialog.hasInput
         || live.hudBarRuntimeLifetime !== options.runtimeGeneration) return null;
       const commit = nextHudBarPlanCommit({ ...hudBarClock.current }, live.hudBarRuntimeLifetime,
         live.hudBarPlayerObjectId ?? null,
@@ -105,6 +126,57 @@ export function useBevyQuestUi(options: Options) {
       return currentHudBarPlans(readHudBarDrawPlan(runtime), liveSnapshot, status.revision, true);
     };
     liveHudBarReaderRef.current = liveHudBarReader;
+    const liveWorldControlsReader = (): QuestWorldControls | null => {
+      const context = acknowledgedSnapshot?.worldContext;
+      if (stopped || !context || !latest.current.requested || latest.current.runtimeRef.current !== runtime
+        || latest.current.runtimeGeneration !== options.runtimeGeneration || !supportsBevyQuestWorldContext(runtime)) return null;
+      const live = latest.current.snapshot();
+      if (!documentVisible() || !live.inGame || !live.hostVisible || !live.presentation || live.dialog.hasInput
+        || JSON.stringify(live.presentation) !== JSON.stringify(acknowledgedSnapshot?.presentation)
+        || !sameQuestWorldDraft(live.worldDraft ?? null, context)
+        || JSON.stringify({quests:live.quests,completedKnown:live.completedKnown,completedQuestIds:live.completedQuestIds,profile:live.profile})
+          !== JSON.stringify({quests:acknowledgedSnapshot?.quests,completedKnown:acknowledgedSnapshot?.completedKnown,completedQuestIds:acknowledgedSnapshot?.completedQuestIds,profile:acknowledgedSnapshot?.profile})) return null;
+      const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
+      if (!status?.ready || !Number.isFinite(now) || status.frame < lastFrame
+        || status.revision !== context.revision || !currentBevyQuestLocale(status, live.language, requiredPresentationRevision)) return null;
+      if (status.frame > lastFrame) { lastFrame = status.frame; lastFrameAt = now; }
+      if (now < lastFrameAt || now - lastFrameAt > 2000) return null;
+      return readQuestWorldControls(runtime, context, live.presentation.logicalWidth, live.presentation.logicalHeight);
+    };
+    liveWorldControlsReaderRef.current = liveWorldControlsReader;
+    const questNameTargetsReader = (): readonly number[] | null => {
+      const context = acknowledgedSnapshot?.worldContext;
+      if (stopped || !context || !latest.current.requested || latest.current.runtimeRef.current !== runtime
+        || latest.current.runtimeGeneration !== options.runtimeGeneration || !documentVisible()) return null;
+      const live = latest.current.snapshot();
+      if (!live.inGame || !live.hostVisible || !sameQuestWorldDraft(live.worldDraft ?? null, context)
+        || JSON.stringify({ quests: live.quests, completedKnown: live.completedKnown, completedQuestIds: live.completedQuestIds, profile: live.profile })
+          !== JSON.stringify({ quests: acknowledgedSnapshot?.quests, completedKnown: acknowledgedSnapshot?.completedKnown,
+            completedQuestIds: acknowledgedSnapshot?.completedQuestIds, profile: acknowledgedSnapshot?.profile })) return null;
+      const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
+      if (!status?.ready || status.revision !== context.revision || status.frame < lastFrame
+        || !Number.isFinite(now) || now < lastFrameAt || now - lastFrameAt > 2000) return null;
+      return readBevyQuestNameTargets(runtime, context);
+    };
+    questNameTargetsReaderRef.current = questNameTargetsReader;
+    const worldControlBlockersReader = (): QuestWorldControls | null => {
+      if (stopped || !latest.current.requested || !documentVisible() || latest.current.runtimeRef.current !== runtime
+        || latest.current.runtimeGeneration !== options.runtimeGeneration) return null;
+      const live = latest.current.snapshot();
+      if (!live.inGame || !live.hostVisible || !live.presentation || live.dialog.hasInput) return null;
+      const context = acknowledgedSnapshot?.worldContext;
+      const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
+      if (context && status?.ready && status.revision === context.revision
+        && status.frame >= lastFrame && Number.isFinite(now) && now >= lastFrameAt && now - lastFrameAt <= 2000) {
+        // These rectangles describe painted pixels only. Source freshness is
+        // still required separately before any Quest action is accepted.
+        const measured = readQuestWorldControls(runtime, context, live.presentation.logicalWidth, live.presentation.logicalHeight, true);
+        if (measured) paintedWorldControlsRef.current = { runtime, runtimeGeneration: options.runtimeGeneration, controls: measured };
+      }
+      const painted = paintedWorldControlsRef.current;
+      return painted?.runtime === runtime && painted.runtimeGeneration === options.runtimeGeneration ? painted.controls : null;
+    };
+    worldControlBlockersReaderRef.current = worldControlBlockersReader;
     runtime.setMir2QuestUiIntentSink((json) => {
       try {
         const intent = JSON.parse(json) as BevyQuestUiIntent;
@@ -120,7 +192,9 @@ export function useBevyQuestUi(options: Options) {
           lastFrameAt = now;
           rendererHealthy = currentStatus.ready;
         }
-        if (stopped || !rendererHealthy || !currentStatus?.ready || now - lastFrameAt > 2000
+        if (stopped || !documentVisible() || !rendererHealthy || !currentStatus?.ready || now - lastFrameAt > 2000
+          || latest.current.runtimeRef.current !== runtime
+          || latest.current.runtimeGeneration !== options.runtimeGeneration
           || !latest.current.requested || !live.inGame || !live.hostVisible
           || !live.presentation || !currentSnapshot?.presentation
           || JSON.stringify(live.presentation) !== JSON.stringify(currentSnapshot.presentation)
@@ -130,6 +204,20 @@ export function useBevyQuestUi(options: Options) {
           || intent.generation !== currentSnapshot.generation || typeof intent.type !== "string") {
           return JSON.stringify({ accepted: false, error: "The game session changed." });
         }
+        if (isQuestWorldAction(intent.type)) {
+          const context = acknowledgedSnapshot?.worldContext ?? null;
+          if (!parseQuestWorldAction(intent) || !context || !sameQuestWorldStamp(intent, context)
+            || currentStatus.revision < context.revision
+            || !sameQuestWorldDraft(live.worldDraft ?? null, context)
+            || JSON.stringify({ quests: live.quests, completedKnown: live.completedKnown,
+              completedQuestIds: live.completedQuestIds, profile: live.profile })
+              !== JSON.stringify({ quests: acknowledgedSnapshot?.quests,
+                completedKnown: acknowledgedSnapshot?.completedKnown,
+                completedQuestIds: acknowledgedSnapshot?.completedQuestIds,
+                profile: acknowledgedSnapshot?.profile })) {
+            return JSON.stringify({ accepted: false, error: "The quest world changed." });
+          }
+        }
         return JSON.stringify(latest.current.onIntent(intent));
       } catch {
         return JSON.stringify({ accepted: false, error: "The quest action could not be sent." });
@@ -138,7 +226,8 @@ export function useBevyQuestUi(options: Options) {
     const tick = () => {
       if (stopped) return;
       try {
-        const liveSnapshot = latest.current.snapshot();
+        const inputSnapshot = latest.current.snapshot();
+        const liveSnapshot = { ...inputSnapshot, hostVisible: inputSnapshot.hostVisible && documentVisible() };
         // Older UI runtimes reject unknown snapshot fields, including nested
         // player keys. Probe each image capability before serializing the DTO.
         const hpSupported = supportsBevyHpOrb(runtime);
@@ -147,7 +236,8 @@ export function useBevyQuestUi(options: Options) {
         const weightSupported = supportsBevyWeightBar(runtime);
         const drawPlanSupported = supportsHudBarDrawPlan(runtime);
         const localeSupported = supportsBevyQuestLocale(runtime);
-        const { hudBarPlayerObjectId, hudBarRuntimeLifetime, ...hostSnapshot } = liveSnapshot;
+        const worldContextSupported = supportsBevyQuestWorldContext(runtime);
+        const { hudBarPlayerObjectId, hudBarRuntimeLifetime, worldDraft, ...hostSnapshot } = liveSnapshot;
         const player = { ...liveSnapshot.player };
         if (!mpSupported) { delete player.mp; delete player.maxMp; }
         const hudBarPlan = drawPlanSupported && hudBarRuntimeLifetime !== undefined
@@ -191,15 +281,19 @@ export function useBevyQuestUi(options: Options) {
           publishState(false, false, "Shared quest UI is waiting for a valid stage layout");
           return;
         }
-        lastValidSnapshot = currentSnapshot;
-        const serialized = JSON.stringify({ ...currentSnapshot, openRevision });
+        const serialized = JSON.stringify({ ...currentSnapshot, openRevision,
+          ...(worldContextSupported ? { worldDraft } : {}) });
         if (serialized !== lastSnapshot) {
           const sentRevision = nextRevision();
-          if (!runtime.setMir2QuestUiSnapshot!(JSON.stringify({ ...currentSnapshot, openRevision, revision: sentRevision }))) {
+          const worldContext = worldContextSupported && currentSnapshot.inGame && currentSnapshot.hostVisible
+            ? stampBevyQuestWorldContext(worldDraft ?? null, sentRevision) : null;
+          const sentSnapshot: BevyQuestUiSnapshot = { ...currentSnapshot, presentation: currentSnapshot.presentation,
+            openRevision, revision: sentRevision, ...(worldContext ? { worldContext } : {}) };
+          if (!runtime.setMir2QuestUiSnapshot!(JSON.stringify(sentSnapshot))) {
             throw new Error("Shared quest UI rejected the current snapshot");
           }
-          acknowledgedSnapshot = { ...currentSnapshot, presentation: currentSnapshot.presentation,
-            openRevision, revision: sentRevision };
+          lastValidSnapshot = sentSnapshot;
+          acknowledgedSnapshot = sentSnapshot;
           // A new layout needs an applied geometry acknowledgement. Ordinary
           // HP/quest/NPC updates keep the same renderer owner while Bevy consumes
           // the model on its next frame; switching to React on each update
@@ -237,7 +331,9 @@ export function useBevyQuestUi(options: Options) {
           status?.revision ?? -1, Boolean(status && status.frame >= lastFrame && now - lastFrameAt <= 2000 && !stalled)) : null;
         publishState(ready, ready && Boolean(status?.capturesPointer || currentSnapshot.questLogOpen || currentSnapshot.dialog.isOpen),
           stalled ? "Shared quest renderer stopped responding" : status?.error ?? null,
-          hpOrb, mpOrb, experienceBar, weightBar, hudBarPlans);
+          hpOrb, mpOrb, experienceBar, weightBar, hudBarPlans, ready && liveWorldControlsReader() !== null,
+          questNameTargetsReader() ?? []);
+        worldControlBlockersReader();
         if (ready && status && status.openRevision === openRevision && status.questLogOpen !== lastRequestedOpen) {
           lastRequestedOpen = status.questLogOpen;
           latest.current.onOpenChange(status.questLogOpen);
@@ -247,7 +343,7 @@ export function useBevyQuestUi(options: Options) {
         publishState(false, false, error instanceof Error ? error.message : "Shared quest UI unavailable");
         if (lastValidSnapshot) {
           try {
-            runtime.setMir2QuestUiSnapshot!(JSON.stringify({ ...lastValidSnapshot, inGame: false,
+            runtime.setMir2QuestUiSnapshot!(JSON.stringify({ ...lastValidSnapshot, worldContext: undefined, inGame: false,
               hostVisible: false, revision: nextRevision(), openRevision }));
             lastSnapshot = "";
           } catch { /* The compatibility UI remains the owner. */ }
@@ -256,19 +352,24 @@ export function useBevyQuestUi(options: Options) {
     };
     refreshRef.current = tick;
     tick();
+    if (typeof document !== "undefined") document.addEventListener("visibilitychange", tick);
     const timer = window.setInterval(tick, 100);
     return () => {
       stopped = true;
       if (liveHudBarReaderRef.current === liveHudBarReader) liveHudBarReaderRef.current = null;
+      if (liveWorldControlsReaderRef.current === liveWorldControlsReader) liveWorldControlsReaderRef.current = null;
+      if (worldControlBlockersReaderRef.current === worldControlBlockersReader) worldControlBlockersReaderRef.current = null;
+      if (questNameTargetsReaderRef.current === questNameTargetsReader) questNameTargetsReaderRef.current = null;
       if (refreshRef.current === tick) refreshRef.current = null;
       window.clearInterval(timer);
+      if (typeof document !== "undefined") document.removeEventListener("visibilitychange", tick);
       // HMR/remount must not leave a callable transport from the old page.
       runtime.clearMir2QuestUiIntentSink?.();
       if (lastValidSnapshot) {
-        runtime.setMir2QuestUiSnapshot?.(JSON.stringify({ ...lastValidSnapshot, inGame: false,
+        runtime.setMir2QuestUiSnapshot?.(JSON.stringify({ ...lastValidSnapshot, worldContext: undefined, inGame: false,
           hostVisible: false, questLogOpen: false, revision: nextRevision(), openRevision: nextOpenRevision() }));
       }
     };
   }, [options.requested, options.runtimeGeneration]);
-  return { ...state, refresh, readLiveHudBarPlans };
+  return { ...state, refresh, readLiveHudBarPlans, readLiveWorldControls, readLiveWorldControlBlockers, readLiveQuestNameTargets };
 }

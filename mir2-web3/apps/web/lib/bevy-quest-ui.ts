@@ -5,6 +5,8 @@ import type { BevyExperienceBarRect, BevyExperienceBarStatus } from "./bevy-expe
 import type { BevyWeightBarRect, BevyWeightBarStatus } from "./bevy-weight-bar";
 import type { HudBarPlanCommit, HudBarPlanRuntime } from "./bevy-hud-bar-draw-plan";
 import type { Mir2Language } from "./localization";
+import { sameQuestWorldStamp, type QuestWorldContext, type QuestWorldStamp } from "./bevy-quest-world-context";
+import type { QuestRouteTarget } from "./bevy-quest-world-actions";
 
 /** Versioned browser host boundary; no transport or game-state mutation lives here. */
 export type BevyQuestReward =
@@ -126,6 +128,7 @@ export type BevyQuestUiSnapshot = {
   experienceBarSlot?: BevyExperienceBarRect | null;
   weightBarSlot?: BevyWeightBarRect | null;
   hudBarPlan?: HudBarPlanCommit;
+  worldContext?: QuestWorldContext | null;
 };
 
 export type BevyQuestUiStatus = {
@@ -145,13 +148,19 @@ export type BevyQuestUiStatus = {
   weightBar?: BevyWeightBarStatus;
 };
 
-export type BevyQuestUiIntent = {
+export type BevyQuestUiIntent = Partial<QuestWorldStamp> & {
   generation: number;
   type: string;
   questIndex?: number;
   npcIndex?: number;
   selectedItemIndex?: number;
   target?: string;
+  objectId?: number;
+  x?: number;
+  y?: number;
+  resetEpoch?: number;
+  mapIndex?: number;
+  routeTarget?: QuestRouteTarget;
 };
 
 export type BevyQuestUiIntentResult = { accepted: boolean; requestId?: string; error?: string };
@@ -162,7 +171,36 @@ export type BevyQuestUiRuntime = HudBarPlanRuntime & {
   clearMir2QuestUiIntentSink?: () => void;
   setMir2QuestUiOperationAck?: (json: string) => boolean;
   getMir2QuestUiStatus?: () => string;
+  getMir2QuestWorldContextVersion?: () => unknown;
+  getMir2QuestWorldControlRects?: () => string;
+  getMir2QuestNameTargetsVersion?: () => number;
+  getMir2QuestNameTargets?: () => string;
 };
+
+/** The Native tracker determines membership; this reader only validates its current proof. */
+export function readBevyQuestNameTargets(runtime: BevyQuestUiRuntime | null, context: QuestWorldContext): readonly number[] | null {
+  try {
+    if (runtime?.getMir2QuestNameTargetsVersion?.() !== 1 || !runtime.getMir2QuestNameTargets) return null;
+    const json = runtime.getMir2QuestNameTargets();
+    if (typeof json !== "string" || json.length > 16384) return null;
+    const result = JSON.parse(json);
+    if (!result || typeof result !== "object" || Array.isArray(result)
+      || Object.keys(result).sort().join() !== "known,objectIds,stamp,version" || result.version !== 1
+      || typeof result.known !== "boolean" || !Array.isArray(result.objectIds)) return null;
+    if (!result.known) return null;
+    const stamp = result.stamp;
+    if (!stamp || typeof stamp !== "object" || Array.isArray(stamp)
+      || Object.keys(stamp).sort().join() !== "connectionGeneration,generation,mapFileName,playerObjectId,revision,sceneRevision,sessionGeneration"
+      || !sameQuestWorldStamp(stamp, context) || result.objectIds.length > context.entities.length) return null;
+    const seen = new Set<number>();
+    for (const id of result.objectIds) {
+      if (!Number.isSafeInteger(id) || id < 1 || id > 0xffffffff || seen.has(id)
+        || !context.entities.some(entity => entity.objectId === id && entity.kind === "monster" && entity.dead === false)) return null;
+      seen.add(id);
+    }
+    return Object.freeze([...seen]);
+  } catch { return null; }
+}
 
 type HostCounters = { generation: number; request: number };
 // A Bevy App can outlive a React remount/HMR. Neither session identities nor

@@ -336,6 +336,7 @@ pub fn normalize_raw_skills(rows: &[serde_json::Value]) -> Result<SkillModel, se
         } else if obj.get("name").is_some_and(serde_json::Value::is_null) {
             obj.insert("name".into(), serde_json::json!(""));
         }
+        #[cfg(any(feature = "portable-quest-ui", feature = "item-tooltip"))]
         if let Some(template) = obj
             .get("spell")
             .and_then(serde_json::Value::as_str)

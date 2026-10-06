@@ -4,6 +4,10 @@ import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
 import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
 import {composeStagePoint,sameComposeAuthority,sameComposeScope,type ClipboardGesture,type ComposeProof,type ComposeTextOperation,type MailComposeHost} from "../lib/bevy-mail-text-input";
 import { HudPointerRouter } from "../lib/bevy-hud-ui";
+import { crystalKeyNameFromBrowserEvent, matchingCrystalKeyFunctions, crystalDropViewDeadline } from "../lib/player-ui-preferences";
+import { crystalWindowShortcut, crystalSkillShortcutSlot } from "../lib/crystal-shortcut-actions";
+import { crystalCombatModeStopsDispatch } from "../lib/shared-combat-mode-keys";
+import { OriginalClientSkillBars } from "./components/original-client-skill-bars";
 
 import {
   memo,
@@ -33,6 +37,7 @@ import { matchesBevyExperienceBarView, readBevyExperienceBarSlot } from "../lib/
 import { matchesBevyWeightBarView, readBevyWeightBarSlot } from "../lib/bevy-weight-bar";
 import { HudBarCanvasController } from "../lib/bevy-hud-bar-draw-plan";
 import { readBevyQuestPresentation } from "../lib/bevy-quest-ui";
+import { questWorldControlAt } from "../lib/bevy-quest-world-controls";
 import { sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
@@ -539,6 +544,9 @@ export function OriginalClientShell({
   dispatchBevyHudNavigation,
   bevyQuestUiReady = false,
   bevyQuestUiCapturesPointer = false,
+  bevyQuestWorldUiReady = false,
+  readBevyQuestWorldControls,
+  readBevyQuestWorldControlBlockers,
   bevyHpOrb = null,
   bevyMpOrb = null,
   bevyExperienceBar = null,
@@ -612,6 +620,7 @@ export function OriginalClientShell({
   onSendChat,
   onRequestTrade,
   onRentExpandedStorage,
+  storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
   onLogout,
   onCreateCharacter,
   onDeleteCharacter,
@@ -637,11 +646,15 @@ export function OriginalClientShell({
   onClaimMail,
   onDeleteMail,
   onBuyGameShopItem,
+  cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip, onGameShopVisibilityChange, onHeroShortcut, parityUiBlocksGameplay,
+  crystalKeyBindings, playerUiPreferences, questNameTargetObjectIds, dropViewHeld = false, getKeybindCaptureActive,
+  onCrystalWindowShortcut, onCrystalGameplayShortcut, onCrystalDropViewHeldChange, skillBars,
   onSendClientCommand,
   onStartTutorial,
   onToggleCharacter,
   onToggleInventory,
   onToggleQuestLog,
+  onToggleOptions,
   onCloseCharacter,
   onCloseInventory,
   onCloseStorage,
@@ -791,8 +804,26 @@ export function OriginalClientShell({
   // shell's existing motion clock without any dedicated timer.
   const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
-  const [questLocalModalOpen, setQuestLocalModalOpen] = useState(false);
-  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [questLocalModalOpen, setQuestLocalModalOpenState] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpenState] = useState(false);
+  const questLocalModalRef = useRef(false), mobileMoreOpenRef = useRef(false);
+  const hpOverlayChangeRef = useRef(onHpOrbLocalOverlayChange); hpOverlayChangeRef.current = onHpOrbLocalOverlayChange;
+  function setQuestLocalModalOpen(next: boolean | ((previous: boolean) => boolean)) {
+    const open = typeof next === "function" ? next(questLocalModalRef.current) : next;
+    questLocalModalRef.current = open; hpOverlayChangeRef.current?.(open || mobileMoreOpenRef.current);
+    setQuestLocalModalOpenState(open);
+  }
+  function setMobileMoreOpen(next: boolean | ((previous: boolean) => boolean)) {
+    const open = typeof next === "function" ? next(mobileMoreOpenRef.current) : next;
+    mobileMoreOpenRef.current = open; hpOverlayChangeRef.current?.(questLocalModalRef.current || open);
+    setMobileMoreOpenState(open);
+  }
+  const [sceneHoveredObjectId, setSceneHoveredObjectId] = useState<string | null>(null);
+  const sceneHoveredObjectIdRef = useRef<string | null>(null);
+  function updateSceneCombatPointer(cursor: [number, number] | null, hovered: string | null) {
+    if (sceneHoveredObjectIdRef.current !== hovered) { sceneHoveredObjectIdRef.current = hovered; setSceneHoveredObjectId(hovered); }
+    onCombatPointer?.(cursor, hovered);
+  }
   useLayoutEffect(() => {
     onHpOrbLocalOverlayChange?.(questLocalModalOpen || mobileMoreOpen);
   }, [mobileMoreOpen, onHpOrbLocalOverlayChange, questLocalModalOpen]);
@@ -904,6 +935,7 @@ export function OriginalClientShell({
     webGl2SharedCanvasPrototype, world.activeNpcDialog, world.playerHp, world.playerMaxHp,
     world.playerMp, world.playerMaxMp, world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight]);
   const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
+  const heldQuestControlPointersRef = useRef(new Set<number>());
   const bagPointerRouterRef = useRef(new BagPointerRouter());
   const storagePointerRouterRef = useRef(new StoragePointerRouter());
   const npcShopPointerRouterRef = useRef(new NpcShopPointerRouter());
@@ -1173,10 +1205,9 @@ export function OriginalClientShell({
     viewportLayout,
   ]);
 
-  // Announce that #mir2-web3-canvas is mounted so the Bevy runtime can boot against it.
-  // This shell is lazily mounted (dynamic, ssr:false); the runtime attaches to this canvas
-  // on boot, so booting before it exists panics bevy_winit ("Cannot find element"). This
-  // mount effect runs after the canvas is committed to the DOM.
+  // Announce that both fixed canvases are mounted so the runtime can select one.
+  // This shell is lazily mounted (dynamic, ssr:false); booting before the selected
+  // canvas exists panics bevy_winit. This effect runs after both DOM commits.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const w = window as Window & { __mir2BevyCanvasReady?: boolean };
@@ -1265,6 +1296,26 @@ export function OriginalClientShell({
   }, [loginTransitionFrame, playLoginEffect]);
 
   const combatTildeRef=useRef(false);
+  const dropViewUntilRef = useRef<number | null>(null);
+  const dropViewTimerRef = useRef<number | null>(null);
+  const dropViewCallbackRef = useRef(onCrystalDropViewHeldChange); dropViewCallbackRef.current = onCrystalDropViewHeldChange;
+  useEffect(() => () => {
+    if (dropViewTimerRef.current !== null) window.clearTimeout(dropViewTimerRef.current);
+    dropViewTimerRef.current = null; dropViewUntilRef.current = null; dropViewCallbackRef.current?.(false);
+  }, [screen, player?.objectId, bevyMapRuntimeGeneration]);
+  function revealDropView() {
+    const now = performance.now(), previous = dropViewUntilRef.current, until = crystalDropViewDeadline(previous, now);
+    if (until === null || until === previous) return;
+    dropViewUntilRef.current = until; dropViewCallbackRef.current?.(true);
+    if (dropViewTimerRef.current !== null) window.clearTimeout(dropViewTimerRef.current);
+    const expire = () => {
+      if (dropViewUntilRef.current !== until) return;
+      const remaining = until - performance.now();
+      if (remaining > 0) { dropViewTimerRef.current = window.setTimeout(expire, remaining); return; }
+      dropViewTimerRef.current = null; dropViewCallbackRef.current?.(false);
+    };
+    dropViewTimerRef.current = window.setTimeout(expire, until - now);
+  }
   const combatCancelRef=useRef(onCombatCancel);combatCancelRef.current=onCombatCancel;
   useEffect(()=>{
     const down=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=true;};
@@ -1327,12 +1378,43 @@ export function OriginalClientShell({
     }
 
     function handleShortcutKey(event: KeyboardEvent) {
-      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+      // The Keybind capture listener owns propagation. Gameplay only yields.
+      if (event.defaultPrevented || getKeybindCaptureActive?.() || document.visibilityState !== "visible" || !document.hasFocus()) return;
+      if (npcShopBlocksWorldInput(false)) { stopNpcShopWorldInput(); event.preventDefault(); return; }
       if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
       if(bevyMailComposeReady||bevyMailComposePending){if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
       if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
       if (bevyQuestUiCapturesPointer) return;
       if (keyboardInputTargetIsEditable(event.target)) return;
+      if (crystalKeyBindings) {
+        const key = crystalKeyNameFromBrowserEvent(event);
+        if (event.metaKey || !key) return;
+        const functions = matchingCrystalKeyFunctions(crystalKeyBindings, key,
+          { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current });
+        let handled = false;
+        for (const functionId of functions) {
+          const action = crystalWindowShortcut(functionId);
+          if (action) {
+            handled = true;
+            if (!event.repeat) onCrystalWindowShortcut?.(action);
+          } else if (functionId === "DropView") {
+            if (!event.repeat) revealDropView(); handled = true;
+          } else if (crystalSkillShortcutSlot(functionId) === null) {
+            handled = onCrystalGameplayShortcut?.(functionId, event.repeat) === true || handled;
+            if (crystalCombatModeStopsDispatch(functionId)) { event.preventDefault(); return; }
+          }
+          if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+        }
+        const combat = onCombatKey?.({ type: "key", key,
+          modifiers: { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current } }, event.repeat);
+        if (handled || functions.length || combat?.handled) { event.preventDefault(); return; }
+        // A configured unbound key never falls back to a guessed spell or belt slot.
+        if (event.altKey || event.ctrlKey || event.shiftKey || isKeyboardMoveKey(event.key)) return;
+        if (selectedEntity && (event.key === " " || event.key === "Enter")) { event.preventDefault(); onPrimaryTargetAction(); }
+        return;
+      }
+      if (onHeroShortcut?.(event.key, event.ctrlKey, event.altKey || event.metaKey, event.shiftKey, event.repeat)) { event.preventDefault(); return; }
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
       const combat=onCombatKey?.({type:"key",key:event.key,modifiers:{alt:event.altKey,ctrl:event.ctrlKey,shift:event.shiftKey,tilde:combatTildeRef.current}},event.repeat);
       if(combat?.handled){event.preventDefault();return;}
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
@@ -1364,16 +1446,12 @@ export function OriginalClientShell({
       // F1–F8 cast the skill in that primary skill-bar slot. Crystal maps
       // KeybindOptions.Bar1Skill1..8 to Keys.F1..F8 (KeyBindSettings.cs:242) and
       // stores the slot in each spell's `Magic.Key` (mirrored onto `skill.hotkey`).
-      // Prefer an explicit binding; otherwise fall back to the spell's position in
-      // the known-skills list (the order shown in the character window's spell tab),
-      // so the bar is usable before any slots are explicitly assigned.
+      // Only an actual authoritative hotkey can choose a spell.
       const skillBarMatch = /^F([1-8])$/.exec(event.key);
       if (skillBarMatch && !combat?.supported) {
         const slot = Number.parseInt(skillBarMatch[1], 10);
         const skill =
-          world.knownSkills.find((entry) => entry.hotkey === slot) ??
-          world.knownSkills[slot - 1] ??
-          null;
+          world.knownSkills.find((entry) => entry.hotkey === slot) ?? null;
         if (skill) {
           event.preventDefault();
           onCastSkill(skill.key);
@@ -1402,7 +1480,7 @@ export function OriginalClientShell({
     }
 
     window.addEventListener("keydown", handleShortcutKey);
-    return () => window.removeEventListener("keydown", handleShortcutKey);
+    return () => { window.removeEventListener("keydown", handleShortcutKey); };
   }, [
     screen,
     selectedEntity,
@@ -1413,18 +1491,20 @@ export function OriginalClientShell({
     onCastSkill,
     onCombatKey,
     onUseItem,
+    onHeroShortcut, parityUiBlocksGameplay, crystalKeyBindings, getKeybindCaptureActive,
+    onCrystalWindowShortcut, onCrystalGameplayShortcut, onCrystalDropViewHeldChange,
     bevyQuestUiCapturesPointer,
     bevyStorageUiActive, bevyStorageUiTransitioning,
     bevyMailComposeReady,bevyMailComposePending,
   ]);
 
-  function npcShopBlocksWorldInput(): boolean {
-    return npcShopPointerCallbacksRef.current.getBevyNpcShopInputBlocked?.() === true;
+  function npcShopBlocksWorldInput(includeParity = true): boolean {
+    return (includeParity && parityUiBlocksGameplay?.() === true) || npcShopPointerCallbacksRef.current.getBevyNpcShopInputBlocked?.() === true;
   }
 
   function stopNpcShopWorldInput() {
     heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false;
-    heldScenePointerRef.current = null; onViewportDirectionStop(); onCombatPointer?.(null, null);
+    heldScenePointerRef.current = null; onViewportDirectionStop(); updateSceneCombatPointer(null, null);
   }
 
   function guardNpcShopGameplay<Args extends unknown[]>(callback: (...args: Args) => void): (...args: Args) => void {
@@ -1471,6 +1551,7 @@ export function OriginalClientShell({
     }
 
     function handleKeyboardMoveDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || getKeybindCaptureActive?.()) { stopNpcShopWorldInput(); return; }
       if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
       if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
       if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
@@ -3380,7 +3461,8 @@ export function OriginalClientShell({
     if (!tile) return;
 
     if (pointer.button === 2) {
-      onViewportDirectionStep(tile.x, tile.y, "run");
+      if (playerUiPreferences?.newMove) onViewportTileSecondaryAction(tile.x, tile.y);
+      else onViewportDirectionStep(tile.x, tile.y, "run");
     } else {
       onViewportDirectionStep(tile.x, tile.y, "walk");
     }
@@ -3519,7 +3601,38 @@ export function OriginalClientShell({
     return true;
   }
 
+  function handleSharedQuestWorldPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel") {
+    const held = heldQuestControlPointersRef.current;
+    if (held.has(event.pointerId)) {
+      event.preventDefault();
+      if (phase === "up" || phase === "cancel") held.delete(event.pointerId);
+      return true;
+    }
+    const frame = stageFrameRef.current;
+    if (phase !== "down" || !frame || screen !== "game" || !sceneInteractionReady
+      || questLocalModalOpen || mobileMoreOpen || !(event.target instanceof HTMLElement)
+      || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)) return false;
+    const point = scenePointFromMouseEvent({clientX:event.clientX,clientY:event.clientY,currentTarget:frame});
+    const hud = readBevyHudStatus?.() ?? null;
+    const bagForeground = bevyBagUiActive && bagPointerCallbacksRef.current.getBevyBagPointerContext?.()?.inputRegions.some(rect =>
+      point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height);
+    if (bagForeground && !hud?.modal) return false;
+    const foregroundBlocksWorld = !bevyQuestUiCapturesPointer && (hud?.modal || hud?.foregroundRects.some(rect =>
+      point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height));
+    const controls = readBevyQuestWorldControlBlockers?.() ?? readBevyQuestWorldControls?.() ?? null;
+    const width = Number(frame.dataset.viewportSceneWidth), height = Number(frame.dataset.viewportSceneHeight);
+    if (!foregroundBlocksWorld && (!controls || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0
+      || !questWorldControlAt(controls, point.sceneX * controls.logicalWidth / width, point.sceneY * controls.logicalHeight / height))) return false;
+    held.add(event.pointerId);
+    // Bevy receives the ordinary pointer event; platform world routers must not consume that gesture.
+    event.preventDefault(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    return true;
+  }
+
   function handleSharedUiPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"){
+    if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
+    // Skill DOM owns new gestures; existing canvas leases still receive their terminal edges.
+    if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar")) return;
     if(handleSharedNpcShopPointer(event,phase))return;
     if(handleSharedComposePointer(event,phase))return;
     if(handleSharedMailPointer(event,phase))return;
@@ -3721,7 +3834,8 @@ export function OriginalClientShell({
         if (typeof lease.action !== "string") dispatchBevyHudNavigation?.(lease.action);
         else if (lease.action === "character" || lease.action === "bag" || lease.action === "quest") dispatchBevyHudNavigation?.({ type: lease.action });
         else if (lease.action === "skill") dispatchBevyHudNavigation?.({ type: "selectCharacterPage", page: "spells" });
-        else if (lease.action !== "option") window.dispatchEvent(new CustomEvent("mir2:hud-host-action", { detail: lease.action }));
+        else if (lease.action === "option") onToggleOptions?.();
+        else window.dispatchEvent(new CustomEvent("mir2:hud-host-action", { detail: lease.action }));
       }
     } else if (phase === "move" && lease.origin === "world" && heldScenePointerRef.current) {
       heldScenePointerRef.current.sceneX = point.sceneX; heldScenePointerRef.current.sceneY = point.sceneY;
@@ -3737,6 +3851,7 @@ export function OriginalClientShell({
     clientX: number; clientY: number; shiftKey?:boolean; preventDefault: () => void;
   }, phase: "down" | "move" | "up" | "cancel") {
     if (handleSharedCharacterPointer(event, phase)) return;
+    if (handleSharedQuestWorldPointer(event, phase)) return;
     if (handleSharedHudPointer(event, phase)) return;
     const router = bagPointerRouterRef.current;
     const onCanvas = event.target instanceof HTMLElement
@@ -3816,8 +3931,8 @@ export function OriginalClientShell({
   useEffect(() => {
     const up = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "up");
     const cancel = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "cancel");
-    const blur = () => { cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
-    const resize = () => { cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    const blur = () => { heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
+    const resize = () => { heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
     window.addEventListener("pointerup", up, true);
     window.addEventListener("pointercancel", cancel, true);
     window.addEventListener("blur", blur);
@@ -3827,6 +3942,7 @@ export function OriginalClientShell({
       window.removeEventListener("pointercancel", cancel, true);
       window.removeEventListener("blur", blur);
       window.removeEventListener("resize", resize);
+      heldQuestControlPointersRef.current.clear();
       cancelSharedNpcShopPointer();
       cancelSharedStoragePointer();
       cancelSharedComposePointer();
@@ -3881,8 +3997,8 @@ export function OriginalClientShell({
     if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
     const hoverTarget=event.target instanceof Element?event.target.closest<HTMLElement>("[data-object-id]"):null;
     const pointForCombat=scenePointFromMouseEvent(event),tileForCombat=tileFromScenePoint(pointForCombat.sceneX,pointForCombat.sceneY);
-    const blocked=event.target instanceof Element&&Boolean(event.target.closest(".game-ui-scene, .login-overlay, .select-overlay"));
-    onCombatPointer?.(blocked||!tileForCombat?null:[tileForCombat.x,tileForCombat.y],blocked?null:hoverTarget?.dataset.objectId??null);
+    const blocked=event.target instanceof Element&&Boolean(event.target.closest(".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar"));
+    updateSceneCombatPointer(blocked||!tileForCombat?null:[tileForCombat.x,tileForCombat.y],blocked?null:hoverTarget?.dataset.objectId??null);
     if (isSharedBagCompatibilityMouse(event)) return;
     if (bevyQuestUiCapturesPointer) { heldScenePointerRef.current = null; return; }
     const held = heldScenePointerRef.current;
@@ -4078,7 +4194,7 @@ export function OriginalClientShell({
           onMouseDown={handleScenePointerAction}
           onMouseMove={handleScenePointerMove}
           onMouseUp={(event) => { if (!isSharedBagCompatibilityMouse(event)) stopHeldScenePointer(); }}
-          onMouseLeave={()=>onCombatPointer?.(null,null)}
+          onMouseLeave={()=>updateSceneCombatPointer(null,null)}
           onContextMenuCapture={(event) => {
             if (screen === "game") {
               event.preventDefault();
@@ -4124,12 +4240,10 @@ export function OriginalClientShell({
             aria-hidden={screen !== "game"}
           >
             {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
-            {!webGl2SharedCanvasPrototype ? (
-              <canvas
-                id="mir2-web3-canvas"
-                className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
-              />
-            ) : null}
+            <canvas
+              id="mir2-web3-canvas"
+              className={webGl2SharedCanvasPrototype || hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
+            />
             <WebGl2MapAtlasLayer
               enabled={mapGpuActive}
               stageWidth={stagePresentation.virtualWidth}
@@ -4180,6 +4294,12 @@ export function OriginalClientShell({
               registerEntityEl={sceneMotionDriver.registerEntityEl}
               sceneSpriteFrameIndex={sceneSpriteFrameIndex}
               useBevyEntityRenderer={hideDomEntitySpritesForBevy}
+              nameView={playerUiPreferences?.nameView ?? true}
+              hoveredObjectId={sceneHoveredObjectId}
+              questTargetObjectIds={questNameTargetObjectIds}
+              dropView={(playerUiPreferences?.dropView ?? true) || dropViewHeld}
+              hpView={playerUiPreferences?.hpView ?? true}
+              effectsEnabled={playerUiPreferences?.effect ?? true}
               entityKindClassName={entityKindClassName}
               onPickGroundDrop={onPickGroundDrop}
               onActivateEntity={onActivateEntity}
@@ -4200,30 +4320,29 @@ export function OriginalClientShell({
             registerEntityEl={sceneMotionDriver.registerEntityEl}
             chatBubbles={sceneChatBubbles}
             damageFloaters={world.damageFloaters}
+            hpView={playerUiPreferences?.hpView ?? true}
             targetActionLabel={selectedTargetReadoutLabel}
             entityKindClassName={entityKindClassName}
             viewportLayout={viewportLayout}
           />
+          {screen === "game" && skillBars ? <OriginalClientSkillBars {...skillBars}
+            inputBlocked={skillBars.inputBlocked || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen}
+            onCastSlot={lease => {
+              if (!skillBars.onCastSlot || !sceneInteractionReady || questLocalModalRef.current || mobileMoreOpenRef.current) return;
+              const point = lease.cursor;
+              const tile = point ? tileFromScenePoint(point[0] * stagePresentation.virtualWidth / 1024, point[1] * stagePresentation.virtualHeight / 768) : null;
+              if (point && !tile) return;
+              skillBars.onCastSlot(lease, tile ? [tile.x, tile.y] : null);
+            }} /> : null}
           <canvas ref={experienceDrawCanvasRef} className="hud-bar-draw-plan hud-bar-draw-plan-experience"
             width={1004} height={8} aria-hidden="true" tabIndex={-1} />
           <canvas ref={weightDrawCanvasRef} className="hud-bar-draw-plan hud-bar-draw-plan-weight"
             width={76} height={12} aria-hidden="true" tabIndex={-1} />
-          {webGl2SharedCanvasPrototype ? (
-            <canvas
-              id="mir2-web3-canvas"
-              className={`bevy-shared-ui-canvas${screen === "game" && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner)
-                ? " shared-quest-ui-visible" : ""}`}
-              data-ui-interactive={bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive ? "true" : undefined}
-              style={{ pointerEvents: screen === "game" && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
-              aria-label="Shared game windows"
-              tabIndex={-1}
-            />
-          ) : null}
           <canvas
             id="mir2-quest-ui-canvas"
-            className={!webGl2SharedCanvasPrototype && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
-            data-ui-interactive={!webGl2SharedCanvasPrototype && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "true" : undefined}
-            style={{ pointerEvents: !webGl2SharedCanvasPrototype && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
+            className={(bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
+            data-ui-interactive={bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady ? "true" : undefined}
+            style={{ pointerEvents: (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
             aria-label="Shared game windows"
             tabIndex={-1}
           />
@@ -4390,6 +4509,7 @@ export function OriginalClientShell({
                   showCharacter,
                   showQuestLog,
                   sharedQuestUiActive: bevyQuestUiReady,
+                  sharedQuestWorldUiActive: bevyQuestWorldUiReady,
                   sharedBagUiActive: bevyBagUiActive,
                   sharedStorageUiActive: bevyStorageUiActive || bevyStorageUiTransitioning,
                   sharedHudUiActive: bevyHudUiReady,
@@ -4401,6 +4521,7 @@ export function OriginalClientShell({
                   onInventoryCompatibilityInteraction,
                   onQuestUiModalChange,
                   onHpOrbModalChange: setQuestLocalModalOpen,
+                  hpView: playerUiPreferences?.hpView ?? true,
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
@@ -4412,10 +4533,12 @@ export function OriginalClientShell({
                   onSendChat,
                   onRequestTrade,
                   onRentExpandedStorage,
+                  storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
                   onLogout,
                   onToggleCharacter,
                   onToggleInventory,
                   onToggleQuestLog,
+                  onToggleOptions,
                   onCloseCharacter,
                   onCloseInventory,
                   onCloseStorage,
@@ -4449,6 +4572,7 @@ export function OriginalClientShell({
                   onToggleMail,
                   onDeleteMail,
                   onBuyGameShopItem,
+                  cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip, onGameShopVisibilityChange,
                   onSendClientCommand,
                   inputProfile: clientProfile.input,
                   gamepadFamily: clientProfile.gamepad.family,
