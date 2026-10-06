@@ -1,5 +1,13 @@
 # Android 对齐当前 Windows 完整度 goal
 
+2026-10-06 最新首帧诊断源码 `951a9ed71`，只读/显式开关/每进程128条，尚未实施渲染行为修复。
+同源446输入、443其他整文件保护；新增预算 compiled red3/5→green8/8，十四适用门通过（runtime309含新增8）。
+仅新 uiPreview 诊断APK，保留数据安装/回读SHA/原资源核验；五新PID原图已复核，夜间三次共11条GL506，GPU门仍FAIL。
+实测把错误收窄到3520×1980→2340×1080首个改尺寸帧、acquire与present之间，发生在离线注入和灯光启用之前。
+具体失败绘制附件机制仍待证实，诊断开关会影响时序，不能把零报错样本当验收；下一步追踪绘制目标。
+[首改尺寸诊断、精确APK及完整未完门](generated/player-qa/native-android-surface-probe-20261006/README.md)。
+完整AP-01–21、NI-17 PARTIAL、goal Active及Windows冻结功能基线不变；下列旧包/旧实测严格保留原源码归属。
+
 2026-10-06 当前原生 Android 光照源码：共享灯源 `c57a3cf06` + 贴图兼容修补 `1f01c1351`。
 复用原 Windows 地图/对象/效果灯源，匹配资源请求/render-ready/同帧 pose 后发布；Windows 仅薄委托。
 实际 API31 缺少 VIEW_FORMATS 导致首版渲染退出；修补保留原 sRGB 视图，未改 shader/颜色/游戏规则。

@@ -1,0 +1,3316 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-android-bounded-surface-probe-not-acceptance",
+  "source": "951a9ed717019273011454fbda3a627261b2244a",
+  "parent": "6c12eac0c400e81cc4bb7e0c8216b991be7dce6f",
+  "productLightingSource": "1f01c13519f369af1ff1f43a166c12053072e122",
+  "created": "2026-10-06T02:06:58.390Z",
+  "goalStatus": "ACTIVE",
+  "fullWindowsGoalDenominator": "AP-01 through AP-21 unchanged",
+  "nativeLightingStatus": "PARTIAL",
+  "diagnosticOnly": true,
+  "behaviorFixImplemented": false,
+  "scope": [
+    "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+    "mir2-web3/third_party/bevy_render/src/view/window/android_gpu_probe.rs",
+    "mir2-web3/apps/game-client/runtime/src/lib.rs"
+  ],
+  "buildInputCount": 446,
+  "buildInputsSha256": "d4cefe59d3a41d526370ca9f283c15fb86cbdae81b65c0b9031e6753d44c706e",
+  "inputs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/audio.rs",
+      "bytes": 55530,
+      "sha256": "ed2c8e4a48ffd0dc5b5321bc755c979ee583f44fc563767c6aedc62940de6831"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "bytes": 4157,
+      "sha256": "e34f4900608a157441ff9ba3760c689fa617a42e8e10007c0e37876598afe2dc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/character.rs",
+      "bytes": 3525,
+      "sha256": "a88338e21f6f26c59f5f91c5501eda3a7740d646159f221745b9ab74d241fb50"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/chat.rs",
+      "bytes": 9211,
+      "sha256": "6c9a1fc7aa345d9bbabf934ebb8835b972a738e454784fe396351a823bb73bcb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "bytes": 10554,
+      "sha256": "04357156a342fef53328b49e72e18c860c64f400f8ba498fabc77d5ad6f4ad8b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/additive_ui.rs",
+      "bytes": 2094,
+      "sha256": "45f42fdd40995f4e0ac78a4c39a7169de5d4b3dd88d3b3e9122a80c09481eeeb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "bytes": 4167,
+      "sha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "bytes": 5081,
+      "sha256": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "bytes": 5565,
+      "sha256": "a3e951f895b500d876ce15a1b75bde026f0454837faeb7835ec532e28add50b6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "bytes": 12593,
+      "sha256": "1b71977b7c33c5b3ba5e969f21413cd3cc929e4c9608872db33d60b03e8b9eaf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "bytes": 7425,
+      "sha256": "c8f223ed07ad7a58f01116ff696282f802650934370031a1182808c56c3c434f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "bytes": 5078,
+      "sha256": "4097d3ff5dd7646df62c683452b091efd943aee1da08313b7463f3811e566de1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "bytes": 112588,
+      "sha256": "1a7c257feeda322e788e99a2c52947084822ed5a847db5f4190594b6b851c59c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat_phone_tests.rs",
+      "bytes": 2699,
+      "sha256": "44488f0072c054adc14800fd8e1e4bda043284859dd2f1163ff8d3714bb170cd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "bytes": 4752,
+      "sha256": "10357c6c7b1554ea37b0955f72ebc0635fb241265dcd9a86ed5794ccedb6dc6a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "bytes": 17156,
+      "sha256": "e5ebfda4f3e01fd414f1736bf19225f1ab4b994678150f418adbd8e6e37a7e86"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "bytes": 26565,
+      "sha256": "295a5cf8f7c7d4a476afc5f5f570777762808383b15cc9a8f9a7c9aa0c9868eb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "bytes": 6764,
+      "sha256": "27583b21b786a7ee8f85ee1a3161bb894e4f109456c1d2d82a898771029cec38"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/crystal_additive_ui.wgsl",
+      "bytes": 296,
+      "sha256": "7528835165fe6aea1c6375df8b87b310a04e5e50a23c7e99ac5dc5ec02e5a39c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_frames.json",
+      "bytes": 42219,
+      "sha256": "85f11ac54f47fd5a2fb9d036d5abfa3696b028335e70a214fe54907ebf1d6087"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "bytes": 25057,
+      "sha256": "94a905bb9bfd24f08d97c1bd56a0a36313f83deffdcc01c4054176f42b3feed1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "bytes": 12424,
+      "sha256": "d83378debcd140db2639201a2e82c9d1d72bab70e51df1a4b8a74dd2ec877e11"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "bytes": 12450,
+      "sha256": "e284f66470d493ba8ab09e2d80136b1b42ab9850b3bf30e3d265f3ddcb679524"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "bytes": 26742,
+      "sha256": "33c4a62263ff7c5226e87e913536c77fb9d03d0bf2a9e342eebcef9999e8d46a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "bytes": 16931,
+      "sha256": "9ed1da1eee549e3da8d70c5309b401decc5cc682eb82bcc1bae18aa1e27bc3e9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "bytes": 5785,
+      "sha256": "079c90665f29881c932261d569f23daef7e96654473a818178fa2843fb34d015"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "bytes": 10750,
+      "sha256": "d883fb09df661f9ab197f6c444821d6ed5df88bd5be4e1530a4a69685dbfb28d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "bytes": 4710,
+      "sha256": "c8d037635dab159243428f95b1f6a5e7fc5b3d50e5d8443cc751ef80f0101c0d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 10200,
+      "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "bytes": 20025,
+      "sha256": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "bytes": 7599,
+      "sha256": "99525afbafb8affd057dc9752763386f7238895a0839de4f3ae6ed3bf8911a65"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "bytes": 5742,
+      "sha256": "94198f0805ef0d67155ec489fc7aa7488987cfb9f730226b29fcfa2350d77e98"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 44873,
+      "sha256": "8c4a4ab275d29c0a35aa723f3a9877ecc372b16158cd645373e6eaf82b2e2993"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "bytes": 12243,
+      "sha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "bytes": 41557,
+      "sha256": "71cd4043a705a63aa81a4af9329510aad7baceb06ce848e63f9747f68cd711dc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "bytes": 9046,
+      "sha256": "b4935dc36d12f48b563457149db579c668fde070e84e262c204b05556ea401d6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "bytes": 9950,
+      "sha256": "b31050c3fac7e3e055e36eb1f3b780f99c7b46361efa7fde11c7f82fd16a8d9b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "bytes": 3994,
+      "sha256": "501b39d47e14d8bad22f9442889a94e0b4ccb30f16930573b3af42683b367a66"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "bytes": 10270,
+      "sha256": "aeacc26d4b5895dc4d452dcacc3c5db55a5a985c6bf5795d0f38d83c89ee9954"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "bytes": 8158,
+      "sha256": "2b0634dcd27a4a428fc250138a12c1d69b94a7a03a26638dfc76dc8a42339117"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "bytes": 15417,
+      "sha256": "e17f765c6f15f14bac5c8daa22787d5bc3dcf44c1a46411a71df11bb39d028a2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "bytes": 9145,
+      "sha256": "72e6df988fd4c3e6a486963826da3d91a3c048b55645d601ac22a4fb6a627922"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "bytes": 27795,
+      "sha256": "021e175e686ba0d9d605f1181abf2f27530567d218c2169ad203484fa2ecd17e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "bytes": 40034,
+      "sha256": "f45e3ae5819e9bd7d9b77a493629e6c6154723ca1daed9f832afee3c56467956"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "bytes": 6252,
+      "sha256": "c4ebdea0f878d59374a3803b77af259e54f927686985b8de84fbbe20d13305d5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "bytes": 4446,
+      "sha256": "466ed3dfa5176a5cda58dfa3fc7fad9f7da5a5f4ca2444eb311f9a9f82c92117"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "bytes": 340,
+      "sha256": "c1ff409f274b58ab5c80b93a5772f2f14fbd47cc83ef4770be9cb9d77193b3db"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "bytes": 96011,
+      "sha256": "1bf524ab1c711c9297ce62c201b93aa01aeb40ba1c2847321383de9e13725e15"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "bytes": 6725,
+      "sha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "bytes": 6993,
+      "sha256": "7211e2beec5d38dded136cdcd5d4aa3226254cc6f17c0a7378c7c0c77ea954e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "bytes": 72094,
+      "sha256": "cf5527b4765801459d959ff399e8e274499bcfae00aa1a5874023c9e97346747"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "bytes": 17332,
+      "sha256": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "bytes": 14162,
+      "sha256": "ecb3eadc58ae5333d16f91bf7dcb9a44105b120de27c2dd655e305af72e782ed"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "bytes": 31669,
+      "sha256": "46f85f80a5303b50ed48fcf89aaa0cd5526cbe178aece1c262b56d9e92823bc9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "bytes": 10199,
+      "sha256": "454325de28cc47301c8e4fbd2e247d5e6ea7a354a699f1b1cebeac2f0e2cef05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "bytes": 7609,
+      "sha256": "b2eba78cc674f4a039606bc1551d22ba20d895b73cd8a2aa571ffbf25edf3ebf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "bytes": 6479,
+      "sha256": "7e1d2d74ed1e53dc4636f125cff77ea908a7a76f28957feb2b5fe1d2ae41cead"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "bytes": 2722,
+      "sha256": "d43815d47d9c73bd678852e80f3be0ff828834648ac8c6fefcbf9d72761d1339"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "bytes": 1936,
+      "sha256": "f235a96e71ee6a873703e33879bd51c7cb7b35280f29d0ea9a132ed53da9e07e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/localized_help.rs",
+      "bytes": 17246,
+      "sha256": "1ddb8b3d1d4824631ac1b6caf2758e5e77baf407899469930b24f6d757adcc52"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "bytes": 10806,
+      "sha256": "aae7f2052cf6b1102b10f8a28d40ec27335ef8d0ba7f164dad37d9eb68b26235"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "bytes": 10036,
+      "sha256": "d290c785f44667f361b60381e3d9c69bd94f298d42ad7448fb27392b343fe050"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "bytes": 4360,
+      "sha256": "ace6030f977a4f65b2c462c5331fe0211778eb66f9753250309db441fb7f034c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "bytes": 25227,
+      "sha256": "df32ff8acad96d9f6ece7c4f5c4f67c4e91d32d75bda533b498a90afff806f20"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "bytes": 14550,
+      "sha256": "1505452fbe1fd0fc8918e828ac5c58e94367f55e6513b79bebaa63aa1371e99c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "bytes": 28490,
+      "sha256": "9addf321be872dd4abbd0d6c2afd57668a080ef4a790ecd3d21bab63359ddb46"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "bytes": 14920,
+      "sha256": "5546faacd887f708c78f42e1ddea55d6b2bb014372582bde1ad619582e4a2e4e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "bytes": 8760,
+      "sha256": "bded0f8ea94b78b2d3b95fd595ef79037267b1f4b0d9865d5b7c8755f349438d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "bytes": 7482,
+      "sha256": "279e12b2f787f8f489d0f8618a5fd53dcc71fbe28d712930d3e77ee829a54de7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "bytes": 31995,
+      "sha256": "54e0326f085deb0f9d0894e6d40f1e884d9ef405b53d0226abbafe0d4631c1da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "bytes": 13494,
+      "sha256": "b681ad0aafd8b4b9ea175e0d51240f83289e8fa88f0e353726a043b61e59ed32"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "bytes": 10205,
+      "sha256": "97461fd55a379060f339acba8564e4075650623626a90612e74d0dead663ad3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "bytes": 13839,
+      "sha256": "2b2cabff7d3a844818b8fc147c6e9467119bf13f6faa3a6db12b004eee1c6d18"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "bytes": 2564,
+      "sha256": "fb497377a303ae874e64680ae1823b6077188992aec430dcdc4b1e09c2e97c85"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "bytes": 3048,
+      "sha256": "082000adf8d7d7ab762d1d3b8a85aa57cdee6371f79dc4420defcfdd64e5ff43"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "bytes": 11955,
+      "sha256": "a6bd1e7fb79bba3fd3deabe3dc61d167f177782d0fce507ae87be6de46d39bc0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "bytes": 18236,
+      "sha256": "1f5e9fbf512980113c09c1904e7c4c9c634fe618065036f001fbb8e290ece28e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "bytes": 1350,
+      "sha256": "80b175dc6637d0f6aa25058962450484495dc11fbe8dfacacc36fd05461052f9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "bytes": 16275,
+      "sha256": "2b9ebb9c0845d8acf1e10648cd3107eb92d12f47fe1505796e043a21025ab91b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "bytes": 20511,
+      "sha256": "28cec2945eaf0c166398f94ad74fb7235112af9898d64b9478c2f2374e91ad06"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "bytes": 8152,
+      "sha256": "57689fef43667dd00e2eb04a11309cde539a87d7182845dfb4fb57f316800016"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs",
+      "bytes": 26676,
+      "sha256": "054552c6cfa0e44828ada20de355c08f5eb8315870aa45824942062a54d2cc1e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/nonmodal_input_tests.rs",
+      "bytes": 3585,
+      "sha256": "7c287db57d50f8c0237bfe14192c6eebca809474de842314305d09acf19d64b1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "bytes": 26053,
+      "sha256": "63aa5f1398ffd1044197a346e8b21be471956d3ff7f2744353a9a444cc01e30c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "bytes": 11871,
+      "sha256": "c980989728c9732893498fd432ea0608f85d10b28863e327a5897942d0cad989"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "bytes": 35032,
+      "sha256": "35b997c6ca607d4888da0708903b8d8290a5d739a89e9b6bb59cdcfe5df1a851"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "bytes": 7166,
+      "sha256": "f094a7d5dc436b5340b4a635e819799f5c2d72da3a110f185713d8d862fbc2b8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "bytes": 14497,
+      "sha256": "b9f62345e1b945d31c457bb71e6cb7f1272fd0afee937244a6f302ab09b9eec7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 948346,
+      "sha256": "9805cc5b12f8356a3d51fe36425c53ed5e682b1e037ed2f8a9c0f15f662c5117"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "bytes": 15329,
+      "sha256": "c2c56972872c9d1b9ec1dc1daec2c01138c2a3d02fce7c2565cf25b5b8e1f068"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "bytes": 13051,
+      "sha256": "12a98e580bfbd8cf6ad47f083ad7c5977f857a6d71e0d82e238780c833560a05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "bytes": 17405,
+      "sha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "bytes": 9702,
+      "sha256": "417f139273ea15ce0f9bb4bade9a9f73c2627e20a835e1e9114c3674302b68d3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "bytes": 25158,
+      "sha256": "658a9ed3f794710771f25f86fa84692dbae03d69e1c8b38f68fa19bab016ecf1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "bytes": 4665,
+      "sha256": "478c53622ef7ff83641660e3fc6911a08548ba48fa7ecd786a99fe41e98b3c68"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "bytes": 31699,
+      "sha256": "fc0caefaefcbcd972e7678e31060ad91225669148fff9ee39190af3a04c24b34"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "bytes": 21237,
+      "sha256": "fa4f9ca81d031971afb9154829c9a37e33c35ffba30adf53955c7c67a1ab97cf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "bytes": 15803,
+      "sha256": "8ac2fe53aa2362a14e442aa7064c5e1281b5e78e6b34b183b9ed9f25b8c5d735"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "bytes": 11897,
+      "sha256": "100bfbdfdb75b1708a429b45682364ffa38ab77445338b4a4f5d58ad34ff2a92"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "bytes": 10940,
+      "sha256": "67af261683bcd2a8d22311b7c5c7552347d0f788c96051f5d7b74e07c849f70d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "bytes": 20429,
+      "sha256": "200546521047e9f01bae320eb270a78a0432de1ccc475981e31aea34830699cd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "bytes": 13092,
+      "sha256": "2c03db012c8fd0a8abbd40f77c4eb413dafe5df6140e1134e0f07ea00a7cdd40"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "bytes": 12624,
+      "sha256": "734068c2ccef7e6e3ae0cdbe9d20a6a67adec6de564f4911a106f271dee83286"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "bytes": 8199,
+      "sha256": "c4e3e1e2887b832ac8bb39dc12e70663ae69b9b8552ed760982d661e40eb3115"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "bytes": 17307,
+      "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "bytes": 27582,
+      "sha256": "dfd89dee7c19b1b7ab56c631f49574d12ec6d3b3ffd974a94cf73e58c7798163"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "bytes": 30967,
+      "sha256": "474897b243e24fe81762af9cb208fa131f4f2a1f4741028f7c7063c2a7fbb0c3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "bytes": 8556,
+      "sha256": "98c4ddd5528254bdbb78f396b0614b68090382812cf108548d345d1e7536b148"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "bytes": 20355,
+      "sha256": "fcfb775d08cadeef53dab9850ceea25b3773aafffcc85f4dc98b68f321a5f31d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "bytes": 5393,
+      "sha256": "e0988f17e76dd152696f95a6b37802d61ae3225dd4e192fba4de2cebc2a1e6ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "bytes": 13099,
+      "sha256": "f7efcde453c73905e6bd8bf22a71c0b39d2f1b604c5abdb34036a518f28073db"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "bytes": 9428,
+      "sha256": "ccb903a6bb3fee2370794d99a7aed360398d9a06e5996e7251acab2006952c4c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "bytes": 15437,
+      "sha256": "06a91ca47f6866f726090f00bd722712bffd05320a9077e38feb8ed487c55e2e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "bytes": 14224,
+      "sha256": "0d41b9e146db66d37a4147348873a2833b763f4d396f1f4805e0e5de91712335"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "bytes": 27664,
+      "sha256": "ca84a11c4c77d96fb6aa580ce64b39f2197442ebacdbe3d23ef42e93889a4638"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "bytes": 34843,
+      "sha256": "e5ca2c18c4ab2e0b1892b8906a3e815a31fb82ea88bed5a767da78795352ef21"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "bytes": 17157,
+      "sha256": "d3022d83e31e199decccabc24db4601cf4560c8276663dc92a54a1e3a3326d98"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "bytes": 28376,
+      "sha256": "093ec8546f3d4a7a531811648725ac3ab2d8cba696964fb69f3d5515220b35a1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "bytes": 1712,
+      "sha256": "c89e2cf6e182eb79503443f9d5289b7dc9da8688379f8622263f6b5112c0a443"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 60408,
+      "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/entities.rs",
+      "bytes": 9881,
+      "sha256": "17b2002531113b996a28c8fee4e94fe147350b57b8be38fab9a5157465596e4c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/graduation_tests.rs",
+      "bytes": 3493,
+      "sha256": "90ed22b17ffef2a68099cda3b0985e369984a31c4dd69701547c486f046d7a5c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_model.rs",
+      "bytes": 38516,
+      "sha256": "b8d71b106988b37516ba61769e0313c30d756b1a099d7ab654073ca073ab7966"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hud.rs",
+      "bytes": 6225,
+      "sha256": "b23c5f5b19b4b02b5aec27cb8f4b1440d8a9822748a69e91500933cab41704a9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/inventory.rs",
+      "bytes": 30859,
+      "sha256": "8afafb56f0982b57b533fa93f06a7cddbf416c4199f4073b5ef352b29702fc23"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 3178,
+      "sha256": "f3f74024d714a0c1d69d359897aac5d434b84624c2428e5b2b160679c0289bb8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/mail.rs",
+      "bytes": 18020,
+      "sha256": "4deff9868f1938d2c685755f98d674c9ec2699806fcdbc0f0019714e1628e63e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/mail_service.rs",
+      "bytes": 5082,
+      "sha256": "4084f7a4f067ec27eaa9c4ef3536e3da4f8e24402da5a20134f0bdb8d79fffcf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/map.rs",
+      "bytes": 10934,
+      "sha256": "7613359832b2cb3985d58528ac97599112ed6891e51435f13defda8678a0eb51"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_chat_ingress.rs",
+      "bytes": 2763,
+      "sha256": "09b993fc22688e6342e2e2e904159f97f4412e2314aa6acd5592d72468527e31"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "bytes": 42229,
+      "sha256": "531beba5dace3a8309470d1f2a8c9c9c0978aca6057a3e6f8d51ee6568e67e9d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+      "bytes": 41632,
+      "sha256": "b481245dc058af0b31080e593e811dae8fab582ed0fb5769af2c26207284362e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "bytes": 26969,
+      "sha256": "3be13bb053cba061317fd5b230b3b4541f1754b27c2394fa247a481f068c66e9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "bytes": 23201,
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_lighting_environment.rs",
+      "bytes": 5315,
+      "sha256": "d37781d81eb74db7ab350f1af94d3b23894b9c4e586c6407236f28759b10e3dc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_lighting_environment_tests.rs",
+      "bytes": 6797,
+      "sha256": "7bf13dd7360d3f3d3b9895794d1ed5db1c9d54b48c1e3c1efffdc7f18c86a2be"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_lighting_sources.rs",
+      "bytes": 14717,
+      "sha256": "09abb6da66a66718c0dea4f05d5d66911e4440ccec87579416aedc1a75807ece"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_lighting_sources_tests.rs",
+      "bytes": 9486,
+      "sha256": "ad9469ecad065546375b6eecb8039a18b5835a10978bf599cc0b9f7285625c3b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+      "bytes": 11698,
+      "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+      "bytes": 13402,
+      "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "bytes": 13160,
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_player_ingress.rs",
+      "bytes": 14471,
+      "sha256": "aaabccc3212f26d3f3c346b1c526e4de1e0f6b5bc1ca2594a3710dde75994504"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+      "bytes": 22705,
+      "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "bytes": 91928,
+      "sha256": "89aa2eaa3c8664edb8fc91436a359d8b0e6dfac06d1fc96f7b990de8173e4d75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "bytes": 22843,
+      "sha256": "924a54ea616c1e8a2510aa4ed073d587c02bb9046d0381904ed1a7994f4bbf58"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "bytes": 124979,
+      "sha256": "00915ac21b2add09ed4a9ee3f84fed40c1e6969643851fc711cf0387c8406fe2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_skill_ingress.rs",
+      "bytes": 29301,
+      "sha256": "eb4135ba255ae4ee756dd4dbd5e315781bb0ba4f54694ef840e5005bee5ee775"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_social_egress.rs",
+      "bytes": 29102,
+      "sha256": "41be6b508899136174f656203954fa1b4f4e84a0164f7a0643fda18c086458d7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+      "bytes": 12436,
+      "sha256": "bc82fbe75c8274598ee543836aefa619345892f472450e9daac4ca71609c9438"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "bytes": 5508,
+      "sha256": "d770d6ef22ef0af72df9c8a6dc093c991f1be3e69926a177c753d9befacfe1ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/options_effects.rs",
+      "bytes": 28290,
+      "sha256": "d086e5faa0c6e20a659da1fe5b35636a374021135d97ea84300b9279a8901a7a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/pending_operations.rs",
+      "bytes": 101671,
+      "sha256": "2c605919440c4c26c53c6cc05116aa29a029d385b8eac421aa8a4013d1c31d3b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/player_text.rs",
+      "bytes": 48924,
+      "sha256": "2ce3f43ac7e6babf52c5c02a535a91967390716f2a61f4841c80f2e487c88799"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_destination.rs",
+      "bytes": 3762,
+      "sha256": "44a0098f515f600f252ed995efcc653a0e56826e6539fe0d2ac792b82f15d02b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_guidance.rs",
+      "bytes": 5675,
+      "sha256": "202a7faa12f0d2e635512570fb05616ee29900275f0d0f9341e758745b787c2c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "bytes": 10738,
+      "sha256": "1c03c5632058aa4e3c0daa97bd3ca40ab887b87f57e8397dbf2a411c52055a81"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_journey.rs",
+      "bytes": 37931,
+      "sha256": "d02a13f5e0d9d1e452dabb71fa24d77a0f7a26193648d29c0fb729ba5b917d6f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_model.rs",
+      "bytes": 32330,
+      "sha256": "3d99a0b1d67615d08c0281e5eca180eee9e16462fc368d77a0996e44511b0798"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "bytes": 65454,
+      "sha256": "ddcc76281c46a923e41e1b01de56676eb1154336e015efb2201c79c25ab81d44"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_multilingual_visual_tests.rs",
+      "bytes": 26680,
+      "sha256": "26b0b1cb2a246b570272cd966fb77cb3aa0b17605fd9ed52fe3caa39bfabe274"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_nonmodal_input_tests.rs",
+      "bytes": 10293,
+      "sha256": "d2ad9c40d84983faddee466363b1670255d0a7d2f84634e3df2c2860db345f25"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "bytes": 76211,
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_practice.rs",
+      "bytes": 13951,
+      "sha256": "bcd6ae532b44b69ec17728c966e6db52d50bea9c6928e4f4f290059e7a07249e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_route.rs",
+      "bytes": 6565,
+      "sha256": "b4876ec4b953d9e899ad45626585d37f2e3cb6242ef939c8fa9ccf484f30fb39"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_supplies.rs",
+      "bytes": 30824,
+      "sha256": "0feef7fcbcd0a2e3b73ecebc06b7275c785979faa384e54cddc553dd0b547ff2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "bytes": 19277,
+      "sha256": "73e910af9a2824f92fdfca88c5d1fb9c658d1d44efb5c7d4143ead9def126057"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "bytes": 21232,
+      "sha256": "e513ebd6245b94589b2617235e43978cbe35eac8ad0f58484f8d49e78f2babe0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 368258,
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 9075,
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 15596,
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "bytes": 16414,
+      "sha256": "ee7edd097d1f2208a6a746a1d1c84bcaa096d02a5008411734dd3122bba27357"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "bytes": 21495,
+      "sha256": "5d73ec6765b3df04ad357686d6abe2d10910e0e3cad628d5dd7ce4156322bbd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_model.rs",
+      "bytes": 27851,
+      "sha256": "d887897dae3024215dbfba43477ee409084285aaec3fe371418af57d55d26efb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76619,
+      "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "bytes": 10477,
+      "sha256": "5ad3148fda7f25ea47b1754ebcbfdad9c8fb5b54ba7106bd550ecf2fc6b832c6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs",
+      "bytes": 2096,
+      "sha256": "bdb25cbd182ad28e54ed238766656b78bf86fa4557112d14ac1df1d2b4eccde3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "bytes": 123990,
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/AndroidManifest.xml",
+      "bytes": 1309,
+      "sha256": "3c1ca9ac38cf3eb938eec4e0e612aefc972b5e881c4110225afa3e7f6e0ec67e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/EditorBackPolicy.java",
+      "bytes": 729,
+      "sha256": "41aaf0463295fb5fbceae661b082ff8077a82691993cd5e77288b225617f35a2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/ForegroundRecoveryPolicy.java",
+      "bytes": 694,
+      "sha256": "e8f9b53e9adf7ad362943654c86e1855d27ce77c6abdd6bce5feb82513a2bd59"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewayHostPolicy.java",
+      "bytes": 918,
+      "sha256": "88cfecb9c4da76e1d943e514aa4a286801e0c40e32a770ba0d03163d0a85621f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 44758,
+      "sha256": "c3bd93c35e3be78c8f30d3d7fb56ae211ea55fe479de60f890e0b54517929476"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21458,
+      "sha256": "a7feec3a62cbfba294edf6eb408974467bc6a176f986bb9edc0a7c998a740334"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/NetworkRecoveryPolicy.java",
+      "bytes": 1176,
+      "sha256": "3a005db5bb5be9c01abac2471321af844d3c5ee448ce5db6b76ab7b66dad5a1c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 22350,
+      "sha256": "720e7e9b45dacf22b2752ee1ad7987e1271044d1a80e0d0d2c1a16b48eed7ea7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+      "bytes": 3855,
+      "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/res/values/styles.xml",
+      "bytes": 520,
+      "sha256": "a7e0937066308874ff5b1d12378f8c6c8e14a58f81d4b58bf5ca328bb434c863"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/EditorBackPolicyTest.java",
+      "bytes": 1871,
+      "sha256": "1172e2e90d9284a3fff716d20e90d224dcc395d6f81ecb0c5f809ddd66fcf8c6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/ForegroundRecoveryPolicyTest.java",
+      "bytes": 1266,
+      "sha256": "6b0476f51c74dd943bd65671c84e97fa7300e612913dcbb2acbfbf05944c654b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewayHostPolicyTest.java",
+      "bytes": 3710,
+      "sha256": "eecd75e50bcbdf1b5872b331c581976265e55144b9a8371d5e5f0fb34478d141"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 103380,
+      "sha256": "764d7907b75106e0c0f25df1f4e5a0a2038a1a2998a26468a040e9664b6d851f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/LightingMetadataIngressTest.java",
+      "bytes": 8952,
+      "sha256": "11399d9d9c8c2c846a75725f387ffe56fa9ade267d61c9c2296739ff6562fadf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/LightingScenePreviewTest.java",
+      "bytes": 3973,
+      "sha256": "7900f94708e9c44710b60aa40b183091095ca3a43046a27bb55e1747edbe6410"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/NetworkRecoveryPolicyTest.java",
+      "bytes": 1651,
+      "sha256": "4ebfd9f8ed8088b3f80f727e2589191ecbc90c7283520442e06e062c055f098c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 24756,
+      "sha256": "da6523a9b4917384a1ea0aa60333d2b03f72d240607871422723b40935f05450"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "bytes": 5853,
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/android_input.rs",
+      "bytes": 25598,
+      "sha256": "97937ad46492e7f653bcaa1ea09539608775336e94549d52e22a14335c749cfd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/android_ui_clipping.rs",
+      "bytes": 8342,
+      "sha256": "ebded183169996b954f6a97598dff3170fb2c3be295d18d4d45d1923c0bb5f96"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_editor_tests.rs",
+      "bytes": 5396,
+      "sha256": "52a0f5036b96f0500112e935ecc71683539a02bff5b71f1d3aeb83e24b381983"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_ingress.rs",
+      "bytes": 3119,
+      "sha256": "2f5b777cf15bb5669388d7b00553ef1b639fdee5c0ecb497e6eb468d054d67a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_ingress_tests.rs",
+      "bytes": 6493,
+      "sha256": "64d0972bcd6a63b6bf3a8fa6aaaba7df5efe658b973bf834094f6ed8f78220e2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/entity_overlays.rs",
+      "bytes": 43874,
+      "sha256": "b4c257695aa95de6fdf86c44967863c7c5ba3c4e7675b2a13581f0301316fbd3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/entity_render.rs",
+      "bytes": 106111,
+      "sha256": "7510a34a0ca288ddd7088e2c011cc6ee659a80814e11be469691952e99b1c043"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/form_input.rs",
+      "bytes": 14346,
+      "sha256": "6510a8da70e4994b1ca1337651dc0d2a5648f7552015d2f1bf92ab94ac247d40"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "bytes": 134167,
+      "sha256": "68827507dfaf64a8ce322fb278811ed1cc62a4491c33e1e3c40ab9e19ce4146b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ground_labels.rs",
+      "bytes": 12741,
+      "sha256": "760d9e65686f9229b00d2dde6daef9c93bee15aa7eaf0b0b287c6332ccd57c11"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ground_pickups.rs",
+      "bytes": 5473,
+      "sha256": "16a53a93d59ede82a52b802c5a358020d0e24df47a6f688e33ac4c369c1aa15e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/hero_egress.rs",
+      "bytes": 41621,
+      "sha256": "65afd69611fa52caaeca08220182daccb214098c95a404ca85048098ec55b681"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/hero_ingress.rs",
+      "bytes": 42534,
+      "sha256": "48729951d593a770224713a626a00207bf2f4d4109b80906601cc34fced5df81"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/hero_jni_preview_tests.rs",
+      "bytes": 10919,
+      "sha256": "ffc50b0f66a196f41cfbf257be2920d55bf7bd0d2afc843b75b10c001237b62d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/inventory_ingress.rs",
+      "bytes": 15530,
+      "sha256": "cc9ac0b17602d95bfe15f30968faff18599122706a2a0447826911fcb5cd80e9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "bytes": 9207,
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 96420,
+      "sha256": "2d83bd6005022e4be28acee996c955032989ac87164e8318ce64a54107ec369c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_effect_tests.rs",
+      "bytes": 4504,
+      "sha256": "99fdb2432cb78ae26209889e18def28bf858abf16ea48dc45df4b53418932bc7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_frame_host_tests.rs",
+      "bytes": 3884,
+      "sha256": "1917e78eacb90fc4cc4823d58ef3c2fb91d2c3fb5c429d6589a16ce505cfe873"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_host_tests.rs",
+      "bytes": 7196,
+      "sha256": "e61ce4b605e7feacb805e1056b9f7137f4be80bb7332189516ca88c2b87b6497"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_ingress.rs",
+      "bytes": 20339,
+      "sha256": "cc7f2c15f95af6beb76aa7a7c0abbb923505b7105067bd66be6af91d3b7cc65c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_map_tests.rs",
+      "bytes": 3340,
+      "sha256": "2146883760736eb6b497f390a2b6073b3c08ef71cbed6dda3226824169fb16e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_render.rs",
+      "bytes": 7508,
+      "sha256": "8a6bb0c791cb752851e08a0317adb1593d3460ab2e8eb9e07e618f4378789aa0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lighting_render_tests.rs",
+      "bytes": 10926,
+      "sha256": "c34e4315e2fee7068c8d2733b7f5d730e503ea97f1c4e8e933200769224da2c1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/live_entity.rs",
+      "bytes": 181102,
+      "sha256": "db9d7878d3f230704a535e384b29ac228380c2ad8790e35164d2ce69c477021c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+      "bytes": 22594,
+      "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+      "bytes": 12532,
+      "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+      "bytes": 31534,
+      "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_jni_preview_tests.rs",
+      "bytes": 6346,
+      "sha256": "5cc0dfb95048b6e6dd5bc4981e54efcdb5690aa4ede77292a3e03e06e800b64a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/main.rs",
+      "bytes": 368,
+      "sha256": "3180e4e43507fc2ee69f130fcc3069fea5d430d62b559d8f7d377353d50ae05a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/map_objects.rs",
+      "bytes": 11066,
+      "sha256": "86338a8d5d1f3edb6521487df4f7b5375b27b3a0e5d442622f5ba53685b4b16d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/map_render.rs",
+      "bytes": 38135,
+      "sha256": "546755dc1be499012a42b9d6231265f7f860e5258d01d925cd248913f52b177e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+      "bytes": 93883,
+      "sha256": "d93365726d151fb9aca8254fa517b1dcb914e92b91abdbaa99a2c571535604bb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "bytes": 5208,
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "bytes": 20887,
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_chat_layout_tests.rs",
+      "bytes": 9828,
+      "sha256": "3c687a97d2bfff9432c497d0ebb06d2210d0ca30bfa35fdd635186de14d2c6d3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "bytes": 29603,
+      "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud_tests.rs",
+      "bytes": 11246,
+      "sha256": "927470363bc30c7a881201261d6db60fddc92984540d3b796dd07fb9c562d7ae"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panel_tests.rs",
+      "bytes": 5382,
+      "sha256": "13b1a1e0ea296edd3a85e073600105697dc373b91f5a864c8f8ff98739553a57"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "bytes": 4789,
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "bytes": 20595,
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_sidebar_tests.rs",
+      "bytes": 4393,
+      "sha256": "d733bfe413b112326ce752331ef846a69b2935f74495e6281734f24b0071228c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "bytes": 10548,
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress/tests.rs",
+      "bytes": 8167,
+      "sha256": "e6784b9c094e0eca58234e6d11b0c575889848ae04321efe7d483ad1dda65ec4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+      "bytes": 8715,
+      "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+      "bytes": 32437,
+      "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+      "bytes": 6222,
+      "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/scene_effects.rs",
+      "bytes": 41583,
+      "sha256": "8dd04cc1225b1e873704c07c36cfea49b6cea88501e551e3f4956c79a369f53c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 253638,
+      "sha256": "cee461860ecb6836a97d05a585699e30b0204a1a39cf6939fcfa38a96f27741e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/skill_ingress.rs",
+      "bytes": 17929,
+      "sha256": "353341cc7f6b881a1106220530364ece3b2ac6840eaa2fc55b1a6ca6d7820e93"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+      "bytes": 40202,
+      "sha256": "8f9e10a6b9c1d957a0c29af006d1f07eb16cd2506bd9695c67e655e6c95ecafa"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/social_jni_preview_tests.rs",
+      "bytes": 10840,
+      "sha256": "20b766d96f7a567177ee52d7822b5a5d1714bd0fe904f6a1eb1a321c7ba0bf90"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "bytes": 10918,
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/touch_cursor_bridge_tests.rs",
+      "bytes": 8844,
+      "sha256": "8e27d28aa217e01b7ad8ac6a1fff51890544e2d84d9c0593ba14be3a98339e72"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 111926,
+      "sha256": "2970dba9754301297750d8c8cf3f2b45da9e8eaf3295c03c13bd00cc953c5eec"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_assets.rs",
+      "bytes": 32498,
+      "sha256": "fba6eb6492ae32eedadef877024c99ed7c8f10041d6316bc3e08e4e37a723658"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+      "bytes": 5009,
+      "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_projection.rs",
+      "bytes": 19800,
+      "sha256": "4b85d5dc9f641063426ac9baa687dd3afdb6a8b06878316a2d824298d8011087"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 149003,
+      "sha256": "974d1b00d3673b226e9e0f71c460660d2f640010ee144b48d2c786868b53d4f4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2062,
+      "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/assets.rs",
+      "bytes": 35827,
+      "sha256": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+      "bytes": 148043,
+      "sha256": "513e8406d285750d725fd6f2eabef8a3a4b54c0a17aae556018747da2f882952"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/big_map_input.rs",
+      "bytes": 12818,
+      "sha256": "b619ca0c162338eb0c1a7b56acb0337bd1c645594f61e4b75a67b8455633bdcd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/big_map_input_tests.rs",
+      "bytes": 17113,
+      "sha256": "877347cb5fd04813ac6e07028cda2df84e7af5de283bbde075e43a18e79ae3cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/branding.rs",
+      "bytes": 2012,
+      "sha256": "999dcde18d74c5161e9c02453a3034ed00ce5f42e63d7df73976399c321edea1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/buried_monster_replay_tests.rs",
+      "bytes": 11185,
+      "sha256": "9871cc97f4d7af02d07d6c67f3c39558f40fc59ad59d616fa063251f2549f5da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/capture.rs",
+      "bytes": 69537,
+      "sha256": "cb1cd6d712832dbccddfde819135718d424692f5e9ba198af6bafec2b7cff96f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/capture/provenance.rs",
+      "bytes": 6284,
+      "sha256": "a4396ffecdbaf1d17b50fc41e5b161c68f6a36937bdd53d0ca1c56243c86c8f5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/clipboard.rs",
+      "bytes": 30062,
+      "sha256": "8cc09b46f59c3aec86f8e3768cc40d634b9f9a6e621d950dbde8c00c7d7f7c89"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/cursor.rs",
+      "bytes": 7511,
+      "sha256": "ebb1b50761500213d1f278e5c8766fa1cfef4cca51425044e55b567a98c68c3a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "bytes": 419466,
+      "sha256": "2d2387df675f0dea136857889a15f7841a44e031e305c339c2ae8e362d5449c4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_health.rs",
+      "bytes": 16623,
+      "sha256": "89e882263dd97b7f46ca4deb75ffaa029735873fc3788883ad1cbc429540e9f2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_overlays.rs",
+      "bytes": 92027,
+      "sha256": "4ee7ac78f5b7ac845561bbbe17f7d04fd2e33ea4507e44029166fd55b2e82e6c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "bytes": 161964,
+      "sha256": "29ca4043cb0b981bf935e11110f012a8d3ec734d09575352c4e5431769e34bca"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "bytes": 9696,
+      "sha256": "537602df77c31189ffee93dbbbe775b35905abb54f58d668fdf16d18e3c22d97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/frame_sets.rs",
+      "bytes": 19005,
+      "sha256": "91e81ee8493937c7f36cc36aba8fe78d3e505463dfa513ba936e2c41063e32ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 323202,
+      "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 449445,
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway_account_feedback.rs",
+      "bytes": 3916,
+      "sha256": "2dc06913529f8df491890b25df4723326a6f98ac41d519e602ca790bb7e418d9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway_handshake_tests.rs",
+      "bytes": 6652,
+      "sha256": "00adc0100280164dac2c980bb5957443d340ad95d86a66120c1e883906ae8123"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway_map_identity_tests.rs",
+      "bytes": 11887,
+      "sha256": "2d929e35b46df55d2bae253fc5d444b77f5efb4c27abae2b30b89eca31b8cc73"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/hero_pointer_settings.rs",
+      "bytes": 599,
+      "sha256": "811e218f65588532fe23e9d4f81596f48ff8b6fae62ce02ea418061a0b217e1b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/hero_wire.rs",
+      "bytes": 3584,
+      "sha256": "2c42694b507d0787d3aa8adf7d99c264703cfe5670e59cbd41781596738365b5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "bytes": 304892,
+      "sha256": "f29d900e5ce0454e56d83fb76707f497bef2e45eeaddf932abf0d7070b7b114c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "bytes": 9441,
+      "sha256": "34be87057e4fac3f0bfc7033ad9451ca195fa33963e6bf7c1a2d695f8c8834db"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/lifecycle.rs",
+      "bytes": 3028,
+      "sha256": "3b9d9fbb2ceb251fb06f1a3edae0b7983a2e0f7d08680267d228032a4f28e4df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/lighting.rs",
+      "bytes": 33704,
+      "sha256": "6d1dd25dbcf85b405fa3007dd6425f93a442291dd44f65fc578ea60b872b65d8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "bytes": 20604,
+      "sha256": "72bd28372023ed3ea210b5f5849055b34cc22dea25b38ea3b4a2963c013b2fba"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/map_parser.rs",
+      "bytes": 104461,
+      "sha256": "ba37570e822f1cb43bc00f50660fd9a215b274fd43c884f5fd1eba4770c587dd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/map_player_movement_tests.rs",
+      "bytes": 4208,
+      "sha256": "89620d464fc6a51a925096bb5bbb47792fe9302214c91ffc334ded5ca86f0585"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/minimap_input.rs",
+      "bytes": 2415,
+      "sha256": "ad14be32a64588c726918b4df80d6ac82a8105a57b785ccf4ead70dc7ceb6878"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/minimap_input_tests.rs",
+      "bytes": 11412,
+      "sha256": "ec852356b9d68af66afb7d4838eb80c58d7cce58853da1c760d27813ca0f5fd4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/movement_trace.rs",
+      "bytes": 6217,
+      "sha256": "3791e450cdfe0d60dfb5ca8aea9b9195af2a9952e31e06f96b71b50abd321b77"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_display.rs",
+      "bytes": 13714,
+      "sha256": "62111f80c89b07532510c8d30219906a16a7ed3b9e3c9fbc2d9acb62069a1354"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_fonts.rs",
+      "bytes": 18497,
+      "sha256": "a7c818049cf11bd329c9df4894ded25da8f93e808c6da766b1d8e4bb9f7ccc82"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "bytes": 14859,
+      "sha256": "4484a1d307bf7a9891a2c044f84ad5fabdc857f27f4084927e4331f21b56f1c5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "bytes": 21220,
+      "sha256": "f91ef8c7242e593729e5615d8383584066c83f98b641eb937b5069d8239c4eff"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_locale.rs",
+      "bytes": 12554,
+      "sha256": "05314f30e26da67ad45430e117db13670cd73b3ac04751d64c0d299135bbbdf7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "bytes": 83806,
+      "sha256": "31982f0a315ce10e4c00cd66748f41a10aaaa09eb6fa213f2bc8079ab0a240ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/nonmodal_panel_input_tests.rs",
+      "bytes": 15357,
+      "sha256": "64ac956527d33d9b69226d1d5cce79450769a10a93b075caabe3884fb9a051a4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pet_effects.rs",
+      "bytes": 9972,
+      "sha256": "77e5a8f705d65269250062df46a592ea0c11b287cbd4fd0f7c50e75846086a55"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "bytes": 39275,
+      "sha256": "2b6bf528e36e22509098a0e72db4bace7147fd0f1a088f5db99cc345433dc6e6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs",
+      "bytes": 4349,
+      "sha256": "180e96e5a5066a459cc06a3ad3f4d06bdde575d5d580a2ee92282fdfb684dc04"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/session_config.rs",
+      "bytes": 23069,
+      "sha256": "bb76a681dab34035c6669899624421f40ad863643004ea13508eaf6b8b198045"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "bytes": 26964,
+      "sha256": "1e8edb018931909da3e7f9c699810c7717252337f748c89ac6a1c45cfc73177d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "bytes": 4165,
+      "sha256": "81cdd23d1ef56b700a2f013f386fb31d24994313568731ade9154672b98cca40"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/spell_targeting.rs",
+      "bytes": 9357,
+      "sha256": "a55dc9d727a63d1cd5956c20fab100a21d05c187f313052f9899becf96a8db42"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/startup_diagnostics.rs",
+      "bytes": 18183,
+      "sha256": "b0b9841e35abae01befef03a25a207b59c563e47bf7a46782b27c84d8063abd6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/timing.rs",
+      "bytes": 3565,
+      "sha256": "52e73b0f86f3dd8a485592509dd7acda4c3c65042bb5561673b6f50d59f4a968"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs",
+      "bytes": 8144,
+      "sha256": "4448a154b6370e16505d2227767d0e199f9c0ff31c87a24bbb52f09c37b7e3d4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/window_sizing.rs",
+      "bytes": 40446,
+      "sha256": "70ac5f3bc983596b4840babecdde600346b29fe99f248cdee40c70634ed03649"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/additive_material.rs",
+      "bytes": 13668,
+      "sha256": "478ebde3f15e1d1cfda49f32a18e1cbda6a6da87de183c0e085057939708e464"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "bytes": 12441,
+      "sha256": "79ccebe5d0dd38a515795dcf13e9eec1b4393c8d9584b1853b58841045d13af9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/android_schedule_cleanup.rs",
+      "bytes": 2307,
+      "sha256": "7870419d9459a0f63c67f2c8af7fd901f57de72b1a73390528eb3dfc1eed7c97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/capture_context.rs",
+      "bytes": 7956,
+      "sha256": "00754168779eda8591989226d9985c0fc2ce5b02a687dbd19b7aeccba7604ab5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "bytes": 1090,
+      "sha256": "dd8c223ac85f416917182938986e8ccbf594d7a241e34df9a509044e78d84204"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "bytes": 1590,
+      "sha256": "6fde9a1d77ddaafe316cc6bca1e5eb91dc28e1d77abf70e5994b72020c10a021"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/entity_animation.rs",
+      "bytes": 63419,
+      "sha256": "5cecf77412f5029398a35edd838566d35ca5db4b467bbab07e952ad61d64a7f2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "bytes": 15382,
+      "sha256": "2b0c40f7202e680edc881ea36172183868142a01de317e68cba87936e90c2829"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "bytes": 4326,
+      "sha256": "754e5fd395941d82f98402483f05092dd7e87b0d3a657ebfa850b3352ad99316"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/interpolation.rs",
+      "bytes": 8462,
+      "sha256": "d31c211204e35750913bb2c252f60af30edb6227fac4d9e59e6f2b9ced41abb6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 453334,
+      "sha256": "a800cec0628c97c69cc2f5fe029959f567069f5cae485a173c5224f4b2a05fc9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lighting.rs",
+      "bytes": 21670,
+      "sha256": "537a9316c5f63e82b623cff8fbc0bd6c67df24e07cc614c0b52ac2ffcbf1fc33"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lighting_schedule_tests.rs",
+      "bytes": 2799,
+      "sha256": "7ae88183c0a881518e35eb3a7343e454415341dedde572f2e86df14ef0317b53"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/local_motion.rs",
+      "bytes": 67768,
+      "sha256": "1a65024ad71611068dd574e767b592eb6dd499ccfa0324926294565c23fc8b32"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "bytes": 3575,
+      "sha256": "29cb33815287ed071b6d5110a5bf79c9d5d06a4f066f71066a830e7bc3f29899"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/motion.rs",
+      "bytes": 42774,
+      "sha256": "dbd6051812a14738e356eac9a151cdb5dfab760da0bb4dd12da7857032948e52"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/movement_shadow.rs",
+      "bytes": 53217,
+      "sha256": "ca24171396c5566ce0a4ce510763590a3fbf680d3811bc512e8f8e961521a369"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 82471,
+      "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "bytes": 2094,
+      "sha256": "4b18f2d99433ab6c231f2db1cd929e20e38dc45ea6c8cf35a52028b416089944"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_lighting_diagnostics.rs",
+      "bytes": 612,
+      "sha256": "ee828c9fce100cc84a87f1eba90a1dd0c9c0053b42c04167b7cb16998acbb3e2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_lighting_target.rs",
+      "bytes": 2962,
+      "sha256": "041f576fefd066242b7f9068afc38c684f3ca753d2776232f87bef55051f92b2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_render_receipt.rs",
+      "bytes": 6212,
+      "sha256": "2d9cb2806442565acddd3a21c5a9c9d36a2c659faea3e11c37e74c928e6ea9a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_world_receipt.rs",
+      "bytes": 7139,
+      "sha256": "ce168606bd36ed57a651a1b0e2b70ebcc4137193a04d908f68f674fe83c446c9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/presentation_pose.rs",
+      "bytes": 26877,
+      "sha256": "9d28250412fabd3890626d58cc2492982a21fdbc4fa988222e27198786ac984b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/remote_motion.rs",
+      "bytes": 29251,
+      "sha256": "7c29f8b13ee55dd5d0ee4c90b23c955e388a335ef5552792813ae692196b9458"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/render_diagnostics.rs",
+      "bytes": 27863,
+      "sha256": "645245e4474dc4ad4cb171cb7840008476cdc5a32ffe8e6671581f43185d48e4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/action.rs",
+      "bytes": 6653,
+      "sha256": "d95e0b339619179d361ba076576ba036b711d52c2c032c443a9879335ae28ae0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/effect.rs",
+      "bytes": 7369,
+      "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/game_shop.rs",
+      "bytes": 9660,
+      "sha256": "ce9a43af84fce92e4ba437cdabc1978889bd1661916ed338a63ef15dfcdc267c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/lib.rs",
+      "bytes": 443,
+      "sha256": "fa2548bb42f386f8b01084f143d8865d2ad61a09696cb965a7345106f326093b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/reducer.rs",
+      "bytes": 67001,
+      "sha256": "6d30e69277856b71b0558c42a0b79740b3e7e4bb045ee1cbe013a9e32be185af"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/registry.rs",
+      "bytes": 88537,
+      "sha256": "4bb2744f107109feba9b9ac699e82b231f0905e01fb4babd6c810fc5aefa8934"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/state.rs",
+      "bytes": 23514,
+      "sha256": "d4e46cf765ee0e13856bf3666c95eeb2511494a20d95e1fe4540771b9b84ddb4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/storage.rs",
+      "bytes": 4363,
+      "sha256": "8b080cde6b3321d77b2d0f0865c6b196d0241ee4a546ca50e6f6a7edb9fafce0"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_creature_settings.rs",
+      "bytes": 2162,
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_guild_settings.rs",
+      "bytes": 4046,
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_hero_settings.rs",
+      "bytes": 7918,
+      "sha256": "58a19687be4d6794dfed69f6a16608f76adb82722b9cf000eaca2f6b73daaf27"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_item_image.rs",
+      "bytes": 2932,
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_map_events.rs",
+      "bytes": 6669,
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "bytes": 167262,
+      "sha256": "0981721fff2ec9f609500a194341d85ec8083cc943d49a03677256c84bf63664"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/error.rs",
+      "bytes": 3373,
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/frame.rs",
+      "bytes": 1275,
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/ids.rs",
+      "bytes": 30620,
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/io.rs",
+      "bytes": 5117,
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/item_image.rs",
+      "bytes": 1218,
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/lib.rs",
+      "bytes": 1909,
+      "sha256": "469da5e493dcb9f0e31f75e5bfbfd8c165d6c0bf9f04b40f7f6224dd3dc823d3"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/packets.rs",
+      "bytes": 307016,
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/trace.rs",
+      "bytes": 29621,
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/types.rs",
+      "bytes": 118258,
+      "sha256": "6250bf8857a1925e4a0c1b3b85dfab9b332d23e563cc33c87fddf44f276109ad"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/batching/gpu_preprocessing.rs",
+      "bytes": 110668,
+      "sha256": "781e7aba424686cc9b7e3082e2c6e6ee35c529b5159d4955257884eff975afa8"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/batching/mod.rs",
+      "bytes": 9857,
+      "sha256": "38a7d11d4cd9237ea653ac45649eef4a819b8683368c7ccc6f8f44ef42db7d4f"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/batching/no_gpu_preprocessing.rs",
+      "bytes": 7343,
+      "sha256": "1df03ef2511633e51725f40c66ecfb224fb4091bf5fa01629e546eb64e7bcf7c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/bindless.wgsl",
+      "bytes": 1882,
+      "sha256": "38d50d3c5f9a67ae43e258e708ce634fe5b496aeb6ad7f1ab5cb323f13d0ae46"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/camera.rs",
+      "bytes": 47415,
+      "sha256": "0eacf560705b9106de141195a726bbf45e0665cb71e6c86fe5fb714d02be1fd9"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/color_operations.wgsl",
+      "bytes": 8964,
+      "sha256": "afc30836e6c5467cbfdd5585e92bc5c7eb6dec6aeb8ef2ae26b3dfdf25e0aee6"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/diagnostic/erased_render_asset_diagnostic_plugin.rs",
+      "bytes": 2619,
+      "sha256": "a9646d03485a1383fa5561252bcc9af8c027454ea6207feeacdf31ea9540c683"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/diagnostic/internal.rs",
+      "bytes": 29181,
+      "sha256": "971f43e3267fcb3c1fa63479027fccb33636b4fa545b2af1599fe425283ef7fb"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/diagnostic/mesh_allocator_diagnostic_plugin.rs",
+      "bytes": 3180,
+      "sha256": "e19cfef3f48833ccedcf299f34cbd4eaf98519b28403e0a80d3bdb8ec11231bd"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/diagnostic/mod.rs",
+      "bytes": 10902,
+      "sha256": "83fe42062a8ba21010ac211d419a6bb67ce36074bbca8463236d5df70b7cd096"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/diagnostic/render_asset_diagnostic_plugin.rs",
+      "bytes": 2257,
+      "sha256": "06b6f0214800c5d2e267276e042d859a14c91faac2b662dd300869391671fb1f"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/diagnostic/tracy_gpu.rs",
+      "bytes": 3457,
+      "sha256": "8bff8f19f4993eee16591d64b458cdad2231f0e0eb0eba6ba2f8276129bebc80"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/erased_render_asset.rs",
+      "bytes": 18075,
+      "sha256": "ad7e31dbec54f02a91c4b2b201a60328b2ceafe63f301af396b06af6018852bf"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/error_handler.rs",
+      "bytes": 9380,
+      "sha256": "6ce6c6f0a432afe4dcdca0b3987d1ab8deb2d0fd7021cddd2bb7ba4c9fe25d83"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/extract_component.rs",
+      "bytes": 5266,
+      "sha256": "d98af76ae47ff0ed6839a7d94d5d76a2faa1c59fb780d9177c64fc8cbce7240c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/extract_instances.rs",
+      "bytes": 4203,
+      "sha256": "7b4147d49ba7570d034830dfcdde39dc65b1c8c54ccd7a565451295b4f658ea7"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/extract_param.rs",
+      "bytes": 4799,
+      "sha256": "9b101919224368274aaa97e185fc97b26dd8dffed1b696ffe50ec59c3f6a801b"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/extract_plugin.rs",
+      "bytes": 9364,
+      "sha256": "c417b926dfe77700e6abcdf009a1e554f280ee97a02611c1c138316b085eecbd"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/extract_resource.rs",
+      "bytes": 2977,
+      "sha256": "d9e1d7bf4e135ae2711407f14effa8fb184c17096551271e68e35f7a3acaed23"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/globals.rs",
+      "bytes": 2601,
+      "sha256": "9cdf4272c5926ffd59d2523587958fab044c04cbedea3f1428ded779f0157bd2"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/globals.wgsl",
+      "bytes": 475,
+      "sha256": "09c63ede97ca028bb1950982fab1089969e8820d6951da39bddf7d6ba2e7e234"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/gpu_component_array_buffer.rs",
+      "bytes": 1953,
+      "sha256": "49fb853316ed88462a5581a75682345360a954a172f53c4d268c1b3dbf91b20d"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/gpu_readback.rs",
+      "bytes": 14494,
+      "sha256": "1093c05bc564272a890524c64114ce31938dc021c9a10db7322290518ea87468"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/lib.rs",
+      "bytes": 22489,
+      "sha256": "2f2d4f2655a6c90320d2f5f5f486be7c0e68d9b36ded3e7cc81a93992a057ed0"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/maths.wgsl",
+      "bytes": 5988,
+      "sha256": "6bf67beb44db72b2125b4ac478fd7034c980ab81dad114a4a3542e2808ef7525"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/mesh/allocator.rs",
+      "bytes": 21125,
+      "sha256": "4450e371e1bfd8eb8a75aa41438dc28ca290e3d91128dc109f68882b81929e2e"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/mesh/mod.rs",
+      "bytes": 7086,
+      "sha256": "72b668355a88174dbc00dc42e4131e6108ab7447cec49ecee1d422f38960384f"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/mesh/morph.rs",
+      "bytes": 10057,
+      "sha256": "957c43ff09cfa9aad30cef597485aa47fbba25a86809e1a74122597bfe8d0e26"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/occlusion_culling/mesh_preprocess_types.wgsl",
+      "bytes": 2638,
+      "sha256": "233a46c3ae3ae5d131ce918664f2fd6fe09227cf8201a20a1ba5ebed6093d588"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/occlusion_culling/mod.rs",
+      "bytes": 4879,
+      "sha256": "6dc0a063261a5195b67812d26d891032187a84376194cd2580bbdcc1b5d9621a"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/pipelined_rendering.rs",
+      "bytes": 8666,
+      "sha256": "b6d8747280e66028416bb7b52b25a3457be156b7936a5872bbad920f51f00e34"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_asset.rs",
+      "bytes": 22170,
+      "sha256": "fec69e4c27506056a55fc472e30fb113fdf316dc73647fb11794fb6c1ac77377"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_phase/draw.rs",
+      "bytes": 15135,
+      "sha256": "9149b831eb34fb2876d156cdfd8e5250d2d31fe45bf982369238910b8fa1561d"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_phase/draw_state.rs",
+      "bytes": 25373,
+      "sha256": "f1a1622ce09d9f78e3f3dc330fe9f0f147f4377f6e5ed2a8239009db39e2d4cd"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_phase/mod.rs",
+      "bytes": 109457,
+      "sha256": "7e965d1bbc2343e810db7263fdd6cc3aa78ff202705951664f418bbdd16a3cae"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_phase/rangefinder.rs",
+      "bytes": 1364,
+      "sha256": "43ef211f1e887579eb5e6d4828445fc0a0c2bd18d83fd1460fdef2881b78c108"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/atomic_pod.rs",
+      "bytes": 9279,
+      "sha256": "a64db2126faaa3d73e4ebed39e502d11bd8140c3afc77abed9d58d7c675f5fe5"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/batched_uniform_buffer.rs",
+      "bytes": 5515,
+      "sha256": "816ad9e3a11a52029f4555c298a448e1e01b32a37c0480b4c36eaf913ddb666c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/bind_group.rs",
+      "bytes": 34300,
+      "sha256": "c0efbc7a55dffa8e71f5a7ff158b5123b2b031f44db99275a61ad6c008dda14f"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/bind_group_entries.rs",
+      "bytes": 8103,
+      "sha256": "f18d41114ac0edbabc483a8d9db71a9f3fe4f7e4a85c0deda1d256de6dd61ed6"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/bind_group_layout.rs",
+      "bytes": 1839,
+      "sha256": "1f5d1449d285803165b2b1ae6954974172b7250f18a18ae5dd3eb0a9ac9ac1ee"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/bindless.rs",
+      "bytes": 15143,
+      "sha256": "c14c5a4c6bbef2f39cc7fd375d1c964c3d6eb611e5dd0d3dd3227b32fb4a3092"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/buffer.rs",
+      "bytes": 1304,
+      "sha256": "0b07122d84007a2043ba4a1c26337c42225bab3f5fec985c791378c4a53f16ab"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/buffer_vec.rs",
+      "bytes": 33814,
+      "sha256": "55fbe1aed02ee518759a528d8323d11c4427f8fac9302a8189a4f05a83c111bd"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/gpu_array_buffer.rs",
+      "bytes": 4376,
+      "sha256": "6a5876b75983fa74f91bc5005d5f38d37a894effcbe301c93f48758781f03bea"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/mod.rs",
+      "bytes": 3775,
+      "sha256": "334156d43f0f9d72b54bd892236acded3088a8a4905f0ba1b7b8713082894600"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/pipeline.rs",
+      "bytes": 2098,
+      "sha256": "e539b293bf4170cd2b5f6ef479bffd9367129c132a853810235566ed6d99b7cd"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/pipeline_cache.rs",
+      "bytes": 32957,
+      "sha256": "bf5bfbabf80171e294dcd344e06b6a00aac27b96dea7eba332a25fb6182f3d11"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/pipeline_specializer.rs",
+      "bytes": 10628,
+      "sha256": "61ca29a8b8e45523f34bc87e6a0c197a3a02f858fcf6f5c3d4ac51c0dd348b23"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/sparse_buffer_update.wgsl",
+      "bytes": 2600,
+      "sha256": "0513e12f2918f7a5ce4b7577fb5c5dac9d9482d84c582f53d1da45b428786d01"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/sparse_buffer_vec.rs",
+      "bytes": 37558,
+      "sha256": "72163efdb9a9b98d3610e14348b3c88f5ff301ac4106049eb14c49219cc308be"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/specializer.rs",
+      "bytes": 12932,
+      "sha256": "7e3b8128d68aef9d8d64dbe5c05bd2e0b773c8f4e6e902f26d1c22514d5728f2"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/storage_buffer.rs",
+      "bytes": 10135,
+      "sha256": "fd3f95d73d0eb941f3eefaeb2d33f09d3bd139506fc2afb44952257664852316"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/texture.rs",
+      "bytes": 5056,
+      "sha256": "31415aaeef526d5aa84195298bac0572fe2a67d3e143f6f485e5e9539d93481e"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/render_resource/uniform_buffer.rs",
+      "bytes": 14681,
+      "sha256": "09c699b99ca5712b61dc38ce3703155701999ab75801a5f38172475c23b73d1c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "bytes": 13568,
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/raw_vulkan_init.rs",
+      "bytes": 5606,
+      "sha256": "0460cb128e491419d2870f54c2ee65b9f05506861197b562fd72c4153a78e208"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/render_context.rs",
+      "bytes": 10192,
+      "sha256": "debd0e387f78784f821a36ea2ef24803b45850e4b1e31ec2bb0b79bd3450df91"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/render_device.rs",
+      "bytes": 11243,
+      "sha256": "d5d1d3569583a97a48d8c790e1fa2621e2f049d9771173b3c92731461a4c8370"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/wgpu_wrapper.rs",
+      "bytes": 1833,
+      "sha256": "cfe3712eaaeec88a8a1226ee762dd714fc178d04ae906ca97fe481d5b81baec9"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/settings.rs",
+      "bytes": 13393,
+      "sha256": "43f11fef2be79d7f34043849db8ef49c460da0534b96baa2abc8b816e68525cf"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/slab_allocator.rs",
+      "bytes": 38077,
+      "sha256": "69961cedf3d9f88eb9d41afde974a23bc067858c493eaf2ed0ae022196556d4a"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/storage.rs",
+      "bytes": 8281,
+      "sha256": "dcce6f3140c253231a106b1343c0dfa5e78e3175a78e9e78863e65ee3764b35a"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/sync_component.rs",
+      "bytes": 2660,
+      "sha256": "a3e64ee27d64460088b0b0c662662f4dbbc9c245614537674f45e57e09e85012"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/sync_world.rs",
+      "bytes": 23382,
+      "sha256": "01ac3edc3ab3291e2d50299bd2d9df4406ba835b096df828e5686ec8978d200f"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/texture/fallback_image.rs",
+      "bytes": 9512,
+      "sha256": "e6983f4dd19d3c389da8bcc8adfd5bab001bde712a28c5f89427a87e360f2c3c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/texture/gpu_image.rs",
+      "bytes": 8030,
+      "sha256": "93ce4dd53c7e855b2ebc057fc23e71c191f1fd74c0f9ae224b49de260d556708"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/texture/manual_texture_view.rs",
+      "bytes": 2538,
+      "sha256": "016dac9019e1e33c99642c574cca21a4e418f87cdd538eb362a85d52855f67e7"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/texture/mod.rs",
+      "bytes": 2978,
+      "sha256": "da0f018fff89c787d66ce52ccaea5198f5f268b19e563da87e5afb1a22f68031"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/texture/texture_attachment.rs",
+      "bytes": 6698,
+      "sha256": "340d5ac501a49cfad055856aff80a01c18ccb661e4825ee236841491452ba8ca"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/texture/texture_cache.rs",
+      "bytes": 3858,
+      "sha256": "ed7f971acf4f4e7b99f35310fd899e501dd7d8c813d3ba32584fe2782a640d50"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/uniform.rs",
+      "bytes": 3500,
+      "sha256": "bda46ebb994da6099fc42f3891a4d588cbe8eac0d66a0a3d825a467e51f05a88"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/mod.rs",
+      "bytes": 50432,
+      "sha256": "c2d58fdd183ff859987d04b8edc45d51d3b865074493b3a912682a5ddf98212c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/view.wgsl",
+      "bytes": 9699,
+      "sha256": "f49c0c0a847701efd31783113b02a2610d3f27add3d54b4e9f4e39705d2c1f61"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/visibility/mod.rs",
+      "bytes": 17611,
+      "sha256": "b86c5a48c4f0373ea0a6c1dcdb2c4b5139e219ec58fae64966c0c226e8dcc99c"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/visibility/range.rs",
+      "bytes": 9944,
+      "sha256": "dc8b8cc48cf538072ce6159e396877ade8d067c9d4f74c92ed6a60d91bd86180"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/android_gpu_probe.rs",
+      "bytes": 5812,
+      "sha256": "5dc8150fbb57bbfa689a3db98c5376b6a75c1d7ebf357f0408853978733111b0"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "bytes": 28967,
+      "sha256": "0594d47c9cc4feedeb24aa745e9b0cc6830f71ad57195c1c0ffecc6b3dbd2268"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/screenshot.rs",
+      "bytes": 27000,
+      "sha256": "f49e4ca4f0929fc51a5c55fc002294c6009ae7a4c1c07dc6ef6c8ff737df0c5b"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/screenshot.wgsl",
+      "bytes": 606,
+      "sha256": "0f4615da1a891dee4391ae976d8e863f0f8b14478c2fe19fc8c23d4c7bc20bd6"
+    }
+  ],
+  "profile": {
+    "MIR2_ANDROID_GPU_SURFACE_PROBE": "1",
+    "defaultBuildOption": "unset/off",
+    "maximumRecordsPerProcess": 128,
+    "acceptanceSignal": false
+  },
+  "scopeAudit": {
+    "captured": "2026-10-06T01:46:59.480Z",
+    "source": "6c12eac0c400e81cc4bb7e0c8216b991be7dce6f",
+    "scope": [
+      "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "mir2-web3/third_party/bevy_render/src/view/window/android_gpu_probe.rs",
+      "mir2-web3/apps/game-client/runtime/src/lib.rs"
+    ],
+    "protectedWholeFiles": 443,
+    "protectedChanges": [],
+    "runtimeOutsideTestHookByteExact": true,
+    "windowOutsideDiagnosticHooksByteExact": true,
+    "productionBehaviorChange": false
+  },
+  "originalGitCheckpoints": [
+    {
+      "path": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+    },
+    {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "failures": [
+    {
+      "label": "red-compiled-surface-probe-budget",
+      "exitCode": 101,
+      "compiledRustTests": false,
+      "rust": [],
+      "sourceUnchanged": true,
+      "logSha256": "2468eb7c5149f0ff5cfbc0a1f984ed00c566f9b5b8f1ffe1e2c202d1e89378ed",
+      "productBehaviorFailure": false,
+      "kind": "uncompiled test-entry harness failure"
+    },
+    {
+      "label": "red-compiled-runtime-surface-probe-budget",
+      "exitCode": 101,
+      "compiledRustTests": false,
+      "rust": [],
+      "sourceUnchanged": true,
+      "logSha256": "34d093e2261eeb2e0742bb213e65ce171b06c45084f419ed2a99cd191c9020ca",
+      "productBehaviorFailure": false,
+      "kind": "uncompiled test-entry harness failure"
+    },
+    {
+      "label": "red-compiled-manifest-surface-probe-budget",
+      "exitCode": 101,
+      "compiledRustTests": true,
+      "rust": [
+        {
+          "passed": 3,
+          "failed": 5,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "5532aef345a2dffe61c9d0617f7ffecbc6a9c383f106437902c1f17352758720",
+      "productBehaviorFailure": false,
+      "kind": "new diagnostic budget compiled regression red"
+    }
+  ],
+  "greenFocused": {
+    "exitCode": 0,
+    "rust": [
+      {
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "sourceUnchanged": true
+  },
+  "gates": [
+    {
+      "label": "bound-gpu-probe-android-normal",
+      "exitCode": 0,
+      "started": "2026-10-06T01:48:42.977Z",
+      "ended": "2026-10-06T01:49:55.106Z",
+      "rust": [
+        {
+          "passed": 529,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "3082f6b35ba77c0228d92065a3acfca6690381da93f9ead7548945fab6b602b2",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-android/Cargo.toml --lib --locked --offline -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-android-preview",
+      "exitCode": 0,
+      "started": "2026-10-06T01:49:55.295Z",
+      "ended": "2026-10-06T01:50:55.143Z",
+      "rust": [
+        {
+          "passed": 577,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "a8d3a9dc482f56b0caf438a5da4f3dd6f64c154563e16c78c251e26ef1e4f546",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-android/Cargo.toml --features ui-preview --lib --locked --offline -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-shared-player-ui",
+      "exitCode": 0,
+      "started": "2026-10-06T01:50:55.329Z",
+      "ended": "2026-10-06T01:51:04.595Z",
+      "rust": [
+        {
+          "passed": 1324,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "adbef27c07103ed52f4fb53f506b542ceb863f4eb59a7262ee17ec73043efde4",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/client-bevy/Cargo.toml --features native-player-ui --lib --locked --offline -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-runtime",
+      "exitCode": 0,
+      "started": "2026-10-06T01:51:04.749Z",
+      "ended": "2026-10-06T01:51:05.808Z",
+      "rust": [
+        {
+          "passed": 309,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "076d6411444bb4b8b54a9a598806039105160b36a83e5ca556d1aeeb50389004",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/runtime/Cargo.toml --lib --locked --offline -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-java-full",
+      "exitCode": 0,
+      "started": "2026-10-06T01:51:05.960Z",
+      "ended": "2026-10-06T01:52:22.634Z",
+      "rust": [],
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.LightingScenePreviewTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.LightingScenePreviewTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "f09782a0816ddc51c8125980d2e3497239d6e15574e549c8a927eb17ea75bb19",
+      "entryPoint": "./gradlew --offline --no-daemon --no-build-cache --rerun-tasks :app:testDebugUnitTest :app:testUiPreviewUnitTest --console=plain"
+    },
+    {
+      "label": "bound-gpu-probe-windows-hero-fifo",
+      "exitCode": 0,
+      "started": "2026-10-06T01:52:22.813Z",
+      "ended": "2026-10-06T01:53:08.852Z",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "4c9e768a676df37efdd3bdd739b42403f1ad7a6624bf3f1706d54ff5449020ed",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline hero_receipt_backpressure -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-windows-skill-fifo",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:09.002Z",
+      "ended": "2026-10-06T01:53:09.555Z",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "58919b1e31fc3de1311afc4e72758d409441672f04c0ec7e38d8cabb01bb66c3",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline skill_receipt_retry -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-windows-protocol",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:09.714Z",
+      "ended": "2026-10-06T01:53:10.096Z",
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "ce2182ae42db68f03b999da3fbfa4d600510faef60e27eb614b1780a5461b6e1",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline native_protocol::tests -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-windows-original",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:10.241Z",
+      "ended": "2026-10-06T01:53:10.647Z",
+      "rust": [
+        {
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "bd8386ff629567f64b8a3b70baf3a753a3669642545a45a9dc729bcd80eaa76b",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline map_parser::lighting::tests -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-windows-map",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:10.808Z",
+      "ended": "2026-10-06T01:53:11.172Z",
+      "rust": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "4f9564ec89178db887729cc5db1ccc7070a02844a07022ecbfdaac9331ffd343",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline map_light -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-windows-effects",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:11.331Z",
+      "ended": "2026-10-06T01:53:11.705Z",
+      "rust": [
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "3b3306cb5c48afeaa43a535bba34008ffe8f9d9f698c219f4c9b18f13a53448f",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --locked --offline effect_light_snapshot -- --test-threads=1"
+    },
+    {
+      "label": "bound-gpu-probe-api31-normal",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:11.862Z",
+      "ended": "2026-10-06T01:53:12.371Z",
+      "rust": [],
+      "sourceUnchanged": true,
+      "logSha256": "0ef9e80d6ecf2707210a88d2aef516e2d079468a5da03742e1d1ab25846d8e02",
+      "entryPoint": "cargo +1.95.0 ndk -t arm64-v8a --platform 31 check --lib --locked --offline"
+    },
+    {
+      "label": "bound-gpu-probe-api31-preview",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:12.531Z",
+      "ended": "2026-10-06T01:53:12.910Z",
+      "rust": [],
+      "sourceUnchanged": true,
+      "logSha256": "2d91023c96f5b7768adbbce66df16e3de15a8646173e175dfee1d4d86acfcea8",
+      "entryPoint": "cargo +1.95.0 ndk -t arm64-v8a --platform 31 check --lib --features ui-preview --locked --offline"
+    },
+    {
+      "label": "bound-gpu-probe-real-bichon-resource",
+      "exitCode": 0,
+      "started": "2026-10-06T01:53:13.057Z",
+      "ended": "2026-10-06T01:53:24.277Z",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "logSha256": "f34f4141cc877ef1c4ef4a3e84d4165c7b0c088fe4f6c0c2816a42e5517ad113",
+      "entryPoint": "cargo +1.95.0 test --manifest-path mir2-web3/apps/game-client/platform-android/Cargo.toml --lib --locked --offline configured_bichon_pack_builds_real_floor_frame_when_present -- --test-threads=1 --nocapture"
+    }
+  ],
+  "apk": {
+    "variant": "preview",
+    "source": "951a9ed717019273011454fbda3a627261b2244a",
+    "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/final-apks/mir2-native-surface-probe-preview-951a9ed71.apk",
+    "bytes": 542071047,
+    "sha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+    "nativeElfBytes": 150306368,
+    "nativeElfSha256": "be688a6d0d22970ce8c4eb9e47c33ecb6afb6c20ebd74090571979b13a0d7e1d",
+    "nativeElfMatchesThisVariantStrippedOutput": true,
+    "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+    "gatewayUrl": "",
+    "uiPreview": true,
+    "diagnosticOnly": true,
+    "acceptance": false,
+    "gpuSurfaceProbeBuildOption": "1",
+    "maximumDiagnosticRecordsPerProcess": 128,
+    "entityPack": {
+      "schemaVersion": 1,
+      "kind": "mir2-android-entity-pack-lock",
+      "packId": "android-archer-mount-bow-proof-20260912",
+      "sourceMode": "override",
+      "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+      "manifestBytes": 2506377,
+      "atlasCount": 1,
+      "pageCount": 5,
+      "rectCount": 7848,
+      "pageBytes": 8779443
+    }
+  },
+  "resourceAudit": {
+    "variant": "preview",
+    "apkSha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+    "nativeElfSha256": "be688a6d0d22970ce8c4eb9e47c33ecb6afb6c20ebd74090571979b13a0d7e1d",
+    "selectedUiPngCount": 6647,
+    "selectedMetadataCount": 3,
+    "libraries": [
+      {
+        "library": "Items",
+        "pngCount": 1003,
+        "allSelectedBytesMatch": true,
+        "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+        "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+      },
+      {
+        "library": "StateItem",
+        "pngCount": 5192,
+        "allSelectedBytesMatch": true,
+        "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+        "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+      },
+      {
+        "library": "MagIcon",
+        "pngCount": 224,
+        "allSelectedBytesMatch": true,
+        "metadataSha256": null,
+        "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+      },
+      {
+        "library": "MagIcon2",
+        "pngCount": 224,
+        "allSelectedBytesMatch": true,
+        "metadataSha256": null,
+        "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+      },
+      {
+        "library": "UI_32bit",
+        "pngCount": 4,
+        "allSelectedBytesMatch": true,
+        "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+        "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+      }
+    ],
+    "lightingOriginalFrames": [
+      {
+        "range": 0,
+        "bytes": 24327,
+        "sha256": "8abb26b2c3568efef810e419b5c3322d90133d02c7e01a958eb1c1cd66521bc8"
+      },
+      {
+        "range": 1,
+        "bytes": 37751,
+        "sha256": "f317886b08b02f793a70cc8dd5b377acdfa78b596898524ad0963c5332fa57db"
+      },
+      {
+        "range": 2,
+        "bytes": 51065,
+        "sha256": "b1b7533de8b0e58e263b562d1af4a4cddbacc0ecca96033d3b9f011dccce132d"
+      },
+      {
+        "range": 3,
+        "bytes": 66669,
+        "sha256": "829d24301b9b989496ee0581c7a6096c6300afc15a62945a6b7700a1d56b9177"
+      },
+      {
+        "range": 4,
+        "bytes": 86918,
+        "sha256": "2d1f6370d6e9d83ab04c2ed08b13d7b2dd9ea480856710ed4ea9a35509a48edf"
+      },
+      {
+        "range": 5,
+        "bytes": 105484,
+        "sha256": "10757d7006798a497ccf7fe0284756d32905b4b4ac457d041efc0879ecd4c9db"
+      },
+      {
+        "range": 6,
+        "bytes": 127337,
+        "sha256": "1ba1a6aa32631a534cf98d7d59beed617f8d0bf9ac4ac4701ffb2d1743b258b2"
+      },
+      {
+        "range": 7,
+        "bytes": 148683,
+        "sha256": "b0e2fcd6b21d6e8c773b1312c6fdcb228446f2f0e1e595a95c9aa3b0f0168ae2"
+      },
+      {
+        "range": 8,
+        "bytes": 171964,
+        "sha256": "9ca401dce3a8c252e00ea156b5a619c16eca34fc8036d455f91c9f77bb0c2767"
+      },
+      {
+        "range": 9,
+        "bytes": 198508,
+        "sha256": "e52605b4e20f19563ec37bba8afd7aeb2ed8690fb1a25c974819e37278cb33e7"
+      }
+    ],
+    "lightingFramesByteMatchFrozenWindows": true,
+    "frozenWeightFramesByteMatch": true,
+    "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+    "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+    "entityPack": {
+      "schemaVersion": 1,
+      "kind": "mir2-android-entity-pack-lock",
+      "packId": "android-archer-mount-bow-proof-20260912",
+      "sourceMode": "override",
+      "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+      "manifestBytes": 2506377,
+      "atlasCount": 1,
+      "pageCount": 5,
+      "rectCount": 7848,
+      "pageBytes": 8779443
+    },
+    "approvedFullResourceReleaseAccepted": false
+  },
+  "installation": {
+    "variant": "preview",
+    "pkg": "com.mir2.web3.uipreview",
+    "source": "951a9ed717019273011454fbda3a627261b2244a",
+    "started": "2026-10-06T01:56:30.921Z",
+    "ended": "2026-10-06T01:56:37.202Z",
+    "output": "Performing Streamed Install\nSuccess",
+    "path": "/data/app/~~UOigulhRnL1FAlAAIEaJ7g==/com.mir2.web3.uipreview-UIQOH16IQj18DCFgv3N_uQ==/base.apk",
+    "pulled": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/installed-preview-951a9ed71.apk",
+    "pull": "/data/app/~~UOigulhRnL1FAlAAIEaJ7g==/com.mir2.web3.uipreview-UIQOH16IQj18DCFgv3N_uQ==/base.apk: 1 file pulled, 0 skipped. 195.5 MB/s (542071047 bytes in 2.645s)",
+    "bytes": 542071047,
+    "sha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+    "preserveData": true
+  },
+  "device": {
+    "captured": "2026-10-06T01:51:42.121Z",
+    "devices": "List of devices attached\nemulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emulator64_arm64 transport_id:5\n\n",
+    "serial": "emulator-5554",
+    "avd": "Mir2_API_31_ARM64\r\nOK",
+    "release": "12",
+    "api": "31",
+    "model": "sdk_gphone64_arm64",
+    "abi": "arm64-v8a",
+    "hardware": "ranchu",
+    "gpu": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))",
+    "physicalDevices": 0
+  },
+  "samples": [
+    {
+      "scene": "lighting-night-jni",
+      "pid": "14753",
+      "source": "951a9ed717019273011454fbda3a627261b2244a",
+      "alive": true,
+      "targetForeground": true,
+      "foregroundActivity": "    mResumedActivity: ActivityRecord{794633 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t467}",
+      "apkSha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-night-jni-pid14753.png",
+      "pngSha256": "7f5aa7f0dba6d6b4d810690c34a13a1d14b929ac3f49b1c3c072ecd6536923ac",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/lighting-night-jni-pid14753.log",
+      "logSha256": "ccdacf2cbf8ea7593c1a9381380111bfbd59fb221b57b5fb3133c4eb9a80eb43",
+      "width": 2340,
+      "height": 1080,
+      "GL506": 5,
+      "fatal": 0,
+      "renderValidationError": false,
+      "nativeRenderExit": false,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "uniqueDiagnosticSequences": 128,
+      "diagnosticBudgetObserved": true,
+      "online": false,
+      "physical": false
+    },
+    {
+      "scene": "lighting-night-jni",
+      "pid": "14831",
+      "source": "951a9ed717019273011454fbda3a627261b2244a",
+      "alive": true,
+      "targetForeground": true,
+      "foregroundActivity": "    mResumedActivity: ActivityRecord{6cb2722 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t468}",
+      "apkSha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-night-jni-pid14831.png",
+      "pngSha256": "9974a2e21c06f82327c98a74fa002549f8a45938d218fd7d24e013bb25f0f6d1",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/lighting-night-jni-pid14831.log",
+      "logSha256": "6256179cc3f66935e6a6e010a7f6a9db5d337243888eca0ced6fd8735328271d",
+      "width": 2340,
+      "height": 1080,
+      "GL506": 1,
+      "fatal": 0,
+      "renderValidationError": false,
+      "nativeRenderExit": false,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "uniqueDiagnosticSequences": 128,
+      "diagnosticBudgetObserved": true,
+      "online": false,
+      "physical": false
+    },
+    {
+      "scene": "lighting-night-jni",
+      "pid": "14910",
+      "source": "951a9ed717019273011454fbda3a627261b2244a",
+      "alive": true,
+      "targetForeground": true,
+      "foregroundActivity": "    mResumedActivity: ActivityRecord{22cf43e u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t469}",
+      "apkSha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-night-jni-pid14910.png",
+      "pngSha256": "bbbc24c36f35c0f8295b40987fbb2c92d741d8ae6e12489320923cc10a328f32",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/lighting-night-jni-pid14910.log",
+      "logSha256": "a7b3a001326f985238b49d16bba40062f9b449547d3ca139866b6cd9f37aef26",
+      "width": 2340,
+      "height": 1080,
+      "GL506": 5,
+      "fatal": 0,
+      "renderValidationError": false,
+      "nativeRenderExit": false,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "uniqueDiagnosticSequences": 128,
+      "diagnosticBudgetObserved": true,
+      "online": false,
+      "physical": false
+    },
+    {
+      "scene": "lighting-dawn-jni",
+      "pid": "14991",
+      "source": "951a9ed717019273011454fbda3a627261b2244a",
+      "alive": true,
+      "targetForeground": true,
+      "foregroundActivity": "    mResumedActivity: ActivityRecord{ffdc837 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t470}",
+      "apkSha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-dawn-jni-pid14991.png",
+      "pngSha256": "fa4d9b0d4ee6c331c02cc990e6b520aba25be0a7e3f089f70d0e3c2bfa3eb34c",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/lighting-dawn-jni-pid14991.log",
+      "logSha256": "2b8f5db2740b245b6d662b02e53ecbc5b5ad8977528fd4a1e4bc8ed45bb47e82",
+      "width": 2340,
+      "height": 1080,
+      "GL506": 0,
+      "fatal": 0,
+      "renderValidationError": false,
+      "nativeRenderExit": false,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "uniqueDiagnosticSequences": 128,
+      "diagnosticBudgetObserved": true,
+      "online": false,
+      "physical": false
+    },
+    {
+      "scene": "lighting-day-jni",
+      "pid": "15071",
+      "source": "951a9ed717019273011454fbda3a627261b2244a",
+      "alive": true,
+      "targetForeground": true,
+      "foregroundActivity": "    mResumedActivity: ActivityRecord{a051d22 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t471}",
+      "apkSha256": "4c3a5bd0b01ac1e1ef23e11eeeef975b9fe688de1bb3277b12c71401a18df291",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-day-jni-pid15071.png",
+      "pngSha256": "d968a8d4af0efc3788acbd672e6540659b179ac9b5da2f1b65724c86b14d02c3",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/lighting-day-jni-pid15071.log",
+      "logSha256": "4cb4f06bb937a242d4186a0e31f25dcdeae23d399525187c1899a5e061eae542",
+      "width": 2340,
+      "height": 1080,
+      "GL506": 0,
+      "fatal": 0,
+      "renderValidationError": false,
+      "nativeRenderExit": false,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "uniqueDiagnosticSequences": 128,
+      "diagnosticBudgetObserved": true,
+      "online": false,
+      "physical": false
+    }
+  ],
+  "visualReview": {
+    "source": "951a9ed717019273011454fbda3a627261b2244a",
+    "captured": "2026-10-06T02:05:30.235Z",
+    "images": [
+      {
+        "pid": "14753",
+        "scene": "lighting-night-jni",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-night-jni-pid14753.png",
+        "sha256": "7f5aa7f0dba6d6b4d810690c34a13a1d14b929ac3f49b1c3c072ecd6536923ac",
+        "width": 2340,
+        "height": 1080,
+        "inspectedAtOriginalResolution": true,
+        "observation": "Offline Bichon floor, self/torch monster/FireWall and darkening/local light pools visible; phone fixture controls remain incomplete.",
+        "fullPhoneUiAccepted": false,
+        "completeWindowsPixelsAccepted": false
+      },
+      {
+        "pid": "14831",
+        "scene": "lighting-night-jni",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-night-jni-pid14831.png",
+        "sha256": "9974a2e21c06f82327c98a74fa002549f8a45938d218fd7d24e013bb25f0f6d1",
+        "width": 2340,
+        "height": 1080,
+        "inspectedAtOriginalResolution": true,
+        "observation": "Offline Bichon floor, self/torch monster/FireWall and darkening/local light pools visible; phone fixture controls remain incomplete.",
+        "fullPhoneUiAccepted": false,
+        "completeWindowsPixelsAccepted": false
+      },
+      {
+        "pid": "14910",
+        "scene": "lighting-night-jni",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-night-jni-pid14910.png",
+        "sha256": "bbbc24c36f35c0f8295b40987fbb2c92d741d8ae6e12489320923cc10a328f32",
+        "width": 2340,
+        "height": 1080,
+        "inspectedAtOriginalResolution": true,
+        "observation": "Offline Bichon floor, self/torch monster/FireWall and darkening/local light pools visible; phone fixture controls remain incomplete.",
+        "fullPhoneUiAccepted": false,
+        "completeWindowsPixelsAccepted": false
+      },
+      {
+        "pid": "14991",
+        "scene": "lighting-dawn-jni",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-dawn-jni-pid14991.png",
+        "sha256": "fa4d9b0d4ee6c331c02cc990e6b520aba25be0a7e3f089f70d0e3c2bfa3eb34c",
+        "width": 2340,
+        "height": 1080,
+        "inspectedAtOriginalResolution": true,
+        "observation": "Offline Bichon floor, self/torch monster/FireWall and darkening/local light pools visible; phone fixture controls remain incomplete.",
+        "fullPhoneUiAccepted": false,
+        "completeWindowsPixelsAccepted": false
+      },
+      {
+        "pid": "15071",
+        "scene": "lighting-day-jni",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW/current-lighting-day-jni-pid15071.png",
+        "sha256": "d968a8d4af0efc3788acbd672e6540659b179ac9b5da2f1b65724c86b14d02c3",
+        "width": 2340,
+        "height": 1080,
+        "inspectedAtOriginalResolution": true,
+        "observation": "Offline Bichon floor, self/torch monster/FireWall and phone fixture controls visible; lighting material disabled.",
+        "fullPhoneUiAccepted": false,
+        "completeWindowsPixelsAccepted": false
+      }
+    ],
+    "physical": false,
+    "online": false,
+    "acceptance": false,
+    "zeroGpuErrorGate": "FAIL",
+    "limits": "Only five original diagnostic offline samples; inspection does not authenticate or close full mobile UI, gameplay, resources, long-duration or device gates."
+  },
+  "triage": {
+    "source": "951a9ed717019273011454fbda3a627261b2244a",
+    "captured": "2026-10-06T02:00:27.855Z",
+    "samples": [
+      {
+        "pid": "14753",
+        "scene": "lighting-night-jni",
+        "GL506": 5,
+        "uniqueSequences": 128,
+        "configuration": [
+          "10-06 09:57:25.298 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 1; phase = \"configure_new\"; thread = ThreadId(2); width = 3520; height = 1980; format = Rgba8Unorm; size_changed = false; present_mode_changed = false;",
+          "10-06 09:57:25.512 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 4; phase = \"configure_changed\"; thread = ThreadId(2); width = 2340; height = 1080; format = Rgba8Unorm; size_changed = true; present_mode_changed = false;"
+        ],
+        "lifecycle": [
+          "10-06 09:57:25.140 14753 14779 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 0; phase = \"lifecycle_read\"; state = Running; thread = ThreadId(6); surfaces = 0;"
+        ],
+        "errors": [
+          {
+            "index": 112,
+            "line": "10-06 09:57:25.675 14753 14775 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:25.584 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:25.711 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 115,
+            "line": "10-06 09:57:25.675 14753 14775 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:25.584 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:25.711 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 118,
+            "line": "10-06 09:57:25.675 14753 14775 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:25.584 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:25.711 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 121,
+            "line": "10-06 09:57:25.675 14753 14775 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:25.584 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:25.711 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 124,
+            "line": "10-06 09:57:25.675 14753 14775 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:25.584 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:25.711 14753 14775 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          }
+        ],
+        "firstInjectionIndex": 175,
+        "firstLightingEnabledIndex": 288
+      },
+      {
+        "pid": "14831",
+        "scene": "lighting-night-jni",
+        "GL506": 1,
+        "uniqueSequences": 128,
+        "configuration": [
+          "10-06 09:57:35.404 14831 14854 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 1; phase = \"configure_new\"; thread = ThreadId(2); width = 3520; height = 1980; format = Rgba8Unorm; size_changed = false; present_mode_changed = false;",
+          "10-06 09:57:35.625 14831 14854 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 4; phase = \"configure_changed\"; thread = ThreadId(2); width = 2340; height = 1080; format = Rgba8Unorm; size_changed = true; present_mode_changed = false;"
+        ],
+        "lifecycle": [
+          "10-06 09:57:35.360 14831 14858 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 0; phase = \"lifecycle_read\"; state = Running; thread = ThreadId(6); surfaces = 0;"
+        ],
+        "errors": [
+          {
+            "index": 111,
+            "line": "10-06 09:57:35.887 14831 14854 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:35.796 14831 14854 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:35.889 14831 14854 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          }
+        ],
+        "firstInjectionIndex": 166,
+        "firstLightingEnabledIndex": 275
+      },
+      {
+        "pid": "14910",
+        "scene": "lighting-night-jni",
+        "GL506": 5,
+        "uniqueSequences": 128,
+        "configuration": [
+          "10-06 09:57:45.483 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 1; phase = \"configure_new\"; thread = ThreadId(2); width = 3520; height = 1980; format = Rgba8Unorm; size_changed = false; present_mode_changed = false;",
+          "10-06 09:57:45.791 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 4; phase = \"configure_changed\"; thread = ThreadId(2); width = 2340; height = 1080; format = Rgba8Unorm; size_changed = true; present_mode_changed = false;"
+        ],
+        "lifecycle": [
+          "10-06 09:57:45.422 14910 14935 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 0; phase = \"lifecycle_read\"; state = Running; thread = ThreadId(5); surfaces = 0;"
+        ],
+        "errors": [
+          {
+            "index": 111,
+            "line": "10-06 09:57:45.990 14910 14932 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:45.907 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:45.992 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 114,
+            "line": "10-06 09:57:45.990 14910 14932 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:45.907 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:45.992 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 117,
+            "line": "10-06 09:57:45.990 14910 14932 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:45.907 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:45.992 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 120,
+            "line": "10-06 09:57:45.990 14910 14932 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:45.907 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:45.992 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          },
+          {
+            "index": 123,
+            "line": "10-06 09:57:45.990 14910 14932 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+            "previousProbe": "10-06 09:57:45.907 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 5; phase = \"acquired\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = None; hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;",
+            "nextProbe": "10-06 09:57:45.992 14910 14932 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 6; phase = \"present\"; thread = ThreadId(2); format = Rgba8Unorm; size = (2340, 1080, 1); requested_view_format = Some(Rgba8Unorm); hal_inner = Renderbuffer { raw: NativeRenderbuffer(5) }; hal_format = Rgba8Unorm; hal_internal_format = 32856;"
+          }
+        ],
+        "firstInjectionIndex": 174,
+        "firstLightingEnabledIndex": 279
+      },
+      {
+        "pid": "14991",
+        "scene": "lighting-dawn-jni",
+        "GL506": 0,
+        "uniqueSequences": 128,
+        "configuration": [
+          "10-06 09:57:55.876 14991 15015 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 1; phase = \"configure_new\"; thread = ThreadId(2); width = 2340; height = 1080; format = Rgba8Unorm; size_changed = false; present_mode_changed = false;"
+        ],
+        "lifecycle": [
+          "10-06 09:57:55.672 14991 15019 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 0; phase = \"lifecycle_read\"; state = Running; thread = ThreadId(6); surfaces = 0;"
+        ],
+        "errors": [],
+        "firstInjectionIndex": 149,
+        "firstLightingEnabledIndex": 258
+      },
+      {
+        "pid": "15071",
+        "scene": "lighting-day-jni",
+        "GL506": 0,
+        "uniqueSequences": 128,
+        "configuration": [
+          "10-06 09:58:05.865 15071 15094 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 1; phase = \"configure_new\"; thread = ThreadId(2); width = 2340; height = 1080; format = Rgba8Unorm; size_changed = false; present_mode_changed = false;"
+        ],
+        "lifecycle": [
+          "10-06 09:58:05.813 15071 15097 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCEsequence = 0; phase = \"lifecycle_read\"; state = Running; thread = ThreadId(5); surfaces = 0;"
+        ],
+        "errors": [],
+        "firstInjectionIndex": 163,
+        "firstLightingEnabledIndex": -1
+      }
+    ],
+    "observed": "All three failing night samples report errors between acquire and present on the first 3520x1980 -> 2340x1080 reconfigured frame, before fixture injection/lighting. Actual acquired descriptor is Rgba8Unorm, HAL internal 32856. Only initial Running lifecycle was consumed before the error.",
+    "inference": "Surface resize and retained output attachment handling is the next focused hypothesis; exact render pass and stale GL attachment are not yet proven.",
+    "zeroErrorGate": "FAIL",
+    "productBehaviorChange": false
+  },
+  "windowsRemote": {
+    "documentationCommit": "6c12eac0c400e81cc4bb7e0c8216b991be7dce6f",
+    "productSource": "951a9ed717019273011454fbda3a627261b2244a",
+    "at": "2026-10-06T01:58:10.512Z",
+    "frozenFunctionalBaseline": "3d735745f1117d42a7859e87604a106351dca935",
+    "refs": {
+      "refs/heads/codex/android-shared-sync": "6c12eac0c400e81cc4bb7e0c8216b991be7dce6f",
+      "refs/heads/codex/playtest-registration": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+      "refs/heads/codex/windows-player-journey": "f72e36fb84c3574fff0aeb2abed856454b14289d"
+    },
+    "selectedWindowsSource": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "pathsSinceFrozen": [
+      "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/.gitattributes",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/native-installed-update-r9.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/run-actual-native-update.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/WN-CANDIDATE-20261001-invited-09-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-attested-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process-attempt5.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-final-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-verification-reuse.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/BUILD-ATTESTATION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/RELEASE-STATEMENT.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/VERSION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-template-copy.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/package-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt4.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt2-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt3-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt4-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt4.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/prepare-real-fixtures-final.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-fixture-preflight-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-input-long-path-diagnostic.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-helper-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-manifest-delta-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-old-r8-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-integration-final-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-package-integration-final.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-r8-r9-final-fixtures.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-evidence.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-final.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/r9-release-receipt.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/release-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-input-preparation.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-staging-path-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/update-archive.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-build.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/BUILD-UPDATER.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/bundle/UPDATER-BUNDLE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/engine-release/ENGINE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/feed/latest.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/apply.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/create-stage.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-apply.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-create-stage.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-plan.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-preflight.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/preflight.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/upload.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/public-https-publication-report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-r9.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md"
+    ],
+    "pathsCount": 83,
+    "functionalPathsCount": 0,
+    "commitsSinceFrozen": 1,
+    "pr": {
+      "baseRefName": "codex/playtest-registration",
+      "headRefName": "codex/android-shared-sync",
+      "headRefOid": "6c12eac0c400e81cc4bb7e0c8216b991be7dce6f",
+      "isDraft": true,
+      "number": 253,
+      "state": "OPEN",
+      "url": "https://github.com/Zombieliu/mir2/pull/253"
+    },
+    "readOnly": true
+  },
+  "remaining": [
+    "Zero-error GPU and uninstrumented resize/resume",
+    "Whole phone UI, real auth and online player loop",
+    "Complete map/object/spell/action/interpolation coverage",
+    "Shared Zone-authoritative movement and persisted re-entry",
+    "Full resources/audio/cache/update delivery",
+    "Physical Android and human frontend acceptance"
+  ],
+  "evidenceRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-framebuffer-20261006-edydFW"
+}
