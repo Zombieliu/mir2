@@ -53,7 +53,7 @@ Zone checkpoint 升至 v7，将矿点/期限/序列/待触发效果纳入认证�
 本地只保存当前挥镐手势，不堆积将来的攻击；发送失败丢弃旧攻击。主人确认的
 匹配动作转换到原版 Mine/Attack2，旁观者仍接受原版 ObjectAttack(None) 的普通
 Attack1。只允许当前地图、位置、朝向、序列和期限内的确认触发 Mine。
-服务端发 400ms 延迟 MapEffect12 和共享 Rubble。原版音效 10091 尚未接通。
+服务端发 400ms 延迟 MapEffect12 和共享 Rubble。原版音效 10091 已按真实 `Sound/91.wav` 接通，SHA/大小固定校验；声音在效果图片解析前处理，回包去重和换图/退出清空沿用现有逻辑。普通 Windows 可听和鼠标实机验收尚未执行。
 
 ## 验证和交付状态
 
@@ -73,3 +73,15 @@ Attack1。只允许当前地图、位置、朝向、序列和期限内的确认�
 配套候选打包、公开发布、受影响 Windows 实机鼠标按住
 采矿和断线验收尚未执行；不能把现有 R17/feed14 算作新增挖矿已经上线。P6 的
 Windows 精炼、检查、领取和完整 P1–P8 Goal 继续开放。
+
+## Original mining sound freeze
+
+Real `Crystal/Build/Client/Debug/Sound/91.wav` is 164642 bytes, SHA256
+`EBCB5E32521CDF7256C334BE1951064EDD21E080264823B327BC6803ACDD38F1`.
+SoundList10091 is a resource ID, not a filename. MapEffect12 queues the source
+clip before optional catalog/PNG lookup; complete i32 location, source packet
+context and nonzero sequence are required. Native14 pass (one explicit GPU
+case is ignored in this run), Bevy added2 and adjacent3 pass. Full verifier
+SelfTest and both exact audio gates pass. Package SelfTest remains blocked by
+absent generated keyed-map cache, with failure retained; new packaging always
+generates its own exact209-map closure. See [audio receipt](generated/player-qa/mining-20261007/sound-freeze-01.json).

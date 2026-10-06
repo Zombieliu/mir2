@@ -1,5 +1,14 @@
 # 经典三职业玩法补齐 Goal — 2026-10-04
 
+> 2026-10-07 original Mine sound10091 is now wired to real91.wav before
+> optional effect-image resolution. Accepted packet/generation dedupe and scene
+> cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest
+> and both exact size/SHA audio gates pass. Package SelfTest missing-keyed-cache
+> failure is preserved. Clean paired builds,209-map packaging, native/server
+> mouse/audio and rollout are the next gates; public gameR17/feed14, D/F and
+> saves are unchanged. This does not complete weapon refining or fullP1–P8.
+> [Evidence](generated/player-qa/mining-20261007/README.md).
+
 ## 2026-10-07 用户授权挖矿：P6 普通玩家采矿闭环
 
 原版23矿区/两矿集导入，当前 profile14矿区和八矿物已接入共享权威。三职业

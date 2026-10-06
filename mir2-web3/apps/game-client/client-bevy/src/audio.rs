@@ -59,6 +59,8 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "pet_olympicmascot.wav",
     "pet_frog.wav",
     "pet_monkey.wav",
+    // Original SoundList.lst 10091: Mine wall impact.
+    "91.wav",
     "005-1.wav",
     "005-2.wav",
     "005-3.wav",
@@ -1096,6 +1098,99 @@ mod tests {
             );
         }
         assert_eq!(queue.len(), 1);
+    }
+
+    #[test]
+    fn mining_hit_wall_uses_original_allowlisted_clip_and_packet_sequence() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        let event = NativeGameplaySoundEvent {
+            generation: 4,
+            sequence: 12,
+            cue: "Mine.hitWall".to_owned(),
+            file_name: "91.wav".to_owned(),
+        };
+        assert!(queue.push(event.clone()));
+        assert!(
+            !queue.push(event.clone()),
+            "the same packet cannot replay its hit"
+        );
+        assert!(
+            !queue.push(NativeGameplaySoundEvent {
+                file_name: "10091.wav".to_owned(),
+                sequence: 13,
+                ..event.clone()
+            }),
+            "the SoundList ID is not a filename"
+        );
+        assert!(!queue.push(NativeGameplaySoundEvent {
+            file_name: "../91.wav".to_owned(),
+            sequence: 13,
+            ..event.clone()
+        }));
+        assert_eq!(queue.drain_bounded(8), vec![event.clone()]);
+        assert!(
+            queue.push(NativeGameplaySoundEvent {
+                generation: 5,
+                sequence: 1,
+                ..event
+            }),
+            "a new connection generation may play a fresh Mine packet"
+        );
+    }
+
+    #[test]
+    fn mining_real_clip_loads_and_spawns_one_gameplay_player() {
+        let _guard = AUDIO_ENV_LOCK.lock().unwrap();
+        let path = discover_audio_file("91.wav")
+            .expect("real original SoundList 10091 clip must be available for this acceptance test");
+        let mut app = app();
+        let source = read_wav_source(
+            &path,
+            &mut app.world_mut().resource_mut::<Assets<AudioSource>>(),
+        )
+        .expect("original Mine clip must pass the production WAV loader");
+        assert_eq!(
+            app.world()
+                .resource::<Assets<AudioSource>>()
+                .get(&source)
+                .unwrap()
+                .bytes
+                .len(),
+            164_642
+        );
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .gameplay_sources
+            .insert("91.wav".to_owned(), source.clone());
+        {
+            let audio = &mut app.world_mut().resource_mut::<OptionsRuntime>().audio;
+            audio.sound_enabled = true;
+            audio.sound_volume = 50;
+        }
+        let event = NativeGameplaySoundEvent {
+            generation: 31,
+            sequence: 12,
+            cue: "Mine.hitWall".to_owned(),
+            file_name: "91.wav".to_owned(),
+        };
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .push(event.clone()));
+        app.update();
+        let mut query = app
+            .world_mut()
+            .query::<(&AudioPlayer<AudioSource>, &NativeGameplaySoundEffectTrack, &PlaybackSettings)>();
+        let players = query.iter(app.world()).collect::<Vec<_>>();
+        assert_eq!(players.len(), 1);
+        assert_eq!(players[0].0.0, source);
+        assert!(matches!(players[0].2.mode, PlaybackMode::Despawn));
+        assert!(!app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .push(event));
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 1);
     }
 
     #[test]

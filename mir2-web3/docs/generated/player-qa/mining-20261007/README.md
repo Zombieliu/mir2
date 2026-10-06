@@ -86,7 +86,17 @@ Linux CI 37510943095 completes successfully on exact source
 are retained in the source-bound receipt. Gateway's nine-test execution took
 552.49s on that runner, separately from its 2m57s build; this is not a gameplay
 performance result. Packaging/publication/install/human acceptance remain open.
-Mining audio 10091 is not available
-as a real resource in the inspected asset roots and remains open. Full checkpoint
+The previous audio-root search missed `Crystal/Build/Client/Debug/Sound`; the actual original91.wav is now found, pinned and wired. Native audible mouse acceptance remains open. Full checkpoint
 acceptance does not authorize incremental active/standby replay, whose current
 replay clock changes random mining rolls. Full P6 weapon refining and P1–P8 stay open.
+
+## Sound follow-up: actual original resource
+
+[Source-bound receipt](sound-freeze-01.json) records the four frozen code-file
+hashes and exact original WAV identity. Native14/0 (GPU1 explicitly ignored)
+and Bevy added2/0 plus adjacent3/0 pass. The full verifier SelfTest passes;
+the package SelfTest missing-keyed-cache failure is retained, while both
+focused gates reject incorrect names, size and SHA and copy actual source WAV.
+These results are source/resource checks, not Windows audible/native mouse or
+paired release acceptance. Paired clean builds and new exact209-map packaging
+will provide separate receipts.

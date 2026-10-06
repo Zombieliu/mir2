@@ -80,6 +80,11 @@ const EFFECT_TRANSIENT_ORDER: f32 = 9.0;
 /// Upper bound on simultaneously-active transient effects.
 pub const MAX_ACTIVE_EFFECTS: usize = 96;
 
+/// Crystal GameScene.MapEffect plays SoundList 10091 immediately on Mine.
+const MINE_MAP_EFFECT: u64 = 12;
+const MINE_HIT_WALL_SOUND_FILE: &str = "91.wav";
+const MINE_HIT_WALL_SOUND_CUE: &str = "Mine.hitWall";
+
 /// Crystal completes the six-frame Spell actor action before Lightning begins.
 const LIGHTNING_SPELL_ACTION_MS: u64 = 600;
 const LIGHTNING_SOUND_FILE: &str = "M40-0.wav";
@@ -3641,6 +3646,9 @@ impl NativeEffects {
     }
 
     fn apply_map_effect(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        // Audio is owned by the accepted packet, not by successful PNG/catalog
+        // loading. Crystal plays 10091 before creating the wall-hit effect.
+        self.apply_mine_wall_sound(payload, provenance);
         let Some(catalog) = effect_catalog() else {
             return;
         };
@@ -3687,6 +3695,29 @@ impl NativeEffects {
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
+    }
+
+    fn apply_mine_wall_sound(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        if provenance.packet != "MapEffect"
+            || provenance.sequence == 0
+            || payload.get("effect").and_then(Value::as_u64) != Some(MINE_MAP_EFFECT)
+        {
+            return;
+        }
+        // The Crystal wire location is a Point of integer i32 map cells.
+        // Reject incomplete, fractional and overflowing positions; observers
+        // of another nearby miner use the same source-owned sound.
+        let location = payload.get("location");
+        if ["x", "y"].iter().any(|axis| {
+            location
+                .and_then(|location| location.get(*axis))
+                .and_then(Value::as_i64)
+                .and_then(|coordinate| i32::try_from(coordinate).ok())
+                .is_none()
+        }) {
+            return;
+        }
+        self.queue_immediate_sound(provenance, MINE_HIT_WALL_SOUND_CUE, MINE_HIT_WALL_SOUND_FILE);
     }
 
     fn apply_object_spell(
@@ -4243,6 +4274,131 @@ mod tests {
     use crate::gameplay_bridge::{NativeEffectEvent, NativeGameplayAdapter};
     use crate::native_protocol::PacketEvent;
     use serde_json::json;
+
+    fn mining_map_event(generation: u64, sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            generation,
+            sequence,
+            packet: "MapEffect".to_owned(),
+            payload: json!({"effect": 12, "value": 0, "location": {"x": 83, "y": 8}}),
+        }
+    }
+
+    #[test]
+    fn mining_wall_sound_does_not_depend_on_effect_images() {
+        let mut fx = NativeEffects::default();
+        let provenance = EffectProvenance {
+            generation: 91,
+            sequence: 40,
+            packet: "MapEffect".to_owned(),
+            spell: "effect".to_owned(),
+        };
+        // This enters the production map-effect handler. An unresolvable
+        // wall-hit sprite must not suppress the original immediate sound.
+        fx.apply_map_effect(
+            &json!({"effect": 12, "value": u32::MAX, "location": {"x": 83, "y": 8}}),
+            &provenance,
+        );
+        assert!(fx.active.is_empty());
+        assert_eq!(
+            fx.take_due_sound_events(0),
+            vec![mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: 91,
+                sequence: 40,
+                cue: MINE_HIT_WALL_SOUND_CUE.to_owned(),
+                file_name: MINE_HIT_WALL_SOUND_FILE.to_owned(),
+            }]
+        );
+        assert!(fx.take_due_sound_events(0).is_empty());
+    }
+
+    #[test]
+    fn mining_map_effect_sound_dedupes_and_clears_at_scene_boundaries() {
+        let mut fx = NativeEffects::default();
+        let zone = HashMap::new();
+        let first = mining_map_event(91, 1);
+        fx.observe(100, 82, 8, &[first.clone()], &zone);
+        let due = fx.take_due_sound_events(100);
+        assert_eq!(due.len(), 1);
+        assert_eq!(due[0].cue, MINE_HIT_WALL_SOUND_CUE);
+        assert_eq!(due[0].file_name, MINE_HIT_WALL_SOUND_FILE);
+        fx.observe(101, 82, 8, &[first], &zone);
+        assert!(fx.take_due_sound_events(101).is_empty());
+        fx.observe(200, 82, 8, &[mining_map_event(92, 1)], &zone);
+        assert_eq!(fx.take_due_sound_events(200).len(), 1);
+        for (sequence, boundary) in [(2, "MapChanged"), (4, "LogOutSuccess")] {
+            fx.observe(
+                300,
+                82,
+                8,
+                &[
+                    mining_map_event(92, sequence),
+                    NativeEffectEvent {
+                        generation: 92,
+                        sequence: sequence + 1,
+                        packet: boundary.to_owned(),
+                        payload: json!({}),
+                    },
+                ],
+                &zone,
+            );
+            assert!(
+                fx.take_due_sound_events(300).is_empty(),
+                "{boundary} must discard the pending old-scene sound"
+            );
+        }
+    }
+
+    #[test]
+    fn mining_wall_sound_rejects_non_mine_or_malformed_packet_context() {
+        let provenance = EffectProvenance {
+            generation: 91,
+            sequence: 40,
+            packet: "MapEffect".to_owned(),
+            spell: "effect".to_owned(),
+        };
+        for payload in [
+            json!({"effect": 13, "location": {"x": 83, "y": 8}}),
+            json!({"effect": "12", "location": {"x": 83, "y": 8}}),
+            json!({"effect": 4_294_967_308_u64, "location": {"x": 83, "y": 8}}),
+            json!({"effect": 12}),
+            json!({"effect": 12, "location": {"x": 83}}),
+            json!({"effect": 12, "location": {"x": 83, "y": "8"}}),
+            json!({"effect": 12, "location": {"x": 83.5, "y": 8}}),
+            json!({"effect": 12, "location": {"x": 2_147_483_648_i64, "y": 8}}),
+        ] {
+            let mut fx = NativeEffects::default();
+            fx.apply_mine_wall_sound(&payload, &provenance);
+            assert!(fx.take_due_sound_events(0).is_empty(), "{payload}");
+        }
+        for (packet, sequence) in [("ObjectAttack", 40), ("MapEffect", 0)] {
+            let mut fx = NativeEffects::default();
+            fx.apply_mine_wall_sound(
+                &mining_map_event(91, 1).payload,
+                &EffectProvenance {
+                    packet: packet.to_owned(),
+                    sequence,
+                    ..provenance.clone()
+                },
+            );
+            assert!(fx.take_due_sound_events(0).is_empty());
+        }
+    }
+
+    #[test]
+    fn mining_wall_clip_matches_original_source_sha256() {
+        use sha2::{Digest, Sha256};
+        let path = mir2_client_bevy::audio::discover_audio_file(MINE_HIT_WALL_SOUND_FILE)
+            .expect("actual packaged/source SoundList 10091 clip");
+        let bytes = fs::read(path).unwrap();
+        assert_eq!(bytes.len(), 164_642);
+        assert_eq!(&bytes[0..4], b"RIFF");
+        assert_eq!(&bytes[8..12], b"WAVE");
+        assert_eq!(
+            format!("{:X}", Sha256::digest(&bytes)),
+            "EBCB5E32521CDF7256C334BE1951064EDD21E080264823B327BC6803ACDD38F1"
+        );
+    }
 
     fn magic_shield_effect_event(sequence: u64, effect: u32) -> NativeEffectEvent {
         NativeEffectEvent {

@@ -1,0 +1,3 @@
+realCopy=C:\mir2-build\mining-native-isolated-20261006\mining-sound-copy-8fcbb09bc08445089697d97185851811\91.wav
+MINING_SOUND_GATE=passed script=package-windows-candidate.ps1 bytes=164642 sha256=EBCB5E32521CDF7256C334BE1951064EDD21E080264823B327BC6803ACDD38F1 exactWhitelist=true wrongSizeRejected=true wrongHashRejected=true
+MINING_SOUND_GATE=passed script=verify-windows-candidate.ps1 bytes=164642 sha256=EBCB5E32521CDF7256C334BE1951064EDD21E080264823B327BC6803ACDD38F1 exactWhitelist=true wrongSizeRejected=true wrongHashRejected=true
