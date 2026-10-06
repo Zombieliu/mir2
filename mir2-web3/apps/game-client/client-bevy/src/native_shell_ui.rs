@@ -2419,7 +2419,7 @@ fn render_monthly_card(parent: &mut ChildSpawnerCommands, model: &NativeShellMod
     if !model.monthly_card.open { return; }
     let card = &model.monthly_card;
     parent.spawn((absolute_node(spec::CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
-        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.75)), GlobalZIndex(100)))
+        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.75)), GlobalZIndex(2000)))
         .with_children(|layer| {
             spawn_localized_frame(layer, spec::CrystalRect::new(202.0, 190.0, 620.0, 390.0));
             spawn_aux_text(layer, "Monthly Card", spec::CrystalRect::new(222.0, 207.0, 580.0, 34.0), 22.0, GOLD, Justify::Center);
@@ -2545,7 +2545,7 @@ mod tests {
                 }
                 assert!(texts.contains(&expected.monthly_card.code));
                 assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
-                assert!(app.world_mut().query::<&GlobalZIndex>().iter(app.world()).any(|z| z.0 == 100));
+                assert!(app.world_mut().query::<&GlobalZIndex>().iter(app.world()).any(|z| z.0 > 1000));
             });
         }
         let mut model = expected;

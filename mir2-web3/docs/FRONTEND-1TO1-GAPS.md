@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-06 monthly-card native Candidate has a character-selection modal,
+> localized rules, expiry, code input/paste, redeem and refresh in all nine locales.
+> Wire1/state5 and actual nine-locale offscreen GPU visibility/layout pass with
+> zero missing glyphs, overflowing labels or outside nodes. The first occluded
+> modal frame is retained; GlobalZIndex correction and open/closed frame assertion
+> prevent a layout-only false green. Live paired rollout, player clicks and human
+> language/visual acceptance remain open. No classic parity percentage changes.
+> [Actual frames and scope](generated/player-qa/monthly-card-20261006/README.md).
+
 > 2026-10-04 v27 default Candidate source derives208 runtime maps plus the
 > source-only D71653 room,209 native resources.67,993 drawable references and
 > 224 Monster049 frames are physically checked, with zero drawable gaps.

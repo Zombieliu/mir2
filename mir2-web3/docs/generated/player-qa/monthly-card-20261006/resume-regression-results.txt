@@ -1,0 +1,26 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 46.90s
+     Running unittests src\lib.rs (C:/mir2-build/gateway-tests-r51\debug\deps\mir2_gateway-b035aa43022289bb.exe)
+running 22 tests
+test web::tests::explicit_logout_and_disconnect_revoke_native_resume_family_before_execution ... ok
+test web::tests::native_resume_atomically_restores_bound_session_and_replay_fails ... ok
+test web::tests::native_resume_auth_revision_overflow_blocks_issue_reserve_and_commit ... ok
+test web::tests::native_resume_commit_rechecks_lease_expiry_under_the_store_mutex ... ok
+test web::tests::native_resume_control_never_maps_to_simulation_auth_or_unsafe_actions ... ok
+test web::tests::native_resume_credential_and_lease_are_consumed_once_under_one_mutex ... ok
+test web::tests::native_resume_expired_credential_with_live_lease_is_terminal_and_releases_capacity ... ok
+test web::tests::native_resume_first_post_resume_action_rechecks_identity_before_execution ... ok
+test web::tests::native_resume_handler_reconnects_once_rotates_credential_and_replays_no_commands ... ok
+test web::tests::native_resume_identity_revoked_during_prepare_cannot_commit_or_retry_and_drops_resources ... ok
+test web::tests::native_resume_json_is_explicit_strict_and_secret_redacted ... ok
+test web::tests::native_resume_rejects_cache_revocation_without_consuming_the_lease ... ok
+test web::tests::native_resume_rejects_expired_identity_binding ... ok
+test web::tests::native_resume_rejects_revoked_identity_without_consuming_the_lease ... ok
+test web::tests::native_resume_rejects_wrong_gateway_session_and_character_bindings ... ok
+test web::tests::native_resume_remote_revocation_after_precheck_is_caught_by_post_commit_shared_revalidate ... ok
+test web::tests::native_resume_reservation_drop_and_explicit_rollback_restore_exact_lease ... ok
+test web::tests::native_resume_revocation_after_revalidate_before_commit_is_linearized_and_never_activates ... ok
+test web::tests::native_resume_route_failure_rolls_back_and_exact_token_retries_without_orphan_permits ... ok
+test web::tests::native_resume_server_event_contracts_are_exact_and_rejection_is_uniform ... ok
+test web::tests::native_resume_zone_failure_rolls_back_and_second_attempt_commits ... ok
+test web::tests::reconnect_grace_expiry_revokes_native_resume_credentials ... ok
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 902 filtered out; finished in 7.69s

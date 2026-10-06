@@ -1,5 +1,13 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-06 月卡 Candidate：角色选择页可查询期限、粘贴启用码、兑换和刷新。
+> Windows 协议1/1、状态/输入5/5通过；九语言实际离屏 GPU 窗口均可见，
+> 缺字、文字越界和窗口越界均为0。首次截图发现窗口被选择页遮住，已修正
+> GlobalZIndex并补上打开/关闭画面对比，原失败截图保留。服务端真实 HTTP/WS
+> 3/3、账本9/9和独立 PostgreSQL 并发1/1通过。仍未发布配套客户端/网关，
+> 玩家实机点击、正式服收费和在线支付未验收；旧玩法 P1–P8验收不变。
+> [月卡实际截图和证据](generated/player-qa/monthly-card-20261006/README.md)。
+
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
 > after P3/source513eb83, applying only two Gateway terminal hunks. Source7
 > merges its actual nested rank, retires exact current editor context, and is

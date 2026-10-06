@@ -581,6 +581,10 @@ fn monthly_card_nine_language_modal_renders_offscreen() {
     let mut cases = Vec::new();
     for locale in Locale::ALL {
         native_i18n::activate(locale);
+        app.insert_resource(fixture_model(NativeShellScreen::CharacterSelect));
+        warm_i18n_images(&mut app);
+        let baseline = output.join(format!("monthly-card-{}-closed.png", locale.code()));
+        capture_i18n(&mut app, &target, &baseline);
         let mut model = fixture_model(NativeShellScreen::CharacterSelect);
         model.monthly_card.open = true;
         model.monthly_card.code = format!("MC1-{}", "A".repeat(43));
@@ -603,7 +607,9 @@ fn monthly_card_nine_language_modal_renders_offscreen() {
         assert_eq!(app.world().resource::<NativeShellModel>(), &model);
         let filename = format!("monthly-card-{}.png", locale.code());
         capture_i18n(&mut app, &target, &output.join(&filename));
-        cases.push(json!({"locale":locale.code(),"image":filename,"texts":layouts}));
+        assert!(fs::read(&baseline).unwrap() != fs::read(output.join(&filename)).unwrap(),
+            "monthly modal must change the actual rendered frame; layout alone cannot prove visibility");
+        cases.push(json!({"locale":locale.code(),"image":filename,"visibleFrameChanged":true,"texts":layouts}));
     }
     fs::write(report, serde_json::to_vec_pretty(&json!({"passed":true,"cases":cases})).unwrap()).unwrap();
 }

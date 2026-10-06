@@ -4,7 +4,8 @@
 > account ledger, hashed codes, idempotent operator orders, calendar renewal,
 > authenticated redemption and server-authoritative expiry/admission. Ledger9
 > and actual shared HTTP/WS/resume3 pass; independent PostgreSQL writer proof
-> is prepared, not yet accepted. No production writer/schema/feed was changed.
+> now passes1/1 in actual isolated PG16 CI37464517808 (whole workflow success).
+> Resume22/store22 regressions pass. No production writer/schema/feed was changed.
 > The earlier time-card gap is closed in source only, not online payment or
 > public realm activation. Older classic Goal/P6 acceptance stays unchanged.
 > [Runbook and verification](MONTHLY-CARD-ACCESS-20261006.md).

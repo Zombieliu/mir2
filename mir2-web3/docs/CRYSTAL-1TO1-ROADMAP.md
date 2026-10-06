@@ -4,7 +4,9 @@
 > calendar, deterministic operator order/code, atomic spent receipt, native
 > expiry/redeem/status modal and server StartGame/resume/idle/fast-path checks.
 > Ledger9/9, real HTTP/shared WS/resume3/3, native wire1/1 and modal state5/5
-> pass; GPU and isolated PostgreSQL proof remain in progress. It does not
+> pass. Nine-locale actual GPU modal visibility/layout and isolated PostgreSQL
+> competing-writer1/1 pass; server CI37464517808 succeeds. Initial modal occlusion
+> and its correction are retained; resume22/store22 regressions pass. It does not
 > grant classic parity or close mining/weapon-upgrade P6. Public feed/realm
 > and REQUIRED=0 remain unchanged; online cash payment is not integrated.
 > [Monthly implementation evidence](MONTHLY-CARD-ACCESS-20261006.md).

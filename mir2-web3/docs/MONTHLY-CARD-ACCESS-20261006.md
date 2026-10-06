@@ -79,7 +79,7 @@ authenticated HTTP endpoint. Wall-clock checks do not scan historical receipts
 on each movement: admission reads the cached expiry, with an authoritative
 refresh at expired boundaries and world entry/resume.
 
-## Verification at the implementation checkpoint
+## Verification and remaining delivery
 
 - Windows native binary compiled with Rust 1.95.0; monthly wire/redaction 1/1.
 - Simulation monthly ledger 9/9, including boundary, renewal, independent
@@ -89,15 +89,37 @@ refresh at expired boundaries and world entry/resume.
   logs in normally, creates a character, is denied without access, redeems,
   enters the shared Zone, expires on an actual idle server wake, is saved and
   logged out, renews over HTTP and enters again under a one-player limit.
-- Original failures were retained in owned C scratch logs: missing QA save
-  recovery key, delayed denied-entry capacity release and bootstrap timer
-  deferral. Fixes retain the real policy, authentication and persistence gates.
-- Native modal9-language state/input and receipt correlation 5/5. The explicit
-  offline GPU layout/screenshot fixture is next at this checkpoint.
-- PostgreSQL independent-writer test compiles, but was locally ignored because
-  there is no running local PostgreSQL/Docker service. The dedicated
-  `monthly-card-acceptance.yml` creates an isolated QA database and explicitly
-  runs it. No skipped database test is counted as acceptance.
+- Initial failures were a missing QA save recovery key, delayed denied-entry
+  capacity release and bootstrap timer deferral. Their diagnoses and corrected
+  real-flow checks are recorded here; the fixes retain the actual policy,
+  authentication and persistence gates.
+- Existing native-resume 22/22 and account-store 22/22 regressions pass.
+- Native state/input and receipt correlation 5/5 pass again on the final UI
+  binary. The explicit offline GPU fixture runs all nine locales. Each open
+  modal changes the captured frame from its closed baseline; missing glyphs,
+  overflowing text nodes and nodes outside the viewport are all zero.
+- Manual review of the first GPU screenshots caught the monthly layer behind
+  the character-selection root: layout checks alone had incorrectly passed.
+  The layer is now 2000 above the shell root at 1000, and the fixture additionally
+  compares actual rendered open/closed frames. The initial occluded frame and
+  layout report are retained as failure evidence, not counted as acceptance.
+  Final Traditional Chinese, Arabic and Brazilian Portuguese frames were
+  visually inspected. Full player interaction and human translation acceptance
+  are still unexecuted.
+- PostgreSQL was locally ignored because there is no running local service.
+  Actual isolated PG16 CI explicitly executes four independent writers, single
+  redemption credit, reopened-store persistence, renewal and hashed receipt
+  storage: 1/1 passes. The complete [server acceptance run37464517808](https://github.com/Zombieliu/mir2/actions/runs/37464517808)
+  succeeds on `cb330c515a3f16a3d5fb0acbeac0f8fe35b1aedc` with ledger9/9 and
+  real HTTP/WS/resume3/3. The UI-only correction follows that server source.
+
+[Durable screenshots, reports and execution receipts](generated/player-qa/monthly-card-20261006/README.md).
+
+No public client/Gateway rollout, production account migration, subscription
+grant or charging switch was performed. Finish the paired deployment and
+ordinary player interaction with REQUIRED=0 before any paid activation. Price,
+currency and payment provider are separate business inputs; the current feature
+supports trusted operator-issued activation codes.
 
 This feature grants account access only. It does not alter experience, drops,
 game coins, daily rewards, mining or equipment upgrades.

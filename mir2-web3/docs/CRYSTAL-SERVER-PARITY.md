@@ -4,7 +4,9 @@
 > an absent source capability: account-wide30-day wall clock, atomic receipts,
 > renewals, protected issuance and authenticated native/HTTP redemption;
 > StartGame/resume/fast movement and idle saved logout enforce required access.
-> Ledger9 and real shared HTTP/WS/resume3 pass. PostgreSQL acceptance is pending;
+> Ledger9 and real shared HTTP/WS/resume3 pass. Actual isolated PostgreSQL
+> competing-writer1/1 and complete server CI37464517808 pass; resume22/store22
+> regressions pass. Native nine-locale GPU modal visibility/layout passes;
 > no original Crystal parity percentage or public realm acceptance is gained.
 > REQUIRED defaults OFF; currency credits remain separate from access time.
 > [Implementation details](MONTHLY-CARD-ACCESS-20261006.md).

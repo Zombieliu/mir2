@@ -3,8 +3,11 @@
 > 2026-10-06 user requests a monthly time card. Candidate implements account-
 > wide30-day calendar access, code issuance/redemption, renewal, server world
 > admission and saved expiry logout. Ledger9, actual shared HTTP/WS/resume3,
-> native wire1 and nine-language modal state5 pass. GPU/isolated PostgreSQL
-> verification remain in progress; REQUIRED=0 and public versions unchanged.
+> native wire1 and nine-language modal state5 pass. Actual nine-locale GPU
+> visibility/layout and isolated PostgreSQL competing-writer1 pass; server
+> CI37464517808 succeeds. Initial modal occlusion is retained as failed evidence.
+> Resume22 and account-store22 regressions pass. REQUIRED=0 and public versions
+> remain unchanged; pricing/online payment and public activation stay open.
 > Earlier point-card-absent audit is superseded for this Candidate only.
 > Original mining/Windows weapon-upgrade P6 remains open.
 > [Implementation and remaining activation scope](MONTHLY-CARD-ACCESS-20261006.md).

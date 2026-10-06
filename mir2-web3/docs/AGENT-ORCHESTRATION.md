@@ -3,7 +3,10 @@
 > 2026-10-06 user authorizes account monthly access. Root remains the sole
 > writer in the isolated classic lane. Server ledger9/9, real shared HTTP/WS
 > and expired-resume3/3, native wire1/1 and nine-locale modal state5/5 pass.
-> GPU layout and isolated PostgreSQL acceptance are in progress. Required
+> Actual nine-locale GPU modal frames pass after the occluded first fixture is
+> corrected; missing glyphs, overflow and outside nodes are zero. Independent
+> PostgreSQL writer acceptance1/1 and server CI37464517808 succeed. Existing
+> resume22/22 and account-store22/22 regressions pass. Required
 > access defaults OFF; no public feed, live Gateway, D/F install or player-save
 > mutation. This additive feature does not complete the prior P1–P8 Goal.
 > [Rules, operator flow and verification](MONTHLY-CARD-ACCESS-20261006.md).

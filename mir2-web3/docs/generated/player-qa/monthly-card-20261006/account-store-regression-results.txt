@@ -1,0 +1,26 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 23s
+     Running unittests src\lib.rs (C:/mir2-build/gateway-tests-r51\debug\deps\mir2_simulation-17fe2de09d2a0925.exe)
+running 22 tests
+test config::config_account_store_durability_tests::post_rename_unknown_keeps_live_old_and_freezes_all_shared_writers ... ok
+test config::config_account_store_durability_tests::pre_rename_failure_keeps_live_and_disk_old_but_allows_a_later_write ... ok
+test config::tests::account_store_environment_requires_database_url_for_postgres_source ... ok
+test config::tests::account_store_new_records_current_schema_version ... ok
+test config::tests::account_store_runtime_backend_defaults_to_file_for_local_development ... ok
+test config::tests::account_store_runtime_backend_defaults_to_postgres_for_production ... ok
+test config::tests::account_store_runtime_backend_rejects_file_backend_in_production ... ok
+test config::tests::account_store_save_replaces_existing_file_and_cleans_temp_file ... ok
+test config::tests::account_store_scoping_and_source_merge_preserve_shared_game_shop_state ... ok
+test config::tests::corrupt_account_store_loads_default_without_deleting_source ... ok
+test config::tests::file_account_store_repository_loads_saves_and_reports_status ... ok
+test config::tests::legacy_account_store_without_schema_version_migrates_on_load ... ok
+test config::tests::postgres_account_store_pool_config_reads_env ... ok
+test config::tests::postgres_source_mode_rejects_stale_account_store_writer ... ok
+test config::tests::simulation_config_backup_and_restore_roundtrips_account_store ... ok
+test config::tests::simulation_config_clone_shares_account_store_persist_lock ... ok
+test config::tests::simulation_config_reports_configured_account_store_repositories ... ok
+test runtime::save::save_fail_closed_tests::delete_character_without_account_identity_is_rejected_and_does_not_mutate_account_store ... ok
+test runtime::save::save_fail_closed_tests::new_character_without_account_identity_is_rejected_and_does_not_mutate_account_store ... ok
+test runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store ... ok
+test runtime::session::tests::file_account_store_survives_fresh_config_reload ... ok
+test runtime::session::tests::shared_account_store_persists_new_character_across_sessions ... ok
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 2034 filtered out; finished in 3.93s
