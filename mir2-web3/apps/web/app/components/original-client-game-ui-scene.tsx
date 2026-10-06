@@ -4,7 +4,7 @@ import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-core-runtime";
 import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
 
-import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 
 import { useWorldSelector } from "../../lib/world-model";
 import type { WorldStore } from "../../lib/world-model";
@@ -85,6 +85,10 @@ type GameUiSceneProps = {
   npcRepairView?: NpcRepairView | null;
   onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
   onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
+  onToggleNpcRepairHold?: (view: NpcRepairView) => void;
+  npcRepairTargetSelection?: NpcRepairSelection | null;
+  onRegisterNpcRepairTarget?: (view: NpcRepairView, node: HTMLElement) => () => void;
+  onNpcRepairBagPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
   defaultChatExpanded?: boolean;
   chatUi?: ChatUiControls;
   mapImageRouteSource?: MapImageRouteSource | null;
@@ -187,6 +191,7 @@ function GameUiSceneInner({
   npcShopService,
   npcRepairService,
   npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
+  onToggleNpcRepairHold, npcRepairTargetSelection, onRegisterNpcRepairTarget, onNpcRepairBagPointerDown,
   defaultChatExpanded = true,
   chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
   onChatMessageChange,
@@ -631,6 +636,9 @@ function GameUiSceneInner({
           repairView={npcRepairView}
           onSelectRepair={onSelectNpcRepair}
           onConfirmRepair={onConfirmNpcRepair}
+          onToggleRepairHold={onToggleNpcRepairHold}
+          repairTargetSelection={npcRepairTargetSelection}
+          onRegisterRepairTarget={onRegisterNpcRepairTarget}
           initialTab={npcRepairService}
           availableTabs={[npcRepairService]}
           repairItems={
@@ -687,6 +695,8 @@ function GameUiSceneInner({
         <InventoryWindow
           initialDeleteMode={inventoryInitialDeleteMode}
           onCompatibilityInteraction={onInventoryCompatibilityInteraction}
+          repairMode={npcRepairService !== null}
+          onRepairPointerDown={onNpcRepairBagPointerDown}
           t={t}
           locale={locale}
           activeTab={activeInventoryTab}

@@ -30,6 +30,7 @@ import {
 } from "../lib/original-ui";
 import { createAssetResidency } from "../lib/asset-residency";
 import { BagPointerRouter } from "../lib/bevy-bag-ui";
+import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry } from "../lib/npc-repair-service";
 import { StoragePointerRouter } from "../lib/bevy-storage-ui";
 import { NpcShopPointerRouter } from "../lib/bevy-npc-shop-ui";
 import { matchesBevyHpOrbView, matchesBevyMpOrbView, readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
@@ -604,7 +605,8 @@ export function OriginalClientShell({
   storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
-  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
+  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onToggleNpcRepairHold,
+  onBeginNpcRepairDrag, onCancelNpcRepairDrag, onDropNpcRepairDrag,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -809,6 +811,41 @@ export function OriginalClientShell({
   // shell's existing motion clock without any dedicated timer.
   const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
+  const npcRepairTargetRef = useRef<{ view: NpcRepairView; node: HTMLElement } | null>(null);
+  const npcRepairQuarantineRef = useRef(new Map<number, number>());
+  const npcRepairClickFenceRef = useRef(new Map<number, { startedAt: number; target: EventTarget | null }>());
+  type RepairPointerLease = { drag: NpcRepairDrag; view: NpcRepairView; geometry: NpcRepairDragGeometry;
+    startedAt: number; item: HTMLElement; target: HTMLElement; stage: HTMLElement;
+    cancel: typeof onCancelNpcRepairDrag; drop: typeof onDropNpcRepairDrag; hold?: { token: object } };
+  const npcRepairPointerRef = useRef<RepairPointerLease | null>(null);
+  const [npcRepairTargetSelection, setNpcRepairTargetSelection] = useState<NpcRepairSelection | null>(null);
+  const npcRepairVisibleTargetRef = useRef<NpcRepairSelection | null>(null);
+  function changeNpcRepairTarget(selection: NpcRepairSelection | null) {
+    npcRepairVisibleTargetRef.current = selection; setNpcRepairTargetSelection(selection);
+  }
+  function confirmNpcRepairTarget(selection: NpcRepairSelection): boolean {
+    const result = onConfirmNpcRepair?.(selection) === true;
+    if (npcRepairVisibleTargetRef.current === selection) changeNpcRepairTarget(null);
+    return result;
+  }
+  function openNpcRepairBagPage(tab: InventoryTabKey) {
+    const lease = npcRepairPointerRef.current;
+    if (lease) cancelNpcRepairPointer(lease);
+    onOpenInventoryTab(tab);
+  }
+  const registerNpcRepairTarget = useCallback((view: NpcRepairView, node: HTMLElement) => {
+    const binding = { view, node }; npcRepairTargetRef.current = binding;
+    const panel = node.parentElement;
+    for (const [id, record] of npcRepairClickFenceRef.current) {
+      if (!(record.target instanceof Node) || !panel?.contains(record.target)) npcRepairClickFenceRef.current.delete(id);
+    }
+    return () => {
+      if (npcRepairTargetRef.current !== binding) return;
+      npcRepairTargetRef.current = null;
+      const lease = npcRepairPointerRef.current;
+      if (lease?.target === node && lease.view.stamp === view.stamp) cancelNpcRepairPointer(lease);
+    };
+  }, []);
   const [questLocalModalOpen, setQuestLocalModalOpenState] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpenState] = useState(false);
   const questLocalModalRef = useRef(false), mobileMoreOpenRef = useRef(false);
@@ -3634,7 +3671,121 @@ export function OriginalClientShell({
     return true;
   }
 
+  function repairGeometry(item: HTMLElement, target: HTMLElement, pointerId: number, pointerType: "mouse" | "touch"): NpcRepairDragGeometry | null {
+    const stage = stageFrameRef.current;
+    if (!stage || !stage.isConnected || !item.isConnected || !target.isConnected || !stage.contains(item) || !stage.contains(target)
+      || activeInventoryTab !== "bag1" && activeInventoryTab !== "bag2") return null;
+    const rect = (node: HTMLElement) => { const r = node.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
+    return { pointerId, pointerType, page: activeInventoryTab, stage, target, item,
+      stageRect: rect(stage), targetRect: rect(target), itemRect: rect(item), virtualWidth: stagePresentation.virtualWidth,
+      virtualHeight: stagePresentation.virtualHeight, scale: stagePresentation.scale, devicePixelRatio: window.devicePixelRatio };
+  }
+
+  function cancelNpcRepairPointer(expected = npcRepairPointerRef.current) {
+    if (!expected || npcRepairPointerRef.current !== expected) return;
+    npcRepairPointerRef.current = null;
+    npcRepairQuarantineRef.current.set(expected.geometry.pointerId, expected.startedAt);
+    try { expected.cancel?.(expected.drag); }
+    finally {
+      if (expected.hold) endCombatUiHold("bag", expected.hold);
+      try { if (expected.item.hasPointerCapture(expected.geometry.pointerId)) expected.item.releasePointerCapture(expected.geometry.pointerId); } catch { /* Terminal is already retired. */ }
+    }
+  }
+
+  function beginNpcRepairPointer(event: ReactPointerEvent<HTMLButtonElement>, item: ItemActionRef) {
+    if (!npcRepairService) return;
+    event.preventDefault(); event.stopPropagation();
+    if (npcRepairPointerRef.current) {
+      cancelNpcRepairPointer(); npcRepairQuarantineRef.current.set(event.pointerId, event.timeStamp);
+      rememberNpcRepairControlClick(event); return;
+    }
+    if (!event.isPrimary || event.button !== 0 || event.pointerType !== "mouse" && event.pointerType !== "touch"
+      || npcRepairQuarantineRef.current.has(event.pointerId) || !showInventory || !npcRepairView) return;
+    const target = npcRepairTargetRef.current;
+    if (!target || target.view.stamp !== npcRepairView.stamp || target.view.source !== npcRepairView.source) return;
+    const geometry = repairGeometry(event.currentTarget, target.node, event.pointerId, event.pointerType);
+    if (!geometry) return;
+    const drag = onBeginNpcRepairDrag?.(npcRepairView, item, geometry);
+    if (!drag) return;
+    const lease: RepairPointerLease = { drag, view: npcRepairView, geometry, startedAt: event.timeStamp,
+      item: event.currentTarget, target: target.node, stage: geometry.stage as HTMLElement,
+      cancel: onCancelNpcRepairDrag, drop: onDropNpcRepairDrag };
+    npcRepairPointerRef.current = lease;
+    try { event.currentTarget.setPointerCapture(event.pointerId); }
+    catch { cancelNpcRepairPointer(lease); return; }
+    heldScenePointerRef.current = null; onViewportDirectionStop();
+    beginCombatUiHold("bag", event.pointerId); lease.hold = combatUiHoldRef.current.get("bag");
+    if (npcRepairPointerRef.current !== lease && lease.hold) endCombatUiHold("bag", lease.hold);
+  }
+
+  function handleNpcRepairPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "down" | "move" | "up" | "cancel"): boolean {
+    const quarantine = npcRepairQuarantineRef.current, lease = npcRepairPointerRef.current;
+    if (quarantine.has(event.pointerId)) {
+      event.preventDefault();
+      if (phase === "down") rememberNpcRepairControlClick(event);
+      if ((phase === "up" || phase === "cancel") && event.timeStamp >= quarantine.get(event.pointerId)!) quarantine.delete(event.pointerId);
+      return true;
+    }
+    if (!lease) return false;
+    event.preventDefault();
+    if (event.pointerId !== lease.geometry.pointerId) {
+      if (phase === "down") {
+        cancelNpcRepairPointer(lease); quarantine.set(event.pointerId, event.timeStamp);
+        rememberNpcRepairControlClick(event);
+      }
+      return true;
+    }
+    if (event.timeStamp < lease.startedAt) return true;
+    if (phase === "down") { cancelNpcRepairPointer(lease); return true; }
+    if (phase === "move") return true;
+    npcRepairPointerRef.current = null; // Retire before synchronous callbacks.
+    quarantine.set(event.pointerId, lease.startedAt);
+    const target = npcRepairTargetRef.current;
+    const geometry = repairGeometry(lease.item, lease.target, event.pointerId, lease.geometry.pointerType);
+    const current = phase === "up" && event.pointerType === lease.geometry.pointerType && screen === "game" && showInventory && stageFrameRef.current === lease.stage
+      && npcRepairView?.stamp === lease.view.stamp && npcRepairView.source === lease.view.source
+      && target !== null && target.node === lease.target && target.view.stamp === lease.view.stamp;
+    const priorTarget = npcRepairVisibleTargetRef.current;
+    try {
+      const result = current && geometry ? lease.drop?.(lease.drag, geometry, event.clientX, event.clientY) : null;
+      if (!result) lease.cancel?.(lease.drag);
+      else if (npcRepairVisibleTargetRef.current === priorTarget) changeNpcRepairTarget(result.submitted ? null : result.selection);
+    } finally {
+      if (lease.hold) endCombatUiHold("bag", lease.hold);
+      try { if (lease.item.hasPointerCapture(event.pointerId)) lease.item.releasePointerCapture(event.pointerId); } catch { /* Already released. */ }
+      if (quarantine.get(event.pointerId) === lease.startedAt) quarantine.delete(event.pointerId);
+    }
+    return true;
+  }
+
+  function npcRepairControlTarget(target: EventTarget | null): HTMLButtonElement | null {
+    if (!(target instanceof Element)) return null;
+    const button = target.closest<HTMLButtonElement>("button"), panel = npcRepairTargetRef.current?.node.parentElement;
+    const wrapper = button?.parentElement;
+    return button && panel && wrapper && wrapper.parentElement === panel
+      && wrapper.hasAttribute("data-npc-repair-control") ? button : null;
+  }
+  function rememberNpcRepairControlClick(event: Parameters<typeof handleSharedBagPointer>[0]) {
+    const target = npcRepairControlTarget(event.target);
+    if (target) npcRepairClickFenceRef.current.set(event.pointerId, { startedAt: event.timeStamp, target });
+  }
+  function fenceNpcRepairClick(event: globalThis.MouseEvent) {
+    if (event.detail === 0) return; // Keyboard activation is an independent user action.
+    const target = npcRepairControlTarget(event.target);
+    if (!target) return;
+    const pointerId = (event as globalThis.MouseEvent & { pointerId?: number }).pointerId;
+    const ledger = npcRepairClickFenceRef.current;
+    const exactPointer = typeof pointerId === "number" && Number.isSafeInteger(pointerId) && pointerId >= 0;
+    const records = exactPointer ? [[pointerId!, ledger.get(pointerId!)]] as const : [...ledger.entries()];
+    const match = records.find(([, record]) => record && record.target === target && event.timeStamp >= record.startedAt);
+    if (match) {
+      ledger.delete(match[0]);
+      event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+    }
+  }
+
   function handleSharedUiPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"){
+    if (handleNpcRepairPointer(event, phase)) return;
     if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
     // Skill DOM owns new gestures; existing canvas leases still receive their terminal edges.
     if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar")) return;
@@ -3852,7 +4003,7 @@ export function OriginalClientShell({
   }
 
   function handleSharedBagPointer(event: {
-    target: EventTarget | null; pointerId: number; pointerType: string; button: number;
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number; timeStamp: number;
     clientX: number; clientY: number; shiftKey?:boolean; preventDefault: () => void;
   }, phase: "down" | "move" | "up" | "cancel") {
     if (handleSharedCharacterPointer(event, phase)) return;
@@ -3918,6 +4069,8 @@ export function OriginalClientShell({
   // DOM, not a concurrent render that has not updated the stage yet.
   useLayoutEffect(() => { sharedBagPointerHandlerRef.current = handleSharedUiPointer; });
   useLayoutEffect(() => {
+    const repairLease = npcRepairPointerRef.current;
+    if (repairLease) cancelNpcRepairPointer(repairLease);
     cancelSharedNpcShopPointer();
     cancelSharedStoragePointer();
     cancelSharedComposePointer();
@@ -3932,21 +4085,43 @@ export function OriginalClientShell({
     // before the shared canvas became interactive.
     heldScenePointerRef.current = null;
     onViewportDirectionStop();
-  }, [bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
+  }, [npcRepairView?.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
   useEffect(() => {
+    const down = (event: globalThis.PointerEvent) => {
+      if (!npcRepairPointerRef.current && !npcRepairQuarantineRef.current.has(event.pointerId)) {
+        const ledger = npcRepairClickFenceRef.current, control = npcRepairControlTarget(event.target);
+        ledger.delete(event.pointerId);
+        for (const [id, record] of ledger) {
+          if (control && record.target === control && !npcRepairQuarantineRef.current.has(id)) ledger.delete(id);
+        }
+      }
+      if (npcRepairPointerRef.current || npcRepairQuarantineRef.current.has(event.pointerId)) sharedBagPointerHandlerRef.current(event, "down");
+    };
+    const click = (event: globalThis.MouseEvent) => fenceNpcRepairClick(event);
     const up = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "up");
     const cancel = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "cancel");
-    const blur = () => { heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
-    const resize = () => { heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    const blur = () => { cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
+    const resize = () => { cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    const hidden = () => { if (document.visibilityState === "hidden") cancelNpcRepairPointer(); };
+    const pagehide = () => cancelNpcRepairPointer();
+    window.addEventListener("pointerdown", down, true);
+    window.addEventListener("click", click, true);
     window.addEventListener("pointerup", up, true);
     window.addEventListener("pointercancel", cancel, true);
     window.addEventListener("blur", blur);
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", hidden);
+    window.addEventListener("pagehide", pagehide);
     return () => {
+      window.removeEventListener("pointerdown", down, true);
+      window.removeEventListener("click", click, true);
       window.removeEventListener("pointerup", up, true);
       window.removeEventListener("pointercancel", cancel, true);
       window.removeEventListener("blur", blur);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", hidden);
+      window.removeEventListener("pagehide", pagehide);
+      cancelNpcRepairPointer();
       heldQuestControlPointersRef.current.clear();
       cancelSharedNpcShopPointer();
       cancelSharedStoragePointer();
@@ -4535,7 +4710,11 @@ export function OriginalClientShell({
                   storagePasswordOpenVersion,
                   npcShopService,
                   npcRepairService,
-                  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
+                  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair: confirmNpcRepairTarget,
+                  onToggleNpcRepairHold,
+                  npcRepairTargetSelection: npcRepairTargetSelection?.stamp === npcRepairView?.stamp ? npcRepairTargetSelection : null,
+                  onRegisterNpcRepairTarget: registerNpcRepairTarget,
+                  onNpcRepairBagPointerDown: beginNpcRepairPointer,
                   defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
                   onSendChat,
@@ -4554,7 +4733,7 @@ export function OriginalClientShell({
                   onCloseNpcShopService,
                   onCloseNpcRepairService,
                   onOpenCharacterTab,
-                  onOpenInventoryTab,
+                  onOpenInventoryTab: openNpcRepairBagPage,
                   onSelectNpcDialogTarget,
                   onSubmitNpcInput,
                   onUseItem,

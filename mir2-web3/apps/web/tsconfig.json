@@ -96,7 +96,9 @@
     ".next-web-windows-catchup-20261007-01/types/**/*.ts",
     ".next-web-windows-catchup-20261007-01/dev/types/**/*.ts",
     ".next-web-windows-catchup-20261007-02/types/**/*.ts",
-    ".next-web-windows-catchup-20261007-02/dev/types/**/*.ts"
+    ".next-web-windows-catchup-20261007-02/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-03/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-03/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

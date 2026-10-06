@@ -9,8 +9,13 @@ export type NpcRepairBagRow = Readonly<{ uniqueId: number | null; slot: number; 
 export type NpcRepairRow = NpcRepairBagRow & Readonly<{ quote: NpcRepairQuote | null; disabled: boolean;
   reason: "unknown" | "gold" | "busy" | "locked" | null }>;
 export type NpcRepairView = Readonly<{ stamp: object; source: object; mode: NpcRepairMode; name: string;
-  gold: number; rows: readonly NpcRepairRow[] }>;
+  gold: number; hold: boolean; rows: readonly NpcRepairRow[] }>;
 export type NpcRepairSelection = Readonly<{ stamp: object; uniqueId: number }>;
+export type NpcRepairDragGeometry = Readonly<{ pointerId: number; pointerType: "mouse" | "touch"; page: "bag1" | "bag2";
+  stage: object; target: object; item: object; stageRect: readonly number[]; targetRect: readonly number[]; itemRect: readonly number[];
+  virtualWidth: number; virtualHeight: number; scale: number; devicePixelRatio: number }>;
+export type NpcRepairDrag = Readonly<{ stamp: object; uniqueId: number; slot: number }>;
+export type NpcRepairDrop = Readonly<{ selection: NpcRepairSelection; submitted: boolean }>;
 export type NpcRepairProof = Readonly<{ command: Readonly<{ type: "repairItem" | "specialRepairItem"; uniqueId: number }> }>;
 type QuoteReader = (input: NpcRepairQuoteInput) => NpcRepairQuote | null;
 const record = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -88,6 +93,19 @@ function barrier(socket: object, create = true): Barrier | null {
 }
 type Active = Readonly<{ owner: NpcRepairOwner; mode: NpcRepairMode; rate: number; source: object; name: string; epoch: number }>;
 type Capture = Readonly<{ active: Active; key: string; view: NpcRepairView }>;
+function geometryValid(g: NpcRepairDragGeometry): boolean {
+  return record(g) && uint(g.pointerId) && (g.pointerType === "mouse" || g.pointerType === "touch") && (g.page === "bag1" || g.page === "bag2")
+    && typeof g.stage === "object" && g.stage !== null && typeof g.target === "object" && g.target !== null
+    && typeof g.item === "object" && g.item !== null && [g.stageRect, g.targetRect, g.itemRect].every(r => Array.isArray(r)
+      && r.length === 4 && r.every(Number.isFinite) && r[2] > 0 && r[3] > 0)
+    && [g.virtualWidth, g.virtualHeight, g.scale, g.devicePixelRatio].every(n => Number.isFinite(n) && n > 0);
+}
+function sameGeometry(a: NpcRepairDragGeometry, b: NpcRepairDragGeometry): boolean {
+  return geometryValid(b) && a.pointerId === b.pointerId && a.pointerType === b.pointerType && a.page === b.page
+    && a.stage === b.stage && a.target === b.target && a.item === b.item && a.virtualWidth === b.virtualWidth
+    && a.virtualHeight === b.virtualHeight && a.scale === b.scale && a.devicePixelRatio === b.devicePixelRatio
+    && ["stageRect", "targetRect", "itemRect"].every(k => a[k as "stageRect"].every((n, i) => n === b[k as "stageRect"][i]));
+}
 function freezeData(value: unknown): void {
   if (value && typeof value === "object") { for (const child of Object.values(value)) freezeData(child); Object.freeze(value); }
 }
@@ -120,13 +138,15 @@ export class NpcRepairService {
   private views = new WeakMap<NpcRepairView, Capture>();
   private selections = new WeakMap<NpcRepairSelection, Capture>();
   private proofs = new WeakMap<NpcRepairProof, { capture: Capture; used: boolean }>();
+  private drags = new WeakMap<NpcRepairDrag, { capture: Capture; geometry: NpcRepairDragGeometry; used: boolean }>();
+  private holdMode: NpcRepairMode | null = null;
   open(owner: NpcRepairOwner, mode: NpcRepairMode, rate: unknown, source: object, name = ""): boolean {
     this.close();
     if (!ownerValid(owner) || (mode !== "repair" && mode !== "special") || typeof rate !== "number" || !Number.isFinite(rate)
       || rate < 0 || !Number.isFinite(Math.fround(rate)) || !source || !barrier(owner.socket) || this.epoch >= Number.MAX_SAFE_INTEGER) return false;
     this.active = Object.freeze({ owner: Object.freeze({ ...owner }), mode, rate, source, name, epoch: this.epoch }); return true;
   }
-  close(): void { this.active = null; this.currentCapture = null; if (this.epoch < Number.MAX_SAFE_INTEGER) ++this.epoch; }
+  close(): void { this.active = null; this.currentCapture = null; this.holdMode = null; if (this.epoch < Number.MAX_SAFE_INTEGER) ++this.epoch; }
   invalidateInventory(): void {
     this.raw = null; this.currentCapture = null;
     if (this.inventoryEpoch < Number.MAX_SAFE_INTEGER) ++this.inventoryEpoch; else this.close();
@@ -134,11 +154,13 @@ export class NpcRepairService {
   /** Changed/unknown input retires intents before any receive callbacks run. */
   prepareSnapshot(owner: NpcRepairOwner | null, raw: unknown): void {
     const source = snapshotSource(owner, raw);
+    if (!source || !owner || this.active && !sameOwner(this.active.owner, owner)) this.holdMode = null;
     if (!source || !owner || !this.raw || !sameOwner(this.raw.owner, owner) || this.raw.key !== source.key) this.invalidateInventory();
   }
   observeSnapshot(owner: NpcRepairOwner | null, raw: unknown): boolean {
     const source = snapshotSource(owner, raw);
-    if (!source || !owner || this.inventoryEpoch >= Number.MAX_SAFE_INTEGER) { this.invalidateInventory(); return false; }
+    if (owner && this.active && !sameOwner(this.active.owner, owner)) this.holdMode = null;
+    if (!source || !owner || this.inventoryEpoch >= Number.MAX_SAFE_INTEGER) { this.holdMode = null; this.invalidateInventory(); return false; }
     if (this.raw && sameOwner(this.raw.owner, owner) && this.raw.key === source.key) return true;
     // Equality can preserve a continuously known source only. An explicit
     // mutation/unknown interval cleared raw and already spent the old epoch.
@@ -166,18 +188,52 @@ export class NpcRepairService {
     if (this.active !== active || this.raw !== raw) return null;
     const key = JSON.stringify({ epoch: active.epoch, inventoryEpoch: this.inventoryEpoch, rate: active.rate, gold, bag, rows });
     const stamp = this.currentCapture?.active === active && this.currentCapture.key === key ? this.currentCapture.view.stamp : Object.freeze({});
-    const view: NpcRepairView = Object.freeze({ stamp, source: active.source, mode: active.mode, name: active.name, gold, rows: Object.freeze(rows) });
+    const view: NpcRepairView = Object.freeze({ stamp, source: active.source, mode: active.mode, name: active.name, gold,
+      hold: this.holdMode === active.mode, rows: Object.freeze(rows) });
     const capture = { active, key, view }; this.views.set(view, capture); this.currentCapture = capture; return view;
   }
   private current(capture: Capture, view: NpcRepairView | null): boolean {
     const live = view && this.views.get(view);
     return !!live && live === this.currentCapture && this.raw !== null && this.active === capture.active
-      && live.active === capture.active && live.key === capture.key;
+      && live.active === capture.active && live.key === capture.key && live.view.stamp === capture.view.stamp;
   }
   select(view: NpcRepairView, uniqueId: number, current: NpcRepairView | null): NpcRepairSelection | null {
     const capture = this.views.get(view);
-    if (!capture || !this.current(capture, current) || !view.rows.some(row => row.uniqueId === uniqueId && !row.disabled)) return null;
+    if (!capture || !this.current(capture, current) || !view.rows.some(row => row.uniqueId === uniqueId && row.input !== null
+      && row.quote !== null && (row.reason === null || row.reason === "gold"))) return null;
     const selection = Object.freeze({ stamp: view.stamp, uniqueId }); this.selections.set(selection, capture); return selection;
+  }
+  toggleHold(view: NpcRepairView, current: NpcRepairView | null): boolean | null {
+    const capture = this.views.get(view);
+    if (!capture || !this.current(capture, current)) return null;
+    this.holdMode = this.holdMode === capture.active.mode ? null : capture.active.mode;
+    return this.holdMode !== null;
+  }
+  beginDrag(view: NpcRepairView, uniqueId: number, slot: number, geometry: NpcRepairDragGeometry,
+    current: NpcRepairView | null): NpcRepairDrag | null {
+    const capture = this.views.get(view);
+    if (!capture || !this.current(capture, current) || !geometryValid(geometry) || !uint(uniqueId) || !uint(slot, 79)
+      || Math.floor(slot / 40) !== (geometry.page === "bag2" ? 1 : 0)
+      || !view.rows.some(row => row.uniqueId === uniqueId && row.slot === slot && row.input !== null && row.quote !== null
+        && (row.reason === null || row.reason === "gold"))) return null;
+    const drag = Object.freeze({ stamp: view.stamp, uniqueId, slot });
+    const detached = Object.freeze({ ...geometry, stageRect: Object.freeze([...geometry.stageRect]),
+      targetRect: Object.freeze([...geometry.targetRect]), itemRect: Object.freeze([...geometry.itemRect]) });
+    this.drags.set(drag, { capture, geometry: detached, used: false }); return drag;
+  }
+  cancelDrag(drag: NpcRepairDrag): void { const lease = this.drags.get(drag); if (lease) lease.used = true; }
+  drop(drag: NpcRepairDrag, geometry: NpcRepairDragGeometry, x: number, y: number,
+    current: NpcRepairView | null): NpcRepairSelection | null {
+    const lease = this.drags.get(drag);
+    if (!lease || lease.used) return null;
+    lease.used = true; // Spend the terminal before validation or caller callbacks.
+    const r = lease.geometry.targetRect;
+    if (!this.current(lease.capture, current) || !sameGeometry(lease.geometry, geometry) || !Number.isFinite(x) || !Number.isFinite(y)
+      || x < r[0] || y < r[1] || x >= r[0] + r[2] || y >= r[1] + r[3]
+      || !current!.rows.some(row => row.uniqueId === drag.uniqueId && row.slot === drag.slot && row.input !== null && row.quote !== null
+        && (row.reason === null || row.reason === "gold"))) return null;
+    const selection = Object.freeze({ stamp: current!.stamp, uniqueId: drag.uniqueId });
+    this.selections.set(selection, lease.capture); return selection;
   }
   reserve(selection: NpcRepairSelection, current: NpcRepairView | null): NpcRepairProof | null {
     const capture = this.selections.get(selection); this.selections.delete(selection);

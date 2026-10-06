@@ -52,7 +52,9 @@ import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
 import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
 import { MailDispatcher,MailParcelController,mailContentKey,sameMailOwner,type MailRuntime,type MailOwner,type MailIntent,type MailOutcome,type MailSendProof,type MailCommandType,type MailComposeProof,type MailDraftState,type MailQuoteProof,type MailLockProof } from "../lib/bevy-mail-ui";
 import {projectMailParcelSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
-import { NpcRepairService, type NpcRepairOwner, type NpcRepairView, type NpcRepairSelection, type NpcRepairProof } from "../lib/npc-repair-service";
+import { NpcRepairService, type NpcRepairOwner, type NpcRepairView, type NpcRepairSelection, type NpcRepairProof,
+  type NpcRepairDrag, type NpcRepairDragGeometry, type NpcRepairDrop } from "../lib/npc-repair-service";
+import type { ItemActionRef } from "./components/original-client-types";
 import type { MailPresentation } from "./components/original-client-mail-window";
 import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
 import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
@@ -2958,7 +2960,7 @@ export default function HomePage() {
     // `send` is a stable hoisted closure over refs; intentionally excluded.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHeroPet]);
-  const [activeInventoryTab, setActiveInventoryTab] = useState<"bag1" | "bag2" | "quest">("bag1");
+  const [activeInventoryTab, setActiveInventoryTab, activeInventoryTabRef] = useImmediateUiState<"bag1" | "bag2" | "quest">("bag1");
   const [activeCharacterTab, setActiveCharacterTab] = useState<"char" | "stats1" | "stats2" | "spells">("char");
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
   const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<PredictedPlayerMotion | null>(null);
@@ -8829,6 +8831,33 @@ export default function HomePage() {
     return npcRepairAuthorityRef.current.select(view, uniqueId, readNpcRepairView());
   }
 
+  function toggleNpcRepairHold(view: NpcRepairView): void {
+    if (npcRepairAuthorityRef.current.toggleHold(view, readNpcRepairView()) !== null) renderParityServices(n => n + 1);
+  }
+
+  function beginNpcRepairDrag(view: NpcRepairView, item: ItemActionRef, geometry: NpcRepairDragGeometry): NpcRepairDrag | null {
+    if (!bagOpenRef.current || activeInventoryTabRef.current !== geometry.page || item.container !== geometry.page || !Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot >= 40
+      || typeof item.authoritativeUniqueId !== "number") return null;
+    const matches = worldRef.current.inventoryItems.filter(row => row.key === item.key && row.uniqueId === item.uniqueId
+      && row.authoritativeUniqueId === item.authoritativeUniqueId && row.slot === item.slot && row.container === item.container);
+    if (matches.length !== 1) return null;
+    return npcRepairAuthorityRef.current.beginDrag(view, item.authoritativeUniqueId,
+      item.slot + (item.container === "bag2" ? 40 : 0), geometry, readNpcRepairView());
+  }
+
+  function cancelNpcRepairDrag(drag: NpcRepairDrag): void { npcRepairAuthorityRef.current.cancelDrag(drag); }
+
+  function dropNpcRepairDrag(drag: NpcRepairDrag, geometry: NpcRepairDragGeometry, x: number, y: number): NpcRepairDrop | null {
+    if (!bagOpenRef.current || activeInventoryTabRef.current !== geometry.page) { cancelNpcRepairDrag(drag); return null; }
+    const current = readNpcRepairView();
+    const selection = npcRepairAuthorityRef.current.drop(drag, geometry, x, y, current);
+    if (!selection || !current) return null;
+    const row = current.rows.find(row => row.uniqueId === selection.uniqueId);
+    if (row?.reason === "gold") appendLog(t("client.LowGold", [], "Not enough gold."), "system");
+    const submitted = current.hold && row?.disabled === false ? confirmNpcRepair(selection) : false;
+    return { selection, submitted };
+  }
+
   function confirmNpcRepair(selection: NpcRepairSelection): boolean {
     const proof = npcRepairAuthorityRef.current.reserve(selection, readNpcRepairView());
     if (!proof) return false;
@@ -10825,6 +10854,13 @@ export default function HomePage() {
   }
 
   function openInventory(tab: "bag1" | "bag2" | "quest") {
+    if (npcRepairServiceRef.current) {
+      if (tab === "quest") return;
+      // This service has already leased DOM ownership; page changes must not
+      // start another shared handoff or close the NPC service on touch.
+      if (bagCompatibilityModeRef.current !== "fullInventory") { closeNpcRepairService(); requestBagCompatibility("fullInventory"); }
+      setActiveInventoryTab(tab); setShowInventory(true); return;
+    }
     if (sharedHudNavigationRef.current.ready) {
       navigateSharedHud({ type: "openBag" });
       setActiveInventoryTab(tab);
@@ -13688,10 +13724,14 @@ export default function HomePage() {
       case "NPCRepair":
       case "NPCSRepair": {
         const mode = event.packet === "NPCSRepair" ? "special" : "repair";
-        // Crystal repairs are NPC-driven. Surface the dedicated repair list
-        // instead of the generic inventory/character windows.
+        // The DOM Bag handoff must precede full-owner service capture.
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
         retireNpcShopService();
+        closeNpcRepairService();
+        endStorageService();
+        requestBagCompatibility("fullInventory");
+        setShowInventory(true);
+        setActiveInventoryTab("bag1");
         const owner = readNpcRepairOwner();
         const npcSource = owner && currentNpcRepairDialogSource(owner);
         if (owner && npcSource && npcRepairAuthorityRef.current.open(owner, mode, payload.rate,
@@ -13699,7 +13739,6 @@ export default function HomePage() {
           npcRepairDialogBindingRef.current = npcSource;
           setNpcRepairService(mode);
         }
-        setShowInventory(false);
         setShowCharacter(false);
         break;
       }
@@ -18343,6 +18382,10 @@ export default function HomePage() {
       npcRepairView={readNpcRepairView()}
       onSelectNpcRepair={selectNpcRepair}
       onConfirmNpcRepair={confirmNpcRepair}
+      onToggleNpcRepairHold={toggleNpcRepairHold}
+      onBeginNpcRepairDrag={beginNpcRepairDrag}
+      onCancelNpcRepairDrag={cancelNpcRepairDrag}
+      onDropNpcRepairDrag={dropNpcRepairDrag}
       onAccountIdChange={value => { if (authSurfaceCurrent(authRenderEpoch) && !loginBusyRef.current) { accountIdRef.current = value; setAccountId(value); } }}
       onPasswordChange={value => { if (authSurfaceCurrent(authRenderEpoch) && !loginBusyRef.current) { passwordRef.current = value; setPassword(value); } }}
       onLanguageChange={setLanguage}

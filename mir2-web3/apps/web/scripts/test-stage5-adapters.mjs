@@ -2788,7 +2788,7 @@ const parityPageNames = ["currentSpellsOwner", "currentSocialReplyOwner", "curre
   "currentQuestWorldIdentity", "currentCombatModeOwner", "sameCombatModeOwner", "nextCombatModeRevision",
   "captureCombatModeSnapshot", "captureCombatModeReceipt", "readCombatModeSource",
   "currentGuildBuffSource", "captureParityPacket", "captureParitySnapshot", "readPlayerItemTooltip", "readHeroItemTooltip",
-  "readCashGameShopItemTooltip", "guildStorageTooltipItem", "readGuildStorageItemTooltip", "readSocialItemSurface"];
+  "readCashGameShopItemTooltip", "guildStorageTooltipItem", "readGuildStorageItemTooltip", "readSocialItemSurface", "readNpcRepairOwner", "captureNpcRepairDialog", "currentNpcRepairDialogSource", "readNpcRepairView", "selectNpcRepair", "toggleNpcRepairHold", "beginNpcRepairDrag", "cancelNpcRepairDrag", "dropNpcRepairDrag", "confirmNpcRepair"];
 const parityDeclarations = new Map();
 let paritySendRawNode, parityReceiptNode, parityReceiveGuard;
 function visitParityPage(node) {
@@ -2876,6 +2876,8 @@ function parityPageFixture(owner, world = {}) {
     heroWindowActorRef:ref(null), heroRestockScheduledRef:ref(false), setHeroWindows:()=>{}, sameHeroSession:heroUi.sameHeroSession,
     observeBootstrapRef:ref(null), observePreferenceRef:ref(null),
     authSendRef:ref(null), chatUiRuntimeRef:ref(null), questCoreRuntimeRef:ref(null),
+    npcRepairDialogSourceRef:ref(null), npcRepairDialogBindingRef:ref(null), activeInventoryTabRef:ref("bag1"), sendRawHandler:ref(null),
+    sendRaw:(...args)=>scope.sendRawHandler.current(...args), mailMutationAllowed:mailParcelGateway.mailMutationAllowed,
     mapImageRouteRef:ref(null), mapRouteLocalModalRef:ref(false),
     questSceneRevisionRef:ref(owner.sceneRevision), combatModePhysicalRef:ref(null),
     combatModeRawRef:ref(null), combatModeRevisionRef:ref(0), combatModeHostRef:ref(null),
@@ -2904,7 +2906,7 @@ function parityPageFixture(owner, world = {}) {
     ...socialItems, socialCatalogRef:ref(new Map()), guildStorageRawRef:ref(null), guildPermissionsRef:ref(null),
     socialOwnTradeRef:ref(null), tradeLifecycleRef:ref({state:"closed",partner:""}), tradeIncarnationRef:ref(1),
   };
-  const keys = Object.keys(scope), api = new Function(...keys, parityPageJs + "\nreturn {currentCombatModeOwner,readCombatModeSource,captureCombatModeSnapshot,captureCombatModeReceipt,parityIngress,parityFinal,parityReceipt,parityCollectClaim,heroProofCurrent,heroInputAllowed,heroUiLeaseCurrent,changeHeroWindows,parityItemMutationAllowed,currentHeroModel,currentCreatureSource,currentCashGameShopSource,currentGuildBuffSource,captureParityPacket,captureParitySnapshot,readPlayerItemTooltip,readHeroItemTooltip,readCashGameShopItemTooltip,guildStorageTooltipItem,readGuildStorageItemTooltip,readSocialItemSurface};")(...keys.map(k=>scope[k]));
+  const keys = Object.keys(scope), api = new Function(...keys, parityPageJs + "\nreturn {currentCombatModeOwner,readCombatModeSource,captureCombatModeSnapshot,captureCombatModeReceipt,parityIngress,parityFinal,parityReceipt,parityCollectClaim,heroProofCurrent,heroInputAllowed,heroUiLeaseCurrent,changeHeroWindows,parityItemMutationAllowed,currentHeroModel,currentCreatureSource,currentCashGameShopSource,currentGuildBuffSource,captureParityPacket,captureParitySnapshot,readPlayerItemTooltip,readHeroItemTooltip,readCashGameShopItemTooltip,guildStorageTooltipItem,readGuildStorageItemTooltip,readSocialItemSurface,readNpcRepairView,captureNpcRepairDialog,toggleNpcRepairHold,beginNpcRepairDrag,dropNpcRepairDrag,confirmNpcRepair};")(...keys.map(k=>scope[k]));
   return {scope,api,socket,sent,sentBodies,microtasks};
 }
 function heroPageFixture() {
@@ -4668,9 +4670,37 @@ check("NPC repair Page consumer captures NPC owner and rate, retires invalid sou
   const shopFns=[];function walkShop(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="NpcShopWindow")shopFns.push(node);ts.forEachChild(node,walkShop);}walkShop(shopAst);
   assert.ok(shopFns.length>0);
   const shopText=shopFns[0].getText(shopAst);
-  assert.match(shopText,/repairView\?\.rows\.find\(item\s*=>\s*item\.uniqueId\s*===\s*row\.id\)/);
-  assert.match(shopText,/onSelectRepair\?\.\(repairView, row\.id\)/);
-  assert.match(shopText,/repairSelectionCurrent/);
+  // Repair returns its target UI before the generic Buy/Sell list. Check that
+  // reachable branch, not the removed legacy list-row selection handlers.
+  const repairBranches=shopFns[0].body.statements.filter(node=>ts.isIfStatement(node)&&node.expression.getText(shopAst)==="repairTab"
+    &&ts.isBlock(node.thenStatement)&&node.thenStatement.statements.some(statement=>ts.isReturnStatement(statement)));
+  assert.equal(repairBranches.length,1,"sole reachable early repair UI branch");
+  const repairBranch=repairBranches[0],repairStatements=repairBranch.thenStatement.statements;
+  const repairBindings=new Map(repairStatements.filter(ts.isVariableStatement).flatMap(statement=>[...statement.declarationList.declarations])
+    .map(declaration=>[declaration.name.getText(shopAst),declaration.initializer]));
+  assert.equal(repairBindings.get("targetSelection").getText(shopAst),"repairTargetSelection?.stamp === repairView?.stamp ? repairTargetSelection : null");
+  assert.equal(repairBindings.get("target").getText(shopAst),"targetSelection ? repairView?.rows.find(row => row.uniqueId === targetSelection.uniqueId) : null");
+  const genericReturn=shopFns[0].body.statements.find(node=>ts.isReturnStatement(node));
+  assert.ok(genericReturn&&repairBranch.end<genericReturn.getStart(shopAst),"repair target branch cannot fall through to the generic list");
+  let confirmControl=null;
+  function findRepairControl(node){
+    if(ts.isJsxElement(node)&&node.openingElement.attributes.properties.some(attr=>ts.isJsxAttribute(attr)
+      &&attr.name.getText(shopAst)==="data-npc-repair-control"&&attr.initializer&&ts.isStringLiteral(attr.initializer)&&attr.initializer.text==="confirm")){
+      assert.equal(confirmControl,null);confirmControl=node;
+    }
+    ts.forEachChild(node,findRepairControl);
+  }
+  findRepairControl(repairBranch);assert.ok(confirmControl,"reachable physical repair confirm control");
+  const confirmButtons=confirmControl.children.filter(node=>ts.isJsxSelfClosingElement(node)&&node.tagName.getText(shopAst)==="SpriteButton");assert.equal(confirmButtons.length,1);
+  const confirmAttributes=new Map(confirmButtons[0].attributes.properties.filter(ts.isJsxAttribute).map(attr=>[attr.name.getText(shopAst),attr.initializer]));
+  assert.equal(confirmAttributes.get("disabled").expression.getText(shopAst),"!targetSelection || !target || target.disabled || blocked() || !onConfirmRepair");
+  const confirmClick=confirmAttributes.get("onClick").expression;assert.ok(ts.isArrowFunction(confirmClick)&&ts.isBlock(confirmClick.body));
+  assert.equal(confirmClick.body.statements.length,1);const confirmIf=confirmClick.body.statements[0];assert.ok(ts.isIfStatement(confirmIf));
+  assert.equal(confirmIf.expression.getText(shopAst),"targetSelection && target && !target.disabled && !blocked()");
+  assert.equal(confirmIf.thenStatement.getText(shopAst),"onConfirmRepair?.(targetSelection);");
+  assert.match(shopText,/const blocked = \(\) => inputBlocked \|\| getInputBlocked\?\.\(\) === true/);
+  assert.match(shopText,/if \(repairTab && repairView && node\) return onRegisterRepairTarget\?\.\(repairView, node\)/);
+  assert.match(shopText,/\[repairTab, repairView\?\.stamp, onRegisterRepairTarget\]/);
 });
 
 check("NPC repair mail locks use Bag UID and optional blocked-cell checks; ordinary and special modes accept real UID zero", () => {
@@ -4691,6 +4721,331 @@ check("NPC repair mail locks use Bag UID and optional blocked-cell checks; ordin
     assert.equal(service.enter(proof,view,{...proof.command}),true);
     assert.equal(service.acknowledge(socket,"ItemRepaired",{uniqueId:0,currentDura:0,maxDura:0}),true);
   }
+});
+
+
+// Source20 extends the existing real module and Page extraction. Quote answers
+// stay opaque ABI-shaped data: these checks never calculate repair prices.
+const repairDragGeometry = Object.freeze({ pointerId: 7, pointerType: "mouse", page: "bag1",
+  stage: {}, target: {}, item: {}, stageRect: [10,20,800,600], targetRect: [110,120,80,60],
+  itemRect: [30,40,32,32], virtualWidth: 800, virtualHeight: 600, scale: 1, devicePixelRatio: 2 });
+check("NPC repair opaque drag accepts actual UID zero and Bag2 physical slot and spends every terminal once", () => {
+  for (const [uid, slot, container] of [[0,7,"bag1"],[901,3,"bag2"]]) {
+    const owner=npcRepairOwner(), service=new NpcRepairService(), raw=npcRepairSnapshot({inventoryItems:[npcRepairItem(uid,slot,container)]});
+    assert.equal(service.open(owner,"repair",0.25,{}),true);assert.equal(service.observeSnapshot(owner,raw),true);
+    const view=service.view(owner,npcRepairQuote,()=>true), geometry={...repairDragGeometry,page:container};
+    const drag=service.beginDrag(view,uid,slot+(container==="bag2"?40:0),geometry,view);assert.ok(drag);assert.equal(Object.isFrozen(drag),true);
+    assert.equal(service.drop({...drag},geometry,111,121,view),null,"copying public fields cannot mint a registered drag");
+    const selection=service.drop(drag,geometry,111,121,view);assert.equal(selection.uniqueId,uid);
+    assert.equal(service.drop(drag,geometry,111,121,view),null);assert.equal(service.beginDrag(view,uid,slot, {...geometry,page:container==="bag1"?"bag2":"bag1"},view),null);
+    const cancelled=service.beginDrag(view,uid,drag.slot,geometry,view);assert.ok(cancelled);service.cancelDrag(cancelled);
+    assert.equal(service.drop(cancelled,geometry,111,121,view),null);
+    const outside=service.beginDrag(view,uid,drag.slot,geometry,view);assert.ok(outside);
+    assert.equal(service.drop(outside,geometry,190,121,view),null,"right boundary is outside");
+    assert.equal(service.drop(outside,geometry,111,121,view),null,"outside consumes the old terminal");
+  }
+});
+check("NPC repair known low gold remains selectable by row or drag while confirmation stays disabled", () => {
+  const owner=npcRepairOwner(),service=new NpcRepairService();assert.equal(service.open(owner,"special",0.25,{}),true);
+  assert.equal(service.observeSnapshot(owner,npcRepairSnapshot()),true);
+  const low=service.view(owner,input=>({...npcRepairQuote(input),affordable:false}),()=>true);
+  assert.equal(low.rows[0].reason,"gold");assert.equal(low.rows[0].disabled,true);
+  assert.ok(service.select(low,900,low));const drag=service.beginDrag(low,900,7,repairDragGeometry,low);assert.ok(drag);
+  const selected=service.drop(drag,repairDragGeometry,111,121,low);assert.ok(selected);assert.equal(service.reserve(selected,low),null);
+  const ready=service.view(owner,npcRepairQuote,()=>true);const staleSelection=service.select(ready,900,ready),proof=service.reserve(staleSelection,ready);assert.ok(proof);
+  const poorer=service.view(owner,input=>({...npcRepairQuote(input),affordable:false}),()=>true);
+  assert.equal(service.enter(proof,poorer,{...proof.command}),false);assert.equal(service.enter(proof,ready,{...proof.command}),false);
+  for(const [reader,allowed,reason] of [[()=>null,()=>true,"unknown"],[npcRepairQuote,()=>false,"locked"]]){
+    const blocked=service.view(owner,reader,allowed);assert.equal(blocked.rows[0].reason,reason);
+    assert.equal(service.select(blocked,900,blocked),null);assert.equal(service.beginDrag(blocked,900,7,repairDragGeometry,blocked),null);
+  }
+});
+check("NPC repair drag live geometry page pointer DPR and source changes cannot revive a spent token", () => {
+  for(const delta of [{pointerId:8},{pointerType:"touch"},{page:"bag2"},{stage:{}},{target:{}},{item:{}},
+    {stageRect:[11,20,800,600]},{targetRect:[111,120,80,60]},{itemRect:[31,40,32,32]},
+    {virtualWidth:801},{virtualHeight:601},{scale:2},{devicePixelRatio:1},{targetRect:[110,120,0,60]}]){
+    const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+    const view=service.view(owner,npcRepairQuote,()=>true),drag=service.beginDrag(view,900,7,repairDragGeometry,view);assert.ok(drag);
+    assert.equal(service.drop(drag,{...repairDragGeometry,...delta},111,121,view),null);
+    assert.equal(service.drop(drag,repairDragGeometry,111,121,view),null);
+  }
+  for(const delta of [{socket:{}},{connectionGeneration:99},{sessionGeneration:99},{ownerRevision:99},{playerObjectId:18},{sceneRevision:99},{mapFileName:"M002.map"}]){
+    const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+    const view=service.view(owner,npcRepairQuote,()=>true),drag=service.beginDrag(view,900,7,repairDragGeometry,view);
+    assert.equal(service.drop(drag,repairDragGeometry,111,121,service.view({...owner,...delta},npcRepairQuote,()=>true)),null);
+  }
+  for(const change of [raw=>{raw.gold++;},raw=>{raw.inventoryItems[0].quantity++;raw.inventoryItems[0].tooltipSource.userItem.count++;},
+    raw=>{raw.inventoryItems[0].slot++;},raw=>{raw.inventoryItems[0].tooltipSource.info.price++;}]){
+    const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+    const view=service.view(owner,npcRepairQuote,()=>true),drag=service.beginDrag(view,900,7,repairDragGeometry,view),next=npcRepairSnapshot();change(next);
+    service.prepareSnapshot(owner,next);service.observeSnapshot(owner,next);
+    assert.equal(service.drop(drag,repairDragGeometry,111,121,service.view(owner,npcRepairQuote,()=>true)),null);
+  }
+
+  // No raw retirement here: equal source/key restoration must still carry a
+  // different stamp after quote or mutation authority became unknown/locked.
+  for(const unavailable of ["quote","permission"]){
+    const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+    const known=service.view(owner,npcRepairQuote,()=>true),continuous=service.view(owner,npcRepairQuote,()=>true);
+    assert.equal(continuous.stamp,known.stamp,"consecutive fully known views preserve the same stamp");
+    const positiveDrag=service.beginDrag(known,900,7,repairDragGeometry,continuous);assert.ok(positiveDrag);
+    assert.ok(service.drop(positiveDrag,repairDragGeometry,111,121,continuous),"same-stamp refresh retains valid drag authority");
+    assert.ok(service.select(known,900,continuous),"same-stamp refresh retains valid selection authority");
+    const drag=service.beginDrag(known,900,7,repairDragGeometry,continuous),selection=service.select(known,900,continuous);
+    const proof=service.reserve(service.select(known,900,continuous),continuous);assert.ok(drag);assert.ok(selection);assert.ok(proof);
+    const blocked=service.view(owner,unavailable==="quote"?()=>null:npcRepairQuote,()=>unavailable!=="permission");
+    assert.equal(blocked.rows[0].reason,unavailable==="quote"?"unknown":"locked");assert.notEqual(blocked.stamp,known.stamp);
+    const restored=service.view(owner,npcRepairQuote,()=>true);assert.equal(restored.rows[0].reason,null);
+    assert.deepEqual(restored.rows,known.rows,"restored rows and costs are completely identical");assert.notEqual(restored.stamp,known.stamp);
+    assert.equal(service.drop(drag,repairDragGeometry,111,121,restored),null,"equal key cannot revive an older drag stamp");
+    assert.equal(service.select(known,900,restored),null,"old display stamp cannot create a new selection");
+    assert.equal(service.reserve(selection,restored),null,"equal key cannot revive an older selection stamp");
+    assert.equal(service.enter(proof,restored,{...proof.command}),false,"equal key cannot revive an older proof stamp");
+  }
+});
+check("NPC repair Hold preserves normal authoritative updates but unknown owner source and close discard it", () => {
+  const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+  let view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,false);assert.equal(service.toggleHold(view,view),true);
+  view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,true);
+  const next=npcRepairSnapshot({gold:480});next.inventoryItems[0].durabilityCurrent=60;next.inventoryItems[0].tooltipSource.userItem.current_dura=60;
+  service.prepareSnapshot(owner,next);service.observeSnapshot(owner,next);view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,true);
+  service.invalidateInventory();service.observeSnapshot(owner,next);view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,true,"post-send source retire does not turn off explicit Hold");
+  for(const bad of [null,{...next,inventoryItems:null}]){
+    service.prepareSnapshot(owner,bad);assert.equal(service.observeSnapshot(owner,bad),false);service.observeSnapshot(owner,next);
+    view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,false);assert.equal(service.toggleHold(view,view),true);
+  }
+  service.prepareSnapshot({...owner,ownerRevision:9},next);service.observeSnapshot(owner,next);view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,false);
+  assert.equal(service.toggleHold(view,view),true);service.close();service.open(owner,"repair",0.25,{});
+  view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,false);
+});
+check("NPC repair fresh Hold drops keep entered UID barrier through cancel close and exact ACK without replay", () => {
+  const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"special",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+  let view=service.view(owner,npcRepairQuote,()=>true);service.toggleHold(view,view);view=service.view(owner,npcRepairQuote,()=>true);
+  const first=service.beginDrag(view,900,7,repairDragGeometry,view),selection=service.drop(first,repairDragGeometry,111,121,view),proof=service.reserve(selection,view);
+  assert.ok(proof);let sends=0;const entered=service.enter(proof,view,{...proof.command});assert.equal(entered,true);if(entered)sends++;
+  assert.equal(service.enter(proof,view,{...proof.command}),false);service.cancelDrag(first);service.invalidateInventory();service.observeSnapshot(owner,npcRepairSnapshot());
+  view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.hold,true);assert.equal(view.rows[0].reason,"busy");
+  assert.equal(service.beginDrag(view,900,7,repairDragGeometry,view),null);service.close();service.open(owner,"special",0.25,{});
+  view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.rows[0].reason,"busy");
+  assert.equal(service.acknowledge({},"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),false);
+  assert.equal(service.acknowledge(owner.socket,"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),true);
+  view=service.view(owner,npcRepairQuote,()=>true);assert.equal(view.rows[0].reason,null);assert.equal(service.drop(first,repairDragGeometry,111,121,view),null);
+  assert.equal(sends,1,"ACK and service changes never submit another command");
+});
+
+check("NPC repair actual Page Hold drop sends once through final proof and live owner source barriers", () => {
+  for(const variant of ["manual","hold","lowGold","owner","source","pending"]){
+    const owner=npcRepairOwner(),raw=npcRepairSnapshot(),page=parityPageFixture(owner,{...raw,connected:true,playerHp:100,entities:[{objectId:17,dead:false}]});
+    const service=new NpcRepairService(),scope=page.scope;scope.npcRepairAuthorityRef.current=service;
+    scope.equipmentBagOwnerRef.current.ownerRevision=owner.ownerRevision;scope.bagOpenRef.current=true;
+    scope.npcRepairServiceRef.current="repair";scope.equipmentControllerRef.current={status:()=>({ready:true,pending:0})};
+    scope.questCoreRuntimeRef.current={readNpcRepairQuote:input=>({...npcRepairQuote(input),affordable:variant!=="lowGold"})};
+    page.api.captureNpcRepairDialog({...raw,activeNpcDialog:{npcObjectId:55}},owner);
+    scope.npcRepairDialogBindingRef.current=scope.npcRepairDialogSourceRef.current;
+    assert.equal(service.open(owner,"repair",0.25,scope.npcRepairDialogBindingRef.current),true);assert.equal(service.observeSnapshot(owner,raw),true);
+    let listener=()=>{};scope.sendRawHandler.current=(command,options)=>page.api.parityFinal(command,options,page.socket,listener);
+    let view=page.api.readNpcRepairView();assert.ok(view);assert.equal(view.hold,false);
+    if(variant!=="manual"){page.api.toggleNpcRepairHold(view);view=page.api.readNpcRepairView();assert.equal(view.hold,true);}
+    assert.equal(page.sent.length,0,"Hold toggle has no wire action");
+    const row=scope.worldRef.current.inventoryItems[0];row.key="actual-bag-7";row.authoritativeUniqueId=900;
+    const item={key:row.key,uniqueId:900,authoritativeUniqueId:900,container:"bag1",slot:7};
+    const token=page.api.beginNpcRepairDrag(view,item,repairDragGeometry);assert.ok(token);
+    if(variant==="owner")listener=()=>{scope.equipmentSessionGenerationRef.current++;};
+    if(variant==="source")listener=()=>{service.prepareSnapshot(owner,null);};
+    if(variant==="pending")listener=()=>{scope.pendingStorageRequestsRef.current.set("new-flight",{});};
+    const result=page.api.dropNpcRepairDrag(token,repairDragGeometry,111,121);assert.ok(result);assert.equal(result.selection.uniqueId,900);
+    assert.equal(result.submitted,variant==="hold");assert.equal(page.sent.length,variant==="hold"?1:0);
+    assert.equal(page.api.dropNpcRepairDrag(token,repairDragGeometry,111,121),null);
+    if(variant==="manual"){assert.equal(page.api.confirmNpcRepair(result.selection),true);assert.equal(page.sent.length,1);}
+    if(variant==="lowGold"){assert.equal(page.api.confirmNpcRepair(result.selection),false);assert.equal(page.sent.length,0);}
+    if(variant==="hold"||variant==="manual"){
+      assert.deepEqual(page.sent,[{type:"repairItem",uniqueId:900}]);
+      assert.equal(page.api.confirmNpcRepair(result.selection),false);assert.equal(page.sent.length,1);
+      assert.equal(service.acknowledge(owner.socket,"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),true);
+      assert.equal(page.sent.length,1,"exact ACK cannot replay the drop");
+    }
+  }
+});
+
+// Extract the actual Shell event routes and registered capture listeners. DOM
+// objects below supply geometry/capture only; repair authority is the real module.
+const repairShellSource=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8");
+const repairShellAst=ts.createSourceFile("original-client-shell.tsx",repairShellSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const repairShellNames=new Set(["repairGeometry","cancelNpcRepairPointer","beginNpcRepairPointer","handleNpcRepairPointer","fenceNpcRepairClick",
+  "npcRepairControlTarget","rememberNpcRepairControlClick","handleSharedUiPointer","changeNpcRepairTarget","confirmNpcRepairTarget","openNpcRepairBagPage"]);
+const repairShellDeclarations=new Map();let repairTargetRegistration=null,repairListenerEffect=null,repairLostCapture=null;
+function visitRepairShell(node){
+  if(ts.isFunctionDeclaration(node)&&node.name&&repairShellNames.has(node.name.text))repairShellDeclarations.set(node.name.text,node.getText(repairShellAst));
+  if(ts.isVariableDeclaration(node)&&ts.isIdentifier(node.name)&&node.name.text==="registerNpcRepairTarget"){
+    assert.ok(ts.isCallExpression(node.initializer)&&ts.isArrowFunction(node.initializer.arguments[0]));repairTargetRegistration=node.initializer.arguments[0].getText(repairShellAst);
+  }
+  if(ts.isCallExpression(node)&&ts.isIdentifier(node.expression)&&node.expression.text==="useEffect"&&ts.isArrowFunction(node.arguments[0])){
+    const calls=[];function visitCalls(child){if(ts.isCallExpression(child)&&ts.isPropertyAccessExpression(child.expression)
+      &&child.expression.name.text==="addEventListener"&&ts.isStringLiteral(child.arguments[0]))calls.push(child.arguments[0].text);ts.forEachChild(child,visitCalls);}
+    visitCalls(node.arguments[0]);if(calls.includes("pointerdown")&&calls.includes("click")&&calls.includes("visibilitychange")){
+      assert.equal(repairListenerEffect,null);repairListenerEffect=node.arguments[0].getText(repairShellAst);
+    }
+  }
+  if(ts.isJsxAttribute(node)&&node.name.getText(repairShellAst)==="onLostPointerCapture"&&node.initializer&&ts.isJsxExpression(node.initializer)
+    &&node.initializer.expression&&ts.isArrowFunction(node.initializer.expression)
+    &&node.initializer.expression.body.getText(repairShellAst)==='handleSharedUiPointer(event, "cancel")')repairLostCapture=node.initializer.expression.getText(repairShellAst);
+  ts.forEachChild(node,visitRepairShell);
+}
+visitRepairShell(repairShellAst);
+assert.equal(repairShellDeclarations.size,repairShellNames.size);assert.ok(repairTargetRegistration);assert.ok(repairListenerEffect);assert.ok(repairLostCapture);
+const repairShellJs=ts.transpileModule([...repairShellDeclarations.values()].join("\n")+
+  "\nconst registerNpcRepairTarget="+repairTargetRegistration+";\nconst lostRepairCapture="+repairLostCapture+
+  ";\nfunction installRepairPointerListeners(){return ("+repairListenerEffect+")();}",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+
+
+const repairInventorySource=readFileSync(new URL("../app/components/original-client-inventory-window.tsx",import.meta.url),"utf8");
+const repairInventoryAst=ts.createSourceFile("original-client-inventory-window.tsx",repairInventorySource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const repairInventoryDeclarations=new Map(),repairInventoryHandlers=new Map();let repairConsumedInitializer=null;
+function visitRepairInventory(node){
+  if(ts.isFunctionDeclaration(node)&&node.name&&["mailItemLocked","activateInventoryItem"].includes(node.name.text))repairInventoryDeclarations.set(node.name.text,node.getText(repairInventoryAst));
+  if(ts.isVariableDeclaration(node)&&ts.isIdentifier(node.name)&&node.name.text==="consumedRepairPointerRef"){
+    assert.ok(ts.isCallExpression(node.initializer));repairConsumedInitializer=node.initializer.arguments[0].getText(repairInventoryAst);
+  }
+  if(ts.isJsxOpeningElement(node)){
+    const attrs=node.attributes.properties,className=attrs.find(attr=>ts.isJsxAttribute(attr)&&attr.name.getText(repairInventoryAst)==="className");
+    if(className?.initializer&&ts.isStringLiteral(className.initializer)&&className.initializer.text==="inventory-item-card"){
+      for(const name of ["onPointerDown","onMouseDown","onClick"]){const attr=attrs.find(attr=>ts.isJsxAttribute(attr)&&attr.name.getText(repairInventoryAst)===name);
+        assert.ok(attr?.initializer&&ts.isJsxExpression(attr.initializer)&&ts.isArrowFunction(attr.initializer.expression));repairInventoryHandlers.set(name,attr.initializer.expression.getText(repairInventoryAst));}
+    }
+  }
+  ts.forEachChild(node,visitRepairInventory);
+}
+visitRepairInventory(repairInventoryAst);assert.equal(repairInventoryDeclarations.size,2);assert.equal(repairInventoryHandlers.size,3);assert.ok(repairConsumedInitializer);
+const repairInventoryJs=ts.transpileModule([...repairInventoryDeclarations.values()].join("\n")+
+  "\nconst consumedRepairPointerRef={current:"+repairConsumedInitializer+"};\n"+
+  [...repairInventoryHandlers].map(([name,text])=>"const "+name+"="+text+";").join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const repairInventoryEquipment=loadPureProductionDeclarations(new URL("../app/components/original-client-inventory-utils.ts",import.meta.url),["equipmentSlotForItemKey","equipmentSlotForItem"]);
+
+check("NPC repair actual Shell captured drag terminal owns routing geometry and successor cleanup",()=>{
+  for(const variant of ["normal","outside","cancel","page","rect","DPR","hidden","screen","source","pointerType","lostcapture","successor","reentrant"]){
+    const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+    let view=service.view(owner,npcRepairQuote,()=>true),api,dropCount=0,cancelCount=0,fallthrough=0,stopCount=0;
+    class MemoryNode{constructor(rect){this.rect=rect;this.isConnected=true;this.captures=new Set();}getBoundingClientRect(){const[left,top,width,height]=this.rect;return{left,top,width,height};}
+      contains(node){return node===this||this.children?.some(child=>child.contains(node))===true;}closest(selector){return selector==="button"?(this.tagName==="BUTTON"?this:this.parentElement?.closest(selector)??null):null;}hasAttribute(name){return this.attributes?.has(name)===true;}setPointerCapture(id){this.captures.add(id);}hasPointerCapture(id){return this.captures.has(id);}releasePointerCapture(id){this.captures.delete(id);}}
+    const stage=new MemoryNode([10,20,800,600]),item=new MemoryNode([30,40,32,32]),target=new MemoryNode([110,120,80,60]);stage.children=[item,target];
+    const ref=current=>({current}),scope={Element:MemoryNode,Node:MemoryNode,HTMLElement:MemoryNode,window:{devicePixelRatio:2},
+      stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},activeInventoryTab:"bag1",screen:"game",showInventory:true,
+      npcRepairService:"repair",npcRepairView:view,npcRepairPointerRef:ref(null),npcRepairTargetRef:ref(null),npcRepairVisibleTargetRef:ref(null),
+      npcRepairQuarantineRef:ref(new Map()),npcRepairClickFenceRef:ref(new Map()),heldScenePointerRef:ref({old:true}),heldQuestControlPointersRef:ref(new Set()),combatUiHoldRef:ref(new Map()),
+      setNpcRepairTargetSelection:()=>{},onOpenInventoryTab:()=>{},onViewportDirectionStop:()=>{stopCount++;},
+      beginCombatUiHold:(kind,id)=>scope.combatUiHoldRef.current.set(kind,{pointerId:id}),endCombatUiHold:(kind,hold)=>{if(scope.combatUiHoldRef.current.get(kind)===hold)scope.combatUiHoldRef.current.delete(kind);},
+      onBeginNpcRepairDrag:(_view,_item,geometry)=>service.beginDrag(_view,900,7,geometry,view),
+      onCancelNpcRepairDrag:drag=>{cancelCount++;service.cancelDrag(drag);},
+      onDropNpcRepairDrag:(drag,geometry,x,y)=>{dropCount++;const selection=service.drop(drag,geometry,x,y,view);
+        if(selection&&variant==="reentrant"){const newer=service.select(view,901,view);api.changeNpcRepairTarget(newer);
+          api.beginNpcRepairPointer({pointerId:9,pointerType:"mouse",isPrimary:true,button:0,timeStamp:40,currentTarget:item,target:item,preventDefault(){},stopPropagation(){}},{});}
+        return selection?{selection,submitted:false}:null;},
+      handleSharedQuestWorldPointer:()=>{fallthrough++;},handleSharedNpcShopPointer:()=>{fallthrough++;return false;},handleSharedComposePointer:()=>false,
+      handleSharedMailPointer:()=>false,handleSharedStoragePointer:()=>false,handleSharedSpellsPointer:()=>false,handleSharedBagPointer:()=>{fallthrough++;}};
+    const keys=Object.keys(scope);api=new Function(...keys,repairShellJs+"\nreturn {beginNpcRepairPointer,handleSharedUiPointer,cancelNpcRepairPointer,registerNpcRepairTarget,changeNpcRepairTarget,lostRepairCapture,setView:value=>npcRepairView=value,setTab:value=>activeInventoryTab=value,setVisible:value=>showInventory=value,setScreen:value=>screen=value};")(...keys.map(key=>scope[key]));
+    const cleanup=api.registerNpcRepairTarget(view,target),down={pointerId:7,pointerType:"mouse",isPrimary:true,button:0,timeStamp:10,currentTarget:item,target:item,clientX:111,clientY:121,
+      prevented:0,preventDefault(){this.prevented++;},stopPropagation(){}};
+    api.beginNpcRepairPointer(down,{});const first=scope.npcRepairPointerRef.current;assert.ok(first);assert.equal(item.hasPointerCapture(7),true);assert.equal(stopCount,1);assert.equal(scope.heldScenePointerRef.current,null);
+    api.handleSharedUiPointer({...down,timeStamp:9},"up");assert.equal(scope.npcRepairPointerRef.current,first);assert.equal(dropCount,0,"older terminal cannot finish current gesture");
+    if(variant==="page")api.setTab("bag2");if(variant==="rect")target.rect=[111,120,80,60];if(variant==="DPR")scope.window.devicePixelRatio=1;
+    if(variant==="hidden")api.setVisible(false);if(variant==="screen")api.setScreen("select");
+    if(variant==="source"){const changed=npcRepairSnapshot({gold:499});service.prepareSnapshot(owner,changed);service.observeSnapshot(owner,changed);view=service.view(owner,npcRepairQuote,()=>true);api.setView(view);}
+    if(variant==="successor"){
+      api.cancelNpcRepairPointer(first);api.handleSharedUiPointer({...down,timeStamp:20},"up");
+      const successorTarget=new MemoryNode([110,120,80,60]);stage.children.push(successorTarget);api.registerNpcRepairTarget(view,successorTarget);
+      api.beginNpcRepairPointer({...down,pointerId:9,timeStamp:30},{});const successor=scope.npcRepairPointerRef.current;assert.ok(successor);
+      cleanup();api.cancelNpcRepairPointer(first);assert.equal(scope.npcRepairPointerRef.current,successor);assert.equal(scope.npcRepairTargetRef.current.node,successorTarget);
+      api.cancelNpcRepairPointer(successor);assert.equal(service.drop(first.drag,first.geometry,111,121,view),null);continue;
+    }
+    const terminal={...down,timeStamp:20,clientX:variant==="outside"?190:111,pointerType:variant==="pointerType"?"touch":"mouse"};
+    if(variant==="lostcapture")api.lostRepairCapture(terminal);else api.handleSharedUiPointer(terminal,variant==="cancel"?"cancel":"up");
+    assert.equal(fallthrough,0,"repair terminals never fall through to shared/world routes");assert.equal(item.hasPointerCapture(7),false);
+    if(variant==="normal")assert.equal(scope.npcRepairVisibleTargetRef.current.uniqueId,900);
+    else if(variant==="reentrant"){assert.equal(scope.npcRepairVisibleTargetRef.current.uniqueId,901);assert.equal(scope.npcRepairPointerRef.current.geometry.pointerId,9);api.cancelNpcRepairPointer();}
+    else assert.equal(scope.npcRepairVisibleTargetRef.current,null);
+    assert.equal(service.drop(first.drag,first.geometry,111,121,view),null);assert.equal(scope.combatUiHoldRef.current.size,0);assert.equal(scope.npcRepairPointerRef.current,null);
+    if(["cancel","hidden","screen","page","source","pointerType","lostcapture"].includes(variant))assert.equal(cancelCount,1);
+    cleanup();
+  }
+});
+check("NPC repair actual capture listeners quarantine second pointer through compatibility click while new gestures and keyboard remain usable",()=>{
+  const owner=npcRepairOwner(),service=new NpcRepairService();service.open(owner,"repair",0.25,{});service.observeSnapshot(owner,npcRepairSnapshot());
+  let view=service.view(owner,npcRepairQuote,()=>true);let api,sends=0,routeDown=0,fallthrough=0,stops=0;
+  class MemoryNode{constructor(rect){this.rect=rect;this.isConnected=true;this.captures=new Set();}getBoundingClientRect(){const[left,top,width,height]=this.rect;return{left,top,width,height};}
+    contains(node){return node===this||this.children?.some(child=>child.contains(node))===true;}closest(selector){return selector==="button"?(this.tagName==="BUTTON"?this:this.parentElement?.closest(selector)??null):null;}hasAttribute(name){return this.attributes?.has(name)===true;}setPointerCapture(id){this.captures.add(id);}hasPointerCapture(id){return this.captures.has(id);}releasePointerCapture(id){this.captures.delete(id);}}
+  const stage=new MemoryNode([10,20,800,600]),item=new MemoryNode([30,40,32,32]),target=new MemoryNode([110,120,80,60]),confirm=new MemoryNode([210,120,80,30]);const panel=new MemoryNode([100,100,200,120]),wrapper=new MemoryNode([210,120,80,30]),holdWrapper=new MemoryNode([210,160,80,30]),holdControl=new MemoryNode([210,160,80,30]);
+  confirm.tagName=holdControl.tagName="BUTTON";wrapper.attributes=holdWrapper.attributes=new Set(["data-npc-repair-control"]);
+  target.parentElement=wrapper.parentElement=holdWrapper.parentElement=panel;confirm.parentElement=wrapper;holdControl.parentElement=holdWrapper;
+  wrapper.children=[confirm];holdWrapper.children=[holdControl];panel.children=[target,wrapper,holdWrapper];stage.children=[item,panel];
+  const windowHandlers=new Map(),documentHandlers=new Map(),registrations=[],ref=current=>({current});
+  const scope={Element:MemoryNode,Node:MemoryNode,HTMLElement:MemoryNode,
+    window:{devicePixelRatio:2,addEventListener:(name,handler,capture)=>{windowHandlers.set(name,handler);registrations.push([name,capture]);},removeEventListener:(name,handler)=>{assert.equal(windowHandlers.get(name),handler);windowHandlers.delete(name);}},
+    document:{visibilityState:"visible",addEventListener:(name,handler)=>documentHandlers.set(name,handler),removeEventListener:(name,handler)=>{assert.equal(documentHandlers.get(name),handler);documentHandlers.delete(name);}},
+    stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},activeInventoryTab:"bag1",screen:"game",showInventory:true,
+    npcRepairService:"repair",npcRepairView:view,npcRepairPointerRef:ref(null),npcRepairTargetRef:ref(null),npcRepairVisibleTargetRef:ref(null),npcRepairQuarantineRef:ref(new Map()),npcRepairClickFenceRef:ref(new Map()),
+    heldScenePointerRef:ref(null),heldQuestControlPointersRef:ref(new Set()),combatUiHoldRef:ref(new Map()),sharedBagPointerHandlerRef:ref(null),setNpcRepairTargetSelection:()=>{},onOpenInventoryTab:()=>{},onViewportDirectionStop:()=>{},
+    beginCombatUiHold:(kind,id)=>scope.combatUiHoldRef.current.set(kind,{pointerId:id}),endCombatUiHold:(kind,hold)=>{if(scope.combatUiHoldRef.current.get(kind)===hold)scope.combatUiHoldRef.current.delete(kind);},
+    onBeginNpcRepairDrag:(_view,_item,geometry)=>service.beginDrag(_view,901,43,{...geometry,page:"bag2"},view),
+    onCancelNpcRepairDrag:drag=>service.cancelDrag(drag),onDropNpcRepairDrag:(drag,geometry,x,y)=>{const selection=service.drop(drag,geometry,x,y,view);return selection?{selection,submitted:false}:null;},
+    onConfirmNpcRepair:selection=>{const proof=service.reserve(selection,view);if(!proof||!service.enter(proof,view,{...proof.command}))return false;sends++;return true;},
+    handleSharedQuestWorldPointer:()=>{fallthrough++;},handleSharedNpcShopPointer:()=>{fallthrough++;return false;},handleSharedComposePointer:()=>false,handleSharedMailPointer:()=>false,
+    handleSharedStoragePointer:()=>false,handleSharedSpellsPointer:()=>false,handleSharedBagPointer:()=>{fallthrough++;},
+    cancelSharedNpcShopPointer:()=>{stops++;},cancelSharedStoragePointer:()=>{},cancelSharedComposePointer:()=>{},cancelSharedMailPointer:()=>{},cancelSharedSpellsPointer:()=>{},cancelSharedCharacterPointer:()=>{},cancelSharedBagPointer:()=>{},cancelSharedHudPointer:()=>{}};
+  // The dragged B row is the actual Bag2 slot43; the previously selected A row
+  // belongs to the same authoritative repair view and remains visible.
+  scope.activeInventoryTab="bag2";
+  const keys=Object.keys(scope);api=new Function(...keys,repairShellJs+"\nreturn {beginNpcRepairPointer,handleSharedUiPointer,registerNpcRepairTarget,changeNpcRepairTarget,confirmNpcRepairTarget,installRepairPointerListeners,setView:value=>npcRepairView=value};")(...keys.map(key=>scope[key]));
+  scope.sharedBagPointerHandlerRef.current=(event,phase)=>{if(phase==="down")routeDown++;api.handleSharedUiPointer(event,phase);};
+  api.registerNpcRepairTarget(view,target);const cleanup=api.installRepairPointerListeners();
+  assert.deepEqual(registrations.filter(([name])=>["pointerdown","click","pointerup","pointercancel"].includes(name)),[["pointerdown",true],["click",true],["pointerup",true],["pointercancel",true]]);
+  const event=(pointerId,timeStamp,eventTarget=item,detail=1)=>({pointerId,timeStamp,pointerType:"mouse",isPrimary:true,button:0,currentTarget:item,target:eventTarget,clientX:111,clientY:121,detail,
+    prevented:false,stopped:false,preventDefault(){this.prevented=true;},stopPropagation(){this.stopped=true;},stopImmediatePropagation(){this.stopped=true;}});
+  const selectedA=service.select(view,900,view);assert.ok(selectedA);api.changeNpcRepairTarget(selectedA);
+  windowHandlers.get("pointerdown")(event(1,10));assert.equal(routeDown,0,"inactive canvas pointerdown is not double routed");
+  api.beginNpcRepairPointer(event(1,10),{});const dragB=scope.npcRepairPointerRef.current;assert.ok(dragB);
+  const second=event(2,11,confirm);windowHandlers.get("pointerdown")(second);assert.equal(second.prevented,true);assert.equal(scope.npcRepairPointerRef.current,null);assert.equal(scope.npcRepairQuarantineRef.current.has(2),true);
+  const secondUp=event(2,12,confirm);windowHandlers.get("pointerup")(secondUp);assert.equal(secondUp.prevented,true);assert.equal(scope.npcRepairQuarantineRef.current.has(2),false);
+  assert.equal(fallthrough,0);assert.equal(scope.npcRepairVisibleTargetRef.current,selectedA);
+  const compat=event(2,13,confirm);windowHandlers.get("click")(compat);if(!compat.stopped)api.confirmNpcRepairTarget(selectedA);
+  assert.equal(compat.prevented,true);assert.equal(compat.stopped,true);assert.equal(sends,0,"retired second gesture cannot Confirm the older selection");
+  const spentClick=event(2,14,confirm);windowHandlers.get("click")(spentClick);assert.equal(spentClick.stopped,false,"matched compatibility click consumes its single-use fence");
+  api.beginNpcRepairPointer(event(3,30),{});windowHandlers.get("pointerdown")(event(4,31,confirm));windowHandlers.get("pointerup")(event(4,32,confirm));
+  const legacy=event(undefined,33,confirm);windowHandlers.get("click")(legacy);assert.equal(legacy.stopped,true,"legacy click matches the captured physical button");
+  api.beginNpcRepairPointer(event(5,40),{});windowHandlers.get("pointerdown")(event(6,41,holdControl));windowHandlers.get("pointerup")(event(6,42,holdControl));
+  const holdClick=event(6,43,holdControl);windowHandlers.get("click")(holdClick);if(!holdClick.stopped)service.toggleHold(view,view);
+  assert.equal(holdClick.stopped,true);view=service.view(owner,npcRepairQuote,()=>true);api.setView(view);assert.equal(view.hold,false,"retired second gesture cannot toggle Hold");
+  const keyboard=event(2,50,confirm,0);windowHandlers.get("click")(keyboard);assert.equal(keyboard.stopped,false);assert.equal(api.confirmNpcRepairTarget(selectedA),true);assert.equal(sends,1);
+  assert.equal(service.drop(dragB.drag,dragB.geometry,111,121,view),null);
+  assert.equal(service.acknowledge(owner.socket,"ItemRepaired",{uniqueId:900,currentDura:60,maxDura:100}),true);
+  const newA=service.select(view,900,view);assert.ok(newA);api.changeNpcRepairTarget(newA);
+  windowHandlers.get("pointerdown")(event(2,60,confirm));const freshClick=event(2,62,confirm);windowHandlers.get("click")(freshClick);
+  assert.equal(freshClick.stopped,false);assert.equal(api.confirmNpcRepairTarget(newA),true);assert.equal(sends,2);
+  for(const [offset,terminal] of ["blur","resize","visibilitychange","pagehide","pointercancel"].entries()){
+    const id=30+offset;api.beginNpcRepairPointer(event(id,100+id),{});const lease=scope.npcRepairPointerRef.current;assert.ok(lease);
+    if(terminal==="visibilitychange"){documentHandlers.get(terminal)();assert.equal(scope.npcRepairPointerRef.current,lease);scope.document.visibilityState="hidden";documentHandlers.get(terminal)();scope.document.visibilityState="visible";}
+    else windowHandlers.get(terminal)(event(id,200+id));
+    assert.equal(scope.npcRepairPointerRef.current,null);assert.equal(service.drop(lease.drag,lease.geometry,111,121,view),null);assert.equal(sends,2);
+  }
+  cleanup();assert.equal(windowHandlers.size,0);assert.equal(documentHandlers.size,0);assert.equal(scope.combatUiHoldRef.current.size,0);
+  // Exercise the actual Inventory JSX handlers and activation function across a
+  // synchronous repair close, rather than assuming preventDefault kills mouse.
+  const activated=[],repairDowns=[],inventoryItem={key:"HealthPotion",name:"Health Potion",slot:7,container:"bag1",uniqueId:900,authoritativeUniqueId:900};
+  const inventoryScope={repairMode:true,item:inventoryItem,window:{},mailLocks:[],storageMode:null,deleteMode:false,sellMode:false,pendingMoveItem:null,
+    equipmentSlotForItem:repairInventoryEquipment.equipmentSlotForItem,onRepairPointerDown:event=>repairDowns.push(event.pointerId),onUseItem:value=>activated.push(value)};
+  const inventoryKeys=Object.keys(inventoryScope),inventoryApi=new Function(...inventoryKeys,repairInventoryJs+
+    "\nreturn {onPointerDown,onMouseDown,onClick,setRepair:value=>repairMode=value,consumedRepairPointerRef};")(...inventoryKeys.map(key=>inventoryScope[key]));
+  const button={},otherButton={},inventoryEvent={pointerId:70,pointerType:"mouse",isPrimary:true,button:0,detail:1,currentTarget:button,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};
+  inventoryApi.onPointerDown({...inventoryEvent});assert.deepEqual(repairDowns,[70]);inventoryApi.setRepair(false);
+  inventoryApi.onMouseDown({...inventoryEvent});assert.equal(activated.length,0,"repair down then close cannot use through compatibility mousedown");
+  inventoryApi.onClick({...inventoryEvent});assert.equal(activated.length,0);
+  for(const invalid of [{defaultPrevented:true},{isPrimary:false},{button:2},{pointerType:"pen"}]){
+    inventoryApi.onPointerDown({...inventoryEvent,...invalid});inventoryApi.onMouseDown({...inventoryEvent});assert.equal(activated.length,0,"invalid/quarantined fresh edge cannot unlock activation");
+  }
+  inventoryApi.onPointerDown({...inventoryEvent,currentTarget:otherButton});inventoryApi.onMouseDown({...inventoryEvent});assert.equal(activated.length,0,"another physical button cannot unlock the old one");
+  inventoryApi.onClick({...inventoryEvent,detail:0});assert.equal(activated.length,1,"independent keyboard activation is preserved after close");
+  inventoryApi.onPointerDown({...inventoryEvent,pointerId:71});inventoryApi.onMouseDown({...inventoryEvent});assert.equal(activated.length,2,"a valid fresh pointer gesture restores ordinary activation");
+  assert.deepEqual(activated[1],{key:"HealthPotion",uniqueId:900,authoritativeUniqueId:900,slot:7,container:"bag1"});
+  inventoryApi.setRepair(true);inventoryApi.onClick({...inventoryEvent,detail:0});assert.equal(activated.length,2,"repair mode cannot borrow ordinary keyboard item use");
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

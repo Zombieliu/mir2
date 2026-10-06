@@ -1,6 +1,21 @@
 # Frontend 1:1 Gaps
 
-## Source19：NPC维修路径部分接线（2026-10-07）
+## Source20：三维修源码候选闭合，玩家验收待运行（2026-10-07）
+
+Source20已闭合普通维修Bag、特殊维修Bag与维修报价三个有界源码动作：实际Bag DOM button捕获primary mouse/touch、raw UID0/container0/Bag2+40来源，经不透明单用gesture token投放当前75×75目标；维修框为Native176×147布局，Hold/Confirm已接真实控件。最终发送仍受当前owner/stamp/source/geometry/page/scale/DPR/node identity、物理socket UID屏障及精确ItemRepaired ACK门槛保护。terminal先burn再callback，second pointer取消并隔离至terminal和兼容click，close后原Bag button的兼容mousedown保留WeakSet custody。已知金币不足可选择/投放但禁止确认，unknown/locked/busy拒绝；Hold toggle不发送，每fresh accepted drop至多发送一次，正常ACK/dura/gold刷新保留Hold，unknown/owner/mode/close清掉，transient unknown后same key不能复活旧stamp。没有ACK自动重发。
+
+Root实际Node03 11脚本218/218、0失败/0跳过；Stage5原282具名组＋8新增＝290内部组只计一个文件级Node测试，不与218相加。三条旧不可达UI结构断言替换为更强的实际可达Native维修branch AST断言，其余保留；Combat原23测试/断言保留并装配真实Shell依赖。strict code-only非增量TSC03退出0、零日志。Node01/TSC01失败历史保留，prepared02配置未执行。
+
+Root实际Next01退出0（PID77812，112130ms），新dist为`.next-web-windows-catchup-20261007-03`，严格TypeScript13.8s与13静态页；27387原输入fresh hash零漂移，另两项仅允许03 include/route import元数据更新。Next19007文件/308目录含根/602553319 B，61 NFT/37094引用（37092 regular＋2目录），0missing/private；已声明node_modules junction未遍历。Thin01实际退出0（PID103048，28428ms），新包`.mir2-thin-client-web-windows-catchup-20261007-03`，63136输入零漂移；7301文件/776目录含根/0links/372719297 B，原377487360 B cap余4768063 B。独立pure-fs静态审查接受，0确认blocker、0执行/0写，实际复核63136 inputs、19007 Next输出、7301全包与11 runtime leaves；44 warning完整多重集保持，231 JSON source/output逐对字节匹配，仅限定承接历史token结论，未新跑parser/lexer。
+
+Source18 Core/PUI、Native、renderer Rust有效输入图保持不变，421 high-level输入零漂移，本批未新运行其Rust测试或三组构建；默认Core WASM252205 B/JS24393 B、PUI WASM70277 B/JS14472 B按指纹限定承接。Native archive104710144 B只重hash，未启动。当前仅三维修行open→legacy/sourceCandidate closed：103 shared/200 legacy/6 open/8 common limitation；其余314行不变，317 ordered IDs、originalAudit及Native历史完整保留，全部player not-run。这不是完整验收分母，无overall percentage，Candidate100=false、goal active；源码/有限检查/静态构建均不证明可玩。
+
+下一项Source21先提取共享Rust轻量tooltip与renderer-free PUI，接入真实Bag/Belt/Character mount（含装备）；记录集其余6项为`F02.world.fishing-click`、`F05.bag.tooltip-compat`、`F05.belt.move-from-bag`、`F05.belt.tooltip`、`F09.NPC.PEARL`、`F11.RANKING.INSPECT`。W6实际UI/玩家、移动真机与最终frontend验收依用户要求暂缓。Source19 c400与Source18父7567已实际push并经HTTPS ls-remote确认；Source20新提交仍pending，不能称已发布。
+
+证据：[矩阵06](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix06.md)、[Source20组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-combined-build-result01.json)、[QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。以下Source19及更早段落是历史阶段记录，当前状态以上述Source20为准。
+
+
+## 历史Source19：NPC维修路径部分接线（2026-10-07）
 
 现有有限检查218/218和strict TSC通过；Next01、Thin01构建是静态验证，不代表UI操作。Web已接入真实Bag UID、NPC rate/owner、共享Rust quote及精确单用proof/ACK门槛；但固定Windows流程要求Bag drag/drop到普通或特殊维修目标及Hold自动确认，现有Web列表选中/确认不足以关闭行为行。三个F09维修项在矩阵05仍open/partial，修理报价也不能仅因共享Rust quote存在就算动作完成。记录总数与类别不等于完整分母，317行玩家验收均not-run，W6继续暂缓。
 

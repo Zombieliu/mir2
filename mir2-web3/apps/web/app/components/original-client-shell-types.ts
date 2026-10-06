@@ -4,7 +4,7 @@ import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
-import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
+import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry, NpcRepairDrop } from "../../lib/npc-repair-service";
 import type { BagPointerContext, BagPointerEdge } from "../../lib/bevy-bag-ui";
 import type { BevyHpOrbStatus, BevyMpOrbStatus } from "../../lib/bevy-hp-orb";
 import type { WorldStore } from "../../lib/world-model";
@@ -281,6 +281,10 @@ export type OriginalClientShellProps = {
   npcRepairView?: NpcRepairView | null;
   onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
   onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
+  onToggleNpcRepairHold?: (view: NpcRepairView) => void;
+  onBeginNpcRepairDrag?: (view: NpcRepairView, item: ItemActionRef, geometry: NpcRepairDragGeometry) => NpcRepairDrag | null;
+  onCancelNpcRepairDrag?: (drag: NpcRepairDrag) => void;
+  onDropNpcRepairDrag?: (drag: NpcRepairDrag, geometry: NpcRepairDragGeometry, x: number, y: number) => NpcRepairDrop | null;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;

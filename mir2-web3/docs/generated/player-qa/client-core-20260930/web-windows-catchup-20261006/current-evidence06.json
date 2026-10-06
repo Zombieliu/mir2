@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "kind": "source20-closed-repair-source-candidate-finite-next-thin-static-checkpoint",
+  "generatedAtUtc": "2026-10-06T19:35:33.108Z",
+  "parentCommit": "c400a19bf65c06dd84cf54a20f2d0c379b894e62",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "artifacts": {
+    "feature-matrix06.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix06.json",
+      "bytes": 2830285,
+      "sha256": "e01eea6d54125f02a663c1ef67021d7f065d613c81e98c1de9e1ea2de3c7443f"
+    },
+    "feature-matrix06.md": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix06.md",
+      "bytes": 33376,
+      "sha256": "8ebec58ed082e96b681200d211757edc7169d5ad94bfec151efa25c194d8eb07"
+    },
+    "README.md": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "bytes": 18943,
+      "sha256": "20813700864befb8c9ae0b644e01a8b746254f72256fd62b95b803f8133df4dd"
+    },
+    "repair-source20-finite-result01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-finite-result01.json",
+      "bytes": 20389,
+      "sha256": "b576c1d9da49afe10bfb07907663e4262f5a40805427aca6e6d2c9b5725aee91"
+    },
+    "repair-source20-action-chain-review01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-action-chain-review01.json",
+      "bytes": 9671,
+      "sha256": "f85d542b45b91a8d0dcbf00a8e6e4c80fc999bd9f4a7f9ebd8db19998d0cfcb5"
+    },
+    "repair-source20-combined-build-result01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-combined-build-result01.json",
+      "bytes": 47048,
+      "sha256": "c20c93dbe39dd9e0f47bbef08c7e19dac8bc1d2d6d452a913eefdbdabf541d19"
+    }
+  },
+  "currentDocs": [
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "bytes": 219209,
+      "sha256": "028874624af579cad9f56fd25d195e30576c743f6e9a0547e25f1bc42d6ef679"
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "bytes": 830246,
+      "sha256": "0c8fec0c429661422e4cb39b1bf02140069b4e2f52821a8f6c0965eea0a322d9"
+    },
+    {
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 156536,
+      "sha256": "de4efdba3d46235725eaea58db2524f80f24ab251409b400c346da5918df0b68"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 947933,
+      "sha256": "cd7b1b1c97cc794aca3a331773766e0113b38bb6a55e7ce8c0b6254c77da99a4"
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "bytes": 571770,
+      "sha256": "bf44bd958ef77c19e43f7bcd06121119783c5a6824d219b014b27f70cc8079ad"
+    },
+    {
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 30026,
+      "sha256": "a07bd3184fe88eb15537da45ce3c6e3bccc35775174e8e1411c2a3611ac96d88"
+    }
+  ],
+  "summary": {
+    "sourceCategories": {
+      "shared": 103,
+      "legacy": 200,
+      "open": 6,
+      "commonLimitation": 8
+    },
+    "stablePlayerRows": 317,
+    "allPlayerRows": "not-run",
+    "completeDenominatorFrozen": false,
+    "overallPercentage": null,
+    "goalStatus": "active",
+    "candidate100": false,
+    "fixtureAssociations": {
+      "priorSource19": {
+        "rowAssociations": 206,
+        "uniqueDeclarations": 110
+      },
+      "source20Added": {
+        "rowAssociations": 24,
+        "uniqueDeclarations": 8
+      },
+      "current": {
+        "rowAssociations": 230,
+        "uniqueDeclarations": 118
+      },
+      "mapping": [
+        {
+          "declaration": "NPC repair opaque drag accepts actual UID zero and Bag2 physical slot and spends every terminal once",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4732,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair known low gold remains selectable by row or drag while confirmation stays disabled",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4748,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair drag live geometry page pointer DPR and source changes cannot revive a spent token",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4763,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair Hold preserves normal authoritative updates but unknown owner source and close discard it",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4806,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair fresh Hold drops keep entered UID barrier through cancel close and exact ACK without replay",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4821,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair actual Page Hold drop sends once through final proof and live owner source barriers",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4836,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair actual Shell captured drag terminal owns routing geometry and successor cleanup",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4924,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        },
+        {
+          "declaration": "NPC repair actual capture listeners quarantine second pointer through compatibility click while new gestures and keyboard remain usable",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 4971,
+          "rows": [
+            "F09.NPC.REPAIR_BAG",
+            "F09.NPC.SREPAIR_BAG",
+            "F09.NPC.REPAIR_QUOTE"
+          ],
+          "coveredAspect": "Actual repair drag/quote/Hold source and in-memory dependency fixture; both ordinary and special mode paths share this route; no player behavior proof"
+        }
+      ],
+      "qualification": "Eight actual new named groups explicitly associated with three related repair rows; shared ordinary/special source route and quote/Hold fences. Associations/internal groups are not distinct Node executions or player acceptance."
+    },
+    "node": {
+      "scripts": 11,
+      "passed": 218,
+      "failed": 0,
+      "skipped": 0,
+      "stage5HistoricalInternalGroups": 282,
+      "stage5NewInternalGroups": 8,
+      "stage5InternalGroups": 290,
+      "stage5GroupsAreOneFileTest": true,
+      "notAddedTo218": true
+    },
+    "strictCodeOnlyNonincrementalTsc03Passed": true,
+    "next": {
+      "actualExit0": true,
+      "pid": 77812,
+      "elapsedMs": 112130,
+      "dist": ".next-web-windows-catchup-20261007-03",
+      "strictTypeScript": "passed13.8s",
+      "staticPages": 13,
+      "originalInputs": 27387,
+      "originalInputDrift": 0,
+      "allowedGeneratedMetadata": 2,
+      "files": 19007,
+      "directoriesIncludingRoot": 308,
+      "bytes": 602553319,
+      "nftTraces": 61,
+      "nftReferences": 37094,
+      "nftRegular": 37092,
+      "nftDirectories": 2,
+      "nftMissing": 0,
+      "nftPrivate": 0,
+      "declaredJunctionTraversed": false
+    },
+    "thin": {
+      "actualExit0": true,
+      "pid": 103048,
+      "elapsedMs": 28428,
+      "root": ".mir2-thin-client-web-windows-catchup-20261007-03",
+      "originalInputs": 63136,
+      "inputDrift": 0,
+      "files": 7301,
+      "directoriesIncludingRoot": 776,
+      "links": 0,
+      "bytes": 372719297,
+      "capBytes": 377487360,
+      "headroomBytes": 4768063,
+      "actualRuntimeLeaves": 11,
+      "actualSourceOutputJsonPairs": 231,
+      "warningFullMultiset": 44
+    },
+    "newRustTests": 0,
+    "newCorePuiNativeRendererBuilds": 0,
+    "carriedHistoricalBuildQualification": "Source18 valid Rust input graphs unchanged, Root421 high-level snapshot zero drift; actual Source20 source/packaged runtime leaves match. Carried evidence only; no fresh Rust execution, runtime launch or UI/player proof.",
+    "coreWasmBytes": 252205,
+    "coreJsBytes": 24393,
+    "puiWasmBytes": 70277,
+    "puiJsBytes": 14472,
+    "nativeArchiveBytes": 104710144,
+    "nativeArchiveRehashedNotStarted": true
+  },
+  "independentReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "finalSourceAccepted": true,
+    "node03Tsc03Accepted": true,
+    "nextThinStaticResultAccepted": true,
+    "confirmedP0P1Blockers": 0,
+    "actualReadOnlyChecks": {
+      "thinDistinctInputFiles": 63136,
+      "thinInputBytes": 1521369551,
+      "nextRegularOutputFiles": 19007,
+      "nextRegularOutputBytes": 602553319,
+      "packageFiles": 7301,
+      "packageDirectoriesIncludingRoot": 776,
+      "packageBytes": 372719297,
+      "packageLinks": 0,
+      "sourceAndPackageMismatches": 0,
+      "nftTraceCount": 61,
+      "nftReferences": 37094,
+      "nftRegularFiles": 37092,
+      "nftDirectoryReferences": 2,
+      "nftMissing": 0,
+      "nftPrivate": 0,
+      "runtimeLeaves": 11,
+      "jsonSourceOutputPairsActuallyRehashed": 231,
+      "warningMessagesAndDuplicateCountsCompared": 44,
+      "allowedGeneratedMetadataOnly": true
+    },
+    "reviewerWrites": 0,
+    "reviewerExecutions": 0,
+    "qualification": "Independent pure fs/path/crypto/data verification of actual immutable source/config/log/receipt and static Next/Thin artifacts; no product code/test/build/runtime execution by reviewer, no UI or player proof."
+  },
+  "preservation": {
+    "onlyThreeRepairRowsChanged": [
+      "F09.NPC.REPAIR_BAG",
+      "F09.NPC.SREPAIR_BAG",
+      "F09.NPC.REPAIR_QUOTE"
+    ],
+    "allOther314RowsIdentical": true,
+    "all317OrderedIdsPreserved": true,
+    "allOriginalAuditAndNativeDataUnchanged": true,
+    "historyPins": [
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.json",
+        "bytes": 2763265,
+        "sha256": "1e5921dd279183d107a086edea1bf91de56d7402d3c1325be1a48796eeb4f94c"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.md",
+        "bytes": 37640,
+        "sha256": "e03d7aaf19c5a94b5ad829625e39decf4ef8a1ffd92ccfcf50a3a5981d45f545"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/current-evidence05.json",
+        "bytes": 5971,
+        "sha256": "08028e7f1452b12230f659c9d32df8ccde231297c6488ca35432e51f7968fdb0"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-finite-result01.json",
+        "bytes": 19667,
+        "sha256": "54aff998cd9718bf687acecb3f2d38e723564edee0ba0887ac590f7d8d208903"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-action-chain-review01.json",
+        "bytes": 6981,
+        "sha256": "a198189c5e6cae1d87e428abc9b68ea68946dc547bf14bc3011424708d720855"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-combined-build-result01.json",
+        "bytes": 52526,
+        "sha256": "14b732c460ce14cbb77de15fc0cc4578e23ad11661142508a5fd3506ddad684d"
+      }
+    ],
+    "oldArtifactsWritten": false,
+    "source19PartialStatePreservedAsExplicitHistory": true,
+    "node01Tsc01FailuresRetained": true,
+    "prepared02ConfigsExecuted": false,
+    "stage5ThreeObsoleteUiAssertionsReplacedWithActualReachableNativeBranchAst": true,
+    "stage5OtherAssertionsRetained": true,
+    "combat23OriginalTestsAndAssertionsRetained": true
+  },
+  "remainingSourceGapIds": [
+    "F02.world.fishing-click",
+    "F05.bag.tooltip-compat",
+    "F05.belt.move-from-bag",
+    "F05.belt.tooltip",
+    "F09.NPC.PEARL",
+    "F11.RANKING.INSPECT"
+  ],
+  "nextPriority": "Source21 lightweight shared Rust tooltip + renderer-free PUI + real Bag/Belt/Character mounts; then Bag-to-Belt, fishing-click, Pearl, Ranking Inspect; mobile/human UI remains pending",
+  "sourcePublication": {
+    "parentCommit": "c400a19bf65c06dd84cf54a20f2d0c379b894e62",
+    "parentRemotePushVerified": true,
+    "parentRemoteReadback": {
+      "toolChunk": "5ae019",
+      "exitCode": 0,
+      "remoteHead": "c400a19bf65c06dd84cf54a20f2d0c379b894e62",
+      "branch": "refs/heads/codex/windows-player-journey"
+    },
+    "localCommit": "pending scoped Source20 source/evidence commit",
+    "remotePush": "pending Source20 commit; previous Source18+19 source successfully published"
+  },
+  "limits": [
+    "No complete acceptance denominator; categories and finite fixture associations are bounded source bookkeeping.",
+    "218 Node tests include a single Stage5 file test with290 internal groups, not218+290.",
+    "Source20 three source candidate closures do not prove a committed React tree, actual input handling, real Rust quote/WASM execution, service/network or playable client.",
+    "231 JSON byte matches only carry the historical token conclusion; no new parser/lexer execution.",
+    "All317 player rows, W6 UI, login/combat/save-relogin and mobile/human frontend acceptance remain not-run."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false,
+  "writerProductOrTestExecutions": 0
+}

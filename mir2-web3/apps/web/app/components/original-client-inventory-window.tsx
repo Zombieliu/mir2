@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 
 import { ORIGINAL_UI, type InventoryTabKey } from "../../lib/original-ui";
 import {
@@ -38,6 +38,8 @@ import type {
 type InventoryWindowProps = {
   initialDeleteMode?: boolean;
   onCompatibilityInteraction?: () => void;
+  repairMode?: boolean;
+  onRepairPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
   t: TranslateFn;
   locale: string;
   activeTab: InventoryTabKey;
@@ -73,6 +75,7 @@ type InventoryWindowProps = {
 export function InventoryWindow({
   initialDeleteMode = false,
   onCompatibilityInteraction,
+  repairMode = false, onRepairPointerDown,
   t,
   locale,
   activeTab,
@@ -100,6 +103,7 @@ export function InventoryWindow({
   onAutoArrangeBag,
 }: InventoryWindowProps) {
   const [deleteMode, setDeleteMode] = useState(initialDeleteMode);
+  const consumedRepairPointerRef = useRef(new WeakSet<HTMLButtonElement>());
   const [itemFilter, setItemFilter] = useState<InventoryItemFilter>("all");
   const [contextMenu, setContextMenu] = useState<{ item: DisplayItem; x: number; y: number } | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
@@ -122,7 +126,7 @@ export function InventoryWindow({
   const visibleStorageItems = storagePageLocked
     ? []
     : world.storageItems.filter((item) => item.slot >= storagePageStart && item.slot < storagePageEnd);
-  const showStorageWindow = storageMode !== null;
+  const showStorageWindow = storageMode !== null && !repairMode;
   const [pendingDeleteItem, setPendingDeleteItem] = useState<DisplayItem | null>(null);
   const [pendingSellItem, setPendingSellItem] = useState<DisplayItem | null>(null);
   const [deleteFeedback, setDeleteFeedback] = useState<string | null>(null);
@@ -131,6 +135,13 @@ export function InventoryWindow({
   const [splitCount, setSplitCount] = useState("1");
   const [pendingGoldDrop, setPendingGoldDrop] = useState(false);
   const [goldDropAmount, setGoldDropAmount] = useState("100");
+
+  useEffect(() => {
+    if (!repairMode) return;
+    setDeleteMode(false); setSellMode(false); setStorageMode(null); setContextMenu(null);
+    setPendingDeleteItem(null); setPendingSellItem(null); setPendingMoveItem(null);
+    setPendingSplitItem(null); setPendingGoldDrop(false); setShowStoragePasswordPanel(false);
+  }, [repairMode]);
 
   useEffect(() => {
     if (storageServiceOpenVersion <= 0 || initialDeleteMode) {
@@ -443,6 +454,7 @@ export function InventoryWindow({
   }
 
   function confirmSellItem(item: DisplayItem) {
+    if (repairMode) return;
     if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
       action: "sell",
@@ -468,6 +480,7 @@ export function InventoryWindow({
   }
 
   function confirmDeleteItem(item: DisplayItem) {
+    if (repairMode) return;
     if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
       action: "drop",
@@ -490,6 +503,7 @@ export function InventoryWindow({
   }
 
   function confirmSplitItem(item: DisplayItem) {
+    if (repairMode) return;
     if(mailItemLocked(item))return;
     const count = Number.parseInt(splitCount, 10);
     if (!Number.isFinite(count) || count <= 0) {
@@ -519,6 +533,7 @@ export function InventoryWindow({
   }
 
   function confirmGoldDrop() {
+    if (repairMode) return;
     const amount = Number.parseInt(goldDropAmount, 10);
     if (!Number.isFinite(amount) || amount <= 0) {
       return;
@@ -576,6 +591,7 @@ export function InventoryWindow({
 
   return (
     <div className={`window-shell inventory-window ${showStorageWindow ? "with-storage" : ""}`}
+      style={repairMode ? { left: "auto", right: 16, top: 86, transform: "none" } : undefined}
       onPointerDownCapture={onCompatibilityInteraction} onKeyDownCapture={onCompatibilityInteraction}>
       <img className="window-frame" src={ORIGINAL_UI.inventory.frame} alt="" draggable={false} />
 
@@ -594,6 +610,7 @@ export function InventoryWindow({
           type="button"
           className="window-tab-button"
           onClick={() => {
+            if (repairMode) return;
             onTabChange("quest");
             setStorageMode("takeBack");
             setPendingMoveItem(null);
@@ -629,6 +646,7 @@ export function InventoryWindow({
             setDeleteFeedback(null);
           }}
           active={deleteMode}
+          disabled={repairMode}
         />
       </div>
       <div className="inventory-sell">
@@ -637,6 +655,7 @@ export function InventoryWindow({
           aria-label={t("ui.sellItem", [], "Sell Item")}
           title={t("ui.sellItem", [], "Sell Item")}
           className={sellMode ? "active" : ""}
+          disabled={repairMode}
           onClick={() => {
             setSellMode((current) => !current);
             setDeleteMode(false);
@@ -675,6 +694,7 @@ export function InventoryWindow({
             }}
 	            title={slot.key}
 	            onClick={() => {
+	              if (repairMode) return;
 	              const takeBackItem =
 	                pendingMoveItem?.container === "storage"
 	                  ? pendingMoveItem
@@ -734,20 +754,30 @@ export function InventoryWindow({
               type="button"
               className="inventory-item-card"
               disabled={mailItemLocked(item)}
-              style={{ left: slot.x, top: slot.y, ...(dimmed ? { opacity: 0.28 } : null) }}
+              style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null) }}
               data-filtered-out={dimmed ? "true" : undefined}
               aria-label={item.name}
+              onPointerDown={(event) => {
+                if (repairMode) {
+                  consumedRepairPointerRef.current.add(event.currentTarget);
+                  onRepairPointerDown?.(event, item);
+                } else if (!event.defaultPrevented && event.isPrimary && event.button === 0
+                  && (event.pointerType === "mouse" || event.pointerType === "touch")) consumedRepairPointerRef.current.delete(event.currentTarget);
+              }}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
                 event.preventDefault();
+                if (consumedRepairPointerRef.current.has(event.currentTarget) || repairMode) return;
                 activateInventoryItem(item);
               }}
               onClick={(event) => {
+                if (repairMode) { event.preventDefault(); return; }
                 if (event.detail !== 0) return;
                 activateInventoryItem(item);
               }}
 	              onContextMenu={(event) => {
 	                event.preventDefault();
+	                if (repairMode) return;
 	                if (storageMode === "store" && item.container !== "storage") {
 	                  setPendingMoveItem(item);
 	                  setPendingSplitItem(null);
@@ -797,7 +827,7 @@ export function InventoryWindow({
         })}
       </div>
 
-      {activeTab !== "quest" ? (
+      {activeTab !== "quest" && !repairMode ? (
         <div
           style={{
             position: "absolute",
@@ -823,7 +853,7 @@ export function InventoryWindow({
         </div>
       ) : null}
 
-      {contextMenu ? (
+      {contextMenu && !repairMode ? (
         <>
           <div
             style={{ position: "fixed", inset: 0, zIndex: 55 }}
@@ -890,6 +920,7 @@ export function InventoryWindow({
       <button
         type="button"
         className="inventory-gold"
+        disabled={repairMode}
         aria-label={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)} — ${t("ui.dropGold", [], "Drop Gold")}`}
         title={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)}`}
         onClick={() => {
@@ -1223,7 +1254,7 @@ export function InventoryWindow({
           ) : null}
         </div>
       ) : null}
-      {pendingDeleteItem ? (
+      {pendingDeleteItem && !repairMode ? (
         <InventoryDeletePanel
           t={t}
           item={pendingDeleteItem}
@@ -1231,7 +1262,7 @@ export function InventoryWindow({
           onClose={() => setPendingDeleteItem(null)}
         />
       ) : null}
-      {pendingSellItem ? (
+      {pendingSellItem && !repairMode ? (
         <InventorySellPanel
           t={t}
           item={pendingSellItem}
@@ -1239,7 +1270,7 @@ export function InventoryWindow({
           onClose={() => setPendingSellItem(null)}
         />
       ) : null}
-      {pendingSplitItem ? (
+      {pendingSplitItem && !repairMode ? (
         <InventorySplitPanel
           t={t}
           item={pendingSplitItem}
@@ -1249,7 +1280,7 @@ export function InventoryWindow({
           onClose={() => setPendingSplitItem(null)}
         />
       ) : null}
-      {pendingGoldDrop ? (
+      {pendingGoldDrop && !repairMode ? (
         <InventoryGoldDropPanel
           t={t}
           goldDropAmount={goldDropAmount}
