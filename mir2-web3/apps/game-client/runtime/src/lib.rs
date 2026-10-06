@@ -22,6 +22,7 @@ pub mod native_ingest;
 mod native_ingest;
 pub mod native_render_receipt;
 pub mod native_lighting_diagnostics;
+mod native_lighting_target;
 pub mod native_world_receipt;
 mod presentation_pose;
 mod remote_motion;
@@ -3449,6 +3450,8 @@ fn ingest_pending_lighting_render_state(
 fn sync_lighting_render(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    #[cfg(target_os = "android")]
+    adapter: Res<bevy::render::renderer::RenderAdapter>,
     state: Res<RuntimeLightingRenderState>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
@@ -3528,11 +3531,15 @@ fn sync_lighting_render(
             material.border_darkness = border_darkness;
         }
     } else {
-        let buffer_image = images.add(Image::new_target_texture(
+        #[cfg(target_os = "android")]
+        let supports_view_formats = adapter.get_downlevel_capabilities().flags
+            .contains(bevy::render::render_resource::DownlevelFlags::VIEW_FORMATS);
+        #[cfg(not(target_os = "android"))]
+        let supports_view_formats = true;
+        let buffer_image = images.add(native_lighting_target::image(
             stage_size.x,
             stage_size.y,
-            TextureFormat::Rgba8Unorm,
-            Some(TextureFormat::Rgba8UnormSrgb),
+            supports_view_formats,
         ));
         let buffer_camera = commands
             .spawn((
