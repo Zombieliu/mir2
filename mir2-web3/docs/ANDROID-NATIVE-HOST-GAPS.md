@@ -1,5 +1,67 @@
 # Android native host ingress audit
 
+## 2026-10-06 完整注册表单的原生宿主接通（完整 goal 仍 Active）
+
+产品源码：`4b21c6c8c367a072b301b11cec4d27b117310133`，父提交 `01442aa505`。
+共享 Crystal 注册表单及校验已存在，但 Android 明确拒绝 SubmitRegistration，
+Java 宿主也没有入口。本叶只改三个 Android 宿主文件、一个测试文件及本记录，
+不改共享 UI 布局、Windows、服务端认证/角色/存档规则；完整 AP-01–21 分母不变。
+
+现在复用共享校验并核对已接受表单/日期 tick，完整转发 newAccount 的 type 与七字段：
+accountId/password/birthDateBinary/userName/secretQuestion/secretAnswer/emailAddress。
+确认密码与日期文本不发上网；Java 私有控制入口只在 READY 接受，REGISTERING 期间
+禁止重复注册、登录、Start 与玩法写入。只按服务端整数结果 8 返回共享 Login，
+不自动登录或获得角色/世界权限。范围/形状校验不是 Android 自创的认证规则。
+注册结果反馈逐字节沿用冻结 Windows 的展示函数；READY 不再覆盖已处理结果提示。
+原生队列满会释放 pending，敏感四字段在入队尝试后清除；发送失败、断线和超时仍终止会话。
+预览入口明确拒绝离线注册，保持禁止联网；nativeResumeV1 仍未协商。
+
+失败先行：Java 首轮 compiled 0/14→14/14、Rust 0/8→8/8。
+独立只读审查发现 Java 会把 Unicode 数字字符串当作成功，新增 compiled red 1/1，
+改为与 Windows 相同的 ASCII 有符号整数解析；最终 GatewaySession 普通版82/82、
+预览新增15/15，以及 Rust 新增8/8（两种变体）。测试还直接调用真实旧 socket 回调，
+验证新请求 pending 时不能被旧 generation 完成；直接执行真实定时回调，不声称已等满20秒。
+协议没有注册 request ID：同连接下一次重试后到达的旧重复回包仍无法区分，未宣称绝对隔离。
+
+450 输入绑定；五文件范围外445整文件、原67个网络/6个Lighting用例正文及原Rust测试模块
+逐字节保留。工具连带格式化六个测试文件及旧正文的漂移已全部撤回，未提交范围外改动。
+十五个新鲜同源门通过：Android537/preview585、shared1324+10原ignored、
+runtime309+1原ignored、Java两种各123（8类，无fail/error/skipped）、API31双检查，
+Mac宿主Windows光照14/地图4/效果2/协议21/账号反馈4/Hero FIFO1/技能FIFO1及实际比奇资源1。
+计数有交叠，不相加；这是Mac上的参照测试，不是Windows OS全量或人工验收。
+首次账号反馈筛选零匹配已保留且排除，纠正模块别名后真实4/4；辅助脚本字段/补丁换行失败
+均保留为工具故障，不冒充产品失败或有效验收。
+
+两份 APK 均绑定上述产品提交，Rust release-profile + Android Debug/uiPreview；
+code35/name0.1.32-gameshop-phone 未变，不是商店 Release。Gateway为空，预览禁止联网，
+GPU诊断开关关闭。Gradle无法strip原生库，按原样封装；字节相同不代表去符号成功。
+
+| 包 | 字节数 | SHA-256 |
+| --- | ---: | --- |
+| `mir2-native-registration-host-normal-4b21c6c8c.apk` | 533985511 | `482c74db74f6c656b28f02e86457cf18934c8b28703b6d0742dc47992a6694b3` |
+| `mir2-native-registration-host-preview-4b21c6c8c.apk` | 542082095 | `d0b9d6bdc63d256736b58b32d4396d819fc8987647f87e1cedbea97dca6ee0e6` |
+
+本机证据目录从 mir2-web3 解析：
+`apps/game-client/platform-android/target/native-registration-host-20261006-SAXSZ4/`。
+APK在final-apks，publication-evidence.json绑定包/门槛/安装/设备/日志与两张原图。
+两包保留数据更新，安装后回读SHA相同；对应variant库产物、6647UI PNG/3metadata、
+10个冻结Windows原Lighting帧逐字节匹配。这不是完整获准资源发布或全图覆盖。
+
+API31/Android12/ARM64模拟器，独立8秒前台PID17287/17366，fatal/渲染退出均0，
+两张2340×1080原图实际查看。普通包只显示原登录和Test server not configured，
+预览是显式OFFLINE/NOT LIVE的本地比奇/对象/夜间灯光；大黑诊断面板及空快捷栏仍在。
+普通/预览本次GL506为2/0，诊断记录均0；零错误GPU门仍FAIL，不能靠单次零错误宣布修复。
+截图没有执行注册控制写入/注册结果JNI；TLS与Rust状态链不是真实Gateway注册或手机UI验收。
+
+05:19 UTC只读Windows仍56ee063fb，较冻结3d735745f +1提交/83文档/0功能路径。
+investigate指导了失败先行、独立复核和五文件边界；同版本wgpu-hal83文件修补、
+恢复接线11文件范围以及整套UI三轮失败后的重新批准仍待人类答复，均未擅自实施。
+AP-02仍PARTIAL、NI-17 PARTIAL、NI-18 OPEN、完整goal Active；
+真实注册/登录/在线玩家/Zone保存、完整恢复、手机UI/多指/IME/九语言、
+2969全图缺失引用/完整资源/音频/更新、真机0台与人工验收仍OPEN。
+下一步接通其他已有共享账号入口并补获准环境实测；恢复/UI/GPU分别遵守原确认边界。
+Status: DONE_WITH_CONCERNS（仅本注册宿主叶）。
+
 ## 2026-10-06 实际连接的能力协商修补（完整 goal 仍 Active）
 
 产品源码：`697d6b545e3f61796568c9da1438bea9bed05343`，父提交 `59487ba7a`。
