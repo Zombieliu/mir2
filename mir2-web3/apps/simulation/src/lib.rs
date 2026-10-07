@@ -1,6 +1,7 @@
 mod config;
 pub mod db_projection;
 mod runtime;
+pub mod npc_purchase_journal;
 pub mod user_item_uid;
 mod world_runtime;
 
@@ -42,6 +43,7 @@ pub use runtime::{
     NpcPurchaseRequest, NpcPurchaseCurrency, NpcPurchaseSource, NpcPurchaseRejection,
     NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome, NpcPurchaseProcessingError,
     NpcPurchaseProcessingExecution,
+    NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseDurableExecution, NpcPurchaseDurableError,
     CreatureOperation, CreatureOwner, CreaturePickupIntent,
     crystal_world_respawn_spawns, gate5_demo_scenario, intelligent_creature_allows_ground_drop,
     reset_account_password_after_recovery, run_zone_replay_scenario,

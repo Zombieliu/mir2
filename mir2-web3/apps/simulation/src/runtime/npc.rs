@@ -561,8 +561,11 @@ pub(super) fn current_player_name_for_market(world: &World) -> String {
 
 pub(super) fn process_crystal_npc_goods_expiry(world: &mut World) {
     let now = binary_datetime_ticks(current_binary_datetime());
+    expire_crystal_npc_goods(&mut world.resource_mut::<NpcStateResource>(), now);
+}
+
+fn expire_crystal_npc_goods(resources: &mut NpcStateResource, now: i64) {
     let expired = {
-        let mut resources = world.resource_mut::<NpcStateResource>();
         let mut expired = Vec::new();
         for entry in &mut resources.npc_buy_back_items {
             let mut retained = Vec::new();
@@ -585,10 +588,9 @@ pub(super) fn process_crystal_npc_goods_expiry(world: &mut World) {
         return;
     }
 
-    let mut resources = world.resource_mut::<NpcStateResource>();
     for (script_key, item) in expired {
         if crystal_npc_used_goods_accepts_item(&script_key, item.item_index) {
-            push_crystal_npc_used_good_item(&mut resources, &script_key, item);
+            push_crystal_npc_used_good_item(resources, &script_key, item);
         }
     }
 }
@@ -909,15 +911,15 @@ pub(super) fn record_crystal_npc_service_context(
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum CrystalNpcPurchaseSource {
+pub(super) enum CrystalNpcPurchaseSource {
     Trade,
     BuyBack,
     Used,
 }
 
 pub(super) struct CrystalNpcPurchaseItem {
-    item: UserItem,
-    source: CrystalNpcPurchaseSource,
+    pub(super) item: UserItem,
+    pub(super) source: CrystalNpcPurchaseSource,
 }
 
 pub(super) fn active_crystal_buy_service(service: &ActiveNpcServiceState) -> bool {
@@ -997,171 +999,171 @@ pub(super) fn buy_item_with_purchase_outcome(
         &mut NpcPurchaseCapture { gold: None, purchase: Some(outcome) })
 }
 
-fn reject_gold_buy(request: NpcGoldBuyRequest, reason: NpcGoldBuyRejection,
-    outcome: &mut NpcPurchaseCapture<'_>) -> Vec<ServerPacket> {
-    outcome.rejected(request, reason);
-    Vec::new()
+/// All mutations, including expiry maintenance on a rejected purchase, remain
+/// on owned clones until the caller chooses its publication boundary.
+#[derive(Debug)]
+pub(super) struct PreparedNpcPurchase {
+    pub(super) outcome: NpcPurchaseProcessingOutcome,
+    pub(super) packets: Vec<ServerPacket>,
+    pub(super) inventory: Option<InventoryResource>,
+    pub(super) npc: Option<NpcStateResource>,
+    pub(super) gold: Option<u32>,
+    pub(super) pearls: Option<i32>,
+    legacy_rejection: Option<NpcGoldBuyRejection>,
+}
+impl PreparedNpcPurchase {
+    fn rejected(request: NpcGoldBuyRequest, reason: NpcGoldBuyRejection,
+        npc: Option<NpcStateResource>) -> Self {
+        Self { outcome: NpcPurchaseProcessingOutcome::Rejected { request: request.into(), reason: reason.into() },
+            legacy_rejection: Some(reason), packets: Vec::new(), inventory: None, npc, gold: None, pearls: None }
+    }
+    pub(super) fn apply(self, world: &mut World) -> Vec<ServerPacket> {
+        if let Some(npc) = self.npc { *world.resource_mut::<NpcStateResource>() = npc; }
+        if let Some(gold) = self.gold { world.resource_mut::<PlayerRuntimeResource>().gold = gold; }
+        if let Some(pearls) = self.pearls {
+            world.resource_mut::<super::resources::Stage5SystemsResource>()
+                .stage5_systems.intelligent_creature_pearls = pearls;
+        }
+        if let Some(inventory) = self.inventory { *world.resource_mut::<InventoryResource>() = inventory; }
+        self.packets
+    }
 }
 
 fn buy_item_recording_impl(world: &mut World, request: NpcGoldBuyRequest,
-    ordinary_only: bool, outcome: &mut NpcPurchaseCapture<'_>) -> Vec<ServerPacket> {
+    ordinary_only: bool, capture: &mut NpcPurchaseCapture<'_>) -> Vec<ServerPacket> {
+    let plan = prepare_npc_purchase(world, request.into(), ordinary_only);
+    let outcome = plan.outcome.clone();
+    let legacy_rejection = plan.legacy_rejection;
+    let packets = plan.apply(world);
+    match outcome {
+        NpcPurchaseProcessingOutcome::Rejected { .. } =>
+            capture.rejected(request, legacy_rejection.expect("rejected plan has a legacy reason")),
+        NpcPurchaseProcessingOutcome::Committed { currency, source, charged, admitted_count, incoming_unique_id, .. } => {
+            let source = match source {
+                NpcPurchaseSource::Trade => CrystalNpcPurchaseSource::Trade,
+                NpcPurchaseSource::BuyBack => CrystalNpcPurchaseSource::BuyBack,
+                NpcPurchaseSource::Used => CrystalNpcPurchaseSource::Used,
+            };
+            capture.committed(request, currency, source, charged, admitted_count, incoming_unique_id);
+        }
+    }
+    packets
+}
+
+pub(super) fn staged_npc_goods(world: &World) -> NpcStateResource {
+    let mut npc = world.resource::<NpcStateResource>().clone();
+    expire_crystal_npc_goods(&mut npc, binary_datetime_ticks(current_binary_datetime()));
+    npc
+}
+
+pub(super) fn prepare_npc_purchase(world: &World, request: NpcPurchaseRequest,
+    ordinary_only: bool) -> PreparedNpcPurchase {
+    prepare_npc_purchase_checked(world, request, ordinary_only, None)
+}
+
+pub(super) fn prepare_npc_purchase_for_intent(world: &World, operation: crate::npc_purchase_journal::NpcPurchaseOperation,
+    producer_scope: [u8; 32]) -> PreparedNpcPurchase {
+    prepare_npc_purchase_checked(world, operation.intent.request, false, Some((operation.intent, operation.actor, producer_scope)))
+}
+
+fn prepare_npc_purchase_checked(world: &World, request: NpcPurchaseRequest, ordinary_only: bool,
+    expected: Option<(crate::npc_purchase_journal::NpcPurchaseIntent, [u8; 32], [u8; 32])>) -> PreparedNpcPurchase {
+    let request: NpcGoldBuyRequest = request.into();
     let NpcGoldBuyRequest { item_index, count, panel_type } = request;
     if count == 0 || panel_type != CRYSTAL_PANEL_BUY {
-        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidRequest, outcome);
+        return PreparedNpcPurchase::rejected(request, NpcGoldBuyRejection::InvalidRequest, None);
     }
     if current_player_is_dead(world) {
-        return reject_gold_buy(request, NpcGoldBuyRejection::PlayerDead, outcome);
+        return PreparedNpcPurchase::rejected(request, NpcGoldBuyRejection::PlayerDead, None);
     }
-
-    let Some(service) =
-        current_crystal_npc_service_in_range(world).filter(active_crystal_buy_service)
-    else {
-        return reject_gold_buy(request, NpcGoldBuyRejection::ServiceUnavailable, outcome);
+    let Some(service) = current_crystal_npc_service_in_range(world).filter(active_crystal_buy_service) else {
+        return PreparedNpcPurchase::rejected(request, NpcGoldBuyRejection::ServiceUnavailable, None);
     };
-
     if ordinary_only && matches!(service.label_key.as_str(), "PEARLBUY" | "BUYBACK" | "BUYUSED") {
-        return reject_gold_buy(request, NpcGoldBuyRejection::UnsupportedService, outcome);
+        return PreparedNpcPurchase::rejected(request, NpcGoldBuyRejection::UnsupportedService, None);
     }
-    process_crystal_npc_goods_expiry(world);
-    let rate = crystal_npc_info_by_script_key(&service.script_key)
-        .map(|npc| npc.price_rate)
-        .unwrap_or(1.0);
-    let Some(purchase_item) = crystal_npc_service_item_for_purchase(world, &service, item_index)
-    else {
-        return reject_gold_buy(request, NpcGoldBuyRejection::UnknownGood, outcome);
+    let mut staged_npc = staged_npc_goods(world);
+    macro_rules! reject {
+        ($reason:expr) => { return PreparedNpcPurchase::rejected(request, $reason, Some(staged_npc)); };
+    }
+    let rate = crystal_npc_info_by_script_key(&service.script_key).map(|npc| npc.price_rate).unwrap_or(1.0);
+    let Some(purchase_item) = crystal_npc_service_item_for_purchase_with_state(world, &service, item_index, &staged_npc) else {
+        reject!(NpcGoldBuyRejection::UnknownGood);
     };
     if ordinary_only && !matches!(purchase_item.source, CrystalNpcPurchaseSource::Trade) {
-        return reject_gold_buy(request, NpcGoldBuyRejection::UnsupportedService, outcome);
+        reject!(NpcGoldBuyRejection::UnsupportedService);
     }
     let source_item = purchase_item.item.clone();
-    let Some(template) = crystal_item_by_index(source_item.item_index) else {
-        return reject_gold_buy(request, NpcGoldBuyRejection::UnknownGood, outcome);
-    };
-
-    let requested_count = u32::from(count);
-    let is_resale = matches!(
-        purchase_item.source,
-        CrystalNpcPurchaseSource::BuyBack | CrystalNpcPurchaseSource::Used
-    );
-    // Wire carriers permit a zero count, but a finite resale entry must contain
-    // an actual item. Do not charge or remove empty stock by clamping it to one.
-    if is_resale && source_item.count == 0 {
-        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+    let Some(template) = crystal_item_by_index(source_item.item_index) else { reject!(NpcGoldBuyRejection::UnknownGood); };
+    if let Some((intent, actor, scope)) = expected {
+        if super::npc_purchase_transaction::catalog_intent(&service, &purchase_item, &template, rate,
+            request.into(), actor, scope).ok() != Some(intent) {
+            reject!(NpcGoldBuyRejection::ServiceUnavailable);
+        }
     }
-    let buy_count = if is_resale {
-        requested_count.min(u32::from(source_item.count.max(1)))
-    } else {
-        requested_count
-    };
-    if buy_count == 0 || buy_count > u32::from(template.stack_size.max(1)) {
-        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidQuantity, outcome);
-    }
-
+    let is_resale = matches!(purchase_item.source, CrystalNpcPurchaseSource::BuyBack | CrystalNpcPurchaseSource::Used);
+    if is_resale && source_item.count == 0 { reject!(NpcGoldBuyRejection::InvalidDelivery); }
+    let buy_count = if is_resale { u32::from(count).min(u32::from(source_item.count.max(1))) } else { u32::from(count) };
+    if buy_count == 0 || buy_count > u32::from(template.stack_size.max(1)) { reject!(NpcGoldBuyRejection::InvalidQuantity); }
     let cost = crystal_npc_purchase_cost(&template, buy_count, rate);
     let uses_pearls = service.label_key == "PEARLBUY";
-    let player_name = world
-        .resource::<SessionResource>()
-        .selected_character
-        .as_ref()
-        .map(|character| character.name.clone())
-        .unwrap_or_default();
-    {
-        let resources = world.resource::<InventoryResource>();
-        let balance = if uses_pearls {
-            world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls.max(0) as u32
-        } else { world.resource::<PlayerRuntimeResource>().gold };
-        if balance < cost {
-            return reject_gold_buy(request, NpcGoldBuyRejection::InsufficientGold, outcome);
+    let currency = if uses_pearls { NpcPurchaseCurrency::Pearls } else { NpcPurchaseCurrency::Gold };
+    let source = match purchase_item.source {
+        CrystalNpcPurchaseSource::Trade => NpcPurchaseSource::Trade,
+        CrystalNpcPurchaseSource::BuyBack => NpcPurchaseSource::BuyBack,
+        CrystalNpcPurchaseSource::Used => NpcPurchaseSource::Used,
+    };
+    let gold = world.resource::<PlayerRuntimeResource>().gold;
+    let pearls = world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls;
+    let balance = if uses_pearls { pearls.max(0) as u32 } else { gold };
+    if balance < cost { reject!(NpcGoldBuyRejection::InsufficientGold); }
+    let resources = world.resource::<InventoryResource>();
+    let (inventory, incoming) = if source == NpcPurchaseSource::Trade && !uses_pearls {
+        let Some(now_utc_ticks) = npc_gold_trade_utc_ticks(world, &service) else { reject!(NpcGoldBuyRejection::ClockUnavailable); };
+        let Some(plan) = plan_npc_gold_trade_gain(resources, &template, count, source_item.unique_id, now_utc_ticks) else {
+            reject!(NpcGoldBuyRejection::InvalidDelivery);
+        };
+        plan
+    } else {
+        let Some(plan) = plan_npc_resale_or_pearl_gain(resources, &template, buy_count, &source_item) else {
+            reject!(NpcGoldBuyRejection::InvalidDelivery);
+        };
+        plan
+    };
+    let incoming_unique_id = incoming.unique_id;
+    let mut packets = Vec::new();
+    if !uses_pearls { packets.push(ServerPacket::LoseGold { gold: cost }); }
+    packets.push(ServerPacket::GainedItem { item: incoming });
+    match purchase_item.source {
+        CrystalNpcPurchaseSource::Trade => {}
+        CrystalNpcPurchaseSource::BuyBack => {
+            let player_name = current_player_name_for_market(world);
+            let Some(entry) = staged_npc.npc_buy_back_items.iter_mut().find(|entry|
+                entry.script_key.eq_ignore_ascii_case(&service.script_key) && entry.player_name == player_name) else {
+                    reject!(NpcGoldBuyRejection::InvalidDelivery);
+                };
+            let Some(index) = entry.items.iter().position(|item| item.item.unique_id == item_index) else {
+                reject!(NpcGoldBuyRejection::InvalidDelivery);
+            };
+            entry.items.remove(index);
+            packets.push(crystal_npc_goods_packet(entry.items.iter().map(|item| item.item.clone()).collect(), rate, CRYSTAL_PANEL_BUY, false));
         }
-        if matches!(purchase_item.source, CrystalNpcPurchaseSource::Trade) && !uses_pearls {
-            let Some(now_utc_ticks) = npc_gold_trade_utc_ticks(world, &service) else {
-                return reject_gold_buy(request, NpcGoldBuyRejection::ClockUnavailable, outcome);
-            };
-            let Some((staged, incoming)) = plan_npc_gold_trade_gain(
-                resources,
-                &template,
-                count,
-                source_item.unique_id,
-                now_utc_ticks,
-            ) else {
-                return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
-            };
-            // All capacity, identity and wire conversions completed on the clone.
-            // No callback or other fallible work separates these two live writes.
-            world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
-            *world.resource_mut::<InventoryResource>() = staged;
-            outcome.committed(request, NpcPurchaseCurrency::Gold, purchase_item.source, cost, count, incoming.unique_id);
-            return vec![
-                ServerPacket::LoseGold { gold: cost },
-                ServerPacket::GainedItem { item: incoming },
-            ];
+        CrystalNpcPurchaseSource::Used => {
+            let Some(entry) = staged_npc.npc_used_goods_items.iter_mut().find(|entry|
+                entry.script_key.eq_ignore_ascii_case(&service.script_key)) else { reject!(NpcGoldBuyRejection::InvalidDelivery); };
+            let Some(index) = entry.items.iter().position(|item| item.unique_id == item_index) else { reject!(NpcGoldBuyRejection::InvalidDelivery); };
+            entry.items.remove(index);
+            let script = crystal_npc_script_by_key(&service.script_key);
+            let panel_type = if service.label_key == "BUYUSED" { CRYSTAL_PANEL_BUY_SUB } else { CRYSTAL_PANEL_BUY };
+            packets.push(crystal_npc_goods_packet_for_script_with_extra(script.as_ref(), &entry.items, panel_type, CRYSTAL_GOODS_HIDE_ADDED_STATS));
         }
-
-        {
-            let Some((staged_inventory, incoming)) = plan_npc_resale_or_pearl_gain(
-                resources, &template, buy_count, &source_item,
-            ) else {
-                return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
-            };
-            // Stock removal and every outgoing conversion are staged as well.
-            let mut staged_npc = world.resource::<NpcStateResource>().clone();
-            let incoming_unique_id = incoming.unique_id;
-            let mut packets = Vec::new();
-            if !uses_pearls { packets.push(ServerPacket::LoseGold { gold: cost }); }
-            packets.push(ServerPacket::GainedItem { item: incoming });
-            match purchase_item.source {
-                CrystalNpcPurchaseSource::Trade => {}
-                CrystalNpcPurchaseSource::BuyBack => {
-                    let Some(entry) = staged_npc.npc_buy_back_items.iter_mut().find(|entry| {
-                        entry.script_key.eq_ignore_ascii_case(&service.script_key)
-                            && entry.player_name == player_name
-                    }) else {
-                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
-                    };
-                    let Some(index) = entry.items.iter().position(|item| item.item.unique_id == item_index) else {
-                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
-                    };
-                    entry.items.remove(index);
-                    packets.push(crystal_npc_goods_packet(
-                        entry.items.iter().map(|item| item.item.clone()).collect(),
-                        rate, CRYSTAL_PANEL_BUY, false,
-                    ));
-                }
-                CrystalNpcPurchaseSource::Used => {
-                    let Some(entry) = staged_npc.npc_used_goods_items.iter_mut()
-                        .find(|entry| entry.script_key.eq_ignore_ascii_case(&service.script_key)) else {
-                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
-                    };
-                    let Some(index) = entry.items.iter().position(|item| item.unique_id == item_index) else {
-                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
-                    };
-                    entry.items.remove(index);
-                    let script = crystal_npc_script_by_key(&service.script_key);
-                    let panel_type = if service.label_key == "BUYUSED" {
-                        CRYSTAL_PANEL_BUY_SUB
-                    } else { CRYSTAL_PANEL_BUY };
-                    packets.push(crystal_npc_goods_packet_for_script_with_extra(
-                        script.as_ref(), &entry.items, panel_type, CRYSTAL_GOODS_HIDE_ADDED_STATS,
-                    ));
-                }
-            }
-            filter_crystal_npc_goods_for_profile(world, &mut packets);
-            // All required resources, stock and outgoing carriers were validated
-            // before the debit. No fallible conversion separates the live writes.
-            let currency = if uses_pearls {
-                world.resource_mut::<super::resources::Stage5SystemsResource>()
-                    .stage5_systems.intelligent_creature_pearls -= cost as i32;
-                NpcPurchaseCurrency::Pearls
-            } else {
-                world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
-                NpcPurchaseCurrency::Gold
-            };
-            *world.resource_mut::<InventoryResource>() = staged_inventory;
-            *world.resource_mut::<NpcStateResource>() = staged_npc;
-            // buy_count cannot exceed the original u16 count.
-            outcome.committed(request, currency, purchase_item.source, cost, buy_count as u16, incoming_unique_id);
-            return packets;
-        }
+    }
+    filter_crystal_npc_goods_for_profile(world, &mut packets);
+    PreparedNpcPurchase {
+        outcome: NpcPurchaseProcessingOutcome::Committed { request: request.into(), currency, source, charged: cost,
+            admitted_count: buy_count as u16, incoming_unique_id }, packets, inventory: Some(inventory),
+        npc: Some(staged_npc), gold: (!uses_pearls).then(|| gold - cost),
+        pearls: uses_pearls.then(|| pearls - cost as i32), legacy_rejection: None,
     }
 }
 
@@ -1170,9 +1172,17 @@ pub(super) fn crystal_npc_service_item_for_purchase(
     service: &ActiveNpcServiceState,
     item_index: u64,
 ) -> Option<CrystalNpcPurchaseItem> {
+    crystal_npc_service_item_for_purchase_with_state(world, service, item_index, world.resource::<NpcStateResource>())
+}
+
+pub(super) fn crystal_npc_service_item_for_purchase_with_state(
+    world: &World, service: &ActiveNpcServiceState, item_index: u64, resources: &NpcStateResource,
+) -> Option<CrystalNpcPurchaseItem> {
     if service.label_key == "BUYBACK" {
-        return crystal_npc_buy_back_items_for_script(world, &service.script_key)
-            .into_iter()
+        let player_name = current_player_name_for_market(world);
+        return resources.npc_buy_back_items.iter().find(|entry|
+            entry.script_key.eq_ignore_ascii_case(&service.script_key) && entry.player_name == player_name)
+            .into_iter().flat_map(|entry| entry.items.iter().map(|item| item.item.clone()))
             .filter(|item| crystal_npc_profile_allows_item(world, item))
             .find(|item| item.unique_id == item_index)
             .map(|item| CrystalNpcPurchaseItem {
@@ -1203,8 +1213,8 @@ pub(super) fn crystal_npc_service_item_for_purchase(
         }
     }
 
-    crystal_npc_used_goods_for_script(world, &service.script_key)
-        .into_iter()
+    resources.npc_used_goods_items.iter().find(|entry| entry.script_key.eq_ignore_ascii_case(&service.script_key))
+        .into_iter().flat_map(|entry| entry.items.iter().cloned())
         .filter(|item| crystal_npc_profile_allows_item(world, item))
         .find(|item| item.unique_id == item_index)
         .map(|item| CrystalNpcPurchaseItem {

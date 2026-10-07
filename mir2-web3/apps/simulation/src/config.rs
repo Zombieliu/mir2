@@ -1752,6 +1752,10 @@ impl CurrencyKind {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterSaveRecord {
+    /// Private atomic NPC purchase history and non-reusable character incarnation.
+    /// Absent on legacy saves; never projected through WorldSnapshot or mail.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
     #[serde(default, skip_serializing_if = "GuildExperienceJournal::is_empty")]
     pub guild_experience_journal: GuildExperienceJournal,
     /// Optimistic revision for the complete private character snapshot.
@@ -1868,6 +1872,7 @@ impl CharacterSaveRecord {
         Self {
             revision: 0,
             guild_experience_journal: GuildExperienceJournal::default(),
+            npc_purchase_journal: None,
             character,
             map_file_name: String::new(),
             map_title: String::new(),

@@ -1,9 +1,11 @@
 //! Authoritative local processing evidence for all NPC purchase branches.
 //! These results are not durable, correlated network receipts or delivery ACKs.
 use mir2_protocol::{ClientPacket, ServerPacket};
+use serde::{Deserialize, Serialize};
 use super::npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NpcPurchaseRequest {
     pub item_index: u64,
     pub count: u16,
@@ -26,12 +28,15 @@ impl From<NpcPurchaseRequest> for NpcGoldBuyRequest {
 }
 
 /// Determined by the actual server service, independently of the goods source.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum NpcPurchaseCurrency { Gold, Pearls }
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum NpcPurchaseSource { Trade, BuyBack, Used }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum NpcPurchaseRejection {
     InvalidRequest, PlayerDead, ServiceUnavailable, UnsupportedService,
     UnknownGood, InvalidQuantity, InsufficientCurrency, ClockUnavailable, InvalidDelivery,
@@ -52,7 +57,8 @@ impl From<NpcGoldBuyRejection> for NpcPurchaseRejection {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
 pub enum NpcPurchaseProcessingOutcome {
     /// Wallet, inventory and any resale stock updates completed in memory.
     /// `admitted_count` is the actual delivery count after the legacy resale clamp.

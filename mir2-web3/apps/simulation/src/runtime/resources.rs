@@ -451,6 +451,8 @@ pub(super) struct SessionResource {
     ranking_inspect_generation: u64,
     ranking_inspect_active: bool,
     active_save_revision: Arc<AtomicU64>,
+    pub(super) npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
+    pub(super) npc_purchase_producer: Option<[u8; 32]>,
 }
 
 impl SessionResource {
@@ -464,6 +466,8 @@ impl SessionResource {
             ranking_inspect_generation: 0,
             ranking_inspect_active: false,
             active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
+            npc_purchase_journal: None,
+            npc_purchase_producer: None,
         }
     }
 
@@ -492,7 +496,9 @@ impl SessionResource {
         self.ranking_inspect_active = false;
     }
 
-    pub(super) fn clear_active_save_revision(&self) {
+    pub(super) fn clear_active_save_revision(&mut self) {
+        self.npc_purchase_journal = None;
+        self.npc_purchase_producer = None;
         self.active_save_revision
             .store(UNKNOWN_ACTIVE_SAVE_REVISION, Ordering::Release);
     }

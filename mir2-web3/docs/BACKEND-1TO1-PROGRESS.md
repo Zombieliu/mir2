@@ -1,5 +1,22 @@
 # Backend 1:1 Progress
 
+## Source27：本地购买存档与恢复通过，网关及两端回执继续接线（2026-10-07）
+
+新增私有 Actor journal，把原 request scope/sequence/full intent、实际 Gold/Pearls、Trade/BuyBack/Used 结果及权威 revision 与完整 character checkpoint 放进既有 account source 的同一次 transaction。当前活动 Session 提供 producer enrollment、实际 catalog proof、原 ID 只读 query 和单次 durable purchase；精确 duplicate 不再次写档、扣款、交付或删除 stock，terminal rejection 保留。journal 不进入普通 WorldSnapshot，旧存档的 optional 缺失保持兼容。
+
+购买先在同一个过期维护 clone 上校验 proof/currency/source，再规划钱包、库存、所选 stock 和输出；完整 commit 后才发布 live 状态。mail、mentor、relationship、经济标记、Pearls、婚戒装备及 XP/level/roster 的合并结果同步发布。File rename 结果不明时保留 Unknown 并冻结旧 cache；已确认 PostCommit 的精确 receipt 不被后处理错误或 panic 吞掉。失败 LogOut/Disconnect save 仍先退役购买 authority，同 Session restore 不允许回滚旧 actor/history。
+
+本轮真实重登夹具发现已保存的空 bag/storage 会被旧 demo 初始化补种，现以 committed revision 或已有 journal 保护整个 checkpoint，保留 revision0/无 journal 的旧初始化。首轮46/48与第二轮49/50原日志保留：另一处是夹具只改 sequence、未改实际 request；新增 legacy 期望则明确保留既有 TownTeleport Bag2/slot0 UID0→40 规范化，仅更正该独立期望，完整 checkpoint、两次 load 与 File 不变断言均保持。
+
+Root 最终 Rust03 实际 Simulation50＋旧Gold15＋Pearl6＋Save59＋Demo1＝131，再加既有 Gateway Gold owner16＝147次成功执行/146个唯一测试（Pearl一项重复选中）；新增 journal18＋Session/File19＝37项 distinct 全部具名执行。全部6次成功调用使用最终 Rust03，2次历史失败不累加其部分通过。884唯一普通输入0漂移，原881中7改/874保护、新增3；8次串行原 CargoGuard 均为 actual GetVolume C≥50GiB、fresh≤2000ms、PolicyB exited/Dispose。5份 Rust02 回归配置只准备未执行，不计测试。
+
+这里完成的是本地 Session/File 边界。下一项接真实 Gateway owner/Hosted/RPC 的能力与原 ID query、mutation 单次发送且 Unknown 不 fallback，再接 strict wire/ABI、Native/Web 实际 dispatcher/receiver 和含权威经济 revision 的完整 applied snapshot。当前个人 NPC checkpoint 不证明 shared-zone Used stock 原子所有权；当前新 Session/独立 File 检查也不代表另一个 OS process 的冷启动或并发 owner 验收，继续单列验证。客户端 opt-in 不能当服务端已接受能力。
+
+已构建包仍是 Source25 的 Next08/Thin08，不含 Source26/27，待完整接线后重建匹配组合。用户“继续代码，暂不操作界面”持续有效；实际资源/WASM 初始化、登录→战斗→保存→重登、移动真机和最终 frontend 验收未运行。Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common；317条是有界记录，不是全项目分母，overall percentage=null、Candidate100=false、goal active。
+
+Source26 已实际提交推送并核验远端4cbba7a193e5283b8f7d92ee2be8416262cd8d68；本轮承接其事后 publication 收据。Source27 的提交推送状态另由 Root 实际操作核验，文档和测试本身不证明发布。证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-finite-result01.json)、[Source26 实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-publication01.json)。以下 Source26 及更早正文完整保留为历史，本轮状态以上述 Source27 为准。
+
+
 ## Source26：购买本地结果与共享未决状态通过有限回归，完整回执链继续（2026-10-07）
 
 服务端新增全NPC购买的直接本地处理结果，实际标明Gold/Pearls、Trade/BuyBack/Used、扣款、实际准入数量及incoming UID。Gold回购/二手路径先完整规划库存、所选stock与输出，再提交钱包/库存/NPC；零数量有限stock提交前拒绝。旧Gold严格接口、价格、数量clamp、整条resale stock删除与合法旧SomeDura载体保持，UID0允许。stock expiry预处理仍是独立维护，不承诺失败回滚过期维护、复制全部额外属性或durable提交。

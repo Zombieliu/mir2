@@ -251,6 +251,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     super::refine_oven::snapshot_timer(&mut saved_systems.refine, true);
     Some(CharacterSaveRecord {
         guild_experience_journal: super::shared_guild_experience::snapshot(world),
+        npc_purchase_journal: session.npc_purchase_journal.clone(),
         revision,
         character,
         map_file_name: map.current_map.file_name.clone(),
@@ -1058,8 +1059,9 @@ pub(super) fn merge_persisted_mail_into_character_save(
     save: &mut CharacterSaveRecord,
     persisted_save: &CharacterSaveRecord,
 ) -> Result<bool, String> {
+    let journal_changed = super::npc_purchase_transaction::protect_npc_purchase_journal(save, persisted_save)?;
     let Some(persisted_state) = persisted_save.stage5_systems_json.as_deref() else {
-        return Ok(false);
+        return Ok(journal_changed);
     };
     let persisted_systems = serde_json::from_str::<Stage5SystemsState>(persisted_state)
         .map_err(|error| format!("failed to decode persisted stage5 mail: {error}"))?;
@@ -1115,7 +1117,7 @@ pub(super) fn merge_persisted_mail_into_character_save(
         .extend(persisted_systems.economy_projection_event_ids);
     let markers_changed = systems.economy_projection_event_ids.len() != marker_count;
     let mail_changed = merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)?;
-    if !markers_changed && !mail_changed && !mentor_changed && !marriage_changed {
+    if !journal_changed && !markers_changed && !mail_changed && !mentor_changed && !marriage_changed {
         return Ok(false);
     }
     save.stage5_systems_json = Some(
@@ -1888,6 +1890,11 @@ pub(super) fn normalize_legacy_default_vitals(save: &mut CharacterSaveRecord) ->
 pub(super) fn normalize_legacy_default_account_demo_seed_state(
     save: &mut CharacterSaveRecord,
 ) -> bool {
+    // A committed complete checkpoint owns its empty containers and zero wallet.
+    // Only the uncommitted legacy demo record can require starter seeding.
+    if save.revision != 0 || save.npc_purchase_journal.is_some() {
+        return false;
+    }
     if save.character.index != 0 || save.character.level != 7 {
         return false;
     }
@@ -2499,6 +2506,10 @@ struct DecodedCharacterSavePreflight {
 fn decode_and_validate_character_save(
     save: &CharacterSaveRecord,
 ) -> Result<DecodedCharacterSavePreflight, String> {
+    if let Some(journal) = &save.npc_purchase_journal {
+        journal.validate_for(&journal.account_id, save.character.index, &save.character.name, save.revision)
+            .map_err(|error| error.to_string())?;
+    }
     let (mut inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
     let mut hero_equipment = decode_saved_item_states("hero equipment", &save.hero_equipment_items_json)?;
@@ -2577,6 +2588,22 @@ fn apply_character_save_with_timing(
         npc_buy_back_items,
         npc_used_goods_items,
     } = decode_and_validate_character_save(save)?;
+    if let Some(journal) = &save.npc_purchase_journal {
+        let session = world.resource::<SessionResource>();
+        let account = active_session_mutating_account_id(session)
+            .ok_or("NPC purchase journal restore requires an authenticated account")?;
+        journal.validate_for(&account, save.character.index, &save.character.name, save.revision)
+            .map_err(|error| error.to_string())?;
+    }
+    if let Some(current) = world.resource::<SessionResource>().npc_purchase_journal.as_ref()
+        .filter(|_| matches!(skill_timing_restore, SkillTimingRestore::PreserveSameSession)) {
+        let session = world.resource::<SessionResource>();
+        if session.active_save_revision().is_some_and(|revision| save.revision < revision)
+            || !save.npc_purchase_journal.as_ref().is_some_and(|restored|
+                current.actor == restored.actor && restored.entries.starts_with(&current.entries)) {
+            return Err("NPC purchase checkpoint cannot retire an actor or erase a committed result".into());
+        }
+    }
     let now_ms = unix_now_ms();
     let skill_states = skill_states
         .into_iter()
@@ -2621,6 +2648,8 @@ fn apply_character_save_with_timing(
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());
         session.bind_active_save_revision(save.revision);
+        session.npc_purchase_journal = save.npc_purchase_journal.clone();
+        session.npc_purchase_producer = None;
         session.activate_ranking_inspect();
     }
     world
