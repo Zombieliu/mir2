@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-07 final client-only NPC map/shop publication: actual R20/source8fa
+> and signed16 are public. Strict complete packaging/CMS/decoded delivery,
+> stage37603327260 (41 objects / 1,077,405,420 full CDN bytes), same-commit
+> separate promote37605195682 and actual Windows HTTPS/CMS/206 pass.
+> Previous feed15 bytes/fingerprints, all service PIDs, D/F files and saves
+> are preserved; no Gateway restart or UI takeover. Existing Launcher updates
+> without reinstalling; exact old engine/Bootstrap are reused. Public native
+> NPC/shop human and affected-laptop acceptance remain open; fullP1–P8 is
+> unfinished. Earlier R19/15 entries below are historical freeze records.
+> [Actual release evidence](generated/player-qa/npc-map-shop-20261007/publication-16/README.md).
+
 > 2026-10-07 NPC map/shop Candidate adds selected row highlight, requested
 > ordinary GO TO, old auto-run retirement and goods wheel/track/thumb input.
 > Bevy37+20, native23+9 and explicit GPU1 pass with actual original UI frames.
