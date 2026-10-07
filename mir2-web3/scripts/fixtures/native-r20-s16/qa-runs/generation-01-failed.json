@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.r20.s16.generator-attempt-observation.v1",
+  "attempt": 1,
+  "passed": false,
+  "exitCode": 1,
+  "result": "reviewed_immutable_plan_required",
+  "sourceRevision": "8faedd89fbcdda7d4f814c05f7d2f56979ab5bf5",
+  "publicationPlanSha256": "905bc48ea9a210d5cb8ef5d82f748b341d9654cf287f1c3803ce74a1a7ae556d",
+  "rootVerificationSha256": "6a59813e8e3451820a064e1ff1c9f7525f77e0aab6ed85ffa791c8679c3192e8",
+  "rawInputHashesVerified": true,
+  "observedExpectedCurrent": "exact signed15 predecessor pointer",
+  "generatorExpectedCurrent": null,
+  "publicationOutputsWritten": false,
+  "cloudWrites": false,
+  "publicStateChanged": false,
+  "oldChannelFilesModified": false,
+  "rawCliOutput": "{\"passed\": false, \"result\": \"reviewed_immutable_plan_required\", \"cloudWrites\": false, \"oldChannelFilesModified\": false}"
+}

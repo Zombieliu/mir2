@@ -1,0 +1,3 @@
+# Temporary negative-test links and byte fixtures are retained locally.
+# Publish the raw test logs and receipts, rather than absolute test links.
+fixtures/
