@@ -41,6 +41,10 @@ mod npc;
 mod npc_gold_buy_outcome;
 pub use npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,
     NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution};
+mod npc_purchase_outcome;
+pub use npc_purchase_outcome::{NpcPurchaseRequest, NpcPurchaseCurrency, NpcPurchaseSource,
+    NpcPurchaseRejection, NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome,
+    NpcPurchaseProcessingError, NpcPurchaseProcessingExecution};
 mod npc_gold_trade_expiry;
 mod npc_script;
 mod onchain;

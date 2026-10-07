@@ -2073,9 +2073,9 @@ pub(super) fn plan_npc_gold_trade_gain(
     Some((staged, incoming))
 }
 
-/// Pearl purchases retain the legacy per-item delivery metadata. Unlike the
+/// Pearl and resale purchases retain the legacy per-item delivery metadata. Unlike the
 /// generic gain helper, a failed plan cannot fall back onto an occupied cell.
-pub(super) fn plan_npc_pearl_gain(
+pub(super) fn plan_npc_resale_or_pearl_gain(
     resources: &InventoryResource,
     template: &CrystalItemTemplate,
     quantity: u32,

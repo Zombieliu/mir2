@@ -6,6 +6,8 @@ use crate::runtime::{
     SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
     LocalPlayerVitalsSnapshot, NpcGoldBuyRequest, NpcGoldBuyBeforeExecution,
     NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,
+    NpcPurchaseRequest, NpcPurchaseBeforeExecution, NpcPurchaseProcessingError,
+    NpcPurchaseProcessingExecution,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -342,6 +344,15 @@ pub trait WorldRuntime: Send + Sync {
         _authenticated: bool, _request: NpcGoldBuyRequest,
     ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
         Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime))
+    }
+
+    /// Local evidence for all NPC purchase branches, not a network capability.
+    fn supports_typed_npc_purchase_outcome(&self) -> bool { false }
+
+    fn execute_production_npc_purchase_requiring_typed_outcome(&mut self,
+        _authenticated: bool, _request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::UnsupportedRuntime))
     }
 
     fn execute_production_player_command(
@@ -1163,6 +1174,17 @@ impl WorldRuntime for InProcessWorldRuntime {
             return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
         }
         self.session.try_npc_gold_buy_with_outcome(request)
+    }
+
+    fn supports_typed_npc_purchase_outcome(&self) -> bool { true }
+
+    fn execute_production_npc_purchase_requiring_typed_outcome(&mut self,
+        authenticated: bool, request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        if !authenticated {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotAuthenticated));
+        }
+        self.session.try_npc_purchase_with_outcome(request)
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {

@@ -1,5 +1,20 @@
 # Web 对齐 Windows：固定基线目标
 
+## Source26：购买本地结果与共享未决状态通过有限回归，完整回执链继续（2026-10-07）
+
+服务端新增全NPC购买的直接本地处理结果，实际标明Gold/Pearls、Trade/BuyBack/Used、扣款、实际准入数量及incoming UID。Gold回购/二手路径先完整规划库存、所选stock与输出，再提交钱包/库存/NPC；零数量有限stock提交前拒绝。旧Gold严格接口、价格、数量clamp、整条resale stock删除与合法旧SomeDura载体保持，UID0允许。stock expiry预处理仍是独立维护，不承诺失败回滚过期维护、复制全部额外属性或durable提交。
+
+共享Core新增独立于transport的Actor绑定单笔经济状态：保留original request ID/full intent与checked sequence；当前producer完整baseline＋checked revision门槛，精确terminal receipt与当前已应用完整snapshot两序都具备才结算。Unknown、旧producer、错Actor、错tuple及partial snapshot不清未决；同Actor重连仅给原ID只读恢复信息，foreign Actor不能覆盖旧ledger。此纯模块尚未接ABI、Native/Web真实dispatcher、网络协议或持久journal，不能把定义或测试当成前端购买恢复已完成。
+
+Root实际Core173＋Simulation新12/旧Gold15/Pearl6＋Gateway旧Gold owner16＝222次选定成功执行，新增Core21＋Simulation12＝33项distinct声明均具名执行。Core173在Rust02运行，之后仅Simulation新测试夹具改变、Core有效输入完全未变而限定承接；其余49在最终Rust04 fresh。Simulation01编译失败/0测试与02的11通过/1失败原日志保留；分别只纠正测试数量类型u16和错误非零UID假设，完整carrier比较及真实交付身份断言保持。881唯一regular输入0漂移，原878中7改/871保护、新增3；七次串行原CargoGuard actual GetVolume C≥50GiB、fresh≤2000ms、PolicyB退出/Dispose均核对。这里不是全workspace或玩家验收。
+
+下一项继续全货币/source的durable journal＋完整character checkpoint＋receipt/revision原子提交，再贯通owner/remote版本化结果与只读查询、实际capability接受、严格wire/ABI及两端receiver/full snapshot。Matrix11逐字保持103shared/206legacy/0raw open/8common；317条有界记录不是全项目分母，overall percentage仍为null、Candidate100=false、goal active。不能把原始缺口分类关闭当成已经稳定可玩。
+
+已构建并推送核验的包仍是Source25提交7b1afe2706a4eec037f085d1f599d2ea987f031f的Next08/Thin08；本轮没有重建生产组合，该包不含Source26购买代码。用户“继续代码，暂不操作界面”持续有效，实际资源/WASM初始化、登录→战斗→保存→重登、移动真机与最终frontend验收未运行。Source26 Git发布由Root实际提交推送后另报，文档/收据本身不证明发布。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-finite-result01.json)、[Source25实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-publication01.json)。以下Source25及更早正文保留为历史，本轮状态以上述Source26为准。
+
+
 ## Source25：排名查看代码与候选包已完成，实际游玩待验收（2026-10-07）
 
 排名查看已接入共享Rust准入、可选PUI严格ABI、Native真实排名身份及Web实际发送入口；返回PlayerInspect使用真实14装备位置与raw carrier/tooltip，窗口只读。后端采用严格离线快照和本地在线当前owner投影，登录、保存失败、退出及旧连接退役均有具名回归；远端owner仍Unknown、Observe禁用、旧wire无request nonce，不宣称跨服完整能力。

@@ -140,6 +140,9 @@ use super::session::SimulationSession;
 use super::npc_gold_buy_outcome::{finish_npc_gold_buy_processing, NpcGoldBuyRequest,
     NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError,
     NpcGoldBuyProcessingExecution};
+use super::npc_purchase_outcome::{finish_npc_purchase_processing, NpcPurchaseRequest,
+    NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome, NpcPurchaseProcessingError,
+    NpcPurchaseProcessingExecution};
 use super::skills::{
     assign_magic_key, cast_skill_with_context, skill_key_for_crystal_spell, SkillCastContext,
 };
@@ -9098,7 +9101,7 @@ impl SimulationSession {
         // Abort/process loss cannot yield processing evidence. Legacy packet entry
         // intentionally retains its original panic behavior.
         let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            let packets = self.try_handle_packet_recording_buy(request.packet(), Some(&mut outcome));
+            let packets = self.try_handle_packet_recording_buy(request.packet(), Some(&mut outcome), None);
             postprocess(packets)
         })).unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
         finish_npc_gold_buy_processing(packets, outcome)
@@ -9116,12 +9119,49 @@ impl SimulationSession {
         self.run_npc_gold_buy_with_outcome(request, |_| panic!("controlled postprocessing panic"))
     }
 
+    /// All NPC currencies and goods sources use the actual handler's local result.
+    /// This requires authentication and StartGame; it does not provide a durable receipt.
+    pub fn try_npc_purchase_with_outcome(&mut self, request: NpcPurchaseRequest)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |result| result)
+    }
+
+    fn run_npc_purchase_with_outcome<F>(&mut self, request: NpcPurchaseRequest, postprocess: F)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError>
+    where F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String> {
+        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>()).is_none() {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotAuthenticated));
+        }
+        if !is_in_world(self.app.world()) {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotInGame));
+        }
+        let mut outcome = None;
+        let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let packets = self.try_handle_packet_recording_buy(request.packet(), None, Some(&mut outcome));
+            postprocess(packets)
+        })).unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
+        finish_npc_purchase_processing(packets, outcome)
+    }
+
+    #[cfg(test)]
+    pub(super) fn npc_purchase_with_postprocessing_failure(&mut self, request: NpcPurchaseRequest)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |result| result.and_then(|_| Err("controlled postprocessing failure".into())))
+    }
+
+    #[cfg(test)]
+    pub(super) fn npc_purchase_with_postprocessing_panic(&mut self, request: NpcPurchaseRequest)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |_| panic!("controlled postprocessing panic"))
+    }
+
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
-        self.try_handle_packet_recording_buy(packet, None)
+        self.try_handle_packet_recording_buy(packet, None, None)
     }
 
     fn try_handle_packet_recording_buy(&mut self, packet: ClientPacket,
         buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+        purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
     ) -> Result<Vec<ServerPacket>, String> {
         if matches!(
             packet,
@@ -9176,7 +9216,7 @@ impl SimulationSession {
             |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
         let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
-        let mut packets = self.handle_packet_impl(packet, buy_outcome);
+        let mut packets = self.handle_packet_impl(packet, buy_outcome, purchase_outcome);
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
             self.app.world_mut(), journey_context, &packets);
         packets.append(&mut journey_packets);
@@ -9187,6 +9227,7 @@ impl SimulationSession {
 
     fn handle_packet_impl(&mut self, packet: ClientPacket,
         buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+        purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
     ) -> Vec<ServerPacket> {
         match packet {
             ClientPacket::ClientVersion { .. } => {
@@ -10176,10 +10217,12 @@ impl SimulationSession {
                 item_index,
                 count,
                 panel_type,
-            } => match buy_outcome {
-                Some(outcome) => super::npc::buy_item_with_processing_outcome(self.app.world_mut(),
+            } => match (buy_outcome, purchase_outcome) {
+                (_, Some(outcome)) => super::npc::buy_item_with_purchase_outcome(self.app.world_mut(),
+                    NpcPurchaseRequest { item_index, count, panel_type }, outcome),
+                (Some(outcome), None) => super::npc::buy_item_with_processing_outcome(self.app.world_mut(),
                     NpcGoldBuyRequest { item_index, count, panel_type }, outcome),
-                None => buy_item_impl(self.app.world_mut(), item_index, count, panel_type),
+                (None, None) => buy_item_impl(self.app.world_mut(), item_index, count, panel_type),
             },
             ClientPacket::SellItem { unique_id, count } => {
                 sell_item_impl(self.app.world_mut(), unique_id, count)
