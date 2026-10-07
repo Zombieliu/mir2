@@ -63,6 +63,9 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 # Repository-local recovery and diagnostic worktrees
 /tmp/
 /mir2-web3/tmp/
+# Retain deliberately linked/malformed publication test outputs locally.
+/mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/fixtures/
+/mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/interrupt-fixtures/
 /.codex/backups/
 /refactor-pwa/
 

@@ -27,6 +27,15 @@ mir2-web3/scripts/cloudflare_read_authority_probe.py -text
 mir2-web3/scripts/test_cloudflare_read_authority_probe.py -text
 mir2-web3/scripts/native_r17_r2_delivery.py -text
 mir2-web3/scripts/test_native_r17_r2_delivery.py -text
+# Signed R19 publication source identities must match on Windows and Linux.
+mir2-web3/scripts/prepare_native_r19_s15_fixed.py -text
+mir2-web3/scripts/native_r19_s15_r2_delivery.py -text
+mir2-web3/scripts/test_native_r19_s15_r2_delivery.py -text
+mir2-web3/scripts/test_native_r19_s15_interrupt.py -text
+mir2-web3/scripts/fixtures/native-r19-s15/actual-cms15/** -text
+mir2-web3/scripts/fixtures/native-r19-s15/predecessor14/** -text
+mir2-web3/scripts/fixtures/native-r19-s15/preview/** -text
+mir2-web3/scripts/fixtures/native-r19-s15/failed-generation-02/** -text
 # The admitted native object table is pinned by its raw byte SHA.
 mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json -text whitespace=blank-at-eol,space-before-tab,cr-at-eol
 

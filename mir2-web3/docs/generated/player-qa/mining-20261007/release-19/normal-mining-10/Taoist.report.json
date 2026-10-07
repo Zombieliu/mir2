@@ -1,0 +1,113 @@
+{
+  "class": "Taoist",
+  "accountId": "MiningR19C07",
+  "sourceRevision": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "nativeInputAcceptance": false,
+  "qaAdminCommands": false,
+  "status": "failed",
+  "characterIndex": 3,
+  "ownerObjectId": 1000,
+  "start": {
+    "allowObserve": false,
+    "class": "Taoist",
+    "creatureSummoned": false,
+    "credit": 0,
+    "direction": "Up",
+    "equipmentSectionPresent": true,
+    "expandedStorageExpiryTimeBinaryDatetime": 0,
+    "experience": 30,
+    "gender": "Male",
+    "gold": 15300,
+    "guildName": "",
+    "guildRank": "",
+    "hair": 0,
+    "hasExpandedStorage": false,
+    "hasHero": false,
+    "hasStoragePassword": false,
+    "heroBehaviour": 0,
+    "hp": 68,
+    "intelligentCreatureCount": 0,
+    "inventorySectionPresent": true,
+    "level": 12,
+    "levelEffects": 0,
+    "location": {
+      "x": 27,
+      "y": 172
+    },
+    "magicCount": 0,
+    "maxExperience": 10000,
+    "maxHp": 68,
+    "maxMp": 52,
+    "mp": 52,
+    "name": "MinerR19C07",
+    "nameColourArgb": -1,
+    "objectId": 1000,
+    "observer": false,
+    "questInventorySectionPresent": true,
+    "realId": 3,
+    "requireStoragePassword": true,
+    "storagePasswordLastSetBinaryDatetime": 0,
+    "summonedCreatureType": 99
+  },
+  "attackAttempts": 23,
+  "elapsedMs": 32099,
+  "wallHistory": [
+    {
+      "position": {
+        "x": 27,
+        "y": 172
+      },
+      "wall": {
+        "x": 27,
+        "y": 171
+      }
+    }
+  ],
+  "ordinaryRelocationSteps": 0,
+  "potionUseAttempts": 9,
+  "ownerAttacks": 14,
+  "mineEffects": 14,
+  "ore": [
+    {
+      "added_stats": [],
+      "awake_type": 0,
+      "awake_values": [],
+      "count": 1,
+      "current_dura": 4000,
+      "cursed": false,
+      "expire_info": null,
+      "gem_count": 0,
+      "gm_made": false,
+      "identified": true,
+      "is_shop_item": false,
+      "item_index": 828,
+      "max_dura": 10000,
+      "refine_added": 0,
+      "refine_success_chance": 0,
+      "refined_value": 0,
+      "rental_information": null,
+      "sealed_info": null,
+      "slots": [],
+      "soul_bound_id": -1,
+      "unique_id": 6,
+      "wedding_ring": -1
+    }
+  ],
+  "toolWear": [
+    9877,
+    9860,
+    9847,
+    9837
+  ],
+  "escape": {
+    "direction": "Up",
+    "x": 27,
+    "y": 172
+  },
+  "escapeAccepted": false,
+  "quietOwnedAttacks": 0,
+  "quietAccepted": true,
+  "error": "Ordinary move/cancel must not replay mining",
+  "normalLogoutConfirmed": true,
+  "traceEvents": 949
+}

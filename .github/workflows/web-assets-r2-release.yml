@@ -22,13 +22,14 @@ on:
         required: false
         type: string
       native_updater_sequence:
-        description: Fixed signed native updater publication; game R17 stays unchanged
+        description: Fixed signed native publication; 13/14 use R17 and 15 uses R19
         required: false
         default: '13'
         type: choice
         options:
           - '13'
           - '14'
+          - '15'
       native_stage_sha256:
         description: Exact SHA256 of the retained stage receipt; required only for promote
         required: false
@@ -172,12 +173,21 @@ jobs:
           python3 -B scripts/test_native_r17_s14_r2_delivery.py
           python3 -B scripts/test_native_r17_s14_interrupt.py
 
+      - name: Check signed15 R19 admission, bounded transport and cancellation
+        working-directory: mir2-web3
+        run: |
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r19-s15-publication.test.mjs
+          python3 -B scripts/test_native_r19_s15_r2_delivery.py
+          python3 -B scripts/test_native_r19_s15_interrupt.py
+
       - name: Retain raw offline checks
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: native-r17-tooling-${{ github.run_id }}
-          path: mir2-web3/evidence/
+          path: |
+            mir2-web3/evidence/
+            mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/
           if-no-files-found: error
           retention-days: 7
 
@@ -206,6 +216,7 @@ jobs:
           case "$MIR2_NATIVE_SEQUENCE" in
             13) native_driver=scripts/native_r17_r2_delivery.py ;;
             14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
+            15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
             *) exit 1 ;;
           esac
           timeout --signal=INT --kill-after=30s 330m python3 -B "$native_driver" --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
@@ -234,12 +245,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           MIR2_NATIVE_STAGE_RUN: ${{ inputs.native_stage_run_id }}
           MIR2_NATIVE_STAGE_SHA: ${{ inputs.native_stage_sha256 }}
+          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
         run: |
           set -euo pipefail
           [[ "$MIR2_NATIVE_STAGE_RUN" =~ ^[1-9][0-9]{0,19}$ ]]
           [[ "$MIR2_NATIVE_STAGE_SHA" =~ ^[0-9a-f]{64}$ ]]
           install -d -m 700 "$RUNNER_TEMP/mir2-native-r17-promote"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$MIR2_NATIVE_STAGE_RUN" --jq '{workflow_id,event,conclusion,head_branch}' > "$RUNNER_TEMP/mir2-native-r17-promote/stage-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$MIR2_NATIVE_STAGE_RUN" --jq '{workflow_id,event,conclusion,head_branch,head_sha}' > "$RUNNER_TEMP/mir2-native-r17-promote/stage-run.json"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
@@ -247,6 +259,8 @@ jobs:
           assert value['workflow_id'] == 284517107
           assert value['event'] == 'workflow_dispatch' and value['conclusion'] == 'success'
           assert value['head_branch'] == os.environ['GITHUB_REF_NAME']
+          if os.environ['MIR2_NATIVE_SEQUENCE'] == '15':
+              assert value['head_sha'] == os.environ['GITHUB_SHA']
           PY
 
       - name: Download the retained stage artifact from this repository
@@ -276,6 +290,7 @@ jobs:
           case "$MIR2_NATIVE_SEQUENCE" in
             13) native_driver=scripts/native_r17_r2_delivery.py ;;
             14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
+            15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
             *) exit 1 ;;
           esac
           timeout --signal=INT --kill-after=30s 8m python3 -B "$native_driver" --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"

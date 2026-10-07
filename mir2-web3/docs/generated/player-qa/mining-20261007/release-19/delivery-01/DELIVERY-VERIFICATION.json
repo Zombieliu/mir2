@@ -1,0 +1,212 @@
+{
+  "schema": "mir2.windows.delivery-verification.v1",
+  "passed": true,
+  "cmsVerified": false,
+  "requiresExternalSignatureVerification": true,
+  "bundles": [
+    {
+      "path": "delivery/0335ad7cdf9c3ff44fb3bee101e8f50fd839a4796be9a5fddbf7822fd680e7e0.m2b.gz",
+      "fileCount": 1667,
+      "expandedBytes": 66880144
+    },
+    {
+      "path": "delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "fileCount": 238,
+      "expandedBytes": 66984185
+    },
+    {
+      "path": "delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "fileCount": 254,
+      "expandedBytes": 67040639
+    },
+    {
+      "path": "delivery/3dee530c49de40dfad3afb3b7b83f0d9426fa0ac202202567f2c01f20ea21a38.m2b.gz",
+      "fileCount": 7065,
+      "expandedBytes": 67105494
+    },
+    {
+      "path": "delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "fileCount": 13836,
+      "expandedBytes": 67101395
+    },
+    {
+      "path": "delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "fileCount": 13470,
+      "expandedBytes": 67094186
+    },
+    {
+      "path": "delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "fileCount": 13356,
+      "expandedBytes": 67107209
+    },
+    {
+      "path": "delivery/252ff6897b3b3813badb123752b463af8e1c068a57cb6a11ffe9261a07b66d87.m2b.gz",
+      "fileCount": 10187,
+      "expandedBytes": 67107574
+    },
+    {
+      "path": "delivery/74769fd0ba6af20b4c9f7a7b66a08890590772c5854d84466429d39b12b16722.m2b.gz",
+      "fileCount": 27526,
+      "expandedBytes": 67107942
+    },
+    {
+      "path": "delivery/cb84a498f2e024905c52930a5c07018d168fe58279550ed5815536aabae63e4c.m2b.gz",
+      "fileCount": 24444,
+      "expandedBytes": 66583801
+    },
+    {
+      "path": "delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "fileCount": 14328,
+      "expandedBytes": 67044154
+    },
+    {
+      "path": "delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "fileCount": 16373,
+      "expandedBytes": 67106633
+    },
+    {
+      "path": "delivery/6634d75a99bbb0d3486917599b048d07ade067aa7cfc9a980bb09033a513e4c4.m2b.gz",
+      "fileCount": 11221,
+      "expandedBytes": 66711387
+    },
+    {
+      "path": "delivery/5efcf2a7a6e22850479f2a007e2565515ae277830e5f61eadc6899e8676128cd.m2b.gz",
+      "fileCount": 610,
+      "expandedBytes": 15846922
+    },
+    {
+      "path": "delivery/c407ba4eaf8b686ef8ccdaf7d8a8e4d41a98df2c75b9270850940d0de3c5b60f.m2b.gz",
+      "fileCount": 1,
+      "expandedBytes": 111107119
+    }
+  ],
+  "patches": [
+    {
+      "path": "delivery/a0ede1b679d255a2dcfe5c22269036e105b321a618b3c0f122fc2bbe468ced11.m2d.gz",
+      "baseSha256": "D0780475EFA9F9C1ECD730DFCFC11E38B9B0659F05B3B1F7D93B4F80C3D734E0",
+      "baseSize": 111013376,
+      "targetSha256": "3ABC0C7B74AF234D797705AC9CE32A68ABEFAC70BF43095093A353C81145F297",
+      "targetBytes": 111107072,
+      "operationCount": 35,
+      "copyBytes": 30587676,
+      "literalBytes": 80519396,
+      "expandedBytes": 80519867
+    }
+  ],
+  "checkedArtifacts": [
+    {
+      "path": "delivery/0335ad7cdf9c3ff44fb3bee101e8f50fd839a4796be9a5fddbf7822fd680e7e0.m2b.gz",
+      "size": 60714170,
+      "sha256": "0335AD7CDF9C3FF44FB3BEE101E8F50FD839A4796BE9A5FDDBF7822FD680E7E0"
+    },
+    {
+      "path": "delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "size": 66861961,
+      "sha256": "565AF7B642A235BEC7518966243B586BF4668FA93F730E96F747C9400690D2E2"
+    },
+    {
+      "path": "delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "size": 66910012,
+      "sha256": "84FF6726EF8065D8B18E9CE6A796FB22782BE8DF1F36A65305FD4AE594D782E7"
+    },
+    {
+      "path": "delivery/3dee530c49de40dfad3afb3b7b83f0d9426fa0ac202202567f2c01f20ea21a38.m2b.gz",
+      "size": 46880754,
+      "sha256": "3DEE530C49DE40DFAD3AFB3B7B83F0D9426FA0AC202202567F2C01F20EA21A38"
+    },
+    {
+      "path": "delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "size": 65556826,
+      "sha256": "6FB1307F7539F7454F9552AD2639F6E8EF3F75344C958B6EDE94207641301A4E"
+    },
+    {
+      "path": "delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "size": 65601792,
+      "sha256": "53A489C9BE927FBAD4087D595567604C6CFA33A4960BB48EBA646A631203974B"
+    },
+    {
+      "path": "delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "size": 65610644,
+      "sha256": "E83E50787DF75D6E3D4A64AEF7640E0D36B849E17AAAE87568F8A1D526D6B25B"
+    },
+    {
+      "path": "delivery/252ff6897b3b3813badb123752b463af8e1c068a57cb6a11ffe9261a07b66d87.m2b.gz",
+      "size": 63807337,
+      "sha256": "252FF6897B3B3813BADB123752B463AF8E1C068A57CB6A11FFE9261A07B66D87"
+    },
+    {
+      "path": "delivery/74769fd0ba6af20b4c9f7a7b66a08890590772c5854d84466429d39b12b16722.m2b.gz",
+      "size": 55867713,
+      "sha256": "74769FD0BA6AF20B4C9F7A7B66A08890590772C5854D84466429D39B12B16722"
+    },
+    {
+      "path": "delivery/cb84a498f2e024905c52930a5c07018d168fe58279550ed5815536aabae63e4c.m2b.gz",
+      "size": 55134787,
+      "sha256": "CB84A498F2E024905C52930A5C07018D168FE58279550ED5815536AABAE63E4C"
+    },
+    {
+      "path": "delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "size": 60049370,
+      "sha256": "E14BB6681791C37AC1DDB771841DB1756B7E9DF00DF46D240E529CDBB087CEB9"
+    },
+    {
+      "path": "delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "size": 59737743,
+      "sha256": "BA1D18A6FC2AE0E87F4B41CCF730A87E2E4D5F31188957CE348A376B36D08FBE"
+    },
+    {
+      "path": "delivery/6634d75a99bbb0d3486917599b048d07ade067aa7cfc9a980bb09033a513e4c4.m2b.gz",
+      "size": 60049219,
+      "sha256": "6634D75A99BBB0D3486917599B048D07ADE067AA7CFC9A980BB09033A513E4C4"
+    },
+    {
+      "path": "delivery/5efcf2a7a6e22850479f2a007e2565515ae277830e5f61eadc6899e8676128cd.m2b.gz",
+      "size": 12699131,
+      "sha256": "5EFCF2A7A6E22850479F2A007E2565515AE277830E5F61EADC6899E8676128CD"
+    },
+    {
+      "path": "delivery/c407ba4eaf8b686ef8ccdaf7d8a8e4d41a98df2c75b9270850940d0de3c5b60f.m2b.gz",
+      "size": 36299805,
+      "sha256": "C407BA4EAF8B686EF8CCDAF7D8A8E4D41A98DF2C75B9270850940D0DE3C5B60F"
+    },
+    {
+      "path": "delivery/a0ede1b679d255a2dcfe5c22269036e105b321a618b3c0f122fc2bbe468ced11.m2d.gz",
+      "size": 25543855,
+      "sha256": "A0EDE1B679D255A2DCFE5C22269036E105B321A618B3C0F122FC2BBE468CED11"
+    }
+  ],
+  "startedUnix": 1791327891,
+  "candidate": "WN-CANDIDATE-20261007-invited-19",
+  "sourceRevision": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "candidateRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\m19\\mir2-player-journey\\mir2-web3\\dist\\r19",
+  "deliveryRoot": "C:\\mir2-playtest-releases\\20261007-mining-r19\\delivery-01",
+  "manifestSha256": "71277A8AF15632A715D5E8D72CA95004FBEE9A687AD4F963DF8016E5368897BA",
+  "versionSha256": "66E60B50A181511ACB7A9076C959D1D23C9D890D9E2FA6CAA168E42CCBF52681",
+  "deliverySha256": "B7BA15B5478BFF38A04B2678CCB52377E572AC0F7996B7AF69403F1D137CF45A",
+  "metadata": [
+    {
+      "path": "PACKAGE-MANIFEST.json",
+      "size": 31537753,
+      "sha256": "71277A8AF15632A715D5E8D72CA95004FBEE9A687AD4F963DF8016E5368897BA"
+    },
+    {
+      "path": "VERSION.json",
+      "size": 1221,
+      "sha256": "66E60B50A181511ACB7A9076C959D1D23C9D890D9E2FA6CAA168E42CCBF52681"
+    },
+    {
+      "path": "RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "E614B21B5FFA3CE82DFAF8C39270F317A3DEFED0BF0C1C378B52637B03AC0B24"
+    },
+    {
+      "path": "RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "D8A9D7162E4C851FA66B7D86CC206621F514E7348DA28E933B80139932BFD3B1"
+    }
+  ],
+  "payloadFiles": 154576,
+  "payloadBytes": 986290068,
+  "compressedBytes": 867325119,
+  "finishedUnix": 1791327928
+}
