@@ -1,7 +1,8 @@
+import { npcPearlBuyInput } from "./npc-pearl-buy";
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
-import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision,
+import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision, readSharedNpcPearlBuyPlan,
   type PresentationWasmModule, type EntityAnimationRuntime, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
   type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision } from "./client-presentation-runtime";
 export type { EntityAnimationRuntime, ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
@@ -169,6 +170,8 @@ export type ClientCoreRuntime = {
   /** One cached Core-owned send slot; remounts never construct another flight. */
   getMailSendSlot(): MailSendSlotRuntime;
   getNpcGoldBuyAttemptSlot(): NpcGoldBuyAttemptSlotRuntime;
+  /** Optional Pearl presentation policy; no server transaction receipt. */
+  getMir2NpcPearlBuyPlan(json: string): string;
 };
 
 export type MailSendInput = {recipient:string;message:string;gold:number;attachmentUniqueIds:number[];stamped:boolean};
@@ -505,6 +508,10 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       readCashPreviewLayers(input: CashPreviewInput) { return readSharedCashPreview(presentation, input); },
       turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(presentation, direction, right); },
       readNpcRepairQuote(input: NpcRepairQuoteInput) { return readSharedNpcRepairQuote(presentation, input); },
+      getMir2NpcPearlBuyPlan(json: string) {
+        const input = npcPearlBuyInput(json), plan = input ? readSharedNpcPearlBuyPlan(presentation,input) : null;
+        return plan ? JSON.stringify({version:1,ok:true,...plan}) : '{"version":1,"ok":false}';
+      },
       planBagToBeltMove(input: BagToBeltMoveInput) { return readSharedBagToBeltMovePlan(presentation, input); },
       getEntityAnimationRuntime() { return getEntityAnimationRuntime(); },
       fishingClickTargets(input: FishingClickTargetsInput) { return readSharedFishingClickTargets(presentation, input); },

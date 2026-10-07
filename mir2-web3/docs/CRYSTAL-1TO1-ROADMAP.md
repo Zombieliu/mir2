@@ -1,5 +1,35 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Source24：Pearl 源码候选闭合，玩家验收待运行（2026-10-07）
+
+仅 `F09.NPC.PEARL` 由open转为legacy/sourceCandidate closed：完整raw Pearl目录与已知钱包接入实际GameShop confirm/double-click、Page共享Core报价/准入与单用opaque claim紧邻socket.send；UID0保留，数量/价格由共同Rust planner与f32单价oracle决定，optional PUI Pearl ABI2拒绝缺失或失效事实。Gold授权继续独立；共同规则不将整个DOM painter升为shared，raw BuyItem三字段未变。
+
+实际客户端Rust148＋70＋24＝242/242，17项新增distinct；后端Gold54＋Pearl6＝60/60，4项新增distinct。Pearl01错误filter实际0 tests仅证明compile，不计60，旧记录保留。Web原11脚本220/220与独立NPC购买94/94分开；Stage5内部392组只计220中的一个file-level测试。strict非增量TSC02实际退出0，其后仅排除的MJS夹具改变、有效TS输入未变而限定承接；Next07 fresh strict TypeScript14.4s/13静态页。以上是有限CPU/源夹具与静态构建，关联数不等于执行数。
+
+Core/PUI实际WASM252590 / 262065 B、JS24393 / 23779 B，原WASM<262144 B与JS≤204800 B预算保持，PUI距门槛仅79 B。Native实际104700416 B/SHA256 `2d36a8a24120f2de8ccbb80221b7994a31c784333d1dfc515c71237c909c2224`，Gateway105727488 B/SHA256 `b9302153eead156227169fa3e5f94d6024145f590c5fa75d124d66df481ef347`；三renderer fresh构建退出0，版本仍 `bevy-8e38472ba5cf5ef3`。均未启动，renderer immutable release仍为原ignored生成资源。
+
+Next07实际19007文件/308目录含根/608768029 B，61 NFT/122259 raw引用→37094 canonical（37092 regular＋2 declared junction），0missing/private且不遍历junction。Thin07实际退出0、23988ms，63195 canonical输入/7301文件/776目录含根/373096153 B/0links；原cap377487360 B余4391207 B。独立source-only静态bundle审查接受、0 blocker；44 warning完整多重集及231 JSON actual source/output pairs与Source23相同，仅限定承接historical token结论，未新跑parser/lexer。
+
+后端先选择真实合法空槽，库存/NPC所选stock/输出转换先staging，最后连续写钱包/库存/NPC；失败不扣款、不失目标Used stock，保留旧SomeDura/legacy metadata/UID allocator。既有expiry预处理是独立维护，不是rollback；不承诺全部stats/sockets复制或catalog UID成为delivery UID。共同经济wire仍无correlated ACK，entered/flushed/unknown保持未决，Native无限stock同UID/count pending；完整structured catalog上限2MiB与既有complete authority1MiB分开，超后者fail closed。
+
+矩阵10为103 shared/205 legacy/1 open/8 common limitation；只改Pearl一行，其余316整row、317 ordered IDs、全部native/originalAudit/rawCounts及玩家not-run保持。当前有限字段实际332关联/200唯一声明/按row去重331，path＋name/declaration身份；F01.safe-key.open原duplicate保留，Pearl旧声明转historical，当前仅21个NPC-buy literal Pearl声明（94 actual包含这些）。唯一remainingConfirmedRawGapId是 `F11.RANKING.INSPECT`，317不是完整验收分母，无overall percentage、Candidate100=false、goal active。
+
+Source23已实际push并核验远端 `c63136131bf9bc65e482188920c1c2a37730aeba`；Source24 commit/push仍pending，由Root实际执行后报告。下一项Source25 Ranking Inspect与PUI体积优化，再跨货币correlated经济回执及宽队列；新增ranking_inspect.rs仍unhooked/uncompiled，不计done。用户“继续代码，暂不操作界面”持续有效，真实UI/HTTP/socket/网络游戏/WASM API或实例、登录/游戏/保存重登、mobile与最终frontend玩家验收均未运行。
+
+证据：[矩阵10](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix10.json)、[当前证据10](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/current-evidence10.json)、[客户端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-client-finite02.json)、[Web有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-web-finite01.json)、[后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-backend-finite01.json)、[动作链复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-action-chain-review01.json)、[组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-combined-build-result01.json)、[Source23实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-publication02.json)。以下全部旧正文（包括Progress77后端有限段）逐字保留为历史，旧pending与“未修复”仅表示当时状态，当前以上述Source24为准。
+
+## Source24 后端当前：Pearl 交付规划已通过有限检查（2026-10-07）
+
+Source24 Pearl 交付规划先选择真实合法空槽，无旧 occupied fallback；库存、NPC 所选 stock 和输出转换均先 staging，最后连续提交钱包、库存与 NPC 写入。交付失败不扣款、不移除目标 Used stock；保留旧 SomeDura、legacy metadata 与 UID allocator，Gold 原 OrdinaryOnly 边界仍拒绝 Pearl。既有 stock expiry 预处理是独立维护，不是 rollback；本批不承诺复制全部来源 stats/sockets，也不把 catalog UID 当 delivery UID。
+
+486/486 后端 source pins 匹配、0 漂移，仅 inventory / npc / npc_pearl_tests 三文件 delta，独立 source review 已接受。原 CargoGuard 严格串行实际 Gold54/54＋Pearl6/6＝60/60，4 项新增 distinct；Pearl01 错误 filter 实际选中 0 tests，只证明 compile 退出0，不计 test acceptance，原记录保留。
+
+原 threshold53687091200 B、fresh≤2000ms 与 PolicyB 保持；三次 actual GetVolume C 分别463951278080 / 463938695168 / 475692322816 B，sampleEnd→childStart UTC wall 上界59 / 62 / 63ms。该新鲜度不使用 probeEnd 时间，退出与 Dispose 回执保持。
+
+共同协议限制仍是未实现 correlated 经济 ACK 与连续购买未决收敛；raw BuyItem 三字段未变。当前段只报告上述后端60项有限CPU检查；本轮 Gateway 静态包待构建，UI、HTTP/socket、WASM API/实例及真实玩家均未运行，不代表全 suite、完整数据库事务或可玩。Candidate100=false、goal active；无总体百分比。
+
+证据：[Pearl Source24 后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-backend-finite01.json)（23114 B，SHA256 `775e5151e9931c3ae9c881c309daab3b97080ccdf5665b2f2a865f43840a0ec3`）。以下 Source23 / Progress76 及更早正文逐字保留为历史；其中 Pearl“并未在本批修复”等措辞表示旧阶段，当前后端交付范围以上述 Source24 / Progress77 为准，经济 ACK 与未决收敛限制继续有效。
+
 ## Source23：世界钓鱼源码候选闭合，玩家验收待运行（2026-10-07）
 
 仅`F02.world.fishing-click`由open转为legacy/sourceCandidate closed。实际Page/Shell主鼠标或stage touch Walk接入共享Rust钓鱼几何、转向/一秒cast clock及自有动画状态机；raw fishing/有符号i16 transform、三邻格阻挡与water均取typed事实，unknown不补standing或0。useLayoutEffect提交的只读pose绑定独立epoch/incarnation/continuity和≤250ms新鲜度；真实rod UID0、layout、owner/socket/session/map/Core与物理指针共同约束授权。terminal先burn再callback，第二指针/blur/旧cleanup与重入不得复活旧手势；unknown必须fresh down，合法cooldown/nonstanding/nonwater None可保留held retry。最后不透明单用proof紧邻真实socket.send，发送unknown保留cast clock且不自动重试；这不证明真实运行或经济ACK。共同规则不将整个DOM world painter升为shared。

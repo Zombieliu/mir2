@@ -1,0 +1,658 @@
+{
+  "schemaVersion": 1,
+  "id": "current-evidence10",
+  "generatedAtUtc": "2026-10-07T04:37:52.224Z",
+  "currentSourceEpoch": "Source24 Pearl",
+  "parentCommit": "c63136131bf9bc65e482188920c1c2a37730aeba",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "matrix": {
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix10.json",
+    "bytes": 3115285,
+    "sha256": "62b67b2971eef99dd36ed9d9409c46ab1a40ecd20f6a0a958aad43dac1e27e94"
+  },
+  "matrixMd": {
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix10.md",
+    "bytes": 34253,
+    "sha256": "5ef4b1313771c871184c55aed264345f6f61583c534687a6e8264d63ae08c896"
+  },
+  "documents": [
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "bytes": 41755,
+      "sha256": "b338d6c1b16676b08bd93e0b00e745f2f282416ef879f8168227488ea463f209"
+    },
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "bytes": 233922,
+      "sha256": "6b8c60b09811654bbfa382afcc91707202615161994f191690998b935069758c"
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "bytes": 851948,
+      "sha256": "f283c10432bde7bac267875e3a08b920b069713b3b2857b3f096acb12680bde2"
+    },
+    {
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 173353,
+      "sha256": "c73303ffd33ecd5890e9ea00756ae448654e4942178557b685d23d1ca1b88ca5"
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "bytes": 593472,
+      "sha256": "2932b806f5f51800a2564465d83b913c20a3edae008f51028c0d91f8708bf107"
+    },
+    {
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 46843,
+      "sha256": "a64cc515a438c4d147c4ad2c19768a8622387599fa95b69600ac3470874ff969"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 971714,
+      "sha256": "f96ba33cdd5191202328f535a2c4e3c9c26ba88236ce5268e6ac8ca7eb95f871"
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "bytes": 514666,
+      "sha256": "ae6d496693fff32ba7ef979f357f3e2f6c062d2bf020914407ab7118f5c2a48a"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "bytes": 457195,
+      "sha256": "90852278e2018a44d05845183a640d21551e328e92e0c1463fd1bb9e47ee74e3"
+    }
+  ],
+  "evidence": {
+    "pearl-source24-combined-build-result01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-combined-build-result01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\pearl-source24-combined-build-result01.json",
+      "bytes": 67661,
+      "sha256": "2fca4b5d94b415c25e5684ddb6fac85f3191f9828f6bf46c4b6d17968dac7529"
+    },
+    "pearl-source24-action-chain-review01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-action-chain-review01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\pearl-source24-action-chain-review01.json",
+      "bytes": 8738,
+      "sha256": "126da3bda7bc6d1ce30b943e38c0b4195b4f8ad99986a91ec239063b7080729c"
+    },
+    "pearl-source24-client-finite02.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-client-finite02.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\pearl-source24-client-finite02.json",
+      "bytes": 17800,
+      "sha256": "e8435c91830135005b4adb4ee722766dd3cddc11d94cbc646ef123b4b97f38e2"
+    },
+    "pearl-source24-web-finite01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-web-finite01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\pearl-source24-web-finite01.json",
+      "bytes": 19520,
+      "sha256": "c5837935272704f2d58ac25caebb1f6403a7f484c7bd00e45c5c9f179b1cc80d"
+    },
+    "pearl-source24-backend-finite01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-backend-finite01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\pearl-source24-backend-finite01.json",
+      "bytes": 23114,
+      "sha256": "775e5151e9931c3ae9c881c309daab3b97080ccdf5665b2f2a865f43840a0ec3"
+    },
+    "fishing-source23-publication02.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-publication02.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-publication02.json",
+      "bytes": 2156,
+      "sha256": "7872878aa28429ec6b5836b6fce66813f622c7874a7df49729f1af0015e20e8a"
+    }
+  },
+  "classification": {
+    "legacy": 205,
+    "common limitation": 8,
+    "shared": 103,
+    "open": 1
+  },
+  "rawCounts": {
+    "records": 317,
+    "categories": {
+      "legacy": 179,
+      "open": 27,
+      "common limitation": 8,
+      "shared": 103
+    },
+    "namedFixtureRowAssociations": 172,
+    "uniqueNamedFixtureDeclarations": 84,
+    "confirmedRawOpenRecords": 27
+  },
+  "fixtureAssociationCounts": {
+    "rowAssociations": 332,
+    "uniqueDeclarations": 200,
+    "rowDeduplicatedAssociations": 331
+  },
+  "fixtureAssociationAlgorithm": "Actual fields flatten finiteChecks.declaration object/array plus finiteChecks.declarations; exclude historical fields. Identity path+(name or declaration); per-row dedup separate. Original F01.safe-key.open duplicate retained. Associations are not execution or acceptance counts.",
+  "pearlFiniteDeclarations": [
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1612,
+      "declaration": "Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1624,
+      "declaration": "Pearl actual Page final claim enters the existing Core immediately before exact four-key send",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1640,
+      "declaration": "Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1661,
+      "declaration": "Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1673,
+      "declaration": "Pearl actual Page missing or invalid wallet never admits a free host quote",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1686,
+      "declaration": "Pearl actual Page wallet catalog and service ABA invalidate exact captured source",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1700,
+      "declaration": "Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1725,
+      "declaration": "Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1738,
+      "declaration": "Pearl actual Page action and final Core entry reentrancy cannot publish a second flight",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1751,
+      "declaration": "Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1770,
+      "declaration": "Pearl actual Page own parcel hero and storage reservations reject before Core entry",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1782,
+      "declaration": "Pearl actual Page retires catalog while retaining personal wallet on service close",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1812,
+      "declaration": "Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1832,
+      "declaration": "Pearl full snapshot wallet observation remains inside completed owner inventory projection",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1853,
+      "declaration": "Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1883,
+      "declaration": "Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1897,
+      "declaration": "Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1917,
+      "declaration": "Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1928,
+      "declaration": "Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1955,
+      "declaration": "Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "line": 1972,
+      "declaration": "Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation",
+      "rows": [
+        "F09.NPC.PEARL"
+      ],
+      "coveredAspect": "Actual extracted product Page/dispatcher/catalog/wallet/opaque claim code with explicit memory and ABI-shaped fixtures; no browser, WASM API, socket or player execution."
+    }
+  ],
+  "pearlHistoricalFiniteRetained": true,
+  "preservation": {
+    "other316WholeRowsEqual": true,
+    "all317OrderedIdsEqual": true,
+    "all317PlayerStatus": "not-run",
+    "pearlNativeEqual": true,
+    "pearlOriginalAuditEqual": true,
+    "rawCountsEqual": true,
+    "safeKeyOriginalDuplicateRetained": true,
+    "markdownInverseProofs": [
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+        "insertionStartByte": 38,
+        "insertedBytes": 4306,
+        "originalBytes": 37449,
+        "originalSha256": "7962a520689ba24bdc2ad7679a85aba60438c8014df07ee3b79aa034b494a03e",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/AGENT-ORCHESTRATION.md",
+        "insertionStartByte": 87312,
+        "insertedBytes": 1298,
+        "originalBytes": 232624,
+        "originalSha256": "41a9a57f4cb872edd673492f040340c88a532273425dcec5082f18b06bdf2328",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/AGENT-TASK-QUEUE.md",
+        "insertionStartByte": 19,
+        "insertedBytes": 4866,
+        "originalBytes": 847082,
+        "originalSha256": "813ab787da095f99be4339f4e07e554d2e6ad7e4e497872d2faa8b7d5595e501",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+        "insertionStartByte": 33,
+        "insertedBytes": 4866,
+        "originalBytes": 168487,
+        "originalSha256": "ab7fc4ce4822f150c69c450221d657e8cc9edd79476ef28af08a14048e1ac577",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+        "insertionStartByte": 20,
+        "insertedBytes": 4866,
+        "originalBytes": 588606,
+        "originalSha256": "783996772ee7cf759d9210c10d4f8f5a3c4aea81f71def59c61ff761a4e817a2",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+        "insertionStartByte": 42,
+        "insertedBytes": 4866,
+        "originalBytes": 41977,
+        "originalSha256": "237c307f3af7798f2e722c1b4f1ee8874008a66d2bea31c44620f0adf3ffe109",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+        "insertionStartByte": 37,
+        "insertedBytes": 4866,
+        "originalBytes": 966848,
+        "originalSha256": "df0629a5aba8580ca520afc23e24a1f08e4fcbede754ebeb34e4d4e57a4d9d18",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+        "insertionStartByte": 23,
+        "insertedBytes": 4892,
+        "originalBytes": 509774,
+        "originalSha256": "12a1ddbb9fd9165fda92a99ae3b02675a56bcc79f7457483b44856c121bd6651",
+        "inverseEqualsOriginal": true
+      },
+      {
+        "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+        "insertionStartByte": 24,
+        "insertedBytes": 4892,
+        "originalBytes": 452303,
+        "originalSha256": "3f42f55d7bb47d73fa604f5d06ae56eb94780b145f4ba9f21235ee06e7a9e578",
+        "inverseEqualsOriginal": true
+      }
+    ]
+  },
+  "actualCurrentRust": {
+    "passed": 242,
+    "modules": {
+      "Core": 148,
+      "PUI": 70,
+      "Native": 24
+    },
+    "newDistinct": 17,
+    "fullWorkspaceSuite": false
+  },
+  "actualBackend": {
+    "passed": 60,
+    "Gold": 54,
+    "Pearl": 6,
+    "newDistinct": 4,
+    "wrongFilterPearl01Tests": 0,
+    "wrongFilterCompileOnly": true
+  },
+  "actualWeb": {
+    "original11Scripts": 220,
+    "separateNpcBuy": 94,
+    "stage5InternalGroups": 392,
+    "stage5FileLevelTests": 1,
+    "stage5IncludedIn220": true,
+    "tsc02ActualExit0": true,
+    "tsc02QualifiedCarry": "only excluded MJS changed after actual TSC02; effective TypeScript input unchanged; full snapshot02 historical"
+  },
+  "core": {
+    "manifest": {
+      "abiVersion": 1,
+      "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+      "sourceSha256": "ad61a7bcba7a246854648a8e3c9b24a3a4cfd449ea3f6eab3a9f313a69fc2e5b",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 252590,
+          "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141",
+        "sourceSha256": "ad61a7bcba7a246854648a8e3c9b24a3a4cfd449ea3f6eab3a9f313a69fc2e5b",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 23779,
+            "sha256": "90c07fc04846a72952b293c112ff66d22b7babedd593dd3b84f5c76f37de397b"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 262065,
+            "sha256": "82a550dc68cf4196843e721acaaf611addf79b57c1c6cd3b748485157d685cd8"
+          }
+        }
+      }
+    },
+    "budget": {
+      "wasmStrictLessThan": 262144,
+      "jsAtMost": 204800,
+      "puiWasmBytes": 262065,
+      "headroomToThresholdBytes": 79,
+      "budgetRaised": false
+    }
+  },
+  "native": {
+    "outputs": [
+      {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows/debug/mir2-platform-windows.exe",
+        "bytes": 104700416,
+        "sha256": "2d36a8a24120f2de8ccbb80221b7994a31c784333d1dfc515c71237c909c2224"
+      }
+    ],
+    "actualExitCode": 0
+  },
+  "gateway": {
+    "executable": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows/debug/mir2-gateway.exe",
+      "bytes": 105727488,
+      "sha256": "b9302153eead156227169fa3e5f94d6024145f590c5fa75d124d66df481ef347"
+    },
+    "actualExitCode": 0
+  },
+  "renderer": {
+    "version": "bevy-8e38472ba5cf5ef3",
+    "actualExitCode": 0,
+    "ignoredImmutableRelease": true
+  },
+  "next": "Source25 Ranking Inspect and PUI size optimization, then cross-currency correlated economic receipts and wider queue; ranking_inspect.rs unhooked/uncompiled not done",
+  "thin": {
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-07",
+    "inputSnapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-thin01-source-snapshot.json",
+      "bytes": 22908744,
+      "sha256": "13cd7196e917cea5b220cd1811b9379d851074aade820f037e2a3df4e9014edc"
+    },
+    "canonicalUniqueInputs": 63195,
+    "outputSnapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-thin01-output-snapshot.json",
+      "bytes": 2922776,
+      "sha256": "63a5e7d4029298f3b4dc64a3c4177b3b9831e815af47af77a5cf4b16d7a04b41"
+    },
+    "report": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-thin01-size-report.json",
+      "bytes": 21894,
+      "sha256": "75fb137437c56b84f8804fc637728a7502006bf6b9c532399c794b7b32966794"
+    },
+    "stats": {
+      "exists": true,
+      "bytes": 373096153,
+      "files": 7301,
+      "directories": 776,
+      "links": 0
+    },
+    "capBytes": 377487360,
+    "headroomBytes": 4391207,
+    "selectedRuntimeCopies": 11,
+    "coreSelection": {
+      "compiledManifest": {
+        "abiVersion": 1,
+        "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+        "sourceSha256": "ad61a7bcba7a246854648a8e3c9b24a3a4cfd449ea3f6eab3a9f313a69fc2e5b",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 252590,
+            "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+          }
+        },
+        "presentation": {
+          "abiVersion": 1,
+          "version": "62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141",
+          "sourceSha256": "ad61a7bcba7a246854648a8e3c9b24a3a4cfd449ea3f6eab3a9f313a69fc2e5b",
+          "files": {
+            "mir2_platform_web.js": {
+              "bytes": 23779,
+              "sha256": "90c07fc04846a72952b293c112ff66d22b7babedd593dd3b84f5c76f37de397b"
+            },
+            "mir2_platform_web_bg.wasm": {
+              "bytes": 262065,
+              "sha256": "82a550dc68cf4196843e721acaaf611addf79b57c1c6cd3b748485157d685cd8"
+            }
+          }
+        }
+      },
+      "selectedPaths": [
+        "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+        "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+        "client-core/62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141/mir2_platform_web.js",
+        "client-core/62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141/mir2_platform_web_bg.wasm"
+      ],
+      "packagedClosure": {
+        "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+        "abiVersion": 1,
+        "activeVersions": [
+          "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+          "62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141"
+        ],
+        "files": [
+          {
+            "relativePath": "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          {
+            "relativePath": "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+            "bytes": 252590,
+            "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+          },
+          {
+            "relativePath": "client-core/62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141/mir2_platform_web.js",
+            "bytes": 23779,
+            "sha256": "90c07fc04846a72952b293c112ff66d22b7babedd593dd3b84f5c76f37de397b"
+          },
+          {
+            "relativePath": "client-core/62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141/mir2_platform_web_bg.wasm",
+            "bytes": 262065,
+            "sha256": "82a550dc68cf4196843e721acaaf611addf79b57c1c6cd3b748485157d685cd8"
+          }
+        ],
+        "exactActiveBundleClosure": true,
+        "leavesPerBundle": 2
+      }
+    },
+    "jsonCompaction": {
+      "details": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-thin01-size-report.json-compaction-details.json",
+        "bytes": 65777,
+        "sha256": "b82f37b7ecdb2562419b9752936df43f973dba22946abcfaa59392fc073f83a9"
+      },
+      "actualPairs": 231,
+      "sourceAndOutputPairsEqualSource23": true,
+      "tokenConclusion": "Qualified historical carry only on actual identical231 source/output byte/hash pairs; no new parser/lexer execution."
+    },
+    "warningReview": {
+      "count": 44,
+      "fullMultisetEqualSource23": true,
+      "allMessagesUntruncated": true
+    },
+    "actualExitCode": 0,
+    "actualElapsedMs": 23988
+  },
+  "staticReview": {
+    "reviewer": "/root/source24_actual_result_review",
+    "accepted": true,
+    "sourceOnly": true,
+    "input63195Matched": true,
+    "next19007Matched": true,
+    "nft37092Matched": true,
+    "thin7301Matched": true,
+    "selectedRuntime11Matched": true,
+    "confirmedBlockers": 0
+  },
+  "sourcePublication": {
+    "Source23": {
+      "published": true,
+      "remoteCommit": "c63136131bf9bc65e482188920c1c2a37730aeba",
+      "receipt": {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-publication02.json",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-publication02.json",
+        "bytes": 2156,
+        "sha256": "7872878aa28429ec6b5836b6fce66813f622c7874a7df49729f1af0015e20e8a"
+      }
+    },
+    "Source24": "commit/push pending Root actual execution"
+  },
+  "remainingConfirmedRawGapIds": [
+    "F11.RANKING.INSPECT"
+  ],
+  "limitations": [
+    "No correlated economic ACK; entered/flushed/unknown cannot be treated as completed or auto-unlocked for continuous buy.",
+    "Structured raw catalog envelope is bounded at2MiB, while complete buy authority keeps existing1MiB Core limit; exceeding it fails closed.",
+    "Backend preserves existing SomeDura/metadata/allocator behavior; does not promise full stats/sockets clone or catalog UID as delivery UID.",
+    "Expiry preprocessing is independent maintenance, not transaction rollback.",
+    "Whitespace-only old fishing test diff is a touched input, not Pearl product policy.",
+    "Original remote media inventory/immutable asset-origin coverage, runtime warnings, release doctor and browser smoke remain unverified.",
+    "317 bounded audit rows do not supply a whole goal denominator or overall completion percentage.",
+    "All player/UI/login/game/save-relogin/mobile acceptance deferred under user restriction.",
+    "Native unlimited stock with same UID/count remains pending; no correlated economic ACK."
+  ],
+  "scope": "Ordinary data record only, no executable runner. Finite CPU/source fixtures and static builds do not prove runtime, full suite or real players.",
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalStatus": "active",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkGameUsed": false,
+  "wasmApiUsed": false,
+  "playerAccepted": false,
+  "mobileAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -120,7 +120,9 @@ import { StorageRentalConfirmation, type StorageRentalProof, type StorageRentalF
 import { projectSocialInventory, projectOwnTradeItems, projectGuildStorageItems, type SocialItemSlot } from "../lib/social-item-window-model";
 import { SocialWindowOperations, socialWindowItemCommand, guildPermissionsFromOptions, applyGuildStorageChange, type SocialWindowOperationKind, type SocialWindowOperationProof } from "../lib/social-window-operations";
 import { NpcGoldBuyDispatcher, NpcGoldBuyInventoryReadiness, npcGoldBuyInventoryMutationPacket, type NpcGoldBuyCurrent, type NpcGoldBuyRuntime,
-  type NpcGoldBuyProof, type NpcGoldBuyQuote, type NpcGoldBuyGood } from "../lib/bevy-npc-shop-buy";
+  type NpcGoldBuyProof, type NpcPearlBuyProof, type NpcGoldBuyQuote, type NpcGoldBuyGood } from "../lib/bevy-npc-shop-buy";
+import { NpcPearlShopSource, npcPearlJson } from "../lib/npc-pearl-buy-source";
+import { parseNpcPearlBuyPlan, type NpcPearlBuyCurrent } from "../lib/npc-pearl-buy";
 import { sameBagOwner, type BagCommandToken, type BagOwnerToken, type BevyBagUiIntent, type BevyBagUiRuntime } from "../lib/bevy-bag-ui";
 import { bagBeltGeometryIsCurrent, bagBeltReleasePointIsCurrent, sameBagBeltGeometry, type BagBeltGeometry, type BagBeltDropTarget,
   type BagBeltGestureProof, type BagBeltReleasePoint, type BagBeltCallbacks } from "../lib/bag-belt-gesture";
@@ -2760,12 +2762,16 @@ export default function HomePage() {
   const npcShopTabBindingRef = useRef(npcShopTabBinding);
   npcShopTabBindingRef.current = npcShopTabBinding;
   const npcBuySelectedRef = useRef<number | null>(null);
+  const npcPearlShopSourceRef = useRef(new NpcPearlShopSource());
+  const npcPearlSendEpochRef = useRef(0);
+  const npcPearlBuyProofsRef = useRef(new WeakMap<NpcPearlBuyProof, {currentJson:string;wireJson:string;core:object;socket:WebSocket;sendEpoch:number|null}>());
   const npcBuyDispatcherRef = useRef<NpcGoldBuyDispatcher | null>(null);
   const npcLegacyBuyProofsRef = useRef(new WeakMap<object, { currentJson: string; wireJson: string; used: boolean }>());
   if (npcBuyDispatcherRef.current === null) {
     npcBuyDispatcherRef.current = new NpcGoldBuyDispatcher({
-      runtime: { get getMir2NpcGoldBuyPlan() { return runtimeRef.current?.getMir2NpcGoldBuyPlan; } },
-      read: readNpcGoldBuyCurrent,
+      runtime: { get getMir2NpcGoldBuyPlan() { return runtimeRef.current?.getMir2NpcGoldBuyPlan; },
+        get getMir2NpcPearlBuyPlan() { return questCoreRuntimeRef.current?.getMir2NpcPearlBuyPlan; } },
+      read: readNpcBuyCurrent,
       getAttemptSlot: () => questCoreRuntimeRef.current?.getNpcGoldBuyAttemptSlot() ?? null,
       readSocket: () => { const socket = socketRef.current; return socket ? { socket, isOpen: socket.readyState === WebSocket.OPEN } : null; },
     });
@@ -6080,6 +6086,7 @@ export default function HomePage() {
   }
 
   function suspendEquipmentConnection(reason: "socketClosed" | "logoutPending" | "connectionUnavailable") {
+    npcPearlShopSourceRef.current.retire();
     retireWorldFishingGesture(); worldFishingSourceRef.current.retire(); worldFishingCommitRef.current = null;
     if (reason !== "logoutPending") { retireSocialRequests(); retireSocialItemConnection(); }
     else { storageRentalRef.current.retire(); setStorageRentalPrompt(null); }
@@ -6098,6 +6105,7 @@ export default function HomePage() {
   }
 
   function retireEquipmentSession() {
+    npcPearlShopSourceRef.current.retire();
     retireWorldFishingGesture(); worldFishingSourceRef.current.retire(); worldFishingCommitRef.current = null;
     retireSocialRequests();
     observePreferenceRef.current = null; observeBootstrapRef.current = null;
@@ -6245,11 +6253,21 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
     if (isSpectatorBrowserMode()) return false;
+    // Every nested submission invalidates an older Pearl checkpoint, even when
+    // its command is later rejected or restores an otherwise equal source.
+    if (npcPearlSendEpochRef.current >= Number.MAX_SAFE_INTEGER) return false;
+    const pearlSendEpoch = ++npcPearlSendEpochRef.current;
+    if (options?.npcPearlBuyProof) {
+      if (Reflect.ownKeys(options).some(key => key !== "npcPearlBuyProof" && key !== "quiet")) return false;
+      const lease = npcPearlBuyProofsRef.current.get(options.npcPearlBuyProof);
+      if (!lease || lease.sendEpoch !== null) return false;
+      lease.sendEpoch = pearlSendEpoch;
+    }
     if (command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof) return false;
     // A newly submitted item/combat/UI operation ends a pre-existing world hold.
     if (!options?.worldFishingProof && (isMailItemMutation(command)
@@ -6278,7 +6296,7 @@ export default function HomePage() {
     if (command.type === "chat" && command.message === "@ADDSTORAGE" && !options?.storageRentalProof) return false;
     if (!socialItemMutationAllowed(command, options?.socialItemProof)) return false;
     if (["tradeReply", "tradeConfirm", "tradeCancel", "tradeGold"].includes(String(command.type)) && !options?.socialTradeProof) return false;
-    const npcBuyDispatcher = options?.npcBuyProof ? npcBuyDispatcherRef.current : null;
+    const npcBuyDispatcher = options?.npcBuyProof || options?.npcPearlBuyProof ? npcBuyDispatcherRef.current : null;
     const socket = socketRef.current;
     if (socket?.readyState !== WebSocket.OPEN) return false;
     if ((command.type === "storeItemV2" || command.type === "takeBackItemV2") && !options?.storageProof) return false;
@@ -6290,10 +6308,11 @@ export default function HomePage() {
     if (options?.npcUi && (!options.npcBuyProof || !npcShopIntentMatchesCommand(options.npcUi.intent, command)
       || npcShopUiIngressRef.current?.allows(options.npcUi.intent) !== true)) return false;
     if (command.type === "buyItem" && !options?.npcUi && npcShopUiIngressRef.current?.blocksInput()) return false;
-    if ((options?.npcBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem") return false;
+    if ((options?.npcBuyProof || options?.npcPearlBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem") return false;
     if (command.type === "buyItem") {
-      if (Boolean(options?.npcBuyProof) === Boolean(options?.npcLegacyBuyProof)) return false;
+      if ([options?.npcBuyProof,options?.npcPearlBuyProof,options?.npcLegacyBuyProof].filter(Boolean).length !== 1) return false;
       if (options?.npcBuyProof && !npcBuyDispatcher?.allows(options.npcBuyProof, command)) return false;
+      if (options?.npcPearlBuyProof && !npcBuyDispatcher?.allowsPearl(options.npcPearlBuyProof, command)) return false;
       if (options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, command)) return false;
     }
     const diagnosticCommand = isSensitiveGatewayCommand(command) ? { type: command.type } : command;
@@ -6481,18 +6500,22 @@ export default function HomePage() {
         || !bagBeltMovesRef.current.enter(proof.reservation, owner, wireCommand)) return false;
     }
     if (options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)) return false;
+    // The Pearl proof enters only after all product and listener callbacks.
+    // No external callback follows Core entry before this exact send.
+    if (options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket,
+      () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))) return false;
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
       if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof);
       if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof);
       if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof);
-      if (!options?.npcBuyProof) throw error;
-      npcBuyDispatcher?.transportResult(options.npcBuyProof, "unknown");
+      if (!options?.npcBuyProof && !options?.npcPearlBuyProof) throw error;
+      npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "unknown");
       console.error("[mir2] NPC purchase send outcome is unknown", error);
       return false;
     }
-    if (options?.npcBuyProof) npcBuyDispatcher?.transportResult(options.npcBuyProof, "flushed");
+    if (options?.npcBuyProof || options?.npcPearlBuyProof) npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "flushed");
     if (isMovementCommand(command)) {
       scheduleMovementConfirmTick();
     }
@@ -9212,6 +9235,7 @@ export default function HomePage() {
   }
 
   function retireNpcShopService() {
+    npcPearlShopSourceRef.current.retireCatalog();
     closeNpcRepairService();
     npcBuyDispatcherRef.current?.withdraw();
     npcShopClockRef.current.service += 1;
@@ -9220,12 +9244,115 @@ export default function HomePage() {
     setNpcShopService(null);
   }
 
+  function observeNpcPearlWallet(amount: unknown): void {
+    npcBuyDispatcherRef.current?.withdraw();
+    const owner = currentSocialReceiveOwner();
+    const wallet = npcPearlShopSourceRef.current.observeWallet(owner,amount);
+    const service = npcShopServiceRef.current;
+    if (service?.currency === "pearls") {
+      const next = {...service,pearlBalance:wallet?.amount ?? null};
+      npcShopServiceRef.current = next; setNpcShopService(next);
+    }
+    npcBuyDispatcherRef.current?.observe();
+  }
+
+  function npcPearlBuyCurrent(service: DisplayNpcShopService | null, current: WorldState,
+    owner: Pick<BagCommandToken,"connectionGeneration"|"sessionGeneration"|"ownerRevision">,
+    selectedId: number | null): NpcPearlBuyCurrent | null {
+    try {
+      const physical = currentSocialReplyOwner(false), source = npcPearlShopSourceRef.current;
+      if (!physical || !service || npcShopServiceRef.current !== service || service.currency !== "pearls"
+        || service.panelType !== 0 || !service.supportsBuy || current.playerObjectId !== String(physical.playerObjectId)
+        || current.mapFileName !== physical.mapFileName || owner.connectionGeneration !== physical.connectionGeneration
+        || owner.sessionGeneration !== physical.sessionGeneration || owner.ownerRevision !== equipmentBagOwnerRef.current.ownerRevision) return null;
+      const catalog = source.currentCatalog(physical), wallet = source.currentWallet(physical);
+      if (!catalog) return null;
+      const inventory = projectBevyBagModel(current,{npcGoldTrade:true});
+      if (!inventory.ok) return null;
+      const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+      const controller = equipmentControllerRef.current, ledger = controller?.status();
+      const result: NpcPearlBuyCurrent = {currency:"pearls",owner:{...owner,playerObjectId:physical.playerObjectId},
+        serviceRevision:service.serviceRevision,catalogRevision:catalog.revision,
+        presentation:{mapFileName:current.mapFileName,sceneRevision:physical.sceneRevision,playerObjectId:current.playerObjectId,
+          x:player?.x ?? null,y:player?.y ?? null},catalog,wallet,selectedId,inventory:inventory.model,allowsBuy:service.supportsBuy,
+        blocked:screenRef.current !== "game" || !current.connected || !player || player.dead || current.playerHp === 0
+          || document.visibilityState !== "visible" || !document.hasFocus() || wallet === null
+          || equipmentHostSuspendReasonRef.current !== null || !equipmentStartGameRef.current || !ledger?.ready || ledger.pending > 0
+          || !npcGoldBuyInventoryRef.current.matches({connectionGeneration:owner.connectionGeneration,
+            sessionGeneration:owner.sessionGeneration,playerObjectId:physical.playerObjectId},inventory.model)
+          || pendingStorageRequestsRef.current.size > 0 || (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0
+          || !!mailCollectBarrierRef.current || !!socialItemOperationsRef.current.pending || !!storageRentalRef.current.pending
+          || !!heroOperationsRef.current.pending || !!bagBeltMovesRef.current.pending
+           || !!cashPurchasesRef.current.pending() || !!creatureOperationsRef.current.pending()
+           || !!mailDispatcherRef.current?.composer.pending(currentSpellsOwner(physical.playerObjectId))};
+      // Check product-owned references after ledger/availability callbacks.
+      if (npcShopServiceRef.current !== service || equipmentControllerRef.current !== controller
+        || socketRef.current !== physical.socket || equipmentConnectionGenerationRef.current !== physical.connectionGeneration
+        || equipmentSessionGenerationRef.current !== physical.sessionGeneration || equipmentBagOwnerRef.current.ownerRevision !== owner.ownerRevision
+        || worldRef.current !== current || source.currentCatalog(physical) !== catalog || source.currentWallet(physical) !== wallet) return null;
+      npcPearlJson(result);
+      return result;
+    } catch { return null; }
+  }
+
+  function readNpcPearlBuyCurrent(): NpcPearlBuyCurrent | null {
+    return npcPearlBuyCurrent(npcShopServiceRef.current,worldRef.current,{connectionGeneration:equipmentConnectionGenerationRef.current,
+      sessionGeneration:equipmentSessionGenerationRef.current,ownerRevision:equipmentBagOwnerRef.current.ownerRevision},npcBuySelectedRef.current);
+  }
+  function readNpcBuyCurrent(): NpcGoldBuyCurrent | NpcPearlBuyCurrent | null {
+    return npcShopServiceRef.current?.currency === "pearls" ? readNpcPearlBuyCurrent() : readNpcGoldBuyCurrent();
+  }
+
+  function npcPearlSendCurrent(proof: NpcPearlBuyProof, wire: Record<string,unknown>, socket: WebSocket): boolean {
+    try {
+      const lease = npcPearlBuyProofsRef.current.get(proof);
+      if (!lease || lease.sendEpoch === null || npcPearlSendEpochRef.current !== lease.sendEpoch
+        || lease.socket !== socket || questCoreRuntimeRef.current !== lease.core || npcPearlJson(wire) !== lease.wireJson) return false;
+      const current = readNpcPearlBuyCurrent(), worldNow = worldRef.current, service = npcShopServiceRef.current;
+      const ui = npcShopUiIngressRef.current, controller = equipmentControllerRef.current, mail = mailDispatcherRef.current;
+      if (!current || current.blocked || npcPearlJson(current) !== lease.currentJson || ui?.blocksInput() === true
+        || !parityItemMutationAllowed(wire) || !socialItemMutationAllowed(wire)
+        || !mailMutationAllowed(wire,mailParcelRef.current?.snapshot ?? null,mailParcelRef.current?.state?.blockedUniqueIds ?? [])
+        || !storageMutationAllowed(worldNow,wire,pendingStorageRequestsRef.current.values())) return false;
+      // All ABI readers precede the last product-owned source/pending checkpoint.
+      const ledger = controller?.status(), mailPending = mail?.composer.pending(currentSpellsOwner(current.owner.playerObjectId));
+      const cashPending = cashPurchasesRef.current.pending(), creaturePending = creatureOperationsRef.current.pending();
+      const focused = document.hasFocus();
+      const finalInventory = projectBevyBagModel(worldNow,{npcGoldTrade:true});
+      if (!finalInventory.ok || npcPearlJson(finalInventory.model) !== npcPearlJson(current.inventory)
+        || !npcGoldBuyInventoryRef.current.matches(current.owner,finalInventory.model)) return false;
+      const player = worldNow.entities.find(entity => entity.objectId === worldNow.playerObjectId);
+      const source = npcPearlShopSourceRef.current;
+      const mapFileName = worldNow.mapFileName;
+      if (typeof mapFileName !== "string" || mapFileName.length === 0) return false;
+      const physical = {socket,connectionGeneration:current.owner.connectionGeneration,sessionGeneration:current.owner.sessionGeneration,
+        playerObjectId:current.owner.playerObjectId,sceneRevision:current.presentation?.sceneRevision as number,mapFileName};
+      return focused && document.visibilityState === "visible" && !!player && !player.dead && worldNow.playerHp !== 0
+        && !!ledger?.ready && ledger.pending === 0 && !mailPending && !cashPending && !creaturePending
+        && npcPearlSendEpochRef.current === lease.sendEpoch && worldRef.current === worldNow
+        && npcShopServiceRef.current === service && service?.currency === "pearls" && service.supportsBuy && service.panelType === 0
+        && service.serviceRevision === current.serviceRevision && npcBuySelectedRef.current === current.selectedId
+        && equipmentConnectionGenerationRef.current === current.owner.connectionGeneration
+        && equipmentSessionGenerationRef.current === current.owner.sessionGeneration
+        && equipmentBagOwnerRef.current.ownerRevision === current.owner.ownerRevision
+        && socialSceneRevisionRef.current === physical.sceneRevision && worldNow.playerObjectId === String(physical.playerObjectId)
+        && screenRef.current === "game" && worldNow.connected && equipmentHostSuspendReasonRef.current === null
+        && !!equipmentStartGameRef.current && pendingStorageRequestsRef.current.size === 0
+        && (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) === 0 && !mailCollectBarrierRef.current
+        && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending
+        && !heroOperationsRef.current.pending && !bagBeltMovesRef.current.pending
+        && source.currentCatalog(physical) === current.catalog && source.currentWallet(physical) === current.wallet
+        && npcShopUiIngressRef.current === ui && equipmentControllerRef.current === controller && mailDispatcherRef.current === mail
+        && questCoreRuntimeRef.current === lease.core && socketRef.current === socket && socket.readyState === WebSocket.OPEN;
+    } catch { return false; }
+  }
+
   function npcGoldBuyCurrent(service: DisplayNpcShopService | null, current: WorldState,
     owner: Pick<BagCommandToken, "connectionGeneration" | "sessionGeneration" | "ownerRevision">,
     selectedId: number | null): NpcGoldBuyCurrent | null {
     const playerObjectId = typeof current.playerObjectId === "string" && /^[1-9][0-9]*$/.test(current.playerObjectId)
       ? Number(current.playerObjectId) : NaN;
-    if (!service || !service.supportsBuy || !Number.isSafeInteger(playerObjectId) || playerObjectId <= 0 || playerObjectId > 0xffff_ffff) return null;
+    if (!service || service.currency === "pearls" || !service.supportsBuy || !Number.isSafeInteger(playerObjectId) || playerObjectId <= 0 || playerObjectId > 0xffff_ffff) return null;
     const inventory = projectBevyBagModel(current, { npcGoldTrade: true });
     if (!inventory.ok) return null;
     const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
@@ -9379,6 +9506,8 @@ export default function HomePage() {
   function quoteNpcShopItem(id: number, quantity: number): NpcGoldBuyQuote | null {
     if (npcShopUiIngressRef.current?.blocksInput() || npcShopServiceRef.current !== npcShopService) return null;
     npcBuySelectedRef.current = id;
+    if (npcShopService?.currency === "pearls") return npcBuyDispatcherRef.current?.previewPearl(
+      npcPearlBuyCurrent(npcShopService,world,equipmentRenderOwnerToken,id),quantity) ?? null;
     return npcBuyDispatcherRef.current?.preview(npcGoldBuyCurrent(npcShopService, world, equipmentRenderOwnerToken, id), quantity) ?? null;
   }
 
@@ -9388,7 +9517,7 @@ export default function HomePage() {
     if (claim) lease.used = true;
     const live = readNpcGoldBuyCurrent();
     const good = live?.shop.goods.find(item => item.unique_id === live.shop.selected_id);
-    return Boolean(live && !live.blocked && good && !good.requires_gold_buy_plan
+    return Boolean(live && !live.blocked && good && !good.use_pearls && !good.requires_gold_buy_plan
       && JSON.stringify(live) === lease.currentJson && JSON.stringify(wire) === lease.wireJson);
   }
 
@@ -9397,6 +9526,19 @@ export default function HomePage() {
     if (!Number.isSafeInteger(id) || id < 0 || !Number.isSafeInteger(quantity) || quantity <= 0
       || !npcShopService || panelType !== npcShopService.panelType) return;
     npcBuySelectedRef.current = id;
+    if (npcShopService.currency === "pearls") {
+      const captured = npcPearlBuyCurrent(npcShopService,world,equipmentRenderOwnerToken,id), core = questCoreRuntimeRef.current;
+      const dispatcher = npcBuyDispatcherRef.current, socket = socketRef.current;
+      if (!captured || captured.blocked || !core || !dispatcher || !socket || socket.readyState !== WebSocket.OPEN) return;
+      retireWorldFishingGesture();
+      const prepared = dispatcher.preparePearl(captured,quantity);
+      if (!prepared) return;
+      npcPearlBuyProofsRef.current.set(prepared.proof,{currentJson:npcPearlJson(captured),wireJson:npcPearlJson(prepared.wire),core,socket,sendEpoch:null});
+      try { sendRaw(prepared.wire,{npcPearlBuyProof:prepared.proof}); }
+      catch (error) { console.error("[mir2] Pearl purchase rejected before transport",error); }
+      finally { dispatcher.rejectIfUnentered(prepared.proof); }
+      return;
+    }
     const captured = npcGoldBuyCurrent(npcShopService, world, equipmentRenderOwnerToken, id);
     if (!captured || captured.blocked) return;
     const good = captured.shop.goods.find(item => item.unique_id === id);
@@ -12566,6 +12708,7 @@ export default function HomePage() {
         inventory?.ok ? inventory.model : null);
       observeBagBeltInventorySnapshot(snapshot, connectionGeneration, beforeInventorySnapshot);
       if (complete) {
+        observeNpcPearlWallet((snapshot.stage5Systems as Record<string,unknown> | null)?.intelligentCreaturePearls);
         const owner = readNpcRepairOwner();
         npcRepairAuthorityRef.current.observeSnapshot(owner, snapshot);
         captureNpcRepairDialog(snapshot, owner);
@@ -12576,6 +12719,9 @@ export default function HomePage() {
 
   function handleGatewayEvent(event: GatewayEvent, connectionGeneration: number, source:WebSocket) {
     if (connectionGeneration !== equipmentConnectionGenerationRef.current || socketRef.current !== source) return;
+    if (event.type === "packet" && event.packet === "UpdateIntelligentCreatureList") {
+      observeNpcPearlWallet((event.payload as Record<string,unknown> | null)?.pearlCount);
+    }
     if (event.type === "packet" && event.packet === "MoveItem") {
       const owner = bagBeltPhysicalOwner();
       if (owner && bagBeltMovesRef.current.acknowledge(owner, event.payload ?? {})) renderBagOwner(n => n + 1);
@@ -14393,6 +14539,7 @@ export default function HomePage() {
 
       // NPC interaction surfaces ----------------------------------------------
       case "NPCGoods": {
+        npcPearlShopSourceRef.current.retireCatalog();
         const goods = (Array.isArray(payload.list) ? payload.list : []).flatMap((value) => {
           if (!value || typeof value !== "object") return [];
           const item = value as Record<string, unknown>;
@@ -14439,6 +14586,7 @@ export default function HomePage() {
           serviceRevision: npcShopClockRef.current.service,
           catalogRevision: npcShopClockRef.current.catalog,
           hideAddedStats: payload.hideAddedStats === true,
+          currency:"gold",
           npcName,
           panelType: typeof payload.panelType === "number" && Number.isInteger(payload.panelType)
             && payload.panelType >= 0 && payload.panelType <= 255 ? payload.panelType : 255,
@@ -14457,6 +14605,7 @@ export default function HomePage() {
         break;
       }
       case "NPCSell": {
+        if (npcShopServiceRef.current?.currency === "pearls") retireNpcShopService();
         const existing = npcShopServiceRef.current;
         const npcName =
           worldRef.current.activeNpcDialog?.npcName ||
@@ -14479,7 +14628,43 @@ export default function HomePage() {
         setShowCharacter(false);
         break;
       }
-      case "NPCPearlGoods":
+      case "NPCPearlGoods": {
+        retireNpcShopService();
+        const owner = currentSocialReceiveOwner();
+        const core = questCoreRuntimeRef.current, planner = core?.getMir2NpcPearlBuyPlan;
+        const catalog = npcPearlShopSourceRef.current.observeCatalog(owner,event.packet,payload,(infoPrice,rate,unitPrice) => {
+          try {
+            if (!owner || !core || typeof planner !== "function" || questCoreRuntimeRef.current !== core
+              || core.getMir2NpcPearlBuyPlan !== planner) return false;
+            const plan = parseNpcPearlBuyPlan(JSON.parse(planner.call(core,npcPearlJson({
+              allowsBuy:true,selected:true,usePearls:true,uniqueId:0,unitPrice,stock:-1,quantity:1,
+              walletKnown:false,pearls:0,occupied:0,infoPrice,rate,
+            }))));
+            const current = currentSocialReceiveOwner();
+            return !!plan && plan.denial === 4 && plan.quote === unitPrice && !!current
+              && sameSocialPhysicalOwner(owner,current) && owner.sceneRevision === current.sceneRevision
+              && owner.mapFileName === current.mapFileName && questCoreRuntimeRef.current === core
+              && core.getMir2NpcPearlBuyPlan === planner;
+          } catch { return false; }
+        });
+        const npcName = worldRef.current.activeNpcDialog?.npcName || npcServiceNameRef.current || t("ui.shopTitle",[],"Shop");
+        npcServiceNameRef.current = npcName;
+        npcShopClockRef.current.service += 1;
+        npcShopClockRef.current.catalog += 1;
+        const nextShop: DisplayNpcShopService = {
+          serviceRevision:npcShopClockRef.current.service,catalogRevision:npcShopClockRef.current.catalog,
+          hideAddedStats:false,currency:"pearls",pearlBalance:npcPearlShopSourceRef.current.currentWallet(owner)?.amount ?? null,
+          npcName,panelType:catalog?.panelType ?? 255,supportsBuy:true,supportsSell:false,
+          buyItems:(catalog?.goods ?? []).map(good => ({id:good.uniqueId,itemIndex:good.itemIndex,name:good.name,icon:good.icon,
+            price:good.unitPrice,count:good.count,stock:good.stock,tooltipSource:good.tooltipSource,
+            description:good.description,purchaseRate:catalog!.rate,requiresGoldBuyPlan:false,requiresPearlBuyPlan:true})),
+        };
+        npcShopServiceRef.current = nextShop; setNpcShopService(nextShop);
+        npcBuyDispatcherRef.current?.observe();
+        updateWorld(current => ({...current,activeNpcDialog:null}));
+        closeNpcRepairService(); setShowInventory(false); setShowCharacter(false);
+        break;
+      }
       case "NPCRefine":
       case "NPCReplaceWedRing":
         retireNpcShopService();

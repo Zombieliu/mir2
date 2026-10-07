@@ -49,3 +49,8 @@ pub use fishing_click::{fishing_click_abi_version, fishing_click_targets, fishin
 pub mod entity_animation;
 #[cfg(feature = "presentation-ui")]
 pub use entity_animation::{entity_animation_abi_version, EntityAnimationBridge};
+
+#[cfg(feature = "presentation-ui")]
+pub mod npc_pearl_buy;
+#[cfg(feature = "presentation-ui")]
+pub use npc_pearl_buy::{npc_pearl_buy_abi_version, npc_pearl_buy_plan};

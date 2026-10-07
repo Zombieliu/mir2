@@ -584,7 +584,7 @@ export type NpcShopGood = {
   id: number | string;
   name: string;
   icon: number;
-  /** Unit price in gold. */
+  /** Unit price in the merchant currency; display only for shared purchases. */
   price: number;
   /** Stack size sold per purchase (>=1). */
   count?: number;
@@ -595,6 +595,8 @@ export type NpcShopGood = {
   description?: string;
   /** Legacy resale/other services keep their existing controls. */
   requiresGoldBuyPlan?: boolean;
+  /** Pearl stock always requires a current shared quote; no legacy price fallback. */
+  requiresPearlBuyPlan?: boolean;
   /** Marks an offer the player cannot afford / is not allowed to buy. */
   disabled?: boolean;
 };
@@ -620,8 +622,11 @@ export type NpcShopWindowProps = {
   t: TranslateFn;
   /** Merchant name shown in the header. */
   npcName?: string;
-  /** Player gold, shown in the footer and used to grey unaffordable rows. */
+  /** Gold remains available for gold purchases, selling and repairs. */
   gold?: number;
+  currency?: "gold" | "pearls";
+  /** Nullable signed wallet fact. Display normalization never grants purchase authority. */
+  pearlBalance?: number | null;
   /** Initial tab; defaults to "buy". */
   initialTab?: NpcShopTab;
   tab?: NpcShopTab;
@@ -683,6 +688,7 @@ export function NpcShopWindow({
   t,
   npcName,
   gold,
+  currency = "gold", pearlBalance = null,
   initialTab = "buy",
   tab: controlledTab, onTabChange, inputBlocked = false, getInputBlocked,
   availableTabs = ["buy", "sell", "repair", "special"],
@@ -728,8 +734,16 @@ export function NpcShopWindow({
     [rows, selectedId],
   );
 
-  const sharedBuy = tab === "buy" && !showBuyBack && Boolean(onQuoteBuy)
-    && (selected as NpcShopGood | null)?.requiresGoldBuyPlan !== false;
+  const pearlBuy = tab === "buy" && (currency === "pearls"
+    || (selected as NpcShopGood | null)?.requiresPearlBuyPlan === true);
+  const sharedBuy = tab === "buy" && !showBuyBack && (pearlBuy || Boolean(onQuoteBuy)
+    && (selected as NpcShopGood | null)?.requiresGoldBuyPlan !== false);
+  const pearlsKnown = typeof pearlBalance === "number" && Number.isSafeInteger(pearlBalance);
+  const displayedPearls = pearlsKnown ? Math.max(0, pearlBalance!) : null;
+  const quoteCanBuy = (quote: NpcGoldBuyQuote | null | undefined, usesPearls: boolean) =>
+    quote?.canBuy === true && (usesPearls ? pearlsKnown && quote.currency === "pearls"
+      && typeof quote.totalPearls === "number" && Number.isSafeInteger(quote.totalPearls) && quote.totalPearls >= 0
+      : quote.currency !== "pearls");
   const firstQuote = sharedBuy && selected && !blocked() ? onQuoteBuy?.(selected.id, quantity) : null;
   const maxQuantity = tab === "sell" ? Math.max(1, (selected as NpcShopOwnedItem | null)?.count ?? 1)
     : sharedBuy ? Math.max(1, firstQuote?.maxQuantity ?? 1) : 99;
@@ -737,13 +751,21 @@ export function NpcShopWindow({
   const supportsQuantity = tab === "buy" || tab === "sell";
   const buyQuote = sharedBuy && selected && !blocked() ? onQuoteBuy?.(selected.id, effectiveQuantity) : null;
   const selectedRepairQuote = repairTab ? repairView?.rows.find(row => row.uniqueId === selectedId)?.quote ?? null : null;
-  const total = repairTab ? selectedRepairQuote?.displayedTotal ?? null : sharedBuy ? buyQuote?.totalGold ?? null
+  const total = repairTab ? selectedRepairQuote?.displayedTotal ?? null : pearlBuy
+    ? buyQuote?.currency === "pearls" ? buyQuote.totalPearls ?? null : null
+    : sharedBuy ? buyQuote?.totalGold ?? null
     : selected ? Math.max(0, Math.trunc(selected.price)) * (supportsQuantity ? effectiveQuantity : 1) : 0;
   const goldKnown = typeof gold === "number";
-  const affordable = repairTab ? selectedRepairQuote?.affordable === true : !goldKnown || tab !== "buy" || total !== null && total <= gold!;
+  const affordable = repairTab ? selectedRepairQuote?.affordable === true : pearlBuy
+    ? quoteCanBuy(buyQuote, true) : !goldKnown || tab !== "buy" || total !== null && total <= gold!;
 
   function confirm() {
-    if (blocked() || !selected || sharedBuy && !buyQuote?.canBuy) return;
+    if (blocked() || !selected || selected.disabled) return;
+    // Render quotes describe the controls. Only a fresh quote can authorize this edge.
+    if (sharedBuy || pearlBuy) {
+      const currentQuote = onQuoteBuy?.(selected.id, effectiveQuantity);
+      if (!quoteCanBuy(currentQuote, pearlBuy) || blocked()) return;
+    }
     if (repairTab) {
       if (!selected.disabled && repairSelectionCurrent && repairSelection && selectedRepairQuote?.affordable) {
         onConfirmRepair?.(repairSelection); setRepairSelection(null); setSelectedId(null);
@@ -779,8 +801,8 @@ export function NpcShopWindow({
         : tab === "repair"
           ? t("ui.shopRepair", [], "Repair")
           : t("ui.shopSpecialRepair", [], "Special Repair");
-  const confirmEnabled = !inputBlocked && Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable
-    && (!sharedBuy || buyQuote?.canBuy === true) && (!repairTab || repairSelectionCurrent);
+  const confirmEnabled = !blocked() && Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable
+    && (!(sharedBuy || pearlBuy) || quoteCanBuy(buyQuote, pearlBuy)) && (!repairTab || repairSelectionCurrent);
 
   if (repairTab) {
     const targetSelection = repairTargetSelection?.stamp === repairView?.stamp ? repairTargetSelection : null;
@@ -895,7 +917,12 @@ export function NpcShopWindow({
           rows.map((row) => {
             const isSelected = row.id === selectedId;
             const colour = row.grade ? NPC_SHOP_GRADE_COLOUR[row.grade] : "#f4ecd6";
-            const unaffordable = goldKnown && tab === "buy" && !showBuyBack && Math.trunc(row.price) > gold!;
+            const pearlRow = tab === "buy" && !showBuyBack && (currency === "pearls"
+              || (row as NpcShopGood).requiresPearlBuyPlan === true);
+            const rowQuote = pearlRow && !blocked() ? onQuoteBuy?.(row.id, 1) : null;
+            const unaffordable = pearlRow ? pearlsKnown && rowQuote?.currency === "pearls"
+              && typeof rowQuote.totalPearls === "number" && rowQuote.totalPearls > displayedPearls!
+              : goldKnown && tab === "buy" && !showBuyBack && Math.trunc(row.price) > gold!;
             const rowDisabled = Boolean(row.disabled);
             return (
               <button
@@ -921,10 +948,17 @@ export function NpcShopWindow({
                 onDoubleClick={() => {
                   if (blocked()) return;
                   setSelectedId(row.id);
-                  if (confirmEnabledFor(row, tab, showBuyBack, gold)) {
-                    if (tab === "buy") (showBuyBack ? onBuyBack : onBuy)?.(row.id, 1);
-                    else if (tab === "sell") onSell?.(row.id, 1);
-                  }
+                  if (row.disabled) return;
+                  if (tab === "buy") {
+                    const usesPearls = currency === "pearls" || (row as NpcShopGood).requiresPearlBuyPlan === true;
+                    const usesSharedQuote = usesPearls || !showBuyBack && Boolean(onQuoteBuy)
+                      && (row as NpcShopGood).requiresGoldBuyPlan !== false;
+                    if (usesSharedQuote) {
+                      const currentQuote = onQuoteBuy?.(row.id, 1);
+                      if (!quoteCanBuy(currentQuote, usesPearls) || blocked()) return;
+                    } else if (!confirmEnabledFor(row, tab, showBuyBack, gold)) return;
+                    (showBuyBack ? onBuyBack : onBuy)?.(row.id, 1);
+                  } else if (tab === "sell" && confirmEnabledFor(row, tab, showBuyBack, gold)) onSell?.(row.id, 1);
                 }}
               >
                 <span style={shopStyle.rowIconArea}>
@@ -1006,7 +1040,9 @@ export function NpcShopWindow({
           className="npc-shop-confirm"
           style={{ ...shopStyle.confirmButton, ...(!confirmEnabled ? shopStyle.confirmDisabled : null) }}
           disabled={!confirmEnabled}
-          title={!affordable ? t("client.LowGold", [], "Not enough gold.") : undefined}
+          title={!affordable ? pearlBuy
+            ? t("ui.shopLowPearls", [], "Not enough pearls, or the pearl balance is unavailable.")
+            : t("client.LowGold", [], "Not enough gold.") : undefined}
           onClick={confirm}
         >
           {actionLabel}
@@ -1017,8 +1053,9 @@ export function NpcShopWindow({
         <span style={shopStyle.footerLabel}>{t("ui.shopTotal", [], "Total")}</span>
         <span style={{ ...shopStyle.footerValue, ...(!affordable ? shopStyle.rowPriceBad : null) }}>{total === null ? "—" : formatGold(total)}</span>
         <span style={shopStyle.footerSpacer} />
-        <span style={shopStyle.footerLabel}>{t("client.Gold", [], "Gold")}</span>
-        <span style={shopStyle.footerValue}>{goldKnown ? formatGold(gold!) : "—"}</span>
+        <span style={shopStyle.footerLabel}>{pearlBuy ? t("client.Pearls", [], "Pearls") : t("client.Gold", [], "Gold")}</span>
+        <span style={shopStyle.footerValue}>{pearlBuy ? displayedPearls === null ? "—" : formatGold(displayedPearls)
+          : goldKnown ? formatGold(gold!) : "—"}</span>
       </div>
     </section>
   );

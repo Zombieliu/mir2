@@ -297,6 +297,8 @@ export type DisplayNpcShopGood = {
   price: number;
   /** Positive ordinary-gold scope; incomplete raw remains read-only. */
   requiresGoldBuyPlan?: boolean;
+  /** Pearl offers also require shared admission, using their personal wallet. */
+  requiresPearlBuyPlan?: boolean;
   /** Complete packet carrier; price is display-only and rate remains raw. */
   tooltipSource?: unknown;
   purchaseRate?: number;
@@ -310,6 +312,8 @@ export type DisplayNpcShopService = {
   /** Local service/catalog clocks, never server purchase receipts. */
   serviceRevision: number;
   catalogRevision: number;
+  currency?: "gold" | "pearls";
+  pearlBalance?: number | null;
   hideAddedStats: boolean;
   npcName: string;
   panelType: number;

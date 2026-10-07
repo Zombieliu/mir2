@@ -2073,6 +2073,77 @@ pub(super) fn plan_npc_gold_trade_gain(
     Some((staged, incoming))
 }
 
+/// Pearl purchases retain the legacy per-item delivery metadata. Unlike the
+/// generic gain helper, a failed plan cannot fall back onto an occupied cell.
+pub(super) fn plan_npc_pearl_gain(
+    resources: &InventoryResource,
+    template: &CrystalItemTemplate,
+    quantity: u32,
+    source: &UserItem,
+) -> Option<(InventoryResource, UserItem)> {
+    if quantity == 0 || quantity > u32::from(template.stack_size.max(1)) {
+        return None;
+    }
+    super::items::validate_user_item_carrier(source).ok()?;
+    validate_npc_gold_trade_carried_roster(resources)?;
+    let key = crystal_item_key_for_template(template);
+    let (container, slot) = crystal_empty_add_item_slots(resources, ItemContainer::Bag1, &key)
+        .into_iter()
+        .next()?;
+    let (added_attack, added_defence) = super::items::user_item_added_attack_defence(source);
+    let item = ItemState {
+        key: key.clone(),
+        name: template.name.clone(),
+        icon: item_icon_for_key(&key),
+        slot,
+        unique_id: allocate_item_unique_id(resources, container, slot),
+        container,
+        quantity,
+        description: template.tooltip.as_deref().unwrap_or("Crystal NPC shop item.").to_string(),
+        durability_current: Some(source.current_dura),
+        durability_max: Some(source.max_dura),
+        weight: u16::from(template.weight.max(1)),
+        equip_slot: crystal_equipment_slot_for_item_key(&key),
+        grade: match template.grade {
+            1 => ItemGrade::Common,
+            2 => ItemGrade::Rare,
+            3 => ItemGrade::Legendary,
+            _ => ItemGrade::None,
+        },
+        added_attack,
+        added_defence,
+        added_stats: Vec::new(),
+        socketed: Vec::new(),
+        user_item_metadata: None,
+        cursed: false,
+        socket_slots: template.slots,
+        gem_count: 0,
+        identified: None,
+        soul_bound_id: None,
+        sealed_expiry_time_binary_datetime: 0,
+        sealed_next_time_binary_datetime: 0,
+        rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
+        attack: crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC),
+        defence: crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC),
+        heal_hp: 0,
+        heal_mp: 0,
+    };
+    validate_committed_item_state_carrier(&item).ok()?;
+    let incoming = try_user_item_from_item_state(&item).ok()?;
+    validate_committed_user_item_carrier(&incoming).ok()?;
+    let mut staged = resources.clone();
+    if container == ItemContainer::Belt {
+        staged.belt_items.push(item);
+    } else {
+        staged.inventory_items.push(item);
+    }
+    validate_npc_gold_trade_carried_roster(&staged)?;
+    Some((staged, incoming))
+}
+
 pub(super) fn can_gain_item_quantity(
     resources: &InventoryResource,
     container: ItemContainer,

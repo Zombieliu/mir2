@@ -82,6 +82,7 @@ test('production integration captures raw before coalescing and final event proo
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
   'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
+  'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))',
  ]);
 
  // The original ordered parity suffix ends at the two additive Auth nodes.
@@ -134,15 +135,20 @@ test('production integration captures raw before coalescing and final event proo
  assert.equal(worldFishingProofGate.elseStatement,undefined);
  assert.ok(ts.isReturnStatement(worldFishingProofGate.thenStatement));
  assert.equal(worldFishingProofGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
- assert.equal(statements[authClaimIndex+5],socketTry,'no executable external callback between final proof gates and sole socket send');
- assert.equal(socketIndex,authClaimIndex+5);
+ const pearlGate=statements[authClaimIndex+5];
+ assert.ok(ts.isIfStatement(pearlGate));assert.equal(normalized(pearlGate.expression),'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))');
+ assert.equal(pearlGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(pearlGate.thenStatement));
+ assert.equal(pearlGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
+ assert.equal(statements[authClaimIndex+6],socketTry,'no executable external callback between final Pearl Core entry and sole socket send');
+ assert.equal(socketIndex,authClaimIndex+6);
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-4),[
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-5),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
-  'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)'
+  'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
+  'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))'
  ]);
  // Execute the actual final Auth fragment with its actual durable gate and
  // Page surface check. Only socket writes and document facts are memory data.
@@ -201,22 +207,23 @@ test('production integration captures raw before coalescing and final event proo
  // The whole actual early admission block is retained. Mixed NPC proofs on a
  // combat command and a Buy carrying both proof kinds must never reach entry.
  const npcEarlyGuards=statements.filter(n=>ts.isIfStatement(n)&&[
-  '(options?.npcBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem"',
+  '(options?.npcBuyProof || options?.npcPearlBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem"',
   'command.type === "buyItem"',
  ].includes(normalized(n.expression)));
  assert.equal(npcEarlyGuards.length,2);
  assert.deepEqual(npcEarlyGuards.map(n=>normalized(n.expression)),[
-  '(options?.npcBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem"','command.type === "buyItem"']);
+  '(options?.npcBuyProof || options?.npcPearlBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem"','command.type === "buyItem"']);
  const earlyBuy=npcEarlyGuards[1];assert.ok(ts.isBlock(earlyBuy.thenStatement));
  assert.deepEqual(earlyBuy.thenStatement.statements.map(n=>ts.isIfStatement(n)?normalized(n.expression):null),[
-  'Boolean(options?.npcBuyProof) === Boolean(options?.npcLegacyBuyProof)',
+  '[options?.npcBuyProof,options?.npcPearlBuyProof,options?.npcLegacyBuyProof].filter(Boolean).length !== 1',
   'options?.npcBuyProof && !npcBuyDispatcher?.allows(options.npcBuyProof, command)',
+  'options?.npcPearlBuyProof && !npcBuyDispatcher?.allowsPearl(options.npcPearlBuyProof, command)',
   'options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, command)',
  ]);
  const receipt=statements[socketIndex+1];
- assert.ok(ts.isIfStatement(receipt));assert.equal(normalized(receipt.expression),'options?.npcBuyProof');
- assert.equal(receipt.thenStatement.getText(sendAst),'npcBuyDispatcher?.transportResult(options.npcBuyProof, "flushed");');
- assert.equal(normalized(socketTry.catchClause.block),'{ if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof); if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof); if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof); if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof); if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof); if (!options?.npcBuyProof) throw error; npcBuyDispatcher?.transportResult(options.npcBuyProof, "unknown"); console.error("[mir2] NPC purchase send outcome is unknown", error); return false; }');
+ assert.ok(ts.isIfStatement(receipt));assert.equal(normalized(receipt.expression),'options?.npcBuyProof || options?.npcPearlBuyProof');
+ assert.equal(receipt.thenStatement.getText(sendAst),'npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "flushed");');
+ assert.equal(normalized(socketTry.catchClause.block),'{ if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof); if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof); if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof); if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof); if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof); if (!options?.npcBuyProof && !options?.npcPearlBuyProof) throw error; npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "unknown"); console.error("[mir2] NPC purchase send outcome is unknown", error); return false; }');
  const npcGateCode=ts.transpileModule([...npcEarlyGuards,...npcFinalGuards,socketTry,receipt].map(n=>n.getText(sendAst)).join('\n')+'\nreturn true;',
   {compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
  const actualNpcGate=new Function('command','wireCommand','options','npcBuyDispatcher','legacyNpcBuyAllowed','socket','serialized','console',
@@ -229,7 +236,8 @@ test('production integration captures raw before coalescing and final event proo
   const calls=[],socket={send:value=>calls.push(value)},dispatcher={allows:()=>{calls.push('allows');return false;},claim:()=>{calls.push('claim');return false;},transportResult:()=>calls.push('receipt')},legacy=()=>{calls.push('legacy');return false;};
   assert.equal(runNpcGate({type},{type},{combatProof:{}},dispatcher,legacy,socket,'wire',console),true);
   assert.deepEqual(calls,['wire'],'valid combat commands bypass both NPC proof callbacks');
-  for(const options of [{npcBuyProof:{}},{npcLegacyBuyProof:{}},{npcBuyProof:{},npcLegacyBuyProof:{}}]){
+  for(const options of [{npcBuyProof:{}},{npcLegacyBuyProof:{}},{npcBuyProof:{},npcLegacyBuyProof:{}},
+    {npcPearlBuyProof:{}},{npcBuyProof:{},npcPearlBuyProof:{}},{npcPearlBuyProof:{},npcLegacyBuyProof:{}}]){
    calls.length=0;assert.equal(runNpcGate({type},{type},options,dispatcher,legacy,socket,'wire',console),false);
    assert.deepEqual(calls,[],'actual early guard refuses foreign NPC proofs before callbacks or socket');
   }

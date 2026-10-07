@@ -5,18 +5,18 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 // Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
-const sources = { fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
+const sources = { pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
   rental: { "./social-incoming-replies": "social" }, bag: { "./world-model/item-identity": "identity" },
-  socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{}, guildBuff:{}, socialActions: {}, extended: {} };
+  socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {} };
 const modules = new Map();
 function loadPure(name) {
   assert(Object.hasOwn(sources, name), "module outside pure allowlist");
@@ -296,7 +296,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     storageUiIngressRef: { current: null }, storageServiceActiveRef: { current: false }, storageCompatibilityRef: { current: false },
     setStorageServiceActive: () => {}, setStorageCompatibility: () => {}, setStoragePasswordOpenVersion: () => {}, setStorageServiceOpenVersion: () => {},
     npcBuyDispatcherRef: { current: { withdraw: () => npcWithdrawals.push("withdraw"), status:()=>({flight:null}) } },
-    npcRepairAuthorityRef: { current: { invalidateInventory: () => {}, close: () => {} } },
+    npcRepairAuthorityRef: { current: new (loadPure("repair").NpcRepairService)() },
+    npcPearlShopSourceRef: {current:new (loadPure("pearlSource").NpcPearlShopSource)()},
+    npcPearlSendEpochRef:{current:0},npcPearlBuyProofsRef:{current:new WeakMap()},
     npcRepairDialogBindingRef: { current: null }, npcRepairServiceRef: { current: null }, setNpcRepairService: () => {},
     npcGoldBuyInventoryRef: { current: { invalidate: () => npcInventoryRetirements.push("invalidate") } },
     npcShopClockRef: { current: { service: 3, catalog: 4 } }, npcBuySelectedRef: { current: 77 },
@@ -1836,4 +1838,24 @@ test("actual physical socket-close Auth retirement clears queued secrets and epo
   const retired=page.scope.loginAuthRef.current;
   page.receive("NewAccount",{result:8},page.scope.equipmentConnectionGenerationRef.current,page.socket);
   assert.equal(page.scope.loginAuthRef.current,retired);
+});
+
+
+test("Pearl actual Storage Page service retirement preserves wallet and session retirement clears it",()=>{
+  const page=harness(),source=page.scope.npcPearlShopSourceRef.current;
+  const owner=page.currentSocialReceiveOwner();assert(owner);
+  const wallet=source.observeWallet(owner,-1);assert(wallet);
+  page.retireNpcShopService();assert.strictEqual(source.currentWallet(owner),wallet);
+  assert.equal(page.scope.npcShopServiceRef.current,null);
+  page.retireEquipmentSession();assert.equal(source.currentWallet(owner),null);
+  assert.equal(source.currentCatalog(owner),null);
+});
+
+test("Pearl foreign or mixed buy proof cannot enter actual Storage sendRaw on another command",()=>{
+  for(const command of [{type:"magic",spell:1,direction:0},{type:"buyItem",itemIndex:0,count:2,panelType:0}]){
+    const page=harness(),before=page.attempts;
+    const options=command.type==="buyItem"?{npcPearlBuyProof:{},npcBuyProof:{}}:{npcPearlBuyProof:{}};
+    assert.equal(page.sendRaw(command,options),false);
+    assert.equal(page.attempts,before);assert.equal(page.sent.length,0);
+  }
 });

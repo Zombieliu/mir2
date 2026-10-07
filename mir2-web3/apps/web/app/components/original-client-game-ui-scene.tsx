@@ -609,6 +609,8 @@ function GameUiSceneInner({
           key={`${npcShopService.serviceRevision}:${npcShopService.catalogRevision}`}
           t={t}
           npcName={npcShopService.npcName}
+          currency={npcShopService.currency ?? "gold"}
+          pearlBalance={npcShopService.pearlBalance ?? null}
           gold={world.gold}
           initialTab={npcShopService.supportsBuy ? "buy" : "sell"}
           tab={npcShopTab}

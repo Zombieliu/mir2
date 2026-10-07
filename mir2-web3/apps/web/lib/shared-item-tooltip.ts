@@ -1,3 +1,6 @@
+import { parseCrystalItemInfo, type CrystalCatalogInfo } from "./crystal-item-source";
+export type { CrystalCatalogInfo } from "./crystal-item-source";
+
 /** Read-only bridge to the same Crystal tooltip calculation used by Native. */
 export type CrystalTooltipKind = "name" | "attack" | "defence" | "weight" | "awake" | "socket" | "need" | "bind" | "overlap" | "story" | "gmMade";
 export type CrystalTooltipColour = "white" | "yellow" | "deepSkyBlue" | "darkOrange" | "plum" | "red" | "cyan" | "darkKhaki" | "khaki" | "orchid";
@@ -31,12 +34,6 @@ const signedI32 = (value: unknown): value is number => typeof value === "number"
   && value >= -2147483648 && value <= 2147483647;
 const cache = new WeakMap<CrystalTooltipRuntime, {getter: NonNullable<CrystalTooltipRuntime["getMir2ItemTooltipDocument"]>;
   entries: Map<string, CrystalTooltipDocument>}>();
-export type CrystalCatalogInfo = Readonly<{
-  itemIndex: number;
-  name: string;
-  icon: number;
-  raw: Readonly<Record<string, unknown>>;
-}>;
 const catalogCache = new WeakMap<CrystalTooltipRuntime, {
   getter: (json: string) => string;
   entries: Map<number, CrystalCatalogInfo>;
@@ -58,38 +55,8 @@ export function readSharedItemCatalogInfo(runtime: CrystalTooltipRuntime | null,
     if (typeof text !== "string" || text.length > 65536) return null;
     const response: unknown = JSON.parse(text);
     if (!record(response) || response.version !== 1 || response.ok !== true || !record(response.itemInfo)) return null;
-    const raw = response.itemInfo;
-    if (raw.item_index !== itemIndex || typeof raw.name !== "string" || !raw.name
-      || raw.name.length > 512 || raw.name.includes("\0")) return null;
-    const unsignedFields: ReadonlyArray<readonly [string, number]> = [
-      ["item_type", 255], ["grade", 255], ["required_type", 255], ["required_class", 255],
-      ["required_gender", 255], ["item_set", 255], ["weight", 255], ["light", 255], ["required_amount", 255],
-      ["image", 65535], ["durability", 65535], ["stack_size", 65535], ["price", 4294967295],
-      ["effect", 255], ["random_stats_id", 255], ["slots", 255],
-    ];
-    if (unsignedFields.some(([key, max]) => !integer(raw[key], max))) return null;
-    for (const key of ["shape", "bind", "unique"]) {
-      if (typeof raw[key] !== "number" || !Number.isSafeInteger(raw[key]) || raw[key] < -32768 || raw[key] > 32767) return null;
-    }
-    const flags = ["start_item", "need_identify", "show_group_pickup", "class_based", "level_based", "can_mine",
-      "global_drop_notify", "can_fast_run", "can_awakening"];
-    if (flags.some(key => typeof raw[key] !== "boolean")
-      || !(raw.tooltip === null || typeof raw.tooltip === "string" && raw.tooltip.length <= 8192 && !raw.tooltip.includes("\0"))
-      || !Array.isArray(raw.stats) || raw.stats.length > 256) return null;
-    let statBudget = 0;
-    const stats = [];
-    for (const row of raw.stats) {
-      if (!record(row) || Object.keys(row).length !== 2 || !integer(row.stat, 255)
-        || typeof row.value !== "number" || !Number.isSafeInteger(row.value) || row.value < -2147483648 || row.value > 2147483647) return null;
-      statBudget += Math.abs(row.value);
-      if (statBudget > 536870911) return null;
-      stats.push(Object.freeze({stat: row.stat, value: row.value}));
-    }
-    const fields = new Set(["item_index", "name", "shape", "bind", "unique", "tooltip", "stats",
-      ...unsignedFields.map(([key]) => key), ...flags]);
-    if (Object.keys(raw).length !== fields.size || Object.keys(raw).some(key => !fields.has(key))) return null;
-    const result = Object.freeze({itemIndex, name: raw.name, icon: raw.image as number,
-      raw: Object.freeze({...raw, stats: Object.freeze(stats)})});
+    const result = parseCrystalItemInfo(response.itemInfo, itemIndex);
+    if (!result) return null;
     if (cached.entries.size >= 512) cached.entries.delete(cached.entries.keys().next().value!);
     cached.entries.set(itemIndex, result);
     return result;

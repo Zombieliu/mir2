@@ -5,12 +5,26 @@ import ts from "typescript";
 
 // The repository's existing source-test loader. Imports are type-only: no
 // runtime/WASM initialization, product socket, browser or gateway dependency.
+// Source24 real pure Pearl dependencies; no Core loader or WASM instance.
+function loadPearlBuyDependency(relative, dependencies = {}) {
+  const source = readFileSync(new URL(relative, import.meta.url), "utf8");
+  const output = ts.transpileModule(source, {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  const loaded = {exports:{}};
+  new Function("require","exports","module",output)(name=>{
+    assert.ok(Object.hasOwn(dependencies,name),"unexpected Pearl dependency "+name);
+    return dependencies[name];
+  },loaded.exports,loaded);
+  return loaded.exports;
+}
+const actualCrystalItem=loadPearlBuyDependency("../lib/crystal-item-source.ts");
+const actualPearlSource=loadPearlBuyDependency("../lib/npc-pearl-buy-source.ts",{"./crystal-item-source":actualCrystalItem});
+const actualPearlBuy=loadPearlBuyDependency("../lib/npc-pearl-buy.ts",{"./npc-pearl-buy-source":actualPearlSource});
 const compiled = ts.transpileModule(readFileSync(new URL("../lib/bevy-npc-shop-buy.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 });
 const module = { exports: {} };
 new Function("require", "exports", "module", compiled.outputText)(
-  name => { throw new Error("Unexpected runtime dependency " + name); }, module.exports, module,
+  name => { if(name === "./npc-pearl-buy") return actualPearlBuy; throw new Error("Unexpected runtime dependency " + name); }, module.exports, module,
 );
 const { quoteNpcGoldBuy, NpcGoldBuyDispatcher } = module.exports;
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -382,6 +396,9 @@ const pagePureSources = {
   storage: "../lib/storage-gateway-adapter.ts",
   bag: "../lib/bevy-bag-model.ts",
   operations: "../lib/social-window-operations.ts",
+  repair: "../lib/npc-repair-service.ts",
+  belt: "../lib/bag-belt-move-dispatcher.ts",
+  incoming:"../lib/social-incoming-replies.ts",creature:"../lib/creature-player-ui.ts",cash:"../lib/cash-game-shop-ui.ts",
 };
 const pagePureRequires = {
   identity: {}, equipment: { "./world-model/item-identity": "identity" },
@@ -389,7 +406,10 @@ const pagePureRequires = {
   storage: { "./equipment-gateway-adapter": "equipment",
     "./world-model/item-identity": "identity", "./mail-parcel-gateway-adapter": "parcel" },
   bag: { "./world-model/item-identity": "identity" },
-  operations: {},
+  operations: {}, repair: {"./equipment-gateway-adapter":"equipment"},
+  belt: {"./mail-parcel-gateway-adapter":"parcel"},
+  incoming:{},creature:{"./social-incoming-replies":"incoming"},
+  cash:{"./social-incoming-replies":"incoming","./creature-player-ui":"creature"},
 };
 const pagePureModules = new Map();
 function loadPagePure(name) {
@@ -411,7 +431,10 @@ const actualPageAst = ts.createSourceFile("actual-npc-buy-page.tsx", actualPageS
   ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcShopItem",
   "legacyNpcBuyAllowed", "buyNpcShopItem", "retireNpcShopService", "send", "sendRaw",
-  "itemCommandRequiresOwner", "socialItemMutationAllowed", "parityItemMutationAllowed"];
+  "itemCommandRequiresOwner", "socialItemMutationAllowed", "parityItemMutationAllowed",
+  "npcPearlBuyCurrent", "readNpcPearlBuyCurrent", "readNpcBuyCurrent", "npcPearlSendCurrent",
+  "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner", "observeNpcPearlWallet",
+  "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture"];
 const npcPageDeclarations = new Map();
 const npcPageDispatcherCreations = [];
 const npcResponseClauses = [];
@@ -437,6 +460,13 @@ const npcPageJavaScript = ts.transpileModule(npcPageNames.map(name => npcPageDec
   + "\nfunction createActualNpcDispatcher() { return " + npcPageDispatcherCreations[0] + "; }", {
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
 }).outputText;
+
+// Extract only actual pure auth classifiers; do not initialize login runtime.
+const npcAuthAst=ts.createSourceFile("npc-auth-selectors.ts",readFileSync(new URL("../lib/client-login-runtime.ts",import.meta.url),"utf8"),ts.ScriptTarget.Latest,true);
+const npcAuthDeclarations=npcAuthAst.statements.filter(node=>ts.isFunctionDeclaration(node)&&["preauthCommandKind","isSensitiveGatewayCommand"].includes(node.name?.text));
+assert.equal(npcAuthDeclarations.length,2);
+const npcAuthJavaScript=ts.transpileModule(npcAuthDeclarations.map(node=>node.getText(npcAuthAst).replace(/^export /,"")).join("\n"),{compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+const npcAuthSelectors=new Function(npcAuthJavaScript+"\nreturn {preauthCommandKind,isSensitiveGatewayCommand};")();
 const npcPureBag = loadPagePure("bag");
 const npcPureParcel = loadPagePure("parcel");
 const npcPureStorage = loadPagePure("storage");
@@ -486,6 +516,19 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
     heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
+    ...npcAuthSelectors, npcPearlJson:actualPearlSource.npcPearlJson,parseNpcPearlBuyPlan:actualPearlBuy.parseNpcPearlBuyPlan,
+    npcPearlShopSourceRef:{current:new actualPearlSource.NpcPearlShopSource()},
+    npcPearlBuyProofsRef:{current:new WeakMap()},npcPearlSendEpochRef:{current:0},
+    socialSceneRevisionRef:{current:0}, document:{visibilityState:"visible",hasFocus:()=>true},
+    bagBeltMovesRef:{current:new (loadPagePure("belt").BagBeltMoveDispatcher)()},
+    bagBeltInventoryReadyRef:{current:null}, equipmentSnapshotRef:{current:null},
+    storageRentalRef:{current:{pending:null}},
+    cashPurchasesRef:{current:new (loadPagePure("cash").CashGameShopPurchases)()},
+    creatureOperationsRef:{current:new (loadPagePure("creature").CreaturePlayerOperations)()},
+    npcRepairAuthorityRef:{current:new (loadPagePure("repair").NpcRepairService)()},
+    npcRepairDialogBindingRef:{current:null}, setNpcRepairService:()=>{},
+    worldFishingGestureRegistryRef:{current:new WeakMap()},
+    worldFishingActiveGestureRef:{current:null},worldFishingQueuedRef:{current:null},
     NpcGoldBuyDispatcher, projectBevyBagModel: npcPureBag.projectBevyBagModel,
     npcGoldBuyInventoryRef: { current: new module.exports.NpcGoldBuyInventoryReadiness() },
     mailMutationAllowed: npcPureParcel.mailMutationAllowed,
@@ -536,11 +579,11 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   // Use the actual Page constructor expression, including its stable runtime
   // getter and read closure. Only trace wrappers surround real methods.
   const dispatcher = api.createActualNpcDispatcher();
-  for (const name of ["prepare", "allows", "claim"]) {
+  for (const name of ["prepare", "allows", "claim", "preparePearl", "allowsPearl", "claimPearl"]) {
     const actual = dispatcher[name].bind(dispatcher);
     dispatcher[name] = (...args) => {
       trace.push(name); const result = actual(...args);
-      if (name === "prepare" && result) proofs.push(result);
+      if ((name === "prepare" || name === "preparePearl") && result) proofs.push(result);
       return result;
     };
   }
@@ -1533,4 +1576,415 @@ test("matching connection facade contract reuses the immutable holder and socket
   assert.equal(p.instances.length,1);
   assert(p.inputs("connection").every(input=>input.run==="1"&&input.connection==="1"));
   assert.strictEqual(Object.getOwnPropertyDescriptor(documentOwner,key).value,holder);
+});
+
+// Source24: reuse the existing actual Page harness and scripted Core protocol.
+// These host DTOs are fixed ABI replies, never an implementation of the planner.
+const pearlHostPlan={version:1,ok:true,maxQuantity:99,quote:34,admittedCount:2,denial:0};
+const pearlHostWire={type:"buyItem",itemIndex:0,count:2,panelType:0};
+const pearlHostTicket={transport:"1",body:JSON.stringify(pearlHostWire)};
+function installPearlPage(f) {
+  const rawGood=uid=>{const index=5,info={item_index:index,name:"Same visible name",item_type:1,grade:1,required_type:0,required_class:31,required_gender:3,item_set:0,shape:0,weight:4,light:0,required_amount:5,image:0,durability:4000,stack_size:20,price:900,start_item:false,effect:0,need_identify:false,show_group_pickup:false,class_based:false,level_based:false,can_mine:false,global_drop_notify:false,bind:0,unique:0,random_stats_id:0,can_fast_run:false,can_awakening:false,slots:0,stats:[{stat:4,value:2},{stat:5,value:4}],tooltip:null},
+    userItem={unique_id:uid,item_index:index,current_dura:0,max_dura:0,count:1,soul_bound_id:-1,identified:true,cursed:false,slots:[null],gem_count:0,added_stats:[{stat:5,value:3}],awake_type:0,awake_values:[],refined_value:0,refine_added:0,refine_success_chance:0,wedding_ring:-1,expire_info:null,rental_information:null,is_shop_item:true,sealed_info:null,gm_made:false};
+    return {...copy(userItem),id:uid,uniqueId:uid,itemIndex:index,name:"Same visible name",price:17,icon:10,grade:1,description:"raw Pearl trade",
+      tooltipSource:{info,realInfo:null,userItem,socketInfos:[null],realSocketInfos:[]}};};
+  const raw={panelType:0,rate:1.25,list:[rawGood(0),rawGood(42)]};
+  const physical=f.currentSocialReplyOwner(false), source=f.scope.npcPearlShopSourceRef.current;
+  const catalog=source.observeCatalog(physical,"NPCPearlGoods",raw,()=>true); assert(catalog);
+  const wallet=source.observeWallet(physical,200); assert(wallet);
+  Object.assign(f.scope.npcShopService,{currency:"pearls",catalogRevision:catalog.revision,
+    pearlBalance:wallet.amount,buyItems:catalog.goods.map(good=>({id:good.uniqueId,name:good.name,
+      price:good.unitPrice,count:good.count,stock:good.stock,icon:good.icon,description:good.description,
+      tooltipSource:good.tooltipSource,requiresPearlBuyPlan:true}))});
+  f.scope.world.gold=0;
+  const readyOwner={connectionGeneration:1,sessionGeneration:2,ownerRevision:0,playerObjectId:1};
+  f.scope.npcGoldBuyInventoryRef.current.finish(f.scope.npcGoldBuyInventoryRef.current.begin(readyOwner),
+    readyOwner,true,npcPureBag.projectBevyBagModel(f.scope.world,{npcGoldTrade:true}).model);
+  f.pearlCalls=[];f.pearlAnswer=()=>pearlHostPlan;
+  const getter=function(json){f.trace.push("Pearl.planner");f.pearlCalls.push(JSON.parse(json));
+    const answer=f.pearlAnswer(JSON.parse(json));return typeof answer==="string"?answer:JSON.stringify(answer);};
+  f.scope.questCoreRuntimeRef.current.getMir2NpcPearlBuyPlan=getter;
+  f.protocol.ready("9007199254740993","1",pearlHostTicket);
+  f.rawPearl=raw;f.physicalPearl=physical;f.pearlGetter=getter;
+  return f;
+}
+
+test("Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price",()=>{
+  const f=installPearlPage(npcPageHarness());
+  const quote=f.quoteNpcShopItem(0,100);
+  assert.equal(quote.currency,"pearls");assert.equal(quote.totalGold,null);assert.equal(quote.totalPearls,34);
+  assert.deepEqual(quote.command,pearlHostWire);assert.equal(f.calls.length,0);
+  assert.deepEqual(f.pearlCalls,[{allowsBuy:true,selected:true,usePearls:true,uniqueId:0,unitPrice:17,
+    stock:-1,quantity:100,walletKnown:true,pearls:200,occupied:1,infoPrice:900,rate:1.25}]);
+  assert.equal(f.readNpcGoldBuyCurrent(),null);assert.equal(f.readNpcBuyCurrent().currency,"pearls");
+  assert.equal(f.scope.npcShopService.buyItems[0].name,f.scope.npcShopService.buyItems[1].name);
+  assert.equal(f.attempts.length,0);
+});
+
+test("Pearl actual Page final claim enters the existing Core immediately before exact four-key send",()=>{
+  const f=installPearlPage(npcPageHarness());
+  f.protocol.set("enter",input=>{f.trace.push("Core.enter");assert.deepEqual(input.ticket,pearlHostTicket);
+    return decision("entered",{ticket:pearlHostTicket});});
+  f.buyNpcShopItem(0,2,0);
+  assert.equal(f.proofs.length,1);assert(Object.isFrozen(f.proofs[0].proof));
+  assert.deepEqual(Object.keys(f.proofs[0].proof),[]);assert.deepEqual(f.sent,[pearlHostWire]);
+  assert.deepEqual(Object.keys(f.sent[0]).sort(),["count","itemIndex","panelType","type"]);
+  assert.deepEqual(f.trace,["preparePearl","Pearl.planner","allowsPearl","Pearl.planner","action","claimPearl","Pearl.planner","Core.enter","socket"]);
+  assert.equal(f.protocol.instances.length,1);assert.equal(f.calls.length,0);assert.equal(f.pearlCalls.length,3);
+  assert.equal(f.protocol.inputs("receipt")[0].outcome,"flushed");
+  assert.equal(f.protocol.inputs("receipt").at(-1).outcome,"definitelyUnsent");
+  assert.equal(f.sendRaw(f.proofs[0].wire,{npcPearlBuyProof:f.proofs[0].proof}),false);
+  assert.equal(f.attempts.length,1);
+});
+
+test("Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods",()=>{
+  const f=installPearlPage(npcPageHarness());f.scope.npcBuySelectedRef.current=0;
+  const live=f.readNpcPearlBuyCurrent();assert(live);
+  assert.equal(f.dispatcher.prepare(live,2),null);assert.equal(f.dispatcher.preview(live,2),null);
+  const prepared=f.dispatcher.preparePearl(live,2);assert(prepared);
+  assert.equal(f.dispatcher.allows(prepared.proof,prepared.wire),false);
+  assert.equal(f.dispatcher.claim(prepared.proof,prepared.wire,JSON.stringify(prepared.wire),f.socket),false);
+  assert.equal(f.sendRaw(prepared.wire,{npcBuyProof:prepared.proof}),false);
+  assert.equal(f.sendRaw(prepared.wire,{npcLegacyBuyProof:prepared.proof}),false);
+  for(const options of [{npcBuyProof:prepared.proof,npcPearlBuyProof:prepared.proof},
+    {npcPearlBuyProof:prepared.proof,npcLegacyBuyProof:{}},
+    {npcBuyProof:{},npcPearlBuyProof:prepared.proof,npcLegacyBuyProof:{}}])
+    assert.equal(f.sendRaw(prepared.wire,options),false);
+  assert.equal(f.dispatcher.allowsPearl(prepared.proof,prepared.wire),true);
+  const gold=npcPageHarness();gold.scope.npcBuySelectedRef.current=77;
+  const goldProof=gold.dispatcher.prepare(gold.readNpcGoldBuyCurrent(),2);assert(goldProof);
+  assert.equal(gold.dispatcher.allowsPearl(goldProof.proof,goldProof.wire),false);
+  assert.equal(gold.dispatcher.claimPearl(goldProof.proof,goldProof.wire,JSON.stringify(goldProof.wire),gold.socket),false);
+  assert.equal(f.attempts.length,0);assert.equal(gold.attempts.length,0);
+});
+
+test("Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID",()=>{
+  for(const quantity of [99,100,65535]){
+    const f=installPearlPage(npcPageHarness());f.buyNpcShopItem(0,quantity,0);
+    assert.deepEqual(f.sent,[pearlHostWire]);assert.equal(f.pearlCalls[0].quantity,quantity);
+    assert(f.pearlCalls.every(input=>input.uniqueId===0&&input.unitPrice===17));
+  }
+  for(const [id,quantity,panel] of [[0,0,0],[0,65536,0],[5,2,0],[0,2,1],[-1,2,0],[42.5,2,0]]){
+    const f=installPearlPage(npcPageHarness());f.buyNpcShopItem(id,quantity,panel);
+    assert.equal(f.attempts.length,0);assert.equal(f.proofs.length,0);assert.equal(f.pearlCalls.length,0);
+  }
+});
+
+test("Pearl actual Page missing or invalid wallet never admits a free host quote",()=>{
+  for(const amount of [null,undefined,"0",.5,NaN,Infinity,2147483648]){
+    const f=installPearlPage(npcPageHarness());f.scope.npcPearlShopSourceRef.current.observeWallet(f.physicalPearl,amount);
+    f.pearlAnswer=()=>({...pearlHostPlan,quote:0});f.buyNpcShopItem(0,2,0);
+    assert.equal(f.proofs.length,0);assert.equal(f.attempts.length,0);assert.equal(f.pearlCalls.length,0);
+  }
+  const known=installPearlPage(npcPageHarness());
+  known.scope.npcPearlShopSourceRef.current.observeWallet(known.physicalPearl,-1);
+  known.pearlAnswer=()=>({...pearlHostPlan,quote:0});known.buyNpcShopItem(0,2,0);
+  assert.deepEqual(known.sent,[pearlHostWire]);assert.equal(known.pearlCalls[0].walletKnown,true);
+  assert.equal(known.pearlCalls[0].pearls,-1,"signed wallet delegates normalization to Core/PUI");
+});
+
+test("Pearl actual Page wallet catalog and service ABA invalidate exact captured source",()=>{
+  for(const mutate of [
+    f=>f.scope.npcPearlShopSourceRef.current.observeWallet(f.physicalPearl,200),
+    f=>f.scope.npcPearlShopSourceRef.current.observeCatalog(f.physicalPearl,"NPCPearlGoods",f.rawPearl,()=>true),
+    f=>{f.scope.npcShopClockRef.current.service++;f.scope.npcShopServiceRef.current={...f.scope.npcShopServiceRef.current,serviceRevision:2};},
+    f=>{f.retireNpcShopService();f.scope.npcShopServiceRef.current=f.scope.npcShopService;},
+  ]){
+    const f=installPearlPage(npcPageHarness());f.onAction(()=>mutate(f));f.buyNpcShopItem(0,2,0);
+    assert.equal(f.proofs.length,1);assert.equal(f.attempts.length,0);
+    assert.equal(f.protocol.inputs("enter").length,0);
+    assert.equal(f.sendRaw(f.proofs[0].wire,{npcPearlBuyProof:f.proofs[0].proof}),false);
+  }
+});
+
+test("Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration",()=>{
+  for(const edge of ["socket","connection","session","scene","map","owner","core","visibility","focus"]){
+    const f=installPearlPage(npcPageHarness());const savedCore=f.scope.questCoreRuntimeRef.current;
+    f.onAction(()=>{
+      if(edge==="socket")f.scope.socketRef.current={readyState:1};
+      if(edge==="connection")f.scope.equipmentConnectionGenerationRef.current++;
+      if(edge==="session")f.scope.equipmentSessionGenerationRef.current++;
+      if(edge==="scene")f.scope.socialSceneRevisionRef.current++;
+      if(edge==="map")f.scope.world.mapFileName="D001";
+      if(edge==="owner")f.scope.equipmentBagOwnerRef.current.ownerRevision++;
+      if(edge==="core")f.scope.questCoreRuntimeRef.current={...savedCore};
+      if(edge==="visibility")f.scope.document.visibilityState="hidden";
+      if(edge==="focus")f.scope.document.hasFocus=()=>false;
+    });f.buyNpcShopItem(0,2,0);
+    assert.equal(f.attempts.length,0,edge);assert.equal(f.protocol.inputs("enter").length,0,edge);
+    f.scope.socketRef.current=f.socket;f.scope.equipmentConnectionGenerationRef.current=1;
+    f.scope.equipmentSessionGenerationRef.current=2;f.scope.socialSceneRevisionRef.current=0;
+    f.scope.world.mapFileName="D000";f.scope.equipmentBagOwnerRef.current.ownerRevision=0;
+    f.scope.questCoreRuntimeRef.current=savedCore;f.scope.document.visibilityState="visible";
+    f.scope.document.hasFocus=()=>true;
+    assert.equal(f.sendRaw(f.proofs[0].wire,{npcPearlBuyProof:f.proofs[0].proof}),false,edge);
+    assert.equal(f.attempts.length,0,edge);
+  }
+});
+
+test("Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade",()=>{
+  for(const edge of ["denial","price","getter","getterThrow"]){
+    const f=installPearlPage(npcPageHarness());f.onAction(()=>{
+      if(edge==="denial")f.pearlAnswer=()=>({...pearlHostPlan,admittedCount:null,denial:7});
+      if(edge==="price")f.pearlAnswer=()=>({...pearlHostPlan,quote:35});
+      if(edge==="getter")f.scope.questCoreRuntimeRef.current.getMir2NpcPearlBuyPlan=json=>f.pearlGetter(json);
+      if(edge==="getterThrow")Object.defineProperty(f.scope.questCoreRuntimeRef.current,"getMir2NpcPearlBuyPlan",{get(){throw Error("getter retired");}});
+    });f.buyNpcShopItem(0,2,0);
+    assert.equal(f.attempts.length,0);assert.equal(f.calls.length,0);assert.equal(f.legacyProofs.length,0);
+    assert.equal(f.protocol.inputs("enter").length,0);
+  }
+});
+
+test("Pearl actual Page action and final Core entry reentrancy cannot publish a second flight",()=>{
+  for(const edge of ["action","enter"]){
+    const f=installPearlPage(npcPageHarness());let once=false;
+    const reenter=()=>{if(once)return;once=true;f.buyNpcShopItem(0,2,0);};
+    if(edge==="action")f.onAction(reenter);
+    else f.protocol.set("enter",()=>{reenter();return decision("entered",{ticket:pearlHostTicket});});
+    f.buyNpcShopItem(0,2,0);assert.equal(once,true);assert.equal(f.proofs.length,1);
+    assert.deepEqual(f.sent,[pearlHostWire]);assert.equal(f.protocol.inputs("bind").length,1);
+    assert.equal(f.protocol.inputs("enter").length,1);assert.equal(f.protocol.instances.length,1);
+    assert.equal(f.trace.filter(entry=>entry==="action").length,1);
+  }
+});
+
+test("Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement",()=>{
+  for(const phase of ["entered","unknown","flushed"]){
+    const f=installPearlPage(npcPageHarness());if(phase==="unknown")f.throwSocket();
+    f.buyNpcShopItem(0,2,0);assert.equal(f.attempts.length,1);
+    // Script a lawful already-held Core state. No host fixture simulates transitions.
+    f.protocol.hold(phase,"9007199254740993","1",pearlHostTicket);
+    for(const op of ["observe","availability"])f.protocol.set(op,decision(phase,{ticket:pearlHostTicket}));
+    f.scope.npcPearlShopSourceRef.current.observeWallet(f.physicalPearl,999);
+    f.scope.npcPearlShopSourceRef.current.observeCatalog(f.physicalPearl,"NPCPearlGoods",f.rawPearl,()=>true);
+    f.dispatcher.observe();f.buyNpcShopItem(0,2,0);
+    assert.equal(f.attempts.length,1);assert.equal(f.dispatcher.status().flight.phase,phase);
+    assert.equal(f.quoteNpcShopItem(0,2).blockReason,"localPending");
+    const holder=f.slot;f.dispatcher.dispose();f.dispatcher.activate();f.dispatcher.observe();
+    assert.strictEqual(f.slot,holder);assert.equal(f.protocol.instances.length,1);
+    assert.equal(f.dispatcher.status().flight.phase,phase);assert.equal(f.attempts.length,1);
+    assert(f.protocol.inputs("receipt").every(input=>input.ticket.body===JSON.stringify(pearlHostWire)));
+  }
+});
+
+test("Pearl actual Page own parcel hero and storage reservations reject before Core entry",()=>{
+  for(const edge of ["hero","mailCollect","storage","ui"]){
+    const f=installPearlPage(npcPageHarness());f.onAction(()=>{
+      if(edge==="hero")f.scope.heroOperationsRef.current.pending={state:"entered",proof:{}};
+      if(edge==="mailCollect")f.scope.mailCollectBarrierRef.current={};
+      if(edge==="storage")f.scope.pendingStorageRequestsRef.current.set(1,{enteredSocket:true});
+      if(edge==="ui")f.scope.npcShopUiIngressRef.current={blocksInput:()=>true};
+    });f.buyNpcShopItem(0,2,0);
+    assert.equal(f.attempts.length,0,edge);assert.equal(f.protocol.inputs("enter").length,0,edge);
+  }
+});
+
+test("Pearl actual Page retires catalog while retaining personal wallet on service close",()=>{
+  const f=installPearlPage(npcPageHarness()), source=f.scope.npcPearlShopSourceRef.current;
+  const wallet=source.currentWallet(f.physicalPearl);f.retireNpcShopService();
+  assert.equal(source.currentCatalog(f.physicalPearl),null);assert.strictEqual(source.currentWallet(f.physicalPearl),wallet);
+  assert.equal(f.scope.npcShopServiceRef.current,null);assert.equal(f.readNpcBuyCurrent(),null);
+  assert.equal(f.quoteNpcShopItem(0,2),null);f.buyNpcShopItem(0,2,0);assert.equal(f.attempts.length,0);
+});
+
+// Extract the authentic receive fence and its wallet step, plus both complete
+// creature-list clauses. The rest of gateway/game projection is outside this fixture.
+let pearlReceiveFence,pearlWalletReceiveStep;
+const pearlCreatureCases=new Map();
+function visitPearlReceive(node){
+  if(ts.isFunctionDeclaration(node)&&node.name?.text==="handleGatewayEvent"){
+    assert.equal(pearlReceiveFence,undefined);pearlReceiveFence=node.body.statements[0].getText(actualPageAst);
+    const steps=node.body.statements.filter(statement=>ts.isIfStatement(statement)
+      &&statement.expression.getText(actualPageAst)==='event.type === "packet" && event.packet === "UpdateIntelligentCreatureList"');
+    assert.equal(steps.length,1);pearlWalletReceiveStep=steps[0].getText(actualPageAst);
+  }
+  if(ts.isCaseClause(node)&&ts.isStringLiteral(node.expression)&&["NewIntelligentCreature","UpdateIntelligentCreatureList"].includes(node.expression.text)){
+    assert.equal(pearlCreatureCases.has(node.expression.text),false);pearlCreatureCases.set(node.expression.text,node.getText(actualPageAst));
+  }
+  ts.forEachChild(node,visitPearlReceive);
+}
+visitPearlReceive(actualPageAst);assert.equal(pearlCreatureCases.size,2);
+const pearlReceiveJs=ts.transpileModule('return function(event,connectionGeneration,source){'+pearlReceiveFence+'\n'
+  +pearlWalletReceiveStep+'\nconst payload=event.payload??{};switch(event.packet){'
+  +["NewIntelligentCreature","UpdateIntelligentCreatureList"].map(name=>pearlCreatureCases.get(name)).join("\n")+'}};',
+  {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+
+test("Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount",()=>{
+  const f=installPearlPage(npcPageHarness()),source=f.scope.npcPearlShopSourceRef.current;
+  f.scope.world.stage5Systems={intelligentCreatures:[]};
+  const receive=new Function("equipmentConnectionGenerationRef","socketRef","observeNpcPearlWallet","updateWorld",pearlReceiveJs)(
+    f.scope.equipmentConnectionGenerationRef,f.scope.socketRef,f.observeNpcPearlWallet,
+    fn=>{f.scope.worldRef.current=fn(f.scope.worldRef.current);});
+  const old=source.currentWallet(f.physicalPearl);
+  receive({type:"packet",packet:"UpdateIntelligentCreatureList",payload:{pearlCount:999}},0,f.socket);
+  receive({type:"packet",packet:"UpdateIntelligentCreatureList",payload:{pearlCount:999}},1,{});
+  assert.strictEqual(source.currentWallet(f.physicalPearl),old);
+  receive({type:"packet",packet:"NewIntelligentCreature",payload:{creatureList:[{name:"new creature"}]}},1,f.socket);
+  assert.strictEqual(source.currentWallet(f.physicalPearl),old);
+  assert.deepEqual(f.scope.worldRef.current.stage5Systems.intelligentCreatures,[{name:"new creature"}]);
+  receive({type:"packet",packet:"UpdateIntelligentCreatureList",payload:{pearlCount:-1,creatureList:[]}},1,f.socket);
+  assert.equal(source.currentWallet(f.physicalPearl).amount,-1);
+  assert(source.currentWallet(f.physicalPearl).revision>old.revision);
+  receive({type:"packet",packet:"UpdateIntelligentCreatureList",payload:{creatureList:[]}},1,f.socket);
+  assert.equal(source.currentWallet(f.physicalPearl),null,"missing amount retires wallet, never substitutes free zero");
+});
+
+test("Pearl full snapshot wallet observation remains inside completed owner inventory projection",()=>{
+  const found=[];
+  function visit(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="applyNpcGoldBuyGatewaySnapshot")found.push(node);ts.forEachChild(node,visit);}
+  visit(actualPageAst);assert.equal(found.length,1);
+  const body=found[0].body.statements,tries=body.filter(node=>ts.isTryStatement(node));assert.equal(tries.length,1);
+  const complete=tries[0].finallyBlock.statements.find(node=>ts.isIfStatement(node)&&node.expression.getText(actualPageAst)==="complete");
+  assert(complete);const calls=complete.thenStatement.statements.filter(node=>node.getText(actualPageAst).includes("observeNpcPearlWallet("));
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].getText(actualPageAst),'observeNpcPearlWallet((snapshot.stage5Systems as Record<string,unknown> | null)?.intelligentCreaturePearls);');
+  const outside=tries[0].finallyBlock.statements.filter(node=>node!==complete).map(node=>node.getText(actualPageAst)).join("\n");
+  assert.doesNotMatch(outside,/observeNpcPearlWallet\(/);
+  const raw=ts.transpileModule('return function(complete,snapshot){if(complete){'+calls[0].getText(actualPageAst)+'}};',
+    {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+  const f=installPearlPage(npcPageHarness()),source=f.scope.npcPearlShopSourceRef.current;
+  const observe=new Function("observeNpcPearlWallet",raw)(f.observeNpcPearlWallet),old=source.currentWallet(f.physicalPearl);
+  observe(false,{stage5Systems:{intelligentCreaturePearls:999}});assert.strictEqual(source.currentWallet(f.physicalPearl),old);
+  observe(true,{stage5Systems:{intelligentCreaturePearls:0}});assert.equal(source.currentWallet(f.physicalPearl).amount,0);
+  observe(true,{stage5Systems:{}});assert.equal(source.currentWallet(f.physicalPearl),null);
+});
+
+
+test("Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry",()=>{
+  for(const key of ["npcBuyProof","npcLegacyBuyProof","npcUi","npcRepairProof","combatProof","mailProof","cashProof","creatureProof"]){
+    const f=installPearlPage(npcPageHarness());let checked=false;
+    f.onAction(()=>{
+      if(checked)return;checked=true;
+      const prepared=f.proofs[0];assert(prepared);
+      assert.equal(f.sendRaw(prepared.wire,{npcPearlBuyProof:prepared.proof,[key]:{}}),false,key);
+      assert.equal(f.protocol.inputs("enter").length,0,key);assert.equal(f.attempts.length,0,key);
+    });
+    f.buyNpcShopItem(0,2,0);assert.equal(checked,true);assert.deepEqual(f.sent,[],key);
+    assert.equal(f.protocol.inputs("enter").length,0,key);
+    assert(f.scope.npcPearlSendEpochRef.current>=2,key);
+    f.onAction(null);f.protocol.ready("9007199254740994","1",pearlHostTicket);
+    f.buyNpcShopItem(0,2,0);assert.deepEqual(f.sent,[pearlHostWire],key);
+    assert.equal(f.protocol.inputs("enter").length,1,key);
+  }
+});
+
+const pearlGoodsCases=[];
+(function visit(node){if(ts.isCaseClause(node)&&ts.isStringLiteral(node.expression)&&node.expression.text==="NPCPearlGoods")pearlGoodsCases.push(node.getText(actualPageAst));ts.forEachChild(node,visit);})(actualPageAst);
+assert.equal(pearlGoodsCases.length,1);
+const pearlGoodsReceiveJs=ts.transpileModule('return function(event,connectionGeneration,source){'+pearlReceiveFence+'\nconst payload=event.payload??{};switch(event.packet){'+pearlGoodsCases[0]+'}};',
+  {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+function bindActualPearlGoodsReceive(f){
+  const scope={...f.scope,...f,npcServiceNameRef:{current:"Pearl trader"},
+    updateWorld:fn=>{f.scope.worldRef.current=fn(f.scope.worldRef.current);},
+    setShowInventory:value=>{f.inventoryVisible=value;},setShowCharacter:value=>{f.characterVisible=value;}};
+  const names=Object.keys(scope);return new Function(...names,pearlGoodsReceiveJs)(...names.map(name=>scope[name]));
+}
+
+test("Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0",()=>{
+  const f=installPearlPage(npcPageHarness());f.pearlCalls.length=0;
+  f.pearlAnswer=input=>({...pearlHostPlan,quote:input.unitPrice,admittedCount:null,denial:4});
+  const receive=bindActualPearlGoodsReceive(f);
+  receive({type:"packet",packet:"NPCPearlGoods",payload:f.rawPearl},1,f.socket);
+  const service=f.scope.npcShopServiceRef.current;
+  assert.equal(service.currency,"pearls");assert.equal(service.panelType,0);assert.equal(service.pearlBalance,200);
+  assert.deepEqual(service.buyItems.map(row=>row.id),[0,42]);assert(service.buyItems.every(row=>row.requiresPearlBuyPlan&&!row.requiresGoldBuyPlan));
+  assert.equal(f.pearlCalls.length,2);assert(f.pearlCalls.every(input=>input.walletKnown===false&&input.quantity===1&&input.infoPrice===900&&input.rate===1.25));
+  assert.equal(f.calls.length,0);assert.equal(f.attempts.length,0);assert.equal(f.inventoryVisible,false);assert.equal(f.characterVisible,false);
+  const raw=f.scope.npcPearlShopSourceRef.current.currentCatalog(f.currentSocialReceiveOwner()).rawPayload;
+  assert.deepEqual(raw,f.rawPearl);
+});
+
+test("Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows",()=>{
+  for(const edge of ["missing","badJSON","wrongDenial","priceMismatch","getter","scene"]){
+    const f=installPearlPage(npcPageHarness());const receive=bindActualPearlGoodsReceive(f);
+    f.pearlAnswer=input=>({...pearlHostPlan,quote:input.unitPrice,admittedCount:null,denial:4});
+    if(edge==="missing")delete f.scope.questCoreRuntimeRef.current.getMir2NpcPearlBuyPlan;
+    if(edge==="badJSON")f.pearlAnswer=()=>"{";
+    if(edge==="wrongDenial")f.pearlAnswer=input=>({...pearlHostPlan,quote:input.unitPrice,admittedCount:null,denial:7});
+    if(edge==="priceMismatch")f.pearlAnswer=()=>({...pearlHostPlan,quote:18,admittedCount:null,denial:4});
+    if(edge==="getter"||edge==="scene")f.pearlAnswer=input=>{
+      if(edge==="getter")f.scope.questCoreRuntimeRef.current.getMir2NpcPearlBuyPlan=json=>f.pearlGetter(json);
+      else f.scope.socialSceneRevisionRef.current++;
+      return {...pearlHostPlan,quote:input.unitPrice,admittedCount:null,denial:4};
+    };
+    receive({type:"packet",packet:"NPCPearlGoods",payload:f.rawPearl},1,f.socket);
+    assert.equal(f.scope.npcPearlShopSourceRef.current.currentCatalog(f.currentSocialReceiveOwner()),null,edge);
+    assert.deepEqual(f.scope.npcShopServiceRef.current.buyItems,[],edge);
+    assert.equal(f.scope.npcShopServiceRef.current.panelType,255,edge);assert.equal(f.attempts.length,0);
+  }
+});
+
+test("Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row",()=>{
+  const f=installPearlPage(npcPageHarness());const receive=bindActualPearlGoodsReceive(f);
+  f.pearlAnswer=input=>({...pearlHostPlan,quote:input.unitPrice,admittedCount:null,denial:4});
+  const raw=copy(f.rawPearl);delete raw.list[1].soul_bound_id;
+  receive({type:"packet",packet:"NPCPearlGoods",payload:raw},1,f.socket);
+  assert.deepEqual(f.scope.npcShopServiceRef.current.buyItems,[]);
+  assert.equal(f.scope.npcPearlShopSourceRef.current.currentCatalog(f.currentSocialReceiveOwner()),null);
+  assert.equal(f.attempts.length,0);assert.equal(f.calls.length,0);
+});
+
+
+test("Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read",()=>{
+  for(const edge of ["pending","hidden","focus","hp","dead","catalog","wallet","scene","storage","epoch"]){
+    const f=installPearlPage(npcPageHarness());let checked=false;
+    f.onAction(()=>{
+      if(checked)return;checked=true;const original=f.scope.equipmentControllerRef.current.status;let reads=0;
+      f.scope.equipmentControllerRef.current.status=()=>{
+        reads++;if(reads===2){
+          if(edge==="hidden")f.scope.document.visibilityState="hidden";
+          if(edge==="focus")f.scope.document.hasFocus=()=>false;
+          if(edge==="hp")f.scope.world.playerHp=0;
+          if(edge==="dead")f.scope.world.entities[0].dead=true;
+          if(edge==="catalog")f.scope.npcPearlShopSourceRef.current.retireCatalog();
+          if(edge==="wallet")f.scope.npcPearlShopSourceRef.current.observeWallet(f.physicalPearl,200);
+          if(edge==="scene")f.scope.socialSceneRevisionRef.current++;
+          if(edge==="storage")f.scope.pendingStorageRequestsRef.current.set(1,{enteredSocket:true});
+          if(edge==="epoch")assert.equal(f.sendRaw({type:"gameShopBuy",gIndex:1,quantity:1,priceType:1}),false);
+        }
+        return {ready:true,pending:edge==="pending"&&reads>=2?1:0};
+      };
+      assert.equal(f.npcPearlSendCurrent(f.proofs[0].proof,f.proofs[0].wire,f.socket),false,edge);
+      assert.equal(reads,2,edge);if(edge!=="pending")f.scope.equipmentControllerRef.current.status=original;
+    });
+    f.buyNpcShopItem(0,2,0);assert.equal(checked,true);assert.equal(f.attempts.length,0,edge);
+    assert.equal(f.protocol.inputs("enter").length,0,edge);
+  }
+});
+
+test("Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof",()=>{
+  const f=installPearlPage(npcPageHarness());let nested=false;
+  f.onAction(()=>{if(nested)return;nested=true;const service=f.scope.npcShopServiceRef.current;
+    const wallet=f.scope.npcPearlShopSourceRef.current.currentWallet(f.physicalPearl);
+    assert.equal(f.sendRaw({type:"gameShopBuy",gIndex:1,quantity:1,priceType:1}),false);
+    assert.strictEqual(f.scope.npcShopServiceRef.current,service);
+    assert.strictEqual(f.scope.npcPearlShopSourceRef.current.currentWallet(f.physicalPearl),wallet);
+  });
+  f.buyNpcShopItem(0,2,0);assert.equal(nested,true);assert.equal(f.attempts.length,0);assert.equal(f.protocol.inputs("enter").length,0);
+  const old=f.proofs[0];assert.equal(f.sendRaw(old.wire,{npcPearlBuyProof:old.proof}),false);
+  assert.equal(f.attempts.length,0);assert(f.scope.npcPearlSendEpochRef.current>=3);
+  f.onAction(null);f.protocol.ready("9007199254740994","1",pearlHostTicket);
+  f.buyNpcShopItem(0,2,0);assert.deepEqual(f.sent,[pearlHostWire]);assert.equal(f.proofs.length,2);
+  assert.notStrictEqual(f.proofs[0].proof,f.proofs[1].proof);assert.equal(f.protocol.inputs("enter").length,1);
+});
+
+
+test("Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation",()=>{
+  const f=installPearlPage(npcPageHarness());
+  const raw={panelType:0,rate:1.25,list:Array.from({length:8},(_,uid)=>{
+    const row=copy(f.rawPearl.list[0]);row.id=uid;row.uniqueId=uid;row.unique_id=uid;
+    row.tooltipSource.userItem.unique_id=uid;row.description="p".repeat(4096);return row;
+  })},before=copy(raw);assert(Buffer.byteLength(JSON.stringify(raw))>16384);
+  const catalog=f.scope.npcPearlShopSourceRef.current.observeCatalog(f.physicalPearl,"NPCPearlGoods",raw,()=>true);assert(catalog);
+  f.scope.npcShopService.catalogRevision=catalog.revision;
+  f.scope.npcShopService.buyItems=catalog.goods.map(row=>({id:row.uniqueId,name:row.name,price:row.unitPrice,
+    count:row.count,stock:row.stock,icon:row.icon,tooltipSource:row.tooltipSource,description:row.description,requiresPearlBuyPlan:true}));
+  assert.equal(f.quoteNpcShopItem(0,2).totalPearls,34);
+  assert.deepEqual(f.readNpcPearlBuyCurrent().catalog.rawPayload,before);
+  f.onAction(()=>{raw.list[0].unique_id=999;raw.list[0].price=0;raw.list[0].tooltipSource.userItem.added_stats[0].value=999;});
+  f.buyNpcShopItem(0,2,0);assert.deepEqual(f.sent,[pearlHostWire]);assert.equal(f.protocol.inputs("enter").length,1);
+  const lease=f.scope.npcPearlBuyProofsRef.current.get(f.proofs[0].proof);assert(lease);
+  assert.deepEqual(JSON.parse(lease.currentJson).catalog.rawPayload,before);
+  assert.deepEqual(catalog.rawPayload,before);assert(Object.isFrozen(catalog.rawPayload.list[0].tooltipSource.userItem));
+  assert.equal(f.calls.length,0);assert.equal(f.pearlCalls.length,4);
 });

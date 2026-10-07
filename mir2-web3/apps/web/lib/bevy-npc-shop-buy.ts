@@ -1,4 +1,5 @@
 import type { BevyInventoryModel } from "./bevy-bag-model";
+import { captureNpcPearlBuy, invokeNpcPearlBuy, type NpcPearlBuyCurrent, type NpcPearlBuyCapture, type NpcPearlBuyQuote } from "./npc-pearl-buy";
 import type { NpcGoldBuyAttemptSlotRuntime, NpcGoldBuyAttemptState, NpcGoldBuyTransportTicket } from "./client-core-runtime";
 
 export type NpcGoldBuyGood = {
@@ -19,26 +20,32 @@ export type NpcGoldBuyOwner = {
 /** JSON-only local input/layout context; no renderer measurement is required. */
 export type NpcGoldBuyPresentation = Readonly<Record<string, unknown>> | null;
 export type NpcGoldBuyCurrent = {
+  currency?: "gold";
   owner: NpcGoldBuyOwner; serviceRevision: number; catalogRevision: number;
   presentation: NpcGoldBuyPresentation;
   shop: NpcGoldBuyShop; inventory: BevyInventoryModel; blocked: boolean;
 };
-export type NpcGoldBuyRuntime = { getMir2NpcGoldBuyPlan?: (json: string) => string };
+type NpcBuyCurrent = NpcGoldBuyCurrent | NpcPearlBuyCurrent;
+export type NpcGoldBuyRuntime = { getMir2NpcGoldBuyPlan?: (json: string) => string; getMir2NpcPearlBuyPlan?: (json: string) => string };
 export type NpcGoldBuyWire = Readonly<{
   type: "buyItem"; itemIndex: number; count: number; panelType: 0;
 }>;
 export type NpcGoldBuyQuote = Readonly<{
   maxQuantity: number; totalGold: number | null; canBuy: boolean;
   blockReason: string | null; command: NpcGoldBuyWire | null;
+  currency?: "pearls"; totalPearls?: number | null;
 }>;
 declare const npcGoldBuyProof: unique symbol;
 /** A local token; only the issuing dispatcher's WeakMap can recognize it. */
 export type NpcGoldBuyProof = Readonly<{ [npcGoldBuyProof]: true }>;
+declare const npcPearlBuyProof: unique symbol;
+export type NpcPearlBuyProof = Readonly<{ [npcPearlBuyProof]: true }>;
+export type PreparedNpcPearlBuy = Readonly<{ proof: NpcPearlBuyProof; quote: NpcPearlBuyQuote; wire: NpcGoldBuyWire }>;
 export type PreparedNpcGoldBuy = Readonly<{
   proof: NpcGoldBuyProof; quote: NpcGoldBuyQuote; wire: NpcGoldBuyWire;
 }>;
 export type NpcGoldBuyDispatcherOptions = {
-  runtime: NpcGoldBuyRuntime; read: () => NpcGoldBuyCurrent | null;
+  runtime: NpcGoldBuyRuntime; read: () => NpcBuyCurrent | null;
   getAttemptSlot: () => NpcGoldBuyAttemptSlotRuntime | null;
   readSocket: () => { socket: object; isOpen: boolean } | null;
 };
@@ -134,12 +141,14 @@ export class NpcGoldBuyInventoryReadiness {
 }
 
 type SocketBinding = Readonly<{ socket: object; transport: string }>;
-type Capture = { requestJson: string; contextJson: string; authorityJson: string; selectedId: number | null; quantity: number; blocked: boolean };
+type Capture = { currency: "gold" | "pearls"; requestJson: string; contextJson: string; authorityJson: string; selectedId: number | null; quantity: number; blocked: boolean };
 type LiveCapture = Capture & SocketBinding;
-function capture(current: NpcGoldBuyCurrent | null, quantity: number): Capture | null {
+function capture(current: NpcBuyCurrent | null, quantity: number): Capture | null {
   try {
     if (!current || !safe(quantity, 65_535)) return null;
     jsonText(current);
+    if (current.currency === "pearls") return captureNpcPearlBuy(current, quantity);
+    if (current.currency !== undefined && current.currency !== "gold") return null;
     const owner = current.owner;
     if (!record(owner) || !keys(owner, ["connectionGeneration", "sessionGeneration", "ownerRevision", "playerObjectId"])
       || !safe(owner.connectionGeneration) || owner.connectionGeneration === 0
@@ -154,7 +163,7 @@ function capture(current: NpcGoldBuyCurrent | null, quantity: number): Capture |
     // an Entered/Unknown flight when only that evidence is withdrawn or refreshed.
     const inventoryAuthority = { ...request.inventory };
     delete inventoryAuthority.npcGoldTradeCapacity;
-    return { requestJson, contextJson: jsonText({ owner, serviceRevision: current.serviceRevision,
+    return { currency: "gold", requestJson, contextJson: jsonText({ owner, serviceRevision: current.serviceRevision,
       catalogRevision: current.catalogRevision, presentation: current.presentation }),
     authorityJson: jsonText({ owner: { connectionGeneration: owner.connectionGeneration, sessionGeneration: owner.sessionGeneration, playerObjectId: owner.playerObjectId },
       serviceRevision: current.serviceRevision, catalogRevision: current.catalogRevision,
@@ -164,7 +173,7 @@ function capture(current: NpcGoldBuyCurrent | null, quantity: number): Capture |
   } catch { return null; }
 }
 function sameCapture(a: Capture | null, b: Capture): boolean {
-  return a !== null && !a.blocked && !b.blocked && a.requestJson === b.requestJson && a.contextJson === b.contextJson;
+  return a !== null && a.currency === b.currency && !a.blocked && !b.blocked && a.requestJson === b.requestJson && a.contextJson === b.contextJson;
 }
 function wireValue(value: unknown): NpcGoldBuyWire | null {
   try {
@@ -199,6 +208,10 @@ function parseQuote(json: unknown, input: Capture): NpcGoldBuyQuote | null {
 type Planner = NonNullable<NpcGoldBuyRuntime["getMir2NpcGoldBuyPlan"]>;
 function invoke(runtime: NpcGoldBuyRuntime, planner: Planner, input: Capture): NpcGoldBuyQuote | null {
   try {
+    if (input.currency === "pearls") {
+      const quote = invokeNpcPearlBuy(runtime, planner, input as NpcPearlBuyCapture);
+      return runtime.getMir2NpcPearlBuyPlan === planner ? quote : null;
+    }
     const quote = parseQuote(planner.call(runtime, input.requestJson), input);
     return runtime.getMir2NpcGoldBuyPlan === planner ? quote : null;
   } catch { return null; }
@@ -209,7 +222,7 @@ export function quoteNpcGoldBuy(
 ): NpcGoldBuyQuote | null {
   try {
     const input = capture(current, quantity), planner = runtime.getMir2NpcGoldBuyPlan;
-    return input && !input.blocked && typeof planner === "function" ? invoke(runtime, planner, input) : null;
+    return input && input.currency === "gold" && !input.blocked && typeof planner === "function" ? invoke(runtime, planner, input) : null;
   } catch { return null; }
 }
 type Lease = {
@@ -220,7 +233,7 @@ type Lease = {
 
 /** Gesture proofs bind a shared Core flight to the actual current socket. */
 export class NpcGoldBuyDispatcher {
- private readonly proofs = new WeakMap<NpcGoldBuyProof, Lease>();
+ private readonly proofs = new WeakMap<NpcGoldBuyProof | NpcPearlBuyProof, Lease>();
  private busy = false;
  private active = true;
  private producer: object = Object.freeze({});
@@ -315,13 +328,22 @@ export class NpcGoldBuyDispatcher {
    && value.socket === binding.socket && value.transport === binding.transport;
  }
 
- preview(current: NpcGoldBuyCurrent | null, quantity: number): NpcGoldBuyQuote | null {
+ private planner(input: Capture): Planner | undefined {
+   return input.currency === "pearls" ? this.options.runtime.getMir2NpcPearlBuyPlan : this.options.runtime.getMir2NpcGoldBuyPlan;
+  }
+  preview(current: NpcGoldBuyCurrent | null, quantity: number): NpcGoldBuyQuote | null {
+   return this.previewFor("gold",current,quantity);
+  }
+  previewPearl(current: NpcPearlBuyCurrent | null, quantity: number): NpcPearlBuyQuote | null {
+   return this.previewFor("pearls",current,quantity) as NpcPearlBuyQuote | null;
+  }
+  private previewFor(currency: "gold" | "pearls", current: NpcBuyCurrent | null, quantity: number): NpcGoldBuyQuote | null {
   if (this.busy || !this.active) return null;
   this.busy = true;
   try {
    const input = capture(current, quantity), live = this.live(quantity), slot = this.slot;
-   const planner = this.options.runtime.getMir2NpcGoldBuyPlan;
-   if (!slot || !input || !sameCapture(live, input) || typeof planner !== 'function') return null;
+   const planner = input ? this.planner(input) : undefined;
+   if (!slot || !input || input.currency !== currency || !sameCapture(live, input) || typeof planner !== 'function') return null;
    const quote = invoke(this.options.runtime, planner, input);
    if (!quote || !live || !this.sameLive(this.live(quantity), input, live) || this.slot !== slot) return null;
    const producer = this.producer, status = slot.transact(producer, { op: 'status' });
@@ -332,14 +354,21 @@ export class NpcGoldBuyDispatcher {
  }
 
  prepare(current: NpcGoldBuyCurrent | null, quantity: number): PreparedNpcGoldBuy | null {
+   return this.prepareFor("gold",current,quantity) as PreparedNpcGoldBuy | null;
+  }
+  preparePearl(current: NpcPearlBuyCurrent | null, quantity: number): PreparedNpcPearlBuy | null {
+   return this.prepareFor("pearls",current,quantity) as PreparedNpcPearlBuy | null;
+  }
+  private prepareFor(currency: "gold" | "pearls", current: NpcBuyCurrent | null, quantity: number):
+    Readonly<{proof:NpcGoldBuyProof|NpcPearlBuyProof;quote:NpcGoldBuyQuote;wire:NpcGoldBuyWire}> | null {
   if (this.busy || !this.active) return null;
   this.busy = true;
   let reserved: { slot: NpcGoldBuyAttemptSlotRuntime; producer: object; token: string; ticket: NpcGoldBuyTransportTicket | null } | null = null;
   let published = false;
   try {
    const input = capture(current, quantity), live = this.live(quantity), slot = this.slot;
-   const planner = this.options.runtime.getMir2NpcGoldBuyPlan;
-   if (!slot || !input || !sameCapture(live, input) || typeof planner !== 'function') return null;
+   const planner = input ? this.planner(input) : undefined;
+   if (!slot || !input || input.currency !== currency || !sameCapture(live, input) || typeof planner !== 'function') return null;
    const quote = invoke(this.options.runtime, planner, input);
    if (!quote?.canBuy || !quote.command || !live
     || !this.sameLive(this.live(quantity), input, live) || this.slot !== slot) return null;
@@ -355,7 +384,7 @@ export class NpcGoldBuyDispatcher {
    if (!bound.ok || !bound.matched || bound.state.flight?.token !== token || bound.state.flight.phase !== 'bound') return null;
    reserved.ticket = ticket;
    if (!this.bindingCurrent(slot, producer, binding)) return null;
-   const proof = Object.freeze({}) as NpcGoldBuyProof;
+   const proof = Object.freeze({}) as NpcGoldBuyProof | NpcPearlBuyProof;
    this.proofs.set(proof, { input, quoteJson: JSON.stringify(quote), wire: quote.command, planner,
     slot, producer, socket: binding.socket, token, authorityRevision, ticket, consumed: false });
    published = true;
@@ -374,7 +403,7 @@ export class NpcGoldBuyDispatcher {
  private valid(lease: Lease, wire: unknown, body?: string, socket?: object): boolean {
   if (!this.active || this.slot !== lease.slot || this.producer !== lease.producer || !sameWire(wire, lease.wire)
    || jsonText(wire) !== lease.ticket.body || body !== undefined && body !== lease.ticket.body
-   || socket !== undefined && socket !== lease.socket || this.options.runtime.getMir2NpcGoldBuyPlan !== lease.planner
+   || socket !== undefined && socket !== lease.socket || this.planner(lease.input) !== lease.planner
    || !this.bindingCurrent(lease.slot, lease.producer, lease)
    || !this.sameLive(this.live(lease.input.quantity), lease.input, { socket: lease.socket, transport: lease.ticket.transport })) return false;
   const quote = invoke(this.options.runtime, lease.planner, lease.input);
@@ -387,9 +416,11 @@ export class NpcGoldBuyDispatcher {
   return allowed.ok && allowed.matched && allowed.state.authorityRevision === lease.authorityRevision
    && this.bindingCurrent(lease.slot, lease.producer, lease);
  }
- allows(proof: NpcGoldBuyProof, wire: unknown): boolean {
+ allows(proof: NpcGoldBuyProof, wire: unknown): boolean { return this.allowsFor("gold",proof,wire); }
+  allowsPearl(proof: NpcPearlBuyProof, wire: unknown): boolean { return this.allowsFor("pearls",proof,wire); }
+  private allowsFor(currency:"gold"|"pearls",proof:NpcGoldBuyProof|NpcPearlBuyProof,wire:unknown):boolean {
   const lease = this.proofs.get(proof);
-  if (!lease || lease.consumed || this.busy || !this.active) return false;
+  if (!lease || lease.input.currency !== currency || lease.consumed || this.busy || !this.active) return false;
   this.busy = true;
   try { return this.valid(lease, wire); } catch { this.withdraw(); return false; } finally { this.busy = false; }
  }
@@ -398,8 +429,14 @@ export class NpcGoldBuyDispatcher {
   * those reads. No external host callback follows it before Core enter; a caller
   * that changes its source and still returns true violates this contract. */
  claim(proof: NpcGoldBuyProof, wire: unknown, body: string, socket: object, beforeEntry?: () => boolean): boolean {
+   return this.claimFor("gold",proof,wire,body,socket,beforeEntry);
+  }
+  claimPearl(proof: NpcPearlBuyProof, wire: unknown, body: string, socket: object, beforeEntry?: () => boolean): boolean {
+   return this.claimFor("pearls",proof,wire,body,socket,beforeEntry);
+  }
+  private claimFor(currency:"gold"|"pearls",proof:NpcGoldBuyProof|NpcPearlBuyProof,wire:unknown,body:string,socket:object,beforeEntry?:()=>boolean):boolean {
   const lease = this.proofs.get(proof);
-  if (!lease || lease.consumed || this.busy || !this.active) return false;
+  if (!lease || lease.input.currency !== currency || lease.consumed || this.busy || !this.active) return false;
   lease.consumed = true; this.busy = true;
   try {
    if (!this.valid(lease, wire, body, socket)) return false;
@@ -414,11 +451,11 @@ export class NpcGoldBuyDispatcher {
   } catch { this.withdraw(); return false; } finally { this.busy = false; }
  }
  /** Exact Core receipts cannot downgrade an entered/unknown/flushed attempt. */
- rejectIfUnentered(proof: NpcGoldBuyProof): void {
+ rejectIfUnentered(proof: NpcGoldBuyProof | NpcPearlBuyProof): void {
   const lease = this.proofs.get(proof); if (!lease) return; lease.consumed = true;
   try { lease.slot.transact(lease.producer, { op: 'receipt', token: lease.token, ticket: lease.ticket, outcome: 'definitelyUnsent' }); } catch { /* Core barrier remains. */ }
  }
- transportResult(proof: NpcGoldBuyProof, outcome: 'flushed'|'unknown'): void {
+ transportResult(proof: NpcGoldBuyProof | NpcPearlBuyProof, outcome: 'flushed'|'unknown'): void {
   const lease = this.proofs.get(proof); if (!lease) return;
   try { lease.slot.transact(lease.producer, { op: 'receipt', token: lease.token, ticket: lease.ticket, outcome }); } catch { /* No reset or retry on receipt failure. */ }
  }

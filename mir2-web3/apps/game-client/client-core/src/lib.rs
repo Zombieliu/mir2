@@ -12,6 +12,7 @@ pub mod map_route;
 pub mod chat_ui;
 pub mod cash_preview;
 pub mod npc_repair_quote;
+pub mod npc_pearl_buy;
 pub mod equipment_pending;
 pub mod intent;
 pub mod fishing_click;

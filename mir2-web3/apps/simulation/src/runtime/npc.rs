@@ -30,7 +30,7 @@ use super::equipment::{crystal_item_added_stat_weight, crystal_item_current_pric
 use super::inventory::{
     add_or_increment_item_with_durability_and_stats, binary_datetime_ticks, can_gain_item_quantity,
     current_binary_datetime, future_binary_datetime_minutes, item_matches_inventory_unique_id,
-    plan_npc_gold_trade_gain,
+    plan_npc_gold_trade_gain, plan_npc_pearl_gain,
 };
 use super::items::{
     crystal_item_key_for_template, crystal_item_template_for_item_key, merged_user_item_stats,
@@ -1050,6 +1050,60 @@ fn buy_item_recording_impl(world: &mut World, request: NpcGoldBuyRequest,
                 ServerPacket::LoseGold { gold: cost },
                 ServerPacket::GainedItem { item: incoming },
             ];
+        }
+
+        if uses_pearls {
+            let Some((staged_inventory, incoming)) = plan_npc_pearl_gain(
+                resources, &template, buy_count, &source_item,
+            ) else {
+                return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+            };
+            // Stock removal and every outgoing conversion are staged as well.
+            let mut staged_npc = world.resource::<NpcStateResource>().clone();
+            let mut packets = vec![ServerPacket::GainedItem { item: incoming }];
+            match purchase_item.source {
+                CrystalNpcPurchaseSource::Trade => {}
+                CrystalNpcPurchaseSource::BuyBack => {
+                    let Some(entry) = staged_npc.npc_buy_back_items.iter_mut().find(|entry| {
+                        entry.script_key.eq_ignore_ascii_case(&service.script_key)
+                            && entry.player_name == player_name
+                    }) else {
+                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+                    };
+                    let Some(index) = entry.items.iter().position(|item| item.item.unique_id == item_index) else {
+                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+                    };
+                    entry.items.remove(index);
+                    packets.push(crystal_npc_goods_packet(
+                        entry.items.iter().map(|item| item.item.clone()).collect(),
+                        rate, CRYSTAL_PANEL_BUY, false,
+                    ));
+                }
+                CrystalNpcPurchaseSource::Used => {
+                    let Some(entry) = staged_npc.npc_used_goods_items.iter_mut()
+                        .find(|entry| entry.script_key.eq_ignore_ascii_case(&service.script_key)) else {
+                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+                    };
+                    let Some(index) = entry.items.iter().position(|item| item.unique_id == item_index) else {
+                        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+                    };
+                    entry.items.remove(index);
+                    let script = crystal_npc_script_by_key(&service.script_key);
+                    let panel_type = if service.label_key == "BUYUSED" {
+                        CRYSTAL_PANEL_BUY_SUB
+                    } else { CRYSTAL_PANEL_BUY };
+                    packets.push(crystal_npc_goods_packet_for_script_with_extra(
+                        script.as_ref(), &entry.items, panel_type, CRYSTAL_GOODS_HIDE_ADDED_STATS,
+                    ));
+                }
+            }
+            filter_crystal_npc_goods_for_profile(world, &mut packets);
+            // No callback or fallible conversion separates the live writes.
+            world.resource_mut::<super::resources::Stage5SystemsResource>()
+                .stage5_systems.intelligent_creature_pearls -= cost as i32;
+            *world.resource_mut::<InventoryResource>() = staged_inventory;
+            *world.resource_mut::<NpcStateResource>() = staged_npc;
+            return packets;
         }
 
         if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, buy_count) {

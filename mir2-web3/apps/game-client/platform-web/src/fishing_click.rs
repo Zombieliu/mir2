@@ -493,7 +493,7 @@ mod tests {
                 let mut value=base.clone(); value["origin"][key]=input; assert_targets_oracle(&value.to_string());
             }
         }
-        for text in ["", "null", "{}", "[]", "[1]", "[1,[10,10]]", "[1,[10,10],2,0]", "{", 
+        for text in ["", "null", "{}", "[]", "[1]", "[1,[10,10]]", "[1,[10,10],2,0]", "{",
             r#"{"version":1,"origin":{"x":10,"y":10},"direction":2}{}"#,
             r#"{"vers\u0069on":1,"origin":{"x":10,"y":10},"direction":2}"#,
             r#"{"version":1,"vers\u0069on":1,"origin":{"x":10,"y":10},"direction":2}"#,

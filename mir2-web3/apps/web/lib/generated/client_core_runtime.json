@@ -1,7 +1,7 @@
 {
   "abiVersion": 1,
   "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
-  "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+  "sourceSha256": "ad61a7bcba7a246854648a8e3c9b24a3a4cfd449ea3f6eab3a9f313a69fc2e5b",
   "files": {
     "mir2_platform_web.js": {
       "bytes": 24393,
@@ -14,16 +14,16 @@
   },
   "presentation": {
     "abiVersion": 1,
-    "version": "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b",
-    "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+    "version": "62ccff61e3b7741c3035e763cd9d2d07fd322c0b037ec26acd510ac0c3501141",
+    "sourceSha256": "ad61a7bcba7a246854648a8e3c9b24a3a4cfd449ea3f6eab3a9f313a69fc2e5b",
     "files": {
       "mir2_platform_web.js": {
-        "bytes": 22264,
-        "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+        "bytes": 23779,
+        "sha256": "90c07fc04846a72952b293c112ff66d22b7babedd593dd3b84f5c76f37de397b"
       },
       "mir2_platform_web_bg.wasm": {
-        "bytes": 259415,
-        "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+        "bytes": 262065,
+        "sha256": "82a550dc68cf4196843e721acaaf611addf79b57c1c6cd3b748485157d685cd8"
       }
     }
   }

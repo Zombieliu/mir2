@@ -1,3 +1,6 @@
+import { npcPearlJson } from "./npc-pearl-buy-source";
+import { npcPearlBuyInput, parseNpcPearlBuyPlan, type NpcPearlBuyInput, type NpcPearlBuyPlan } from "./npc-pearl-buy";
+export type { NpcPearlBuyInput, NpcPearlBuyPlan } from "./npc-pearl-buy";
 import { readSharedItemTooltip, type CrystalTooltipItem, type CrystalTooltipDocument, type CrystalTooltipRuntime } from "./shared-item-tooltip";
 import { readSharedFishingClickTargets as readFishingTargets, readSharedFishingClickDecision as readFishingDecision,
   type FishingClickWasmModule, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision } from "./shared-fishing-click";
@@ -56,6 +59,9 @@ export type MapRouteWasmModule = {
     edges: Uint8Array) => Int32Array;
 };
 export type PresentationWasmModule = FishingClickWasmModule & {
+  npc_pearl_buy_abi_version?: () => number;
+  npc_pearl_buy_plan?: (allowsBuy: boolean, selected: boolean, usePearls: boolean, uniqueId: number, price: number,
+    stock: number, quantity: number, walletKnown: boolean, pearls: number, occupied: number, infoPrice: number, rate: number) => string;
   entity_animation_abi_version?: () => number;
   EntityAnimationBridge?: new () => RawEntityAnimationBridge;
   bag_to_belt_move_abi_version?: () => number;
@@ -360,4 +366,22 @@ export function createSharedEntityAnimationAccessor(module: PresentationWasmModu
     } catch { return null; }
     finally { busy = false; }
   };
+}
+
+/** Optional scalar policy; quantity, stock, price, wallet and 46-entry admission remain Rust rules. */
+export function readSharedNpcPearlBuyPlan(module: PresentationWasmModule, input: NpcPearlBuyInput): NpcPearlBuyPlan | null {
+  try {
+    const abi = module.npc_pearl_buy_abi_version, planner = module.npc_pearl_buy_plan;
+    if (typeof abi !== 'function' || typeof planner !== 'function') return null;
+    const checked = npcPearlBuyInput(npcPearlJson(input));
+    if (!checked) return null;
+    const version = abi.call(module);
+    if (version !== 2 || module.npc_pearl_buy_abi_version !== abi || module.npc_pearl_buy_plan !== planner) return null;
+    const text = planner.call(module,checked.allowsBuy,checked.selected,checked.usePearls,checked.uniqueId,checked.unitPrice,
+      checked.stock,checked.quantity,checked.walletKnown,checked.pearls,checked.occupied,checked.infoPrice,checked.rate);
+    const finalVersion = abi.call(module);
+    if (finalVersion !== 2 || module.npc_pearl_buy_abi_version !== abi || module.npc_pearl_buy_plan !== planner
+      || typeof text !== 'string' || text.length > 1024) return null;
+    return parseNpcPearlBuyPlan(JSON.parse(text));
+  } catch { return null; }
 }

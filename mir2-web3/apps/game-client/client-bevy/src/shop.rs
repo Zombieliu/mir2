@@ -4,6 +4,7 @@
 //! Shop panel shows server-priced goods with correct Buy/Sell disabled states.
 
 use bevy::prelude::Resource;
+use mir2_client_core::npc_pearl_buy::{plan_npc_pearl_buy, NpcPearlBuyFacts, NpcPearlBuyPlan, NpcPearlGood};
 use serde::{Deserialize, Serialize};
 
 use crate::inventory::CrystalItemTooltipSourceModel;
@@ -219,6 +220,23 @@ pub fn shop_quantity_dec(q: u16) -> u16 {
     shop_quantity_clamped(q.saturating_sub(SHOP_QUANTITY_STEP))
 }
 
+/// Only Pearl uses this fixed Windows entry-count admission. Ordinary Gold
+/// retains its independent full-carrier and compatible-stack capacity planner.
+fn native_pearl_buy_plan(
+    shop: &ShopModel, inventory: &InventoryModel, quantity: u16, pearls: u32,
+    allows_buy: bool,
+) -> NpcPearlBuyPlan {
+    plan_npc_pearl_buy(NpcPearlBuyFacts {
+        allows_buy,
+        selected: shop.selected().map(|good| NpcPearlGood {
+            unique_id: good.unique_id, use_pearls: good.use_pearls,
+            unit_price: good.price, stock: good.stock,
+        }),
+        quantity, balance: Some(pearls),
+        occupied_bag_entries: inventory.items.iter().filter(|item| item.container == 0).count(),
+    })
+}
+
 pub fn shop_buy_enabled(shop: &ShopModel, inventory: &InventoryModel, quantity: u16) -> bool {
     shop_buy_enabled_with_pearls(shop, inventory, quantity, 0)
 }
@@ -234,6 +252,10 @@ pub fn shop_buy_enabled_with_pearls(
     };
     if good.uses_gold_buy_plan() {
         return crate::npc_shop_buy::plan_npc_gold_buy(shop, inventory, quantity).can_buy;
+    }
+    if good.use_pearls {
+        // Preserve the old enabled helper: the command entry owns service gating.
+        return native_pearl_buy_plan(shop, inventory, quantity, pearls, true).admitted_count.is_some();
     }
     let qty = shop_quantity_clamped(quantity) as u32;
     if qty == 0 {
@@ -266,6 +288,13 @@ pub fn shop_buy_item_command(
     if !shop.allows_buy() { return None; }
     if good.uses_gold_buy_plan() {
         return crate::npc_shop_buy::plan_npc_gold_buy(shop, inventory, quantity).command;
+    }
+    if good.use_pearls {
+        let plan = native_pearl_buy_plan(shop, inventory, quantity, pearls, shop.allows_buy());
+        return Some(crate::npc_shop_buy::NpcGoldBuyCommand {
+            command_type: crate::npc_shop_buy::NpcGoldBuyCommandType::BuyItem,
+            item_index: plan.item_index?, count: plan.admitted_count?, panel_type: 0,
+        });
     }
     shop_buy_enabled_with_pearls(shop, inventory, quantity, pearls).then_some(
         crate::npc_shop_buy::NpcGoldBuyCommand {
@@ -500,5 +529,73 @@ mod pearl_tests {
         shop.goods[0].use_pearls = false;
         assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 1, 100));
         assert_eq!(shop.goods[0].price_label(), "Price: 1 gold");
+    }
+}
+
+#[cfg(test)]
+mod shared_pearl_tests {
+    use super::*;
+    use crate::inventory::ItemModel;
+
+    fn shop() -> ShopModel {
+        ShopModel {
+            goods: vec![ShopGood { unique_id: 0, price: 10, stock: -1,
+                use_pearls: true, panel_type: 9, ..Default::default() }],
+            selected_id: Some(0), ..Default::default()
+        }
+    }
+
+    #[test]
+    fn pearl_native_enabled_retains_closed_service_but_command_requires_buy() {
+        let mut shop = shop(); let inventory = InventoryModel::default();
+        assert!(shop_buy_enabled_with_pearls(&shop, &inventory, 2, 20));
+        assert_eq!(shop_buy_item_command(&shop, &inventory, 2, 20), None);
+        shop.service_mode = NpcShopServiceMode::Buy;
+        let command = shop_buy_item_command(&shop, &inventory, 2, 20).unwrap();
+        assert_eq!((command.item_index, command.count, command.panel_type), (0, 2, 0));
+        assert_eq!(command.command_type, crate::npc_shop_buy::NpcGoldBuyCommandType::BuyItem);
+        assert_eq!(serde_json::to_value(command).unwrap(), serde_json::json!({
+            "type":"buyItem","itemIndex":0,"count":2,"panelType":0,
+        }));
+    }
+
+    #[test]
+    fn pearl_native_u32_wallet_and_saturating_clamped_count_survive() {
+        let mut shop = shop(); shop.supports_buy = true;
+        shop.goods[0].unique_id = u64::MAX; shop.selected_id = Some(u64::MAX);
+        shop.goods[0].price = u32::MAX;
+        let inventory = InventoryModel::default();
+        assert!(shop_buy_enabled_with_pearls(&shop, &inventory, u16::MAX, u32::MAX));
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, u16::MAX, u32::MAX - 1));
+        let command = shop_buy_item_command(&shop, &inventory, u16::MAX, u32::MAX).unwrap();
+        assert_eq!((command.item_index, command.count, command.panel_type), (u64::MAX, 99, 0));
+        assert_eq!(shop_buy_quantity_max(&shop, &inventory), 99);
+    }
+
+    #[test]
+    fn pearl_native_counts_only_container_zero_and_keeps_fixed_46_entry_limit() {
+        let mut shop = shop(); shop.supports_buy = true;
+        let mut inventory = InventoryModel { capacity: 86, gold: u32::MAX, ..Default::default() };
+        inventory.items = (0..45).map(|slot| ItemModel { slot, container: 0, ..Default::default() }).collect();
+        for container in [1, 2, 3] {
+            inventory.items.extend((0..50).map(|slot| ItemModel { slot, container, ..Default::default() }));
+        }
+        assert!(shop_buy_enabled_with_pearls(&shop, &inventory, 2, 20));
+        assert!(shop_buy_item_command(&shop, &inventory, 2, 20).is_some());
+        inventory.items.push(ItemModel { slot: 45, container: 0, ..Default::default() });
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 2, 20));
+        assert_eq!(shop_buy_item_command(&shop, &inventory, 2, 20), None);
+    }
+
+    #[test]
+    fn pearl_native_does_not_replace_the_ordinary_gold_authority_route() {
+        let mut shop = shop(); shop.supports_buy = true;
+        shop.goods[0].use_pearls = false; shop.goods[0].requires_gold_buy_plan = true;
+        let inventory = InventoryModel { gold: 100, ..Default::default() };
+        assert!(shop.goods[0].uses_gold_buy_plan());
+        // Missing ordinary-Gold source remains denied by its existing planner.
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 1, u32::MAX));
+        assert_eq!(shop_buy_item_command(&shop, &inventory, 1, u32::MAX), None);
+        assert_eq!(shop_buy_quantity_max(&shop, &inventory), 0);
     }
 }
