@@ -224,6 +224,10 @@ fn zone_poison_is_zero(value: &u16) -> bool {
     *value == 0
 }
 
+fn zone_hair_is_zero(value: &u8) -> bool {
+    *value == 0
+}
+
 fn zone_generation_is_zero(value: &u64) -> bool {
     *value == 0
 }
@@ -452,6 +456,21 @@ pub struct ZoneMonsterKillAward {
     pub boss_audit: Option<ZoneBossRewardAudit>,
 }
 
+/// Trusted personal-session projection of equipment and cosmetic state only.
+/// Position, life, poison, visibility and transformation remain Zone-owned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ZonePlayerAppearance {
+    pub hair: u8,
+    pub light: u8,
+    pub weapon: i16,
+    pub weapon_effect: i16,
+    pub armour: i16,
+    pub wing_effect: u8,
+    pub mount_type: i16,
+    pub riding_mount: bool,
+    pub fishing: bool,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum ZoneCommand {
     Join(ZoneJoin),
@@ -510,6 +529,10 @@ pub enum ZoneCommand {
     },
     /// Trusted owner/session lifecycle mirror. Unlike ordinary pool changes,
     /// explicit Revive can clear Dead; no client packet exposes this command.
+    SyncPlayerAppearance {
+        session_id: SessionId,
+        appearance: ZonePlayerAppearance,
+    },
     SyncPlayerVitalsAndLife {
         session_id: SessionId,
         hp: i32,
@@ -1259,6 +1282,9 @@ pub(crate) struct ZonePlayer {
     pub mp: i32,
     pub position: Point,
     pub direction: MirDirection,
+    // Omit the legacy default to preserve existing checkpoint commitments.
+    #[serde(default, skip_serializing_if = "zone_hair_is_zero")]
+    pub hair: u8,
     pub light: u8,
     pub weapon: i16,
     pub weapon_effect: i16,
@@ -1330,6 +1356,27 @@ pub(crate) struct ZoneReincarnationOffer {
 }
 
 impl ZonePlayer {
+    pub(super) fn appearance(&self) -> ZonePlayerAppearance {
+        ZonePlayerAppearance {
+            hair: self.hair, light: self.light, weapon: self.weapon,
+            weapon_effect: self.weapon_effect, armour: self.armour,
+            wing_effect: self.wing_effect, mount_type: self.mount_type,
+            riding_mount: self.riding_mount, fishing: self.fishing,
+        }
+    }
+
+    pub(super) fn apply_appearance(&mut self, appearance: ZonePlayerAppearance) {
+        self.hair = appearance.hair;
+        self.light = appearance.light;
+        self.weapon = appearance.weapon;
+        self.weapon_effect = appearance.weapon_effect;
+        self.armour = appearance.armour;
+        self.wing_effect = appearance.wing_effect;
+        self.mount_type = appearance.mount_type;
+        self.riding_mount = appearance.riding_mount;
+        self.fishing = appearance.fishing;
+    }
+
     pub(super) fn vital_settlement(&mut self, hp_before: i32) -> ZoneVitalSettlement {
         self.vital_receipt_sequence = self
             .vital_receipt_sequence
@@ -1384,6 +1431,7 @@ impl ZonePlayer {
             mp: join.mp.max(0),
             position: join.position,
             direction: join.direction,
+            hair: 0,
             light: 0,
             weapon: -1,
             weapon_effect: 0,
@@ -1403,7 +1451,7 @@ impl ZonePlayer {
             mount_type: -1,
             riding_mount: false,
             fishing: false,
-            transform_type: 0,
+            transform_type: -1,
             level_effects: 0,
             visible_object_ids: BTreeSet::new(),
             movement_actions: VecDeque::new(),

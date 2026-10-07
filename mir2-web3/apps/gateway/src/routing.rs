@@ -3536,6 +3536,7 @@ impl SharedInProcessZoneState {
             | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }
+            | ZoneCommand::SyncPlayerAppearance { session_id, .. }
             | ZoneCommand::SyncSharedObjects { session_id, .. }
             | ZoneCommand::BroadcastSharedObjectPackets { session_id, .. }
             | ZoneCommand::SyncGroundDrops { session_id, .. }
@@ -9532,6 +9533,7 @@ impl SharedInProcessZoneSessionRuntime {
         let mut join_snapshot = self
             .inner
             .active_zone_join_snapshot(session_id.as_str().to_string());
+        let player_appearance = self.inner.active_zone_player_appearance();
         let mut packets = Vec::new();
         let mut transform = None;
         let mut shout_consume = None;
@@ -9641,7 +9643,10 @@ impl SharedInProcessZoneSessionRuntime {
                 zone_state
                     .zone_session_keys
                     .insert(session_id.clone(), key.clone());
-                let mut outbounds = zone_state.zone_manager.join(join.clone());
+                let mut outbounds = match player_appearance {
+                    Some(appearance) => zone_state.zone_manager.join_with_appearance(join.clone(), appearance),
+                    None => zone_state.zone_manager.join(join.clone()),
+                };
                 outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SyncPlayerVitalsAndLife {
                     session_id: session_id.clone(), hp: join.hp, max_hp: join.max_hp, mp: join.mp,
                     dead: snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).is_some_and(|entity| entity.dead),
@@ -9717,6 +9722,11 @@ impl SharedInProcessZoneSessionRuntime {
             }
         } else if let Some(join) = join_snapshot.as_ref() {
             let mut outbounds = Vec::new();
+            if let Some(appearance) = player_appearance {
+                outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SyncPlayerAppearance {
+                    session_id: session_id.clone(), appearance,
+                }));
+            }
             let now_ms = Self::zone_now_ms();
             let zone_transform = zone_state.zone_manager.player_transform(&session_id);
             if allow_transform_sync
@@ -15788,6 +15798,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "shared_player_appearance_tests.rs"]
+    mod shared_player_appearance_tests;
     #[path = "mining_tests.rs"]
     mod mining_tests;
     #[path = "cross_map_drop_lifecycle_tests.rs"]

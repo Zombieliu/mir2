@@ -33,5 +33,5 @@ pub use types::{
     ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats, ZoneJourneyEventKind,
     ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique, ZoneMagicPracticeReceipt,
     ZoneMagicPracticeSpell,
-    ZoneVitalSettlement,
+    ZoneVitalSettlement, ZonePlayerAppearance,
 };

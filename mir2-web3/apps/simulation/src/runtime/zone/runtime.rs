@@ -1403,6 +1403,53 @@ impl ZoneRuntime {
         self.clear_native_periodic_player_poisons(object_id);
     }
 
+    pub(super) fn calibrate_joined_player_appearance(
+        &mut self,
+        session_id: &SessionId,
+        appearance: super::types::ZonePlayerAppearance,
+        outbounds: &mut [ZoneOutbound],
+    ) {
+        let Some(player) = self.players.get_mut(session_id) else { return; };
+        player.apply_appearance(appearance);
+        let object_id = player.object_id;
+        let canonical = super::packets::object_player_packet(player);
+        // Join has not sent these packets yet. Replace only this actor's
+        // projection so observers never cache default equipment on first sight.
+        for outbound in outbounds {
+            let packets = match outbound {
+                ZoneOutbound::ToSession { packets, .. }
+                | ZoneOutbound::ToMany { packets, .. }
+                | ZoneOutbound::ToAll { packets } => packets,
+                _ => continue,
+            };
+            for packet in packets {
+                if matches!(packet, ServerPacket::ObjectPlayer { info } if info.object_id == object_id) {
+                    *packet = canonical.clone();
+                }
+            }
+        }
+    }
+
+    fn sync_player_appearance(
+        &mut self,
+        session_id: &SessionId,
+        appearance: super::types::ZonePlayerAppearance,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else { return Vec::new(); };
+        if player.appearance() == appearance { return Vec::new(); }
+        player.apply_appearance(appearance);
+        let player = player.clone();
+        let mut recipients = self.visible_chat_recipients(&player);
+        recipients.retain(|recipient| recipient != session_id);
+        if recipients.is_empty() { return Vec::new(); }
+        // Native packet-first clients need a complete sprite descriptor,
+        // including changed hair and absent weapons, rather than PlayerUpdate.
+        vec![ZoneOutbound::ToMany {
+            session_ids: recipients,
+            packets: vec![super::packets::object_player_packet(&player)],
+        }]
+    }
+
     fn sync_player_vitals(
         &mut self,
         session_id: &SessionId,
@@ -1590,6 +1637,9 @@ impl ZoneRuntime {
                 max_hp,
                 mp,
             } => self.sync_player_vitals(&session_id, hp, max_hp, mp, None),
+            ZoneCommand::SyncPlayerAppearance { session_id, appearance } => {
+                self.sync_player_appearance(&session_id, appearance)
+            }
             ZoneCommand::SyncPlayerVitalsAndLife {
                 session_id, hp, max_hp, mp, dead,
             } => self.sync_player_vitals(&session_id, hp, max_hp, mp, Some(dead)),

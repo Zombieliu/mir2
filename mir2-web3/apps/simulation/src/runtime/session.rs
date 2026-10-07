@@ -884,6 +884,14 @@ impl SimulationSession {
         Ok(())
     }
 
+    /// Authenticated personal equipment/cosmetics; never a client-supplied actor.
+    pub fn active_zone_player_appearance(&self) -> Option<crate::ZonePlayerAppearance> {
+        if !is_in_world(self.app.world()) || self.active_identity().is_none() {
+            return None;
+        }
+        self_zone_player_appearance(self.app.world())
+    }
+
     pub fn active_zone_join_snapshot(&self, session_id: impl Into<String>) -> Option<ZoneJoin> {
         if !is_in_world(self.app.world()) {
             return None;

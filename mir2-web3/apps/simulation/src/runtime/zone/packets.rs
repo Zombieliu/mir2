@@ -26,7 +26,7 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             level: player.level,
             location: player.position.clone(),
             direction: player.direction,
-            hair: 0,
+            hair: player.hair,
             light: player.light,
             weapon: player.weapon,
             weapon_effect: player.weapon_effect,

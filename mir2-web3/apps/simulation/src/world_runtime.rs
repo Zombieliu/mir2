@@ -794,6 +794,10 @@ impl InProcessWorldRuntime {
         self.session.active_zone_join_snapshot(session_id)
     }
 
+    pub fn active_zone_player_appearance(&self) -> Option<crate::ZonePlayerAppearance> {
+        self.session.active_zone_player_appearance()
+    }
+
     /// Read the trusted combat projection without building the much broader
     /// world/quest/UI snapshot used by a full Zone join.
     pub fn zone_player_combat_stats(&self) -> ZonePlayerCombatStats {

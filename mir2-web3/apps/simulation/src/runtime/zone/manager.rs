@@ -358,6 +358,24 @@ impl ZoneManager {
         self.handle_for_key(key, ZoneCommand::Join(join))
     }
 
+    /// Gateway supplies only authenticated personal equipment/cosmetics.
+    /// Calibrate the new Zone actor before its first ObjectPlayer is sent.
+    pub fn join_with_appearance(
+        &mut self,
+        join: ZoneJoin,
+        appearance: super::types::ZonePlayerAppearance,
+    ) -> Vec<ZoneOutbound> {
+        let session_id = join.session_id.clone();
+        let key = ZoneKey::for_map(&join.map_file_name);
+        let mut outbounds = self.join(join);
+        if self.session_zones.get(&session_id) == Some(&key) {
+            if let Some(zone) = self.zones.get_mut(&key) {
+                zone.calibrate_joined_player_appearance(&session_id, appearance, &mut outbounds);
+            }
+        }
+        outbounds
+    }
+
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
         match &command {
             ZoneCommand::Join(join) => self.join(join.clone()),
@@ -372,6 +390,7 @@ impl ZoneManager {
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
             | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
+            | ZoneCommand::SyncPlayerAppearance { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }
             | ZoneCommand::SyncSharedObjects { session_id, .. }

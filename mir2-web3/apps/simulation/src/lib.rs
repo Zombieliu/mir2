@@ -60,7 +60,7 @@ pub use runtime::{
     ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata, ZoneMonsterDefense,
     ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
     ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
-    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZonePlayerCombatStats, ZonePlayerAppearance, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,

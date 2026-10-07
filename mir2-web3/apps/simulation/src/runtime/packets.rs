@@ -7849,6 +7849,32 @@ pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<Serv
     })
 }
 
+/// Use the same authoritative shape selection as the owner's sprite snapshot.
+/// An empty weapon stays -1 instead of synthesizing CWeapon/00.
+pub(super) fn self_zone_player_appearance(world: &World) -> Option<crate::ZonePlayerAppearance> {
+    let player = player_entity(world)?;
+    let body = world.entity(player).get::<CharacterBody>()?;
+    let equipment = &world.resource::<InventoryResource>().equipment_items;
+    let shape = |slot, fallback| {
+        equipment_shape(Some(equipment), slot)
+            .or(fallback)
+            .and_then(|shape| i16::try_from(shape).ok())
+            .unwrap_or(-1)
+    };
+    let mount = world.resource::<MountResource>();
+    Some(crate::ZonePlayerAppearance {
+        hair: world.resource::<Stage5SystemsResource>().stage5_systems.appearance.hair,
+        light: crystal_self_player_light(world, equipment),
+        weapon: shape(EquipmentSlot::Weapon, body.weapon_shape),
+        weapon_effect: 0,
+        armour: shape(EquipmentSlot::Armour, body.armour_shape),
+        wing_effect: crystal_player_wing_effect(body, equipment),
+        mount_type: mount.mount_type,
+        riding_mount: mount.riding_mount,
+        fishing: world.resource::<FishingResource>().fishing,
+    })
+}
+
 pub(super) fn collect_world_entities(
     world: &World,
     scene_view: Option<&mir2_game_data::SceneView>,

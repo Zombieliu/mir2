@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> 2026-10-07 shared remote appearance Candidate corrects ordinary transform
+> -1 and synchronizes trusted equipment/hair before Join and on changes. Root
+> is the sole writer; independent read-only review passes the main path.
+> Zone5/Gateway3 and atomic restore2 pass. Adjacent Zone208/1 retains an
+> identical unchanged-source drop-award failure. Normal three classes/both
+> genders and ordinary equip/remove/transfer are covered. No client/feed16
+> update is needed; Linux build, drained server rollout and native/public
+> appearance acceptance remain pending. father requested50000 gold is delivered
+> once by private system mail, awaiting claim; broad P1–P8 stays unfinished.
+> [Exact scope and evidence](SHARED-PLAYER-APPEARANCE-20261007.md).
+
+
 > 2026-10-07 source2b04 mining Gateway is now paired with published R19/updater15.
 > Strict six-count/TCP drain, private DB/state/config backup, old/candidate exit0
 > and cold start pass with no journal panic. Original realm, authentication,

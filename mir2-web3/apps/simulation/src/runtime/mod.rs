@@ -96,7 +96,7 @@ pub use zone::{
     ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
     ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn,
     ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
-    ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneOutput, ZonePlayerAppearance, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
