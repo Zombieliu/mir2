@@ -62,10 +62,20 @@ GPU 使用原始 UI 资源和实际物品图标布局系统；选中 Smith、启
 
 ## 发布状态
 
-此记录冻结源码检查阶段；公开版本仍是 **R19 / 签名更新15**。新客户端修复尚未
-进入公开 feed。下一步是干净源码 attested Release、完整资源包装与签名交付，
-再以独立 R20/s16 固定闭包发布及实际升级检查。旧 updater/Bootstrap 可复用；
-客户端单独更新无需网关重启。正式发布须单独记录真实回执，不能复用旧 `passed`
-字段，也不能用未签名 Debug EXE 替换正式安装。
+源码检查记录原先冻结在 R19/更新15；后续已完成 attested Release、严格完整资源
+包装、签名交付与实际发布。现在公开版本为 **R20 / 签名更新16**，游戏源码为
+`8faedd89fbcdda7d4f814c05f7d2f56979ab5bf5`；独立发布提交为
+`aba54763f797c90596fd8aeea7f24c622fe71bed`。
+
+Stage `37603327260` 核对全部 41 个 CDN 对象、1,077,405,420 字节；独立 promote
+`37605195682` 使用同一提交和准确 stage 回执 SHA。源站原子交换保存旧15清单的
+字节和指纹，全部服务 PID 保持；没有重启网关、覆盖 D/F 安装或修改玩家存档。
+Windows 实际 updater HTTPS discovery、清单/engine/game/delivery CMS、engine 完整
+SHA 和 Bootstrap TLS 206 原字节均通过。旧签名 engine 与 Bootstrap 直接复用。
+
+现有自动更新启动器重新打开即可获取 R20，无须重装。这里只完成发布和下载验证，
+没有执行完整安装器或声称受影响笔记本、本次正式 R20 的 NPC/商店真人验收已通过。
+此前用户「我试了可以的」与当前旧客户端操作不被移记为未发布 R20 的人类验收。
+[实际发布回执、失败记录和下载入口](generated/player-qa/npc-map-shop-20261007/publication-16/README.md)。
 
 完整 P1–P8 Goal、升级武器和持续原生采矿验收不因本轮修复而完成。
