@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-07 NPC map/shop Candidate adds selected row highlight, requested
+> ordinary GO TO, old auto-run retirement and goods wheel/track/thumb input.
+> Bevy37+20, native23+9 and explicit GPU1 pass with actual original UI frames.
+> This requested navigation differs from Crystal paid teleport; server rules
+> and goods remain unchanged. Public R19/feed15, normal Windows/public clicks,
+> full weapon refining and completeP1–P8 acceptance remain separate gates.
+> [Current Candidate evidence](NATIVE-NPC-MAP-SHOP-20261007.md).
+
 > 2026-10-07 mining Candidate publication is complete for R19/source2b04 and
 > updater15/sourceb4390. All40 public objects are verified; separate same-commit
 > stage/promote, drained/backup/normal cold Gateway start, Windows HTTPS/CMS/206

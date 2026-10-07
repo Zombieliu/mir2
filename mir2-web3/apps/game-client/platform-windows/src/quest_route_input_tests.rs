@@ -4,6 +4,11 @@ use mir2_client_bevy::chat::ChatModel;
 use mir2_client_bevy::quest_ui::QuestUiState;
 use mir2_client_bevy::quest_supplies::SupplyVendor;
 
+mod big_map_npc_input_tests {
+    use super::*;
+    include!("big_map_npc_input_tests.rs");
+}
+
 fn task_steward_app(npc_id: u32, origin: (i32, i32)) -> (
     bevy::prelude::App,
     std::sync::mpsc::Receiver<GatewayCommand>,

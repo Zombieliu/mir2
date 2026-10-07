@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-10-07 root is the sole NPC map/shop code writer; two read-only
+> explorers audit Crystal behavior and catalog/input edges. Native NPC GO TO
+> and ordinary goods scrolling Candidate pass Bevy37+20, native23+9 and GPU1.
+> Root corrected modal notice and Pixel stage scaling review findings.
+> No protected E/D/F, player-save, online Gateway or public R19/feed15 change.
+> Attested client-only delivery is next; broad parity/human acceptance stay open.
+> [Scope and retained failures](NATIVE-NPC-MAP-SHOP-20261007.md).
+
 > 2026-10-07 root completes the paired mining Candidate publication: actual
 > gameR19/source2b04 and updater15/sourceb4390 are live. Stage37552557996
 > verifies40 complete CDN objects/1,051,831,921 bytes; separate promote37554003953

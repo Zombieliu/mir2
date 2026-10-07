@@ -1425,6 +1425,7 @@ fn begin_quest_route_navigation(
         return Err(match intent.target {
             QuestRouteTarget::Entrance => "入口导航已过期；请按当前地图重新选择。",
             QuestRouteTarget::TaskNpc { .. } => "Task Steward route expired. Select the task again.",
+            QuestRouteTarget::MapNpc { .. } => "NPC destination changed. Select the NPC again.",
             QuestRouteTarget::Supply { .. } => "补给导航已过期；请按当前地图重新选择。",
             QuestRouteTarget::HuntRegion { .. } => "狩猎区域导航已过期；请按当前地图重新选择。",
         });
@@ -1442,6 +1443,10 @@ fn begin_quest_route_navigation(
         && (pinned_primary.is_some_and(|primary| primary != intent.quest_index)
             || !tracker.is_some_and(|tracker| intent.matches_task_npc_destination(tracker))) {
         return Err("Task Steward destination changed. Select the task again.");
+    }
+    if matches!(intent.target, QuestRouteTarget::MapNpc { .. })
+        && !big_map.is_some_and(|model| intent.matches_big_map_npc_destination(model)) {
+        return Err("NPC destination changed. Select the NPC again.");
     }
     let map_file = presentation
         .current_map_file_name()
@@ -1463,7 +1468,8 @@ fn begin_quest_route_navigation(
     );
     let destination = (intent.x, intent.y);
     let hunt_area = match intent.target {
-        QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } | QuestRouteTarget::TaskNpc { .. } => None,
+        QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } | QuestRouteTarget::TaskNpc { .. }
+            | QuestRouteTarget::MapNpc { .. } => None,
         QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea { center: destination, radius }),
     };
     let supply_area = match intent.target {
@@ -1471,6 +1477,7 @@ fn begin_quest_route_navigation(
             .filter(|route| !route.is_entrance)
             .map(|_| big_map_input::HuntArea { center: destination, radius: 2 }),
         QuestRouteTarget::TaskNpc { .. } => Some(big_map_input::HuntArea { center: destination, radius: 2 }),
+        QuestRouteTarget::MapNpc { .. } => Some(big_map_input::HuntArea { center: destination, radius: 2 }),
         _ => None,
     };
     let steps = if let Some(area) = hunt_area.or(supply_area) {
@@ -2067,8 +2074,11 @@ pub fn mouse_world_interaction_system(
                 Ok(destination) => {
                     // Starting travel dismisses the diary's world-input shield;
                     // the persistent task card remains visible during movement.
-                    if let Some(ui) = player_ui.as_deref_mut().filter(|ui| ui.quest_open()) {
-                        ui.core.panel = mir2_ui_core::state::UiPanel::None;
+                    if let Some(ui) = player_ui.as_deref_mut() {
+                        ui.local_keys.auto_run = false;
+                        if ui.quest_open() {
+                            ui.core.panel = mir2_ui_core::state::UiPanel::None;
+                        }
                     }
                     if let Some(state) = quest_ui_state.as_deref_mut() {
                         let target_label = if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {

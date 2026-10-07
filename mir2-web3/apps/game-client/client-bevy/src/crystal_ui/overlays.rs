@@ -16,6 +16,8 @@ mod skill_page;
 mod npc_item_service;
 #[path = "big_map_coordinates.rs"]
 mod big_map_coordinates;
+#[path = "npc_shop_scroll.rs"]
+mod npc_shop_scroll;
 #[path = "localized_help.rs"]
 mod localized_help;
 
@@ -1290,6 +1292,7 @@ pub struct ShopUiState {
 pub(crate) struct BigMapControls<'w> {
     model: Option<ResMut<'w, BigMapModel>>,
     intents: Option<ResMut<'w, BigMapGatewayIntentQueue>>,
+    navigation: Option<ResMut<'w, crate::quest_ui::QuestRouteNavigationIntentQueue>>,
     ui: Option<ResMut<'w, BigMapUiState>>,
     time: Option<Res<'w, Time>>,
     skill_binding: Option<ResMut<'w, SkillBindingUi>>,
@@ -3355,7 +3358,7 @@ enum OverlayButton {
     BigMapMyLocation,
     BigMapSearchFocus,
     BigMapSearchSubmit,
-    BigMapTeleport,
+    BigMapNavigate,
     SelectBigMapNpc(u32),
     // NPC shop
     SelectShopGood(u64),
@@ -3637,6 +3640,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<options_volume::OptionsVolumeDrag>()
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapGatewayIntentQueue>()
+            .init_resource::<crate::quest_ui::QuestRouteNavigationIntentQueue>()
             .init_resource::<BigMapUiState>()
             .init_resource::<crate::skill_model::SkillModelReceipts>()
             .init_resource::<SkillBindingUi>()
@@ -3767,7 +3771,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     )
                         .chain(),
                     process_inventory_delete_pointer,
-                    process_guild_storage_pointer,
+                    (process_guild_storage_pointer, npc_shop_scroll::process).chain(),
                     (process_overlay_keyboard, options_volume::process).chain(),
                     (
                         process_overlay_buttons,
@@ -6787,6 +6791,7 @@ pub(crate) fn process_overlay_keyboard(
         skill_binding: mut skill_binding,
         skills: mut skills,
         skill_persistence: mut skill_persistence,
+        ..
     } = big_map_controls;
     let OverlayKeyboardControls {
         mut surface_signals,
@@ -7902,6 +7907,7 @@ fn process_overlay_buttons(
             BigMapControls {
                 model: mut big_map,
                 intents: mut big_map_intents,
+                navigation: mut big_map_navigation,
                 ui: mut big_map_ui,
                 time,
                 skill_binding: mut skill_binding,
@@ -9781,12 +9787,27 @@ fn process_overlay_buttons(
                     }
                 }
             }
-            OverlayButton::BigMapTeleport => {
+            OverlayButton::BigMapNavigate => {
                 if state.bigmap_open() {
-                    if let (Some(big_map), Some(big_map_intents)) =
-                        (big_map.as_deref(), big_map_intents.as_deref_mut())
+                    if let (Some(big_map), Some(navigation)) =
+                        (big_map.as_deref(), big_map_navigation.as_deref_mut())
                     {
-                        let _ = big_map_intents.teleport_selected(big_map);
+                        if let Some(npc) = big_map.selected_navigation_npc() {
+                            let intent = crate::quest_ui::QuestRouteNavigationIntent {
+                                target: crate::quest_ui::QuestRouteTarget::MapNpc { object_id: npc.object_id },
+                                quest_index: 0,
+                                reset_epoch: big_map.reset_epoch,
+                                map_index: npc.map_index,
+                                x: npc.location.x,
+                                y: npc.location.y,
+                            };
+                            if navigation.push(intent) {
+                                state.core.panel = mir2_ui_core::state::UiPanel::None;
+                                if let Some(ui) = big_map_ui.as_deref_mut() {
+                                    ui.search_focused = false;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -9986,15 +10007,12 @@ fn process_overlay_buttons(
             }
             OverlayButton::ShopPageUp => {
                 if state.npc_shop_open() && shop.allows_buy() {
-                    shop_ui.start_index = shop_ui.start_index.saturating_sub(1);
-                    shop.selected_id = None;
+                    npc_shop_scroll::scroll_rows(&mut shop, &mut shop_ui, -1);
                 }
             }
             OverlayButton::ShopPageDown => {
                 if state.npc_shop_open() && shop.allows_buy() {
-                    shop_ui.start_index =
-                        (shop_ui.start_index + 1).min(shop.goods.len().saturating_sub(8));
-                    shop.selected_id = None;
+                    npc_shop_scroll::scroll_rows(&mut shop, &mut shop_ui, 1);
                 }
             }
             OverlayButton::ShopConfirm => {
@@ -12856,6 +12874,46 @@ fn overlay_centered_text_at(
                 TextLayout::new(Justify::Center, LineBreak::NoWrap),
             ));
         });
+}
+
+fn spawn_big_map_npc_row(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    rect: CrystalRect,
+    object_id: u32,
+    selected: bool,
+) {
+    let mut row = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            padding: UiRect::horizontal(Val::Px(3.0)),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Start,
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(if selected {
+            Color::srgba(0.38, 0.25, 0.08, 0.90)
+        } else {
+            Color::srgba(0.10, 0.07, 0.03, 0.62)
+        }),
+    ));
+    if object_id != 0 {
+        row.insert((Button, OverlayButton::SelectBigMapNpc(object_id)));
+    }
+    row.with_children(|row| {
+        row.spawn((
+            Text::new(label.to_owned()),
+            crate::crystal_ui::typography::crystal_text_font(9.0),
+            TextColor(if selected { Color::srgb(1.0, 0.84, 0.35) } else { TEXT }),
+            TextLayout::new(Justify::Left, LineBreak::NoWrap),
+            FocusPolicy::Pass,
+        ));
+    });
 }
 
 fn overlay_absolute_button(
@@ -16119,8 +16177,8 @@ fn render_bigmap(
         823,
         Some(823),
         CrystalRect::new(638.0, 432.0, 72.0, 25.0),
-        OverlayButton::BigMapTeleport,
-        model.selected_teleport_intent().is_some(),
+        OverlayButton::BigMapNavigate,
+        model.selected_navigation_npc().is_some(),
     );
     spawn_overlay_crystal_button(
         parent,
@@ -16151,12 +16209,12 @@ fn render_bigmap(
 
     for (row, npc) in rendered.npcs.iter().enumerate() {
         let label = format!("{} [{},{}]", crate::player_text::name(&npc.name), npc.location.x, npc.location.y);
-        overlay_absolute_button(
+        spawn_big_map_npc_row(
             parent,
             &label,
-            CrystalRect::new(590.0, 50.0 + row as f32 * 21.0, 140.0, 25.0),
-            OverlayButton::SelectBigMapNpc(npc.object_id),
-            npc.object_id != 0,
+            CrystalRect::new(590.0, 50.0 + row as f32 * 21.0, 140.0, 21.0),
+            npc.object_id,
+            model.selected_npc_object_id == Some(npc.object_id),
         );
         parent.spawn(BigMapNpcRowEntity {
             object_id: npc.object_id,
@@ -16228,17 +16286,11 @@ fn render_shop(
             OverlayButton::ShopPageDown,
             shop_ui.start_index.saturating_add(8) < shop.goods.len(),
         );
-        let max_start = shop.goods.len().saturating_sub(8);
-        let scroll_top = if max_start == 0 {
-            49.0
-        } else {
-            49.0 + 217.0 * shop_ui.start_index as f32 / max_start as f32
-        };
         spawn_static_overlay_sprite(
             parent,
             asset_server,
             "original-ui/Prguse2/205.png".to_owned(),
-            CrystalRect::new(219.0, scroll_top, 12.0, 18.0),
+            npc_shop_scroll::thumb_rect(shop_ui.start_index, shop.goods.len()),
         );
         spawn_overlay_crystal_button_enabled(
             parent,
@@ -19819,6 +19871,11 @@ mod tests {
         assert_eq!(state.bigmap_zoom, 2.0);
     }
 
+    mod npc_navigation_tests {
+        use super::*;
+        include!("big_map_npc_navigation_tests.rs");
+    }
+
     fn spawn_big_map_render_test(
         mut commands: Commands,
         asset_server: Res<AssetServer>,
@@ -20051,7 +20108,7 @@ mod tests {
     }
 
     #[test]
-    fn big_map_disabled_teleport_uses_explicit_crystal_title_823_frame() {
+    fn big_map_disabled_go_to_uses_explicit_crystal_title_823_frame() {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins)
             .add_plugins(AssetPlugin::default())
@@ -20068,9 +20125,9 @@ mod tests {
                 world.query::<(Entity, &OverlayButton, &CrystalImageButton, &Children)>();
             let (entity, _, button, children) = buttons
                 .iter(world)
-                .find(|(_, action, _, _)| matches!(action, OverlayButton::BigMapTeleport))
-                .expect("BigMap Teleport button");
-            let sprite_entity = children.iter().next().expect("Teleport button sprite");
+                .find(|(_, action, _, _)| matches!(action, OverlayButton::BigMapNavigate))
+                .expect("BigMap GO TO button");
+            let sprite_entity = children.iter().next().expect("GO TO button sprite");
             (entity, button.clone(), sprite_entity)
         };
         assert!(!button.enabled);
@@ -20081,7 +20138,7 @@ mod tests {
         );
         let image = world
             .get::<ImageNode>(sprite_entity)
-            .expect("Teleport sprite image");
+            .expect("GO TO sprite image");
         assert_eq!(
             world
                 .resource::<AssetServer>()

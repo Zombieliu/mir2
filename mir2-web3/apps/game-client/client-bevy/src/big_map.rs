@@ -3,9 +3,9 @@
 //! This module deliberately stops at the authoritative client contract.  It
 //! stores the current `MapInformation` identity plus `NewMapInfo`,
 //! `WorldMapSetup`, and `SearchMapResult` data, exposes the same 18-row NPC
-//! window as Crystal, and produces metadata for a server-gated teleport
-//! intent. It never changes the player's map or reports teleport success; a
-//! gateway/renderer can consume the intent later.
+//! window as Crystal, and validates ordinary NPC navigation separately from
+//! server-gated teleport metadata. It never changes the player's map or
+//! reports transport success; the movement host consumes navigation later.
 
 use std::collections::{BTreeMap, VecDeque};
 
@@ -617,6 +617,26 @@ impl BigMapModel {
             .find(|npc| npc.object_id == selected && npc.show_on_big_map)
     }
 
+    /// Ordinary walking needs a current, unambiguous map destination, not
+    /// permission to use the separate paid/server-gated teleport service.
+    pub fn selected_navigation_npc(&self) -> Option<&BigMapNpc> {
+        let current = self.current_map_index?;
+        if self.view != BigMapView::CurrentMap || self.active_map_index != Some(current) {
+            return None;
+        }
+        let map = self.active_map()?;
+        let npc = self.selected_npc()?;
+        if npc.object_id == 0
+            || npc.map_index != current
+            || npc.location.x < 0 || npc.location.x >= map.info.width
+            || npc.location.y < 0 || npc.location.y >= map.info.height
+            || map.info.npcs.iter().filter(|row| row.object_id == npc.object_id).count() != 1
+        {
+            return None;
+        }
+        Some(npc)
+    }
+
     pub fn filtered_npcs(&self) -> Vec<&BigMapNpc> {
         let query = normalize_filter_query(&self.search.draft);
         self.active_map()
@@ -1000,6 +1020,48 @@ mod tests {
         model.set_search_draft("NPC 20");
         assert_eq!(model.visible_npcs().len(), 1);
         assert!(model.selected_npc().is_none());
+    }
+
+    #[test]
+    fn ordinary_npc_navigation_does_not_require_paid_teleport_permission() {
+        let mut model = BigMapModel::default();
+        model.apply_new_map_info(1, info(vec![npc(42, "Blacksmith", false)]));
+        model.set_current_map(1);
+        assert!(model.select_npc(42));
+        assert_eq!(model.selected_navigation_npc().unwrap().object_id, 42);
+        assert!(model.selected_teleport_intent().is_none());
+        assert_eq!(model.current_map_index, Some(1));
+        // Selection is idempotent across a retained/held mouse press.
+        assert!(model.select_npc(42));
+        assert_eq!(model.selected_navigation_npc().unwrap().object_id, 42);
+    }
+
+    #[test]
+    fn ordinary_npc_navigation_rejects_ambiguous_hidden_foreign_and_outside_destinations() {
+        for invalid in ["world", "remote", "npc-map", "hidden", "zero", "negative", "width", "height", "duplicate"] {
+            let mut model = BigMapModel::default();
+            model.apply_new_map_info(1, info(vec![npc(42, "Blacksmith", false)]));
+            model.set_current_map(1);
+            assert!(model.select_npc(42));
+            match invalid {
+                "world" => model.view = BigMapView::WorldMap,
+                "remote" => model.active_map_index = Some(2),
+                "npc-map" => model.maps.get_mut(&1).unwrap().info.npcs[0].map_index = 2,
+                "hidden" => model.maps.get_mut(&1).unwrap().info.npcs[0].show_on_big_map = false,
+                "zero" => {
+                    model.maps.get_mut(&1).unwrap().info.npcs[0].object_id = 0;
+                    model.selected_npc_object_id = Some(0);
+                }
+                "negative" => model.maps.get_mut(&1).unwrap().info.npcs[0].location.x = -1,
+                "width" => model.maps.get_mut(&1).unwrap().info.npcs[0].location.x = 700,
+                "height" => model.maps.get_mut(&1).unwrap().info.npcs[0].location.y = 700,
+                "duplicate" => {
+                    model.maps.get_mut(&1).unwrap().info.npcs.push(npc(42, "Other", false));
+                }
+                _ => unreachable!(),
+            }
+            assert!(model.selected_navigation_npc().is_none(), "{invalid}");
+        }
     }
 
     #[test]

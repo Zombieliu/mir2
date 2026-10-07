@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-07 bounded NPC sidebar selection/ordinary GO TO and missing
+> goods scrolling are repaired. Bevy37+20, native23+9 and GPU1 pass; two
+> actual original-asset frames show selected Smith and final-page pickaxe.
+> Scroll input is local, scale aware and canceled by modal/context changes.
+> No live Windows/public/human acceptance is inferred; public remainsR19/15.
+> [Evidence and exact remaining delivery](NATIVE-NPC-MAP-SHOP-20261007.md).
+
 > 2026-10-07 native mining now has a current held directional gesture, actual
 > equipped CanMine/UID/durability and complete input/UI/movement invalidation.
 > Owner fresh matching confirmation uses source Mine/Attack2; observers retain

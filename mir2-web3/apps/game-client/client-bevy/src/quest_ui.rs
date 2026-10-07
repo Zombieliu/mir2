@@ -391,6 +391,7 @@ pub enum QuestUiIntent {
 pub enum QuestRouteTarget {
     Entrance,
     TaskNpc { object_id: u32 },
+    MapNpc { object_id: u32 },
     HuntRegion { monster_index: i32, radius: i32 },
     Supply { vendor: crate::quest_supplies::SupplyVendor },
 }
@@ -400,6 +401,7 @@ impl QuestRouteTarget {
         match self {
             Self::Entrance => "入口",
             Self::TaskNpc { .. } => "Task Steward",
+            Self::MapNpc { .. } => "NPC",
             Self::HuntRegion { .. } => "狩猎区域",
             Self::Supply { .. } => "补给地点",
         }
@@ -422,6 +424,19 @@ pub struct QuestRouteNavigationIntent {
 }
 
 impl QuestRouteNavigationIntent {
+    /// Big Map GO TO shares the ordinary movement controller. The selected
+    /// server-provided NPC and coordinates must still match when it is used.
+    pub fn matches_big_map_npc_destination(self, model: &crate::big_map::BigMapModel) -> bool {
+        let QuestRouteTarget::MapNpc { object_id } = self.target else { return false; };
+        self.quest_index == 0
+            && model.reset_epoch == self.reset_epoch
+            && model.current_map_index == Some(self.map_index)
+            && model.selected_navigation_npc().is_some_and(|npc| {
+                npc.object_id == object_id && npc.map_index == self.map_index
+                    && npc.location.x == self.x && npc.location.y == self.y
+            })
+    }
+
     /// A town approach is valid only for a displayed periodic task endpoint.
     /// This never authorizes accepting or granting a reward remotely.
     pub fn matches_task_npc_destination(self, tracker: &QuestTracker) -> bool {
@@ -497,6 +512,9 @@ fn quest_route_intent_is_current(
     };
     if big_map.reset_epoch != intent.reset_epoch || big_map.current_map_index != Some(intent.map_index) {
         return false;
+    }
+    if matches!(intent.target, QuestRouteTarget::MapNpc { .. }) {
+        return intent.matches_big_map_npc_destination(big_map);
     }
     if let QuestRouteTarget::Supply { vendor } = intent.target {
         return state.supply_open && state.supply_vendor == Some(vendor) && intent.matches_supply_destination();

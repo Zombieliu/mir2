@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-07 current user NPC map selection/GO TO and unscrollable goods
+> Candidate are repaired in an isolated sole-writer lane. Current NPC routing
+> reuses ordinary acknowledged movement; successful travel retires auto-run.
+> Goods wheel/thumb/arrows are bounded and modal/identity/scale guarded.
+> Bevy37+20, native23+9 and explicit GPU1 pass; real Smith/Vincent pickaxe
+> vendors are documented. Raw failures remain. Public R19/feed15 and protected
+> installations/saves/Gateway stay unchanged; new attested delivery and actual
+> Windows/public acceptance are next, not fullP1–P8 completion.
+> [Evidence](NATIVE-NPC-MAP-SHOP-20261007.md).
+
 > 2026-10-07 mining Candidate R19/source2b04 and signed updater15 are actually
 > published. Linux release/tooling,40 complete CDN objects, paired drained
 > Gateway backup/normal cold start, native HTTPS/CMS/206 and ordinary public

@@ -1,5 +1,15 @@
 # Agent Resume Handoff
 
+> Latest 2026-10-07 NPC map/shop lane: root owns isolated
+> codex/npc-map-go-20261007 based on c1033. NPC selection/ordinary GO TO,
+> auto-run retirement and missing shop wheel/thumb input pass37+20+23+9 and
+> GPU1. Preserve E/D/F and live Gateway; publicR19/feed15 remains current.
+> Next: clean attested Windows client, signed complete R20/s16 closure,
+> actual upgrade/input acceptance. Read-only release audit identifies reusable
+> signed engine b4390, R19 persistent delivery artifacts, r2-client-delivery
+> generic recipes, old r18 verified resource input and fixed s16 publisher gates.
+> [Implementation and exact receipts](NATIVE-NPC-MAP-SHOP-20261007.md).
+
 > Latest map-render handoff: 2026-07-13. The visible Bichon rectangles came from
 > opaque black matte pixels in packed object atlases plus a browser-incompatible
 > additive alpha equation. The runtime now routes all object-like libraries,
