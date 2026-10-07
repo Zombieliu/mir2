@@ -1,0 +1,333 @@
+   Compiling mir2-client-bevy v0.1.0 (C:\Users\Administrator\.codex\worktrees\npc-map-go\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+error[E0603]: function `shop_good` is private
+     --> src\crystal_ui\npc_shop_scroll_tests.rs:1:68
+      |
+    1 | use super::super::tests::{help_button_test_app, press_help_button, shop_good};
+      |                                                                    ^^^^^^^^^ private function
+      |
+note: the function `shop_good` is defined here
+     --> src\crystal_ui\overlays.rs:18672:5
+      |
+18672 |     fn shop_good(id: u64, name: &str, price: u32, stock: i32) -> ShopGood {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:48:58
+   |
+48 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+49 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:51:51
+   |
+51 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:74:5
+   |
+74 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, and `SKILL_ROW_SIZE`
+   --> src\crystal_ui\overlays.rs:116:5
+    |
+116 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+117 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+124 |     SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+    |                                                          ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:7660:8
+     |
+7660 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7661 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7660 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7661 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+error[E0063]: missing field `phase` in initializer of `bevy::bevy_input::mouse::MouseWheel`
+  --> src\crystal_ui\npc_shop_scroll_tests.rs:38:35
+   |
+38 |     app.world_mut().write_message(MouseWheel { unit, x: 0., y, window });
+   |                                   ^^^^^^^^^^ missing `phase`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:110:9
+    |
+110 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:155:9
+    |
+155 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:1182:5
+     |
+1182 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6792:17
+     |
+6792 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6793:28
+     |
+6793 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:6793:28
+     |
+6793 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:7229:18
+     |
+7229 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7914:25
+     |
+7914 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7915:36
+     |
+7915 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:7898:5
+     |
+7898 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:7915:36
+     |
+7915 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src\crystal_ui\overlays.rs:11302:9
+      |
+11302 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src\crystal_ui\overlays.rs:11303:9
+      |
+11303 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src\crystal_ui\overlays.rs:15461:5
+      |
+15461 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src\crystal_ui\overlays.rs:15462:5
+      |
+15462 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src\crystal_ui\overlays.rs:15463:5
+      |
+15463 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_parcel_tests.rs:212:9
+    |
+212 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:1961:5
+     |
+1961 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+Some errors have detailed explanations: E0063, E0603.
+For more information about an error, try `rustc --explain E0063`.
+warning: `mir2-client-bevy` (lib test) generated 34 warnings
+error: could not compile `mir2-client-bevy` (lib test) due to 2 previous errors; 34 warnings emitted
