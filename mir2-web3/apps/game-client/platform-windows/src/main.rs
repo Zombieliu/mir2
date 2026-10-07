@@ -32,6 +32,7 @@ mod movement_trace;
 mod native_fonts;
 mod native_protocol;
 mod npc_purchase_client;
+mod npc_purchase_projection;
 mod session_config;
 mod shell_bridge;
 mod social_bond_wire;

@@ -10,6 +10,8 @@
 //     (`unique_id`, `item_index`, `current_dura`, `max_dura`, `count`).
 //   * `ClientFriend` / `ClientMail` use rename_all = "camelCase".
 
+import { npcPurchaseDecimal, npcPurchaseSignedDecimal, parseNpcPurchaseMailItemJson } from "./npc-purchase-client";
+
 export type PacketRecord = Record<string, unknown>;
 
 export function packetNumber(value: unknown): number | undefined {
@@ -150,13 +152,14 @@ export function normalizeFriendList(raw: unknown): NormalizedFriend[] {
   });
 }
 
-export type NormalizedMailAttachment = {uniqueId:number|null;itemIndex:number|null;name:string|null;key:string|null;
+export type NormalizedMailAttachment = {uniqueId:number|string|null;itemIndex:number|null;name:string|null;key:string|null;
   count:number;currentDura:number;maxDura:number;soulBoundId:number;identified:boolean|null;cursed:boolean;gemCount:number};
 export type NormalizedMail = {mailId:number;senderName:string;message:string;subject:string;opened:boolean;locked:boolean;
   canReply:boolean;collected:boolean;gold:number;items:NormalizedMailAttachment[];itemCount:number;
   dateSentBinaryDatetime:string|null;metadataKnown:boolean};
 const mailObject=(v:unknown):v is Record<string,unknown>=>Boolean(v)&&typeof v==="object"&&!Array.isArray(v);
 const mailInt=(v:unknown,min:number,max:number):v is number=>typeof v==="number"&&Number.isSafeInteger(v)&&v>=min&&v<=max;
+const mailIdentity=(v:unknown):v is number|string=>mailInt(v,1,Number.MAX_SAFE_INTEGER)||npcPurchaseDecimal(v)&&v!=="0";
 /** ClientMail and the existing Stage5 bootstrap use one loss-aware representation.
  * Unsafe numeric identities cannot be recovered by converting the rounded number to text. */
 export function parseMailList(raw:unknown):NormalizedMail[]|null {
@@ -176,8 +179,8 @@ export function parseMailList(raw:unknown):NormalizedMail[]|null {
       if(!Array.isArray(states)||states.length>5)return null;
       if(states.length){const decoded=[];for(const rawState of states){
         if(typeof rawState!=="string"||rawState.length>262144)return null;
-        let state:unknown;try{state=JSON.parse(rawState);}catch{return null;}
-        if(!mailObject(state)||!mailInt(state.unique_id,1,Number.MAX_SAFE_INTEGER)||typeof state.name!=="string"||typeof state.key!=="string")return null;
+        let state:unknown;try{state=parseNpcPurchaseMailItemJson(rawState);}catch{return null;}
+        if(!mailObject(state)||!mailIdentity(state.unique_id)||typeof state.name!=="string"||typeof state.key!=="string")return null;
         const metadata=state.user_item_metadata;if(metadata!==undefined&&metadata!==null&&!mailObject(metadata))return null;
         decoded.push({unique_id:state.unique_id,item_index:mailObject(metadata)?metadata.item_index??null:null,name:state.name,key:state.key,count:state.quantity,
           current_dura:state.durability_current??0,max_dura:state.durability_max??0,soul_bound_id:state.soul_bound_id??-1,gem_count:state.gem_count??0,
@@ -185,25 +188,27 @@ export function parseMailList(raw:unknown):NormalizedMail[]|null {
       }sourceItems=decoded;}
     }
     if(!Array.isArray(sourceItems)||sourceItems.length>5)return null;
-    const items:NormalizedMailAttachment[]=[];
+    const items:NormalizedMailAttachment[]=[],attachmentIds=new Set<string>();
     for(const item of sourceItems){
       if(typeof item==="string"){if(item.length>512)return null;items.push({uniqueId:null,itemIndex:null,name:item,key:item,count:1,currentDura:0,maxDura:0,soulBoundId:0,identified:false,cursed:false,gemCount:0});continue;}
       if(!mailObject(item))return null;
       const uid=item.unique_id??item.uniqueId??null,index=item.item_index??item.itemIndex??null;
-      if(uid!==null&&!mailInt(uid,1,Number.MAX_SAFE_INTEGER)||index!==null&&!mailInt(index,-2147483648,2147483647))return null;
+      if(uid!==null&&!mailIdentity(uid)||index!==null&&!mailInt(index,-2147483648,2147483647))return null;
+      if(item.unique_id!==undefined&&item.uniqueId!==undefined&&String(item.unique_id)!==String(item.uniqueId))return null;
+      if(uid!==null){if(attachmentIds.has(String(uid)))return null;attachmentIds.add(String(uid));}
       const count=item.count??0,current=item.current_dura??item.currentDura??0,max=item.max_dura??item.maxDura??0,
         soul=item.soul_bound_id??item.soulBoundId??0,gem=item.gem_count??item.gemCount??0;
       if(![count,current,max,gem].every(v=>mailInt(v,0,65535))||!mailInt(soul,-2147483648,2147483647))return null;
       const name=item.name??null,key=item.key??null;
       if(name!==null&&(typeof name!=="string"||name.length>512)||key!==null&&(typeof key!=="string"||key.length>512))return null;
-      items.push({uniqueId:uid as number|null,itemIndex:index as number|null,name:name as string|null,key:key as string|null,count:count as number,
+      items.push({uniqueId:uid as number|string|null,itemIndex:index as number|null,name:name as string|null,key:key as string|null,count:count as number,
         currentDura:current as number,maxDura:max as number,soulBoundId:soul,gemCount:gem as number,identified:typeof item.identified==="boolean"?item.identified:null,cursed:item.cursed===true});
     }
     const gold=entry.gold??0;if(!mailInt(gold,0,0xffffffff))return null;
     const date=entry.dateSentBinaryDatetime??entry.date_sent_binary_datetime;
     // Decimal text is lossless only when it was received as text. A JS-safe integer is also exact.
     let dateText:string|null=null;
-    if(typeof date==="string"&&/^-?\d{1,19}$/.test(date)){try{const n=BigInt(date);if(n>=BigInt("-9223372036854775808")&&n<=BigInt("9223372036854775807"))dateText=date;}catch{/* unknown */}}
+    if(npcPurchaseSignedDecimal(date))dateText=date;
     else if(mailInt(date,Number.MIN_SAFE_INTEGER,Number.MAX_SAFE_INTEGER))dateText=String(date);
     const reply=entry.canReply??entry.can_reply;
     const subject=entry.subject??"";if(typeof subject!=="string"||subject.length>4096)return null;
@@ -274,12 +279,28 @@ function gatewayGameShopDateReviver(this:Record<string,unknown>,key:string,value
   try{const n=BigInt(source);return n>=-9223372036854775808n&&n<=9223372036854775807n?source:null;}catch{return null;}
 }
 
+export function exactGatewayBinaryDatetime(value: unknown): number | string | undefined {
+  return mailInt(value, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) || npcPurchaseSignedDecimal(value)
+    ? value : undefined;
+}
+/** Ordinary storage packets use these declared i64 fields. Without original
+ * token support their unsafe numeric observations are unavailable. */
+function gatewayStorageDateReviver(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string}):unknown {
+  const sourceField = key === "storagePasswordLastSetBinaryDatetime" && typeof this.hasStoragePassword === "boolean"
+    || key === "expandedStorageExpiryTimeBinaryDatetime" && typeof this.hasExpandedStorage === "boolean"
+    || key === "lastSetBinaryDatetime" && typeof this.hasPassword === "boolean"
+    || key === "expiryTimeBinaryDatetime" && typeof this.hasExpandedStorage === "boolean";
+  if (!sourceField || typeof value !== "number" || Number.isSafeInteger(value)) return value;
+  const original = context?.source;
+  return npcPurchaseSignedDecimal(original) ? original : null;
+}
+
 /** Preserve plain item expiry on every packet and the existing ReceiveMail date.
  * Without reviver source support, an unsafe plain expiry becomes unknown. */
 export function parseGatewayMailDates(text:string):unknown {
   const parse=JSON.parse as (text:string,reviver:(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string})=>unknown)=>unknown;
   const parsed:unknown=parse(text,function(key,value,context){
-    return gatewayItemExpiryReviver.call(this,key,gatewayCreatureTimeReviver.call(this,key,gatewayGameShopDateReviver.call(this,key,value,context),context),context);
+    return gatewayStorageDateReviver.call(this,key,gatewayItemExpiryReviver.call(this,key,gatewayCreatureTimeReviver.call(this,key,gatewayGameShopDateReviver.call(this,key,value,context),context),context),context);
   });
   if(mailObject(parsed)&&parsed.type==="packet"&&parsed.packet==="ChangePasswordBanned") {
     return parse(text,function(key,value,context){

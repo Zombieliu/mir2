@@ -6,6 +6,8 @@ use std::sync::OnceLock;
 mod crystal_guild_settings;
 mod crystal_creature_settings;
 mod crystal_hero_settings;
+mod crystal_npc_goods;
+pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_json};
 pub use crystal_hero_settings::{crystal_hero_settings, calculate_crystal_hero_base_stat, CrystalHeroSettings, CrystalHeroSource, CrystalHeroRules};
 pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
 #[cfg(test)]

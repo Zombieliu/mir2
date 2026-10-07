@@ -192,6 +192,8 @@ export type WorldItem = {
   uniqueId: number;
   /** Original nonnegative safe-integer server instance ID; absent for display-only slot aliases. */
   authoritativeUniqueId?: number;
+  /** Exact owner snapshot identity when it cannot enter the older numeric API. */
+  exactUniqueId?: string;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -215,6 +217,8 @@ export type EquipmentItem = {
   uniqueId?: number;
   /** Original nonnegative safe-integer server instance ID, independent of the equipment slot. */
   authoritativeUniqueId?: number;
+  /** Exact owner snapshot identity; numeric-only mutations remain unavailable. */
+  exactUniqueId?: string;
   quantity?: number;
   name: string;
   icon: number;
@@ -409,7 +413,7 @@ export type Stage5SystemsState = {
 /** Server attestation for ordinary Gold Trade capacity; never reconstructed from a display item. */
 export type NpcGoldTradeCapacity = {
   rosterValid: boolean;
-  freshCompatibleUniqueIds: readonly number[];
+  freshCompatibleUniqueIds: readonly (number | string)[];
 };
 
 export type WorldState = {
@@ -443,8 +447,8 @@ export type WorldState = {
   hasStoragePassword: boolean;
   requireStoragePassword: boolean;
   storageSessionUnlocked: boolean;
-  storagePasswordLastSetBinaryDatetime: number;
-  expandedStorageExpiryTimeBinaryDatetime: number;
+  storagePasswordLastSetBinaryDatetime: number | string;
+  expandedStorageExpiryTimeBinaryDatetime: number | string;
   worldTick: number;
   selectedObjectId: string | null;
   miniMapIndex: number | null;

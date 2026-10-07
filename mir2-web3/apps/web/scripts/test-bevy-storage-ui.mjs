@@ -5,7 +5,7 @@ import ts from "typescript";
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
-const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui"]);
+const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "bag-belt-gesture"]);
 function load(name, fresh = false) {
   assert.ok(pureModules.has(name), "unexpected non-pure import: " + name);
   if (!fresh && cache.has(name)) return cache.get(name);
@@ -28,7 +28,7 @@ function world() {
     inventoryItems: [worldItem("bag2", 4, 0)], beltItems: [], equipmentItems: [],
     storageItems: [worldItem("storage", 3, 7)], storageSize: 160,
     hasStoragePassword: false, storageSessionUnlocked: true, hasExpandedStorage: false,
-    expandedStorageExpiryTimeBinaryDatetime: 639028224000000000 };
+    expandedStorageExpiryTimeBinaryDatetime: 1000 };
 }
 function fixture(overrides = {}) {
   let now = 100, status = null, sink = null, state = null, host, behavior = () => false;
@@ -96,11 +96,34 @@ test("storage source projection preserves Bag2 physical slots, UID0 and binary e
   assert.equal(p.ok, true);
   assert.equal(p.inventory.items[0].container, 0); assert.equal(p.inventory.items[0].slot, 44);
   assert.equal(p.inventory.items[0].uniqueId, 0); assert.equal(p.storage.items[0].container, 4);
-  assert.equal(p.storage.expiry, 639028224000000000);
+  assert.equal(p.storage.expiry, 1000);
   assert.equal(storage.validStorageModel(p.inventory, p.storage), true);
   const missing = world(); delete missing.storageItems[0].authoritativeUniqueId;
   missing.storageItems[0].uniqueId = 300; missing.storageItems[0].tooltipSource = { info: {}, userItem: { unique_id: 7 } };
   assert.equal(projection.projectBevyStorageModel(missing).storage.items[0].uniqueId, null);
+});
+
+test("Source31 storage controller safe expiry preserves custody and wide or unsafe date carriers fail closed", () => {
+  const projected = projection.projectBevyStorageModel(world());
+  assert.equal(projected.ok, true);
+  assert.equal(projected.storage.expiry, 1000);
+  assert.equal(storage.validStorageModel(projected.inventory, projected.storage), true);
+  const current = fixture(); current.activate();
+  assert.equal(current.state.active, true);
+  assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
+  // The old unsafe Number fixture could not prove the original i64 token.
+  // A one-tick-different date rounds at conversion and is also unavailable;
+  // canonical text stays exact in WorldState but ABI1 cannot consume it.
+  for (const expiry of ["639028224000000001", "-9223372036854775808", "9223372036854775807",
+    639028224000000000, Number("639028224000000001")]) {
+    const input = { ...world(), expandedStorageExpiryTimeBinaryDatetime: expiry };
+    const rejected = projection.projectBevyStorageModel(input);
+    assert.equal(rejected.ok, false, String(expiry));
+    assert.deepEqual(rejected.error, { code: "invalidField", field: "storage" });
+    assert.equal(input.expandedStorageExpiryTimeBinaryDatetime, expiry);
+  }
+  assert.equal(current.state.active, true);
+  assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
 });
 
 test("storage source projection rejects duplicate cells/UIDs, cross-pane UID collisions and invalid accessible inputs", () => {
@@ -371,7 +394,8 @@ test("desktop and touch admission use their declared geometry thresholds without
 function shellStorageFixture() {
   const text = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
   const ast = ts.createSourceFile("shell.tsx", text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const names = ["scenePointFromMouseEvent", "beginCombatUiHold", "endCombatUiHold", "cancelSharedStoragePointer", "handleSharedStoragePointer"];
+  const names = ["scenePointFromMouseEvent", "beginCombatUiHold", "endCombatUiHold", "cancelSharedStoragePointer", "handleSharedStoragePointer",
+    "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"];
   const declarations = [];
   function visit(node) {
     if (ts.isFunctionDeclaration(node) && names.includes(node.name?.text)) declarations.push(node.getText(ast));
@@ -387,6 +411,7 @@ function shellStorageFixture() {
       onBevyStoragePointer(edge) { const accepted = f.host.pointer(edge); hook?.(edge); return accepted; } } },
     stageFrameRef: { current: { focus() {}, getBoundingClientRect: () => ({ left: 0, top: 0, width: 1024, height: 768 }) } },
     stagePresentation: { virtualWidth: 1024, virtualHeight: 768 }, heldScenePointerRef: { current: null },
+    worldFishingPhysicalRef: { current: null }, worldFishingTerminalRef: { current: null },
     onViewportDirectionStop() { stops++; }, stopHeldScenePointer() { scope.heldScenePointerRef.current = null; stops++; },
     sceneInteractionReady: true, questLocalModalOpen: false, mobileMoreOpen: false, bevyQuestUiCapturesPointer: false,
     bevyStorageUiActive: true, bevyStorageUiTransitioning: false,

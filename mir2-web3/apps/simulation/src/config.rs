@@ -7547,6 +7547,25 @@ impl<'de> Deserialize<'de> for NpcGoldTradeCapacity {
     }
 }
 
+/// The current read-only NPC catalogue, captured from the same authoritative
+/// World as the personal economy. No packet cursor or private checkpoint is used.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NativeNpcShopSnapshot {
+    pub npc_object_id: u32,
+    pub script_key: String,
+    pub service: String,
+    pub packet_type: String,
+    pub list: Vec<UserItem>,
+    /// Same-turn browser presentation from the shared real Crystal template join.
+    #[serde(default)]
+    pub display_goods: Vec<serde_json::Value>,
+    /// Finite JSON number preserves the actual f32 packet rate while keeping Eq.
+    pub rate: serde_json::Number,
+    pub panel_type: u8,
+    pub hide_added_stats: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
@@ -7615,6 +7634,12 @@ pub struct WorldSnapshot {
     pub hero_vitals: Option<HeroVitalsSnapshot>,
     #[serde(default)]
     pub hero_weights: HeroWeightsSnapshot,
+    /// Actual current hero level table, paired with stage5Systems.hero.experience.
+    #[serde(default)]
+    pub hero_max_experience: Option<i64>,
+    /// Same-turn current service and catalogue; null means no current shop.
+    #[serde(default)]
+    pub native_npc_shop: Option<NativeNpcShopSnapshot>,
     #[serde(default)]
     pub storage_items: Vec<WorldItemSnapshot>,
     pub equipment_items: Vec<EquipmentItemSnapshot>,

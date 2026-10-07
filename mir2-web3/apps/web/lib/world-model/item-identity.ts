@@ -6,13 +6,19 @@ export function authoritativeItemUniqueId(value: unknown): number | undefined {
     ? value
     : undefined;
 }
+/** Full-range source identity is text, never recovered from an unsafe Number. */
+export function exactItemUniqueId(value: unknown): string | undefined {
+  if (authoritativeItemUniqueId(value) !== undefined) return String(value);
+  return typeof value === "string" && /^(?:0|[1-9][0-9]{0,19})$/.test(value)
+    && BigInt(value) <= 18446744073709551615n ? value : undefined;
+}
 
 /** Preserve the old display key while keeping server identity separate. */
 export function projectInventoryItemIdentity(
   rawUniqueId: unknown,
   container: ItemContainer,
   slot: number,
-): Pick<WorldItem, "uniqueId" | "authoritativeUniqueId"> {
+): Pick<WorldItem, "uniqueId" | "authoritativeUniqueId" | "exactUniqueId"> {
   const authoritativeUniqueId = authoritativeItemUniqueId(rawUniqueId);
   const uniqueId = typeof rawUniqueId === "number"
     ? rawUniqueId
@@ -20,6 +26,7 @@ export function projectInventoryItemIdentity(
   return {
     uniqueId,
     ...(authoritativeUniqueId === undefined ? {} : { authoritativeUniqueId }),
+    ...(typeof rawUniqueId === "string" && exactItemUniqueId(rawUniqueId) !== undefined ? { exactUniqueId: rawUniqueId } : {}),
   };
 }
 

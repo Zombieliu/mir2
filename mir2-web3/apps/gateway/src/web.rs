@@ -9716,59 +9716,11 @@ fn user_item_summary_json(item: &UserItem) -> Value {
 /// its item database before drawing the shop. The web client needs the same
 /// name/icon/unit-price join at the gateway boundary.
 fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
-    let mut entry = serde_json::to_value(item)
-        .ok()
-        .and_then(|value| value.as_object().cloned())
-        .unwrap_or_default();
-    entry.insert("id".into(), json!(item.unique_id));
-    entry.insert("uniqueId".into(), json!(item.unique_id));
-    // Exact goods selector for the durable protocol, before any JS Number conversion.
-    entry.insert("purchaseItemIndex".into(), json!(item.unique_id.to_string()));
-    entry.insert("itemIndex".into(), json!(item.item_index));
-    entry.insert("count".into(), json!(item.count));
-
-    if let Some(template) = crystal_item_by_index(item.item_index) {
-        entry.insert("name".into(), json!(template.name));
-        entry.insert(
-            "icon".into(),
-            json!(mir2_game_data::crystal_user_item_image(
-                template.item_type,
-                template.shape,
-                template.stack_size,
-                template.image,
-                u32::from(item.count),
-            )),
-        );
-        entry.insert(
-            "price".into(),
-            json!(((template.price as f32) * rate).floor() as u32),
-        );
-        // The displayed unit price cannot reconstruct a multi-item f32 total.
-        let socket_infos: Vec<_> = item.slots.iter().map(|slot| {
-            slot.as_ref().and_then(|socket| crystal_item_by_index(socket.item_index))
-        }).collect();
-        entry.insert("tooltipSource".into(), json!({
-            "info": &template, "realInfo": null, "userItem": item,
-            "socketInfos": socket_infos, "realSocketInfos": [],
-        }));
-        entry.insert("grade".into(), json!(template.grade));
-        if let Some(description) = template.tooltip.filter(|value| !value.trim().is_empty()) {
-            entry.insert("description".into(), json!(description));
-        }
-    } else {
-        entry.insert("name".into(), json!(format!("Item #{}", item.item_index)));
-        entry.insert("icon".into(), json!(0));
-        entry.insert("price".into(), json!(0));
-    }
-    Value::Object(entry)
+    mir2_game_data::crystal_npc_goods_item_json(item, rate)
 }
 
 fn npc_goods_list_json(list: &[UserItem], rate: f32) -> Value {
-    Value::Array(
-        list.iter()
-            .map(|item| npc_goods_item_json(item, rate))
-            .collect(),
-    )
+    mir2_game_data::crystal_npc_goods_list_json(list, rate)
 }
 
 /// Maps a `Vec<Option<UserItem>>` trade payload into the contract item array,

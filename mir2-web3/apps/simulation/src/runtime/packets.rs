@@ -6921,6 +6921,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         hero_stats:hero_stats.snapshot(),
         hero_vitals,
         hero_weights:crate::config::HeroWeightsSnapshot {bag:hero_stats.bag,wear:hero_stats.wear,hand:hero_stats.hand},
+        hero_max_experience: stage5.stage5_systems.hero.as_ref().map(|hero| mir2_game_data::crystal_hero_settings().max_experience(hero.level)),
+        native_npc_shop: super::npc_purchase_snapshot::current_shop(world),
         storage_items: resources
             .storage_items
             .iter()

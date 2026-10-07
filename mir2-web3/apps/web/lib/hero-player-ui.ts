@@ -6,7 +6,7 @@ export type HeroUiOwner = Readonly<{
 type Row = Record<string, unknown>;
 export type HeroActor = Readonly<{ objectId: number; name: string; class: string; gender: string; generation: number }>;
 export type HeroItem = Readonly<{
-  slot: number; uniqueId: number; itemIndex: number; count: number; name: string; icon: number;
+  slot: number; uniqueId: number | string; itemIndex: number; count: number; name: string; icon: number;
   userItem: Readonly<Row>; info: Readonly<Row>; tooltipSource: Readonly<Row>;
 }>;
 export type HeroMagic = Readonly<{ spell: string; name: string; icon: number; key: number; level: number; raw: Readonly<Row> }>;
@@ -16,7 +16,7 @@ export type HeroPlayerModel = Readonly<{
   informationSerial: number; snapshotSerial: number; personalSerial: number; skillSnapshotSerial: number;
   inventoryCapacity: number; inventory: readonly (HeroItem | null)[]; equipment: readonly (HeroItem | null)[];
   personalInventory: readonly (HeroItem | null)[] | null; magics: readonly HeroMagic[];
-  hp: number; mp: number; level: number; experience: number; maxExperience: number; spawned: boolean; riding: boolean | null;
+  hp: number; mp: number; level: number; experience: number | string; maxExperience: number | string; spawned: boolean; riding: boolean | null;
   autoPot: boolean; hpPercent: number; mpPercent: number; hpItemIndex: number; mpItemIndex: number;
   stats: readonly Readonly<{ stat: number; value: number }>[];
   weights: Readonly<{ bag: number; wear: number; hand: number }>;
@@ -49,6 +49,11 @@ const classes = ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"];
 const genders = ["Male", "Female"];
 const capacities = [10, 18, 26, 34, 42];
 const i32 = (v: unknown): v is number => int(v, -2147483648, 2147483647);
+const exactId = (v: unknown): v is number | string => int(v, 1) || typeof v === "string"
+  && /^[1-9][0-9]{0,19}$/.test(v) && BigInt(v) <= 18446744073709551615n;
+const exactExperience = (v: unknown): v is number | string => int(v, 0) || typeof v === "string"
+  && /^(?:0|[1-9][0-9]{0,18})$/.test(v) && BigInt(v) <= 9223372036854775807n;
+const sameId = (a: unknown, b: unknown) => exactId(a) && exactId(b) && String(a) === String(b);
 /** Stable serialization is a proof of the entire source, never an instance ID. */
 function canonical(value: unknown): string {
   if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);
@@ -78,7 +83,7 @@ function sameActor(a: HeroActor, b: HeroActor): boolean {
   return a.objectId === b.objectId && a.name === b.name && a.class === b.class && a.gender === b.gender && a.generation === b.generation;
 }
 function userItem(v: unknown, depth = 0): v is Row {
-  if (!row(v) || depth > 8 || !int(v.unique_id, 1) || !i32(v.item_index) || !int(v.count, 1, 65535)) return false;
+  if (!row(v) || depth > 8 || !exactId(v.unique_id) || !i32(v.item_index) || !int(v.count, 1, 65535)) return false;
   for (const k of ["current_dura", "max_dura", "gem_count"]) if (!int(v[k], 0, 65535)) return false;
   for (const k of ["soul_bound_id", "refine_success_chance", "wedding_ring"]) if (!i32(v[k])) return false;
   for (const k of ["awake_type", "refined_value", "refine_added"]) if (!int(v[k], 0, 255)) return false;
@@ -91,10 +96,10 @@ function userItem(v: unknown, depth = 0): v is Row {
 function nullableItems(v: unknown, count: number): v is (Row | null)[] {
   return Array.isArray(v) && v.length === count && Array.from(v).every(x => x === null || userItem(x));
 }
-function custodyIds(items: readonly (HeroItem | Row | null)[]): number[] {
-  const result: number[] = [];
+function custodyIds(items: readonly (HeroItem | Row | null)[]): string[] {
+  const result: string[] = [];
   const visit = (raw: Row) => {
-    result.push(raw.unique_id as number);
+    result.push(String(raw.unique_id));
     for (const child of raw.slots as (Row | null)[]) if (child) visit(child);
   };
   for (const item of items) if (item) visit("userItem" in item ? item.userItem as Row : item as Row);
@@ -109,8 +114,7 @@ function magic(v: unknown): v is Row {
 function information(v: unknown): v is Row {
   if (!row(v) || !int(v.object_id, 1, 4294967295) || !text(v.name) || !classes.includes(String(v.class))
     || !genders.includes(String(v.gender)) || !int(v.level, 0, 65535) || !int(v.hair, 0, 255)
-    || !i32(v.hp) || !i32(v.mp) || typeof v.experience !== "number" || !Number.isFinite(v.experience)
-    || typeof v.max_experience !== "number" || !Number.isFinite(v.max_experience)
+    || !i32(v.hp) || !i32(v.mp) || !exactExperience(v.experience) || !exactExperience(v.max_experience)
     || !Array.isArray(v.inventory) || !capacities.includes(v.inventory.length) || !nullableItems(v.inventory, v.inventory.length)
     || !nullableItems(v.equipment, 14) || !Array.isArray(v.magics) || v.magics.length > 256 || !v.magics.every(magic)
     || new Set(v.magics.map(m => m.spell)).size !== v.magics.length || typeof v.auto_pot !== "boolean"
@@ -130,20 +134,20 @@ function itemInfo(v: unknown, index: unknown): v is Row {
 }
 function sparseItems(v: unknown, capacity: number, personal = false): (HeroItem | null)[] | null {
   if (!Array.isArray(v) || v.length > capacity) return null;
-  const result: (HeroItem | null)[] = Array(capacity).fill(null), ids = new Set<number>();
+  const result: (HeroItem | null)[] = Array(capacity).fill(null), ids = new Set<string>();
   for (const raw of v) {
     if (personal && row(raw) && raw.container === "quest") continue;
     if (!row(raw) || !["bag1", "bag2", "belt"].includes(String(raw.container)) || !int(raw.slot, 0, personal ? 39 : capacity - 1)) return null;
     const slot = personal && raw.container === "bag2" ? raw.slot + 40 : raw.slot;
     if ((personal && raw.container === "belt") || slot >= capacity || result[slot] !== null
-      || !int(raw.uniqueId, 1) || ids.has(raw.uniqueId) || !int(raw.quantity, 1, 65535)
+      || !exactId(raw.uniqueId) || ids.has(String(raw.uniqueId)) || !int(raw.quantity, 1, 65535)
       || !text(raw.name) || !int(raw.icon, 0, 65535) || !row(raw.tooltipSource)
-      || !userItem(raw.tooltipSource.userItem) || raw.tooltipSource.userItem.unique_id !== raw.uniqueId
+      || !userItem(raw.tooltipSource.userItem) || !sameId(raw.tooltipSource.userItem.unique_id, raw.uniqueId)
       || raw.tooltipSource.userItem.count !== raw.quantity || !itemInfo(raw.tooltipSource.info, raw.tooltipSource.userItem.item_index)
       || (raw.tooltipSource.realInfo != null && (!row(raw.tooltipSource.realInfo)
         || !itemInfo(raw.tooltipSource.realInfo, raw.tooltipSource.realInfo.item_index)))) return null;
     const info = raw.tooltipSource.realInfo ?? raw.tooltipSource.info;
-    ids.add(raw.uniqueId);
+    ids.add(String(raw.uniqueId));
     result[slot] = { slot, uniqueId: raw.uniqueId, itemIndex: raw.tooltipSource.userItem.item_index as number,
       count: raw.quantity, name: raw.name, icon: raw.icon, userItem: raw.tooltipSource.userItem,
       info: info as Row, tooltipSource: raw.tooltipSource };
@@ -154,7 +158,7 @@ function enrich(items: (Row | null)[], catalog: readonly (HeroItem | null)[]): (
   const result: (HeroItem | null)[] = [];
   for (const [slot, raw] of items.entries()) {
     if (!raw) { result.push(null); continue; }
-    const view = catalog.find(v => v !== null && v.uniqueId === raw.unique_id && v.itemIndex === raw.item_index);
+    const view = catalog.find(v => v !== null && sameId(v.uniqueId, raw.unique_id) && v.itemIndex === raw.item_index);
     if (!view) return null;
     result.push({ ...view, slot, count: raw.count as number, userItem: raw,
       tooltipSource: { ...view.tooltipSource, userItem: raw } });
@@ -246,6 +250,10 @@ export class HeroPlayerAuthority {
         || !row(weights) || ![weights.bag, weights.wear, weights.hand].every(i32)) return null;
       let inventory = inv, equipment = gear;
       const infoNewer = this.infoSerial > this.worldSerial;
+      const snapshotExperience = Object.hasOwn(w, "heroMaxExperience");
+      const experience = infoNewer || !snapshotExperience ? h.experience : stage.experience;
+      const maxExperience = infoNewer || !snapshotExperience ? h.max_experience : w.heroMaxExperience;
+      if (!exactExperience(experience) || !exactExperience(maxExperience)) return null;
       if (infoNewer) {
         if (h.level !== stage.level) return null;
         const nextInv = enrich(h.inventory as (Row | null)[], [...inv, ...gear]);
@@ -286,8 +294,8 @@ export class HeroPlayerAuthority {
         class: h.class as string, gender: h.gender as string, generation: this.generation };
       const data = { actor, inventory, equipment, personalInventory: personal, magics,
         hp: infoNewer ? h.hp as number : vitals.hp, mp: infoNewer ? h.mp as number : vitals.mp,
-        level: infoNewer ? h.level as number : stage.level, experience: h.experience as number,
-        maxExperience: h.max_experience as number, spawned: true, riding: this.actorState?.riding ?? null,
+        level: infoNewer ? h.level as number : stage.level, experience,
+        maxExperience, spawned: true, riding: this.actorState?.riding ?? null,
         autoPot, hpPercent, mpPercent, hpItemIndex, mpItemIndex, stats, weights: weights as { bag: number; wear: number; hand: number } };
       const sourceKey = canonical(data);
       // Preserve socket identity; never freeze an external transport object.
@@ -334,14 +342,18 @@ function mergePlan(model: HeroPlayerModel, from: HeroCell, to: HeroCell): HeroAc
   if (from.grid === "Inventory" && to.grid === "Inventory") return null;
   if ([from.grid, to.grid].includes("Inventory") && [from.grid, to.grid].includes("HeroEquipment")) return null;
   const a = at(model, from), b = at(model, to);
-  if (!a || !b || a.uniqueId === b.uniqueId || a.itemIndex !== b.itemIndex || b.count >= ((b.tooltipSource.info as Row).stack_size as number)) return null;
+  if (!a || !b || !int(a.uniqueId, 1) || !int(b.uniqueId, 1) || a.uniqueId === b.uniqueId || a.itemIndex !== b.itemIndex || b.count >= ((b.tooltipSource.info as Row).stack_size as number)) return null;
   return { wire: { type: "mergeItem", gridFrom: from.grid, gridTo: to.grid, idFrom: a.uniqueId, idTo: b.uniqueId },
     confirmationRequired: false, crossPlayer: from.grid === "Inventory" || to.grid === "Inventory" };
 }
 /** Concrete reachable commands only; unsupported attachments and manual casts have no plan. */
 export function planHeroAction(model: HeroPlayerModel, action: HeroUiAction): HeroActionPlan | null {
   if (!model.spawned) return null;
-  const result = (wire: HeroWire, confirmationRequired = false, crossPlayer = false): HeroActionPlan => ({ wire, confirmationRequired, crossPlayer });
+  // Legacy mutation transport still requires numeric instance IDs. Exact text
+  // remains visible, but never becomes a rounded or invalid legacy command.
+  const result = (wire: HeroWire, confirmationRequired = false, crossPlayer = false): HeroActionPlan | null =>
+    ["uniqueId", "idFrom", "idTo"].some(field => field in wire && !int(wire[field], 1))
+      ? null : ({ wire, confirmationRequired, crossPlayer });
   switch (action.kind) {
     case "move": {
       if (action.from === action.to || !at(model, { grid: "HeroInventory", slot: action.from }) || !available(model, { grid: "HeroInventory", slot: action.to })) return null;
@@ -408,9 +420,9 @@ export function heroActionCurrent(dto: HeroActionDto, model: HeroPlayerModel): b
 }
 export function heroRestockCandidate(model: HeroPlayerModel, belt: number): HeroRestockCandidate | null {
   const item = int(belt, 0, 1) ? model.inventory[belt] : null;
-  if (!item || item.count !== 1) return null;
-  const source = model.inventory.find(i => i && i.slot >= 2 && i.itemIndex === item.itemIndex);
-  return source ? Object.freeze({ actor: model.actor, owner: model.owner, belt, from: source.slot, uniqueId: source.uniqueId, itemIndex: source.itemIndex }) : null;
+  if (!item || item.count !== 1 || !int(item.uniqueId, 1)) return null;
+  const source = model.inventory.find(i => i && i.slot >= 2 && i.itemIndex === item.itemIndex && int(i.uniqueId, 1));
+  return source && int(source.uniqueId, 1) ? Object.freeze({ actor: model.actor, owner: model.owner, belt, from: source.slot, uniqueId: source.uniqueId, itemIndex: source.itemIndex }) : null;
 }
 /** Explicit subsequent action only; observing consumption never automatically sends a restock. */
 export function heroRestockAction(candidate: HeroRestockCandidate, model: HeroPlayerModel): HeroActionDto | null {

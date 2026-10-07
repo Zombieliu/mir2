@@ -212,6 +212,21 @@ impl<T: Clone + Eq> NpcGoldBuyAttemptSlot<T> {
         true
     }
 
+    /// Called only by a host which retained this original transport proof and
+    /// observed an exact durable settlement after the complete owner checkpoint
+    /// was applied. Ordinary transport receipts never call this method.
+    pub fn retire_durably_settled(&mut self, token: NpcGoldBuyAttemptToken, ticket: &T) -> bool {
+        if !self.flight.as_ref().is_some_and(|attempt| attempt.token == token
+            && attempt.ticket.as_ref() == Some(ticket)
+            && matches!(attempt.phase, NpcGoldBuyAttemptPhase::Entered
+                | NpcGoldBuyAttemptPhase::Flushed | NpcGoldBuyAttemptPhase::Unknown)) {
+            return false;
+        }
+        let attempt = self.flight.take().expect("checked exact durable settlement");
+        self.archive(attempt);
+        true
+    }
+
     fn receipt_phase(phase: NpcGoldBuyAttemptPhase, outcome: NpcGoldBuyAttemptOutcome)
         -> Option<NpcGoldBuyAttemptPhase> {
         use NpcGoldBuyAttemptOutcome as Outcome;
@@ -254,3 +269,35 @@ impl<T: Clone + Eq> NpcGoldBuyAttemptSlot<T> {
 #[cfg(test)]
 #[path = "npc_gold_buy_attempt_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+mod durable_settlement_tests {
+    use super::*;
+    fn ready() -> NpcGoldBuyAttemptSlot<u64> {
+        let mut slot = NpcGoldBuyAttemptSlot::new();
+        assert!(slot.observe_connection(NpcGoldBuyConnectionEpoch {run:1,connection:1}));
+        assert!(slot.observe_authority("full original source")); slot.set_available(true); slot
+    }
+    #[test]
+    fn native_npc_durable_settlement_rejects_unentered_wrong_ticket_and_duplicate() {
+        let mut slot = ready(); let token = slot.reserve().unwrap();
+        assert!(!slot.retire_durably_settled(token,&8));
+        assert!(slot.bind(token,8)); assert!(!slot.retire_durably_settled(token,&8));
+        assert!(slot.begin_entry(token,&8)); assert!(!slot.retire_durably_settled(token,&9));
+        assert!(slot.retire_durably_settled(token,&8)); assert!(!slot.retire_durably_settled(token,&8));
+        let next = slot.reserve().unwrap(); assert!(next.value() > token.value());
+        assert!(slot.bind(next,9)); assert!(slot.begin_entry(next,&9));
+        assert!(!slot.retire_durably_settled(token,&8)); assert!(slot.flight().is_some());
+    }
+    #[test]
+    fn native_npc_durable_settlement_preserves_legacy_flush_unknown_and_model_barriers() {
+        for outcome in [NpcGoldBuyAttemptOutcome::Flushed,NpcGoldBuyAttemptOutcome::Unknown] {
+            let mut slot = ready(); let token = slot.reserve().unwrap();
+            assert!(slot.bind(token,8)); assert!(slot.begin_entry(token,&8));
+            assert!(slot.apply_receipt(token,&8,outcome));
+            assert!(slot.observe_authority("changed complete source")); slot.set_available(true);
+            assert!(slot.reserve().is_none()); assert!(!slot.retire_durably_settled(token,&9));
+            assert!(slot.retire_durably_settled(token,&8)); assert!(slot.reserve().is_some());
+        }
+    }
+}

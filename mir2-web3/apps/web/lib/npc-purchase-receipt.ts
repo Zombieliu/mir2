@@ -1,6 +1,8 @@
 /** A document owns one non-resettable shared economic host. All actual peer
  * checks and full application still belong to the caller; this facade only
  * binds private Core tokens to exact physical sockets and retained producers. */
+import { parseNpcPurchaseJson } from "./npc-purchase-client";
+
 export type NpcPurchaseReceiptModule = {
   npc_purchase_receipt_abi_version?: () => number;
   NpcPurchaseReceiptBridge?: new () => { transact(input: string): string };
@@ -20,7 +22,7 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 function decision(raw: string): NpcPurchaseReceiptDecision {
   if (typeof raw !== "string" || raw.length > 16 * 1024 * 1024) throw Error("Invalid receipt ABI output");
-  const value: unknown = JSON.parse(raw);
+  const value: unknown = parseNpcPurchaseJson(raw, "abi");
   if (!record(value) || typeof value.ok !== "boolean"
     || (!value.ok && (typeof value.error !== "string" || Object.keys(value).sort().join() !== "error,ok"))) {
     throw Error("Invalid receipt ABI response");

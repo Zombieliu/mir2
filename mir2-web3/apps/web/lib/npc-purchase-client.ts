@@ -14,8 +14,51 @@ const integer = (v: unknown, lo: number, hi: number): v is number => Number.isSa
 export const npcPurchaseDecimal = (v: unknown): v is string => typeof v === "string"
   && /^(?:0|[1-9][0-9]{0,19})$/.test(v) && BigInt(v) <= 18446744073709551615n;
 const nonzero = (v: unknown): v is string => npcPurchaseDecimal(v) && v !== "0";
+export const npcPurchaseSignedDecimal = (v: unknown): v is string => typeof v === "string"
+  && /^(?:0|[1-9][0-9]{0,18}|-[1-9][0-9]{0,18})$/.test(v)
+  && BigInt(v) >= -9223372036854775808n && BigInt(v) <= 9223372036854775807n;
+/** Only declared integer leaves of the actual owner WorldSnapshot may carry
+ * lossless decimal text. A similarly named unknown field grants no identity. */
+function ownerIntegerKind(path: readonly (string | number)[]): "u64" | "i64" | null {
+  const key = path.map(part => typeof part === "number" ? "*" : encodeURIComponent(part).replace(/\*/g, "%2A")).join("/");
+  if (/^snapshot\/(?:belt|inventory|storage|equipment|heroInventory|heroEquipment)Items\/\*\/uniqueId$/.test(key)
+    || /^snapshot\/(?:belt|inventory|storage|equipment|heroInventory|heroEquipment)Items\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/unique_id$/.test(key)
+    || /^snapshot\/nativeNpcShop\/list\/\*(?:\/slots\/\*)*\/unique_id$/.test(key)
+    || /^snapshot\/nativeNpcShop\/displayGoods\/\*\/(?:id|uniqueId|unique_id)$/.test(key)
+    || /^snapshot\/nativeNpcShop\/displayGoods\/\*(?:\/slots\/\*)+\/unique_id$/.test(key)
+    || /^snapshot\/nativeNpcShop\/displayGoods\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/unique_id$/.test(key)
+    || key === "snapshot/npcGoldTradeCapacity/freshCompatibleUniqueIds/*"
+    || /^snapshot\/stage5Systems\/itemRental\/rentedItems\/\*\/itemId$/.test(key)
+    || /^snapshot\/stage5Systems\/trade\/offeredUniqueIds\/[^/]+$/.test(key)
+    || key === "snapshot/stage5Systems/refine/pendingUniqueId"
+    || /^snapshot\/mailItemState(?:\/socketed\/\*)*\/unique_id$/.test(key)
+    || /^snapshot\/mailItemState(?:\/socketed\/\*)*\/user_item_metadata\/slots\/\*(?:\/slots\/\*)*\/unique_id$/.test(key)) return "u64";
+  if (/^snapshot\/(?:storagePasswordLastSetBinaryDatetime|expandedStorageExpiryTimeBinaryDatetime)$/.test(key)
+    || key === "snapshot/heroMaxExperience" || key === "snapshot/stage5Systems/hero/experience"
+    || /^snapshot\/equipmentItems\/\*\/(?:sealedExpiryTimeBinaryDatetime|sealedNextTimeBinaryDatetime)$/.test(key)
+    || /^snapshot\/(?:belt|inventory|storage|equipment|heroInventory|heroEquipment)Items\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
+    || /^snapshot\/nativeNpcShop\/list\/\*(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
+    || /^snapshot\/nativeNpcShop\/displayGoods\/\*(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
+    || /^snapshot\/nativeNpcShop\/displayGoods\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
+    || key === "snapshot/stage5Systems/relationship/marriedDateBinaryDatetime"
+    || /^snapshot\/stage5Systems\/mail\/\*\/(?:dateSentBinaryDatetime|date_sent_binary_datetime)$/.test(key)
+    || /^snapshot\/stage5Systems\/intelligentCreatures\/\*\/(?:expireBinaryDatetime|blackstoneTime|maintainFoodTime)$/.test(key)
+    || /^snapshot\/stage5Systems\/itemRental\/rentedItems\/\*\/itemReturnDateBinaryDatetime$/.test(key)
+    || /^snapshot\/mailItemState(?:\/socketed\/\*)*\/(?:sealed_expiry_time_binary_datetime|sealed_next_time_binary_datetime|rental_expiry_binary_datetime)$/.test(key)
+    || /^snapshot\/mailItemState(?:\/socketed\/\*)*\/user_item_metadata(?:\/slots\/\*(?:\/slots\/\*)*)?\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)) return "i64";
+  return null;
+}
 const opaque = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{64}$/.test(v) && /[1-9a-f]/.test(v);
-function plain(value: unknown, depth = 0): unknown {
+const exactUnsigned = (v: unknown): boolean => integer(v, 0, Number.MAX_SAFE_INTEGER) || npcPurchaseDecimal(v);
+const exactSigned = (v: unknown): boolean => integer(v, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) || npcPurchaseSignedDecimal(v);
+function exactSnapshotLeaves(value: unknown, path: readonly (string | number)[]): boolean {
+  const kind = ownerIntegerKind(path);
+  if (path.length === 2 && path[0] === "snapshot" && path[1] === "heroMaxExperience" && value === null) return true;
+  if (kind) return kind === "u64" ? exactUnsigned(value) : exactSigned(value);
+  if (Array.isArray(value)) return value.every((child, index) => exactSnapshotLeaves(child, [...path, index]));
+  return !record(value) || Object.entries(value).every(([key, child]) => exactSnapshotLeaves(child, [...path, key]));
+}
+function plain(value: unknown, depth = 0, originalSnapshot?: unknown, path: readonly string[] = []): unknown {
   if (depth > 64) throw Error("Deep NPC decision");
   if (value === null || ["string", "boolean"].includes(typeof value)) return value;
   if (typeof value === "number" && Number.isFinite(value) && (!Number.isInteger(value) || Number.isSafeInteger(value))) return value;
@@ -31,12 +74,92 @@ function plain(value: unknown, depth = 0): unknown {
     if (array && key === "length") continue;
     if (!descriptor.enumerable || array && !/^(?:0|[1-9][0-9]*)$/.test(key)) throw Error("Invalid NPC decision fields");
     count++;
-    (result as Data)[key] = plain(descriptor.value, depth + 1);
+    (result as Data)[key] = originalSnapshot !== undefined && path.length === 1 && path[0] === "frame" && key === "snapshot"
+      ? quarantineSnapshot(descriptor.value, originalSnapshot, ["snapshot"], depth + 1)
+      : plain(descriptor.value, depth + 1, originalSnapshot, [...path, key]);
   }
   if (array && count !== descriptors.length.value) throw Error("Sparse NPC decision");
   return Object.freeze(result);
 }
+/** A retained pre-Source31 facade may already have decoded this DTO. Its
+ * rounded projection is compared, never used as the economic source. Only
+ * declared integer leaves may differ in representation; every other field,
+ * primitive, key, descriptor and shape must match the original accepted raw. */
+function quarantineSnapshot(projected: unknown, exact: unknown, path: readonly (string | number)[], depth: number): unknown {
+  if (depth > 64) throw Error("Deep old NPC projection");
+  if (typeof projected === "number" && Number.isInteger(projected) && !Number.isSafeInteger(projected)) {
+    const kind = ownerIntegerKind(path);
+    if (typeof exact !== "string" || !(kind === "u64" ? npcPurchaseDecimal(exact) : kind === "i64" && npcPurchaseSignedDecimal(exact))
+      || !Number.isFinite(projected) || Number(exact) !== projected) throw Error("Mismatched old NPC integral projection");
+    return exact;
+  }
+  if (projected === null || typeof projected !== "object") {
+    if (projected !== exact) throw Error("Mismatched old NPC projection");
+    return plain(projected);
+  }
+  const array = Array.isArray(projected), proto = Object.getPrototypeOf(projected);
+  if (exact === null || typeof exact !== "object" || array !== Array.isArray(exact)
+    || proto !== null && proto !== (array ? Array.prototype : Object.prototype)) throw Error("Invalid old NPC projection shape");
+  const descriptors = Object.getOwnPropertyDescriptors(projected), keys = Reflect.ownKeys(descriptors);
+  const exactKeys = Reflect.ownKeys(exact);
+  if (keys.length !== exactKeys.length || keys.some(key => typeof key !== "string" || !exactKeys.includes(key))) throw Error("Mismatched old NPC projection keys");
+  for (const key of keys) {
+    if (typeof key !== "string" || ["toJSON", "__proto__", "constructor", "prototype"].includes(key)) throw Error("Unsafe old NPC projection key");
+    const descriptor = descriptors[key];
+    if (!Object.hasOwn(descriptor, "value") || key !== "length" && !descriptor.enumerable) throw Error("Accessor old NPC projection");
+    if (array && key === "length") {
+      if (descriptor.value !== (exact as unknown[]).length) throw Error("Mismatched old NPC projection array");
+      continue;
+    }
+    if (array && !/^(?:0|[1-9][0-9]*)$/.test(key)) throw Error("Invalid old NPC projection array key");
+    quarantineSnapshot(descriptor.value, (exact as Data)[key], [...path, array ? Number(key) : key], depth + 1);
+  }
+  return exact;
+}
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(plain(a)) === JSON.stringify(plain(b));
+export const sameNpcPurchaseData = (a: unknown, b: unknown): boolean => {
+  try { return same(a, b); } catch { return false; }
+};
+/** The display projection belongs to the same actual list/profile. It cannot
+ * substitute a different UserItem or manufacture a selector from UI indices. */
+export function npcPurchaseShopSource(value: unknown, requireDisplay = true): Data | null {
+  try {
+    const shop = plain(value);
+    const names = ["npcObjectId", "scriptKey", "service", "packetType", "list", "rate", "panelType", "hideAddedStats"];
+    if (!fields(shop, requireDisplay || record(shop) && Object.hasOwn(shop, "displayGoods") ? [...names, "displayGoods"] : names)
+      || !integer(shop.npcObjectId, 1, 0xffff_ffff) || typeof shop.scriptKey !== "string" || shop.scriptKey.length === 0
+      || !["BUY", "BUYSELL", "BUYBACK", "BUYUSED", "PEARLBUY", "BUYNEW", "BUYSELLNEW"].includes(String(shop.service))
+      || shop.packetType !== (shop.service === "PEARLBUY" ? "NPCPearlGoods" : "NPCGoods")
+      || !Array.isArray(shop.list) || requireDisplay && !Array.isArray(shop.displayGoods)
+      || shop.displayGoods !== undefined && (!Array.isArray(shop.displayGoods) || shop.list.length !== shop.displayGoods.length)
+      || typeof shop.rate !== "number" || !Number.isFinite(shop.rate) || !Number.isFinite(Math.fround(shop.rate)) || shop.rate < 0
+      || !integer(shop.panelType, 0, 255) || shop.panelType !== (shop.service === "BUYUSED" ? 1 : 0)
+      || typeof shop.hideAddedStats !== "boolean" || !exactSnapshotLeaves(shop, ["snapshot", "nativeNpcShop"])) return null;
+    const ids = new Set<string>();
+    for (let index = 0; index < shop.list.length; index++) {
+      const item = shop.list[index];
+      if (!record(item) || !exactUnsigned(item.unique_id) || ids.has(String(item.unique_id))) return null;
+      ids.add(String(item.unique_id));
+      if (!Array.isArray(shop.displayGoods)) continue;
+      const row = shop.displayGoods[index];
+      if (!record(row)
+        || Object.keys(row).some(key => !Object.hasOwn(item, key)
+          && !["id", "uniqueId", "purchaseItemIndex", "itemIndex", "name", "icon", "price", "tooltipSource", "grade", "description"].includes(key))
+        || Object.keys(item).some(key => !Object.hasOwn(row, key) || !same(row[key], item[key]))
+        || !exactUnsigned(row.id) || !exactUnsigned(row.uniqueId)
+        || String(row.id) !== String(item.unique_id) || String(row.uniqueId) !== String(item.unique_id)
+        || !npcPurchaseDecimal(row.purchaseItemIndex) || row.purchaseItemIndex !== String(item.unique_id)
+        || row.itemIndex !== item.item_index || typeof row.name !== "string"
+        || row.description !== undefined && typeof row.description !== "string"
+        || !integer(row.icon, 0, 65535) || !integer(row.price, 0, 0xffff_ffff) || !integer(row.count, 1, 65535)) return null;
+      if (row.tooltipSource === undefined && !requireDisplay) continue;
+      if (!record(row.tooltipSource) || !record(row.tooltipSource.info) || !same(row.tooltipSource.userItem, item)
+        || row.tooltipSource.info.item_index !== item.item_index || row.name !== row.tooltipSource.info.name
+        || row.grade !== row.tooltipSource.info.grade || !integer(row.grade, 0, 255)) return null;
+    }
+    return shop;
+  } catch { return null; }
+}
 const requestValid = (v: unknown): v is NpcPurchaseRequest => fields(v, ["itemIndex", "count", "panelType"])
   && npcPurchaseDecimal(v.itemIndex) && integer(v.count, 1, 65535) && integer(v.panelType, 0, 255);
 const bindingValid = (v: unknown): v is Binding => fields(v, ["actor", "producerScope", "beginId"])
@@ -49,9 +172,9 @@ const intentValid = (v: unknown): v is Intent => fields(v, ["request", "currency
 const operationValid = (v: unknown): v is Operation => fields(v, ["actor", "requestScope", "sequence", "intent"])
   && opaque(v.actor) && opaque(v.requestScope) && nonzero(v.sequence) && intentValid(v.intent);
 
-/** Parse original JSON before any Number rounding. Unknown integral projections
- * are unavailable until a canonical-string snapshot ABI is present. */
-export function parseNpcPurchaseJson(raw: string): unknown {
+/** Parse original JSON before Number conversion. Only explicitly declared owner
+ * integer leaves gain the canonical exact-string projection. */
+export function parseNpcPurchaseJson(raw: string, ownerProjection: boolean | "abi" | "world" = false): unknown {
   if (typeof raw !== "string" || raw.length === 0 || raw.length > 16 * 1024 * 1024) throw Error("Invalid NPC JSON size");
   let offset = 0;
   const ws = () => { while (/[\t\n\r ]/.test(raw[offset] ?? "!")) offset++; };
@@ -64,19 +187,19 @@ export function parseNpcPurchaseJson(raw: string): unknown {
     }
     throw Error("Unclosed NPC JSON string");
   };
-  const value = (depth: number): unknown => {
+  const value = (depth: number, path: readonly (string | number)[]): unknown => {
     if (depth > 64) throw Error("Deep NPC JSON");
     ws();
     if (raw[offset] === '"') return string();
     if (raw[offset] === "{") {
-      offset++; ws(); const result: Data = Object.create(null), keys = new Set<string>();
+      offset++; ws(); const result: Data = ownerProjection === "abi" ? {} : Object.create(null), keys = new Set<string>();
       if (raw[offset] === "}") { offset++; return Object.freeze(result); }
       for (;;) {
         ws(); if (raw[offset] !== '"') throw Error("Invalid NPC JSON key");
         const key = string();
         if (keys.has(key) || ["__proto__", "constructor", "prototype", "toJSON"].includes(key)) throw Error("Duplicate or unsafe NPC JSON key");
         keys.add(key); ws(); if (raw[offset++] !== ":") throw Error("Invalid NPC JSON field");
-        result[key] = value(depth + 1); ws();
+        result[key] = value(depth + 1, [...path, key]); ws();
         const next = raw[offset++]; if (next === "}") return Object.freeze(result);
         if (next !== ",") throw Error("Invalid NPC JSON object");
       }
@@ -85,7 +208,7 @@ export function parseNpcPurchaseJson(raw: string): unknown {
       offset++; ws(); const result: unknown[] = [];
       if (raw[offset] === "]") { offset++; return Object.freeze(result); }
       for (;;) {
-        result.push(value(depth + 1)); ws(); const next = raw[offset++];
+        result.push(value(depth + 1, [...path, result.length])); ws(); const next = raw[offset++];
         if (next === "]") return Object.freeze(result);
         if (next !== ",") throw Error("Invalid NPC JSON array");
       }
@@ -96,6 +219,14 @@ export function parseNpcPurchaseJson(raw: string): unknown {
     const token = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/.exec(raw.slice(offset))?.[0];
     if (!token) throw Error("Invalid NPC JSON value");
     offset += token.length;
+    const kind = ownerProjection === "world" ? path[0] === "payload" ? ownerIntegerKind(["snapshot", ...path.slice(1)]) : null
+      : ownerProjection === "abi" ? path[0] === "frame" ? ownerIntegerKind(path.slice(1)) : null
+      : ownerProjection ? ownerIntegerKind(path) : null;
+    if (kind) {
+      if (!(kind === "u64" ? npcPurchaseDecimal(token) : npcPurchaseSignedDecimal(token))) throw Error("Invalid exact owner integer");
+      const exact = BigInt(token);
+      return exact >= BigInt(Number.MIN_SAFE_INTEGER) && exact <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(exact) : token;
+    }
     const decimal = /^(-?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?$/.exec(token)!;
     const fraction = decimal[3] ?? "", exponentText = decimal[4] ?? "0";
     // Bound exact arithmetic before allocating powers of ten, including
@@ -114,21 +245,72 @@ export function parseNpcPurchaseJson(raw: string): unknown {
     }
     return number;
   };
-  const result = value(0); ws(); if (offset !== raw.length) throw Error("Trailing NPC JSON");
+  const result = value(0, []); ws(); if (offset !== raw.length) throw Error("Trailing NPC JSON");
   return result;
+}
+/** Stage5 keeps a complete saved ItemState as JSON text. Decode that original
+ * text separately; the full owner source keeps its unmodified text carrier. */
+export function parseNpcPurchaseMailItemJson(raw: string): unknown {
+  const envelope = parseNpcPurchaseJson('{"snapshot":{"mailItemState":' + raw + '}}', true);
+  if (!fields(envelope, ["snapshot"]) || !fields(envelope.snapshot, ["mailItemState"])
+    || !exactSnapshotLeaves(envelope.snapshot.mailItemState, ["snapshot", "mailItemState"])) throw Error("Invalid mail item source");
+  return envelope.snapshot.mailItemState;
 }
 
 // Detection consumes no identity, receipt or authority. The original string is
 // passed untouched to the strict Rust receiver, including malformed frames.
-export function isNpcPurchaseOwnerFrame(raw: unknown): raw is string {
-  if (typeof raw !== "string") return false;
-  try { return JSON.parse(raw)?.type === "npcPurchaseOwner"; } catch { return /"npcPurchaseOwner"/.test(raw); }
+function hasTopLevelJsonType(raw: unknown, expected: string): raw is string {
+  if (typeof raw !== "string" || raw.length > 16 * 1024 * 1024) return false;
+  let offset = 0;
+  const ws = () => { while (/[\t\n\r ]/.test(raw[offset] ?? "!")) offset++; };
+  const string = (): string => {
+    const start = offset++;
+    while (offset < raw.length) {
+      const char = raw[offset++];
+      if (char === "\\") { offset++; continue; }
+      if (char === '"') return JSON.parse(raw.slice(start, offset)) as string;
+    }
+    throw Error("Unclosed marker string");
+  };
+  try {
+    ws(); if (raw[offset++] !== "{") return false;
+    let depth = 1;
+    while (offset < raw.length && depth > 0) {
+      const char = raw[offset];
+      if (char === '"') {
+        const key = string();
+        // Iterative structural routing has no recursion-depth escape: even a
+        // rejected deep value before a duplicate type cannot hide an owner.
+        if (depth === 1 && key === "type") {
+          ws();
+          if (raw[offset] === ":") {
+            offset++; ws();
+            if (raw[offset] === '"' && string() === expected) return true;
+          }
+        }
+        continue;
+      }
+      offset++;
+      if (char === "{" || char === "[") depth++;
+      else if (char === "}" || char === "]") depth--;
+    }
+    return false;
+  } catch { return false; }
+}
+export function isNpcPurchaseOwnerFrame(raw: unknown): raw is string { return hasTopLevelJsonType(raw, "npcPurchaseOwner"); }
+export function isNpcPurchaseWorldFrame(raw: unknown): raw is string { return hasTopLevelJsonType(raw, "worldSnapshot"); }
+/** Ordinary snapshots are display sources only; this decoder creates no Core
+ * receipt, producer, Applied witness or recovery authority. */
+export function parseNpcPurchaseWorldFrame(raw: string): Readonly<{ type: "worldSnapshot"; payload: Data }> {
+  const frame = parseNpcPurchaseJson(raw, "world");
+  if (!fields(frame, ["type", "payload"]) || frame.type !== "worldSnapshot" || !record(frame.payload)) throw Error("Invalid world snapshot frame");
+  return frame as Readonly<{ type: "worldSnapshot"; payload: Data }>;
 }
 
 /** Require the full economic projection; the opaque raw source retains fields
  * the visible model does not yet render. No inventory/tick/UID readiness proof. */
 export function completeNpcPurchaseSnapshot(v: unknown): v is Data {
-  if (!record(v)) return false;
+  if (!record(v) || !exactSnapshotLeaves(v, ["snapshot"])) return false;
   const required = ["tick", "mapTitle", "mapFileName", "inSafeZone", "lightSetting", "playerObjectId",
     "playerHp", "playerMaxHp", "playerMp", "playerMaxMp", "playerCrystalStats", "playerPkPoints",
     "playerExperience", "playerMaxExperience", "gold", "credit", "cityCurrencies", "currentWeight", "playerWeights",
@@ -150,7 +332,7 @@ export function completeNpcPurchaseSnapshot(v: unknown): v is Data {
   if (["playerHp", "playerMaxHp", "playerMp", "playerMaxMp"].some(key => !nullableInt(v[key]))
     || ["currentWeight", "maxWeight", "freeBagSlots", "maxBagSlots", "storageSize"].some(key => !integer(v[key], 0, 65535))
     || ["hasExpandedStorage", "hasStoragePassword", "requireStoragePassword", "inSafeZone"].some(key => typeof v[key] !== "boolean")
-    || ["storagePasswordLastSetBinaryDatetime", "expandedStorageExpiryTimeBinaryDatetime"].some(key => !integer(v[key], Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER))
+    || ["storagePasswordLastSetBinaryDatetime", "expandedStorageExpiryTimeBinaryDatetime"].some(key => !exactSigned(v[key]))
     || ![46,54,58,62,66,70,74,78,82,86].includes(v.inventoryCapacity)
     || Object.values(v.cityCurrencies).some(amount => !integer(amount, 0, 0xffff_ffff))
     || (v.playerCrystalStats as unknown[]).some(stat => !record(stat) || !integer(stat.stat, 0, 255) || !integer(stat.value, -2147483648, 2147483647))) return false;
@@ -159,9 +341,9 @@ export function completeNpcPurchaseSnapshot(v: unknown): v is Data {
   const item = (value: unknown, equipment = false): boolean => record(value)
     && typeof value.key === "string" && typeof value.name === "string" && typeof value.description === "string"
     && integer(value.quantity, 1, 0xffff_ffff) && integer(value.icon, 0, 65535)
-    && (equipment ? (!Object.hasOwn(value, "uniqueId") || integer(value.uniqueId, 0, Number.MAX_SAFE_INTEGER))
+    && (equipment ? (!Object.hasOwn(value, "uniqueId") || exactUnsigned(value.uniqueId))
       && ["weapon", "armour", "helmet", "mount", "necklace", "torch", "braceletLeft", "braceletRight", "ringLeft", "ringRight", "amulet", "boots", "belt", "stone"].includes(String(value.slot))
-      : integer(value.uniqueId, 0, Number.MAX_SAFE_INTEGER) && integer(value.slot, 0, 255)
+      : exactUnsigned(value.uniqueId) && integer(value.slot, 0, 255)
         && ["bag1", "bag2", "quest", "belt", "storage"].includes(String(value.container)));
   if (["beltItems", "inventoryItems", "storageItems", "heroInventoryItems", "heroEquipmentItems"].some(key => (v[key] as unknown[]).some(row => !item(row)))
     || (v.equipmentItems as unknown[]).some(row => !item(row, true))
@@ -172,6 +354,24 @@ export function completeNpcPurchaseSnapshot(v: unknown): v is Data {
   if (!record(self) || typeof self.name !== "string" || !["Warrior", "Wizard", "Taoist", "Assassin", "Archer"].includes(String(self.class))
     || !["Male", "Female"].includes(String(self.gender)) || !integer(self.level, 1, 65535)) return false;
   const systems = v.stage5Systems;
+  if (systems.hero !== null && (!record(systems.hero) || !Object.hasOwn(v, "heroMaxExperience")
+    || !exactSigned(v.heroMaxExperience) || !exactSigned(systems.hero.experience))
+    || systems.hero === null && Object.hasOwn(v, "heroMaxExperience") && v.heroMaxExperience !== null) return false;
+  if (Object.hasOwn(v, "nativeNpcShop") && v.nativeNpcShop !== null) {
+    const shop = npcPurchaseShopSource(v.nativeNpcShop, false);
+    if (!shop
+      || v.activeNpcDialog !== null && (!record(v.activeNpcDialog) || v.activeNpcDialog.npcObjectId !== shop.npcObjectId)) return false;
+  }
+  if (!Array.isArray(systems.mail)) return false;
+  for (const mail of systems.mail) {
+    if (!record(mail)) return false;
+    const states = mail.itemStatesJson;
+    if (states !== undefined) {
+      if (!Array.isArray(states) || states.length > 5) return false;
+      try { if (states.some(raw => typeof raw !== "string" || !record(parseNpcPurchaseMailItemJson(raw)))) return false; }
+      catch { return false; }
+    }
+  }
   const nested = (value: unknown, keys: string[]) => record(value) && keys.every(key => Object.hasOwn(value, key));
   if (!nested(systems.mentor, ["isMentor", "cooldownUntilMs", "allowMentor", "name", "level", "online", "menteeExp", "pendingRequestFrom", "pendingRequestLevel"])
     || !nested(systems.relationship, ["allowLoverRecall", "cooldownUntilMs", "allowMarriage", "partnerName", "marriedDateBinaryDatetime", "mapName", "marriedDays", "pendingRequestFrom", "pendingDivorceFrom"])) return false;
@@ -279,9 +479,9 @@ export class NpcPurchaseClient {
       }
     }
   }
-  begin(): boolean {
+  begin(refresh = false): boolean {
     const session = this.options.session();
-    if (!session || !this.active || this.begunSession === session) return false;
+    if (!session || !this.active || !refresh && this.begunSession === session) return false;
     this.withdraw(); this.begunSession = session;
     try { return this.dispatch("begin", {}, { kind: "begin" }); } catch { return false; }
   }
@@ -302,8 +502,10 @@ export class NpcPurchaseClient {
     try {
       // Receipt observation still reaches Core when the generic snapshot cannot
       // safely project, but such a frame can never issue an Applied witness.
-      const result = this.call({ op: "receive", frame: raw });
-      const frame = parseNpcPurchaseJson(raw);
+      const response = this.options.host.transact(this.source, this.options.socket, { op: "receive", frame: raw });
+      const frame = parseNpcPurchaseJson(raw, true);
+      const detached = record(frame) ? plain(response, 0, frame.snapshot) : null;
+      const result = record(detached) && detached.ok === true ? detached : null;
       if (!result || !fields(frame, ["type", "protocolVersion", "requestId", "reply", "snapshot", "authority"])
         || frame.type !== "npcPurchaseOwner" || frame.protocolVersion !== 1 || !nonzero(frame.requestId)
         || !same(result.frame, frame) || !record(frame.reply)) return;

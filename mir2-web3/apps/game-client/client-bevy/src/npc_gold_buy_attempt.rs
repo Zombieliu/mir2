@@ -175,6 +175,19 @@ impl NpcGoldBuyGate {
             || !state.attempts.begin_entry(token, &ticket) { return None; }
         Some(action())
     }
+    /// The permanent Native owner calls this only after its retained durable
+    /// operation receives Core Observation::Settled. The original full UI
+    /// ticket and command must still identify the entered flight; a changed
+    /// model, flush, timeout, or inventory-only observation cannot release it.
+    pub fn settle_durable(&self, ticket: NpcGoldBuyTicket, command: &NpcGoldBuyCommand) -> bool {
+        let Ok(mut state) = self.0.lock() else { return false; };
+        let Some(token) = state.attempts.flight().map(|attempt| attempt.token) else { return false; };
+        if !ticket.is_valid() || ticket.local_attempt_token != token.value()
+            || !state.command.as_ref().is_some_and(|(saved, original, _)| *saved == token && original == command) {
+            return false;
+        }
+        state.attempts.retire_durably_settled(token, &ticket)
+    }
     /// Monotonic Core observation clock for rejecting stale painted controls.
     /// This read-only value grants no purchase or transport authority.
     pub fn ui_authority_revision(&self) -> Option<u64> {
@@ -228,6 +241,26 @@ mod tests {
         inventory.gold = 100; let (_, command) = gate.reserve(&shop, &inventory, 2).unwrap();
         assert_eq!(command, plan_npc_gold_buy(&shop, &inventory, 2).command.unwrap());
         assert!(gate.reserve(&shop, &inventory, 3).is_none());
+    }
+    #[test]
+    fn native_npc_durable_ui_settlement_binds_original_source_ticket_and_command() {
+        let (shop,inventory) = models(); let gate = connected_gate();
+        assert!(gate.observe("owner",1,&npc_gold_buy_model_authority(&shop,&inventory).unwrap(),true));
+        let (token,command) = gate.reserve(&shop,&inventory,1).unwrap(); let original = ticket(token,1);
+        assert!(gate.bind(token,original)); assert!(!gate.settle_durable(original,&command));
+        assert_eq!(gate.commit(original,||()),Some(())); assert!(gate.receipt(original,NpcGoldBuyAttemptOutcome::Flushed));
+        let mut fresh_inventory=inventory.clone();fresh_inventory.gold-=1;
+        assert!(gate.observe("owner",2,&npc_gold_buy_model_authority(&shop,&fresh_inventory).unwrap(),true));
+        let mut changed = command.clone(); changed.count += 1;
+        assert!(!gate.settle_durable(original,&changed));
+        assert!(!gate.settle_durable(NpcGoldBuyTicket {source_revision:2,..original},&command));
+        assert!(!gate.settle_durable(NpcGoldBuyTicket {connection:2,..original},&command));
+        assert!(gate.reserve(&shop,&inventory,1).is_none());
+        assert!(gate.reserve(&shop,&fresh_inventory,1).is_none());
+        assert!(gate.settle_durable(original,&command)); assert!(!gate.settle_durable(original,&command));
+        let (next,_) = gate.reserve(&shop,&fresh_inventory,1).unwrap(); assert!(next.value() > token.value());
+        let fresh = ticket(next,2); assert!(gate.bind(next,fresh)); assert_eq!(gate.commit(fresh,||()),Some(()));
+        assert!(!gate.settle_durable(original,&command)); assert!(gate.feedback().pending);
     }
     #[test]
     fn npc_gold_gate_preserves_entered_on_close_and_exact_old_unsent() {

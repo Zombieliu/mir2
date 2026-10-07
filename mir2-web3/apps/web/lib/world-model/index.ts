@@ -32,6 +32,7 @@ export type {
 export { DEFAULT_WORLD_STATE } from "./types";
 export {
   authoritativeItemUniqueId,
+  exactItemUniqueId,
   currentAuthoritativeEquipmentItem,
   currentAuthoritativeItem,
   equipmentSourceGrid,

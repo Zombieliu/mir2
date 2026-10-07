@@ -23,6 +23,16 @@ pub struct Dispatch {
     pub request: wire::ClientRequest,
     pub body: String,
 }
+/// Encoding and allocator preflight, still definitely unsent. Native consumes
+/// this once inside its original UI proof's final synchronous claim.
+pub(crate) struct PreparedEntry {
+    token: ConnectionToken,
+    binding: PurchaseBinding,
+    operation: wire::Operation,
+    key: core::OperationKey,
+    request: wire::ClientRequest,
+    body: String,
+}
 
 /// Strictly correlated full frame; its snapshot is still unapplied.
 #[derive(Debug)]
@@ -68,6 +78,14 @@ impl NativeNpcPurchaseClient {
     pub fn connection(&self) -> Option<ConnectionToken> { self.host.connection() }
     pub fn current_binding(&self) -> Option<PurchaseBinding> { self.host.current_binding() }
     pub fn pending_current(&self) -> Option<core::PendingPurchase> { self.host.pending_current() }
+    /// A fresh host binding may recover its original entered operation once;
+    /// the current freshly entered operation waits for its owner response.
+    pub(crate) fn recovery_needed(&self) -> bool {
+        let Some(binding)=self.current_binding() else{return false;};
+        let Some(pending)=self.pending_current() else{return false;};
+        pending.phase!=core::PurchasePhase::Queued && self.reservations.get(&pending.key.actor).is_some_and(|saved|
+            pending.phase==core::PurchasePhase::Unknown || saved.binding!=binding || saved.token!=binding.connection())
+    }
 
     /// Withdraw before the checked allocator, including its exhaustion path.
     pub fn open_connection(&mut self) -> Result<ConnectionToken> {
@@ -129,9 +147,26 @@ impl NativeNpcPurchaseClient {
     pub fn enter(&mut self, token: ConnectionToken, binding: PurchaseBinding,
         operation: &wire::Operation) -> Result<Dispatch>
     {
+        let prepared = self.prepare_enter(token,binding,operation)?;
+        self.commit_prepared_entry(prepared)
+    }
+    pub(crate) fn prepare_enter(&mut self, token: ConnectionToken, binding: PurchaseBinding,
+        operation: &wire::Operation) -> Result<PreparedEntry>
+    {
         self.binding_for(token, binding)?;
         let key = self.reservation_matches(token, binding, operation)?;
+        if !self.pending_current().is_some_and(|pending| pending.key == key
+            && pending.intent == core_intent(&operation.intent) && pending.phase == core::PurchasePhase::Queued) {
+            return Err("Original queued purchase required");
+        }
         let (request, body) = self.allocate(wire::Action::Purchase { operation: operation.clone() })?;
+        Ok(PreparedEntry { token,binding,operation:operation.clone(),key,request,body })
+    }
+    pub(crate) fn commit_prepared_entry(&mut self, prepared: PreparedEntry) -> Result<Dispatch> {
+        let PreparedEntry {token,binding,operation,key,request,body} = prepared;
+        self.binding_for(token,binding)?;
+        self.reservation_matches(token,binding,&operation)?;
+        if self.controls.len()>=MAX_CONTROLS {return Err("Purchase control capacity reached");}
         if !self.host.begin_entry(binding, key, core_intent(&operation.intent)) {
             return Err("Purchase entry refused");
         }
@@ -297,6 +332,10 @@ fn core_intent(value: &wire::Intent) -> core::PurchaseIntent {
     core::PurchaseIntent { item_index: value.request.item_index.get(), requested_count: value.request.count,
         panel: value.request.panel_type, currency: core_currency(value.currency), source: core_source(value.source),
         service_catalog_proof: core::ServiceCatalogProof::from_server_bytes(value.service_catalog_proof.get()).expect("strict proof") }
+}
+pub(crate) fn settlement_matches(operation: &wire::Operation, settlement: &core::PurchaseSettlement) -> bool {
+    operation.validate().is_ok() && operation_key(operation) == settlement.key
+        && core_intent(&operation.intent) == settlement.intent
 }
 fn operation_key(value: &wire::Operation) -> core::OperationKey {
     core::OperationKey { actor: actor(value.actor), request_id: core::RequestId::from_parts(scope(value.request_scope),
@@ -673,6 +712,18 @@ mod tests {
         assert_eq!(client.applied(old_binding, witness(old_binding, 10)), core::Observation::Ignored);
         assert!(client.reserve(token, binding, intent()).is_err());
         assert_eq!(client.controls.len(), 1);
+    }
+
+    #[test]
+    fn native_prepared_entry_allocator_refusal_keeps_exact_unsent_custody() {
+        let (mut client,token,binding)=ready();
+        let operation=reserve(&mut client,token,binding);
+        client.last_control=u64::MAX;
+        assert!(client.prepare_enter(token,binding,&operation).is_err());
+        assert_eq!(client.pending_current().unwrap().phase,core::PurchasePhase::Queued);
+        assert!(!client.cancel_unsent(token,binding,&wire::Operation {sequence:wire::U64::new(operation.sequence.get()+1),..operation.clone()}));
+        assert!(client.cancel_unsent(token,binding,&operation));
+        assert!(client.pending_current().is_none());
     }
 
     #[test]

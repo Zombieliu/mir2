@@ -1,15 +1,16 @@
 import { sameSocialReplyOwner, type SocialReplyOwner } from "./social-incoming-replies";
+import { npcPurchaseSignedDecimal } from "./npc-purchase-client";
 
 export const STORAGE_RENTAL_GOLD = 1_000_000;
 export const STORAGE_RENTAL_DAYS = 10;
 export type StorageRentalFacts = Readonly<{
   owner: SocialReplyOwner; serviceRevision: number; hasExpandedStorage: boolean;
-  expiryObservation: number; storageSize: number; gold: number;
+  expiryObservation: number | string; storageSize: number; gold: number;
 }>;
 export type StorageRentalProof = Readonly<{ id: number; facts: StorageRentalFacts; shared: boolean }>;
 function ready(f: StorageRentalFacts | null): f is StorageRentalFacts {
   return !!f && Number.isSafeInteger(f.serviceRevision) && f.serviceRevision > 0
-    && typeof f.hasExpandedStorage === "boolean" && Number.isInteger(f.expiryObservation)
+    && typeof f.hasExpandedStorage === "boolean" && (Number.isSafeInteger(f.expiryObservation) || npcPurchaseSignedDecimal(f.expiryObservation))
     && Number.isSafeInteger(f.storageSize) && f.storageSize > 0
     && Number.isSafeInteger(f.gold) && f.gold >= STORAGE_RENTAL_GOLD;
 }

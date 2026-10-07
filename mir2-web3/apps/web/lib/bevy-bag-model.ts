@@ -1,4 +1,4 @@
-import { authoritativeItemUniqueId, crystalInventoryCapacities } from "./world-model/item-identity";
+import { authoritativeItemUniqueId, exactItemUniqueId, crystalInventoryCapacities } from "./world-model/item-identity";
 import type { EquipmentItem, EquipmentSlot, NpcGoldTradeCapacity, WorldItem, WorldState } from "./world-model/types";
 
 /**
@@ -27,6 +27,7 @@ type TooltipSource = Record<string, unknown> & { info: Record<string, unknown> }
 
 export type BevyBagItem = {
   uniqueId: number | null;
+  exactUniqueId?: string;
   key: string;
   name: string;
   quantity: number;
@@ -169,11 +170,17 @@ function baseItem(
   const durabilityCurrent = optionalInteger(item.durabilityCurrent, 65_535, source, index, "durabilityCurrent");
   const durabilityMax = optionalInteger(item.durabilityMax, 65_535, source, index, "durabilityMax");
   const tooltipSource = optionalTooltipSource(item.tooltipSource, source, index);
+  const exactUniqueId = item.exactUniqueId === undefined ? undefined : exactItemUniqueId(item.exactUniqueId);
+  if (item.exactUniqueId !== undefined && (exactUniqueId === undefined
+    || item.authoritativeUniqueId !== undefined && exactItemUniqueId(item.authoritativeUniqueId) !== exactUniqueId)) {
+    fail("invalidField", source, index, "exactUniqueId");
+  }
   return {
     // A missing, invalid or unsafe original id means read-only presentation.
     // In particular, display `uniqueId` and tooltip `user_item.unique_id`
     // have no authority here. Zero is a valid concrete id.
     uniqueId: authoritativeItemUniqueId(item.authoritativeUniqueId) ?? null,
+    ...(exactUniqueId === undefined ? {} : { exactUniqueId }),
     key: requiredString(item.key, source, index, "key"),
     name: requiredString(item.name, source, index, "name"),
     quantity: integer(item.quantity, 4_294_967_295, source, index, "quantity"),
@@ -277,8 +284,8 @@ function npcGoldTradeCapacity(value: unknown): NpcGoldTradeCapacity | null | und
     || typeof value.rosterValid !== "boolean" || !Array.isArray(value.freshCompatibleUniqueIds)
     || value.freshCompatibleUniqueIds.length > 86
     || !value.rosterValid && value.freshCompatibleUniqueIds.length !== 0
-    || value.freshCompatibleUniqueIds.some(id => typeof id !== "number" || !Number.isSafeInteger(id) || id < 0)
-    || new Set(value.freshCompatibleUniqueIds).size !== value.freshCompatibleUniqueIds.length) {
+    || value.freshCompatibleUniqueIds.some(id => exactItemUniqueId(id) === undefined)
+    || new Set(value.freshCompatibleUniqueIds.map(exactItemUniqueId)).size !== value.freshCompatibleUniqueIds.length) {
     fail("invalidField", undefined, undefined, "npcGoldTradeCapacity");
   }
   return { rosterValid: value.rosterValid, freshCompatibleUniqueIds: [...value.freshCompatibleUniqueIds] };
@@ -301,22 +308,23 @@ export function projectBevyBagModel(world: BevyBagWorldSource, options?: { npcGo
   try {
     const evidence = npcGoldTradeCapacity(world.npcGoldTradeCapacity);
     const npcAliases = options?.npcGoldTrade === true && evidence?.rosterValid === true;
-    const compatible = new Set(evidence?.freshCompatibleUniqueIds ?? []);
+    const compatible = new Set(evidence?.freshCompatibleUniqueIds.map(exactItemUniqueId) ?? []);
     const items: BevyBagItem[] = [];
     const occupied = new Set<string>();
-    const identities = new Set<number>();
+    const identities = new Set<string>();
     const gridIdentities = new Set<string>();
     const add = (item: BevyBagItem, source: SourceName, index: number) => {
       const grid = `${item.container}:${item.slot}`;
+      const id = item.exactUniqueId ?? exactItemUniqueId(item.uniqueId);
       if (occupied.has(grid)) fail("duplicateGrid", source, index, "slot");
-      if (item.uniqueId !== null && (gridIdentities.has(item.container + ":" + item.uniqueId)
-        || identities.has(item.uniqueId) && (!npcAliases || compatible.has(item.uniqueId)))) {
+      if (id !== undefined && (gridIdentities.has(item.container + ":" + id)
+        || identities.has(id) && (!npcAliases || compatible.has(id)))) {
         fail("duplicateUniqueId", source, index, "authoritativeUniqueId");
       }
       occupied.add(grid);
-      if (item.uniqueId !== null) {
-        identities.add(item.uniqueId);
-        gridIdentities.add(item.container + ":" + item.uniqueId);
+      if (id !== undefined) {
+        identities.add(id);
+        gridIdentities.add(item.container + ":" + id);
       }
       items.push(item);
     };
@@ -343,7 +351,7 @@ export function projectBevyBagModel(world: BevyBagWorldSource, options?: { npcGo
     }
     if (evidence) {
       for (const id of compatible) {
-        const rows = items.filter(item => item.uniqueId === id);
+        const rows = items.filter(item => (item.exactUniqueId ?? exactItemUniqueId(item.uniqueId)) === exactItemUniqueId(id));
         if (rows.length !== 1 || rows[0].container > 1) fail("invalidField", undefined, undefined, "npcGoldTradeCapacity");
       }
     }
@@ -365,15 +373,16 @@ export function projectBevyStorageItems(source: readonly WorldItem[], capacity: 
     return { ok: false, error: { code: "invalidCapacity", field: "storageSize" } };
   }
   try {
-    const cells = new Set<number>(), ids = new Set<number>();
+    const cells = new Set<number>(), ids = new Set<string>();
     const items = source.map((item, index): BevyStorageItem => {
       if (!isRecord(item) || item.container !== "storage") fail("unexpectedContainer", "storageItems", index, "container");
       const slot = integer(item.slot, capacity - 1, "storageItems", index, "slot");
       const projected = baseItem(item as WorldItem, "storageItems", index, 0, slot);
       if (cells.has(slot)) fail("duplicateGrid", "storageItems", index, "slot");
-      if (projected.uniqueId !== null && ids.has(projected.uniqueId)) fail("duplicateUniqueId", "storageItems", index, "authoritativeUniqueId");
+      const id = projected.exactUniqueId ?? exactItemUniqueId(projected.uniqueId);
+      if (id !== undefined && ids.has(id)) fail("duplicateUniqueId", "storageItems", index, "authoritativeUniqueId");
       cells.add(slot);
-      if (projected.uniqueId !== null) ids.add(projected.uniqueId);
+      if (id !== undefined) ids.add(id);
       return { ...projected, container: 4 };
     });
     return { ok: true, items };

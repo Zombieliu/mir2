@@ -46,6 +46,9 @@ mod trade_projection;
 #[path = "gateway_catalog_transport.rs"]
 mod catalog_transport;
 
+#[path = "npc_purchase_gateway.rs"]
+mod npc_purchase_gateway;
+
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
@@ -337,6 +340,9 @@ pub(crate) struct OwnedGatewayCommand {
     mail_send:Option<Arc<NativeMailSendProof>>,
     npc_gold_buy:Option<Arc<NativeNpcGoldBuyProof>>,
     npc_gold_buy_required:bool,
+    // Missing publication authority is retained as unavailable. Dequeue never
+    // replaces it with a newer catalogue or inventory.
+    npc_purchase_source:Option<npc_purchase_gateway::UiSource>,
 }
 
 #[derive(Clone)]
@@ -471,6 +477,15 @@ struct NativeCommandFenceState {
     mail_quote_delivery_failed:Option<mir2_client_bevy::mail_service::MailServiceStreamEpoch>,
     mail_send_flight:Option<Arc<NativeMailSendProof>>,
     npc_gold_buy:NativeNpcGoldBuySourceState,
+    npc_economy_gate:Option<mir2_bevy_runtime::npc_purchase_economy::NativeNpcEconomyGate>,
+    hero_owner_gate:Option<(NativeCommandStamp,mir2_bevy_runtime::npc_purchase_economy::NativeHeroOwnerGate)>,
+    npc_entry_pending:bool,
+}
+impl NativeCommandFenceState {
+    fn retire_npc_economy(&mut self) {
+        if let Some(gate) = self.npc_economy_gate.take() { gate.retire(); }
+        if let Some((_,gate)) = self.hero_owner_gate.take() { gate.retire(); }
+    }
 }
 
 
@@ -480,6 +495,15 @@ struct NativeNpcGoldBuySourceState {
     inventory: Option<mir2_client_bevy::inventory::InventoryModel>, inventory_ready: bool,
     shop: mir2_client_bevy::shop::ShopModel, shop_ready: bool,
     snapshot_dialog: Option<Value>, dialog_retired_since_snapshot: bool,
+}
+fn npc_snapshot_service_parent(payload: Option<&Value>) -> Option<Value> {
+    let payload = payload?;
+    if let Some(source) = payload.get("nativeNpcShop") {
+        if source.is_null() { return Some(Value::Null); }
+        return Some(json!({"npcObjectId":source.get("npcObjectId"),"scriptKey":source.get("scriptKey"),
+            "service":source.get("service"),"packetType":source.get("packetType")}));
+    }
+    payload.get("activeNpcDialog").cloned()
 }
 impl Default for NativeNpcGoldBuySourceState {
     fn default() -> Self { Self { revision: 1, stamp: None, inventory: None,
@@ -566,11 +590,13 @@ impl NativeCommandFence {
     fn begin_npc_gold_buy_snapshot(&self, payload: Option<&Value>) {
         if let Ok(mut state) = self.0.lock() {
             let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
-            let dialog = payload.and_then(|value| value.get("activeNpcDialog"));
-            let valid = dialog.is_some_and(|value| value.is_object()
+            // A store replaces the main text dialog. Its same-turn service
+            // parent, not visibility of NPCDialog text, owns the catalogue.
+            let dialog = npc_snapshot_service_parent(payload);
+            let valid = dialog.as_ref().is_some_and(|value| value.is_object()
                 && value.get("npcObjectId").and_then(Value::as_u64)
                     .is_some_and(|id| id > 0 && id <= u32::MAX as u64));
-            let changed = state.npc_gold_buy.snapshot_dialog.as_ref() != dialog;
+            let changed = state.npc_gold_buy.snapshot_dialog != dialog;
             state.npc_gold_buy.inventory_ready = false;
             if !valid || changed {
                 state.npc_gold_buy.advance();
@@ -579,7 +605,7 @@ impl NativeCommandFence {
                     state.npc_gold_buy.shop_ready = false;
                 }
             }
-            state.npc_gold_buy.snapshot_dialog = dialog.cloned();
+            state.npc_gold_buy.snapshot_dialog = dialog;
             state.npc_gold_buy.dialog_retired_since_snapshot = false;
             for waker in state.waiters.values() { waker.wake_by_ref(); }
         }
@@ -658,6 +684,15 @@ impl NativeCommandFence {
             if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.shop_ready = delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
         }
     }
+    fn stage_npc_gold_buy_complete_catalog(&self, value: &Value) -> Option<(NativeCommandStamp,u64)> {
+        let model: mir2_client_bevy::shop::ShopModel = serde_json::from_value(value.clone()).ok()?;
+        let mut state = self.0.lock().ok()?; let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        state.npc_gold_buy.shop_ready = false;
+        if state.npc_gold_buy.shop != model { state.npc_gold_buy.advance(); }
+        state.npc_gold_buy.shop = model;
+        for waker in state.waiters.values() { waker.wake_by_ref(); }
+        (state.npc_gold_buy.revision > 0).then_some((stamp,state.npc_gold_buy.revision))
+    }
     fn observe_npc_gold_buy_service(&self, signal: mir2_client_bevy::shop::NpcShopServiceSignal, delivered: bool) {
         if let Ok(mut state) = self.0.lock() {
             let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
@@ -677,7 +712,7 @@ impl NativeCommandFence {
         Self(Arc::new(Mutex::new(NativeCommandFenceState {
             current: NativeCommandStamp { run:run.unwrap_or(0),connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:None,map:None },
             connected:false,connection_entry_revision:None,retired:run.is_none(),next_sequence:Some(1),outstanding:HashMap::new(),
-            entry_requested:false,entry_authorized:false,terminals:VecDeque::new(),waiters:HashMap::new(),mail_quote_delivery_failed:None,mail_send_flight:None,npc_gold_buy:Default::default(),
+            entry_requested:false,entry_authorized:false,terminals:VecDeque::new(),waiters:HashMap::new(),mail_quote_delivery_failed:None,mail_send_flight:None,npc_gold_buy:Default::default(),npc_economy_gate:None,hero_owner_gate:None,npc_entry_pending:false,
         })))
     }
     pub(crate) fn stamp(&self) -> Option<NativeCommandStamp> {
@@ -706,6 +741,7 @@ impl NativeCommandFence {
     pub(crate) fn revoke_local_leave(&self,stamp:NativeCommandStamp)->bool{
         let Ok(mut state)=self.0.lock() else{return false;};
         if !Self::matches(&state,stamp,NativeCommandScope::Leave){return false;}
+        state.retire_npc_economy();
         let Some(revision)=state.current.cancellation.checked_add(1) else{state.retired=true;for waker in state.waiters.values(){waker.wake_by_ref();}return false;};
         state.current.cancellation=revision;
         state.current.actor=None;state.current.map=None;state.entry_requested=false;state.entry_authorized=false;
@@ -720,13 +756,20 @@ impl NativeCommandFence {
         } else { Self::matches(&state,stamp,scope) };
         if !valid { return Err(()); }
 
+        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::Login {..}
+            | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..})) {
+            state.retire_npc_economy();
+            state.npc_entry_pending=true;
+        }
+
         if scope==NativeCommandScope::Leave {
+            state.retire_npc_economy();
             let Some(revision)=state.current.cancellation.checked_add(1) else{state.retired=true;for waker in state.waiters.values(){waker.wake_by_ref();}return Err(());};
             state.current.cancellation=revision;
             state.current.actor=None;state.current.map=None;
             state.entry_requested=false;state.entry_authorized=false;
         }
-        if scope==NativeCommandScope::Shutdown { state.retired=true;state.connected=false; }
+        if scope==NativeCommandScope::Shutdown { state.retire_npc_economy();state.retired=true;state.connected=false; }
         if matches!(scope,NativeCommandScope::Leave|NativeCommandScope::Shutdown){for waker in state.waiters.values(){waker.wake_by_ref();}}
         let sequence=state.next_sequence.ok_or(())?;
         state.next_sequence=sequence.checked_add(1);
@@ -734,7 +777,10 @@ impl NativeCommandFence {
         state.outstanding.insert(sequence,stamp);
         let npc_gold_buy_required=matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,..})
             if state.npc_gold_buy.shop.goods.iter().any(|good|good.unique_id==*item_index&&good.uses_gold_buy_plan()));
-        Ok(GatewayCommand::Owned(Box::new(OwnedGatewayCommand {command,stamp,sequence,commit_revision:state.current.cancellation,fence:self.clone(),mail_quote:None,mail_send:None,npc_gold_buy:None,npc_gold_buy_required})))
+        let npc_purchase_source=if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{..})) {
+            npc_purchase_gateway::UiSource::at_publication(&state,stamp)
+        }else{None};
+        Ok(GatewayCommand::Owned(Box::new(OwnedGatewayCommand {command,stamp,sequence,commit_revision:state.current.cancellation,fence:self.clone(),mail_quote:None,mail_send:None,npc_gold_buy:None,npc_gold_buy_required,npc_purchase_source})))
     }
     fn allows(&self, owned:&OwnedGatewayCommand) -> bool {
         self.0.lock().ok().is_some_and(|s| s.outstanding.get(&owned.sequence)==Some(&owned.stamp)
@@ -764,6 +810,7 @@ impl NativeCommandFence {
     }
     fn socket_lost(&self) {
         if let Ok(mut s)=self.0.lock() {
+            s.retire_npc_economy();
             for waker in s.waiters.values(){waker.wake_by_ref();}
             s.connected=false;s.connection_entry_revision=None;s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
             if let (Some(c),Some(o),Some(e),Some(p))=(s.current.connection.checked_add(1),s.current.owner_epoch.checked_add(1),s.current.scene_epoch.checked_add(1),s.current.procedure.checked_add(1)) {
@@ -774,12 +821,13 @@ impl NativeCommandFence {
     }
     fn authorize_entry(&self, resumed:bool) {
         if let Ok(mut s)=self.0.lock() {
-            if (resumed&&s.connection_entry_revision==Some(s.current.cancellation)) || (!resumed&&s.entry_requested) {s.entry_authorized=true;s.entry_requested=false;}
+            if (resumed&&s.connection_entry_revision==Some(s.current.cancellation)) || (!resumed&&s.entry_requested) {s.entry_authorized=true;s.entry_requested=false;s.npc_entry_pending=false;}
         }
     }
     fn observe_scene(&self, map:i32, boundary:bool) {
         if let Ok(mut s)=self.0.lock() {
             if boundary || s.current.map.is_some_and(|old|old!=map) {
+                s.retire_npc_economy();
                 for waker in s.waiters.values(){waker.wake_by_ref();}
                 if let Some(epoch)=s.current.scene_epoch.checked_add(1) {s.current.scene_epoch=epoch;} else {s.retired=true;}
             }
@@ -788,6 +836,7 @@ impl NativeCommandFence {
     }
     fn revoke_owner(&self) {
         if let Ok(mut s)=self.0.lock() {
+            s.retire_npc_economy();
             for waker in s.waiters.values(){waker.wake_by_ref();}
             s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
             if let (Some(o),Some(p),Some(e))=(s.current.owner_epoch.checked_add(1),s.current.procedure.checked_add(1),s.current.scene_epoch.checked_add(1)) {
@@ -808,11 +857,31 @@ impl NativeCommandFence {
         if s.retired || !s.connected || actor==0 {return None;}
         if s.current.actor!=Some(actor) {
             if !s.entry_authorized {return None;}
+            s.retire_npc_economy();
             let Some(epoch)=s.current.owner_epoch.checked_add(1) else {s.retired=true;for waker in s.waiters.values(){waker.wake_by_ref();}return None;};
             s.current.owner_epoch=epoch;
             s.current.actor=Some(actor);s.entry_authorized=false;
         }
         Some(s.current)
+    }
+    /// Ordinary owner display uses the same authenticated lifetime as commands.
+    /// This source channel cannot acknowledge an economic bundle or settlement.
+    fn prepare_hero_owner(&self,stamp:NativeCommandStamp,owner:&Value)
+        -> Result<Option<mir2_bevy_runtime::npc_purchase_economy::NativeHeroOwnerUpdate>,String> {
+        use mir2_bevy_runtime::npc_purchase_economy::{NativeHeroOwnerEpoch,NativeHeroOwnerGate};
+        let mut state=self.0.lock().map_err(|_|"Hero owner fence poisoned")?;
+        if state.npc_entry_pending || !Self::matches(&state,stamp,NativeCommandScope::World) {return Ok(None);}
+        if state.hero_owner_gate.as_ref().is_some_and(|(saved,_)|*saved!=stamp) {
+            if let Some((_,gate))=state.hero_owner_gate.take(){gate.retire();}
+        }
+        if state.hero_owner_gate.is_none() {
+            let epoch=NativeHeroOwnerEpoch {run:stamp.run,connection:stamp.connection,procedure:stamp.procedure,
+                owner_epoch:stamp.owner_epoch,scene_epoch:stamp.scene_epoch,cancellation:stamp.cancellation,
+                actor:stamp.actor.ok_or("Hero owner actor missing")?,map:stamp.map.ok_or("Hero owner map missing")?};
+            state.hero_owner_gate=Some((stamp,NativeHeroOwnerGate::new(epoch).map_err(|error|format!("Hero owner gate: {error:?}"))?));
+        }
+        state.hero_owner_gate.as_ref().expect("current Hero owner gate").1.prepare(owner)
+            .map(Some).map_err(|error|format!("Hero owner source: {error:?}"))
     }
 }
 
@@ -1722,7 +1791,7 @@ struct WalletState {
 /// transitions. A missing JSON field means "no update"; it must not erase the
 /// complete `UserInformation` values that were already delivered.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-struct NativeUiPlayerCursor {
+pub(crate) struct NativeUiPlayerCursor {
     npc_shop_uses_pearls: bool,
     // Raw f32 bits retain Eq on the cursor and survive partial snapshots.
     npc_shop_purchase_rate_bits: Option<u32>,
@@ -1757,7 +1826,15 @@ impl NativeUiPlayerCursor {
         *self = Self::default();
     }
 
-    fn observe_world_snapshot(&mut self, payload: &Value) {
+    pub(crate) fn observe_world_snapshot(&mut self, payload: &Value) {
+        if let Some(source) = payload.get("nativeNpcShop") {
+            self.npc_shop_uses_pearls = source.get("packetType").and_then(Value::as_str) == Some("NPCPearlGoods");
+            self.npc_shop_purchase_rate_bits = source.get("rate").and_then(Value::as_f64)
+                .map(|rate| rate as f32).filter(|rate| rate.is_finite() && *rate >= 0.0).map(f32::to_bits);
+            self.npc_shop_panel_type = source.get("panelType").and_then(Value::as_u64)
+                .and_then(|panel| u8::try_from(panel).ok()).unwrap_or(0);
+            self.npc_shop_hide_added_stats = source.get("hideAddedStats").and_then(Value::as_bool).unwrap_or(false);
+        }
         // Full world snapshots own this optional block; absent/null must clear old weights.
         self.player_weights = payload
             .get("playerWeights")
@@ -1963,7 +2040,7 @@ impl NativeUiPlayerCursor {
         }
     }
 
-    fn to_read_model_json(&self) -> Value {
+    pub(crate) fn to_read_model_json(&self) -> Value {
         json!({
             "player": {
                 "hp": self.hp.unwrap_or_default(),
@@ -2902,6 +2979,8 @@ where
     let mut resume_state = NativeResumeClientState::default();
     let mut game_shop_receipt_gate = GameShopReceiptGate::default();
     let mut retry_delay = None;
+    // Permanent Actor ledgers outlive physical reconnect and UI entry.
+    let mut npc_purchases = npc_purchase_gateway::NativeNpcPurchaseGateway::new()?;
     loop {
         if let Some(delay) = retry_delay.take() {
             match wait_for_retry_or_leave_until(
@@ -3057,6 +3136,7 @@ where
         };
 
         generation = generation.checked_add(1).ok_or_else(||"connection generation exhausted".to_owned())?;
+        npc_purchases.open_connection()?;
         if let Some(fence)=&ownership {fence.begin_connection()?;}
         crate::timing::report(
             &format!("websocket_connected:generation{generation}"),
@@ -3084,6 +3164,7 @@ where
         )
         .await;
         if !matches!(handshake_result, ResumeLifecycle::Complete(())) {
+            npc_purchases.disconnect();
             if let Some(fence)=&ownership {fence.socket_lost();}
             let error = match handshake_result {
                 ResumeLifecycle::Cancel => {
@@ -3174,8 +3255,10 @@ where
             &mut game_shop_receipt_gate,
             &mut push_world_state,
             mail_stream,
+            &mut npc_purchases,
         )
         .await;
+        npc_purchases.disconnect();
         if let Some(fence)=&ownership {fence.socket_lost();}
         match exit {
             Ok(ConnectedExit::Shutdown) => return Ok(()),
@@ -3727,6 +3810,7 @@ async fn send_resume_handshake(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.to_owned(),
             CATALOG_GZIP_CAPABILITY.to_owned(),
         ],
     }
@@ -3798,6 +3882,7 @@ async fn send_resume_handshake_with_resume_controls<R: CommandSource>(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.to_owned(),
             CATALOG_GZIP_CAPABILITY.to_owned(),
         ],
     }
@@ -3888,6 +3973,7 @@ async fn run_connected_gateway<R, F>(
     game_shop_receipt_gate: &mut GameShopReceiptGate,
     push_world_state: &mut F,
     mail_stream: NativeMailServiceStream,
+    npc_purchases: &mut npc_purchase_gateway::NativeNpcPurchaseGateway,
 ) -> Result<ConnectedExit, String>
 where
     R: CommandSource,
@@ -3961,6 +4047,29 @@ where
             }
             _ = input_poll.tick() => {
                 if commands.ownership_fence().is_some_and(|fence|fence.is_retired()){return Ok(ConnectedExit::Shutdown);}
+                if let Some(fence) = commands.ownership_fence() {
+                    if let Some((dispatch,stamp)) = npc_purchases.begin_if_ready(Some(&fence),gameplay_adapter.last_full_producer_stamp,*phase,connection_bootstrap_sent,last_world_payload.as_ref().and_then(map_file_name))? {
+                        match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                            other => return Err(format!("Native purchase Begin control unavailable: {other:?}")),
+                        }
+                    }
+                    // This consumes only the Runtime's sealed completion after
+                    // every model and the entire owner source changed in World.
+                    npc_purchases.drain_applied(&fence)?;
+                    if let Some((dispatch,stamp)) = npc_purchases.recovery_if_ready()? {
+                        match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                            other => return Err(format!("Native purchase Query control unavailable: {other:?}")),
+                        }
+                    }
+                    if let Some(outcome) = npc_purchases.purchase_if_ready(&mut socket).await {
+                        match outcome {
+                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                            other => return Err(format!("Native purchase entered sender unavailable: {other:?}")),
+                        }
+                    }
+                }
                 if *phase==ConnectionPhase::Normal {skill_cursor.flush_hero_model();skill_cursor.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model);}
                 let batch=unsent_command_batch(drain_command_batch(commands,reconnect_config.command_batch_limit));
                 if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed".into());}
@@ -3989,6 +4098,26 @@ where
                             }
                             AwaitingResumeCommandAction::Ignore => {retire_unsent_command(&enveloped_command);continue;},
                         }
+                    }
+                    if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::BuyItem {..})) {
+                        // Every actual native NPC Buy gesture uses the durable
+                        // lane. An unavailable/refused quote never falls back.
+                        let Some(owned) = ownership_proof else { continue; };
+                        let fence = owned.fence.clone();
+                        match npc_purchases.quote(owned) {
+                            Ok((dispatch,stamp)) => match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                                NativeSinkCommit::Flushed => {},
+                                NativeSinkCommit::DefinitelyUnsent => npc_purchases.cancel_quote(),
+                                other => { npc_purchases.cancel_quote(); return Err(format!("Native purchase Quote control unavailable: {other:?}")); }
+                            },
+                            Err(_) => {}, // Exact original UI proof is retired as unsent.
+                        }
+                        continue;
+                    }
+                    if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::Login {..}
+                        | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..}
+                        | NativeOutboundCommand::LogOut | NativeOutboundCommand::Disconnect)) {
+                        npc_purchases.leave_or_select();
                     }
                     let explicit_leave = matches!(
                         &command,
@@ -4101,6 +4230,22 @@ where
                             &frame,
                             game_shop_receipt_gate,
                             |text, gate| {
+                                // Owner frames bypass all ordinary number/date
+                                // decoders, packet cursors and movement overlays.
+                                if npc_purchase_gateway::claims_owner_frame(text) {
+                                    if *phase != ConnectionPhase::Normal { return Ok(InboundDisposition::Quarantined); }
+                                    let Some(fence) = gameplay_adapter.command_fence.as_ref() else { return Ok(InboundDisposition::Quarantined); };
+                                    if let Some(owner) = npc_purchases.receive(text,fence)? {
+                                        last_world_payload = Some(owner.clone());
+                                        update_wallet_from_snapshot(&mut last_wallet,&owner);
+                                        // Replace the read cursor from this same source;
+                                        // never merge an older packet's wallet/XP.
+                                        ui_cursor = NativeUiPlayerCursor::default();
+                                        ui_cursor.observe_world_snapshot(&owner);
+                                    }
+                                    return Ok(InboundDisposition::Applied);
+                                }
+                                npc_purchases.before_ordinary_frame(text);
                                 let disposition = handle_gateway_text_for_connection(
                                     text,
                                     &mut snapshot_log_counter,
@@ -4124,6 +4269,7 @@ where
                                     gate,
                                     push_world_state,
                                 )?;
+                                npc_purchases.after_ordinary_frame(text,*phase,connection_bootstrap_sent);
                                 // Consume exactly the same authoritative
                                 // envelope that drove the gameplay bridge.
                                 // Quarantined pre-resume frames are forbidden
@@ -4781,7 +4927,16 @@ where
                 .payload
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
+            // Capture the actual public owner before map, wallet and packet
+            // cursors can replace fields. Old protocol specimens have no gate.
+            let hero_raw_owner = if payload.get("heroMaxExperience").is_some() {
+                crate::npc_purchase_projection::project_hero(&payload)?;
+                Some(payload.clone())
+            } else {None};
             let npc_buy_raw_inventory=full_npc_gold_buy_inventory_snapshot(&payload);
+            let npc_buy_raw_catalog = if payload.get("nativeNpcShop").is_some() {
+                Some(serde_json::to_value(crate::npc_purchase_projection::project_shop(&payload)?).map_err(|error|error.to_string())?)
+            } else { None };
             validate_quest_operation_ack(&payload)?;
             map_packet_cursor.trace_snapshot_identity(&payload);
             // Source identity is checked before cursor metadata can overwrite
@@ -4915,11 +5070,15 @@ where
                 let _ = mir2_bevy_runtime::native_ingest::push_native_storage_model(storage_json);
             }
             let mut npc_buy_shop_delivery=None;
-            if payload_has_valid_shop_array(&payload) {
+            if let Some(shop) = npc_buy_raw_catalog {
+                let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
+                let delivered = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                npc_buy_shop_delivery=Some((shop,delivered,true));
+            } else if payload_has_valid_shop_array(&payload) {
                 let shop = transform_shop_model_from_snapshot(&payload, ui_cursor);
                 let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
                 let delivered = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
-                npc_buy_shop_delivery=Some((shop,delivered));
+                npc_buy_shop_delivery=Some((shop,delivered,false));
             }
 
             if world_ingest==WorldSnapshotIngestOutcome::Applied && ui_ingest&&map_ingest&&entity_ingest&&skill_ingest {
@@ -4927,10 +5086,15 @@ where
                 gameplay_adapter.last_full_producer_stamp=owned_gameplay_snapshot.command_stamp;
                 gameplay_adapter.last_full_producer_models=owned_gameplay_snapshot.producer_models.clone();
             }
+            if let (Some(owner),Some(fence),Some(stamp))=(hero_raw_owner.as_ref(),gameplay_adapter.command_fence.as_ref(),owned_gameplay_snapshot.command_stamp) {
+                if let Some(update)=fence.prepare_hero_owner(stamp,owner)? {
+                    let _=mir2_bevy_runtime::native_ingest::push_native_hero_owner_snapshot(update);
+                }
+            }
             if let Some(fence)=&gameplay_adapter.command_fence{
                 let staged=if npc_buy_raw_inventory{fence.stage_npc_gold_buy_inventory(&inventory)}else{None};
                 fence.finish_npc_gold_buy_inventory(staged,npc_buy_raw_inventory&&inventory_ingest&&world_ingest==WorldSnapshotIngestOutcome::Applied&&owned_gameplay_snapshot.producer_models.is_some());
-                if let Some((shop,delivered))=npc_buy_shop_delivery{let staged=fence.stage_npc_gold_buy_catalog(&shop,false);fence.finish_npc_gold_buy_catalog(staged,delivered);}
+                if let Some((shop,delivered,complete))=npc_buy_shop_delivery{let staged=if complete {fence.stage_npc_gold_buy_complete_catalog(&shop)}else{fence.stage_npc_gold_buy_catalog(&shop,false)};fence.finish_npc_gold_buy_catalog(staged,delivered);}
             }
             // Legacy adapters preserve established fixture delivery; production never
             // presents a backpressured snapshot as an applied producer grant.
@@ -5961,7 +6125,7 @@ fn character_summary_from_value(value: &Value) -> Option<CharacterSummary> {
 /// The gateway serializes `WorldSnapshot` with u32 `objectId`s and a wide field
 /// set; the Bevy runtime deserializes a smaller camelCase shape with string
 /// object ids and the movement timing the motion table consumes.
-fn transform_world_snapshot(payload: &Value) -> Value {
+pub(crate) fn transform_world_snapshot(payload: &Value) -> Value {
     let entities = payload
         .get("entities")
         .and_then(Value::as_array)
@@ -6328,7 +6492,7 @@ fn transform_game_shop_stock_from_packet(payload: &Value) -> Option<Value> {
 /// `NPCSell` remain separate packet signals; the shared ShopModel folds that
 /// ordered pair into one BUYSELL capability set, while a lone NPCSell stays
 /// sell-only.
-fn npc_shop_service_from_packet(
+pub(crate) fn npc_shop_service_from_packet(
     packet: &str,
     payload: &Value,
 ) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
@@ -6401,7 +6565,7 @@ fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCurs
     })
 }
 
-fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
+pub(crate) fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
     let list = ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
         .iter()
         .find_map(|key| payload.get(*key))
@@ -6486,7 +6650,7 @@ fn shop_hide_added_stats(payload: &Value) -> bool {
 
 /// The ordinary catalogue packet changes both goods and their currency atomically.
 /// Malformed catalogues must not change the currency of the previous visible shop.
-fn transform_npc_catalog_packet(
+pub(crate) fn transform_npc_catalog_packet(
     packet: &str,
     payload: &Value,
     cursor: &mut NativeUiPlayerCursor,
@@ -6549,7 +6713,7 @@ fn mail_source(payload: &Value) -> Option<&Value> {
         .or_else(|| payload.get("stage5").and_then(|value| value.get("mail")))
 }
 
-fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
+pub(crate) fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
     let entries = mail_source(payload)?.as_array()?;
     let visible = entries
         .iter()
@@ -6769,7 +6933,7 @@ fn deliver_mail_model_with_feedback(
     Ok(delivered)
 }
 
-fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
+pub(crate) fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
     let source = payload
         .get("storageItems")
         .or_else(|| payload.get("storage_items"))?
@@ -6913,7 +7077,7 @@ fn wallet_value(payload: &Value, field: &str) -> Option<u32> {
         .or_else(|| value_u32(payload.get("amount")))
 }
 
-fn transform_skill_model(payload: &Value) -> Value {
+pub(crate) fn transform_skill_model(payload: &Value) -> Value {
     let skills = payload
         .get("knownSkills")
         .or_else(|| payload.get("known_skills"))
@@ -7402,7 +7566,7 @@ fn full_npc_gold_buy_inventory_snapshot(payload:&Value)->bool {
     mir2_client_bevy::npc_shop_buy::full_npc_gold_buy_inventory(&transform_inventory_model(payload))
 }
 
-fn transform_inventory_model(payload: &Value) -> Value {
+pub(crate) fn transform_inventory_model(payload: &Value) -> Value {
     let gold = value_u32_or(payload.get("gold"), 0);
     // Only an explicit Crystal-array length can unlock page two. Occupied
     // item count and the runtime's broader maxBagSlots value are not evidence

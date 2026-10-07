@@ -24,8 +24,10 @@ export function projectBevyStorageModel(world: Pick<WorldState,
   const size = world.storageSize === 0 ? 80 : world.storageSize;
   if (![world.hasStoragePassword, world.storageSessionUnlocked, world.hasExpandedStorage].every(v => typeof v === "boolean")
     || !Number.isSafeInteger(size) || size < 1 || size > 160
-    || !Number.isFinite(world.expandedStorageExpiryTimeBinaryDatetime)
-    || !Number.isInteger(world.expandedStorageExpiryTimeBinaryDatetime)) {
+    // ABI1's Rust StorageModel accepts a numeric i64 only. Exact wide date
+    // strings stay in WorldState and the React surface; never round them here.
+    || typeof world.expandedStorageExpiryTimeBinaryDatetime !== "number"
+    || !Number.isSafeInteger(world.expandedStorageExpiryTimeBinaryDatetime)) {
     return { ok: false, error: { code: "invalidField", field: "storage" } };
   }
   const projected = projectBevyStorageItems(world.storageItems, size);

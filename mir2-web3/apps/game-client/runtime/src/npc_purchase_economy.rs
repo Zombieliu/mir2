@@ -13,6 +13,403 @@ use mir2_client_core::{npc_purchase_host::{ConnectionToken, PurchaseBinding},
 use serde::{de::DeserializeOwned, Deserialize};
 use serde_json::Value;
 
+fn decode_source<T: DeserializeOwned>(raw: Value) -> Result<T, NativeNpcEconomyError> {
+    serde_json::from_value(raw).map_err(|_| NativeNpcEconomyError::Incomplete)
+}
+fn inventory_matches(left: &InventoryModel, right: &InventoryModel) -> Result<bool, NativeNpcEconomyError> {
+    let left = serde_json::to_value(left).map_err(|_| NativeNpcEconomyError::Decode)?;
+    let right = serde_json::to_value(right).map_err(|_| NativeNpcEconomyError::Decode)?;
+    Ok(left == right)
+}
+fn required_string<'a>(source: &'a Value, key: &str) -> Result<&'a str, NativeNpcEconomyError> {
+    source.get(key).and_then(Value::as_str).ok_or(NativeNpcEconomyError::Incomplete)
+}
+fn required_bool(source: &Value, key: &str) -> Result<bool, NativeNpcEconomyError> {
+    source.get(key).and_then(Value::as_bool).ok_or(NativeNpcEconomyError::Incomplete)
+}
+fn source_array<'a>(source: &'a Value, key: &str) -> Result<&'a Vec<Value>, NativeNpcEconomyError> {
+    source.get(key).and_then(Value::as_array).ok_or(NativeNpcEconomyError::Incomplete)
+}
+
+// WorldItemTooltipSource intentionally omits absent optional carriers. Require
+// complete present Info/UserItem rows before tolerant presentation defaults.
+fn owner_tooltip(raw: Option<&Value>) -> Result<Option<mir2_client_bevy::inventory::CrystalItemTooltipSourceModel>, NativeNpcEconomyError> {
+    let Some(raw) = raw else { return Ok(None); };
+    if !raw.is_object() { return Err(NativeNpcEconomyError::Incomplete); }
+    fn info(raw: &Value) -> Result<(), NativeNpcEconomyError> {
+        let parsed: mir2_client_bevy::inventory::CrystalItemInfoModel = decode_source(raw.clone())?;
+        let shape = serde_json::to_value(parsed).map_err(|_| NativeNpcEconomyError::Decode)?;
+        if shape.as_object().unwrap().keys().any(|key| raw.get(key).is_none())
+            || source_array(raw,"stats")?.iter().any(|s| s.get("stat").and_then(Value::as_u64).is_none()
+                || s.get("value").and_then(Value::as_i64).is_none()) { return Err(NativeNpcEconomyError::Incomplete); }
+        Ok(())
+    }
+    info(raw.get("info").ok_or(NativeNpcEconomyError::Incomplete)?)?;
+    if let Some(real) = raw.get("realInfo").filter(|v| !v.is_null()) { info(real)?; }
+    if let Some(user) = raw.get("userItem").filter(|v| !v.is_null()) {
+        if !mir2_client_bevy::npc_shop_buy::full_npc_gold_user_item(user) { return Err(NativeNpcEconomyError::Incomplete); }
+    }
+    for key in ["socketInfos","realSocketInfos"] {
+        if let Some(rows) = raw.get(key) {
+            for row in rows.as_array().ok_or(NativeNpcEconomyError::Incomplete)? {
+                if !row.is_null() { info(row)?; }
+            }
+        }
+    }
+    decode_source(raw.clone()).map(Some)
+}
+
+fn owner_item(raw: &Value, container: u8, slot: u64) -> Result<ItemModel, NativeNpcEconomyError> {
+    let mut item = raw.as_object().cloned().ok_or(NativeNpcEconomyError::Incomplete)?;
+    item.insert("container".into(), container.into());item.insert("slot".into(), slot.into());
+    let mut projected: ItemModel = decode_source(Value::Object(item))?;
+    projected.tooltip_source = owner_tooltip(raw.get("tooltipSource"))?;
+    if let Some(source) = &projected.tooltip_source { projected.icon = source.user_item_image(projected.quantity); }
+    check_item_metadata(raw,&projected,false,false)?;
+    Ok(projected)
+}
+
+/// Complete public Stage5 mailbox, including concrete attachment state when
+/// supplied. Legacy display-only strings remain explicitly identity-unknown.
+pub fn owner_mail_model(owner: &Value) -> Result<MailModel, NativeNpcEconomyError> {
+    use mir2_client_bevy::mail::{MailAttachment,MailMessage,MAX_MAIL_MESSAGES,MAX_MAIL_ATTACHMENTS};
+    let stage=owner.get("stage5Systems").ok_or(NativeNpcEconomyError::Incomplete)?;
+    let mut mailbox=MailModel::default();
+    for raw in source_array(stage,"mail")? {
+        let deleted=required_bool(raw,"deleted")?;
+        let opened=required_bool(raw,"opened")?;let claimed=required_bool(raw,"claimed")?;let locked=required_bool(raw,"locked")?;
+        let sender=required_string(raw,"from")?;required_string(raw,"to")?;
+        let subject=required_string(raw,"subject")?;let body=required_string(raw,"body")?;
+        let items=source_array(raw,"items")?;let states=source_array(raw,"itemStatesJson")?;
+        if items.len()>MAX_MAIL_ATTACHMENTS || (!states.is_empty() && states.len()!=items.len()) { return Err(NativeNpcEconomyError::Incomplete); }
+        let message=if subject.is_empty(){body.into()}else if body.is_empty(){subject.into()}else{format!("{subject}\n{body}")};
+        let mut mail=MailMessage{id:field_unsigned(raw,"id")?,sender:sender.into(),subject:if subject.is_empty(){message.lines().next().unwrap_or("Mail").into()}else{subject.into()},
+            body:message,gold:u32::try_from(field_unsigned(raw,"gold")?).map_err(|_|NativeNpcEconomyError::Incomplete)?,read:opened,claimed,locked,..Default::default()};
+        for (index,item) in items.iter().enumerate() {
+            let name=item.as_str().filter(|s|!s.is_empty()).ok_or(NativeNpcEconomyError::Incomplete)?;
+            let attachment=if states.is_empty() { MailAttachment{name:Some(name.into()),count:1,..Default::default()} }
+            else {
+                let state=value(states[index].as_str().ok_or(NativeNpcEconomyError::Incomplete)?)?;
+                let metadata=state.get("user_item_metadata");
+                let numeric=|key:&str|->Result<u16,NativeNpcEconomyError>{u16::try_from(field_unsigned(&state,key)?).map_err(|_|NativeNpcEconomyError::Incomplete)};
+                MailAttachment{unique_id:Some(field_unsigned(&state,"unique_id")?),key:Some(required_string(&state,"key")?.into()),
+                    name:Some(required_string(&state,"name")?.into()),count:numeric("quantity")?,image:Some(u32::from(numeric("icon")?)),
+                    item_index:metadata.and_then(|m|m.get("item_index")).filter(|v|!v.is_null()).map(|n|decode_source(n.clone())).transpose()?,
+                    current_dura:state.get("durability_current").filter(|v|!v.is_null()).map(|v|decode_source(v.clone())).transpose()?.unwrap_or(0),
+                    max_dura:state.get("durability_max").filter(|v|!v.is_null()).map(|v|decode_source(v.clone())).transpose()?.unwrap_or(0),
+                    soul_bound_id:state.get("soul_bound_id").filter(|v|!v.is_null()).map(|v|decode_source(v.clone())).transpose()?.unwrap_or(-1),
+                    identified:state.get("identified").filter(|v|!v.is_null()).map(|v|decode_source(v.clone())).transpose()?.unwrap_or(true),
+                    cursed:required_bool(&state,"cursed")?,gem_count:numeric("gem_count")?}
+            };
+            mail.items.push(attachment);
+        }
+        if !deleted { mailbox.mails.push(mail); }
+    }
+    if mailbox.mails.len()>MAX_MAIL_MESSAGES { return Err(NativeNpcEconomyError::Incomplete); }
+    Ok(mailbox)
+}
+
+/// Fresh Hero checkpoint projection. Packet-only object identity/max-XP are
+/// deliberately unknown; the exact Stage5 Hero identity/XP remains in Source.
+pub fn owner_hero_model(owner: &Value) -> Result<HeroModel, NativeNpcEconomyError> {
+    let stage = owner.get("stage5Systems").ok_or(NativeNpcEconomyError::Incomplete)?;
+    let mut hero = HeroModel::default();
+    let maximum=owner.get("heroMaxExperience").ok_or(NativeNpcEconomyError::Incomplete)?;
+    let identity=stage.get("hero").ok_or(NativeNpcEconomyError::Incomplete)?;
+    if identity.is_null() {
+        if !maximum.is_null() { return Err(NativeNpcEconomyError::Incomplete); }
+    } else if maximum.as_i64().is_none_or(|xp|xp<0) { return Err(NativeNpcEconomyError::Incomplete); }
+    let keys = source_array(stage,"heroLearnedMagics")?;
+    if keys.len()>256 || keys.iter().any(|key| key.get("spell").and_then(Value::as_str).is_none()
+        || key.get("key").and_then(Value::as_u64).is_none_or(|key| key != 0 && !(17..=24).contains(&key))) {
+        return Err(NativeNpcEconomyError::Incomplete);
+    }
+    let _: Vec<mir2_client_bevy::hero_model::HeroLearnedKey> = decode_source(Value::Array(keys.clone()))?;
+    for stat in source_array(owner,"heroStats")? {
+        if stat.get("stat").and_then(Value::as_u64).is_none() || stat.get("value").and_then(Value::as_i64).is_none() {
+            return Err(NativeNpcEconomyError::Incomplete);
+        }
+    }
+    let weights = owner.get("heroWeights").ok_or(NativeNpcEconomyError::Incomplete)?;
+    let _: mir2_client_bevy::hero_model::HeroWeights = decode_source(weights.clone())?;
+    if let Some(identity) = stage.get("hero").filter(|v| !v.is_null()) {
+        for key in ["name","class","gender"] { required_string(identity,key)?; }
+        for key in ["level","behaviour","autoHpPercent","autoMpPercent"] { field_unsigned(identity,key)?; }
+        for key in ["spawned","autoPot"] { required_bool(identity,key)?; }
+        for key in ["experience","hpItemIndex","mpItemIndex"] {
+            if identity.get(key).and_then(Value::as_i64).is_none() { return Err(NativeNpcEconomyError::Incomplete); }
+        }
+    }
+    hero.observe_snapshot(owner);
+    if !identity.is_null() && hero.snapshot_identity.is_none() { return Err(NativeNpcEconomyError::Incomplete); }
+    hero.inventory_view.capacity = u16::try_from(field_unsigned(owner,"heroInventoryCapacity")?).map_err(|_| NativeNpcEconomyError::Incomplete)?;
+    for raw in source_array(owner,"heroInventoryItems")? {
+        let slot = field_unsigned(raw,"slot")?;
+        if raw.get("container").and_then(Value::as_str) != Some("bag1") || slot >= u64::from(hero.inventory_view.capacity) {
+            return Err(NativeNpcEconomyError::Incomplete);
+        }
+        hero.inventory_view.items.push(owner_item(raw,0,slot)?);
+    }
+    for raw in source_array(owner,"heroEquipmentItems")? {
+        let slot = field_unsigned(raw,"slot")?;
+        if slot>=14 || raw.get("container").and_then(Value::as_str)!=Some("bag1") { return Err(NativeNpcEconomyError::Incomplete); }
+        hero.inventory_view.items.push(owner_item(raw,2,slot)?);
+    }
+    Ok(hero)
+}
+
+/// Native producer provenance for display updates. This never authorizes a
+/// purchase or emits an Applied receipt.
+#[derive(Debug,Clone,Copy,PartialEq,Eq)]
+pub struct NativeHeroOwnerEpoch {
+    pub run:u64,pub connection:u64,pub procedure:u64,pub owner_epoch:u64,
+    pub scene_epoch:u64,pub cancellation:u64,pub actor:u32,pub map:i32,
+}
+#[derive(Debug,Clone)]
+pub struct NativeHeroOwnerGate { epoch:NativeHeroOwnerEpoch,active:Arc<Mutex<bool>> }
+impl NativeHeroOwnerGate {
+    pub fn new(epoch:NativeHeroOwnerEpoch)->Result<Self,NativeNpcEconomyError> {
+        if [epoch.run,epoch.connection,epoch.procedure,epoch.owner_epoch,epoch.scene_epoch,epoch.cancellation].contains(&u64::MAX) {
+            return Err(NativeNpcEconomyError::Correlation);
+        }
+        Ok(Self{epoch,active:Arc::new(Mutex::new(true))})
+    }
+    pub fn retire(&self){if let Ok(mut active)=self.active.lock(){*active=false;}}
+    pub fn prepare(&self,owner:&Value)->Result<NativeHeroOwnerUpdate,NativeNpcEconomyError> {
+        if field_unsigned(owner,"playerObjectId")?!=u64::from(self.epoch.actor) {return Err(NativeNpcEconomyError::Correlation);}
+        let model=owner_hero_model(owner)?;
+        let json=serde_json::to_string(&model).map_err(|_|NativeNpcEconomyError::Decode)?;
+        if json.len()>MAX_BUNDLE_BYTES{return Err(NativeNpcEconomyError::TooLarge);}
+        if !self.active.lock().is_ok_and(|active|*active){return Err(NativeNpcEconomyError::Retired);}
+        Ok(NativeHeroOwnerUpdate{gate:self.clone(),json:Arc::from(json)})
+    }
+    pub(crate) fn same_gate(&self,other:&Self)->bool{Arc::ptr_eq(&self.active,&other.active)}
+}
+#[derive(Debug,Clone)]
+pub struct NativeHeroOwnerUpdate { gate:NativeHeroOwnerGate,json:Arc<str> }
+impl NativeHeroOwnerUpdate {
+    pub(crate) fn retained_bytes(&self)->usize{self.json.len()+std::mem::size_of::<Self>()}
+    pub(crate) fn same_source(&self,other:&Self)->bool{self.gate.same_gate(&other.gate)}
+}
+#[derive(Resource)]
+pub(crate) struct NativeHeroOwnerCheckpoint {
+    hero:HeroModel,gate:Option<NativeHeroOwnerGate>,reset_revision:u64,scene_revision:u64,
+}
+pub fn apply_native_hero_owner_update(world:&mut World,update:NativeHeroOwnerUpdate)->bool {
+    let Ok(mut model)=serde_json::from_str::<HeroModel>(&update.json) else{return false;};
+    let Ok(active)=update.gate.active.lock() else{return false;};
+    if !*active{return false;}
+    if let Some(current)=world.get_resource::<HeroModel>() {
+        // Object ID, hair and packet skill information remain packet facts.
+        // Keep a bootstrap only while identity and carried items still match.
+        let Ok(same_inventory)=inventory_matches(&current.inventory_view,&model.inventory_view) else{return false;};
+        if current.info.as_ref().zip(model.snapshot_identity.as_ref()).is_some_and(|(packet,source)|
+            packet.name==source.name && packet.class==source.class && packet.gender==source.gender)
+            && same_inventory {
+            model.info=current.info.clone();model.base_stats=current.base_stats.clone();
+            model.auto_pot_view=current.auto_pot_view.clone();
+        }
+        model.session_epoch=current.session_epoch;model.hero_generation=current.hero_generation;
+        model.revision=current.revision.saturating_add(1);
+    }
+    let reset_revision=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
+    let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    world.insert_resource(NativeHeroOwnerCheckpoint{hero:model.clone(),gate:Some(update.gate.clone()),reset_revision,scene_revision});
+    world.insert_resource(model);true
+}
+
+pub(crate) fn merge_fresh_native_hero_checkpoint(world:&World,incoming:&mut HeroModel) {
+    let reset=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
+    let scene=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    if let Some(source)=world.get_resource::<NativeHeroOwnerCheckpoint>() {
+        let current=source.reset_revision==reset && source.scene_revision==scene
+            && source.gate.as_ref().is_none_or(|gate|gate.active.lock().is_ok_and(|active|*active));
+        incoming.snapshot_identity=if current{source.hero.snapshot_identity.clone()}else{None};
+        if current && source.hero.session_epoch!=0 {
+            incoming.session_epoch=source.hero.session_epoch;
+            incoming.hero_generation=incoming.hero_generation.max(source.hero.hero_generation);
+            if let Some(present)=world.get_resource::<HeroModel>() {incoming.revision=incoming.revision.max(present.revision.saturating_add(1));}
+        }
+        if incoming.snapshot_identity.is_none() || incoming.info.as_ref().zip(incoming.snapshot_identity.as_ref()).is_some_and(|(packet,source)|
+            packet.name!=source.name || packet.class!=source.class || packet.gender!=source.gender) {
+            incoming.info=None;incoming.base_stats=None;
+        }
+    }else{
+        merge_native_owner_hero_checkpoint(world.get_resource::<NativeNpcEconomySource>(),reset,scene,incoming);
+    }
+}
+
+/// Actual parsed packet consumer, also usable by a Native owner of a bare
+/// World. Source identity and display clocks are reconciled before replacement.
+pub fn apply_native_hero_packet_model(world:&mut World,mut model:HeroModel) {
+    merge_fresh_native_hero_checkpoint(world,&mut model);
+    if model.skill_key_ack.is_some() {
+        if let Some(mut receipts)=world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
+            receipts.0.push_back(model.clone());
+        }
+    }
+    world.insert_resource(model);
+}
+
+/// Public Stage5 names, wallet and local trade offers are projected without a
+/// packet cursor. Packet-only remote status/counters remain unknown defaults.
+pub fn owner_social_model(owner: &Value) -> Result<SocialModel, NativeNpcEconomyError> {
+    use mir2_client_bevy::social::{GroupMemberModel,GuildMemberModel,GuildStorageItemModel,TradeItemModel};
+    let stage = owner.get("stage5Systems").ok_or(NativeNpcEconomyError::Incomplete)?;
+    let group = &stage["group"];let guild = &stage["guild"];
+    let mut social = SocialModel::default();
+    social.group.allow_invites = required_bool(group,"allowGroup")?;
+    required_string(group,"lootMode")?;
+    let members = source_array(group,"members")?;
+    if members.len()>mir2_client_bevy::social::MAX_GROUP_MEMBERS { return Err(NativeNpcEconomyError::Incomplete); }
+    for member in members { social.group.members.push(GroupMemberModel{name:member.as_str().ok_or(NativeNpcEconomyError::Incomplete)?.into(),..Default::default()}); }
+    social.group.active = !social.group.members.is_empty();
+    let name = required_string(guild,"name")?;let rank = required_string(guild,"rank")?;
+    social.guild.name = (!name.is_empty()).then(||name.into());social.guild.rank_name=(!rank.is_empty()).then(||rank.into());
+    social.guild.gold = u32::try_from(field_unsigned(guild,"storageGold")?).map_err(|_| NativeNpcEconomyError::Incomplete)?;
+    social.guild.notice=decode_source(guild.get("notice").cloned().ok_or(NativeNpcEconomyError::Incomplete)?)?;
+    social.guild.permissions=decode_source(guild.get("permissions").cloned().ok_or(NativeNpcEconomyError::Incomplete)?)?;
+    let members = source_array(guild,"members")?;
+    if members.len()>mir2_client_bevy::social::MAX_GUILD_MEMBERS || social.guild.notice.len()>mir2_client_bevy::social::MAX_NOTICE_LINES
+        || social.guild.permissions.len()>mir2_client_bevy::social::MAX_GUILD_PERMISSIONS { return Err(NativeNpcEconomyError::Incomplete); }
+    for member in members { social.guild.members.push(GuildMemberModel{name:member.as_str().ok_or(NativeNpcEconomyError::Incomplete)?.into(),..Default::default()}); }
+    social.guild.member_count=members.len() as u16;
+    let stored=guild.get("storageItems").and_then(Value::as_object).ok_or(NativeNpcEconomyError::Incomplete)?;
+    let states=guild.get("storageItemStates").and_then(Value::as_object).ok_or(NativeNpcEconomyError::Incomplete)?;
+    let users=guild.get("storageItemUsers").and_then(Value::as_object).ok_or(NativeNpcEconomyError::Incomplete)?;
+    if stored.keys().ne(states.keys()) || stored.keys().ne(users.keys()) { return Err(NativeNpcEconomyError::Incomplete); }
+    if !stored.is_empty() { social.guild.storage_items.resize(mir2_client_bevy::social::MAX_GUILD_STORAGE_ITEMS,None); }
+    for (slot,key) in stored {
+        if slot.parse::<usize>().ok().is_none_or(|n|n.to_string()!=*slot) {return Err(NativeNpcEconomyError::Incomplete);}
+        let slot:usize=slot.parse().map_err(|_|NativeNpcEconomyError::Incomplete)?;
+        if slot>=social.guild.storage_items.len() { return Err(NativeNpcEconomyError::Incomplete); }
+        let item=value(states[&slot.to_string()].as_str().ok_or(NativeNpcEconomyError::Incomplete)?)?;
+        if item.get("key")!=Some(key) { return Err(NativeNpcEconomyError::Incomplete); }
+        let item_index=item.get("user_item_metadata").and_then(|m|m.get("item_index")).and_then(Value::as_i64)
+            .and_then(|n|i32::try_from(n).ok()).ok_or(NativeNpcEconomyError::Incomplete)?;
+        social.guild.storage_items[slot]=Some(GuildStorageItemModel{unique_id:field_unsigned(&item,"unique_id")?,item_index,
+            count:u16::try_from(field_unsigned(&item,"quantity")?).map_err(|_|NativeNpcEconomyError::Incomplete)?,
+            user_id:users[&slot.to_string()].as_i64().ok_or(NativeNpcEconomyError::Incomplete)?,tooltip_source:None});
+    }
+    if let Some(trade)=stage.get("trade").filter(|v|!v.is_null()) {
+        social.trade.partner=Some(required_string(trade,"partner")?.into());
+        social.trade.my_offer_nonce=Some(required_string(trade,"settlementNonce")?.into());
+        let offered=u32::try_from(field_unsigned(trade,"offeredGold")?).map_err(|_|NativeNpcEconomyError::Incomplete)?;
+        let currency=required_string(trade,"offeredCurrency")?;
+        if !matches!(currency,"gold"|"feitian"|"bichon") {return Err(NativeNpcEconomyError::Incomplete);}
+        social.trade.my_gold=if currency=="gold"{offered}else{0};
+        social.trade.my_confirmed=required_bool(trade,"locked")?;
+        social.trade.state=if required_bool(trade,"completed")? {"completed"}else{"open"}.into();
+        let slots=trade.get("offeredSlots").and_then(Value::as_object).ok_or(NativeNpcEconomyError::Incomplete)?;
+        let ids=trade.get("offeredUniqueIds").and_then(Value::as_object).ok_or(NativeNpcEconomyError::Incomplete)?;
+        if slots.keys().ne(ids.keys()) || slots.len()>mir2_client_bevy::social::MAX_TRADE_ITEMS { return Err(NativeNpcEconomyError::Incomplete); }
+        if !slots.is_empty() { social.trade.my_items.resize(mir2_client_bevy::social::MAX_TRADE_ITEMS,None); }
+        for (slot,bag) in slots {
+            if slot.parse::<usize>().ok().is_none_or(|n|n.to_string()!=*slot) {return Err(NativeNpcEconomyError::Incomplete);}
+            let slot:usize=slot.parse().map_err(|_|NativeNpcEconomyError::Incomplete)?;
+            if slot>=social.trade.my_items.len() { return Err(NativeNpcEconomyError::Incomplete); }
+            let id=ids[&slot.to_string()].as_u64().ok_or(NativeNpcEconomyError::Incomplete)?;
+            let bag=bag.as_u64().ok_or(NativeNpcEconomyError::Incomplete)?;
+            let raw=source_array(owner,"inventoryItems")?.iter().find(|item|item["uniqueId"].as_u64()==Some(id)
+                && item["slot"].as_u64().map(|slot|if item["container"].as_str()==Some("bag2"){slot+40}else{slot})==Some(bag))
+                .ok_or(NativeNpcEconomyError::Incomplete)?;
+            let tooltip=owner_tooltip(raw.get("tooltipSource"))?;
+            social.trade.my_items[slot]=Some(TradeItemModel{unique_id:Some(id),item_index:tooltip.as_ref().map(|t|t.info.item_index),
+                name:Some(required_string(raw,"name")?.into()),count:u16::try_from(field_unsigned(raw,"quantity")?).map_err(|_|NativeNpcEconomyError::Incomplete)?,
+                tooltip_source:tooltip});
+        }
+    }
+    Ok(social)
+}
+
+#[cfg(feature="native-npc-economy")]
+fn shop_tooltip(owner:&Value,raw:&Value)->Result<mir2_client_bevy::inventory::CrystalItemTooltipSourceModel,NativeNpcEconomyError> {
+    use mir2_client_bevy::inventory::{CrystalItemInfoModel,CrystalUserItemModel,CrystalItemTooltipSourceModel};
+    fn info(index:i32)->Result<mir2_game_data::CrystalItemTemplate,NativeNpcEconomyError> {
+        let mut rows=mir2_game_data::crystal_item_manifest_ref().items.iter().filter(|item|item.item_index==index);
+        let row=rows.next().ok_or(NativeNpcEconomyError::Incomplete)?;
+        if rows.next().is_some() {return Err(NativeNpcEconomyError::Incomplete);}
+        Ok(row.clone())
+    }
+    fn parsed(index:i32)->Result<CrystalItemInfoModel,NativeNpcEconomyError> {
+        decode_source(serde_json::to_value(info(index)?).map_err(|_|NativeNpcEconomyError::Decode)?)
+    }
+    if !mir2_client_bevy::npc_shop_buy::full_npc_gold_user_item(raw) {return Err(NativeNpcEconomyError::Incomplete);}
+    let user:CrystalUserItemModel=decode_source(raw.clone())?;
+    let object=field_unsigned(owner,"playerObjectId")?;
+    let actor=source_array(owner,"entities")?.iter().find(|actor|actor["objectId"].as_u64()==Some(object)&&actor["kind"].as_str()==Some("selfPlayer"))
+        .ok_or(NativeNpcEconomyError::Incomplete)?;
+    let level=u16::try_from(field_unsigned(actor,"level")?).map_err(|_|NativeNpcEconomyError::Incomplete)?;
+    let class:mir2_protocol::MirClass=decode_source(actor["class"].clone())?;
+    let template=info(user.item_index)?;
+    let real=|index:i32|->Option<CrystalItemInfoModel>{
+        let template=info(index).ok()?;
+        decode_source(serde_json::to_value(mir2_game_data::crystal_real_item_for_player(&template,level,class)).ok()?).ok()
+    };
+    let source=CrystalItemTooltipSourceModel{info:decode_source(serde_json::to_value(&template).map_err(|_|NativeNpcEconomyError::Decode)?)?,
+        real_info:real(user.item_index),socket_infos:user.slots.iter().map(|slot|slot.as_ref().and_then(|item|parsed(item.item_index).ok())).collect(),
+        real_socket_infos:user.slots.iter().map(|slot|slot.as_ref().and_then(|item|real(item.item_index))).collect(),user_item:Some(user)};
+    Ok(source)
+}
+
+/// Service capability comes from the same in-range server owner turn, never
+/// from cached NPC packets or display text in a dialog.
+pub fn owner_shop_service(owner:&Value)->Result<mir2_client_bevy::shop::NpcShopServiceSignal,NativeNpcEconomyError> {
+    use mir2_client_bevy::shop::{NpcShopServiceSignal,NpcShopServiceMode};
+    let raw=owner.get("nativeNpcShop").ok_or(NativeNpcEconomyError::Incomplete)?;
+    if raw.is_null() {return Ok(NpcShopServiceSignal::default());}
+    if field_unsigned(raw,"npcObjectId")?>u64::from(u32::MAX) || required_string(raw,"scriptKey")?.is_empty() {return Err(NativeNpcEconomyError::Incomplete);}
+    let mode=match required_string(raw,"service")? {
+        "BUY"|"BUYSELL"|"BUYBACK"|"BUYUSED"|"PEARLBUY"|"BUYNEW"|"BUYSELLNEW"=>NpcShopServiceMode::Buy,
+        _=>return Err(NativeNpcEconomyError::Incomplete),
+    };
+    let rate=raw.get("rate").and_then(Value::as_f64).map(|n|n as f32).filter(|rate|rate.is_finite()&&*rate>=0.).ok_or(NativeNpcEconomyError::Incomplete)?;
+    let signal=NpcShopServiceSignal{mode,repair_rate:matches!(mode,NpcShopServiceMode::Repair|NpcShopServiceMode::SpecialRepair).then_some(rate)};
+    Ok(signal)
+}
+
+pub fn owner_shop_catalog(owner:&Value)->Result<ShopModel,NativeNpcEconomyError> {
+    let source=owner.get("nativeNpcShop").ok_or(NativeNpcEconomyError::Incomplete)?;
+    let signal=owner_shop_service(owner)?;
+    let mut capabilities=ShopModel::default();capabilities.apply_service_signal(signal);
+    if matches!(source.get("service").and_then(Value::as_str),Some("BUYSELL"|"BUYSELLNEW")) {capabilities.supports_sell=true;}
+    if source.is_null() {return Ok(capabilities);}
+    let packet=required_string(source,"packetType")?;
+    if !matches!(packet,"NPCGoods"|"NPCPearlGoods") {return Err(NativeNpcEconomyError::Incomplete);}
+    if (source["service"].as_str()==Some("PEARLBUY"))!=(packet=="NPCPearlGoods") {return Err(NativeNpcEconomyError::Incomplete);}
+    let list=source_array(source,"list")?;
+    let panel=u8::try_from(field_unsigned(source,"panelType")?).map_err(|_|NativeNpcEconomyError::Incomplete)?;
+    let rate=source["rate"].as_f64().map(|n|n as f32).ok_or(NativeNpcEconomyError::Incomplete)?;
+    capabilities.hide_added_stats=required_bool(source,"hideAddedStats")?;
+    if list.len()>4096 {return Err(NativeNpcEconomyError::Incomplete);}
+    let mut identities=std::collections::BTreeSet::new();
+    for raw in list {
+        if !identities.insert(field_unsigned(raw,"unique_id")?) {return Err(NativeNpcEconomyError::Incomplete);}
+        #[cfg(not(feature="native-npc-economy"))]
+        {let _=(raw,panel,rate,packet);return Err(NativeNpcEconomyError::Incomplete);}
+        #[cfg(feature="native-npc-economy")]
+        {
+            let tooltip=shop_tooltip(owner,raw)?;
+            let id=field_unsigned(raw,"unique_id")?;let count=u16::try_from(field_unsigned(raw,"count")?).map_err(|_|NativeNpcEconomyError::Incomplete)?;
+            let ordinary=required_bool(raw,"is_shop_item")?;
+            if count==0 {return Err(NativeNpcEconomyError::Incomplete);}
+            let price=mir2_client_core::npc_pearl_buy::npc_pearl_catalog_unit_price(tooltip.info.price,rate).ok_or(NativeNpcEconomyError::Incomplete)?;
+            capabilities.goods.push(mir2_client_bevy::shop::ShopGood{unique_id:id,name:tooltip.info.name.clone(),price,
+                purchase_rate:ordinary.then_some(rate),requires_gold_buy_plan:ordinary&&packet=="NPCGoods",use_pearls:packet=="NPCPearlGoods",
+                count,stock:if ordinary{-1}else{i32::from(count)},panel_type:panel,icon:tooltip.user_item_image(u32::from(count)),tooltip_source:Some(tooltip),..Default::default()});
+        }
+    }
+    Ok(capabilities)
+}
+fn check_owner_shop(owner:&Value,shop:&ShopModel)->Result<(),NativeNpcEconomyError> {
+    let expected=owner_shop_catalog(owner)?;let mut actual=shop.clone();
+    // UI choices and atlas geometry are local presentation, never authority.
+    actual.selected_id=None;actual.selected_bag_slot_for_sell=None;actual.selected_bag_slot_for_repair=None;
+    for good in &mut actual.goods {good.icon_width=0;good.icon_height=0;}
+    if actual!=expected {return Err(NativeNpcEconomyError::Projection);}
+    Ok(())
+}
+
 const MAX_BUNDLE_BYTES: usize = 64 * 1024 * 1024;
 const MAX_APPLIED: usize = 32;
 const MAX_HIGH_WATER_BYTES: usize = 128 * 1024 * 1024;
@@ -33,6 +430,11 @@ pub struct NativeNpcEconomyProjection {
     pub social_json: String,
 }
 impl NativeNpcEconomyProjection {
+    /// Validation is predecode only. It never constitutes an Applied witness.
+    pub fn validate_source(&self) -> Result<(),NativeNpcEconomyError> {
+        if self.retained_bytes()>MAX_BUNDLE_BYTES {return Err(NativeNpcEconomyError::TooLarge);}
+        Decoded::decode(self).map(|_|())
+    }
     fn retained_bytes(&self) -> usize {
         [&self.owner_json, &self.world_json, &self.ui_json, &self.inventory_json,
             &self.mail_json, &self.storage_json, &self.shop_json, &self.skill_json,
@@ -84,7 +486,7 @@ impl NativeNpcEconomyGate {
         let _ = Decoded::decode(&projection)?;
         if !self.is_current(binding) { return Err(NativeNpcEconomyError::Retired); }
         Ok(NativeNpcEconomyBundle { gate: self.clone(), binding, witness,
-            projection: Arc::new(projection) })
+            projection: Arc::new(projection), hero_owner_gate:None })
     }
     /// Only the single-writer connection owner consumes this bounded completion.
     pub fn try_recv_applied(&self) -> Option<NativeNpcEconomyApplied> {
@@ -106,10 +508,23 @@ pub struct NativeNpcEconomyBundle {
     binding: PurchaseBinding,
     witness: SnapshotWitness,
     projection: Arc<NativeNpcEconomyProjection>,
+    hero_owner_gate:Option<NativeHeroOwnerGate>,
 }
 impl NativeNpcEconomyBundle {
+    /// Attach the current Native owner display lifetime, without changing the
+    /// original economic source or its binding/witness. This token never
+    /// contributes authority to Applied; it only preserves presentation clocks.
+    pub fn with_hero_owner_gate(mut self,gate:&NativeHeroOwnerGate)->Result<Self,NativeNpcEconomyError> {
+        let owner=value(&self.projection.owner_json)?;
+        if field_unsigned(&owner,"playerObjectId")?!=u64::from(gate.epoch.actor) {return Err(NativeNpcEconomyError::Correlation);}
+        if !gate.active.lock().is_ok_and(|active|*active){return Err(NativeNpcEconomyError::Retired);}
+        self.hero_owner_gate=Some(gate.clone());
+        if self.retained_bytes()>MAX_BUNDLE_BYTES{return Err(NativeNpcEconomyError::TooLarge);}
+        Ok(self)
+    }
     pub(crate) fn gate(&self) -> &NativeNpcEconomyGate { &self.gate }
-    pub(crate) fn retained_bytes(&self) -> usize { self.projection.retained_bytes() }
+    pub(crate) fn retained_bytes(&self) -> usize { self.projection.retained_bytes().saturating_add(
+        self.hero_owner_gate.as_ref().map_or(0,|_|std::mem::size_of::<NativeHeroOwnerGate>())) }
     pub(crate) fn retire(&self) { self.gate.retire(); }
 }
 
@@ -133,12 +548,39 @@ pub struct NativeNpcEconomySource {
     owner: Arc<Value>,
     gate: NativeNpcEconomyGate,
     reset_revision: u64,
+    scene_revision: u64,
 }
 impl NativeNpcEconomySource {
     pub fn owner(&self) -> &Value { &self.owner }
     pub fn owner_json(&self) -> &str { &self.projection.owner_json }
     pub fn witness(&self) -> SnapshotWitness { self.witness }
     pub fn binding(&self) -> PurchaseBinding { self.binding }
+}
+
+/// Packet projections carry presentation and acknowledgements, but cannot
+/// replace the XP identity pair already applied from a complete owner turn.
+pub(crate) fn merge_native_owner_hero_checkpoint(
+    source: Option<&NativeNpcEconomySource>, reset_revision: u64, scene_revision: u64,
+    incoming: &mut HeroModel,
+) {
+    let Some(source)=source.filter(|s|s.reset_revision==reset_revision && s.scene_revision==scene_revision) else {
+        incoming.snapshot_identity=None;
+        return;
+    };
+    // This source passed the complete sealed decoder before it entered World.
+    let Ok(authoritative)=owner_hero_model(source.owner()) else { incoming.snapshot_identity=None;return; };
+    incoming.snapshot_identity=authoritative.snapshot_identity;
+    if incoming.info.as_ref().zip(incoming.snapshot_identity.as_ref()).is_some_and(|(packet,source)|
+        packet.name!=source.name || packet.class!=source.class || packet.gender!=source.gender) {
+        incoming.info=None;incoming.base_stats=None;
+    }
+    if incoming.snapshot_identity.is_none() {
+        // An explicit owner no-Hero checkpoint also withdraws a cached packet
+        // bootstrap; otherwise its stale XP would become visible again.
+        incoming.info=None;incoming.base_stats=None;incoming.spawned=false;
+        incoming.inventory_view=authoritative.inventory_view;
+        incoming.stats=authoritative.stats;incoming.weights=authoritative.weights;
+    }
 }
 
 // Reset clears exposed owner data but must not erase an actor's revision
@@ -168,7 +610,7 @@ fn owner_economic_fingerprint(owner: &Value) -> Result<String, NativeNpcEconomyE
     let mut fields = serde_json::Map::new();
     for key in ["playerExperience", "playerMaxExperience", "gold", "credit", "cityCurrencies",
         "inventoryCapacity", "inventoryItems", "beltItems", "equipmentItems", "storageItems",
-        "heroInventoryItems", "heroEquipmentItems", "heroInventoryCapacity"] {
+        "heroInventoryItems", "heroEquipmentItems", "heroInventoryCapacity", "heroMaxExperience"] {
         if let Some(value) = owner.get(key) { fields.insert(key.into(), value.clone()); }
     }
     let object = field_unsigned(owner, "playerObjectId")?;
@@ -327,14 +769,14 @@ impl Decoded {
         let inventory: InventoryModel = model(&p.inventory_json, &["items"])?;
         let mail: MailModel = model(&p.mail_json, &["mails"])?;
         let storage: StorageModel = model(&p.storage_json, &["items"])?;
-        let shop = model(&p.shop_json, &["goods"])?;
+        let shop: ShopModel = model(&p.shop_json, &["goods"])?;
         let skill: SkillModel = model(&p.skill_json, &["skills"])?;
-        let hero = model(&p.hero_json, &[])?;
+        let hero: HeroModel = model(&p.hero_json, &[])?;
         let social_json = value(&p.social_json)?;
         if ["group", "guild", "trade"].iter().any(|k| !social_json.get(*k).is_some_and(Value::is_object)) {
             return Err(NativeNpcEconomyError::Incomplete);
         }
-        let social = serde_json::from_value(social_json).map_err(|_| NativeNpcEconomyError::Decode)?;
+        let social: SocialModel = serde_json::from_value(social_json).map_err(|_| NativeNpcEconomyError::Decode)?;
         for (key, projected) in [("playerHp", ui.player.hp), ("playerMaxHp", ui.player.max_hp),
             ("playerMp", ui.player.mp), ("playerMaxMp", ui.player.max_mp)] {
             let actual = owner.get(key).and_then(Value::as_i64).ok_or(NativeNpcEconomyError::Incomplete)?;
@@ -370,19 +812,21 @@ impl Decoded {
             || Some(storage.expiry) != owner["expandedStorageExpiryTimeBinaryDatetime"].as_i64()
             || world.player_object_id.as_deref().and_then(|s| s.parse::<u64>().ok()) != Some(object)
         { return Err(NativeNpcEconomyError::Projection); }
+        if ui.player.crystal_stats.as_ref()!=Some(&decode_source::<Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>>(owner["playerCrystalStats"].clone())?)
+            || ui.player.weights!=decode_source(owner["playerWeights"].clone())?
+            || !ui.player.current_weight_known || u64::from(ui.player.current_weight)!=field_unsigned(&owner,"currentWeight")?
+            || u64::from(ui.player.max_weight)!=field_unsigned(&owner,"maxWeight")? { return Err(NativeNpcEconomyError::Projection); }
         check_items(&owner, &inventory.items, &["inventoryItems", "beltItems", "equipmentItems"])?;
         check_items(&owner, &storage.items, &["storageItems"])?;
-        let visible_mail: Vec<&Value> = systems["mail"].as_array().unwrap().iter()
-            .filter(|m| m.get("deleted").and_then(Value::as_bool) != Some(true)).collect();
-        if visible_mail.len() != mail.mails.len() { return Err(NativeNpcEconomyError::Projection); }
-        for (source, projected) in visible_mail.iter().zip(&mail.mails) {
-            let id = source.get("mailId").or_else(|| source.get("id")).and_then(unsigned);
-            if id != Some(projected.id) || projected.operation.is_some()
-                || source.get("items").and_then(Value::as_array).map(Vec::len) != Some(projected.items.len())
-                || source.get("gold").and_then(unsigned) != Some(u64::from(projected.gold)) {
-                return Err(NativeNpcEconomyError::Projection);
-            }
+        if mail.mails!=owner_mail_model(&owner)?.mails || social!=owner_social_model(&owner)? { return Err(NativeNpcEconomyError::Projection); }
+        let expected=owner_hero_model(&owner)?;
+        if !inventory_matches(&hero.inventory_view,&expected.inventory_view)? || hero.stats!=expected.stats || hero.weights!=expected.weights
+            || hero.learned_keys!=expected.learned_keys || hero.spawned!=expected.spawned || hero.snapshot_identity!=expected.snapshot_identity
+            || hero.info.is_some() || hero.base_stats.is_some() || hero.skill_key_ack.is_some()
+            || !hero.magic_clocks.is_empty() || !hero.actor_candidates.is_empty() || !inventory_matches(&hero.auto_pot_view,&expected.auto_pot_view)? {
+            return Err(NativeNpcEconomyError::Projection);
         }
+        check_owner_shop(&owner,&shop)?;
         if skill.skills.len() != owner["knownSkills"].as_array().unwrap().len() { return Err(NativeNpcEconomyError::Projection); }
         Ok(Self { owner, world, ui, inventory, mail, storage, shop, skill, hero, social })
     }
@@ -440,6 +884,15 @@ fn check_item_metadata(source: &Value, projected: &ItemModel, equipment: bool, s
     if source.get("tooltipSource").is_none() && Some(u64::from(projected.icon)) != source["icon"].as_u64() {
         return Err(NativeNpcEconomyError::Projection);
     }
+    let tooltip=owner_tooltip(source.get("tooltipSource"))?;
+    if tooltip.as_ref().and_then(|tooltip|tooltip.user_item.as_ref()).is_some_and(|user|
+        source.get("uniqueId").and_then(unsigned).is_some_and(|id|id!=user.unique_id)
+        || source.get("quantity").and_then(unsigned)!=Some(u64::from(user.count))) {
+        return Err(NativeNpcEconomyError::Incomplete);
+    }
+    if projected.tooltip_source!=tooltip || tooltip.as_ref().is_some_and(|source|projected.icon!=source.user_item_image(projected.quantity)) {
+        return Err(NativeNpcEconomyError::Projection);
+    }
     let model = serde_json::to_value(projected).map_err(|_| NativeNpcEconomyError::Decode)?;
     for field in ["durabilityCurrent", "durabilityMax"] {
         let raw = source.get(field).ok_or(NativeNpcEconomyError::Incomplete)?;
@@ -484,21 +937,36 @@ fn equipment_slot(value: Option<&Value>) -> Result<u64, NativeNpcEconomyError> {
 /// barrier can commit. No later ordinary model drains until the next frame.
 pub(crate) fn apply_pending_native_npc_economy(world: &mut World) {
     let revision = world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0, |r| r.0);
-    if world.get_resource::<NativeNpcEconomySource>().is_some_and(|s| s.reset_revision != revision) {
+    let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    if world.get_resource::<NativeNpcEconomySource>().is_some_and(|s| s.reset_revision != revision || s.scene_revision != scene_revision)
+        || world.get_resource::<NativeHeroOwnerCheckpoint>().is_some_and(|s|s.reset_revision!=revision || s.scene_revision!=scene_revision) {
         clear_native_npc_economy_source(world);
     }
     let bundle = world.get_resource::<crate::native_ingest::NativeInbound>()
         .and_then(|inbound| inbound.take_npc_economy_front());
-    if let Some(bundle) = bundle { let _ = apply_bundle(world, bundle); }
+    if let Some(bundle) = bundle { let _ = apply_native_npc_economy_bundle(world, bundle); }
+}
+
+/// Exclusive main-thread application for trusted native World owners. The
+/// sealed bundle still undergoes all decoding, epoch and revision checks.
+pub fn apply_native_npc_economy_bundle(world:&mut World,bundle:NativeNpcEconomyBundle)->bool {
+    apply_bundle(world,bundle)
 }
 
 fn apply_bundle(world: &mut World, bundle: NativeNpcEconomyBundle) -> bool {
-    let Ok(decoded) = Decoded::decode(&bundle.projection) else { return false; };
+    let Ok(mut decoded) = Decoded::decode(&bundle.projection) else { return false; };
     let Ok(fingerprint) = owner_economic_fingerprint(&decoded.owner) else { return false; };
     let Ok(mut custody) = bundle.gate.custody.lock() else { return false; };
     if !custody.active || custody.binding != bundle.binding || !correlated(bundle.binding, bundle.witness)
         || custody.applied.len() >= MAX_APPLIED { return false; }
     if world.get_resource::<NativeNpcEconomyHighWater>().is_some_and(|history| !history.accepts(bundle.witness, &fingerprint)) { return false; }
+    // Lock the exact display lifetime before copying any presentation clock.
+    // An attached retired token cannot lend its epoch to a new owner.
+    let hero_guard=if let Some(gate)=&bundle.hero_owner_gate {
+        let Ok(active)=gate.active.lock() else{return false;};
+        if !*active{return false;}Some(active)
+    }else{None};
+    preserve_current_hero_presentation(world,&bundle,&mut decoded.hero);
     use mir2_client_bevy::pending_operations::{PendingOperations, AuthoritativeModelRevisions,
         AuthoritativeModelDomain, mark_authoritative_refresh, reconcile_inventory_refresh,
         reconcile_mail_refresh, reconcile_storage_refresh, reconcile_shop_refresh};
@@ -527,20 +995,50 @@ fn apply_bundle(world: &mut World, bundle: NativeNpcEconomyBundle) -> bool {
     world.insert_resource(decoded.storage);
     world.insert_resource(decoded.shop);
     world.insert_resource(decoded.skill);
+    let hero_checkpoint=decoded.hero.clone();
     world.insert_resource(decoded.hero);
     world.insert_resource(decoded.social);
     let reset_revision = world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0, |r| r.0);
+    let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    world.insert_resource(NativeHeroOwnerCheckpoint{hero:hero_checkpoint,gate:bundle.hero_owner_gate.clone(),reset_revision,scene_revision});
     world.insert_resource(NativeNpcEconomySource { binding: bundle.binding, witness: bundle.witness,
-        projection: Arc::clone(&bundle.projection), owner: Arc::new(decoded.owner), gate: bundle.gate.clone(), reset_revision });
+        projection: Arc::clone(&bundle.projection), owner: Arc::new(decoded.owner), gate: bundle.gate.clone(), reset_revision, scene_revision });
     if !world.contains_resource::<NativeNpcEconomyHighWater>() { world.insert_resource(NativeNpcEconomyHighWater::default()); }
     world.resource_mut::<NativeNpcEconomyHighWater>().actors.insert(bundle.witness.actor,
         (bundle.witness.server_revision, fingerprint));
     custody.applied.push_back(NativeNpcEconomyApplied { binding: bundle.binding, witness: bundle.witness });
+    drop(hero_guard);
     true
 }
 
+fn preserve_current_hero_presentation(world:&World,bundle:&NativeNpcEconomyBundle,incoming:&mut HeroModel) {
+    // A caller-provided epoch (including Source30's explicit 11) is exact.
+    if incoming.session_epoch!=0{return;}
+    let reset=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
+    let scene=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    let Some(checkpoint)=world.get_resource::<NativeHeroOwnerCheckpoint>().filter(|s|s.reset_revision==reset && s.scene_revision==scene) else{return;};
+    let same_display_gate=checkpoint.gate.as_ref().zip(bundle.hero_owner_gate.as_ref())
+        .is_some_and(|(current,attached)|current.same_gate(attached));
+    if checkpoint.gate.is_some() && bundle.hero_owner_gate.is_some() && !same_display_gate{return;}
+    let same_economic_binding=world.get_resource::<NativeNpcEconomySource>().is_some_and(|source|
+        source.reset_revision==reset && source.scene_revision==scene && source.binding==bundle.binding && source.gate.same_gate(&bundle.gate));
+    if !same_display_gate && !same_economic_binding{return;}
+    if !same_display_gate && checkpoint.gate.as_ref().is_some_and(|gate|!gate.active.lock().is_ok_and(|active|*active)){return;}
+    let Some(current)=world.get_resource::<HeroModel>().filter(|model|model.session_epoch!=0 && model.session_epoch!=u64::MAX) else{return;};
+    incoming.session_epoch=current.session_epoch;
+    incoming.hero_generation=current.hero_generation;
+    incoming.revision=current.revision.saturating_add(1);
+}
+
 pub(crate) fn clear_native_npc_economy_source(world: &mut World) {
-    if let Some(source) = world.remove_resource::<NativeNpcEconomySource>() { source.gate.retire(); }
+    let source=world.remove_resource::<NativeNpcEconomySource>();
+    let checkpoint=world.remove_resource::<NativeHeroOwnerCheckpoint>();
+    let had_source=source.is_some() || checkpoint.is_some();
+    if let Some(source)=source {source.gate.retire();}
+    if let Some(source)=checkpoint {if let Some(gate)=source.gate{gate.retire();}}
+    if had_source {if let Some(mut hero)=world.get_resource_mut::<HeroModel>() {
+        hero.snapshot_identity=None;hero.info=None;hero.base_stats=None;
+    }}
 }
 
 #[cfg(test)]
@@ -569,9 +1067,10 @@ pub(crate) mod tests {
             "cityCurrencies":{"bichon":0,"feitian":0},"playerCrystalStats":[],"playerPkPoints":0,
             "currentWeight":0,"playerWeights":null,"maxWeight":0,"freeBagSlots":40,"maxBagSlots":40,
             "npcGoldTradeCapacity":null,"storagePasswordLastSetBinaryDatetime":0,
-            "heroInventoryItems":[],"heroEquipmentItems":[],"heroInventoryCapacity":46,
+            "heroInventoryItems":[],"heroEquipmentItems":[],"heroInventoryCapacity":10,
             "heroStats":[],"heroVitals":null,"heroWeights":{"bag":0,"wear":0,"hand":0}
         }).as_object().unwrap().clone());
+        owner["heroMaxExperience"]=Value::Null;owner["nativeNpcShop"]=Value::Null;
         owner.as_object_mut().unwrap().extend(json!({
             "sceneView":null,"terrainPatches":[],"decorObjects":[],"groundDrops":[],"questLog":[],
             "activeNpcDialog":null,"npcScriptDiagnostics":[],"activeBuffs":[],"mapTransfers":[],"interactionHints":[],
@@ -613,8 +1112,8 @@ pub(crate) mod tests {
             storage_json:serde_json::to_string(&StorageModel { unlocked:true,..Default::default() }).unwrap(),
             shop_json:serde_json::to_string(&ShopModel::default()).unwrap(),
             skill_json:serde_json::to_string(&SkillModel::default()).unwrap(),
-            hero_json:serde_json::to_string(&HeroModel::default()).unwrap(),
-            social_json:serde_json::to_string(&SocialModel::default()).unwrap(),
+            hero_json:serde_json::to_string(&owner_hero_model(&owner).unwrap()).unwrap(),
+            social_json:serde_json::to_string(&owner_social_model(&owner).unwrap()).unwrap(),
         })
     }
     fn prepare(gate: &NativeNpcEconomyGate, witness: SnapshotWitness, p: NativeNpcEconomyProjection) -> NativeNpcEconomyBundle {
@@ -672,7 +1171,7 @@ pub(crate) mod tests {
         for key in ["playerObjectId","entities","playerHp","playerMaxHp","playerMp","playerMaxMp","gold","credit",
             "playerExperience","playerMaxExperience","inventoryCapacity","inventoryItems","beltItems","equipmentItems","storageItems",
             "knownSkills","storageSize","hasExpandedStorage","hasStoragePassword","requireStoragePassword","expandedStorageExpiryTimeBinaryDatetime",
-            "stage5Systems","cityCurrencies","heroInventoryItems","heroEquipmentItems","heroInventoryCapacity","heroStats","heroWeights","heroVitals",
+            "stage5Systems","cityCurrencies","heroInventoryItems","heroEquipmentItems","heroInventoryCapacity","heroStats","heroWeights","heroVitals","heroMaxExperience","nativeNpcShop",
             "playerCrystalStats","playerPkPoints","currentWeight","maxWeight","freeBagSlots","maxBagSlots","playerWeights","storagePasswordLastSetBinaryDatetime"] {
             let mut raw=owner.clone();raw.as_object_mut().unwrap().remove(key);
             let mut q=p.clone();q.owner_json=raw.to_string();assert!(gate.prepare(w,q).is_err(),"{key}");
@@ -799,6 +1298,123 @@ pub(crate) mod tests {
     }
 
     #[test]
+    fn native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond() {
+        let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
+        owner["stage5Systems"]["hero"]=json!({"name":"Hero","class":"Wizard","gender":"Female","level":9,"experience":77,
+            "behaviour":0,"spawned":true,"autoPot":false,"autoHpPercent":30,"autoMpPercent":40,"hpItemIndex":0,"mpItemIndex":0});
+        owner["heroMaxExperience"]=json!(200);owner["heroVitals"]=json!({"hp":20,"maxHp":30,"mp":10,"maxMp":15});
+        owner["heroInventoryItems"]=json!([source_item(22,3,"bag1",2,"hero potion")]);
+        owner["heroEquipmentItems"]=json!([source_item(23,8,"bag1",1,"hero ring")]);
+        p.owner_json=owner.to_string();p.hero_json=serde_json::to_string(&owner_hero_model(&owner).unwrap()).unwrap();
+        let mut world=World::new();assert!(apply_bundle(&mut world,prepare(&gate,w,p.clone())));
+        let hero=world.resource::<HeroModel>();assert!(hero.info.is_none());
+        assert_eq!(hero.snapshot_read_model().unwrap().player.experience,77);
+        assert_eq!(hero.snapshot_read_model().unwrap().player.max_experience,200);
+        assert_eq!(hero.inventory_view.items[1].slot,8);assert_eq!(hero.inventory_view.items[1].container,2);
+        for (field,changed) in [("snapshotIdentity",Value::Null),("spawned",json!(false)),("inventoryView",serde_json::to_value(InventoryModel::default()).unwrap()),
+            ("learnedKeys",Value::Null),("weights",Value::Null)] {
+            let mut q=p.clone();let mut hero:Value=serde_json::from_str(&q.hero_json).unwrap();hero[field]=changed;q.hero_json=hero.to_string();
+            assert_eq!(gate.prepare(w,q).unwrap_err(),NativeNpcEconomyError::Projection,"{field}");
+        }
+        assert_eq!(gate.try_recv_applied().unwrap().witness(),w);assert_eq!(gate.try_recv_applied(),None);
+    }
+
+    #[test]
+    fn native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond() {
+        let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
+        owner["stage5Systems"]["group"]["members"]=json!(["Alice","Bob"]);
+        owner["stage5Systems"]["guild"]["name"]=json!("Guild");owner["stage5Systems"]["guild"]["rank"]=json!("Leader");
+        owner["stage5Systems"]["guild"]["members"]=json!(["Alice"]);owner["stage5Systems"]["guild"]["storageGold"]=json!(123);
+        owner["inventoryItems"]=json!([source_item(22,0,"bag1",2,"potion")]);
+        owner["stage5Systems"]["trade"]=json!({"settlementNonce":"offer","partner":"Bob","offeredItems":["22"],"offeredSlots":{"8":0},
+            "offeredUniqueIds":{"8":22},"offeredGold":12,"heldGold":12,"offeredCurrency":"gold","accepted":false,"locked":true,"escrowPrepared":false,"completed":false});
+        p.owner_json=owner.to_string();p.inventory_json=serde_json::to_string(&InventoryModel{gold:90,items:vec![owner_item(&owner["inventoryItems"][0],0,0).unwrap()],..Default::default()}).unwrap();
+        p.social_json=serde_json::to_string(&owner_social_model(&owner).unwrap()).unwrap();
+        let mut world=World::new();assert!(apply_bundle(&mut world,prepare(&gate,w,p.clone())));
+        let social=world.resource::<SocialModel>();assert_eq!(social.guild.gold,123);assert_eq!(social.group.members.len(),2);
+        assert_eq!(social.trade.my_items[8].as_ref().unwrap().unique_id,Some(22));assert!(social.trade.my_items[0].is_none());
+        for field in ["group","guild","trade"] {
+            let mut q=p.clone();let mut social:Value=serde_json::from_str(&q.social_json).unwrap();social[field]=json!({});q.social_json=social.to_string();
+            assert_eq!(gate.prepare(w,q).unwrap_err(),NativeNpcEconomyError::Projection,"{field}");
+        }
+    }
+
+    #[test]
+    fn native_npc_economy_mail_content_flags_and_concrete_attachment_correspond() {
+        let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
+        let metadata=json!({"item_index":42,"awake_type":0,"awake_values":[],"refined_value":0,"refine_added":0,
+            "refine_success_chance":0,"wedding_ring":-1,"expire_info":null,"rental_information":null,"sealed_info":null,"slots":[],"is_shop_item":false,"gm_made":false});
+        let mut state=json!({"unique_id":0,"key":"potion","name":"Potion","quantity":3,"icon":7,"slot":0,"container":"bag1",
+            "description":"","durability_current":2,"durability_max":5,"weight":1});
+        for fields in [
+            json!({"equip_slot":null,"grade":"common","added_attack":0,"added_defence":0,"added_stats":[],"socketed":[],
+                "socket_slots":0,"soul_bound_id":null,"identified":true,"cursed":false,"gem_count":1}),
+            json!({"sealed_expiry_time_binary_datetime":0,"sealed_next_time_binary_datetime":0,"rental_binding_flags":0,
+                "rental_owner_name":"","rental_expiry_binary_datetime":0,"rental_locked":false,"attack":0,"defence":0,
+                "heal_hp":0,"heal_mp":0,"user_item_metadata":metadata}),
+        ] {
+            state.as_object_mut().unwrap().extend(fields.as_object().unwrap().clone());
+        }
+        owner["stage5Systems"]["mail"]=json!([{"id":3,"from":"Bank","to":"Alice","subject":"Payment","body":"Settled","gold":7,
+            "items":["potion"],"itemStatesJson":[state.to_string()],"opened":true,"locked":true,"claimed":false,"deleted":false}]);
+        p.owner_json=owner.to_string();p.mail_json=serde_json::to_string(&owner_mail_model(&owner).unwrap()).unwrap();
+        let mut world=World::new();assert!(apply_bundle(&mut world,prepare(&gate,w,p.clone())));
+        let mail=&world.resource::<MailModel>().mails[0];assert_eq!(mail.body,"Payment\nSettled");assert_eq!(mail.items[0].unique_id,Some(0));assert_eq!(mail.items[0].count,3);
+        for (field,changed) in [("sender",json!("Fake")),("subject",json!("Fake")),("body",json!("Fake")),("claimed",json!(true)),("locked",json!(false)),("read",json!(false))] {
+            let mut q=p.clone();let mut mail:Value=serde_json::from_str(&q.mail_json).unwrap();mail["mails"][0][field]=changed;q.mail_json=mail.to_string();
+            assert_eq!(gate.prepare(w,q).unwrap_err(),NativeNpcEconomyError::Projection,"{field}");
+        }
+        let mut mail:Value=serde_json::from_str(&p.mail_json).unwrap();mail["mails"][0]["items"][0]["count"]=json!(2);p.mail_json=mail.to_string();
+        assert_eq!(gate.prepare(w,p).unwrap_err(),NativeNpcEconomyError::Projection);
+    }
+
+    #[test]
+    fn native_npc_economy_partial_tooltip_cannot_default_into_source_authority() {
+        let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
+        let mut item=source_item(22,0,"bag1",2,"potion");item["tooltipSource"]=json!({"info":{"item_index":42}});
+        owner["inventoryItems"]=json!([item]);p.owner_json=owner.to_string();
+        p.inventory_json=serde_json::to_string(&InventoryModel{gold:90,items:vec![ItemModel{unique_id:Some(22),key:"22".into(),name:"potion".into(),quantity:2,
+            grade:Some("common".into()),..Default::default()}],..Default::default()}).unwrap();
+        assert_eq!(gate.prepare(w,p).unwrap_err(),NativeNpcEconomyError::Incomplete);assert_eq!(gate.try_recv_applied(),None);
+    }
+
+    #[cfg(feature="native-npc-economy")]
+    #[test]
+    fn native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond() {
+        let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
+        let user=mir2_client_bevy::inventory::CrystalUserItemModel{unique_id:u64::MAX,item_index:658,count:3,is_shop_item:false,..Default::default()};
+        owner["nativeNpcShop"]=json!({"npcObjectId":4990,"scriptKey":"BichonProvince/NaturalCave/WickedTrader","service":"BUYBACK",
+            "packetType":"NPCGoods","list":[user],"rate":1.337_f32,"panelType":0,"hideAddedStats":false});
+        p.owner_json=owner.to_string();p.shop_json=serde_json::to_string(&owner_shop_catalog(&owner).unwrap()).unwrap();
+        let mut world=World::new();assert!(apply_bundle(&mut world,prepare(&gate,w,p.clone())));
+        let good=&world.resource::<ShopModel>().goods[0];assert_eq!(good.unique_id,u64::MAX);assert_eq!(good.stock,3);assert_eq!(good.purchase_rate,None);
+        assert_eq!(good.name,mir2_game_data::crystal_item_by_index(658).unwrap().name);
+        for (field,changed) in [("price",json!(0)),("name",json!("Fake")),("stock",json!(-1)),("use_pearls",json!(true)),("count",json!(2))] {
+            let mut q=p.clone();let mut shop:Value=serde_json::from_str(&q.shop_json).unwrap();shop["goods"][0][field]=changed;q.shop_json=shop.to_string();
+            assert_eq!(gate.prepare(w,q).unwrap_err(),NativeNpcEconomyError::Projection,"{field}");
+        }
+        let mut shop:Value=serde_json::from_str(&p.shop_json).unwrap();shop["goods"][0]["tooltip_source"]["userItem"]["current_dura"]=json!(123);
+        p.shop_json=shop.to_string();assert_eq!(gate.prepare(w,p).unwrap_err(),NativeNpcEconomyError::Projection);
+    }
+
+    #[cfg(feature="native-npc-economy")]
+    #[test]
+    fn native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced() {
+        let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
+        let user=mir2_client_bevy::inventory::CrystalUserItemModel{unique_id:0,item_index:658,count:2,..Default::default()};
+        let raw_user=serde_json::to_value(user).unwrap();let tooltip=shop_tooltip(&owner,&raw_user).unwrap();
+        let mut item=source_item(0,0,"bag1",2,"potion");item["tooltipSource"]=serde_json::to_value(&tooltip).unwrap();
+        owner["inventoryItems"]=json!([item]);p.owner_json=owner.to_string();
+        p.inventory_json=serde_json::to_string(&InventoryModel{gold:90,items:vec![owner_item(&owner["inventoryItems"][0],0,0).unwrap()],..Default::default()}).unwrap();
+        assert!(gate.prepare(w,p.clone()).is_ok());
+        for field in ["info","realInfo","userItem"] {
+            let mut q=p.clone();let mut inventory:Value=serde_json::from_str(&q.inventory_json).unwrap();
+            inventory["items"][0]["tooltipSource"][field]=Value::Null;q.inventory_json=inventory.to_string();
+            assert!(gate.prepare(w,q).is_err(),"{field}");
+        }
+    }
+
+    #[test]
     fn native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate() {
         let (gate,w,p)=fixture();let mut world=World::new();assert!(apply_bundle(&mut world,prepare(&gate,w,p.clone())));
         assert!(!apply_bundle(&mut world,prepare(&gate,SnapshotWitness{server_revision:6,..w},p.clone())));
@@ -880,6 +1496,44 @@ pub(crate) mod tests {
     }
 
     #[test]
+    fn native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime() {
+        let epoch=NativeHeroOwnerEpoch{run:1,connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:3,map:0};
+        for boundary in ["other-gate","retired","scene","session"] {
+            let (gate,w,projection)=fixture();let owner:Value=serde_json::from_str(&projection.owner_json).unwrap();
+            let display_gate=NativeHeroOwnerGate::new(epoch).unwrap();let mut world=World::new();
+            world.insert_resource(HeroModel{session_epoch:41,hero_generation:3,revision:6,..Default::default()});
+            assert!(apply_native_hero_owner_update(&mut world,display_gate.prepare(&owner).unwrap()));
+            if boundary=="other-gate" {
+                let prior=prepare(&gate,w,projection.clone()).with_hero_owner_gate(&display_gate).unwrap();
+                assert!(apply_native_npc_economy_bundle(&mut world,prior));gate.try_recv_applied().unwrap();
+            }
+            let other=NativeHeroOwnerGate::new(NativeHeroOwnerEpoch{connection:2,..epoch}).unwrap();
+            let chosen=if boundary=="other-gate"{&other}else{&display_gate};
+            let bundle=prepare(&gate,w,projection).with_hero_owner_gate(chosen).unwrap();
+            match boundary {
+                "retired"=>display_gate.retire(),
+                "scene"=>{world.insert_resource(crate::SceneResetRevision(1));},
+                "session"=>{world.insert_resource(mir2_client_bevy::pending_operations::SessionResetRevision(1));},
+                _=>{},
+            }
+            let applied=apply_native_npc_economy_bundle(&mut world,bundle);
+            if boundary=="retired" {
+                assert!(!applied);assert_eq!(world.resource::<HeroModel>().session_epoch,41);assert!(gate.try_recv_applied().is_none());
+            }else{
+                assert!(applied);assert_eq!(world.resource::<HeroModel>().session_epoch,0,"{boundary}");
+            }
+        }
+        // Once a complete source exists, the same exact economic binding is
+        // another safe presentation lineage without any display-token borrow.
+        let (gate,w,projection)=fixture();let mut explicit=projection.clone();
+        let mut hero:Value=serde_json::from_str(&explicit.hero_json).unwrap();hero["sessionEpoch"]=11.into();hero["heroGeneration"]=3.into();
+        explicit.hero_json=hero.to_string();let mut world=World::new();
+        assert!(apply_native_npc_economy_bundle(&mut world,prepare(&gate,w,explicit)));
+        assert!(apply_native_npc_economy_bundle(&mut world,prepare(&gate,w,projection)));
+        assert_eq!((world.resource::<HeroModel>().session_epoch,world.resource::<HeroModel>().hero_generation),(11,3));
+    }
+
+    #[test]
     fn native_npc_economy_same_revision_refine_clock_refresh_retains_original_source() {
         let (gate,w,p)=fixture();let mut world=World::new();
         assert!(apply_bundle(&mut world,prepare(&gate,w,p.clone())));
@@ -929,8 +1583,7 @@ pub(crate) mod tests {
         economic_conflict(|p,owner| {
             owner["stage5Systems"]["mail"]=json!([{"id":3,"from":"Bank","to":"Alice","subject":"Payment","body":"Settled",
                 "gold":7,"items":[],"itemStatesJson":[],"opened":false,"locked":false,"claimed":false,"deleted":false}]);
-            p.mail_json=serde_json::to_string(&MailModel { mails:vec![mir2_client_bevy::mail::MailMessage {
-                id:3,gold:7,sender:"Bank".into(),..Default::default() }],selected_id:None }).unwrap();
+            p.mail_json=serde_json::to_string(&owner_mail_model(owner).unwrap()).unwrap();
         });
     }
 

@@ -5,7 +5,7 @@ import ts from "typescript";
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
-const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "equipment-gateway-adapter", "mail-parcel-gateway-adapter", "storage-gateway-adapter", "social-window-operations", "social-incoming-replies", "storage-rental-confirmation"]);
+const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "equipment-gateway-adapter", "mail-parcel-gateway-adapter", "storage-gateway-adapter", "social-window-operations", "social-incoming-replies", "storage-rental-confirmation", "bag-belt-gesture", "npc-purchase-client", "bag-belt-move-dispatcher", "npc-repair-service"]);
 function load(name, fresh = false) {
   assert.ok(pureModules.has(name), "unexpected non-pure import: " + name);
   if (!fresh && cache.has(name)) return cache.get(name);
@@ -28,7 +28,7 @@ function world() {
     inventoryItems: [worldItem("bag2", 4, 0)], beltItems: [], equipmentItems: [],
     storageItems: [worldItem("storage", 3, 7)], storageSize: 160,
     hasStoragePassword: false, storageSessionUnlocked: true, hasExpandedStorage: false,
-    expandedStorageExpiryTimeBinaryDatetime: 639028224000000000 };
+    expandedStorageExpiryTimeBinaryDatetime: 1000 };
 }
 function fixture(overrides = {}) {
   let now = 100, status = null, sink = null, state = null, host, behavior = () => false;
@@ -101,7 +101,17 @@ function functions(relative, names, scope) {
   function visit(n) {
     if (ts.isFunctionDeclaration(n) && names.includes(n.name?.text)) {
       assert.equal(found.has(n.name.text), false, "ambiguous source function " + n.name.text);
-      found.set(n.name.text, n.getText(ast));
+      // Execute selected declarations as a script, preserving their original
+      // function bodies. Module-only export/default tokens cannot enter Function.
+      let declaration = n.getText(ast);
+      const start = n.getStart(ast);
+      const moduleModifiers = (n.modifiers ?? []).filter(modifier =>
+        modifier.kind === ts.SyntaxKind.ExportKeyword || modifier.kind === ts.SyntaxKind.DefaultKeyword);
+      for (const modifier of [...moduleModifiers].sort((a, b) => b.getStart(ast) - a.getStart(ast))) {
+        declaration = declaration.slice(0, modifier.getStart(ast) - start)
+          + declaration.slice(modifier.getEnd() - start);
+      }
+      found.set(n.name.text, declaration);
     }
     ts.forEachChild(n, visit);
   }
@@ -130,6 +140,12 @@ function pageFixture() {
   const owner = f.owners.at(-1);
   const scope = {
     heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
+    npcPearlSendEpochRef: { current: 0 },
+    bagBeltMovesRef: { current: new (load("bag-belt-move-dispatcher").BagBeltMoveDispatcher)() },
+    bagBeltInventoryReadyRef: { current: null },
+    npcRepairAuthorityRef: { current: new (load("npc-repair-service").NpcRepairService)() },
+    worldFishingActiveGestureRef: { current: null }, worldFishingQueuedRef: { current: null },
+    worldFishingGestureRegistryRef: { current: new Map() },
     worldRef: { current: { ...world(), connected: true, playerObjectId: "3", mapFileName: "D001", requireStoragePassword: false } },
     equipmentBagOwnerRef: { current: { ...owner, connectionGeneration: 3, sessionGeneration: 5 } },
     equipmentConnectionGenerationRef: { current: 3 }, equipmentSessionGenerationRef: { current: 5 },
@@ -162,11 +178,13 @@ function pageFixture() {
     setStorageServiceOpenVersion: value => { values.serviceVersion = value; },
     setBagCompatibilityMode: value => { values.bagCompatibility = value; },
   };
+  Object.assign(scope, functions("lib/client-login-runtime.ts", ["preauthCommandKind", "isSensitiveGatewayCommand"], scope));
   const names = ["currentEquipmentOwner", "itemCommandRequiresOwner", "send", "sendRaw", "submitStorageTransfer",
     "endStorageService", "requestBagCompatibility", "storageIntentMatchesCommand", "dispatchBevyStorageIntent",
     "socialItemMutationAllowed", "parityItemMutationAllowed", "currentSpellsOwner", "currentSocialReplyOwner", "currentStorageRentalFacts",
     "closeStorageRentalUi", "cancelStorageRental", "confirmStorageRental",
-    "isMovementCommand", "isCombatResolutionCommand", "isMovementPredictionBlockingCommand"];
+    "isMovementCommand", "isCombatResolutionCommand", "isMovementPredictionBlockingCommand",
+    "retireWorldFishingGesture", "cancelWorldFishingGesture"];
   const api = functions("app/page.tsx", names, scope);
   f.behavior = api.dispatchBevyStorageIntent;
   return { f, scope, api, sent, values, logs, yields,
@@ -373,7 +391,8 @@ test("actual Page service lifecycle requests only Storage until close then reque
 function shellStorageFixture() {
   const text = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
   const ast = ts.createSourceFile("shell.tsx", text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const names = ["scenePointFromMouseEvent", "beginCombatUiHold", "endCombatUiHold", "cancelSharedStoragePointer", "handleSharedStoragePointer"];
+  const names = ["scenePointFromMouseEvent", "beginCombatUiHold", "endCombatUiHold", "cancelSharedStoragePointer", "handleSharedStoragePointer",
+    "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"];
   const declarations = [];
   function visit(node) {
     if (ts.isFunctionDeclaration(node) && names.includes(node.name?.text)) declarations.push(node.getText(ast));
@@ -389,6 +408,7 @@ function shellStorageFixture() {
       onBevyStoragePointer(edge) { const accepted = f.host.pointer(edge); hook?.(edge); return accepted; } } },
     stageFrameRef: { current: { focus() {}, getBoundingClientRect: () => ({ left: 0, top: 0, width: 1024, height: 768 }) } },
     stagePresentation: { virtualWidth: 1024, virtualHeight: 768 }, heldScenePointerRef: { current: null },
+    worldFishingPhysicalRef: { current: null }, worldFishingTerminalRef: { current: null },
     onViewportDirectionStop() { stops++; }, stopHeldScenePointer() { scope.heldScenePointerRef.current = null; stops++; },
     sceneInteractionReady: true, questLocalModalOpen: false, mobileMoreOpen: false, bevyQuestUiCapturesPointer: false,
     bevyStorageUiActive: true, bevyStorageUiTransitioning: false,
@@ -484,10 +504,13 @@ test("actual Shell keyboard effects include storage transitions in their depende
 });
 
 test("actual Shell window blur/resize/unmount withdraw Storage and remove its own terminal listeners", () => {
-  const calls = [], listeners = new Map();
+  const calls = [], listeners = new Map(), documentListeners = new Map();
   const scope = { window: {
     addEventListener(type, fn, capture) { assert.equal(listeners.has(type), false); listeners.set(type, { fn, capture }); },
     removeEventListener(type, fn, capture) { assert.equal(listeners.get(type)?.fn, fn); assert.equal(listeners.get(type)?.capture, capture); listeners.delete(type); },
+  }, document: { visibilityState: "visible",
+    addEventListener(type, fn, capture) { assert.equal(documentListeners.has(type), false); documentListeners.set(type, { fn, capture }); },
+    removeEventListener(type, fn, capture) { assert.equal(documentListeners.get(type)?.fn, fn); assert.equal(documentListeners.get(type)?.capture, capture); documentListeners.delete(type); },
   }, sharedBagPointerHandlerRef: { current: (event, phase) => calls.push(["terminal", phase, event]) },
     cancelSharedStoragePointer: phase => calls.push(["storage", phase ?? "cancel"]),
     heldQuestControlPointersRef: { current: new Set() } };
@@ -495,14 +518,29 @@ test("actual Shell window blur/resize/unmount withdraw Storage and remove its ow
   scope.npcShopPointerCallbacksRef = { current: {} };
   scope.combatUiHoldRef = { current: new Map() };
   scope.heldScenePointerRef = { current: null };
-  Object.assign(scope, functions("app/original-client-shell.tsx", ["cancelSharedNpcShopPointer"], scope));
+  scope.onCombatUiHeld = undefined;
+  scope.bagBeltPointerRef = { current: null }; scope.bagBeltArmedSharedRef = { current: null };
+  scope.bagBeltQuarantineRef = { current: new Map() }; scope.bagBeltClickFenceRef = { current: new Map() };
+  scope.bagBeltButtonsRef = { current: null }; scope.bagBeltGeometryRef = { current: null };
+  scope.bagBeltCallbacksRef = { current: {} };
+  scope.npcRepairPointerRef = { current: null }; scope.npcRepairQuarantineRef = { current: new Map() };
+  scope.npcRepairClickFenceRef = { current: new Map() };
+  scope.worldFishingPhysicalRef = { current: null }; scope.worldFishingTerminalRef = { current: null };
+  Object.assign(scope, functions("app/original-client-shell.tsx", ["cancelSharedNpcShopPointer", "cancelBagBeltPointer", "cancelNpcRepairPointer",
+    "endCombatUiHold", "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"], scope));
   for (const name of ["Compose", "Mail", "Spells", "Character", "Bag", "Hud"]) scope["cancelShared" + name + "Pointer"] = () => {};
-  const cleanup = effect("app/original-client-shell.tsx", "useEffect", 'window.addEventListener("pointerup", up, true)', scope)();
-  assert.equal(listeners.size, 4);
+  const cleanup = effect("app/original-client-shell.tsx", "useEffect", 'cancelSharedStoragePointer("blur")', scope)();
+  assert.equal(listeners.size, 8);
+  assert.deepEqual([...listeners.keys()], ["pointerdown", "click", "mousedown", "pointerup", "pointercancel", "blur", "resize", "pagehide"]);
+  for (const [type, listener] of listeners) assert.equal(listener.capture,
+    ["pointerdown", "click", "mousedown", "pointerup", "pointercancel"].includes(type) ? true : undefined, type);
+  assert.equal(documentListeners.size, 1); assert.deepEqual([...documentListeners.keys()], ["visibilitychange"]);
+  assert.equal(documentListeners.get("visibilitychange").capture, undefined);
   listeners.get("blur").fn(); listeners.get("resize").fn();
   const event = { pointerId: 1 }; listeners.get("pointerup").fn(event);
   assert.deepEqual(calls, [["storage", "blur"], ["storage", "cancel"], ["terminal", "up", event]]);
-  cleanup(); assert.equal(listeners.size, 0); assert.deepEqual(calls.at(-1), ["storage", "cancel"]);
+  cleanup(); assert.equal(listeners.size, 0); assert.equal(documentListeners.size, 0);
+  assert.deepEqual(calls.at(-1), ["storage", "cancel"]);
 });
 
 test("actual Shell layout owner/geometry replacement cancels Storage before clearing world holds", () => {
@@ -512,7 +550,13 @@ test("actual Shell layout owner/geometry replacement cancels Storage before clea
   scope.npcShopPointerRouterRef = { current: { held: null, cancel: () => null } };
   scope.npcShopPointerCallbacksRef = { current: {} };
   scope.combatUiHoldRef = { current: new Map() };
-  Object.assign(scope, functions("app/original-client-shell.tsx", ["cancelSharedNpcShopPointer"], scope));
+  scope.onCombatUiHeld = undefined;
+  scope.bagBeltPointerRef = { current: null }; scope.bagBeltArmedSharedRef = { current: null };
+  scope.bagBeltQuarantineRef = { current: new Map() };
+  scope.npcRepairPointerRef = { current: null }; scope.npcRepairQuarantineRef = { current: new Map() };
+  scope.worldFishingPhysicalRef = { current: null }; scope.worldFishingTerminalRef = { current: null };
+  Object.assign(scope, functions("app/original-client-shell.tsx", ["cancelSharedNpcShopPointer", "cancelBagBeltPointer", "cancelNpcRepairPointer",
+    "endCombatUiHold", "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"], scope));
   for (const name of ["Compose", "Mail", "Hud", "Character", "Spells", "Bag"]) scope["cancelShared" + name + "Pointer"] = () => calls.push(name);
   effect("app/original-client-shell.tsx", "useLayoutEffect", "if (bevyBagOwnerRevision === 0", scope)();
   assert.equal(calls[0], "storage"); assert.equal(calls.at(-1), "stop"); assert.equal(scope.heldScenePointerRef.current, null);
@@ -567,6 +611,29 @@ test("actual Storage hook obsolete cleanup leaves the replacement sink/host/owne
   cleanupNew(); assert.equal(h.refs[1].current, null); assert.equal(f.sink, null); assert.equal(owners.length, ownerCount);
 });
 
+
+test("Source31 storage integration safe expiry preserves custody and wide or unsafe date carriers fail closed", () => {
+  const projected = projection.projectBevyStorageModel(world());
+  assert.equal(projected.ok, true);
+  assert.equal(projected.storage.expiry, 1000);
+  assert.equal(storage.validStorageModel(projected.inventory, projected.storage), true);
+  const current = fixture(); current.activate();
+  assert.equal(current.state.active, true);
+  assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
+  // The former unsafe Number fixture was invalid exact-source evidence.
+  // Preserve the original controller chain with safe input and explicitly
+  // reject both exact wide text and numbers whose source may be rounded.
+  for (const expiry of ["639028224000000001", "-9223372036854775808", "9223372036854775807",
+    639028224000000000, Number("639028224000000001")]) {
+    const input = { ...world(), expandedStorageExpiryTimeBinaryDatetime: expiry };
+    const rejected = projection.projectBevyStorageModel(input);
+    assert.equal(rejected.ok, false, String(expiry));
+    assert.deepEqual(rejected.error, { code: "invalidField", field: "storage" });
+    assert.equal(input.expandedStorageExpiryTimeBinaryDatetime, expiry);
+  }
+  assert.equal(current.state.active, true);
+  assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
+});
 
 test("actual Shell arming shortcut listener swallows combat/item keys before their callbacks", () => {
   for (const [active, transitioning] of [[true, false], [false, true]]) {

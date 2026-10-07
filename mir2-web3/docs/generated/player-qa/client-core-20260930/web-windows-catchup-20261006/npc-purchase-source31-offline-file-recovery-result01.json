@@ -1,0 +1,3016 @@
+{
+  "owner": "Root",
+  "kind": "Actual complete ordinary locked dependency file recovery",
+  "generatedAtUtc": "2026-10-07T17:01:49.780Z",
+  "source": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-list-snapshot01.json",
+    "bytes": 45099,
+    "sha256": "0a0944f6ebd5802d5169c470639410d9749fc31b153762ee626808d4bec8acfd"
+  },
+  "inventory": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-inventory01.json",
+    "bytes": 2371021,
+    "sha256": "33e52397a57e614a43000076b62e4c437e96c21e935a757626cf89a007baa999"
+  },
+  "review": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-review01.json",
+    "bytes": 83979,
+    "sha256": "4cfa9c7e4b66ad17409e6743d612e2ada7b95543ffcc18f5bf7020e7fb8122b4"
+  },
+  "actualRecoveredPackages": 104,
+  "actualVerifiedRegularFiles": 15209,
+  "actualBytes": 380580501,
+  "actualDirectories": 1774,
+  "symlinksOrExtraFiles": 0,
+  "compilerVersion": "5.9.3",
+  "completeCompilerFileCount": 132,
+  "preservedCompilerRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-source31-preserved-official-typescript592-01",
+  "packages": [
+    {
+      "relative": "node_modules/@0no-co/graphql.web",
+      "name": "@0no-co/graphql.web",
+      "version": "1.2.0",
+      "archive": {
+        "relative": "node_modules/@0no-co/graphql.web",
+        "version": "1.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\ff\\58\\87cbd4d3afade013561c47989d8f1f14444cf5b3490587275fddb04b097caa8e190873a8a00334cec77ccf89f0b0151f3bb6c87fe0f6bd70db6ce9dda8b7",
+        "archiveBytes": 24793,
+        "integrity": "sha512-/1iHy9TTr63gE1YcR5idjx8UREz1s0kFhydf3bBLCXyqjhkIc6igAzTOx3zPifCwFR87tsh/4Pa9cNts6d2otw==",
+        "archiveSha256": "fbe1c7f9900a4919696c01a15835fba534fd98502d5f92d9b4e4c96e5e586f3b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract001.config.json",
+          "bytes": 2958,
+          "sha256": "311fab9a8467a680018c5804a5fd67c3726be9a51e64178a0a8b07e1df3b0c26"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract001.outer.json",
+          "bytes": 569,
+          "sha256": "a2e7fe9eaf92bf058b9cf2f282b83a3c6a68779b5ae0086050fb91d4205b4c3e"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@0no-co/graphqlsp",
+      "name": "@0no-co/graphqlsp",
+      "version": "1.15.4",
+      "archive": {
+        "relative": "node_modules/@0no-co/graphqlsp",
+        "version": "1.15.4",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\36\\dd\\43547719d3c94a44ac21894d1a9971fbedf49dacee83cf28cb1340e40b17db33f375480b37d9defacb5c6d0b33391fd793d220d2ed2764b20457589bb4e6",
+        "archiveBytes": 349480,
+        "integrity": "sha512-Nt1DVHcZ08lKRKwhiU0amXH77fSdrO6DzyjLE0DkCxfbM/N1SAs32d76y1xtCzM5H9eT0iDS7SdksgRXWJu05g==",
+        "archiveSha256": "7ae5123dae8eca5e9199b3d5a6b6e13f1c8745e55b176a5e75c78e7c0cb3fb49",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 19,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract002.config.json",
+          "bytes": 2956,
+          "sha256": "310a212b213d8773b3986e56ae2ddcf0b2587a06cc2f39760cb56554c6ba21da"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract002.outer.json",
+          "bytes": 567,
+          "sha256": "ee004b03d1c02a2c83e5df22fc1188e2b331f912020369a3e2a55d5ff814d027"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/crc32",
+      "name": "@aws-crypto/crc32",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/crc32",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\9c\\b6\\c25aa40d8148b0c2d16c7a7d4077302dbee2d1b104bcad880cbb10ab74a7fd90eb2c6a618bb8fc324d8f70c986e536bf7ed5733cbface80d33cf48878036",
+        "archiveBytes": 12423,
+        "integrity": "sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==",
+        "archiveSha256": "ed68c3f0af61d392546cae651a34469124aa1f446e405e5e7009668ae41d547d",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 20,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract003.config.json",
+          "bytes": 2956,
+          "sha256": "630a8ab8280fcf341b5a6657f9079ed225a6ff369fe68822f212528adc3e999c"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract003.outer.json",
+          "bytes": 567,
+          "sha256": "28f746e950423fd3ff4706113a9c1c9cd61aecde82b4b27dc1a825ff68196804"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/crc32c",
+      "name": "@aws-crypto/crc32c",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/crc32c",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\fa\\25\\9bf2a6872d82ab36f1916e26111d274a45686da395e5654101c038d835ffa5cb9495606eb3128608771bdfe51df3c9e3f5eb0e0f2c19f7ac7d7173be116a",
+        "archiveBytes": 10297,
+        "integrity": "sha512-+iWb8qaHLYKrNvGRbiYRHSdKRWhto5XlZUEBwDjYNf+ly5SVYG6zEoYIdxvf5R3zyeP16w4PLBn3rH1xc74Rag==",
+        "archiveSha256": "167243cc9b412d7dcdd44241459a028eece53c6f1a4d685ab2a223582c4645be",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 20,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract004.config.json",
+          "bytes": 2957,
+          "sha256": "dec9207f249951f2cfab260910465bc92d062daad2b1d8593d6be863c19d9375"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract004.outer.json",
+          "bytes": 568,
+          "sha256": "61a0faace5d34b9d9c7bdb3789852ce4d701808514aa68d3acead0bf905f7f1a"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/sha1-browser",
+      "name": "@aws-crypto/sha1-browser",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/sha1-browser",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\38\\7e\\a5bde0857dc0e35f875b02f0854985232598c3affdd7277c47b639f73a3e5bf518e88d0a3c9e9a0b780fdb37090e92b490d3082b1f35e4e2d0d1c462897a",
+        "archiveBytes": 10701,
+        "integrity": "sha512-OH6lveCFfcDjX4dbAvCFSYUjJZjDr/3XJ3xHtjn3Oj5b9RjojQo8npoLeA/bNwkOkrSQ0wgrHzXk4tDRxGKJeg==",
+        "archiveSha256": "e826b35562b3f15b98ac139708dfa7ff8977e94b4bb58e63288fdf836df3f1ea",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 41,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract005.config.json",
+          "bytes": 2963,
+          "sha256": "c5c706458decee489d0e271d343d5fe55de6e33e3990128a25722ce67dcda405"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract005.outer.json",
+          "bytes": 574,
+          "sha256": "88245cc4f4e8c17411f60c4a8941e5e7176a468b8826983200b6caf141a95b76"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/sha256-browser",
+      "name": "@aws-crypto/sha256-browser",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/sha256-browser",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\01\\77\\cdfe51a8b52430bba1cd704b08012a3b9165d9e47616bdf3a648d283b04a82e0e6ac853a7c6a54e66b3f85ed30b62f4f37485bf945d07ea94dd5b35919ab",
+        "archiveBytes": 11389,
+        "integrity": "sha512-AXfN/lGotSQwu6HNcEsIASo7kWXZ5HYWvfOmSNKDsEqC4OashTp8alTmaz+F7TC2L083SFv5RdB+qU3Vs1kZqw==",
+        "archiveSha256": "002434bc7804fca4ed59bac1e1d3cd4671fff7092549238d420486d4c81ec28d",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 41,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract006.config.json",
+          "bytes": 2965,
+          "sha256": "f48b0682ad3acc81518a294c8e8d929f4e04fa8893c15dbb71613981b2b98fe2"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract006.outer.json",
+          "bytes": 576,
+          "sha256": "a8094e3c339c6e45d5c33d0ae6b782654df30af1eb8511c5fbb885888c13728f"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/sha256-js",
+      "name": "@aws-crypto/sha256-js",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/sha256-js",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\14\\54\\10caeede76ee2e7ef219f8e69d1691c73adf9e49305a61a922e3873e6a48e0eea660f6839078b964efb17ab5262a8c30050a5ac7264f6d31fd07755c8ebc",
+        "archiveBytes": 25935,
+        "integrity": "sha512-FFQQyu7edu4ufvIZ+OadFpHHOt+eSTBaYaki44c+akjg7qZg9oOQeLlk77F6tSYqjDAFClrHJk9tMf0HdVyOvA==",
+        "archiveSha256": "5750638b4fb1e159e2a6eff84532d285511db49eeef2f698d6f8484d42e4a96a",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 41,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract007.config.json",
+          "bytes": 2960,
+          "sha256": "cd2c8d2735b5bc799af1a258d7bfaf2f9c66ca932e88462cd1540a22b6592282"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract007.outer.json",
+          "bytes": 571,
+          "sha256": "76a40cb365841e2e33e324840b94a1ba671c1da2de47eaa057d9b59d41b5dc82"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/supports-web-crypto",
+      "name": "@aws-crypto/supports-web-crypto",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/supports-web-crypto",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\88\\0b\\d4a2d9b4db590cdf778274d7f020dfff17beff2000c34ace7c8be30368ea85ad58d9a3d6c06a5d0d2bb1eead1b962cba45d622d7ee06d6ae31e37a8f9816",
+        "archiveBytes": 8132,
+        "integrity": "sha512-iAvUotm021kM33eCdNfwIN//F77/IADDSs58i+MDaOqFrVjZo9bAal0NK7HurRuWLLpF1iLX7gbWrjHjeo+YFg==",
+        "archiveSha256": "d40491cd07616550648f940dbadf9ec8313aa96ed1378d9c6d10c59f900c7db8",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 20,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract008.config.json",
+          "bytes": 2970,
+          "sha256": "840e6944c1894f07d5110307b3df05868dbe0ce062dd9da0fa28738ca1d4bc8b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract008.outer.json",
+          "bytes": 581,
+          "sha256": "90b28eb7a586a66fc4b1f9032d7b58ac06528d7daa346dcdb2553553d0040f36"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-crypto/util",
+      "name": "@aws-crypto/util",
+      "version": "5.2.0",
+      "archive": {
+        "relative": "node_modules/@aws-crypto/util",
+        "version": "5.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\e1\\19\\14f44b08e99a41bdee5fb1e42518d51628c6b544b3d0d5d9e39d0a1ed3b95d7c8cdcb066f9842e56d039bbbb8db7296cdac25ae96e35c1ad7084bfdcdacd",
+        "archiveBytes": 9241,
+        "integrity": "sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==",
+        "archiveSha256": "42aa9abd7adb5928b922e009433f46df0613a57f18bace8dbfb43cd1d0f772d3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 41,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract009.config.json",
+          "bytes": 2955,
+          "sha256": "6085d5af9af204edef15b533c0a88b37cb33c183d39ae3607ab2d256a56c1171"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract009.outer.json",
+          "bytes": 566,
+          "sha256": "6a4e6d43d103e4f142483284a44c4f75f8151c2b1b9b75709643382ae9200523"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/client-s3",
+      "name": "@aws-sdk/client-s3",
+      "version": "3.1055.0",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/client-s3",
+        "version": "3.1055.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\17\\15\\70bb0f3a736330e29fb4b4eb6813ed6c0d393e78e0590ff370c0afb0c31d601e474efc4612bf6df53bd03560cf073e352b234bd9fe13ffb337240711d6d0",
+        "archiveBytes": 387058,
+        "integrity": "sha512-FxVwuw86c2Mw4p+0tOtoE+1sDTk+eOBZD/NwwK+wwx1gHkdO/EYSv231O9A1YM8HPjUrI0vZ/hP/szckBxHW0A==",
+        "archiveSha256": "2da002aec24765c80a1534e699e3cc82219b02b4e4653ae8eb83c89f2040e87c",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 431,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract010.config.json",
+          "bytes": 2957,
+          "sha256": "a8f19fc9ad632e739c4f49668f033238c63ceac26c32f249169de8a0f5d497f0"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract010.outer.json",
+          "bytes": 569,
+          "sha256": "06f8a149930728bf3eff47d1ace545e2ed098ab754e3304a82c3839b33ec8c46"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/core",
+      "name": "@aws-sdk/core",
+      "version": "3.974.14",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/core",
+        "version": "3.974.14",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\a6\\96\\a69b4e2ea23de184d3b9225412b390faad65f57d6933727e9ae2966ba2393c63a39b63dc332c3753fc4ab782fe8ef6139e6e2f6d613341f1bf1f423f5727",
+        "archiveBytes": 116257,
+        "integrity": "sha512-ppamm04uoj3hhNO5IlQSs5D6rWX1fWkzcn6a4pZrojk8Y6ObY9wzLDdT/Eq3gv6O9hOebi9tYTNB8b8fQj9XJw==",
+        "archiveSha256": "44feb32ffbc7e5cd98d6a4edef9fc632625caeee9dabbdf6d73767adca17f47d",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 338,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract011.config.json",
+          "bytes": 2952,
+          "sha256": "4e5fc97e54ffa1fdab5a6e1e183199bbfd72c8d4516efd19d1a1af2f13ce18e9"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract011.outer.json",
+          "bytes": 564,
+          "sha256": "7b663f09ead930a98ae4195b96a0d1ab05d2b5f0bf221efe406343c15c95c3c4"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/crc64-nvme",
+      "name": "@aws-sdk/crc64-nvme",
+      "version": "3.972.9",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/crc64-nvme",
+        "version": "3.972.9",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\3f\\e4\\06a339979f6999648eec0e093e6949be45323ad4c3d2141f88af6be312311b12c1387bb858b73ac3bc0531672f64a3cd61e777b5d7e17f19896fc0391a39",
+        "archiveBytes": 6777,
+        "integrity": "sha512-P+QGozmXn2mZZI7sDgk+aUm+RTI61MPSFB+Ir2vjEjEbEsE4e7hYtzrDvAUxZy9ko81h53e11+F/GYlvwDkaOQ==",
+        "archiveSha256": "0026a16e7b88387f524ec74273a31559d41ae54a491c9abe00f07bdebc738d1d",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 13,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract012.config.json",
+          "bytes": 2958,
+          "sha256": "d2cd1cea190f09faaa6a38f14db72cb8f493677a6fe94bfbe01914c4bd9eb9e5"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract012.outer.json",
+          "bytes": 569,
+          "sha256": "68da2a631c3a90577ea4ca3fb5905e9ed20074975359e00cf0f01471db1fb77a"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-env",
+      "name": "@aws-sdk/credential-provider-env",
+      "version": "3.972.40",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-env",
+        "version": "3.972.40",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\8e\\34\\f4a7463b299b5cbc4c5888f08b267a8cf659170d5d4a04483fd77384d835efffd6dab7397224754a5049d134971c6343b64ae975ec4d6cbb7f0281d06119",
+        "archiveBytes": 6280,
+        "integrity": "sha512-jjT0p0Y7KZtcvExYiPCLJnqM9lkXDV1KBEg/13OE2DXv/9batzlyJHVKUEnRNJccY0O2Sul17E1su38CgdBhGQ==",
+        "archiveSha256": "d045d73221d54d642f6ed2e87c231d323d6e74dfc335d391de8ad92a003c46a6",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 10,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract013.config.json",
+          "bytes": 2971,
+          "sha256": "2e27fa7f102167bec5a2ed58593e5da58a7966cf736d23ebfcbc5523a82905e4"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract013.outer.json",
+          "bytes": 582,
+          "sha256": "a8499615943deaf0a086a35b852565e47a3529462bc62922dae45c49d52dcddd"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-http",
+      "name": "@aws-sdk/credential-provider-http",
+      "version": "3.972.42",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-http",
+        "version": "3.972.42",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\fb\\77\\ec2ad5b26dee418ca114037ff4ee887b0327ddf362040f6fa0cb26957d2ff83d4efc1374da390c5218e275b7b22679fa22770fe77bd400edaa57f3012726",
+        "archiveBytes": 5661,
+        "integrity": "sha512-+3fsKtWybe5BjKEUA3/07oh7Ayfd82IED2+gyyaVfS/4PU78E3TaOQxSGOJ1t7Imefoidw/ne9QA7apX8wEnJg==",
+        "archiveSha256": "0832641427dd73561437a0aaafde3ff1880eee588d4671a17160458bf080b765",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 33,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract014.config.json",
+          "bytes": 2972,
+          "sha256": "86f686f43da234407766cf23a25686f56752d92dfc765b80e421065614986275"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract014.outer.json",
+          "bytes": 583,
+          "sha256": "3e25f976e41b845533dd92a0ae96f304c72063ed935d5f65e35ca90b10199eec"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-ini",
+      "name": "@aws-sdk/credential-provider-ini",
+      "version": "3.972.44",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-ini",
+        "version": "3.972.44",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\81\\91\\70e7005e7c220f83dbe94fe815e457617cd2a161354365ad48b1909c9f7491a1850e27f134e6fc08a20909a289ea04bd2db411a2e6f86d857ef171e7a446",
+        "archiveBytes": 11399,
+        "integrity": "sha512-gZFw5wBefCIPg9vpT+gV5FdhfNKhYTVDZa1IsZCcn3SRoYUOJ/E05vwIogkJoonqBL0ttBGi5vhthX7xceekRg==",
+        "archiveSha256": "9b47e5e7077dec265b5272848f62468a909e568a5864c8a59e9e4c23af16e1a3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 34,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract015.config.json",
+          "bytes": 2971,
+          "sha256": "1f805f0652b3f1d84e99d0a23b22085f0bcafba1aad0ff2f9e4787dfa5cbc2c8"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract015.outer.json",
+          "bytes": 582,
+          "sha256": "603077356d89589c231792a31f32e2880517caf40dfb83117ea663f784bcda0a"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-login",
+      "name": "@aws-sdk/credential-provider-login",
+      "version": "3.972.44",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-login",
+        "version": "3.972.44",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\42\\a1\\061df41e660503aa1ef3a6a1ee7eb67c4fae3810b116bc1fb881475ec0bc91c3821117ee8226a790b915aab9c65d433a1078c87b7cd003f415b114074d8a",
+        "archiveBytes": 6372,
+        "integrity": "sha512-QqEGHfQeZgUDqh7zpqHufrZ8T644ELEWvB+4gUdewLyRw4IRF+6CJqeQuRWqucZdQzoQeMh7fNAD9BWxFAdNig==",
+        "archiveSha256": "978f4b7444871152e6c89e2e79ee5d9b4fd04a628f04803db666f43c30424dc7",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 15,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract016.config.json",
+          "bytes": 2973,
+          "sha256": "1b5a0b8d492a8a8b5d11423f7b86f27ac136a52573ebc9a81cd504542b86c500"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract016.outer.json",
+          "bytes": 584,
+          "sha256": "ec383cbcab4422b66f20d11b41cad8c9d221d033f3aae8339f0f7c2862327ce9"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-node",
+      "name": "@aws-sdk/credential-provider-node",
+      "version": "3.972.45",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-node",
+        "version": "3.972.45",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\dd\\80\\afe761315c8473dcb015372b1ebddfaceda912a60f5d977f6ff4b27b74e407face6b1e2de3319610cb1c0c9a097140632ecd845f434a355523f650e94847",
+        "archiveBytes": 9820,
+        "integrity": "sha512-3YCv52ExXIRz3LAVNysevd+s7akSpg9dl39v9LJ7dOQH+s5rHi3jMZYQyxwMmglxQGMuzYRfQ0o1VSP2UOlIRw==",
+        "archiveSha256": "0a6943a95418af1865bbfba05bc538d8b91bfbee4397444472890a741f9d9598",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 16,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract017.config.json",
+          "bytes": 2972,
+          "sha256": "03d8b97318a33dd74c01b6c2585c2ecf9936e758ac904d45fbf2351f23064546"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract017.outer.json",
+          "bytes": 583,
+          "sha256": "d18d5648d99b4149a02bfbe9883f42dd90220ae829d6ce8b86a6bc36c3e80835"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-process",
+      "name": "@aws-sdk/credential-provider-process",
+      "version": "3.972.40",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-process",
+        "version": "3.972.40",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\71\\76\\a8ce580908ec2613a0fbc789e970f77293b92215976b1a33770fab575ed22d24930d18f69f0df0099f861099c88ca281bf5fe6f463a453a9d555331dba8e",
+        "archiveBytes": 7166,
+        "integrity": "sha512-cXaozlgJCOwmE6D7x4npcPdyk7kiFZdrGjN3D6tXXtItJJMNGPafDfAJn4YQmciMooG/X+b0Y6RTqdVVMx26jg==",
+        "archiveSha256": "8cffd476c3c354c6402f8c6438f31d406f7b693ce7a4e8184645708012dc7f53",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 19,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract018.config.json",
+          "bytes": 2975,
+          "sha256": "d74cd2a1e1dd26d7e7f5eaa7de32bdfa9dcf6b446a17afca6f9d1085c32decb1"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract018.outer.json",
+          "bytes": 586,
+          "sha256": "2286da5490fa21521b7a4dfe2976bfb058c6f493cc73318998f5d65949274613"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-sso",
+      "name": "@aws-sdk/credential-provider-sso",
+      "version": "3.972.44",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-sso",
+        "version": "3.972.44",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\61\\e3\\e88f9910b8f984d0c1e7c9fb5709fb0ef19481776903af9d1710852b75e8d26c61656b262f52e0a885d6fc76b84684f9ba6fae68ec7d5e0b6e84661c14bc",
+        "archiveBytes": 9167,
+        "integrity": "sha512-YePoj5kQuPmE0MHnyftXCfsO8ZSBd2kDr50XEIUrdejSbGFlayYvUuCohdb8drhGhPm6b65o7H1eC26EZhwUvA==",
+        "archiveSha256": "555035f0044c6233ba79f618be9705165f6165de4e79790bd6df82dcc7f98ef4",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 26,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract019.config.json",
+          "bytes": 2971,
+          "sha256": "607f8bce7759b2c08b8603ea91bf5f9b9f34ba7ac1f71034ac3f453d486eb0bb"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract019.outer.json",
+          "bytes": 582,
+          "sha256": "94554394bef631837cac60f35b35f5465fa4f02a3218105ad25fb4bb1c94fab3"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/credential-provider-web-identity",
+      "name": "@aws-sdk/credential-provider-web-identity",
+      "version": "3.972.44",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/credential-provider-web-identity",
+        "version": "3.972.44",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\62\\cf\\c925efbef19d98e66791d6d68c05a55cac6040d3f5ec553411faa38a65b74dca0fbc265bf9ad8652c21f12a841d8d3482848e672ecf1f3676acb350c432e",
+        "archiveBytes": 9437,
+        "integrity": "sha512-Ys/JJe++8Z2Y5meR1taMBaVcrGBA0/XsVTQR+qOKZbdNyg+8Jlv5rYZSwh8SqEHY00goSOZy7PHzZ2rLNQxDLg==",
+        "archiveSha256": "81fdd6821dfcc1c6e367119eea41ab064ddfd32e011f0ec0d36d77db67fb2343",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 15,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract020.config.json",
+          "bytes": 2980,
+          "sha256": "92729cab43545b9decc53f662d7c71ec97d2857c1a6ef9c9556b7ca865f7dc54"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract020.outer.json",
+          "bytes": 591,
+          "sha256": "fdaffb19f03a016aee5a202c99100d41f0ab0505c9cd3c871fbd832126fdf958"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/middleware-bucket-endpoint",
+      "name": "@aws-sdk/middleware-bucket-endpoint",
+      "version": "3.972.16",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/middleware-bucket-endpoint",
+        "version": "3.972.16",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\16\\16\\ac31304306630dec411ad6151e1f0a39a7932fdc39bcc345446dd5d7ffaa256bfbb2851b89b7ccc6907d3d98b4e669bdb45124f31293eacaa1287b532a36",
+        "archiveBytes": 12174,
+        "integrity": "sha512-FhasMTBDBmMN7EEa1hUeHwo5p5Mv3Dm8w0VEbdXX/6ola/uyhRuJt8zGkH09mLTmab20USTzEpPqyqEoe1MqNg==",
+        "archiveSha256": "405bf9a640c442017f5692ac46864fe54a6e72d2f466f215b040051e53dab4a4",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 25,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract021.config.json",
+          "bytes": 2974,
+          "sha256": "3559bfcbe51bb94d7e47529e6c6ded5b27f3278994fec27360865e747dd14e5e"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract021.outer.json",
+          "bytes": 585,
+          "sha256": "89116021d6ce2d70d419ce2aeac5f376b0d2b0ec8eca29fd357e5a98eb32526b"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/middleware-expect-continue",
+      "name": "@aws-sdk/middleware-expect-continue",
+      "version": "3.972.13",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/middleware-expect-continue",
+        "version": "3.972.13",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\b0\\78\\aa20583ca368a94fbb78d01f3d563d2e6d252d63a392b7ff847bf397847721e4ae3ef35ccfdbe417f0b91cfe7276412982c92c4e91eed311b997ebd7deda",
+        "archiveBytes": 5881,
+        "integrity": "sha512-sHiqIFg8o2ipT7t40B89Vj0ubSUtY6OSt/+Ee/OXhHch5K4+81zP2+QX8Lkc/nJ2QSmCySxOke7TEbmX69fe2g==",
+        "archiveSha256": "ecd1925085b05b848efb9b9facb371e1c8b7b710c64200817ef73b52b700d4d0",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract022.config.json",
+          "bytes": 2974,
+          "sha256": "6e6967d785bf2d53c443de865bb4ed82298575436b9e960f4180fdf282d10004"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract022.outer.json",
+          "bytes": 585,
+          "sha256": "f1c858a0f46042ed53071d4c0cb36666f1f34d5015c54cf82a7fc9f81e3eea4a"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/middleware-flexible-checksums",
+      "name": "@aws-sdk/middleware-flexible-checksums",
+      "version": "3.974.22",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/middleware-flexible-checksums",
+        "version": "3.974.22",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\a2\\dd\\646752461d4c5c5cf3804617a3fe7ffe39d7f1f553edeb4a4dad4abc2dffd4d9b948177fae8f9bf9ea0c3be950fbd1d66fadf78b368f632b3ea94097ce94",
+        "archiveBytes": 17278,
+        "integrity": "sha512-ot1kZ1JGHUxcXPOARhej/n/+Odfx9VPt60pNrUq8Lf/U2blIF3+uj5v56gw76VD70dZvrfeLNo9jKz6pQJfOlA==",
+        "archiveSha256": "da76b7ef63ee6aebaf8088c2f1ab9a70c0a27f6412831a462157453c02a5746b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 81,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract023.config.json",
+          "bytes": 2977,
+          "sha256": "fa6f51a2fc2a559b0e433d0dd9ed70bffce2da821d1bf2036e66f4742b194b08"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract023.outer.json",
+          "bytes": 588,
+          "sha256": "c57ab209d820076fef11ca5d083a10be63bc8d4d7c0f2e9dae26530df71d6c27"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/middleware-location-constraint",
+      "name": "@aws-sdk/middleware-location-constraint",
+      "version": "3.972.11",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/middleware-location-constraint",
+        "version": "3.972.11",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\86\\47\\eca4d50fe1cae2007eada27e8118a8279b9759c7eedb50ecb562a9537de8c37943c0336dc3f35abf217fa17654b7294b1fc06cf90034ea656281114a5fe0",
+        "archiveBytes": 5976,
+        "integrity": "sha512-hkfspNUP4criAH6ton6BGKgnm5dZx+7bUOy1YqlTfejDeUPAM23D81q/IX+hdlS3KUsfwGz5ADTqZWKBEUpf4A==",
+        "archiveSha256": "100baaa29adba9a2b787dd7ca80f271618ee9f2a918f57908e0bd8a544cbee43",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 10,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract024.config.json",
+          "bytes": 2978,
+          "sha256": "8cb764ee589cc3695b23969fcba7060ee6df050028c0ec5ac84c7d7df31462de"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract024.outer.json",
+          "bytes": 589,
+          "sha256": "759005ed18f0ff3c288724612a69a637fb2a42aa8464bee24988f6af5f780256"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/middleware-sdk-s3",
+      "name": "@aws-sdk/middleware-sdk-s3",
+      "version": "3.972.43",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/middleware-sdk-s3",
+        "version": "3.972.43",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\08\\19\\a2c4c637e8974076df402e09bbc9596f397194087b7d676927e69f5754ee52b4ee87087f9c6b257b6185750832ec5ef57279b6978019a27fdc07a3109e34",
+        "archiveBytes": 19455,
+        "integrity": "sha512-CBmixMY36JdAdt9ALgm7yVlvOXGUCHt9Z2kn5p9XVO5StO6HCH+cayV7YYV1CDLsXvVyebaXgBmif9wHoxCeNA==",
+        "archiveSha256": "8a244a78a7a3d4be4c712516127c85053fcf6cc33a979d7424e690e68eaf63d1",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 75,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract025.config.json",
+          "bytes": 2965,
+          "sha256": "42b2000a2aa09d1d34dbc225806d5935397ef26748208e436ef4f734935e6eba"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract025.outer.json",
+          "bytes": 576,
+          "sha256": "a99c7b4a9b3b388a7929e131ba2c6950248c601c180d8499036edec6d129d315"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/middleware-ssec",
+      "name": "@aws-sdk/middleware-ssec",
+      "version": "3.972.11",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/middleware-ssec",
+        "version": "3.972.11",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\ec\\f4\\2f18d86dbde2a5bd5a8d6a1a96c79cabc313fb79cc00a01d5d6017fc78ac1fa36b73cc26cd9d6faada73b7374eba92d41a07888141b0d15ad8b39be6a6a1",
+        "archiveBytes": 6046,
+        "integrity": "sha512-7PQvGNhtveKlvVqNahqWx5yrwxP7ecwAoB1dYBf8eKwfo2tzzCbNnW+q2nO3N066ktQaB4iBQbDRWtizm+amoQ==",
+        "archiveSha256": "ae13c8e18da24e6bac8ff70a2c93a951bdeb5d5c88e07179023562f0031ab507",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract026.config.json",
+          "bytes": 2963,
+          "sha256": "da70dba643e5c59e954abc3394f605f4f5234afba93c7416db87ae9b9c65b621"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract026.outer.json",
+          "bytes": 574,
+          "sha256": "e4f3ae292e030c08d6635977b4d8b6fdca2812e63efcadf63fd9bce5d81370b9"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/nested-clients",
+      "name": "@aws-sdk/nested-clients",
+      "version": "3.997.12",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/nested-clients",
+        "version": "3.997.12",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\26\\cd\\9561a08cdbaf5f781d1cb347069a522174e813f5a32acdd071ebc942cba9150987f3af44f7ea8bd4143bdf5266ad92e05ec812610b068b061ecff26787e5",
+        "archiveBytes": 87997,
+        "integrity": "sha512-Js2VYaCM269feB0cs0cGmlIhdOgT9aMqzdBx68lCy6kVCYfzr0T36ovUFDvfUmatkuBeyBJhCwaLBh7P8meH5Q==",
+        "archiveSha256": "9ccc37ba9a64c9094fbf6ab45de791f4145dbfe5e6dd36c719e74ee34bef6617",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 339,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract027.config.json",
+          "bytes": 2962,
+          "sha256": "c0e1538b5d79604af188ec94c3fe9217f9721384d6aac59cde3a2932205b6403"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract027.outer.json",
+          "bytes": 574,
+          "sha256": "143dc4f964eede2ab23a03281c8bcd10447e07c7c1380955d3682d3fc91b2d75"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/signature-v4-multi-region",
+      "name": "@aws-sdk/signature-v4-multi-region",
+      "version": "3.996.29",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/signature-v4-multi-region",
+        "version": "3.996.29",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\15\\ec\\3d16842a3adff4292bd960ffaa756d1d7ce85f43d37e825d94503bc23d6ea690f287962f4b31b2b15a3fb0679cca3da3a8ab1b91dc7872dce4e99dd91f4b",
+        "archiveBytes": 8435,
+        "integrity": "sha512-Few9FoQqOt/0KSvZYP+qdW0dfOhfQ9N+gl2UUDvCPW6mkPKHli9LMbKxWj+wZ5zKPaOoqxuR3Hhy3OTpndkfSw==",
+        "archiveSha256": "71039d8f51e3fd96c5d3b26598ff964553b316c7641cb120f67efb2f15920434",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 16,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract028.config.json",
+          "bytes": 2973,
+          "sha256": "e11d3425e9340456ecb249608ee753411871b0f7409456674d3d7fcd3f26acce"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract028.outer.json",
+          "bytes": 584,
+          "sha256": "aa37021500557930ab9ca916fdc53f258e57d295a6010af35e9a6864c94051e4"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/token-providers",
+      "name": "@aws-sdk/token-providers",
+      "version": "3.1054.0",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/token-providers",
+        "version": "3.1054.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\84\\6f\\58280a6664ec3e76b27d36ea1a7ff3af0bc7b95b5fb77a82de379a76b95099456b2fdbbb5e212d1be24887e927efdd63266a6a98271984d96330ca9fcbfc",
+        "archiveBytes": 10133,
+        "integrity": "sha512-hG9YKApmZOw+drJ9Nuoaf/OvC8e5W1+3eoLeN5p2uVCZRWsv27teIS0b4kiH6Sfv3WMmamqYJxmE2WMwyp/L/A==",
+        "archiveSha256": "ea5903092df9f2edd1efff4ab3046b33aa76b789155b2613681600a9db680c09",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 37,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract029.config.json",
+          "bytes": 2963,
+          "sha256": "fd40154edd5ea251bc174b49b625139ea4c88eba17bfa28180e75ec81093cf2f"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract029.outer.json",
+          "bytes": 574,
+          "sha256": "1299c69c45fa3cbb1de4ba6369bbde83dcb96c03e23e2ad6e0336a1e4bdc6e70"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/types",
+      "name": "@aws-sdk/types",
+      "version": "3.973.9",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/types",
+        "version": "3.973.9",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\92\\e0\\5f81055d733e4199aa5ce00d7761ba55c3fa5791eb1f85eb5c158c1b9eda9ab3cb05e35387c9de28dbcfbf4c6d9941d1c1b2ff742ecbb9cbaa22b6f60276",
+        "archiveBytes": 14479,
+        "integrity": "sha512-kuBfgQVdcz5Bmapc4A13YbpVw/pXkesfhetcFYwbntqas8sF41OHyd4o28+/TG2ZQdHBsv90Lsu5y6oitvYCdg==",
+        "archiveSha256": "c466d95e6914253c437b5c3a0d801d6826bee3cd662580190a55a6debd0183f9",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 124,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract030.config.json",
+          "bytes": 2953,
+          "sha256": "9058ff7eb47e11543b0d5506e23e97922331ea872fdc56feec208ff5f3aa8334"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract030.outer.json",
+          "bytes": 564,
+          "sha256": "75ef24f281b42d691739e2cc3b1821fda1071f8f3bcee2210b9b5bfa3f87301e"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/util-locate-window",
+      "name": "@aws-sdk/util-locate-window",
+      "version": "3.965.5",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/util-locate-window",
+        "version": "3.965.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\5a\\19\\4934d20d401fbdaad2ed64972941d819c374820c2a5775424fedc4e81b01db0960a745c90695ce81c7f3a15b021814d027f85232758f1267442656edf14d",
+        "archiveBytes": 5209,
+        "integrity": "sha512-WhlJNNINQB+9qtLtZJcpQdgZw3SCDCpXdUJP7cToGwHbCWCnRckGlc6Bx/OhWwIYFNAn+FIydY8SZ0QmVu3xTQ==",
+        "archiveSha256": "cd861dbcc747ce1f15ae1c4cd15fc4332bb65ba88ef072effe5856c4763d731e",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract031.config.json",
+          "bytes": 2966,
+          "sha256": "e13a55bda8a09db014d7fb9f05456afd7673938982569f732e57bdfdffd5997b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract031.outer.json",
+          "bytes": 577,
+          "sha256": "1d94372b0a1b6676c8d48aa7583356d8315f46c9568c1ea6dd4c1c67f8e3293e"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws-sdk/xml-builder",
+      "name": "@aws-sdk/xml-builder",
+      "version": "3.972.26",
+      "archive": {
+        "relative": "node_modules/@aws-sdk/xml-builder",
+        "version": "3.972.26",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\70\\36\\ebaaf0d2ef7c2197a6003d23ead14eb08731ba51623d3ee5a1d30ad4b86a197b185612a85dba76ee915ee20686969c557500e0eeb4ce61383eabb67e37f6",
+        "archiveBytes": 13130,
+        "integrity": "sha512-cDbrqvDS73whl6YAPSPq0U6whzG6UWI9PuWh0wrUuGoZexhWEqhdunbukV7iBoaWnFV1AODutM5hOD6rtn439g==",
+        "archiveSha256": "3dad8f6656fbb3ce23cf9f0e8b1928167cda75d41b2036ebdcd593facd6568b6",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 34,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract032.config.json",
+          "bytes": 2959,
+          "sha256": "e7f888c28ff658dc2c7e56bdd00845cfd8d1426f306abcb3df2bc128ccff0d64"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract032.outer.json",
+          "bytes": 570,
+          "sha256": "ec2b9d778c840248889f79f14e2827aaa0734eee1b575e72b747092212ef51a1"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@aws/lambda-invoke-store",
+      "name": "@aws/lambda-invoke-store",
+      "version": "0.2.4",
+      "archive": {
+        "relative": "node_modules/@aws/lambda-invoke-store",
+        "version": "0.2.4",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\89\\8f\\32be3134cbae75062c4a34f826bf55ab41cf86675e36b1bd33e206270a10c363662a2383ff8ec4a8a415ab29f02decb389024397b7bac2fe19acf9672541",
+        "archiveBytes": 7959,
+        "integrity": "sha512-iY8yvjE0y651BixKNPgmv1WrQc+GZ142sb0z4gYnChDDY2YqI4P/jsSopBWrKfAt7LOJAkOXt7rC/hms+WclQQ==",
+        "archiveSha256": "f6bcaef73a748772ac68fa667d5cd5df966d9d924716ea8ccbe5a451d4da3159",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract033.config.json",
+          "bytes": 2963,
+          "sha256": "2a9da0be06695d775f62d0bf15ed452a0c1810f71336e48475288e2ce48b8848"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract033.outer.json",
+          "bytes": 574,
+          "sha256": "f422ee04c0ff0442d3dbe1573798cf9d692c147fcc40903327c864863c481b5c"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@gql.tada/cli-utils",
+      "name": "@gql.tada/cli-utils",
+      "version": "1.7.3",
+      "archive": {
+        "relative": "node_modules/@gql.tada/cli-utils",
+        "version": "1.7.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\de\\24\\18e44fe3befdcb9e1e83d4c87bcebf816fd0bf4c69350c7926fa56c88d0067640bb69be05c4dcaf57b7b2952de806ba1c6ff100dd97c696d6c3da1900b12",
+        "archiveBytes": 501652,
+        "integrity": "sha512-3iQY5E/jvv3Lnh6D1Mh7zr+Bb9C/TGk1DHkm+lbIjQBnZAu2m+BcTcr1e3spUt6Aa6HG/xAN2XxpbWw9oZALEg==",
+        "archiveSha256": "2a48eb09189f34a9fd6b8723605ffddaab0f88ed5fb8ad0b8630b6986cbd2b87",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 29,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract034.config.json",
+          "bytes": 2958,
+          "sha256": "408005d89837f21205dc10575159ea3f017161607415b1b7f4bbc4befdecfdf9"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract034.outer.json",
+          "bytes": 569,
+          "sha256": "d65b3dfb3ad5cba2b5ea60ede1b69ae619eed33383c1f542b29e30a03c336670"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@gql.tada/internal",
+      "name": "@gql.tada/internal",
+      "version": "1.0.9",
+      "archive": {
+        "relative": "node_modules/@gql.tada/internal",
+        "version": "1.0.9",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\06\\9f\\328be90baf3209de5e437f1873e3c1f83821f62c25fea5285a3dc26087ea2206de9c96b8d428360d0c3dd9efc683437f93cabc5ee1d77431f2e0a522cf3e",
+        "archiveBytes": 93778,
+        "integrity": "sha512-Bp8yi+kLrzIJ3l5Dfxhz48H4OCH2LCX+pShaPcJgh+oiBt6clrjUKDYNDD3Z78aDQ3+Tyrxe4dd0MfLgpSLPPg==",
+        "archiveSha256": "ce711469ff32991711b4945dcab428e7ed0fc812a8e6e6899bb35d2bab9ac780",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 9,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract035.config.json",
+          "bytes": 2957,
+          "sha256": "5dabd6848d85bfd9b667c08e0821ae63d183f750bf2329121ef09635f8cf1658"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract035.outer.json",
+          "bytes": 568,
+          "sha256": "81abd340957a6cf40d4e42a83afa5431fbfc9e316838b4c2c0dc157f0e818830"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@graphql-typed-document-node/core",
+      "name": "@graphql-typed-document-node/core",
+      "version": "3.2.0",
+      "archive": {
+        "relative": "node_modules/@graphql-typed-document-node/core",
+        "version": "3.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\98\\1f\\6802c3429bd68cdff48ebf862d04ca996d88f5d11edd92af1bc81ab1198fe7705c217f6a10ccc57e2c24655a80d210127708e891d72783bccb6ca0eb2e15",
+        "archiveBytes": 1496,
+        "integrity": "sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==",
+        "archiveSha256": "f8f217e2545c7f5727a451e3e7f739541954587c3a27e88bb8dcf44abcceba8a",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 3,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract036.config.json",
+          "bytes": 2972,
+          "sha256": "3ba92aec71cca91978e473a3578196752b0f12420d15a234d75b61103a9b787b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract036.outer.json",
+          "bytes": 583,
+          "sha256": "b8f2bd87a06d7cae0a2a0cb29ca49d0975e241448f1ae4ebc72b50a6a4fef863"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@img/colour",
+      "name": "@img/colour",
+      "version": "1.1.0",
+      "archive": {
+        "relative": "node_modules/@img/colour",
+        "version": "1.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\4d\\de\\faabb8f9ee8fed2d57604bbe3a7180117d2cb193c8847d1c5ec0bf61e0e3336216d6e1301ca69974993e1ecaa5dd761e8bfe3c2833be66a3b8b16bfa4279",
+        "archiveBytes": 17410,
+        "integrity": "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==",
+        "archiveSha256": "6c2df3ac33d4b8647191ad8942a579e6004be00c25846677eab85f04702d85b1",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 6,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract037.config.json",
+          "bytes": 2950,
+          "sha256": "38a9ca2362ea897f7d5bf7250d1da6275da47f844f7457db41f936764879c81c"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract037.outer.json",
+          "bytes": 561,
+          "sha256": "bd498d75ead2b6d59cad0ac32fb25eba4c83ac64f7d69279ab4845f24a6e2679"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@img/sharp-win32-x64",
+      "name": "@img/sharp-win32-x64",
+      "version": "0.35.3",
+      "archive": {
+        "relative": "node_modules/@img/sharp-win32-x64",
+        "version": "0.35.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\0f\\8c\\b5bcd799ac820908dfae1da595b47f3a07e682add31862389ccbda571ef6c665e1982cb49ddf0755b82dfb171557954d4046c93ce1e2967d631719812abc",
+        "archiveBytes": 8434051,
+        "integrity": "sha512-D4y1vNeZrIIJCN+uHaWVtH86B+aCrdMYYjicy9pXHvbGZeGYLLSd3wdVuC37FxVXlU1ARsk84eKWfWMXGYEqvA==",
+        "archiveSha256": "f0f81118ad4557cceb6c4f90adaf252926e7cd3f6cd3d7040053d4bba088e940",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract038.config.json",
+          "bytes": 2959,
+          "sha256": "492c3f30d7e67e027b267bf4e556cc36c56a1ee8af6e925056a4e0350b0d37d6"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract038.outer.json",
+          "bytes": 570,
+          "sha256": "93d2463cd5b2350c84597a379051283b77718ce47c9a53a6c8d76209803c538c"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@mysten/bcs",
+      "name": "@mysten/bcs",
+      "version": "2.0.5",
+      "archive": {
+        "relative": "node_modules/@mysten/bcs",
+        "version": "2.0.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\0e\\8a\\7d5eadfa0cf2e5b26203419bd4838b897810712068ab829d8e5c66847dffa6b4b2850685b61e71376924d24a988c407f574618f0b62335eb3149845ab3d1",
+        "archiveBytes": 47410,
+        "integrity": "sha512-Dop9Xq36DPLlsmIDQZvUg4uJeBBxIGirgp2OXGaEff+mtLKFBoW2HnE3aSTSSpiMQH9XRhjwtiM16zFJhFqz0Q==",
+        "archiveSha256": "e89d5a3697b9f2b36cf781c02fae1013719530eab5ca1e6cd681d2e0ab9f813e",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 42,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract039.config.json",
+          "bytes": 2950,
+          "sha256": "cec4dde8dc5a3fa2d8baed3d6db4932bee9ba07fe3d2fa9bf944af740d4ef9aa"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract039.outer.json",
+          "bytes": 561,
+          "sha256": "1dbdbe5bb3331f24f007b2cdc7d172779cad7798650121cffba691b4474e4867"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@mysten/sui",
+      "name": "@mysten/sui",
+      "version": "2.16.2",
+      "archive": {
+        "relative": "node_modules/@mysten/sui",
+        "version": "2.16.2",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\59\\44\\d8dc04d71a3cdd9131c0acd050cbc9114c6638466d0ae6567df3005ee636eb06b885f55487a7cee8a90dde80804ce5e368d0434b9165c182e00ad207bae1",
+        "archiveBytes": 1042852,
+        "integrity": "sha512-WUTY3ATXGjzdkTHArNBQy8kRTGY4Rm0K5lZ98wBe5jbrBriF9VSHp87oqQ3egIBM5eNo0ENLkWXBguAK0ge64Q==",
+        "archiveSha256": "9d500855b8ee1e222696a11dd9fc0b5aac217188c7711841eceec3b13927e6de",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 762,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract040.config.json",
+          "bytes": 2950,
+          "sha256": "1596b179b26b412189f6f163ccee52d35b805ca228a03a312316e37704372218"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract040.outer.json",
+          "bytes": 562,
+          "sha256": "59272e7886e7f875dd76bab99720a248630a08619aaec9cab5eddf7e1230445c"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@mysten/utils",
+      "name": "@mysten/utils",
+      "version": "0.3.3",
+      "archive": {
+        "relative": "node_modules/@mysten/utils",
+        "version": "0.3.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\81\\51\\e7e6da21db87975cb1320649f0c0cd85fed6c382a3d7d328fbecab478eea1851a965710f6f4b019f1ac032dfd21c4c1db9f58a6bb7f64e13076ea7eceba4",
+        "archiveBytes": 22906,
+        "integrity": "sha512-gVHn5toh24eXXLEyBknwwM2F/tbDgqPX0yj77KtHjuoYUallcQ9vSwGfGsAy39IcTB259Yprt/ZOEwdup+zrpA==",
+        "archiveSha256": "acfefeca50bdf0317f8b913d991b8cf130f44c44bef25645a2d0ffc9dd6378a8",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 44,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract041.config.json",
+          "bytes": 2952,
+          "sha256": "341f74088acf43528e8e99a2010bad10664e8b8b266d76c001c416bba0222ffd"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract041.outer.json",
+          "bytes": 563,
+          "sha256": "cb12f452f602690b057f3cf29cdb6fdb70016f0e23ad179d6b04b4820124d0c0"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@mysten/wallet-standard",
+      "name": "@mysten/wallet-standard",
+      "version": "0.20.3",
+      "archive": {
+        "relative": "node_modules/@mysten/wallet-standard",
+        "version": "0.20.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\2a\\9d\\44a5669003000db8ca130892957599c439a13d689e4f3ef202eea83e277bba51fdb456c56c427819965c9a4b63901e6fa22e527370b5c77dfeedb6f40963",
+        "archiveBytes": 21770,
+        "integrity": "sha512-Kp1EpWaQAwANuMoTCJKVdZnEOaE9aJ5PPvIC7qg+J3u6Uf20VsVsQngZllyaS2OQHm+iLlJzcLXHff7ttvQJYw==",
+        "archiveSha256": "d441e1212d6a950773c71d9be25778149a35e94408e942d653b99388d642b216",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 62,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract042.config.json",
+          "bytes": 2962,
+          "sha256": "a62fa9e47121730937f9e4d1fa9d3504b864cd4ef7110d8020943a27f3042ce0"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract042.outer.json",
+          "bytes": 573,
+          "sha256": "bf9164ed4f4fc573183953acbacad1967ac5de932ae076ab21791109db71c5f4"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@next/env",
+      "name": "@next/env",
+      "version": "16.2.11",
+      "archive": {
+        "relative": "node_modules/@next/env",
+        "version": "16.2.11",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\d1\\da\\39037049da0c56af464231c0fa0615be7b9f798f2c5d4e5deb5d34ba94eb43f1e92d3225ba08ef843f0b7511c6b50c19e6f74affec676229604ac47fbe0c",
+        "archiveBytes": 4769,
+        "integrity": "sha512-0do5A3BJ2gxWr0ZCMcD6BhW+e595jyxdTl3rXTS6lOtD8ektMiW6CO+EPwt1Eca1DBnm90r/7GdiKWBKxH++DA==",
+        "archiveSha256": "0a4199277de951c394ba8c844d8c897c9028761cb0f60d7bb33ff9c5a9ce8fcb",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 4,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract043.config.json",
+          "bytes": 2948,
+          "sha256": "0ac5529fca35c7c3ce89e40129e5dda4af4ee76f2138663b5e11e7a7b5659601"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract043.outer.json",
+          "bytes": 559,
+          "sha256": "b4066bf59b5e00513e16013ffb9c4225c325c153a34b59467331486c7d6d2bf5"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@next/swc-win32-x64-msvc",
+      "name": "@next/swc-win32-x64-msvc",
+      "version": "16.2.11",
+      "archive": {
+        "relative": "node_modules/@next/swc-win32-x64-msvc",
+        "version": "16.2.11",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\99\\df\\022cd8204b50f1f69520029ce9b39b807fe37c18df71cb0ce6371f6f1c05a8f781ed070082aa44a7848add7d07bcdc3873f0b7e8ff6d0d6f56716a5d3ddb",
+        "archiveBytes": 43836936,
+        "integrity": "sha512-md8CLNggS1Dx9pUgApzps5uAf+N8GN9xywzmNx9vHAWo94HtBwCCqkSnhIrdfQe83Dhz8Lfo/20Nb1Zxal092w==",
+        "archiveSha256": "6a80880b39022989bff154289bf345b528d432aa6db15248e4d0a579863dbe9f",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 3,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract044.config.json",
+          "bytes": 2963,
+          "sha256": "4be74f0ac4f7d2ef18e97b604f33e9e74f046ef924aa60da46ca17e423dea576"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract044.outer.json",
+          "bytes": 575,
+          "sha256": "3e53d9b26c3594487d952aabb3317760d9200001981fca2441d56c4aafa30d06"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@noble/curves",
+      "name": "@noble/curves",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@noble/curves",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\4f\\f0\\681e01578ab6f410d48f06abb35f4adc8d778ce8ba3cf766b68e560992a93cdcba99c7497539fec3ce5289ea3929bccae41d29c07206f925e80bf1278891",
+        "archiveBytes": 436285,
+        "integrity": "sha512-T/BoHgFXirb0ENSPBquzX0rcjXeM6Lo892a2jlYJkqk83LqZx0l1Of7DzlKJ6jkpvMrkHSnAcgb5JegL8SeIkQ==",
+        "archiveSha256": "6daf47e557e070b0657eda25549466bae3d07df555de4f702363355e8fb92ec8",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 113,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract045.config.json",
+          "bytes": 2952,
+          "sha256": "9d42ad243513dba8e12aed460652eb251a5a664423b739a6575e7519dafed2d0"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract045.outer.json",
+          "bytes": 563,
+          "sha256": "3547b2e661d4556e313357d314e747fd339080b4d8dd84b9e6b9e505d58b2025"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@noble/hashes",
+      "name": "@noble/hashes",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@noble/hashes",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\21\\8a\\831a24d769be859e20209d2759c2059ba26c69cbd16d62f2cab3bc0252cd9af119084c6f831463b50ccf5cafe137fd18000d1a458eb295689d73eac8ed12",
+        "archiveBytes": 180002,
+        "integrity": "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==",
+        "archiveSha256": "018b38bd7af36645fa0ece8f89eba21c828f3e4d219da5aacadd78bd0e654606",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 98,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract046.config.json",
+          "bytes": 2952,
+          "sha256": "0c0f59f0283a9bf5656711fbc87ab6342b403a782ada2431e1bf02dcb56f70f4"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract046.outer.json",
+          "bytes": 563,
+          "sha256": "a305b7de0a92f0fb150eb9df85e5dd4946cbaf97ce0a925e9698df96fe33bbf4"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@nodable/entities",
+      "name": "@nodable/entities",
+      "version": "2.1.1",
+      "archive": {
+        "relative": "node_modules/@nodable/entities",
+        "version": "2.1.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\3e\\28\\371f10c8a0c8237441fc3827ff76471398b1632518d6baaf234a7925bb6f38fd328e3e26d24444663b2922c26c974edbfad663fee387f718cc74b4b0328e",
+        "archiveBytes": 18014,
+        "integrity": "sha512-Pig3HxDIoMgjdEH8OCf/dkcTmLFjJRjWuq8jSnklu284/TKOPibSRERmOykiwmyXTtv61mP+44f3GMx0tLAyjg==",
+        "archiveSha256": "c729f731b15affcbc2e8e722593f7a749e195c760e6da10a5123ecec3c898e35",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract047.config.json",
+          "bytes": 2956,
+          "sha256": "c1fd591a999da3a1ccd3569a625bf53adc5a0cff1e1a9cd1d213edb208aae521"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract047.outer.json",
+          "bytes": 567,
+          "sha256": "d4acefab4fcd89b34c2b4f98d15920fd0a977b1effa2f94114279ec0eac60d35"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@protobuf-ts/grpcweb-transport",
+      "name": "@protobuf-ts/grpcweb-transport",
+      "version": "2.11.1",
+      "archive": {
+        "relative": "node_modules/@protobuf-ts/grpcweb-transport",
+        "version": "2.11.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\d5\\6e\\2eb4376f381f911cc150d2ca0be09767c635d5f9d75e188520d3c0ef66b03c32cea4e4d37a181154da81d975339c255a4fac3274d91265aad6a808c341b7",
+        "archiveBytes": 17233,
+        "integrity": "sha512-1W4utDdvOB+RHMFQ0soL4JdnxjXV+ddeGIUg08DvZrA8Ms6k5NN6GBFU2oHZdTOcJVpPrDJ02RJlqtaoCMNBtw==",
+        "archiveSha256": "848a1bb63d45072fdf472094af5309639734e479f3adc916149cc8fe94372551",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 18,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract048.config.json",
+          "bytes": 2969,
+          "sha256": "043b4ea6c30362fccf3a64da69618a2bd0eda6d258e8cf0ac0f063423dad1c9b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract048.outer.json",
+          "bytes": 580,
+          "sha256": "7699a00e1f6fe14e9acb961aa8a24e42e09799c9ac90cce4e41a900b63aca420"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@protobuf-ts/runtime",
+      "name": "@protobuf-ts/runtime",
+      "version": "2.11.1",
+      "archive": {
+        "relative": "node_modules/@protobuf-ts/runtime",
+        "version": "2.11.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\2a\\e0\\da4f521f1e4ba0336a72cfe170898f347a35ab907d6902d38139916e47a4971054ec9dbfe3890590d6b088adc2b1d81b72c67c56e815b0b15480fc87be59",
+        "archiveBytes": 54285,
+        "integrity": "sha512-KuDaT1IfHkugM2pyz+FwiY80ejWrkH1pAtOBOZFuR6SXEFTsnb/jiQWQ1rCIrcKx2BtyxnxW6BWwsVSA/Ie+WQ==",
+        "archiveSha256": "3bb18cb373565b5c95e466c1db76e4b1d8166b62276a15e3547c36f9e25b502b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 90,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract049.config.json",
+          "bytes": 2959,
+          "sha256": "c042ec46bc07c8205cf6caba14583797a38ad86226308a15fc3f13ada1640502"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract049.outer.json",
+          "bytes": 570,
+          "sha256": "7c8b6c14184e697b73d25b97ff7f38bfeb645b1a636d55803685346f0be73c26"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@protobuf-ts/runtime-rpc",
+      "name": "@protobuf-ts/runtime-rpc",
+      "version": "2.11.1",
+      "archive": {
+        "relative": "node_modules/@protobuf-ts/runtime-rpc",
+        "version": "2.11.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\e0\\2a\\aa526340fbfb8ccf4d3e7770982a01255cef55ac46ee7239c11448ea2381ae0eb110df631a237abef6a3c1bc818e94be0f9875ebcccdf6bc13d646140a59",
+        "archiveBytes": 25863,
+        "integrity": "sha512-4CqqUmNA+/uMz00+d3CYKgElXO9VrEbucjnBFEjqI4GuDrEQ32MaI3q+9qPBvIGOlL4PmHXrzM32vBPWRhQKWQ==",
+        "archiveSha256": "b4226f2052274f94fa3d509580389c1e51908a1d4cb6bbbeb134c0e4bf795a5f",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 60,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract050.config.json",
+          "bytes": 2963,
+          "sha256": "39da0055cf32fd8717437e8f29e96dab35f9f71dcd4a8dc7b39dfec0df7523ca"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract050.outer.json",
+          "bytes": 574,
+          "sha256": "4bee5e4b32d4d882586d33b1ea54cf7998848b8a3c87c017845d2c5a4567bbaa"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@scure/base",
+      "name": "@scure/base",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@scure/base",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\6f\\c5\\c4ba92626de8225d5fad0d4b1e23ca0b41cf1e8b777fe0991bd91a5b1e1dcc7c4d39e28bf7b88cf6761164077148f22c18904874806080a64ad882090f36",
+        "archiveBytes": 40895,
+        "integrity": "sha512-b8XEupJibegiXV+tDUseI8oLQc8ei3d/4Jkb2RpbHh3MfE054ov3uIz2dhFkB3FI8iwYkEh0gGCApkrYggkPNg==",
+        "archiveSha256": "659e1b1eaac82df04e5a4b97ef48779cfd3e7c24dafde5efa4324659a25d70a3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract051.config.json",
+          "bytes": 2950,
+          "sha256": "38e373874723d71393d6eb047acd0033499e6f202b7a235628ca8374d4ade152"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract051.outer.json",
+          "bytes": 561,
+          "sha256": "8c326443252a7c7e839a21e8a60def56ffa73e31391170fb45536b7180d68b77"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@scure/bip32",
+      "name": "@scure/bip32",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@scure/bip32",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\cc\\5a\\fbb7617e6bdfb9b41ed06daac5d8740d62b82308d6a82c0ba965d2a4ac5318328cc97f9cea1f658909089b3339b5a90d10a20af15463b7a977d00d831a42",
+        "archiveBytes": 13628,
+        "integrity": "sha512-zFr7t2F+a9+5tB7QbarF2HQNYrgjCNaoLAupZdKkrFMYMozJf5zqH2WJCQibMzm1qQ0QogrxVGO3qXfQDYMaQg==",
+        "archiveSha256": "648335439c8bf752209a40cd470aa86858de844d491fb46d9d934cb96073f08b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract052.config.json",
+          "bytes": 2951,
+          "sha256": "b9f0b2ce09f1faa4a9bce4833152f01ce21a3d09d7ae96ab1d935ce9f238b47f"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract052.outer.json",
+          "bytes": 562,
+          "sha256": "83d8246582031f80c29e00e661b7851ce065916b7fe4c91dde6e6b77ca946ca3"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@scure/bip39",
+      "name": "@scure/bip39",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@scure/bip39",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\4f\\f0\\63fd8bd830d9083eae8410d3bafeb72cd9eeea4cdbb2a145dfd0a0450e6a74643bb41f65f82eaeb20b78b473c3dc5a4a2fe446d6fb241965b74c9a4d79e0",
+        "archiveBytes": 82073,
+        "integrity": "sha512-T/Bj/YvYMNkIPq6EENO6/rcs2e7qTNuyoUXf0KBFDmp0ZDu0H2X4Lq6yC3i0c8PcWkov5EbW+yQZZbdMmk154A==",
+        "archiveSha256": "04a6e2bb040301954373f543e44c352137f14dff58f942782769984ef5ea8e1c",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 26,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract053.config.json",
+          "bytes": 2951,
+          "sha256": "f02acc4b6ebd23fabfc5f71c87b8a6c8eefb99d1aae248081deee76c1fd6d809"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract053.outer.json",
+          "bytes": 562,
+          "sha256": "18d7366ad054f316c413e3c2664a701fef2d27dcc4d2bebc952c972fae8c9091"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/core",
+      "name": "@smithy/core",
+      "version": "3.24.5",
+      "archive": {
+        "relative": "node_modules/@smithy/core",
+        "version": "3.24.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\2a\\df\\29854838e4cd7912385801b67e7c58a46277a28cbbbd2e2ba0cfc66c633da2f23d21cc6bf6ecb58aa441d845fbe3f8bc823928a3a5c47fda2f11a2e57e70",
+        "archiveBytes": 305556,
+        "integrity": "sha512-Kt8phUg45M15EjhYAbZ+fFikYneijLu9Liugz8ZsYz2i8j0hzGv27LWKpEHYRfvj+LyCOSijpcR/2i8RouV+cA==",
+        "archiveSha256": "49c18dec569e6a1ae120735678e3169313a7afecc7b1baf5679e356cf67678a7",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 724,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract054.config.json",
+          "bytes": 2951,
+          "sha256": "5588d26b696b4d068c2b133be26900300b84ff281b8f5b94626339a133659a67"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract054.outer.json",
+          "bytes": 563,
+          "sha256": "35c44fbce3d74eb2f2f73f5e2ec8866926d27750eca4149fcf05f95ee095a5ae"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/credential-provider-imds",
+      "name": "@smithy/credential-provider-imds",
+      "version": "4.3.5",
+      "archive": {
+        "relative": "node_modules/@smithy/credential-provider-imds",
+        "version": "4.3.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\ca\\21\\7cc47a5d91a4dfccb56a173b0fe96bcd82110afaa6732d85850f5dcbd92b0585b5f004697176870a17de6a8ebeece651393516a07be10914ae2602cc7cf1",
+        "archiveBytes": 11883,
+        "integrity": "sha512-yiF8xHpdkaTfzLVqFzsP6WvNghEK+qZzLYWFD13L2SsFhbXwBGlxdocKF95qjr7s5lE5NRage+EJFK4mAsx88Q==",
+        "archiveSha256": "7ffba4856d36c58f63402a90cf39aa4ff578dc11b6d1cc6adb74738932105c7e",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 36,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract055.config.json",
+          "bytes": 2971,
+          "sha256": "d40eaf180c0ec9bfd0a92759355a3cb275342491ff3a4fd56bbb8c97a750f9e3"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract055.outer.json",
+          "bytes": 582,
+          "sha256": "c05a62773f3ea01d588656e417390d0036b963e8790fce9b3c4c03c4203480be"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/fetch-http-handler",
+      "name": "@smithy/fetch-http-handler",
+      "version": "5.4.5",
+      "archive": {
+        "relative": "node_modules/@smithy/fetch-http-handler",
+        "version": "5.4.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\48\\ad\\d531e1f47e26e075383641e07e3b8a7b632ff61391c138725e0b9f05b2190375eb97f253a03bb3df8d87cbc8f2cfd5c879e63f75710a8a0730d2d2646349",
+        "archiveBytes": 8431,
+        "integrity": "sha512-SK3VMeH0fibgdTg2QeB+O4p7Yy/2E5HBOHJeC58FshkDdeuX8lOgO7PfjYfLyPLP1ch55j91cQqKBzDS0mRjSQ==",
+        "archiveSha256": "3b472231c037649685107e8eba0fe767cad563a784b63cdfb041cb70603cadb2",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 14,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract056.config.json",
+          "bytes": 2965,
+          "sha256": "f8b3277cf8ec90b2336428119c96907df207bdea89a46bb2b31fd971e7677b7f"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract056.outer.json",
+          "bytes": 576,
+          "sha256": "c83be8c8c1fdb131352c7022c948ca1c95c33986ca742a463d9a2effc7bd4cf9"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/is-array-buffer",
+      "name": "@smithy/is-array-buffer",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@smithy/is-array-buffer",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\18\\63\\f73bd4050f6e2e19e0176148f04935c0468aa967290769d3a603c1b9bdf24f2b4fc30baeea6bfff4aafaab2732f5c5cf164165fbff273b7f0b9d8cf1cf84",
+        "archiveBytes": 5718,
+        "integrity": "sha512-GGP3O9QFD24uGeAXYUjwSTXARoqpZykHadOmA8G5vfJPK0/DC67qa//0qvqrJzL1xc8WQWX7/yc7fwudjPHPhA==",
+        "archiveSha256": "34f42607b0756d7ac1251cbb89f24a92a7cb1511c6a23975ddd91fea2d6ef7bd",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract057.config.json",
+          "bytes": 2962,
+          "sha256": "4ba51de11467a566c86bcecc283e7f5acfa4f4cbeca754dcbaa13454d97fa6f7"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract057.outer.json",
+          "bytes": 573,
+          "sha256": "26ffe0ead4c3731fb72bba79cc2c031d06bc371b9aa79f73e656355575bee1e5"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/node-http-handler",
+      "name": "@smithy/node-http-handler",
+      "version": "4.7.5",
+      "archive": {
+        "relative": "node_modules/@smithy/node-http-handler",
+        "version": "4.7.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\dd\\d0\\3d4d0fb26d1499fe6d309db661881cb80dece382ad486ff659ad84e9243060a682cb53f483cd973f834c7430d01d3897b5c0f70cfb1d8f0519a83aeafe4b",
+        "archiveBytes": 18295,
+        "integrity": "sha512-3dA9TQ+ybRSZ/m0wnbZhiBy4Dezjgq1Ib/ZZrYTpJDBgpoLLU/SDzZc/g0x0MNAdOJe1wPcM+x2PBRmoOur+Sw==",
+        "archiveSha256": "cb5a570d787c8ac63bde82d5c44813afd492faf1e64091b8a49c854595190c00",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 38,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract058.config.json",
+          "bytes": 2964,
+          "sha256": "fa9b45fb689142606f2dfbe1b219ad234cf272843d521cea3392eba51aa8dcdc"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract058.outer.json",
+          "bytes": 575,
+          "sha256": "6e4361afc246a29beb208dfb1e91ae1898970b15dd4a2f3a145c1e4d6bb1bad2"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/signature-v4",
+      "name": "@smithy/signature-v4",
+      "version": "5.4.5",
+      "archive": {
+        "relative": "node_modules/@smithy/signature-v4",
+        "version": "5.4.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\40\\12\\4a586a889271f475cf4b5a97c7d6691da24031ea25d837751c437798eae204c9272ea100217e5f7881eee8cd4cbd5a0154744f31b2fc018da6016d698f34",
+        "archiveBytes": 14953,
+        "integrity": "sha512-QBJKWGqIknH0dc9LWpfH1mkdokAx6iXYN3UcQ3eY6uIEyScuoQAhfl94ge7ozUy9WgFUdE8xsvwBjaYBbWmPNA==",
+        "archiveSha256": "a2a07cfd6ee0f31d9bc3cf75453042d7f0eb6733d6224baee80076f5aeadd404",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 32,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract059.config.json",
+          "bytes": 2959,
+          "sha256": "307a10d08897cd9d74c1bed47c6a543a863dd254de8a413aad2cc180907a502a"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract059.outer.json",
+          "bytes": 570,
+          "sha256": "183b65a593dcd84606dcd2f4a7a2cf99aa1f503029131a346f96da2d980d8b78"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/types",
+      "name": "@smithy/types",
+      "version": "4.14.2",
+      "archive": {
+        "relative": "node_modules/@smithy/types",
+        "version": "4.14.2",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\3f\\ea\\2d0316d5e02a81c9ba7b1247090ab8a0eb7c84d84ecfb8d54e9a2955311731fcef900f31942d3acab2ae03575de049f6a4f4e6cfad668797ff5b2f961c5b",
+        "archiveBytes": 41006,
+        "integrity": "sha512-P+otAxbV4CqBybp7EkcJCrig63yE2E7PuNVOmilVMRcx/O+QDzGULTrKsq4DV13gSfak9ObPrWaHl/9bL5YcWw==",
+        "archiveSha256": "0418e15e756ed51be193064c9926bb47b4d055d18c399d45aafed3ab8d7c4245",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 146,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract060.config.json",
+          "bytes": 2952,
+          "sha256": "a0db9f713019ae0931ec432c2036579c23f19e02f597d9f3ab13daa4f93de168"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract060.outer.json",
+          "bytes": 563,
+          "sha256": "1f10650cca6a2d42d674e60471b13db9560844751550bb7e32ed4b3687fb012f"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/util-buffer-from",
+      "name": "@smithy/util-buffer-from",
+      "version": "2.2.0",
+      "archive": {
+        "relative": "node_modules/@smithy/util-buffer-from",
+        "version": "2.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\20\\97\\5605b4dc310e8303481d36187f070acb90347e0035b92abd5a6667789370c817a7b3315e11d8d200993d3cc10277c942bcdad8475a60bf4e72bfc2930c20",
+        "archiveBytes": 6039,
+        "integrity": "sha512-IJdWBbTcMQ6DA0gdNhh/BwrLkDR+ADW5Kr1aZmd4k3DIF6ezMV4R2NIAmT08wQJ3yUK82thHWmC/TnK/wpMMIA==",
+        "archiveSha256": "25141bd3368b188c51e4de6380f74143e11ae93006b90d661971b3684174b1f8",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract061.config.json",
+          "bytes": 2963,
+          "sha256": "91742fd1fac519d4b08cf5c22ce6ab3e8f438269b157a869e77721c9c8098775"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract061.outer.json",
+          "bytes": 574,
+          "sha256": "e5b8ecd05eeeb347561eb99cf4b7a58cc763b072360078820fe943b2165200f7"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@smithy/util-utf8",
+      "name": "@smithy/util-utf8",
+      "version": "2.3.0",
+      "archive": {
+        "relative": "node_modules/@smithy/util-utf8",
+        "version": "2.3.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\47\\c4\\5d9fc1f2ef628a71e6e02e2bfc8d0710917a0b30e186bf9b88d7f93497eb27aa43b34354740a15010b158c941b0531e9168ead3046e748c1e16ceec293e4",
+        "archiveBytes": 6767,
+        "integrity": "sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A==",
+        "archiveSha256": "b137f56c3a32a49c883d0332e1c14bf413f5d7020395c650035b1f4ea2fa021a",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 27,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract062.config.json",
+          "bytes": 2956,
+          "sha256": "ae2f760a6a9dd3d9b873de461be2e9feeadd65491154c394927176713a699c1b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract062.outer.json",
+          "bytes": 567,
+          "sha256": "a6974fd05183f08103a260167c0d1fba308b682eef97b1ee59da014c6c0fc63b"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@swc/helpers",
+      "name": "@swc/helpers",
+      "version": "0.5.15",
+      "archive": {
+        "relative": "node_modules/@swc/helpers",
+        "version": "0.5.15",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\25\\0e\\53b8c8b8e4ec22e3f048300241a12428389bb5da83a4fe0003aa57142fd24474707cbf28d44acc6a78d5e79971e360a322d96718b5ecc610486a508fc4da",
+        "archiveBytes": 54016,
+        "integrity": "sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==",
+        "archiveSha256": "97e22cf245b7f60a14f14305e07211b459321cef2c3349f33df8adcd58396456",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 422,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract063.config.json",
+          "bytes": 2951,
+          "sha256": "7ad24a1a3edf8003906797909095524164cd7a32ea6a078e7318f5d5b10c32ed"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract063.outer.json",
+          "bytes": 563,
+          "sha256": "1cc895f3c4c4c9a6d2ca07705c128f49916efcc00faf6de849dbada8a8d01b3d"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@types/node",
+      "name": "@types/node",
+      "version": "25.0.3",
+      "archive": {
+        "relative": "node_modules/@types/node",
+        "version": "25.0.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\5b\\ad\\3d6ee2d545599e5baf77c4a7f31de215ea72461b3f7cb823df79723510b30b5d578a619f66d797c03126943c11d82c616c55170c9920a4b103ab655f4160",
+        "archiveBytes": 441306,
+        "integrity": "sha512-W609buLVRVmeW693xKfzHeIV6nJGGz98uCPfeXI1ELMLXVeKYZ9m15fAMSaUPBHYLGFsVRcMmSCksQOrZV9BYA==",
+        "archiveSha256": "6f4ea893387ef6ad2bba2f6a3b1e6c1c7b4858a7bb49d7ec2caaab528328aa04",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 89,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract064.config.json",
+          "bytes": 2950,
+          "sha256": "5ee6ef87f6642d8e76ba7bf0000b5920a3a3fcec439bbba7761c4a05b082b878"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract064.outer.json",
+          "bytes": 561,
+          "sha256": "a1f01ef4a6f20ac33bd6bcdaff29d6d9522fd8e63aae9ae832d7aaa92cc95f6c"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@types/react",
+      "name": "@types/react",
+      "version": "19.2.7",
+      "archive": {
+        "relative": "node_modules/@types/react",
+        "version": "19.2.7",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\31\\6b\\6f1eb1992c5b6d81e123dbc5571f1a66c186e8aff0133d86c17d215910844ad1e70214b976428e79cf9d87b2cf9457d09137bb6b49eab5cdb831ed80d65a",
+        "archiveBytes": 76416,
+        "integrity": "sha512-MWtvHrGZLFttgeEj28VXHxpmwYbor/ATPYbBfSFZEIRK0ecCFLl2Qo55z52Hss+UV9CRN7trSeq1zbgx7YDWWg==",
+        "archiveSha256": "3a377f0650bf9b34a4efd077f4279b92540d4cd8c77081adcf3e710e76cfb28b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 16,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract065.config.json",
+          "bytes": 2951,
+          "sha256": "c1347c5a9ae191cdb584e6117e35ab694187ca1924d32c09b42ed9cb975c5c97"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract065.outer.json",
+          "bytes": 562,
+          "sha256": "7b9932ae359b6f1057f5e3c1e04dc125ad8033c1027941491dc2a3b1b71e5ff2"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@types/react-dom",
+      "name": "@types/react-dom",
+      "version": "19.2.3",
+      "archive": {
+        "relative": "node_modules/@types/react-dom",
+        "version": "19.2.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\8e\\9d\\8bfde63a7e7f8a81555000ea9822d6c5d1563f600a5ee4ccf61746b29123bc831df56d8099caf49e6310872afcc71b97998dcfb3c9a4b906b056c9adbe91",
+        "archiveBytes": 7725,
+        "integrity": "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==",
+        "archiveSha256": "01766931e7f616e61d59ddaedfa23869e8d0df4641245d70ecbad2b415bf0d4b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 17,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract066.config.json",
+          "bytes": 2955,
+          "sha256": "8784df5c1e4a33bb51ccf19faca4be133d525a784530d7b9ab3bb8f247a0dc52"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract066.outer.json",
+          "bytes": 566,
+          "sha256": "0868e5ec0d517dc72b3f279abfeb00798a099c74cc003ac5623f6161dda205bc"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@wallet-standard/app",
+      "name": "@wallet-standard/app",
+      "version": "1.1.0",
+      "archive": {
+        "relative": "node_modules/@wallet-standard/app",
+        "version": "1.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\dc\\28\\a3beb3bdbadc79f7c923af8e614db6de7b2910ad07ca9929f17963a0536e53384a6f722a43fdb60341622a52fd4e73a28ae184ada2448cbbf14135e70651",
+        "archiveBytes": 10087,
+        "integrity": "sha512-3CijvrO9utx598kjr45hTbbeeykQrQfKmSnxeWOgU25TOEpvcipD/bYDQWIqUv1Oc6KK4YStokSMu/FBNecGUQ==",
+        "archiveSha256": "8ed433702ab6c319ce53a1b60e975f40cabeeee953ba7d85f8d41a644bbb3878",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 18,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract067.config.json",
+          "bytes": 2959,
+          "sha256": "ee4852c7a16e64f8bce97cc73dccdc40594663c32c29b88f7d9fc6c2fbbc8e79"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract067.outer.json",
+          "bytes": 570,
+          "sha256": "97eae39a4e362aa413b5b2a6153c8b08da8e1853696e3a06b3b2c39ad58ec0be"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@wallet-standard/base",
+      "name": "@wallet-standard/base",
+      "version": "1.1.0",
+      "archive": {
+        "relative": "node_modules/@wallet-standard/base",
+        "version": "1.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\0c\\90\\d08632a648d54b29622da0a4e1252f82b0942347d00e04e8ab0554f517d6294720bda181c4f999d27fccbc6f152986d2aa75030f550da61e8858751bc355",
+        "archiveBytes": 10399,
+        "integrity": "sha512-DJDQhjKmSNVLKWItoKThJS+CsJQjR9AOBOirBVT1F9YpRyC9oYHE+ZnSf8y8bxUphtKqdQMPVQ2mHohYdRvDVQ==",
+        "archiveSha256": "22b86bacb5295235eb03281fbcec43ffb60960da36dd2dc2a15fa095266ee5a3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 39,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract068.config.json",
+          "bytes": 2960,
+          "sha256": "9a9b1ca8b52f49f670e1c617e934c7dc9913fdfa39ba786fb0deda18720a6489"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract068.outer.json",
+          "bytes": 571,
+          "sha256": "81cc547d90ce7d99485fdcb6f1298ecdde3d14bac05c34bd9f2dba971ff8a3ca"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@wallet-standard/core",
+      "name": "@wallet-standard/core",
+      "version": "1.1.1",
+      "archive": {
+        "relative": "node_modules/@wallet-standard/core",
+        "version": "1.1.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\e5\\79\\a373af8e7b485c3df55ce67f05efb3552f0c75255028095810a4bcafff8dff6e1b4889ff86c77594ac395a483a0cf22da4036c5de98a056c70b1b3e7b4cc",
+        "archiveBytes": 5419,
+        "integrity": "sha512-5Xmjc6+Oe0hcPfVc5n8F77NVLwx1JVAoCVgQpLyv/43/bhtIif+Gx3WUrDlaSDoM8i2kA2xd6YoFbHCxs+e0zA==",
+        "archiveSha256": "6a47d2d3f371e158eaeb8cd5d0172887779abf26f0858dd70c37b6bbb79adbc8",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 13,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract069.config.json",
+          "bytes": 2960,
+          "sha256": "619faff002612bf138ee93bc5121c0c0f739fe93128edc966a20c18ba88cfd21"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract069.outer.json",
+          "bytes": 571,
+          "sha256": "6738a1f7c3a528481587d3eda96a42823c617e03b58bbaaed959b57684a28998"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@wallet-standard/errors",
+      "name": "@wallet-standard/errors",
+      "version": "0.1.1",
+      "archive": {
+        "relative": "node_modules/@wallet-standard/errors",
+        "version": "0.1.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\57\\c2\\6ed56be897c8bf543c9038786387198c57098a8b0cb15190671e1b623d9253598d14fd285bda2116c869e06046c0929dac19398478d5f5b55c8647b3ea37",
+        "archiveBytes": 26153,
+        "integrity": "sha512-V8Ju1Wvol8i/VDyQOHhjhxmMVwmKiwyxUZBnHhtiPZJTWY0U/Shb2iEWyGngYEbAkp2sGTmEeNX1tVyGR7PqNw==",
+        "archiveSha256": "31930e7bcdaeeb469533855e383afc8d05a973dc817aea674b7bcb6febb1a388",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 62,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract070.config.json",
+          "bytes": 2962,
+          "sha256": "a2fb9da337855a01a418328c6ccb6f295b4429fdb2831c257f7476d10bb1da10"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract070.outer.json",
+          "bytes": 573,
+          "sha256": "4bbf1ad7134584ab15870c8953955f8f96162356819b767f0f13135cfb368530"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@wallet-standard/features",
+      "name": "@wallet-standard/features",
+      "version": "1.1.0",
+      "archive": {
+        "relative": "node_modules/@wallet-standard/features",
+        "version": "1.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\86\\21\\22bd6373b71ef7b3eee22f1b2e0f5b0e276f31b518b1e7c5bb5e7cf85f3cc0fe9174f9a89c9d682339d035d1da150c40d9754b9908822a1bde9214d94352",
+        "archiveBytes": 9117,
+        "integrity": "sha512-hiEivWNztx73s+7iLxsuD1sOJ28xtRix58W7Xnz4XzzA/pF0+aicnWgjOdA10doVDEDZdUuZCIIqG96SFNlDUg==",
+        "archiveSha256": "c7236092ada2e3662ec28db295c3fb1b045d2e04ad2ebb6dcfd44bc9bef5ab0e",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 32,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract071.config.json",
+          "bytes": 2964,
+          "sha256": "86c1fc566c87ca8832354d8bfe80ea2387bb90ae9e6d575ccf27a7849182b330"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract071.outer.json",
+          "bytes": 575,
+          "sha256": "53a74d68d15b8283393b34eb509c9400f6b0243831a20eb0055a720ec9ea6094"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/@wallet-standard/wallet",
+      "name": "@wallet-standard/wallet",
+      "version": "1.1.0",
+      "archive": {
+        "relative": "node_modules/@wallet-standard/wallet",
+        "version": "1.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\1a\\df\\139d2943669025f9158e38007f92ebc2ed1a5c75602515b1cda22e20b17b1f6966b54024fa2c171f2184cf74e642f4e559503c2a1ae18072a65e8c39878e",
+        "archiveBytes": 12194,
+        "integrity": "sha512-Gt8TnSlDZpAl+RWOOAB/kuvC7RpcdWAlFbHNoi4gsXsfaWa1QCT6LBcfIYTPdOZC9OVZUDwqGuGAcqZejDmHjg==",
+        "archiveSha256": "d8a299ddaa18e84a9bd44c7a1af307c57fac66fa4f48744de2ebbb188a0ddde9",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 25,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract072.config.json",
+          "bytes": 2962,
+          "sha256": "6e15787e244183afc306c538020d96027d016c6eff4eec14aa87b20621e5d6eb"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract072.outer.json",
+          "bytes": 573,
+          "sha256": "22f35b2cc98532b9cbc34454afa2cc3565af03865125907541da8e0fc983e5d5"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/baseline-browser-mapping",
+      "name": "baseline-browser-mapping",
+      "version": "2.10.19",
+      "archive": {
+        "relative": "node_modules/baseline-browser-mapping",
+        "version": "2.10.19",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\a8\\29\\0d2e2dac7c13a7f17859434157b13d4a8bf628e4ff7486b9116a6545452eff295f61a5f0381e4a16354d79dbef30d333e39f1a39a6cc7934bdcf48682fe6",
+        "archiveBytes": 52715,
+        "integrity": "sha512-qCkNLi2sfBOn8XhZQ0FXsT1Ki/Yo5P90hrkRamVFRS7/KV9hpfA4HkoWNU152+8w0zPjnxo5psx5NL3PSGgv5g==",
+        "archiveSha256": "e1e76738cc1a6a4e635c77819546c1b16e0641244fb262886337cc77bc72e25e",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract073.config.json",
+          "bytes": 2963,
+          "sha256": "0a5b7121981d239bfb54052d36aaa16a344bc34ce068d0d3e62257fa5886c0a8"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract073.outer.json",
+          "bytes": 574,
+          "sha256": "df344d57a6947a3636c785c9f43f5678122e2d1f809851f73a4fac0340ae2cb9"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/bowser",
+      "name": "bowser",
+      "version": "2.14.1",
+      "archive": {
+        "relative": "node_modules/bowser",
+        "version": "2.14.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\b7\\33\\e3cc2c7280029614e24fd35d68c451ece7b1f3221384ada70880078f138a6a0772e29002ca9d2cd4c94e0c1acf7f882114b879402538d373933ebbb6041a",
+        "archiveBytes": 64403,
+        "integrity": "sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==",
+        "archiveSha256": "9701a257a1e25b0caf9740a48979d4d955e61c0e4dfa7508d4a789eb4e41caa0",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 14,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract074.config.json",
+          "bytes": 2945,
+          "sha256": "57f764d895d2111681d2e43203baa8f54973af89ab44bbdd8bd36c1b7d050179"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract074.outer.json",
+          "bytes": 556,
+          "sha256": "94d8f8e03ff5b4c37fc46afd39561c16f633b181e4c368aa89cfc13f276675d5"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/caniuse-lite",
+      "name": "caniuse-lite",
+      "version": "1.0.30001788",
+      "archive": {
+        "relative": "node_modules/caniuse-lite",
+        "version": "1.0.30001788",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\ea\\af\\07169fa5390b5c7fbc012beb847a7c729955a418a9231690afc395b6e5c98cc040d4e39a75c5014142ff090e530caf2ede371c81691faac6099351990845",
+        "archiveBytes": 330532,
+        "integrity": "sha512-6q8HFp+lOQtcf7wBK+uEenxymVWkGKkjFpCvw5W25cmMwEDU45p1xQFBQv8JDlMMry7eNxyBaR+qxgmTUZkIRQ==",
+        "archiveSha256": "c131ad6c4485033f7d8c78ef38199e293b149f6cad355282dadb873767202de7",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 839,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract075.config.json",
+          "bytes": 2951,
+          "sha256": "dd92dda2beb317c9cb0b67d2de9e140a929fedb95d94ca5d80c1bda70d44abe8"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract075.outer.json",
+          "bytes": 563,
+          "sha256": "cc323d666742a6f8120d62a5560d12fd5f232a7aaf9cdbc4c75a85cca2daf9aa"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/chalk",
+      "name": "chalk",
+      "version": "5.6.2",
+      "archive": {
+        "relative": "node_modules/chalk",
+        "version": "5.6.2",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\ec\\dc\\c12f4acde9f3145be7fb03a228e21e34a90946fb11a6b4cc5f6e71ff2bb4c0b6df094165502beea0d145ca31e549a3257912490db04ad0f29543ddb2c76c",
+        "archiveBytes": 13831,
+        "integrity": "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==",
+        "archiveSha256": "94957715a483aa3b9db60c8f22d5498227d8025c407f982eef81e34f37574ffd",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 12,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract076.config.json",
+          "bytes": 2944,
+          "sha256": "93c04ee63c963c34b278334c6a446784c1baee519d51ebf09f86ff4933f0720a"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract076.outer.json",
+          "bytes": 555,
+          "sha256": "2ef27cee8be7d4921de302516cbb1ebee40687f1a8578cb37ba7099ccec101e9"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/client-only",
+      "name": "client-only",
+      "version": "0.0.1",
+      "archive": {
+        "relative": "node_modules/client-only",
+        "version": "0.0.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\21\\5d\\cebb48d233366b777a59e3c9cb913f4303b020d699cfcda8908695bb73745b72aab3bf3cd5bbe2fc81fa8ca7ff08336310b528aa682c6badc7eef08f2b30",
+        "archiveBytes": 481,
+        "integrity": "sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==",
+        "archiveSha256": "dcd7bc3868e2d3518d08944559952e4a68f581d89a84b6892de9fd8f40860b19",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 3,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract077.config.json",
+          "bytes": 2950,
+          "sha256": "000286e4520a72112235538a58eb5743f87b16e95d0116cc36212efb63a4f368"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract077.outer.json",
+          "bytes": 561,
+          "sha256": "f05b17ce7d222a2d51bd1fc489be9c8907eb5072fc8dc9312c6a590965f4825e"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/commander",
+      "name": "commander",
+      "version": "13.1.0",
+      "archive": {
+        "relative": "node_modules/commander",
+        "version": "13.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\fe\\b1\\5e0a934941b852663195c0ef51155df13ea6e71114bc326210cc2b43ff397a82926e57f6cc2ee37dda81b717b77ca031071d1aee8d25cd52bf1fa639ed2b",
+        "archiveBytes": 51398,
+        "integrity": "sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==",
+        "archiveSha256": "d5703ba285336d6d6d86fecf7a9f064e248879497d98ccc98ca849a62e34822a",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 14,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract078.config.json",
+          "bytes": 2948,
+          "sha256": "1fe862f0c9b71858e925c66e33c426fea4b14aa9528626950994ee9de4788617"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract078.outer.json",
+          "bytes": 559,
+          "sha256": "52c52534af53f64de75b4d310a580d7eced358b722fffeab7d8a3c1191860374"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/csstype",
+      "name": "csstype",
+      "version": "3.2.3",
+      "archive": {
+        "relative": "node_modules/csstype",
+        "version": "3.2.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\cf\\51\\c629c632db103c00641fc2b9f43c0cbe3c1ed7fc64a3dd45495bda8aca7e37c566be825e675e6538aaa2cc4735952c50bc2aeb145fc4ffd240a2398a4021",
+        "archiveBytes": 138324,
+        "integrity": "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==",
+        "archiveSha256": "f3501f8ee1c73f7568fecb22c11231162c0467e59262461da5579519307427a3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 5,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract079.config.json",
+          "bytes": 2946,
+          "sha256": "e6bad997cb22be0410ad3ffd7ae377090bca30cc1efe825df344ffd46aae0a65"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract079.outer.json",
+          "bytes": 557,
+          "sha256": "319762931394cf6765e9d2eeee0d1240a9298914563b85f5bd34dc28d2458659"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/detect-libc",
+      "name": "detect-libc",
+      "version": "2.1.2",
+      "archive": {
+        "relative": "node_modules/detect-libc",
+        "version": "2.1.2",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\06\\d8\\f604e38ef37a375b21f9f5ef0c817b3111055c6ab9143a9118aee6c1d2eaf09cdd74c90dfae2bb22072535d67665a966199b4e62fe87fb8a8e26ce2841b5",
+        "archiveBytes": 7776,
+        "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==",
+        "archiveSha256": "270dec0fc06cff86481da8af2dd8f18dee6b602790b14ef0e1c2c18d7da39427",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract080.config.json",
+          "bytes": 2950,
+          "sha256": "6cfc573c9defa374b17376f13ba8611f606d7e6d927687f4bdc8352c96987b09"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract080.outer.json",
+          "bytes": 561,
+          "sha256": "b4ba19250c931d29e68e636d873e441e7f3c52449e8c73feefb67077d9bdb295"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/fast-xml-builder",
+      "name": "fast-xml-builder",
+      "version": "1.2.0",
+      "archive": {
+        "relative": "node_modules/fast-xml-builder",
+        "version": "1.2.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\d3\\46\\805a27aa7dff99261b1703883583b33c93eec062831450717eff315be54e94bff3f4565e10668f38fc872e7f361a94bb848fdf76f1b5cdf4f6db173305d1",
+        "archiveBytes": 54599,
+        "integrity": "sha512-00aAWieqff+ZJhsXA4g1g7M8k+7AYoMUUHF+/zFb5U6Uv/P0Vl4QZo84/IcufzYalLuEj9928bXN9PbbFzMF0Q==",
+        "archiveSha256": "b9344ea671b80ab2d3d4614883991c8584d36db9607e32b57e56b81b9c8af487",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 14,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract081.config.json",
+          "bytes": 2955,
+          "sha256": "9b16c2a326f59562488521cdd62f3628c0d77ebe8a0c9d171d3d331a89094cba"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract081.outer.json",
+          "bytes": 566,
+          "sha256": "522c37b71e119525908006c6af572865aa26f9c5e57eec6d0434842b34a533a8"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/fast-xml-parser",
+      "name": "fast-xml-parser",
+      "version": "5.7.3",
+      "archive": {
+        "relative": "node_modules/fast-xml-parser",
+        "version": "5.7.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\0b\\40\\1a36e0be9ac732eafac040a01cfeb32afb300f1e875f1c666ee2c1957a1bc042dfc92c6d4ee7311c61c5d2639cd2aabe18560c6c07ea475d3ab48bb78396",
+        "archiveBytes": 271790,
+        "integrity": "sha512-C0AaNuC+mscy6vrAQKAc/rMq+zAPHodfHGZu4sGVehvAQt/JLG1O5zEcYcXSY5zSqr4YVgxsB+pHXTq0i7eDlg==",
+        "archiveSha256": "0cbd7fbfa60fc17386629671c6cb6f32b6762ab0f440c342aa436547b3e964b4",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 53,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract082.config.json",
+          "bytes": 2954,
+          "sha256": "f33a5db47e27b58a7750dc6f54852bf95bf94d7276770cfff532fc92bcc6fc31"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract082.outer.json",
+          "bytes": 565,
+          "sha256": "029e70f8067c1badd287ddd68a1ff4e984c92b2eb0783e8e72b21adc1fee936f"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/gql.tada",
+      "name": "gql.tada",
+      "version": "1.9.2",
+      "archive": {
+        "relative": "node_modules/gql.tada",
+        "version": "1.9.2",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\43\\14\\47569c6dace55d617cfaa1abead2504cf99769d2cc1aa4b189703e122e95c372c0f7dfb0470c5af3aaa8df91b7a9bf4b120223b42c669bbb5908e43e46ca",
+        "archiveBytes": 34246,
+        "integrity": "sha512-QxRHVpxtrOVdYXz6oavq0lBM+Zdp0swapLGJcD4SLpXDcsD337BHDFrzqqjfkbepv0sSAiO0LGabu1kI5D5Gyg==",
+        "archiveSha256": "9bf5e57be680b3b170afd8e571d7bd25f31e243deafac92ca2bdd6009f1034c3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 26,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract083.config.json",
+          "bytes": 2947,
+          "sha256": "ae6543162a8c2917b823e9b0393ae60c023dff3b5d4462956c625fcd4618f094"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract083.outer.json",
+          "bytes": 558,
+          "sha256": "6cd6faf52540ec939db06b1f71bcd95f6775ae9ca6aeeb7ef9109fe070c58309"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/graphql",
+      "name": "graphql",
+      "version": "16.14.0",
+      "archive": {
+        "relative": "node_modules/graphql",
+        "version": "16.14.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\04\\1b\\d0ff8d3aa7ee0265b4e909b54f4b17f3ad9adb9ee5923f510b620c92e81fa135e2b382b741e0973309ae55654050ac36bd8549e09b42a77b163aa4944de5",
+        "archiveBytes": 297260,
+        "integrity": "sha512-BBvQ/406p+4CZbTpCbVPSxfzrZrbnuWSP1ELYgyS6B+hNeKzgrdB4JczCa5VZUBQrDa9hUngm0KnexY6pJRN5Q==",
+        "archiveSha256": "01e928d1b07eaa669465415c3b83b2c72dd8ddb4b7e6ac3261c0c862ecf1e8ba",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 397,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract084.config.json",
+          "bytes": 2946,
+          "sha256": "66d67387677022e98ba835a330400368575c8f6b6284cf0c3ca37e796b1eef08"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract084.outer.json",
+          "bytes": 558,
+          "sha256": "0960b570e81eb1a44838044539872d4efe83e98ddd9e88e0b438a7a3fbf58534"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/nanoid",
+      "name": "nanoid",
+      "version": "3.3.18",
+      "archive": {
+        "relative": "node_modules/nanoid",
+        "version": "3.3.18",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\0d\\38\\383096c631691f8ba55915d36ddbf71a31b432e0ebbe3a9fe1250bc611672755fa00d5003ec7344a033c3d8c3ebe19538e798aff98872e0d276e83a17afb",
+        "archiveBytes": 5713,
+        "integrity": "sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==",
+        "archiveSha256": "b9dc81cb403ea2510314dd2d1ad8d71934f325db90c1b43805e781b87e3fb009",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 25,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract085.config.json",
+          "bytes": 2945,
+          "sha256": "893ef7b4c32bcbbc5359784bbdb24159a58efff0810b2c9984a7fd509a550565"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract085.outer.json",
+          "bytes": 556,
+          "sha256": "855d07a6979238b66e7014d29ab8e7b6faf115396dea78807e804a77e10ab74d"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/next",
+      "name": "next",
+      "version": "16.2.11",
+      "archive": {
+        "relative": "node_modules/next",
+        "version": "16.2.11",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\07\\7d\\fdcdaa9bc8af1c9b186802f2eb730a1a6f008fd70cf6d734b37eac6a5c07a64eed815e71fbb509df72094abf5be731420305cf87b61ed738342b89366245",
+        "archiveBytes": 34509286,
+        "integrity": "sha512-B339zaqbyK8cmxhoAvLrcwoabwCP1wz21zSzfqxqXAemTu2BXnH7tQnfcglKv1vnMUIDBc+Hth7XODQriTZiRQ==",
+        "archiveSha256": "ef12cf1c102c398c90aa8265e09452bdc00b4c1eff794382a082d29a861c8838",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 8077,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract086.config.json",
+          "bytes": 2943,
+          "sha256": "993a6e68d86d2eb4d4d599449c9d01c4cb5c6e433ed8f42f660acf308b434e3c"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract086.outer.json",
+          "bytes": 556,
+          "sha256": "e27e5510e4faaebd8ce5b672bee0579f136532f37cc9c6ee132f04b9954172e6"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/nipplejs",
+      "name": "nipplejs",
+      "version": "1.0.3",
+      "archive": {
+        "relative": "node_modules/nipplejs",
+        "version": "1.0.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\64\\75\\49c52b5779abb550d1526d5b384551ca407c07c988d5b7ff4fda97e978757934ad4cb64264092e302daa0fab7e9fdd55af461f803e1b1cd0c4a46a60b2ce",
+        "archiveBytes": 110968,
+        "integrity": "sha512-ZHVJxStXeau1UNFSbVs4RVHKQHwHyYjVt/9P2pfpeHV5NK1MtkJkCS4wLaoPq36f3VWvRh+APhsc0MSkamCyzg==",
+        "archiveSha256": "741093b1f20ec21d5d278f0ec79c5652b6504a95ec7efb25850b812ddba55c13",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 20,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract087.config.json",
+          "bytes": 2947,
+          "sha256": "64e47c8fcaf76c8d18b23a19cba805d0192653c2933ce2ee65bae72a82af031f"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract087.outer.json",
+          "bytes": 558,
+          "sha256": "1dad738aa3e08ad8da57cee7140fc9943d285cd8a5fda411d37f4f6ddfd3ea1d"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/path-expression-matcher",
+      "name": "path-expression-matcher",
+      "version": "1.5.0",
+      "archive": {
+        "relative": "node_modules/path-expression-matcher",
+        "version": "1.5.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\71\\ba\\dead957eeabbdd42bac3fa218c7191448a24ab6eff537dd92f9eeb32eb2d31d062815d110583f63ae468487e6d2d9cb9ed4e18730a77cac29d56463782c9",
+        "archiveBytes": 36327,
+        "integrity": "sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ==",
+        "archiveSha256": "1351ff7f33dae4660827cf6fb74c109f0840daea989faa2c991cd85bc3e9b173",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 12,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract088.config.json",
+          "bytes": 2962,
+          "sha256": "356dfcd8c3be20eeba74831790b2e3e8181f368f64867c5dd30fea7ce9ec0632"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract088.outer.json",
+          "bytes": 573,
+          "sha256": "55b892e263affb45a5161d4503d0fb3d9545796ffc57dc622cddae682d5246fd"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/picocolors",
+      "name": "picocolors",
+      "version": "1.1.1",
+      "archive": {
+        "relative": "node_modules/picocolors",
+        "version": "1.1.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\c5\\c7\\87dac9e1b5be4cf658aa0ec984c39ea57b7efa993664117fe311bfd1c4d1727a036e97b78db250973fd1438ff2dcbb45fc284c8c71e3f69eda5a1eb0c454",
+        "archiveBytes": 2625,
+        "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==",
+        "archiveSha256": "d3aedb2807967b7eb37fd11b03b7e3701e725af79c650d0812ff7213f8f882d9",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 7,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract089.config.json",
+          "bytes": 2949,
+          "sha256": "596863b7b259ab3df9599c01bc0379e5066d0445d6c9af7ab7f9e51e37a42354"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract089.outer.json",
+          "bytes": 560,
+          "sha256": "aebf13450e4761f74d2d2914126bec544c4b0ad3603e3566a3c4a93bfbd34f18"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/poseidon-lite",
+      "name": "poseidon-lite",
+      "version": "0.2.1",
+      "archive": {
+        "relative": "node_modules/poseidon-lite",
+        "version": "0.2.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\c4\\8a\\fe1ba1de61f3a10aeb3076a705a525f8ed23e19b41298ac589ea1edf1e55b069522f1f774b9de8e96adaedc3a5dce8768bae9ab4e72ed545fbc3983188a2",
+        "archiveBytes": 431846,
+        "integrity": "sha512-xIr+G6HeYfOhCuswdqcFpSX47SPhm0EpisWJ6h7fHlWwaVIvH3dLnejpatrtw6Xc6HaLrpq05y7VRfvDmDGIog==",
+        "archiveSha256": "fd7b260daac27f091be2c19e4899b8a283de71fc4ed90ad4244cccdc6e513716",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 54,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract090.config.json",
+          "bytes": 2952,
+          "sha256": "faa2c2ca22548b74ddfe5b0af124d4a41bcba2b49fc3ca9664a8e9c2cee5d9da"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract090.outer.json",
+          "bytes": 563,
+          "sha256": "f8c881357fd6d84e5aaa2469f2899ecbeb21f6266fed4366d8a29fd3c5536caf"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/postcss",
+      "name": "postcss",
+      "version": "8.5.21",
+      "archive": {
+        "relative": "node_modules/postcss",
+        "version": "8.5.21",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\bf\\8b\\0334fddf74d89631f69b3bb3b039074e5fc4e2412ced2b24f55a3d30fa3ecb0da9652538494410419b3546c988f472b321ee3955e337a93e488dbbd5300d",
+        "archiveBytes": 51355,
+        "integrity": "sha512-v4sDNP3fdNiWMfabO7OwOQdOX8TiQSztKyT1Wj0w+j7LDallJThJRBBBmzVGyYj0crMh7jlV4zepPkiNu9UwDQ==",
+        "archiveSha256": "d69aca82a3dd1e91546cfdbda0e9ab6218b634b511fb9ca16c764ca2ec0938e8",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 55,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract091.config.json",
+          "bytes": 2946,
+          "sha256": "4a9dd88f2e2e5213e40584945c447eca998ed28b6bcee262d926f1dbb6dfb832"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract091.outer.json",
+          "bytes": 557,
+          "sha256": "dfe7c0de55c66e1eb38e0b1211eb0785f71c6aee667b88b6f3e11409fa48c14e"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/react",
+      "name": "react",
+      "version": "19.2.3",
+      "archive": {
+        "relative": "node_modules/react",
+        "version": "19.2.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\2a\\ef\\e18586d58ce4275c3645bf6f9189b98b146c0575e78a1c570e4e5aedef1a65067c9ae4e1a7fe12110eca8389251c7ce46c0c2ecc3f1c28ae4f23070b0858",
+        "archiveBytes": 24804,
+        "integrity": "sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==",
+        "archiveSha256": "546df22e736ccd4f4d496fe6f365257dde59421c5c5b4347528aeb8a7c74ae7b",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 27,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract092.config.json",
+          "bytes": 2944,
+          "sha256": "fafdf158d2d59c9053630d3c981576317f7fa27b9d02e2b0720279d60a352964"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract092.outer.json",
+          "bytes": 555,
+          "sha256": "47f93edbd667594f36959a717b1e28ede06d5220d988fbec038145dccb983fd6"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/react-dom",
+      "name": "react-dom",
+      "version": "19.2.3",
+      "archive": {
+        "relative": "node_modules/react-dom",
+        "version": "19.2.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\c8\\42\\eee1698b3f0e4caff966784a68c79af0dd111369c13ef89807a90cddd9d83e61b26e6adde31f88a781cf963d98716a817376ff72df71be17b365e4ed0606",
+        "archiveBytes": 1276385,
+        "integrity": "sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==",
+        "archiveSha256": "b549d1b35a00d1ea73d2f726e975b0c90ad44177a610557b43e0f1509e7aefd5",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 43,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract093.config.json",
+          "bytes": 2948,
+          "sha256": "ea3fa179fb80185d850c7e2ed5da08f6605f99b012671bd178b379eb5d72ca00"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract093.outer.json",
+          "bytes": 559,
+          "sha256": "9341db8399944dc39bb53265123275124fcb53bb72fa8d17e46c60489b14c0c1"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/scheduler",
+      "name": "scheduler",
+      "version": "0.27.0",
+      "archive": {
+        "relative": "node_modules/scheduler",
+        "version": "0.27.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\78\\db\\fe5ab55b2aed5fdef6d8253ff1b62179b320391cf20cb5ff48818fe72a0d2c5aacc0504bea63fc66ece71973fa9a7cbc7f88ef4580e99e480a78bf9b62fd",
+        "archiveBytes": 10015,
+        "integrity": "sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==",
+        "archiveSha256": "ab26ce35ce4032f04b78cfc5bbb4cfe13358e9fe7a5433a8aa6315c3debc5095",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 15,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract094.config.json",
+          "bytes": 2948,
+          "sha256": "92fb7e8720149b9562b71d6a8a7c549e1fc0f9d86b83c10efc6850961afad87c"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract094.outer.json",
+          "bytes": 559,
+          "sha256": "51aaef42af8fc0601a013682a12a2e08326ec2967e978fca5d267200052db218"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/semver",
+      "name": "semver",
+      "version": "7.8.5",
+      "archive": {
+        "relative": "node_modules/semver",
+        "version": "7.8.5",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\63\\bf\\ca0ec6fc2e3a28669c1aa86cae94ee8342592c8029dc7211c693eb19218e1206f52870c044147e54af57c8e1d57e26f974c3a723bee71a222e34a6e462a0",
+        "archiveBytes": 29399,
+        "integrity": "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==",
+        "archiveSha256": "d85045d4300d7d57c891336b95df532e73f34c22ffcd222452b6d08b9d127d5d",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 53,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract095.config.json",
+          "bytes": 2945,
+          "sha256": "c1728ab8827b7d244bb22f99e4a1095aeabe77d65b83dd4813839319382224a8"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract095.outer.json",
+          "bytes": 556,
+          "sha256": "0ef498d35e03925f6c25dbbac9f1d9e97844525906b02676187ecd58751b7f98"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/sharp",
+      "name": "sharp",
+      "version": "0.35.3",
+      "archive": {
+        "relative": "node_modules/sharp",
+        "version": "0.35.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\7a\\3d\\33547b991870a20015dc3717988694673cd3c072f6c6f1131d0408430312ca9024554a92b7232bbba9bab0dc9333a23d1111e33a7f7b492ed570974d36dd",
+        "archiveBytes": 214036,
+        "integrity": "sha512-ej0zVHuZGHCiABXcNxeYhpRnPNPAcvbG8RMdBAhDAxLKkCRVSpK3Iyu7qbqw3JMzoj0REeM6f3tJLtVwl0023Q==",
+        "archiveSha256": "53637f5503f81d10b02097eca6f94c44e69d92ba7ef759f268a0c4ea1d06ae54",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 47,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract096.config.json",
+          "bytes": 2944,
+          "sha256": "75292f650dcc24e63e6a403205b5b31b628556788cd31bbd9064713591863357"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract096.outer.json",
+          "bytes": 555,
+          "sha256": "47e7dd75c62020a0afebe749788b9c3ae10a3b7de8528e84d4a68d2771752129"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/source-map-js",
+      "name": "source-map-js",
+      "version": "1.2.1",
+      "archive": {
+        "relative": "node_modules/source-map-js",
+        "version": "1.2.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\51\\75\\8c2a12cec1529bef6f0852d40f5f17d853ebac7726ed52b2bff2e184f0240cbeb84ea70bf30c1c23d108522fb31073bbc8b084811bc550f3e203431a5f40",
+        "archiveBytes": 35340,
+        "integrity": "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==",
+        "archiveSha256": "f126a6f9fca487a43219d8cb8c3a955279187a966119d548eb5cd47e999d4853",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 18,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract097.config.json",
+          "bytes": 2952,
+          "sha256": "3180b3031ff776f84f58214af33eaede943818b2d88b5a53af2b173846f0521b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract097.outer.json",
+          "bytes": 563,
+          "sha256": "0e3bd7a4f3eda2bf8ce6f42c38bfe2c67ad4a1103bc57dec677408ad73003eb6"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/strnum",
+      "name": "strnum",
+      "version": "2.3.0",
+      "archive": {
+        "relative": "node_modules/strnum",
+        "version": "2.3.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\ba\\6b\\3728d778d8f1b2c79c5aa154ced668d4d5b1f7369638becad5967bfd3cd1aa423f3077bac9ea7132a4bac9ef3e6fc4ae513f4c8c2e8e89fc6b26eb60c8e5",
+        "archiveBytes": 4472,
+        "integrity": "sha512-ums3KNd42PGyx5xaoVTO1mjU1bH3NpY4vsrVlnv9PNGqQj8wd7rJ6nEypLrJ7z5vxK5RP0yMLo6J/Gsm62DI5Q==",
+        "archiveSha256": "9e2cf6df5cbd565d426c6d9539438d2e1bd3919f56dcf2c4abd3b67391cb7a53",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 5,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract098.config.json",
+          "bytes": 2945,
+          "sha256": "0bb4d172e824fe40584b3bb3bcd84d1a5e59e381afe2ad9e34d816bcfd88fba0"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract098.outer.json",
+          "bytes": 556,
+          "sha256": "fc1326728ce7dea2d8e396cd10ce8a1538072a67b6b7a7be8524afbebc982f23"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/styled-jsx",
+      "name": "styled-jsx",
+      "version": "5.1.6",
+      "archive": {
+        "relative": "node_modules/styled-jsx",
+        "version": "5.1.6",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\a9\\25\\720d378ca2d76f418a0758b346c111491c2fa2f99bdd051628b0e1600be5a0d6fc787eb376fd11bf340ed262aaaf28d2dfdfd3f62d2440da9bba9f45d864",
+        "archiveBytes": 156474,
+        "integrity": "sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==",
+        "archiveSha256": "42484b6c98ce658ee672927a3f7b9ac8920dfff3e406c01fbd62e2a8761bb7f9",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 20,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract099.config.json",
+          "bytes": 2949,
+          "sha256": "4cf8f43b55b89870d9c972eff55cca73c3d25c04fb3eb6efcc4c278c4679096a"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract099.outer.json",
+          "bytes": 560,
+          "sha256": "2c2296eb1568294b9f210339c4eb79a8ff8e2f1af0367df79cd1c51631bd6bd1"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/tslib",
+      "name": "tslib",
+      "version": "2.8.1",
+      "archive": {
+        "relative": "node_modules/tslib",
+        "version": "2.8.1",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\a0\\91\\6ef781d06fe29576e49440bef09e99aa9df98bb0e03f9c087a6fa107d30084a0ad3f98f79753a737c0a0d5f373243ae1cf447b525ca294f7d2016b34bfdb",
+        "archiveBytes": 18477,
+        "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==",
+        "archiveSha256": "66f635d5eeabae44807534976913a102cf615b9a045368359c9f79ae6ee2119e",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 14,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract100.config.json",
+          "bytes": 2944,
+          "sha256": "4958467023906a2ebcf6dff8d2a37292478c0226796c1138079aa29f5b5a2f7f"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract100.outer.json",
+          "bytes": 555,
+          "sha256": "e5b27c25ccff06143f652c4c46646b28dd79045c3d89e5794b166b169a41a93d"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/typescript",
+      "name": "typescript",
+      "version": "5.9.3",
+      "archive": {
+        "relative": "node_modules/typescript",
+        "version": "5.9.3",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\8e\\5d\\6f6733c38a72ebf5e52ddc9feded5e8580d130f508ef04f772b33f4a7d00c3e357d0ac2d98e2f290762694a454f86d795bd511e12e9a7cc2d9ba3394e04b",
+        "archiveBytes": 4377468,
+        "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+        "archiveSha256": "10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 132,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract101.config.json",
+          "bytes": 2949,
+          "sha256": "fecbf9ed7e2d306d4875fb399d7aae02b1b0575fca4dd2b6e93deac5456e3595"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract101.outer.json",
+          "bytes": 560,
+          "sha256": "363c934614e57dd5bbc10f1c7e70c4b9fa9dd4cd05915d1cc1b8939bdb174079"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/undici-types",
+      "name": "undici-types",
+      "version": "7.16.0",
+      "archive": {
+        "relative": "node_modules/undici-types",
+        "version": "7.16.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\67\\3f\\9a6564a3f0b13ace8c43fb1ae387855f9081bc61ae8bbd8919aad5101893d98d8979df2a42694c16aa8ede234c7ae8a046791a3e9a504490c49e499dfc37",
+        "archiveBytes": 27127,
+        "integrity": "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==",
+        "archiveSha256": "53b5e2fa12a4118a4838e80b1cc6e1d8cd30d6f7e5bea69640e5386f6eb3f8af",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 45,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract102.config.json",
+          "bytes": 2951,
+          "sha256": "d87008f2a4ec208d95d057b29c4a0089ea64bf58a13270d5f5627ea9d06e650b"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract102.outer.json",
+          "bytes": 562,
+          "sha256": "47d1fc65dc090beaa3f528c0749474c651c8e03533dcde071526e7cd1b631668"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/valibot",
+      "name": "valibot",
+      "version": "1.4.2",
+      "archive": {
+        "relative": "node_modules/valibot",
+        "version": "1.4.2",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\82\\37\\42bc9e9ddd1c870277aac4c60c5bd40c0b060c6f78e938ed08c87655d5b9d11c5047ad7dd590820bb795d84745a1c07887eccb72f28bee3d9fcede06a6ae",
+        "archiveBytes": 184447,
+        "integrity": "sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==",
+        "archiveSha256": "523d2044ac64460f8f29cae16fec163ff96e8012c084d0f01a817c3db04db447",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 9,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract103.config.json",
+          "bytes": 2946,
+          "sha256": "36d61beaeec628485386f04dead560039d160d5ed6bd79ab63d149aca242a2b1"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract103.outer.json",
+          "bytes": 557,
+          "sha256": "e6fe282aefb8ce017334bcb50f1fd74f31421ce162c473bdfadffcad8b1b4ad3"
+        }
+      }
+    },
+    {
+      "relative": "node_modules/xml-naming",
+      "name": "xml-naming",
+      "version": "0.1.0",
+      "archive": {
+        "relative": "node_modules/xml-naming",
+        "version": "0.1.0",
+        "archive": "C:\\Users\\Administrator\\AppData\\Local\\npm-cache\\_cacache\\content-v2\\sha512\\93\\c2\\8ef61accc8d93ab545aa51f9131196decd146938d54ecd44e773ded59c2bf28fa4dff65c9447d1030087a254bbf9ea3b0c7285c4c235bc2afe723d8e7697",
+        "archiveBytes": 5296,
+        "integrity": "sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw==",
+        "archiveSha256": "19347cbcba429e9f240427ce4e5998efe30a47cb9131b5673fc2f0441f7f4f57",
+        "packageScriptsDeclared": false
+      },
+      "regularFiles": 4,
+      "extraction": {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract104.config.json",
+          "bytes": 2949,
+          "sha256": "94b5a65591bb6763ad33d72629c3a599641a4bca42a283b9b4ae302b959eaeec"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-cache-extract104.outer.json",
+          "bytes": 560,
+          "sha256": "6da3477348a316817f1bb810bedf3786608e11838a166899d9c282dc8b0b7432"
+        }
+      }
+    }
+  ],
+  "fileVerificationChunks": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk001.json",
+      "bytes": 347746,
+      "sha256": "42075c7c87528b9a803255c3910d86fc1637915d7030e6ed3dbe9cd45dcb8424"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk002.json",
+      "bytes": 379996,
+      "sha256": "08f819ec9262aa8a7127830b95e613ded92486f3dd7be79686b916cfaac73a27"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk003.json",
+      "bytes": 360776,
+      "sha256": "28cb352fb19f88ee1c57f1eb928a867e3aa7fb5d8f021b7a96dfe728ebe3d521"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk004.json",
+      "bytes": 355776,
+      "sha256": "3d065094409609308cd9ccf932c594d75062876298d80bc4db0ccf9ac5aacaa6"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk005.json",
+      "bytes": 337581,
+      "sha256": "44c423ce6771a95ca4fdf9b8a1b7941bbdee9150c4eb228091eeac3e85603634"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk006.json",
+      "bytes": 332818,
+      "sha256": "c91d3bd2d6bebcdb9882473c15ba171fe1aebea1a6d6288dbb07a0efc413d30b"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk007.json",
+      "bytes": 338908,
+      "sha256": "f21301855fd80dccc09ea10d4f193282137adf8550b618e68e9ae34a5edaa057"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk008.json",
+      "bytes": 380255,
+      "sha256": "0308ab21b42ae45e78e28c0a5f61110d889938769b1b1d05e1d87abfb545ae67"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk009.json",
+      "bytes": 343281,
+      "sha256": "acecb6d58d16ef957655febf6af724d001e1fb28bb1f423965538d353c4e0caf"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk010.json",
+      "bytes": 324122,
+      "sha256": "77f7cb77b7b5851e54b8bd05d1fe661935dd04c8de21bd48dd5a10bda6b6e8da"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk011.json",
+      "bytes": 328127,
+      "sha256": "c17c30e7258bb6f2dcf3342b040369cdf56d9d9d1bf340e3ccfa726e292056b2"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk012.json",
+      "bytes": 325573,
+      "sha256": "f8992ffdcfb6a35bedda0cdd3117a07f4a4053ac9cf17f2ea62335fcef20766b"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk013.json",
+      "bytes": 322270,
+      "sha256": "24408de6af6f9cab91ad23d77e8f8e25fbc12b9bce0ad52cd8791d977dd81cd1"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk014.json",
+      "bytes": 343101,
+      "sha256": "b1520a1dade807f8c780704df9d1061eaa8f540c0fd21ba89f6680c36dcbfc80"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk015.json",
+      "bytes": 354368,
+      "sha256": "c24b77f66f0d733e1874710958a22a053ae4b7aa23f6d2ddc3a74be490ad4fe7"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk016.json",
+      "bytes": 346729,
+      "sha256": "3560344b50581db3c1f48374523a09a6de4a42b3d1cdbe945279b71932ecf295"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk017.json",
+      "bytes": 346926,
+      "sha256": "d9a16682f2886b8b7278b5180b29da4226a37202b6dba1f90a5dd118035898b0"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk018.json",
+      "bytes": 354683,
+      "sha256": "57ed83c016c47c41058d44417f600a2b5d23e294f022aa180ca667a21583a10f"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk019.json",
+      "bytes": 364259,
+      "sha256": "35927dce431e9c3110776893e52104c1fccaf5d69f341276665f432fa6709197"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk020.json",
+      "bytes": 346915,
+      "sha256": "e181ed3f22f1198d116a9569b008a99a179a0e34827958dec31ccb857efe608b"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk021.json",
+      "bytes": 350906,
+      "sha256": "059f5e68c23a2231f216ef18bfda8a1c76aa68aa96e4f425abe3dec66abae3cb"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk022.json",
+      "bytes": 354873,
+      "sha256": "03d325523477828710739e4462d4d8d47f89dea00febcfa19dc03ad4264d5b9a"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk023.json",
+      "bytes": 354273,
+      "sha256": "ce2e78e256e985825080db10c255684491d0d58b683c949a7d774f80d25abc17"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk024.json",
+      "bytes": 360440,
+      "sha256": "9ae1c3d258c502b9d1faa91e5bbad7b39cb2335aad56da6402b69f6dac518409"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk025.json",
+      "bytes": 352412,
+      "sha256": "309cb8918c45ac206b72d8693bf1903fabd86d7ca3b9b83cf00c7a4a38657508"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk026.json",
+      "bytes": 364520,
+      "sha256": "02d8d916705f8ee3c37af6829118143e92962c8097834f147396c0222320569b"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk027.json",
+      "bytes": 357338,
+      "sha256": "c7e2895f7c62c89eb8ecec093d66660021998c4282acf73963087f6787f0d03d"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk028.json",
+      "bytes": 347064,
+      "sha256": "25c502c63e68fa5af70b2d05ac496e8e083d9b706f0ccd58faeb0aa9f0932254"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk029.json",
+      "bytes": 348845,
+      "sha256": "16b0b133d6689def3b071ce2a389b5ceb61f7225a411d66df7537d6d32e8ec48"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk030.json",
+      "bytes": 319785,
+      "sha256": "f9585fac245cf3bfc320baa8cb51a09e9200e25d5eda3b13651f27eae6e2632e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-offline-file-recovery-chunk031.json",
+      "bytes": 132064,
+      "sha256": "ab696cc9652b986b383418e66d0cd1cc304d71867c47086cb372d917993b168c"
+    }
+  ],
+  "missingOptional": [
+    {
+      "relative": "node_modules/@emnapi/runtime",
+      "version": "1.11.2",
+      "reason": "not in known public cache"
+    },
+    {
+      "relative": "node_modules/@img/sharp-wasm32",
+      "version": "0.35.3",
+      "reason": "not in known public cache"
+    }
+  ],
+  "history": "Initial single large builtin-only fs recovery cell timed out/reset before a result; no package script/build/test/installer executed. Resume accepted only exact archive-matching existing files or owned preserved TS5.9.2 bytes, then verified complete15209-file tree in31 bounded chunks.",
+  "packageLockChanged": false,
+  "packageScriptsExecuted": false,
+  "installerUsed": false,
+  "networkUsed": false,
+  "productExecuted": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

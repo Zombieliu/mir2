@@ -3293,35 +3293,33 @@ fn ingest_pending_storage_model(
     );
 }
 
-fn ingest_pending_hero_model(
-    mut hero: ResMut<mir2_client_bevy::hero_model::HeroModel>,
-    mut receipts: ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>,
-    native: Res<native_ingest::NativeInbound>,
-) {
-    native.drain_matching(
+fn ingest_pending_hero_model(world:&mut World) {
+    let mut messages=Vec::new();
+    world.resource::<native_ingest::NativeInbound>().drain_matching(
         |message| {
             matches!(
                 message,
                 native_ingest::NativeInboundMessage::HeroModel(_)
+                    | native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_)
                     | native_ingest::NativeInboundMessage::HeroModelReceipt(_)
             )
         },
-        |message| {
+        |message| messages.push(message),
+    );
+    for message in messages {
+            if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update)=message {
+                npc_purchase_economy::apply_native_hero_owner_update(world,update);
+                continue;
+            }
             if let native_ingest::NativeInboundMessage::HeroModel(json)
             | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
             {
                 match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
-                    Ok(model) => {
-                        if model.skill_key_ack.is_some() {
-                            receipts.0.push_back(model.clone());
-                        }
-                        *hero = model;
-                    }
+                    Ok(model) => npc_purchase_economy::apply_native_hero_packet_model(world,model),
                     Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
                 }
             }
-        },
-    );
+    }
 }
 
 fn ingest_pending_skill_model(

@@ -130,8 +130,7 @@ fn item(
         .iter()
         .find(|item| item.container == container && item.slot == slot)
     {
-        if let Some(info) = model.info.as_ref() {
-            let mut actor = actor_ui(info);
+        if let Some(mut actor) = model.snapshot_read_model().or_else(||model.info.as_ref().map(actor_ui)) {
             actor.player.crystal_stats = model.stats.clone();
             cell.insert(CrystalItemHint(crystal_item_tooltip_document(
                 item,
@@ -227,7 +226,28 @@ pub fn render(
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
-    let (Ok(root), Some(info)) = (roots.single(), model.info.as_ref()) else {
+    let Ok(root)=roots.single() else {return;};
+    let Some(info)=model.info.as_ref() else {
+        // A checkpoint knows economic identity/XP without a packet-only
+        // object ID or hair. Show its exact status without inventing either.
+        if state.hero.character_open {
+            if let Some(actor)=model.snapshot_read_model() {
+                let p=state.hero.character_position.unwrap_or([760,0]);
+                commands.entity(root).with_children(|parent| {
+                    parent.spawn((HeroRoot,Node{position_type:PositionType::Absolute,left:Val::Px(p[0] as f32),top:Val::Px(p[1] as f32),
+                        width:Val::Px(264.),height:Val::Px(380.),..default()},ImageNode::new(assets.load("original-ui/Title/504.png")),
+                        GlobalZIndex(geometry::window_z(&state.hero,geometry::HeroWindow::Character)))).with_children(|parent| {
+                        button(parent,&assets,"Prguse2",360,CrystalRect::new(241.,3.,24.,21.),HeroAction::CloseCharacter);
+                        overlay_centered_text_at(parent,actor.player.name.as_deref().unwrap_or(""),CrystalRect::new(0.,12.,264.,18.),32./3.,Color::WHITE);
+                        image(parent,&assets,"Title",506,CRYSTAL_CHARACTER_PAGE_RECT,1.);
+                        let weights=model.weights.map(|w|character_stats::Weights{bag:Some(i64::from(w.bag)),wear:Some(i64::from(w.wear)),hand:Some(i64::from(w.hand))}).unwrap_or_default();
+                        for (text,top) in character_stats::lines(&actor.player,false,weights) {
+                            overlay_text_at(parent,&text,CrystalRect::new(134.,top,105.,16.),32./3.,Color::WHITE);
+                        }
+                    });
+                });
+            }
+        }
         return;
     };
     let ui = &state.hero;
@@ -534,11 +554,11 @@ pub fn render(
                             &assets,
                             wings.as_deref(),
                             &model.inventory_view,
-                            &actor_ui(info),
+                            &model.snapshot_read_model().unwrap_or_else(||actor_ui(info)),
                         );
                     }
                     if matches!(ui.page, HeroPage::Status | HeroPage::State) {
-                        let mut actor = actor_ui(info);
+                        let mut actor = model.snapshot_read_model().unwrap_or_else(||actor_ui(info));
                         actor.player.crystal_stats = model.stats.clone();
                         let weights = model
                             .weights

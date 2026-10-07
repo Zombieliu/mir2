@@ -7,6 +7,10 @@ use serde_json::Value;
 #[derive(Resource, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HeroModel {
+    /// Public owner-checkpoint identity and XP. Packet-only object ID/hair
+    /// remain in info; neither is manufactured from a personal checkpoint.
+    #[serde(default)]
+    pub snapshot_identity: Option<HeroSnapshotIdentity>,
     #[serde(default)]
     pub hero_generation: u64,
     #[serde(default)]
@@ -50,6 +54,27 @@ pub struct HeroModel {
     #[serde(default)]
     pub auto_pot_view: crate::inventory::InventoryModel,
 }
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroSnapshotIdentity {
+    pub name: String,
+    pub class: mir2_protocol::MirClass,
+    pub gender: mir2_protocol::MirGender,
+    pub level: u16,
+    pub experience: i64,
+    pub max_experience: i64,
+    pub behaviour: u8,
+    pub spawned: bool,
+    pub auto_pot: bool,
+    pub auto_hp_percent: u8,
+    pub auto_mp_percent: u8,
+    pub hp_item_index: i32,
+    pub mp_item_index: i32,
+    pub vitals: Option<HeroSnapshotVitals>,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroSnapshotVitals { pub hp:i32,pub max_hp:i32,pub mp:i32,pub max_mp:i32 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct HeroActorState {
     pub object_id: u32,
@@ -203,12 +228,31 @@ pub struct HeroWeights {
     pub hand: i32,
 }
 impl HeroModel {
+    /// The renderer uses checkpoint XP/max-XP whenever that exact public
+    /// source is present. Legacy packet-only sessions keep their old display.
+    pub fn snapshot_read_model(&self) -> Option<crate::read_model::UiReadModel> {
+        let hero=self.snapshot_identity.as_ref()?;
+        let mut player=crate::read_model::PlayerStats{name:Some(hero.name.clone()),class_name:Some(format!("{:?}",hero.class)),
+            gender:Some(format!("{:?}",hero.gender)),level:u32::from(hero.level),experience:hero.experience,max_experience:hero.max_experience,
+            crystal_stats:self.stats.clone(),..Default::default()};
+        if let Some(v)=hero.vitals {player.hp=v.hp;player.max_hp=v.max_hp;player.mp=v.mp;player.max_mp=v.max_mp;}
+        Some(crate::read_model::UiReadModel{player})
+    }
     pub fn observe_snapshot(&mut self, payload: &Value) -> bool {
         self.item_result_receipt = false;
         let Some(stage) = payload.get("stage5Systems") else {
             return false;
         };
         let mut changed = false;
+        if payload.get("heroMaxExperience").is_some() {
+            let identity=stage.get("hero").filter(|hero|!hero.is_null()).and_then(|hero| {
+                let mut source=hero.as_object()?.clone();
+                source.insert("maxExperience".into(),payload.get("heroMaxExperience")?.clone());
+                source.insert("vitals".into(),payload.get("heroVitals")?.clone());
+                serde_json::from_value::<HeroSnapshotIdentity>(Value::Object(source)).ok().filter(|hero|hero.level>0 && hero.max_experience>=0)
+            });
+            if self.snapshot_identity!=identity {self.snapshot_identity=identity;changed=true;}
+        }
         self.skill_key_ack = payload
             .get("skillKeyAck")
             .filter(|v| !v.is_null())
@@ -480,6 +524,9 @@ impl HeroModel {
                         || old.class != info.class
                         || old.gender != info.gender
                 }) {
+                    if self.snapshot_identity.as_ref().is_some_and(|source|source.name!=info.name||source.class!=info.class||source.gender!=info.gender) {
+                        self.snapshot_identity=None;
+                    }
                     self.hero_generation = self.hero_generation.saturating_add(1);
                     self.spawned = false;
                     self.riding_mount = None;
@@ -726,6 +773,30 @@ impl HeroModel {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity() {
+        let mut model=HeroModel::default();
+        let snapshot=serde_json::json!({"heroMaxExperience":200,"heroVitals":{"hp":20,"maxHp":30,"mp":10,"maxMp":15},
+            "heroStats":[],"heroWeights":{"bag":1,"wear":2,"hand":3},"stage5Systems":{"heroLearnedMagics":[],
+                "hero":{"name":"Hero","class":"Warrior","gender":"Male","level":2,"experience":77,"behaviour":0,"spawned":true,
+                    "autoPot":false,"autoHpPercent":30,"autoMpPercent":40,"hpItemIndex":0,"mpItemIndex":0}}});
+        assert!(model.observe_snapshot(&snapshot));assert!(model.info.is_none());
+        let display=model.snapshot_read_model().unwrap();assert_eq!((display.player.experience,display.player.max_experience),(77,200));
+        assert_eq!(display.player.hair,None);assert_eq!(display.player.hp,20);
+        let mut packet=info();packet.experience=1;packet.max_experience=100;
+        model.apply_packet_at("HeroInformation",&serde_json::json!({"info":packet}),0);
+        assert_eq!(model.snapshot_read_model().unwrap().player.experience,77);
+        let mut next=snapshot;next["stage5Systems"]["hero"]["experience"]=serde_json::json!(88);next["heroMaxExperience"]=serde_json::json!(300);
+        assert!(model.observe_snapshot(&next));assert_eq!(model.snapshot_read_model().unwrap().player.max_experience,300);
+    }
+    #[test]
+    fn native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair() {
+        let mut model=HeroModel::default();
+        model.observe_snapshot(&serde_json::json!({"heroMaxExperience":null,"heroVitals":null,"stage5Systems":{"hero":null}}));
+        assert!(model.snapshot_read_model().is_none());
+        model.observe_snapshot(&serde_json::json!({"heroMaxExperience":100,"heroVitals":null,"stage5Systems":{"hero":{"name":"Partial","experience":2}}}));
+        assert!(model.snapshot_read_model().is_none());
+    }
     fn info() -> HeroUserInformation {
         HeroUserInformation {
             object_id: 12,

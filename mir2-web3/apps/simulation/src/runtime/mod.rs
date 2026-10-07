@@ -43,6 +43,7 @@ pub use npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBu
     NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution};
 mod npc_purchase_outcome;
 mod npc_purchase_transaction;
+mod npc_purchase_snapshot;
 pub use npc_purchase_transaction::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseDurableExecution, NpcPurchaseDurableError};
 pub use npc_purchase_outcome::{NpcPurchaseRequest, NpcPurchaseCurrency, NpcPurchaseSource,
     NpcPurchaseRejection, NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome,

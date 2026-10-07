@@ -117,6 +117,8 @@ pub(crate) enum NativeInboundMessage {
     StoragePatch(String),
     SkillModel(String),
     HeroModel(String),
+    /// Sealed display source from a fresh owner snapshot; never a receipt.
+    HeroOwnerSnapshot(crate::npc_purchase_economy::NativeHeroOwnerUpdate),
     HeroModelReceipt(String),
     SkillModelReceipt(String),
     SocialModel(String),
@@ -663,6 +665,7 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::StorageModel(_)
             | NativeInboundMessage::StorageItems(_)
             | NativeInboundMessage::HeroModel(_)
+            | NativeInboundMessage::HeroOwnerSnapshot(_)
             | NativeInboundMessage::SkillModel(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
     )
@@ -670,6 +673,7 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
 
 fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessage) -> bool {
     match (left, right) {
+        (NativeInboundMessage::HeroOwnerSnapshot(left),NativeInboundMessage::HeroOwnerSnapshot(right))=>left.same_source(right),
         (NativeInboundMessage::WorldState(_), NativeInboundMessage::WorldState(_))
         | (
             NativeInboundMessage::EntityRenderState(_),
@@ -739,6 +743,7 @@ fn is_operation_ack(message: &NativeInboundMessage) -> bool {
 fn native_message_bytes(message: &NativeInboundMessage) -> usize {
     match message {
         NativeInboundMessage::NpcEconomyBundle(bundle) => bundle.retained_bytes(),
+        NativeInboundMessage::HeroOwnerSnapshot(update)=>update.retained_bytes(),
         NativeInboundMessage::WorldState(json)
         | NativeInboundMessage::EntityRenderState(json)
         | NativeInboundMessage::EffectRenderState(json)
@@ -996,6 +1001,10 @@ pub fn push_native_hero_model(json: String) -> bool {
     })
 }
 
+pub fn push_native_hero_owner_snapshot(update:crate::npc_purchase_economy::NativeHeroOwnerUpdate)->bool {
+    send_native(NativeInboundMessage::HeroOwnerSnapshot(update))
+}
+
 pub fn push_native_skill_model(json: String) -> bool {
     let receipt = serde_json::from_str::<serde_json::Value>(&json)
         .ok()
@@ -1200,6 +1209,7 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
     matches!(
         message,
         NativeInboundMessage::WorldState(_)
+            | NativeInboundMessage::HeroOwnerSnapshot(_)
             | NativeInboundMessage::NpcEconomyBundle(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
@@ -1216,6 +1226,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
     matches!(
         message,
         NativeInboundMessage::WorldState(_)
+            | NativeInboundMessage::HeroOwnerSnapshot(_)
             | NativeInboundMessage::NpcEconomyBundle(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
@@ -1305,6 +1316,109 @@ mod tests {
         let mut future = Vec::new();
         inbound.drain_matching(|m| matches!(m, NativeInboundMessage::InventoryModel(_)), |m| future.push(m));
         assert!(matches!(&future[..], [NativeInboundMessage::InventoryModel(s)] if s == "future"));
+    }
+
+    #[cfg(feature="native-npc-economy")]
+    #[test]
+    fn native_npc_economy_ordinary_hero_packet_keeps_source_xp_until_owner_withdrawal_or_reset() {
+        use bevy::ecs::system::RunSystemOnce;
+        use crate::npc_purchase_economy::{apply_native_npc_economy_bundle,owner_hero_model,NativeNpcEconomySource};
+        use mir2_client_bevy::hero_model::{HeroModel,HeroModelReceipts};
+        let (gate,w,mut projection)=crate::npc_purchase_economy::tests::fixture();
+        let mut owner:serde_json::Value=serde_json::from_str(&projection.owner_json).unwrap();
+        owner["stage5Systems"]["hero"]=serde_json::json!({"name":"Hero","class":"Warrior","gender":"Male","level":2,
+            "experience":77,"behaviour":0,"spawned":true,"autoPot":false,"autoHpPercent":30,"autoMpPercent":30,"hpItemIndex":0,"mpItemIndex":0});
+        owner["heroMaxExperience"]=200.into();projection.owner_json=owner.to_string();
+        projection.hero_json=serde_json::to_string(&owner_hero_model(&owner).unwrap()).unwrap();
+        let mut world=bevy::prelude::World::new();
+        world.insert_resource(crate::SceneResetRevision::default());
+        world.insert_resource(mir2_client_bevy::pending_operations::SessionResetRevision::default());
+        world.insert_resource(HeroModelReceipts::default());
+        assert!(apply_native_npc_economy_bundle(&mut world,gate.prepare(w,projection.clone()).unwrap()));
+        assert_eq!(gate.try_recv_applied().unwrap().witness(),w);
+        let packet=mir2_protocol::HeroUserInformation{object_id:12,name:"Hero".into(),class:mir2_protocol::MirClass::Warrior,
+            gender:mir2_protocol::MirGender::Male,level:2,hair:0,hp:10,mp:5,experience:1,max_experience:100,
+            inventory:Some(vec![None;10]),equipment:Some(vec![None;14]),magics:vec![],auto_pot:false,
+            auto_hp_percent:30,auto_mp_percent:30,hp_item_index:0,mp_item_index:0};
+        let mut stale=HeroModel::default();assert!(stale.apply_packet("HeroInformation",&serde_json::json!({"info":packet})));
+        let mut local=active_buffer();assert!(local.enqueue(NativeInboundMessage::HeroModel(serde_json::to_string(&stale).unwrap())));
+        world.insert_resource(NativeInbound{buffer:Arc::new(Mutex::new(local))});
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        let visible=world.resource::<HeroModel>().snapshot_read_model().unwrap();
+        assert_eq!((visible.player.experience,visible.player.max_experience),(77,200));
+        let display_gate=crate::npc_purchase_economy::NativeHeroOwnerGate::new(crate::npc_purchase_economy::NativeHeroOwnerEpoch{
+            run:1,connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:3,map:0}).unwrap();
+        let mut fresh_owner=owner.clone();fresh_owner["stage5Systems"]["hero"]["experience"]=88.into();
+        let update=display_gate.prepare(&fresh_owner).unwrap();
+        assert!(world.resource::<NativeInbound>().buffer.lock().unwrap().enqueue(NativeInboundMessage::HeroOwnerSnapshot(update)));
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        world.resource::<NativeInbound>().buffer.lock().unwrap().enqueue(NativeInboundMessage::HeroModel(serde_json::to_string(&stale).unwrap()));
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        assert_eq!(world.resource::<HeroModel>().snapshot_read_model().unwrap().player.experience,88);
+        assert_eq!(world.resource::<NativeNpcEconomySource>().owner()["stage5Systems"]["hero"]["experience"],77);
+        assert!(gate.try_recv_applied().is_none());
+        let (reset_gate,reset_w,_)=crate::npc_purchase_economy::tests::fixture();
+        let mut reset_world=bevy::prelude::World::new();reset_world.insert_resource(crate::SceneResetRevision::default());
+        assert!(apply_native_npc_economy_bundle(&mut reset_world,reset_gate.prepare(reset_w,projection.clone()).unwrap()));
+        let reset_binding=reset_world.resource::<NativeNpcEconomySource>().binding();
+        reset_world.resource_mut::<crate::SceneResetRevision>().0+=1;
+        crate::npc_purchase_economy::apply_pending_native_npc_economy(&mut reset_world);
+        assert!(!reset_world.contains_resource::<NativeNpcEconomySource>());
+        assert!(reset_world.resource::<HeroModel>().snapshot_identity.is_none());assert!(!reset_gate.is_current(reset_binding));
+        // Explicit complete owner withdrawal removes the cached packet bootstrap.
+        owner["stage5Systems"]["hero"]=serde_json::Value::Null;owner["heroMaxExperience"]=serde_json::Value::Null;
+        projection.owner_json=owner.to_string();projection.hero_json=serde_json::to_string(&owner_hero_model(&owner).unwrap()).unwrap();
+        let mut newer=w;newer.server_revision+=1;
+        assert!(apply_native_npc_economy_bundle(&mut world,gate.prepare(newer,projection).unwrap()));
+        world.resource::<NativeInbound>().buffer.lock().unwrap().enqueue(NativeInboundMessage::HeroModel(serde_json::to_string(&stale).unwrap()));
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        assert!(world.resource::<HeroModel>().snapshot_identity.is_none());assert!(world.resource::<HeroModel>().info.is_none());
+        // The real scene boundary clears source custody and cannot restore it.
+        let binding=world.resource::<NativeNpcEconomySource>().binding();
+        world.resource_mut::<crate::SceneResetRevision>().0+=1;
+        crate::npc_purchase_economy::apply_pending_native_npc_economy(&mut world);
+        assert!(!world.contains_resource::<NativeNpcEconomySource>());assert!(world.resource::<HeroModel>().snapshot_identity.is_none());
+        assert!(!gate.is_current(binding));
+    }
+
+    #[test]
+    fn native_npc_economy_fresh_hero_source_obeys_bundle_order_and_retirement() {
+        use bevy::ecs::system::RunSystemOnce;
+        use crate::npc_purchase_economy::{NativeHeroOwnerEpoch,NativeHeroOwnerGate,owner_hero_model,NativeNpcEconomySource};
+        use mir2_client_bevy::hero_model::{HeroModel,HeroModelReceipts};
+        let (gate,w,mut projection)=crate::npc_purchase_economy::tests::fixture();
+        let mut owner:serde_json::Value=serde_json::from_str(&projection.owner_json).unwrap();
+        owner["stage5Systems"]["hero"]=serde_json::json!({"name":"Hero","class":"Warrior","gender":"Male","level":2,
+            "experience":77,"behaviour":0,"spawned":true,"autoPot":false,"autoHpPercent":30,"autoMpPercent":30,"hpItemIndex":0,"mpItemIndex":0});
+        owner["heroMaxExperience"]=200.into();
+        let epoch=NativeHeroOwnerEpoch{run:1,connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:3,map:0};
+        let display_gate=NativeHeroOwnerGate::new(epoch).unwrap();let mut local=active_buffer();
+        assert!(local.enqueue(NativeInboundMessage::HeroOwnerSnapshot(display_gate.prepare(&owner).unwrap())));
+        owner["stage5Systems"]["hero"]["experience"]=88.into();projection.owner_json=owner.to_string();
+        projection.hero_json=serde_json::to_string(&owner_hero_model(&owner).unwrap()).unwrap();
+        assert!(local.enqueue(NativeInboundMessage::NpcEconomyBundle(gate.prepare(w,projection).unwrap())));
+        owner["stage5Systems"]["hero"]["experience"]=99.into();
+        assert!(local.enqueue(NativeInboundMessage::HeroOwnerSnapshot(display_gate.prepare(&owner).unwrap())));
+        let mut world=bevy::prelude::World::new();world.insert_resource(HeroModel::default());world.insert_resource(HeroModelReceipts::default());
+        world.insert_resource(crate::SceneResetRevision::default());
+        world.insert_resource(NativeInbound{buffer:Arc::new(Mutex::new(local))});
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        assert_eq!(world.resource::<HeroModel>().snapshot_read_model().unwrap().player.experience,77);assert!(gate.try_recv_applied().is_none());
+        crate::npc_purchase_economy::apply_pending_native_npc_economy(&mut world);
+        assert_eq!(world.resource::<HeroModel>().snapshot_read_model().unwrap().player.experience,88);assert_eq!(gate.try_recv_applied().unwrap().witness(),w);
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        assert_eq!(world.resource::<HeroModel>().snapshot_read_model().unwrap().player.experience,99);
+        assert_eq!(world.resource::<NativeNpcEconomySource>().owner()["stage5Systems"]["hero"]["experience"],88);assert!(gate.try_recv_applied().is_none());
+        let retired=display_gate.prepare(&owner).unwrap();display_gate.retire();
+        world.resource::<NativeInbound>().buffer.lock().unwrap().enqueue(NativeInboundMessage::HeroOwnerSnapshot(retired));
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        assert_eq!(world.resource::<HeroModel>().snapshot_read_model().unwrap().player.experience,99);
+        assert!(display_gate.prepare(&owner).is_err());
+        assert!(NativeHeroOwnerGate::new(NativeHeroOwnerEpoch{connection:u64::MAX,..epoch}).is_err());
+        let wrong=NativeHeroOwnerGate::new(NativeHeroOwnerEpoch{actor:4,..epoch}).unwrap();assert!(wrong.prepare(&owner).is_err());
+        world.resource_mut::<crate::SceneResetRevision>().0+=1;
+        crate::npc_purchase_economy::apply_pending_native_npc_economy(&mut world);
+        assert!(world.resource::<HeroModel>().snapshot_identity.is_none());assert!(!world.contains_resource::<NativeNpcEconomySource>());
     }
 
     #[test]

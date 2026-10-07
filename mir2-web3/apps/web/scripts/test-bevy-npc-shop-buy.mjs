@@ -451,6 +451,9 @@ const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcSho
   "itemCommandRequiresOwner", "socialItemMutationAllowed", "parityItemMutationAllowed",
   "npcPearlBuyCurrent", "readNpcPearlBuyCurrent", "readNpcBuyCurrent", "npcPearlSendCurrent",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner", "observeNpcPearlWallet",
+  "npcPurchaseFullEconomyCurrent", "npcPurchaseDisplayFingerprint", "npcPurchaseSnapshotEconomics", "receiveNpcPurchaseGatewayFrame", "applyNpcPurchaseOrdinarySnapshot", "npcPurchaseSessionKey",
+  "npcPurchaseShopMatches", "applyNpcPurchaseShopSnapshot", "applyNpcShopCatalogPacket", "dispatchDurableNpcPurchase", "currentNpcShopTab",
+  "observeNpcPurchaseSocket", "retireNpcPurchaseClient",
   "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors"];
 const npcPageDeclarations = new Map();
 const npcPageDispatcherCreations = [];
@@ -485,6 +488,7 @@ assert.equal(npcAuthDeclarations.length,2);
 const npcAuthJavaScript=ts.transpileModule(npcAuthDeclarations.map(node=>node.getText(npcAuthAst).replace(/^export /,"")).join("\n"),{compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
 const npcAuthSelectors=new Function(npcAuthJavaScript+"\nreturn {preauthCommandKind,isSensitiveGatewayCommand};")();
 const npcPureBag = loadPagePure("bag");
+const npcPureIdentity = loadPagePure("identity");
 const npcPureParcel = loadPagePure("parcel");
 const npcPureStorage = loadPagePure("storage");
 
@@ -533,6 +537,43 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
     npcPurchaseUnavailableRef:{current:false},npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
+    npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},
+    npcPurchaseCatalogSourceRef:{current:new WeakMap()},npcPurchaseClientRef:{current:null},
+    NpcPurchaseClient:actualDurableNpc.NpcPurchaseClient,worldSnapshotVersionRef:{current:0},
+    captureQuestMapGatewayEvent:()=>{},captureSpellsGatewayEvent:()=>{},mergeMailList:value=>value,
+    mailRawRef:{current:null},socialFriendsRef:{current:null},charactersRef:{current:[]},setCharacters:()=>{},
+    completeNpcPurchaseSnapshot:actualDurableNpc.completeNpcPurchaseSnapshot,currentHeroModel:()=>null,
+    isNpcPurchaseOwnerFrame:actualDurableNpc.isNpcPurchaseOwnerFrame,isNpcPurchaseWorldFrame:actualDurableNpc.isNpcPurchaseWorldFrame,
+    parseNpcPurchaseWorldFrame:actualDurableNpc.parseNpcPurchaseWorldFrame,
+    parseGatewayMailDates:expiryPackets.parseGatewayMailDates,
+    handleGatewayEvent:(event,generation,socket,raw)=>{
+      assert.equal(event.type,"worldSnapshot");scope.ordinaryReceiver(event.payload,raw,generation,socket);
+    },
+    ordinaryApplications:[],
+    applyNpcGoldBuyGatewaySnapshot:(snapshot,generation,full,qualified=false)=>{
+      if(!qualified)assert.equal(full,true);assert.equal(generation,scope.equipmentConnectionGenerationRef.current);
+      scope.ordinaryApplications.push({full,qualified,snapshot});
+      scope.beforeOrdinaryApply?.(snapshot,full,qualified);
+      const next={...scope.worldRef.current,...snapshot,playerObjectId:String(snapshot.playerObjectId),connected:true,
+        entities:snapshot.entities.map(row=>({...row,objectId:String(row.objectId),classKey:row.class,genderKey:row.gender})),
+        inventoryItems:snapshot.inventoryItems.map(row=>({...row,...npcPureIdentity.projectInventoryItemIdentity(row.uniqueId,row.container,row.slot)}))};
+      scope.worldRef.current=next;
+      const physical={socket:scope.socketRef.current,
+        connectionGeneration:generation,sessionGeneration:scope.equipmentSessionGenerationRef.current,playerObjectId:snapshot.playerObjectId,
+        sceneRevision:scope.socialSceneRevisionRef.current,mapFileName:snapshot.mapFileName};
+      if(snapshot.stage5Systems?.intelligentCreaturePearls!==undefined
+        && scope.npcPearlShopSourceRef.current.currentWallet(physical)?.amount!==snapshot.stage5Systems.intelligentCreaturePearls)
+        scope.npcPearlShopSourceRef.current.observeWallet(physical,snapshot.stage5Systems.intelligentCreaturePearls);
+      const model=npcPureBag.projectBevyBagModel(next,{npcGoldTrade:true});assert(model.ok);
+      const owner={connectionGeneration:generation,sessionGeneration:scope.equipmentSessionGenerationRef.current,playerObjectId:snapshot.playerObjectId};
+      assert(scope.npcGoldBuyInventoryRef.current.finish(scope.npcGoldBuyInventoryRef.current.begin(owner),owner,true,model.model));
+    },
+    updateWorld:updater=>{scope.worldRef.current=typeof updater==="function"?updater(scope.worldRef.current):updater;},
+    npcPurchaseShopSource:actualDurableNpc.npcPurchaseShopSource,sameNpcPurchaseData:actualDurableNpc.sameNpcPurchaseData,
+    npcServiceNameRef:{current:"Shop"},setShowInventory:()=>{},setShowCharacter:()=>{},
+    stringOrFallback:(value,fallback)=>typeof value==="string"?value:fallback,numberOrZero:value=>typeof value==="number"?value:0,
+    npcShopTabBindingRef:{current:null},isBevyNpcShopUiVariant:()=>false,
+    accountIdRef:{current:"actor-account"},socialCharacterIndexRef:{current:{current:1}},
     npcPurchaseSelectorsRef:{current:new WeakMap()},npcPurchaseDecimal:actualDurableNpc.npcPurchaseDecimal,
     heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
     ...npcAuthSelectors, npcPearlJson:actualPearlSource.npcPearlJson,parseNpcPearlBuyPlan:actualPearlBuy.parseNpcPearlBuyPlan,
@@ -595,6 +636,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   const keys = Object.keys(scope);
   const api = new Function(...keys, npcPageJavaScript + "\nreturn {" + npcPageNames.join(",") + ",createActualNpcDispatcher};")(
     ...keys.map(key => scope[key]));
+  scope.ordinaryReceiver=api.applyNpcPurchaseOrdinarySnapshot;
   // Use the actual Page constructor expression, including its stable runtime
   // getter and read closure. Only trace wrappers surround real methods.
   const dispatcher = api.createActualNpcDispatcher();
@@ -1250,7 +1292,7 @@ function loadExpiryPipelineModule(relative, modules = {}, json = JSON) {
   }, result.exports, result, json);
   return result.exports;
 }
-const expiryPackets = loadExpiryPipelineModule("../lib/extended-server-packets.ts");
+const expiryPackets = loadExpiryPipelineModule("../lib/extended-server-packets.ts", {"./npc-purchase-client":actualDurableNpc});
 const expiryIdentity = loadExpiryPipelineModule("../lib/world-model/item-identity.ts");
 const expiryPresentation = loadExpiryPipelineModule("../lib/world-model/item-presentation.ts");
 const expiryBag = loadExpiryPipelineModule("../lib/bevy-bag-model.ts", { "./world-model/item-identity": expiryIdentity });
@@ -1307,7 +1349,7 @@ test("old unsafe expiry uses actual source while no-source null is retained thro
   const noSourceJson = { parse(text, reviver) {
     return JSON.parse(text, reviver ? function(key, value) { return reviver.call(this, key, value); } : undefined);
   } };
-  const oldPackets = loadExpiryPipelineModule("../lib/extended-server-packets.ts", {}, noSourceJson);
+  const oldPackets = loadExpiryPipelineModule("../lib/extended-server-packets.ts", {"./npc-purchase-client":actualDurableNpc}, noSourceJson);
   for (const literal of ["9007199254740992", "9007199254740993"]) {
     const actual = recordExpiryRequest(expiryPackets.parseGatewayMailDates(expirySnapshotWire(literal)));
     assert.equal(actual.request.inventory.items[0].tooltipSource.userItem.expire_info.expiry_binary_datetime, literal);
@@ -1888,9 +1930,17 @@ test("Pearl actual Page foreign proof options and nested send attempts retire th
 });
 
 const pearlGoodsCases=[];
-(function visit(node){if(ts.isCaseClause(node)&&ts.isStringLiteral(node.expression)&&node.expression.text==="NPCPearlGoods")pearlGoodsCases.push(node.getText(actualPageAst));ts.forEachChild(node,visit);})(actualPageAst);
+(function visit(node){
+  if(ts.isFunctionDeclaration(node)&&node.name?.text==="applyNpcShopCatalogPacket")return;
+  if(ts.isCaseClause(node)&&ts.isStringLiteral(node.expression)&&node.expression.text==="NPCPearlGoods")pearlGoodsCases.push(node.getText(actualPageAst));
+  ts.forEachChild(node,visit);
+})(actualPageAst);
 assert.equal(pearlGoodsCases.length,1);
-const pearlGoodsReceiveJs=ts.transpileModule('return function(event,connectionGeneration,source){'+pearlReceiveFence+'\nconst payload=event.payload??{};switch(event.packet){'+pearlGoodsCases[0]+'}};',
+// The actual gateway case now delegates to the sole product catalog reducer.
+// Include that complete declaration (and its original source/control fences),
+// rather than accidentally counting its internal switch as a second ingress.
+const pearlGoodsReceiveJs=ts.transpileModule(npcPageDeclarations.get("applyNpcShopCatalogPacket")
+  +'\nreturn function(event,connectionGeneration,source){'+pearlReceiveFence+'\nconst payload=event.payload??{};switch(event.packet){'+pearlGoodsCases[0]+'}};',
   {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
 function bindActualPearlGoodsReceive(f){
   const scope={...f.scope,...f,npcServiceNameRef:{current:"Pearl trader"},
@@ -2012,7 +2062,7 @@ test("Pearl actual Page quote and exact send retain an above16KiB complete struc
 // Source29: run the actual plain TypeScript receipt facade through this existing
 // CPU-only loader. Fixed ABI responses are custody fixtures, not another Core
 // ledger, allocator, pricing algorithm or application-witness implementation.
-const receiptFacade = loadPearlBuyDependency("../lib/npc-purchase-receipt.ts");
+const receiptFacade = loadPearlBuyDependency("../lib/npc-purchase-receipt.ts", {"./npc-purchase-client":actualDurableNpc});
 const receiptTokens = ["0".repeat(62) + "a1", "0".repeat(62) + "a2", "0".repeat(62) + "a3"];
 const originalReceiptOperation = Object.freeze({ actor: "1".repeat(64), requestScope: "2".repeat(64),
   sequence: "9007199254740993", intent: { request: { itemIndex: "0", count: 1, panelType: 0 },
@@ -2364,7 +2414,7 @@ test("Source30 dispatcher malformed extra fields or accessor decisions cannot se
 });
 test("Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays",()=>{
   const rawBranch=actualPageSource.indexOf("if (isNpcPurchaseOwnerFrame(event.data))");
-  assert(rawBranch>=0&&rawBranch<actualPageSource.indexOf("handleGatewayEvent(parseGatewayMailDates(event.data"));
+  assert(rawBranch>=0&&rawBranch<actualPageSource.indexOf("const decoded = parseGatewayMailDates(event.data"));
   assert(actualPageSource.includes("if (!fullEconomy && isMovementOnly && snapSelf)"));
   assert(actualPageSource.includes("stage5Systems: fullEconomy ? snapshot.stage5Systems! : snapshot.stage5Systems"));
   assert(actualPageSource.includes("mergedEntitiesForWorld = packetRuntimeRefresh && !fullEconomy"));
@@ -2412,4 +2462,562 @@ test("Source30 actual owner Pearl projection preserves equal wallet custody and 
   f.observeNpcPearlWallet(200);assert.equal(f.scope.npcShopServiceRef.current,service);assert.equal(source.currentWallet(f.currentSocialReceiveOwner()),wallet);
   f.observeNpcPearlWallet(201);assert.equal(source.currentWallet(f.currentSocialReceiveOwner()).amount,201);
   const next=f.scope.npcShopServiceRef.current;assert.notEqual(next,service);assert.equal(f.scope.npcPurchaseSelectorsRef.current.get(next),selectors);
+});
+
+test("Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves",()=>{
+  const raw='{"snapshot":{"inventoryItems":[{"uniqueId":18446744073709551615,"tooltipSource":{"userItem":{"unique_id":18446744073709551615,"slots":[{"unique_id":9007199254740993,"slots":[],"sealed_info":{"expiry_binary_datetime":-9223372036854775808,"next_seal_binary_datetime":9223372036854775807}}],"expire_info":{"expiry_binary_datetime":621355968000000001}}}}],"equipmentItems":[{"uniqueId":0,"sealedExpiryTimeBinaryDatetime":9223372036854775807,"sealedNextTimeBinaryDatetime":-9223372036854775808}],"storagePasswordLastSetBinaryDatetime":621355968000000001,"expandedStorageExpiryTimeBinaryDatetime":9223372036854775807,"stage5Systems":{"relationship":{"marriedDateBinaryDatetime":621355968000000001},"mail":[{"dateSentBinaryDatetime":-9223372036854775808}],"itemRental":{"rentedItems":[{"itemId":18446744073709551615,"itemReturnDateBinaryDatetime":9223372036854775807}]}}}}';
+  assert.throws(()=>actualDurableNpc.parseNpcPurchaseJson(raw));
+  const projected=actualDurableNpc.parseNpcPurchaseJson(raw,true).snapshot,owned=projected.inventoryItems[0];
+  assert.equal(owned.uniqueId,"18446744073709551615");assert.equal(owned.tooltipSource.userItem.unique_id,owned.uniqueId);
+  assert.equal(owned.tooltipSource.userItem.slots[0].unique_id,"9007199254740993");
+  assert.equal(owned.tooltipSource.userItem.slots[0].sealed_info.expiry_binary_datetime,"-9223372036854775808");
+  assert.equal(owned.tooltipSource.userItem.slots[0].sealed_info.next_seal_binary_datetime,"9223372036854775807");
+  assert.equal(projected.equipmentItems[0].uniqueId,0);assert.equal(projected.stage5Systems.mail[0].dateSentBinaryDatetime,"-9223372036854775808");
+  assert.equal(projected.stage5Systems.itemRental.rentedItems[0].itemId,"18446744073709551615");
+  assert(Object.isFrozen(projected.inventoryItems[0].tooltipSource.userItem.slots));
+});
+test("Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes",()=>{
+  for(const raw of ['{"uniqueId":18446744073709551615}','{"snapshot":{"unknown":{"uniqueId":18446744073709551615}}}',
+    '{"snapshot":{"inventoryItems":[{"uniqueId":18446744073709551616}]}}',
+    '{"snapshot":{"inventoryItems":[{"uniqueId":-1}]}}',
+    '{"snapshot":{"inventoryItems":[{"uniqueId":9007199254740991.1}]}}',
+    '{"snapshot":{"inventoryItems":[{"uniqueId":1e3}]}}',
+    '{"snapshot":{"inventoryItems":[{"uniqueId":0,"\\u0075niqueId":1}]}}',
+    '{"snapshot":{"storagePasswordLastSetBinaryDatetime":-9223372036854775809}}',
+    '{"snapshot":{"expandedStorageExpiryTimeBinaryDatetime":9223372036854775808}}',
+    '{"snapshot":{"inventoryItems/*/uniqueId":18446744073709551615}}']){
+    assert.throws(()=>actualDurableNpc.parseNpcPurchaseJson(raw,true),undefined,raw);
+  }
+  for(const value of ["-9223372036854775808","9223372036854775807","0"])assert(actualDurableNpc.npcPurchaseSignedDecimal(value));
+  for(const value of ["-0","00","-01","9223372036854775808","-9223372036854775809",1])assert.equal(actualDurableNpc.npcPurchaseSignedDecimal(value),false);
+});
+
+// Numeric literals are reconstructed only inside these source fixtures. Product
+// projection receives the original string, never a pre-rounded JS object.
+const s31Max="18446744073709551615",s31MinDate="-9223372036854775808",s31MaxDate="9223372036854775807";
+function s31UserItem(uid=s31Max){return {unique_id:uid,item_index:10,count:1,current_dura:10,max_dura:10,
+  soul_bound_id:0,identified:true,cursed:false,slots:[],gem_count:0,added_stats:[],awake_type:0,awake_values:[],
+  refined_value:0,refine_added:0,refine_success_chance:0,wedding_ring:0,expire_info:{expiry_binary_datetime:s31MinDate},
+  rental_information:null,is_shop_item:false,sealed_info:{expiry_binary_datetime:s31MaxDate,next_seal_binary_datetime:s31MinDate},gm_made:false};}
+function s31ItemInfo(){return {item_index:10,name:"Exact item",item_type:13,grade:0,required_type:0,required_class:31,
+  required_gender:3,item_set:0,shape:0,weight:1,light:0,required_amount:1,image:1,durability:10,stack_size:20,price:1,
+  start_item:false,effect:0,need_identify:false,show_group_pickup:false,class_based:false,level_based:false,can_mine:false,
+  global_drop_notify:false,bind:0,unique:0,random_stats_id:0,can_fast_run:false,can_awakening:false,slots:0,stats:[],tooltip:null};}
+function s31WorldItem(uid=s31Max,slot=0,container="bag1"){return {key:"exact",name:"Exact item",description:"Original",
+  icon:1,uniqueId:uid,slot,container,quantity:1,tooltipSource:{info:s31ItemInfo(),userItem:s31UserItem(uid)}};}
+function s31Shop(uid=s31Max,service="BUYUSED",count=1,npcObjectId=50){
+  const item=s31UserItem(uid);item.count=count;item.is_shop_item=!["BUYUSED","BUYBACK"].includes(service);
+  if(typeof uid==="number"){item.expire_info=null;item.sealed_info=null;}
+  const info=s31ItemInfo();
+  return {npcObjectId,scriptKey:"Bichon/Shop",service,packetType:service==="PEARLBUY"?"NPCPearlGoods":"NPCGoods",
+    list:[item],displayGoods:[{...copy(item),id:uid,uniqueId:uid,purchaseItemIndex:String(uid),itemIndex:item.item_index,
+      name:info.name,icon:info.image,price:info.price,grade:info.grade,
+      tooltipSource:{info,realInfo:null,userItem:copy(item),socketInfos:[],realSocketInfos:[]}}],
+    rate:1,panelType:service==="BUYUSED"?1:0,hideAddedStats:false};
+}
+function s31Snapshot(){const v=s30Snapshot();v.heroMaxExperience=null;v.inventoryItems=[s31WorldItem()];
+  v.storageItems=[s31WorldItem("9007199254740993",0,"storage")];
+  v.equipmentItems=[{...s31WorldItem("9007199254740995"),slot:"weapon",sealedExpiryTimeBinaryDatetime:s31MaxDate,sealedNextTimeBinaryDatetime:s31MinDate}];delete v.equipmentItems[0].container;
+  v.storagePasswordLastSetBinaryDatetime=s31MinDate;v.expandedStorageExpiryTimeBinaryDatetime=s31MaxDate;
+  v.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:[s31Max]};
+  v.nativeNpcShop=s31Shop();v.entities.push({objectId:50,name:"Actual shop",x:11,y:10,direction:"Down",dead:false});
+  v.stage5Systems.relationship.marriedDateBinaryDatetime=s31MinDate;
+  v.stage5Systems.mail=[{id:1,from:"Other",to:"Actor",subject:"Exact",body:"Saved item",gold:0,items:["exact"],
+    itemStatesJson:['{"unique_id":18446744073709551615,"key":"exact","name":"Exact item","quantity":1,"sealed_expiry_time_binary_datetime":-9223372036854775808,"socketed":[{"unique_id":9007199254740993,"key":"socket","name":"Socket","quantity":1}],"user_item_metadata":{"item_index":10,"rental_information":{"expiry_binary_datetime":9223372036854775807},"slots":[]}}'],opened:false,locked:false,claimed:false,deleted:false}];
+  return v;}
+function s31OriginalFrame(f,snapshot=s31Snapshot()){return f.frame(f.sent.at(-1).requestId,{kind:"producer",producer:s30Authority},snapshot,s30Authority)
+  .replace(/("(?:uniqueId|unique_id|id|sealedExpiryTimeBinaryDatetime|sealedNextTimeBinaryDatetime|storagePasswordLastSetBinaryDatetime|expandedStorageExpiryTimeBinaryDatetime|marriedDateBinaryDatetime|expiry_binary_datetime|next_seal_binary_datetime)":)"(18446744073709551615|9007199254740993|9007199254740995|-9223372036854775808|9223372036854775807)"/g,"$1$2")
+  .replace(/("freshCompatibleUniqueIds":\[)"18446744073709551615"/g,(_,prefix)=>prefix+s31Max);}
+
+test("Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict",()=>{
+  const f=liveReceiptFacade(),raw='{"ok":true,"frame":{"snapshot":{"nativeNpcShop":{"list":[{"unique_id":18446744073709551615,"sealed_info":{"expiry_binary_datetime":-9223372036854775808}}]},"storagePasswordLastSetBinaryDatetime":9223372036854775807}}}';
+  f.oracle.responses.set("receive",raw);const value=f.runtime.transact(f.source,f.socket,{op:"receive",frame:"original owner"});
+  assert.equal(value.frame.snapshot.nativeNpcShop.list[0].unique_id,s31Max);assert.equal(value.frame.snapshot.storagePasswordLastSetBinaryDatetime,s31MaxDate);
+  assert(Object.isFrozen(value.frame.snapshot.nativeNpcShop.list[0]));
+  for(const invalid of ['{"ok":true,"sequence":18446744073709551615}','{"ok":true,"frame":{"snapshot":{"unknown":{"uniqueId":18446744073709551615}}}}','{"ok":true,"ok":false}']){
+    const bad=liveReceiptFacade();bad.oracle.responses.set("receive",invalid);assert.equal(bad.runtime.transact(bad.source,bad.socket,{op:"receive",frame:"raw"}).ok,false);
+  }
+});
+test("Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness",()=>{
+  for(const old of [true,false]){const f=s30Harness();assert(f.client.open());assert(f.client.begin());const raw=s31OriginalFrame(f);
+    if(!old)f.state.mutate=(input,result)=>input.op==="receive"?actualDurableNpc.parseNpcPurchaseJson('{"ok":true,"frame":'+input.frame+',"observation":{"kind":"ignored"},"kind":"producer","binding":'+JSON.stringify(f.state.binding)+'}',"abi"):result;
+    f.client.receive(raw);assert.equal(f.applied.length,1);assert.equal(f.ops("applied").length,1);
+    const source=f.applied[0].snapshot;assert.equal(source.inventoryItems[0].uniqueId,s31Max);assert.equal(source.equipmentItems[0].sealedNextTimeBinaryDatetime,s31MinDate);
+    assert.equal(source.storageItems[0].uniqueId,"9007199254740993");assert.equal(source.nativeNpcShop.list[0].unique_id,s31Max);
+    assert.equal(f.applied[0].raw,raw);assert.equal(source.stage5Systems.mail[0].itemStatesJson[0],s31Snapshot().stage5Systems.mail[0].itemStatesJson[0]);
+    f.client.receive(raw);assert.equal(f.applied.length,1);assert.equal(f.ops("applied").length,1);
+  }
+});
+test("Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry",()=>{
+  for(const edge of ["identity","wallet","key","getter","receipt","reentry"]){const f=s30Harness();assert(f.client.open());assert(f.client.begin());let getter=0;
+    f.state.mutate=(input,result)=>{if(input.op!=="receive")return result;
+      if(edge==="identity")result.frame.snapshot.inventoryItems[0].uniqueId=Number("18446744073709547520");
+      if(edge==="wallet")result.frame.snapshot.gold++;
+      if(edge==="key")result.frame.snapshot.inventoryItems[0].extra=true;
+      if(edge==="receipt")result.frame.authority.serverRevision="1";
+      if(edge==="getter")Object.defineProperty(result.frame.snapshot.inventoryItems[0],"uniqueId",{enumerable:true,get(){getter++;return Number(s31Max);}});
+      if(edge==="reentry")result.frame.snapshot=new Proxy(result.frame.snapshot,{ownKeys(target){f.client.withdraw();return Reflect.ownKeys(target);}});
+      return result;};
+    f.client.receive(s31OriginalFrame(f));assert.equal(f.applied.length,0,edge);assert.equal(f.ops("applied").length,0,edge);assert.equal(getter,0);
+  }
+});
+test("Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority",()=>{
+  const v=actualDurableNpc.parseNpcPurchaseJson('{"snapshot":'+JSON.stringify(s31Snapshot())+'}',true).snapshot;
+  const source={...v,inventoryItems:v.inventoryItems.map(row=>({...row,...expiryIdentity.projectInventoryItemIdentity(row.uniqueId,row.container,row.slot)})),
+    equipmentItems:v.equipmentItems.map(row=>({...row,uniqueId:undefined,exactUniqueId:row.uniqueId})),beltItems:[]};
+  const result=expiryBag.projectBevyBagModel(source,{npcGoldTrade:true});assert(result.ok);assert.equal(result.model.items[0].exactUniqueId,s31Max);
+  assert.equal(result.model.items[0].uniqueId,null);assert.equal(expiryIdentity.authoritativeItemUniqueId(s31Max),undefined);
+  const owner={connectionGeneration:1,sessionGeneration:1,playerObjectId:7},ready=new module.exports.NpcGoldBuyInventoryReadiness();
+  assert(ready.finish(ready.begin(owner),owner,true,result.model));assert(ready.matches(owner,result.model));
+  source.inventoryItems.push({...source.inventoryItems[0],slot:1});assert.equal(expiryBag.projectBevyBagModel(source,{npcGoldTrade:true}).ok,false);
+  source.inventoryItems.pop();source.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:[1,"1"]};assert.equal(expiryBag.projectBevyBagModel(source,{npcGoldTrade:true}).ok,false);
+  source.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:["9007199254740993"]};assert.equal(expiryBag.projectBevyBagModel(source,{npcGoldTrade:true}).ok,false);
+});
+test("Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments",()=>{
+  const mail=s31Snapshot().stage5Systems.mail;mail[0].dateSentBinaryDatetime=s31MinDate;mail[0].canReply=true;
+  const parsed=expiryPackets.parseMailList(mail);assert(parsed);assert.equal(parsed[0].items[0].uniqueId,s31Max);assert.equal(parsed[0].dateSentBinaryDatetime,s31MinDate);
+  const saved=actualDurableNpc.parseNpcPurchaseMailItemJson(mail[0].itemStatesJson[0]);assert.equal(saved.unique_id,s31Max);
+  assert.equal(saved.socketed[0].unique_id,"9007199254740993");assert.equal(saved.sealed_expiry_time_binary_datetime,s31MinDate);
+  assert.equal(saved.user_item_metadata.rental_information.expiry_binary_datetime,s31MaxDate);
+  const bad=copy(mail);bad[0].itemStatesJson.push(bad[0].itemStatesJson[0]);assert.equal(expiryPackets.parseMailList(bad),null);
+  bad[0].itemStatesJson=['{"unique_id":0,"unique_id":18446744073709551615}'];assert.equal(expiryPackets.parseMailList(bad),null);
+  for(const value of [Number(s31Max),"18446744073709551616"]){const direct=copy(mail);delete direct[0].itemStatesJson;direct[0].items=[{unique_id:value,count:1}];assert.equal(expiryPackets.parseMailList(direct),null);}
+  for(const date of ["-0","01",Number(s31MaxDate)]){const direct=copy(mail);direct[0].dateSentBinaryDatetime=date;assert.equal(expiryPackets.parseMailList(direct)[0].metadataKnown,false);}
+});
+const s31Hero=loadPearlBuyDependency("../lib/hero-player-ui.ts");
+function s31HeroFixture(){const owner={connectionGeneration:1,sessionGeneration:7,playerObjectId:40,socket:{},sceneRevision:2,mapFileName:"0"};
+  const info={object_id:70,name:"Hero",class:"Warrior",gender:"Male",level:20,hair:0,hp:100,mp:50,experience:1,max_experience:100,
+    inventory:Array(10).fill(null),equipment:Array(14).fill(null),magics:[],auto_pot:true,auto_hp_percent:40,auto_mp_percent:30,hp_item_index:10,mp_item_index:0};
+  const world={playerObjectId:40,mapFileName:"0",inventoryCapacity:46,maxBagSlots:40,inventoryItems:[],heroInventoryCapacity:10,heroInventoryItems:[],heroEquipmentItems:[],
+    heroStats:[],heroVitals:{hp:100,mp:50},heroWeights:{bag:0,wear:0,hand:0},heroMaxExperience:1000,
+    stage5Systems:{hero:{name:"Hero",class:"Warrior",gender:"Male",level:20,spawned:true,autoPot:true,autoHpPercent:40,autoMpPercent:30,hpItemIndex:10,mpItemIndex:0,experience:55},heroLearnedMagics:[]}};
+  const authority=new s31Hero.HeroPlayerAuthority();assert(authority.receiveInformation(info,owner));assert(authority.receiveSnapshot(world,owner));return {owner,info,world,authority};}
+test("Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values",()=>{
+  const f=s31HeroFixture();assert.equal(f.authority.read(f.owner).experience,55);assert.equal(f.authority.read(f.owner).maxExperience,1000);
+  f.world.stage5Systems.hero.experience="9007199254740993";f.world.heroMaxExperience=s31MaxDate;assert(f.authority.receiveSnapshot(f.world,f.owner));
+  assert.equal(f.authority.read(f.owner).experience,"9007199254740993");assert.equal(f.authority.read(f.owner).maxExperience,s31MaxDate);
+  assert(f.authority.receiveInformation(f.info,f.owner));assert.equal(f.authority.read(f.owner).experience,1);
+  assert(f.authority.receiveSnapshot(f.world,f.owner));assert.equal(f.authority.read(f.owner).experience,"9007199254740993");
+  for(const missing of [null,Number(s31MaxDate),"9223372036854775808"]){f.world.heroMaxExperience=missing;assert(f.authority.receiveSnapshot(f.world,f.owner));assert.equal(f.authority.read(f.owner),null);}
+  delete f.world.heroMaxExperience;assert(f.authority.receiveSnapshot(f.world,f.owner));assert.equal(f.authority.read(f.owner).experience,1);
+});
+test("Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model",()=>{
+  const f=s31HeroFixture();f.world.heroInventoryItems=[s31WorldItem()];assert(f.authority.receiveSnapshot(f.world,f.owner));
+  const model=f.authority.read(f.owner);assert(model);assert.equal(model.inventory[0].uniqueId,s31Max);assert.equal(model.inventory[0].userItem.unique_id,s31Max);
+  assert.equal(s31Hero.planHeroAction(model,{kind:"use",slot:0}),null);assert.equal(s31Hero.heroRestockCandidate(model,0),null);
+  f.world.heroEquipmentItems=[s31WorldItem(s31Max,3)];assert(f.authority.receiveSnapshot(f.world,f.owner));assert.equal(f.authority.read(f.owner),null);
+  f.world.heroEquipmentItems=[];f.world.heroInventoryItems[0].uniqueId=Number(s31Max);assert(f.authority.receiveSnapshot(f.world,f.owner));assert.equal(f.authority.read(f.owner),null);
+});
+test("Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves",()=>{
+  const v=s31Snapshot();v.stage5Systems.hero={experience:55};delete v.heroMaxExperience;assert.equal(actualDurableNpc.completeNpcPurchaseSnapshot(v),false);
+  v.heroMaxExperience=1000;assert(actualDurableNpc.completeNpcPurchaseSnapshot(v));v.heroMaxExperience=null;assert.equal(actualDurableNpc.completeNpcPurchaseSnapshot(v),false);
+  v.stage5Systems.hero=null;assert(actualDurableNpc.completeNpcPurchaseSnapshot(v));v.nativeNpcShop.list[0].unique_id="18446744073709551616";assert.equal(actualDurableNpc.completeNpcPurchaseSnapshot(v),false);
+});
+test("Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads",()=>{
+  const f=npcPageHarness(),w=f.scope.worldRef.current;w.stage5Systems={hero:null};w.credit=0;w.activeNpcDialog=null;
+  w.inventoryItems=[{...s31WorldItem(),...expiryIdentity.projectInventoryItemIdentity(s31Max,"bag1",0)}];
+  w.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:[s31Max]};
+  const snapshot={...w,playerObjectId:1,nativeNpcShop:s31Shop(77,"BUYSELL")};
+  snapshot.entities=[...snapshot.entities,{objectId:50,name:"Actual shop"}];
+  f.scope.npcPurchaseApplyingEconomyRef.current=true;f.applyNpcPurchaseShopSnapshot(snapshot);f.scope.npcPurchaseApplyingEconomyRef.current=false;
+  f.scope.npcPurchaseEconomicSourceRef.current={socket:f.socket,session:f.npcPurchaseSessionKey(),snapshot,rawFrame:"strict original fixture"};
+  f.scope.npcPurchaseDisplaySourceRef.current={...f.scope.npcPurchaseEconomicSourceRef.current,fingerprint:f.npcPurchaseDisplayFingerprint(w)};
+  f.scope.equipmentControllerRef.current.status=()=>({ready:false,pending:0});
+  const owner={connectionGeneration:1,sessionGeneration:2,playerObjectId:1},model=npcPureBag.projectBevyBagModel(w,{npcGoldTrade:true});assert(model.ok);
+  assert(f.scope.npcGoldBuyInventoryRef.current.finish(f.scope.npcGoldBuyInventoryRef.current.begin(owner),owner,true,model.model));
+  const service=f.scope.npcShopServiceRef.current;
+  for(let i=0;i<2;i++){const current=f.readNpcGoldBuyCurrent();assert(current);assert.equal(current.blocked,false);assert.equal(current.inventory.items[0].exactUniqueId,s31Max);assert.equal(f.scope.npcShopServiceRef.current,service);}
+  f.scope.equipmentControllerRef.current.status=()=>({ready:false,pending:1});assert.equal(f.readNpcGoldBuyCurrent().blocked,true);
+  f.scope.equipmentControllerRef.current.status=()=>({ready:false,pending:0});f.scope.npcGoldBuyInventoryRef.current.invalidate();assert.equal(f.readNpcGoldBuyCurrent().blocked,true);
+  const valid=s31Snapshot();assert.equal(valid.activeNpcDialog,null);assert(actualDurableNpc.completeNpcPurchaseSnapshot(valid));
+  valid.activeNpcDialog={npcObjectId:51};assert.equal(actualDurableNpc.completeNpcPurchaseSnapshot(valid),false);
+});
+test("Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable",()=>{
+  const raw='{"type":"packet","packet":"ResizeStorage","payload":{"hasExpandedStorage":true,"size":160,"expiryTimeBinaryDatetime":9223372036854775807}}';
+  const supported=expiryPackets.parseGatewayMailDates(raw);assert.equal(supported.payload.expiryTimeBinaryDatetime,s31MaxDate);
+  // This injected parser deliberately provides no reviver token context.
+  const unsupported=loadExpiryPipelineModule("../lib/extended-server-packets.ts",{"./npc-purchase-client":actualDurableNpc},
+    {parse(text,reviver){return JSON.parse(text,reviver?function(key,value){return reviver.call(this,key,value);}:undefined);},stringify:JSON.stringify});
+  assert.equal(unsupported.parseGatewayMailDates(raw).payload.expiryTimeBinaryDatetime,null);
+  for(const value of [Number(s31MaxDate),"-0","9223372036854775808"])assert.equal(expiryPackets.exactGatewayBinaryDatetime(value),undefined);
+  assert.equal(expiryPackets.exactGatewayBinaryDatetime(s31MinDate),s31MinDate);assert.equal(expiryPackets.exactGatewayBinaryDatetime(0),0);
+  assert(actualPageSource.includes("exactGatewayBinaryDatetime(payload.lastSetBinaryDatetime)"));
+});
+// Execute the real Page socket/client constructor, owner apply callback, catalog
+// reducers, current readers and final durable dispatcher. Only the existing
+// world-model boundary and Core ABI are fixtures; this does not start WASM/UI.
+function s31PageOwner(service="BUYUSED"){
+  const page=npcPageHarness(),abi=s30Harness();
+  const core={...page.scope.questCoreRuntimeRef.current,getNpcPurchaseReceiptHost:()=>abi.host,
+    getMir2NpcPearlBuyPlan:json=>JSON.stringify({version:1,ok:true,maxQuantity:99,quote:JSON.parse(json).unitPrice,admittedCount:null,denial:4})};
+  page.scope.questCoreRuntimeRef.current=core;page.dispatcher.observe();page.observeNpcPurchaseSocket(page.socket);
+  const client=page.scope.npcPurchaseClientRef.current?.client;assert(client);
+  const ownerWires=()=>page.sent.filter(value=>value.type==="npcPurchaseOwner");
+  const snapshot=s30Snapshot();snapshot.heroMaxExperience=null;snapshot.nativeNpcShop=s31Shop(77,service,3);
+  snapshot.entities.push({objectId:50,name:"Actual shop",x:11,y:10,direction:"Down",dead:false});
+  snapshot.inventoryItems=[s31WorldItem()];snapshot.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:[s31Max]};
+  snapshot.stage5Systems.intelligentCreaturePearls=100;
+  const raw=(reply,view=null,authority=null,id=ownerWires().at(-1).requestId)=>s31OriginalFrame({
+    sent:[{requestId:id}],frame:(requestId,_reply,_snapshot,_authority)=>abi.frame(requestId,reply,view,authority)},view);
+  const begin=view=>client.receive(raw({kind:"producer",producer:s30Authority},view,s30Authority));
+  begin(snapshot);assert.equal(abi.ops("applied").length,1);assert(page.scope.npcShopServiceRef.current);
+  const quote=(view=null)=>{
+    const wire=ownerWires().at(-1);assert.equal(wire.action.kind,"quote");
+    abi.state.intent={...copy(s30Intent),request:wire.action.request,currency:service==="PEARLBUY"?"pearls":"gold",
+      source:service==="BUYUSED"?"used":service==="BUYBACK"?"buyBack":"trade"};
+    abi.state.operation={...copy(s30Operation),sequence:String(abi.ops("reserve").length+1),intent:abi.state.intent};
+    client.receive(raw({kind:"quote",intent:abi.state.intent},view,view?s30Authority:null,wire.requestId));
+  };
+  return {page,abi,client,snapshot,ownerWires,raw,begin,quote};
+}
+test("Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase",()=>{
+  for(const profile of ["BUYSELL","PEARLBUY","BUYBACK","BUYUSED"]){
+    const f=s31PageOwner(profile),p=f.page;let snapshot=f.snapshot;
+    for(let turn=0;turn<2;turn++){
+      const service=p.scope.npcShopServiceRef.current,id=service.buyItems[0].id;
+      assert.equal(p.scope.worldRef.current.activeNpcDialog,null);assert.equal(service.buyItems[0].count,3-turn);
+      assert.equal(service.buyItems[0].name,snapshot.nativeNpcShop.displayGoods[0].name);
+      for(let read=0;read<2;read++){assert.equal(p.readNpcBuyCurrent().blocked,false);assert.equal(p.scope.npcShopServiceRef.current,service);}
+      p.scope.npcBuySelectedRef.current=id;assert(p.dispatchDurableNpcPurchase(id,1));
+      f.quote(snapshot);assert.equal(p.scope.npcShopServiceRef.current,service,"same Quote source preserves UI custody");
+      const entered=f.ownerWires().at(-1);assert.equal(entered.action.kind,"purchase");assert.equal(entered.action.operation.intent.request.itemIndex,String(id));
+      assert.equal(entered.action.operation.intent.currency,profile==="PEARLBUY"?"pearls":"gold");
+      const next=copy(snapshot);next.nativeNpcShop=s31Shop(78+turn,profile,2-turn);
+      next.inventoryItems.push(s31WorldItem(10001+turn,1+turn));next.npcGoldTradeCapacity.freshCompatibleUniqueIds.push(10001+turn);
+      const authority={...s30Authority,serverRevision:String(turn+1)};
+      const receipt={producerScope:s30Scope,entry:{operation:entered.action.operation,serverRevision:String(turn+1),outcome:{committed:{
+        request:entered.action.operation.intent.request,currency:entered.action.operation.intent.currency,source:entered.action.operation.intent.source,
+        charged:1,admittedCount:1,incomingUniqueId:String(10001+turn)}}}};
+      f.abi.state.mutate=(input,result)=>{if(input.op==="applied")f.abi.state.pending=null;return result;};
+      f.client.receive(f.raw({kind:"purchase",receipt,replayed:false},next,authority,entered.requestId));
+      assert.equal(f.abi.state.pending,null);assert.notEqual(p.scope.npcShopServiceRef.current,service);
+      assert.equal(p.scope.npcBuySelectedRef.current,null);assert.equal(p.scope.npcShopServiceRef.current.buyItems[0].id,78+turn);
+      assert.equal(p.readNpcBuyCurrent().blocked,false);snapshot=next;
+    }
+    assert.equal(f.abi.ops("reserve").length,2);assert.equal(f.abi.ops("enter").length,2);
+    assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,2);assert.equal(f.abi.ops("begin").length,1);
+    assert.equal(p.sent.some(w=>w.type==="buyItem"),false);assert.equal(f.abi.ops("applied").length,5);
+  }
+});
+test("Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source",()=>{
+  const f=s31PageOwner(),p=f.page,original=p.scope.npcShopServiceRef.current;
+  p.scope.npcBuySelectedRef.current=77;const next=copy(f.snapshot);next.nativeNpcShop=s31Shop(78,"BUYUSED",2,51);
+  next.entities.push({objectId:51,name:"Second actual NPC",x:12,y:10,direction:"Down",dead:false});
+  p.scope.npcPurchaseApplyingEconomyRef.current=true;p.applyNpcPurchaseShopSnapshot(next);p.scope.npcPurchaseApplyingEconomyRef.current=false;
+  assert.notEqual(p.scope.npcShopServiceRef.current,original);assert.equal(p.scope.npcShopServiceRef.current.npcName,"Second actual NPC");
+  assert.equal(p.scope.npcBuySelectedRef.current,null);assert.equal(p.scope.npcPurchaseCatalogSourceRef.current.get(p.scope.npcShopServiceRef.current).npcObjectId,51);
+  for(const kind of ["null","missing","missingDisplay","unknownInfo","maxOffer","missingNpc"]){
+    p.scope.npcPurchaseApplyingEconomyRef.current=true;p.applyNpcPurchaseShopSnapshot(f.snapshot);
+    const bad=copy(f.snapshot);if(kind==="null")bad.nativeNpcShop=null;if(kind==="missing")delete bad.nativeNpcShop;
+    if(kind==="missingDisplay")delete bad.nativeNpcShop.displayGoods;
+    if(kind==="unknownInfo")delete bad.nativeNpcShop.displayGoods[0].tooltipSource;
+    if(kind==="maxOffer")bad.nativeNpcShop=s31Shop();if(kind==="missingNpc")bad.entities=bad.entities.filter(row=>row.objectId!==50);
+    p.applyNpcPurchaseShopSnapshot(bad);p.scope.npcPurchaseApplyingEconomyRef.current=false;
+    assert.equal(p.scope.npcShopServiceRef.current,null,kind);assert.equal(p.dispatchDurableNpcPurchase(77,1),false,kind);
+    const received=s31PageOwner();assert(received.client.begin(true));received.begin(bad);
+    assert.equal(received.abi.ops("applied").length,2,"unavailable catalog still applies complete economy: "+kind);
+    assert.equal(received.page.scope.npcShopServiceRef.current,null,kind);
+  }
+  assert.equal(f.abi.ops("begin").length,1);
+});
+test("Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter",()=>{
+  assert(actualDurableNpc.npcPurchaseShopSource(s31Shop()));
+  for(const [profile,panel] of [["BUYBACK",0],["BUYUSED",1]]){
+    const actual=s31Shop(77,profile);assert.equal(actual.panelType,panel);assert(actualDurableNpc.npcPurchaseShopSource(actual));
+    actual.panelType=1-panel;assert.equal(actualDurableNpc.npcPurchaseShopSource(actual),null);
+  }
+  for(const edge of ["raw","selector","profile","grade","unknown","duplicate","getter"]){
+    const shop=s31Shop(77);let calls=0;
+    if(edge==="raw")shop.displayGoods[0].tooltipSource.userItem.count++;
+    if(edge==="selector")shop.displayGoods[0].purchaseItemIndex="78";
+    if(edge==="profile")shop.packetType="NPCPearlGoods";
+    if(edge==="grade")shop.displayGoods[0].grade++;
+    if(edge==="unknown")shop.displayGoods[0].stock=50;
+    if(edge==="duplicate"){shop.list.push(copy(shop.list[0]));shop.displayGoods.push(copy(shop.displayGoods[0]));}
+    if(edge==="getter")Object.defineProperty(shop.displayGoods[0],"id",{enumerable:true,get(){calls++;return 77;}});
+    assert.equal(actualDurableNpc.npcPurchaseShopSource(shop),null,edge);assert.equal(calls,0,edge);
+  }
+  const full=s31Snapshot(),raw=s31OriginalFrame({sent:[{requestId:"1"}],frame:(id,reply,snapshot,authority)=>JSON.stringify({type:"npcPurchaseOwner",protocolVersion:1,requestId:id,reply,snapshot,authority})},full);
+  const exact=actualDurableNpc.parseNpcPurchaseJson(raw,true).snapshot;
+  assert.equal(exact.nativeNpcShop.displayGoods[0].id,s31Max);assert.equal(exact.nativeNpcShop.displayGoods[0].purchaseItemIndex,s31Max);
+  assert.equal(exact.nativeNpcShop.displayGoods[0].tooltipSource.userItem.sealed_info.next_seal_binary_datetime,s31MinDate);
+});
+test("Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops",()=>{
+  const f=s31PageOwner(),p=f.page,source=p.scope.npcPurchaseCatalogSourceRef.current.get(p.scope.npcShopServiceRef.current);
+  const samePacket={list:source.displayGoods,rate:source.rate,panelType:source.panelType,hideAddedStats:source.hideAddedStats};
+  for(let i=0;i<3;i++)p.applyNpcShopCatalogPacket("NPCGoods",samePacket);
+  assert.equal(f.abi.ops("begin").length,1);
+  p.scope.npcBuySelectedRef.current=77;assert(p.dispatchDurableNpcPurchase(77,1));f.quote();
+  const operation=copy(f.abi.state.pending.operation),changed=s31Shop(78,"BUYUSED",2);
+  p.applyNpcShopCatalogPacket("NPCGoods",{list:changed.displayGoods,rate:changed.rate,panelType:changed.panelType,hideAddedStats:changed.hideAddedStats});
+  assert.equal(f.abi.ops("begin").length,2);assert.deepEqual(f.abi.state.pending.operation,operation);assert.equal(f.abi.state.pending.phase,"entered");
+  const fresh=copy(f.snapshot);fresh.nativeNpcShop=changed;f.begin(fresh);
+  assert.equal(f.ownerWires().at(-1).action.kind,"query");assert.deepEqual(f.ownerWires().at(-1).action.operation,operation);
+  assert.equal(f.abi.ops("reserve").length,1);assert.equal(f.abi.ops("enter").length,1);
+  assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,1);
+});
+test("Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown",()=>{
+  for(const edge of ["quote","enter"]){const f=s31PageOwner(),p=f.page;
+    p.scope.npcBuySelectedRef.current=77;assert(p.dispatchDurableNpcPurchase(77,1));
+    const change=()=>{const next=copy(f.snapshot);next.nativeNpcShop=s31Shop(78,"BUYUSED",2);
+      p.scope.npcPurchaseApplyingEconomyRef.current=true;p.applyNpcPurchaseShopSnapshot(next);p.scope.npcPurchaseApplyingEconomyRef.current=false;};
+    if(edge==="quote")change();else f.abi.state.mutate=(input,result)=>{if(input.op==="enter")change();return result;};
+    f.quote();assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,0,edge);
+    assert.equal(f.abi.ops("reserve").length,edge==="quote"?0:1,edge);
+    if(edge==="enter"){assert.equal(f.abi.state.pending.phase,"unknown");assert.deepEqual(f.abi.ops("unknown")[0].operation,f.abi.state.pending.operation);}
+  }
+});
+test("Source31 packet refresh final fences reject reentrant connection change or service withdrawal",()=>{
+  for(const edge of ["connection","service"]){const f=s31PageOwner(),p=f.page,source=s31Shop(78,"BUYUSED",2);
+    const originalSet=p.scope.setNpcShopService;
+    // The actual setter argument is captured in the extracted Page closure;
+    // use its ordinary dispatcher observer boundary for a synchronous callback.
+    const originalObserve=p.dispatcher.observe.bind(p.dispatcher);
+    p.dispatcher.observe=()=>{if(edge==="connection")p.scope.equipmentConnectionGenerationRef.current++;
+      else p.scope.npcShopServiceRef.current=null;return originalObserve();};
+    p.applyNpcShopCatalogPacket("NPCGoods",{list:source.displayGoods,rate:source.rate,panelType:source.panelType,hideAddedStats:false});
+    assert.equal(f.abi.ops("begin").length,1,edge);assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,0,edge);
+    assert.equal(p.scope.setNpcShopService,originalSet);
+  }
+});
+function s31OrdinaryRaw(snapshot){
+  return s31OriginalFrame({sent:[{requestId:"1"}],frame:(_id,_reply,view)=>JSON.stringify({type:"worldSnapshot",payload:view})},snapshot)
+    .replace(/("dateSentBinaryDatetime":)"(-9223372036854775808|9223372036854775807)"/g,"$1$2");
+}
+function s31ReceiveOrdinary(f,snapshot){
+  const raw=s31OrdinaryRaw(snapshot);
+  f.page.receiveNpcPurchaseGatewayFrame({data:raw},f.page.scope.equipmentConnectionGenerationRef.current,f.page.socket);
+  return raw;
+}
+
+test("Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application",()=>{
+  const f=s31PageOwner("BUYSELL"),p=f.page,paired=p.scope.npcPurchaseEconomicSourceRef.current;
+  const snapshot=s31Snapshot();snapshot.nativeNpcShop=s31Shop(77,"BUYSELL",3);
+  snapshot.stage5Systems.mail[0].dateSentBinaryDatetime=s31MinDate;
+  const applied=f.abi.ops("applied").length,raw=s31ReceiveOrdinary(f,snapshot);
+  const exact=p.scope.npcPurchaseDisplaySourceRef.current;
+  assert.equal(exact.rawFrame,raw);assert.equal(exact.snapshot.inventoryItems[0].uniqueId,s31Max);
+  assert.equal(exact.snapshot.storageItems[0].uniqueId,"9007199254740993");
+  assert.equal(exact.snapshot.equipmentItems[0].uniqueId,"9007199254740995");
+  assert.equal(exact.snapshot.equipmentItems[0].sealedNextTimeBinaryDatetime,s31MinDate);
+  assert.equal(exact.snapshot.storagePasswordLastSetBinaryDatetime,s31MinDate);
+  assert.equal(exact.snapshot.expandedStorageExpiryTimeBinaryDatetime,s31MaxDate);
+  assert.equal(exact.snapshot.stage5Systems.mail[0].dateSentBinaryDatetime,s31MinDate);
+  const saved=actualDurableNpc.parseNpcPurchaseMailItemJson(exact.snapshot.stage5Systems.mail[0].itemStatesJson[0]);
+  assert.equal(saved.unique_id,s31Max);assert.equal(saved.socketed[0].unique_id,"9007199254740993");
+  assert.equal(saved.user_item_metadata.rental_information.expiry_binary_datetime,s31MaxDate);
+  assert(Object.isFrozen(exact.snapshot));const projectedItem=p.scope.worldRef.current.inventoryItems[0];
+  assert.equal(projectedItem.exactUniqueId,s31Max);assert.equal(projectedItem.authoritativeUniqueId,undefined);
+  assert.equal(expiryIdentity.currentAuthoritativeItem([projectedItem],{container:projectedItem.container,slot:projectedItem.slot,uniqueId:projectedItem.uniqueId}),null);
+  assert.equal(expiryIdentity.currentAuthoritativeItem([projectedItem],{container:projectedItem.container,slot:projectedItem.slot,uniqueId:Number(s31Max)}),null);
+  const projectedBag=npcPureBag.projectBevyBagModel(p.scope.worldRef.current,{npcGoldTrade:true});assert(projectedBag.ok);
+  assert.equal(projectedBag.model.items[0].exactUniqueId,s31Max);assert.equal(projectedBag.model.items[0].uniqueId,null);
+  assert.equal(p.readNpcBuyCurrent().blocked,false);assert.equal(p.scope.npcPurchaseEconomicSourceRef.current,paired);
+  assert.equal(f.abi.ops("applied").length,applied);assert.equal(f.abi.ops("begin").length,1);
+  for(const invalid of [raw.replace('"gold":100','"gold":18446744073709551615'),
+    raw.replace('"tick":0','"tick":9007199254740993'),raw.replace('"type":"worldSnapshot"','"type":"worldSnapshot","type":"worldSnapshot"')])
+    assert.throws(()=>actualDurableNpc.parseNpcPurchaseWorldFrame(invalid));
+});
+
+test("Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody",()=>{
+  for(const profile of ["BUYSELL","PEARLBUY","BUYBACK","BUYUSED"]){
+    const f=s31PageOwner(profile),p=f.page;let snapshot=copy(f.snapshot);
+    for(let turn=0;turn<2;turn++){
+      const service=p.scope.npcShopServiceRef.current,paired=p.scope.npcPurchaseEconomicSourceRef.current;
+      snapshot.tick+=1;snapshot.entities[0].x+=1;
+      // Clone/reorder Stage5 to prove equality is semantic, not object custody.
+      snapshot.stage5Systems=Object.fromEntries(Object.entries(snapshot.stage5Systems).reverse());
+      s31ReceiveOrdinary(f,snapshot);assert.equal(p.scope.ordinaryApplications.at(-1).full,false);
+      assert.equal(p.scope.npcShopServiceRef.current,service);assert.equal(p.readNpcBuyCurrent().blocked,false);
+      p.scope.worldRef.current={...p.scope.worldRef.current,groundDrops:[{objectId:"999",name:"stale quantity",quantity:99,x:0,y:0}],
+        stage5Systems:{...p.scope.worldRef.current.stage5Systems,mail:[{gold:999}]}};
+      assert.equal(p.npcPurchaseFullEconomyCurrent(p.scope.worldRef.current),false,"all modeled economics participate in display readiness");
+      s31ReceiveOrdinary(f,snapshot);assert.equal(p.scope.ordinaryApplications.at(-1).full,true);
+      assert.deepEqual(p.scope.worldRef.current.groundDrops,snapshot.groundDrops);assert.deepEqual(p.scope.worldRef.current.stage5Systems.mail,snapshot.stage5Systems.mail);
+      snapshot.playerHp--;snapshot.playerExperience++;
+      s31ReceiveOrdinary(f,snapshot);assert.equal(p.scope.ordinaryApplications.at(-1).full,true);
+      assert.equal(p.scope.npcShopServiceRef.current,service);assert.equal(p.scope.npcPurchaseEconomicSourceRef.current,paired);
+      const applied=f.abi.ops("applied").length;
+      for(let read=0;read<2;read++)assert.equal(p.readNpcBuyCurrent().blocked,false);
+      const id=service.buyItems[0].id;p.scope.npcBuySelectedRef.current=id;assert(p.dispatchDurableNpcPurchase(id,1));
+      f.quote(snapshot);assert.equal(p.scope.npcShopServiceRef.current,service);
+      const entered=f.ownerWires().at(-1);assert.equal(entered.action.kind,"purchase");assert.equal(f.abi.ops("applied").length,applied+1);
+      const next=copy(snapshot);next.inventoryItems.push(s31WorldItem(11001+turn,1+turn));
+      next.npcGoldTradeCapacity.freshCompatibleUniqueIds.push(11001+turn);next.nativeNpcShop=s31Shop(78+turn,profile,2-turn);
+      const authority={...s30Authority,serverRevision:String(turn+1)};
+      const receipt={producerScope:s30Scope,entry:{operation:entered.action.operation,serverRevision:String(turn+1),outcome:{committed:{
+        request:entered.action.operation.intent.request,currency:entered.action.operation.intent.currency,source:entered.action.operation.intent.source,
+        charged:1,admittedCount:1,incomingUniqueId:String(11001+turn)}}}};
+      f.abi.state.mutate=(input,result)=>{if(input.op==="applied")f.abi.state.pending=null;return result;};
+      f.client.receive(f.raw({kind:"purchase",receipt,replayed:false},next,authority,entered.requestId));snapshot=next;
+    }
+    assert.equal(f.abi.ops("reserve").length,2);assert.equal(f.abi.ops("enter").length,2);
+    assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,2);assert.equal(f.abi.ops("begin").length,1);
+  }
+  assert(actualPageSource.includes("applyGatewayWorldSnapshot(snapshot, connectionGeneration, fullEconomy, qualifiedDisplay)"));
+  assert(actualPageSource.includes("fullEconomy = fullEconomy || qualifiedDisplay;"),"equal-source full fallback replaces all packet economic overlays");
+  // Execute the exact Page fallback assignment and reducers with deliberately
+  // stale packet values. This is a reducer fixture, not a running world/UI.
+  const nodes={};
+  (function visit(node){
+    if(ts.isExpressionStatement(node)&&node.getText(actualPageAst)==="fullEconomy = fullEconomy || qualifiedDisplay;")nodes.qualify=node.getText(actualPageAst);
+    if(ts.isVariableDeclaration(node)&&["mergedEntitiesForWorld","mergedGroundDropsForWorld"].includes(node.name.getText(actualPageAst)))
+      nodes[node.name.getText(actualPageAst)]=node.initializer.getText(actualPageAst);
+    if(ts.isPropertyAssignment(node)&&node.name.getText(actualPageAst)==="stage5Systems"&&node.initializer.getText(actualPageAst).startsWith("fullEconomy ?"))
+      nodes.stage=node.initializer.getText(actualPageAst);
+    ts.forEachChild(node,visit);
+  })(actualPageAst);
+  assert.equal(Object.keys(nodes).length,4);
+  const js=ts.transpileModule('return function(fullEconomy,qualifiedDisplay,snapshot,current,entities,groundDrops){'
+    +'const packetRuntimeRefresh=true,currentTime=0,mergedEntities=entities;'+nodes.qualify
+    +'const mergedEntitiesForWorld='+nodes.mergedEntitiesForWorld+';const mergedGroundDropsForWorld='+nodes.mergedGroundDropsForWorld+';'
+    +'return {entities:mergedEntitiesForWorld,groundDrops:mergedGroundDropsForWorld,stage5Systems:'+nodes.stage+'};}',
+    {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+  const forbid=()=>assert.fail("qualified fallback used stale packet economic overlay");
+  const fallback=new Function("mergePacketFirstSnapshotEntities","mergePacketFirstSnapshotGroundDrops","mailRawRef","socialFriendsRef",js)(
+    forbid,forbid,{current:null},{current:null});
+  const source={stage5Systems:{mail:[{gold:3}],mentor:{menteeExp:4}}},entities=[{quantity:2}],drops=[{quantity:5}];
+  const result=fallback(false,true,source,{entities:[{quantity:99}],groundDrops:[{quantity:99}],stage5Systems:{mail:[{gold:99}]}},entities,drops);
+  assert.equal(result.entities,entities);assert.equal(result.groundDrops,drops);assert.equal(result.stage5Systems,source.stage5Systems);
+});
+
+test("Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter",()=>{
+  for(const edge of ["before","quote","enter"]){
+    const f=s31PageOwner(),p=f.page,service=p.scope.npcShopServiceRef.current,applied=f.abi.ops("applied").length;
+    const next=copy(f.snapshot);next.nativeNpcShop=s31Shop(78,"BUYUSED",2,51);
+    next.entities.push({objectId:51,name:"Current second NPC",x:12,y:10,direction:"Down",dead:false});
+    p.scope.npcBuySelectedRef.current=77;
+    p.scope.beforeOrdinaryApply=(_snapshot,_full,qualified)=>{if(qualified){
+      assert.equal(p.scope.npcShopServiceRef.current,null,"changed parent/catalog retired before world projection");
+      assert.equal(p.dispatchDurableNpcPurchase(77,1),false);}};
+    if(edge!=="before")assert(p.dispatchDurableNpcPurchase(77,1));
+    if(edge==="enter")f.abi.state.mutate=(input,result)=>{if(input.op==="enter")s31ReceiveOrdinary(f,next);return result;};
+    else s31ReceiveOrdinary(f,next);
+    if(edge!=="before")f.quote();
+    assert.notEqual(p.scope.npcShopServiceRef.current,service);assert.equal(p.scope.npcShopServiceRef.current.npcName,"Current second NPC");
+    assert.equal(p.scope.npcShopServiceRef.current.buyItems[0].id,78);assert.equal(p.scope.npcBuySelectedRef.current,null);
+    assert.equal(p.scope.ordinaryApplications.at(-1).full,true);assert.equal(f.abi.ops("applied").length,applied);
+    assert.equal(f.abi.ops("begin").length,1);assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,0);
+    if(edge==="before"){assert.equal(p.dispatchDurableNpcPurchase(77,1),false);p.scope.npcBuySelectedRef.current=78;
+      assert(p.dispatchDurableNpcPurchase(78,1));f.quote(next);assert.equal(f.ownerWires().at(-1).action.kind,"purchase");}
+    if(edge==="quote")assert.equal(f.abi.ops("reserve").length,0);
+    if(edge==="enter"){assert.equal(f.abi.state.pending.phase,"unknown");assert.deepEqual(f.abi.ops("unknown")[0].operation,f.abi.state.pending.operation);}
+  }
+});
+
+test("Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws",()=>{
+  const f=s31PageOwner(),p=f.page;p.scope.npcBuySelectedRef.current=77;assert(p.dispatchDurableNpcPurchase(77,1));f.quote();
+  const operation=copy(f.abi.state.pending.operation),paired=p.scope.npcPurchaseEconomicSourceRef.current,applied=f.abi.ops("applied").length;
+  const next=copy(f.snapshot);next.gold--;next.stage5Systems.mentor.menteeExp++;
+  next.inventoryItems.push(s31WorldItem(12001,1));next.npcGoldTradeCapacity.freshCompatibleUniqueIds.push(12001);
+  s31ReceiveOrdinary(f,next);assert.deepEqual(f.abi.state.pending.operation,operation);assert.equal(f.abi.state.pending.phase,"entered");
+  assert.equal(p.scope.npcPurchaseEconomicSourceRef.current,paired);assert.equal(f.abi.ops("applied").length,applied);
+  assert.equal(f.abi.ops("begin").length,1);assert.equal(f.ownerWires().filter(w=>w.action.kind==="query").length,0);
+  assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,1);
+  next.nativeNpcShop=null;s31ReceiveOrdinary(f,next);assert.equal(p.scope.npcShopServiceRef.current,null);
+  assert.deepEqual(f.abi.state.pending.operation,operation);assert.equal(f.abi.ops("applied").length,applied);
+  const display=p.scope.npcPurchaseDisplaySourceRef.current;
+  p.applyNpcPurchaseOrdinarySnapshot(next,s31OrdinaryRaw(next),0,p.socket);assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,display);
+  p.applyNpcPurchaseOrdinarySnapshot(next,s31OrdinaryRaw(next),1,{});assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,display);
+  p.scope.npcPurchaseApplyingEconomyRef.current=true;
+  p.applyNpcPurchaseOrdinarySnapshot(next,s31OrdinaryRaw(next),1,p.socket);assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,display);
+});
+
+test("Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder",()=>{
+  const owner='{ "ty\\u0070e":"npcPurchaseOwner","type":"worldSnapshot","payload":{} }';
+  const reverse='{"type":"worldSnapshot","payload":{},"\\u0074ype":"npcPurchaseOwner"}';
+  const deep='{"ignored":'+"[".repeat(80)+"0"+"]".repeat(80)+',"type":"npcPurchaseOwner","type":"worldSnapshot"}';
+  for(const raw of [owner,reverse,deep,'{"type":"npcPurchaseOwner","broken":']){
+    assert(actualDurableNpc.isNpcPurchaseOwnerFrame(raw));const f=s31PageOwner(),applied=f.abi.ops("applied").length;
+    const ordinary=f.page.scope.ordinaryApplications.length;f.page.receiveNpcPurchaseGatewayFrame({data:raw},1,f.page.socket);
+    assert.equal(f.page.scope.ordinaryApplications.length,ordinary);assert.equal(f.abi.ops("applied").length,applied);
+  }
+  for(const raw of ['{"type":"packet","payload":{"type":"npcPurchaseOwner"}}','{"type":"packet","text":"npcPurchaseOwner"}'])
+    assert.equal(actualDurableNpc.isNpcPurchaseOwnerFrame(raw),false);
+  for(const atEnd of [false,true]){
+    const f=s31PageOwner(),p=f.page;p.scope.npcBuySelectedRef.current=77;assert(p.dispatchDurableNpcPurchase(77,1));f.quote();
+    const operation=copy(f.abi.state.pending.operation),ordinary=p.scope.ordinaryApplications.length;
+    const padding='"padding":"'+"x".repeat(16*1024*1024)+'"';
+    const raw=atEnd?'{"type":"worldSnapshot",'+padding+',"type":"npcPurchaseOwner"}'
+      :'{"type":"npcPurchaseOwner",'+padding+',"type":"worldSnapshot"}';
+    assert.throws(()=>p.receiveNpcPurchaseGatewayFrame({data:raw},1,p.socket),/size/);
+    assert.equal(p.scope.ordinaryApplications.length,ordinary);assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,null);
+    assert.equal(p.scope.npcShopServiceRef.current,null);assert.deepEqual(f.abi.state.pending.operation,operation);
+    assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,1);
+  }
+});
+
+test("Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement",()=>{
+  for(const edge of ["unsafe","duplicate","deep"]){
+    const f=s31PageOwner(),p=f.page,paired=p.scope.npcPurchaseEconomicSourceRef.current,ordinary=p.scope.ordinaryApplications.length;
+    let raw=s31OrdinaryRaw(f.snapshot);
+    if(edge==="unsafe")raw=raw.replace('"tick":0','"tick":9007199254740993');
+    if(edge==="duplicate")raw=raw.replace('"type":"worldSnapshot"','"type":"worldSnapshot","ty\\u0070e":"worldSnapshot"');
+    if(edge==="deep")raw=raw.replace('"payload":{','"payload":{"unknown":'+"[".repeat(70)+"0"+"]".repeat(70)+',');
+    assert.throws(()=>p.receiveNpcPurchaseGatewayFrame({data:raw},1,p.socket),undefined,edge);
+    assert.equal(p.scope.ordinaryApplications.length,ordinary,edge);assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,null,edge);
+    assert.equal(p.scope.npcShopServiceRef.current,null,edge);assert.equal(p.scope.npcPurchaseEconomicSourceRef.current,paired,edge);
+    assert.equal(f.abi.ops("begin").length,1,edge);assert.equal(p.dispatchDurableNpcPurchase(77,1),false,edge);
+    assert.equal(p.scope.npcPurchaseUnavailableRef.current,true,edge);
+    // Only an actual service opening can request a fresh paired Begin after
+    // withdrawal; equivalent periodic display must not regain Core authority.
+    const shop=f.snapshot.nativeNpcShop;
+    p.applyNpcShopCatalogPacket("NPCGoods",{list:shop.displayGoods,rate:shop.rate,panelType:shop.panelType,hideAddedStats:shop.hideAddedStats});
+    assert.equal(f.abi.ops("begin").length,2,edge);f.begin(f.snapshot);
+    assert.equal(p.scope.npcPurchaseUnavailableRef.current,false,edge);assert.equal(p.readNpcBuyCurrent().blocked,false,edge);
+  }
+});
+
+test("Source31 exact integer consumers pass bounded strict no-emit type checking",()=>{
+  const files=["../lib/npc-purchase-client.ts","../lib/npc-purchase-receipt.ts","../lib/world-model/item-identity.ts","../lib/bevy-bag-model.ts",
+    "../lib/extended-server-packets.ts","../lib/storage-rental-confirmation.ts","../lib/hero-player-ui.ts","../lib/bevy-storage-model.ts"].map(relative=>fileURLToPath(new URL(relative,import.meta.url)));
+  const program=ts.createProgram(files,{noEmit:true,incremental:false,strict:true,target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext,
+    moduleResolution:ts.ModuleResolutionKind.Bundler,lib:["lib.es2022.d.ts","lib.dom.d.ts"],types:[]});
+  const diagnostics=ts.getPreEmitDiagnostics(program);assert.equal(diagnostics.length,0,ts.formatDiagnostics(diagnostics,{getCanonicalFileName:file=>file,getCurrentDirectory:()=>process.cwd(),getNewLine:()=>"\n"}));
+});
+
+test("Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding",()=>{
+  const source=readFileSync(new URL("../app/components/original-client-inventory-utils.ts",import.meta.url),"utf8");
+  const ast=ts.createSourceFile("actual-storage-date-utils.ts",source,ts.ScriptTarget.Latest,true);
+  const names=["formatBinaryDateTimeLabel","dateFromBinaryDateTime"],declarations=ast.statements
+    .filter(node=>ts.isFunctionDeclaration(node)&&names.includes(node.name?.text)).map(node=>node.getText(ast));
+  assert.equal(declarations.length,2);
+  const output=ts.transpileModule(declarations.join("\n"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  const module={exports:{}};new Function("exports",output)(module.exports);
+  const format=module.exports.formatBinaryDateTimeLabel;
+  const expected=local=>new Intl.DateTimeFormat("en-GB",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:local?undefined:"UTC"}).format(new Date(0));
+  // One tick after the Unix epoch stays exact; kind bits are never a signed
+  // Number. Exercise the actual formatter that the inventory window calls.
+  for(const [raw,local] of [["621355968000000001",false],[(621355968000000001n|0x4000000000000000n).toString(),false],
+    [BigInt.asIntN(64,621355968000000001n|0x8000000000000000n).toString(),true]]){
+    assert.equal(format("en-GB",raw,"Expires: {0}"),"Expires: "+expected(local));
+    assert.equal(typeof raw,"string");
+  }
+  for(const value of [0,Number("621355968000000001"),"01","+1","1e3","-0","9223372036854775807","9223372036854775808","-9223372036854775809"])
+    assert.equal(format("en-GB",value,"Expires: {0}"),null,String(value));
+  assert(format("en-GB",Number.MAX_SAFE_INTEGER,"Expires: {0}"));
+  const inventory=readFileSync(new URL("../app/components/original-client-inventory-window.tsx",import.meta.url),"utf8");
+  assert.match(inventory,/formatBinaryDateTimeLabel\([\s\S]{0,100}world\.storagePasswordLastSetBinaryDatetime/);
+  assert.match(inventory,/formatBinaryDateTimeLabel\([\s\S]{0,100}world\.expandedStorageExpiryTimeBinaryDatetime/);
+  const types=readFileSync(new URL("../app/components/original-client-types.ts",import.meta.url),"utf8");
+  for(const name of ["storagePasswordLastSetBinaryDatetime","expandedStorageExpiryTimeBinaryDatetime"])
+    assert(types.includes(name+': WorldState["'+name+'"]'));
+  const barrel=readFileSync(new URL("../lib/world-model/index.ts",import.meta.url),"utf8");
+  assert.match(barrel,/export \{[^}]*\bexactItemUniqueId\b[^}]*\} from "\.\/item-identity"/);
+});
+
+test("Source31 numeric storage ABI projects safe expiry and refuses wide exact strings or unsafe numeric dates",()=>{
+  const storage=loadExpiryPipelineModule("../lib/bevy-storage-model.ts",{"./bevy-bag-model":expiryBag});
+  const world={inventoryCapacity:46,maxBagSlots:40,gold:100,inventoryItems:[],beltItems:[],equipmentItems:[],storageItems:[],storageSize:80,
+    hasStoragePassword:false,storageSessionUnlocked:true,hasExpandedStorage:false,expandedStorageExpiryTimeBinaryDatetime:1000};
+  for(const expiry of [0,1000,Number.MIN_SAFE_INTEGER,Number.MAX_SAFE_INTEGER]){
+    const p=storage.projectBevyStorageModel({...world,expandedStorageExpiryTimeBinaryDatetime:expiry});
+    assert.equal(p.ok,true);assert.equal(p.storage.expiry,expiry);
+  }
+  for(const expiry of ["621355968000000001","-9223372036854775808","9223372036854775807","1000",Number("621355968000000001"),Number.MIN_SAFE_INTEGER-1,NaN,Infinity,1.5]){
+    const input={...world,expandedStorageExpiryTimeBinaryDatetime:expiry};
+    const p=storage.projectBevyStorageModel(input);
+    assert.equal(p.ok,false,String(expiry));assert.equal(p.error.field,"storage");
+    assert.equal(input.expandedStorageExpiryTimeBinaryDatetime,expiry);
+  }
 });

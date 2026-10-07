@@ -1,4 +1,5 @@
 import type { OriginalMapRegion } from "../../lib/scene-types";
+import type { WorldState } from "../../lib/world-model/types";
 
 export type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
 export type ItemContainer = "bag1" | "bag2" | "quest" | "belt" | "storage";
@@ -373,8 +374,8 @@ export type DisplayWorld = {
   hasStoragePassword: boolean;
   requireStoragePassword: boolean;
   storageSessionUnlocked: boolean;
-  storagePasswordLastSetBinaryDatetime: number;
-  expandedStorageExpiryTimeBinaryDatetime: number;
+  storagePasswordLastSetBinaryDatetime: WorldState["storagePasswordLastSetBinaryDatetime"];
+  expandedStorageExpiryTimeBinaryDatetime: WorldState["expandedStorageExpiryTimeBinaryDatetime"];
   worldTick: number;
   sceneView: {
     center: { x: number; y: number };

@@ -1,0 +1,1000 @@
+{
+  "owner": "Root",
+  "kind": "Source31 final selected Rust91 from actual original immutable per-call guard runs",
+  "generatedAtUtc": "2026-10-07T17:59:04.264Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "actualFinalSelectedPassed": 91,
+  "uniqueFinalPassingNames": [
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_begin_pair_and_enqueue_never_publish_applied",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_dropped_flush_keeps_original_ui_and_durable_unknown_custody",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_healthy_unknown_queries_original_once_without_purchase_retry",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_identical_quote_source_preserves_publication_custody",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_malformed_owner_never_consumes_original_begin_control",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_ordinary_hero_source_uses_owner_lifetime_without_begin",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_pending_entry_retires_bundle_before_world_and_refuses_late_owner",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_publication_source_change_refuses_quote_without_reserve",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_quoted_source_change_refuses_purchase_without_reserve",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_raw_marker_catches_escaped_and_duplicate_type_before_decoder",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_readiness_scene_or_inventory_change_refuses_final_purchase",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_readonly_quote_retains_ui_proof_and_exact_settlement_allows_repeat",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_receipt_hero_gate_requires_current_unretired_owner_lifetime",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_store_parent_survives_dismissed_main_text_dialog",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_unknown_reconnect_queries_original_without_purchase_retry",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_used_sub_catalog_quotes_buy_panel_zero_and_enters_once",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_wrong_durable_tuple_cannot_release_original_ui_proof",
+    "npc_purchase_client::tests::native_actor_capacity_refusal_retains_original_operation_and_all_history",
+    "npc_purchase_client::tests::native_begin_pair_is_not_complete_application_and_exact_quote_is_required",
+    "npc_purchase_client::tests::native_begin_requires_same_turn_pair_and_superseded_begin_cannot_select",
+    "npc_purchase_client::tests::native_control_capacity_and_exhaustion_withdraw_before_refusal_without_eviction",
+    "npc_purchase_client::tests::native_currencies_sources_and_zero_selector_roundtrip_without_local_pricing",
+    "npc_purchase_client::tests::native_failure_unknown_and_before_execution_preserve_entered_barrier",
+    "npc_purchase_client::tests::native_foreign_actor_selection_retains_original_and_retired_producer_is_refused",
+    "npc_purchase_client::tests::native_prepared_entry_allocator_refusal_keeps_exact_unsent_custody",
+    "npc_purchase_client::tests::native_quote_supersession_and_new_begin_revoke_exact_quote",
+    "npc_purchase_client::tests::native_raw_invalid_or_wrong_operation_reply_never_consumes_saved_control",
+    "npc_purchase_client::tests::native_receipt_and_complete_witness_settle_in_both_orders_preserving_uid_zero",
+    "npc_purchase_client::tests::native_reconnect_same_or_new_producer_queries_original_operation_only",
+    "npc_purchase_client::tests::native_replacement_connection_and_foreign_host_tokens_cannot_rebind_or_consume",
+    "npc_purchase_client::tests::native_terminal_rejection_and_post_commit_receipt_still_need_complete_witness",
+    "npc_purchase_client::tests::native_unsent_feedback_requires_original_custody_and_entered_never_cancels",
+    "npc_purchase_projection::tests::native_npc_projection_actual_raw_finite_catalogue_keeps_uid_and_source_stock",
+    "npc_purchase_projection::tests::native_npc_projection_complete_owner_is_lossless_and_uses_fresh_models",
+    "npc_purchase_projection::tests::native_npc_projection_hero_panel_epoch_survives_receipt_and_old_packet_models",
+    "npc_purchase_projection::tests::native_npc_projection_missing_economic_source_cannot_default_or_overlay",
+    "native_ingest::tests::native_npc_economy_fresh_hero_source_obeys_bundle_order_and_retirement",
+    "native_ingest::tests::native_npc_economy_ordinary_hero_packet_keeps_source_xp_until_owner_withdrawal_or_reset",
+    "native_ingest::tests::native_npc_economy_queue_barrier_prevents_later_typed_models_overtaking",
+    "native_ingest::tests::native_npc_economy_queue_bundle_is_protected_under_snapshot_and_ack_pressure",
+    "native_ingest::tests::native_npc_economy_queue_byte_limit_rejects_whole_bundle_without_ack",
+    "native_ingest::tests::native_npc_economy_queue_data_and_scene_reset_drop_bundle_without_completion",
+    "native_ingest::tests::native_npc_economy_queue_drop_retires_queued_custody_gracefully",
+    "native_ingest::tests::native_npc_economy_queue_later_receipt_reserve_waits_for_barrier",
+    "native_ingest::tests::native_npc_economy_queue_reserved_cost_materialization_obeys_exact_byte_cap",
+    "npc_purchase_economy::tests::native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_all_models_predecode_before_any_mutation",
+    "npc_purchase_economy::tests::native_npc_economy_bounded_completion_refuses_mutation_when_full",
+    "npc_purchase_economy::tests::native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains",
+    "npc_purchase_economy::tests::native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced",
+    "npc_purchase_economy::tests::native_npc_economy_duplicate_and_escaped_duplicate_are_rejected",
+    "npc_purchase_economy::tests::native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime",
+    "npc_purchase_economy::tests::native_npc_economy_item_metadata_mismatch_rejects_before_application",
+    "npc_purchase_economy::tests::native_npc_economy_mail_content_flags_and_concrete_attachment_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_mandatory_source_domains_cannot_use_defaults",
+    "npc_purchase_economy::tests::native_npc_economy_missing_public_hero_city_and_character_domains_never_apply",
+    "npc_purchase_economy::tests::native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate",
+    "npc_purchase_economy::tests::native_npc_economy_partial_tooltip_cannot_default_into_source_authority",
+    "npc_purchase_economy::tests::native_npc_economy_partial_wrong_actor_scope_and_max_rejected",
+    "npc_purchase_economy::tests::native_npc_economy_public_fingerprint_does_not_invent_private_checkpoint_fields",
+    "npc_purchase_economy::tests::native_npc_economy_real_item_vectors_reject_null_missing_slot_and_unknown_container",
+    "npc_purchase_economy::tests::native_npc_economy_reset_clears_source_and_retires_old_ack",
+    "npc_purchase_economy::tests::native_npc_economy_retirement_fences_prepared_bundle",
+    "npc_purchase_economy::tests::native_npc_economy_revision_history_survives_reset_and_fresh_binding",
+    "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_gold_conflicts",
+    "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_inventory_conflicts",
+    "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_mail_conflicts",
+    "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_pearls_conflicts",
+    "npc_purchase_economy::tests::native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh",
+    "npc_purchase_economy::tests::native_npc_economy_same_revision_refine_clock_refresh_retains_original_source",
+    "npc_purchase_economy::tests::native_npc_economy_sparse_named_equipment_uses_crystal_slots",
+    "npc_purchase_economy::tests::native_npc_economy_uid_zero_belt_and_equipment_are_complete",
+    "npc_purchase_economy::tests::native_npc_economy_wallet_xp_level_capacity_and_storage_mismatch_rejected",
+    "crystal_ui::overlays::hero_dialog::tests::native_npc_economy_hero_checkpoint_opens_read_only_status_without_packet_actions",
+    "hero_model::tests::native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair",
+    "hero_model::tests::native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity",
+    "npc_gold_buy_attempt::durable_settlement_tests::native_npc_durable_settlement_preserves_legacy_flush_unknown_and_model_barriers",
+    "npc_gold_buy_attempt::durable_settlement_tests::native_npc_durable_settlement_rejects_unentered_wrong_ticket_and_duplicate",
+    "npc_gold_buy_attempt::tests::native_npc_durable_ui_settlement_binds_original_source_ticket_and_command",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_hero_maximum_is_actual_current_level_table",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_legacy_decode_defaults_only_new_optional_fields",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_market_preserves_full_u64_and_actual_stock",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_pearl_currency_comes_from_current_service",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_purchase_updates_same_owner_display_and_keeps_service",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_retired_or_nonbuy_context_withdraws_catalogue",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_service_popup_keeps_real_parent_without_text_dialog",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_trade_matches_actual_packet_without_mutation",
+    "crystal_npc_goods::tests::npc_goods_snapshot_projection_keeps_max_identity_and_template_facts",
+    "crystal_npc_goods::tests::npc_goods_snapshot_projection_list_and_unknown_template_preserve_wire"
+  ],
+  "newDistinctComparedSource30": 47,
+  "newDistinctNames": [
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_begin_pair_and_enqueue_never_publish_applied",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_dropped_flush_keeps_original_ui_and_durable_unknown_custody",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_healthy_unknown_queries_original_once_without_purchase_retry",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_identical_quote_source_preserves_publication_custody",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_malformed_owner_never_consumes_original_begin_control",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_ordinary_hero_source_uses_owner_lifetime_without_begin",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_pending_entry_retires_bundle_before_world_and_refuses_late_owner",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_publication_source_change_refuses_quote_without_reserve",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_quoted_source_change_refuses_purchase_without_reserve",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_raw_marker_catches_escaped_and_duplicate_type_before_decoder",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_readiness_scene_or_inventory_change_refuses_final_purchase",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_readonly_quote_retains_ui_proof_and_exact_settlement_allows_repeat",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_receipt_hero_gate_requires_current_unretired_owner_lifetime",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_store_parent_survives_dismissed_main_text_dialog",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_unknown_reconnect_queries_original_without_purchase_retry",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_used_sub_catalog_quotes_buy_panel_zero_and_enters_once",
+    "gateway::npc_purchase_gateway::tests::native_npc_gateway_wrong_durable_tuple_cannot_release_original_ui_proof",
+    "npc_purchase_client::tests::native_prepared_entry_allocator_refusal_keeps_exact_unsent_custody",
+    "npc_purchase_projection::tests::native_npc_projection_actual_raw_finite_catalogue_keeps_uid_and_source_stock",
+    "npc_purchase_projection::tests::native_npc_projection_complete_owner_is_lossless_and_uses_fresh_models",
+    "npc_purchase_projection::tests::native_npc_projection_hero_panel_epoch_survives_receipt_and_old_packet_models",
+    "npc_purchase_projection::tests::native_npc_projection_missing_economic_source_cannot_default_or_overlay",
+    "native_ingest::tests::native_npc_economy_fresh_hero_source_obeys_bundle_order_and_retirement",
+    "native_ingest::tests::native_npc_economy_ordinary_hero_packet_keeps_source_xp_until_owner_withdrawal_or_reset",
+    "npc_purchase_economy::tests::native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced",
+    "npc_purchase_economy::tests::native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime",
+    "npc_purchase_economy::tests::native_npc_economy_mail_content_flags_and_concrete_attachment_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond",
+    "npc_purchase_economy::tests::native_npc_economy_partial_tooltip_cannot_default_into_source_authority",
+    "crystal_ui::overlays::hero_dialog::tests::native_npc_economy_hero_checkpoint_opens_read_only_status_without_packet_actions",
+    "hero_model::tests::native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair",
+    "hero_model::tests::native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity",
+    "npc_gold_buy_attempt::durable_settlement_tests::native_npc_durable_settlement_preserves_legacy_flush_unknown_and_model_barriers",
+    "npc_gold_buy_attempt::durable_settlement_tests::native_npc_durable_settlement_rejects_unentered_wrong_ticket_and_duplicate",
+    "npc_gold_buy_attempt::tests::native_npc_durable_ui_settlement_binds_original_source_ticket_and_command",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_hero_maximum_is_actual_current_level_table",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_legacy_decode_defaults_only_new_optional_fields",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_market_preserves_full_u64_and_actual_stock",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_pearl_currency_comes_from_current_service",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_purchase_updates_same_owner_display_and_keeps_service",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_retired_or_nonbuy_context_withdraws_catalogue",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_service_popup_keeps_real_parent_without_text_dialog",
+    "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_trade_matches_actual_packet_without_mutation",
+    "crystal_npc_goods::tests::npc_goods_snapshot_projection_keeps_max_identity_and_template_facts",
+    "crystal_npc_goods::tests::npc_goods_snapshot_projection_list_and_unknown_template_preserve_wire"
+  ],
+  "currentSourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust04-snapshot.json",
+    "bytes": 269700,
+    "sha256": "942fb78613fdd5027bfb9252135dc1823e799b7fdc984524c7e9973a227ee341"
+  },
+  "current881SourceDrift": 0,
+  "nativeSource03ConditionalCarry": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime-fixture-correction01.json",
+    "bytes": 3638,
+    "sha256": "831b0485af617245a5221c287c3c53b77c8efa64f48f3ec4181f08ecdb172010"
+  },
+  "simulationAndGameDataActual10": {
+    "result": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation-finite-result02.json",
+      "bytes": 15604,
+      "sha256": "3067cc1cdc2435687929a90e47074aad0b934bb0b9cfa38d23062767f2af953b"
+    },
+    "currentDeclared367Drift": 0,
+    "actualFinalSelected": 10,
+    "runs": [
+      {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05.config.json",
+          "bytes": 4206,
+          "sha256": "c2009d0911754000830fa17febe62a5eb05f42caa954160acf5b9d6f778d8485"
+        },
+        "sourceSnapshot": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-snapshot.json",
+          "bytes": 111896,
+          "sha256": "420f99e49abd0b2a98dfe40a06da7cad4fd1910a85d14a19a9d83a2569ceab79"
+        },
+        "sourceReview": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation06-review.json",
+          "bytes": 1476,
+          "sha256": "6db8293775898d59a7cb1734a86bb20f73fce9d4593d743c918675b9d87ea36c"
+        },
+        "policy": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05.policy.json",
+          "bytes": 2362,
+          "sha256": "efb84ce07e48748a006e96b02659b8b63dc010230bf0a301cc70ee4b56768a8d"
+        },
+        "rawPins": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-cargo-receipts\\9fd80f0a1f7a4c7886bd6040f6166ede\\after.json",
+            "bytes": 319,
+            "sha256": "6fe9d5e8930242f9b4e166b14e47d0f2284ccfdd1aa32ae48e361a5b16ae7269"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-cargo-receipts\\9fd80f0a1f7a4c7886bd6040f6166ede\\before.json",
+            "bytes": 1027,
+            "sha256": "b15d1ea1250f2ecdc14fdd2ddb389eb5584f6cb115fee901f7ce9c6c968df853"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-cargo-receipts\\9fd80f0a1f7a4c7886bd6040f6166ede\\probe-process.json",
+            "bytes": 442,
+            "sha256": "830cc590ceb90240befbdf23944405bbc2e0895cd1612ed9224f3ac17df144a5"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-cargo-receipts\\9fd80f0a1f7a4c7886bd6040f6166ede\\probe.stderr.bin",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-cargo-receipts\\9fd80f0a1f7a4c7886bd6040f6166ede\\probe.stdout.bin",
+            "bytes": 197,
+            "sha256": "d8743b301a2db3bec2f7df3821400ab983d7d8a7daa47e0f0323fdd9ef6b1491"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05.stdout.log",
+            "bytes": 1073,
+            "sha256": "6946188b98192f69fee6728694f6b9ec7439b05a248cac4a589fc76f7977f5ff"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05.stderr.log",
+            "bytes": 37544,
+            "sha256": "1535f6e5bebe290e03c5abe21be7be8d23208a8f02d1dabcbf1dad1e3d63ebfe"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05.outer.json",
+            "bytes": 454,
+            "sha256": "a978044ed56dcd45520f663ffa1c6ca8bf576d61e5b3e2aa9716c9dfca509f43"
+          }
+        ],
+        "nonce": "9fd80f0a1f7a4c7886bd6040f6166ede",
+        "actualRemainingCBytes": "421812449280",
+        "freshnessUpperMs": 64.7347,
+        "guard": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 150836,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 82903,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "cargoExitCode": 0,
+        "passingNames": [
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_hero_maximum_is_actual_current_level_table",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_legacy_decode_defaults_only_new_optional_fields",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_market_preserves_full_u64_and_actual_stock",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_pearl_currency_comes_from_current_service",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_purchase_updates_same_owner_display_and_keeps_service",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_retired_or_nonbuy_context_withdraws_catalogue",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_service_popup_keeps_real_parent_without_text_dialog",
+          "runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_trade_matches_actual_packet_without_mutation"
+        ],
+        "probeAndChildLifeCycle": {
+          "probeCode": 0,
+          "probeKilled": false,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "policy": "B"
+        }
+      },
+      {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01.config.json",
+          "bytes": 4106,
+          "sha256": "c87491fcbf0f1f312a165c0d504556eb81f6024bd66da70b025bf15a918ac635"
+        },
+        "sourceSnapshot": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-snapshot.json",
+          "bytes": 111896,
+          "sha256": "420f99e49abd0b2a98dfe40a06da7cad4fd1910a85d14a19a9d83a2569ceab79"
+        },
+        "sourceReview": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation06-review.json",
+          "bytes": 1476,
+          "sha256": "6db8293775898d59a7cb1734a86bb20f73fce9d4593d743c918675b9d87ea36c"
+        },
+        "policy": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01.policy.json",
+          "bytes": 2360,
+          "sha256": "808465fa3c9b0897117ad6f008e2f500059e781f81b0fa2f70354e71e11daa8d"
+        },
+        "rawPins": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01-cargo-receipts\\3bbdeb5b149345438153110dedafd306\\after.json",
+            "bytes": 319,
+            "sha256": "fac212a6977dcdff7090a6b9f74f90f3ea1af95fc4b46f73b3b7255a5534c2e9"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01-cargo-receipts\\3bbdeb5b149345438153110dedafd306\\before.json",
+            "bytes": 990,
+            "sha256": "9772ddf0bb5dd0936f5cf730578a71e618c99a72c5c98449cc38c133ad162e6b"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01-cargo-receipts\\3bbdeb5b149345438153110dedafd306\\probe-process.json",
+            "bytes": 430,
+            "sha256": "1a515cf74590acbc97e1bb3a64523882622ca61832354f2425691ebaff70b1cd"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01-cargo-receipts\\3bbdeb5b149345438153110dedafd306\\probe.stderr.bin",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01-cargo-receipts\\3bbdeb5b149345438153110dedafd306\\probe.stdout.bin",
+            "bytes": 197,
+            "sha256": "5dd1a3c343351ef1821f51ab2ce6f8e6ba1f834792098069210d4f447559b2a8"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01.stdout.log",
+            "bytes": 328,
+            "sha256": "193b60f8c7e78ca24ba1c92f0a9221ed0932996bb48e562a3b1ab22fcd28abc9"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01.stderr.log",
+            "bytes": 609,
+            "sha256": "189920a9dc484fc870f3e8d5401538f46be3c9b09a4d212145d0617c1de599c5"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01.outer.json",
+            "bytes": 452,
+            "sha256": "ef55bab593f2ccc6fa7cf75c0995c75a9571266a7f84e47b3066b9fb8d831b6e"
+          }
+        ],
+        "nonce": "3bbdeb5b149345438153110dedafd306",
+        "actualRemainingCBytes": "421741699072",
+        "freshnessUpperMs": 61.9313,
+        "guard": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 153272,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 17066,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-gamedata01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "cargoExitCode": 0,
+        "passingNames": [
+          "crystal_npc_goods::tests::npc_goods_snapshot_projection_keeps_max_identity_and_template_facts",
+          "crystal_npc_goods::tests::npc_goods_snapshot_projection_list_and_unknown_template_preserve_wire"
+        ],
+        "probeAndChildLifeCycle": {
+          "probeCode": 0,
+          "probeKilled": false,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "policy": "B"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": "native03",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--bin",
+        "mir2-platform-windows",
+        "npc_purchase_",
+        "--",
+        "--test-threads=1"
+      ],
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03.config.json",
+        "bytes": 4169,
+        "sha256": "4b6374a5d5d87276cc8d50f81ce0ca41b3c7468533bff568e665f9c547dfb04c"
+      },
+      "actualSelected": 36,
+      "actualNames": [
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_begin_pair_and_enqueue_never_publish_applied",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_dropped_flush_keeps_original_ui_and_durable_unknown_custody",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_healthy_unknown_queries_original_once_without_purchase_retry",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_identical_quote_source_preserves_publication_custody",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_malformed_owner_never_consumes_original_begin_control",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_ordinary_hero_source_uses_owner_lifetime_without_begin",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_pending_entry_retires_bundle_before_world_and_refuses_late_owner",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_publication_source_change_refuses_quote_without_reserve",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_quoted_source_change_refuses_purchase_without_reserve",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_raw_marker_catches_escaped_and_duplicate_type_before_decoder",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_readiness_scene_or_inventory_change_refuses_final_purchase",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_readonly_quote_retains_ui_proof_and_exact_settlement_allows_repeat",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_receipt_hero_gate_requires_current_unretired_owner_lifetime",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_store_parent_survives_dismissed_main_text_dialog",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_unknown_reconnect_queries_original_without_purchase_retry",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_used_sub_catalog_quotes_buy_panel_zero_and_enters_once",
+        "gateway::npc_purchase_gateway::tests::native_npc_gateway_wrong_durable_tuple_cannot_release_original_ui_proof",
+        "npc_purchase_client::tests::native_actor_capacity_refusal_retains_original_operation_and_all_history",
+        "npc_purchase_client::tests::native_begin_pair_is_not_complete_application_and_exact_quote_is_required",
+        "npc_purchase_client::tests::native_begin_requires_same_turn_pair_and_superseded_begin_cannot_select",
+        "npc_purchase_client::tests::native_control_capacity_and_exhaustion_withdraw_before_refusal_without_eviction",
+        "npc_purchase_client::tests::native_currencies_sources_and_zero_selector_roundtrip_without_local_pricing",
+        "npc_purchase_client::tests::native_failure_unknown_and_before_execution_preserve_entered_barrier",
+        "npc_purchase_client::tests::native_foreign_actor_selection_retains_original_and_retired_producer_is_refused",
+        "npc_purchase_client::tests::native_prepared_entry_allocator_refusal_keeps_exact_unsent_custody",
+        "npc_purchase_client::tests::native_quote_supersession_and_new_begin_revoke_exact_quote",
+        "npc_purchase_client::tests::native_raw_invalid_or_wrong_operation_reply_never_consumes_saved_control",
+        "npc_purchase_client::tests::native_receipt_and_complete_witness_settle_in_both_orders_preserving_uid_zero",
+        "npc_purchase_client::tests::native_reconnect_same_or_new_producer_queries_original_operation_only",
+        "npc_purchase_client::tests::native_replacement_connection_and_foreign_host_tokens_cannot_rebind_or_consume",
+        "npc_purchase_client::tests::native_terminal_rejection_and_post_commit_receipt_still_need_complete_witness",
+        "npc_purchase_client::tests::native_unsent_feedback_requires_original_custody_and_entered_never_cancels",
+        "npc_purchase_projection::tests::native_npc_projection_actual_raw_finite_catalogue_keeps_uid_and_source_stock",
+        "npc_purchase_projection::tests::native_npc_projection_complete_owner_is_lossless_and_uses_fresh_models",
+        "npc_purchase_projection::tests::native_npc_projection_hero_panel_epoch_survives_receipt_and_old_packet_models",
+        "npc_purchase_projection::tests::native_npc_projection_missing_economic_source_cannot_default_or_overlay"
+      ],
+      "actualCRemainingBytes": "386750423040",
+      "sampleEndToChildStartTruncatedUtcUpperMs": 66.9462,
+      "nonce": "6497834ca26147649777051eacd5d650",
+      "after": {
+        "childPid": 157552,
+        "childStartedUtc": "/Date(1791393104070)/",
+        "childStartMs": 915.8041000000001,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791393475713)/",
+        "completionMs": 372552.7991,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "rawPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03.stdout.log",
+          "bytes": 4432,
+          "sha256": "72b4f87e2861cf737ad2a988cba689fff44842f663c13543da720c9e027f3ca2"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03.stderr.log",
+          "bytes": 47297,
+          "sha256": "0b109aa8804baf4b9fac61cc0a5d048093c4b1a95ad7445778a7aa23e7263d1a"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03.outer.json",
+          "bytes": 451,
+          "sha256": "86b80e7020fbcb5d82119b5b16e0940476ad34b4bd759bdda3553793250403d6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03-cargo-receipts\\6497834ca26147649777051eacd5d650\\before.json",
+          "bytes": 1039,
+          "sha256": "a93ec4c149dc4ddaf41fd89ed643c4fe2641f33a8cf732a2f33a23a769b4f29b"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03-cargo-receipts\\6497834ca26147649777051eacd5d650\\after.json",
+          "bytes": 330,
+          "sha256": "ac6d7b29c22f4b5d1f149e9951090f0b19fbf5f9e58684f3476d866ac4622f7d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03-cargo-receipts\\6497834ca26147649777051eacd5d650\\probe-process.json",
+          "bytes": 431,
+          "sha256": "bf7333732d29b0a1bd25bbd312cb3f82951b6e93db87849d9c6ca0248778c5d2"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03-cargo-receipts\\6497834ca26147649777051eacd5d650\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "03bd7fd6ad506ca24b1248c559f9bc957c3cf239f73aa3031c1ed2ea86d6c713"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native03-cargo-receipts\\6497834ca26147649777051eacd5d650\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust03-snapshot.json",
+        "bytes": 269307,
+        "sha256": "a40754c9de50771aeb61a0b813e67904f95b28b120a87e2ad4c6f8b38970d0e0"
+      }
+    },
+    {
+      "id": "runtime04",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/runtime/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--features",
+        "native-npc-economy",
+        "--lib",
+        "native_npc_economy_",
+        "--",
+        "--test-threads=1"
+      ],
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04.config.json",
+        "bytes": 4227,
+        "sha256": "a2ed42e1a119c7b52aa76cd8de1f5ca5947d393a99cf2102b4cbacdbd7da3dcc"
+      },
+      "actualSelected": 39,
+      "actualNames": [
+        "native_ingest::tests::native_npc_economy_fresh_hero_source_obeys_bundle_order_and_retirement",
+        "native_ingest::tests::native_npc_economy_ordinary_hero_packet_keeps_source_xp_until_owner_withdrawal_or_reset",
+        "native_ingest::tests::native_npc_economy_queue_barrier_prevents_later_typed_models_overtaking",
+        "native_ingest::tests::native_npc_economy_queue_bundle_is_protected_under_snapshot_and_ack_pressure",
+        "native_ingest::tests::native_npc_economy_queue_byte_limit_rejects_whole_bundle_without_ack",
+        "native_ingest::tests::native_npc_economy_queue_data_and_scene_reset_drop_bundle_without_completion",
+        "native_ingest::tests::native_npc_economy_queue_drop_retires_queued_custody_gracefully",
+        "native_ingest::tests::native_npc_economy_queue_later_receipt_reserve_waits_for_barrier",
+        "native_ingest::tests::native_npc_economy_queue_reserved_cost_materialization_obeys_exact_byte_cap",
+        "npc_purchase_economy::tests::native_npc_economy_actual_raw_shop_info_price_and_finite_stock_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_all_models_predecode_before_any_mutation",
+        "npc_purchase_economy::tests::native_npc_economy_bounded_completion_refuses_mutation_when_full",
+        "npc_purchase_economy::tests::native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains",
+        "npc_purchase_economy::tests::native_npc_economy_complete_tooltip_instance_and_real_info_cannot_be_replaced",
+        "npc_purchase_economy::tests::native_npc_economy_duplicate_and_escaped_duplicate_are_rejected",
+        "npc_purchase_economy::tests::native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime",
+        "npc_purchase_economy::tests::native_npc_economy_item_metadata_mismatch_rejects_before_application",
+        "npc_purchase_economy::tests::native_npc_economy_mail_content_flags_and_concrete_attachment_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_mandatory_source_domains_cannot_use_defaults",
+        "npc_purchase_economy::tests::native_npc_economy_missing_public_hero_city_and_character_domains_never_apply",
+        "npc_purchase_economy::tests::native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond",
+        "npc_purchase_economy::tests::native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate",
+        "npc_purchase_economy::tests::native_npc_economy_partial_tooltip_cannot_default_into_source_authority",
+        "npc_purchase_economy::tests::native_npc_economy_partial_wrong_actor_scope_and_max_rejected",
+        "npc_purchase_economy::tests::native_npc_economy_public_fingerprint_does_not_invent_private_checkpoint_fields",
+        "npc_purchase_economy::tests::native_npc_economy_real_item_vectors_reject_null_missing_slot_and_unknown_container",
+        "npc_purchase_economy::tests::native_npc_economy_reset_clears_source_and_retires_old_ack",
+        "npc_purchase_economy::tests::native_npc_economy_retirement_fences_prepared_bundle",
+        "npc_purchase_economy::tests::native_npc_economy_revision_history_survives_reset_and_fresh_binding",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_gold_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_inventory_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_mail_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_changed_pearls_conflicts",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh",
+        "npc_purchase_economy::tests::native_npc_economy_same_revision_refine_clock_refresh_retains_original_source",
+        "npc_purchase_economy::tests::native_npc_economy_sparse_named_equipment_uses_crystal_slots",
+        "npc_purchase_economy::tests::native_npc_economy_uid_zero_belt_and_equipment_are_complete",
+        "npc_purchase_economy::tests::native_npc_economy_wallet_xp_level_capacity_and_storage_mismatch_rejected"
+      ],
+      "actualCRemainingBytes": "373203333120",
+      "sampleEndToChildStartTruncatedUtcUpperMs": 69.8717,
+      "nonce": "92782470512c4f54a220fe11eb63240e",
+      "after": {
+        "childPid": 158160,
+        "childStartedUtc": "/Date(1791394776172)/",
+        "childStartMs": 1006.5313000000001,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791394804276)/",
+        "completionMs": 29110.5183,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "rawPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04.stdout.log",
+          "bytes": 4373,
+          "sha256": "1f067f7310bac3f7cea7d90bb60d054f8c7310b610ba1d121e2f7e1061563af8"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04.stderr.log",
+          "bytes": 1603,
+          "sha256": "4966d50c3d527786c1d90a4c53bee1cb0a1f9a755d9bb5a8be62c0e578955abd"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04.outer.json",
+          "bytes": 451,
+          "sha256": "5f1ec9cb3cde97466ba51ccb5aafa36ae82aea91dddc8097575a29095d2b6761"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04-cargo-receipts\\92782470512c4f54a220fe11eb63240e\\before.json",
+          "bytes": 1047,
+          "sha256": "d0d64a5087f83451c682e5e7ec0708ba4607b47d00bf624ee7ff023000a3f7f5"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04-cargo-receipts\\92782470512c4f54a220fe11eb63240e\\after.json",
+          "bytes": 329,
+          "sha256": "1da64033d9278d3daeea4efe2f65cbab73a70e853fd0f65daaf6220942fa938f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04-cargo-receipts\\92782470512c4f54a220fe11eb63240e\\probe-process.json",
+          "bytes": 431,
+          "sha256": "8550501b6c6ec043b4765259deb984039e823666229aaeb94df1cdab7ac7fc1b"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04-cargo-receipts\\92782470512c4f54a220fe11eb63240e\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "b3403de7c5339ca49584409a9bd8e5a1d2e86131f3316686d228450dee65f6b7"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime04-cargo-receipts\\92782470512c4f54a220fe11eb63240e\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust04-snapshot.json",
+        "bytes": 269700,
+        "sha256": "942fb78613fdd5027bfb9252135dc1823e799b7fdc984524c7e9973a227ee341"
+      }
+    },
+    {
+      "id": "hero01",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/client-bevy/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--features",
+        "native-ui",
+        "--lib",
+        "native_npc_economy_",
+        "--",
+        "--test-threads=1"
+      ],
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01.config.json",
+        "bytes": 4223,
+        "sha256": "713ba244658b80849c08425305f5cf3c43eefa14251f063405b4e8cca08f8caa"
+      },
+      "actualSelected": 3,
+      "actualNames": [
+        "crystal_ui::overlays::hero_dialog::tests::native_npc_economy_hero_checkpoint_opens_read_only_status_without_packet_actions",
+        "hero_model::tests::native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair",
+        "hero_model::tests::native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity"
+      ],
+      "actualCRemainingBytes": "369588633600",
+      "sampleEndToChildStartTruncatedUtcUpperMs": 65.2791,
+      "nonce": "427ac3a3464b4c28a96bb7d8ed9b78ea",
+      "after": {
+        "childPid": 149116,
+        "childStartedUtc": "/Date(1791394974207)/",
+        "childStartMs": 1332.4,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791395058740)/",
+        "completionMs": 85863.61910000001,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "rawPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01.stdout.log",
+          "bytes": 465,
+          "sha256": "358b2d080d2fa8dae089e94137e9a8d16d7728e82a959a7dc1fba10b5311812f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01.stderr.log",
+          "bytes": 29273,
+          "sha256": "67c2cd4820a6d66267285510298beb71ad5f821ccc8bd0c45f20f98402f15d2d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01.outer.json",
+          "bytes": 448,
+          "sha256": "04a8f90fb6a8e6219eb5b69f46ed19af9a4577188f1bac86d005e7972480133d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01-cargo-receipts\\427ac3a3464b4c28a96bb7d8ed9b78ea\\before.json",
+          "bytes": 1041,
+          "sha256": "db4c2c0213f24f0acc37c727919c08b0f2f2e5174cc6daefd6904e717a140efa"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01-cargo-receipts\\427ac3a3464b4c28a96bb7d8ed9b78ea\\after.json",
+          "bytes": 325,
+          "sha256": "dc095e651bf1586d60143f1c38b68ec57797805de2b6a9c76a38dee941cb0ccf"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01-cargo-receipts\\427ac3a3464b4c28a96bb7d8ed9b78ea\\probe-process.json",
+          "bytes": 433,
+          "sha256": "00afe132ab58e8a4c46ba9936b9f21a78463d79975d3bbdf1a1f8a1c5d1f809f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01-cargo-receipts\\427ac3a3464b4c28a96bb7d8ed9b78ea\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "38bbe487b7f4d99a3611ca18830268a6902333123766730ad7d6ed245834caca"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-hero01-cargo-receipts\\427ac3a3464b4c28a96bb7d8ed9b78ea\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust04-snapshot.json",
+        "bytes": 269700,
+        "sha256": "942fb78613fdd5027bfb9252135dc1823e799b7fdc984524c7e9973a227ee341"
+      }
+    },
+    {
+      "id": "core01",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/client-core/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "native_npc_durable_settlement_",
+        "--",
+        "--test-threads=1"
+      ],
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01.config.json",
+        "bytes": 4213,
+        "sha256": "b6b9c7e39818cd136d81b3b98209cb612b064757359266c20b3ac0c76651a204"
+      },
+      "actualSelected": 2,
+      "actualNames": [
+        "npc_gold_buy_attempt::durable_settlement_tests::native_npc_durable_settlement_preserves_legacy_flush_unknown_and_model_barriers",
+        "npc_gold_buy_attempt::durable_settlement_tests::native_npc_durable_settlement_rejects_unentered_wrong_ticket_and_duplicate"
+      ],
+      "actualCRemainingBytes": "369567924224",
+      "sampleEndToChildStartTruncatedUtcUpperMs": 61.4544,
+      "nonce": "305b686b982e4e5b82a42987f82834bb",
+      "after": {
+        "childPid": 155992,
+        "childStartedUtc": "/Date(1791395115499)/",
+        "childStartMs": 949.4985,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791395118570)/",
+        "completionMs": 4020.9074,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "rawPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01.stdout.log",
+          "bytes": 390,
+          "sha256": "e736bdfe324b9fbb3f2d8b84c717cc3c8c0264c3c79dfd26a5f2477745e54a87"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01.stderr.log",
+          "bytes": 319,
+          "sha256": "85ea145e872d53ac17b6603be7716e0a6da82ad964cff65f0e0c2209ea1e8026"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01.outer.json",
+          "bytes": 447,
+          "sha256": "a2a008a54bf2bd7925af8fdfcb8c05a3b92c62d360bec60fe5bd28e880432528"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01-cargo-receipts\\305b686b982e4e5b82a42987f82834bb\\before.json",
+          "bytes": 1034,
+          "sha256": "5e221b7ac869d19726861c77a6e1bc1cd4f291b9b265f343bf0b8a4ea9c9af27"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01-cargo-receipts\\305b686b982e4e5b82a42987f82834bb\\after.json",
+          "bytes": 318,
+          "sha256": "feb031980b2b1b0e430aa0fcece2e7341c1737adf7e544e448df2f0473e19bf6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01-cargo-receipts\\305b686b982e4e5b82a42987f82834bb\\probe-process.json",
+          "bytes": 440,
+          "sha256": "627e8d652f4f33d77c55cb8f14336609a3416be61d46aac835c26b82819dfd90"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01-cargo-receipts\\305b686b982e4e5b82a42987f82834bb\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "3860a48e5c89cb6cb819ec8910b1a5a40e10a609caa02ef55e5b4beb7a79bda2"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-core01-cargo-receipts\\305b686b982e4e5b82a42987f82834bb\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust04-snapshot.json",
+        "bytes": 269700,
+        "sha256": "942fb78613fdd5027bfb9252135dc1823e799b7fdc984524c7e9973a227ee341"
+      }
+    },
+    {
+      "id": "bevy01",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/client-bevy/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "native_npc_durable_ui_settlement_",
+        "--",
+        "--test-threads=1"
+      ],
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01.config.json",
+        "bytes": 4219,
+        "sha256": "ac91326bf11b4a5b0bc44b9a465e9750a9c45a4b9912c07ad26cf3e213da7af9"
+      },
+      "actualSelected": 1,
+      "actualNames": [
+        "npc_gold_buy_attempt::tests::native_npc_durable_ui_settlement_binds_original_source_ticket_and_command"
+      ],
+      "actualCRemainingBytes": "369325879296",
+      "sampleEndToChildStartTruncatedUtcUpperMs": 64.5967,
+      "nonce": "dea1483d8e744dd9a5b4a69708713ff2",
+      "after": {
+        "childPid": 156436,
+        "childStartedUtc": "/Date(1791395201206)/",
+        "childStartMs": 986.7176000000001,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791395216371)/",
+        "completionMs": 16151.6097,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "rawPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01.stdout.log",
+          "bytes": 229,
+          "sha256": "97f92e312b32c633702c74c86c4bccc123685611d10f867b5ecca4649845ed7c"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01.stderr.log",
+          "bytes": 813,
+          "sha256": "9c2a06ac73005ac3a937d86c2deefb278b54a3d42080782152b51145657f4947"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01.outer.json",
+          "bytes": 448,
+          "sha256": "1f2eed3b0c663a576a4a0b92d9960cf2fd676248134c2951ea55088fb5e6c3a4"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01-cargo-receipts\\dea1483d8e744dd9a5b4a69708713ff2\\before.json",
+          "bytes": 1028,
+          "sha256": "e5df267da97ef21f28e45d5df97443e9b9d39df026b7a2466e28a651f2814ae6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01-cargo-receipts\\dea1483d8e744dd9a5b4a69708713ff2\\after.json",
+          "bytes": 329,
+          "sha256": "43d7c806f447c6d7387a46c1f08502aefec904adfb7a013b2a5cb9fd92cb00e5"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01-cargo-receipts\\dea1483d8e744dd9a5b4a69708713ff2\\probe-process.json",
+          "bytes": 431,
+          "sha256": "8766270df3a082ea92d411504610f6704671841336edac80d042d61c9f23f5a6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01-cargo-receipts\\dea1483d8e744dd9a5b4a69708713ff2\\probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "f938fd5db951cf9839fb56e8d81cde2858632ffb2978ad3d558c09989c418bdb"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-bevy01-cargo-receipts\\dea1483d8e744dd9a5b4a69708713ff2\\probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-rust04-snapshot.json",
+        "bytes": 269700,
+        "sha256": "942fb78613fdd5027bfb9252135dc1823e799b7fdc984524c7e9973a227ee341"
+      }
+    }
+  ],
+  "retainedHistoryExcluded": [
+    {
+      "native01": "actual locked graph refusal101/0 tests; two existing activated Runtime edges added, all versions/checksums unchanged",
+      "correction": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-lock-correction01.json",
+        "bytes": 1695,
+        "sha256": "5a023d973aa760a81e3070583d452107a23850f523ea39f4f57800718c26423c"
+      }
+    },
+    {
+      "native02": "actual101/0 tests; missing InventoryModel PartialEq replaced only complete serde JSON equality with propagated errors"
+    },
+    {
+      "runtime02": "actual101/0 tests; test fixture json! recursion; product unchanged",
+      "correction": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-runtime-fixture-correction01.json",
+        "bytes": 3638,
+        "sha256": "831b0485af617245a5221c287c3c53b77c8efa64f48f3ec4181f08ecdb172010"
+      }
+    },
+    {
+      "runtime03": "actual immutable Guard refusal90/0 tests/0 probe/0 child: missing preexisting receipt directory; new runtime04 root used; original guard/probe/threshold unchanged"
+    },
+    [
+      {
+        "result": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation-finite-result01.json",
+          "bytes": 17241,
+          "sha256": "86a7a016366c7309dd137d3d6bce8ab19f36788c4950b94304abc3e1989d0075"
+        },
+        "oldSelectedPassed": 7,
+        "note": "Earlier snapshot04 seven checks are superseded by current snapshot05 eight; prior failures/raw evidence remain unchanged."
+      },
+      {
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation04.config.json",
+          "bytes": 4097,
+          "sha256": "6d22d335a33a451b2f762368a79d147f77176819985395a78407487837051a04"
+        },
+        "sourceReview": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation05-review.json",
+          "bytes": 1247,
+          "sha256": "5b0c761881540cae7769531d9bf4922191fbcce60ee1d6019802263bb32b3da9"
+        },
+        "outer": {
+          "owner": "Root",
+          "exitCode": 90,
+          "guardPid": 155312,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 72,
+          "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation04.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "rawPins": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation04.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation04.stderr.log",
+            "bytes": 31,
+            "sha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation04.outer.json",
+            "bytes": 452,
+            "sha256": "432a81922faf3beddc2471de54f755fee774fdbe1590bf7a66becb3f6bfc4b10"
+          }
+        ],
+        "nonceFiles": [],
+        "actualTestsExecuted": 0,
+        "reason": "Original guard refused independentReviewAccepted=false before forwarding; accepted independent source review06 supplied without changing any guard/helper/policy logic."
+      }
+    ]
+  ],
+  "knownLimitations": [
+    "No real UI, network/socket or renderer/Core/WASM instance launched; selected finite tests are not workspace/full client acceptance",
+    "Native dropped flush proves Unknown retention after dropping future, not interruption of permanent Pending flush",
+    "Native repeat local sequence includes terminal rejection plus complete Applied; no two live successful buys demonstrated",
+    "Runtime SkillModel same-count row correspondence remains limited; actual fresh transform used",
+    "Hero ordinary/receipt model gating verified in finite World only"
+  ],
+  "finiteMemoryOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalActive": true
+}
