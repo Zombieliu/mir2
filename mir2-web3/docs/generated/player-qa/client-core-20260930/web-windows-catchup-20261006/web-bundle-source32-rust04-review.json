@@ -1,0 +1,50 @@
+{
+  "owner": "Root",
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust04-snapshot.json",
+    "bytes": 274835,
+    "sha256": "7f72b8128add0a5589abf7b358b31ed1063729638807eccafa8254e1c8ad249e"
+  },
+  "sourceSnapshotSha": "7f72b8128add0a5589abf7b358b31ed1063729638807eccafa8254e1c8ad249e",
+  "sourceCount": 893,
+  "reviewers": [
+    "Root frontier schema/integration coordinator",
+    "/root/source30_native_client bounded Wire implementation",
+    "/root/source30_native_bundle independent read-only product and test review"
+  ],
+  "review": "Root and independent read-only reviewer accept2 frozen product inputs,891 protected of893. Typed serde/frozen decode/old wire encoders remain unchanged. Add validated compact Value encoding and exact-byte compact client-request encoding; Web bridge uses those and reuses its existing recursive StrictMailValue raw walker with independent original2MiB frame limit. No custody, authentication, host ledger, ABI exports or policy gates changed. Three new Wire differential tests compare original serde and864 byte-identical request specimens; two new bridge tests compare the original raw walker at exact limits, duplicates/depth/legacy shapes and original serde outputs across pure Begin/Quote/Reserve/Enter/Receive/Applied.17 original/current bridge tests,26 Wire tests; originalNative36/Gateway13 controlled-memory/file fixtures also selected. No I/O/World application/live authority claim. Source accepted before execution; strict size and all metadata/publication gates remain pending.",
+  "independentFrozenBridge": {
+    "bytes": 69877,
+    "sha256": "204b02c757bc0f7785db76941f7e4c3e8293af6dbad03656add74667210e4fb7"
+  },
+  "independentFrozenWire": {
+    "bytes": 108194,
+    "sha256": "19a0fb610fbf007a9da75849c0cee64826af47a2422f2b9f250f42ac426170c9"
+  },
+  "previousReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust03-review.json",
+    "bytes": 2720,
+    "sha256": "8798a16bb34beebfe7c32e82752e75f408f2ef361430bfde26e4dc429228a592"
+  },
+  "retainedAbiFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-abi-test01-failure.json",
+    "bytes": 1979,
+    "sha256": "85cfaa69e72189c0155cd68960dfd983a5b4a62c1bb22a3fd3b5123175f95ab7"
+  },
+  "previousMeasuredCore": {
+    "bytes": 365241,
+    "strictLessThan": 262144,
+    "accepted": false,
+    "initialBytes": 460011
+  },
+  "testsPreparedOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

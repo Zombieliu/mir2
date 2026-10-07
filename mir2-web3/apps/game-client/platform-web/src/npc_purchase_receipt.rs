@@ -15,6 +15,7 @@ use mir2_client_core::npc_purchase_host::{BeginTicket, ConnectionToken,
     NpcPurchaseReceiptHost, PurchaseBinding};
 use mir2_client_core::npc_purchase_receipt as core;
 use mir2_client_wire as wire;
+#[cfg(test)]
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use wasm_bindgen::prelude::*;
@@ -25,12 +26,13 @@ const MAX_CONTROLS: usize = 64;
 const MAX_INPUT: usize = 6 * wire::MAX_SERVER_FRAME_BYTES + wire::MAX_CLIENT_REQUEST_BYTES;
 static LAST_BRIDGE: AtomicUsize = AtomicUsize::new(0);
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(Serialize, Deserialize))]
+#[cfg_attr(test, serde(rename_all = "camelCase", deny_unknown_fields))]
 struct BindingStamp { actor: wire::Opaque32, producer_scope: wire::Opaque32, begin_id: wire::U64 }
 
-#[derive(Deserialize)]
-#[serde(tag = "op", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[cfg_attr(test, derive(Debug, PartialEq, Deserialize))]
+#[cfg_attr(test, serde(tag = "op", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields))]
 enum Request {
     OpenConnection {},
     Begin { token: wire::Opaque32 },
@@ -44,6 +46,94 @@ enum Request {
     Applied { token: wire::Opaque32, binding: BindingStamp, authority: wire::Producer, complete: bool },
     Withdraw { token: wire::Opaque32, disconnect: bool },
     Status {},
+}
+
+// The raw duplicate walker runs before this exact shape decoder. Keeping one
+// Value edge avoids linking a second enum/content deserializer into the small
+// browser policy bundle; the typed wire validators remain authoritative.
+impl Request {
+    fn field_names(op: &str) -> Result<&'static [&'static str], wire::WireError> {
+        Ok(match op {
+            "openConnection" | "status" => &["op"],
+            "begin" => &["op", "token"],
+            "receive" => &["op", "token", "frame"],
+            "quote" => &["op", "token", "binding", "request"],
+            "reserve" => &["op", "token", "binding", "intent"],
+            "enter" | "cancelUnsent" | "unknown" => &["op", "token", "binding", "operation"],
+            "query" => &["op", "token", "binding"],
+            "applied" => &["op", "token", "binding", "authority", "complete"],
+            "withdraw" => &["op", "token", "disconnect"],
+            _ => return Err(wire::WireError::Invalid("unknown bridge operation")),
+        })
+    }
+
+    fn from_value(value: &Value) -> Result<Self, wire::WireError> {
+        use wire::value_decode as decode;
+        // Internally tagged serde structs also accept a tag-first sequence.
+        // Normalize only an exact sequence in the declared field order.
+        let normalized;
+        let value = if let Some(sequence) = value.as_array() {
+            let tag = sequence.first().ok_or(wire::WireError::Invalid("bridge operation required"))?;
+            let names = Self::field_names(decode::string(tag)?)?;
+            if sequence.len() != names.len() { return Err(wire::WireError::Invalid("bridge request field count")); }
+            normalized = Value::Object(names.iter().zip(sequence).map(|(name, value)| ((*name).to_owned(), value.clone())).collect());
+            &normalized
+        } else { value };
+        let input = value.as_object().ok_or(wire::WireError::Invalid("bridge request object required"))?;
+        let op = decode::string(decode::field(input, "op")?)?;
+        let fields = Self::field_names(op)?;
+        let input = decode::object(value, fields)?;
+        if op == "openConnection" { return Ok(Self::OpenConnection {}); }
+        if op == "status" { return Ok(Self::Status {}); }
+        let token = decode::opaque(decode::field(input, "token")?)?;
+        if op == "begin" { return Ok(Self::Begin { token }); }
+        if op == "receive" {
+            return Ok(Self::Receive { token, frame: decode::string(decode::field(input, "frame")?)?.to_owned() });
+        }
+        if op == "withdraw" {
+            let disconnect = decode::field(input, "disconnect")?.as_bool()
+                .ok_or(wire::WireError::Invalid("bridge disconnect boolean required"))?;
+            return Ok(Self::Withdraw { token, disconnect });
+        }
+        let binding = BindingStamp::from_value(decode::field(input, "binding")?)?;
+        Ok(match op {
+            "quote" => Self::Quote { token, binding, request: decode::purchase_request(decode::field(input, "request")?)? },
+            "reserve" => Self::Reserve { token, binding, intent: decode::intent_buffered(decode::field(input, "intent")?)? },
+            "enter" | "cancelUnsent" | "unknown" => {
+                let operation = decode::operation_buffered(decode::field(input, "operation")?)?;
+                match op {
+                    "enter" => Self::Enter { token, binding, operation },
+                    "cancelUnsent" => Self::CancelUnsent { token, binding, operation },
+                    _ => Self::Unknown { token, binding, operation },
+                }
+            }
+            "query" => Self::Query { token, binding },
+            "applied" => {
+                let authority = decode::producer(decode::field(input, "authority")?)?;
+                let complete = decode::field(input, "complete")?.as_bool()
+                    .ok_or(wire::WireError::Invalid("bridge complete boolean required"))?;
+                Self::Applied { token, binding, authority, complete }
+            }
+            _ => return Err(wire::WireError::Invalid("unknown bridge operation")),
+        })
+    }
+}
+
+impl BindingStamp {
+    fn from_value(value: &Value) -> Result<Self, wire::WireError> {
+        use wire::value_decode as decode;
+        // Serde's existing struct edge also accepts an exact positional tuple.
+        // Preserve that spelling while requiring all three original fields.
+        if let Some(fields) = value.as_array() {
+            if fields.len() != 3 { return Err(wire::WireError::Invalid("bridge binding field count")); }
+            return Ok(Self { actor: decode::opaque(&fields[0])?,
+                producer_scope: decode::opaque(&fields[1])?, begin_id: decode::u64(&fields[2])? });
+        }
+        let input = decode::object(value, &["actor", "producerScope", "beginId"])?;
+        Ok(Self { actor: decode::opaque(decode::field(input, "actor")?)?,
+            producer_scope: decode::opaque(decode::field(input, "producerScope")?)?,
+            begin_id: decode::u64(decode::field(input, "beginId")?)? })
+    }
 }
 
 struct Dispatch {
@@ -103,7 +193,7 @@ impl NpcPurchaseReceiptBridge {
     fn parse_and_apply(&mut self, raw: &str) -> ResultValue {
         if raw.is_empty() || raw.len() > MAX_INPUT { return Err("Invalid purchase bridge input size"); }
         let StrictMailValue(value) = serde_json::from_str(raw).map_err(|_| "Invalid purchase bridge JSON")?;
-        let request: Request = serde_json::from_value(value).map_err(|_| "Invalid purchase bridge request")?;
+        let request = Request::from_value(&value).map_err(|_| "Invalid purchase bridge request")?;
         self.apply(request)
     }
 
@@ -123,7 +213,7 @@ impl NpcPurchaseReceiptBridge {
         if self.controls.len() >= MAX_CONTROLS { return Err("Purchase control capacity reached"); }
         let sequence = self.last_control.checked_add(1).ok_or("Purchase control IDs exhausted")?;
         let request = wire::ClientRequest::new(wire::U64::new(sequence), action).map_err(|_| "Invalid purchase wire request")?;
-        let body = wire::encode_client_request(&request).map_err(|_| "Invalid purchase wire request")?;
+        let body = wire::encode_client_request_compact(&request).map_err(|_| "Invalid purchase wire request")?;
         self.last_control = sequence;
         Ok((request, body))
     }
@@ -132,7 +222,7 @@ impl NpcPurchaseReceiptBridge {
         request: wire::ClientRequest, body: String, ticket: Option<BeginTicket>,
         binding: Option<(BindingStamp, PurchaseBinding)>) -> Value
     {
-        let response = json!({"ok":true,"request":request,"body":body});
+        let response = json!({"ok":true,"request":wire::value_encode::client_request(&request).expect("validated purchase request"),"body":body});
         self.controls.insert(request.request_id.get(), Dispatch { token, connection, request, ticket, binding });
         response
     }
@@ -166,7 +256,7 @@ impl NpcPurchaseReceiptBridge {
                 self.last_connection = sequence;
                 self.connection = Some((token, connection));
                 self.binding = None; self.quote = None; self.latest_quote = None;
-                Ok(json!({"ok":true,"token":token}))
+                Ok(json!({"ok":true,"token":wire::value_encode::opaque(token)}))
             }
             Request::Begin { token } => {
                 let connection = self.connection_for(token)?;
@@ -197,7 +287,7 @@ impl NpcPurchaseReceiptBridge {
                 self.reservations.insert(key.actor, Reservation { token, binding, operation: operation.clone() });
                 self.quote = None;
                 self.latest_quote = None;
-                Ok(json!({"ok":true,"operation":operation}))
+                Ok(json!({"ok":true,"operation":wire::value_encode::operation(&operation).expect("validated reserved operation")}))
             }
             Request::Enter { token, binding, operation } => {
                 let current = self.binding_for(token, &binding)?;
@@ -252,7 +342,7 @@ impl NpcPurchaseReceiptBridge {
 
     fn receive(&mut self, token: wire::Opaque32, raw: &str) -> ResultValue {
         let connection = self.connection_for(token)?;
-        let frame = wire::parse_server_frame(raw).map_err(|_| "Invalid purchase server frame")?;
+        let frame = decode_server_frame(raw)?;
         let control = frame.request_id.get();
         let saved = self.controls.get(&control).ok_or("Purchase control custody missing")?;
         if saved.token != token || saved.connection != connection { return Err("Purchase reply connection mismatch"); }
@@ -277,7 +367,7 @@ impl NpcPurchaseReceiptBridge {
         // Exact parsed response retires only this control; economic custody is
         // held independently in Core and never cleared by miss or failure.
         let saved = self.controls.remove(&control).expect("checked control custody");
-        let mut output = json!({"ok":true,"frame":frame,"observation":{"kind":"ignored"}});
+        let mut output = json!({"ok":true,"frame":wire::value_encode::server_frame(&frame).expect("validated purchase frame"),"observation":{"kind":"ignored"}});
         match &frame.reply {
             wire::ServerReply::Producer { producer } => {
                 let ticket = saved.ticket.ok_or("Begin ticket custody missing")?;
@@ -287,13 +377,13 @@ impl NpcPurchaseReceiptBridge {
                     begin_id: frame.request_id };
                 self.actors.insert(binding.actor());
                 self.binding = Some((stamp.clone(), binding)); self.quote = None; self.latest_quote = None;
-                output["kind"] = json!("producer"); output["binding"] = json!(stamp);
+                output["kind"] = json!("producer"); output["binding"] = binding_value(&stamp);
             }
             wire::ServerReply::Quote { intent } => {
                 if self.latest_quote != Some(control) { return Err("Superseded purchase quote response"); }
                 let (_, binding) = saved.binding.ok_or("Quote binding custody missing")?;
                 self.quote = Some((binding, intent.clone()));
-                output["kind"] = json!("quote"); output["intent"] = json!(intent);
+                output["kind"] = json!("quote"); output["intent"] = wire::value_encode::intent(intent).expect("validated purchase intent");
             }
             _ => {
                 output["kind"] = json!("result");
@@ -320,14 +410,14 @@ impl NpcPurchaseReceiptBridge {
                 self.reservations.remove(&value.key.actor);
                 let result = match value.result {
                     core::EconomicResult::Committed { server_revision, currency, source, charged, admitted_count, incoming_uid } =>
-                        json!({"kind":"committed","serverRevision":wire::U64::new(server_revision),
-                            "currency":wire_currency(currency),"source":wire_source(source),"charged":charged,
-                            "admittedCount":admitted_count,"incomingUniqueId":wire::U64::new(incoming_uid)}),
+                        json!({"kind":"committed","serverRevision":wire::value_encode::u64(wire::U64::new(server_revision)),
+                            "currency":wire::value_encode::currency(wire_currency(currency)),"source":wire::value_encode::source(wire_source(source)),"charged":charged,
+                            "admittedCount":admitted_count,"incomingUniqueId":wire::value_encode::u64(wire::U64::new(incoming_uid))}),
                     core::EconomicResult::Rejected { server_revision } =>
-                        json!({"kind":"rejected","serverRevision":wire::U64::new(server_revision)}),
+                        json!({"kind":"rejected","serverRevision":wire::value_encode::u64(wire::U64::new(server_revision))}),
                     core::EconomicResult::Unknown => json!({"kind":"unknown"}),
                 };
-                json!({"kind":"settled","settlement":{"operation":operation(value.key, value.intent),"result":result}})
+                json!({"kind":"settled","settlement":{"operation":wire::value_encode::operation(&operation(value.key, value.intent)).expect("validated retained operation"),"result":result}})
             }
         }
     }
@@ -335,13 +425,31 @@ impl NpcPurchaseReceiptBridge {
     fn status(&self) -> Value {
         let actors: Vec<_> = self.actors.iter().map(|actor| {
             let ledger = self.host.ledger(*actor).expect("retained actor");
-            json!({"actor":opaque(actor.bytes()),"lastSequence":wire::U64::new(ledger.last_sequence()),
-                "appliedBaseline":ledger.applied_baseline().map(wire::U64::new),"pending":ledger.pending().map(pending)})
+            json!({"actor":wire::value_encode::opaque(opaque(actor.bytes())),"lastSequence":wire::value_encode::u64(wire::U64::new(ledger.last_sequence())),
+                "appliedBaseline":ledger.applied_baseline().map(|revision|wire::value_encode::u64(wire::U64::new(revision))),"pending":ledger.pending().map(pending)})
         }).collect();
-        json!({"ok":true,"token":self.connection.map(|(token, _)|token),
-            "binding":self.binding.as_ref().map(|(stamp, _)|stamp),
+        json!({"ok":true,"token":self.connection.map(|(token, _)|wire::value_encode::opaque(token)),
+            "binding":self.binding.as_ref().map(|(stamp, _)|binding_value(stamp)),
             "pending":self.host.pending_current().map(pending),"actors":actors,"controls":self.controls.len()})
     }
+}
+
+
+// Both JSON documents retain their own bounded, recursive duplicate check.
+// Reuse the already-linked strict DOM walker rather than instantiate a second
+// equivalent visitor in the small browser bundle.
+fn decode_server_frame(raw: &str) -> Result<wire::ServerFrame, &'static str> {
+    if raw.is_empty() || raw.len() > wire::MAX_SERVER_FRAME_BYTES {
+        return Err("Invalid purchase server frame");
+    }
+    let StrictMailValue(value) = serde_json::from_str(raw).map_err(|_| "Invalid purchase server frame")?;
+    wire::value_decode::server_frame(&value).map_err(|_| "Invalid purchase server frame")
+}
+
+fn binding_value(value: &BindingStamp) -> Value {
+    json!({"actor":wire::value_encode::opaque(value.actor),
+        "producerScope":wire::value_encode::opaque(value.producer_scope),
+        "beginId":wire::value_encode::u64(value.begin_id)})
 }
 
 fn actor(value: wire::Opaque32) -> core::ActorKey { core::ActorKey::from_server_bytes(value.get()).expect("strict actor") }
@@ -392,7 +500,7 @@ fn core_receipt(receipt: &wire::Receipt) -> core::PurchaseReceipt {
 fn pending(value: core::PendingPurchase) -> Value {
     let phase = match value.phase { core::PurchasePhase::Queued => "queued", core::PurchasePhase::Entered => "entered",
         core::PurchasePhase::Unknown => "unknown", core::PurchasePhase::AwaitingSnapshot => "awaitingSnapshot" };
-    json!({"operation":operation(value.key, value.intent),"minimumRevision":wire::U64::new(value.minimum_revision),"phase":phase})
+    json!({"operation":wire::value_encode::operation(&operation(value.key, value.intent)).expect("validated retained operation"),"minimumRevision":wire::value_encode::u64(wire::U64::new(value.minimum_revision)),"phase":phase})
 }
 
 #[cfg(test)]
@@ -736,4 +844,213 @@ mod tests {
         assert_eq!(status(&mut bridge)["pending"]["phase"], "queued");
         assert_eq!(successor["sequence"], "2");
     }
+
+    #[test]
+    fn compact_request_decoder_preserves_all_legacy_operations_and_exact_field_failures() {
+        let token = json!(opaque_fixture(1));
+        let binding = json!({"actor":opaque_fixture(1),"producerScope":opaque_fixture(2),"beginId":"0"});
+        let operation = wire::Operation { actor:opaque_fixture(1),request_scope:opaque_fixture(2),
+            sequence:wire::U64::new(1),intent:intent() };
+        let requests = [
+            json!({"op":"openConnection"}),json!({"op":"status"}),
+            json!({"op":"begin","token":token}),
+            json!({"op":"receive","token":token,"frame":"original raw frame"}),
+            json!({"op":"quote","token":token,"binding":binding,"request":intent().request}),
+            json!({"op":"reserve","token":token,"binding":binding,"intent":intent()}),
+            json!({"op":"enter","token":token,"binding":binding,"operation":operation}),
+            json!({"op":"cancelUnsent","token":token,"binding":binding,"operation":operation}),
+            json!({"op":"unknown","token":token,"binding":binding,"operation":operation}),
+            json!({"op":"query","token":token,"binding":binding}),
+            json!({"op":"applied","token":token,"binding":binding,"authority":producer(1,2,0),"complete":false}),
+            json!({"op":"withdraw","token":token,"disconnect":false}),
+        ];
+        for value in requests {
+            assert_eq!(Request::from_value(&value).unwrap(), serde_json::from_value::<Request>(value.clone()).unwrap());
+            let names = Request::field_names(value["op"].as_str().unwrap()).unwrap();
+            let tuple = Value::Array(names.iter().map(|name| value[*name].clone()).collect());
+            assert_eq!(Request::from_value(&tuple).unwrap(),serde_json::from_value::<Request>(tuple.clone()).unwrap());
+            let mut short = tuple.clone();short.as_array_mut().unwrap().pop();
+            assert!(Request::from_value(&short).is_err());assert!(serde_json::from_value::<Request>(short).is_err());
+            let mut long = tuple;long.as_array_mut().unwrap().push(Value::Null);
+            assert!(Request::from_value(&long).is_err());assert!(serde_json::from_value::<Request>(long).is_err());
+            let mut extra = value.clone();extra["extra"] = Value::Null;
+            assert!(Request::from_value(&extra).is_err());assert!(serde_json::from_value::<Request>(extra).is_err());
+            for field in value.as_object().unwrap().keys() {
+                let mut missing = value.clone();missing.as_object_mut().unwrap().remove(field);
+                assert!(Request::from_value(&missing).is_err(),"missing {field}: {value}");
+                assert!(serde_json::from_value::<Request>(missing).is_err());
+                let mut null = value.clone();null[field] = Value::Null;
+                assert!(Request::from_value(&null).is_err(),"null {field}: {value}");
+                assert!(serde_json::from_value::<Request>(null).is_err());
+            }
+            if value.get("binding").is_some() {
+                let mut tuple = value.clone();tuple["binding"] = json!([binding["actor"],binding["producerScope"],binding["beginId"]]);
+                assert_eq!(Request::from_value(&tuple).unwrap(),serde_json::from_value::<Request>(tuple.clone()).unwrap());
+                for invalid in [json!([]),json!([binding["actor"],binding["producerScope"]]),
+                    json!([binding["actor"],binding["producerScope"],binding["beginId"],null])] {
+                    tuple["binding"] = invalid;
+                    assert!(Request::from_value(&tuple).is_err());assert!(serde_json::from_value::<Request>(tuple.clone()).is_err());
+                }
+            }
+        }
+        for malformed in [json!([]),json!([1]),json!(["unknownOperation"]),json!({"op":{"status":null}}),json!({"op":"unknownOperation"})] {
+            assert!(Request::from_value(&malformed).is_err());assert!(serde_json::from_value::<Request>(malformed).is_err());
+        }
+    }
+
+    #[test]
+    fn compact_request_nested_numeric_proofs_and_enum_spellings_match_existing_serde() {
+        let token = json!(opaque_fixture(1));
+        let binding = json!({"actor":opaque_fixture(1),"producerScope":opaque_fixture(2),"beginId":"18446744073709551615"});
+        let original = json!({"op":"reserve","token":token,"binding":binding,"intent":intent()});
+        for (pointer, samples) in [
+            ("/intent/request/count",vec![json!(0),json!(65536),json!(-1),json!(3.0),json!("3"),Value::Null]),
+            ("/intent/request/panelType",vec![json!(256),json!(-1),json!(0.0),json!("0"),Value::Null]),
+            ("/intent/request/itemIndex",vec![json!(1),json!("01"),json!("18446744073709551616"),Value::Null]),
+            ("/binding/beginId",vec![json!(1),json!("01"),json!("18446744073709551616"),Value::Null]),
+            ("/intent/serviceCatalogProof",vec![json!(0),json!("00"),json!("0000000000000000000000000000000000000000000000000000000000000000"),Value::Null]),
+            ("/intent/currency",vec![json!({"pearls":null}),json!({"pearls":{}}),json!({"pearls":false}),json!({"pearls":0}),json!({"pearls":""}),json!({"pearls":[]}),json!({"pearls":{"x":1}}),json!({"pearls":null,"gold":null}),json!("unknown"),Value::Null]),
+            ("/intent/source",vec![json!({"used":null}),json!({"used":{}}),json!({"used":true}),json!({"used":1}),json!({"used":""}),json!({"used":[]}),json!({"used":{"x":1}}),json!("unknown"),Value::Null]),
+        ] {
+            for replacement in samples {
+                let mut value = original.clone();*value.pointer_mut(pointer).unwrap() = replacement;
+                let compact = Request::from_value(&value);let legacy = serde_json::from_value::<Request>(value.clone());
+                assert_eq!(compact.is_ok(),legacy.is_ok(),"different schema for {pointer}: {value}");
+                if let (Ok(compact),Ok(legacy)) = (compact,legacy) {assert_eq!(compact,legacy);}
+            }
+        }
+        for count in [1,65535] {
+            let mut value = original.clone();value["intent"]["request"]["count"] = json!(count);
+            assert_eq!(Request::from_value(&value).unwrap(),serde_json::from_value::<Request>(value).unwrap());
+        }
+    }
+
+    #[test]
+    fn reused_raw_frame_walker_matches_original_limits_duplicates_and_legacy_shapes() {
+        let operation = wire::Operation { actor:opaque_fixture(1),request_scope:opaque_fixture(2),
+            sequence:wire::U64::new(u64::MAX),intent:intent() };
+        let request = wire::ClientRequest::new(wire::U64::new(u64::MAX),wire::Action::Purchase { operation }).unwrap();
+        let authority = producer(1,2,u64::MAX-1);
+        let snapshot = json!({"fixture":{"text":"中文\\\"\n😀","wide":u64::MAX,"signed":i64::MIN},"array":[null,true,0]});
+        let replies = [
+            wire::ServerReply::Producer { producer:authority.clone() },
+            wire::ServerReply::Quote { intent:intent() },
+            wire::ServerReply::Recovery { receipt:None },
+            wire::ServerReply::Recovery { receipt:Some(receipt(&request,2,u64::MAX-1)) },
+            wire::ServerReply::Purchase { receipt:receipt(&request,2,u64::MAX-1),replayed:false },
+            wire::ServerReply::Failure { state:wire::FailureState::BeforeExecution,receipt:None },
+            wire::ServerReply::Failure { state:wire::FailureState::Unknown,receipt:None },
+            wire::ServerReply::Failure { state:wire::FailureState::PostCommit,receipt:Some(receipt(&request,2,u64::MAX-1)) },
+        ];
+        let compare = |raw: &str| {
+            let compact = decode_server_frame(raw);
+            let original = wire::parse_server_frame(raw);
+            assert_eq!(compact.is_ok(),original.is_ok(),"different raw acceptance ({} bytes)",raw.len());
+            if let (Ok(compact),Ok(original)) = (compact,original) { assert_eq!(compact,original); }
+        };
+        for reply in replies {
+            let original = wire::ServerFrame::new(request.request_id,reply,Some(snapshot.clone()),Some(authority.clone())).unwrap();
+            let raw = wire::encode_server_frame(&original).unwrap();
+            assert_eq!(decode_server_frame(&raw).unwrap(),original);compare(&raw);
+            let value:Value = serde_json::from_str(&raw).unwrap();
+            let tuple = json!([value["type"],value["protocolVersion"],value["requestId"],value["reply"],value["snapshot"],value["authority"]]);
+            assert_eq!(decode_server_frame(&tuple.to_string()).unwrap(),original);compare(&tuple.to_string());
+        }
+        let base = wire::ServerFrame::new(request.request_id,
+            wire::ServerReply::Quote { intent:intent() },Some(snapshot),Some(authority)).unwrap();
+        let raw = wire::encode_server_frame(&base).unwrap();
+        let mut value:Value = serde_json::from_str(&raw).unwrap();
+        for spelling in [json!({"pearls":null}),json!({"pearls":{}})] {
+            value["reply"]["intent"]["currency"] = spelling;
+            assert_eq!(decode_server_frame(&value.to_string()).unwrap(),base);compare(&value.to_string());
+        }
+        value["reply"] = json!(["quote",value["reply"]["intent"]]);
+        assert_eq!(decode_server_frame(&value.to_string()).unwrap(),base);compare(&value.to_string());
+        value = serde_json::from_str(&raw).unwrap();value["type"] = json!({"npcPurchaseOwner":null});
+        assert_eq!(decode_server_frame(&value.to_string()).unwrap(),base);compare(&value.to_string());
+        value["type"] = json!({"npcPurchaseOwner":{}});
+        assert!(decode_server_frame(&value.to_string()).is_err());compare(&value.to_string());
+        let boundary = format!("{raw}{}"," ".repeat(wire::MAX_SERVER_FRAME_BYTES-raw.len()));
+        assert_eq!(boundary.len(),wire::MAX_SERVER_FRAME_BYTES);
+        assert_eq!(decode_server_frame(&boundary).unwrap(),base);compare(&boundary);
+        let too_long = format!("{boundary} ");
+        assert!(decode_server_frame(&too_long).is_err());compare(&too_long);
+        for invalid in [String::new()," ".to_owned(),format!("{raw} null"),
+            raw.replacen("\"requestId\":","\"requestId\":\"1\",\"requestId\":",1),
+            raw.replacen("\"requestId\":","\"requestId\":\"1\",\"\\u0072equestId\":",1),
+            raw.replacen("\"text\":","\"x\":1,\"x\":2,\"text\":",1),
+            raw.replacen("\"text\":","\"x\":1,\"\\u0078\":2,\"text\":",1)] {
+            assert!(decode_server_frame(&invalid).is_err());compare(&invalid);
+        }
+        for depth in [16,160] {
+            let nested = format!("{}null{}","[".repeat(depth),"]".repeat(depth));
+            let deep_raw = format!(r#"{{"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","reply":{{"kind":"recovery","receipt":null}},"snapshot":{nested},"authority":{{"actor":{},"producerScope":{},"serverRevision":"0"}}}}"#,
+                serde_json::to_string(&opaque_fixture(1)).unwrap(),serde_json::to_string(&opaque_fixture(2)).unwrap());
+            assert_eq!(decode_server_frame(&deep_raw).is_ok(),depth==16);compare(&deep_raw);
+        }
+    }
+
+    #[test]
+    fn compact_bridge_outputs_preserve_original_body_and_complete_frame_carriers() {
+        let mut bridge = NpcPurchaseReceiptBridge::new().unwrap();
+        let opened = successful(&mut bridge,json!({"op":"openConnection"}));
+        let token = opened["token"].clone();
+        let typed_token:wire::Opaque32 = serde_json::from_value(token.clone()).unwrap();
+        assert_eq!(token,serde_json::to_value(typed_token).unwrap());
+        let sent = successful(&mut bridge,json!({"op":"begin","token":token}));
+        let begin_request = dispatched(&sent);
+        assert_eq!(sent["request"],serde_json::to_value(&begin_request).unwrap());
+        assert_eq!(sent["body"],wire::encode_client_request(&begin_request).unwrap());
+        let snapshot = json!({"completeFixture":{"text":"中文\\\"\n😀","wide":u64::MAX,"signed":i64::MIN},"array":[null,true,0]});
+        let authority = producer(1,2,10);
+        let begin_frame = wire::ServerFrame::new(begin_request.request_id,
+            wire::ServerReply::Producer { producer:authority.clone() },Some(snapshot.clone()),Some(authority)).unwrap();
+        let received = successful(&mut bridge,json!({"op":"receive","token":token,"frame":wire::encode_server_frame(&begin_frame).unwrap()}));
+        assert_eq!(received["frame"],serde_json::to_value(&begin_frame).unwrap());
+        assert_eq!(received["frame"]["snapshot"],snapshot);
+        let binding = received["binding"].clone();
+        let typed_binding:BindingStamp = serde_json::from_value(binding.clone()).unwrap();
+        assert_eq!(binding,serde_json::to_value(&typed_binding).unwrap());
+        assert_eq!(status(&mut bridge)["actors"][0]["appliedBaseline"],Value::Null);
+        applied(&mut bridge,&token,&binding,10,true);
+        let quoted = successful(&mut bridge,json!({"op":"quote","token":token,"binding":binding,"request":intent().request}));
+        let quote_request = dispatched(&quoted);
+        assert_eq!(quoted["request"],serde_json::to_value(&quote_request).unwrap());
+        assert_eq!(quoted["body"],wire::encode_client_request(&quote_request).unwrap());
+        let quote_frame = wire::ServerFrame::new(quote_request.request_id,wire::ServerReply::Quote { intent:intent() },None,None).unwrap();
+        let received = successful(&mut bridge,json!({"op":"receive","token":token,"frame":wire::encode_server_frame(&quote_frame).unwrap()}));
+        assert_eq!(received["intent"],serde_json::to_value(intent()).unwrap());
+        assert_eq!(received["frame"],serde_json::to_value(&quote_frame).unwrap());
+        assert_eq!(received["frame"]["snapshot"],Value::Null);
+        assert_eq!(received["frame"]["authority"],Value::Null);
+        let reserved = successful(&mut bridge,json!({"op":"reserve","token":token,"binding":binding,"intent":intent()}));
+        let operation:wire::Operation = serde_json::from_value(reserved["operation"].clone()).unwrap();
+        assert_eq!(reserved["operation"],serde_json::to_value(&operation).unwrap());
+        assert_eq!(status(&mut bridge)["pending"]["operation"],reserved["operation"]);
+        let entered = successful(&mut bridge,json!({"op":"enter","token":token,"binding":binding,"operation":operation}));
+        let purchase_request = dispatched(&entered);
+        assert_eq!(entered["request"],serde_json::to_value(&purchase_request).unwrap());
+        assert_eq!(entered["body"],wire::encode_client_request(&purchase_request).unwrap());
+        let mut committed = receipt(&purchase_request,2,u64::MAX-1);
+        if let wire::Outcome::Committed { charged, .. } = &mut committed.entry.outcome { *charged = u32::MAX; }
+        let purchase_frame = wire::ServerFrame::new(purchase_request.request_id,
+            wire::ServerReply::Purchase { receipt:committed,replayed:false },Some(snapshot.clone()),Some(producer(1,2,u64::MAX-1))).unwrap();
+        let received = successful(&mut bridge,json!({"op":"receive","token":token,"frame":wire::encode_server_frame(&purchase_frame).unwrap()}));
+        assert_eq!(received["frame"],serde_json::to_value(&purchase_frame).unwrap());
+        assert_eq!(received["frame"]["snapshot"],snapshot);
+        assert_eq!(received["observation"]["kind"],"pending");
+        let settled = applied(&mut bridge,&token,&binding,u64::MAX-1,true);
+        assert_eq!(settled["observation"]["settlement"]["operation"],serde_json::to_value(operation).unwrap());
+        let result = json!({"kind":"committed","serverRevision":wire::U64::new(u64::MAX-1),
+            "currency":wire::Currency::Pearls,"source":wire::Source::Used,"charged":u32::MAX,
+            "admittedCount":2,"incomingUniqueId":wire::U64::new(0)});
+        assert_eq!(settled["observation"]["settlement"]["result"],result);
+        let final_status = status(&mut bridge);
+        assert_eq!(final_status["binding"],serde_json::to_value(typed_binding).unwrap());
+        assert_eq!(final_status["actors"][0]["actor"],serde_json::to_value(opaque_fixture(1)).unwrap());
+        assert_eq!(final_status["actors"][0]["lastSequence"],serde_json::to_value(wire::U64::new(1)).unwrap());
+        assert_eq!(final_status["actors"][0]["appliedBaseline"],serde_json::to_value(wire::U64::new(u64::MAX-1)).unwrap());
+        assert_eq!(final_status["pending"],Value::Null);
+    }
+
 }

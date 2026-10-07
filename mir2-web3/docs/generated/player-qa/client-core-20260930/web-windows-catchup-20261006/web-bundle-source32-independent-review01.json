@@ -1,0 +1,86 @@
+{
+  "owner": "Root",
+  "kind": "Source32 independent read-only actual finite evidence review",
+  "createdAtUtc": "2026-10-07T20:54:52.181Z",
+  "reviewer": "/root/source30_native_bundle",
+  "finalResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-finite-result01.json",
+    "bytes": 331952,
+    "sha256": "e40d3976e5bdc70d76530791ccb3ea59371f7c20e14641c6d47414532b5c384a"
+  },
+  "coreResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust04-core-build-result01.json",
+    "bytes": 17748,
+    "sha256": "39b934c6c74d184f6d5e5696c8db4a01bad562d0691c75d1eed5820113bc880b"
+  },
+  "source": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust04-snapshot.json",
+    "bytes": 274835,
+    "sha256": "7f72b8128add0a5589abf7b358b31ed1063729638807eccafa8254e1c8ad249e"
+  },
+  "reviewAccepted": true,
+  "confirmedBlockers": 0,
+  "sourceAccepted": true,
+  "finiteScopedTestsAccepted": true,
+  "checkedDirectResultPins": 946,
+  "checkedAdditionalCoreConfigurationToolPins": 37,
+  "checkedCurrentSourceInputs": 893,
+  "comparedInitialFinalSources": {
+    "changed": 2,
+    "protected": 891,
+    "additions": 0,
+    "drift": 0
+  },
+  "actualStdoutPasses": {
+    "wire": 26,
+    "webAbi": 17,
+    "native": 36,
+    "gateway": 13,
+    "total": 92,
+    "unique": 92
+  },
+  "newDistinctNames": {
+    "wire": 10,
+    "webAbi": 4,
+    "total": 14
+  },
+  "requestByteSpecimens": 864,
+  "byteSpecimensNotCountedAsExtraTests": true,
+  "finalCargoCalls": 5,
+  "actualNonceFiles": 25,
+  "freshnessConservativeUpperMs": [
+    65,
+    63,
+    71,
+    82,
+    64
+  ],
+  "freshnessMaximumMs": 82,
+  "actualGetVolumeCThresholdBytes": "53687091200",
+  "freshnessThresholdMs": 2000,
+  "actualGetVolumeCAllPassed": true,
+  "originalArgsAndGuardPinsMatched": true,
+  "policyBClosedAll": true,
+  "core": {
+    "rawBytes": 655522,
+    "bindgenBytes": 394339,
+    "optimizedBytes": 351501,
+    "strictLessThan": 262144,
+    "strictBudgetPassed": false,
+    "jsAndBothDtsByteIdenticalAcrossAllThreeCoreStages": true,
+    "metadataGatesPassed": false
+  },
+  "retainedHistoricalPassesNotAdded": true,
+  "retainedAbiFailure": true,
+  "manifestMatrixUnchanged": true,
+  "source33PlanImplementationPerformed": false,
+  "source33PlanScopeAccepted": true,
+  "boundary": "Read-only matching original source and exact evidence; no new execution, package acceptance, full Module/name/import-export validation, UI, live authority or World application claim. Preserve all published Source25 Core/PUI exports, explicit unshipped receipt raw-package migration, permanent facade/ledger, original budgets and full verification gates for future third-bundle implementation.",
+  "reviewerExecutedTests": false,
+  "reviewerModifiedFiles": false,
+  "reviewerLaunchedProduct": false,
+  "reviewerUsedWasmApi": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

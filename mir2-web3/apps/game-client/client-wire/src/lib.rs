@@ -439,7 +439,379 @@ fn parse<T: serde::de::DeserializeOwned>(text: &str, maximum: usize) -> Result<T
     Ok(serde_json::from_value(value)?)
 }
 pub fn parse_client_request(text: &str) -> Result<ClientRequest> { parse(text, MAX_CLIENT_REQUEST_BYTES) }
-pub fn parse_server_frame(text: &str) -> Result<ServerFrame> { parse(text, MAX_SERVER_FRAME_BYTES) }
+pub fn parse_server_frame(text: &str) -> Result<ServerFrame> {
+    if text.is_empty() || text.len() > MAX_SERVER_FRAME_BYTES {
+        return Err(WireError::Invalid("wire message size exceeded"));
+    }
+    let StrictValue(value) = serde_json::from_str(text)?;
+    value_decode::server_frame(&value)
+}
+
+/// Compact decoding of already duplicate-checked JSON values. These functions
+/// establish the same typed schema and semantic validation as serde, not peer
+/// authentication, connection custody, or a complete Applied checkpoint.
+/// Raw external messages must still pass the bounded StrictValue walker above;
+/// a Value alone cannot reveal keys overwritten by a different JSON parser.
+pub mod value_decode {
+    use super::*;
+    use serde_json::Map;
+
+    pub fn object<'a>(value: &'a Value, names: &[&str]) -> Result<&'a Map<String, Value>> {
+        let value = value.as_object().ok_or(WireError::Invalid("expected object"))?;
+        if value.len() != names.len() || names.iter().any(|name| !value.contains_key(*name)) {
+            return Err(WireError::Invalid("missing or unknown field"));
+        }
+        Ok(value)
+    }
+    pub fn field<'a>(value: &'a Map<String, Value>, name: &str) -> Result<&'a Value> {
+        value.get(name).ok_or(WireError::Invalid("missing field"))
+    }
+    pub fn string(value: &Value) -> Result<&str> {
+        value.as_str().ok_or(WireError::Invalid("expected string"))
+    }
+    pub fn boolean(value: &Value) -> Result<bool> {
+        value.as_bool().ok_or(WireError::Invalid("expected boolean"))
+    }
+    fn unsigned(value: &Value) -> Result<std::primitive::u64> {
+        value.as_u64().ok_or(WireError::Invalid("expected unsigned integer"))
+    }
+    pub fn u8(value: &Value) -> Result<std::primitive::u8> {
+        std::primitive::u8::try_from(unsigned(value)?).map_err(|_| WireError::Invalid("u8 overflow"))
+    }
+    pub fn u16(value: &Value) -> Result<std::primitive::u16> {
+        std::primitive::u16::try_from(unsigned(value)?).map_err(|_| WireError::Invalid("u16 overflow"))
+    }
+    pub fn u32(value: &Value) -> Result<std::primitive::u32> {
+        std::primitive::u32::try_from(unsigned(value)?).map_err(|_| WireError::Invalid("u32 overflow"))
+    }
+    pub fn u64(value: &Value) -> Result<U64> { U64::parse(string(value)?) }
+    pub fn opaque(value: &Value) -> Result<Opaque32> { Opaque32::parse(string(value)?) }
+
+    // ValueDeserializer accepts unit enums as strings or single null-valued
+    // enum maps. Preserve that existing typed-serde input shape; serialization
+    // remains the canonical string. Internally tagged kind/op tags are strings.
+    pub fn unit_enum_name(value: &Value) -> Result<&str> { unit_enum_name_in(value, false) }
+    fn unit_enum_name_in(value: &Value, buffered: bool) -> Result<&str> {
+        match value {
+            Value::String(value) => Ok(value),
+            Value::Object(value) if value.len() == 1 => {
+                let (name, payload) = value.iter().next().ok_or(WireError::Invalid("empty enum"))?;
+                // ContentDeserializer's unit path additionally accepts an
+                // empty map, for internally tagged newtype compatibility.
+                // It does not ignore arbitrary enum payloads.
+                if payload.is_null() || buffered && payload.as_object().is_some_and(Map::is_empty) {
+                    Ok(name)
+                } else { Err(WireError::Invalid("unit enum payload")) }
+            }
+            _ => Err(WireError::Invalid("expected unit enum")),
+        }
+    }
+    pub fn currency(value: &Value) -> Result<Currency> { currency_in(value, false) }
+    fn currency_in(value: &Value, buffered: bool) -> Result<Currency> {
+        match unit_enum_name_in(value, buffered)? {
+            "gold" => Ok(Currency::Gold), "pearls" => Ok(Currency::Pearls),
+            _ => Err(WireError::Invalid("unknown currency")),
+        }
+    }
+    pub fn source(value: &Value) -> Result<Source> { source_in(value, false) }
+    fn source_in(value: &Value, buffered: bool) -> Result<Source> {
+        match unit_enum_name_in(value, buffered)? {
+            "trade" => Ok(Source::Trade), "buyBack" => Ok(Source::BuyBack), "used" => Ok(Source::Used),
+            _ => Err(WireError::Invalid("unknown source")),
+        }
+    }
+    pub fn rejection(value: &Value) -> Result<Rejection> { rejection_in(value, false) }
+    fn rejection_in(value: &Value, buffered: bool) -> Result<Rejection> {
+        match unit_enum_name_in(value, buffered)? {
+            "invalidRequest" => Ok(Rejection::InvalidRequest), "playerDead" => Ok(Rejection::PlayerDead),
+            "serviceUnavailable" => Ok(Rejection::ServiceUnavailable), "unsupportedService" => Ok(Rejection::UnsupportedService),
+            "unknownGood" => Ok(Rejection::UnknownGood), "invalidQuantity" => Ok(Rejection::InvalidQuantity),
+            "insufficientCurrency" => Ok(Rejection::InsufficientCurrency), "clockUnavailable" => Ok(Rejection::ClockUnavailable),
+            "invalidDelivery" => Ok(Rejection::InvalidDelivery),
+            _ => Err(WireError::Invalid("unknown rejection")),
+        }
+    }
+    pub fn failure_state(value: &Value) -> Result<FailureState> { failure_state_in(value, false) }
+    fn failure_state_in(value: &Value, buffered: bool) -> Result<FailureState> {
+        match unit_enum_name_in(value, buffered)? {
+            "beforeExecution" => Ok(FailureState::BeforeExecution), "unknown" => Ok(FailureState::Unknown),
+            "postCommit" => Ok(FailureState::PostCommit),
+            _ => Err(WireError::Invalid("unknown failure state")),
+        }
+    }
+
+    // Derived ordinary structs also accept exact positional sequences. Keep
+    // that compatibility for typed DTOs without weakening object field checks.
+    enum Fields<'a> { Object(&'a Map<String, Value>), Sequence(&'a [Value]) }
+    impl<'a> Fields<'a> {
+        fn get(&self, name: &str, index: usize) -> Result<&'a Value> {
+            match self {
+                Self::Object(value) => field(value, name),
+                Self::Sequence(value) => value.get(index).ok_or(WireError::Invalid("missing field")),
+            }
+        }
+    }
+    fn fields<'a>(value: &'a Value, names: &[&str]) -> Result<Fields<'a>> {
+        match value {
+            Value::Array(value) if value.len() == names.len() => Ok(Fields::Sequence(value)),
+            _ => object(value, names).map(Fields::Object),
+        }
+    }
+
+    pub fn purchase_request(value: &Value) -> Result<PurchaseRequest> {
+        let value = fields(value, &["itemIndex", "count", "panelType"])?;
+        PurchaseRequest::new(u64(value.get("itemIndex", 0)?)?, u16(value.get("count", 1)?)?, u8(value.get("panelType", 2)?)?)
+    }
+    pub fn intent(value: &Value) -> Result<Intent> { intent_in(value, false) }
+    /// Match the ContentDeserializer context used inside a tagged bridge
+    /// Request or ServerReply, including null/empty-map unit enum payloads.
+    pub fn intent_buffered(value: &Value) -> Result<Intent> { intent_in(value, true) }
+    fn intent_in(value: &Value, buffered: bool) -> Result<Intent> {
+        let value = fields(value, &["request", "currency", "source", "serviceCatalogProof"])?;
+        let value = Intent { request: purchase_request(value.get("request", 0)?)?, currency: currency_in(value.get("currency", 1)?, buffered)?,
+            source: source_in(value.get("source", 2)?, buffered)?, service_catalog_proof: opaque(value.get("serviceCatalogProof", 3)?)? };
+        value.validate()?; Ok(value)
+    }
+    pub fn operation(value: &Value) -> Result<Operation> { operation_in(value, false) }
+    /// Match the ContentDeserializer context of a tagged bridge Request.
+    pub fn operation_buffered(value: &Value) -> Result<Operation> { operation_in(value, true) }
+    fn operation_in(value: &Value, buffered: bool) -> Result<Operation> {
+        let value = fields(value, &["actor", "requestScope", "sequence", "intent"])?;
+        let value = Operation { actor: opaque(value.get("actor", 0)?)?, request_scope: opaque(value.get("requestScope", 1)?)?,
+            sequence: u64(value.get("sequence", 2)?)?, intent: intent_in(value.get("intent", 3)?, buffered)? };
+        value.validate()?; Ok(value)
+    }
+    pub fn producer(value: &Value) -> Result<Producer> {
+        let value = fields(value, &["actor", "producerScope", "serverRevision"])?;
+        let value = Producer { actor: opaque(value.get("actor", 0)?)?, producer_scope: opaque(value.get("producerScope", 1)?)?,
+            server_revision: u64(value.get("serverRevision", 2)?)? };
+        value.validate()?; Ok(value)
+    }
+    pub fn outcome(value: &Value) -> Result<Outcome> { outcome_in(value, false) }
+    // Internally tagged ServerReply buffers fields through serde Content,
+    // whose external struct-variant payloads accept positional sequences.
+    // Standalone ValueDeserializer accepts object payloads only. Preserve
+    // both existing entry-point shapes rather than broadening either decoder.
+    fn outcome_in(value: &Value, buffered: bool) -> Result<Outcome> {
+        let value = value.as_object().ok_or(WireError::Invalid("expected outcome object"))?;
+        if value.len() != 1 { return Err(WireError::Invalid("expected one outcome")); }
+        let (kind, payload) = value.iter().next().ok_or(WireError::Invalid("empty outcome"))?;
+        match kind.as_str() {
+            "committed" => {
+                let names = &["request", "currency", "source", "charged", "admittedCount", "incomingUniqueId"];
+                let value = if buffered { fields(payload, names)? } else { Fields::Object(object(payload, names)?) };
+                Ok(Outcome::Committed { request: purchase_request(value.get("request", 0)?)?, currency: currency_in(value.get("currency", 1)?, buffered)?,
+                    source: source_in(value.get("source", 2)?, buffered)?, charged: u32(value.get("charged", 3)?)?,
+                    admitted_count: u16(value.get("admittedCount", 4)?)?, incoming_unique_id: u64(value.get("incomingUniqueId", 5)?)? })
+            }
+            "rejected" => {
+                let names = &["request", "reason"];
+                let value = if buffered { fields(payload, names)? } else { Fields::Object(object(payload, names)?) };
+                Ok(Outcome::Rejected { request: purchase_request(value.get("request", 0)?)?, reason: rejection_in(value.get("reason", 1)?, buffered)? })
+            }
+            _ => Err(WireError::Invalid("unknown outcome")),
+        }
+    }
+    pub fn receipt_entry(value: &Value) -> Result<ReceiptEntry> { receipt_entry_in(value, false) }
+    fn receipt_entry_in(value: &Value, buffered: bool) -> Result<ReceiptEntry> {
+        let value = fields(value, &["operation", "serverRevision", "outcome"])?;
+        let value = ReceiptEntry { operation: operation_in(value.get("operation", 0)?, buffered)?, server_revision: u64(value.get("serverRevision", 1)?)?,
+            outcome: outcome_in(value.get("outcome", 2)?, buffered)? };
+        value.validate()?; Ok(value)
+    }
+    pub fn receipt(value: &Value) -> Result<Receipt> { receipt_in(value, false) }
+    fn receipt_in(value: &Value, buffered: bool) -> Result<Receipt> {
+        let value = fields(value, &["producerScope", "entry"])?;
+        let value = Receipt { producer_scope: opaque(value.get("producerScope", 0)?)?, entry: receipt_entry_in(value.get("entry", 1)?, buffered)? };
+        value.validate()?; Ok(value)
+    }
+    fn nullable_receipt(value: &Value) -> Result<Option<Receipt>> {
+        if value.is_null() { Ok(None) } else { receipt_in(value, true).map(Some) }
+    }
+    pub fn server_reply(value: &Value) -> Result<ServerReply> {
+        // TaggedContentVisitor also accepts [tag, variant fields...]. The tag
+        // is still a string, and each variant keeps its exact positional length.
+        let kind = match value {
+            Value::Array(value) => value.first().ok_or(WireError::Invalid("missing reply kind"))?,
+            Value::Object(value) => field(value, "kind")?,
+            _ => return Err(WireError::Invalid("expected reply")),
+        };
+        let value = match string(kind)? {
+            "producer" => {
+                let value = fields(value, &["kind", "producer"])?;
+                ServerReply::Producer { producer: producer(value.get("producer", 1)?)? }
+            }
+            "quote" => {
+                let value = fields(value, &["kind", "intent"])?;
+                ServerReply::Quote { intent: intent_in(value.get("intent", 1)?, true)? }
+            }
+            "recovery" => {
+                let value = fields(value, &["kind", "receipt"])?;
+                ServerReply::Recovery { receipt: nullable_receipt(value.get("receipt", 1)?)? }
+            }
+            "purchase" => {
+                let value = fields(value, &["kind", "receipt", "replayed"])?;
+                ServerReply::Purchase { receipt: receipt_in(value.get("receipt", 1)?, true)?, replayed: boolean(value.get("replayed", 2)?)? }
+            }
+            "failure" => {
+                let value = fields(value, &["kind", "state", "receipt"])?;
+                ServerReply::Failure { state: failure_state_in(value.get("state", 1)?, true)?, receipt: nullable_receipt(value.get("receipt", 2)?)? }
+            }
+            _ => return Err(WireError::Invalid("unknown reply")),
+        };
+        value.validate()?; Ok(value)
+    }
+    pub fn server_frame(value: &Value) -> Result<ServerFrame> {
+        let value = fields(value, &["type", "protocolVersion", "requestId", "reply", "snapshot", "authority"])?;
+        if unit_enum_name(value.get("type", 0)?)? != "npcPurchaseOwner" {
+            return Err(WireError::Invalid("unknown envelope type"));
+        }
+        let snapshot = value.get("snapshot", 4)?;
+        let authority = value.get("authority", 5)?;
+        let value = ServerFrame { wire_type: EnvelopeType::NpcPurchaseOwner, protocol_version: u16(value.get("protocolVersion", 1)?)?,
+            request_id: u64(value.get("requestId", 2)?)?, reply: server_reply(value.get("reply", 3)?)?,
+            snapshot: if snapshot.is_null() { None } else { Some(snapshot.clone()) },
+            authority: if authority.is_null() { None } else { Some(producer(authority)?) } };
+        value.validate()?; Ok(value)
+    }
+}
+/// Compact Value construction with the existing typed serialization rules.
+/// This changes neither authentication nor receipt/Applied custody. Validate
+/// before emitting any public DTO, and keep snapshots uninterpreted carriers.
+pub mod value_encode {
+    use super::*;
+
+    macro_rules! object {
+        ($($key:literal => $value:expr),* $(,)?) => {{
+            let mut fields = serde_json::Map::new();
+            $(fields.insert($key.to_owned(), $value);)*
+            Value::Object(fields)
+        }};
+    }
+    pub fn u64(value: U64) -> Value { Value::String(value.get().to_string()) }
+    pub fn opaque(value: Opaque32) -> Value { Value::String(value.hex()) }
+    pub fn currency_name(value: Currency) -> &'static str {
+        match value { Currency::Gold => "gold", Currency::Pearls => "pearls" }
+    }
+    pub fn source_name(value: Source) -> &'static str {
+        match value { Source::Trade => "trade", Source::BuyBack => "buyBack", Source::Used => "used" }
+    }
+    pub fn rejection_name(value: Rejection) -> &'static str {
+        match value {
+            Rejection::InvalidRequest => "invalidRequest", Rejection::PlayerDead => "playerDead",
+            Rejection::ServiceUnavailable => "serviceUnavailable", Rejection::UnsupportedService => "unsupportedService",
+            Rejection::UnknownGood => "unknownGood", Rejection::InvalidQuantity => "invalidQuantity",
+            Rejection::InsufficientCurrency => "insufficientCurrency", Rejection::ClockUnavailable => "clockUnavailable",
+            Rejection::InvalidDelivery => "invalidDelivery",
+        }
+    }
+    pub fn failure_state_name(value: FailureState) -> &'static str {
+        match value { FailureState::BeforeExecution => "beforeExecution", FailureState::Unknown => "unknown", FailureState::PostCommit => "postCommit" }
+    }
+    pub fn currency(value: Currency) -> Value { Value::String(currency_name(value).into()) }
+    pub fn source(value: Source) -> Value { Value::String(source_name(value).into()) }
+    pub fn rejection(value: Rejection) -> Value { Value::String(rejection_name(value).into()) }
+    pub fn failure_state(value: FailureState) -> Value { Value::String(failure_state_name(value).into()) }
+    pub fn purchase_request(value: &PurchaseRequest) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("itemIndex" => u64(value.item_index), "count" => value.count.into(), "panelType" => value.panel_type.into()))
+    }
+    pub fn intent(value: &Intent) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("request" => purchase_request(&value.request)?, "currency" => currency(value.currency),
+            "source" => source(value.source), "serviceCatalogProof" => opaque(value.service_catalog_proof)))
+    }
+    pub fn operation(value: &Operation) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("actor" => opaque(value.actor), "requestScope" => opaque(value.request_scope),
+            "sequence" => u64(value.sequence), "intent" => intent(&value.intent)?))
+    }
+    pub fn producer(value: &Producer) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("actor" => opaque(value.actor), "producerScope" => opaque(value.producer_scope), "serverRevision" => u64(value.server_revision)))
+    }
+    pub fn outcome(value: &Outcome) -> Result<Value> {
+        // Standalone Outcome serde validates its nested checked request, not
+        // a missing external intent. ReceiptEntry supplies tuple validation.
+        Ok(match value {
+            Outcome::Committed { request, currency: paid_currency, source: paid_source, charged, admitted_count, incoming_unique_id } =>
+                object!("committed" => object!("request" => purchase_request(request)?, "currency" => currency(*paid_currency),
+                    "source" => source(*paid_source), "charged" => (*charged).into(), "admittedCount" => (*admitted_count).into(),
+                    "incomingUniqueId" => u64(*incoming_unique_id))),
+            Outcome::Rejected { request, reason } => object!("rejected" => object!("request" => purchase_request(request)?, "reason" => rejection(*reason))),
+        })
+    }
+    pub fn receipt_entry(value: &ReceiptEntry) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("operation" => operation(&value.operation)?, "serverRevision" => u64(value.server_revision), "outcome" => outcome(&value.outcome)?))
+    }
+    pub fn receipt(value: &Receipt) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("producerScope" => opaque(value.producer_scope), "entry" => receipt_entry(&value.entry)?))
+    }
+    pub fn action(value: &Action) -> Result<Value> {
+        value.validate()?;
+        Ok(match value {
+            Action::Begin => object!("kind" => Value::String("begin".into())),
+            Action::Quote { request } => object!("kind" => Value::String("quote".into()), "request" => purchase_request(request)?),
+            Action::Query { operation: original } => object!("kind" => Value::String("query".into()), "operation" => operation(original)?),
+            Action::Purchase { operation: original } => object!("kind" => Value::String("purchase".into()), "operation" => operation(original)?),
+        })
+    }
+    pub fn client_request(value: &ClientRequest) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("type" => Value::String("npcPurchaseOwner".into()), "protocolVersion" => value.protocol_version.into(),
+            "requestId" => u64(value.request_id), "action" => action(&value.action)?))
+    }
+    pub fn server_reply(value: &ServerReply) -> Result<Value> {
+        value.validate()?;
+        Ok(match value {
+            ServerReply::Producer { producer: current } => object!("kind" => Value::String("producer".into()), "producer" => producer(current)?),
+            ServerReply::Quote { intent: quoted } => object!("kind" => Value::String("quote".into()), "intent" => intent(quoted)?),
+            ServerReply::Recovery { receipt: terminal } => object!("kind" => Value::String("recovery".into()),
+                "receipt" => terminal.as_ref().map(receipt).transpose()?.unwrap_or(Value::Null)),
+            ServerReply::Purchase { receipt: terminal, replayed } => object!("kind" => Value::String("purchase".into()),
+                "receipt" => receipt(terminal)?, "replayed" => Value::Bool(*replayed)),
+            ServerReply::Failure { state, receipt: terminal } => object!("kind" => Value::String("failure".into()),
+                "state" => failure_state(*state), "receipt" => terminal.as_ref().map(receipt).transpose()?.unwrap_or(Value::Null)),
+        })
+    }
+    pub fn server_frame(value: &ServerFrame) -> Result<Value> {
+        value.validate()?;
+        Ok(object!("type" => Value::String("npcPurchaseOwner".into()), "protocolVersion" => value.protocol_version.into(),
+            "requestId" => u64(value.request_id), "reply" => server_reply(&value.reply)?,
+            "snapshot" => value.snapshot.as_ref().cloned().unwrap_or(Value::Null),
+            "authority" => value.authority.as_ref().map(producer).transpose()?.unwrap_or(Value::Null)))
+    }
+}
+
+/// Web-only call sites may use this additive encoder to avoid reaching typed
+/// serde serializers. Its byte order is the original checked DTO serializer's
+/// order, including tag-first Action. Every interpolated string is canonical
+/// decimal, lowercase hex, or a closed enum spelling after full validation;
+/// no arbitrary user text, snapshot, or general JSON escaping enters this body.
+pub fn encode_client_request_compact(value: &ClientRequest) -> Result<String> {
+    value.validate()?;
+    fn request(value: &PurchaseRequest) -> String {
+        format!("{{\"itemIndex\":\"{}\",\"count\":{},\"panelType\":{}}}", value.item_index.get(), value.count, value.panel_type)
+    }
+    fn operation(value: &Operation) -> String {
+        format!("{{\"actor\":\"{}\",\"requestScope\":\"{}\",\"sequence\":\"{}\",\"intent\":{{\"request\":{},\"currency\":\"{}\",\"source\":\"{}\",\"serviceCatalogProof\":\"{}\"}}}}",
+            value.actor.hex(), value.request_scope.hex(), value.sequence.get(), request(&value.intent.request),
+            value_encode::currency_name(value.intent.currency), value_encode::source_name(value.intent.source), value.intent.service_catalog_proof.hex())
+    }
+    let action = match &value.action {
+        Action::Begin => "{\"kind\":\"begin\"}".into(),
+        Action::Quote { request: value } => format!("{{\"kind\":\"quote\",\"request\":{}}}", request(value)),
+        Action::Query { operation: value } => format!("{{\"kind\":\"query\",\"operation\":{}}}", operation(value)),
+        Action::Purchase { operation: value } => format!("{{\"kind\":\"purchase\",\"operation\":{}}}", operation(value)),
+    };
+    let text = format!("{{\"type\":\"npcPurchaseOwner\",\"protocolVersion\":{},\"requestId\":\"{}\",\"action\":{}}}",
+        value.protocol_version, value.request_id.get(), action);
+    if text.len() > MAX_CLIENT_REQUEST_BYTES { return Err(WireError::Invalid("wire message size exceeded")); }
+    Ok(text)
+}
+
 pub fn encode_client_request(value: &ClientRequest) -> Result<String> {
     let text = serde_json::to_string(value)?;
     if text.len() > MAX_CLIENT_REQUEST_BYTES { return Err(WireError::Invalid("wire message size exceeded")); }
@@ -482,6 +854,531 @@ mod tests {
     fn rejected(mut receipt: Receipt, reason: Rejection) -> Receipt {
         receipt.entry.outcome = Outcome::Rejected { request: receipt.entry.operation.intent.request.clone(), reason };
         receipt
+    }
+
+    fn assert_value_decode<T>(value: &Value, decode: fn(&Value) -> Result<T>, accepted: bool)
+    where T: serde::de::DeserializeOwned + fmt::Debug + PartialEq {
+        let original = serde_json::from_value::<T>(value.clone());
+        let compact = decode(value);
+        assert_eq!(original.is_ok(), accepted, "serde oracle: {value}: {original:?}");
+        assert_eq!(compact.is_ok(), accepted, "compact decoder: {value}: {compact:?}");
+        if let (Ok(original), Ok(compact)) = (original, compact) { assert_eq!(compact, original); }
+    }
+    fn assert_frame_decode(raw: &str, accepted: bool) {
+        let original = parse::<ServerFrame>(raw, MAX_SERVER_FRAME_BYTES);
+        let compact = parse_server_frame(raw);
+        assert_eq!(original.is_ok(), accepted, "serde raw oracle: {original:?}");
+        assert_eq!(compact.is_ok(), accepted, "compact raw decoder: {compact:?}");
+        if let (Ok(original), Ok(compact)) = (original, compact) { assert_eq!(compact, original); }
+    }
+
+    fn assert_value_encode<T>(value: &T, encode: fn(&T) -> Result<Value>, accepted: bool)
+    where T: Serialize + fmt::Debug {
+        let original = serde_json::to_value(value);
+        let compact = encode(value);
+        assert_eq!(original.is_ok(), accepted, "serde encode oracle: {value:?}: {original:?}");
+        assert_eq!(compact.is_ok(), accepted, "compact encode: {value:?}: {compact:?}");
+        if let (Ok(original), Ok(compact)) = (original, compact) { assert_eq!(compact, original); }
+    }
+
+    #[test]
+    fn schema_value_encode_all_valid_variants_and_boundaries_match_serde() {
+        for currency in [Currency::Gold, Currency::Pearls] {
+            assert_eq!(value_encode::currency(currency), serde_json::to_value(currency).unwrap());
+            for source in [Source::Trade, Source::BuyBack, Source::Used] {
+                assert_eq!(value_encode::source(source), serde_json::to_value(source).unwrap());
+                for (selector, count, panel) in [(0, 1, 0), (u64::MAX, u16::MAX, u8::MAX)] {
+                    let mut terminal = receipt();
+                    terminal.entry.operation.intent = Intent { request: PurchaseRequest::new(U64::new(selector), count, panel).unwrap(),
+                        currency, source, service_catalog_proof: opaque(3) };
+                    terminal.entry.outcome = Outcome::Committed { request: terminal.entry.operation.intent.request.clone(), currency, source,
+                        charged: u32::MAX, admitted_count: count, incoming_unique_id: U64::new(selector) };
+                    terminal.entry.server_revision = U64::new(u64::MAX - 1);
+                    assert_value_encode(&terminal.entry.operation.intent.request, value_encode::purchase_request, true);
+                    assert_value_encode(&terminal.entry.operation.intent, value_encode::intent, true);
+                    assert_value_encode(&terminal.entry.operation, value_encode::operation, true);
+                    assert_value_encode(&terminal.entry.outcome, value_encode::outcome, true);
+                    assert_value_encode(&terminal.entry, value_encode::receipt_entry, true);
+                    assert_value_encode(&terminal, value_encode::receipt, true);
+                    for action in [Action::Begin, Action::Quote { request: terminal.entry.operation.intent.request.clone() },
+                        Action::Query { operation: terminal.entry.operation.clone() }, Action::Purchase { operation: terminal.entry.operation.clone() }] {
+                        assert_value_encode(&action, value_encode::action, true);
+                        let request = ClientRequest::new(U64::new(u64::MAX), action).unwrap();
+                        assert_value_encode(&request, value_encode::client_request, true);
+                    }
+                }
+            }
+        }
+        for revision in [0, u64::MAX - 1] {
+            assert_value_encode(&Producer { server_revision: U64::new(revision), ..producer() }, value_encode::producer, true);
+        }
+        for reason in [Rejection::InvalidRequest, Rejection::PlayerDead, Rejection::ServiceUnavailable,
+            Rejection::UnsupportedService, Rejection::UnknownGood, Rejection::InvalidQuantity,
+            Rejection::InsufficientCurrency, Rejection::ClockUnavailable, Rejection::InvalidDelivery] {
+            assert_eq!(value_encode::rejection(reason), serde_json::to_value(reason).unwrap());
+            let terminal = rejected(receipt(), reason);
+            assert_value_encode(&terminal.entry.outcome, value_encode::outcome, true);
+            assert_value_encode(&terminal, value_encode::receipt, true);
+        }
+        for state in [FailureState::BeforeExecution, FailureState::Unknown, FailureState::PostCommit] {
+            assert_eq!(value_encode::failure_state(state), serde_json::to_value(state).unwrap());
+        }
+        for raw in [0, 1, u64::MAX] { assert_eq!(value_encode::u64(U64::new(raw)), serde_json::to_value(U64::new(raw)).unwrap()); }
+        let mut bytes = [0; 32]; bytes[0] = 0xab; bytes[31] = 0x09;
+        let identity = Opaque32::from_bytes(bytes).unwrap();
+        assert_eq!(value_encode::opaque(identity), serde_json::to_value(identity).unwrap());
+        let replies = [ServerReply::Producer { producer: producer() }, ServerReply::Quote { intent: operation().intent },
+            ServerReply::Recovery { receipt: None }, ServerReply::Recovery { receipt: Some(receipt()) },
+            ServerReply::Purchase { receipt: receipt(), replayed: false }, ServerReply::Purchase { receipt: receipt(), replayed: true },
+            ServerReply::Failure { state: FailureState::BeforeExecution, receipt: None },
+            ServerReply::Failure { state: FailureState::Unknown, receipt: None },
+            ServerReply::Failure { state: FailureState::PostCommit, receipt: Some(receipt()) }];
+        for reply in replies {
+            assert_value_encode(&reply, value_encode::server_reply, true);
+            for paired in [false, true] {
+                let snapshot = json!({"public":[null,true,u64::MAX,i64::MIN,-1,1.25,{"arbitrary":"quote\" slash\\ Unicode英雄"}]});
+                let frame = ServerFrame::new(U64::new(11), reply.clone(), paired.then_some(snapshot), paired.then_some(producer())).unwrap();
+                assert_value_encode(&frame, value_encode::server_frame, true);
+                let encoded = value_encode::server_frame(&frame).unwrap();
+                assert_eq!(encoded["snapshot"], frame.snapshot.clone().unwrap_or(Value::Null));
+                assert!(encoded.as_object().unwrap().contains_key("snapshot"));
+                assert!(encoded.as_object().unwrap().contains_key("authority"));
+            }
+        }
+        // Outcome has no external intent when serialized alone. Preserve the
+        // old distinction: ReceiptEntry, not this serializer, rejects zero.
+        let standalone = Outcome::Committed { request: operation().intent.request, currency: Currency::Gold, source: Source::Trade,
+            charged: 0, admitted_count: 0, incoming_unique_id: U64::new(0) };
+        assert_value_encode(&standalone, value_encode::outcome, true);
+    }
+
+    #[test]
+    fn schema_value_encode_invalid_public_dtos_match_serde_rejection() {
+        let invalid_request = PurchaseRequest { item_index: U64::new(0), count: 0, panel_type: u8::MAX };
+        assert_value_encode(&invalid_request, value_encode::purchase_request, false);
+        let invalid_intent = Intent { request: invalid_request.clone(), ..operation().intent };
+        assert_value_encode(&invalid_intent, value_encode::intent, false);
+        let invalid_operation = Operation { sequence: U64::new(0), ..operation() };
+        assert_value_encode(&invalid_operation, value_encode::operation, false);
+        let invalid_producer = Producer { server_revision: U64::new(u64::MAX), ..producer() };
+        assert_value_encode(&invalid_producer, value_encode::producer, false);
+        for outcome in [Outcome::Committed { request: invalid_request.clone(), currency: Currency::Gold, source: Source::Trade,
+            charged: 0, admitted_count: 1, incoming_unique_id: U64::new(0) },
+            Outcome::Rejected { request: invalid_request.clone(), reason: Rejection::InvalidRequest }] {
+            assert_value_encode(&outcome, value_encode::outcome, false);
+        }
+        let mut invalid_receipts = Vec::new();
+        for revision in [0, u64::MAX] {
+            let mut value = receipt(); value.entry.server_revision = U64::new(revision); invalid_receipts.push(value);
+        }
+        for change in 0..9 {
+            let mut value = receipt();
+            if let Outcome::Committed { request, currency, source, admitted_count, .. } = &mut value.entry.outcome {
+                match change {
+                    0 => request.item_index = U64::new(0), 1 => request.count = 2, 2 => request.panel_type = 1,
+                    3 => *currency = Currency::Pearls, 4 => *source = Source::Used, 5 => *admitted_count = 0,
+                    6 => *admitted_count = 4, 7 => value.entry.operation.sequence = U64::new(0),
+                    _ => value.entry.operation.intent.request.count = 0,
+                }
+            }
+            invalid_receipts.push(value);
+        }
+        for value in invalid_receipts {
+            assert_value_encode(&value.entry, value_encode::receipt_entry, false);
+            assert_value_encode(&value, value_encode::receipt, false);
+            for reply in [ServerReply::Recovery { receipt: Some(value.clone()) }, ServerReply::Purchase { receipt: value.clone(), replayed: false },
+                ServerReply::Failure { state: FailureState::PostCommit, receipt: Some(value.clone()) }] {
+                assert_value_encode(&reply, value_encode::server_reply, false);
+            }
+        }
+        for action in [Action::Quote { request: invalid_request }, Action::Query { operation: invalid_operation.clone() },
+            Action::Purchase { operation: invalid_operation }] {
+            assert_value_encode(&action, value_encode::action, false);
+            let request = ClientRequest { action, ..ClientRequest::new(U64::new(1), Action::Begin).unwrap() };
+            assert_value_encode(&request, value_encode::client_request, false);
+            assert!(encode_client_request(&request).is_err()); assert!(encode_client_request_compact(&request).is_err());
+        }
+        for request in [ClientRequest { request_id: U64::new(0), ..ClientRequest::new(U64::new(1), Action::Begin).unwrap() },
+            ClientRequest { protocol_version: 2, ..ClientRequest::new(U64::new(1), Action::Begin).unwrap() }] {
+            assert_value_encode(&request, value_encode::client_request, false);
+            assert!(encode_client_request(&request).is_err()); assert!(encode_client_request_compact(&request).is_err());
+        }
+        for reply in [ServerReply::Producer { producer: invalid_producer }, ServerReply::Quote { intent: invalid_intent },
+            ServerReply::Failure { state: FailureState::PostCommit, receipt: None },
+            ServerReply::Failure { state: FailureState::Unknown, receipt: Some(receipt()) },
+            ServerReply::Failure { state: FailureState::BeforeExecution, receipt: Some(receipt()) }] {
+            assert_value_encode(&reply, value_encode::server_reply, false);
+        }
+        for change in 0..8 {
+            let mut value = frame();
+            match change {
+                0 => value.snapshot = None, 1 => value.authority = None, 2 => value.snapshot = Some(Value::Null),
+                3 => value.authority.as_mut().unwrap().actor = opaque(9),
+                4 => value.authority.as_mut().unwrap().producer_scope = opaque(9),
+                5 => value.authority.as_mut().unwrap().server_revision = U64::new(7),
+                6 => value.protocol_version = 2, _ => value.request_id = U64::new(0),
+            }
+            assert_value_encode(&value, value_encode::server_frame, false);
+        }
+        let mut mismatch = ServerFrame::new(U64::new(1), ServerReply::Producer { producer: producer() },
+            Some(json!({})), Some(producer())).unwrap();
+        mismatch.authority.as_mut().unwrap().server_revision = U64::new(8);
+        assert_value_encode(&mismatch, value_encode::server_frame, false);
+    }
+
+    #[test]
+    fn schema_compact_client_request_bytes_match_original_encoder() {
+        let mut bytes = [0; 32]; bytes[0] = 0xab; bytes[31] = 0x09;
+        let identity = Opaque32::from_bytes(bytes).unwrap();
+        for currency in [Currency::Gold, Currency::Pearls] {
+            for source in [Source::Trade, Source::BuyBack, Source::Used] {
+                for selector in [0, 1, u64::MAX] {
+                    for count in [1, u16::MAX] {
+                        for panel in [0, 1, u8::MAX] {
+                            let original = Operation { actor: identity, request_scope: opaque(2), sequence: U64::new(u64::MAX),
+                                intent: Intent { request: PurchaseRequest::new(U64::new(selector), count, panel).unwrap(), currency, source,
+                                    service_catalog_proof: identity } };
+                            for action in [Action::Begin, Action::Quote { request: original.intent.request.clone() },
+                                Action::Query { operation: original.clone() }, Action::Purchase { operation: original.clone() }] {
+                                for control in [1, u64::MAX] {
+                                    let value = ClientRequest::new(U64::new(control), action.clone()).unwrap();
+                                    let expected = encode_client_request(&value).unwrap();
+                                    assert_eq!(expected, serde_json::to_string(&value).unwrap());
+                                    let compact = encode_client_request_compact(&value).unwrap();
+                                    assert_eq!(compact.as_bytes(), expected.as_bytes());
+                                    assert_eq!(parse_client_request(&compact).unwrap(), value);
+                                    assert_eq!(serde_json::from_str::<Value>(&compact).unwrap(), value_encode::client_request(&value).unwrap());
+                                    assert!(compact.len() <= MAX_CLIENT_REQUEST_BYTES);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        let begin = ClientRequest::new(U64::new(1), Action::Begin).unwrap();
+        assert_eq!(encode_client_request_compact(&begin).unwrap(),
+            "{\"type\":\"npcPurchaseOwner\",\"protocolVersion\":1,\"requestId\":\"1\",\"action\":{\"kind\":\"begin\"}}");
+    }
+
+    #[test]
+    fn schema_value_decode_all_replies_and_integer_boundaries_match_serde() {
+        let replies = [ServerReply::Producer { producer: producer() }, ServerReply::Quote { intent: operation().intent },
+            ServerReply::Recovery { receipt: None }, ServerReply::Recovery { receipt: Some(receipt()) },
+            ServerReply::Purchase { receipt: receipt(), replayed: false }, ServerReply::Purchase { receipt: receipt(), replayed: true },
+            ServerReply::Failure { state: FailureState::BeforeExecution, receipt: None },
+            ServerReply::Failure { state: FailureState::Unknown, receipt: None },
+            ServerReply::Failure { state: FailureState::PostCommit, receipt: Some(receipt()) }];
+        for reply in replies {
+            assert_value_decode(&serde_json::to_value(&reply).unwrap(), value_decode::server_reply, true);
+            for paired in [false, true] {
+                let carrier = json!({"nested":[null, true, -1, u64::MAX, {"public":"source","fraction":1.25}]});
+                let specimen = ServerFrame::new(U64::new(u64::MAX), reply.clone(), paired.then_some(carrier), paired.then_some(producer())).unwrap();
+                let value = serde_json::to_value(&specimen).unwrap();
+                assert_value_decode(&value, value_decode::server_frame, true);
+                assert_frame_decode(&value.to_string(), true);
+                assert_eq!(value_decode::server_frame(&value).unwrap().snapshot, specimen.snapshot);
+            }
+        }
+        for (currency, source) in [(Currency::Gold, Source::Trade), (Currency::Pearls, Source::Trade),
+            (Currency::Gold, Source::BuyBack), (Currency::Gold, Source::Used), (Currency::Pearls, Source::Used)] {
+            for selector in [0, u64::MAX] {
+                let mut specimen = receipt();
+                specimen.entry.operation.intent = Intent { request: PurchaseRequest::new(U64::new(selector), u16::MAX, u8::MAX).unwrap(),
+                    currency, source, service_catalog_proof: opaque(3) };
+                specimen.entry.server_revision = U64::new(u64::MAX - 1);
+                specimen.entry.outcome = Outcome::Committed { request: specimen.entry.operation.intent.request.clone(), currency, source,
+                    charged: u32::MAX, admitted_count: u16::MAX, incoming_unique_id: U64::new(selector) };
+                assert_value_decode(&serde_json::to_value(&specimen.entry.operation.intent.request).unwrap(), value_decode::purchase_request, true);
+                assert_value_decode(&serde_json::to_value(&specimen.entry.operation.intent).unwrap(), value_decode::intent, true);
+                assert_value_decode(&serde_json::to_value(&specimen.entry.operation).unwrap(), value_decode::operation, true);
+                assert_value_decode(&serde_json::to_value(&specimen.entry.outcome).unwrap(), value_decode::outcome, true);
+                assert_value_decode(&serde_json::to_value(&specimen.entry).unwrap(), value_decode::receipt_entry, true);
+                assert_value_decode(&serde_json::to_value(&specimen).unwrap(), value_decode::receipt, true);
+            }
+        }
+        for revision in [0, u64::MAX - 1] {
+            let specimen = Producer { server_revision: U64::new(revision), ..producer() };
+            assert_value_decode(&serde_json::to_value(specimen).unwrap(), value_decode::producer, true);
+        }
+        for reason in [Rejection::InvalidRequest, Rejection::PlayerDead, Rejection::ServiceUnavailable,
+            Rejection::UnsupportedService, Rejection::UnknownGood, Rejection::InvalidQuantity,
+            Rejection::InsufficientCurrency, Rejection::ClockUnavailable, Rejection::InvalidDelivery] {
+            assert_value_decode(&serde_json::to_value(rejected(receipt(), reason)).unwrap(), value_decode::receipt, true);
+        }
+    }
+
+    #[test]
+    fn schema_value_decode_missing_extra_and_wrong_shapes_match_serde() {
+        let valid = serde_json::to_value(frame()).unwrap();
+        for path in ["", "/reply", "/reply/receipt", "/reply/receipt/entry", "/reply/receipt/entry/operation",
+            "/reply/receipt/entry/operation/intent", "/reply/receipt/entry/operation/intent/request",
+            "/reply/receipt/entry/outcome/committed", "/reply/receipt/entry/outcome/committed/request", "/authority"] {
+            let keys: Vec<_> = valid.pointer(path).unwrap().as_object().unwrap().keys().cloned().collect();
+            for key in keys {
+                let mut value = valid.clone(); value.pointer_mut(path).unwrap().as_object_mut().unwrap().remove(&key);
+                assert_value_decode(&value, value_decode::server_frame, false);
+            }
+            let mut value = valid.clone(); value.pointer_mut(path).unwrap().as_object_mut().unwrap().insert("extra".into(), Value::Null);
+            assert_value_decode(&value, value_decode::server_frame, false);
+        }
+        for (path, malformed) in [("/reply/kind", json!("unknown")), ("/reply/kind", json!({"purchase":null})),
+            ("/reply/replayed", json!(0)), ("/reply/receipt", Value::Null), ("/protocolVersion", json!(1.0)),
+            ("/authority", json!([])), ("/reply/receipt/entry/outcome", json!({"unknown":{}})),
+            ("/reply/receipt/entry/outcome/committed", Value::Null)] {
+            let mut value = valid.clone(); *value.pointer_mut(path).unwrap() = malformed;
+            assert_value_decode(&value, value_decode::server_frame, false);
+        }
+        for reply in [json!({"kind":"recovery","receipt":null}), json!({"kind":"failure","state":"unknown","receipt":null})] {
+            assert_value_decode(&reply, value_decode::server_reply, true);
+            let mut missing = reply; missing.as_object_mut().unwrap().remove("receipt");
+            assert_value_decode(&missing, value_decode::server_reply, false);
+        }
+        for value in [Value::Null, json!(true), json!(1), json!("frame"), json!([])] {
+            assert_value_decode(&value, value_decode::server_frame, false);
+        }
+    }
+
+    #[test]
+    fn schema_value_decode_semantic_tuple_mutations_match_serde() {
+        let valid = serde_json::to_value(frame()).unwrap();
+        for (path, malformed) in [("/protocolVersion", json!(2)), ("/requestId", json!("0")),
+            ("/reply/receipt/entry/operation/sequence", json!("0")), ("/reply/receipt/entry/serverRevision", json!("0")),
+            ("/reply/receipt/entry/serverRevision", json!(u64::MAX.to_string())),
+            ("/reply/receipt/entry/outcome/committed/request/itemIndex", json!("0")),
+            ("/reply/receipt/entry/outcome/committed/request/count", json!(2)),
+            ("/reply/receipt/entry/outcome/committed/request/panelType", json!(1)),
+            ("/reply/receipt/entry/outcome/committed/currency", json!("pearls")),
+            ("/reply/receipt/entry/outcome/committed/source", json!("used")),
+            ("/reply/receipt/entry/outcome/committed/admittedCount", json!(0)),
+            ("/reply/receipt/entry/outcome/committed/admittedCount", json!(4)),
+            ("/authority/actor", serde_json::to_value(opaque(9)).unwrap()),
+            ("/authority/producerScope", serde_json::to_value(opaque(9)).unwrap()),
+            ("/authority/serverRevision", json!("7")), ("/authority/serverRevision", json!(u64::MAX.to_string())),
+            ("/snapshot", Value::Null), ("/authority", Value::Null)] {
+            let mut value = valid.clone(); *value.pointer_mut(path).unwrap() = malformed;
+            assert_value_decode(&value, value_decode::server_frame, false);
+        }
+        for reply in [json!({"kind":"failure","state":"postCommit","receipt":null}),
+            json!({"kind":"failure","state":"unknown","receipt":receipt()}),
+            json!({"kind":"failure","state":"beforeExecution","receipt":receipt()})] {
+            assert_value_decode(&reply, value_decode::server_reply, false);
+        }
+        let mut initial = serde_json::to_value(ServerFrame::new(U64::new(1), ServerReply::Producer { producer: producer() },
+            Some(json!({})), Some(producer())).unwrap()).unwrap();
+        initial["authority"]["serverRevision"] = json!("8");
+        assert_value_decode(&initial, value_decode::server_frame, false);
+    }
+
+    #[test]
+    fn schema_value_decode_unit_enum_compatibility_matches_serde() {
+        for value in [json!("gold"), json!({"gold":null}), json!("pearls"), json!({"pearls":null})] {
+            assert_value_decode(&value, value_decode::currency, true);
+        }
+        for name in ["trade", "buyBack", "used"] {
+            assert_value_decode(&json!({name:null}), value_decode::source, true);
+        }
+        for name in ["invalidRequest", "playerDead", "serviceUnavailable", "unsupportedService", "unknownGood",
+            "invalidQuantity", "insufficientCurrency", "clockUnavailable", "invalidDelivery"] {
+            assert_value_decode(&json!({name:null}), value_decode::rejection, true);
+        }
+        for name in ["beforeExecution", "unknown", "postCommit"] {
+            assert_value_decode(&json!({name:null}), value_decode::failure_state, true);
+        }
+        let mut value = serde_json::to_value(frame()).unwrap();
+        value["type"] = json!({"npcPurchaseOwner":null});
+        for path in ["/reply/receipt/entry/operation/intent", "/reply/receipt/entry/outcome/committed"] {
+            value.pointer_mut(path).unwrap()["currency"] = json!({"gold":null});
+            value.pointer_mut(path).unwrap()["source"] = json!({"trade":null});
+        }
+        assert_value_decode(&value, value_decode::server_frame, true);
+        let mut rejected = serde_json::to_value(rejected(receipt(), Rejection::UnknownGood)).unwrap();
+        rejected["entry"]["outcome"]["rejected"]["reason"] = json!({"unknownGood":null});
+        assert_value_decode(&rejected, value_decode::receipt, true);
+        for value in [json!({"gold":true}), json!({"gold":0}), json!({"gold":{}}), json!({"gold":null,"pearls":null}),
+            json!({}), Value::Null, json!([]), json!(1), json!("unknown")] {
+            assert_value_decode(&value, value_decode::currency, false);
+        }
+        assert_buffered_unit_enum_payloads_match_serde();
+    }
+
+    #[derive(Debug, PartialEq, Deserialize)]
+    #[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+    enum BufferedValue<T> { Value { value: T } }
+    fn assert_buffered_value_decode<T>(value: &Value, decode: fn(&Value) -> Result<T>, accepted: bool)
+    where T: serde::de::DeserializeOwned + fmt::Debug + PartialEq {
+        let original = serde_json::from_value::<BufferedValue<T>>(json!({"kind":"value","value":value}));
+        let compact = decode(value);
+        assert_eq!(original.is_ok(), accepted, "buffered serde oracle: {value}: {original:?}");
+        assert_eq!(compact.is_ok(), accepted, "buffered compact decoder: {value}: {compact:?}");
+        if let (Ok(BufferedValue::Value { value: original }), Ok(compact)) = (original, compact) {
+            assert_eq!(compact, original);
+        }
+    }
+
+    fn assert_buffered_unit_enum_payloads_match_serde() {
+        // Content's unit compatibility accepts only null or an empty object.
+        // Every other JSON payload shape must still fail in tagged contexts.
+        for payload in [Value::Null, json!({}), json!(false), json!(true), json!(0), json!(1), json!(-1), json!(1.25),
+            json!(""), json!("ignored"), json!([]), json!([null]), json!([1]), json!({"ignored":null}), json!({"ignored":[]})] {
+            let direct = payload.is_null();
+            let buffered = direct || payload.as_object().is_some_and(serde_json::Map::is_empty);
+            for name in ["gold", "pearls"] {
+                let enum_value = json!({name:payload});
+                assert_value_decode(&enum_value, value_decode::currency, direct);
+                let mut value = serde_json::to_value(operation().intent).unwrap(); value["currency"] = enum_value;
+                assert_value_decode(&value, value_decode::intent, direct);
+                assert_buffered_value_decode(&value, value_decode::intent_buffered, buffered);
+                assert_value_decode(&json!({"kind":"quote","intent":value}), value_decode::server_reply, buffered);
+                let mut value = serde_json::to_value(operation()).unwrap(); value["intent"]["currency"] = json!({name:payload});
+                assert_value_decode(&value, value_decode::operation, direct);
+                assert_buffered_value_decode(&value, value_decode::operation_buffered, buffered);
+            }
+            for name in ["trade", "buyBack", "used"] {
+                let enum_value = json!({name:payload});
+                assert_value_decode(&enum_value, value_decode::source, direct);
+                let mut value = serde_json::to_value(operation().intent).unwrap(); value["source"] = enum_value;
+                assert_value_decode(&value, value_decode::intent, direct);
+                assert_buffered_value_decode(&value, value_decode::intent_buffered, buffered);
+                assert_value_decode(&json!({"kind":"quote","intent":value}), value_decode::server_reply, buffered);
+                let mut value = serde_json::to_value(operation()).unwrap(); value["intent"]["source"] = json!({name:payload});
+                assert_value_decode(&value, value_decode::operation, direct);
+                assert_buffered_value_decode(&value, value_decode::operation_buffered, buffered);
+            }
+            for (path, name) in [("/entry/operation/intent/currency", "gold"), ("/entry/operation/intent/source", "trade"),
+                ("/entry/outcome/committed/currency", "gold"), ("/entry/outcome/committed/source", "trade")] {
+                let mut value = serde_json::to_value(receipt()).unwrap(); *value.pointer_mut(path).unwrap() = json!({name:payload});
+                assert_value_decode(&value, value_decode::receipt, direct);
+                let reply = json!({"kind":"purchase","receipt":value,"replayed":false});
+                assert_value_decode(&reply, value_decode::server_reply, buffered);
+                let frame = json!({"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","reply":reply,"snapshot":null,"authority":null});
+                assert_value_decode(&frame, value_decode::server_frame, buffered);
+                assert_frame_decode(&frame.to_string(), buffered);
+            }
+            for name in ["invalidRequest", "playerDead", "serviceUnavailable", "unsupportedService", "unknownGood",
+                "invalidQuantity", "insufficientCurrency", "clockUnavailable", "invalidDelivery"] {
+                assert_value_decode(&json!({name:payload}), value_decode::rejection, direct);
+                let mut value = serde_json::to_value(rejected(receipt(), Rejection::UnknownGood)).unwrap();
+                value["entry"]["outcome"]["rejected"]["reason"] = json!({name:payload});
+                assert_value_decode(&value, value_decode::receipt, direct);
+                let reply = json!({"kind":"purchase","receipt":value,"replayed":false});
+                assert_value_decode(&reply, value_decode::server_reply, buffered);
+                let frame = json!({"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","reply":reply,"snapshot":null,"authority":null});
+                assert_value_decode(&frame, value_decode::server_frame, buffered);
+            }
+            for name in ["beforeExecution", "unknown", "postCommit"] {
+                assert_value_decode(&json!({name:payload}), value_decode::failure_state, direct);
+                let receipt = if name == "postCommit" { serde_json::to_value(receipt()).unwrap() } else { Value::Null };
+                let reply = json!({"kind":"failure","state":{name:payload},"receipt":receipt});
+                assert_value_decode(&reply, value_decode::server_reply, buffered);
+            }
+            // The frame envelope is outside the tagged reply's buffered scope.
+            let mut value = serde_json::to_value(frame()).unwrap(); value["type"] = json!({"npcPurchaseOwner":payload});
+            assert_value_decode(&value, value_decode::server_frame, direct);
+        }
+    }
+
+    fn positional(value: &Value, names: &[&str]) -> Value {
+        Value::Array(names.iter().map(|name| value[*name].clone()).collect())
+    }
+    #[test]
+    fn schema_value_decode_positional_struct_and_buffered_outcomes_match_serde() {
+        let request = serde_json::to_value(operation().intent.request).unwrap();
+        let request = positional(&request, &["itemIndex", "count", "panelType"]);
+        assert_value_decode(&request, value_decode::purchase_request, true);
+        for malformed in [json!(["0",1]), json!(["0",1,0,0])] {
+            assert_value_decode(&malformed, value_decode::purchase_request, false);
+        }
+        let intent = serde_json::to_value(operation().intent).unwrap();
+        assert_value_decode(&positional(&intent, &["request", "currency", "source", "serviceCatalogProof"]), value_decode::intent, true);
+        let operation = serde_json::to_value(operation()).unwrap();
+        assert_value_decode(&positional(&operation, &["actor", "requestScope", "sequence", "intent"]), value_decode::operation, true);
+        let producer = serde_json::to_value(producer()).unwrap();
+        assert_value_decode(&positional(&producer, &["actor", "producerScope", "serverRevision"]), value_decode::producer, true);
+        let receipt_value = serde_json::to_value(receipt()).unwrap();
+        assert_value_decode(&positional(&receipt_value["entry"], &["operation", "serverRevision", "outcome"]), value_decode::receipt_entry, true);
+        assert_value_decode(&positional(&receipt_value, &["producerScope", "entry"]), value_decode::receipt, true);
+        let value = serde_json::to_value(frame()).unwrap();
+        assert_value_decode(&positional(&value, &["type", "protocolVersion", "requestId", "reply", "snapshot", "authority"]), value_decode::server_frame, true);
+        for rejected_outcome in [false, true] {
+            let specimen = if rejected_outcome { rejected(receipt(), Rejection::UnknownGood) } else { receipt() };
+            let mut value = serde_json::to_value(ServerFrame::new(U64::new(1), ServerReply::Purchase { receipt: specimen, replayed: false }, None, None).unwrap()).unwrap();
+            let key = if rejected_outcome { "rejected" } else { "committed" };
+            let names: &[&str] = if rejected_outcome { &["request", "reason"] } else { &["request", "currency", "source", "charged", "admittedCount", "incomingUniqueId"] };
+            let outcome = &mut value["reply"]["receipt"]["entry"]["outcome"];
+            outcome[key] = positional(&outcome[key], names);
+            assert_value_decode(outcome, value_decode::outcome, false);
+            assert_value_decode(&value, value_decode::server_frame, true);
+            assert_frame_decode(&value.to_string(), true);
+            value["reply"]["receipt"] = positional(&value["reply"]["receipt"], &["producerScope", "entry"]);
+            assert_value_decode(&value, value_decode::server_frame, true);
+        }
+        for reply in [ServerReply::Producer { producer: super::tests::producer() }, ServerReply::Quote { intent: super::tests::operation().intent },
+            ServerReply::Recovery { receipt: None }, ServerReply::Recovery { receipt: Some(receipt()) },
+            ServerReply::Purchase { receipt: receipt(), replayed: true },
+            ServerReply::Failure { state: FailureState::Unknown, receipt: None },
+            ServerReply::Failure { state: FailureState::PostCommit, receipt: Some(receipt()) }] {
+            let names: &[&str] = match &reply {
+                ServerReply::Producer { .. } => &["kind", "producer"], ServerReply::Quote { .. } => &["kind", "intent"],
+                ServerReply::Recovery { .. } => &["kind", "receipt"], ServerReply::Purchase { .. } => &["kind", "receipt", "replayed"],
+                ServerReply::Failure { .. } => &["kind", "state", "receipt"],
+            };
+            let value = positional(&serde_json::to_value(&reply).unwrap(), names);
+            assert_value_decode(&value, value_decode::server_reply, true);
+            let frame = json!({"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","reply":value,"snapshot":null,"authority":null});
+            assert_value_decode(&frame, value_decode::server_frame, true); assert_frame_decode(&frame.to_string(), true);
+        }
+        for malformed in [json!(["recovery"]), json!(["recovery",null,null]), json!(["failure","unknown"]),
+            json!(["purchase",receipt()]), json!([0,null]), json!(["quote",null])] {
+            assert_value_decode(&malformed, value_decode::server_reply, false);
+        }
+    }
+
+    #[test]
+    fn schema_value_decode_raw_duplicate_depth_and_limits_match_serde() {
+        let valid = encode_server_frame(&frame()).unwrap();
+        assert_frame_decode(&valid, true);
+        for (needle, replacement) in [("\"requestId\":\"11\"", "\"requestId\":\"11\",\"request\\u0049d\":\"11\""),
+            ("\"kind\":\"purchase\"", "\"kind\":\"purchase\",\"k\\u0069nd\":\"purchase\""),
+            ("\"schemaSpecimen\":true", "\"schemaSpecimen\":true,\"schema\\u0053pecimen\":true")] {
+            let invalid = valid.replacen(needle, replacement, 1);
+            assert_ne!(invalid, valid); assert_frame_decode(&invalid, false);
+        }
+        let escaped = valid.replacen("\"requestId\"", "\"request\\u0049d\"", 1);
+        assert_ne!(escaped, valid); assert_frame_decode(&escaped, true);
+        let exact = format!("{}{}", " ".repeat(MAX_SERVER_FRAME_BYTES - valid.len()), valid);
+        assert_frame_decode(&exact, true); assert_frame_decode(&format!(" {exact}"), false);
+        assert_frame_decode(&format!("{valid} {{}}"), false); assert_frame_decode("", false);
+        let deep = valid.replace("{\"schemaSpecimen\":true}", &format!("{}0{}", "[".repeat(200), "]".repeat(200)));
+        assert_ne!(deep, valid); assert_frame_decode(&deep, false);
+    }
+
+    #[test]
+    fn schema_value_decode_public_helpers_keep_exact_scalar_shapes() {
+        for raw in ["0", "1", "255", "256", "65535", "65536", "4294967295", "4294967296", "-1", "-0", "1.0", "1e0", "\"1\"", "null", "true"] {
+            let value: Value = serde_json::from_str(raw).unwrap();
+            let unsigned = matches!(raw, "0" | "1" | "255" | "256" | "65535" | "65536" | "4294967295" | "4294967296");
+            assert_value_decode(&value, value_decode::u8, unsigned && matches!(raw, "0" | "1" | "255"));
+            assert_value_decode(&value, value_decode::u16, unsigned && matches!(raw, "0" | "1" | "255" | "256" | "65535"));
+            assert_value_decode(&value, value_decode::u32, unsigned && raw != "4294967296");
+        }
+        for (value, accepted) in [(json!("0"),true), (json!(u64::MAX.to_string()),true), (json!("01"),false),
+            (json!("18446744073709551616"),false), (json!(0),false), (Value::Null,false)] {
+            assert_value_decode(&value, value_decode::u64, accepted);
+        }
+        for (value, accepted) in [(serde_json::to_value(opaque(1)).unwrap(),true), (json!("00".repeat(32)),false),
+            (json!("AA".repeat(32)),false), (json!(1),false), (Value::Null,false)] {
+            assert_value_decode(&value, value_decode::opaque, accepted);
+        }
+        let value = json!({"present":null}); let map = value_decode::object(&value, &["present"]).unwrap();
+        assert_eq!(value_decode::field(map,"present").unwrap(), &Value::Null);
+        assert!(value_decode::field(map,"missing").is_err());
+        assert!(value_decode::object(&value,&[]).is_err()); assert!(value_decode::object(&value,&["missing"]).is_err());
+        assert!(value_decode::object(&json!([null]),&["present"]).is_err());
+        assert_eq!(value_decode::string(&json!("exact")).unwrap(), "exact");
+        assert!(value_decode::string(&json!(1)).is_err()); assert!(value_decode::string(&Value::Null).is_err());
+        assert!(value_decode::boolean(&json!(true)).unwrap()); assert!(!value_decode::boolean(&json!(false)).unwrap());
+        assert!(value_decode::boolean(&json!(1)).is_err()); assert!(value_decode::boolean(&Value::Null).is_err());
     }
 
     #[test]

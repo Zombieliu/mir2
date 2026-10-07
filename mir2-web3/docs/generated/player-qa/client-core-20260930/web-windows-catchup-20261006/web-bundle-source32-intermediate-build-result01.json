@@ -1,0 +1,142 @@
+{
+  "owner": "Root",
+  "kind": "Source32 Rust03 compact decoding measured Core still rejected",
+  "generatedAtUtc": "2026-10-07T20:17:15.993Z",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust03-snapshot.json",
+    "bytes": 272150,
+    "sha256": "6f6a13af52b55a2fe0e6d516a6f8f7e7918eb54c0d455b6af89c00298d58a363"
+  },
+  "tests": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust03-finite-result01.json",
+    "bytes": 40510,
+    "sha256": "24d6ff0d39d4591801dc250710ea2e883bfd307aae75c46e629ce52c558a430b"
+  },
+  "compileConfig": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02.config.json",
+    "bytes": 4191,
+    "sha256": "af88ff87a291ffc0ca3a62480af32115b7bbbe71a3e65674ca189d4125259357"
+  },
+  "compileOuter": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02.outer.json",
+    "bytes": 451,
+    "sha256": "fefac38931383f3dc51d5f0e3a31897e60cf5283c5943c6dbb6d9f6d1e4467e5"
+  },
+  "compileStdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "compileStderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02.stderr.log",
+    "bytes": 266,
+    "sha256": "2ac1f1c43ce8676cd97c187c39a75985b34327593092946a65d929cbf1778e9d"
+  },
+  "compileNonce": "467850f38c8141939419123820c49018",
+  "compileReceiptPins": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02-cargo-receipts\\467850f38c8141939419123820c49018\\after.json",
+      "bytes": 328,
+      "sha256": "c8f450be6e258c6ed8495d8e63f73d7ef0f03314a08c5b8b62754f5aa64741f6"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02-cargo-receipts\\467850f38c8141939419123820c49018\\before.json",
+      "bytes": 1039,
+      "sha256": "76b641d61a23bc168a7657b5c22b35a6a4c75881c62f5e4e2e31572f05f42b3f"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02-cargo-receipts\\467850f38c8141939419123820c49018\\probe-process.json",
+      "bytes": 432,
+      "sha256": "7737b64967c4834c28537cb12ee93a152262383767b8fd7c2249c50c0d307bdd"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02-cargo-receipts\\467850f38c8141939419123820c49018\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-build02-cargo-receipts\\467850f38c8141939419123820c49018\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "71d63153e25663005d9816f1bb4105aaf75212dd85496c2290679fd0c976a259"
+    }
+  ],
+  "compileFreshnessUpperMs": 72,
+  "compilePolicyBClosed": true,
+  "raw": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\compiled-core02.wasm",
+    "bytes": 694724,
+    "sha256": "ce167094511a1b74de87231ac88b7f4913635972564e0663e9e0668b0394eaf3"
+  },
+  "bindgenConfig": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-bindgen02.config.json",
+    "bytes": 3809,
+    "sha256": "be2e8b9350ec1f9078a8ee94b7eb9d947a1682b8d5b7d7e16f0d9e76043f1636"
+  },
+  "bindgenSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-bindgen02-snapshot.json",
+    "bytes": 272451,
+    "sha256": "73d0edd342683007fa4d6ae7ad3faf44a19b014b84287f980c87353358dde5f5"
+  },
+  "bindgenFiles": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\core02\\mir2_platform_web.d.ts",
+      "bytes": 7504,
+      "sha256": "717dab7b50950464e1bf27867009dc4a1929be28b644237da69d37008346184a"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\core02\\mir2_platform_web.js",
+      "bytes": 26545,
+      "sha256": "384253e61e4d9ebf57bd223652f03b86926740d9ccdeba2c8ff4dcd130b84c53"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\core02\\mir2_platform_web_bg.wasm",
+      "bytes": 409704,
+      "sha256": "6dfce5738b33183e949af5b9a6cebfb9faf9447e0cc1a235b1a84ed4e8bbd789"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\core02\\mir2_platform_web_bg.wasm.d.ts",
+      "bytes": 3764,
+      "sha256": "09646a1d7ff8cbc6bfe64c8eba4b278ee1a9c40679ebb5bdff9c9b1cebdebb36"
+    }
+  ],
+  "optConfig": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-opt02.config.json",
+    "bytes": 4059,
+    "sha256": "738be68fcbf477ead7c117143b79860fa61ede21da6fcae5527766c28c3a7087"
+  },
+  "optSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-core-opt02-snapshot.json",
+    "bytes": 272822,
+    "sha256": "3d4a032bce0c0553b5667575f9e3775c4d0f3eea6b53b4acea1eb93027162158"
+  },
+  "optimized": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-staging01\\core02\\optimized_mir2_platform_web_bg.wasm",
+    "bytes": 365241,
+    "sha256": "32f350193772848080e2d43cb318fb90671662110d55ac1a3551a77622a36b7d"
+  },
+  "sizeGate": {
+    "wasmBytes": 365241,
+    "wasmStrictLimit": 262144,
+    "wasmPass": false,
+    "jsBytes": 26545,
+    "jsLimit": 204800,
+    "jsPass": true
+  },
+  "savedBytes": 94770,
+  "savedPercentage": 20.601681264143682,
+  "generatedJsTypesUnchanged": true,
+  "previousRejectedBuild": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-initial-build-result01.json",
+    "bytes": 20527,
+    "sha256": "cdd0018749223ed6f3885c5bc3ea095111bdce6c73f2b11480c7ef915975b153"
+  },
+  "productionBuildAccepted": false,
+  "metadataValidated": false,
+  "wasmApiUsed": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "next": "Preserve typed serde output ABI; replace repeated Web-only typed JSON serialization with canonical compact production Value/byte encoders and exact old-output oracle tests. No cap increase or helper mutation."
+}
