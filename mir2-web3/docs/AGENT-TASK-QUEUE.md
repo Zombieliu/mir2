@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-07 final source c6c32381a6 passes actual Linux CI37617054260:
+> appearance Zone5/Gateway3, cold-world cleanup1 and release/security/siege jobs.
+> Exact ZIP/package/binary proofs pass after retaining an archive-name verifier
+> failure. Private server staging and sealed operator are complete. Live R19,
+> native R20/feed16 and both online actors stay unchanged; human normal exit
+> approval is pending before drain/backup/switch and public appearance checks.
+> Windows relink failure and original Zone drop-award failure remain recorded.
+> [Prepared evidence](generated/player-qa/shared-player-appearance-20261007/prepared-01/README.md).
+
 > 2026-10-07 shared remote appearance Candidate corrects ordinary transform
 > -1 and synchronizes trusted equipment/hair before Join and on changes. Root
 > is the sole writer; independent read-only review passes the main path.
