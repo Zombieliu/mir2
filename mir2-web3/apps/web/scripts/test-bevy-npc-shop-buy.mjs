@@ -3006,15 +3006,21 @@ test("Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks
   assert.match(barrel,/export \{[^}]*\bexactItemUniqueId\b[^}]*\} from "\.\/item-identity"/);
 });
 
-test("Source31 numeric storage ABI projects safe expiry and refuses wide exact strings or unsafe numeric dates",()=>{
-  const storage=loadExpiryPipelineModule("../lib/bevy-storage-model.ts",{"./bevy-bag-model":expiryBag});
+test("Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates",()=>{
+  const storage=loadExpiryPipelineModule("../lib/bevy-storage-model.ts",{"./bevy-bag-model":expiryBag,"./npc-purchase-client":actualDurableNpc});
   const world={inventoryCapacity:46,maxBagSlots:40,gold:100,inventoryItems:[],beltItems:[],equipmentItems:[],storageItems:[],storageSize:80,
     hasStoragePassword:false,storageSessionUnlocked:true,hasExpandedStorage:false,expandedStorageExpiryTimeBinaryDatetime:1000};
   for(const expiry of [0,1000,Number.MIN_SAFE_INTEGER,Number.MAX_SAFE_INTEGER]){
     const p=storage.projectBevyStorageModel({...world,expandedStorageExpiryTimeBinaryDatetime:expiry});
     assert.equal(p.ok,true);assert.equal(p.storage.expiry,expiry);
   }
-  for(const expiry of ["621355968000000001","-9223372036854775808","9223372036854775807","1000",Number("621355968000000001"),Number.MIN_SAFE_INTEGER-1,NaN,Infinity,1.5]){
+  for(const expiry of ["0","1000","621355968000000001","621355968000000002","-9223372036854775808","9223372036854775807"]){
+    const input={...world,expandedStorageExpiryTimeBinaryDatetime:expiry};
+    const p=storage.projectBevyStorageModel(input);
+    assert.equal(p.ok,true,expiry);assert.equal(p.storage.expiry,expiry);
+    assert.equal(input.expandedStorageExpiryTimeBinaryDatetime,expiry);
+  }
+  for(const expiry of ["+1","-0","01","-01"," 1","1 ","1e3","1.0","9223372036854775808","-9223372036854775809",Number("621355968000000001"),Number.MIN_SAFE_INTEGER-1,NaN,Infinity,1.5]){
     const input={...world,expandedStorageExpiryTimeBinaryDatetime:expiry};
     const p=storage.projectBevyStorageModel(input);
     assert.equal(p.ok,false,String(expiry));assert.equal(p.error.field,"storage");

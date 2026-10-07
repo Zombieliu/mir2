@@ -72,6 +72,33 @@ fn storage_contract_preserves_large_and_negative_datetime_not_uid_rules() {
     let mut v=value();v["storage"]["size"]=160.into();v["storage"]["items"][0]["slot"]=100.into();
     let parsed=parse(v).unwrap();assert!(!parsed.storage.is_valid_slot(100),"expired expanded backing item stays inaccessible");
 }
+
+#[test]
+fn storage_contract_exact_i64_text_reaches_ingress_without_loosening_uid_bounds() {
+    for expiry in [0_i64, 1000, 639_028_224_000_000_001, 639_028_224_000_000_002,
+        -8_584_900_000_000_000_001, i64::MIN, i64::MAX] {
+        let mut v=value();v["storage"]["expiry"]=expiry.to_string().into();
+        let parsed=parse(v.clone()).unwrap();
+        assert_eq!(parsed.storage.expiry,expiry);
+        assert_eq!(parsed.storage.page(1).expiry,expiry);
+        let mut ingress=StorageIngress::default();assert!(ingress.accept(parsed));
+        assert_eq!(ingress.pending.as_ref().unwrap().storage.expiry,expiry);
+        assert!(ingress.withdraw(identity(1,0)));assert!(ingress.pending.is_none());
+        v["inventory"]["items"][0]["uniqueId"]=(SAFE+1).into();
+        assert!(parse(v).is_err(),"an exact date never authorizes an unsafe UID");
+    }
+}
+#[test]
+fn storage_contract_rejects_malformed_or_out_of_range_expiry_text() {
+    for expiry in ["+1","-0","01","-01"," 1","1 ","","1e3","1.0",
+        "9223372036854775808","-9223372036854775809"] {
+        let mut v=value();v["storage"]["expiry"]=expiry.into();assert!(parse(v).is_err(),"{expiry}");
+    }
+    for expiry in [Value::Null,serde_json::json!(true),serde_json::json!({}),serde_json::json!([])] {
+        let mut v=value();v["storage"]["expiry"]=expiry;assert!(parse(v).is_err());
+    }
+}
+
 #[test]
 fn storage_contract_rejects_oversized_arrays_before_truncation_and_bad_locks() {
     let mut invalid=value();

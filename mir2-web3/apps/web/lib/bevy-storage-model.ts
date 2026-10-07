@@ -1,5 +1,6 @@
 import { projectBevyBagModel, projectBevyStorageItems, type BevyBagProjectionError, type BevyInventoryModel, type BevyStorageItem } from "./bevy-bag-model";
 import type { WorldState } from "./world-model/types";
+import { npcPurchaseSignedDecimal } from "./npc-purchase-client";
 
 export type BevyStorageModel = {
   items: BevyStorageItem[];
@@ -7,12 +8,16 @@ export type BevyStorageModel = {
   has_password: boolean;
   unlocked: boolean;
   has_expanded: boolean;
-  expiry: number;
+  expiry: number | string;
 };
 
 export type BevyStorageProjection =
   | { ok: true; inventory: BevyInventoryModel; storage: BevyStorageModel }
   | { ok: false; error: BevyBagProjectionError };
+
+/** Exact signed i64 carrier. Unsafe JS numbers cannot recover their original token. */
+export const validStorageExpiry = (expiry: unknown): expiry is number | string =>
+  typeof expiry === "number" ? Number.isSafeInteger(expiry) : npcPurchaseSignedDecimal(expiry);
 
 /** Presentation only. Crystal item identities and transfers remain authoritative. */
 export function projectBevyStorageModel(world: Pick<WorldState,
@@ -24,10 +29,7 @@ export function projectBevyStorageModel(world: Pick<WorldState,
   const size = world.storageSize === 0 ? 80 : world.storageSize;
   if (![world.hasStoragePassword, world.storageSessionUnlocked, world.hasExpandedStorage].every(v => typeof v === "boolean")
     || !Number.isSafeInteger(size) || size < 1 || size > 160
-    // ABI1's Rust StorageModel accepts a numeric i64 only. Exact wide date
-    // strings stay in WorldState and the React surface; never round them here.
-    || typeof world.expandedStorageExpiryTimeBinaryDatetime !== "number"
-    || !Number.isSafeInteger(world.expandedStorageExpiryTimeBinaryDatetime)) {
+    || !validStorageExpiry(world.expandedStorageExpiryTimeBinaryDatetime)) {
     return { ok: false, error: { code: "invalidField", field: "storage" } };
   }
   const projected = projectBevyStorageItems(world.storageItems, size);

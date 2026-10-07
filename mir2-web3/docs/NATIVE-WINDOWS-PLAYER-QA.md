@@ -1,5 +1,20 @@
 # Windows 原生可玩闭环验收清单
 
+## Source35：共享仓库日期修复；代码覆盖97.5%，实际可玩待验证（2026-10-08）
+
+共享 Storage 现在接受精确 canonical signed i64 日期字符串；兼容原安全 Number、Rust i64 数值序列化、默认0与 expiryTimeBinaryDatetime 别名。Web projector/direct host 使用同一原有谓词，拒绝 unsafe Number、溢出及非规范字符串；UID、authority与日历规则保持。本轮仅客户端和测试，未改变 simulation、gateway、协议或后端 parity。
+
+实际 Rust26＋原三个 Web脚本204次通过＝230次/227唯一名称，新增7项（Rust4/Web3），另3项为已有测试重命名。严格 TypeScript5.9.3 非增量 no-emit 实际 exit0、零诊断；用户 tsconfig 不纳入提交。897 Rust输入2改/895保护、17120 Web输入7改/17113保护，17121唯一声明输入在各调用前后及最终复核匹配；不是全 workspace 覆盖。独立只读复核原收据、日志、134个嵌套pins与17121源pins通过。
+
+三 renderer 原 Cargo、wasm-bindgen 与 Binaryen131 静态转换/优化均实际 exit0。optimized WASM30889189/17749024/31851030 B、JS134346/117176/132320 B 满足原 WASM≤32505856/JS≤204800。普通WebGL2 ABI0无共享Storage路径、产物保持旧字节；WebGPU/WebGL2-shared ABI1编译实际修改。原Guard5次/25份nonce、C≥50GiB、freshness上界最大96ms、PolicyB全部关闭。原CLI无强制deadline，实际优化小于600000ms。
+
+完整 metadata/name/normalized ABI/default-gzip/初始化/发布仍 not-run，原helper的WASM API当前禁止，未替换公开manifest。可分发Web仍Source25 Next08/Thin08，不含Source26–35。下一交付项是源码匹配的完整Web包；Shared SkillModel内容一致性、Native完整写入deadline、宽UID动作ABI、Hero WASM adapter与旧引擎packet-only宽日期仍未关闭。
+
+固定清单103 shared/206 legacy/8 common/0 raw open，309/317≈97.5%只是有界代码记录，overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持；实际登录→战斗→保存→重登、移动真机及玩家验收未执行，无可信试玩日期。Source34已实际提交推送核验64b2d675c83a22fb2c54f2d1a8753272ea87c94c；本轮提交以后续实际Git结果为准。
+
+证据：[实际有限结果02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json)、[原始字节含全部25份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json)、[Source34发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json)。两次Root数据reader错误（展示括号、拒绝归档WASM字节）保留，不计产品/测试失败，未启动进程或改断言。下面Source34及更旧段落为历史。
+
+
 > 2026-09-03 relocated-launch map repair: the native map locator resolves a
 > junction's physical asset root before looking for the development map pack.
 > Startup now requires/decodes map 0 and no longer labels an index alone as

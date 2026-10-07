@@ -1,6 +1,6 @@
 import type { BevyInventoryModel } from "./bevy-bag-model";
 import { validBagModel, type BagIdentity, type BagInputRegion, type BagOwner, type BevyBagPlayer } from "./bevy-bag-ui";
-import type { BevyStorageModel } from "./bevy-storage-model";
+import { validStorageExpiry, type BevyStorageModel } from "./bevy-storage-model";
 import type { BevyQuestUiPresentation } from "./bevy-quest-ui";
 import type { Mir2Language } from "./localization";
 
@@ -101,7 +101,7 @@ export function fitsStorage(p: BevyQuestUiPresentation | null): boolean {
 export function validStorageModel(inventory: BevyInventoryModel | null, storage: BevyStorageModel | null): boolean {
   if (!validBagModel(inventory) || !storage || !safe(storage.size) || storage.size < 1 || storage.size > 160
     || ![storage.has_password, storage.unlocked, storage.has_expanded].every(v => typeof v === "boolean")
-    || !Number.isFinite(storage.expiry) || !Number.isInteger(storage.expiry) || !Array.isArray(storage.items)) return false;
+    || !validStorageExpiry(storage.expiry) || !Array.isArray(storage.items)) return false;
   const cells = new Set<number>(), ids = new Set(inventory.items.flatMap(i => i.uniqueId === null ? [] : [i.uniqueId]));
   for (const item of storage.items) {
     if (!item || item.container !== 4 || !safe(item.slot) || item.slot >= storage.size || cells.has(item.slot)

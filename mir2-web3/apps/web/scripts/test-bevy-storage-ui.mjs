@@ -5,7 +5,7 @@ import ts from "typescript";
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
-const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "bag-belt-gesture"]);
+const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "bag-belt-gesture", "npc-purchase-client"]);
 function load(name, fresh = false) {
   assert.ok(pureModules.has(name), "unexpected non-pure import: " + name);
   if (!fresh && cache.has(name)) return cache.get(name);
@@ -103,7 +103,7 @@ test("storage source projection preserves Bag2 physical slots, UID0 and binary e
   assert.equal(projection.projectBevyStorageModel(missing).storage.items[0].uniqueId, null);
 });
 
-test("Source31 storage controller safe expiry preserves custody and wide or unsafe date carriers fail closed", () => {
+test("Source35 storage controller safe expiry preserves custody and unsafe numeric dates fail closed", () => {
   const projected = projection.projectBevyStorageModel(world());
   assert.equal(projected.ok, true);
   assert.equal(projected.storage.expiry, 1000);
@@ -111,11 +111,8 @@ test("Source31 storage controller safe expiry preserves custody and wide or unsa
   const current = fixture(); current.activate();
   assert.equal(current.state.active, true);
   assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
-  // The old unsafe Number fixture could not prove the original i64 token.
-  // A one-tick-different date rounds at conversion and is also unavailable;
-  // canonical text stays exact in WorldState but ABI1 cannot consume it.
-  for (const expiry of ["639028224000000001", "-9223372036854775808", "9223372036854775807",
-    639028224000000000, Number("639028224000000001")]) {
+  // Numbers whose original i64 source may already be rounded stay unavailable.
+  for (const expiry of [639028224000000000, Number("639028224000000001")]) {
     const input = { ...world(), expandedStorageExpiryTimeBinaryDatetime: expiry };
     const rejected = projection.projectBevyStorageModel(input);
     assert.equal(rejected.ok, false, String(expiry));
@@ -124,6 +121,45 @@ test("Source31 storage controller safe expiry preserves custody and wide or unsa
   }
   assert.equal(current.state.active, true);
   assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
+});
+
+
+test("Source35 exact storage expiry text survives projection publication and applied owner handoff", () => {
+  for (const expiry of ["0", "1000", "-1000", "9007199254740992", "639028224000000001",
+    "639028224000000002", "-8584900000000000001", "-9223372036854775808", "9223372036854775807"]) {
+    const input = { ...world(), expandedStorageExpiryTimeBinaryDatetime: expiry };
+    const projected = projection.projectBevyStorageModel(input);
+    assert.equal(projected.ok, true, expiry);
+    assert.equal(projected.storage.expiry, expiry);
+    assert.equal(storage.validStorageModel(projected.inventory, projected.storage), true);
+    const f = fixture();
+    f.input = { ...f.input, inventory: projected.inventory, storage: projected.storage,
+      blockedUniqueIds: [0], pendingCells: [{ container: 0, slot: 44 }, { container: 4, slot: 10 }] };
+    f.activate();
+    assert.equal(f.snapshots.at(-1).storage.expiry, expiry);
+    assert.equal(input.expandedStorageExpiryTimeBinaryDatetime, expiry);
+    assert.deepEqual(f.snapshots.at(-1).blockedUniqueIds, [0]);
+    assert.deepEqual(f.snapshots.at(-1).pendingCells, f.input.pendingCells);
+    assert.equal(f.snapshots.at(-1).inventory.items[0].uniqueId, 0);
+  }
+});
+
+test("Source35 malformed dates and unsafe direct host numbers withdraw an active storage owner", () => {
+  for (const expiry of ["+1", "-0", "01", "-01", " 1", "1 ", "", "1e3", "1.0",
+    "9223372036854775808", "-9223372036854775809", Number.MIN_SAFE_INTEGER - 1,
+    Number.MAX_SAFE_INTEGER + 1, Number("639028224000000001"), NaN, Infinity, 1.5, null, {}, []]) {
+    const input = { ...world(), expandedStorageExpiryTimeBinaryDatetime: expiry };
+    assert.equal(projection.projectBevyStorageModel(input).ok, false, String(expiry));
+    const f = fixture(); f.activate();
+    const i = f.intent(); f.emit(i); assert.equal(f.host.allows(i), true);
+    f.input.storage = { ...f.input.storage, expiry };
+    assert.equal(storage.validStorageModel(f.input.inventory, f.input.storage), false);
+    assert.equal(f.host.claim(i), false);
+    const count = f.snapshots.length; f.host.tick();
+    assert.equal(f.snapshots.length, count, "invalid carrier never reaches the snapshot setter");
+    assert.equal(f.state.active, false); assert.equal(f.host.pointerContext(), null);
+    assert.equal(f.withdrawals.length, 1);
+  }
 });
 
 test("storage source projection rejects duplicate cells/UIDs, cross-pane UID collisions and invalid accessible inputs", () => {
@@ -230,6 +266,7 @@ test("live model, service, session, owner and layout changes invalidate admitted
     f => { f.input.inventory = { ...f.input.inventory, gold: 201 }; },
     f => { f.input.storage = { ...f.input.storage, unlocked: false }; },
     f => { f.input.storage = { ...f.input.storage, items: [] }; },
+    f => { f.input.storage = { ...f.input.storage, expiry: "639028224000000001" }; },
     f => { f.input.serviceRevision++; }, f => { f.input.sessionGeneration++; },
     f => { f.input.connectionGeneration++; }, f => { f.input.ownerRevision++; },
     f => { f.input.presentation = { ...presentation, stageCssScale: 0.8 }; },

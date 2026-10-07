@@ -612,7 +612,7 @@ test("actual Storage hook obsolete cleanup leaves the replacement sink/host/owne
 });
 
 
-test("Source31 storage integration safe expiry preserves custody and wide or unsafe date carriers fail closed", () => {
+test("Source35 storage integration safe expiry preserves custody and unsafe numeric dates fail closed", () => {
   const projected = projection.projectBevyStorageModel(world());
   assert.equal(projected.ok, true);
   assert.equal(projected.storage.expiry, 1000);
@@ -620,11 +620,8 @@ test("Source31 storage integration safe expiry preserves custody and wide or uns
   const current = fixture(); current.activate();
   assert.equal(current.state.active, true);
   assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
-  // The former unsafe Number fixture was invalid exact-source evidence.
-  // Preserve the original controller chain with safe input and explicitly
-  // reject both exact wide text and numbers whose source may be rounded.
-  for (const expiry of ["639028224000000001", "-9223372036854775808", "9223372036854775807",
-    639028224000000000, Number("639028224000000001")]) {
+  // A numeric carrier without its original i64 token remains unavailable.
+  for (const expiry of [639028224000000000, Number("639028224000000001")]) {
     const input = { ...world(), expandedStorageExpiryTimeBinaryDatetime: expiry };
     const rejected = projection.projectBevyStorageModel(input);
     assert.equal(rejected.ok, false, String(expiry));
@@ -633,6 +630,35 @@ test("Source31 storage integration safe expiry preserves custody and wide or uns
   }
   assert.equal(current.state.active, true);
   assert.equal(current.snapshots.at(-1).storage.expiry, 1000);
+});
+
+
+test("Source35 actual Page wide storage dates retain one-shot physical Bag2 transfer custody", () => {
+  for (const expiry of ["639028224000000001", "-8584900000000000001"]) {
+    const p = pageFixture();
+    p.scope.worldRef.current.expandedStorageExpiryTimeBinaryDatetime = expiry;
+    const projected = projection.projectBevyStorageModel(p.scope.worldRef.current);
+    assert.equal(projected.ok, true);
+    p.f.input.inventory = projected.inventory; p.f.input.storage = projected.storage;
+    p.reactivate();
+    assert.equal(p.f.snapshots.at(-1).storage.expiry, expiry);
+    let during;
+    p.listener = () => {
+      during = [...p.scope.pendingStorageRequestsRef.current.values()];
+      assert.equal(during.length, 1); assert.equal(during[0].enteredSocket, false);
+      assert.equal(during[0].proof.source.container, "bag2"); assert.equal(during[0].proof.source.slot, 4);
+      p.f.input.blockedUniqueIds = [0];
+      p.f.input.pendingCells = [{ container: 0, slot: 44 }, { container: 4, slot: 10 }];
+    };
+    const intent = p.f.intent(); assert.equal(p.f.emit(intent), true);
+    assert.deepEqual(p.sent, [{ type: "storeItemV2", requestId: "st-0000000000000001", from: 44, to: 10 }]);
+    assert.equal(during[0].enteredSocket, true);
+    assert.equal(p.scope.pendingStorageRequestsRef.current.size, 1);
+    assert.equal(p.scope.storageRequestSequenceRef.current, 2);
+    assert.equal(p.f.host.claim(intent), false); assert.equal(p.f.emit(intent), false);
+    assert.equal(p.sent.length, 1);
+    assert.equal(p.scope.worldRef.current.expandedStorageExpiryTimeBinaryDatetime, expiry);
+  }
 });
 
 test("actual Shell arming shortcut listener swallows combat/item keys before their callbacks", () => {
