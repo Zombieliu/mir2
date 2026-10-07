@@ -1,6 +1,7 @@
 //! Crystal RankingDialog.cs: authoritative twenty-row ranking window.
 //! Included as a child of overlays. Packet dispatch and session reset belong to the host.
 use super::*;
+use mir2_client_core::ranking_inspect::{plan_ranking_inspect, RankingInspectFacts};
 use mir2_protocol::{ClientPacket, MirClass, RankCharacterInfo, ServerPacket};
 #[path = "player_inspect.rs"]
 pub mod player_inspect;
@@ -121,15 +122,16 @@ impl RankingDialogUi {
             RankingAction::Previous => self.move_rows(-1, now_ms),
             RankingAction::Next => self.move_rows(1, now_ms),
             RankingAction::Inspect(row) => {
-                if self.due_ms.is_some() || self.requested.is_some() || now_ms <= *inspect_ready_ms
-                {
-                    return None;
-                }
-                let object_id = u32::try_from(self.rows.get(row)?.player_id).ok()?;
-                self.player_inspect.request(self.rows[row].name.clone());
-                *inspect_ready_ms = now_ms.saturating_add(500);
+                let row = self.rows.get(row)?;
+                let plan = plan_ranking_inspect(&RankingInspectFacts {
+                    opened: Some(self.open), rankings_ready: Some(self.due_ms.is_none()),
+                    pending: Some(self.requested.is_some()), player_id: Some(row.player_id),
+                    now_ms, next_ready_ms: *inspect_ready_ms,
+                })?;
+                self.player_inspect.request(row.name.clone());
+                *inspect_ready_ms = plan.next_ready_ms;
                 return Some(ClientPacket::Inspect {
-                    object_id,
+                    object_id: plan.object_id,
                     ranking: true,
                     hero: false,
                 });

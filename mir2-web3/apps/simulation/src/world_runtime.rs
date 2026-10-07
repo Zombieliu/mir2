@@ -163,6 +163,9 @@ pub fn validate_production_player_command(
         WorldCommand::ClientPacket(ClientPacket::SendMail { .. }) if !authenticated => {
             Err("authenticated account is required to send mail".to_string())
         }
+        WorldCommand::ClientPacket(ClientPacket::Inspect { .. }) if !authenticated => {
+            Err("authenticated account is required to inspect a character".to_string())
+        }
         WorldCommand::NativeGameShopPurchase(_) if !authenticated => {
             Err("authenticated account is required for native GameShop purchases".to_string())
         }
@@ -448,6 +451,27 @@ impl InProcessWorldRuntime {
             online_only,
             online_characters,
         )
+    }
+
+    pub fn prepare_ranking_inspect(
+        &self,
+        player_id: u32,
+    ) -> Option<crate::runtime::RankingInspectRequest> {
+        self.session.prepare_ranking_inspect(player_id)
+    }
+
+    pub fn active_ranking_inspect_projection(
+        &self,
+    ) -> Option<crate::runtime::RankingInspectOnlineProjection> {
+        self.session.active_ranking_inspect_projection()
+    }
+
+    pub fn complete_ranking_inspect(
+        &self,
+        request: crate::runtime::RankingInspectRequest,
+        presence: crate::runtime::RankingInspectPresence,
+    ) -> Vec<ServerPacket> {
+        self.session.complete_ranking_inspect(request, presence)
     }
 
     pub fn friends_with_online_characters(

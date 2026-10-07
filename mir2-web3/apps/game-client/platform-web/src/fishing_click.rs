@@ -8,7 +8,9 @@ use mir2_client_core::fishing_click::{
 };
 #[cfg(test)]
 use serde::Deserialize;
-use serde_json::{json, Value};
+#[cfg(test)]
+use serde_json::json;
+use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 const MAX_INPUT_BYTES: usize = 4096;
@@ -158,10 +160,14 @@ pub fn fishing_click_targets(input: &str) -> String {
         let origin = input.origin.pair();
         let candidates = fishing_walk_candidates(origin, input.direction)?;
         let water = fishing_water_target(origin, input.direction)?;
-        Some(json!({"version":1,"ok":true,
-            "walkCandidates":candidates.map(|candidate| json!({"direction":candidate.direction,
-                "cell":{"x":candidate.cell.0,"y":candidate.cell.1}})),
-            "waterTarget":{"x":water.0,"y":water.1}}).to_string())
+        let [direct, clockwise, counterclockwise] = candidates;
+        Some(format!(
+            r#"{{"ok":true,"version":1,"walkCandidates":[{{"cell":{{"x":{},"y":{}}},"direction":{}}},{{"cell":{{"x":{},"y":{}}},"direction":{}}},{{"cell":{{"x":{},"y":{}}},"direction":{}}}],"waterTarget":{{"x":{},"y":{}}}}}"#,
+            direct.cell.0, direct.cell.1, direct.direction,
+            clockwise.cell.0, clockwise.cell.1, clockwise.direction,
+            counterclockwise.cell.0, counterclockwise.cell.1, counterclockwise.direction,
+            water.0, water.1,
+        ))
     };
     resolve().unwrap_or_else(|| REJECTED.to_owned())
 }
@@ -188,13 +194,13 @@ pub fn fishing_click_decision(input: &str) -> String {
             facing_matches: input.facing_matches, standing: input.standing,
             fishing: input.fishing, transform_type: input.transform_type,
         };
-        let decision = match decide_fishing_click(&facts, input.now_ms, input.last_cast_ms) {
-            FishingClickDecision::None => json!({"type":"none"}),
-            FishingClickDecision::Turn { direction, delay_ms } => json!({"type":"turn",
-                "direction":direction,"delayMs":delay_ms}),
-            FishingClickDecision::Cast => json!({"type":"cast","lastCastMs":input.now_ms}),
-        };
-        Some(json!({"version":1,"ok":true,"decision":decision}).to_string())
+        Some(match decide_fishing_click(&facts, input.now_ms, input.last_cast_ms) {
+            FishingClickDecision::None => r#"{"decision":{"type":"none"},"ok":true,"version":1}"#.to_owned(),
+            FishingClickDecision::Turn { direction, delay_ms } => format!(
+                r#"{{"decision":{{"delayMs":{delay_ms},"direction":{direction},"type":"turn"}},"ok":true,"version":1}}"#),
+            FishingClickDecision::Cast => format!(
+                r#"{{"decision":{{"lastCastMs":{},"type":"cast"}},"ok":true,"version":1}}"#, input.now_ms),
+        })
     };
     resolve().unwrap_or_else(|| REJECTED.to_owned())
 }

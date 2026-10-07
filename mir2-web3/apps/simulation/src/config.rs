@@ -4920,6 +4920,20 @@ impl SimulationConfig {
         }
     }
 
+    /// Ranking IDs are not globally unique database keys. Resolve them from one
+    /// complete repeatable-read source snapshot, not a per-process login cache.
+    /// This never installs that snapshot over live personal session state.
+    pub(crate) fn ranking_inspect_authority_snapshot(&self) -> Result<AccountStore, String> {
+        if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+            let database_url = self.account_store_database_url.clone()
+                .ok_or("ranking inspect account source unavailable")?;
+            return load_account_store_from_postgres(database_url, self.default_character.clone());
+        }
+        self.account_store.lock()
+            .map(|store| store.clone())
+            .map_err(|_| "ranking inspect account source unavailable".to_string())
+    }
+
     /// Refresh one account from the authoritative PostgreSQL repository.
     ///
     /// Zone handoff and reconnect can land on a process whose in-memory account

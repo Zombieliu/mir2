@@ -47,6 +47,20 @@ mod onchain;
 mod packets;
 mod pathfind;
 mod quests;
+mod ranking_inspect;
+pub use ranking_inspect::{
+    RankingInspectIdentity, RankingInspectOnlineProjection,
+};
+
+/// Server-owned presence, never a field supplied by a player packet. An online
+/// owner without a current projection must not fall back to its saved equipment.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RankingInspectPresence {
+    Offline,
+    Online(Option<RankingInspectOnlineProjection>),
+    Unknown,
+}
+
 mod refine_oven;
 mod rental;
 mod resources;
@@ -79,7 +93,7 @@ pub use drops::{
 pub use map::set_crystal_full_world_zone_collision;
 pub use monsters::crystal_world_respawn_spawns;
 pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
-pub use packets::{ChatPacketPreparation, PreparedChatPacket};
+pub use packets::{ChatPacketPreparation, PreparedChatPacket, RankingInspectRequest};
 pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
     ActiveSessionIdentity, LocalPlayerVitalsSnapshot, PasskeyRecoveryPreflight,

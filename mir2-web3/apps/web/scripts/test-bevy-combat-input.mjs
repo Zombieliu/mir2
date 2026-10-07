@@ -51,6 +51,7 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(ts.isExpressionStatement(actualSocketSend)&&ts.isCallExpression(actualSocketSend.expression));
  assert.equal(actualSocketSend.getText(sendAst),'socket.send(serialized);');
  assert.equal(socketTry.finallyBlock,undefined);
+ const rankingInspectCondition='wireCommand.type === "inspect" && (!options?.rankingInspectProof ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))';
  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).map(n=>ts.isIfStatement(n)?normalized(n.expression):null),[
   'options?.mailProof','options?.mailQuoteProof','options?.mailLockProof',
   "options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket))",
@@ -83,6 +84,7 @@ test('production integration captures raw before coalescing and final event proo
   'options?.bagBeltProof',
   'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
   'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))',
+  rankingInspectCondition,
  ]);
 
  // The original ordered parity suffix ends at the two additive Auth nodes.
@@ -139,16 +141,21 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(ts.isIfStatement(pearlGate));assert.equal(normalized(pearlGate.expression),'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))');
  assert.equal(pearlGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(pearlGate.thenStatement));
  assert.equal(pearlGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
- assert.equal(statements[authClaimIndex+6],socketTry,'no executable external callback between final Pearl Core entry and sole socket send');
- assert.equal(socketIndex,authClaimIndex+6);
+ const rankingInspectGate=statements[authClaimIndex+6];
+ assert.ok(ts.isIfStatement(rankingInspectGate));assert.equal(normalized(rankingInspectGate.expression),rankingInspectCondition);
+ assert.equal(rankingInspectGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(rankingInspectGate.thenStatement));
+ assert.equal(rankingInspectGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
+ assert.equal(statements[authClaimIndex+7],socketTry,'no executable external callback between final Pearl Core entry and sole socket send');
+ assert.equal(socketIndex,authClaimIndex+7);
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-5),[
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-6),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
   'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
-  'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))'
+  'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))',
+  rankingInspectCondition
  ]);
  // Execute the actual final Auth fragment with its actual durable gate and
  // Page surface check. Only socket writes and document facts are memory data.
@@ -295,12 +302,12 @@ test('actual Page HP overlay callback and combat producer block immediately befo
   socialItemWindowsRef:{current:{guild:false,trade:false}},socialReplyWindowsRef:{current:{group:false,bonds:false}},socialRosterWindowsRef:{current:{friends:false}},
   npcShopServiceRef:{current:null},npcRepairServiceRef:{current:null},npcShopUiIngressRef:{current:null},storageUiIngressRef:{current:null}});
  for(const key of ['questReactModalOpenRef','bagOpenRef','characterOpenRef','questLogOpenRef','heroPetOpenRef','rankingWindowRef','marketOpenRef','conquestOpenRef',
-  'buffsOpenRef','mailUiOpenRef','worldMapOpenRef','chatSettingsOpenRef','tutorialOpenRef','storageServiceActiveRef'])deps[key]={current:false};
+  'buffsOpenRef','mailUiOpenRef','worldMapOpenRef','chatSettingsOpenRef','tutorialOpenRef','storageServiceActiveRef','rankingInspectOpenRef'])deps[key]={current:false};
  assert.equal(deps.crystalKeyBindingsRef.current.length,96);assert.deepEqual(deps.crystalKeyBindingsRef.current,nativeKeyboardDefaults);
   const readFacts=extracted(read,deps);assert.equal(readFacts().facts.enabled,true);
   assert.equal(readFacts().facts.spellLockKey,nativeKeyboardDefaults.find(binding=>binding.function==='TargetSpellLockOn').key);
   assert.deepEqual(readFacts().facts.bindings,nativeKeyboardDefaults.filter(binding=>/^Bar[12]Skill[1-8]$/.test(binding.function)));
- for(const key of ['heroManagementOpenRef','skillBarPointerHeldRef','questReactModalOpenRef','bagOpenRef']){deps[key].current=true;assert.equal(readFacts().facts.enabled,false,'actual synchronous live fence '+key);deps[key].current=false;assert.equal(readFacts().facts.enabled,true);}
+ for(const key of ['heroManagementOpenRef','skillBarPointerHeldRef','questReactModalOpenRef','bagOpenRef','rankingInspectOpenRef']){deps[key].current=true;assert.equal(readFacts().facts.enabled,false,'actual synchronous live fence '+key);deps[key].current=false;assert.equal(readFacts().facts.enabled,true);}
  const readSharedFacts=extracted(read,{...deps,webGl2SharedCanvasPrototype:true});
  assert.equal(readSharedFacts().facts.enabled,true,'hidden stage UI cannot hide a visible DOM world');
  assert.equal(selectors.at(-1),'.game-world-composite');

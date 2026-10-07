@@ -29,6 +29,7 @@ use mir2_simulation::{
     GroundDropSnapshot, InProcessWorldRuntime, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
     NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyRequest,
     SessionId, SharedAccountInventoryTransactionKind,
+    RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence,
     SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
@@ -2672,6 +2673,14 @@ struct ZoneJourneyEventProgress {
     committed: BTreeSet<ZoneJourneyEventIdentity>,
 }
 
+#[derive(Debug, Clone)]
+struct RankingInspectOwnerProjection {
+    session_id: SessionId,
+    life_generation: u64,
+    object_id: u32,
+    projection: RankingInspectOnlineProjection,
+}
+
 #[derive(Debug)]
 struct SharedInProcessZoneState {
     next_zone_object_id: u32,
@@ -2699,6 +2708,8 @@ struct SharedInProcessZoneState {
     journey_event_progress: BTreeMap<ZonePresenceKey, ZoneJourneyEventProgress>,
     teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
+    // Current owner equipment only; never checkpointed or used as offline data.
+    ranking_inspect_projections: BTreeMap<ZonePresenceKey, RankingInspectOwnerProjection>,
     // Ephemeral recipient identity cache; not part of any wire/checkpoint schema.
     // It keeps a departed player's queued Remove distinguishable from monsters.
     live_zone_player_ids: BTreeMap<ZonePresenceKey, BTreeSet<u32>>,
@@ -3005,6 +3016,7 @@ impl SharedInProcessZoneState {
             journey_event_progress: BTreeMap::new(),
             teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
+            ranking_inspect_projections: BTreeMap::new(),
             live_zone_player_ids: BTreeMap::new(),
             departed_live_zone_player_ids: BTreeSet::new(),
             players: BTreeMap::new(),
@@ -3420,6 +3432,7 @@ impl SharedInProcessZoneState {
             journey_event_progress: checkpoint.journey_event_progress.into_iter().collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
+            ranking_inspect_projections: BTreeMap::new(),
             live_zone_player_ids: BTreeMap::new(),
             departed_live_zone_player_ids: BTreeSet::new(),
             players,
@@ -3588,6 +3601,7 @@ impl SharedInProcessZoneState {
         self.journey_event_progress.remove(key);
         self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
+        self.ranking_inspect_projections.remove(key);
         self.live_zone_player_ids.remove(key);
     }
 
@@ -8239,6 +8253,7 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             retired_local_ground_drop_ids: BTreeSet::new(),
             owner_dead_entity_ids: BTreeSet::new(),
             last_game_shop_purchase_outcome: None,
+            next_ranking_inspect_ms: 0,
             #[cfg(test)]
             fail_next_npc_teleport_checkpoint_restore: false,
             #[cfg(test)]
@@ -8902,6 +8917,7 @@ struct SharedInProcessZoneSessionRuntime {
     retired_local_ground_drop_ids: BTreeSet<(String, u32)>,
     owner_dead_entity_ids: BTreeSet<u32>,
     last_game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
+    next_ranking_inspect_ms: u64,
     #[cfg(test)]
     fail_next_npc_teleport_checkpoint_restore: bool,
     #[cfg(test)]
@@ -9051,6 +9067,87 @@ impl fmt::Debug for SharedInProcessZoneSessionRuntime {
 }
 
 impl SharedInProcessZoneSessionRuntime {
+    fn ranking_inspect_presence(
+        &self,
+        identity: &RankingInspectIdentity,
+    ) -> Result<RankingInspectPresence, String> {
+        // Never hold a registry lock while acquiring a Zone or account lock.
+        let (registered_zones, replica_zone_ids) = {
+            let replicas = self.ranking_replica_zones.lock()
+                .map_err(|_| "inspect Zone replica registry unavailable".to_string())?;
+            let registry = self.ranking_zones.lock()
+                .map_err(|_| "inspect Zone registry unavailable".to_string())?;
+            (registry.iter().map(|(id, resources)| {
+                (id.clone(), resources.zone_state.clone(), replicas.contains(id))
+            }).collect::<Vec<_>>(), replicas.clone())
+        };
+        let has_replica = !replica_zone_ids.is_empty();
+        let mut zones = registered_zones.clone();
+        // A detached pre-restore Arc must never be added back beside a newer
+        // registered owner. Empty registries occur only in local memory fixtures.
+        if zones.is_empty() && !has_replica {
+            zones.push((self.inventory_zone_id.clone(), self.zone_state.clone(), false));
+        }
+        let key = ZonePresenceKey {
+            account_id: identity.account_id.clone(), character_index: identity.character_index,
+        };
+        let mut found = None;
+        for (_, state, replica) in zones {
+            let state = state.lock().map_err(|_| "inspect Zone presence unavailable".to_string())?;
+            let Some(player) = state.players.get(&key) else { continue; };
+            if found.is_some() { return Ok(RankingInspectPresence::Unknown); }
+            let current = !replica && !state.teardown_fences.contains(&key);
+            let projection = if current {
+                state.ranking_inspect_projections.get(&key).filter(|record| {
+                    state.zone_sessions.get(&key) == Some(&record.session_id)
+                        && state.zone_manager.player_life_generation(&record.session_id)
+                            == Some(record.life_generation)
+                        && player.zone_object_id == record.object_id
+                        && player.entity.name == identity.name
+                        && record.projection.identity == *identity
+                }).map(|record| record.projection.clone())
+            } else { None };
+            // A missing/retired online projection is not an offline character.
+            found = Some(RankingInspectPresence::Online(projection));
+        }
+        // Restore/adopt may retire a copied Arc while its old session is still
+        // finishing a command. Release every Zone lock before checking the
+        // complete registry and replica custody again, using the same lock order.
+        if !self.ranking_inspect_registry_is_current(&registered_zones, &replica_zone_ids)? {
+            return Ok(RankingInspectPresence::Unknown);
+        }
+        Ok(found.unwrap_or(if has_replica {
+            // Replica absence cannot prove that a remote owner is offline.
+            RankingInspectPresence::Unknown
+        } else { RankingInspectPresence::Offline }))
+    }
+
+    fn ranking_inspect_registry_is_current(
+        &self,
+        captured: &[(ZoneId, Arc<Mutex<SharedInProcessZoneState>>, bool)],
+        captured_replicas: &BTreeSet<ZoneId>,
+    ) -> Result<bool, String> {
+        let replicas = self.ranking_replica_zones.lock()
+            .map_err(|_| "inspect Zone replica registry unavailable".to_string())?;
+        let registry = self.ranking_zones.lock()
+            .map_err(|_| "inspect Zone registry unavailable".to_string())?;
+        Ok(*replicas == *captured_replicas && registry.len() == captured.len()
+            && captured.iter().all(|(id, state, _)| registry.get(id)
+                .is_some_and(|resources| Arc::ptr_eq(state, &resources.zone_state))))
+    }
+
+    fn execute_ranking_inspect(&mut self, player_id: u32) -> Result<Vec<ServerPacket>, String> {
+        let now_ms = Self::zone_now_ms();
+        if now_ms <= self.next_ranking_inspect_ms { return Ok(Vec::new()); }
+        self.next_ranking_inspect_ms = now_ms.saturating_add(500);
+        self.publish_ranking_inspect_projection();
+        let Some(request) = self.inner.prepare_ranking_inspect(player_id) else {
+            return Ok(Vec::new());
+        };
+        let presence = self.ranking_inspect_presence(request.target_identity())?;
+        Ok(self.inner.complete_ranking_inspect(request, presence))
+    }
+
     fn online_character_identities(&self) -> Result<BTreeSet<(String, i32)>, String> {
         // Release the registry lock before acquiring any Zone lock, and
         // release all presence locks before reading the account store.
@@ -9844,7 +9941,7 @@ impl SharedInProcessZoneSessionRuntime {
             .session_state
             .lock()
             .expect("shared zone movement session mutex should not be poisoned")
-            .activate(key, map_file_name, cached_map_transfers);
+            .activate(key.clone(), map_file_name, cached_map_transfers);
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_transform(transform);
@@ -9857,7 +9954,38 @@ impl SharedInProcessZoneSessionRuntime {
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
+        self.publish_ranking_inspect_projection();
         packets
+    }
+
+    /// Refresh only personal Inspect facts. Tick/native attack deliberately skip
+    /// the full map snapshot, but their level/equipment effects must still retire
+    /// the previous projection. Never retain an old cache when export fails.
+    fn publish_ranking_inspect_projection(&mut self) {
+        let Some(key) = self.current_presence_key() else { return; };
+        let session_id = SharedInProcessZoneState::zone_session_id_for_key(&key);
+        let inspect_projection = self.inner.active_ranking_inspect_projection();
+        let mut state = self.zone_state.lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        state.ranking_inspect_projections.remove(&key);
+        if let Some(projection) = inspect_projection {
+            if !state.teardown_fences.contains(&key)
+                && projection.identity.account_id == key.account_id
+                && projection.identity.character_index == key.character_index
+                && state.zone_sessions.get(&key) == Some(&session_id)
+            {
+                if let (Some(life_generation), Some(player)) = (
+                    state.zone_manager.player_life_generation(&session_id), state.players.get(&key),
+                ) {
+                    if player.entity.name == projection.identity.name {
+                        let object_id = player.zone_object_id;
+                        state.ranking_inspect_projections.insert(key, RankingInspectOwnerProjection {
+                            session_id, life_generation, object_id, projection,
+                        });
+                    }
+                }
+            }
+        }
     }
 
     fn remove_presence(&mut self) -> Vec<ServerPacket> {
@@ -14630,6 +14758,18 @@ impl SharedInProcessZoneSessionRuntime {
             is_trade_state_mutation && self.has_pending_durable_trade_projection();
         drop(predrain_stage);
         let inner_stage = GatewaySlowStage::start("shared_session.inner_execute");
+        // Logout/disconnect retire the personal Inspect generation before saving.
+        // A failed save retains the recovery presence, but must not retain its
+        // old online projection. Predrain can publish, so retire at this boundary.
+        if removes_presence {
+            if let Some(key) = self.current_presence_key() {
+                self.zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .ranking_inspect_projections
+                    .remove(&key);
+            }
+        }
         let mut command_packets = if blocks_durable_trade_mutation {
             trade_item_failure.clone().into_iter().collect()
         } else if unavailable_shared_target {
@@ -14640,6 +14780,11 @@ impl SharedInProcessZoneSessionRuntime {
             }
         } else if shared_guilds::is_guild_command(&command) {
             self.execute_shared_guild(&command)
+        } else if let WorldCommand::ClientPacket(ClientPacket::Inspect {
+            object_id, ranking: true, ..
+        }) = &command
+        {
+            self.execute_ranking_inspect(*object_id)?
         } else if let WorldCommand::ClientPacket(ClientPacket::GetRanking {
             rank_type,
             rank_index,
@@ -15026,6 +15171,9 @@ impl SharedInProcessZoneSessionRuntime {
         }
         self.filter_stale_owner_dead_entity_packets(&mut packets);
         self.normalize_owner_state_packets(&mut packets);
+        if !removes_presence {
+            self.publish_ranking_inspect_projection();
+        }
         Ok(packets)
     }
 
@@ -30070,9 +30218,83 @@ mod tests {
             retired_local_ground_drop_ids: Default::default(),
             owner_dead_entity_ids: Default::default(),
             last_game_shop_purchase_outcome: None,
+            next_ranking_inspect_ms: 0,
             fail_next_npc_teleport_checkpoint_restore: false,
             npc_gold_buy_after_capture_hook: None,
         }
+    }
+
+    #[test]
+    fn ranking_inspect_registry_fence_rejects_replaced_arc_and_changed_replica_set() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let zone_id = ZoneId::new("inspect-custody");
+        let resources = factory.resources_for_zone(&zone_id);
+        let mut runtime = shared_session_runtime(resources.zone_state.clone());
+        runtime.ranking_zones = factory.zones.clone();
+        runtime.ranking_replica_zones = factory.replica_zone_ids.clone();
+        let captured = vec![(zone_id.clone(), resources.zone_state.clone(), false)];
+        let replicas = BTreeSet::new();
+        assert!(runtime.ranking_inspect_registry_is_current(&captured, &replicas).unwrap());
+        let replacement = SharedInProcessZoneRuntimeFactory::new();
+        let next_resources = replacement.resources_for_zone(&zone_id);
+        assert!(factory.adopt_zone_resources_from(&replacement, &zone_id).unwrap());
+        assert!(!runtime.ranking_inspect_registry_is_current(&captured, &replicas).unwrap());
+        let next = vec![(zone_id.clone(), next_resources.zone_state.clone(), false)];
+        assert!(runtime.ranking_inspect_registry_is_current(&next, &replicas).unwrap());
+        factory.mark_zone_as_replica(&zone_id);
+        assert!(!runtime.ranking_inspect_registry_is_current(&next, &replicas).unwrap());
+        assert!(!runtime.ranking_inspect_registry_is_current(&[], &replicas).unwrap());
+    }
+
+    #[test]
+    fn ranking_inspect_replica_absence_is_unknown_and_live_missing_projection_is_not_offline() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let remote = ZoneId::new("inspect-replica");
+        let resources = factory.resources_for_zone(&remote);
+        let mut runtime = shared_session_runtime(resources.zone_state.clone());
+        runtime.ranking_zones = factory.zones.clone();
+        runtime.ranking_replica_zones = factory.replica_zone_ids.clone();
+        let identity = mir2_simulation::RankingInspectIdentity { account_id: "absent".into(), character_index: 17, name: "Absent".into() };
+        assert!(matches!(runtime.ranking_inspect_presence(&identity).unwrap(), mir2_simulation::RankingInspectPresence::Offline));
+        factory.mark_zone_as_replica(&remote);
+        assert!(matches!(runtime.ranking_inspect_presence(&identity).unwrap(), mir2_simulation::RankingInspectPresence::Unknown));
+
+        let mut local = shared_session_runtime(Arc::new(Mutex::new(SharedInProcessZoneState::new())));
+        start_new_runtime(&mut local, "inspect-local", "InspectLocal");
+        // The default starter fixture has no exact equipment root UIDs. Use a
+        // known empty loadout through the real restore and publication paths.
+        let mut initial = local.inner.active_character_checkpoint().unwrap();
+        initial.equipment_items_json.clear();
+        initial.equipment_items_explicit_empty = true;
+        local.inner.restore_active_character_checkpoint(&initial).unwrap();
+        local.execute(WorldCommand::Tick).unwrap();
+        let projection = local.inner.active_ranking_inspect_projection().unwrap();
+        let key = local.current_presence_key().unwrap();
+        local.zone_state.lock().unwrap().ranking_inspect_projections.remove(&key);
+        assert!(matches!(local.ranking_inspect_presence(&projection.identity).unwrap(), mir2_simulation::RankingInspectPresence::Online(None)));
+    }
+
+    #[test]
+    fn ranking_inspect_tick_refreshes_real_personal_level_without_full_zone_snapshot() {
+        let mut runtime = shared_session_runtime(Arc::new(Mutex::new(SharedInProcessZoneState::new())));
+        start_new_runtime(&mut runtime, "inspect-tick", "InspectTick");
+        // Establish a complete projection without inventing starter item UIDs.
+        let mut initial = runtime.inner.active_character_checkpoint().unwrap();
+        initial.equipment_items_json.clear();
+        initial.equipment_items_explicit_empty = true;
+        runtime.inner.restore_active_character_checkpoint(&initial).unwrap();
+        runtime.execute(WorldCommand::Tick).unwrap();
+        let before = runtime.inner.active_ranking_inspect_projection().unwrap();
+        let key = runtime.current_presence_key().unwrap();
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.character.level = 28;
+        runtime.inner.restore_active_character_checkpoint(&checkpoint).unwrap();
+        assert_ne!(before.info.level, 28);
+        assert_eq!(runtime.zone_state.lock().unwrap().ranking_inspect_projections[&key].projection.info.level, before.info.level);
+        runtime.execute(WorldCommand::Tick).unwrap();
+        let live = runtime.inner.active_ranking_inspect_projection().unwrap();
+        assert_eq!(live.info.level, 28);
+        assert_eq!(runtime.zone_state.lock().unwrap().ranking_inspect_projections[&key].projection.info.level, live.info.level);
     }
 
     #[test]

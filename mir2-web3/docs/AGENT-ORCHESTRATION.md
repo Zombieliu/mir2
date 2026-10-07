@@ -641,6 +641,21 @@ Stop and ask only when:
 
 ## Current Round Status
 
+排名查看已接入共享Rust准入、可选PUI严格ABI、Native真实排名身份及Web实际发送入口；返回PlayerInspect使用真实14装备位置与raw carrier/tooltip，窗口只读。后端采用严格离线快照和本地在线当前owner投影，登录、保存失败、退出及旧连接退役均有具名回归；远端owner仍Unknown、Observe禁用、旧wire无request nonce，不宣称跨服完整能力。
+
+实际客户端选定Rust240/240，Backend80/80（新增12＋56＝68项distinct Rust均执行），原11个Web脚本220/220；Stage5内部440组只计一个文件级测试。严格非增量类型检查通过。Simulation63、Gateway unit5按已执行且未变有效输入限定承接，Gateway chain12在最终Backend06 fresh；历史失败及原断言保留，不称全workspace或全部320在最后快照重跑。
+
+Core/PUI、Windows EXE、Gateway、三renderer、Next08和Thin08均已实际构建通过并独立静态复核，未启动。PUI WASM261575 B，原strict262144 B门槛余569 B。Next08 fresh strictTypeScript20.9s/13静态页、19007files/610069210 B；Thin08 63203冻结输入，7301files/776dirs含根/0links/373130249 B，原377487360 B cap余4357111 B。11 runtime副本、231实际JSON source/output pairs与44 warning完整多重集均核对；JSON仅按相同字节限定承接历史token结论，无新parser。包位于apps/web/.mir2-thin-client-web-windows-catchup-20261007-08。
+
+Matrix11仅F11.RANKING.INSPECT由open转为legacy/sourceCandidate，103shared/206legacy/0open/8common；其余316整row、317ordered IDs、native/originalAudit和raw历史保持。358关联/226唯一声明/每row去重357是具名检查映射，不能当执行或验收数量。317不是全项目分母，overall percentage=null、Candidate100=false、goal active。
+
+用户“继续代码，暂不操作界面”继续有效；实际资源/WASM初始化、标准登录→角色→移动换图→任务/战斗/掉落→保存退出重登、移动真机及玩家验收全部not-run。Mount/Pet/Gate等遗漏资源需要配置不可变origin并通过release:doctor/真实smoke，静态包不证明在线可玩。下一代码项是跨Gold/Pearl/BuyBack/Used关联购买回执及恢复去重，entered/flushed/unknown不能当成功或自动释放；之后继续宽队列和未穷尽变体。
+
+Source24已实际提交推送并核验远端6562c474a67cf1c377a600ae254997be744879b4。本段记录Source25源码和构建结果；本轮Git发布状态由Root实际commit、push及远端核验单独报告。以下Source24及更旧状态保留为历史，旧pending/unhooked句不是当前结果。
+
+证据：[矩阵11](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix11.json)、[当前静态组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-combined-build-result01.json)、[客户端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-client-finite-result01.json)、[后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-backend-finite-result01.json)、[Web有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-web-finite-result01.json)。
+
+
 Source24当前仅F09.NPC.PEARL open→legacy/sourceCandidateclosed，共同Rust准入/钱包/完整raw目录/实际DOM确认及最终单用proof接线，DOM painter仍legacy。Rust242/17new、Backend60/4new、Web220与NPC94分开、Stage5392只计onefile；TSC02按MJS-only有效TS输入限定承接，Core/PUI/Native/Gateway/三renderer/Next07/Thin07静态构建实际通过，独立source-only接受0blocker。Matrix10为103shared/205legacy/1open/8common，实际332关联/200unique/331row-dedup；其余316整row与历史保持，317非完整分母。Source23远端c63136131bf9bc65e482188920c1c2a37730aeba已published，Source24gitpending。经济correlated ACK/无限stock同UIDcount pending、2MiBcatalog vs1MiBauthority failclosed继续明示；下一Source25 Ranking Inspect＋PUI余79B体积优化，再经济回执/宽队列，unhooked/uncompiled ranking_inspect.rs不计done。player/UI/HTTP/socket/WASM/mobile全not-run，Candidate100=false/goalactive，无overall%。见[矩阵10](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix10.json)、[组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-combined-build-result01.json)。以下原Current Round状态逐字保留为历史，当前以本段为准。
 
 Source23当前仅`F02.world.fishing-click`源码候选闭合：真实物理Walk/typed raw facts/共同Rust owned pose与相邻单用发送proof已接线，世界DOM仍legacy。原11 Node05实际218/218（Stage5内部357只计一个文件）；TSC05/06、Backend7 jobs/242通过、最终PUI Rust07 fresh64及Core/PUI/三renderer/Native/Gateway/Next06/Thin06静态构建通过。历史Rust04/NativeInput仅按未变有效配置限定承接；旧失败记录保留。Matrix09为103 shared/204 legacy/2 open/8 common，316其他row与历史字段保持，全部player not-run；317不是完整分母，无overall%，Candidate100=false、goal active。Source22已push `4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef`，Source23发布创建时pending由Root实际完成。下一项Source24 Pearl共享准入/钱包/真实Web DOM并明示无correlated经济ACK与Native无限stock同UID/count pending限制，随后Source25 Ranking Inspect及宽队列；继续代码、暂不操作界面或运行服务/WASM API。见[有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-finite-result01.json)、[组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-combined-build-result01.json)与[矩阵09](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix09.json)。本节以下原状态逐字保留为历史，当前以本段及任务队列Source23为准。

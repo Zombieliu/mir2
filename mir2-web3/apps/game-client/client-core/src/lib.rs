@@ -16,6 +16,7 @@ pub mod npc_pearl_buy;
 pub mod equipment_pending;
 pub mod intent;
 pub mod fishing_click;
+pub mod ranking_inspect;
 pub mod entity_animation;
 pub mod ordered_map;
 pub mod interpolation;

@@ -46,6 +46,11 @@ pub mod fishing_click;
 pub use fishing_click::{fishing_click_abi_version, fishing_click_targets, fishing_click_decision};
 
 #[cfg(feature = "presentation-ui")]
+pub mod ranking_inspect;
+#[cfg(feature = "presentation-ui")]
+pub use ranking_inspect::{ranking_inspect_abi_version, ranking_inspect_admission};
+
+#[cfg(feature = "presentation-ui")]
 pub mod entity_animation;
 #[cfg(feature = "presentation-ui")]
 pub use entity_animation::{entity_animation_abi_version, EntityAnimationBridge};

@@ -2621,6 +2621,7 @@ fn apply_character_save_with_timing(
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());
         session.bind_active_save_revision(save.revision);
+        session.activate_ranking_inspect();
     }
     world
         .resource_mut::<PlayerPermissionResource>()

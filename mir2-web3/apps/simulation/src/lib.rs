@@ -35,6 +35,7 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence, RankingInspectRequest,
     SharedMonsterKillCommitFailure,
     NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,
     NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,

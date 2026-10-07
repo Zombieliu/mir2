@@ -52,6 +52,8 @@ import {
 import { MarketWindow, type MarketListing, type MarketWindowProps } from "./original-client-market-window";
 import { QuestLogWindow, type QuestLogEntry, type QuestLogWindowProps } from "./original-client-quest-log-window";
 import { RankingWindow, type RankingEntry, type RankingPage, type RankingTabKey, type RankingWindowProps } from "./original-client-ranking-window";
+import { OriginalInspectWindow, type OriginalInspectWindowProps } from "./original-client-inspect-window";
+import type { RankingPlayerInspect } from "../../lib/shared-ranking-inspect";
 import { TradeWindow, type TradeSummary, type TradeWindowProps } from "./original-client-trade-window";
 import {
   WorldMapWindow,
@@ -94,6 +96,8 @@ export type {
   RankingPage,
   RankingTabKey,
   RankingWindowProps,
+  OriginalInspectWindowProps,
+  RankingPlayerInspect,
   RelationshipSummary,
   TradeSummary,
   TradeWindowProps,
@@ -116,6 +120,7 @@ export {
   MarketWindow,
   QuestLogWindow,
   RankingWindow,
+  OriginalInspectWindow,
   TradeWindow,
   WorldMapWindow,
 };
@@ -276,7 +281,11 @@ export type ExtraWindowsProps = {
       RankingWindowProps,
       "activeTab" | "page" | "playerName" | "onSelectTab" | "onRefresh" | "onToggleOnlineOnly"
       | "requestPending" | "onlineOnly" | "onPrevious" | "onNext"
+      | "onInspect"
     >;
+
+  inspect?: WindowToggle & { info: RankingPlayerInspect | null }
+    & Pick<OriginalInspectWindowProps, "onReadItemTooltip">;
 
   market?: WindowToggle &
     Pick<
@@ -364,6 +373,7 @@ function ExtraWindowsInner({
   friends,
   bonds,
   ranking,
+  inspect,
   market,
   mail,
   conquest,
@@ -528,9 +538,13 @@ function ExtraWindowsInner({
           onlineOnly={ranking.onlineOnly}
           onPrevious={ranking.onPrevious}
           onNext={ranking.onNext}
+          onInspect={ranking.onInspect}
           onClose={ranking.onClose}
         />
       ) : null}
+
+      {inspect?.open && inspect.info ? <OriginalInspectWindow t={t} info={inspect.info}
+        onClose={inspect.onClose} onReadItemTooltip={inspect.onReadItemTooltip} /> : null}
 
       {market?.open ? (
         <MarketWindow

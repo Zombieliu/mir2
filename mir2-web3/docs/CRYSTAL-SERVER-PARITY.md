@@ -1,5 +1,21 @@
 # Crystal Server Parity
 
+## Source25：排名查看代码与候选包已完成，实际游玩待验收（2026-10-07）
+
+排名查看已接入共享Rust准入、可选PUI严格ABI、Native真实排名身份及Web实际发送入口；返回PlayerInspect使用真实14装备位置与raw carrier/tooltip，窗口只读。后端采用严格离线快照和本地在线当前owner投影，登录、保存失败、退出及旧连接退役均有具名回归；远端owner仍Unknown、Observe禁用、旧wire无request nonce，不宣称跨服完整能力。
+
+实际客户端选定Rust240/240，Backend80/80（新增12＋56＝68项distinct Rust均执行），原11个Web脚本220/220；Stage5内部440组只计一个文件级测试。严格非增量类型检查通过。Simulation63、Gateway unit5按已执行且未变有效输入限定承接，Gateway chain12在最终Backend06 fresh；历史失败及原断言保留，不称全workspace或全部320在最后快照重跑。
+
+Core/PUI、Windows EXE、Gateway、三renderer、Next08和Thin08均已实际构建通过并独立静态复核，未启动。PUI WASM261575 B，原strict262144 B门槛余569 B。Next08 fresh strictTypeScript20.9s/13静态页、19007files/610069210 B；Thin08 63203冻结输入，7301files/776dirs含根/0links/373130249 B，原377487360 B cap余4357111 B。11 runtime副本、231实际JSON source/output pairs与44 warning完整多重集均核对；JSON仅按相同字节限定承接历史token结论，无新parser。包位于apps/web/.mir2-thin-client-web-windows-catchup-20261007-08。
+
+Matrix11仅F11.RANKING.INSPECT由open转为legacy/sourceCandidate，103shared/206legacy/0open/8common；其余316整row、317ordered IDs、native/originalAudit和raw历史保持。358关联/226唯一声明/每row去重357是具名检查映射，不能当执行或验收数量。317不是全项目分母，overall percentage=null、Candidate100=false、goal active。
+
+用户“继续代码，暂不操作界面”继续有效；实际资源/WASM初始化、标准登录→角色→移动换图→任务/战斗/掉落→保存退出重登、移动真机及玩家验收全部not-run。Mount/Pet/Gate等遗漏资源需要配置不可变origin并通过release:doctor/真实smoke，静态包不证明在线可玩。下一代码项是跨Gold/Pearl/BuyBack/Used关联购买回执及恢复去重，entered/flushed/unknown不能当成功或自动释放；之后继续宽队列和未穷尽变体。
+
+Source24已实际提交推送并核验远端6562c474a67cf1c377a600ae254997be744879b4。本段记录Source25源码和构建结果；本轮Git发布状态由Root实际commit、push及远端核验单独报告。以下Source24及更旧状态保留为历史，旧pending/unhooked句不是当前结果。
+
+证据：[矩阵11](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix11.json)、[当前静态组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-combined-build-result01.json)、[客户端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-client-finite-result01.json)、[后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-backend-finite-result01.json)、[Web有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-web-finite-result01.json)。
+
 ## Progress78：Source24 Pearl 源码候选与静态构建闭合，玩家验收待运行（2026-10-07）
 
 仅 `F09.NPC.PEARL` 由open转为legacy/sourceCandidate closed：完整raw Pearl目录与已知钱包接入实际GameShop confirm/double-click、Page共享Core报价/准入与单用opaque claim紧邻socket.send；UID0保留，数量/价格由共同Rust planner与f32单价oracle决定，optional PUI Pearl ABI2拒绝缺失或失效事实。Gold授权继续独立；共同规则不将整个DOM painter升为shared，raw BuyItem三字段未变。

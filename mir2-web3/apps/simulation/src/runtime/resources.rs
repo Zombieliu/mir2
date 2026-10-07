@@ -448,6 +448,8 @@ pub(super) struct SessionResource {
     pub(super) account_id: Option<String>,
     pub(super) characters: Vec<CharacterRecord>,
     pub(super) selected_character: Option<CharacterRecord>,
+    ranking_inspect_generation: u64,
+    ranking_inspect_active: bool,
     active_save_revision: Arc<AtomicU64>,
 }
 
@@ -459,6 +461,8 @@ impl SessionResource {
             account_id: None,
             characters: vec![config.default_character.clone()],
             selected_character: None,
+            ranking_inspect_generation: 0,
+            ranking_inspect_active: false,
             active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
         }
     }
@@ -470,6 +474,22 @@ impl SessionResource {
 
     pub(super) fn bind_active_save_revision(&self, revision: u64) {
         self.active_save_revision.store(revision, Ordering::Release);
+    }
+
+    pub(super) fn ranking_inspect_generation(&self) -> Option<u64> {
+        self.ranking_inspect_active.then_some(self.ranking_inspect_generation)
+    }
+
+    pub(super) fn activate_ranking_inspect(&mut self) {
+        self.ranking_inspect_active = false;
+        if let Some(generation) = self.ranking_inspect_generation.checked_add(1) {
+            self.ranking_inspect_generation = generation;
+            self.ranking_inspect_active = true;
+        }
+    }
+
+    pub(super) fn retire_ranking_inspect(&mut self) {
+        self.ranking_inspect_active = false;
     }
 
     pub(super) fn clear_active_save_revision(&self) {
@@ -1122,5 +1142,28 @@ impl ObjectIdAllocatorResource {
         let id = self.next_runtime_monster_object_id;
         self.next_runtime_monster_object_id += 1;
         id
+    }
+}
+
+#[cfg(test)]
+mod ranking_inspect_lifecycle_tests {
+    use super::*;
+    #[test]
+    fn ranking_inspect_game_generation_retires_and_never_wraps() {
+        let mut session = SessionResource::new(&SimulationConfig::default());
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), Some(1));
+        session.retire_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), Some(2));
+        session.ranking_inspect_generation = u64::MAX;
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.retire_ranking_inspect();
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        assert_eq!(session.ranking_inspect_generation, u64::MAX);
     }
 }

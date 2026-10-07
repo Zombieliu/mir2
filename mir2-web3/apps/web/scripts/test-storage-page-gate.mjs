@@ -5,13 +5,13 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 // Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
-const sources = { pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
+const sources = { rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
@@ -94,6 +94,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "setShowGuild", "setShowGroup", "setShowBonds", "setShowRanking", "friendCharacterIndex", "removeFriendEntry", "editFriendMemo",
   "changeGuildMemberRank", "saveGuildRank", "rankingRequestForTab", "issueRankingRequest", "requestRanking", "refreshRanking",
   "moveRankingRows", "setRankingOnlineOnly", "applyRankingPacket", "refreshFriends", "setShowFriends",
+  "currentRankingInspectSource", "closeRankingInspect",
   "readSocialRosterSource", "socialRosterProofCurrent", "sendSocialRosterCommand", "projectPartnerTradePacket", "sendTradeUiCommand", "confirmTrade"];
 const declarations = new Map();
 const ackCases = [];
@@ -334,6 +335,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     setShowGroupState: value => { scope.groupOpen = value; }, setShowBondsState: value => { scope.bondsOpen = value; },
     setShowGuildState: value => { scope.guildOpen = value; }, setShowRankingState: value => { scope.rankingOpen = value; },
     rankingWindowRef: {current: false}, rankingQueriesRef: {current: new pureSocialActions.RankingQueries()}, renderRankingRequests: () => {},
+    rankingInspectRequestsRef: {current: new (loadPure("rankingInspectRequests").RankingInspectRequests)()},
+    rankingInspectOpenRef: {current: false}, rankingInspectBindingRef: {current: null},
+    setRankingInspectInfo: value => {scope.rankingInspectInfo=value;},
     guildRanksRef: {current: null}, socialFriendsRef: {current: null},
     socialRosterWindowsRef: {current: {friends: false}}, socialRosterRenderSources: {friend: null, guild: null},
     setShowFriendsState: value => { scope.friendsOpen = value; },
@@ -762,7 +766,7 @@ test("actual Page Guild rank assignment saves type2 separately from type3 rename
 });
 
 const rankingPacket = (rankType = 3, count = 100) => ({rankType, count, myRank: 8, listings: [22, 33],
-  listingDetails: [{playerId: 22, name: "First", level: 30, class: "Taoist"}, {name: "Second", level: 29, class: "Wizard"}]});
+  listingDetails: [{playerId: 22, name: "First", level: 30, class: "Taoist"}, {playerId: 33, name: "Second", level: 29, class: "Wizard"}]});
 
 test("actual Page friend final roster proof rejects same-socket logout scene replacement and closed window before immutable DTO entry", () => {
   for (const command of [{type: "removeFriend", characterIndex: 42}, {type: "addMemo", characterIndex: 42, memo: "memo"},

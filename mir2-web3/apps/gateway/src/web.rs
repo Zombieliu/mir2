@@ -2098,6 +2098,12 @@ enum BrowserCommand {
         #[serde(alias = "onlineOnly", default)]
         online_only: bool,
     },
+    Inspect {
+        #[serde(alias = "objectId")]
+        object_id: u32,
+        ranking: bool,
+        hero: bool,
+    },
     GetRentedItems,
     ItemRentalRequest,
     ItemRentalFee {
@@ -8375,6 +8381,12 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             rank_index,
             online_only,
         })),
+        BrowserCommand::Inspect { object_id, ranking, hero } => {
+            if !ranking || hero {
+                return Err("only ranked player inspection is supported".to_string());
+            }
+            Ok(SessionAction::Packet(ClientPacket::Inspect { object_id, ranking, hero }))
+        }
         BrowserCommand::GetRentedItems => Ok(SessionAction::Packet(ClientPacket::GetRentedItems)),
         BrowserCommand::ItemRentalRequest => {
             Ok(SessionAction::Packet(ClientPacket::ItemRentalRequest))
@@ -9923,6 +9935,22 @@ fn monster_packet_sprite(image: u16) -> Value {
 
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
+        ServerPacket::PlayerInspect { info } => {
+            let mut projected = json!(info);
+            projected["equipment"] = Value::Array(info.equipment.iter().map(|slot| {
+                slot.as_ref().map_or(Value::Null, |item| {
+                    // Inspect keeps all fourteen physical positions. The same
+                    // Crystal template join supplies the actual item image and
+                    // full tooltip carrier; shop pricing is not an Inspect fact.
+                    let mut projected_item = npc_goods_item_json(item, 1.0);
+                    if let Some(fields) = projected_item.as_object_mut() {
+                        fields.remove("price");
+                    }
+                    projected_item
+                })
+            }).collect());
+            json!({ "type": "packet", "packet": "PlayerInspect", "payload": { "info": projected } })
+        }
         ServerPacket::Raw { packet_id, payload } => {
             let packet_name = server_packet_raw_display_name(*packet_id);
             json!({
@@ -17168,6 +17196,58 @@ mod tests {
                 online_only: true,
             })
         ));
+    }
+
+    #[test]
+    fn ranking_inspect_browser_command_preserves_zero_id_and_requires_literal_namespace_flags() {
+        let command = serde_json::from_str::<BrowserCommand>(r#"{"type":"inspect","objectId":0,"ranking":true,"hero":false}"#).unwrap();
+        assert!(matches!(super::browser_command_to_action(command).unwrap(),
+            SessionAction::Packet(ClientPacket::Inspect { object_id: 0, ranking: true, hero: false })));
+        for raw in [
+            r#"{"type":"inspect","objectId":0,"ranking":false,"hero":false}"#,
+            r#"{"type":"inspect","objectId":0,"ranking":true,"hero":true}"#,
+        ] {
+            assert!(super::browser_command_to_action(serde_json::from_str::<BrowserCommand>(raw).unwrap()).is_err());
+        }
+        for raw in [
+            r#"{"type":"inspect","objectId":-1,"ranking":true,"hero":false}"#,
+            r#"{"type":"inspect","objectId":0.5,"ranking":true,"hero":false}"#,
+            r#"{"type":"inspect","objectId":4294967296,"ranking":true,"hero":false}"#,
+            r#"{"type":"inspect","objectId":0,"ranking":true}"#,
+        ] { assert!(serde_json::from_str::<BrowserCommand>(raw).is_err()); }
+    }
+
+    #[test]
+    fn ranking_inspect_event_preserves_target_fourteen_slots_uid_zero_and_actual_tooltip_carrier() {
+        let mut item = sample_user_item(0, 2);
+        item.item_index = 11;
+        let mut socket = sample_user_item(9, 1);
+        socket.item_index = 658;
+        item.slots = vec![None, Some(socket.clone())];
+        let mut equipment = vec![None; 14];
+        equipment[9] = Some(item.clone());
+        let info = mir2_protocol::PlayerInspectInfo { name: "Target".into(), guild_name: "Guild".into(),
+            guild_rank: "Member".into(), equipment, class: MirClass::Taoist, gender: MirGender::Female,
+            hair: 7, level: 28, lover_name: "CurrentPartner".into(), allow_observe: false, is_hero: false };
+        let event = super::server_packet_to_event(&ServerPacket::PlayerInspect { info });
+        assert_eq!(event["packet"], "PlayerInspect");
+        let projected = &event["payload"]["info"];
+        assert_eq!(projected["name"], "Target");
+        assert_eq!(projected["isHero"], false);
+        assert_eq!(projected["class"], "Taoist");
+        assert_eq!(projected["guildName"], "Guild");
+        assert_eq!(projected["loverName"], "CurrentPartner");
+        assert_eq!(projected["equipment"].as_array().unwrap().len(), 14);
+        assert!(projected["equipment"][0].is_null());
+        let row = &projected["equipment"][9];
+        assert_eq!(row["unique_id"], 0);
+        assert_eq!(row["item_index"], 11);
+        assert!(row.get("price").is_none());
+        assert_eq!(row["tooltipSource"]["userItem"], serde_json::to_value(item).unwrap());
+        assert!(row["tooltipSource"]["userItem"]["slots"][0].is_null());
+        assert_eq!(row["tooltipSource"]["userItem"]["slots"][1], serde_json::to_value(socket).unwrap());
+        assert!(row["tooltipSource"]["socketInfos"][0].is_null());
+        assert_eq!(row["tooltipSource"]["socketInfos"][1]["item_index"], 658);
     }
 
     #[test]

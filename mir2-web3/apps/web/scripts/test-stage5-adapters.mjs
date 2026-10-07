@@ -2888,6 +2888,7 @@ function parityPageFixture(owner, world = {}) {
     WebSocket:{OPEN:1}, document:{visibilityState:"visible",hasFocus:()=>true},
     isSpectatorBrowserMode:()=>false, initialSceneAssetsReadyRef:ref(true), queueMicrotask:callback=>microtasks.push(callback),
     playerReferenceWindowsRef:ref({help:false,hotkeys:false,options:false,capture:false}),
+    rankingInspectOpenRef:ref(false),
     bevyHpLocalOverlayOpenRef:ref(false), questReactModalOpenRef:ref(false), bagOpenRef:ref(false), characterOpenRef:ref(false), questLogOpenRef:ref(false),
     socialReplyWindowsRef:ref({group:false,bonds:false}), socialRosterWindowsRef:ref({friends:false}), rankingWindowRef:ref(false),
     marketOpenRef:ref(false), conquestOpenRef:ref(false), buffsOpenRef:ref(false), mailUiOpenRef:ref(false), worldMapOpenRef:ref(false),
@@ -2931,7 +2932,7 @@ function parityPageFixture(owner, world = {}) {
     ...socialItems, socialCatalogRef:ref(new Map()), guildStorageRawRef:ref(null), guildPermissionsRef:ref(null),
     socialOwnTradeRef:ref(null), tradeLifecycleRef:ref({state:"closed",partner:""}), tradeIncarnationRef:ref(1),
   };
-  const keys = Object.keys(scope), api = new Function(...keys, parityPageJs + "\nreturn {currentCombatModeOwner,readCombatModeSource,captureCombatModeSnapshot,captureCombatModeReceipt,parityIngress,parityFinal,parityReceipt,parityCollectClaim,heroProofCurrent,heroInputAllowed,heroUiLeaseCurrent,changeHeroWindows,parityItemMutationAllowed,currentHeroModel,currentCreatureSource,currentCashGameShopSource,currentGuildBuffSource,captureParityPacket,captureParitySnapshot,ownedItemTooltipRequest,captureOwnedItemTooltipReaders,commitOwnedItemTooltipReaders,readPlayerItemTooltip,readHeroItemTooltip,readCashGameShopItemTooltip,guildStorageTooltipItem,readGuildStorageItemTooltip,readSocialItemSurface,readNpcRepairView,captureNpcRepairDialog,toggleNpcRepairHold,beginNpcRepairDrag,dropNpcRepairDrag,confirmNpcRepair};")(...keys.map(k=>scope[k]));
+  const keys = Object.keys(scope), api = new Function(...keys, parityPageJs + "\nreturn {currentCombatModeOwner,readCombatModeSource,captureCombatModeSnapshot,captureCombatModeReceipt,parityIngress,parityFinal,parityReceipt,parityCollectClaim,heroProofCurrent,heroInputAllowed,referenceWindowsBlockGameplay,heroUiLeaseCurrent,changeHeroWindows,parityItemMutationAllowed,currentHeroModel,currentCreatureSource,currentCashGameShopSource,currentGuildBuffSource,captureParityPacket,captureParitySnapshot,ownedItemTooltipRequest,captureOwnedItemTooltipReaders,commitOwnedItemTooltipReaders,readPlayerItemTooltip,readHeroItemTooltip,readCashGameShopItemTooltip,guildStorageTooltipItem,readGuildStorageItemTooltip,readSocialItemSurface,readNpcRepairView,captureNpcRepairDialog,toggleNpcRepairHold,beginNpcRepairDrag,dropNpcRepairDrag,confirmNpcRepair};")(...keys.map(k=>scope[k]));
   return {scope,api,socket,sent,sentBodies,microtasks};
 }
 function heroPageFixture() {
@@ -4204,9 +4205,10 @@ check("Quest name getter rejects stale full stamp foreign or dead entities dupli
 // execution, route-search coverage, pricing proof, or player/UI acceptance.
 // ---------------------------------------------------------------------------
 const fishingClickAdapter=loadTypeScriptModule(new URL("../lib/shared-fishing-click.ts",import.meta.url));
+const rankingInspectAdapter=loadTypeScriptModule(new URL("../lib/shared-ranking-inspect.ts",import.meta.url),{"./crystal-item-source":crystalItemSource});
 const pearlSourceModule=loadTypeScriptModule(new URL("../lib/npc-pearl-buy-source.ts",import.meta.url),{"./crystal-item-source":crystalItemSource});
 const pearlBuyModule=loadTypeScriptModule(new URL("../lib/npc-pearl-buy.ts",import.meta.url),{"./npc-pearl-buy-source":pearlSourceModule});
-const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url), {"./shared-item-tooltip":sharedTooltip,"./shared-fishing-click":fishingClickAdapter,"./npc-pearl-buy-source":pearlSourceModule,"./npc-pearl-buy":pearlBuyModule});
+const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url), {"./shared-item-tooltip":sharedTooltip,"./shared-fishing-click":fishingClickAdapter,"./npc-pearl-buy-source":pearlSourceModule,"./npc-pearl-buy":pearlBuyModule,"./shared-ranking-inspect":rankingInspectAdapter});
 const presentationChatDocument = {
   version:1, epoch:7, open:false, size:0, lineCount:4, frameIndex:0, countBarIndex:0,
   top:500, height:100, controlTop:600, inputTop:650, track:80, knobTop:0, index:0,
@@ -5614,7 +5616,13 @@ assert.equal(bagBeltFollowingFishingEntry.expression.getText(parityPageAst),"opt
 const bagBeltFollowingPearlEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltEntryNodes[0])+2];
 assert.ok(ts.isIfStatement(bagBeltFollowingPearlEntry));
 assert.equal(bagBeltFollowingPearlEntry.expression.getText(parityPageAst).replace(/\s+/g," "),"options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+3,paritySocketIndex,"actual Bag entry retains Fishing then Pearl entry immediately before socket.send");
+const bagBeltFollowingRankingInspectEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltEntryNodes[0])+3];
+assert.ok(ts.isIfStatement(bagBeltFollowingRankingInspectEntry));
+assert.equal(bagBeltFollowingRankingInspectEntry.expression.getText(parityPageAst).replace(/\s+/g,""),
+  'wireCommand.type==="inspect"&&(!options?.rankingInspectProof||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))',
+  "actual Ranking Inspect claim follows the unchanged Bag Fishing and Pearl guards");
+assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+1,paritySocketIndex,"actual Ranking Inspect guard adjoins the socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+4,paritySocketIndex,"actual Bag entry retains Fishing then Pearl entry immediately before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -5623,7 +5631,7 @@ const bagBeltPageJs=ts.transpileModule([...bagBeltPageDeclarations.values()].joi
   paritySendStatements.slice(paritySerializeIndex,paritySerializeIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+
   paritySendStatements.slice(parityDtoIndex,parityDtoIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
-  "\n"+bagBeltEntryNodes[0].getText(parityPageAst)+"\n"+bagBeltFollowingFishingEntry.getText(parityPageAst)+"\n"+bagBeltFollowingPearlEntry.getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}",
+  "\n"+bagBeltEntryNodes[0].getText(parityPageAst)+"\n"+bagBeltFollowingFishingEntry.getText(parityPageAst)+"\n"+bagBeltFollowingPearlEntry.getText(parityPageAst)+"\n"+bagBeltFollowingRankingInspectEntry.getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}",
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 const bagBeltOwnerModule=loadTypeScriptModule(new URL("../lib/bevy-bag-ui.ts",import.meta.url),{
   "./bag-belt-gesture":bagBeltGeometryModule,"./world-model/item-identity":itemIdentity});
@@ -6112,7 +6120,12 @@ const fishingSocketIndex=fishingSendStatements.findIndex(node=>ts.isTryStatement
 const fishingFollowingPearlEntry=fishingSendStatements[fishingSendStatements.indexOf(fishingSendEntry[0])+1];
 assert.ok(ts.isIfStatement(fishingFollowingPearlEntry));
 assert.equal(fishingFollowingPearlEntry.expression.getText(fishingPageAst),bagBeltFollowingPearlEntry.expression.getText(parityPageAst),"same actual Pearl claim guard after Fishing and Bag custody");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+2,fishingSocketIndex,"WorldFishing retains exact Pearl guard immediately before actual socket send");
+const fishingFollowingRankingInspectEntry=fishingSendStatements[fishingSendStatements.indexOf(fishingSendEntry[0])+2];
+assert.ok(ts.isIfStatement(fishingFollowingRankingInspectEntry));
+assert.equal(fishingFollowingRankingInspectEntry.expression.getText(fishingPageAst),bagBeltFollowingRankingInspectEntry.expression.getText(parityPageAst),
+  "same exact Ranking Inspect guard after the unchanged Fishing and Pearl claims");
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+1,fishingSocketIndex,"Fishing fixture Ranking Inspect guard adjoins actual socket try");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+3,fishingSocketIndex,"WorldFishing retains exact Pearl guard immediately before actual socket send");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -6120,7 +6133,7 @@ assert.equal(fishingPreflightGuards.length,2,"actual raw fishing cast requires i
 const fishingPageJs=ts.transpileModule([...fishingPageDeclarations.values()].join("\n")+"\nfunction fishingSocketEntry(command,options,socket,beforeFinal){"+
   fishingPreflightGuards.map(node=>node.getText(fishingPageAst)).join("\n")+"\n"+fishingSendStatements.slice(fishingSerializeIndex,fishingSerializeIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+fishingSendStatements.slice(fishingDtoIndex,fishingDtoIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
-  "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingFollowingPearlEntry.getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
+  "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingFollowingPearlEntry.getText(fishingPageAst)+"\n"+fishingFollowingRankingInspectEntry.getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 function worldFishingPageFixture(){
   const owner=npcRepairOwner(),rod={...npcRepairItem(0,"weapon"),authoritativeUniqueId:0};delete rod.container;
@@ -6152,7 +6165,7 @@ function worldFishingPageFixture(){
     setWorldFishingRecord:()=>{},console:{error:(...args)=>errors.push(args)},
     sendRaw:(command,options)=>{entryProofs.push(options.worldFishingProof);return api.fishingSocketEntry(command,options,page.socket,beforeFinal);},
     sendCrystalTurn:(direction,proof)=>{entryProofs.push(proof);return api.fishingSocketEntry({type:"turn",direction},{worldFishingProof:proof},page.socket,beforeFinal);}};
-  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod};")(...keys.map(key=>scope[key]));
+  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked};")(...keys.map(key=>scope[key]));
   page.socket.send=body=>{if(throwTransport)throw Error("fixture unknown transport");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
   api.captureWorldFishingSnapshot({...raw,entities:[self]},owner.connectionGeneration);
   const source=scope.worldFishingSourceRef.current.current(api.worldFishingOwner());assert.ok(source?.animationKnown,"actual raw M001.map snapshot must establish normalized map authority");assert.ok(api.readWorldFishingRod(),"actual raw UID-zero rod source must pass current equipment custody");
@@ -6939,6 +6952,509 @@ check("Pearl complete raw catalog beyond 2MiB rejects the entire source before e
   assert.equal(calls,0);assert.equal(f.source.currentCatalog(f.physical),null);
   assert.throws(()=>pearlSourceModule.npcPearlJson(raw));
   assert.throws(()=>pearlSourceModule.npcPearlJson({field:"s".repeat(16385)}),"ordinary source string budget remains strict");
+});
+
+// Source25 optional ABI fixtures use fixed JS responses, never WASM execution.
+// They check data custody and actual source presentation, not gesture/send rights.
+function rankingAdmissionInput(delta={}) { return {version:1,opened:true,rankingsReady:true,pending:false,playerId:0,nowMs:1001,nextReadyMs:1000,...delta}; }
+function rankingAdmissionModule(reply={version:1,ok:true,objectId:0,nextReadyMs:1501}) {
+  const calls=[];
+  return {calls,module:{ranking_inspect_abi_version:()=>1,ranking_inspect_admission(json){calls.push(JSON.parse(json));return JSON.stringify(reply);}}};
+}
+check("Ranking Inspect optional ABI delegates exact seven fields and preserves ID0",()=>{
+  const f=rankingAdmissionModule(),input=rankingAdmissionInput();
+  const result=presentationRuntime.readSharedRankingInspectAdmission(f.module,input);
+  assert.deepEqual(result,{version:1,ok:true,objectId:0,nextReadyMs:1501});assert(Object.isFrozen(result));
+  assert.deepEqual(f.calls,[input]);assert.equal(Object.keys(f.calls[0]).length,7);
+  assert.strictEqual(presentationRuntime.parseRankingPlayerInspect,rankingInspectAdapter.parseRankingPlayerInspect);
+});
+check("Ranking Inspect absent optional capability never affects ordinary map admission",()=>{
+  for(const module of [{},{ranking_inspect_abi_version:()=>1},{ranking_inspect_admission:()=>"{}"},
+    {ranking_inspect_abi_version:()=>2,ranking_inspect_admission:()=>{throw Error("must not call");}}])
+    assert.equal(presentationRuntime.readSharedRankingInspectAdmission(module,rankingAdmissionInput()),null);
+  assert.deepEqual(presentationRuntime.searchSharedMapRoute({getMir2MapRouteVersion:()=>1,getMir2MapRoutePlan:()=>Int32Array.of(0)},
+    {width:1,height:1,origin:{x:0,y:0},goal:{x:0,y:0},edges:new Uint8Array(1)}),{status:"ok",steps:[]});
+});
+check("Ranking Inspect strict input bounds booleans exact keys and non-data descriptors reject before getter",()=>{
+  const f=rankingAdmissionModule();
+  for(const delta of [{version:2},{opened:1},{rankingsReady:null},{pending:"false"},{playerId:-1},{playerId:4294967296},
+    {playerId:0.5},{playerId:-0},{nowMs:-1},{nowMs:Number.MAX_SAFE_INTEGER+1},{nextReadyMs:NaN},{nextReadyMs:1.5},{extra:true}])
+    assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,rankingAdmissionInput(delta)),null);
+  const missing=rankingAdmissionInput();delete missing.pending;
+  assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,missing),null);
+  let touched=0;const accessor=rankingAdmissionInput();Object.defineProperty(accessor,"opened",{enumerable:true,get(){touched++;return true;}});
+  assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,accessor),null);assert.equal(touched,0);assert.equal(f.calls.length,0);
+});
+check("Ranking Inspect JS does not duplicate shared readiness or cooldown planning",()=>{
+  const f=rankingAdmissionModule({version:1,ok:false});
+  for(const delta of [{opened:false},{rankingsReady:false},{pending:true},{nowMs:1000},{nowMs:0,nextReadyMs:9999}]) {
+    const input=rankingAdmissionInput(delta);
+    assert.deepEqual(presentationRuntime.readSharedRankingInspectAdmission(f.module,input),{version:1,ok:false});
+    assert.deepEqual(f.calls.at(-1),input);
+  }
+  assert.equal(f.calls.length,5);
+});
+check("Ranking Inspect strict rejection and success output shapes reject foreign fields or unsafe integers",()=>{
+  for(const reply of [{version:1,ok:false,objectId:0},{version:1,ok:true},{version:2,ok:false},{version:1,ok:0},
+    {version:1,ok:true,objectId:1,nextReadyMs:1501},{version:1,ok:true,objectId:4294967296,nextReadyMs:1501},
+    {version:1,ok:true,objectId:0,nextReadyMs:Number.MAX_SAFE_INTEGER+1},
+    {version:1,ok:true,objectId:0,nextReadyMs:-1},{version:1,ok:true,objectId:0,nextReadyMs:1501,extra:true}]) {
+    const f=rankingAdmissionModule(reply);assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,rankingAdmissionInput()),null);
+  }
+  for(const raw of ["{", "x".repeat(1025), '{"version":1,"ok":true,"objectId":0,"nextReadyMs":-0}']) {
+    const f=rankingAdmissionModule();f.module.ranking_inspect_admission=()=>raw;
+    assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,rankingAdmissionInput()),null);
+  }
+});
+check("Ranking Inspect whole canonical ABI response rejects raw and escaped duplicate keys",()=>{
+  const success='{"version":1,"ok":true,"objectId":0,"nextReadyMs":1501}',rejected='{"version":1,"ok":false}';
+  for(const [canonical,fields] of [[success,[["version",1],["ok",true],["objectId",0],["nextReadyMs",1501]]],
+    [rejected,[["version",1],["ok",false]]]]){
+    for(const [key,value] of fields){
+      const original=JSON.stringify(key)+":"+JSON.stringify(value);
+      const escaped='"\\u'+key.charCodeAt(0).toString(16).padStart(4,"0")+key.slice(1)+'":'+JSON.stringify(value);
+      for(const duplicate of [original,escaped]){
+        const raw=canonical.replace(original,original+","+duplicate);assert.notEqual(raw,canonical);
+        const f=rankingAdmissionModule();f.module.ranking_inspect_admission=()=>raw;
+        assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,rankingAdmissionInput()),null,key+":"+duplicate);
+      }
+    }
+  }
+});
+check("Ranking Inspect only fixed Rust canonical ordering and number forms publish ABI plans",()=>{
+  const canonical='{"version":1,"ok":true,"objectId":0,"nextReadyMs":1501}';
+  for(const raw of ['{"ok":true,"version":1,"objectId":0,"nextReadyMs":1501}',canonical+"\n"," "+canonical,
+    canonical.replace('"version"','"vers\\u0069on"'),canonical.replace('"objectId":0','"objectId":0e0'),
+    canonical.replace('"nextReadyMs":1501','"nextReadyMs":1501.0'),'{"ok":false,"version":1}',
+    '{"version":1,"ok":false}\n']){
+    const f=rankingAdmissionModule();f.module.ranking_inspect_admission=()=>raw;
+    assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,rankingAdmissionInput()),null,raw);
+  }
+  for(const [raw,input,expected] of [[canonical,rankingAdmissionInput(),{version:1,ok:true,objectId:0,nextReadyMs:1501}],
+    ['{"version":1,"ok":false}',rankingAdmissionInput(),{version:1,ok:false}],
+    ['{"version":1,"ok":true,"objectId":0,"nextReadyMs":9007199254740991}',
+      rankingAdmissionInput({nowMs:Number.MAX_SAFE_INTEGER-500,nextReadyMs:Number.MAX_SAFE_INTEGER-501}),
+      {version:1,ok:true,objectId:0,nextReadyMs:Number.MAX_SAFE_INTEGER}]]){
+    const f=rankingAdmissionModule();f.module.ranking_inspect_admission=()=>raw;
+    assert.deepEqual(presentationRuntime.readSharedRankingInspectAdmission(f.module,input),expected);
+  }
+});
+check("Ranking Inspect maximum u32 and safe JS clocks remain literal without u64 coercion",()=>{
+  const input=rankingAdmissionInput({playerId:4294967295,nowMs:Number.MAX_SAFE_INTEGER,nextReadyMs:0});
+  const f=rankingAdmissionModule({version:1,ok:true,objectId:4294967295,nextReadyMs:Number.MAX_SAFE_INTEGER});
+  assert.deepEqual(presentationRuntime.readSharedRankingInspectAdmission(f.module,input),
+    {version:1,ok:true,objectId:4294967295,nextReadyMs:Number.MAX_SAFE_INTEGER});assert.deepEqual(f.calls,[input]);
+});
+check("Ranking Inspect changed optional ABI identities and mutated input reject publication",()=>{
+  for(const edge of ["abi","getter","input","throw"]){
+    const input=rankingAdmissionInput(),f=rankingAdmissionModule(),getter=f.module.ranking_inspect_admission;
+    f.module.ranking_inspect_admission=function(json){const answer=getter(json);
+      if(edge==="abi")f.module.ranking_inspect_abi_version=()=>1;
+      if(edge==="getter")f.module.ranking_inspect_admission=()=>answer;
+      if(edge==="input")input.playerId=1;
+      if(edge==="throw")throw Error("optional getter unavailable");return answer;};
+    assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,input),null,edge);
+  }
+});
+check("Ranking Inspect reentrant ABI property and function reads invalidate outer publication",()=>{
+  for(const edge of ["property","abi","getter"]){
+    const input=rankingAdmissionInput(),f=rankingAdmissionModule(),base=f.module.ranking_inspect_admission;let entered=false,nested="unset";
+    const reenter=()=>{if(!entered){entered=true;nested=presentationRuntime.readSharedRankingInspectAdmission(f.module,input);}};
+    if(edge==="property")Object.defineProperty(f.module,"ranking_inspect_admission",{get(){reenter();return base;}});
+    if(edge==="abi")f.module.ranking_inspect_abi_version=()=>{reenter();return 1;};
+    if(edge==="getter")f.module.ranking_inspect_admission=json=>{reenter();return base(json);};
+    assert.equal(presentationRuntime.readSharedRankingInspectAdmission(f.module,input),null,edge);assert.equal(nested,null,edge);
+  }
+});
+function rankingInspectRawRow(uid=0) {
+  const pearl=pearlRawGood(uid),source=pearl.tooltipSource;
+  return {...JSON.parse(JSON.stringify(source.userItem)),name:source.info.name,icon:source.info.image,tooltipSource:JSON.parse(JSON.stringify(source))};
+}
+function rankingInspectPayload(delta={}) {
+  const equipment=Array(14).fill(null);equipment[0]=rankingInspectRawRow();equipment[13]=rankingInspectRawRow(42);
+  return {name:"Actual target",guildName:"Target guild",guildRank:"Officer",equipment,class:"Archer",gender:"Female",hair:7,
+    level:45,loverName:"Target lover",allowObserve:false,isHero:false,...delta};
+}
+check("Ranking PlayerInspect projects actual target facts and fourteen stable positional holes",()=>{
+  const input=rankingInspectPayload(),info=rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target");assert(info);
+  assert.equal(info.name,"Actual target");assert.equal(info.class,"Archer");assert.equal(info.gender,"Female");assert.equal(info.hair,7);
+  assert.equal(info.level,45);assert.equal(info.guildName,"Target guild");assert.equal(info.guildRank,"Officer");assert.equal(info.loverName,"Target lover");
+  assert.equal(info.allowObserve,false);assert.equal(info.isHero,false);assert.equal(info.equipment.length,14);
+  assert.equal(info.equipment[0].uniqueId,0);assert.equal(info.equipment[0].slotIndex,0);assert.equal(info.equipment[13].slotIndex,13);
+  assert(info.equipment.slice(1,13).every(item=>item===null));assert.equal(info.equipment[0].icon,input.equipment[0].tooltipSource.info.image);
+  assert.equal(info.equipment[0].sourceKind,"instance");assert(Object.isFrozen(info));assert(Object.isFrozen(info.equipment));
+});
+check("Ranking PlayerInspect rejects requester fallback wrong target Hero and missing identity facts",()=>{
+  assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload(),"Requester"),null);
+  for(const delta of [{name:"Requester"},{isHero:true},{hero:false,isHero:undefined},{class:"archer"},{class:4},{gender:1},
+    {hair:256},{level:65536},{level:"45"},{allowObserve:0},{guildName:null},{guildRank:undefined},{loverName:null}])
+    assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload(delta),"Actual target"),null);
+  for(const key of ["name","guildName","guildRank","class","gender","hair","level","loverName","allowObserve","isHero","equipment"]){
+    const input=rankingInspectPayload();delete input[key];assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target"),null,key);
+  }
+});
+check("Ranking PlayerInspect rejects short long sparse or fabricated equipment",()=>{
+  for(const equipment of [[],Array(13).fill(null),Array(15).fill(null),Array(14),[...Array(13).fill(null),{}]])
+    assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload({equipment}),"Actual target"),null);
+  const empty=rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload({equipment:Array(14).fill(null)}),"Actual target");
+  assert(empty);assert.deepEqual(empty.equipment,Array(14).fill(null));
+});
+check("Ranking PlayerInspect requires all raw User22 and actual template carrier facts",()=>{
+  for(const key of crystalItemSource.crystalUserItemFields){const input=rankingInspectPayload();delete input.equipment[0][key];
+    assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target"),null,key);}
+  for(const mutate of [row=>delete row.tooltipSource,row=>delete row.tooltipSource.info,row=>{row.tooltipSource.info=null;},
+    row=>{row.tooltipSource.userItem.count=2;},row=>{row.tooltipSource.info.item_index=99;},row=>{row.unique_id=Number.MAX_SAFE_INTEGER+1;},
+    row=>delete row.name,row=>delete row.icon,row=>{row.name="Requester item";},row=>{row.icon=65536;},row=>{row.icon=-1;},
+    row=>{row.unique_id="18446744073709551615";},row=>{row.tooltipSource.userItem.unique_id=Number.MAX_SAFE_INTEGER+1;}]){
+    const input=rankingInspectPayload();mutate(input.equipment[0]);assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target"),null);
+  }
+});
+check("Ranking PlayerInspect independently freezes actual raw carriers added stats and socket null holes",()=>{
+  const input=rankingInspectPayload(),before=JSON.parse(JSON.stringify(input.equipment[0]));
+  const info=rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target"),item=info.equipment[0];
+  assert.deepEqual(item.raw,before);assert.deepEqual(item.tooltipSource,before.tooltipSource);assert.deepEqual(item.tooltipSource.userItem.slots,[null]);
+  assert(Object.isFrozen(item.raw));assert(Object.isFrozen(item.raw.added_stats[0]));assert(Object.isFrozen(item.tooltipSource.userItem.slots));
+  input.equipment[0].added_stats[0].value=99;input.equipment[0].tooltipSource.userItem.slots[0]={invented:true};
+  assert.deepEqual(item.raw,before);assert.throws(()=>{item.raw.added_stats[0].value=99;},TypeError);
+});
+check("Ranking PlayerInspect keeps actual Gateway concrete stack icon distinct from catalogue image",()=>{
+  const input=rankingInspectPayload(),row=input.equipment[0];
+  row.count=50;row.tooltipSource.userItem.count=50;
+  Object.assign(row.tooltipSource.info,{item_type:8,shape:1,image:11});row.icon=3674;
+  const info=rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target");assert(info);
+  assert.equal(info.equipment[0].icon,3674);assert.equal(info.equipment[0].tooltipSource.info.image,11);
+});
+check("Ranking PlayerInspect duplicate root or socket UID identities reject",()=>{
+  const duplicate=rankingInspectPayload();duplicate.equipment[13]=rankingInspectRawRow(0);
+  assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(duplicate,"Actual target"),null);
+  const input=rankingInspectPayload(),row=input.equipment[0],child=rankingInspectRawRow(42).tooltipSource.userItem;
+  row.slots=[child];row.tooltipSource.userItem.slots=JSON.parse(JSON.stringify(row.slots));
+  row.tooltipSource.socketInfos=[JSON.parse(JSON.stringify(row.tooltipSource.info))];
+  assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target"),null);
+});
+check("Ranking PlayerInspect descriptor getters and unsafe source date facts never synthesize values",()=>{
+  let calls=0;const input=rankingInspectPayload();Object.defineProperty(input,"name",{enumerable:true,get(){calls++;return "Actual target";}});
+  assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(input,"Actual target"),null);assert.equal(calls,0);
+  const date=rankingInspectPayload();date.equipment[0].expire_info={expiry_binary_datetime:Number.MAX_SAFE_INTEGER+1};
+  date.equipment[0].tooltipSource.userItem.expire_info={...date.equipment[0].expire_info};
+  assert.equal(rankingInspectAdapter.parseRankingPlayerInspect(date,"Actual target"),null);
+});
+
+function rankingInspectComponentFixture() {
+  const source=readFileSync(new URL("../app/components/original-client-inspect-window.tsx",import.meta.url),"utf8");
+  const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+  const originalUi=loadTypeScriptModule(new URL("../lib/original-ui.ts",import.meta.url));
+  const jsx=(type,props)=>({type,props}),events=[],reads=[],exports={};
+  const requires={"react":{useMemo:fn=>fn()},"react/jsx-runtime":{jsx,jsxs:jsx,Fragment:"Fragment"},
+    "../../lib/original-ui":originalUi,"./original-client-inventory-utils":{originalItemIconPath:icon=>"memory-icon:"+icon},
+    "./original-client-crystal-item-tooltip":{OriginalCrystalItemTooltip:"SharedTooltip"},
+    "./original-client-item-tooltip":{OriginalItemTooltip:"BasicTooltip"},"./original-client-overlays":{SpriteButton:"CloseButton"},
+    "./original-client-panels":{useActiveItemTooltip(items,reader){return {activate:(item,node)=>events.push({kind:"activate",item,node}),
+      release:(item,node)=>events.push({kind:"release",item,node}),document(item){if(!reader)return null;reads.push(item);return reader(item);}};}}};
+  new Function("exports","require",compiled)(exports,name=>{assert(Object.hasOwn(requires,name),name);return requires[name];});
+  return {render:props=>exports.OriginalInspectWindow(props),events,reads};
+}
+check("Ranking actual Inspect component paints fourteen protocol indexes actual target and Original assets",()=>{
+  const f=rankingInspectComponentFixture(),info=rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload(),"Actual target");
+  const tree=f.render({t:(_key,_args,fallback)=>fallback,info,onClose:()=>{}}),nodes=pearlDomElements(tree);
+  const slots=nodes.filter(node=>Object.hasOwn(node.props,"data-inspect-slot"));assert.equal(slots.length,14);
+  assert.deepEqual(slots.map(node=>node.props["data-inspect-slot"]),[0,1,2,13,4,3,5,6,7,8,9,11,10,12]);
+  assert.equal(slots.filter(node=>node.props.children!==null).length,2);
+  assert.equal(slots[0].props.children.props["aria-label"],info.equipment[0].name);
+  assert.equal(nodes.filter(node=>node.type==="img"&&node.props.src==="/original-ui/Prguse/430.png").length,1);
+  assert.equal(nodes.filter(node=>node.type==="img"&&node.props.src==="/original-ui/Prguse/341.png").length,1);
+  assert.equal(nodes.find(node=>node.props.className==="character-name").props.children,"Actual target");
+  assert.equal(nodes.find(node=>Object.hasOwn(node.props,"data-inspect-guild")).props.children,"Target guild");
+  assert.equal(nodes.find(node=>Object.hasOwn(node.props,"data-inspect-rank")).props.children,"Officer");
+  assert(nodes.some(node=>Object.hasOwn(node.props,"data-inspect-lover")));
+  assert.equal(tree.props["data-inspect-gender"],"Female");assert.equal(tree.props["data-inspect-hair"],7);
+});
+check("Ranking actual Inspect component shares actual carriers through tooltip reader and exposes no item action",()=>{
+  const f=rankingInspectComponentFixture(),info=rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload(),"Actual target");
+  let closed=0;const document={sections:[],broken:false,sourceComplete:true};
+  const tree=f.render({t:(_key,_args,fallback)=>fallback,info,onClose:()=>closed++,onReadItemTooltip:item=>{
+    assert.strictEqual(item,info.equipment[item.slotIndex]);return document;}}),nodes=pearlDomElements(tree);
+  assert.deepEqual(f.reads,[info.equipment[0],info.equipment[13]]);
+  const buttons=nodes.filter(node=>node.type==="button");assert.equal(buttons.length,2);
+  for(const button of buttons){assert.equal(button.props.onClick,undefined);assert.equal(button.props.onDoubleClick,undefined);
+    for(const event of ["onPointerEnter","onPointerLeave","onFocus","onBlur","onPointerCancel","onPointerDown"])assert.equal(typeof button.props[event],"function",event);}
+  assert.equal(nodes.filter(node=>node.type==="SharedTooltip"&&node.props.document===document).length,2);
+  const node={},button=buttons[0];button.props.onPointerEnter({pointerType:"mouse",currentTarget:node});
+  button.props.onPointerCancel({currentTarget:node});assert.deepEqual(f.events.map(event=>event.kind),["activate","release"]);
+  assert.strictEqual(f.events[0].item,info.equipment[0]);nodes.find(node=>node.type==="CloseButton").props.onClick();assert.equal(closed,1);
+});
+check("Ranking actual ExtraWindows forwards onInspect unchanged and guards empty or closed inspect info",()=>{
+  const source=readFileSync(new URL("../app/components/original-client-extra-windows.tsx",import.meta.url),"utf8");
+  const ast=ts.createSourceFile("ranking-extra-windows.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  const ranking=[],inspect=[];
+  (function visit(node){if(ts.isJsxSelfClosingElement(node)){
+    if(node.tagName.getText(ast)==="RankingWindow")ranking.push(node);
+    if(node.tagName.getText(ast)==="OriginalInspectWindow")inspect.push(node);
+  }ts.forEachChild(node,visit);})(ast);
+  assert.equal(ranking.length,1);assert.equal(inspect.length,1);
+  const attr=ranking[0].attributes.properties.find(node=>ts.isJsxAttribute(node)&&node.name.text==="onInspect");
+  assert.equal(attr.initializer.expression.getText(ast),"ranking.onInspect");
+  let expression=inspect[0].parent;while(expression&&!ts.isConditionalExpression(expression))expression=expression.parent;
+  assert(expression);const guard=expression.condition;
+  const js=ts.transpileModule("return "+guard.getText(ast)+";",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+  const admitted=new Function("inspect",js);assert.equal(admitted(undefined),undefined);
+  assert.equal(admitted({open:false,info:{}}),false);assert.equal(admitted({open:true,info:null}),null);
+  const info={};assert.strictEqual(admitted({open:true,info}),info);
+});
+
+// Source25 actual request controller and bounded Page statements. All transports
+// below are inert JS sinks; fixed admission replies do not implement Rust policy.
+const rankingRequestsModule=loadTypeScriptModule(new URL("../lib/ranking-inspect-requests.ts",import.meta.url));
+function rankingRequestFixture() {
+  const controller=new rankingRequestsModule.RankingInspectRequests(),calls=[];
+  const owner={socket:{},connectionGeneration:4,sessionGeneration:8,sceneRevision:3,playerObjectId:17,mapFileName:"0"};
+  let reply={version:1,ok:true,objectId:0,nextReadyMs:1501},edge=null;
+  const module={ranking_inspect_abi_version:()=>1,ranking_inspect_admission(json){calls.push(JSON.parse(json));edge?.();return JSON.stringify(reply);}};
+  const core={readRankingInspectAdmission(input){return presentationRuntime.readSharedRankingInspectAdmission(module,input);}};
+  let source={owner,core,readAdmission:core.readRankingInspectAdmission,page:{rankType:0,rankIndex:0,onlineOnly:false,
+    entries:[{playerId:0,name:"Actual target"},{playerId:7,name:"Other target"}]},query:{rankType:0,rankIndex:0,onlineOnly:false},opened:true,pending:false};
+  const read=()=>source,wire={type:"inspect",objectId:0,ranking:true,hero:false};
+  return {controller,calls,module,core,owner,wire,read,set:delta=>{source={...source,...delta};return source;},
+    setReply:value=>{reply=value;},setEdge:value=>{edge=value;},reserve:(id=0,name="Actual target",now=1001)=>controller.reserve(read,id,name,now),
+    claim:(proof,command=wire,now=1001)=>controller.claim(proof,read(),command,now),
+    info:()=>rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload(),"Actual target")};
+}
+check("Ranking actual request controller reserves unique raw row ID0 and calls exact seven-field shared admission",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();assert(proof);assert(Object.isFrozen(proof));assert(Object.isFrozen(proof.owner));
+  assert.equal(proof.objectId,0);assert.equal(proof.expectedName,"Actual target");assert.strictEqual(proof.owner.socket,f.owner.socket);
+  assert.deepEqual(f.calls,[{version:1,opened:true,rankingsReady:true,pending:false,playerId:0,nowMs:1001,nextReadyMs:0}]);
+  assert.equal(f.controller.pending,true);
+});
+check("Ranking actual request controller missing mismatched or duplicated raw ID rows never invoke admission",()=>{
+  for(const entries of [[{playerId:7,name:"Other target"}],[{playerId:0,name:"Other target"}],
+    [{playerId:0,name:"Actual target"},{playerId:0,name:"Other target"}],
+    [{playerId:0,name:"Actual target"},{playerId:0,name:"Actual target"}]]){
+    const f=rankingRequestFixture();f.set({page:{...f.read().page,entries}});assert.equal(f.reserve(),null);assert.equal(f.calls.length,0);
+  }
+  const f=rankingRequestFixture();assert.equal(f.reserve(99),null);assert.equal(f.reserve(0,""),null);assert.equal(f.calls.length,0);
+});
+check("Ranking actual request controller delegates opened pending and matching-page facts without a JS readiness planner",()=>{
+  for(const [delta,flags] of [[{opened:false},{opened:false,rankingsReady:true,pending:false}],
+    [{pending:true},{opened:true,rankingsReady:true,pending:true}],
+    [{query:{rankType:1,rankIndex:0,onlineOnly:false}},{opened:true,rankingsReady:false,pending:false}]]){
+    const f=rankingRequestFixture();f.set(delta);f.setReply({version:1,ok:false});assert.equal(f.reserve(),null);
+    assert.equal(f.calls.length,1);assert.deepEqual(f.calls[0],{version:1,...flags,playerId:0,nowMs:1001,nextReadyMs:0});
+    assert.equal(f.controller.pending,false);
+  }
+});
+check("Ranking actual request controller refuses missing malformed or foreign checked admission plans",()=>{
+  for(const reply of [null,{version:1,ok:false},{version:1,ok:true,objectId:7,nextReadyMs:1501},
+    {version:1,ok:true,objectId:0,nextReadyMs:Number.MAX_SAFE_INTEGER+1},{version:1,ok:true,objectId:0,nextReadyMs:-1}]){
+    const f=rankingRequestFixture();f.setReply(reply);assert.equal(f.reserve(),null);assert.equal(f.controller.pending,false);
+  }
+});
+check("Ranking actual request controller proofs cannot be copied changed or consumed twice",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();assert(proof);
+  assert.equal(f.claim({...proof}),false);
+  for(const delta of [{objectId:7},{ranking:false},{hero:true},{extra:true},{type:"getRanking"}])assert.equal(f.claim(proof,{...f.wire,...delta}),false);
+  assert.equal(f.claim(proof),true);assert.equal(f.claim(proof),false);
+  f.controller.cancelDefinitelyUnsent(proof);assert.equal(f.controller.pending,true);
+});
+check("Ranking actual request controller getter source changes and recursive reservations cannot publish stale proofs",()=>{
+  for(const delta of [{opened:false},{pending:true},{core:{}},{readAdmission:()=>null}]){
+    const f=rankingRequestFixture();f.setEdge(()=>f.set(delta));assert.equal(f.reserve(),null);assert.equal(f.controller.pending,false);
+  }
+  const f=rankingRequestFixture();let recursive="unset";f.setEdge(()=>{recursive=f.reserve();});
+  assert(f.reserve());assert.equal(recursive,null);assert.equal(f.calls.length,1);
+});
+check("Ranking actual request controller final claim rejects physical owner Core and method replacement",()=>{
+  for(const change of [f=>({owner:{...f.owner,socket:{}}}),f=>({owner:{...f.owner,connectionGeneration:5}}),
+    f=>({owner:{...f.owner,sessionGeneration:9}}),f=>({owner:{...f.owner,sceneRevision:4}}),
+    f=>({owner:{...f.owner,mapFileName:"1"}}),()=>({core:{}}),()=>({readAdmission:()=>null})]){
+    const f=rankingRequestFixture(),proof=f.reserve();f.set(change(f));assert.equal(f.claim(proof),false);
+  }
+});
+check("Ranking actual request controller observed close reopen and page ABA cannot resurrect queued proofs",()=>{
+  for(const kind of ["window","page","query"]){
+    const f=rankingRequestFixture(),original=f.read(),proof=f.reserve();
+    f.set(kind==="window"?{opened:false}:kind==="page"?{page:{...original.page}}:{query:{...original.query,rankIndex:1}});
+    f.controller.observe(f.read());f.set(original);f.controller.observe(f.read());assert.equal(f.claim(proof),false,kind);
+  }
+});
+check("Ranking actual request controller clock rollback invalidates queued proof without replay",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();assert.equal(f.claim(proof,f.wire,1000),false);assert.equal(f.controller.pending,false);
+  assert.equal(f.claim(proof,f.wire,1001),false);
+});
+check("Ranking actual request controller entered flight survives cancellation time rollback and a new query until actual reply",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();assert.equal(f.claim(proof),true);f.controller.cancelDefinitelyUnsent(proof);
+  assert.equal(f.reserve(0,"Actual target",100000),null);assert.equal(f.controller.pending,true);
+  f.set({query:{rankType:1,rankIndex:0,onlineOnly:false}});f.controller.observe(f.read());assert.equal(f.controller.pending,true);
+  assert.equal(f.reserve(0,"Actual target",99999),null);assert.equal(f.controller.pending,true);
+  assert.equal(f.controller.receive(f.info(),f.read()),false);assert.equal(f.controller.pending,false);
+});
+check("Ranking actual request controller closed late valid reply drains without display or automatic retry",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();f.claim(proof);f.controller.closeDisplay();
+  assert.equal(f.controller.pending,true);assert.equal(f.controller.expectedName(f.owner),"Actual target");
+  assert.equal(f.controller.receive(f.info(),f.read()),false);assert.equal(f.controller.pending,false);assert.equal(f.calls.length,1);
+  assert.equal(f.claim(proof),false);
+});
+check("Ranking actual request controller wrong-name Hero and oldsocket lookup do not release entered flight",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();f.claim(proof);
+  assert.equal(f.controller.receive({...f.info(),name:"Requester"},f.read()),false);assert.equal(f.controller.pending,true);
+  assert.equal(f.controller.receive({...f.info(),isHero:true},f.read()),false);assert.equal(f.controller.pending,true);
+  assert.equal(f.controller.expectedName({...f.owner,socket:{}}),null);assert.equal(f.controller.pending,true);
+  assert.equal(f.controller.receive(f.info(),f.read()),true);assert.equal(f.controller.pending,false);
+});
+check("Ranking actual request controller only physical replacement or explicit retirement clears entered unknown",()=>{
+  for(const kind of ["newOwner","retire"]){const f=rankingRequestFixture(),proof=f.reserve();f.claim(proof);
+    if(kind==="newOwner"){f.set({owner:{...f.owner,socket:{},connectionGeneration:5}});f.controller.observe(f.read());}
+    else f.controller.retireConnection();
+    assert.equal(f.controller.pending,false);assert.equal(f.claim(proof),false);
+  }
+});
+check("Ranking legacy name correlation carries no nonce and admits only one entered flight",()=>{
+  const f=rankingRequestFixture(),proof=f.reserve();assert.deepEqual(Object.keys(proof).sort(),["expectedName","objectId","owner"]);
+  f.claim(proof);assert.equal(f.reserve(),null);assert.equal(f.calls.length,1);
+  // A same-name reply is the legacy protocol correlation. It is not proof of a
+  // fresh request nonce, independently owned wire ACK, or unique reply epoch.
+  assert.equal(f.controller.receive(f.info(),f.read()),true);
+});
+
+const rankingPageFunctions=new Map();let rankingPlayerInspectCase;
+(function visit(node){if(ts.isFunctionDeclaration(node)&&node.name&&["currentRankingInspectSource","inspectRankingPlayer","closeRankingInspect",
+  "readRankingInspectTooltip","applyRankingPacket","sameSocialPhysicalOwner"].includes(node.name.text))rankingPageFunctions.set(node.name.text,node);
+  if(ts.isCaseClause(node)&&ts.isStringLiteral(node.expression)&&node.expression.text==="PlayerInspect")rankingPlayerInspectCase=node;
+  ts.forEachChild(node,visit);})(parityPageAst);
+assert.equal(rankingPageFunctions.size,6);assert(rankingPlayerInspectCase);
+const rankingRawGuard=paritySendStatements.find(node=>ts.isIfStatement(node)&&node.expression.getText(parityPageAst).includes('command.type === "inspect"'));
+const rankingFinalGuard=paritySendStatements.find(node=>ts.isIfStatement(node)&&node.expression.getText(parityPageAst).includes('wireCommand.type === "inspect"'));
+assert(rankingRawGuard&&rankingFinalGuard);
+const rankingPageFixtureJs=ts.transpileModule([...rankingPageFunctions.values()].map(node=>node.getText(parityPageAst)).join("\n")+
+  "\nfunction receiveInspect(payload){switch('PlayerInspect'){"+rankingPlayerInspectCase.getText(parityPageAst)+"}}\n"+
+  "function finalRawSend(command,options){"+rankingRawGuard.getText(parityPageAst)+
+  "\nconst socket=socketRef.current,serialized=JSON.stringify(command),wireCommand=JSON.parse(serialized);beforeFinal?.();\n"+
+  rankingFinalGuard.getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}"+
+  "\nreturn {currentRankingInspectSource,inspectRankingPlayer,closeRankingInspect,readRankingInspectTooltip,applyRankingPacket,receiveInspect,finalRawSend};",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+function rankingPageFixture() {
+  const f=rankingRequestFixture(),received=[],sent=[],tooltips=[],ref=current=>({current});let api,clock=1001,beforeFinal=null,throwSend=false,spectator=false,owner=f.owner;
+  const socket={readyState:1,send(body){sent.push(JSON.parse(body));if(throwSend)throw Error("mock unknown send");}};owner={...owner,socket};
+  const core={...f.core,readItemTooltip(item,viewer,now){tooltips.push({item,viewer,now});return tooltipDocumentFixture;}};
+  const query={rankType:0,rankIndex:0,onlineOnly:false},page=f.read().page,world={rankings:{"0:false":page},playerObjectId:17,
+    entities:[{objectId:17,level:33,classKey:"Wizard",genderKey:"Male"}],playerCrystalStats:[{stat:4,value:7}],playerWeights:[1,2,3],currentWeight:2,maxWeight:9};
+  const scope={rankingInspectRequestsRef:ref(f.controller),rankingInspectBindingRef:ref(null),rankingInspectOpenRef:ref(false),
+    questCoreRuntimeRef:ref(core),rankingQueriesRef:ref({desired:query,pending:false,receive(type,actualOwner){received.push({type,owner:actualOwner});return query;},wantsAnother:()=>false}),
+    rankingWindowRef:ref(true),worldRef:ref(world),socketRef:ref(socket),WebSocket:{OPEN:1},document:{visibilityState:"visible"},performance:{now:()=>clock},
+    isSpectatorBrowserMode:()=>spectator,currentSocialReplyOwner:()=>owner,currentSocialReceiveOwner:()=>owner,
+    rankingPageKey:(type,online)=>`${type}:${online}`,setRankingInspectInfo:value=>{scope.display=value;},cancelPlayerUiWorldIntent:()=>{},
+    parseRankingPlayerInspect:rankingInspectAdapter.parseRankingPlayerInspect,console:{error:()=>{}},Date:{now:()=>1234567},
+    updateWorld:fn=>{scope.worldRef.current=fn(scope.worldRef.current);},numberOrUndefined:value=>typeof value==="number"?value:undefined,
+    mapClassKey:value=>value,renderRankingRequests:()=>{},issueRankingRequest:()=>{},get beforeFinal(){return beforeFinal;},
+    send:(command,options)=>api.finalRawSend(command,options)};
+  api=new Function("scope","with(scope){"+rankingPageFixtureJs+"}")(scope);
+  return {f,scope,api,core,owner,socket,sent,received,tooltips,setClock:value=>{clock=value;},setBeforeFinal:value=>{beforeFinal=value;},
+    setOwner:value=>{owner=value;},setSpectator:value=>{spectator=value;},setThrowSend:value=>{throwSend=value;}};
+}
+check("Ranking actual Core facade forwards identical input to optional presentation ABI without planning",()=>{
+  const source=readFileSync(new URL("../lib/client-core-runtime.ts",import.meta.url),"utf8"),ast=ts.createSourceFile("ranking-core.ts",source,ts.ScriptTarget.Latest,true),methods=[];
+  (function visit(node){if(ts.isMethodDeclaration(node)&&node.name.getText(ast)==="readRankingInspectAdmission")methods.push(node);ts.forEachChild(node,visit);})(ast);
+  assert.equal(methods.length,1);const input=rankingAdmissionInput(),module=rankingAdmissionModule();
+  const js=ts.transpileModule("return {"+methods[0].getText(ast)+"};",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+  const facade=new Function("presentation","readSharedRankingInspectAdmission",js)(module.module,presentationRuntime.readSharedRankingInspectAdmission);
+  assert.deepEqual(facade.readRankingInspectAdmission(input),{version:1,ok:true,objectId:0,nextReadyMs:1501});assert.deepEqual(module.calls,[input]);
+});
+check("Ranking actual Page source captures current Core method physical owner query page and known UI readiness",()=>{
+  const page=rankingPageFixture(),source=page.api.currentRankingInspectSource();
+  assert.strictEqual(source.core,page.core);assert.strictEqual(source.readAdmission,page.core.readRankingInspectAdmission);
+  assert.strictEqual(source.owner,page.owner);assert.strictEqual(source.page,page.scope.worldRef.current.rankings["0:false"]);
+  page.scope.document.visibilityState="hidden";assert.equal(page.api.currentRankingInspectSource().opened,false);
+  page.setSpectator(true);assert.equal(page.api.currentRankingInspectSource().owner,null);
+});
+check("Ranking actual Page inspect gesture sends exact four raw fields UID0 through one final proof claim",()=>{
+  const page=rankingPageFixture();page.api.inspectRankingPlayer(0,"Actual target");
+  assert.deepEqual(page.sent,[{type:"inspect",objectId:0,ranking:true,hero:false}]);assert.equal(page.f.controller.pending,true);
+  page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,1);
+});
+check("Ranking actual Page raw Inspect requires proof and final claim directly precedes actual socket send",()=>{
+  const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+1,paritySocketIndex);
+  const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);
+  assert.equal(sends.length,1);assert.equal(sends[0].arguments[0].getText(parityPageAst),"serialized");
+  const listeners=paritySendStatements.map((node,index)=>({node,index})).filter(({node})=>node.getText(parityPageAst).includes("window.dispatchEvent"));
+  assert(listeners.length>0);assert(listeners.every(({index})=>index<finalIndex));assert.equal(page.sent.length,0);
+});
+check("Ranking actual Page final callback owner Core and admission method changes block inspect sink",()=>{
+  for(const change of [page=>page.setOwner({...page.owner,sessionGeneration:9}),page=>{page.scope.questCoreRuntimeRef.current={...page.core};},
+    page=>{page.core.readRankingInspectAdmission=()=>null;},page=>{page.scope.rankingWindowRef.current=false;}]){
+    const page=rankingPageFixture();page.setBeforeFinal(()=>change(page));page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,0);
+  }
+});
+check("Ranking actual Page unknown socket outcome retains entered flight and does not resend",()=>{
+  const page=rankingPageFixture();page.setThrowSend(true);page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,1);
+  assert.equal(page.f.controller.pending,true);page.setThrowSend(false);page.setClock(99999);page.api.inspectRankingPlayer(0,"Actual target");
+  assert.equal(page.sent.length,1);assert.equal(page.f.controller.pending,true);
+});
+check("Ranking actual Page receiver rejects wrong target Hero and oldsocket before draining actual pending",()=>{
+  const page=rankingPageFixture();page.api.inspectRankingPlayer(0,"Actual target");
+  for(const info of [rankingInspectPayload({name:"Requester"}),rankingInspectPayload({isHero:true})]){
+    page.api.receiveInspect({info});assert.equal(page.f.controller.pending,true);assert.equal(page.scope.rankingInspectOpenRef.current,false);
+  }
+  page.setOwner({...page.owner,socket:{}});page.api.receiveInspect({info:rankingInspectPayload()});assert.equal(page.f.controller.pending,true);
+  page.setOwner(page.owner);page.api.receiveInspect({info:rankingInspectPayload()});assert.equal(page.f.controller.pending,false);
+  assert.equal(page.scope.rankingInspectOpenRef.current,true);assert.equal(page.scope.display.name,"Actual target");
+});
+check("Ranking actual Page closed late valid PlayerInspect drains without mounting a window",()=>{
+  const page=rankingPageFixture();page.api.inspectRankingPlayer(0,"Actual target");page.api.closeRankingInspect();
+  page.api.receiveInspect({info:rankingInspectPayload()});assert.equal(page.f.controller.pending,false);
+  assert.equal(page.scope.rankingInspectOpenRef.current,false);assert.equal(page.scope.rankingInspectBindingRef.current,null);assert.equal(page.scope.display,null);
+});
+check("Ranking actual applyRankingPacket rejects raw missing malformed ID or name before query receive",()=>{
+  for(const entry of [{name:"Actual target"},{playerId:null,name:"Actual target"},{playerId:"0",name:"Actual target"},
+    {playerId:-1,name:"Actual target"},{playerId:2147483648,name:"Actual target"},{playerId:0.5,name:"Actual target"},
+    {playerId:0},{playerId:0,name:""},{playerId:0,name:"bad\0name"},{playerId:0,name:7}]){
+    const page=rankingPageFixture();page.api.applyRankingPacket({rankType:0,count:1,listingDetails:[entry]});assert.equal(page.received.length,0);
+  }
+  const page=rankingPageFixture();page.api.applyRankingPacket({rankType:0,count:1,listingDetails:[{playerId:0,name:"Actual target",level:45,class:"Archer"}]});
+  assert.equal(page.received.length,1);assert.equal(page.scope.worldRef.current.rankings["0:false"].entries[0].playerId,0);
+  assert.equal(page.scope.worldRef.current.rankings["0:false"].entries[0].name,"Actual target");
+});
+check("Ranking actual Page tooltip uses actual requester viewer and inspected carrier references without template stats",()=>{
+  const page=rankingPageFixture();page.api.inspectRankingPlayer(0,"Actual target");page.api.receiveInspect({info:rankingInspectPayload()});
+  const info=page.scope.display,item=info.equipment[0];assert.strictEqual(page.api.readRankingInspectTooltip(item),tooltipDocumentFixture);
+  assert.strictEqual(page.tooltips[0].item,item);assert.deepEqual(page.tooltips[0].viewer,{level:33,className:"Wizard",gender:"Male",
+    crystalStats:[{stat:4,value:7}],weights:[1,2,3],currentWeightKnown:true,currentWeight:2,maxWeight:9});
+  assert.equal(page.tooltips[0].now,1234567);assert.equal(page.api.readRankingInspectTooltip({...item}),null);
+});
+check("Ranking actual Page tooltip physical session current Core method and equipment reference fences reject stale readers",()=>{
+  for(const change of [page=>page.setOwner({...page.owner,socket:{}}),page=>page.setOwner({...page.owner,sessionGeneration:9}),
+    page=>page.setOwner({...page.owner,sceneRevision:4}),page=>{page.scope.questCoreRuntimeRef.current={...page.core};},
+    page=>{page.core.readItemTooltip=()=>tooltipDocumentFixture;},page=>{page.scope.rankingInspectOpenRef.current=false;}]){
+    const page=rankingPageFixture();page.api.inspectRankingPlayer(0,"Actual target");page.api.receiveInspect({info:rankingInspectPayload()});
+    const item=page.scope.display.equipment[0];change(page);assert.equal(page.api.readRankingInspectTooltip(item),null);assert.equal(page.tooltips.length,0);
+  }
+  const page=rankingPageFixture();page.api.inspectRankingPlayer(0,"Actual target");page.api.receiveInspect({info:rankingInspectPayload()});
+  const binding=page.scope.rankingInspectBindingRef.current,item=binding.info.equipment[0];
+  binding.tooltip=page.core.readItemTooltip=function(){page.setOwner({...page.owner,sessionGeneration:9});return tooltipDocumentFixture;};
+  assert.equal(page.api.readRankingInspectTooltip(item),null);
+});
+check("Ranking actual Page binds Ranking onInspect receiver and readonly fourteen-position Inspect window",()=>{
+  const extra=[];(function visit(node){if(ts.isJsxSelfClosingElement(node)&&node.tagName.getText(parityPageAst)==="ExtraWindows")extra.push(node);ts.forEachChild(node,visit);})(parityPageAst);
+  assert.equal(extra.length,1);const attrs=new Map(extra[0].attributes.properties.filter(ts.isJsxAttribute).map(node=>[node.name.text,node.initializer?.expression]));
+  assert(attrs.get("ranking").getText(parityPageAst).includes("onInspect:inspectRankingPlayer"));
+  assert(attrs.get("inspect").getText(parityPageAst).includes("info:rankingInspectInfo"));
+  assert(attrs.get("inspect").getText(parityPageAst).includes("onReadItemTooltip:readRankingInspectTooltip"));
+  const inspected=rankingInspectAdapter.parseRankingPlayerInspect(rankingInspectPayload(),"Actual target"),f=rankingInspectComponentFixture();
+  const tree=f.render({t:(_key,_args,fallback)=>fallback,info:inspected,onClose:()=>{}}),nodes=pearlDomElements(tree);
+  assert.equal(nodes.filter(node=>Object.hasOwn(node.props,"data-inspect-slot")).length,14);
+  assert(nodes.filter(node=>node.type==="button").every(node=>!node.props.onClick&&!node.props.onDoubleClick));
+});
+
+check("Ranking active Inspect blocks actual older Hero and Fishing Page paths through shared modal ref",()=>{
+  const hero=heroPageFixture();assert.equal(hero.api.parityIngress({...hero.proof.wire},{heroProof:hero.proof}),true);
+  hero.scope.rankingInspectOpenRef.current=true;
+  assert.equal(hero.api.referenceWindowsBlockGameplay(),true);
+  assert.equal(hero.api.heroInputAllowed(),false);assert.equal(hero.api.heroProofCurrent(hero.proof,hero.proof.wire),false);
+  assert.equal(hero.api.parityFinal({...hero.proof.wire},{heroProof:hero.proof},hero.socket),false);
+  assert.equal(hero.sent.length,0);assert.equal(hero.scope.heroOperationsRef.current.pending.state,"reserved");
+  const fishing=worldFishingPageFixture();assert.equal(fishing.scope.rankingInspectOpenRef.current,false);
+  fishing.scope.rankingInspectOpenRef.current=true;
+  assert.equal(fishing.api.worldFishingPureUiBlocked(),true);
+  assert.equal(fishing.api.beginWorldFishingGesture(fishing.pointer),null);assert.equal(fishing.sent.length,0);assert.equal(fishing.requests.length,0);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

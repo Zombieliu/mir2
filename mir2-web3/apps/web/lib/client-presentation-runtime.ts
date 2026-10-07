@@ -1,4 +1,7 @@
 import { npcPearlJson } from "./npc-pearl-buy-source";
+export { readSharedRankingInspectAdmission, parseRankingPlayerInspect } from "./shared-ranking-inspect";
+export type { RankingInspectAdmissionInput, RankingInspectAdmissionPlan, RankingInspectEquipment, RankingPlayerInspect, RankingInspectWasmModule } from "./shared-ranking-inspect";
+import type { RankingInspectWasmModule } from "./shared-ranking-inspect";
 import { npcPearlBuyInput, parseNpcPearlBuyPlan, type NpcPearlBuyInput, type NpcPearlBuyPlan } from "./npc-pearl-buy";
 export type { NpcPearlBuyInput, NpcPearlBuyPlan } from "./npc-pearl-buy";
 import { readSharedItemTooltip, type CrystalTooltipItem, type CrystalTooltipDocument, type CrystalTooltipRuntime } from "./shared-item-tooltip";
@@ -58,7 +61,7 @@ export type MapRouteWasmModule = {
   getMir2MapRoutePlan?: (width: number, height: number, ox: number, oy: number, gx: number, gy: number,
     edges: Uint8Array) => Int32Array;
 };
-export type PresentationWasmModule = FishingClickWasmModule & {
+export type PresentationWasmModule = FishingClickWasmModule & RankingInspectWasmModule & {
   npc_pearl_buy_abi_version?: () => number;
   npc_pearl_buy_plan?: (allowsBuy: boolean, selected: boolean, usePearls: boolean, uniqueId: number, price: number,
     stock: number, quantity: number, walletKnown: boolean, pearls: number, occupied: number, infoPrice: number, rate: number) => string;

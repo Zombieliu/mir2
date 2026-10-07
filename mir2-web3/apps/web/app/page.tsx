@@ -116,6 +116,8 @@ import type { GuildStorageTooltipItem } from "./components/original-client-guild
 import { GuildBuffAuthority, GuildBuffOperations, type GuildBuffActionDto, type GuildBuffProof } from "../lib/guild-buff-ui";
 import { guildRankSaveCommands, projectGuildRanks, resolveFriendCharacterIndex, RankingQueries, type RankingQuery, type RankingQueryProof, type ProjectedGuildRanks } from "../lib/social-parity-actions";
 import { rankingTabKey } from "../lib/stage5-window-adapters";
+import { RankingInspectRequests, type RankingInspectProof, type RankingInspectSource } from "../lib/ranking-inspect-requests";
+import { parseRankingPlayerInspect, type RankingPlayerInspect, type RankingInspectEquipment } from "../lib/shared-ranking-inspect";
 import { StorageRentalConfirmation, type StorageRentalProof, type StorageRentalFacts } from "../lib/storage-rental-confirmation";
 import { projectSocialInventory, projectOwnTradeItems, projectGuildStorageItems, type SocialItemSlot } from "../lib/social-item-window-model";
 import { SocialWindowOperations, socialWindowItemCommand, guildPermissionsFromOptions, applyGuildStorageChange, type SocialWindowOperationKind, type SocialWindowOperationProof } from "../lib/social-window-operations";
@@ -2172,6 +2174,11 @@ export default function HomePage() {
   const guildRanksRef = useRef<{owner: SocialReplyOwner; guildName: string; value: ProjectedGuildRanks} | null>(null);
   const socialFriendsRef = useRef<{owner: SocialReplyOwner; entries: ReturnType<typeof normalizeFriendList>} | null>(null);
   const rankingQueriesRef = useRef(new RankingQueries());
+  const rankingInspectRequestsRef = useRef(new RankingInspectRequests());
+  const rankingInspectBindingRef = useRef<{info:RankingPlayerInspect; owner:SocialReplyOwner; core:ClientCoreRuntime;
+    tooltip:ClientCoreRuntime["readItemTooltip"]}|null>(null);
+  const rankingInspectOpenRef = useRef(false);
+  const [rankingInspectInfo,setRankingInspectInfo] = useState<RankingPlayerInspect|null>(null);
   const [, renderRankingRequests] = useState(0);
   const socialItemWindowsRef = useRef({guild: false, trade: false});
   const [, renderSocialItems] = useState(0);
@@ -2838,6 +2845,7 @@ export default function HomePage() {
   function setShowRanking(value: boolean | ((prior: boolean) => boolean)) {
     const open = typeof value === "function" ? value(rankingWindowRef.current) : value;
     const wasOpen = rankingWindowRef.current; rankingWindowRef.current = open;
+    rankingInspectRequestsRef.current.observe(currentRankingInspectSource());
     setShowRankingState(open);
     if (open && !wasOpen) refreshRanking();
   }
@@ -3035,6 +3043,7 @@ export default function HomePage() {
     setShowFriends(false);
     setShowBonds(false);
     setShowRanking(false);
+    closeRankingInspect();
     setShowMarket(false);
     setShowConquest(false);
     setShowTrade(false);
@@ -6170,7 +6179,7 @@ export default function HomePage() {
   }
 
   /** Every UI and compatibility command enters this session-owned send gate. */
-  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof }): boolean {
+  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof }): boolean {
     // Supported ordinary combat enters through Rust outputs with a live local proof.
     if(combatIngressRef.current?.supported()&&["attack","rangeAttack","magic","spellToggle"].includes(String(command.type)))return false;
     // Preserve the original callback/intent token through every synchronous
@@ -6253,7 +6262,7 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
@@ -6292,6 +6301,8 @@ export default function HomePage() {
     if (options?.creatureProof && (!heroPetOpenRef.current || !creatureOperationsRef.current.allows(options.creatureProof, currentCreatureSource(), command))) return false;
     if (["removeFriend", "addMemo", "refreshFriends", "editGuildMember"].includes(String(command.type)) && !options?.socialRosterProof) return false;
     if (command.type === "getRanking" && !options?.rankingProof) return false;
+    if (command.type === "inspect" && !options?.rankingInspectProof
+      || options?.rankingInspectProof && command.type !== "inspect") return false;
     if (["groupInvite", "guildInvite", "marriageReply", "divorceReply", "mentorReply"].includes(String(command.type)) && !options?.socialReplyProof) return false;
     if (command.type === "chat" && command.message === "@ADDSTORAGE" && !options?.storageRentalProof) return false;
     if (!socialItemMutationAllowed(command, options?.socialItemProof)) return false;
@@ -6504,6 +6515,9 @@ export default function HomePage() {
     // No external callback follows Core entry before this exact send.
     if (options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket,
       () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))) return false;
+    if (wireCommand.type === "inspect" && (!options?.rankingInspectProof
+      ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket
+      ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))) return false;
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
@@ -7811,7 +7825,7 @@ export default function HomePage() {
   }
   function worldFishingPureUiBlocked(): boolean {
     const windows = playerReferenceWindowsRef.current;
-    return windows.help || windows.hotkeys || windows.options || windows.capture
+    return windows.help || windows.hotkeys || windows.options || windows.capture || rankingInspectOpenRef.current
       || mapRouteLocalModalRef.current || mapRoutePageBlockedRef.current || skillBarPointerHeldRef.current
       || heroManagementOpenRef.current || questWindowOpenRef.current || bevyHpLocalOverlayOpenRef.current || questReactModalOpenRef.current
       || bagOpenRef.current || characterOpenRef.current || questLogOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
@@ -9910,7 +9924,7 @@ export default function HomePage() {
   }
   function referenceWindowsBlockGameplay() {
     const windows = playerReferenceWindowsRef.current;
-    return windows.help || windows.hotkeys || windows.options || windows.capture;
+    return windows.help || windows.hotkeys || windows.options || windows.capture || rankingInspectOpenRef.current;
   }
   function cancelPlayerUiWorldIntent() {
     retireWorldFishingGesture();
@@ -10556,6 +10570,7 @@ export default function HomePage() {
   }
   function issueRankingRequest(query: RankingQuery) {
     const proof = rankingQueriesRef.current.request(query, currentSocialReplyOwner());
+    rankingInspectRequestsRef.current.observe(currentRankingInspectSource());
     renderRankingRequests(n => n + 1);
     if (!proof) return;
     try {
@@ -10574,6 +10589,48 @@ export default function HomePage() {
     if (rankingQueriesRef.current.pending || !page || page.rankIndex !== query.rankIndex || !Number.isSafeInteger(page.count)) return;
     const rankIndex = Math.max(0, Math.min(Math.max(0, page.count - 20), query.rankIndex + Math.sign(direction)));
     if (rankIndex !== query.rankIndex) issueRankingRequest({...query, rankIndex});
+  }
+  function currentRankingInspectSource():RankingInspectSource {
+    const core=questCoreRuntimeRef.current, query=rankingQueriesRef.current.desired;
+    return {owner:isSpectatorBrowserMode()?null:currentSocialReplyOwner(false),core,
+      readAdmission:core?.readRankingInspectAdmission??null,
+      page:worldRef.current.rankings[rankingPageKey(query.rankType,query.onlineOnly)]??null,
+      query,opened:rankingWindowRef.current && document.visibilityState==="visible",
+      pending:Boolean(rankingQueriesRef.current.pending)};
+  }
+  function inspectRankingPlayer(playerId:number,name:string) {
+    let proof:RankingInspectProof|null=null;
+    try {
+      proof=rankingInspectRequestsRef.current.reserve(currentRankingInspectSource,playerId,name,Math.floor(performance.now()));
+      if (!proof) return;
+      rankingInspectBindingRef.current=null; rankingInspectOpenRef.current=false; setRankingInspectInfo(null);
+      if (!send({type:"inspect",objectId:proof.objectId,ranking:true,hero:false},{rankingInspectProof:proof})) {
+        rankingInspectRequestsRef.current.cancelDefinitelyUnsent(proof);
+      }
+    } catch(error) {
+      if (proof) rankingInspectRequestsRef.current.cancelDefinitelyUnsent(proof);
+      console.error("[mir2] ranking inspect outcome is unknown",error);
+    }
+  }
+  function closeRankingInspect() {
+    rankingInspectRequestsRef.current.closeDisplay();
+    rankingInspectBindingRef.current=null; rankingInspectOpenRef.current=false; setRankingInspectInfo(null);
+  }
+  function readRankingInspectTooltip(item:RankingInspectEquipment):CrystalTooltipDocument|null {
+    const binding=rankingInspectBindingRef.current,owner=currentSocialReplyOwner();
+    if (!binding||!rankingInspectOpenRef.current||!owner||!sameSocialPhysicalOwner(binding.owner,owner)
+      ||binding.owner.sceneRevision!==owner.sceneRevision||binding.owner.mapFileName!==owner.mapFileName
+      ||binding.core!==questCoreRuntimeRef.current||binding.core.readItemTooltip!==binding.tooltip
+      ||!binding.info.equipment.includes(item)) return null;
+    const current=worldRef.current,player=current.entities.find(e=>e.objectId===current.playerObjectId);
+    const result=binding.tooltip.call(binding.core,item,{level:player?.level,className:player?.classKey??null,
+      gender:player?.genderKey??null,crystalStats:current.playerCrystalStats??null,weights:current.playerWeights??null,
+      currentWeightKnown:current.playerWeights!=null,currentWeight:current.currentWeight,maxWeight:current.maxWeight},Date.now());
+    const after=currentSocialReplyOwner();
+    return rankingInspectBindingRef.current===binding && rankingInspectOpenRef.current && after
+      && sameSocialPhysicalOwner(binding.owner,after) && binding.owner.sceneRevision===after.sceneRevision
+      && binding.owner.mapFileName===after.mapFileName && questCoreRuntimeRef.current===binding.core
+      && binding.core.readItemTooltip===binding.tooltip ? result : null;
   }
   function refreshFriends() { sendSocialRosterCommand("friend", {type: "refreshFriends"}); }
   function friendCharacterIndex(name: string): number | null {
@@ -12244,6 +12301,7 @@ export default function HomePage() {
     tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
     guildStorageRawRef.current = null; guildPermissionsRef.current = null; guildRanksRef.current = null;
     socialFriendsRef.current = null; rankingQueriesRef.current.retire();
+    rankingInspectRequestsRef.current.retireConnection(); closeRankingInspect();
     socialCatalogRef.current.clear();
     socialCharacterIndexRef.current.current = null;
     renderSocialItems(n => n + 1);
@@ -15985,12 +16043,14 @@ export default function HomePage() {
 
       // Player inspection window ----------------------------------------------
       case "PlayerInspect": {
-        const info = payload.info as Record<string, unknown> | undefined;
-        const name = info ? stringOrFallback(info.name, "") : "";
-        appendLog(
-          t("ui.playerInspect", [name || "?"], `Inspecting ${name || "player"}.`),
-          "system",
-        );
+        const source=currentRankingInspectSource(),expected=rankingInspectRequestsRef.current.expectedName(source.owner);
+        const info=expected===null?null:parseRankingPlayerInspect(payload.info,expected);
+        if (!info||!rankingInspectRequestsRef.current.receive(info,source)||!source.owner
+          ||!source.core||source.core!==questCoreRuntimeRef.current) break;
+        const core=source.core as ClientCoreRuntime;
+        rankingInspectBindingRef.current={info,owner:source.owner,core,tooltip:core.readItemTooltip};
+        cancelPlayerUiWorldIntent();
+        rankingInspectOpenRef.current=true; setRankingInspectInfo(info);
         break;
       }
 
@@ -16858,19 +16918,21 @@ export default function HomePage() {
     if (!Number.isSafeInteger(payload.rankType) || !Number.isSafeInteger(payload.count)
       || Number(payload.count) < 0 || Number(payload.count) > 0x7fff_ffff
       || !Array.isArray(payload.listingDetails) || payload.listingDetails.length > 20) return;
+    if (payload.listingDetails.some(entry=>!entry||typeof entry!=="object"||Array.isArray(entry)
+      ||!Number.isSafeInteger(entry.playerId)||entry.playerId<0||entry.playerId>0x7fff_ffff
+      ||typeof entry.name!=="string"||entry.name.length===0||entry.name.length>256||entry.name.includes("\0"))) return;
     const request = rankingQueriesRef.current.receive(payload.rankType, currentSocialReceiveOwner());
     if (!request) return;
     const {rankType, rankIndex, onlineOnly} = request;
     const listingDetails = Array.isArray(payload.listingDetails) ? payload.listingDetails : [];
-    const listings = Array.isArray(payload.listings) ? payload.listings : [];
     const entries = listingDetails.flatMap((entry, index): RankingEntry[] => {
       if (!entry || typeof entry !== "object") return [];
       const record = entry as Record<string, unknown>;
       return [
         {
           rank: rankIndex + index + 1,
-          playerId: numberOrUndefined(record.playerId ?? listings[index]) ?? 0,
-          name: stringOrFallback(record.name, `Player ${rankIndex + index + 1}`),
+          playerId: record.playerId as number,
+          name: record.name as string,
           level: numberOrUndefined(record.level) ?? 0,
           classKey: mapClassKey(record.class),
         },
@@ -16897,6 +16959,7 @@ export default function HomePage() {
         rankingCurrentKey: key,
       };
       worldRef.current = nextWorld;
+      rankingInspectRequestsRef.current.observe(currentRankingInspectSource());
       return nextWorld;
     });
     renderRankingRequests(n => n + 1);
@@ -19494,7 +19557,8 @@ export default function HomePage() {
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: rankingTabKey(rankingQueriesRef.current.desired.rankType, rankingQueriesRef.current.desired.onlineOnly),
         page: !rankingQueriesRef.current.pending && extraWindowData.rankingPage?.rankType === rankingQueriesRef.current.desired.rankType && extraWindowData.rankingPage?.onlineOnly === rankingQueriesRef.current.desired.onlineOnly && extraWindowData.rankingPage?.rankIndex === rankingQueriesRef.current.desired.rankIndex ? extraWindowData.rankingPage : null,
         onlineOnly: rankingQueriesRef.current.desired.onlineOnly, requestPending: Boolean(rankingQueriesRef.current.pending), playerName: self?.name ?? null,
-        onSelectTab: requestRanking, onRefresh: refreshRanking, onToggleOnlineOnly: setRankingOnlineOnly, onPrevious: () => moveRankingRows(-1), onNext: () => moveRankingRows(1) }}
+        onSelectTab: requestRanking, onRefresh: refreshRanking, onToggleOnlineOnly: setRankingOnlineOnly, onPrevious: () => moveRankingRows(-1), onNext: () => moveRankingRows(1),onInspect:inspectRankingPlayer }}
+      inspect={{open:rankingInspectOpenRef.current,info:rankingInspectInfo,onClose:closeRankingInspect,onReadItemTooltip:readRankingInspectTooltip}}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
       trade={{ open: showTrade, onClose: () => { if (tradeLifecycleRef.current.state === "closed") setShowTrade(false); else cancelTrade(); }, trade: socialTradeSummary,
