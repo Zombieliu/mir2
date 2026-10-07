@@ -2650,6 +2650,7 @@ fn apply_character_save_with_timing(
         session.bind_active_save_revision(save.revision);
         session.npc_purchase_journal = save.npc_purchase_journal.clone();
         session.npc_purchase_producer = None;
+        session.npc_purchase_owner_epoch = None;
         session.activate_ranking_inspect();
     }
     world

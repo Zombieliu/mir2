@@ -348,6 +348,7 @@ pub fn gameplay_event_sink_status(
 fn command_kind_label(kind: &WorldCommandKind) -> String {
     match kind {
         WorldCommandKind::ClientPacket(name) => format!("client.{name}"),
+        WorldCommandKind::NpcPurchaseOwner(action) => format!("npcPurchaseOwner.{action}"),
         WorldCommandKind::PasskeyLogin => "runtime.passkeyLogin".to_string(),
         WorldCommandKind::MoveTo => "runtime.moveTo".to_string(),
         WorldCommandKind::Attack => "runtime.attack".to_string(),

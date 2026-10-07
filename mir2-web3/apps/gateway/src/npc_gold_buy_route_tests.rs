@@ -88,8 +88,8 @@ fn local_session() -> (GatewaySession, NpcGoldBuyRequest, Arc<InMemoryGameplayEv
 }
 
 fn shared_session() -> (GatewaySession, NpcGoldBuyRequest) {
-    // Existing owner cadence is disabled for this finite fixture; no network surface.
-    let factory = SharedInProcessZoneRuntimeFactory::new().fresh_replica();
+    // Synchronous finite Zone fixture; no owner thread or network surface.
+    let factory = SharedInProcessZoneRuntimeFactory::without_background_owner_for_test(&ZoneId::primary());
     let registry = ZoneRegistry::new(ZoneId::primary(), Arc::new(factory));
     let mut session = GatewaySession::new_with_zone_registry(config(), &registry);
     session.zone_owner_command_client = Arc::new(InProcessZoneOwnerCommandClient::new());
@@ -181,7 +181,7 @@ fn npc_gold_gateway_actual_success_reject_success_has_current_outcome_metadata_a
 
 #[test]
 fn npc_gold_gateway_false_unlogged_and_pre_start_are_guarded_without_economy_or_events() {
-    let factory = SharedInProcessZoneRuntimeFactory::new().fresh_replica();
+    let factory = SharedInProcessZoneRuntimeFactory::without_background_owner_for_test(&ZoneId::primary());
     let runtime = factory.create_runtime(config(), &ZoneId::primary());
     let sink = Arc::new(InMemoryGameplayEventSink::default());
     let mut session = GatewaySession::with_routed_world_runtime_and_event_sink(ZoneId::primary(), runtime, sink.clone());

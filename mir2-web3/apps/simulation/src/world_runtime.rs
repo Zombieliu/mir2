@@ -210,6 +210,7 @@ pub(crate) fn parse_debug_crystal_transfer_key(
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorldCommandKind {
+    NpcPurchaseOwner(&'static str),
     ClientPacket(&'static str),
     ReplayRetainedStartGameBootstrap,
     PasskeyLogin,
@@ -344,6 +345,25 @@ pub trait WorldRuntime: Send + Sync {
         _authenticated: bool, _request: NpcGoldBuyRequest,
     ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
         Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime))
+    }
+
+
+    /// Explicit durable owner capability. Unsupported routes never execute BuyItem.
+    fn supports_durable_npc_purchase_owner(&self) -> bool { false }
+
+    fn execute_npc_purchase_owner(&mut self, _authenticated: bool, _owner_epoch: [u8; 32],
+        _action: crate::NpcPurchaseOwnerAction,
+    ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
+        Err(crate::NpcPurchaseDurableError::BeforeExecution { detail: "durable NPC purchase owner capability is unavailable".into() })
+    }
+
+    fn npc_purchase_owner_authority(&self, _owner_epoch: [u8; 32]) -> Option<crate::NpcPurchaseProducer> { None }
+
+
+    fn npc_purchase_owner_checkpoint(&self, _owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> { None }
+
+    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, _checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        Err("world runtime does not implement isolated NPC purchase checkpoint replay".into())
     }
 
     /// Local evidence for all NPC purchase branches, not a network capability.
@@ -1174,6 +1194,30 @@ impl WorldRuntime for InProcessWorldRuntime {
             return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
         }
         self.session.try_npc_gold_buy_with_outcome(request)
+    }
+
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.session.supports_durable_npc_purchase_owner()
+    }
+
+    fn execute_npc_purchase_owner(&mut self, authenticated: bool, owner_epoch: [u8; 32],
+        action: crate::NpcPurchaseOwnerAction,
+    ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
+        self.session.execute_npc_purchase_owner(authenticated, owner_epoch, action)
+    }
+
+    fn npc_purchase_owner_authority(&self, owner_epoch: [u8; 32]) -> Option<crate::NpcPurchaseProducer> {
+        self.session.npc_purchase_owner_authority(owner_epoch).ok()
+    }
+
+
+    fn npc_purchase_owner_checkpoint(&self, owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> {
+        self.session.npc_purchase_owner_checkpoint(owner_epoch).ok()
+    }
+
+    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        self.session.apply_npc_purchase_owner_replica_checkpoint(checkpoint)
     }
 
     fn supports_typed_npc_purchase_outcome(&self) -> bool { true }

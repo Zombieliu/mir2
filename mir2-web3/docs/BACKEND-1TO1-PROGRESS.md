@@ -1,5 +1,28 @@
 # Backend 1:1 Progress
 
+## Source28：真实 owner/Hosted/RPC 购买恢复通过，客户端完整应用继续接线（2026-10-07）
+
+真实 durable source、已认证活动角色和 held owner lease 才能启用独立 Begin/Quote/Query/Purchase。默认能力为 false，Hosted/RPC 使用真实 owner，不查本地 shadow。Begin/Purchase 走单次 mutation；Quote 与原完整 operation 的 Query 只读，不进入旧 BuyItem fallback，也不 drain unrelated gameplay/economy。Shared 专用 leaf 只同步已有角色 transform/vitals、执行购买和更新已有 presence/ranking，避免在 PG lease 行锁内进入旧 pending economy 的二次 FOR UPDATE。
+
+回执必须先匹配原 actor/scope/sequence/full intent，并通过 terminal outcome 的 request/currency/source/count/revision 校验，才能作为已知 PostCommit 保留；后续 frame/metadata/projection/journal 错误不吞真实 receipt。当前 live 钱包或交付未完整发布时不给 authority，完整 snapshot 与其经济 revision 在同一次 owner turn 捕获，不能以 tick 或只收到 incoming UID 替代。
+
+Host 内部 journal 记录已提交的完整 character checkpoint，不重放扣款/交付/producer enrollment；仅 isolated replica image 可安装，普通 client command 转换拒绝。相同 revision 只接受完整内容一致的幂等重放；最终 account store 锁内 compare-and-set 防止另一 Session 推进后被覆盖，restore 先退役 producer/owner authority。复制 build ID 恒含 npc-checkpoint-v1 与完整 source label hash，旧 pkg fallback 不再被误作相同恢复 schema。个人 NPC Used-stock checkpoint 仍不证明 shared-zone 全局 stock 原子所有权。
+
+Root 最终 Rust05 实际 Simulation72＋旧 Gold15＋Pearl6＋Save59＋Demo1＝153，Gateway 新 owner8＋旧 Gold16＝24，共177次成功执行/176个唯一测试；新增 DTO11＋Session owner11＋Gateway8＝30项 distinct 全部具名执行。888唯一普通输入0漂移，原884中14改/870保护、新增4。11次实际串行原 CargoGuard 全部 actual GetVolume C≥50GiB、fresh≤2000ms、PolicyB exited/Dispose，共55份 nonce 文件；7份配置只准备未执行。新旧 Gateway 有限夹具使用预插同步 primary ZoneState 和断开的 movement ingress，不启动 owner后台 loop、listener/socket或产品进程。
+
+提交前仅清理新 route 文件末尾1个 LF；独立逆核可精确恢复实测字节，其他887输入不变。177次实际执行仍绑定 Rust05，最终出版快照只承接无语义格式差异，未重复执行，也未扩大接受范围。
+
+历史2轮 compile101/0 tests、Simulation68/72与Gateway7/8均保留，不累计其部分通过。实际测试发现并修复了 Serde internally-tagged unit Begin 会吞额外字段的问题，现以空 struct variant 严格 decode 且保留公开 Begin 及 wire shape。另两处只修正真实药品658到 Belt0/UID0 的夹具期望，保留完整 checkpoint/源 File 不写；最后一处只去掉 standby 夹具提前 save，保留同 revision 冲突保护和重复 replay 验证。
+
+下一项接严格客户端 wire/ABI 与 Native/Web 实际 dispatcher/receiver：新外部 u64 使用 canonical decimal string，原始 JSON 拒 duplicate/unknown，实际服务端 accepted capability/Begin 后才允许购买。共享 Actor ledger 跨 UI/重连保留原 operation，只读恢复且 Unknown 不换 ID/不重发。Native 目前 Applied 仅证明入队，各模型独立 coalesce；须补同一经济 snapshot bundle 在主线程完整应用后的确认，Web 也不能以 inventory-only readiness 或移动快路径发 witness。源码/lib测试不证明真实 TCP/PG/复制部署或另一个 OS process 冷启动。
+
+已构建包仍为 Source25 的 Next08/Thin08，不含 Source26/27/28，待完整接线后重建匹配组合。用户“继续代码，暂不操作界面”持续有效；资源/WASM、登录→战斗→保存→重登、移动真机和 frontend 验收未运行。Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common；309/317≈97.5%仅为有界功能记录，overall percentage=null、Candidate100=false、goal active，当前不承诺可玩日期。
+
+Source27 已实际提交推送并核验远端 e2c42e066b48313309f62d65a2b320b9d93f4495，本轮承接其事后 publication。Source28 发布由 Root 后续实际 Git 操作与独立 publication 记录核验，测试通过本身不证明提交推送。以下 Source27 及更早正文完整保留为历史。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-finite-result01.json)、[独立有限结果复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-independent-review01.json)、[Source27 实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-publication01.json)。
+
+
 ## Source27：本地购买存档与恢复通过，网关及两端回执继续接线（2026-10-07）
 
 新增私有 Actor journal，把原 request scope/sequence/full intent、实际 Gold/Pearls、Trade/BuyBack/Used 结果及权威 revision 与完整 character checkpoint 放进既有 account source 的同一次 transaction。当前活动 Session 提供 producer enrollment、实际 catalog proof、原 ID 只读 query 和单次 durable purchase；精确 duplicate 不再次写档、扣款、交付或删除 stock，terminal rejection 保留。journal 不进入普通 WorldSnapshot，旧存档的 optional 缺失保持兼容。

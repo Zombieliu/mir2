@@ -15,6 +15,8 @@ use mir2_simulation::{
     WorldSnapshot, ZoneRuntimeHandle,
 };
 
+use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction};
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
 use crate::npc_gold_buy_route::{
     npc_gold_buy_command, npc_gold_buy_route_failure, NpcGoldBuyRouteError, NpcGoldBuyRouteExecution,
@@ -569,6 +571,54 @@ impl GatewaySession {
     pub fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         self.zone_owner_command_client
             .supports_typed_game_shop_purchase_outcome(&self.runtime)
+    }
+
+
+    pub fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.zone_owner_command_client.supports_durable_npc_purchase_owner(&self.runtime)
+    }
+
+    pub fn execute_npc_purchase_owner(&mut self, authenticated: bool, action: NpcPurchaseOwnerAction)
+        -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        let lease = self.zone_owner_lease.clone();
+        self.execute_npc_purchase_owner_with_zone_owner_lease(&lease, authenticated, action)
+    }
+
+    pub fn execute_npc_purchase_owner_with_zone_owner_lease(&mut self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        self.validate_zone_owner_lease(lease).map_err(crate::npc_purchase_owner_route::before)?;
+        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase requires authentication")); }
+        let mut known = None;
+        let result = catch_gateway_panic("durable NPC gateway owner route", || {
+            if !self.supports_durable_npc_purchase_owner() {
+                return Err(crate::npc_purchase_owner_route::before("durable NPC purchase owner capability is unavailable"));
+            }
+            let mut routed = match self.zone_owner_command_client.execute_npc_purchase_owner(
+                &mut self.runtime, lease, authenticated, action,
+            ) {
+                Ok(routed) => routed,
+                Err(error) => {
+                    if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error { known = Some(receipt.clone()); }
+                    return Err(error);
+                }
+            };
+            known = crate::npc_purchase_owner_route::terminal_receipt(&routed.reply);
+            // Control/read-only actions do not publish gameplay mutation events
+            // or drain an unrelated global bus into their recovery response.
+            if matches!(action, NpcPurchaseOwnerAction::Purchase { .. }) {
+                let execution = &mut routed.execution;
+                self.publish_gameplay_event(execution);
+                self.active_identity_binding = execution.outcome.active_identity.clone();
+                self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
+                if let Some(bus) = self.global_message_bus.as_ref() {
+                    execution.packets.extend(bus.drain(&self.session_id));
+                    execution.outcome.packet_count = execution.packets.len();
+                }
+            }
+            Ok(routed)
+        });
+        result.unwrap_or_else(|detail| Err(crate::npc_purchase_owner_route::failure(detail, known)))
     }
 
     /// Local owner-path capability only; this does not advertise a transport receipt.

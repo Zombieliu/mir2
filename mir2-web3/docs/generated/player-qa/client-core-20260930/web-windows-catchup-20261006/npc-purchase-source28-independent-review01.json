@@ -1,0 +1,94 @@
+{
+  "owner": "Root",
+  "kind": "Independent Source28 actual finite evidence review",
+  "generatedAtUtc": "2026-10-07T11:36:33.357Z",
+  "result": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-finite-result01.json",
+    "bytes": 180381,
+    "sha256": "049f81512e89cdda60cfab615a05e888f28a6d07a841b07d7e4ffdbee4660b63"
+  },
+  "resultMirror": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-finite-result01.json",
+    "bytes": 180381,
+    "sha256": "049f81512e89cdda60cfab615a05e888f28a6d07a841b07d7e4ffdbee4660b63"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+    "bytes": 274835,
+    "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+  },
+  "reviewers": [
+    {
+      "agent": "/root/source24_actual_result_review",
+      "accepted": true,
+      "confirmedBlockers": 0,
+      "actualInputPins": 888,
+      "inputDrift": 0,
+      "uniqueDirectPinReferences": 145,
+      "acceptedExecutions": 177,
+      "uniqueTestNames": 176,
+      "newDeclaredExecuted": 30,
+      "cargoCalls": 11,
+      "nonceFiles": 55,
+      "minCRemainingBytes": "432446275584",
+      "freshMsRange": [
+        65,
+        83
+      ],
+      "policyBExitedDisposed": true,
+      "strictSerialLifecycle": true
+    },
+    {
+      "agent": "/root/source24_buy_chain_review",
+      "accepted": true,
+      "confirmedBlockers": 0,
+      "directReferences": 243,
+      "expandedReferences": 315,
+      "uniqueExpandedPaths": 146,
+      "policyHashReferences": 162,
+      "currentInputPins": 888,
+      "inputDrift": 0,
+      "acceptedExecutions": 177,
+      "uniqueTestNames": 176,
+      "newDeclaredExecuted": 30,
+      "cargoCalls": 11,
+      "retainedFailureCalls": 4,
+      "preparedOnly": 7
+    }
+  ],
+  "qualification": "Limited actual owned File/lib execution only; 11 schema tests counted as schema, not execution receipts. Actual File/Hosted/RPC adapter/finite direct Host journal dispatch/isolated checkpoint replay corroborated. No TCP/PG/process cold recovery/global stock/client ABI/UI/matching production build/player acceptance.",
+  "sourceAccepted": true,
+  "finiteCpuAccepted": true,
+  "productionBuildAccepted": false,
+  "playerAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "finalPublicationSourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-final-formatting-snapshot02.json",
+    "bytes": 275769,
+    "sha256": "19dcbc785c9daf29be96e9503e38657a75312b814b14500c38d99f31e967cb98"
+  },
+  "postTestFormatting": {
+    "relativePath": "apps/gateway/src/npc_purchase_owner_route.rs",
+    "before": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route.rs",
+      "bytes": 4858,
+      "sha256": "9117c5a6c2b112ddc8e54dfc874c53f5865bfbc4d2590cfe07d95cdfa3460b71"
+    },
+    "after": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route.rs",
+      "bytes": 4857,
+      "sha256": "c2b557650c1878589610759a2d0d4336487b3ca84c23cdd05235a2afbd6399e2"
+    },
+    "removedTrailingNewlineBytes": 1,
+    "allNonTrailingBytesIdentical": true,
+    "testsNotRepeated": true,
+    "independentReviewer": "/root/source24_actual_result_review",
+    "accepted": true,
+    "finalInputPins": 888,
+    "inputDrift": 0,
+    "unchangedInputPins": 887,
+    "qualifiedAt": "177 actual finite executions remain bound to Rust05; final publication derivative changes only trailing EOF LF. No repeat execution and no expanded acceptance."
+  }
+}

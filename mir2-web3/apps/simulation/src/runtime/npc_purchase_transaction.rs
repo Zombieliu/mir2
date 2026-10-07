@@ -30,13 +30,25 @@ pub struct NpcPurchaseReceipt {
     pub producer_scope: [u8; 32],
     pub entry: NpcPurchaseJournalEntry,
 }
+impl NpcPurchaseReceipt {
+    /// A decoded receipt is known only for this exact original operation and a
+    /// valid terminal result. Serde shape alone does not establish a commit.
+    pub fn validate_for_operation(&self, operation: NpcPurchaseOperation) -> Result<(), crate::npc_purchase_journal::NpcPurchaseJournalError> {
+        if self.producer_scope == [0; 32] || self.entry.operation != operation {
+            return Err(crate::npc_purchase_journal::NpcPurchaseJournalError::IntentConflict);
+        }
+        self.entry.validate_terminal()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct NpcPurchaseDurableExecution {
     pub packets: Vec<ServerPacket>,
     pub receipt: NpcPurchaseReceipt,
     pub replayed: bool,
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
 pub enum NpcPurchaseDurableError {
     BeforeExecution { detail: String },
     Unknown { detail: String },
@@ -216,7 +228,177 @@ pub(super) fn catalog_intent(service: &npc::ActiveNpcServiceState, selected: &np
     Ok(NpcPurchaseIntent { request, currency, source, service_catalog_proof })
 }
 
+
+fn owner_economic_projection(save: &CharacterSaveRecord) -> Result<serde_json::Value, String> {
+    let systems: Stage5SystemsState = match save.stage5_systems_json.as_deref() {
+        Some(json) => serde_json::from_str(json).map_err(|error| format!("NPC purchase economic projection decode failed: {error}"))?,
+        None => Stage5SystemsState::default(),
+    };
+    let mut stage5 = serde_json::to_value(systems).map_err(|error| error.to_string())?;
+    // Refine deadlines cross runtime and durable clock domains. They do not
+    // attest a purchase wallet, item delivery, resale carrier or social merge.
+    if let Some(fields) = stage5.as_object_mut() { fields.remove("refine"); }
+    Ok(serde_json::json!({
+        "character": save.character, "experience": save.experience, "maxExperience": save.max_experience,
+        "gold": save.gold, "credit": save.credit, "cityCurrencies": save.city_currencies,
+        "capacity": save.inventory_capacity, "inventory": save.inventory_items_json,
+        "belt": save.belt_items_json, "equipment": save.equipment_items_json,
+        "storage": save.storage_items_json, "heroInventory": save.hero_inventory_items_json,
+        "heroEquipment": save.hero_equipment_items_json, "heroCapacity": save.hero_inventory_capacity,
+        "buyBack": save.npc_buy_back_items_json, "used": save.npc_used_goods_items_json,
+        "rentals": save.item_rental_records_json, "hasRentedItem": save.has_rented_item, "stage5": stage5,
+    }))
+}
+
 impl SimulationSession {
+
+
+    /// Trusted replication captures the actual durable checkpoint, including a
+    /// known commit whose live projection is incomplete. Never sent to players.
+    pub fn npc_purchase_owner_checkpoint(&self, owner_epoch: [u8; 32]) -> Result<CharacterSaveRecord, NpcPurchaseDurableError> {
+        let (account, active) = authenticated_checkpoint(self.app.world()).map_err(before)?;
+        let session = self.app.world().resource::<SessionResource>();
+        if owner_epoch == [0; 32] || session.npc_purchase_owner_epoch != Some(owner_epoch) {
+            return Err(before("NPC purchase checkpoint belongs to a retired owner"));
+        }
+        let local = active.npc_purchase_journal.as_ref().ok_or_else(|| before("NPC purchase actor is not enabled"))?;
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        let store = config.account_store.lock().map_err(|_| before("NPC purchase source lock poisoned"))?;
+        config.ensure_account_store_writable().map_err(before)?;
+        let checkpoint = persisted_checkpoint(&store, &account, &active).map_err(before)?;
+        if checkpoint.npc_purchase_journal.as_ref().map(|journal| journal.actor) != Some(local.actor) {
+            return Err(before("NPC purchase durable actor incarnation changed"));
+        }
+        Ok(checkpoint.clone())
+    }
+
+    /// Journal replay installs an already committed state into an isolated
+    /// standby image. It never enrolls a producer, debits, delivers or writes an
+    /// external account repository. Promotion must Begin a fresh owner producer.
+    pub fn apply_npc_purchase_owner_replica_checkpoint(&mut self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        let config = self.app.world().resource::<RuntimeConfigResource>().config.clone();
+        if config.account_store_path.is_some() || config.account_store_database_url.is_some() {
+            return Err("NPC purchase checkpoint replay requires an isolated replica account image".into());
+        }
+        let account = active_session_mutating_account_id(self.app.world().resource::<SessionResource>())
+            .ok_or("NPC purchase checkpoint replay requires an authenticated actor")?;
+        let journal = checkpoint.npc_purchase_journal.as_ref().ok_or("NPC purchase replay checkpoint has no actor journal")?;
+        journal.validate_for(&account, checkpoint.character.index, &checkpoint.character.name, checkpoint.revision)
+            .map_err(|error| error.to_string())?;
+        validate_character_save_record(checkpoint)?;
+        let (observed_checkpoint, observed_character) = {
+            let store = config.account_store.lock().map_err(|_| "replica account image lock poisoned")?;
+            let record = store.accounts.get(&account).ok_or("replica account no longer exists")?;
+            let previous = record.saves.get(&checkpoint.character.index);
+            if let Some(previous) = previous {
+                if previous.revision > checkpoint.revision { return Err("NPC purchase replay would roll back a complete checkpoint".into()); }
+                if let Some(previous_journal) = &previous.npc_purchase_journal {
+                    if previous_journal.actor != journal.actor || !journal.entries.starts_with(&previous_journal.entries) {
+                        return Err("NPC purchase replay would replace an actor or terminal history".into());
+                    }
+                }
+                if previous.revision == checkpoint.revision && serde_json::to_value(previous).map_err(|error| error.to_string())?
+                    != serde_json::to_value(checkpoint).map_err(|error| error.to_string())? {
+                    return Err("NPC purchase replay has conflicting complete contents at the same revision".into());
+                }
+            }
+            let character = record.characters.iter().find(|character| character.index == checkpoint.character.index
+                && character.name == checkpoint.character.name).ok_or("NPC purchase replica character incarnation changed")?;
+            (serde_json::to_value(previous).map_err(|error| error.to_string())?,
+                serde_json::to_value(character).map_err(|error| error.to_string())?)
+        };
+        self.restore_active_character_checkpoint(checkpoint)?;
+        let mut store = config.account_store.lock().map_err(|_| "replica account image lock poisoned")?;
+        // Recheck the observed image and insert while holding the same lock. A
+        // different Session can advance this shared account while live restore
+        // runs; never overwrite its complete checkpoint or roster. Restore has
+        // already retired producer/owner authority, so this error cannot certify
+        // the incomplete live image as a durable purchase baseline.
+        let record = store.accounts.get_mut(&account).ok_or("replica account retired during replay")?;
+        let character = record.characters.iter_mut().find(|character| character.index == checkpoint.character.index
+            && character.name == checkpoint.character.name).ok_or("replica character retired during replay")?;
+        if serde_json::to_value(record.saves.get(&checkpoint.character.index)).map_err(|error| error.to_string())? != observed_checkpoint
+            || serde_json::to_value(&*character).map_err(|error| error.to_string())? != observed_character {
+            return Err("NPC purchase replica account advanced during live restore; projection remains incomplete".into());
+        }
+        *character = checkpoint.character.clone();
+        record.saves.insert(checkpoint.character.index, checkpoint.clone());
+        Ok(())
+    }
+
+    /// Capability describes this real durable account source, never a shadow runtime.
+    pub fn supports_durable_npc_purchase_owner(&self) -> bool {
+        require_source(self.app.world()).is_ok()
+    }
+
+    /// The owner must first validate its lease, then supply its opaque epoch.
+    /// Changing that epoch retires the old ephemeral producer; its durable actor
+    /// and original operations remain available through read-only recovery.
+    pub fn execute_npc_purchase_owner(
+        &mut self,
+        authenticated: bool,
+        owner_epoch: [u8; 32],
+        action: crate::NpcPurchaseOwnerAction,
+    ) -> Result<crate::NpcPurchaseOwnerExecution, NpcPurchaseDurableError> {
+        use crate::{NpcPurchaseOwnerAction as Action, NpcPurchaseOwnerReply as Reply};
+        if !authenticated || owner_epoch == [0; 32] {
+            return Err(before("NPC purchase requires an authenticated current owner epoch"));
+        }
+        authenticated_checkpoint(self.app.world()).map_err(before)?;
+        if matches!(action, Action::Begin) {
+            let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+            if session.npc_purchase_owner_epoch != Some(owner_epoch) {
+                session.npc_purchase_producer = None;
+                session.npc_purchase_owner_epoch = None;
+            }
+        } else if self.app.world().resource::<SessionResource>().npc_purchase_owner_epoch != Some(owner_epoch) {
+            return Err(before("NPC purchase owner changed; begin the current producer before original-ID recovery"));
+        }
+        let (reply, packets) = match action {
+            Action::Begin => {
+                let producer = self.begin_npc_purchase_producer()?;
+                self.app.world_mut().resource_mut::<SessionResource>().npc_purchase_owner_epoch = Some(owner_epoch);
+                (Reply::Producer { producer }, Vec::new())
+            }
+            Action::Quote { request } => (Reply::Quote { intent: self.npc_purchase_intent(request)? }, Vec::new()),
+            Action::Query { operation } => (Reply::Recovery { receipt: self.query_npc_purchase(operation)? }, Vec::new()),
+            Action::Purchase { operation } => {
+                let purchased = self.try_durable_npc_purchase(operation)?;
+                (Reply::Purchase { receipt: purchased.receipt, replayed: purchased.replayed }, purchased.packets)
+            }
+        };
+        // A terminal receipt remains meaningful without a complete live witness.
+        // In particular, a partial post-commit publication cannot certify the
+        // persisted revision until the corresponding live checkpoint is complete.
+        let authority = self.npc_purchase_owner_authority(owner_epoch).ok();
+        Ok(crate::NpcPurchaseOwnerExecution { reply, packets, authority })
+    }
+
+    /// Called under the same single-writer owner boundary as snapshot capture.
+    /// This is an economic checkpoint revision, never WorldSnapshot.tick.
+    pub fn npc_purchase_owner_authority(
+        &self, owner_epoch: [u8; 32],
+    ) -> Result<NpcPurchaseProducer, NpcPurchaseDurableError> {
+        let (account, active) = authenticated_checkpoint(self.app.world()).map_err(before)?;
+        let session = self.app.world().resource::<SessionResource>();
+        if owner_epoch == [0; 32] || session.npc_purchase_owner_epoch != Some(owner_epoch) {
+            return Err(before("NPC purchase snapshot belongs to a retired owner epoch"));
+        }
+        let producer_scope = session.npc_purchase_producer.ok_or_else(|| before("NPC purchase producer is not enabled"))?;
+        let journal = active.npc_purchase_journal.as_ref().ok_or_else(|| before("NPC purchase actor is not enabled"))?;
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        let store = config.account_store.lock().map_err(|_| before("NPC purchase source lock poisoned"))?;
+        config.ensure_account_store_writable().map_err(before)?;
+        let persisted = persisted_checkpoint(&store, &account, &active).map_err(before)?;
+        if persisted.revision != active.revision || persisted.npc_purchase_journal.as_ref() != Some(journal) {
+            return Err(before("NPC purchase live checkpoint does not contain the current durable actor history"));
+        }
+        if owner_economic_projection(&active).map_err(before)? != owner_economic_projection(persisted).map_err(before)? {
+            return Err(before("NPC purchase complete economic projection is not fully published"));
+        }
+        Ok(NpcPurchaseProducer { actor: journal.actor, producer_scope, server_revision: active.revision })
+    }
+
     /// Enable one authenticated in-world producer. Legacy characters obtain a
     /// random, persistent incarnation inside a strict complete-checkpoint CAS.
     /// The producer scope remains ephemeral and is retired on load/logout.

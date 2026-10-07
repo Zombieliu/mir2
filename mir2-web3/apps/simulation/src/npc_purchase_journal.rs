@@ -161,6 +161,13 @@ fn validate_entry(entry: &NpcPurchaseJournalEntry, actor: &[u8; 32]) -> JournalR
     Ok(())
 }
 
+impl NpcPurchaseJournalEntry {
+    /// Validate the terminal domain result without constructing or exporting a journal.
+    pub fn validate_terminal(&self) -> Result<(), NpcPurchaseJournalError> {
+        validate_entry(self, &self.operation.actor)
+    }
+}
+
 impl NpcPurchaseJournal {
     pub fn new(
         account_id: impl Into<String>,

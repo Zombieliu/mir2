@@ -46,6 +46,9 @@ use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as Toki
 
 use crate::web::GatewaySlowStage;
 use crate::GatewayConfig;
+use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution,
+    NpcPurchaseOwnerReply, NpcPurchaseProducer};
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::npc_gold_buy_route::{
     finish_npc_gold_buy_packets, npc_gold_buy_route_failure, NpcGoldBuyRouteError,
     NpcGoldBuyRouteExecution,
@@ -261,6 +264,17 @@ impl ZoneOwnerCommandRequest {
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease;
 
+
+    /// Opt-in lease guard for durable NPC transactions. A cached lease or an
+    /// unsupported authority must never authorize this commit path.
+    fn supports_durable_npc_purchase_lease(&self) -> bool { false }
+
+    fn with_durable_npc_purchase_lease(&self, _lease: &ZoneOwnerLease,
+        _operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        Err("durable NPC purchase requires a lease authority that holds the current epoch".into())
+    }
+
     fn refresh_owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         self.owner_lease(zone_id)
     }
@@ -291,6 +305,15 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
+
+    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool { false }
+
+    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease, _authenticated: bool, _action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        Err(crate::npc_purchase_owner_route::before("durable NPC purchase owner route is unavailable"))
+    }
+
     fn on_connect(&self, runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
         Ok(runtime.on_connect())
     }
@@ -429,6 +452,15 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
 
 pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool { false }
+
+    fn execute_npc_purchase_owner(&self, _lease: &ZoneOwnerLease,
+        _authenticated: bool, _action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        Err(crate::npc_purchase_owner_route::before("durable NPC purchase RPC route is unavailable"))
+    }
+
     fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
         Err("zone owner RPC transport does not implement on_connect".to_string())
     }
@@ -530,6 +562,16 @@ impl RpcZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
+
+    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.transport.supports_durable_npc_purchase_owner()
+    }
+    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        self.transport.execute_npc_purchase_owner(lease, authenticated, action)
+    }
+
     fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
         self.transport.on_connect()
     }
@@ -661,6 +703,46 @@ impl fmt::Debug for InProcessZoneOwnerCommandClient {
     }
 }
 
+
+fn execute_durable_npc_owner_held(
+    lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    _source_sequence: Option<u64>, runtime: &mut ZoneRuntimeHandle,
+) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+    // The dedicated NPC path never enters shared award/trade/journey predrain.
+    // Those transactions can lock this lease row themselves and belong to their
+    // own command turn; holding a PG owner guard across them would deadlock.
+    crate::npc_purchase_owner_route::execute_owner(runtime, lease, authenticated, action)
+}
+
+fn execute_durable_npc_owner_with_guard(
+    authority: &SharedZoneOwnerLeaseAuthority, lease: &ZoneOwnerLease,
+    authenticated: bool, action: NpcPurchaseOwnerAction,
+    source_sequence: Option<u64>, runtime: &mut ZoneRuntimeHandle,
+) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+    if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase owner action requires authentication")); }
+    if !authority.supports_durable_npc_purchase_lease() {
+        return Err(crate::npc_purchase_owner_route::before("durable NPC owner lease guard is unavailable"));
+    }
+    let mut result = None;
+    let mut known = None;
+    let guarded = crate::session::catch_gateway_panic("durable NPC owner epoch guard", || {
+        authority.with_durable_npc_purchase_lease(lease, &mut || {
+            let routed = execute_durable_npc_owner_held(lease, authenticated, action, source_sequence, runtime);
+            known = match &routed {
+                Ok(routed) => crate::npc_purchase_owner_route::terminal_receipt(&routed.reply),
+                Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => Some(receipt.clone()),
+                _ => None,
+            };
+            result = Some(routed);
+        })
+    }).and_then(|result| result);
+    match guarded {
+        Ok(()) => result.unwrap_or_else(|| Err(crate::npc_purchase_owner_route::failure("durable NPC owner guard did not execute", known))),
+        Err(detail) if result.is_some() => Err(crate::npc_purchase_owner_route::failure(detail, known)),
+        Err(detail) => Err(crate::npc_purchase_owner_route::before(detail)),
+    }
+}
+
 impl InProcessZoneOwnerCommandClient {
     pub fn new() -> Self {
         Self::default()
@@ -676,6 +758,19 @@ impl InProcessZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+
+    fn supports_durable_npc_purchase_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
+            && runtime.supports_durable_npc_purchase_owner()
+    }
+    fn execute_npc_purchase_owner(&self, runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        let authority = self.owner_lease_authority.as_ref()
+            .ok_or_else(|| crate::npc_purchase_owner_route::before("durable NPC purchase requires actual owner lease authority"))?;
+        execute_durable_npc_owner_with_guard(authority, lease, authenticated, action, None, runtime)
+    }
+
     fn supports_typed_npc_gold_buy_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
         runtime.supports_typed_npc_gold_buy_outcome()
     }
@@ -882,6 +977,74 @@ impl fmt::Debug for HostedZoneOwnerCommandClient {
 }
 
 impl HostedZoneOwnerCommandClient {
+
+
+
+    pub(crate) fn npc_purchase_owner_checkpoint_with_lease(&self, lease: &ZoneOwnerLease) -> Result<Option<CharacterSaveRecord>, String> {
+        let authority = self.owner_lease_authority.as_ref().ok_or("durable NPC owner lease authority unavailable")?;
+        let mut checkpoint = None;
+        let mut read_error = None;
+        authority.with_durable_npc_purchase_lease(lease, &mut || {
+            match self.runtime.lock() {
+                Ok(runtime) => checkpoint = runtime.as_ref().and_then(|runtime| runtime.npc_purchase_owner_checkpoint(crate::npc_purchase_owner_route::owner_epoch(lease))),
+                Err(_) => read_error = Some("zone owner hosted runtime mutex poisoned".to_string()),
+            }
+        })?;
+        match read_error { Some(error) => Err(error), None => Ok(checkpoint) }
+    }
+
+    pub(crate) fn apply_npc_purchase_owner_replica_checkpoint(&self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "zone owner hosted runtime mutex poisoned")?;
+        runtime.as_mut().ok_or("zone owner hosted runtime was handed off")?
+            .apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+    }
+
+    pub fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
+            && self.runtime.lock().ok().and_then(|runtime| runtime.as_ref()
+                .map(|runtime| runtime.supports_durable_npc_purchase_owner())).unwrap_or(false)
+    }
+
+    pub fn execute_npc_purchase_owner(&self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        self.execute_npc_purchase_owner_with_source_sequence(lease, authenticated, action, None)
+    }
+
+    pub(crate) fn execute_npc_purchase_owner_with_source_sequence(&self,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+        source_sequence: Option<u64>,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase owner action requires authentication")); }
+        let authority = self.owner_lease_authority.as_ref()
+            .filter(|authority| authority.supports_durable_npc_purchase_lease())
+            .ok_or_else(|| crate::npc_purchase_owner_route::before("durable NPC owner lease guard is unavailable"))?;
+        let mut result = None;
+        let mut known = None;
+        let guarded = crate::session::catch_gateway_panic("hosted durable NPC owner guard", || {
+            authority.with_durable_npc_purchase_lease(lease, &mut || {
+                let routed = crate::session::catch_gateway_panic("hosted durable NPC actual runtime", || {
+                    let mut runtime = self.runtime.lock()
+                        .map_err(|_| crate::npc_purchase_owner_route::before("zone owner hosted runtime mutex poisoned"))?;
+                    let runtime = runtime.as_mut()
+                        .ok_or_else(|| crate::npc_purchase_owner_route::before("zone owner hosted runtime was handed off"))?;
+                    execute_durable_npc_owner_held(lease, authenticated, action, source_sequence, runtime)
+                }).unwrap_or_else(|detail| Err(crate::npc_purchase_owner_route::failure(detail, None)));
+                known = match &routed {
+                    Ok(routed) => crate::npc_purchase_owner_route::terminal_receipt(&routed.reply),
+                    Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => Some(receipt.clone()),
+                    _ => None,
+                };
+                result = Some(routed);
+            })
+        }).and_then(|result| result);
+        match guarded {
+            Ok(()) => result.unwrap_or_else(|| Err(crate::npc_purchase_owner_route::failure("hosted NPC guard did not execute", known))),
+            Err(detail) if result.is_some() => Err(crate::npc_purchase_owner_route::failure(detail, known)),
+            Err(detail) => Err(crate::npc_purchase_owner_route::before(detail)),
+        }
+    }
+
     pub fn new(runtime: ZoneRuntimeHandle) -> Self {
         Self {
             runtime: Mutex::new(Some(runtime)),
@@ -1151,6 +1314,16 @@ impl HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
+
+    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        HostedZoneOwnerCommandClient::supports_durable_npc_purchase_owner(self)
+    }
+    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        HostedZoneOwnerCommandClient::execute_npc_purchase_owner(self, lease, authenticated, action)
+    }
+
     fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
         HostedZoneOwnerCommandClient::on_connect(self)
     }
@@ -1255,6 +1428,16 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        HostedZoneOwnerCommandClient::supports_durable_npc_purchase_owner(self)
+    }
+    fn execute_npc_purchase_owner(&self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        HostedZoneOwnerCommandClient::execute_npc_purchase_owner(self, lease, authenticated, action)
+    }
+
     fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
         HostedZoneOwnerCommandClient::on_connect(self)
     }
@@ -1460,6 +1643,23 @@ impl InMemoryZoneOwnerLeaseAuthority {
 }
 
 impl ZoneOwnerLeaseAuthority for InMemoryZoneOwnerLeaseAuthority {
+
+    fn supports_durable_npc_purchase_lease(&self) -> bool { true }
+
+    fn with_durable_npc_purchase_lease(&self, lease: &ZoneOwnerLease,
+        operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        let leases = self.leases.lock().map_err(|_| "zone owner lease mutex poisoned")?;
+        let current = leases.get(lease.zone_id()).ok_or("durable NPC purchase owner lease is not registered")?;
+        if current.expired_at(shared_gateway_now_ms()) || current.lease != *lease {
+            return Err(stale_zone_owner_lease_error(lease, &current.lease));
+        }
+        // Handoff cannot change this epoch while the single-writer operation
+        // commits its checkpoint and captures its complete projection.
+        crate::session::catch_gateway_panic("durable NPC lease callback", || operation())?;
+        Ok(())
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         self.owner_lease_at(zone_id, shared_gateway_now_ms())
     }
@@ -6385,6 +6585,25 @@ impl SharedInProcessZoneRuntimeFactory {
             autonomous_ticks_by_default: false,
             replica_zone_ids: Arc::new(Mutex::new(BTreeSet::new())),
         }
+    }
+
+    /// Finite library tests use existing synchronous Zone operations without
+    /// creating a movement owner thread. Sending movement into this fixture is
+    /// deliberately disconnected; tests must not use it as a running server.
+    #[cfg(test)]
+    pub(crate) fn without_background_owner_for_test(zone_id: &ZoneId) -> Self {
+        let factory = Self::new().fresh_replica();
+        let (movement_sender, movement_receiver) = sync_channel(SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY);
+        drop(movement_receiver);
+        let resources = SharedInProcessZoneResources {
+            zone_state: Arc::new(Mutex::new(SharedInProcessZoneState::new())),
+            movement_sender,
+            tick_count: Arc::new(AtomicU64::new(0)),
+            autonomous_ticks_enabled: Arc::new(AtomicBool::new(false)),
+        };
+        factory.zones.lock().expect("finite Zone fixture mutex should not be poisoned")
+            .insert(zone_id.clone(), resources);
+        factory
     }
 
     pub(crate) fn configure_mutation_capture(
@@ -11456,6 +11675,32 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.local_player_object_id()
     }
 
+
+    fn validate_durable_npc_actor(&self) -> Result<(), String> {
+        let identity = self.inner.active_identity().ok_or("durable NPC purchase requires an active character")?;
+        if identity.account_id.is_empty() || identity.account_id != identity.account_id.trim()
+            || identity.character_index < 0 || identity.character_name.is_empty() {
+            return Err("durable NPC purchase requires a canonical active character".into());
+        }
+        let expected_key = ZonePresenceKey::from_identity(&identity);
+        let map = self.inner.current_map_file_name().ok_or("durable NPC purchase requires the current in-world map")?;
+        let session = self.movement_ingress.session_state.lock().map_err(|_| "Zone movement session mutex poisoned")?;
+        if session.presence_key.as_ref() != Some(&expected_key) || session.cached_map_file_name.as_deref() != Some(map.as_str()) {
+            return Err("durable NPC purchase requires a live registered Zone session".into());
+        }
+        drop(session);
+        let state = self.zone_state.lock().map_err(|_| "shared Zone presence mutex poisoned")?;
+        if state.teardown_fenced(&expected_key) { return Err("durable NPC purchase owner is fenced for teardown".into()); }
+        let presence = state.players.get(&expected_key).ok_or("durable NPC purchase player is not in the shared Zone")?;
+        let session_id = state.zone_sessions.get(&expected_key).ok_or("durable NPC purchase has no shared Zone session")?;
+        let zone_key = ZoneKey::for_map(&map);
+        if presence.map_file_name != map || state.zone_manager.zone_key_for_session(session_id).as_ref() != Some(&zone_key)
+            || state.zone_manager.zone(&zone_key).and_then(|zone| zone.player_object_id(session_id)).map(|id| id.0) != Some(presence.zone_object_id) {
+            return Err("durable NPC purchase shared actor binding changed".into());
+        }
+        Ok(())
+    }
+
     fn validate_shared_magic_actor(&self, command: &WorldCommand) -> Result<(), String> {
         if let WorldCommand::ClientPacket(ClientPacket::Magic { object_id, .. }) = command {
             // A player's Zone attack always spends that player's resources.
@@ -15238,6 +15483,70 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
         self.inner.supports_typed_npc_gold_buy_outcome()
+    }
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.inner.supports_durable_npc_purchase_owner()
+    }
+
+
+    fn npc_purchase_owner_checkpoint(&self, owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> {
+        self.validate_durable_npc_actor().ok()?;
+        self.inner.npc_purchase_owner_checkpoint(owner_epoch)
+    }
+    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        self.inner.apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+    }
+
+    fn npc_purchase_owner_authority(&self, owner_epoch: [u8; 32]) -> Option<NpcPurchaseProducer> {
+        self.validate_durable_npc_actor().ok()?;
+        self.inner.npc_purchase_owner_authority(owner_epoch)
+    }
+
+    fn execute_npc_purchase_owner(&mut self, authenticated: bool, owner_epoch: [u8; 32],
+        action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerExecution, NpcPurchaseDurableError> {
+        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase requires authentication")); }
+        self.validate_durable_npc_actor().map_err(crate::npc_purchase_owner_route::before)?;
+        if !matches!(action, NpcPurchaseOwnerAction::Purchase { .. }) {
+            return self.inner.execute_npc_purchase_owner(authenticated, owner_epoch, action);
+        }
+        let mut known = None;
+        let result = crate::session::catch_gateway_panic("durable NPC shared owner leaf", || {
+            self.force_inner_to_current_zone_transform();
+            self.force_inner_to_current_zone_vitals();
+            let mut execution = match self.inner.execute_npc_purchase_owner(authenticated, owner_epoch, action) {
+                Ok(execution) => execution,
+                Err(error) => {
+                    if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error { known = Some(receipt.clone()); }
+                    return Err(error);
+                }
+            };
+            known = crate::npc_purchase_owner_route::terminal_receipt(&execution.reply);
+            self.validate_durable_npc_actor().map_err(|detail| crate::npc_purchase_owner_route::failure(detail, known.clone()))?;
+            // Update an existing presence only. Never join/bootstrap, drain
+            // unrelated rewards or contact an external economy transaction.
+            let identity = self.inner.active_identity().expect("validated owner identity");
+            let key = ZonePresenceKey::from_identity(&identity);
+            let snapshot = self.inner.world_snapshot();
+            let entity = snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+                .cloned().ok_or_else(|| crate::npc_purchase_owner_route::failure("durable NPC owner projection has no player", known.clone()))?;
+            {
+                let mut state = self.zone_state.lock().map_err(|_| crate::npc_purchase_owner_route::failure("shared Zone presence mutex poisoned", known.clone()))?;
+                if !state.players.contains_key(&key) || state.teardown_fenced(&key) {
+                    return Err(crate::npc_purchase_owner_route::failure("durable NPC owner presence retired after commit", known.clone()));
+                }
+                state.upsert_player_with_transform_policy(key, &identity.character_name,
+                    snapshot.map_file_name.clone().expect("validated map"), entity,
+                    snapshot.free_bag_slots, snapshot.player_pk_points, true);
+            }
+            self.sync_current_zone_vitals_from_inner();
+            self.normalize_owner_state_packets(&mut execution.packets);
+            self.publish_ranking_inspect_projection();
+            execution.authority = self.npc_purchase_owner_authority(owner_epoch);
+            Ok(execution)
+        });
+        result.unwrap_or_else(|detail| Err(crate::npc_purchase_owner_route::failure(detail, known)))
     }
 
     fn execute_production_npc_gold_buy_requiring_typed_outcome(

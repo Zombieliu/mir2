@@ -634,3 +634,6 @@ fn actual_delete_and_recreate_retires_old_actor_and_recovery_key() {
     assert!(fixture.session.try_durable_npc_purchase(old).is_err());
     assert!(fixture.save_from_file().npc_purchase_journal.unwrap().entries.is_empty());
 }
+
+#[path = "npc_purchase_owner_tests.rs"]
+mod owner_tests;

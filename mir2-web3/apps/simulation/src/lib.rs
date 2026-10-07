@@ -2,6 +2,8 @@ mod config;
 pub mod db_projection;
 mod runtime;
 pub mod npc_purchase_journal;
+pub mod npc_purchase_owner;
+pub use npc_purchase_owner::{NpcPurchaseOwnerAction, NpcPurchaseOwnerReply, NpcPurchaseOwnerExecution, NPC_PURCHASE_OWNER_PROTOCOL_VERSION};
 pub mod user_item_uid;
 mod world_runtime;
 
