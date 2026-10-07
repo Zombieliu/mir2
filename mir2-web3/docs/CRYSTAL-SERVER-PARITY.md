@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> 2026-10-07 shared mining Candidate is actually live on paired R19/source2b04,
+> with updater15. Original probabilities/clocks, ordinary equipped tool and
+> ore purity/wear/save rules are unchanged. Three-class D401 ore witnesses are
+> composed from real phases; no combined pass is invented. Linux release,
+> strict40-object CDN stage/separate promotion, drained backed-up normal
+> Gateway cold start, Windows CMS/HTTPS/206 and public ordinary login/move/
+> relogin6 pass. Native public right-click exit transform also persists. Original
+> realm/auth/capacity/limits and D/F files are preserved. Sustained mouse/human
+> audio, weapon refining, natural progression and fullP1–P8 are separate gates.
+> [Published Candidate and limitations](generated/player-qa/mining-20261007/publication-15/README.md).
+
 > 2026-10-07 original Mine sound10091 is now wired to real91.wav before
 > optional effect-image resolution. Accepted packet/generation dedupe and scene
 > cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest

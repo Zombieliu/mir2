@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.mining.r19.public-wss-acceptance.v1",
+  "passed": true,
+  "gameSource": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "endpoint": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "tlsVerified": true,
+  "ordinaryCommandsOnly": true,
+  "gmAdminCommands": false,
+  "qaLevelOrPositionPreparation": false,
+  "nativeSavedPositionWitness": "native-run-03-public/movement.jsonl",
+  "nativeTraceSha256": "fc1d2e548e056e2038de74b79381505b345e967393fb52fbf68c31e259a51252",
+  "nativeInputAcceptance": false,
+  "actualMiningCoverage": "Separate original D401 paired-ELF class witnesses; these public actors are normal level1",
+  "results": [
+    {
+      "class": "Wizard",
+      "accountId": "PubR19B07",
+      "characterName": "PubMinerB07",
+      "phase": "relogin",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 24,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 289,
+        "y": 618
+      },
+      "normalLogoutConfirmed": true
+    }
+  ]
+}

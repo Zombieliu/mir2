@@ -77,7 +77,23 @@ the normal-player Windows/server press-and-hold, movement and disconnect witness
   the entire stable live authority before and after failed install, retaining all
   field equality and invalid-version rejection. Final recheck is recorded separately.
 
-## Remaining acceptance
+## Actual paired publication follow-up
+
+R19/source2b04 and updater15/sourceb4390 are now actually published.
+Linux CI37527432355 and Linux publisher tooling37551440838 pass; actual
+stage37552557996 checks40 complete public objects, and separate
+promote37554003953 passes from the same publisher commit5e367. The Gateway
+is paired after drain, private backup and normal stop/cold start. Native
+HTTPS/CMS/206 and six ordinary public class login/move/relogin checks pass.
+The real R19 Wizard client additionally confirms public right-click movement
+and saved normal exit; the synthetic mining realm and forward are stopped.
+
+Three-class ore witnesses remain composed from distinct phases, with their
+failed whole reports unchanged. Sustained native holding/human listening,
+affected-laptop installer and full weapon-refining/P1–P8 remain open.
+[Source-bound actual publication, retained failures and screenshots](publication-15/README.md).
+
+## Historical remaining acceptance before publication
 
 Original D401 strict checkpoint restoration and corrected atomic assertion pass;
 source/generator/profile and default production compilation also pass. Independent

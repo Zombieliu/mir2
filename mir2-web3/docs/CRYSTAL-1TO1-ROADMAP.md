@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-07 mining Candidate publication is complete for R19/source2b04 and
+> updater15/sourceb4390. All40 public objects are verified; separate same-commit
+> stage/promote, drained/backup/normal cold Gateway start, Windows HTTPS/CMS/206
+> and ordinary public three-class login/move/relogin6 pass. Native public
+> right-click and saved exit pass; original D401 three-class ore/tool witnesses
+> remain individually qualified, with failed whole runs retained. No original
+> drop/clock reduction, D/F installation change or full parity claim. Sustained
+> native holding/human audio, weapon refining and broader P1–P8 remain open.
+> [Current paired publication](generated/player-qa/mining-20261007/publication-15/README.md).
+
 > 2026-10-07 original Mine sound10091 is now wired to real91.wav before
 > optional effect-image resolution. Accepted packet/generation dedupe and scene
 > cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest

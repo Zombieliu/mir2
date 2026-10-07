@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-10-07 source2b04 mining Gateway is now paired with published R19/updater15.
+> Strict six-count/TCP drain, private DB/state/config backup, old/candidate exit0
+> and cold start pass with no journal panic. Original realm, authentication,
+> capacity and limits are preserved; no automatic v6 rollback touches possible
+> v7 state. CDN40-object stage and separate same-commit promotion pass. Public
+> three-class ordinary login/move/saved-relogin6 and actual native right-click
+> exit/relogin transform pass; no admin or level/position preparation is used
+> for those public checks. Synthetic mining witnesses and their failed phases
+> retain explicit scope. Weapon refining and fullP1–P8 remain unfinished.
+> [Actual operator/network receipts](generated/player-qa/mining-20261007/publication-15/README.md).
+
 > 2026-10-07 original Mine sound10091 is now wired to real91.wav before
 > optional effect-image resolution. Accepted packet/generation dedupe and scene
 > cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest

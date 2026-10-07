@@ -1,0 +1,144 @@
+{
+  "schema": "mir2.mining.r19.public-wss-acceptance.v1",
+  "passed": true,
+  "gameSource": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "endpoint": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "tlsVerified": true,
+  "ordinaryCommandsOnly": true,
+  "gmAdminCommands": false,
+  "qaLevelOrPositionPreparation": false,
+  "previousWholeReport": "public-wss-01/RESULT.json remains failed; all four actual moves occurred, but the harness used a mutated self reference",
+  "nativeInputAcceptance": false,
+  "actualMiningCoverage": "Separate original D401 paired-ELF class witnesses; these public actors are normal level1",
+  "results": [
+    {
+      "class": "Warrior",
+      "accountId": "PubR19A07",
+      "characterName": "PubMinerA07",
+      "phase": "verification",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 23,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 288,
+        "y": 616
+      },
+      "movedTo": {
+        "map": "0",
+        "x": 288,
+        "y": 617
+      },
+      "normalLogoutConfirmed": true
+    },
+    {
+      "class": "Warrior",
+      "accountId": "PubR19A07",
+      "characterName": "PubMinerA07",
+      "phase": "relogin",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 23,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 288,
+        "y": 617
+      },
+      "normalLogoutConfirmed": true
+    },
+    {
+      "class": "Wizard",
+      "accountId": "PubR19B07",
+      "characterName": "PubMinerB07",
+      "phase": "verification",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 24,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 288,
+        "y": 616
+      },
+      "movedTo": {
+        "map": "0",
+        "x": 288,
+        "y": 617
+      },
+      "normalLogoutConfirmed": true
+    },
+    {
+      "class": "Wizard",
+      "accountId": "PubR19B07",
+      "characterName": "PubMinerB07",
+      "phase": "relogin",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 24,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 288,
+        "y": 617
+      },
+      "normalLogoutConfirmed": true
+    },
+    {
+      "class": "Taoist",
+      "accountId": "PubR19C07",
+      "characterName": "PubMinerC07",
+      "phase": "verification",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 25,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 288,
+        "y": 616
+      },
+      "movedTo": {
+        "map": "0",
+        "x": 288,
+        "y": 617
+      },
+      "normalLogoutConfirmed": true
+    },
+    {
+      "class": "Taoist",
+      "accountId": "PubR19C07",
+      "characterName": "PubMinerC07",
+      "phase": "relogin",
+      "ordinaryCommandsOnly": true,
+      "trustedFixtures": false,
+      "nativeInputAcceptance": false,
+      "tlsVerified": true,
+      "passed": true,
+      "characterIndex": 25,
+      "level": 1,
+      "map": "0",
+      "start": {
+        "x": 288,
+        "y": 617
+      },
+      "normalLogoutConfirmed": true
+    }
+  ]
+}

@@ -24,16 +24,37 @@ held cancellation, and the genuine10091 WAV/source gates already pass.
 
 The fixed R19/s15 publisher admits40 complete objects /1,051,831,921 bytes.
 Root checks all three channel Worker suites:414 passes, zero skips. New CLI75
-and Windows SIGINT pass; Linux GNU timeout still requires CI. Existing
+and Windows SIGINT pass; Linux tooling CI37551440838 also passes, including
+GNU timeout termination. Existing
 13/14 channels and their proofs are preserved. Promotion15 additionally
 requires stage and promote from the exact same Git commit.
 
-At this prepublication freeze public gameR17/feed14 remain live. The bounded
-origin append, R2 stage/promote, paired drained Gateway update and actual
-native HTTPS/CMS/206 checks are separate remaining publication gates.
-The v7 Gateway operator will never automatically run the v6 executable
-against possibly migrated saves. Full weapon refining and the broader
-P1–P8 Goal remain open.
+The prepublication freeze retains its historical R17/feed14 status. Actual
+publication now completes: stage37552557996 verifies all40 complete public
+objects and1,051,831,921 bytes; separate promote37554003953 advances15 using
+the exact stage receipt and same publisher commit5e367. Origin15 matches,
+with the old14 bytes/fingerprints preserved in a private backup.
+
+The drained playtest Gateway now runs exact2b04 ELF1c2eab. Private database,
+state and config backups precede activation. Both old and candidate stop
+normally with exit0; the candidate cold-starts again without a journal panic.
+Original realm, authentication, capacity and resource limits are preserved.
+The v7 operator never automatically runs v6 against possible migrated saves.
+
+Actual Windows native HTTPS discovery, feed/engine/game/delivery CMS,
+whole engine SHA and TLS206 original installer bytes pass. Ordinary public
+three-class login, move and saved relogin pass6 checks. The genuine R19 client
+logs into public WSS, displays the normal Wizard, confirms right-click
+movement to(289,618), exits normally, and preserves that transform on a new
+normal Login. The initial public harness failure is retained; only its mutable
+starting-position reference was corrected, with no gameplay change.
+
+Existing launchers can discover signed15. New players can use the
+[29 MB Bootstrap03](https://assets.mir2.obelisk.build/client-updates/installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe).
+This is not a new full-installer timing, affected-laptop or Authenticode
+acceptance result. Sustained native holding, human listening, full weapon
+refining and the broader P1–P8 Goal remain open.
 
 Evidence: [prepublication receipt](generated/player-qa/mining-20261007/release-19/PRE-PUBLICATION-01.json),
+[actual published receipt and raw records](generated/player-qa/mining-20261007/publication-15/README.md),
 [fixed publisher and retained failures](../scripts/fixtures/native-r19-s15/README.md).

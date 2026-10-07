@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-07 root completes the paired mining Candidate publication: actual
+> gameR19/source2b04 and updater15/sourceb4390 are live. Stage37552557996
+> verifies40 complete CDN objects/1,051,831,921 bytes; separate promote37554003953
+> uses the exact stage SHA and same publisher commit5e367. Linux tooling,
+> Windows HTTPS/CMS/206, ordinary public three-class login/move/relogin6 and
+> genuine Windows right-click/save acceptance pass. The drained Gateway is
+> backed up, stopped normally, cold-started and checked without panic. Original
+> realm/auth/capacity/limits and D/F installations are preserved. Failed runs
+> stay recorded; synthetic QA Gateway/forward stop normally. Sustained native
+> holding/human audio, weapon refining and fullP1–P8 remain open.
+> [Actual release and evidence](generated/player-qa/mining-20261007/publication-15/README.md).
+
 > 2026-10-07 original Mine sound10091 is now wired to real91.wav before
 > optional effect-image resolution. Accepted packet/generation dedupe and scene
 > cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest

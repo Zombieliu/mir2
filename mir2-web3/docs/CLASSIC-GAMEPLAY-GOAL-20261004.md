@@ -1,5 +1,13 @@
 # 经典三职业玩法补齐 Goal — 2026-10-04
 
+> 2026-10-07 挖矿 Candidate 已实际配套发布：游戏 R19/source2b04、更新15。
+> 三职业原版产矿/纯度/矿镐损耗与保存证据、公网三职业登录/移动/重登6项、
+> Windows 实机右键移动和正常保存退出、HTTPS/CMS/206均通过。40个完整 CDN
+> 文件、排空备份、网关正常停机冷启和独立同提交 stage/promote 均有回执。
+> E/D/F 用户安装未修改；旧失败保留。持续按键/人工听音、升级武器与全 P1–P8
+> 继续开放，不把旧 Goal 标为完成。
+> [当前实际发布](generated/player-qa/mining-20261007/publication-15/README.md)。
+
 > 2026-10-07 original Mine sound10091 is now wired to real91.wav before
 > optional effect-image resolution. Accepted packet/generation dedupe and scene
 > cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest

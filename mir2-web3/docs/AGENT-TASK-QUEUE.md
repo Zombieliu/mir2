@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-10-07 mining Candidate R19/source2b04 and signed updater15 are actually
+> published. Linux release/tooling,40 complete CDN objects, paired drained
+> Gateway backup/normal cold start, native HTTPS/CMS/206 and ordinary public
+> three-class login/move/relogin6 pass. Genuine Windows right-click movement
+> and normal exit transform persistence pass separately. Three-class original
+> ore/tool witnesses are composed, not one combined passing run. Original
+> realm, auth/capacity/limits and D/F files are preserved; failures stay raw.
+> Next P6 gates: sustained native holding/human audio and complete weapon
+> refining. This closes the bounded mining publication, not fullP1–P8.
+> [Published receipts](generated/player-qa/mining-20261007/publication-15/README.md).
+
 > 2026-10-07 original Mine sound10091 is now wired to real91.wav before
 > optional effect-image resolution. Accepted packet/generation dedupe and scene
 > cancellation remain intact. Native14 and Bevy2+3 pass; verifier full SelfTest
