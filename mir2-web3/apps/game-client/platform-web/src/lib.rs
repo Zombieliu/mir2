@@ -1,24 +1,34 @@
-//! Separate lightweight policy and presentation WebAssembly packages.
-//! Both delegate to shared, platform-neutral client rules without a renderer.
+//! Separate lightweight Core, presentation and NPC purchase policy packages.
+//! Each delegates to shared, platform-neutral client rules without a renderer.
 
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(all(feature = "presentation-ui", feature = "npc-purchase-policy"))]
+compile_error!("presentation-ui and npc-purchase-policy are mutually exclusive product features");
+
+// This visitor has no WebAssembly exports. Core Mail/Gold and NPC policy share
+// the same strict raw JSON boundary without linking each other's adapter ABI.
+#[cfg(any(test, not(feature = "presentation-ui")))]
+mod strict_json;
+
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 mod core_api;
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub use core_api::*;
 
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub mod equipment_pending;
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub mod auth_ui;
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub mod mail_compose;
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub mod mail_parcel;
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub mod npc_gold_buy_attempt;
-#[cfg(not(feature = "presentation-ui"))]
+// Keep the existing pure ABI/oracle tests in default test builds. Production
+// Core/PUI do not include the unpublished NPC receipt ABI.
+#[cfg(any(test, feature = "npc-purchase-policy"))]
 pub mod npc_purchase_receipt;
-#[cfg(not(feature = "presentation-ui"))]
+#[cfg(any(test, feature = "npc-purchase-policy"))]
 pub use npc_purchase_receipt::{npc_purchase_receipt_abi_version, NpcPurchaseReceiptBridge};
 
 #[cfg(feature = "presentation-ui")]

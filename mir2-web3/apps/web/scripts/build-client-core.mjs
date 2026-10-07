@@ -54,8 +54,9 @@ function run(command, args) {
 function verify() {
   const manifest = verifyClientCoreManifest(JSON.parse(fs.readFileSync(manifestPath, "utf8")));
   if (!manifest.presentation) throw new Error("Client-core manifest requires its Presentation bundle; run npm run client-core:build");
+  if (!manifest.npcPurchase) throw new Error("Client-core manifest requires its NPC Purchase bundle; run npm run client-core:build");
   const sourceSha256 = sourceFingerprint();
-  if (manifest.sourceSha256 !== sourceSha256 || manifest.presentation.sourceSha256 !== sourceSha256) {
+  if ([manifest, manifest.presentation, manifest.npcPurchase].some((bundle) => bundle.sourceSha256 !== sourceSha256)) {
     throw new Error("Shared client source changed; rebuild and commit its small WASM packages before publishing");
   }
   const release = readClientCoreRelease({ webRoot, manifest });
@@ -64,7 +65,8 @@ function verify() {
       jsBytes: fs.readFileSync(release.files[index].localPath) });
   }
   console.log("[client-core] verified " + manifest.version + "; wasm=" + manifest.files[files[1]].bytes +
-    " bytes; presentation=" + manifest.presentation.version + "; wasm=" + manifest.presentation.files[files[1]].bytes + " bytes");
+    " bytes; presentation=" + manifest.presentation.version + "; wasm=" + manifest.presentation.files[files[1]].bytes +
+    " bytes; npcPurchase=" + manifest.npcPurchase.version + "; wasm=" + manifest.npcPurchase.files[files[1]].bytes + " bytes");
 }
 
 function buildBundle(label, features, toolConfig, bindgen) {
@@ -146,18 +148,21 @@ if (process.argv[2] === "--verify" || (process.argv.length === 2 && prebuilt)) {
     throw new Error("platform-web requires wasm-bindgen 0.2.118, matching its Cargo.lock");
   }
   const sourceSha256 = sourceFingerprint();
-  // Both builds use the same guarded Cargo executable. Capture Core bytes before
-  // the feature build replaces the target artifact; neither package is published yet.
+  // All three builds use the same guarded Cargo executable. Capture each bundle
+  // before the next feature build replaces the target artifact; nothing is published yet.
   const core = buildBundle("core", [], toolConfig, bindgen);
   const presentation = buildBundle("presentation", ["--features", "presentation-ui"], toolConfig, bindgen);
-  if (sourceFingerprint() !== sourceSha256) throw new Error("Shared client source changed during the two builds");
+  const npcPurchase = buildBundle("npc-purchase", ["--features", "npc-purchase-policy"], toolConfig, bindgen);
+  if (sourceFingerprint() !== sourceSha256) throw new Error("Shared client source changed during the three builds");
   const manifest = { ...describeBundle(core, sourceSha256),
-    presentation: describeBundle(presentation, sourceSha256) };
+    presentation: describeBundle(presentation, sourceSha256),
+    npcPurchase: describeBundle(npcPurchase, sourceSha256) };
   verifyClientCoreManifest(manifest);
-  // All optimization, metadata, budget and cleanup checks have passed for both.
+  // All optimization, metadata, budget and cleanup checks have passed for all three.
   // Only then write immutable leaves, and publish their shared manifest last.
   publishBundle(core);
   publishBundle(presentation);
+  publishBundle(npcPurchase);
   readClientCoreRelease({ webRoot, manifest });
   const json = JSON.stringify(manifest, null, 2) + "\n";
   fs.mkdirSync(path.dirname(manifestPath), { recursive: true });

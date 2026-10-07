@@ -28,6 +28,7 @@ function fixture(t) {
     `${webPath}/scripts/lib/renderer-wasm-opt.mjs`, `${webPath}/scripts/lib/client-core-release-files.mjs`, manifestRelative,
     `${webPath}/public/client-core/${manifest.version}`,
     ...(manifest.presentation ? [`${webPath}/public/client-core/${manifest.presentation.version}`] : []),
+    ...(manifest.npcPurchase ? [`${webPath}/public/client-core/${manifest.npcPurchase.version}`] : []),
     `${corePath}/Cargo.toml`, `${corePath}/src`,
     `${wirePath}/Cargo.toml`, `${wirePath}/src`,
     `${bridgePath}/Cargo.toml`, `${bridgePath}/Cargo.lock`,
@@ -69,7 +70,7 @@ test("stale shared source cannot reuse a prebuilt package", (t) => {
 
 // Source fingerprints are data-only. These do not reuse or bless the stale
 // compiled packages copied by fixture; the complete package checks require a
-// subsequent matching guarded dual build.
+// subsequent matching guarded three-package build.
 for (const relative of [`${wirePath}/Cargo.toml`, `${wirePath}/src/lib.rs`]) {
   test(`wire fingerprint changes when ${relative} changes`, async (t) => {
     const root = fixture(t);
@@ -149,4 +150,22 @@ test("builder rejects undeclared Presentation metadata and exact per-package byt
     const result = run(root);
     assert.notEqual(result.status, 0); assert.match(result.stderr, /undeclared fields|distinct immutable versions|byte budget/);
   }
+});
+
+// Pure source identity checks also cover the independent policy feature and visitor.
+for (const relative of [`${bridgePath}/Cargo.toml`, `${bridgePath}/src/strict_json.rs`]) {
+  test(`NPC policy fingerprint changes when ${relative} changes`, async (t) => {
+    const root = fixture(t);
+    const builder = await import(pathToFileURL(path.join(root, webPath, "scripts/build-client-core.mjs")).href);
+    const before = builder.sourceFingerprint();
+    fs.appendFileSync(path.join(root, relative), relative.endsWith(".rs") ? "\n// NPC visitor drift\n" : "\n# NPC feature drift\n");
+    assert.notEqual(builder.sourceFingerprint(), before);
+  });
+}
+
+test("new builder rejects a legacy dual manifest without NPC Purchase before prebuilt acceptance", (t) => {
+  const root = fixture(t), legacy = { ...manifest }; delete legacy.npcPurchase;
+  fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
+  const result = run(root);
+  assert.notEqual(result.status, 0); assert.match(result.stderr, /requires its NPC Purchase bundle/);
 });

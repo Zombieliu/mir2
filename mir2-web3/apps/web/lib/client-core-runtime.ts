@@ -1,5 +1,5 @@
 import { npcPearlBuyInput } from "./npc-pearl-buy";
-import { persistentNpcPurchaseReceiptHost, type NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
+import { persistentNpcPurchaseReceiptHost, type NpcPurchaseReceiptModule, type NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
 export type { NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
@@ -244,9 +244,11 @@ type WasmModule = {
   mail_send_slot_abi_version?:()=>number;
   MailSendSlotBridge?:new()=>{transact(input:string):string;draft_gold?:()=>number|null|undefined};
   npc_gold_buy_attempt_abi_version?:()=>number;
-  npc_purchase_receipt_abi_version?:()=>number;
-  NpcPurchaseReceiptBridge?:new()=>{transact(input:string):string};
   NpcGoldBuyAttemptBridge?:new()=>{transact(input:string):string};
+};
+
+type NpcPurchaseWasmModule = NpcPurchaseReceiptModule & {
+  default(options: { module_or_path: URL }): Promise<unknown>;
 };
 
 /** Rust String limits are UTF-8 bytes, with no unpaired UTF-16 surrogates. */
@@ -505,6 +507,37 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
     if (presentation.client_presentation_abi_version() !== presentationRelease.abiVersion) {
       throw new Error("Client presentation version mismatch; reload the client");
     }
+    // A declared independent policy is ready before publishing the synchronous facade.
+    const npcDescriptor = (manifest as unknown as { npcPurchase?: unknown }).npcPurchase;
+    let npcPurchase: NpcPurchaseWasmModule | null = null, npcPurchaseVersion: string | null = null;
+    if (npcDescriptor !== undefined) {
+      if (!slotFields(npcDescriptor, ["abiVersion", "version", "sourceSha256", "files"])
+        || npcDescriptor.abiVersion !== 1 || typeof npcDescriptor.version !== "string"
+        || !/^[a-f0-9]{64}$/.test(npcDescriptor.version) || npcDescriptor.version === manifest.version
+        || npcDescriptor.version === presentationRelease.version || npcDescriptor.sourceSha256 !== manifest.sourceSha256
+        || !slotFields(npcDescriptor.files, ["mir2_platform_web.js", "mir2_platform_web_bg.wasm"])) {
+        throw new Error("Invalid independent NPC purchase manifest");
+      }
+      for (const name of ["mir2_platform_web.js", "mir2_platform_web_bg.wasm"]) {
+        const file = npcDescriptor.files[name];
+        if (!slotFields(file, ["bytes", "sha256"]) || typeof file.bytes !== "number"
+          || !Number.isSafeInteger(file.bytes) || file.bytes <= 0
+          || (name.endsWith(".wasm") ? file.bytes >= 262144 : file.bytes > 204800)
+          || typeof file.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(file.sha256)) {
+          throw new Error("Invalid independent NPC purchase file descriptor");
+        }
+      }
+      npcPurchaseVersion = npcDescriptor.version;
+      const npcBase = new URL("/client-core/" + npcPurchaseVersion + "/", window.location.origin);
+      const npcModuleUrl = new URL("mir2_platform_web.js", npcBase);
+      if (attempt > 0) npcModuleUrl.searchParams.set("retry", String(attempt));
+      npcPurchase = await import(/* webpackIgnore: true */ npcModuleUrl.href) as NpcPurchaseWasmModule;
+      await npcPurchase.default({ module_or_path: new URL("mir2_platform_web_bg.wasm", npcBase) });
+      if (npcPurchase.npc_purchase_receipt_abi_version?.() !== npcDescriptor.abiVersion
+        || typeof npcPurchase.NpcPurchaseReceiptBridge !== "function") {
+        throw new Error("Unsupported independent NPC purchase ABI");
+      }
+    }
     const getEntityAnimationRuntime = createSharedEntityAnimationAccessor(presentation);
     let mailSendSlot:MailSendSlotRuntime|null=null;
     return {
@@ -528,7 +561,10 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       },
       getMailSendSlot():MailSendSlotRuntime {return mailSendSlot??=createMailSendSlotRuntime(module);},
       getNpcGoldBuyAttemptSlot():NpcGoldBuyAttemptSlotRuntime {return persistentNpcGoldBuyAttemptSlot(module,document,manifest.version);},
-      getNpcPurchaseReceiptHost():NpcPurchaseReceiptRuntime {return persistentNpcPurchaseReceiptHost(module,document,manifest.version);},
+      getNpcPurchaseReceiptHost():NpcPurchaseReceiptRuntime {
+        if (!npcPurchase || !npcPurchaseVersion) throw new Error("Shared NPC purchase recovery is unavailable; reload the client");
+        return persistentNpcPurchaseReceiptHost(npcPurchase,document,npcPurchaseVersion);
+      },
       resolveQuestAction(input: QuestActionInput): QuestActionDecision {
         return JSON.parse(module.resolve_quest_action(JSON.stringify(input))) as QuestActionDecision;
       },

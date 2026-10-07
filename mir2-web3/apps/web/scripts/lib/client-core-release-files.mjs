@@ -35,17 +35,25 @@ function verifyBundle(manifest, label) {
   return Object.freeze({ abiVersion: 1, version: manifest.version,
     sourceSha256: manifest.sourceSha256, files: Object.freeze(files) });
 }
-/** Legacy single-bundle manifests remain readable; newly built releases carry both. */
+/** Legacy Core and Core/Presentation manifests remain readable. New builds carry all three. */
 export function verifyClientCoreManifest(manifest) {
   const hasPresentation = !!manifest && Object.hasOwn(manifest, "presentation");
-  exactKeys(manifest, ["abiVersion", "version", "sourceSha256", "files", ...(hasPresentation ? ["presentation"] : [])], "Core manifest");
+  const hasNpcPurchase = !!manifest && Object.hasOwn(manifest, "npcPurchase");
+  exactKeys(manifest, ["abiVersion", "version", "sourceSha256", "files",
+    ...(hasPresentation ? ["presentation"] : []), ...(hasNpcPurchase ? ["npcPurchase"] : [])], "Core manifest");
   const core = verifyBundle({ abiVersion: manifest.abiVersion, version: manifest.version,
     sourceSha256: manifest.sourceSha256, files: manifest.files }, "Core");
-  if (!hasPresentation) return core;
-  const presentation = verifyBundle(manifest.presentation, "Presentation");
-  if (presentation.sourceSha256 !== core.sourceSha256) throw new Error("Shared client source changed: Presentation source differs from Core");
-  if (presentation.version === core.version) throw new Error("Core and Presentation must have distinct immutable versions");
-  return Object.freeze({ ...core, presentation });
+  if (hasNpcPurchase && !hasPresentation) throw new Error("NPC Purchase requires its Presentation sibling");
+  const result = { ...core }, versions = new Set([core.version]);
+  for (const [key, label] of [["presentation", "Presentation"], ["npcPurchase", "NPC Purchase"]]) {
+    if (!Object.hasOwn(manifest, key)) continue;
+    const bundle = verifyBundle(manifest[key], label);
+    if (bundle.sourceSha256 !== core.sourceSha256) throw new Error("Shared client source changed: " + label + " source differs from Core");
+    if (versions.has(bundle.version)) throw new Error("Core policy packages must have distinct immutable versions");
+    versions.add(bundle.version);
+    result[key] = bundle;
+  }
+  return Object.freeze(result);
 }
 export function assertCompiledClientCoreManifest(requiredServerFiles, expectedManifest) {
   const serialized = requiredServerFiles?.config?.env?.[CLIENT_CORE_BUILD_MANIFEST_ENV];
@@ -91,7 +99,8 @@ export function readClientCoreRelease({ webRoot, manifest, requireExactClosure =
   const normalized = verifyClientCoreManifest(manifest ?? JSON.parse(regularBytes(
     path.join(root, "lib", "generated", "client_core_runtime.json")).toString("utf8")));
   const parent = directory(path.join(root, "public", "client-core"));
-  const bundles = [normalized, ...(normalized.presentation ? [normalized.presentation] : [])];
+  const bundles = [normalized, ...(normalized.presentation ? [normalized.presentation] : []),
+    ...(normalized.npcPurchase ? [normalized.npcPurchase] : [])];
   const versionDirectories = bundles.map((bundle) => directory(path.join(parent, bundle.version)));
   if (requireExactClosure) {
     entries(parent, bundles.map((bundle) => bundle.version));

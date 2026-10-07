@@ -19,7 +19,7 @@ use mir2_client_wire as wire;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use wasm_bindgen::prelude::*;
-use crate::mail_compose::StrictMailValue;
+use crate::strict_json::StrictMailValue;
 
 const MAX_CONTROLS: usize = 64;
 // A bounded raw frame encoded inside a JSON string can expand sixfold.

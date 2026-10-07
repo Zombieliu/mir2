@@ -25,11 +25,14 @@ async function fixture(t) {
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   return root;
 }
-async function release(root, value = manifest, parts = payloads, presentationParts = null) {
+async function release(root, value = manifest, parts = payloads, presentationParts = null, npcParts = null) {
   await write(path.join(root, "lib", "generated", "client_core_runtime.json"), JSON.stringify(value));
   for (let i = 0; i < names.length; i += 1) await write(path.join(root, "public", "client-core", value.version, names[i]), parts[i]);
   if (value.presentation && presentationParts) {
     for (let i = 0; i < names.length; i += 1) await write(path.join(root, "public", "client-core", value.presentation.version, names[i]), presentationParts[i]);
+  }
+  if (value.npcPurchase && npcParts) {
+    for (let i = 0; i < names.length; i += 1) await write(path.join(root, "public", "client-core", value.npcPurchase.version, names[i]), npcParts[i]);
   }
 }
 
@@ -248,6 +251,158 @@ test("selected Presentation symlinks cannot substitute outside bytes", async (t)
   const root = await fixture(t); await release(root, dualManifest, payloads, presentationPayloads);
   const leaf = path.join(root, "public", "client-core", dualManifest.presentation.version, names[0]);
   const outside = path.join(root, "outside.js"); await write(outside, presentationPayloads[0]); await fs.unlink(leaf);
+  try { await fs.symlink(outside, leaf, "file"); }
+  catch (error) { if (error?.code === "EPERM" || error?.code === "EACCES") { t.skip("OS denied symlink fixture: " + error.code); return; } throw error; }
+  assert.throws(() => readClientCoreRelease({ webRoot: root }), /linked or irregular/);
+});
+
+const npcPayloads = [Buffer.from("export const npcPurchase = 1;\n"), Buffer.from([0, 97, 115, 109, 1, 0, 0, 0, 2])];
+const tripleManifest = { ...dualManifest, npcPurchase: manifestFor(npcPayloads) };
+
+test("NPC purchase descriptor keeps legacy manifests and requires exact ABI source versions filenames and byte budgets", () => {
+  const current = verifyClientCoreManifest(tripleManifest);
+  assert.equal(Object.hasOwn(verifyClientCoreManifest(manifest), "npcPurchase"), false);
+  assert.equal(Object.hasOwn(verifyClientCoreManifest(dualManifest), "npcPurchase"), false);
+  assert.equal(current.npcPurchase.version, tripleManifest.npcPurchase.version);
+  assert.equal(current.npcPurchase.sourceSha256, current.sourceSha256);
+  assert.equal(current.npcPurchase.sourceSha256, current.presentation.sourceSha256);
+  assert.equal(new Set([current.version, current.presentation.version, current.npcPurchase.version]).size, 3);
+  assert.equal(Object.isFrozen(current.npcPurchase), true); assert.equal(Object.isFrozen(current.npcPurchase.files), true);
+  for (const mutate of [
+    (value) => { delete value.presentation; }, (value) => { value.npcPurchase = null; },
+    (value) => { value.npcPurchase = []; }, (value) => { value.npcPurchase.extra = 1; },
+    (value) => { delete value.npcPurchase.sourceSha256; }, (value) => { value.npcPurchase.abiVersion = 2; },
+    (value) => { value.npcPurchase.version = value.version; },
+    (value) => { value.npcPurchase.version = value.presentation.version; },
+    (value) => { value.presentation.version = value.version; },
+    (value) => { value.npcPurchase.version = "../escape"; }, (value) => { value.npcPurchase.version = "A".repeat(64); },
+    (value) => { value.npcPurchase.sourceSha256 = "bad"; },
+    (value) => { value.npcPurchase.sourceSha256 = "2".repeat(64); },
+    (value) => { value.presentation.sourceSha256 = "2".repeat(64); },
+    (value) => { value.npcPurchase.files["../escape"] = value.npcPurchase.files[names[0]]; },
+    (value) => { value.npcPurchase.files["npc.js"] = value.npcPurchase.files[names[0]]; },
+    (value) => { delete value.npcPurchase.files[names[1]]; },
+    (value) => { value.npcPurchase.files[names[0]].extra = 1; },
+    (value) => { value.npcPurchase.files[names[0]].bytes = 0; },
+    (value) => { value.npcPurchase.files[names[0]].bytes = 1.5; },
+    (value) => { value.npcPurchase.files[names[0]].bytes = Number.MAX_SAFE_INTEGER + 1; },
+    (value) => { value.npcPurchase.files[names[0]].sha256 = "bad"; },
+    (value) => { value.npcPurchase.files[names[0]].bytes = 204801; },
+    (value) => { value.npcPurchase.files[names[1]].bytes = 262144; },
+  ]) { const value = clone(tripleManifest); mutate(value); assert.throws(() => verifyClientCoreManifest(value)); }
+  const boundary = clone(tripleManifest);
+  boundary.npcPurchase.files[names[0]].bytes = 204800; boundary.npcPurchase.files[names[1]].bytes = 262143;
+  assert.doesNotThrow(() => verifyClientCoreManifest(boundary));
+});
+
+test("compiled closure pins NPC purchase descriptor and rejects addition removal or independent leaf identity drift", () => {
+  assert.deepEqual(assertCompiledClientCoreManifest(compiled(tripleManifest), tripleManifest), verifyClientCoreManifest(tripleManifest));
+  assert.throws(() => assertCompiledClientCoreManifest(compiled(dualManifest), tripleManifest), /differs/);
+  assert.throws(() => assertCompiledClientCoreManifest(compiled(tripleManifest), dualManifest), /differs/);
+  for (const mutate of [
+    (value) => { value.npcPurchase.version = "8".repeat(64); },
+    (value) => { value.npcPurchase.files[names[0]].sha256 = "9".repeat(64); },
+    (value) => { value.npcPurchase.files[names[1]].bytes += 1; },
+    (value) => { value.sourceSha256 = value.presentation.sourceSha256 = value.npcPurchase.sourceSha256 = "2".repeat(64); },
+  ]) { const value = clone(tripleManifest); mutate(value); assert.throws(() => assertCompiledClientCoreManifest(compiled(value), tripleManifest), /differs/); }
+  const reordered = { ...tripleManifest, npcPurchase: Object.fromEntries(Object.entries({ ...tripleManifest.npcPurchase,
+    files: Object.fromEntries(Object.entries(tripleManifest.npcPurchase.files).reverse()) }).reverse()) };
+  assert.deepEqual(assertCompiledClientCoreManifest(compiled(reordered), tripleManifest), verifyClientCoreManifest(tripleManifest));
+});
+
+test("triple reader returns three active version directories and six exact leaves with strict NPC closure", async (t) => {
+  const root = await fixture(t); await release(root, tripleManifest, payloads, presentationPayloads, npcPayloads);
+  const selected = readClientCoreRelease({ webRoot: root, requireExactClosure: true });
+  const versions = [manifest.version, tripleManifest.presentation.version, tripleManifest.npcPurchase.version];
+  assert.equal(selected.versionDirectory, selected.versionDirectories[0]);
+  assert.deepEqual(selected.versionDirectories.map((entry) => path.basename(entry)), versions);
+  assert.equal(selected.files.length, 6); assert.equal(selected.versionDirectories.length, 3);
+  assert.equal(Object.isFrozen(selected.files), true); assert.equal(Object.isFrozen(selected.versionDirectories), true);
+  for (let i = 0; i < selected.files.length; i += 1) {
+    const bytes = [...payloads, ...presentationPayloads, ...npcPayloads][i], entry = selected.files[i];
+    assert.equal(entry.relativePath, "client-core/" + versions[Math.floor(i / 2)] + "/" + names[i % 2]);
+    assert.equal(entry.bytes, bytes.length); assert.equal(entry.sha256, hash(bytes));
+    assert.deepEqual(await fs.readFile(entry.localPath), bytes);
+  }
+  const history = path.join(root, "public", "client-core", "a".repeat(64), "keep.js"); await write(history, "history");
+  const extra = path.join(selected.versionDirectories[2], "extra.bin"); await write(extra, "source extra");
+  assert.equal(readClientCoreRelease({ webRoot: root }).files.length, 6);
+  assert.throws(() => readClientCoreRelease({ webRoot: root, requireExactClosure: true }), /undeclared entries/);
+  assert.equal(await fs.readFile(history, "utf8"), "history"); assert.equal(await fs.readFile(extra, "utf8"), "source extra");
+  await fs.unlink(history); await fs.rmdir(path.dirname(history));
+  assert.throws(() => readClientCoreRelease({ webRoot: root, requireExactClosure: true }), /undeclared entries/);
+  await fs.unlink(extra); assert.equal(readClientCoreRelease({ webRoot: root, requireExactClosure: true }).files.length, 6);
+  await fs.unlink(selected.files[5].localPath);
+  assert.throws(() => readClientCoreRelease({ webRoot: root }), /ENOENT/);
+});
+
+test("NPC reader rejects same-size leaf hash drift and independently false concatenated version", async (t) => {
+  const root = await fixture(t);
+  for (let i = 0; i < names.length; i += 1) {
+    await release(root, tripleManifest, payloads, presentationPayloads, npcPayloads);
+    const changed = Buffer.from(npcPayloads[i]); changed[changed.length - 1] ^= 1;
+    await fs.writeFile(path.join(root, "public", "client-core", tripleManifest.npcPurchase.version, names[i]), changed);
+    assert.throws(() => readClientCoreRelease({ webRoot: root }), /size\/hash mismatch/);
+  }
+  const falseVersion = clone(tripleManifest); falseVersion.npcPurchase.version = "b".repeat(64);
+  await release(root, falseVersion, payloads, presentationPayloads, npcPayloads);
+  assert.throws(() => readClientCoreRelease({ webRoot: root }), /bundle hash/);
+});
+
+test("NPC file budget accepts exact JS maximum and WASM maximum minus one using ordinary file fixtures", async (t) => {
+  const root = await fixture(t), bounded = [Buffer.alloc(204800, 32), Buffer.alloc(262143, 0)];
+  const value = { ...dualManifest, npcPurchase: manifestFor(bounded) };
+  await release(root, value, payloads, presentationPayloads, bounded);
+  const selected = readClientCoreRelease({ webRoot: root, requireExactClosure: true });
+  assert.deepEqual(selected.files.slice(4).map(({ bytes, sha256 }) => ({ bytes, sha256 })), names.map((name) => value.npcPurchase.files[name]));
+  for (let i = 0; i < 2; i += 1) assert.deepEqual(await fs.readFile(selected.files[4 + i].localPath), bounded[i]);
+  for (const parts of [[Buffer.alloc(204801), bounded[1]], [bounded[0], Buffer.alloc(262144)]])
+    assert.throws(() => verifyClientCoreManifest({ ...dualManifest, npcPurchase: manifestFor(parts) }));
+});
+
+test("Thin standalone and source merge retain all three active packages with six exact post-copy leaves", async (t) => {
+  const root = await fixture(t), source = path.join(root, "source");
+  await release(source, tripleManifest, payloads, presentationPayloads, npcPayloads);
+  const selected = readClientCoreRelease({ webRoot: source }), coreFiles = new Set(selected.files.map((entry) => entry.relativePath));
+  assertCompiledClientCoreManifest(compiled(tripleManifest), selected.manifest);
+  const versions = [manifest.version, tripleManifest.presentation.version, tripleManifest.npcPurchase.version];
+  const obsolete = "client-core/" + "c".repeat(64) + "/" + names[0];
+  const extras = versions.map((version) => "client-core/" + version + "/extra.bin");
+  for (const relative of [obsolete, ...extras]) await write(path.join(source, "public", ...relative.split("/")), "source extra");
+  const selection = (relative, directory) => selectThinPublicEntry(relative, directory, {
+    runtimeVersion: "bevy-0123456789abcdef", runtimeFiles: new Set(), coreVersion: manifest.version, coreFiles,
+  });
+  for (const version of versions) assert.equal(selection("client-core/" + version, true), true);
+  for (const relative of coreFiles) assert.equal(selection(relative, false), true);
+  for (const relative of [obsolete, ...extras]) assert.equal(selection(relative, false), false);
+  assert.equal(selection("client-core/" + "c".repeat(64), true), false);
+  const standalone = path.join(root, "standalone"), appRelativePath = "mir2-web3/apps/web";
+  const tracedApp = path.join(standalone, ...appRelativePath.split("/")); await write(path.join(tracedApp, "server.js"), "server");
+  for (const relative of [...coreFiles, obsolete, ...extras]) await write(path.join(tracedApp, "public", ...relative.split("/")), await fs.readFile(path.join(source, "public", ...relative.split("/"))));
+  const destination = path.join(root, "package");
+  await copyPortableStandalone({ sourceRoot: standalone, destinationRoot: destination, appRelativePath, publicSelection: selection });
+  const packagedApp = path.join(destination, ...appRelativePath.split("/"));
+  const merge = await copySelectedPublic({ sourceRoot: path.join(source, "public"), destinationRoot: path.join(packagedApp, "public"), selection });
+  assert.equal(merge.files, 6); assert.equal(merge.collisions, 6);
+  const packed = readClientCoreRelease({ webRoot: packagedApp, manifest: tripleManifest, requireExactClosure: true });
+  assert.deepEqual((await fs.readdir(path.join(packagedApp, "public", "client-core"))).sort(), [...versions].sort());
+  assert.equal(packed.versionDirectories.length, 3); assert.equal(packed.files.length, 6);
+  for (let i = 0; i < packed.files.length; i += 1) {
+    const bytes = [...payloads, ...presentationPayloads, ...npcPayloads][i];
+    assert.deepEqual(await fs.readFile(packed.files[i].localPath), bytes); assert.equal(packed.files[i].sha256, hash(bytes));
+  }
+  for (const relative of [obsolete, ...extras]) {
+    await assert.rejects(fs.lstat(path.join(packagedApp, "public", ...relative.split("/"))), { code: "ENOENT" });
+    assert.equal(await fs.readFile(path.join(source, "public", ...relative.split("/")), "utf8"), "source extra");
+  }
+  await write(path.join(packed.versionDirectories[2], "extra.bin"), "bad package extra");
+  assert.throws(() => readClientCoreRelease({ webRoot: packagedApp, manifest: tripleManifest, requireExactClosure: true }), /undeclared entries/);
+});
+
+test("selected NPC purchase symlinks cannot substitute outside fixture bytes", async (t) => {
+  const root = await fixture(t); await release(root, tripleManifest, payloads, presentationPayloads, npcPayloads);
+  const leaf = path.join(root, "public", "client-core", tripleManifest.npcPurchase.version, names[0]);
+  const outside = path.join(root, "outside-npc.js"); await write(outside, npcPayloads[0]); await fs.unlink(leaf);
   try { await fs.symlink(outside, leaf, "file"); }
   catch (error) { if (error?.code === "EPERM" || error?.code === "EACCES") { t.skip("OS denied symlink fixture: " + error.code); return; } throw error; }
   assert.throws(() => readClientCoreRelease({ webRoot: root }), /linked or irregular/);

@@ -13,13 +13,17 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 presentation-ui = []
+npc-purchase-policy = ["dep:mir2-client-wire"]
 
 [dependencies]
 mir2-client-core = { path = "../client-core" }
-mir2-client-wire = { path = "../client-wire" }
+mir2-client-wire = { path = "../client-wire", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 wasm-bindgen = "=0.2.118"
+
+[dev-dependencies]
+mir2-client-wire = { path = "../client-wire" }
 
 [profile.release]
 opt-level = "z"
