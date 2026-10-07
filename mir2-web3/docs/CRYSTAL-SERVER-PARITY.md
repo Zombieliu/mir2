@@ -1,23 +1,24 @@
 # Crystal Server Parity
 
-> 2026-10-07 final source c6c32381a6 passes actual Linux CI37617054260:
-> appearance Zone5/Gateway3, cold-world cleanup1 and release/security/siege jobs.
-> Exact ZIP/package/binary proofs pass after retaining an archive-name verifier
-> failure. Private server staging and sealed operator are complete. Live R19,
-> native R20/feed16 and both online actors stay unchanged; human normal exit
-> approval is pending before drain/backup/switch and public appearance checks.
-> Windows relink failure and original Zone drop-award failure remain recorded.
-> [Prepared evidence](generated/player-qa/shared-player-appearance-20261007/prepared-01/README.md).
+> 2026-10-07 shared-player appearance source c6c32381a6 is actually live in
+> the isolated invited playtest after human normal-exit/switch authorization.
+> Drained preflight, private DB/state/config backup, normal old/Candidate stops
+> and Candidate cold restart pass; only ExecStart changes. Capacity51/66/51,
+> environment/unit/resource limits and original production PID stay unchanged.
+> Verified public HTTPS/WSS passes44 checks across all three classes/both
+> genders using five owned accounts; all8 ordinary lifecycles log out normally
+> and final connections/admissions/leases drain. No Windows reinstall/feed16
+> update is needed. Native two-client/human visual acceptance remains open.
+> [Actual rollout evidence](generated/player-qa/shared-player-appearance-20261007/rollout-01/README.md).
 
-> 2026-10-07 shared remote appearance Candidate corrects ordinary transform
-> -1 and synchronizes trusted equipment/hair before Join and on changes. Root
-> is the sole writer; independent read-only review passes the main path.
-> Zone5/Gateway3 and atomic restore2 pass. Adjacent Zone208/1 retains an
-> identical unchanged-source drop-award failure. Normal three classes/both
-> genders and ordinary equip/remove/transfer are covered. No client/feed16
-> update is needed; Linux build, drained server rollout and native/public
-> appearance acceptance remain pending. father requested50000 gold is delivered
-> once by private system mail, awaiting claim; broad P1–P8 stays unfinished.
+> The fix uses ordinary transformation-1 and trusted current equipment/hair
+> before Join and on changes, preserving Zone life/position/status authority.
+> Clean Linux CI37617054260, Zone5/Gateway3, checkpoint regressions and read-only
+> review pass. Both public harness failures are retained: missing Origin,
+> then the unchanged fifth-registration/hour budget. The passing run reuses
+> owned accounts without weakening limits. Original drop-award failure,
+> Windows relink and archive-name verifier failures stay recorded. father50000
+> gold is delivered once by private mail, awaiting claim; fullP1–P8 is unfinished.
 > [Exact scope and evidence](SHARED-PLAYER-APPEARANCE-20261007.md).
 
 

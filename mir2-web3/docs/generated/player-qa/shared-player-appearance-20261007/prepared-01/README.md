@@ -1,5 +1,8 @@
 # Prepared server-only appearance delivery
 
+Historical preparation snapshot. The authorized rollout and actual public
+checks are recorded in [rollout-01](../rollout-01/README.md).
+
 - Clean source: `c6c32381a646dae1067dafdeec57691f606b1779`.
 - Actual CI: [37617054260](https://github.com/Zombieliu/mir2/actions/runs/37617054260),
   overall success. Build/security and reused siege jobs pass.

@@ -45,6 +45,10 @@ installer or native resource update is required for this server correction.
 | Adjacent full shared Zone regression | 208 pass / 1 fail |
 | Same failed drop-award assertion on unchanged released source8fa | 0/1; identical assertion at shared_zone.rs4746 |
 | Read-only independent review | Main path passes; restore/replay limits below remain explicit |
+| Actual isolated playtest rollout | Drained private backup, old/Candidate normal stop0 and cold restart pass; only ExecStart changes |
+| Actual ordinary public WSS | 44/44 over six class/gender variants in five owned accounts; all8 normal logouts confirmed |
+| Final actual public/private health | Pinned source/healthy; all six admission/session counts zero |
+| Native human two-client appearance | Open; no new screenshot/GPU human acceptance is claimed |
 
 Raw logs are retained under `C:/mir2-build/remote-player-*`; no failed run is
 rewritten as a pass. The unrelated original drop-award expectation is not
@@ -73,15 +77,40 @@ executable passes the unchanged cold-world test directly, and clean Linux CI
 independently compiles/tests the final committed source. Do not call the failed
 Windows relink a pass.
 
-The exact verified Linux Gateway is uploaded/extracted privately on the
-playtest host. Its reviewed operator is root-owned and sealed; negative request
-checks accept the intended pair and reject four wrong revision/capacity/hash
-requests. Live R19/PID2930135, public native R20/feed16 and both online player
-sessions remain unchanged. A normal exit/switch question is pending because
-both father and PubMinerB07 are still online. Drained backup/activation and
-ordinary public appearance checks remain unfinished until that reply. No
-Windows reinstall is necessary. Real native screenshots/human acceptance and
-full P1–P8 parity remain separate, unfinished gates.
+The exact verified Linux Gateway is now activated in the isolated invited
+playtest after the human replies "已退出，可以切换". Read-only preflight confirms
+all six admission/session counts and ordinary TCP7200 are drained. The sealed
+operator creates private PostgreSQL/state/config backups, changes only that
+service's ExecStart and preserves capacity51/66/51, environment/base unit/resource
+limits. Old and Candidate stop exit codes are zero; the Candidate then cold
+starts without a shutdown panic. Live PID2984990 runs the pinned binary/source.
+Original production PID3855184/release stays unchanged. No Windows installer,
+resource rebuild, native feed16 promotion or database restore is performed.
+
+Ordinary public HTTPS returns200/healthy on the exact source. WSS with the
+required Origin and normal TLS passes44 checks over Warrior/Wizard/Taoist and
+both genders:20 initial appearance relations,8 gender-switch relations,
+8 movement broadcasts and8 re-login appearance relations. Complete remote
+sprites equal the corresponding owner's ordinary SelfPlayer descriptor and
+use transformation-1/CArmour. Both walked positions persist across ordinary
+logout/re-login, AOI leave removes the prior actor, and all8 owned client
+lifecycles receive LogOutSuccess. Final private/public health confirms all
+owned connections, admissions and reconnect leases drain.
+
+The first public harness fails because Node's global WebSocket omits the
+required Origin. The second, corrected transport succeeds for five ordinary
+accounts then hits the unchanged five-registrations-per-peer/hour rule. Both
+failed reports and cleanup evidence are retained. The passing run reuses those
+five owned accounts and normally creates a female Taoist character in the
+Taoist account, keeping maximum concurrent actors at five. It makes no further
+registration or privileged state preparation, uses no operator rate-limit
+reset, and restarts no service to get a pass. This is functional/public-protocol
+acceptance rather than new load-capacity or native GPU/human acceptance.
+
+No Windows reinstall is necessary. Real native two-client screenshots/human
+appearance acceptance and full P1–P8 parity remain separate, unfinished gates.
+[Actual operator results, all public runs and redacted traffic](generated/player-qa/shared-player-appearance-20261007/rollout-01/README.md)
+are archived separately from the historical preparation snapshot.
 
 The verified binary is 80,703,496 bytes, SHA256
 `7ffbea9de2998ff5265b9bb212caf9c56c9d8c61de5dbc3fa3235442217818d9`.
