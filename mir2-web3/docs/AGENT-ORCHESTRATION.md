@@ -1,5 +1,26 @@
 # Agent Orchestration
 
+## Source29：严格购买 wire、永久 Core host 与 Web ABI 已通过，实际客户端应用继续接线（2026-10-07）
+
+新增独立轻量 client-wire，外部 u64 采用 canonical decimal string，保留 UID0 与 MAX selector；递归拒 duplicate/escaped duplicate、unknown 和数值型 ID。control request ID 与完整 actor/scope/sequence/intent 分开关联，producer/snapshot/authority 必须同对；terminal revision 不能取 MAX，快照 JSON 本身不证明客户端完整应用。
+
+共享 Core host 按 Actor 保留 ledger，跨 UI、同 producer 重连及更换角色不清原 operation、不换 ID、不自动重发；容量与 allocator 耗尽不驱逐历史。Begin/连接更换先撤回 availability，再等 fresh receipt 与完整 applied witness。Web ABI 独立保留 control/ticket，严格 raw frame 匹配后才观察结果；document 永久 facade 将 token 同原 producer/physical socket 绑定，拒 getter/toJSON 和反射重入越过最终 generation fence，旧回调不能借新连接权限。
+
+Gateway actual reader 重新严格解析原 message 后进入专用 serial 队列，实际 authenticated/verified 当前身份、opt-in 和真实 owner 能力共同准入；不走旧 BuyItem fallback。同 owner turn 的 snapshot 与 authority 一起输出，2MiB projection 失败仅保留精确关联的真实 PostCommit receipt。Gold/Pearl goods 增加 purchaseItemIndex 字符串，在 JS Number 转换前保留完整 selector。
+
+Root 最终 Rust02 实际 Gateway13＋wire16＋Core187＋ABI13＋旧Gold16＝245个唯一具名测试；原 NPC 脚本106/106（新增12），严格非增量 TSC exit0/无诊断，共351次最终选定执行，新增48 Rust＋12 Web＝60项 distinct。897 Rust 与27915 Node 普通输入全部独立核验、零漂移；原888 Rust 中11改/877保护，9个快照输入新增，零移除。9次实际原 CargoGuard、45 nonce files 全部 actual GetVolume C≥50GiB、sampleEnd→childStart 上界≤85.5647ms<2000ms、PolicyB Exited/Dispose。
+
+首轮 Gateway workspace roots 编译101/0测试保留，最小修复仅将 client-wire 加到根 exclude；历史 wire/Core/ABI 216次不累加进最终245。结果01派生 freshness 曾误用 probeEnd 差值；独立复核后结果02改为实际 sampleEnd 到 childStarted 的截断毫秒界限，原收据、源码、计数不变，不重复测试。
+
+下一项是 Native/Web actual receiver/dispatcher 与完整经济 bundle。Native 实际用 WS JSON，当前 Applied 只证明入队，多个模型各自 coalesce；须整体预解码、主线程完整应用后回传 witness。Web 新 owner frame 须在普通 decoder 前保留 raw string，完整应用同 revision 的个人经济状态并绕过 movement-only 快路径；inventory/equipment readiness、incoming UID、tick 或入队都不能代替完整应用。
+
+匹配重建前须将 client-wire manifests/src 纳入实际 Core/PUI builder fingerprint 及原 fixture copy。当前已构建包仍是 Source25 Next08/Thin08，不含 Source26–29；原 full11 包回归 node01 本轮只准备未运行，不改旧 manifest/资产伪造新包。Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common，309/317≈97.5%仅是有界代码记录，不是可玩或全项目百分比；overall percentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”持续有效，登录→战斗→保存→重登、资源/WASM与移动/frontend验收均 not-run，当前不承诺可玩日期。
+
+Source28 已实际提交推送并核验远端 fdd3abc37d3ab6df45b428013dda85501d7404c5；本轮承接其事后 publication。Source29 Git 发布由 Root 实际操作后另记，不以测试或文档代替推送证据。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result02.json)、[独立结果复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-independent-review01.json)、[Source28 实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-publication01.json)。以下 Source28 及更早正文完整保留为历史。
+
+
 ## Source28：真实 owner/Hosted/RPC 购买恢复通过，客户端完整应用继续接线（2026-10-07）
 
 真实 durable source、已认证活动角色和 held owner lease 才能启用独立 Begin/Quote/Query/Purchase。默认能力为 false，Hosted/RPC 使用真实 owner，不查本地 shadow。Begin/Purchase 走单次 mutation；Quote 与原完整 operation 的 Query 只读，不进入旧 BuyItem fallback，也不 drain unrelated gameplay/economy。Shared 专用 leaf 只同步已有角色 transform/vitals、执行购买和更新已有 presence/ranking，避免在 PG lease 行锁内进入旧 pending economy 的二次 FOR UPDATE。

@@ -162,6 +162,7 @@ enum ParsedSocketInput {
         skill_key_request: Option<SkillKeyRequest>,
     },
     ClientCapabilities(Vec<String>),
+    NpcPurchaseOwner(mir2_client_wire::ClientRequest),
     ResumeSession(ResumeCredential),
     ResumeRejected,
     SkillKeyRejected {
@@ -843,6 +844,7 @@ struct NativeClientCapabilities {
     native_resume_v1: bool,
     native_game_shop_receipt_v1: bool,
     server_catalog_gzip_v1: bool,
+    durable_npc_purchase_owner_v1: bool,
 }
 
 impl NativeResumeConnectionState {
@@ -1579,6 +1581,13 @@ enum BrowserCommand {
         capabilities: Vec<String>,
     },
     ResumeSession(NativeResumeRequest),
+    NpcPurchaseOwner {
+        #[serde(rename = "protocolVersion")]
+        protocol_version: u16,
+        #[serde(rename = "requestId")]
+        request_id: mir2_client_wire::U64,
+        action: mir2_client_wire::Action,
+    },
     Disconnect,
     TownRevive,
     Login {
@@ -5019,6 +5028,19 @@ fn spawn_socket_reader(
                 }
             };
             let command = match command {
+                BrowserCommand::NpcPurchaseOwner { .. } => {
+                    // Reparse the original bytes with duplicate/unknown-field
+                    // rejection; never dispatch a Value-normalized request.
+                    let parsed = match mir2_client_wire::parse_client_request(&message) {
+                        Ok(request) => ParsedSocketInput::NpcPurchaseOwner(request),
+                        Err(_) => ParsedSocketInput::ProtocolError(
+                            "invalid durable NPC purchase request".to_owned()),
+                    };
+                    if input_tx.send(SocketInbound::Queued(QueuedSocketInput::new(
+                        parsed, Arc::clone(&reader_pending_count), message_permit,
+                    ))).await.is_err() { return; }
+                    continue;
+                }
                 BrowserCommand::ClientCapabilities { capabilities } => {
                     if input_tx
                         .send(SocketInbound::Queued(QueuedSocketInput::new(
@@ -5328,6 +5350,7 @@ async fn handle_socket_work(
     let mut authenticated_account_id: Option<String> = None;
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
     let mut native_game_shop = NativeGameShopConnectionState::default();
+    let mut npc_purchase = crate::npc_purchase_browser::BrowserNpcPurchaseConnection::default();
     let mut server_catalog_gzip_v1 = false;
     let mut first_post_resume_identity_check_pending = false;
     let mut last_identity_revocation_check = Instant::now();
@@ -5426,7 +5449,8 @@ async fn handle_socket_work(
                     continue;
                 }
                 let parsed_input = queued_input.take_input();
-                let (mut action, quest_operation_request, skill_key_request) = match parsed_input {
+                let mut npc_purchase_request = None;
+                let (action, quest_operation_request, skill_key_request) = match parsed_input {
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
@@ -5440,6 +5464,7 @@ async fn handle_socket_work(
                                 native_game_shop.opted_in =
                                     capabilities.native_game_shop_receipt_v1;
                                 server_catalog_gzip_v1 = capabilities.server_catalog_gzip_v1;
+                                npc_purchase.set_opted_in(capabilities.durable_npc_purchase_owner_v1);
                                 if !native_game_shop.opted_in {
                                     native_game_shop.pending = None;
                                 }
@@ -5590,11 +5615,15 @@ async fn handle_socket_work(
                         }
                         continue;
                     }
+                    ParsedSocketInput::NpcPurchaseOwner(request) => {
+                        npc_purchase_request = Some(request);
+                        (None, None, None)
+                    }
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
                         skill_key_request,
-                    } => (action, quest_operation_request, skill_key_request),
+                    } => (Some(action), quest_operation_request, skill_key_request),
                     ParsedSocketInput::SkillKeyRejected { request, error } => {
                         if send_world_snapshot_with_skill_ack(&sender, session, Some(&request), false).await.is_err()
                             || send_error_message(&sender, &error).await.is_err() {
@@ -5630,6 +5659,40 @@ async fn handle_socket_work(
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
                 }
+                if let Some(request) = npc_purchase_request {
+                    let dispatch = tokio::task::block_in_place(|| {
+                        let identity_valid = authenticated && active_identity_session.as_ref()
+                            .zip(authenticated_account_id.as_deref())
+                            .is_some_and(|(verified, account_id)| verified.account_id == account_id
+                                && native_resume_identity_is_active(
+                                    session_cache.as_ref(), &identity, verified, gateway_unix_ms()));
+                        crate::npc_purchase_browser::execute_browser_npc_purchase(
+                            session, &mut npc_purchase, authenticated_account_id.as_deref(),
+                            identity_valid, &request,
+                        )
+                    });
+                    let dispatch = match dispatch {
+                        Ok(dispatch) => dispatch,
+                        Err(error) => {
+                            // No replacement ID, ordinary BuyItem or re-read
+                            // snapshot may conceal an uncertain mutation.
+                            eprintln!("durable NPC response unavailable: {error}");
+                            return;
+                        }
+                    };
+                    let encoded = match mir2_client_wire::encode_server_frame(&dispatch.frame) {
+                        Ok(encoded) => encoded,
+                        Err(_) => return,
+                    };
+                    if sender.lock().await.send(Message::Text(encoded.into())).await.is_err() {
+                        return;
+                    }
+                    for packet in dispatch.packets {
+                        if send_server_packet(&sender, &packet).await.is_err() { return; }
+                    }
+                    continue;
+                }
+                let Some(mut action) = action else { continue; };
                 let native_game_shop_request = if native_game_shop.opted_in {
                     match native_game_shop_request_from_action(&action) {
                         Some(Ok(request)) => {
@@ -7728,7 +7791,8 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::ClientVersion => Ok(SessionAction::Packet(ClientPacket::ClientVersion {
             version_hash: Vec::new(),
         })),
-        BrowserCommand::ClientCapabilities { .. } | BrowserCommand::ResumeSession(_) => Err(
+        BrowserCommand::ClientCapabilities { .. } | BrowserCommand::ResumeSession(_)
+        | BrowserCommand::NpcPurchaseOwner { .. } => Err(
             "native resume control commands must be handled before gameplay dispatch".to_string(),
         ),
         BrowserCommand::Disconnect => Ok(SessionAction::Packet(ClientPacket::Disconnect)),
@@ -9236,6 +9300,8 @@ fn validate_native_client_capabilities(
         server_catalog_gzip_v1: capabilities
             .iter()
             .any(|capability| capability == CATALOG_GZIP_CAPABILITY),
+        durable_npc_purchase_owner_v1: capabilities.iter()
+            .any(|capability| capability == mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY),
     })
 }
 
@@ -9656,6 +9722,8 @@ fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
         .unwrap_or_default();
     entry.insert("id".into(), json!(item.unique_id));
     entry.insert("uniqueId".into(), json!(item.unique_id));
+    // Exact goods selector for the durable protocol, before any JS Number conversion.
+    entry.insert("purchaseItemIndex".into(), json!(item.unique_id.to_string()));
     entry.insert("itemIndex".into(), json!(item.item_index));
     entry.insert("count".into(), json!(item.count));
 
@@ -12810,6 +12878,45 @@ mod tests {
         let replay = super::consume_channel_subject_proof(&cache, &proof)
             .expect_err("the same channel proof must not be accepted twice");
         assert_eq!(replay.0, axum::http::StatusCode::UNAUTHORIZED);
+    }
+
+    #[test]
+    fn npc_purchase_reader_raw_envelope_cannot_fallback_to_generic_buy_item() {
+        let valid = r#"{"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","action":{"kind":"begin"}}"#;
+        let command = serde_json::from_str::<BrowserCommand>(valid).unwrap();
+        assert!(matches!(command, BrowserCommand::NpcPurchaseOwner { .. }));
+        assert!(super::browser_command_to_action(command).is_err());
+        mir2_client_wire::parse_client_request(valid).unwrap();
+        for malformed in [
+            r#"{"type":"npcPurchaseOwner","type":"buyItem","itemIndex":0,"count":1,"panelType":0}"#,
+            r#"{"type":"buyItem","ty\u0070e":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","action":{"kind":"begin"}}"#,
+        ] { assert!(serde_json::from_str::<BrowserCommand>(malformed).is_err()); }
+        for malformed in [
+            valid.replace(r#""requestId":"1""#, r#""requestId":"1","requestId":"2""#),
+            valid.replace(r#""kind":"begin""#, r#""kind":"begin","kind":"begin""#),
+            valid.replace(r#""requestId":"1""#, r#""requestId":"1","admin":true"#),
+        ] { assert!(mir2_client_wire::parse_client_request(&malformed).is_err()); }
+        let capability = super::validate_native_client_capabilities(&[
+            mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.to_owned()]).unwrap();
+        assert!(capability.durable_npc_purchase_owner_v1);
+        assert!(!super::validate_native_client_capabilities(&[]).unwrap().durable_npc_purchase_owner_v1);
+    }
+
+    #[test]
+    fn npc_purchase_goods_selector_is_canonical_before_any_number_conversion() {
+        for selector in [0, 9_007_199_254_740_991, 9_007_199_254_740_993, u64::MAX] {
+            let item = sample_user_item(selector, 1);
+            for packet in [
+                ServerPacket::NPCGoods { list: vec![item.clone()], rate: 1.0, panel_type: 0, hide_added_stats: false },
+                ServerPacket::NPCPearlGoods { list: vec![item.clone()], rate: 1.0, panel_type: 0 },
+            ] {
+                let event = super::server_packet_to_event(&packet);
+                let row = &event["payload"]["list"][0];
+                assert_eq!(row["purchaseItemIndex"], selector.to_string());
+                assert_eq!(row["uniqueId"].as_u64(), Some(selector));
+                assert_eq!(row["unique_id"].as_u64(), Some(selector));
+            }
+        }
     }
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {

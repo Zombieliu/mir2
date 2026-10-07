@@ -95,9 +95,9 @@ impl EconomicResult {
     fn valid_for(self, intent: PurchaseIntent, minimum_revision: u64) -> bool {
         match self {
             Self::Committed { server_revision, currency, source, admitted_count, .. } =>
-                server_revision >= minimum_revision && server_revision != 0 && currency == intent.currency
+                server_revision >= minimum_revision && server_revision != 0 && server_revision != u64::MAX && currency == intent.currency
                     && source == intent.source && admitted_count > 0 && admitted_count <= intent.requested_count,
-            Self::Rejected { server_revision } => server_revision >= minimum_revision && server_revision != 0,
+            Self::Rejected { server_revision } => server_revision >= minimum_revision && server_revision != 0 && server_revision != u64::MAX,
             Self::Unknown => true,
         }
     }
@@ -216,9 +216,21 @@ impl NpcPurchaseReceiptLedger {
         true
     }
 
+    /// Withdraw trusted producer evidence when its physical host binding ends.
+    /// The original operation and allocator survive, including a same-producer
+    /// reconnect. Only fresh receipt and complete application can settle it.
+    pub fn withdraw_authority(&mut self) {
+        self.applied_baseline = None;
+        if let Some(flight) = &mut self.flight {
+            flight.terminal = None;
+            flight.witness_revision = None;
+            if flight.entered { flight.unknown = true; }
+        }
+    }
+
     fn next_minimum_revision(&self) -> Option<u64> {
         let baseline = self.applied_baseline?;
-        baseline.max(self.highest_revision).checked_add(1)
+        baseline.max(self.highest_revision).checked_add(1).filter(|revision| *revision != u64::MAX)
     }
 
     pub fn reserve(&mut self, intent: PurchaseIntent) -> Option<OperationKey> {
@@ -289,7 +301,7 @@ impl NpcPurchaseReceiptLedger {
 
     pub fn observe_snapshot(&mut self, witness: SnapshotWitness) -> Observation {
         if witness.actor != self.actor || witness.producer_scope != self.producer_scope || !witness.complete
-            || witness.server_revision < self.highest_revision { return Observation::Ignored; }
+            || witness.server_revision == u64::MAX || witness.server_revision < self.highest_revision { return Observation::Ignored; }
         self.highest_revision = witness.server_revision;
         self.applied_baseline = Some(witness.server_revision);
         let Some(flight) = &mut self.flight else { return Observation::Pending; };
@@ -625,6 +637,27 @@ mod tests {
     }
 
     #[test]
+    fn same_producer_authority_withdrawal_keeps_original_operation_until_fresh_evidence() {
+        let mut ledger = ready();
+        let purchase = intent(PurchaseCurrency::Gold, PurchaseSource::Trade);
+        let key = enter(&mut ledger, purchase);
+        let receipt = committed(&ledger, key, purchase, 11);
+        assert_eq!(ledger.observe_receipt(receipt), Observation::Pending);
+        ledger.withdraw_authority();
+        assert_eq!(ledger.applied_baseline(), None);
+        assert_eq!(ledger.pending().unwrap().key, key);
+        assert_eq!(ledger.pending().unwrap().phase, PurchasePhase::Unknown);
+        assert_eq!(ledger.last_sequence(), 1);
+        assert_eq!(ledger.reserve(purchase), None);
+        assert!(ledger.rebind(actor(1), scope(2)));
+        assert_eq!(ledger.recovery_query().unwrap().key, key);
+        assert_eq!(ledger.observe_snapshot(snapshot(&ledger, 11)), Observation::Pending);
+        assert!(ledger.pending().is_some());
+        settled(ledger.observe_receipt(receipt), key);
+        assert_eq!(ledger.reserve(purchase).unwrap().request_id.sequence(), 2);
+    }
+
+    #[test]
     fn checked_sequence_exhaustion_keeps_entered_recovery_and_never_wraps() {
         let mut ledger = ready(); ledger.last_sequence = u64::MAX - 1;
         let purchase = intent(PurchaseCurrency::Pearls, PurchaseSource::Trade); let key = enter(&mut ledger, purchase);
@@ -639,11 +672,24 @@ mod tests {
     #[test]
     fn checked_revision_exhaustion_never_fabricates_a_next_baseline_or_clears_flight() {
         let mut ledger = ready(); let purchase = intent(PurchaseCurrency::Gold, PurchaseSource::Used);
-        ledger.observe_snapshot(snapshot(&ledger, u64::MAX)); assert_eq!(ledger.reserve(purchase), None);
+        assert_eq!(ledger.observe_snapshot(snapshot(&ledger, u64::MAX)), Observation::Ignored);
+        assert_eq!(ledger.applied_baseline(), Some(10));
+        ledger.observe_snapshot(snapshot(&ledger, u64::MAX - 1));
+        assert_eq!(ledger.reserve(purchase), None);
         assert_eq!(ledger.last_sequence(), 0);
         let mut active = ready(); let key = enter(&mut active, purchase);
-        active.observe_snapshot(snapshot(&active, u64::MAX)); assert_eq!(active.reserve(purchase), None);
-        let receipt = committed(&active, key, purchase, u64::MAX); settled(active.observe_receipt(receipt), key);
-        assert_eq!(active.reserve(purchase), None);
+        assert_eq!(active.observe_snapshot(snapshot(&active, u64::MAX)), Observation::Ignored);
+        assert_eq!(active.applied_baseline(), Some(10));
+        for bad in [committed(&active, key, purchase, u64::MAX),
+            PurchaseReceipt { result: EconomicResult::Rejected { server_revision: u64::MAX },
+                ..committed(&active, key, purchase, 11) }] {
+            assert_eq!(active.observe_receipt(bad), Observation::Ignored);
+            assert_eq!(active.pending().unwrap().key, key);
+        }
+        active.mark_unknown(key);
+        assert_eq!(active.recovery_query().unwrap().key, key);
+        active.observe_receipt(committed(&active, key, purchase, 11));
+        settled(active.observe_snapshot(snapshot(&active, 11)), key);
+        assert!(active.reserve(purchase).is_some());
     }
 }

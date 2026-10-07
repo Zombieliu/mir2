@@ -598,3 +598,150 @@ fn durable_library_host_dispatch_fences_auth_version_lease_and_records_only_repl
     assert!(recovered.execution.packets.is_empty());
     assert_eq!(fs::read(&path).unwrap(), committed_bytes);
 }
+
+// Source29: actual external durable seam; still no listener or product process.
+fn browser_owner(label: &str) -> (crate::GatewaySession, PathBuf, NpcPurchaseRequest) {
+    let FileOwner { runtime, authority, lease, request, path, .. } = FileOwner::new(label, false);
+    let session = crate::GatewaySession::with_routed_world_runtime_and_owner_authority(
+        ZoneId::primary(), lease, Some(authority), runtime);
+    (session, path, request)
+}
+fn external_request(id: u64, action: mir2_client_wire::Action) -> mir2_client_wire::ClientRequest {
+    let request = mir2_client_wire::ClientRequest::new(mir2_client_wire::U64::new(id), action).unwrap();
+    let raw = mir2_client_wire::encode_client_request(&request).unwrap();
+    mir2_client_wire::parse_client_request(&raw).unwrap()
+}
+fn external_quote(raw: NpcPurchaseRequest) -> mir2_client_wire::Action {
+    mir2_client_wire::Action::Quote { request: mir2_client_wire::PurchaseRequest::new(
+        mir2_client_wire::U64::new(raw.item_index), raw.count, raw.panel_type).unwrap() }
+}
+fn assert_external_before(frame: &mir2_client_wire::ServerFrame) {
+    assert!(matches!(frame.reply, mir2_client_wire::ServerReply::Failure {
+        state: mir2_client_wire::FailureState::BeforeExecution, receipt: None }));
+    assert!(frame.snapshot.is_none() && frame.authority.is_none());
+}
+
+#[test]
+fn durable_npc_purchase_browser_accepts_only_actual_begin_and_idempotent_owner_pair() {
+    use crate::npc_purchase_browser::{BrowserNpcPurchaseConnection, execute_browser_npc_purchase};
+    use mir2_client_wire::{Action, ServerReply};
+    let (mut session, path, raw) = browser_owner("browser-qualified");
+    let original = fs::read(&path).unwrap();
+    let mut state = BrowserNpcPurchaseConnection::default();
+    let begin = external_request(1, Action::Begin);
+    assert_external_before(&execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &begin).unwrap().frame);
+    state.set_opted_in(true);
+    for (account, qualified) in [(None, true), (Some("demo"), false), (Some("foreign"), true), (Some(" demo"), true)] {
+        assert_external_before(&execute_browser_npc_purchase(&mut session, &mut state, account, qualified, &begin).unwrap().frame);
+        assert!(state.accepted().is_none());
+        assert_eq!(fs::read(&path).unwrap(), original);
+    }
+    let quote = external_request(2, external_quote(raw));
+    assert_external_before(&execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &quote).unwrap().frame);
+    assert_eq!(fs::read(&path).unwrap(), original);
+    let first = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &begin).unwrap();
+    let ServerReply::Producer { producer } = first.frame.reply else { panic!("actual qualified Begin") };
+    let accepted = state.accepted().unwrap();
+    assert_eq!(producer.actor.get(), accepted.actor);
+    assert!(first.frame.snapshot.is_some());
+    assert_eq!(first.frame.authority, Some(producer.clone()));
+    let published = fs::read(&path).unwrap();
+    let again = external_request(3, Action::Begin);
+    let second = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &again).unwrap();
+    assert_eq!(second.frame.reply, ServerReply::Producer { producer });
+    assert_eq!(second.frame.request_id.get(), 3);
+    assert_eq!(state.accepted(), Some(accepted));
+    assert_eq!(fs::read(&path).unwrap(), published);
+    state.set_opted_in(false);
+    assert!(state.accepted().is_none());
+    assert_external_before(&execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &quote).unwrap().frame);
+    assert_eq!(fs::read(&path).unwrap(), published);
+}
+
+#[test]
+fn durable_npc_purchase_browser_actual_purchase_original_query_and_replay_are_lossless() {
+    use crate::npc_purchase_browser::{BrowserNpcPurchaseConnection, execute_browser_npc_purchase};
+    use mir2_client_wire::{Action, Operation, ServerReply, U64};
+    let (mut session, path, raw) = browser_owner("browser-purchase");
+    let mut state = BrowserNpcPurchaseConnection::default();
+    state.set_opted_in(true);
+    let began = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+        &external_request(1, Action::Begin)).unwrap();
+    let ServerReply::Producer { producer } = began.frame.reply else { panic!("actual Begin") };
+    let quoted = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+        &external_request(2, external_quote(raw))).unwrap();
+    let ServerReply::Quote { intent } = quoted.frame.reply else { panic!("actual catalog") };
+    let operation = Operation { actor: producer.actor, request_scope: producer.producer_scope,
+        sequence: U64::new(1), intent };
+    let before = fs::read(&path).unwrap();
+    let absent = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+        &external_request(3, Action::Query { operation: operation.clone() })).unwrap();
+    assert_eq!(absent.frame.reply, ServerReply::Recovery { receipt: None });
+    assert!(absent.packets.is_empty());
+    assert_eq!(fs::read(&path).unwrap(), before);
+    let purchase = external_request(4, Action::Purchase { operation: operation.clone() });
+    let result = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &purchase).unwrap();
+    let encoded = mir2_client_wire::encode_server_frame(&result.frame).unwrap();
+    let parsed = mir2_client_wire::parse_server_frame(&encoded).unwrap();
+    parsed.validate_for_request(&purchase).unwrap();
+    let ServerReply::Purchase { receipt, replayed } = parsed.reply else { panic!("actual terminal receipt") };
+    assert!(!replayed);
+    receipt.validate_for_operation(&operation).unwrap();
+    assert_eq!(result.frame.snapshot.as_ref().unwrap()["gold"], 99_840);
+    assert_eq!(result.packets.iter().filter(|packet| matches!(packet, ServerPacket::LoseGold { gold: 160 })).count(), 1);
+    let saved = fs::read(&path).unwrap();
+    for id in [5, 6] {
+        let query = external_request(id, Action::Query { operation: operation.clone() });
+        let recovered = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &query).unwrap();
+        assert_eq!(recovered.frame.reply, ServerReply::Recovery { receipt: Some(receipt.clone()) });
+        assert_eq!(recovered.frame.request_id.get(), id);
+        assert!(recovered.packets.is_empty());
+        assert_eq!(fs::read(&path).unwrap(), saved);
+    }
+    let replay = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+        &external_request(7, Action::Purchase { operation: operation.clone() })).unwrap();
+    assert_eq!(replay.frame.reply, ServerReply::Purchase { receipt: receipt.clone(), replayed: true });
+    assert!(replay.packets.is_empty());
+    assert_eq!(fs::read(&path).unwrap(), saved);
+    let mut foreign = operation.clone();
+    foreign.actor = mir2_client_wire::Opaque32::from_bytes([19; 32]).unwrap();
+    assert_external_before(&execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+        &external_request(8, Action::Purchase { operation: foreign })).unwrap().frame);
+    assert_eq!(fs::read(&path).unwrap(), saved);
+    assert_external_before(&execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), false,
+        &external_request(9, Action::Query { operation })).unwrap().frame);
+    assert!(state.accepted().is_none());
+    assert_eq!(fs::read(&path).unwrap(), saved);
+}
+
+#[test]
+fn durable_npc_purchase_browser_snapshot_projection_keeps_original_turn_and_known_receipt_on_size_failure() {
+    use mir2_client_wire::{Action, FailureState, ServerReply};
+    use crate::npc_purchase_browser::{frame_from_execution, receipt as wire_receipt};
+    for hosted in [false, true] {
+        let mut fixture = FileOwner::new("browser-projection", hosted);
+        let original = fixture.operation(1);
+        let mut routed = fixture.execute(NpcPurchaseOwnerAction::Purchase { operation: original }).unwrap();
+        let known = actual_commit(&routed, original);
+        let wire_known = wire_receipt(&known).unwrap();
+        let request = external_request(11, Action::Purchase { operation: wire_known.entry.operation.clone() });
+        let frame = frame_from_execution(&request, &routed).unwrap();
+        let next = fixture.operation(2);
+        fixture.execute(NpcPurchaseOwnerAction::Purchase { operation: next }).unwrap();
+        assert_eq!(fixture.snapshot().gold, 99_680);
+        assert_eq!(frame.snapshot.as_ref().unwrap()["gold"], 99_840);
+        assert_eq!(frame_from_execution(&request, &routed).unwrap(), frame);
+        // A malformed/oversized projection derivative of an actual committed
+        // owner turn; the genuine receipt is untouched and never fabricated.
+        routed.snapshot.as_mut().unwrap().map_title = Some("x".repeat(mir2_client_wire::MAX_SERVER_FRAME_BYTES));
+        let limited = frame_from_execution(&request, &routed).unwrap();
+        assert_eq!(limited.request_id, request.request_id);
+        assert_eq!(limited.reply, ServerReply::Failure { state: FailureState::PostCommit,
+            receipt: Some(wire_known) });
+        assert!(limited.snapshot.is_none() && limited.authority.is_none());
+        let encoded = mir2_client_wire::encode_server_frame(&limited).unwrap();
+        assert!(encoded.len() < 4096);
+        mir2_client_wire::parse_server_frame(&encoded).unwrap().validate_for_request(&request).unwrap();
+        assert_eq!(known.entry.operation, original);
+    }
+}

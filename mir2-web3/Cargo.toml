@@ -9,5 +9,5 @@ members = [
     "packages/protocol",
     "vendor/dubhe-network-core",
 ]
-exclude = ["apps/game-client/client-core"]
+exclude = ["apps/game-client/client-core", "apps/game-client/client-wire"]
 resolver = "2"

@@ -25,6 +25,7 @@ pub mod mail_parcel;
 pub mod motion;
 pub mod npc_gold_buy_attempt;
 pub mod npc_purchase_receipt;
+pub mod npc_purchase_host;
 pub mod quest;
 pub mod reconciliation;
 

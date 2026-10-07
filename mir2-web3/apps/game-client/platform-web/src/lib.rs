@@ -16,6 +16,10 @@ pub mod mail_compose;
 pub mod mail_parcel;
 #[cfg(not(feature = "presentation-ui"))]
 pub mod npc_gold_buy_attempt;
+#[cfg(not(feature = "presentation-ui"))]
+pub mod npc_purchase_receipt;
+#[cfg(not(feature = "presentation-ui"))]
+pub use npc_purchase_receipt::{npc_purchase_receipt_abi_version, NpcPurchaseReceiptBridge};
 
 #[cfg(feature = "presentation-ui")]
 pub mod map_route;

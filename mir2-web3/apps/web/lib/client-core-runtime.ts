@@ -1,4 +1,6 @@
 import { npcPearlBuyInput } from "./npc-pearl-buy";
+import { persistentNpcPurchaseReceiptHost, type NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
+export type { NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
@@ -171,6 +173,7 @@ export type ClientCoreRuntime = {
   /** One cached Core-owned send slot; remounts never construct another flight. */
   getMailSendSlot(): MailSendSlotRuntime;
   getNpcGoldBuyAttemptSlot(): NpcGoldBuyAttemptSlotRuntime;
+  getNpcPurchaseReceiptHost(): NpcPurchaseReceiptRuntime;
   /** Optional Pearl presentation policy; no server transaction receipt. */
   getMir2NpcPearlBuyPlan(json: string): string;
 };
@@ -241,6 +244,8 @@ type WasmModule = {
   mail_send_slot_abi_version?:()=>number;
   MailSendSlotBridge?:new()=>{transact(input:string):string;draft_gold?:()=>number|null|undefined};
   npc_gold_buy_attempt_abi_version?:()=>number;
+  npc_purchase_receipt_abi_version?:()=>number;
+  NpcPurchaseReceiptBridge?:new()=>{transact(input:string):string};
   NpcGoldBuyAttemptBridge?:new()=>{transact(input:string):string};
 };
 
@@ -523,6 +528,7 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       },
       getMailSendSlot():MailSendSlotRuntime {return mailSendSlot??=createMailSendSlotRuntime(module);},
       getNpcGoldBuyAttemptSlot():NpcGoldBuyAttemptSlotRuntime {return persistentNpcGoldBuyAttemptSlot(module,document,manifest.version);},
+      getNpcPurchaseReceiptHost():NpcPurchaseReceiptRuntime {return persistentNpcPurchaseReceiptHost(module,document,manifest.version);},
       resolveQuestAction(input: QuestActionInput): QuestActionDecision {
         return JSON.parse(module.resolve_quest_action(JSON.stringify(input))) as QuestActionDecision;
       },

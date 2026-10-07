@@ -1988,3 +1988,160 @@ test("Pearl actual Page quote and exact send retain an above16KiB complete struc
   assert.deepEqual(catalog.rawPayload,before);assert(Object.isFrozen(catalog.rawPayload.list[0].tooltipSource.userItem));
   assert.equal(f.calls.length,0);assert.equal(f.pearlCalls.length,4);
 });
+
+
+// Source29: run the actual plain TypeScript receipt facade through this existing
+// CPU-only loader. Fixed ABI responses are custody fixtures, not another Core
+// ledger, allocator, pricing algorithm or application-witness implementation.
+const receiptFacade = loadPearlBuyDependency("../lib/npc-purchase-receipt.ts");
+const receiptTokens = ["0".repeat(62) + "a1", "0".repeat(62) + "a2", "0".repeat(62) + "a3"];
+const originalReceiptOperation = Object.freeze({ actor: "1".repeat(64), requestScope: "2".repeat(64),
+  sequence: "9007199254740993", intent: { request: { itemIndex: "0", count: 1, panelType: 0 },
+    currency: "gold", source: "trade", serviceCatalogProof: "3".repeat(64) } });
+function receiptFacadeOracle() {
+  const inputs = [], instances = [], connections = [...receiptTokens], responses = new Map();
+  class Bridge {
+    constructor() { instances.push(this); }
+    transact(raw) {
+      const request = JSON.parse(raw); inputs.push(request);
+      if (responses.has(request.op)) {
+        const response = responses.get(request.op);
+        return typeof response === "function" ? response(request) : response;
+      }
+      if (request.op === "openConnection") return JSON.stringify({ ok: true, token: connections.shift() });
+      if (request.op === "status") return JSON.stringify({ ok: true, pending: originalReceiptOperation });
+      return JSON.stringify({ ok: true, matched: true });
+    }
+  }
+  return { inputs, instances, responses,
+    module: { npc_purchase_receipt_abi_version: () => 1, NpcPurchaseReceiptBridge: Bridge } };
+}
+function liveReceiptFacade(oracle = receiptFacadeOracle(), owner = {}) {
+  const runtime = receiptFacade.persistentNpcPurchaseReceiptHost(oracle.module, owner, "source29"), source = {}, socket = {};
+  assert.equal(runtime.attachProducer(source), true);
+  assert.equal(runtime.transportFor(source, socket, socket, true), receiptTokens[0]);
+  return { oracle, owner, runtime, source, socket };
+}
+test("receipt_facade_document_remount_retains_one_host_and_original_operation", () => {
+  const { oracle, owner, runtime, source, socket } = liveReceiptFacade();
+  const successor = receiptFacadeOracle();
+  assert.equal(receiptFacade.persistentNpcPurchaseReceiptHost(successor.module, owner, "source29"), runtime);
+  assert.equal(oracle.instances.length, 1); assert.equal(successor.instances.length, 0);
+  assert.deepEqual(runtime.transact(source, socket, { op: "status" }).pending, originalReceiptOperation);
+  assert.equal(runtime.transact(source, socket, { op: "unknown", binding: {}, operation: originalReceiptOperation }).ok, true);
+  const actual = oracle.inputs.at(-1);
+  assert.equal(actual.token, receiptTokens[0]); assert.deepEqual(actual.operation, originalReceiptOperation);
+  const descriptor = Object.getOwnPropertyDescriptor(owner, Symbol.for("mir2.clientCore.npcPurchaseReceipt.v1"));
+  assert.equal(descriptor.configurable, false); assert.equal(descriptor.writable, false);
+});
+test("receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host", () => {
+  const { oracle, owner, runtime, source, socket } = liveReceiptFacade();
+  const successor = receiptFacadeOracle();
+  assert.equal(receiptFacade.persistentNpcPurchaseReceiptHost(successor.module, owner, "different-build"), runtime);
+  assert.deepEqual(oracle.inputs.at(-1), { op: "withdraw", token: receiptTokens[0], disconnect: true });
+  assert.equal(successor.instances.length, 0); assert.equal(oracle.instances.length, 1);
+  assert.equal(runtime.transact(source, socket, { op: "status" }).ok, false);
+  assert.equal(runtime.attachProducer({}), false);
+});
+test("receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade(), nextSource = {}, nextSocket = {};
+  assert.equal(runtime.attachProducer(nextSource), true);
+  assert.equal(runtime.transportFor(nextSource, nextSocket, nextSocket, true), receiptTokens[1]);
+  const count = oracle.inputs.length;
+  assert.equal(runtime.withdrawProducer(source), false);
+  assert.equal(runtime.transact(source, nextSocket, { op: "unknown", operation: originalReceiptOperation }).ok, false);
+  assert.equal(runtime.transact(source, nextSocket, { op: "begin" }).ok, false);
+  assert.equal(oracle.inputs.length, count);
+  assert.equal(runtime.transact(nextSource, nextSocket, { op: "begin" }).ok, true);
+  assert.equal(oracle.inputs.at(-1).token, receiptTokens[1]);
+  assert.equal(runtime.transact(source, socket, { op: "unknown", operation: originalReceiptOperation }).ok, true);
+  assert.equal(oracle.inputs.at(-1).token, receiptTokens[0]);
+});
+test("receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade(), nextSocket = {};
+  assert.equal(runtime.transportFor(source, socket, socket, true), receiptTokens[0]);
+  assert.equal(runtime.transportFor(source, {}, nextSocket, true), null);
+  assert.equal(runtime.transportFor(source, nextSocket, nextSocket, false), null);
+  assert.equal(runtime.transportFor(source, nextSocket, nextSocket, true), receiptTokens[1]);
+  assert.equal(runtime.transportFor(source, socket, socket, true), null);
+  const count = oracle.inputs.length;
+  assert.equal(runtime.transact(source, socket, { op: "begin" }).ok, false);
+  assert.equal(oracle.inputs.length, count);
+  assert.equal(runtime.transact(source, socket, { op: "cancelUnsent", operation: originalReceiptOperation }).ok, true);
+  assert.equal(oracle.inputs.at(-1).token, receiptTokens[0]);
+});
+test("receipt_facade_operation_accessor_is_rejected_without_invocation", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade();
+  let getterCalls = 0;
+  const input = Object.defineProperty({}, "op", { enumerable: true, get() { getterCalls++; return getterCalls === 1 ? "unknown" : "begin"; } });
+  const count = oracle.inputs.length;
+  assert.throws(() => runtime.transact(source, socket, input), /Accessor/);
+  assert.equal(getterCalls, 0); assert.equal(oracle.inputs.length, count);
+  assert.equal(runtime.transact(source, socket, { op: "begin" }).ok, true);
+});
+test("receipt_facade_nested_nondata_and_lossy_values_never_enter_abi", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade();
+  let hooks = 0;
+  const getter = Object.defineProperty({}, "itemIndex", { enumerable: true, get() { hooks++; return "0"; } });
+  const toJSON = { toJSON() { hooks++; return {}; } };
+  const symbol = { [Symbol("hidden")]: 1 };
+  const unsafe = { sequence: 9007199254740992 };
+  const sparse = new Array(2); sparse[1] = "x";
+  for (const nested of [getter, toJSON, symbol, unsafe, sparse, Object.create({ inherited: "x" })]) {
+    const count = oracle.inputs.length;
+    assert.throws(() => runtime.transact(source, socket, { op: "query", nested }));
+    assert.equal(oracle.inputs.length, count);
+  }
+  assert.equal(hooks, 0);
+});
+test("receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade(), nextSource = {};
+  let reflected = 0;
+  const nested = new Proxy({ value: "0" }, { ownKeys(target) { reflected++; runtime.attachProducer(nextSource); return Reflect.ownKeys(target); } });
+  assert.equal(runtime.transact(source, socket, { op: "begin", nested }).ok, false);
+  assert.equal(reflected, 1); assert.equal(oracle.inputs.filter(input => input.op === "begin").length, 0);
+  assert.deepEqual(oracle.inputs.at(-1), { op: "withdraw", token: receiptTokens[0], disconnect: true });
+  const nextSocket = {};
+  assert.equal(runtime.transportFor(nextSource, nextSocket, nextSocket, true), receiptTokens[1]);
+  assert.equal(runtime.transact(nextSource, nextSocket, { op: "begin" }).ok, true);
+});
+test("receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade(), count = oracle.inputs.length;
+  for (const input of [{ op: "openConnection" }, { op: "begin", token: receiptTokens[1] }]) {
+    assert.throws(() => runtime.transact(source, socket, input), /Invalid economic facade request/);
+  }
+  assert.equal(oracle.inputs.length, count);
+});
+test("receipt_facade_bound_bridge_method_survives_old_instance_method_replacement", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade();
+  oracle.instances[0].transact = () => { throw Error("replacement must not execute"); };
+  assert.equal(runtime.transact(source, socket, { op: "begin" }).ok, true);
+  assert.equal(oracle.inputs.at(-1).token, receiptTokens[0]);
+});
+test("receipt_facade_invalid_output_poison_keeps_original_host_unavailable", () => {
+  const { oracle, owner, runtime, source, socket } = liveReceiptFacade();
+  oracle.responses.set("begin", '{"ok":false,"error":"refused","extra":true}');
+  assert.equal(runtime.transact(source, socket, { op: "begin" }).ok, false);
+  assert.deepEqual(oracle.inputs.at(-1), { op: "withdraw", token: receiptTokens[0], disconnect: true });
+  const replacement = receiptFacadeOracle();
+  assert.equal(receiptFacade.persistentNpcPurchaseReceiptHost(replacement.module, owner, "source29"), runtime);
+  assert.equal(replacement.instances.length, 0);
+  assert.equal(runtime.transact(source, socket, { op: "status" }).ok, false);
+});
+test("receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer", () => {
+  const owner = {}, unavailableModule = { npc_purchase_receipt_abi_version: () => 0 };
+  const runtime = receiptFacade.persistentNpcPurchaseReceiptHost(unavailableModule, owner, "source29");
+  assert.equal(runtime.attachProducer({}), false);
+  const replacement = receiptFacadeOracle();
+  assert.equal(receiptFacade.persistentNpcPurchaseReceiptHost(replacement.module, owner, "source29"), runtime);
+  assert.equal(replacement.instances.length, 0);
+});
+test("receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector", () => {
+  const { oracle, runtime, source, socket } = liveReceiptFacade();
+  const input = Object.freeze({ op: "unknown", operation: originalReceiptOperation });
+  assert.equal(runtime.transact(source, socket, input).ok, true);
+  const actual = oracle.inputs.at(-1);
+  assert.equal(actual.operation.sequence, "9007199254740993");
+  assert.equal(actual.operation.intent.request.itemIndex, "0");
+  assert.deepEqual(actual.operation, originalReceiptOperation);
+});
