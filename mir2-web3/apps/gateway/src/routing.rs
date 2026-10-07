@@ -7100,6 +7100,7 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         hp: None,
         max_hp: None,
         light: info.light,
@@ -7139,6 +7140,7 @@ fn world_entity_from_zone_monster_spawn(
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         hp: Some(monster.hp),
         max_hp: Some(monster.max_hp),
         light: 0,
@@ -7266,6 +7268,7 @@ fn world_entity_from_object_player_info(
         has_class_weapon: None,
         dazed: None,
         fishing: Some(info.fishing),
+        transform_type: Some(info.transform_type),
         hp: None,
         max_hp: None,
         light: info.light,
@@ -7297,6 +7300,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         hp: None,
         max_hp: None,
         light: 10,
@@ -15139,6 +15143,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             .filter_map(|entity| entity.quest_icon.map(|icon| (entity.object_id, icon)))
             .collect::<BTreeMap<_, _>>();
         let current_key = self.current_presence_key();
+        let current_identity_key = self
+            .inner
+            .active_identity()
+            .as_ref()
+            .map(ZonePresenceKey::from_identity);
+        let local_self_object_id = self.local_self_object_id();
         let zone_state = self
             .zone_state
             .lock()
@@ -15159,6 +15169,38 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                         self_entity.x = presence.entity.x;
                         self_entity.y = presence.entity.y;
                         self_entity.direction = presence.entity.direction;
+                    }
+                }
+            }
+        }
+        // A personal snapshot cannot infer the raw transform type. Project it
+        // only from the current player's matching retained Zone membership.
+        if current_key.as_ref() == current_identity_key.as_ref() {
+            if let (Some(key), Some(map_file_name), Some(local_self_object_id)) = (
+                current_key.as_ref(),
+                snapshot.map_file_name.as_deref(),
+                local_self_object_id,
+            ) {
+                if let (Some(presence), Some(session_id)) =
+                    (zone_state.players.get(key), zone_state.zone_sessions.get(key))
+                {
+                    let expected_zone_key = ZoneKey::for_map(map_file_name);
+                    if presence.map_file_name == map_file_name
+                        && zone_state.zone_manager.zone_key_for_session(session_id).as_ref()
+                            == Some(&expected_zone_key)
+                    {
+                        if let Some(zone) = zone_state.zone_manager.zone(&expected_zone_key) {
+                            if zone.player_object_id(session_id).map(|id| id.0)
+                                == Some(presence.zone_object_id)
+                            {
+                                if let Some(self_entity) = snapshot.entities.iter_mut().find(|entity| {
+                                    entity.kind == WorldEntityKind::SelfPlayer
+                                        && entity.object_id == local_self_object_id
+                                }) {
+                                    self_entity.transform_type = zone.player_transform_type(session_id);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -17892,6 +17934,133 @@ mod tests {
                 .map(|sprite| sprite.body_library.as_str()),
             Some("NPC/12")
         );
+    }
+
+    fn fishing_transform_fixture() -> (
+        Arc<Mutex<SharedInProcessZoneState>>,
+        SharedInProcessZoneSessionRuntime,
+        SessionId,
+        u32,
+        u32,
+    ) {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(shared.clone());
+        start_new_runtime(&mut runtime, "fishing-transform", "Scout");
+        let key = runtime.current_presence_key().unwrap();
+        let session = runtime.current_zone_session_id().unwrap();
+        let local_id = runtime.local_self_object_id().unwrap();
+        let zone_id = local_id.checked_add(1_000_000).unwrap();
+        let mut join = runtime.inner.active_zone_join_snapshot(session.as_str()).unwrap();
+        join.object_id = zone_id;
+        {
+            let mut state = shared.lock().unwrap();
+            state.players.get_mut(&key).unwrap().zone_object_id = zone_id;
+            // This stale DTO value must never be used as Zone transform evidence.
+            state.players.get_mut(&key).unwrap().entity.transform_type = Some(i16::MIN);
+            state.zone_manager = ZoneManager::new();
+            state.zone_manager.handle(ZoneCommand::Join(join));
+        }
+        (shared, runtime, session, local_id, zone_id)
+    }
+
+    #[test]
+    fn fishing_transform_snapshot_projects_retained_state_with_distinct_actor_ids() {
+        let (shared, runtime, session, local_id, zone_id) = fishing_transform_fixture();
+        assert_ne!(local_id, zone_id);
+        let personal = runtime.inner.world_snapshot();
+        let personal_self = personal.entities.iter().find(|entity| {
+            entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+        }).unwrap();
+        assert_eq!(personal_self.transform_type, None);
+        let initial = runtime.world_snapshot();
+        let initial_self = initial.entities.iter().find(|entity| {
+            entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+        }).unwrap();
+        assert_eq!(initial_self.transform_type, Some(0));
+        for raw in [i16::MIN, -1, 0, 4, i16::MAX] {
+            shared.lock().unwrap().zone_manager.handle(ZoneCommand::BroadcastPackets {
+                session_id: session.clone(),
+                owner_local_object_id: local_id,
+                packets: vec![ServerPacket::TransformUpdate {
+                    object_id: local_id,
+                    transform_type: raw,
+                }],
+                now_ms: 0,
+            });
+            let snapshot = runtime.world_snapshot();
+            let player = snapshot.entities.iter().find(|entity| {
+                entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+            }).unwrap();
+            assert_eq!(player.transform_type, Some(raw));
+        }
+    }
+
+    #[test]
+    fn fishing_transform_snapshot_rejects_mismatched_or_missing_zone_membership() {
+        for invalid in [
+            "presence", "map", "session", "unknown-session", "zone", "zone-map",
+            "object-id", "identity", "leave",
+        ] {
+            let (shared, runtime, session, local_id, _) = fishing_transform_fixture();
+            let key = runtime.current_presence_key().unwrap();
+            {
+                let mut state = shared.lock().unwrap();
+                match invalid {
+                    "presence" => { state.players.remove(&key); }
+                    "map" => {
+                        state.players.get_mut(&key).unwrap().map_file_name = "other-map".into();
+                    }
+                    "session" => { state.zone_sessions.remove(&key); }
+                    "unknown-session" => {
+                        state.zone_sessions.insert(key.clone(), SessionId::new("missing-session"));
+                    }
+                    "zone" => { state.zone_manager = ZoneManager::new(); }
+                    "zone-map" => {
+                        state.zone_manager.handle(ZoneCommand::Leave { session_id: session.clone() });
+                        let mut join = runtime.inner.active_zone_join_snapshot(session.as_str()).unwrap();
+                        join.object_id = state.players[&key].zone_object_id;
+                        join.map_file_name = "other-map".into();
+                        state.zone_manager.handle(ZoneCommand::Join(join));
+                    }
+                    "object-id" => {
+                        state.players.get_mut(&key).unwrap().zone_object_id += 1;
+                    }
+                    "identity" => {
+                        let mut stale = key.clone();
+                        stale.character_index += 1;
+                        let presence = state.players[&key].clone();
+                        state.players.insert(stale.clone(), presence);
+                        state.zone_sessions.insert(stale.clone(), session.clone());
+                        runtime.movement_ingress.session_state.lock().unwrap().presence_key = Some(stale);
+                    }
+                    "leave" => {
+                        state.zone_manager.handle(ZoneCommand::Leave { session_id: session.clone() });
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            let snapshot = runtime.world_snapshot();
+            let player = snapshot.entities.iter().find(|entity| {
+                entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+            }).unwrap();
+            assert_eq!(player.transform_type, None, "invalid {invalid}");
+        }
+    }
+
+    #[test]
+    fn fishing_transform_remote_projection_preserves_the_object_player_raw_carrier() {
+        for raw in [i16::MIN, -1, 0, 4, i16::MAX] {
+            let mut info = shared_object_player_info(602, "RemoteArcher", 331, 271);
+            info.transform_type = raw;
+            info.fishing = true;
+            let entity = world_entity_from_object_player_info(&info, None);
+            assert_eq!(entity.transform_type, Some(raw));
+            assert_eq!(entity.fishing, Some(true));
+            let value = serde_json::to_value(&entity).unwrap();
+            assert_eq!(value["transformType"], serde_json::json!(raw));
+        }
+        assert_eq!(shared_monster_entity(603).transform_type, None);
+        assert_eq!(shared_picker_entity(604, 331, 271).transform_type, None);
     }
 
     #[test]
@@ -30224,6 +30393,7 @@ mod tests {
             has_class_weapon: None,
             dazed: None,
             fishing: None,
+            transform_type: None,
             hp: Some(12),
             max_hp: Some(12),
             light: 0,
@@ -30315,6 +30485,7 @@ mod tests {
             has_class_weapon: None,
             dazed: None,
             fishing: None,
+            transform_type: None,
             hp: None,
             max_hp: None,
             light: 3,

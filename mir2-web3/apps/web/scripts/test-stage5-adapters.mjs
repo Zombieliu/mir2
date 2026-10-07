@@ -2788,7 +2788,7 @@ const parityPageNames = ["currentSpellsOwner", "currentSocialReplyOwner", "curre
   "currentHeroModel", "parityItemMutationAllowed", "heroProofCurrent", "heroInputAllowed", "otherPlayerUiBlocksInput",
   "referenceWindowsBlockGameplay", "heroUiLeaseCurrent", "advanceHeroWindowEpochs", "changeHeroWindows", "syncHeroWindowActor", "scheduleHeroRestock", "syncObservePreference", "currentCreatureSource", "currentCashGameShopSource",
   "currentQuestWorldIdentity", "currentCombatModeOwner", "sameCombatModeOwner", "nextCombatModeRevision",
-  "captureCombatModeSnapshot", "captureCombatModeReceipt", "readCombatModeSource",
+  "captureCombatModeSnapshot", "captureCombatModeReceipt", "readCombatModeSource", "retireWorldFishingGesture", "cancelWorldFishingGesture",
   "currentGuildBuffSource", "captureParityPacket", "captureParitySnapshot", "ownedItemTooltipRequest", "readPlayerItemTooltip", "readHeroItemTooltip",
   "readCashGameShopItemTooltip", "guildStorageTooltipItem", "readGuildStorageItemTooltip", "readSocialItemSurface", "readNpcRepairOwner", "captureNpcRepairDialog", "currentNpcRepairDialogSource", "readNpcRepairView", "selectNpcRepair", "toggleNpcRepairHold", "beginNpcRepairDrag", "cancelNpcRepairDrag", "dropNpcRepairDrag", "confirmNpcRepair"];
 const parityDeclarations = new Map();
@@ -2917,6 +2917,7 @@ function parityPageFixture(owner, world = {}) {
     storageRentalRef:ref(new storageRental.StorageRentalConfirmation()), mailCollectBarrierRef:ref(null), mailDispatcherRef:ref(null),
     mailParcelRef:ref(null), npcBuyDispatcherRef:ref(null), worldSnapshotVersionRef:ref(1), equipmentSnapshotRef:ref({...owner}),
     bagBeltMovesRef:ref(new bagBeltDispatcherModule.BagBeltMoveDispatcher()), bagBeltInventoryReadyRef:ref(null),
+    worldFishingGestureRegistryRef:ref(new WeakMap()),worldFishingActiveGestureRef:ref(null),worldFishingQueuedRef:ref(null),
     renderParityServices:()=>{}, appendLog:()=>{}, t:(_key,_args,fallback)=>fallback,
     isMailItemMutation:mailParcelGateway.isMailItemMutation,
     makeCreaturePlayerSource:creatureUi.makeCreaturePlayerSource, upsertCreaturePlayerRecord:creatureUi.upsertCreaturePlayerRecord,
@@ -4201,7 +4202,8 @@ check("Quest name getter rejects stale full stamp foreign or dead entities dupli
 // through the existing transpiler. WASM methods below are data mocks, not Rust
 // execution, route-search coverage, pricing proof, or player/UI acceptance.
 // ---------------------------------------------------------------------------
-const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url), {"./shared-item-tooltip":sharedTooltip});
+const fishingClickAdapter=loadTypeScriptModule(new URL("../lib/shared-fishing-click.ts",import.meta.url));
+const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url), {"./shared-item-tooltip":sharedTooltip,"./shared-fishing-click":fishingClickAdapter});
 const presentationChatDocument = {
   version:1, epoch:7, open:false, size:0, lineCount:4, frameIndex:0, countBarIndex:0,
   top:500, height:100, controlTop:600, inputTop:650, track:80, knobTop:0, index:0,
@@ -4924,7 +4926,14 @@ assert.equal(repairShellDeclarations.size,repairShellNames.size);assert.ok(repai
 const inactiveBagBeltNames=new Set(["rememberBagBeltClick","fenceBagBeltMouse","cancelBagBeltPointer","handleBagBeltPointer","finishBagBeltPointer"]),inactiveBagBeltDeclarations=[];
 (function visit(node){if(ts.isFunctionDeclaration(node)&&inactiveBagBeltNames.has(node.name?.text))inactiveBagBeltDeclarations.push(node.getText(repairShellAst));ts.forEachChild(node,visit);})(repairShellAst);
 assert.equal(inactiveBagBeltDeclarations.length,inactiveBagBeltNames.size);
-const repairShellJs=ts.transpileModule([...repairShellDeclarations.values(),...inactiveBagBeltDeclarations].join("\n")+
+
+const inactiveWorldFishingNames=new Set(["cancelWorldFishingHeldPointer","retireWorldFishingPhysical"]),inactiveWorldFishingDeclarations=[],inactiveWorldFishingRefs=new Map();
+(function visit(node){if(ts.isFunctionDeclaration(node)&&inactiveWorldFishingNames.has(node.name?.text))inactiveWorldFishingDeclarations.push(node.getText(repairShellAst));
+  if(ts.isVariableDeclaration(node)&&["worldFishingPhysicalRef","worldFishingTerminalRef"].includes(node.name.getText(repairShellAst))){assert.ok(ts.isCallExpression(node.initializer)&&node.initializer.expression.getText(repairShellAst)==="useRef");inactiveWorldFishingRefs.set(node.name.getText(repairShellAst),node.initializer.arguments[0].getText(repairShellAst));}ts.forEachChild(node,visit);})(repairShellAst);
+assert.equal(inactiveWorldFishingDeclarations.length,inactiveWorldFishingNames.size);assert.equal(inactiveWorldFishingRefs.size,2);
+const inactiveWorldFishingText=inactiveWorldFishingDeclarations.join("\n")+"\n"+[...inactiveWorldFishingRefs].map(([name,initializer])=>"const "+name+"={current:"+initializer+"};").join("\n");
+
+const repairShellJs=ts.transpileModule([...repairShellDeclarations.values(),...inactiveBagBeltDeclarations,inactiveWorldFishingText].join("\n")+
   "\nconst bagBeltPointerRef={current:null},bagBeltArmedSharedRef={current:null},bagBeltQuarantineRef={current:new Map()},bagBeltClickFenceRef={current:new Map()},bagBeltGeometryRef={current:null},bagBeltButtonsRef={current:null},bagBeltCallbacksRef={current:{}};\n"+
   "\nconst registerNpcRepairTarget="+repairTargetRegistration+";\nconst lostRepairCapture="+repairLostCapture+
   ";\nfunction installRepairPointerListeners(){return ("+repairListenerEffect+")();}",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
@@ -5524,7 +5533,7 @@ const bagBeltShellNames=new Set(["rememberBagBeltClick","fenceBagBeltMouse","can
   if(ts.isVariableDeclaration(node)&&node.name.getText(repairShellAst)==="registerBeltTargets")bagBeltShellRegistration=node.initializer.arguments[0].getText(repairShellAst);
   ts.forEachChild(node,visit);})(repairShellAst);
 assert.equal(bagBeltShellDeclarations.size,bagBeltShellNames.size);assert.ok(bagBeltShellRect&&bagBeltShellRegistration);
-const bagBeltShellJs=ts.transpileModule([...bagBeltShellDeclarations.values(),bagBeltShellRect,"const registerBeltTargets="+bagBeltShellRegistration+";"].join("\n"),
+const bagBeltShellJs=ts.transpileModule([...bagBeltShellDeclarations.values(),bagBeltShellRect,inactiveWorldFishingText,"const registerBeltTargets="+bagBeltShellRegistration+";"].join("\n"),
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 check("Bag-to-Belt actual Shell terminal burns before callback keeps four pixel threshold and fences compatibility clicks",()=>{
   for(const variant of ["drop","click","four","obscured","cancel","reentrant","bevy"]){
@@ -5591,12 +5600,15 @@ check("Bag-to-Belt actual Shell second pointer quarantines through terminal with
 
 const bagBeltPageNames=new Set(["currentEquipmentOwner","itemCommandRequiresOwner","socialItemMutationAllowed","bagBeltPhysicalOwner","cancelBagToBeltGesture",
   "invalidateBagBeltInventory","observeBagBeltInventorySnapshot","receiveBagBeltDropGeometry","readBagBeltContext","resolveBagBeltSource","bagBeltTargetCurrent",
-  "beginBagToBeltGesture","bagBeltRecordCurrent","armBagToBeltGesture","bagBeltFinalCurrent","submitBagToBeltMove"]),bagBeltPageDeclarations=new Map();
+  "beginBagToBeltGesture","bagBeltRecordCurrent","armBagToBeltGesture","bagBeltFinalCurrent","submitBagToBeltMove","retireWorldFishingGesture","cancelWorldFishingGesture"]),bagBeltPageDeclarations=new Map();
 (function visit(node){if(ts.isFunctionDeclaration(node)&&bagBeltPageNames.has(node.name?.text))bagBeltPageDeclarations.set(node.name.text,node.getText(parityPageAst));ts.forEachChild(node,visit);})(parityPageAst);
 assert.equal(bagBeltPageDeclarations.size,bagBeltPageNames.size);
 const bagBeltEntryNodes=paritySendStatements.filter(node=>ts.isIfStatement(node)&&node.expression.getText(parityPageAst)==="options?.bagBeltProof");
 assert.equal(bagBeltEntryNodes.length,1,"sole actual Bag-to-Belt irreversible entry");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+1,paritySocketIndex,"actual enter is adjacent to socket.send");
+const bagBeltFollowingFishingEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltEntryNodes[0])+1];
+assert.ok(ts.isIfStatement(bagBeltFollowingFishingEntry));
+assert.equal(bagBeltFollowingFishingEntry.expression.getText(parityPageAst),"options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+2,paritySocketIndex,"actual Bag entry precedes sole appended Fishing entry and socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -5605,7 +5617,7 @@ const bagBeltPageJs=ts.transpileModule([...bagBeltPageDeclarations.values()].joi
   paritySendStatements.slice(paritySerializeIndex,paritySerializeIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+
   paritySendStatements.slice(parityDtoIndex,parityDtoIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
-  "\n"+bagBeltEntryNodes[0].getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}",
+  "\n"+bagBeltEntryNodes[0].getText(parityPageAst)+"\n"+bagBeltFollowingFishingEntry.getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}",
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 const bagBeltOwnerModule=loadTypeScriptModule(new URL("../lib/bevy-bag-ui.ts",import.meta.url),{
   "./bag-belt-gesture":bagBeltGeometryModule,"./world-model/item-identity":itemIdentity});
@@ -5752,6 +5764,690 @@ check("Bag-to-Belt Page rejects duplicate global UID zero and missing raw source
     else f.scope.bagBeltInventoryReadyRef.current=null;
     assert.equal(f.api.beginBagToBeltGesture(f.item,f.geometry,"react"),null,change);assert.equal(f.sent.length,0);assert.equal(f.plannerRequests.length,0);
   }
+});
+
+
+// Source23 optional fishing and owned animation boundaries. These exercise the
+// product adapters with bounded JSON getters; they do not instantiate WASM.
+const sharedFishingClick=loadTypeScriptModule(new URL("../lib/shared-fishing-click.ts",import.meta.url));
+const worldFishingSource=loadTypeScriptModule(new URL("../lib/world-fishing-source.ts",import.meta.url));
+const fishingAnimation=loadTypeScriptModule(new URL("../app/components/original-client-entity-animation-runtime.ts",import.meta.url));
+const fishingTargetsInput=()=>({origin:{x:-2147483648,y:2147483647},direction:2});
+const fishingTargetsReply=()=>({version:1,ok:true,walkCandidates:[{direction:2,cell:{x:1,y:2}},
+  {direction:1,cell:{x:3,y:4}},{direction:3,cell:{x:5,y:6}}],waterTarget:{x:7,y:8}});
+const fishingDecisionInput=()=>({origin:{x:0,y:0},direction:2,requestedWalk:false,autoRoute:false,
+  walkBlocked:[false,null,true],rodPresent:null,water:{cell:{x:4,y:0},light:255},facingMatches:null,
+  standing:null,fishing:null,transformType:-32768,nowMs:Number.MAX_SAFE_INTEGER,lastCastMs:0});
+check("Fishing optional ABI forwards exact raw geometry clocks and nullable facts without host arithmetic",()=>{
+  const requests=[],module={fishing_click_abi_version:()=>1,
+    fishing_click_targets(json){requests.push(JSON.parse(json));return JSON.stringify(fishingTargetsReply());},
+    fishing_click_decision(json){const input=JSON.parse(json);requests.push(input);return JSON.stringify({version:1,ok:true,decision:{type:"cast",lastCastMs:input.nowMs}});}};
+  const targets=presentationRuntime.readSharedFishingClickTargets(module,fishingTargetsInput());
+  assert.deepEqual(requests[0],{version:1,...fishingTargetsInput()});assert.deepEqual(targets,{walkCandidates:fishingTargetsReply().walkCandidates,waterTarget:{x:7,y:8}});
+  assert.ok(Object.isFrozen(targets)&&Object.isFrozen(targets.walkCandidates)&&Object.isFrozen(targets.walkCandidates[0].cell));
+  const decision=presentationRuntime.readSharedFishingClickDecision(module,fishingDecisionInput());
+  assert.deepEqual(requests[1],{version:1,...fishingDecisionInput()});assert.deepEqual(decision,{type:"cast",lastCastMs:Number.MAX_SAFE_INTEGER});assert.ok(Object.isFrozen(decision));
+  for(const absent of [{},{fishing_click_abi_version:()=>0},{fishing_click_abi_version:()=>1}]){
+    assert.equal(presentationRuntime.readSharedFishingClickTargets(absent,fishingTargetsInput()),null);
+    assert.equal(presentationRuntime.readSharedFishingClickDecision(absent,fishingDecisionInput()),null);
+  }
+});
+check("Fishing adapters reject coerced raw coordinates clocks directions and malformed outputs",()=>{
+  let calls=0,reply=fishingTargetsReply();const module={fishing_click_abi_version:()=>1,
+    fishing_click_targets(){calls++;return JSON.stringify(reply);},fishing_click_decision(){calls++;return JSON.stringify({version:1,ok:true,decision:{type:"none"}});}};
+  for(const delta of [{origin:{x:"0",y:0}},{origin:{x:2147483648,y:0}},{origin:{x:0,y:-2147483649}},
+    {origin:{x:0,y:0,extra:1}},{direction:-1},{direction:256},{direction:2.5},{extra:true}])
+    assert.equal(sharedFishingClick.readSharedFishingClickTargets(module,{...fishingTargetsInput(),...delta}),null);
+  for(const delta of [{nowMs:-1},{nowMs:1.5},{nowMs:Infinity},{nowMs:"1"},{lastCastMs:Number.MAX_SAFE_INTEGER+1},
+    {requestedWalk:1},{autoRoute:null},{walkBlocked:[false,false]},{walkBlocked:[false,0,true]},
+    {rodPresent:0},{standing:"standing"},{fishing:undefined},{transformType:32768},
+    {water:{cell:{x:0,y:0},light:256}},{water:{cell:{x:0,y:0},light:1,extra:true}}])
+    assert.equal(sharedFishingClick.readSharedFishingClickDecision(module,{...fishingDecisionInput(),...delta}),null);
+  assert.equal(calls,0,"invalid raw facts never enter optional Rust getter");
+  for(const invalid of [null,[],{...fishingTargetsReply(),extra:1},{...fishingTargetsReply(),waterTarget:{x:0,y:0,extra:1}},
+    {...fishingTargetsReply(),walkCandidates:[]},{...fishingTargetsReply(),walkCandidates:[{direction:1,cell:{x:0,y:0}},...fishingTargetsReply().walkCandidates.slice(1)]}]){
+    reply=invalid;assert.equal(sharedFishingClick.readSharedFishingClickTargets(module,fishingTargetsInput()),null);
+  }
+  for(const decision of [{type:"cast",lastCastMs:1},{type:"turn",direction:1,delayMs:200},{type:"turn",direction:2,delayMs:199},
+    {type:"none",extra:true},{type:"cast",lastCastMs:"1"}]){
+    module.fishing_click_decision=()=>JSON.stringify({version:1,ok:true,decision});assert.equal(sharedFishingClick.readSharedFishingClickDecision(module,fishingDecisionInput()),null);
+  }
+  module.fishing_click_decision=()=>JSON.stringify({version:1,ok:true,decision:{type:"turn",direction:2,delayMs:200}});
+  assert.deepEqual(sharedFishingClick.readSharedFishingClickDecision(module,fishingDecisionInput()),{type:"turn",direction:2,delayMs:200});
+  module.fishing_click_targets=()=>"{";assert.equal(sharedFishingClick.readSharedFishingClickTargets(module,fishingTargetsInput()),null);
+  module.fishing_click_targets=()=>"x".repeat(4097);assert.equal(sharedFishingClick.readSharedFishingClickTargets(module,fishingTargetsInput()),null);
+});
+check("Fishing optional ABI custody rejects getter replacement and reentrant input mutation before and after calls",()=>{
+  for(const reader of ["targets","decision"])for(const edge of ["abi-before","abi-after","getter","input-before","input-after"]){
+    const input=reader==="targets"?fishingTargetsInput():fishingDecisionInput(),key="fishing_click_"+reader;
+    let abiCalls=0,calls=0;const mutate=()=>{input.origin.x++;};
+    const module={fishing_click_abi_version(){abiCalls++;if(edge==="abi-before"&&abiCalls===1)module[key]=()=>"{}";
+      if(edge==="abi-after"&&abiCalls===3)module.fishing_click_abi_version=()=>1;
+      if(edge==="input-before"&&abiCalls===1)mutate();return 1;},[key](){calls++;
+      if(edge==="getter")module[key]=()=>"{}";if(edge==="input-after")mutate();
+      return JSON.stringify(reader==="targets"?fishingTargetsReply():{version:1,ok:true,decision:{type:"cast",lastCastMs:input.nowMs}});}};
+    assert.equal(reader==="targets"?sharedFishingClick.readSharedFishingClickTargets(module,input):sharedFishingClick.readSharedFishingClickDecision(module,input),null,reader+" "+edge);
+    assert.equal(calls,edge.endsWith("before")?0:1,reader+" "+edge);
+  }
+});
+const fishingOwner=()=>({socket:{},connectionGeneration:1,sessionGeneration:2,sceneRevision:3,playerObjectId:17,mapFileName:"0"});
+const fishingSnapshot=(owner,delta={})=>({playerObjectId:owner.playerObjectId,mapFileName:owner.mapFileName,
+  entities:[{kind:"selfPlayer",objectId:owner.playerObjectId,x:0,y:1,direction:"Right",dead:false,fishing:false,transformType:0,...delta}]});
+check("WorldFishingSource preserves raw own facts and rejects foreign or stale owner packets",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource(),first=source.observeSnapshot(owner,fishingSnapshot(owner,{x:-2147483648,y:2147483647,transformType:-32768}));
+  assert.ok(first&&first.animationKnown&&first.bootstrapKnown);assert.deepEqual(first.self,{x:-2147483648,y:2147483647,direction:"Right",dead:false});
+  assert.equal(first.transformType,-32768);assert.equal(first.fishing,false);assert.ok(Object.isFrozen(first)&&Object.isFrozen(first.owner)&&Object.isFrozen(first.self));assert.equal(Object.isFrozen(owner.socket),false);
+  for(const foreign of [{...owner,socket:{}},{...owner,sessionGeneration:3},{...owner,sceneRevision:4}]){
+    source.observePacket(foreign,"Disconnect",{});assert.strictEqual(source.current(owner),first);assert.equal(source.current(foreign),null);
+  }
+  source.observePacket(owner,"ObjectTurn",{objectId:18,x:4,y:5,direction:"Down"});assert.strictEqual(source.current(owner),first);
+  const newer={...owner,connectionGeneration:2},next=source.observeSnapshot(newer,fishingSnapshot(newer));assert.notEqual(next.sourceKey,first.sourceKey);assert.equal(source.current(owner),null);
+  source.observePacket(owner,"MapChanged",{});assert.strictEqual(source.current(newer),next);
+});
+check("WorldFishingSource unknown intervals cannot revive from ordinary snapshots or partial actions",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource(),first=source.observeSnapshot(owner,fishingSnapshot(owner));
+  source.observePacket(owner,"ObjectAttack",{objectId:17,direction:"Right"});const unknown=source.current(owner);
+  assert.equal(unknown.animationKnown,false);assert.equal(unknown.bootstrapKnown,false);assert.ok(unknown.continuityRevision>first.continuityRevision);
+  const restored=source.observeSnapshot(owner,fishingSnapshot(owner));assert.equal(restored.animationKnown,false);assert.equal(restored.bootstrapKnown,false);assert.equal(restored.sourceKey,first.sourceKey);
+  source.observePacket(owner,"FishingUpdate",{objectId:17,fishing:true});assert.equal(source.current(owner).animationKnown,false);
+  source.observePacket(owner,"ObjectTurn",{objectId:17,x:2,y:3,location:{x:9,y:3},direction:"Down"});assert.equal(source.current(owner).animationKnown,false);
+  assert.equal(source.current(owner).self,null,"conflicting own raw position withdraws complete self facts");
+  const reacquired=source.observeSnapshot(owner,fishingSnapshot(owner,{x:2,y:3,direction:"Down",fishing:true}));
+  assert.equal(reacquired.animationKnown,false,"complete raw snapshot reacquires dead and transform facts without healing animation");assert.equal(reacquired.bootstrapKnown,false);
+  assert.deepEqual(reacquired.self,{x:2,y:3,direction:"Down",dead:false});
+  const before=source.current(owner);source.observePacket(owner,"ObjectTurn",{objectId:17,location:{x:2,y:3},direction:"Down"},1000);const known=source.current(owner);
+  assert.equal(known.animationKnown,true);assert.equal(known.bootstrapKnown,false);assert.ok(known.continuityRevision>before.continuityRevision);assert.deepEqual(known.self,{x:2,y:3,direction:"Down",dead:false});
+  source.observePacket(owner,"ObjectWalk",{objectId:17,x:3,y:3,direction:"Right"},1001);const walking=source.current(owner);
+  assert.equal(walking.continuityRevision,known.continuityRevision,"complete ordinary actions retain the same known interval");assert.ok(walking.revision>known.revision);assert.equal(walking.bootstrapKnown,false);
+});
+check("WorldFishingSource initial unknown bootstrap is once while malformed raw facts stay unknown",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource();source.observeSnapshot(owner,{playerObjectId:17,mapFileName:"0",entities:[]});
+  const first=source.observeSnapshot(owner,fishingSnapshot(owner));assert.equal(first.bootstrapKnown,true);assert.equal(first.animationKnown,true);
+  for(const delta of [{x:"0"},{dead:undefined},{direction:"right"},{transformType:32768},{fishing:0}]){
+    const record=source.observeSnapshot(owner,fishingSnapshot(owner,delta));assert.equal(record.animationKnown,false);assert.equal(record.bootstrapKnown,false);
+    assert.equal(source.observeSnapshot(owner,fishingSnapshot(owner)).animationKnown,false,"valid plain snapshot cannot restore retired evidence");
+  }
+  const duplicate=fishingSnapshot(owner);duplicate.entities.push({...duplicate.entities[0]});assert.equal(source.observeSnapshot(owner,duplicate).self,null);
+  source.observePacket(owner,"UserLocation",{x:4,y:5,direction:"Down"});assert.equal(source.current(owner).animationKnown,false,"unknown dead fact requires complete own facts");
+});
+check("WorldFishingSource complete normal actions preserve bootstrap continuity and raw transform zero",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource(),first=source.observeSnapshot(owner,fishingSnapshot(owner));
+  source.observePacket(owner,"ObjectAttack",{objectId:17,x:1,y:1,direction:"Right"});const action=source.current(owner);
+  assert.equal(action.bootstrapKnown,true);assert.equal(action.continuityRevision,first.continuityRevision);assert.ok(action.revision>first.revision);
+  source.observePacket(owner,"TransformUpdate",{objectId:17,transformType:0});assert.equal(source.current(owner).transformType,0);
+  source.observePacket(owner,"FishingUpdate",{objectId:17,fishing:false});assert.equal(source.current(owner).fishing,false);
+  source.observePacket(owner,"ObjectDied",{objectId:17,x:1,y:1,direction:"Right"});assert.equal(source.current(owner).self.dead,true);
+  source.observePacket(owner,"ObjectRevived",{objectId:17,x:1,y:1,direction:"Right"});assert.equal(source.current(owner).self.dead,false);
+  source.retire();assert.equal(source.current(owner).animationKnown,false);assert.equal(source.observeSnapshot(owner,fishingSnapshot(owner)).bootstrapKnown,false);
+});
+
+
+check("WorldFishingSource equivalent full snapshots retain exact immutable authority and revision",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource(),raw=fishingSnapshot(owner),first=source.observeSnapshot(owner,raw);
+  assert.strictEqual(source.observeSnapshot(owner,structuredClone(raw)),first);assert.equal(source.current(owner).revision,first.revision);
+  const changed=source.observeSnapshot(owner,fishingSnapshot(owner,{x:1}));assert.notStrictEqual(changed,first);assert.ok(changed.revision>first.revision);
+  assert.equal(changed.continuityRevision,first.continuityRevision);assert.equal(changed.bootstrapKnown,true);
+  assert.strictEqual(source.observeSnapshot(owner,fishingSnapshot(owner,{x:1})),changed);
+  for(const delta of [{fishing:true},{transformType:1},{direction:"Down"},{dead:true}]){
+    const before=source.current(owner),next=source.observeSnapshot(owner,fishingSnapshot(owner,delta));assert.notStrictEqual(next,before);assert.ok(next.revision>before.revision);
+  }
+});
+check("WorldFishingSource own Harvest retires authority until a fresh complete canonical action",()=>{
+  for(const name of ["ObjectHarvest","ObjectHarvested","Harvest"]){
+    const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource(),first=source.observeSnapshot(owner,fishingSnapshot(owner));
+    source.observePacket(owner,name,{objectId:18});assert.strictEqual(source.current(owner),first,"foreign harvest cannot retire own evidence");
+    source.observePacket({...owner,socket:{}},name,{objectId:17});assert.strictEqual(source.current(owner),first,"old physical owner cannot retire current evidence");
+    source.observePacket(owner,name,{objectId:17,x:0,y:1,direction:"Right"});const unknown=source.current(owner);
+    assert.equal(unknown.animationKnown,false,name);assert.equal(unknown.bootstrapKnown,false,name);assert.ok(unknown.continuityRevision>first.continuityRevision,name);
+    const snapshot=source.observeSnapshot(owner,fishingSnapshot(owner));assert.equal(snapshot.animationKnown,false);assert.equal(snapshot.bootstrapKnown,false);
+    source.observePacket(owner,"ObjectTurn",{objectId:17,x:1,y:1,direction:"Down"});const restored=source.current(owner);
+    assert.equal(restored.animationKnown,true);assert.equal(restored.bootstrapKnown,false);assert.ok(restored.continuityRevision>unknown.continuityRevision);
+  }
+});
+
+function ownedAnimationModule(){
+  const calls=[],module={entity_animation_abi_version:()=>1};let constructions=0;
+  class Bridge { constructor(){constructions++;} resolveMir2EntityAnimationPoses(json){calls.push(["resolve",this,json]);return "{}";}
+    getMir2EntityActionPose(json){calls.push(["peek",this,json]);return "{}";} resetMir2EntityAnimations(){calls.push(["reset",this]);} }
+  module.EntityAnimationBridge=Bridge;return {module,calls,Bridge,getConstructions:()=>constructions};
+}
+check("Owned animation optional facade lazily owns one bridge and preserves actual method receiver",()=>{
+  for(const absent of [{},{entity_animation_abi_version:()=>0},{entity_animation_abi_version:()=>1}])assert.equal(presentationRuntime.createSharedEntityAnimationAccessor(absent)(),null);
+  const f=ownedAnimationModule(),get=presentationRuntime.createSharedEntityAnimationAccessor(f.module);assert.equal(f.getConstructions(),0);
+  const runtime=get();assert.ok(runtime);assert.equal(f.getConstructions(),1);assert.strictEqual(get(),runtime);assert.ok(Object.isFrozen(runtime));
+  runtime.resolveMir2EntityAnimationPoses("{}");runtime.getMir2EntityActionPose("{}");runtime.resetMir2EntityAnimations();
+  assert.deepEqual(f.calls.map(call=>call[0]),["resolve","peek","reset"]);for(const call of f.calls)assert.strictEqual(call[1],runtime.source);
+  const other=presentationRuntime.createSharedEntityAnimationAccessor(f.module)();assert.notStrictEqual(other,runtime);assert.notStrictEqual(other.source,runtime.source);assert.equal(f.getConstructions(),2);
+});
+check("Owned animation optional facade rejects changed ABI bridge methods and bounded payloads",()=>{
+  for(const edge of ["abi","bridge","resolve","peek","reset"]){
+    const f=ownedAnimationModule(),get=presentationRuntime.createSharedEntityAnimationAccessor(f.module),runtime=get();
+    if(edge==="abi")f.module.entity_animation_abi_version=()=>1;if(edge==="bridge")f.module.EntityAnimationBridge=class extends f.Bridge{};
+    if(edge==="resolve")runtime.source.resolveMir2EntityAnimationPoses=()=>"{}";if(edge==="peek")runtime.source.getMir2EntityActionPose=()=>"{}";
+    if(edge==="reset")runtime.source.resetMir2EntityAnimations=()=>{};
+    assert.equal(get(),null,edge);assert.throws(()=>runtime.getMir2EntityActionPose("{}"),/unavailable/,edge);assert.equal(f.calls.length,0);
+  }
+  const f=ownedAnimationModule(),runtime=presentationRuntime.createSharedEntityAnimationAccessor(f.module)();
+  assert.throws(()=>runtime.getMir2EntityActionPose("x".repeat(2049)),/unavailable/);
+  assert.throws(()=>runtime.getMir2EntityActionPose("界".repeat(683)),/unavailable/,"UTF8 budget applies independently of character count");
+  assert.throws(()=>runtime.resolveMir2EntityAnimationPoses("x".repeat(2097153)),/unavailable/);assert.equal(f.calls.length,0);
+  const bad=ownedAnimationModule();bad.Bridge.prototype.getMir2EntityActionPose=()=>"x".repeat(2049);
+  assert.throws(()=>presentationRuntime.createSharedEntityAnimationAccessor(bad.module)().getMir2EntityActionPose("{}"),/unavailable/);
+});
+check("Owned animation optional facade burns construction attempt and rejects ABI and method reentry",()=>{
+  const f=ownedAnimationModule();let get;f.module.EntityAnimationBridge=class extends f.Bridge{constructor(){super();assert.equal(get(),null);}};
+  get=presentationRuntime.createSharedEntityAnimationAccessor(f.module);const runtime=get();assert.ok(runtime);assert.strictEqual(get(),runtime);assert.equal(f.getConstructions(),1);
+  const failed=ownedAnimationModule();failed.module.EntityAnimationBridge=class{constructor(){throw Error("constructor");}};
+  const noRetry=presentationRuntime.createSharedEntityAnimationAccessor(failed.module);assert.equal(noRetry(),null);failed.module.EntityAnimationBridge=failed.Bridge;assert.equal(noRetry(),null);assert.equal(failed.getConstructions(),0);
+  const nested=ownedAnimationModule();let facade,access;const events=[];
+  nested.Bridge.prototype.getMir2EntityActionPose=function(json){events.push(json);assert.equal(access(),null);
+    assert.throws(()=>facade.getMir2EntityActionPose("{}"),/unavailable/);assert.throws(()=>facade.resetMir2EntityAnimations(),/unavailable/);return "{}";};
+  access=presentationRuntime.createSharedEntityAnimationAccessor(nested.module);facade=access();assert.equal(facade.getMir2EntityActionPose("{}"),"{}");assert.deepEqual(events,["{}"]);assert.strictEqual(access(),facade);
+  const changed=ownedAnimationModule();changed.Bridge.prototype.getMir2EntityActionPose=function(){changed.module.entity_animation_abi_version=()=>1;return "{}";};
+  const changedAccess=presentationRuntime.createSharedEntityAnimationAccessor(changed.module);assert.throws(()=>changedAccess().getMir2EntityActionPose("{}"),/unavailable/);assert.equal(changedAccess(),null);
+});
+const fishingCoreAst=ts.createSourceFile("client-core-runtime.ts",readFileSync(tooltipCoreUrl,"utf8"),ts.ScriptTarget.Latest,true);
+const fishingCoreMethods=[],fishingAccessorDeclarations=[];
+(function visit(node){if(ts.isMethodDeclaration(node)&&["getEntityAnimationRuntime","fishingClickTargets","decideFishingClick"].includes(node.name.getText(fishingCoreAst)))fishingCoreMethods.push(node);
+  if(ts.isVariableDeclaration(node)&&node.name.getText(fishingCoreAst)==="getEntityAnimationRuntime")fishingAccessorDeclarations.push(node);ts.forEachChild(node,visit);})(fishingCoreAst);
+assert.equal(fishingCoreMethods.length,3,"three actual optional Core fishing and animation proxies");assert.equal(fishingAccessorDeclarations.length,1,"sole actual lazy owned animation accessor");
+const fishingCoreJs=ts.transpileModule("const "+fishingAccessorDeclarations[0].getText(fishingCoreAst)+";const facade={"+fishingCoreMethods.map(node=>node.getText(fishingCoreAst)).join(",")+"};",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+check("Core actual fishing and animation facade forwards optional presentation capabilities independently",()=>{
+  const f=ownedAnimationModule(),requests=[];Object.assign(f.module,{fishing_click_abi_version:()=>1,
+    fishing_click_targets:json=>{requests.push(JSON.parse(json));return JSON.stringify(fishingTargetsReply());},
+    fishing_click_decision:json=>{requests.push(JSON.parse(json));return JSON.stringify({version:1,ok:true,decision:{type:"none"}});}});
+  const create=module=>new Function("presentation","createSharedEntityAnimationAccessor","readSharedFishingClickTargets","readSharedFishingClickDecision",fishingCoreJs+"\nreturn facade;")(
+    module,presentationRuntime.createSharedEntityAnimationAccessor,presentationRuntime.readSharedFishingClickTargets,presentationRuntime.readSharedFishingClickDecision);
+  const core=create(f.module);assert.ok(core.getEntityAnimationRuntime());assert.deepEqual(core.fishingClickTargets(fishingTargetsInput()).waterTarget,{x:7,y:8});assert.deepEqual(core.decideFishingClick(fishingDecisionInput()),{type:"none"});
+  assert.deepEqual(requests,[{version:1,...fishingTargetsInput()},{version:1,...fishingDecisionInput()}]);
+  const missing=create({});assert.equal(missing.getEntityAnimationRuntime(),null);assert.equal(missing.fishingClickTargets(fishingTargetsInput()),null);assert.equal(missing.decideFishingClick(fishingDecisionInput()),null);
+});
+function fishingPoseFixture(){
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource().observeSnapshot(owner,fishingSnapshot(owner)),requests=[];
+  let reply={version:1,known:true,worldKey:"world:0",objectId:"17",actionSourceKey:source.sourceKey,sourceRevision:source.revision,
+    continuityRevision:source.continuityRevision,bridgeEpoch:1,incarnation:1,lastNowMs:1000,action:"standing",direction:"Right"};
+  const runtime={getMir2EntityActionPose(json){requests.push(JSON.parse(json));return JSON.stringify(reply);}},
+    commit={context:{runtime,record:source},worldKey:"world:0",worldSeed:7,atMs:1000,token:{}};
+  return {runtime,commit,source,requests,getReply:()=>reply,setReply:value=>reply=value};
+}
+check("Animation action peek is read only exact authority revision and fresh shared pose without standing fallback",()=>{
+  const f=fishingPoseFixture(),read=now=>fishingAnimation.readCrystalEntityActionPose(f.runtime,f.commit,f.source,now);
+  const pose=read(1250);assert.ok(pose);assert.ok(Object.isFrozen(pose));assert.equal(pose.action,"standing");
+  assert.deepEqual(f.requests,[{version:1,worldKey:"world:0",worldSeed:7,objectId:"17",actionSourceKey:f.source.sourceKey}]);
+  assert.equal(read(1251),null,"250ms inclusive freshness boundary");assert.equal(read(999),null,"future pose cannot become current");
+  for(const now of [-1,1.5,NaN,"1000"])assert.equal(read(now),null);
+  assert.equal(fishingAnimation.readCrystalEntityActionPose({},f.commit,f.source,1000),null);
+  assert.equal(fishingAnimation.readCrystalEntityActionPose({...f.runtime},f.commit,f.source,1000),null,"different current runtime cannot borrow pose");
+  assert.equal(fishingAnimation.readCrystalEntityActionPose(f.runtime,f.commit,{...f.source,revision:f.source.revision+1},1000),null);
+  for(const reply of [null,[],{version:1,known:false},{...f.getReply(),action:"unknown"},{...f.getReply(),direction:"right"},
+    {...f.getReply(),lastNowMs:1.5},{...f.getReply(),sourceRevision:0},{...f.getReply(),continuityRevision:0},
+    {...f.getReply(),sourceRevision:f.source.revision+1},{...f.getReply(),objectId:"18"},{...f.getReply(),extra:true}]){
+    f.setReply(reply);assert.equal(read(1000),null,"unknown or malformed peek cannot default to standing");
+  }
+  assert.ok(f.requests.length>0);
+});
+check("Animation action peek rejects getter replacement and does not advance or resolve an animation world",()=>{
+  const f=fishingPoseFixture();let resolves=0,resets=0;f.runtime.resolveMir2EntityAnimationPoses=()=>{resolves++;return "{}";};f.runtime.resetMir2EntityAnimations=()=>{resets++;};
+  const original=f.runtime.getMir2EntityActionPose;f.runtime.getMir2EntityActionPose=function(json){const raw=original(json);this.getMir2EntityActionPose=()=>raw;return raw;};
+  assert.equal(fishingAnimation.readCrystalEntityActionPose(f.runtime,f.commit,f.source,1000),null);assert.equal(resolves,0);assert.equal(resets,0);assert.equal(f.requests.length,1);
+});
+check("Animation renderer forwards exact clock and canonical action tokens while missing event facts remain unknown",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource().observeSnapshot(owner,fishingSnapshot(owner)),requests=[],
+    runtime={resolveMir2EntityAnimationPoses(json){const raw=JSON.parse(json);requests.push(raw);return JSON.stringify({worldKey:raw.worldKey,nowMs:raw.nowMs,poses:[]});}},
+    entity={objectId:"17",kind:"selfPlayer",x:0,y:1,direction:"Right",movementAnimation:"walking",movementStartedAt:123,attackStartedAt:234,attackAnimation:"melee2"};
+  fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",worldSeed:7,now:1000,selfAuthority:source,entities:[{entity,state:"walking"}]});
+  assert.deepEqual(requests[0],{worldKey:"world:0",worldSeed:7,nowMs:1000,entities:[{objectId:"17",kind:"selfPlayer",direction:"Right",action:"walking",actionToken:"move:123:walking",
+    actionSourceKey:source.sourceKey,actionSourceRevision:source.revision,bootstrapKnown:true,actionKnown:true}]});
+  assert.deepEqual(fishingAnimation.animationEventForEntity(entity,"attackMelee"),{action:"attack2",actionToken:"attack:234:attack2"});
+  assert.deepEqual(fishingAnimation.animationEventForEntity({...entity,movementStartedAt:0},"running"),{action:"running",actionToken:"move:0:running"});
+  for(const attackAnimation of ["melee1","melee2","melee3","melee4"]){const action="attack"+(Number(attackAnimation.slice(-1)));assert.deepEqual(fishingAnimation.animationEventForEntity({...entity,attackAnimation},"attackMelee"),{action,actionToken:"attack:234:"+action});}
+  assert.deepEqual(fishingAnimation.animationEventForEntity({...entity,struckStartedAt:456},"struck"),{action:"struck",actionToken:"struck:456"});
+  fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",worldSeed:7,now:1001,selfAuthority:source,entities:[{entity:{...entity,movementStartedAt:undefined},state:"walking"}]});
+  assert.equal(requests[1].entities[0].actionKnown,false);assert.equal(Object.hasOwn(requests[1].entities[0],"actionToken"),false);
+  const foreign={...entity,objectId:"18"};fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",worldSeed:7,now:1002,selfAuthority:source,entities:[{entity:foreign,state:"standing"}]});
+  assert.equal(Object.hasOwn(requests[2].entities[0],"actionKnown"),false,"own source never promotes another entity");
+  fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",worldSeed:7,now:1003,selfAuthority:{...source,animationKnown:false,bootstrapKnown:false},entities:[{entity,state:"standing"}]});
+  assert.equal(requests[3].entities[0].actionKnown,false);assert.equal(requests[3].entities[0].bootstrapKnown,false,"legacy default standing cannot bootstrap retired own authority");
+  runtime.resolveMir2EntityAnimationPoses=()=>JSON.stringify({worldKey:"world:0",nowMs:999,poses:[{objectId:"17",incarnation:1,animationState:"standing",action:"standing",direction:"Right",logicalFrameIndex:0,queueDepth:0}]});
+  assert.deepEqual(fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",worldSeed:7,now:1002,entities:[{entity,state:"standing"}]}),{},"wrong animation clock cannot publish a pose");
+});
+
+
+check("WorldFishingSource captures immutable canonical action evidence without invented receive clocks",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource();source.observeSnapshot(owner,fishingSnapshot(owner));
+  source.observePacket(owner,"ObjectWalk",{objectId:17,x:1,y:1,direction:"Right"},1000);const first=source.current(owner);
+  assert.equal(first.actionEvidence.family,"walking");assert.equal(first.actionEvidence.receivedAtMs,1000);assert.ok(Object.isFrozen(first.actionEvidence));
+  assert.equal(first.actionEvidence.token,first.sourceKey+":action:"+first.actionEvidence.id);
+  source.observePacket(owner,"ObjectRun",{objectId:17,x:2,y:1,direction:"Right"});const second=source.current(owner);
+  assert.equal(second.actionEvidence.receivedAtMs,null);assert.equal(second.actionEvidence.family,"running");assert.ok(second.actionEvidence.id>first.actionEvidence.id);assert.notEqual(second.actionEvidence.token,first.actionEvidence.token);
+  for(const clock of [-1,1.5,"1000",Number.MAX_SAFE_INTEGER+1]){
+    source.observePacket(owner,"ObjectAttack",{objectId:17,x:2,y:1,direction:"Right"},clock);assert.equal(source.current(owner).actionEvidence.receivedAtMs,null);
+  }
+});
+check("WorldFishingSource UserLocation updates transform but cannot heal unknown or fabricate standing",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource();source.observeSnapshot(owner,fishingSnapshot(owner));
+  source.observePacket(owner,"ObjectWalk",{objectId:17,x:1,y:1,direction:"Right"},1000);const walking=source.current(owner);
+  source.observePacket(owner,"UserLocation",{x:2,y:1,direction:"Down"},1001);const ack=source.current(owner);
+  assert.strictEqual(ack.actionEvidence,walking.actionEvidence);assert.equal(ack.animationKnown,true);assert.equal(ack.actionEvidence.family,"walking");assert.deepEqual(ack.self,{x:2,y:1,direction:"Down",dead:false});
+  source.observePacket(owner,"Harvest",{objectId:17});const unknown=source.current(owner);
+  source.observePacket(owner,"UserLocation",{x:3,y:1,direction:"Right"},1002);const corrected=source.current(owner);
+  assert.equal(corrected.animationKnown,false);assert.equal(corrected.bootstrapKnown,false);assert.equal(corrected.actionEvidence,null);assert.equal(corrected.continuityRevision,unknown.continuityRevision);
+  source.observeSnapshot(owner,fishingSnapshot(owner,{x:3}));assert.equal(source.current(owner).animationKnown,false);
+  source.observePacket(owner,"ObjectTurn",{objectId:17,x:3,y:1,direction:"Right"},1003);assert.equal(source.current(owner).animationKnown,true);assert.equal(source.current(owner).actionEvidence.family,"standing");
+});
+function fishingAnimationEventFixture(){
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource();source.observeSnapshot(owner,fishingSnapshot(owner));const requests=[];
+  const runtime={resolveMir2EntityAnimationPoses(json){const raw=JSON.parse(json);requests.push(raw);return JSON.stringify({worldKey:raw.worldKey,nowMs:raw.nowMs,poses:[]});}};
+  const render=(record,entity,state,motionSnapshot)=>{fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"source23:events",worldSeed:1,now:1000,selfAuthority:record,entities:[{entity,state,motionSnapshot}]});return requests.at(-1).entities[0];};
+  const entity={objectId:"17",kind:"selfPlayer",x:0,y:1,direction:"Right",movementAnimation:"walking",movementStartedAt:1000};
+  return {owner,source,entity,requests,render};
+}
+check("Animation own transient authority rejects missing receive time old timestamps and metadata mismatch",()=>{
+  for(const edge of ["missingReceive","missingTimestamp","oldTimestamp","wrongAnimation","wrongFamily","wrongTransform"]){
+    const f=fishingAnimationEventFixture();f.source.observePacket(f.owner,"ObjectWalk",{objectId:17,x:0,y:1,direction:"Right"},edge==="missingReceive"?undefined:1000);
+    const record=f.source.current(f.owner),entity={...f.entity};if(edge==="missingTimestamp")delete entity.movementStartedAt;
+    if(edge==="oldTimestamp")entity.movementStartedAt=999;if(edge==="wrongAnimation")entity.movementAnimation="running";
+    if(edge==="wrongTransform")entity.x=9;const output=f.render(record,entity,edge==="wrongFamily"?"attackMelee":"walking");
+    assert.equal(output.actionKnown,false,edge);assert.equal(output.bootstrapKnown,false,edge);
+    assert.equal(f.render(record,entity,"standing").actionKnown,false,"failed transient cannot later become standing authority");
+  }
+  const f=fishingAnimationEventFixture();f.source.observePacket(f.owner,"ObjectWalk",{objectId:17,x:0,y:1,direction:"Right"},1000);
+  const record=f.source.current(f.owner),output=f.render(record,{...f.entity,movementStartedAt:999},"walking",{animationState:"walking",startedAt:1001});
+  assert.equal(output.actionKnown,false,"matching actual entity metadata at old clock cannot borrow motion to heal itself");
+  const motion=f.render(record,{...f.entity,movementAnimation:undefined,movementStartedAt:999},"walking",{animationState:"walking",startedAt:1001});
+  assert.equal(motion.actionKnown,true);assert.equal(motion.actionToken,record.actionEvidence.token+":move:1001:walking","canonical motion timestamp wins when entity has no matching animation metadata");
+});
+check("Animation own descriptor cache preserves canonical token after selector standing and rejects reused old event",()=>{
+  const f=fishingAnimationEventFixture();f.source.observePacket(f.owner,"ObjectWalk",{objectId:17,x:0,y:1,direction:"Right"},1000);
+  const first=f.source.current(f.owner),walking=f.render(first,f.entity,"walking"),token=first.actionEvidence.token+":move:1000:walking";
+  assert.equal(walking.actionKnown,true);assert.equal(walking.actionToken,token);assert.equal(walking.bootstrapKnown,false);
+  const completed=f.render(first,{...f.entity,movementAnimation:undefined,movementStartedAt:undefined},"standing");
+  assert.equal(completed.action,"walking");assert.equal(completed.actionKnown,true);assert.equal(completed.actionToken,token,"Rust owns natural completion while host repeats its consumed event");
+  f.source.observePacket(f.owner,"ObjectWalk",{objectId:17,x:0,y:1,direction:"Right"},1000);const next=f.source.current(f.owner);
+  assert.notEqual(next.actionEvidence.token,first.actionEvidence.token);assert.equal(f.render(next,f.entity,"walking").actionKnown,false,"next descriptor cannot reuse consumed timestamp");
+  const fresh=f.render(next,{...f.entity,movementStartedAt:1001},"walking");assert.equal(fresh.actionKnown,true);assert.equal(fresh.actionToken,next.actionEvidence.token+":move:1001:walking");
+  assert.equal(f.render(next,f.entity,"standing").actionToken,fresh.actionToken);
+});
+check("Animation action peek binds exact captured layout clock and independent bridge authority counters",()=>{
+  const f=fishingPoseFixture(),base={...f.getReply(),continuityRevision:19};f.setReply(base);
+  const pose=fishingAnimation.readCrystalEntityActionPose(f.runtime,f.commit,f.source,1250);assert.ok(pose);assert.equal(pose.continuityRevision,19);assert.notEqual(pose.continuityRevision,f.source.continuityRevision);
+  for(const lastNowMs of [999,1001]){f.setReply({...base,lastNowMs});assert.equal(fishingAnimation.readCrystalEntityActionPose(f.runtime,f.commit,f.source,1250),null,"resolve ahead or behind captured commit cannot borrow its authority");}
+  f.setReply(base);assert.equal(fishingAnimation.readCrystalEntityActionPose(f.runtime,{...f.commit,context:{...f.commit.context,record:{...f.source}}},f.source,1000),null,"equivalent record copy cannot replace committed identity");
+});
+check("Animation action peek rejects reentrant commit context owner source and getter mutation",()=>{
+  for(const edge of ["context","runtime","record","worldKey","worldSeed","atMs","token","sourceKey","revision","owner","playerId","getter"]){
+    const f=fishingPoseFixture(),source={...f.source,owner:{...f.source.owner}},context={runtime:f.runtime,record:source},commit={...f.commit,context},original=f.runtime.getMir2EntityActionPose;
+    f.runtime.getMir2EntityActionPose=function(json){const reply=original(json);
+      if(edge==="context")commit.context={...context};if(edge==="runtime")context.runtime={...f.runtime};if(edge==="record")context.record={...source};
+      if(edge==="worldKey")commit.worldKey="successor";if(edge==="worldSeed")commit.worldSeed++;if(edge==="atMs")commit.atMs++;if(edge==="token")commit.token={};
+      if(edge==="sourceKey")source.sourceKey+="changed";if(edge==="revision")source.revision++;if(edge==="owner")source.owner={...source.owner};if(edge==="playerId")source.owner.playerObjectId++;
+      if(edge==="getter")f.runtime.getMir2EntityActionPose=()=>reply;return reply;};
+    assert.equal(fishingAnimation.readCrystalEntityActionPose(f.runtime,commit,source,1000),null,edge);assert.equal(f.requests.length,1,edge);
+  }
+});
+
+
+// Actual Page custody and socket entry with bounded in-memory ABI data and
+// physical-owner records. No network connection or animation engine is created.
+const fishingPageSource=readFileSync(parityPageUrl,"utf8"),fishingPageAst=ts.createSourceFile("page.tsx",fishingPageSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const fishingPageNames=new Set(["worldFishingOwner","cancelWorldFishingGesture","retireWorldFishingGesture","publishWorldFishingSource",
+  "captureWorldFishingGatewayEvent","captureWorldFishingSnapshot","commitWorldFishingAnimation","readWorldFishingRod","worldFishingInputAllowed","worldFishingPureUiBlocked",
+  "worldFishingLeaseCurrent","beginWorldFishingGesture","worldFishingMapCell","worldFishingFinalCurrent","enterWorldFishingSend","tryWorldFishingBlockedClick",
+  "currentSpellsOwner","otherPlayerUiBlocksInput","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
+  "originalMapRegionContainsTile","originalMapCellBlocksMovement"]),fishingPageDeclarations=new Map();
+(function visit(node){if(ts.isFunctionDeclaration(node)&&fishingPageNames.has(node.name?.text))fishingPageDeclarations.set(node.name.text,node.getText(fishingPageAst));ts.forEachChild(node,visit);})(fishingPageAst);
+assert.equal(fishingPageDeclarations.size,fishingPageNames.size,"all actual fishing Page and input authority declarations");
+const fishingSendNode=[];(function visit(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="sendRaw")fishingSendNode.push(node);ts.forEachChild(node,visit);})(fishingPageAst);
+assert.equal(fishingSendNode.length,1);const fishingSendStatements=fishingSendNode[0].body.statements;
+const fishingSendEntry=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&node.expression.getText(fishingPageAst)==="options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)");
+assert.equal(fishingSendEntry.length,1,"sole actual final WorldFishing irreversible entry");
+const fishingSocketIndex=fishingSendStatements.findIndex(node=>ts.isTryStatement(node)&&node.tryBlock.statements.some(child=>ts.isExpressionStatement(child)&&child.expression.getText(fishingPageAst)==="socket.send(serialized)"));
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+1,fishingSocketIndex,"WorldFishing irreversible entry directly precedes actual socket send");
+const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
+const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
+const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
+assert.equal(fishingPreflightGuards.length,2,"actual raw fishing cast requires its opaque source proof");
+const fishingPageJs=ts.transpileModule([...fishingPageDeclarations.values()].join("\n")+"\nfunction fishingSocketEntry(command,options,socket,beforeFinal){"+
+  fishingPreflightGuards.map(node=>node.getText(fishingPageAst)).join("\n")+"\n"+fishingSendStatements.slice(fishingSerializeIndex,fishingSerializeIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
+  "\nif(beforeFinal)beforeFinal();\n"+fishingSendStatements.slice(fishingDtoIndex,fishingDtoIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
+  "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+function worldFishingPageFixture(){
+  const owner=npcRepairOwner(),rod={...npcRepairItem(0,"weapon"),authoritativeUniqueId:0};delete rod.container;
+  rod.tooltipSource.info={...rod.tooltipSource.info,item_type:1,shape:49};rod.tooltipSource.userItem.slots=[null,null,null,null,null];
+  const raw=npcRepairSnapshot({inventoryItems:[],beltItems:[],equipmentItems:[rod]}),page=parityPageFixture(owner,raw),ref=current=>({current}),
+    region={mapFileName:"M001.map",regionBounds:{minX:0,minY:0,maxX:10,maxY:10},cells:[{x:1,y:1,blocked:true},{x:1,y:0,blocked:true},{x:1,y:2,blocked:true},{x:4,y:1,light:105}]},
+    self={objectId:17,kind:"selfPlayer",x:0,y:1,direction:"Right",dead:false,fishing:false,transformType:0},
+    layout=equipmentGateway.projectEquipmentGatewaySnapshot(raw);assert.ok(layout);
+  page.scope.worldRef.current={...page.scope.worldRef.current,entities:[self],originalMapRegion:region};page.scope.equipmentSnapshotRef.current={...owner,snapshot:layout};
+  page.scope.bagBeltInventoryReadyRef.current={layout,raw,signature:JSON.stringify([raw.inventoryCapacity,raw.inventoryItems,raw.beltItems]),epoch:1,snapshotVersion:1};
+  for(const name of ["heroManagementOpenRef","heroPetOpenRef","cashShopOpenRef"])page.scope[name].current=false;
+  page.scope.socialItemWindowsRef.current={guild:false,trade:false};page.scope.equipmentControllerRef.current={status:()=>({ready:true,pending:0})};
+  let now=1000,beforeFinal=null,throwTransport=false,abiEdge=null,peekEdge=null;const requests=[],peekRequests=[],errors=[],entryProofs=[];
+  const fishingModule={fishing_click_abi_version:()=>1,fishing_click_targets(json){const input=JSON.parse(json);requests.push(["targets",input]);abiEdge?.("targets");
+    return JSON.stringify({version:1,ok:true,walkCandidates:[{direction:2,cell:{x:1,y:1}},{direction:1,cell:{x:1,y:0}},{direction:3,cell:{x:1,y:2}}],waterTarget:{x:4,y:1}});},
+    fishing_click_decision(json){const input=JSON.parse(json);requests.push(["decision",input]);abiEdge?.("decision");return JSON.stringify({version:1,ok:true,decision:
+      input.standing===true&&input.facingMatches===true&&input.fishing===false&&input.transformType===0&&input.water?.light>=100&&input.water?.light<=119?{type:"cast",lastCastMs:input.nowMs}:{type:"none"}});}};
+  const runtime={getMir2EntityActionPose(json){const query=JSON.parse(json);peekRequests.push(query);const source=scope.worldFishingSourceRef.current.current(api.worldFishingOwner());
+    const reply={version:1,known:true,worldKey:"world:m001",objectId:"17",actionSourceKey:source?.sourceKey,sourceRevision:source?.revision,
+      continuityRevision:19,bridgeEpoch:2,incarnation:3,lastNowMs:scope.worldFishingCommitRef.current?.atMs,action:"standing",direction:"Right"};peekEdge?.(reply);return JSON.stringify(reply);}},
+    core={fishingClickTargets:input=>presentationRuntime.readSharedFishingClickTargets(fishingModule,input),decideFishingClick:input=>presentationRuntime.readSharedFishingClickDecision(fishingModule,input)};
+  page.scope.questCoreRuntimeRef.current=core;
+  const scope={...page.scope,Date:{now:()=>now},WorldFishingSource:worldFishingSource.WorldFishingSource,sameWorldFishingOwner:worldFishingSource.sameOwner,
+    readCrystalEntityActionPose:fishingAnimation.readCrystalEntityActionPose,ownedItemTooltipRequest:page.api.ownedItemTooltipRequest,
+    mapRoutePageBlockedRef:ref(false),questWindowOpenRef:ref(false),firstPlayableFrameMarkedRef:ref(true),
+    worldFishingSourceRef:ref(new worldFishingSource.WorldFishingSource()),worldFishingRuntimeRef:ref({core,runtime}),worldFishingCommitRef:ref(null),
+    worldFishingGestureRegistryRef:ref(new WeakMap()),worldFishingActiveGestureRef:ref(null),worldFishingSendProofsRef:ref(new WeakMap()),worldFishingQueuedRef:ref(null),
+    worldFishingCastClockRef:ref(null),queuedMoveIntentRef:ref(null),questRouteRunRef:ref(null),nextMoveSendAtRef:ref(0),
+    setWorldFishingRecord:()=>{},console:{error:(...args)=>errors.push(args)},
+    sendRaw:(command,options)=>{entryProofs.push(options.worldFishingProof);return api.fishingSocketEntry(command,options,page.socket,beforeFinal);},
+    sendCrystalTurn:(direction,proof)=>{entryProofs.push(proof);return api.fishingSocketEntry({type:"turn",direction},{worldFishingProof:proof},page.socket,beforeFinal);}};
+  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod};")(...keys.map(key=>scope[key]));
+  page.socket.send=body=>{if(throwTransport)throw Error("fixture unknown transport");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
+  api.captureWorldFishingSnapshot({...raw,entities:[self]},owner.connectionGeneration);
+  const source=scope.worldFishingSourceRef.current.current(api.worldFishingOwner());assert.ok(source?.animationKnown,"actual raw M001.map snapshot must establish normalized map authority");assert.ok(api.readWorldFishingRod(),"actual raw UID-zero rod source must pass current equipment custody");
+  const commit=Object.freeze({context:Object.freeze({runtime,record:source}),worldKey:"world:m001",worldSeed:7,atMs:now,token:Object.freeze({})});api.commitWorldFishingAnimation(commit);assert.strictEqual(scope.worldFishingCommitRef.current,commit);
+  const queued={kind:"direction",direction:"Right",requestedMode:"walk",requestedAt:now};let pointerCurrent=true,pointerEdge=null;
+  const pointer={source:{},stage:{},pointerId:1,pointerType:"mouse",startedAt:now,current:()=>{pointerEdge?.();return pointerCurrent;}};
+  const begin=()=>{const gesture=api.beginWorldFishingGesture(pointer);assert.ok(gesture);scope.queuedMoveIntentRef.current=queued;return gesture;};
+  return {...page,scope,api,raw,rod,region,self,core,runtime,fishingModule,source,commit,queued,pointer,requests,peekRequests,errors,entryProofs,begin,
+    setNow:value=>now=value,setPointerCurrent:value=>pointerCurrent=value,setPointerEdge:value=>pointerEdge=value,setBeforeFinal:value=>beforeFinal=value,setThrow:value=>throwTransport=value,
+    setAbiEdge:value=>abiEdge=value,setPeekEdge:value=>peekEdge=value};
+}
+
+
+check("Fishing Page actual raw UID-zero rod and normalized map sends one exact cast through consumed socket proof",()=>{
+  for(const throws of [false,true]){
+    const f=worldFishingPageFixture(),gesture=f.begin();f.setThrow(throws);
+    assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),true);
+    assert.deepEqual(f.requests,[ ["targets",{version:1,origin:{x:0,y:1},direction:2}],
+      ["decision",{version:1,origin:{x:0,y:1},direction:2,requestedWalk:true,autoRoute:false,walkBlocked:[true,true,true],rodPresent:true,
+        water:{cell:{x:4,y:1},light:105},facingMatches:true,standing:true,fishing:false,transformType:0,nowMs:1000,lastCastMs:0}] ]);
+    assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,1000,"entered outcome owns the shared supplied cast clock even on transport throw");
+    assert.equal(f.entryProofs.length,1);assert.equal(f.scope.worldFishingSendProofsRef.current.has(f.entryProofs[0]),false);
+    assert.equal(f.api.fishingSocketEntry({type:"fishingCast",castOut:true},{worldFishingProof:f.entryProofs[0]},f.socket),false,"consumed final proof cannot replay");
+    assert.equal(f.api.fishingSocketEntry({type:"fishingCast",castOut:true},{},f.socket),false,"unproved raw cast cannot use ordinary send");
+    if(throws){assert.equal(f.sent.length,0);assert.equal(f.errors.length,1);}else{assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}]);assert.equal(Object.keys(f.sent[0]).length,2);}
+    f.api.cancelWorldFishingGesture(gesture);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,1000,"pointer retirement cannot unconsume unknown transport clock");
+  }
+});
+check("Fishing Page actual all-three blockers typed water and readonly standing gates never invent cast facts",()=>{
+  for(const edge of ["run","autoQuest","autoMap","walkable","unknownCell","duplicateCell","light5","lightString","noCommit","staleCommit","wrongPose","oldPose","missingRod"]){
+    const f=worldFishingPageFixture(),gesture=f.begin();
+    if(edge==="run")f.queued.requestedMode="run";if(edge==="autoQuest")f.scope.questRouteRunRef.current={queued:f.queued};if(edge==="autoMap")f.scope.mapImageRouteRef.current={queued:f.queued};
+    if(edge==="walkable")f.region.cells[0].blocked=false;if(edge==="unknownCell")f.region.cells[0].blocked=1;if(edge==="duplicateCell")f.region.cells.push({...f.region.cells[0]});
+    if(edge==="light5")f.region.cells[3].light=5;if(edge==="lightString")f.region.cells[3].light="105";if(edge==="noCommit")f.scope.worldFishingCommitRef.current=null;
+    if(edge==="staleCommit")f.setNow(1251);if(edge==="wrongPose")f.setPeekEdge(reply=>{reply.action="walking";});if(edge==="oldPose")f.setPeekEdge(reply=>{reply.lastNowMs=999;});
+    if(edge==="missingRod")f.scope.worldRef.current.equipmentItems=[];
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,edge==="staleCommit"?1251:1000);
+    assert.equal(f.sent.length,0,edge);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0,edge);
+    if(["run","autoQuest","autoMap"].includes(edge))assert.equal(f.requests.length,0,"excluded movement owner never invokes fishing Core");
+  }
+});
+check("Fishing Page actual final getter and synchronous listener reentry reject changed source owner gates and bridge counters",()=>{
+  for(const at of ["targets","decision","finalPeek","listener"])for(const edge of ["socket","session","source","runtime","core","rod","layout","modal","hidden","storage","social","mail",...(["finalPeek","listener"].includes(at)?["epoch","incarnation","continuity"]:[])]){
+    const f=worldFishingPageFixture(),gesture=f.begin();let peeks=0,changed=false;
+    const mutate=reply=>{if(changed)return;changed=true;
+      if(edge==="socket")f.scope.socketRef.current={readyState:1};if(edge==="session")f.scope.equipmentSessionGenerationRef.current++;
+      if(edge==="source")f.scope.worldFishingSourceRef.current.observePacket(f.api.worldFishingOwner(),"Harvest",{objectId:17},1000);
+      if(edge==="runtime")f.scope.worldFishingRuntimeRef.current={...f.scope.worldFishingRuntimeRef.current,runtime:{...f.runtime}};
+      if(edge==="core")f.scope.questCoreRuntimeRef.current={...f.core};if(edge==="rod")f.rod.tooltipSource.info.shape=1;
+      if(edge==="layout")f.scope.equipmentSnapshotRef.current={...f.scope.equipmentSnapshotRef.current,snapshot:{...f.scope.equipmentSnapshotRef.current.snapshot}};
+      if(edge==="modal")f.scope.mapRouteLocalModalRef.current=true;if(edge==="hidden")f.scope.document.visibilityState="hidden";
+      if(edge==="storage")f.scope.pendingStorageRequestsRef.current.set("new",{});
+      if(edge==="social")Object.defineProperty(f.scope.socialItemOperationsRef.current,"pending",{value:{},configurable:true});
+      if(edge==="mail")f.scope.mailParcelRef.current={state:{blockedUniqueIds:[0]}};
+      if(["epoch","incarnation","continuity"].includes(edge)){const key=edge==="epoch"?"bridgeEpoch":edge==="continuity"?"continuityRevision":"incarnation";
+        if(reply)reply[key]++;else f.setPeekEdge(value=>{value[key]++;});}
+    };
+    if(at==="targets"||at==="decision")f.setAbiEdge(kind=>{if(kind===at)mutate();});
+    if(at==="finalPeek")f.setPeekEdge(reply=>{if(++peeks===2)mutate(reply);});
+    if(at==="listener")f.setBeforeFinal(()=>mutate());
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);
+    assert.equal(f.sent.length,0,at+" "+edge);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0,at+" "+edge);
+  }
+});
+check("Fishing Page equivalent full snapshot preserves current gesture while Harvest and old commit cleanup retire only their owner",()=>{
+  const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;
+  f.api.captureWorldFishingSnapshot({...f.raw,entities:[{...f.self}]},f.scope.equipmentConnectionGenerationRef.current);
+  assert.strictEqual(f.scope.worldFishingActiveGestureRef.current,lease);assert.strictEqual(f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner()),f.source);
+  f.api.commitWorldFishingAnimation(null,{});assert.strictEqual(f.scope.worldFishingCommitRef.current,f.commit,"foreign old cleanup cannot clear committed successor");
+  f.api.captureWorldFishingGatewayEvent({type:"packet",packet:"Harvest",payload:{objectId:17}});assert.equal(f.scope.worldFishingActiveGestureRef.current,null);
+  f.api.captureWorldFishingSnapshot({...f.raw,entities:[{...f.self}]},f.scope.equipmentConnectionGenerationRef.current);
+  assert.equal(f.api.beginWorldFishingGesture(f.pointer),null,"ordinary snapshot cannot revive harvested unknown action interval");
+  assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),false);assert.equal(f.sent.length,0);
+});
+
+
+const fishingShellSource=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8"),fishingShellAst=ts.createSourceFile("original-client-shell.tsx",fishingShellSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const fishingShellNames=new Set(["retireWorldFishingPhysical","cancelWorldFishingHeldPointer","worldFishingStageGeometry","worldFishingPointCurrent",
+  "updateWorldFishingPointerPosition","worldFishingPhysicalCurrent","attachWorldFishingPhysical","handleSceneWorldPointerDown","finishWorldFishingPhysical",
+  "scenePointFromMouseEvent","committedViewportPlayerPosition","tileFromScenePoint","dispatchSceneClickInput","dispatchSceneMoveInput","npcShopBlocksWorldInput","stopNpcShopWorldInput"]),fishingShellDeclarations=new Map(),fishingShellRefInitializers=new Map();
+let fishingListenerEffect=null,fishingContextEffect=null,fishingLayoutEffect=null,fishingIntervalCallback=null;
+(function visit(node){if(ts.isFunctionDeclaration(node)&&fishingShellNames.has(node.name?.text))fishingShellDeclarations.set(node.name.text,node.getText(fishingShellAst));
+  if(ts.isVariableDeclaration(node)&&["worldFishingPhysicalRef","worldFishingTerminalRef","worldFishingPointersRef","worldFishingQuarantineRef","worldFishingShellRef","heldScenePointerRef"].includes(node.name.getText(fishingShellAst))){assert.ok(ts.isCallExpression(node.initializer)&&node.initializer.expression.getText(fishingShellAst)==="useRef");fishingShellRefInitializers.set(node.name.getText(fishingShellAst),node.initializer.arguments[0].getText(fishingShellAst));}
+  if(ts.isCallExpression(node)&&node.expression.getText(fishingShellAst)==="useEffect"&&ts.isArrowFunction(node.arguments[0])&&node.arguments[0].body.getText(fishingShellAst).includes("const pointers = worldFishingPointersRef.current")){assert.equal(fishingListenerEffect,null);fishingListenerEffect=node.arguments[0].getText(fishingShellAst);}
+  if(ts.isCallExpression(node)&&node.expression.getText(fishingShellAst)==="useLayoutEffect"&&ts.isArrowFunction(node.arguments[0])){const text=node.arguments[0].body.getText(fishingShellAst);
+    if(text.includes("worldFishingShellRef.current = context")){assert.equal(fishingContextEffect,null);fishingContextEffect=node.arguments[0].getText(fishingShellAst);}
+    if(text.includes("committedEntityAnimationRef.current = { worldKey: animationWorldKey, poses }")){assert.equal(fishingLayoutEffect,null);fishingLayoutEffect=node.arguments[0].getText(fishingShellAst);}}
+  if(ts.isCallExpression(node)&&node.expression.getText(fishingShellAst)==="window.setInterval"&&ts.isArrowFunction(node.arguments[0])&&node.arguments[0].body.getText(fishingShellAst).includes("dispatchSceneMoveInput(held)")){assert.equal(fishingIntervalCallback,null);fishingIntervalCallback=node.arguments[0].getText(fishingShellAst);}
+  ts.forEachChild(node,visit);})(fishingShellAst);
+assert.equal(fishingShellDeclarations.size,fishingShellNames.size);assert.equal(fishingShellRefInitializers.size,6);assert.ok(fishingListenerEffect&&fishingContextEffect&&fishingLayoutEffect&&fishingIntervalCallback);
+const fishingShellInitializersJs=ts.transpileModule([...fishingShellRefInitializers].map(([name,initializer])=>"const "+name+"={current:"+initializer+"};").join("\n")+"\nreturn {"+[...fishingShellRefInitializers.keys()].join(",")+"};",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const fishingShellJs=ts.transpileModule([...fishingShellDeclarations.values()].join("\n")+"\nfunction installWorldFishingListeners(){return ("+fishingListenerEffect+")();}"+
+  "\nfunction commitWorldFishingShellContext(){return ("+fishingContextEffect+")();}\nfunction commitWorldFishingLayout(){return ("+fishingLayoutEffect+")();}\nconst worldFishingHeldTick="+fishingIntervalCallback+";",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const fishingCanvasMode=loadTypeScriptModule(new URL("../lib/bevy-shared-canvas-mode.ts",import.meta.url));
+const fishingSceneLayout=loadTypeScriptModule(new URL("../app/components/original-client-scene-layout.ts",import.meta.url),{"../../lib/original-ui":loadTypeScriptModule(new URL("../lib/original-ui.ts",import.meta.url))});
+function worldFishingShellFixture(){
+  const page=worldFishingPageFixture(),handlers=new Map(),documentHandlers=new Map(),sinks=[],cancels=[],resolves=[];let now=1000,api,sinkEdge=null;
+  class MemoryStageNode{constructor(id,rect){this.id=id;this.rect=rect;this.isConnected=true;this.dataset={};this.style={display:"block",visibility:"visible",opacity:"1"};this.children=[];}
+    getBoundingClientRect(){const[left,top,width,height]=this.rect;return{left,top,width,height,right:left+width,bottom:top+height};}getClientRects(){return[this.getBoundingClientRect()];}
+    contains(node){return node===this||this.children.includes(node);}closest(selector){if(selector==="[hidden]")return this.hidden?this:null;return this.interactive&&selector.includes("data-ui-interactive")?this:null;}}
+  const stage=new MemoryStageNode("world-stage",[10,20,800,600]),canvas=new MemoryStageNode("world-bevy-canvas",[10,20,800,600]);stage.children=[canvas];stage.dataset={viewportPlayerX:"0",viewportPlayerY:"1"};
+  const state={hit:canvas},document={visibilityState:"visible",hasFocus:()=>true,elementFromPoint:()=>state.hit,
+    addEventListener:(name,fn)=>documentHandlers.set(name,fn),removeEventListener:(name,fn)=>{if(documentHandlers.get(name)===fn)documentHandlers.delete(name);}},
+    window={devicePixelRatio:2,visualViewport:{scale:1},getComputedStyle:node=>node.style,addEventListener:(name,fn)=>handlers.set(name,fn),removeEventListener:(name,fn)=>{if(handlers.get(name)===fn)handlers.delete(name);}},ref=current=>({current});
+  const actualRefs=new Function(fishingShellInitializersJs)();assert.equal(actualRefs.worldFishingPhysicalRef.current,null);assert.equal(actualRefs.worldFishingTerminalRef.current,null);assert.equal(actualRefs.worldFishingPointersRef.current.size,0);
+  page.runtime.resolveMir2EntityAnimationPoses=json=>{const input=JSON.parse(json);resolves.push(input);return JSON.stringify({worldKey:input.worldKey,nowMs:input.nowMs,poses:[]});};
+  const scope={...actualRefs,HTMLElement:MemoryStageNode,document,window,Date:{now:()=>now},stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},
+    bagPointerCallbacksRef:ref({}),npcShopPointerCallbacksRef:ref({}),parityUiBlocksGameplay:undefined,
+    heldKeyboardMoveKeysRef:ref(new Set()),heldKeyboardRunModeRef:ref(false),onViewportDirectionStop:()=>{},updateSceneCombatPointer:()=>{},
+    latestMoveInputRef:ref({screen:"game",player:{x:0,y:1}}),viewportLayout:{offsetX:0,offsetY:0},...fishingSceneLayout,
+    screen:"game",sceneInteractionReady:true,bevyQuestUiCapturesPointer:false,questLocalModalOpen:false,mobileMoreOpen:false,bevyMailComposeReady:false,bevyMailComposePending:false,
+    worldFishingAnimation:{runtime:page.runtime,record:page.source},onBeginWorldFishingGesture:pointer=>page.api.beginWorldFishingGesture(pointer),
+    onCancelWorldFishingGesture:gesture=>{cancels.push(gesture);page.api.cancelWorldFishingGesture(gesture);},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:fishingCanvasMode.sharedUiCanvasId,
+    player:page.self,animationWorldKey:page.source.sourceKey,entityAnimationWorldSeed:7,committedEntityAnimationRef:ref(null),
+    entityAnimationInputs:{entities:[{entity:{...page.self,objectId:"17"},legacyAnimationState:"standing"}]},resolveCrystalEntityAnimationPoses:fishingAnimation.resolveCrystalEntityAnimationPoses,
+    entityAnimationRuntimeFromWindow:fishingAnimation.entityAnimationRuntimeFromWindow,onWorldFishingAnimationCommit:(commit,previous)=>page.api.commitWorldFishingAnimation(commit,previous),
+    onViewportTileSecondaryAction:()=>{throw Error("primary fixture cannot send secondary action");},playerUiPreferences:undefined,
+    onViewportTileClick:(x,y,gesture)=>{sinks.push({kind:"click",x,y,gesture,burned:scope.worldFishingPhysicalRef.current===null&&scope.worldFishingTerminalRef.current?.phase==="terminal"});sinkEdge?.();if(gesture)page.api.tryWorldFishingBlockedClick(page.queued,gesture,page.self,now);},
+    onViewportDirectionStep:(x,y,mode,gesture)=>{sinks.push({kind:"held",x,y,mode,gesture});if(gesture)page.api.tryWorldFishingBlockedClick(page.queued,gesture,page.self,now);}};
+  const keys=Object.keys(scope);api=new Function(...keys,fishingShellJs+"\nreturn {attachWorldFishingPhysical,handleSceneWorldPointerDown,worldFishingPhysicalCurrent,worldFishingStageGeometry,finishWorldFishingPhysical,retireWorldFishingPhysical,installWorldFishingListeners,commitWorldFishingShellContext,commitWorldFishingLayout,worldFishingHeldTick,setContextInputs:value=>{if(Object.hasOwn(value,'onBeginWorldFishingGesture'))onBeginWorldFishingGesture=value.onBeginWorldFishingGesture;if(Object.hasOwn(value,'worldFishingAnimation'))worldFishingAnimation=value.worldFishingAnimation;if(Object.hasOwn(value,'mobileMoreOpen'))mobileMoreOpen=value.mobileMoreOpen;}};")(...keys.map(key=>scope[key]));
+  api.commitWorldFishingShellContext();const cleanup=api.installWorldFishingListeners();
+  const event=(id,time,type="mouse",delta={})=>({pointerId:id,pointerType:type,button:0,isPrimary:true,timeStamp:time,clientX:58,clientY:21,target:canvas,preventDefault(){this.prevented=true;},...delta});
+  const down=(id=1,time=10,type="mouse")=>{const nativeEvent=event(id,time,type);handlers.get("pointerdown")(nativeEvent);const before=scope.heldScenePointerRef.current;
+    if(type==="mouse")scope.heldScenePointerRef.current={button:0,sceneX:48,sceneY:1,tileX:1,tileY:1,startedAt:now,dispatched:false};
+    api.handleSceneWorldPointerDown({...nativeEvent,nativeEvent,currentTarget:stage},before);return nativeEvent;};
+  return {...page,shellScope:scope,shellApi:api,stage,canvas,state,handlers,documentHandlers,sinks,cancels,resolves,cleanup,event,down,
+    setNow:value=>{now=value;page.setNow(value);},setSinkEdge:value=>sinkEdge=value};
+}
+check("Fishing Shell actual short primary pointer terminal burns custody before real Page sink and one cast",()=>{
+  for(const pointerType of ["mouse","touch"]){const f=worldFishingShellFixture();f.down(1,10,pointerType);const lease=f.shellScope.worldFishingPhysicalRef.current;assert.ok(lease?.gesture);
+    f.setSinkEdge(()=>f.handlers.get("pointerup")(f.event(1,12,pointerType)));f.handlers.get("pointerup")(f.event(1,11,pointerType));
+    assert.equal(f.sinks.length,1);assert.equal(f.sinks[0].kind,"click");assert.equal(f.sinks[0].burned,true);assert.equal(f.sinks[0].gesture,lease.gesture);assert.deepEqual([f.sinks[0].x,f.sinks[0].y],[1,1]);
+    assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}]);assert.equal(f.shellScope.worldFishingPhysicalRef.current,null);assert.equal(f.shellScope.worldFishingTerminalRef.current,null);
+    f.handlers.get("pointerup")(f.event(1,13,pointerType));assert.equal(f.sinks.length,1);assert.equal(f.sent.length,1);f.cleanup();assert.equal(f.handlers.size,0);assert.equal(f.documentHandlers.size,0);
+  }
+  const f=worldFishingShellFixture();f.down();f.shellApi.worldFishingHeldTick();assert.equal(f.sinks.length,0,"actual 100ms hold callback does not promote short click");
+  f.setNow(1100);f.shellApi.worldFishingHeldTick();assert.equal(f.sinks[0].kind,"held");assert.equal(f.sinks[0].mode,"walk");assert.ok(f.sinks[0].gesture);assert.equal(f.sent.length,1);
+  f.handlers.get("pointerup")(f.event(1,11));assert.equal(f.sinks.length,1,"held dispatch cannot duplicate short terminal click");f.cleanup();
+});
+check("Fishing Shell actual geometry terminal quarantine and lifecycle retirement keep old pointer proof spent",()=>{
+  for(const field of ["dpr","scale"])for(const value of [0,-1,NaN,Infinity,"2"]){const f=worldFishingShellFixture();
+    if(field==="dpr")f.shellScope.window.devicePixelRatio=value;else f.shellScope.window.visualViewport.scale=value;
+    assert.equal(f.shellApi.worldFishingStageGeometry(f.stage),null,"actual "+field+" must be a positive finite raw number");
+    f.down();assert.equal(f.shellScope.worldFishingPhysicalRef.current,null);f.handlers.get("pointerup")(f.event(1,11));assert.equal(f.sent.length,0);f.cleanup();
+  }
+  for(const edge of ["DPR","rect","hidden","obscured","ui","bag","callback","runtime","modal","source","wrongType","staleUp"]){
+    const f=worldFishingShellFixture();f.down();const lease=f.shellScope.worldFishingPhysicalRef.current;assert.ok(lease);
+    if(edge==="DPR")f.shellScope.window.devicePixelRatio=3;if(edge==="rect")f.stage.rect[0]++;
+    if(edge==="hidden")f.stage.style.visibility="hidden";if(edge==="obscured")f.state.hit={};if(edge==="ui")f.canvas.interactive=true;
+    if(edge==="bag")f.shellScope.bagPointerCallbacksRef.current={getBevyBagPointerContext:()=>({inputRegions:[{left:0,top:0,width:800,height:600}]})};
+    if(edge==="callback")f.shellScope.onBeginWorldFishingGesture=()=>null;if(edge==="runtime")f.shellScope.worldFishingAnimation={...f.shellScope.worldFishingAnimation,runtime:{}};
+    if(edge==="modal")f.shellScope.mobileMoreOpen=true;if(edge==="source")f.shellScope.worldFishingAnimation={...f.shellScope.worldFishingAnimation,record:{...f.source,sourceKey:"successor"}};
+    if(["callback","runtime","modal","source"].includes(edge)){f.shellApi.setContextInputs({onBeginWorldFishingGesture:f.shellScope.onBeginWorldFishingGesture,worldFishingAnimation:f.shellScope.worldFishingAnimation,mobileMoreOpen:f.shellScope.mobileMoreOpen});f.shellApi.commitWorldFishingShellContext();}
+    f.handlers.get("pointerup")(f.event(1,edge==="staleUp"?9:11,edge==="wrongType"?"touch":"mouse"));assert.equal(f.sent.length,0,edge);
+    if(edge==="wrongType"||edge==="staleUp"){assert.strictEqual(f.shellScope.worldFishingPhysicalRef.current,lease);f.handlers.get("pointerup")(f.event(1,12));assert.equal(f.sent.length,1,"only matching newer actual terminal can spend physical source");}
+    else{assert.equal(f.shellScope.worldFishingPhysicalRef.current,null);assert.equal(lease.phase,"retired");assert.equal(f.shellApi.worldFishingPhysicalCurrent(lease),false);}
+    f.cleanup();
+  }
+  for(const edge of ["blur","resize","pagehide","visibilitychange","pointercancel"]){const f=worldFishingShellFixture();f.down();const lease=f.shellScope.worldFishingPhysicalRef.current;
+    if(edge==="visibilitychange"){f.shellScope.document.visibilityState="hidden";f.documentHandlers.get(edge)();f.shellScope.document.visibilityState="visible";}
+    else if(edge==="pointercancel")f.handlers.get(edge)(f.event(1,11));else f.handlers.get(edge)();
+    assert.equal(lease.phase,"retired");f.handlers.get("pointerup")(f.event(1,12));assert.equal(f.sent.length,0);f.cleanup();
+  }
+  const f=worldFishingShellFixture();f.down(1,10);const old=f.shellScope.worldFishingPhysicalRef.current;f.handlers.get("pointerdown")(f.event(2,11));
+  assert.equal(old.phase,"retired");assert.equal(f.shellScope.worldFishingQuarantineRef.current.size,2);f.handlers.get("pointerup")(f.event(1,12));
+  assert.equal(f.shellScope.worldFishingQuarantineRef.current.size,1);f.handlers.get("pointerup")(f.event(2,13));assert.equal(f.shellScope.worldFishingQuarantineRef.current.size,0);assert.equal(f.sent.length,0);
+  f.down(3,20);const successor=f.shellScope.worldFishingPhysicalRef.current;assert.ok(successor);f.shellApi.retireWorldFishingPhysical(old);assert.strictEqual(f.shellScope.worldFishingPhysicalRef.current,successor);
+  f.handlers.get("pointerup")(f.event(3,21));assert.equal(f.sent.length,1);f.cleanup();
+});
+check("Fishing Shell actual shared animation advances only in committed layout with captured clock and successor cleanup",()=>{
+  const f=worldFishingShellFixture();assert.equal(f.resolves.length,0);const firstCleanup=f.shellApi.commitWorldFishingLayout(),first=f.scope.worldFishingCommitRef.current;
+  assert.equal(f.resolves.length,1);assert.equal(f.resolves[0].nowMs,1000);assert.equal(first.atMs,1000);assert.strictEqual(first.context,f.shellScope.worldFishingAnimation);assert.ok(Object.isFrozen(first)&&Object.isFrozen(first.token));
+  f.setNow(1001);const nextCleanup=f.shellApi.commitWorldFishingLayout(),next=f.scope.worldFishingCommitRef.current;assert.notStrictEqual(next,first);assert.equal(next.atMs,1001);
+  firstCleanup();assert.strictEqual(f.scope.worldFishingCommitRef.current,next,"old layout cleanup cannot clear committed successor");nextCleanup();assert.equal(f.scope.worldFishingCommitRef.current,null);f.cleanup();
+});
+
+
+check("Fishing Page final physical callback sees new equipment NPC and composer pending before irreversible entry",()=>{
+  for(const edge of ["equipment","npc","composer"]){const f=worldFishingPageFixture(),gesture=f.begin();let pending=false,reads=0;
+    if(edge==="equipment")f.scope.equipmentControllerRef.current={status:()=>({ready:true,pending:pending?1:0})};
+    if(edge==="npc")f.scope.npcBuyDispatcherRef.current={status:()=>({flight:pending?{}:null})};
+    if(edge==="composer")f.scope.mailDispatcherRef.current={composer:{pending:()=>pending}};
+    f.setBeforeFinal(()=>f.setPointerEdge(()=>{if(++reads===2)pending=true;}));
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.equal(pending,true,edge);assert.ok(reads>=2,edge);
+    assert.equal(f.sent.length,0,edge);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0,edge);
+  }
+});
+check("Fishing Page final actual ingress getter reentry cannot replace owner source or create pending after a captured gate",()=>{
+  for(const ingress of ["npcUi","combat","spells","storageActive","storageTransitioning"])for(const edge of ["owner","source","equipment","npc","composer"]){
+    const f=worldFishingPageFixture(),gesture=f.begin();let reads=0,pending=false;
+    f.scope.equipmentControllerRef.current={status:()=>({ready:true,pending:edge==="equipment"&&pending?1:0})};
+    f.scope.npcBuyDispatcherRef.current={status:()=>({flight:edge==="npc"&&pending?{}:null})};
+    f.scope.mailDispatcherRef.current={composer:{pending:()=>edge==="composer"&&pending}};
+    const mutate=()=>{if(edge==="owner")f.scope.socketRef.current={readyState:1};if(edge==="source")f.scope.worldFishingSourceRef.current.observePacket(f.api.worldFishingOwner(),"Harvest",{objectId:17},1000);
+      if(["equipment","npc","composer"].includes(edge)){pending=true;f.api.retireWorldFishingGesture();}};
+    f.setBeforeFinal(()=>{const invoke=()=>{if(++reads===2)mutate();};
+      if(ingress==="npcUi")f.scope.npcShopUiIngressRef.current={blocksInput:()=>{invoke();return false;}};
+      if(ingress==="combat")f.scope.combatIngressRef.current={hasUiHeld:()=>{invoke();return false;}};
+      if(ingress==="spells")f.scope.spellsIngressRef.current={pointerContext:()=>{invoke();return {modal:false};}};
+      if(ingress==="storageActive")f.scope.storageUiIngressRef.current={get active(){invoke();return false;},transitioning:false};
+      if(ingress==="storageTransitioning")f.scope.storageUiIngressRef.current={active:false,get transitioning(){invoke();return false;}};
+    });
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.ok(reads>=2,ingress+" "+edge);assert.equal(f.sent.length,0,ingress+" "+edge);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0);
+  }
+});
+const fishingReservePrefixes=new Map();
+(function visit(node){if(ts.isBlock(node)){const statements=node.statements;for(let index=1;index<statements.length;index++){
+  const declaration=statements[index];if(!ts.isVariableStatement(declaration))continue;const initializers=declaration.declarationList.declarations.map(item=>item.initializer).filter(Boolean);
+  for(const call of initializers){if(!ts.isCallExpression(call))continue;const expression=call.expression.getText(fishingPageAst),kind=expression==="controller.reserve"?"equipment":expression==="dispatcher.prepare"&&call.arguments.length===2&&call.arguments[0].getText(fishingPageAst)==="captured"?"sharedNpc":expression==="dispatcher?.prepare"&&call.arguments.length===2&&call.arguments[0].getText(fishingPageAst)==="captured"?"compatNpc":expression==="sender.reserve"?"composer":null;
+    if(!kind)continue;assert.equal(statements[index-1].getText(fishingPageAst),"retireWorldFishingGesture();","actual "+kind+" reserve immediately retires old world authority");
+    assert.equal(fishingReservePrefixes.has(kind),false,"sole actual "+kind+" reserve prefix");fishingReservePrefixes.set(kind,statements[index-1].getText(fishingPageAst)+"\n"+declaration.getText(fishingPageAst));}
+  }}ts.forEachChild(node,visit);})(fishingPageAst);
+assert.equal(fishingReservePrefixes.size,4,"equipment both NPC reserve paths and composer reserve remain covered");
+check("Fishing Page actual equipment both NPC and composer reserve prefixes retire gesture before reentrant Core call",()=>{
+  for(const [kind,text] of fishingReservePrefixes){const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current,calls=[];
+    const reserve=(...args)=>{assert.equal(f.scope.worldFishingActiveGestureRef.current,null,kind);assert.equal(lease.valid,false,kind);assert.equal(f.scope.worldFishingGestureRegistryRef.current.has(gesture),false,kind);calls.push(args);return null;};
+    const scope={retireWorldFishingGesture:f.api.retireWorldFishingGesture,controller:{reserve},session:{connectionGeneration:4,sessionGeneration:8},
+      options:{ownerToken:{ownerRevision:3}},operation:{kind:"equip",uniqueId:0,grid:"bag"},dispatcher:{prepare:reserve},captured:{typed:true},intent:{quantity:1},quantity:1,
+      sender:{reserve},owner:f.scope.equipmentStartGameRef.current,mailPresentation:{key:"composer:1"},decision:{payload:{name:"Owned",message:"",gold:0,itemsIdx:[0,0,0,0,0],stamped:false}}};
+    const keys=Object.keys(scope),js=ts.transpileModule(text,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+    new Function(...keys,js)(...keys.map(key=>scope[key]));assert.equal(calls.length,1,kind);assert.equal(f.sent.length,0,kind);
+  }
+});
+
+
+check("Fishing Page required facing pose unknown permanently spends gesture despite exact getter and commit recovery",()=>{
+  for(const edge of ["missingCommit","missingGetter","unknownReply","nullReply"]){const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;
+    const getter=f.runtime.getMir2EntityActionPose,commit=f.scope.worldFishingCommitRef.current;
+    if(edge==="missingCommit")f.scope.worldFishingCommitRef.current=null;if(edge==="missingGetter")delete f.runtime.getMir2EntityActionPose;
+    if(edge==="unknownReply")f.setPeekEdge(reply=>{reply.known=false;});if(edge==="nullReply")f.runtime.getMir2EntityActionPose=()=>"null";
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.equal(f.sent.length,0,edge);assert.equal(lease.valid,false,edge);
+    assert.equal(f.scope.worldFishingActiveGestureRef.current,null,edge);assert.equal(f.scope.worldFishingGestureRegistryRef.current.has(gesture),false,edge);
+    f.scope.worldFishingCommitRef.current=commit;f.runtime.getMir2EntityActionPose=getter;f.setPeekEdge(null);
+    assert.strictEqual(f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner()),f.source);
+    assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),false,"same physical gesture cannot revive after "+edge);assert.equal(f.sent.length,0);
+    const fresh=f.begin();assert.notStrictEqual(fresh,gesture);f.api.tryWorldFishingBlockedClick(f.queued,fresh,f.self,1000);assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}],edge);
+  }
+});
+check("Fishing Page optional targets and decision ABI loss permanently spends gesture after exact facade recovery",()=>{
+  for(const edge of ["missingAbi","missingTargets","nullTargets","missingDecision","nullDecision"]){const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;
+    const original={...f.fishingModule};if(edge==="missingAbi")delete f.fishingModule.fishing_click_abi_version;
+    if(edge==="missingTargets")delete f.fishingModule.fishing_click_targets;if(edge==="nullTargets")f.fishingModule.fishing_click_targets=()=>"null";
+    if(edge==="missingDecision")delete f.fishingModule.fishing_click_decision;if(edge==="nullDecision")f.fishingModule.fishing_click_decision=()=>JSON.stringify({version:1,ok:false});
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.equal(f.sent.length,0,edge);assert.equal(lease.valid,false,edge);
+    Object.assign(f.fishingModule,original);assert.strictEqual(f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner()),f.source);
+    assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),false,edge);assert.equal(f.sent.length,0);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0);
+    const fresh=f.begin();f.api.tryWorldFishingBlockedClick(f.queued,fresh,f.self,1000);assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}],edge);
+  }
+});
+check("Fishing Page final cast peek loss permanently spends held gesture before socket entry and survives getter restoration",()=>{
+  for(const edge of ["firstFinal","socketPreflight","lastEntry"]){const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current,getter=f.runtime.getMir2EntityActionPose;let reads=0;
+    if(edge==="lastEntry")f.setBeforeFinal(()=>{f.runtime.getMir2EntityActionPose=()=>"null";});
+    else f.runtime.getMir2EntityActionPose=function(json){reads++;return reads===(edge==="firstFinal"?2:3)?"null":getter.call(this,json);};
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.equal(f.sent.length,0,edge);assert.equal(lease.valid,false,edge);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0);
+    f.runtime.getMir2EntityActionPose=getter;f.setBeforeFinal(null);assert.strictEqual(f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner()),f.source);
+    assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),false,edge);assert.equal(f.sent.length,0);
+    const fresh=f.begin();f.api.tryWorldFishingBlockedClick(f.queued,fresh,f.self,1000);assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}],edge);
+  }
+});
+check("Fishing Page known nonstanding and valid cooldown none preserve held retry without new physical gesture",()=>{
+  for(const edge of ["nonstanding","cooldown"]){const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;
+    if(edge==="nonstanding")f.setPeekEdge(reply=>{reply.action="walking";});
+    if(edge==="cooldown"){f.scope.worldFishingCastClockRef.current.lastCastMs=500;f.fishingModule.fishing_click_decision=json=>{const input=JSON.parse(json);return JSON.stringify({version:1,ok:true,decision:input.nowMs-input.lastCastMs<1000?{type:"none"}:{type:"cast",lastCastMs:input.nowMs}});};}
+    assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),true);assert.equal(f.sent.length,0);assert.equal(lease.valid,true);assert.strictEqual(f.scope.worldFishingActiveGestureRef.current,lease);
+    assert.strictEqual(f.scope.worldFishingGestureRegistryRef.current.get(gesture),lease);
+    f.setPeekEdge(null);if(edge==="cooldown"){f.setNow(1500);const commit=Object.freeze({...f.commit,atMs:1500,token:Object.freeze({})});f.api.commitWorldFishingAnimation(commit);}
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,edge==="cooldown"?1500:1000);assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}],edge);
+    assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,edge==="cooldown"?1500:1000);
+  }
+});
+check("Fishing Page wrong facing uses actual turn branch and socket proof with known water and unavailable owned pose",()=>{
+  const f=worldFishingPageFixture();f.self.direction="Up";f.api.captureWorldFishingSnapshot({...f.raw,entities:[f.self]},f.api.worldFishingOwner().connectionGeneration);
+  const source=f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner());assert.ok(source?.animationKnown);assert.equal(source.self.direction,"Up");
+  f.scope.worldFishingCommitRef.current=null;delete f.runtime.getMir2EntityActionPose;
+  const decisions=[];f.fishingModule.fishing_click_decision=json=>{const input=JSON.parse(json);decisions.push(input);return JSON.stringify({version:1,ok:true,decision:{type:"turn",direction:input.direction,delayMs:200}});};
+  const gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);
+  assert.deepEqual(f.sent,[{type:"turn",direction:"Right"}]);assert.equal(decisions.length,1);assert.equal(decisions[0].facingMatches,false);assert.equal(decisions[0].standing,null);assert.deepEqual(decisions[0].water,{cell:{x:4,y:1},light:105});
+  assert.equal(f.peekRequests.length,0);assert.equal(lease.valid,true);assert.equal(f.scope.worldFishingCastClockRef.current.lastCastMs,0);assert.equal(f.scope.nextMoveSendAtRef.current,1200);
+});
+check("Fishing Shell unknown physical geometry cannot revive old pointer after repaint but fresh down owns a new cast",()=>{
+  const f=worldFishingShellFixture();f.down(1,10);const lease=f.shellScope.worldFishingPhysicalRef.current;assert.ok(lease);
+  f.stage.style.visibility="hidden";assert.equal(f.shellApi.worldFishingPhysicalCurrent(lease),false);assert.equal(lease.phase,"retired");assert.equal(f.shellScope.worldFishingPhysicalRef.current,null);
+  f.stage.style.visibility="visible";assert.equal(f.shellApi.worldFishingPhysicalCurrent(lease),false);f.handlers.get("pointerup")(f.event(1,12));assert.equal(f.sent.length,0);
+  f.down(2,20);assert.notStrictEqual(f.shellScope.worldFishingPhysicalRef.current,lease);f.handlers.get("pointerup")(f.event(2,21));assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}]);f.cleanup();
+});
+
+
+check("Fishing Page unknown water spends either facing gesture while known nonwater retains valid none",()=>{
+  for(const facing of [true,false]){const f=worldFishingPageFixture();
+    if(!facing){f.self.direction="Up";f.api.captureWorldFishingSnapshot({...f.raw,entities:[f.self]},f.api.worldFishingOwner().connectionGeneration);}
+    const source=f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner());
+    f.fishingModule.fishing_click_decision=json=>{const input=JSON.parse(json);return JSON.stringify({version:1,ok:true,decision:input.water?.light===105?(input.facingMatches?{type:"cast",lastCastMs:input.nowMs}:{type:"turn",direction:input.direction,delayMs:200}):{type:"none"}});};
+    const gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;f.region.cells[3].light="105";
+    f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.equal(lease.valid,false);assert.equal(f.sent.length,0);
+    f.region.cells[3].light=105;assert.strictEqual(f.scope.worldFishingSourceRef.current.current(f.api.worldFishingOwner()),source);
+    assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),false);assert.equal(f.sent.length,0);
+    const fresh=f.begin();if(facing)f.api.commitWorldFishingAnimation(f.commit);f.api.tryWorldFishingBlockedClick(f.queued,fresh,f.self,1000);
+    assert.deepEqual(f.sent,[facing?{type:"fishingCast",castOut:true}:{type:"turn",direction:"Right"}]);
+  }
+  const f=worldFishingPageFixture(),gesture=f.begin(),lease=f.scope.worldFishingActiveGestureRef.current;f.region.cells[3].light=0;
+  assert.equal(f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000),true);assert.equal(lease.valid,true);assert.equal(f.sent.length,0);
+  f.region.cells[3].light=105;f.api.tryWorldFishingBlockedClick(f.queued,gesture,f.self,1000);assert.deepEqual(f.sent,[{type:"fishingCast",castOut:true}]);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

@@ -5,6 +5,7 @@ import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/o
 import type { Mir2Language } from "../../lib/localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import type { BagBeltCallbacks } from "../../lib/bag-belt-gesture";
+import type { WorldFishingCallbacks, WorldFishingGesture } from "../../lib/world-fishing-input";
 import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry, NpcRepairDrop } from "../../lib/npc-repair-service";
 import type { BagPointerContext, BagPointerEdge } from "../../lib/bevy-bag-ui";
 import type { BevyHpOrbStatus, BevyMpOrbStatus } from "../../lib/bevy-hp-orb";
@@ -172,7 +173,7 @@ export type BevyMapRenderState = {
   cameraOffset?: { x: number; y: number };
 };
 
-export type OriginalClientShellProps = BagBeltCallbacks & {
+export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks & {
   language: Mir2Language;
   screen: ClientScreen;
   runtimePhase: string;
@@ -370,11 +371,11 @@ export type OriginalClientShellProps = BagBeltCallbacks & {
   onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
-  onViewportTileClick: (x: number, y: number) => void;
+  onViewportTileClick: (x: number, y: number, gesture?: WorldFishingGesture) => void;
   onViewportTileSecondaryAction: (x: number, y: number) => void;
   onViewportTileStepClick: (x: number, y: number) => void;
   onViewportTileStepSecondaryAction: (x: number, y: number) => void;
-  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run") => void;
+  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture) => void;
   onViewportDirectionIntent: (
     direction: string,
     mode: "walk" | "run",

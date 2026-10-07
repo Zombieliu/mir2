@@ -38,16 +38,55 @@ pub fn item_tooltip_document(input: &str, now_dotnet_ticks: &str) -> String {
     }
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all="camelCase", deny_unknown_fields)]
+#[cfg_attr(test, derive(Debug, Deserialize, PartialEq))]
+#[cfg_attr(test, serde(rename_all="camelCase", deny_unknown_fields))]
 struct QueryItem {
     unique_id: u64, item_index: i32, name: String, icon: u16, count: u16,
-    #[serde(default)]
+    #[cfg_attr(test, serde(default))]
     source_kind: Option<String>,
-    #[serde(default)]
+    #[cfg_attr(test, serde(default))]
     tooltip_source: Option<Value>,
-    #[serde(default)]
+    #[cfg_attr(test, serde(default))]
     legacy: Option<Value>,
+}
+
+// Avoid serde's owned Value deserializer in the production ABI. The old typed
+// decoder remains a test oracle for both object and positional-array inputs.
+fn take_query_item_field(raw: &mut Value, key: &str, index: usize) -> Option<Value> {
+    match raw {
+        Value::Object(fields) => fields.remove(key),
+        Value::Array(fields) => fields.get_mut(index).map(std::mem::take),
+        _ => None,
+    }
+}
+
+fn parse_query_item(mut raw: Value) -> Result<QueryItem, &'static str> {
+    match &raw {
+        Value::Object(fields) => exact_keys(fields, &["uniqueId", "itemIndex", "name", "icon", "count", "sourceKind", "tooltipSource", "legacy"])
+            .map_err(|_| "invalidItem")?,
+        Value::Array(fields) if (5..=8).contains(&fields.len()) => {},
+        _ => return Err("invalidItem"),
+    }
+    let unique_id = take_query_item_field(&mut raw, "uniqueId", 0)
+        .and_then(|value| value.as_u64()).ok_or("invalidItem")?;
+    let item_index = take_query_item_field(&mut raw, "itemIndex", 1)
+        .and_then(|value| value.as_i64()).and_then(|value| i32::try_from(value).ok()).ok_or("invalidItem")?;
+    let name = match take_query_item_field(&mut raw, "name", 2) {
+        Some(Value::String(value)) => value,
+        _ => return Err("invalidItem"),
+    };
+    let icon = take_query_item_field(&mut raw, "icon", 3)
+        .and_then(|value| value.as_u64()).and_then(|value| u16::try_from(value).ok()).ok_or("invalidItem")?;
+    let count = take_query_item_field(&mut raw, "count", 4)
+        .and_then(|value| value.as_u64()).and_then(|value| u16::try_from(value).ok()).ok_or("invalidItem")?;
+    let source_kind = match take_query_item_field(&mut raw, "sourceKind", 5) {
+        None | Some(Value::Null) => None,
+        Some(Value::String(value)) => Some(value),
+        _ => return Err("invalidItem"),
+    };
+    let tooltip_source = take_query_item_field(&mut raw, "tooltipSource", 6).filter(|value| !value.is_null());
+    let legacy = take_query_item_field(&mut raw, "legacy", 7).filter(|value| !value.is_null());
+    Ok(QueryItem { unique_id, item_index, name, icon, count, source_kind, tooltip_source, legacy })
 }
 
 fn query(input: &str, now: i64) -> Result<Value, &'static str> {
@@ -58,8 +97,8 @@ fn query(input: &str, now: i64) -> Result<Value, &'static str> {
     exact_keys(root, &["version", "item", "player"])?;
     if root.get("version").and_then(Value::as_u64) != Some(1) { return Err("unsupportedVersion"); }
     let raw_item = root.remove("item").ok_or("missingItem")?;
-    if raw_item.get("sourceKind").is_some_and(Value::is_null) { return Err("invalidSourceKind"); }
-    let item: QueryItem = serde_json::from_value(raw_item).map_err(|_| "invalidItem")?;
+    if raw_item.as_object().and_then(|item| item.get("sourceKind")).is_some_and(Value::is_null) { return Err("invalidSourceKind"); }
+    let item = parse_query_item(raw_item)?;
     if item.unique_id > MAX_SAFE_JS_INTEGER || item.count == 0 || item.name.is_empty() || item.name.len() > 512 { return Err("invalidItemIdentity"); }
     if item.source_kind.as_deref().is_some_and(|kind| kind != "instance") { return Err("unsupportedSourceKind"); }
     let mut raw_player = root.remove("player").ok_or("missingPlayer")?;
@@ -565,7 +604,7 @@ impl<'de> Deserialize<'de> for StrictValue {
         StrictJsonValue::<MAX_ARRAY>::deserialize(deserializer).map(|value| StrictValue(value.0))
     }
 }
-struct StrictJsonValue<const ARRAY_LIMIT: usize>(Value);
+pub(crate) struct StrictJsonValue<const ARRAY_LIMIT: usize>(pub(crate) Value);
 impl<'de, const ARRAY_LIMIT: usize> Deserialize<'de> for StrictJsonValue<ARRAY_LIMIT> {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         struct StrictVisitor<const ARRAY_LIMIT: usize>;
@@ -853,6 +892,152 @@ mod tests {
         assert_eq!(request,before,"presentation cannot rewrite quantity or independent unit price");
         assert_eq!(request["item"]["count"],5);
         assert_eq!(request["item"]["legacy"]["sellValue"],25);
+    }
+
+    #[test]
+    fn manual_item_decoder_matches_typed_oracle_for_fields_nulls_and_numeric_boundaries() {
+        let base = json!({"uniqueId":0,"itemIndex":-23,"name":"木剑🗡","icon":0,"count":1});
+        let mut cases = vec![base.clone(), fixture()["item"].clone()];
+        for (field, value) in [
+            ("uniqueId",json!(u64::MAX)), ("uniqueId",json!(MAX_SAFE_JS_INTEGER)),
+            ("itemIndex",json!(i32::MIN)), ("itemIndex",json!(i32::MAX)),
+            ("icon",json!(u16::MAX)), ("count",json!(u16::MAX)),
+            ("count",json!(0)), ("name",json!("")),
+            ("sourceKind",Value::Null), ("sourceKind",json!("instance")),
+            ("sourceKind",json!("catalogPreview")),
+            ("tooltipSource",Value::Null), ("tooltipSource",json!([null,{"x":1}])),
+            ("legacy",Value::Null), ("legacy",json!(false)),
+        ] {
+            let mut item = base.clone(); item[field] = value; cases.push(item);
+        }
+        for field in ["uniqueId","itemIndex","name","icon","count"] {
+            let mut value = base.clone(); value.as_object_mut().unwrap().remove(field); cases.push(value);
+            let mut value = base.clone(); value[field] = Value::Null; cases.push(value);
+        }
+        for (field, invalid) in [
+            ("uniqueId",json!(-1)), ("uniqueId",json!(1.0)), ("uniqueId",json!("0")),
+            ("itemIndex",json!(i64::from(i32::MIN)-1)), ("itemIndex",json!(i64::from(i32::MAX)+1)),
+            ("itemIndex",json!(0.0)), ("itemIndex",Value::Null),
+            ("icon",json!(65536)), ("icon",json!(-1)), ("icon",json!(0.0)),
+            ("count",json!(65536)), ("count",json!(false)), ("count",Value::Null),
+            ("name",Value::Null), ("name",json!(1)), ("sourceKind",json!(false)),
+            ("extra",json!(0)),
+        ] {
+            let mut value = base.clone(); value[field] = invalid; cases.push(value);
+        }
+        let positional = json!([0,-23,"木剑🗡",0,1,null,null,null]);
+        for length in 5..=8 {
+            let mut value = positional.clone(); value.as_array_mut().unwrap().truncate(length); cases.push(value);
+        }
+        cases.push(json!([0,-23,"木剑🗡",0,1,"instance",{"raw":true},{"sellValue":25}]));
+        for length in 0..5 {
+            let mut value = positional.clone(); value.as_array_mut().unwrap().truncate(length); cases.push(value);
+        }
+        let mut extra = positional.clone(); extra.as_array_mut().unwrap().push(Value::Null); cases.push(extra);
+        for (index, invalid) in [(0,json!(-1)),(0,json!(1.0)),(1,json!(2147483648_i64)),
+            (1,json!(-2147483649_i64)),(1,json!(0.0)),(2,json!(true)),
+            (3,json!(65536)),(3,json!(0.0)),(4,json!(65536)),(5,json!(true))] {
+            let mut value = positional.clone(); value[index] = invalid; cases.push(value);
+        }
+        for index in 0..5 {
+            let mut value = positional.clone(); value[index] = Value::Null; cases.push(value);
+        }
+        cases.extend([Value::Null, json!([]), json!(false)]);
+        for value in cases {
+            let old = serde_json::from_value::<QueryItem>(value.clone());
+            let new = parse_query_item(value.clone());
+            match (old, new) {
+                (Ok(old), Ok(new)) => assert_eq!(new, old, "item: {value}"),
+                (Err(_), Err(error)) => assert_eq!(error, "invalidItem", "item: {value}"),
+                (old, new) => panic!("decoder disagreement for {value}: old={old:?}, new={new:?}"),
+            }
+        }
+    }
+
+    #[test]
+    fn manual_item_decoder_keeps_strict_json_and_abi_error_precedence_against_typed_oracle() {
+        let raw = r#"{"uniqueId":0,"itemIndex":-23,"name":"木剑🗡","icon":0,"count":1}"#;
+        let strict_decode = |input: &str| -> Result<QueryItem, &'static str> {
+            let StrictValue(value) = serde_json::from_str(input).map_err(|_| "invalidJson")?;
+            parse_query_item(value)
+        };
+        for input in [
+            r#"[0,-23,"木剑🗡",0,1]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0,1,null]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0,1,null,null]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0,1,null,null,null]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0,1,null,null,null,null]"#.to_owned(),
+            r#"[0,-0,"木剑🗡",0,1]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0,1.0]"#.to_owned(),
+            r#"[0,-23,"木剑🗡",0,1,true]"#.to_owned(),
+            raw.to_owned(),
+            raw.replace("\"uniqueId\":0", "\"uniqueId\":9007199254740991"),
+            raw.replace("\"name\":\"木剑🗡\"", "\"name\":\"\\u6728\\u5251\""),
+            raw.replace("\"uniqueId\":0", "\"uniqueId\":0,\"uniqueId\":1"),
+            raw.replace("\"count\":1", "\"count\":1.0"),
+            raw.replace("\"itemIndex\":-23", "\"itemIndex\":-0"),
+            raw.replace("\"count\":1", "\"count\":1,\"sourceKind\":null,\"sourceKind\":\"instance\""),
+            raw.replace("\"count\":1", "\"count\":1,\"unknown\":false"),
+        ] {
+            let old = serde_json::from_str::<QueryItem>(&input);
+            let new = strict_decode(&input);
+            assert_eq!(old.is_ok(), new.is_ok(), "raw item: {input}");
+            if let (Ok(old), Ok(new)) = (old, new) { assert_eq!(old, new); }
+        }
+        // Reconstruct the old typed item's object form only inside this oracle.
+        // Omitting None keeps the object's special sourceKind-null rule separate
+        // from the old array Option semantics, then compare the complete ABI JSON.
+        let typed_item_abi = |item: Value| -> Value {
+            let Ok(old) = serde_json::from_value::<QueryItem>(item) else {
+                return json!({"version":1,"ok":false,"error":"invalidItem"});
+            };
+            let mut canonical = json!({"uniqueId":old.unique_id,"itemIndex":old.item_index,
+                "name":old.name,"icon":old.icon,"count":old.count});
+            if let Some(value) = old.source_kind { canonical["sourceKind"] = json!(value); }
+            if let Some(value) = old.tooltip_source { canonical["tooltipSource"] = value; }
+            if let Some(value) = old.legacy { canonical["legacy"] = value; }
+            let mut request = fixture(); request["item"] = canonical; response(&request)
+        };
+        let original = fixture();
+        let full = json!([0,-23,"Wooden Sword",0,1,null,
+            original["item"]["tooltipSource"].clone(),original["item"]["legacy"].clone()]);
+        let mut arrays = Vec::new();
+        for length in 0..=8 {
+            let mut item = full.clone(); item.as_array_mut().unwrap().truncate(length); arrays.push(item);
+        }
+        let mut extra = full.clone(); extra.as_array_mut().unwrap().push(Value::Null); arrays.push(extra);
+        for (index, value) in [(0,json!(MAX_SAFE_JS_INTEGER+1)),(0,json!(1.0)),
+            (1,json!(i64::from(i32::MIN)-1)),(2,Value::Null),(3,json!(65536)),
+            (4,json!(0)),(4,Value::Null),(5,json!("instance")),
+            (5,json!("catalogPreview")),(5,json!(true)),(6,Value::Null),(7,json!(false))] {
+            let mut item = full.clone(); item[index] = value; arrays.push(item);
+        }
+        for item in arrays {
+            let expected = typed_item_abi(item.clone());
+            let mut request = fixture(); request["item"] = item.clone();
+            assert_eq!(response(&request), expected, "positional item ABI: {item}");
+        }
+        let mut request = fixture(); request["item"] = full;
+        assert_eq!(response(&request)["ok"], true, "positional null sourceKind is None");
+        assert_eq!(response(&request)["document"]["sourceComplete"], true);
+        let mut request = fixture();
+        request["item"]["sourceKind"] = Value::Null;
+        request["item"]["unknown"] = json!(0);
+        assert_eq!(response(&request)["error"], "invalidSourceKind");
+        request["version"] = json!(2);
+        assert_eq!(response(&request)["error"], "unsupportedVersion");
+        request = fixture(); request["item"]["unknown"] = json!(0);
+        assert_eq!(response(&request)["error"], "invalidItem");
+        request = fixture(); request["item"]["uniqueId"] = json!(MAX_SAFE_JS_INTEGER+1);
+        assert_eq!(response(&request)["error"], "invalidItemIdentity");
+        request = fixture(); request["item"]["name"] = json!("木".repeat(171));
+        assert_eq!(response(&request)["error"], "invalidItemIdentity");
+        request = fixture(); request["item"]["name"] = json!("木".repeat(170));
+        assert_eq!(response(&request)["ok"], true);
+        let duplicate = request.to_string().replacen("\"uniqueId\":0", "\"uniqueId\":0,\"uniqueId\":1", 1);
+        let result: Value = serde_json::from_str(&item_tooltip_document(&duplicate, NOW)).unwrap();
+        assert_eq!(result["error"], "invalidJson");
     }
 
 }

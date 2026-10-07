@@ -6303,6 +6303,10 @@ pub struct WorldEntitySnapshot {
     /// use the value carried by Crystal `ObjectPlayerInfo`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fishing: Option<bool>,
+    /// Raw Crystal transform discriminant from authoritative Zone player state
+    /// or `ObjectPlayerInfo`. Missing producers must leave this unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transform_type: Option<i16>,
     pub disposition: WorldEntityDisposition,
     pub sprite: Option<WorldEntitySpriteSnapshot>,
     pub quest_ids: Vec<i32>,

@@ -1,5 +1,37 @@
 # Backend 1:1 Progress
 
+## Progress76：钓鱼权威变身读模型与 Gateway 静态构建已核验（2026-10-07）
+
+Source23 保留 signed i16 可空 transformType：个人默认 None，只有严格匹配的当前 Zone 自有玩家来源可投影权威值，远端 ObjectPlayer 保留原始值。未知不补 0 或 standing；Session 与 Zone 的权威职责仍分离。没有改写战斗、保存或数据库规则。
+
+后端原七项串行 CargoGuard 实际 242/242 通过，含 6 项新增 distinct；486 声明输入匹配。Gateway 原 locked/offline/jobs1 静态构建实际退出 0，EXE 105714688 B，SHA256 `ac512de8899da64c0c82c4273f08c4954dce2a03780518e716774221f862f544`，未启动。原 50GiB 门槛、fresh≤2000ms、PolicyB 退出与 Dispose 回执保持，详见 [后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend-finite01.json) 和 [Gateway 静态结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-gateway-static01.json)。
+
+共享客户端和 Web 原回归、构建及独立静态闭包完成后，Matrix09 仅将 F02.world.fishing-click 源码候选闭合；后端上述 242 次检查不充当该行真实玩家验证。[组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-combined-build-result01.json) 分开记录各源码时期、实际 PUI64、Node218 与 Stage5 内部357；历史客户端执行只按未变有效配置限定承接。
+
+Source22 已实际 push `4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef`；Source23 提交推送在证据创建时 pending，由 Root 完成后报告。下一项 Pearl 的只读审查发现旧 BuyItem 没有经济关联回执，且旧 Pearl 容量预检与实际带耐久插入条件可能不同；新增共享准入不能据此推断事务成功或自动释放未决购买。这是后续需要明确处理的共同协议/事务限制，并未在本批修复。
+
+317 记录是有界审计而非完整验收分母，全部玩家 not-run；无总体百分比、Candidate100 或 goal 完成。用户“继续代码，暂不操作界面”持续有效，未启动 UI、游戏、服务器或进行 HTTP/socket/WASM API、登录、战斗、保存重登及移动真机验收。以下 Progress75 及更早段落保留为历史。
+
+
+## Progress75：钓鱼前置可空原始变身来源已通过有限CPU检查（2026-10-07）
+
+Source23在StateEntity读模型增加可空`transformType: Option<i16>`，保留精确signed原始值。个人快照默认None；只有严格保留的当前Zone membership自有玩家才投影权威Zone变身，远端玩家来自原ObjectPlayer的Some(raw i16)。未知来源不发明0、standing或UI默认姿态；原fishing来源继续保留。此批只补充钓鱼共同客户端所需的权威原始来源，没有修改保存、战斗规则或数据库。
+
+Root实际七项严格串行Cargo任务242/242通过、0失败/0ignored：Simulation transform3＋Gateway transform3＋SharedZone209＋SecurityLifecycle20＋GreatFoxRecall2＋Gateway appearance1＋AOI4，包含6项新增distinct。486项保守声明源码/数据与最终after逐项一致、0漂移；独立源码审查0确认blocker。原source-review中的finiteRustChecksAccepted=false表示创建时尚未执行，后续实际finite01回执确认本批CPU检查通过，历史review原样保留。
+
+每次原CargoGuard actual GetVolume C剩余466448744448–468338282496 B，均≥原53687091200 B（50GiB）门槛；freshness upper bound63–70ms≤原2000ms。七次probe退出0，PolicyB均completed/exited/disposed且child退出0，没有用静态构建或受测夹具替代实际Guard回执。
+
+本批仅源码及有限CPU证据，不据此关闭前端fishing-click行、提高总体parity百分比或宣称可玩。Source23生产组合仍pending，真实UI/HTTP/socket/WASMAPI、登录/游戏/保存重登及移动真机未运行，Candidate100=false、goal active；用户“继续代码，暂不操作界面”持续有效。Source22已实际发布`4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef`，旧pending文本保留创建时态。
+
+| 本批证据 | 字节 / SHA256 |
+| --- | --- |
+| [fishing-source23-backend-finite01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend-finite01.json) | 43362 / `a2c276f5c65046101ca07b567f75f78b672259a0ccae212266ccf6f8e92aaa4a` |
+| [fishing-source23-backend01-snapshot.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend01-snapshot.json) | 145500 / `5c5dfba040a433c7502977d31f7dd28316cfc6586c7967f17f6158b421791bcf` |
+| [fishing-source23-backend01-review.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend01-review.json) | 912 / `d8885a8fba10c4ef365adfdd5d68d1d1d791db1f6cbfdf975af7a2d0b53bf2ce` |
+
+以下Progress74及更旧段落完整保留为历史阶段；当前Source23后端有限范围以上述Progress75与实际finite01为准。
+
+
 ## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
 
 本批 Source03 已通过独立源代码与实际结果审查，0 blocker；现有串行 CargoGuard 下 **3/3 组、53/53 项执行通过**（购买 18、会话 34、商城 1），其中 **16 项新增测试**。两轮历史测试失败保留，不计入 53 项通过数；修正仅涉及新增测试夹具和预期，产品代码保持一致。

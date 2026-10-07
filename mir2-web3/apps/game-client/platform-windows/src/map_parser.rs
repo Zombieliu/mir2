@@ -2820,11 +2820,15 @@ mod tests {
 
 /// Same x-major cell/light rule as Crystal MapCode.FishingCell; cached parse only.
 pub(crate) fn fishing_attribute(map_file_name: &str, x: i32, y: i32) -> Option<u8> {
+    mir2_client_bevy::fishing_click::fishing_attribute(fishing_raw_light(map_file_name, x, y)?)
+}
+
+/// Preserve raw cell light for the shared decision without inferring water.
+pub(crate) fn fishing_raw_light(map_file_name: &str, x: i32, y: i32) -> Option<u8> {
     let map = load_map(map_file_name)?;
     let (x, y) = (usize::try_from(x).ok()?, usize::try_from(y).ok()?);
     if x >= usize::from(map.width) || y >= usize::from(map.height) {
         return None;
     }
-    let light = map.cells.get(x * usize::from(map.height) + y)?.light;
-    (100..=119).contains(&light).then(|| light - 100)
+    Some(map.cells.get(x * usize::from(map.height) + y)?.light)
 }

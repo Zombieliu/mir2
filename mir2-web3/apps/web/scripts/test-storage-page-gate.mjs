@@ -5,13 +5,13 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 // Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
-const sources = { bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
+const sources = { fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
@@ -76,7 +76,7 @@ const requestId = seq => "st-" + String(seq).padStart(16, "0");
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const pageAst = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const names = ["emptyLoginAuthState", "setLoginBusy", "preauthGate", "updateLoginAuth", "authSurfaceCurrent",
+const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFishingGesture", "publishWorldFishingSource", "captureWorldFishingSnapshot", "emptyLoginAuthState", "setLoginBusy", "preauthGate", "updateLoginAuth", "authSurfaceCurrent",
   "openLoginAuth", "closeLoginAuth", "changeRegistrationField", "changePasswordField", "submitRegistration", "submitChangePassword",
   "setSafeKeyFocus", "editSafeKey", "randomSafeKeys", "queuePreauthAttempt", "sendPreauthAttempt", "consumePreauthReply",
   "submitPasswordLoginWithCredentials", "submitLogin", "submitSuiLogin", "submitIdentitySession",
@@ -139,8 +139,11 @@ function visit(node) {
     const statements = node.body.statements;
     const index = statements.findIndex(n => n.getText(pageAst).startsWith("const socialOwner ="));
     assert(index > 0);
-    assert.equal(statements[index - 1].getText(pageAst), "observeEquipmentSnapshot(snapshot, connectionGeneration);");
-    snapshotStatements = statements.slice(index - 1, index + 2).map(n => n.getText(pageAst)).join("\n");
+    // Source23 inserts typed Fishing capture between the existing raw Equipment
+    // barrier and Social observation. Keep both original statements in this fragment.
+    assert.equal(statements[index - 2].getText(pageAst), "observeEquipmentSnapshot(snapshot, connectionGeneration);");
+    assert.equal(statements[index - 1].getText(pageAst), "captureWorldFishingSnapshot(snapshot, connectionGeneration);");
+    snapshotStatements = statements.slice(index - 2, index + 2).map(n => n.getText(pageAst)).join("\n");
   }
   if (ts.isPropertyAssignment(node) && node.name.getText(pageAst) === "social" && node.initializer.getText(pageAst).includes("socialFriendsRef.current")) {
     assert.equal(socialSnapshotFriends, undefined, "sole actual full snapshot FriendUpdate preservation expression");
@@ -208,6 +211,23 @@ assert.equal(snapshotRevision, "worldSnapshotVersionRef.current += 1;");
 assert.ok(socialSnapshotFriends && socialWindowRender && rosterRenderInitializer && tradeLeaseInitializer);
 assert.ok(spouseRenderInitializer && spouseRenderCallbacks);
 assert.ok(authControlsInitializer);
+// Extract only the current pure normalizer; its type-only world import is not run.
+const pureQuestMap = extractPureDeclarations("../lib/bevy-quest-world-context.ts", ["normalizeQuestMapFileName"]);
+const fishingRefNames = ["worldFishingSourceRef", "worldFishingCommitRef", "worldFishingGestureRegistryRef",
+  "worldFishingActiveGestureRef", "worldFishingQueuedRef", "worldFishingCastClockRef", "questSceneRevisionRef"];
+const fishingRefInitializers = new Map();
+(function visitFishingRefs(node) {
+  if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && fishingRefNames.includes(node.name.text)) {
+    assert(!fishingRefInitializers.has(node.name.text), "sole actual Page Fishing ref " + node.name.text);
+    assert.ok(node.initializer && ts.isCallExpression(node.initializer) && node.initializer.expression.getText(pageAst) === "useRef");
+    fishingRefInitializers.set(node.name.text, node.initializer.arguments[0].getText(pageAst));
+  }
+  ts.forEachChild(node, visitFishingRefs);
+})(pageAst);
+assert.equal(fishingRefInitializers.size, fishingRefNames.length, "actual Page dormant Fishing custody initializers");
+const fishingRefsJs = ts.transpileModule([...fishingRefInitializers].map(([name, initializer]) =>
+  "const " + name + " = {current:" + initializer + "};").join("\n"), {compilerOptions: {target: ts.ScriptTarget.ES2022}}).outputText;
+const pureFishingSource = loadPure("fishingSource");
 const pageJavaScript = ts.transpileModule(actualFunctions, {
   fileName: "actual-storage-page-gates.ts",
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
@@ -340,6 +360,14 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     recordDebugEvent: () => {}, appendLog: message => logs.push(message),
     t: (key, _args, fallback) => fallback ?? key,
   };
+  // These are real source/cancel closures with inactive gesture custody. This
+  // storage/social harness has no committed Fishing runtime, proof or physical edge.
+  Object.assign(scope, pureQuestMap, {sameWorldFishingOwner: pureFishingSource.sameOwner},
+    new Function("WorldFishingSource", fishingRefsJs + "\nreturn {" + fishingRefNames.join(",") + "};")(pureFishingSource.WorldFishingSource));
+  scope.setWorldFishingRecord = value => { scope.fishingRecord = typeof value === "function" ? value(scope.fishingRecord ?? null) : value; };
+  assert.equal(scope.worldFishingActiveGestureRef.current, null);
+  assert.equal(scope.worldFishingQueuedRef.current, null);
+  assert.equal(scope.worldFishingCommitRef.current, null);
   scope.updateWorld = updater => { scope.worldRef.current = updater(scope.worldRef.current); };
   const keys = Object.keys(scope);
   const functions = new Function(...keys, pageJavaScript + "\nreturn {"

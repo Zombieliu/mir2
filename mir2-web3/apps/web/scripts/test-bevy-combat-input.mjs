@@ -81,11 +81,12 @@ test('production integration captures raw before coalescing and final event proo
   null, 'authKind', 'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
+  'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
  ]);
 
  // The original ordered parity suffix ends at the two additive Auth nodes.
  // Repair adds a command-scoped proof gate and a local inventory retire.
- // The Bag/Belt entry gate now follows both nodes immediately before transport.
+ // Bag/Belt entry follows both nodes; the additive WorldFishing entry is last before transport.
  const authClaimIndex=statements.findIndex(n=>ts.isIfStatement(n)&&normalized(n.expression)==='authKind');
  const authDeclaration=statements[authClaimIndex-1],authClaim=statements[authClaimIndex];
  assert.ok(ts.isVariableStatement(authDeclaration));
@@ -127,14 +128,21 @@ test('production integration captures raw before coalescing and final event proo
   'const proof = options.bagBeltProof, owner = bagBeltPhysicalOwner();',
   'if (!owner || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !bagBeltFinalCurrent(proof, wireCommand) || !bagBeltMovesRef.current.enter(proof.reservation, owner, wireCommand)) return false;'
  ]);
- assert.equal(statements[authClaimIndex+4],socketTry,'no executable external callback between final proof gates and sole socket send');
- assert.equal(socketIndex,authClaimIndex+4);
+ const worldFishingProofGate=statements[authClaimIndex+4];
+ assert.ok(ts.isIfStatement(worldFishingProofGate));
+ assert.equal(normalized(worldFishingProofGate.expression),'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)');
+ assert.equal(worldFishingProofGate.elseStatement,undefined);
+ assert.ok(ts.isReturnStatement(worldFishingProofGate.thenStatement));
+ assert.equal(worldFishingProofGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
+ assert.equal(statements[authClaimIndex+5],socketTry,'no executable external callback between final proof gates and sole socket send');
+ assert.equal(socketIndex,authClaimIndex+5);
  // Every pre-send statement after the combat claim is covered by the exact
- // ordered list above, including Repair/retire and the final Bag/Belt entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-3),[
+ // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-4),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
-  'options?.bagBeltProof'
+  'options?.bagBeltProof',
+  'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)'
  ]);
  // Execute the actual final Auth fragment with its actual durable gate and
  // Page surface check. Only socket writes and document facts are memory data.
@@ -297,12 +305,16 @@ test('actual Page HP overlay callback and combat producer block immediately befo
 test('UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently',()=>{const f=fixture(),bag={},hud={};const replay=f.proof();f.hook=(p,b)=>{assert.ok(f.host.setUiHeld('bag',bag,true));assert.ok(f.host.setUiHeld('hud',hud,true));return f.host.claim(p,b)?'confirmedSend':'definitelyUnsent';};assert.equal(f.emit().outcome,'definitelyUnsent');const captures=f.captures.length;f.now=60;f.host.tick();assert.equal(f.ready,false);assert.equal(f.captures.length,captures);assert.equal(f.emit(replay).outcome,'definitelyUnsent');assert.equal(f.host.setUiHeld('bag',{},false),false);assert.ok(f.host.setUiHeld('bag',bag,false));f.now=110;f.host.tick();assert.equal(f.ready,false);assert.ok(f.host.hasUiHeld());assert.ok(f.host.setUiHeld('hud',hud,false));f.host.tick();assert.ok(f.ready);f.hook=null;assert.equal(f.emit(f.proof({sequence:f.host.run*2**22+2,edgeSequence:0})).outcome,'confirmedSend');});
 test('UI hold retired owner/runtime and stale release cannot unblock a new token',()=>{const f=fixture(),old={},next={};f.host.setUiHeld('bag',old,true);f.input.owner={...f.input.owner,ownerRevision:1};f.host.observeSnapshot(f.raw,f.input.owner);assert.equal(f.host.hasUiHeld(),false);assert.ok(f.host.setUiHeld('bag',next,true));assert.equal(f.host.setUiHeld('bag',old,false),false);assert.ok(f.host.hasUiHeld());f.host.clearUiHeld();assert.equal(f.host.hasUiHeld(),false);f.host.tick();assert.ok(f.ready);f.host.setUiHeld('bag',next,true);f.host.stop();assert.equal(f.host.hasUiHeld(),false);assert.equal(f.host.setUiHeld('bag',old,true),false);});
 function shellRoutingFixture(channel,configure=()=>{}){
- const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),names=['npcShopBlocksWorldInput','stopNpcShopWorldInput','cancelSharedNpcShopPointer','handleSharedNpcShopPointer','cancelSharedComposePointer','handleSharedComposePointer','cancelSharedMailPointer','handleSharedMailPointer','beginCombatUiHold','endCombatUiHold','cancelSharedBagPointer','cancelSharedCharacterPointer','cancelSharedHudPointer','cancelSharedSpellsPointer','handleSharedBagPointer','handleSharedCharacterPointer','handleSharedHudPointer','handleSharedSpellsPointer','cancelSharedStoragePointer','handleSharedStoragePointer','handleSharedQuestWorldPointer','handleSharedUiPointer','isSharedBagCompatibilityMouse','handleScenePointerAction','stopHeldScenePointer','repairGeometry','cancelNpcRepairPointer','beginNpcRepairPointer','handleNpcRepairPointer','npcRepairControlTarget','rememberNpcRepairControlClick','fenceNpcRepairClick','changeNpcRepairTarget','confirmNpcRepairTarget','openNpcRepairBagPage','rememberBagBeltClick','fenceBagBeltMouse','cancelBagBeltPointer','refreshBagBeltGeometry','bagBeltCallbacksMatch','beginBagBeltPointer','beginCompatBagBeltPointer','finishBagBeltPointer','handleBagBeltPointer'],decl=[];
+ const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),names=['retireWorldFishingPhysical','cancelWorldFishingHeldPointer','worldFishingStageGeometry','worldFishingPointCurrent','worldFishingPhysicalCurrent','attachWorldFishingPhysical','finishWorldFishingPhysical','npcShopBlocksWorldInput','stopNpcShopWorldInput','cancelSharedNpcShopPointer','handleSharedNpcShopPointer','cancelSharedComposePointer','handleSharedComposePointer','cancelSharedMailPointer','handleSharedMailPointer','beginCombatUiHold','endCombatUiHold','cancelSharedBagPointer','cancelSharedCharacterPointer','cancelSharedHudPointer','cancelSharedSpellsPointer','handleSharedBagPointer','handleSharedCharacterPointer','handleSharedHudPointer','handleSharedSpellsPointer','cancelSharedStoragePointer','handleSharedStoragePointer','handleSharedQuestWorldPointer','handleSharedUiPointer','isSharedBagCompatibilityMouse','handleScenePointerAction','stopHeldScenePointer','repairGeometry','cancelNpcRepairPointer','beginNpcRepairPointer','handleNpcRepairPointer','npcRepairControlTarget','rememberNpcRepairControlClick','fenceNpcRepairClick','changeNpcRepairTarget','confirmNpcRepairTarget','openNpcRepairBagPage','rememberBagBeltClick','fenceBagBeltMouse','cancelBagBeltPointer','refreshBagBeltGeometry','bagBeltCallbacksMatch','beginBagBeltPointer','beginCompatBagBeltPointer','finishBagBeltPointer','handleBagBeltPointer'],decl=[];
  function visit(n){if(ts.isFunctionDeclaration(n)&&n.name&&names.includes(n.name.text))decl.push(n.getText(ast));ts.forEachChild(n,visit);}visit(ast);assert.equal(decl.length,names.length);
  const repairRefNames=['npcRepairTargetRef','npcRepairQuarantineRef','npcRepairClickFenceRef','npcRepairPointerRef','npcRepairVisibleTargetRef'],repairRefInitializers=new Map();let repairRegistration=null;
+ // The current Shell world-input paths call real Fishing cancellation. Extract
+ // its closed physical-pointer declarations and actual dormant useRef initializers.
+ const fishingRefNames=['worldFishingPhysicalRef','worldFishingTerminalRef','worldFishingPointersRef','worldFishingQuarantineRef','worldFishingShellRef'],fishingRefInitializers=new Map();
  const bagBeltRefNames=['bagBeltButtonsRef','bagBeltGeometryRef','bagBeltGeometryRevisionRef','bagBeltCallbacksRef','bagBeltContextRef','bagBeltPointerRef','bagBeltArmedSharedRef','bagBeltQuarantineRef','bagBeltRejectedTerminalRef','bagBeltClickFenceRef'],bagBeltRefInitializers=new Map();let bagBeltRectInitializer;
  function visitRepairBindings(n){
   if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)){
+   if(fishingRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');fishingRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
    if(repairRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');repairRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
    if(bagBeltRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');bagBeltRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
    if(n.name.text==='bagBeltRect'){assert.ok(n.initializer&&ts.isArrowFunction(n.initializer));bagBeltRectInitializer=n.initializer.getText(ast);}
@@ -311,6 +323,7 @@ function shellRoutingFixture(channel,configure=()=>{}){
   ts.forEachChild(n,visitRepairBindings);
  }
  visitRepairBindings(ast);for(const name of repairRefNames)assert.ok(repairRefInitializers.has(name),'actual Shell repair ref initializer '+name);assert.ok(repairRegistration,'actual Shell repair target registration');
+ for(const name of fishingRefNames)assert.ok(fishingRefInitializers.has(name),'actual Shell Fishing inactive ref initializer '+name);
  for(const name of bagBeltRefNames)assert.ok(bagBeltRefInitializers.has(name),'actual Shell Bag/Belt inactive ref initializer '+name);assert.ok(bagBeltRectInitializer,'actual Shell Bag/Belt rectangle reader');
 
  const f=fixture(),context={runGeneration:1,connectionGeneration:1,sessionGeneration:2,ownerRevision:0,requestRun:1,playerObjectId:3,ledgerRunGeneration:1,hudGeneration:1,modelRevision:1,presentationRevision:1,renderRevision:1,presentation:{touch:false},modal:false,inputRegions:[{left:100,top:100,width:30,height:30}]};
@@ -324,6 +337,11 @@ function shellRoutingFixture(channel,configure=()=>{}){
  scope.stagePresentation={virtualWidth:1024,virtualHeight:768,scale:1};scope.Element=Element;scope.Node=Element;
  scope.onBeginNpcRepairDrag=undefined;scope.onCancelNpcRepairDrag=undefined;scope.onDropNpcRepairDrag=undefined;scope.onConfirmNpcRepair=undefined;
  scope.setNpcRepairTargetSelection=selection=>{scope.npcRepairTargetSelection=selection;};scope.onOpenInventoryTab=tab=>{scope.activeInventoryTab=tab;};
+ const fishingRefsJs=ts.transpileModule([...fishingRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ Object.assign(scope,new Function(fishingRefsJs+'\nreturn {'+fishingRefNames.join(',')+'};')());
+ assert.equal(scope.worldFishingPhysicalRef.current,null);assert.equal(scope.worldFishingTerminalRef.current,null);
+ assert.equal(scope.worldFishingPointersRef.current.size,0);assert.equal(scope.worldFishingQuarantineRef.current.size,0);
+ assert.equal(scope.worldFishingShellRef.current,null);
  const repairRefsJs=ts.transpileModule([...repairRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
  Object.assign(scope,new Function(repairRefsJs+'\nreturn {'+repairRefNames.join(',')+'};')());
  const bagBeltRefsJs=ts.transpileModule([...bagBeltRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
@@ -333,7 +351,7 @@ function shellRoutingFixture(channel,configure=()=>{}){
  let lifecycle=null;
  function findLifecycle(n){if(ts.isCallExpression(n)&&n.expression.getText(ast)==='useEffect'&&n.arguments[0]?.getText(ast).includes('heldQuestControlPointersRef.current.clear()')&&n.arguments[0]?.getText(ast).includes('window.addEventListener("pointerup"'))lifecycle=n.arguments[0];ts.forEachChild(n,findLifecycle);}findLifecycle(ast);assert.ok(lifecycle,'extract the actual Shell window terminal/cleanup effect');
  const listeners=new Map(),documentListeners=new Map();scope.window={...scope.window,devicePixelRatio:1,addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(listeners.get(name),fn);listeners.delete(name);}};
- scope.document={...scope.document,visibilityState:"visible",addEventListener:(name,fn)=>documentListeners.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(documentListeners.get(name),fn);documentListeners.delete(name);}};
+ scope.document={...scope.document,visibilityState:"visible",hasFocus:()=>true,addEventListener:(name,fn)=>documentListeners.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(documentListeners.get(name),fn);documentListeners.delete(name);}};
  scope.sharedBagPointerHandlerRef={current:null};configure(scope,context);
  const code=ts.transpileModule(decl.join('\n')+'\nconst bagBeltRect = '+bagBeltRectInitializer+';\nconst registerNpcRepairTarget = '+repairRegistration+';\nconst mountPointerLifecycle = '+lifecycle.getText(ast)+';',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,api=new Function(...Object.keys(scope),code+';return {'+names.join(',')+',mountPointerLifecycle};')(...Object.values(scope));
  scope.sharedBagPointerHandlerRef.current=api.handleSharedUiPointer;

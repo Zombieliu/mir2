@@ -39,3 +39,13 @@ pub use item_tooltip::{item_tooltip_abi_version, item_tooltip_document};
 pub mod bag_to_belt;
 #[cfg(feature = "presentation-ui")]
 pub use bag_to_belt::{bag_to_belt_move_abi_version, bag_to_belt_move_plan};
+
+#[cfg(feature = "presentation-ui")]
+pub mod fishing_click;
+#[cfg(feature = "presentation-ui")]
+pub use fishing_click::{fishing_click_abi_version, fishing_click_targets, fishing_click_decision};
+
+#[cfg(feature = "presentation-ui")]
+pub mod entity_animation;
+#[cfg(feature = "presentation-ui")]
+pub use entity_animation::{entity_animation_abi_version, EntityAnimationBridge};

@@ -8048,6 +8048,7 @@ pub(super) fn collect_world_entities(
                 .flatten(),
             dazed: self_marker.is_some().then_some(self_dazed).flatten(),
             fishing: self_marker.is_some().then_some(self_fishing).flatten(),
+            transform_type: None,
             disposition,
             sprite,
             quest_ids,

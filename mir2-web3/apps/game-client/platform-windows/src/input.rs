@@ -3219,39 +3219,44 @@ pub fn mouse_world_interaction_system(
         run_distance,
         now_ms,
     ) else {
-        // Original tries walking and turning before the rod cast branch.
+        // The full Crystal direct/+1/-1 planner above proved all walks blocked.
         if requested_mode == WorldPointerMovementMode::Walk && auto_path_destination.is_none() {
             if let Some(ui) = player_ui.as_deref_mut() {
-                if ui.equipment_dialogs.rod.is_some() {
-                    let water = movement_target(origin, direction, 3);
-                    if map_file_name
-                        .as_deref()
-                        .and_then(|map| crate::map_parser::fishing_attribute(map, water.0, water.1))
-                        .is_some()
-                    {
-                        if entity_direction != direction {
-                            commands.send(PlayerIntent::Turn {
-                                direction: direction.into(),
-                            });
-                            movement.next_move_send_at_ms = now_ms + 200.0;
+                use mir2_client_bevy::fishing_click::{decide_fishing_click, fishing_water_target,
+                    FishingClickFacts, FishingClickDecision, FishingWaterCell};
+                const COMPASS: [&str; 8] = ["Up", "UpRight", "Right", "DownRight", "Down", "DownLeft", "Left", "UpLeft"];
+                if let Some(raw_direction) = COMPASS.iter().position(|value| *value == direction) {
+                    let water = fishing_water_target(origin, raw_direction as u8).and_then(|cell| {
+                        Some(FishingWaterCell { cell, light: crate::map_parser::fishing_raw_light(
+                            map_file_name.as_deref()?, cell.0, cell.1)? })
+                    });
+                    let facing_matches = entity_direction == direction;
+                    // Turning keeps its original precedence over the pose checks.
+                    let pose = facing_matches.then(|| presentation.self_equipment_pose(&object_id)).flatten();
+                    let facts = FishingClickFacts {
+                        origin, direction: raw_direction as u8, requested_walk: true, auto_route: false,
+                        walk_blocked: [Some(true); 3], rod_present: Some(ui.equipment_dialogs.rod.is_some()),
+                        water, facing_matches: Some(facing_matches), standing: pose.map(|p| p.0),
+                        fishing: Some(ui.equipment_dialogs.fishing), transform_type: pose.map(|p| p.1),
+                    };
+                    match decide_fishing_click(&facts, animation_now_ms, ui.equipment_dialogs.last_cast_ms) {
+                        FishingClickDecision::Turn { delay_ms, .. } => {
+                            commands.send(PlayerIntent::Turn { direction: direction.into() });
+                            movement.next_move_send_at_ms = now_ms + f64::from(delay_ms);
                             return;
                         }
-                        if let Some((standing, transform)) =
-                            presentation.self_equipment_pose(&object_id)
-                        {
-                            ui.equipment_dialogs.standing = standing;
-                            if let Some(packet) =
-                                ui.equipment_dialogs
-                                    .cast(animation_now_ms, true, true, transform)
-                            {
+                        FishingClickDecision::Cast => {
+                            ui.equipment_dialogs.standing = pose.is_some_and(|p| p.0);
+                            if let Some(packet) = ui.equipment_dialogs.cast(animation_now_ms, true, true,
+                                pose.expect("a shared Cast requires the current Native pose").1) {
                                 if !commands.send_command(GatewayCommand::Wire(
-                                    NativeOutboundCommand::FishingCast { cast_out: true },
-                                )) {
+                                    NativeOutboundCommand::FishingCast { cast_out: true })) {
                                     ui.equipment_dialogs.release_unsent(&packet);
                                 }
                                 return;
                             }
                         }
+                        FishingClickDecision::None => {}
                     }
                 }
             }

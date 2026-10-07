@@ -1,11 +1,11 @@
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
-import { createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan,
-  type PresentationWasmModule, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
-  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan } from "./client-presentation-runtime";
-export type { ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
-  CashPreviewInput, CashPreviewLayerDocument, NpcRepairQuoteInput, NpcRepairQuote, BagToBeltMoveInput, BagToBeltMovePlan } from "./client-presentation-runtime";
+import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision,
+  type PresentationWasmModule, type EntityAnimationRuntime, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
+  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision } from "./client-presentation-runtime";
+export type { EntityAnimationRuntime, ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
+  CashPreviewInput, CashPreviewLayerDocument, NpcRepairQuoteInput, NpcRepairQuote, BagToBeltMoveInput, BagToBeltMovePlan, FishingClickTargetsInput, FishingClickTargets, FishingClickInput, FishingClickDecision } from "./client-presentation-runtime";
 
 export type AuthValidation = { ok: true; birthDateBinary?: string } |
   { ok: false; code: number; field: string; error: string };
@@ -156,6 +156,9 @@ export type ClientCoreRuntime = {
   turnCashPreview(direction: number, right: boolean): number | null;
   readNpcRepairQuote(input: NpcRepairQuoteInput): NpcRepairQuote | null;
   planBagToBeltMove(input: BagToBeltMoveInput): BagToBeltMovePlan | null;
+  getEntityAnimationRuntime(): EntityAnimationRuntime | null;
+  fishingClickTargets(input: FishingClickTargetsInput): FishingClickTargets | null;
+  decideFishingClick(input: FishingClickInput): FishingClickDecision | null;
   readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number): CrystalTooltipDocument | null;
   resolveQuestAction(input: QuestActionInput): QuestActionDecision;
   /** Additive capability; old Quest-only bundles throw only when requested. */
@@ -493,6 +496,7 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
     if (presentation.client_presentation_abi_version() !== presentationRelease.abiVersion) {
       throw new Error("Client presentation version mismatch; reload the client");
     }
+    const getEntityAnimationRuntime = createSharedEntityAnimationAccessor(presentation);
     let mailSendSlot:MailSendSlotRuntime|null=null;
     return {
       createAuthUi(seed: bigint) { return createAuthUiRuntime(module, seed); },
@@ -502,6 +506,9 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(presentation, direction, right); },
       readNpcRepairQuote(input: NpcRepairQuoteInput) { return readSharedNpcRepairQuote(presentation, input); },
       planBagToBeltMove(input: BagToBeltMoveInput) { return readSharedBagToBeltMovePlan(presentation, input); },
+      getEntityAnimationRuntime() { return getEntityAnimationRuntime(); },
+      fishingClickTargets(input: FishingClickTargetsInput) { return readSharedFishingClickTargets(presentation, input); },
+      decideFishingClick(input: FishingClickInput) { return readSharedFishingClickDecision(presentation, input); },
       readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number) {
         return readSharedPresentationItemTooltip(presentation, item, player, nowMs);
       },

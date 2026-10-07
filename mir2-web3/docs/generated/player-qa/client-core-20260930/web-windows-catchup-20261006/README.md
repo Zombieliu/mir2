@@ -1,5 +1,24 @@
 # Web / Windows 固定基线追赶 QA
 
+## Source23：世界钓鱼源码候选闭合，玩家验收待运行（2026-10-07）
+
+仅`F02.world.fishing-click`由open转为legacy/sourceCandidate closed。实际Page/Shell主鼠标或stage touch Walk接入共享Rust钓鱼几何、转向/一秒cast clock及自有动画状态机；raw fishing/有符号i16 transform、三邻格阻挡与water均取typed事实，unknown不补standing或0。useLayoutEffect提交的只读pose绑定独立epoch/incarnation/continuity和≤250ms新鲜度；真实rod UID0、layout、owner/socket/session/map/Core与物理指针共同约束授权。terminal先burn再callback，第二指针/blur/旧cleanup与重入不得复活旧手势；unknown必须fresh down，合法cooldown/nonstanding/nonwater None可保留held retry。最后不透明单用proof紧邻真实socket.send，发送unknown保留cast clock且不自动重试；这不证明真实运行或经济ACK。共同规则不将整个DOM world painter升为shared。
+
+原11个Node脚本Node05实际218/218、0失败/0跳过；Stage5原318＋新增39＝357内部组只计218中的一个file-level测试，不能相加。strict code-only非增量TSC05与Next生成metadata后的TSC06均退出0。原具名夹具保持，真实Fishing取消依赖及空refs已接入；Combat保留Auth/Repair/Bag proof，新增精确Fishing拒绝门令socket索引+4→+5、尾部3→4；Storage原Equipment位置-1→-2并追加Fishing -1，Social保留，Quest仅增加空queued ref。字符串label与lexical `test(`统计口径已在有限证据06更正，均不等于展开执行数量。原三次体积失败、Bag63通过/1失败、Node04实际130通过/22失败/152 reported（Storage早停）全部保留。
+
+Backend实际7 jobs/242次通过、6项新增distinct；最终PUI Rust07 fresh64通过/0失败含新增6项手工decoder oracle，旧Fish/Tooltip/Bag测试保持。历史Rust04五jobs266通过＋3项原ignored（Core141/PUI58/default44/NativeFish6/Runtime17），PUI58由当前64替代；NativeInput133及其余历史配置仅按未变有效输入限定承接，不称全Rust07重跑、完整suite或总distinct。
+
+Core/PUI actual build05通过，WASM/JS分别252590/24393 B与259415/22264 B，原strict WASM<262144 B及JS≤204800 B保持；PUI距WASM门槛2729 B。三renderer实际通过、版本`bevy-8e38472ba5cf5ef3`。Native104656384 B/SHA256`2c473cae9153b8af53e4dddb5fb700d214f5cf1ece780cad32dd4eaa5a5563ee`及Gateway105714688 B/SHA256`ac512de8899da64c0c82c4273f08c4954dce2a03780518e716774221f862f544`已实际构建且未启动；renderer immutable release仍为既有ignored生成资源。
+
+Next06实际退出0、80826ms，strict TypeScript11.7s/13静态页；27439声明输入、19006文件/308目录含根/599650114 B，61 NFT/37094引用（37092 regular＋2声明junction），0missing/private且不遍历junction。Thin06实际退出0、19976ms，7301文件/776目录含根/0links/373049068 B，原cap377487360 B余4438292 B；63205声明记录实际为63187 canonical unique路径，18项同hash斜线别名不能计unique。独立pureFS复核保留44 warning完整多重集及231 JSON实际source/output pairs与Source22一致，仅限定承接旧token结论，未新跑parser/lexer；04/05 route types仍是明确的historical TS输入，不能称零旧路径。
+
+Matrix09当前103 shared/204 legacy/2 open/8 common limitation；其他316整row、317 ordered IDs、全部native/originalAudit历史与rawCounts保持，player全部not-run。有限字段实际312关联/179唯一decl、每row去重311，F01.safe-key原一处duplicate保留；这不是执行数或完整验收分母，无overall percentage、Candidate100=false、goal active。Source22已实际push `4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef`；Source23 commit/push在证据创建时pending，由Root后续实际完成并报告。
+
+下一项Source24 Pearl共享准入/钱包与actual Web DOM接线；无经济correlated ACK、Native无限stock同UID/count保持pending是必须明示处理的共同协议限制，不能fake ACK。随后Source25 Ranking Inspect及宽队列。用户暂缓界面操作持续有效：UI/browser/headless/server/renderer、HTTP/socket、WASM API/实例、登录/游戏/保存重登和移动真机及最终frontend验收均未运行。
+
+证据：[矩阵09](feature-matrix09.json)、[有限结果](fishing-source23-finite-result01.json)、[动作链复核](fishing-source23-action-chain-review01.json)、[组合构建](fishing-source23-combined-build-result01.json)。以下Source22及更早段落逐字保留为历史，旧pending、下一步与产物路径只表示当时状态，当前以本段为准。
+
+
 ## Source22：Bag→Belt源码候选闭合，玩家验收待运行（2026-10-07）
 
 仅`F05.belt.move-from-bag`由open转为legacy/sourceCandidate closed：实际CompatDOM Bag与默认sharedBevy Bag均可拖到六个真实Belt button，覆盖空槽及occupied swap、UID0和Bag2。共享Core纯planner返回raw from=globalBagSlot+6、to=0..5，原MoveItem仅保留type/grid/from/to四键，grid=belt；不发送EquipSlotItem。旧native outbound误注通过追加来源更正说明，originalAudit/native历史字段保留。共享规则和移动端复用不将整个DOM Belt painter升为shared类别，也不强制compat模式。

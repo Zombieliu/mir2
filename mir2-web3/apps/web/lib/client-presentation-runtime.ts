@@ -1,4 +1,7 @@
 import { readSharedItemTooltip, type CrystalTooltipItem, type CrystalTooltipDocument, type CrystalTooltipRuntime } from "./shared-item-tooltip";
+import { readSharedFishingClickTargets as readFishingTargets, readSharedFishingClickDecision as readFishingDecision,
+  type FishingClickWasmModule, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision } from "./shared-fishing-click";
+export type { FishingClickTargetsInput, FishingClickTargets, FishingClickInput, FishingClickDecision } from "./shared-fishing-click";
 
 /** Thin, data-only adapters for optional shared Rust presentation policies. */
 export type MapRouteInput = Readonly<{ width: number; height: number;
@@ -52,7 +55,9 @@ export type MapRouteWasmModule = {
   getMir2MapRoutePlan?: (width: number, height: number, ox: number, oy: number, gx: number, gy: number,
     edges: Uint8Array) => Int32Array;
 };
-export type PresentationWasmModule = {
+export type PresentationWasmModule = FishingClickWasmModule & {
+  entity_animation_abi_version?: () => number;
+  EntityAnimationBridge?: new () => RawEntityAnimationBridge;
   bag_to_belt_move_abi_version?: () => number;
   bag_to_belt_move_plan?: (json: string) => string;
   item_tooltip_abi_version?: () => number;
@@ -276,4 +281,83 @@ export function readSharedBagToBeltMovePlan(module: PresentationWasmModule, inpu
       || !boundedInteger(plan.from, 0, 255) || !boundedInteger(plan.to, 0, 5) || plan.to !== input.targetSlot) return null;
     return Object.freeze({ uniqueId: plan.uniqueId, from: plan.from, to: plan.to });
   } catch { return null; }
+}
+
+export function readSharedFishingClickTargets(module: PresentationWasmModule, input: FishingClickTargetsInput): FishingClickTargets | null {
+  return readFishingTargets(module, input);
+}
+
+export function readSharedFishingClickDecision(module: PresentationWasmModule, input: FishingClickInput): FishingClickDecision | null {
+  return readFishingDecision(module, input);
+}
+
+export type EntityAnimationRuntime = Readonly<{
+  source: object;
+  resolveMir2EntityAnimationPoses(snapshotJson: string): string;
+  getMir2EntityActionPose(queryJson: string): string;
+  resetMir2EntityAnimations(): void;
+}>;
+
+type RawEntityAnimationBridge = {
+  resolveMir2EntityAnimationPoses(snapshotJson: string): string;
+  getMir2EntityActionPose(queryJson: string): string;
+  resetMir2EntityAnimations(): void;
+};
+
+/** Lazily owns one shared animation world per Core facade. */
+export function createSharedEntityAnimationAccessor(module: PresentationWasmModule): () => EntityAnimationRuntime | null {
+  let cached: { runtime: EntityAnimationRuntime; current: () => boolean } | null = null;
+  let attempted = false, busy = false;
+  return () => {
+    if (busy) return null;
+    busy = true;
+    try {
+      if (cached) return cached.current() ? cached.runtime : null;
+      if (attempted) return null;
+      attempted = true;
+      const abi = module.entity_animation_abi_version, Bridge = module.EntityAnimationBridge;
+      if (typeof abi !== "function" || typeof Bridge !== "function" || abi.call(module) !== 1
+        || module.entity_animation_abi_version !== abi || module.EntityAnimationBridge !== Bridge) return null;
+      const source = new Bridge();
+      if (!source || typeof source !== "object") return null;
+      const resolve = source.resolveMir2EntityAnimationPoses, peek = source.getMir2EntityActionPose;
+      const reset = source.resetMir2EntityAnimations;
+      if (typeof resolve !== "function" || typeof peek !== "function" || typeof reset !== "function") return null;
+      const identities = () => module.entity_animation_abi_version === abi && module.EntityAnimationBridge === Bridge
+        && source.resolveMir2EntityAnimationPoses === resolve && source.getMir2EntityActionPose === peek
+        && source.resetMir2EntityAnimations === reset;
+      const current = () => identities() && abi.call(module) === 1 && identities();
+      const unavailable = () => new Error("Shared entity animation bridge is unavailable");
+      const bounded = (text: unknown, maximum: number): text is string => typeof text === "string"
+        && text.length <= maximum && new TextEncoder().encode(text).byteLength <= maximum;
+      const read = (input: string, maximum: number, getter: (json: string) => string): string => {
+        if (busy) throw unavailable();
+        busy = true;
+        try {
+          if (!bounded(input, maximum) || !current()) throw unavailable();
+          const result = getter.call(source, input);
+          if (!current() || !bounded(result, maximum)) throw unavailable();
+          // Page/Shell retain their existing semantic JSON and authority guards.
+          return result;
+        } finally { busy = false; }
+      };
+      const runtime: EntityAnimationRuntime = Object.freeze({ source,
+        resolveMir2EntityAnimationPoses(snapshotJson: string) { return read(snapshotJson, 2_097_152, resolve); },
+        getMir2EntityActionPose(queryJson: string) { return read(queryJson, 2048, peek); },
+        resetMir2EntityAnimations() {
+          if (busy) throw unavailable();
+          busy = true;
+          try {
+            if (!current()) throw unavailable();
+            reset.call(source);
+            if (!current()) throw unavailable();
+          } finally { busy = false; }
+        },
+      });
+      if (!current()) return null;
+      cached = { runtime, current };
+      return runtime;
+    } catch { return null; }
+    finally { busy = false; }
+  };
 }

@@ -117,3 +117,5 @@ pub mod storage;
 pub mod storage_interaction;
 
 pub use read_model::{PlayerStats, UiReadModel};
+// Platform hosts consume shared fishing policy through the established Bevy adapter edge.
+pub use mir2_client_core::fishing_click;

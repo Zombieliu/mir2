@@ -32,6 +32,7 @@ import { createAssetResidency } from "../lib/asset-residency";
 import { BagPointerRouter } from "../lib/bevy-bag-ui";
 import { bagBeltTargetAtClientPoint, sameBagBeltGeometry, validBagBeltDropGeometry, type BagBeltCallbacks, type BagBeltButtonBinding, type BagBeltGeometry, type BagBeltGestureProof, type BagBeltRect } from "../lib/bag-belt-gesture";
 import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry } from "../lib/npc-repair-service";
+import type { WorldFishingGesture, WorldFishingPointer, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { StoragePointerRouter } from "../lib/bevy-storage-ui";
 import { NpcShopPointerRouter } from "../lib/bevy-npc-shop-ui";
 import { matchesBevyHpOrbView, matchesBevyMpOrbView, readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
@@ -192,6 +193,14 @@ type HeldScenePointer = {
   dispatched: boolean;
   tileX?: number;
   tileY?: number;
+  fishingGesture?: WorldFishingGesture;
+};
+
+type WorldFishingPhysicalPointer = {
+  pointerId: number; pointerType: "mouse" | "touch"; startedAt: number; source: object; stage: HTMLElement;
+  held: HeldScenePointer; gesture: WorldFishingGesture | null; phase: "held" | "terminal" | "retired";
+  clientX: number; clientY: number;
+  callbacks: WorldFishingCallbacks; sourceKey: string; runtime: object; geometry: string; contextGeometry: string;
 };
 
 type ChatBubbleRecord = {
@@ -609,6 +618,7 @@ export function OriginalClientShell({
   npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onToggleNpcRepairHold,
   onBeginNpcRepairDrag, onCancelNpcRepairDrag, onDropNpcRepairDrag,
   onBagBeltDropGeometry, onBeginBagToBeltGesture, onArmBagToBeltGesture, onBagToBeltMove, onCancelBagToBeltGesture,
+  worldFishingAnimation, onWorldFishingAnimationCommit, onBeginWorldFishingGesture, onCancelWorldFishingGesture,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -993,6 +1003,24 @@ export function OriginalClientShell({
     webGl2SharedCanvasPrototype, world.activeNpcDialog, world.playerHp, world.playerMaxHp,
     world.playerMp, world.playerMaxMp, world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight]);
   const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
+  const worldFishingPhysicalRef = useRef<WorldFishingPhysicalPointer | null>(null);
+  const worldFishingTerminalRef = useRef<WorldFishingPhysicalPointer | null>(null);
+  const worldFishingPointersRef = useRef(new Map<number, globalThis.PointerEvent>());
+  const worldFishingQuarantineRef = useRef(new Set<number>());
+  const worldFishingShellRef = useRef<{ callbacks: WorldFishingCallbacks; ready: boolean; sourceKey: string;
+    runtime: object | null; geometry: string } | null>(null);
+  useLayoutEffect(() => {
+    const context = { callbacks: { onBeginWorldFishingGesture, onCancelWorldFishingGesture },
+      ready: screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !questLocalModalOpen && !mobileMoreOpen
+        && !bevyMailComposeReady && !bevyMailComposePending,
+      sourceKey: worldFishingAnimation?.record.sourceKey ?? "", runtime: worldFishingAnimation?.runtime ?? null,
+      geometry: JSON.stringify([stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]) };
+    worldFishingShellRef.current = context;
+    const lease = worldFishingPhysicalRef.current;
+    if (lease && (!context.ready || context.sourceKey !== lease.sourceKey || context.runtime !== lease.runtime
+      || context.geometry !== lease.contextGeometry || context.callbacks.onBeginWorldFishingGesture !== lease.callbacks.onBeginWorldFishingGesture
+      || context.callbacks.onCancelWorldFishingGesture !== lease.callbacks.onCancelWorldFishingGesture)) retireWorldFishingPhysical(lease);
+  });
   const heldQuestControlPointersRef = useRef(new Set<number>());
   const bagPointerRouterRef = useRef(new BagPointerRouter());
   const storagePointerRouterRef = useRef(new StoragePointerRouter());
@@ -1378,8 +1406,8 @@ export function OriginalClientShell({
   useEffect(()=>{
     const down=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=true;};
     const up=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=false;};
-    const pointers=new Set<number>(),pointerDown=(e:PointerEvent)=>{pointers.add(e.pointerId);if(pointers.size>1){heldScenePointerRef.current=null;combatCancelRef.current?.();}},pointerUp=(e:PointerEvent)=>pointers.delete(e.pointerId);
-    const cancel=()=>{combatTildeRef.current=false;pointers.clear();heldScenePointerRef.current=null;combatCancelRef.current?.();};
+    const pointers=new Set<number>(),pointerDown=(e:PointerEvent)=>{pointers.add(e.pointerId);if(pointers.size>1){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;combatCancelRef.current?.();}},pointerUp=(e:PointerEvent)=>pointers.delete(e.pointerId);
+    const cancel=()=>{combatTildeRef.current=false;pointers.clear();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;combatCancelRef.current?.();};
     window.addEventListener("keydown",down,true);window.addEventListener("keyup",up,true);window.addEventListener("pointerdown",pointerDown,true);window.addEventListener("pointerup",pointerUp,true);window.addEventListener("pointercancel",cancel,true);window.addEventListener("blur",cancel);
     return()=>{window.removeEventListener("keydown",down,true);window.removeEventListener("keyup",up,true);window.removeEventListener("pointerdown",pointerDown,true);window.removeEventListener("pointerup",pointerUp,true);window.removeEventListener("pointercancel",cancel,true);window.removeEventListener("blur",cancel);};
   },[]);
@@ -1562,7 +1590,7 @@ export function OriginalClientShell({
 
   function stopNpcShopWorldInput() {
     heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false;
-    heldScenePointerRef.current = null; onViewportDirectionStop(); updateSceneCombatPointer(null, null);
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop(); updateSceneCombatPointer(null, null);
   }
 
   function guardNpcShopGameplay<Args extends unknown[]>(callback: (...args: Args) => void): (...args: Args) => void {
@@ -1973,9 +2001,9 @@ export function OriginalClientShell({
   // `motionNow` on the wrapper element). Transient attack/struck frames quantise to the 120ms tick,
   // which is imperceptible. This is the bulk of the "running is janky / NPCs flicker" fix: stable
   // sprite refs let the memoised <EntitySpriteLayers> skip its per-frame DOM restyle.
-  const viewportEntitySprites = useMemo(() => {
+  const entityAnimationInputs = useMemo(() => {
     if (!player) {
-      return [];
+      return { spriteNow: Date.now(), entities: [] };
     }
     const spriteNow = Date.now();
     const snapshots = entityMotionSnapshotsRef.current;
@@ -2005,18 +2033,45 @@ export function OriginalClientShell({
         legacyAnimationState,
       };
     });
-    const animationPoses = resolveCrystalEntityAnimationPoses({
-      runtime: entityAnimationRuntimeFromWindow(),
-      worldKey: `${world.mapFileName ?? "none"}:${player.objectId}`,
-      worldSeed: entityAnimationWorldSeed,
-      now: spriteNow,
-      entities: animationInputs.map(({ entity, legacyAnimationState, motionSnapshot }) => ({
-        entity,
-        state: legacyAnimationState,
-        motionSnapshot,
+    return { spriteNow, entities: animationInputs };
+  }, [
+    bevyLocalSelfMotion,
+    bevyMapRuntimeGeneration,
+    entityAnimationWorldSeed,
+    player,
+    sceneSpriteFrameIndex,
+    sceneSpriteLibraries,
+    viewportEntities,
+    world.mapFileName,
+  ]);
+  const committedEntityAnimationRef = useRef<{ worldKey: string; poses: ReturnType<typeof resolveCrystalEntityAnimationPoses> } | null>(null);
+  const animationWorldKey = worldFishingAnimation?.record.sourceKey ?? `${world.mapFileName ?? "none"}:${player?.objectId ?? "none"}`;
+  useLayoutEffect(() => {
+    const context = worldFishingAnimation, runtime = context?.runtime ?? entityAnimationRuntimeFromWindow();
+    if (screen !== "game" || !player || !runtime) {
+      committedEntityAnimationRef.current = null;
+      onWorldFishingAnimationCommit?.(null);
+      return;
+    }
+    // Advancing the shared state machine belongs to the committed tree.
+    const atMs = Date.now();
+    const poses = resolveCrystalEntityAnimationPoses({ runtime, worldKey: animationWorldKey,
+      worldSeed: entityAnimationWorldSeed, now: atMs, selfAuthority: context?.record,
+      entities: entityAnimationInputs.entities.map(({ entity, legacyAnimationState, motionSnapshot }) => ({
+        entity, state: legacyAnimationState, motionSnapshot,
       })),
     });
-
+    committedEntityAnimationRef.current = { worldKey: animationWorldKey, poses };
+    if (!context) { onWorldFishingAnimationCommit?.(null); return; }
+    const token = Object.freeze({});
+    const commit = Object.freeze({ context, worldKey: animationWorldKey, worldSeed: entityAnimationWorldSeed, atMs, token });
+    onWorldFishingAnimationCommit?.(commit);
+    return () => onWorldFishingAnimationCommit?.(null, token);
+  }, [animationWorldKey, entityAnimationInputs, entityAnimationWorldSeed, onWorldFishingAnimationCommit, player, screen, worldFishingAnimation]);
+  const viewportEntitySprites = useMemo(() => {
+    const spriteNow = entityAnimationInputs.spriteNow, animationInputs = entityAnimationInputs.entities;
+    const committed = committedEntityAnimationRef.current;
+    const animationPoses = committed?.worldKey === animationWorldKey ? committed.poses : {};
     return animationInputs.map(({
       entity,
       motionSnapshot,
@@ -2040,16 +2095,7 @@ export function OriginalClientShell({
         ),
       };
     });
-  }, [
-    bevyLocalSelfMotion,
-    bevyMapRuntimeGeneration,
-    entityAnimationWorldSeed,
-    player,
-    sceneSpriteFrameIndex,
-    sceneSpriteLibraries,
-    viewportEntities,
-    world.mapFileName,
-  ]);
+  }, [animationWorldKey, entityAnimationInputs, sceneSpriteLibraries, sceneSpriteFrameIndex]);
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(
@@ -3511,6 +3557,164 @@ export function OriginalClientShell({
     };
   }
 
+  function retireWorldFishingPhysical(lease = worldFishingPhysicalRef.current) {
+    if (!lease || lease.phase === "retired") return;
+    lease.phase = "retired";
+    if (worldFishingPhysicalRef.current === lease) worldFishingPhysicalRef.current = null;
+    if (worldFishingTerminalRef.current === lease) worldFishingTerminalRef.current = null;
+    if (lease.gesture) lease.callbacks.onCancelWorldFishingGesture?.(lease.gesture);
+  }
+  function cancelWorldFishingHeldPointer() {
+    const lease = worldFishingPhysicalRef.current, held = heldScenePointerRef.current;
+    if (lease && held && (lease.held === held || lease.gesture !== null && held.fishingGesture === lease.gesture)) retireWorldFishingPhysical(lease);
+  }
+  function worldFishingStageGeometry(stage: HTMLElement): string | null {
+    if (!stage.isConnected || stageFrameRef.current !== stage || document.visibilityState !== "visible" || !document.hasFocus()
+      || stage.closest("[hidden]")) return null;
+    const style = window.getComputedStyle(stage), rect = stage.getBoundingClientRect();
+    if (style.display === "none" || style.visibility !== "visible" || Number(style.opacity) === 0 || stage.getClientRects().length === 0
+      || ![rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) || rect.width <= 0 || rect.height <= 0) return null;
+    const dpr = window.devicePixelRatio, scale = window.visualViewport?.scale ?? 1;
+    if (!Number.isFinite(dpr) || dpr <= 0 || !Number.isFinite(scale) || scale <= 0) return null;
+    return JSON.stringify([rect.left, rect.top, rect.width, rect.height, dpr, scale]);
+  }
+  function worldFishingPointCurrent(lease: WorldFishingPhysicalPointer): boolean {
+    if (![lease.clientX, lease.clientY].every(Number.isFinite)) return false;
+    const rect = lease.stage.getBoundingClientRect();
+    if (lease.clientX < rect.left || lease.clientX >= rect.right || lease.clientY < rect.top || lease.clientY >= rect.bottom) return false;
+    const hit = document.elementFromPoint(lease.clientX, lease.clientY);
+    if (!hit || !lease.stage.contains(hit) || hit.closest("[data-ui-interactive='true'], .game-ui-scene, .login-overlay, .select-overlay")) return false;
+    const point = scenePointFromMouseEvent({ clientX: lease.clientX, clientY: lease.clientY, currentTarget: lease.stage });
+    const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.();
+    if (bag?.inputRegions.some(r => point.sceneX >= r.left && point.sceneY >= r.top && point.sceneX < r.left + r.width && point.sceneY < r.top + r.height)) return false;
+    return true;
+  }
+  function updateWorldFishingPointerPosition(lease: WorldFishingPhysicalPointer, event: globalThis.PointerEvent) {
+    if (worldFishingPhysicalRef.current !== lease || lease.phase !== "held" || event.timeStamp < lease.startedAt) return;
+    lease.clientX = event.clientX; lease.clientY = event.clientY;
+    if (!worldFishingPointCurrent(lease)) { retireWorldFishingPhysical(lease); return; }
+    const held = heldScenePointerRef.current;
+    if (held && (held === lease.held || held.fishingGesture === lease.gesture)) {
+      const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: lease.stage });
+      held.sceneX = point.sceneX; held.sceneY = point.sceneY;
+    }
+  }
+  function worldFishingPhysicalCurrent(lease: WorldFishingPhysicalPointer): boolean {
+    const context = worldFishingShellRef.current, physical = worldFishingPhysicalRef.current === lease && lease.phase === "held",
+      terminal = worldFishingTerminalRef.current === lease && lease.phase === "terminal";
+    const held = heldScenePointerRef.current;
+    if (!context?.ready || !context.runtime || lease.phase === "retired" || !physical && !terminal
+      || context.sourceKey !== lease.sourceKey || context.runtime !== lease.runtime
+      || context.callbacks.onBeginWorldFishingGesture !== lease.callbacks.onBeginWorldFishingGesture
+      || context.callbacks.onCancelWorldFishingGesture !== lease.callbacks.onCancelWorldFishingGesture
+      || worldFishingStageGeometry(lease.stage) !== lease.geometry || !worldFishingPointCurrent(lease)
+      || physical && (worldFishingPointersRef.current.size !== 1 || worldFishingPointersRef.current.get(lease.pointerId) !== lease.source
+        || worldFishingQuarantineRef.current.size > 0 || !held || held !== lease.held && held.fishingGesture !== lease.gesture)) {
+      retireWorldFishingPhysical(lease); return false;
+    }
+    const currentHeld = heldScenePointerRef.current;
+    const valid = lease.phase === (physical ? "held" : "terminal") && worldFishingShellRef.current === context
+      && (physical ? worldFishingPhysicalRef.current === lease && worldFishingPointersRef.current.size === 1
+        && worldFishingPointersRef.current.get(lease.pointerId) === lease.source && worldFishingQuarantineRef.current.size === 0
+        && !!currentHeld && (currentHeld === lease.held || lease.gesture !== null && currentHeld.fishingGesture === lease.gesture)
+        : worldFishingTerminalRef.current === lease);
+    if (!valid) retireWorldFishingPhysical(lease);
+    return valid;
+  }
+  function attachWorldFishingPhysical(held: HeldScenePointer, source: globalThis.PointerEvent): void {
+    const context = worldFishingShellRef.current, stage = stageFrameRef.current;
+    if (held.button !== 0 || !context?.ready || !context.runtime || !stage || !context.sourceKey || source.button !== 0 || source.isPrimary === false
+      || source.pointerType !== "mouse" && source.pointerType !== "touch" || !Number.isSafeInteger(source.pointerId) || source.pointerId < 0
+      || worldFishingQuarantineRef.current.size > 0 || worldFishingPointersRef.current.size !== 1
+      || worldFishingPointersRef.current.get(source.pointerId) !== source || heldScenePointerRef.current !== held) return;
+    const geometry = worldFishingStageGeometry(stage);
+    if (!geometry) return;
+    retireWorldFishingPhysical();
+    const lease: WorldFishingPhysicalPointer = { pointerId: source.pointerId, pointerType: source.pointerType, startedAt: source.timeStamp,
+      source, stage, held, gesture: null, phase: "held", clientX: source.clientX, clientY: source.clientY, callbacks: context.callbacks, sourceKey: context.sourceKey, runtime: context.runtime, geometry, contextGeometry: context.geometry };
+    worldFishingPhysicalRef.current = lease;
+    const pointer: WorldFishingPointer = Object.freeze({ source, stage, pointerId: source.pointerId,
+      pointerType: source.pointerType, startedAt: source.timeStamp, current: () => worldFishingPhysicalCurrent(lease) });
+    const gesture = context.callbacks.onBeginWorldFishingGesture?.(pointer) ?? null;
+    if (!gesture || worldFishingPhysicalRef.current !== lease || lease.phase !== "held" || !worldFishingPhysicalCurrent(lease)) {
+      if (gesture) context.callbacks.onCancelWorldFishingGesture?.(gesture);
+      retireWorldFishingPhysical(lease); return;
+    }
+    lease.gesture = gesture; held.fishingGesture = gesture;
+  }
+  function handleSceneWorldPointerDown(event: ReactPointerEvent<HTMLDivElement>, before: HeldScenePointer | null) {
+    const source = worldFishingPointersRef.current.get(event.pointerId), held = heldScenePointerRef.current;
+    if (!source || source !== event.nativeEvent) return;
+    if (held && held !== before) { attachWorldFishingPhysical(held, source); return; }
+    if (event.pointerType !== "touch" || event.button !== 0 || event.isPrimary === false || !worldFishingShellRef.current?.ready
+      || !(event.target instanceof HTMLElement) || event.target.closest("[data-ui-interactive='true'], .game-ui-scene, .login-overlay, .select-overlay")
+      || event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype) || worldFishingQuarantineRef.current.size > 0
+      || worldFishingPointersRef.current.size !== 1) return;
+    event.preventDefault();
+    const point = scenePointFromMouseEvent(event), pointer: HeldScenePointer = {
+      button: 0, sceneX: point.sceneX, sceneY: point.sceneY, startedAt: Date.now(), dispatched: false,
+    };
+    heldScenePointerRef.current = pointer; attachWorldFishingPhysical(pointer, source);
+  }
+  function finishWorldFishingPhysical(lease: WorldFishingPhysicalPointer, click: boolean) {
+    if (worldFishingPhysicalRef.current !== lease || lease.phase !== "held") return;
+    const held = heldScenePointerRef.current;
+    // Terminal custody is burned before any user callback; only this synchronous edge can use it.
+    worldFishingPhysicalRef.current = null; worldFishingTerminalRef.current = lease; lease.phase = "terminal";
+    if (held && (held === lease.held || held.fishingGesture === lease.gesture)) heldScenePointerRef.current = null;
+    try {
+      if (click && held && !held.dispatched && worldFishingPhysicalCurrent(lease)) dispatchSceneClickInput(held);
+    } finally { retireWorldFishingPhysical(lease); }
+  }
+  useEffect(() => {
+    const down = (event: globalThis.PointerEvent) => {
+      const pointers = worldFishingPointersRef.current, quarantine = worldFishingQuarantineRef.current;
+      const prior = pointers.get(event.pointerId);
+      if (!Number.isSafeInteger(event.pointerId) || event.pointerId < 0 || !Number.isFinite(event.timeStamp) || event.timeStamp < 0) { retireWorldFishingPhysical(); return; }
+      if (prior && (event.timeStamp < prior.timeStamp || event === prior)) return;
+      pointers.set(event.pointerId, event);
+      if (prior || pointers.size > 1 || quarantine.size > 0) {
+        for (const id of pointers.keys()) quarantine.add(id);
+        retireWorldFishingPhysical();
+      }
+    };
+    const up = (event: globalThis.PointerEvent) => {
+      const downEvent = worldFishingPointersRef.current.get(event.pointerId);
+      if (!downEvent || event.timeStamp < downEvent.timeStamp || event.pointerType !== downEvent.pointerType) return;
+      const lease = worldFishingPhysicalRef.current;
+      if (lease && lease.pointerId === event.pointerId && event.pointerType === lease.pointerType && event.timeStamp >= lease.startedAt) {
+        updateWorldFishingPointerPosition(lease, event);
+        finishWorldFishingPhysical(lease, true);
+      }
+      worldFishingPointersRef.current.delete(event.pointerId); worldFishingQuarantineRef.current.delete(event.pointerId);
+    };
+    const move = (event: globalThis.PointerEvent) => {
+      const downEvent = worldFishingPointersRef.current.get(event.pointerId), lease = worldFishingPhysicalRef.current;
+      if (lease && downEvent === lease.source && event.pointerId === lease.pointerId && event.pointerType === lease.pointerType) updateWorldFishingPointerPosition(lease, event);
+    };
+    const cancel = (event: globalThis.PointerEvent) => {
+      const downEvent = worldFishingPointersRef.current.get(event.pointerId);
+      if (!downEvent || event.timeStamp < downEvent.timeStamp || event.pointerType !== downEvent.pointerType) return;
+      const lease = worldFishingPhysicalRef.current;
+      if (lease?.pointerId === event.pointerId && event.timeStamp >= lease.startedAt) retireWorldFishingPhysical(lease);
+      worldFishingPointersRef.current.delete(event.pointerId); worldFishingQuarantineRef.current.delete(event.pointerId);
+    };
+    const retire = () => {
+      for (const id of worldFishingPointersRef.current.keys()) worldFishingQuarantineRef.current.add(id);
+      retireWorldFishingPhysical();
+    };
+    const hidden = () => { if (document.visibilityState !== "visible") retire(); };
+    window.addEventListener("pointerdown", down, true); window.addEventListener("pointerup", up, true); window.addEventListener("pointermove", move, true);
+    window.addEventListener("pointercancel", cancel, true); window.addEventListener("blur", retire); window.addEventListener("resize", retire);
+    window.addEventListener("pagehide", retire); document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("pointerdown", down, true); window.removeEventListener("pointerup", up, true); window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointercancel", cancel, true); window.removeEventListener("blur", retire); window.removeEventListener("resize", retire);
+      window.removeEventListener("pagehide", retire); document.removeEventListener("visibilitychange", hidden);
+      retire(); worldFishingPointersRef.current.clear();
+    };
+  }, []);
+
   function dispatchSceneMoveInput(pointer: HeldScenePointer) {
     if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") return;
@@ -3522,7 +3726,7 @@ export function OriginalClientShell({
       if (playerUiPreferences?.newMove) onViewportTileSecondaryAction(tile.x, tile.y);
       else onViewportDirectionStep(tile.x, tile.y, "run");
     } else {
-      onViewportDirectionStep(tile.x, tile.y, "walk");
+      onViewportDirectionStep(tile.x, tile.y, "walk", pointer.fishingGesture);
     }
   }
 
@@ -3539,7 +3743,7 @@ export function OriginalClientShell({
     if (pointer.button === 2) {
       onViewportTileSecondaryAction(tile.x, tile.y);
     } else {
-      onViewportTileClick(tile.x, tile.y);
+      onViewportTileClick(tile.x, tile.y, pointer.fishingGesture);
     }
   }
 
@@ -3560,7 +3764,7 @@ export function OriginalClientShell({
     try { if(edge)bagPointerCallbacksRef.current.onBevyBagPointer?.(edge); }
     finally {
       if(combatHold)endCombatUiHold("bag",combatHold);
-      if(edge||combatHold){heldScenePointerRef.current=null;onViewportDirectionStop();}
+      if(edge||combatHold){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}
     }
   }
 
@@ -3569,7 +3773,7 @@ export function OriginalClientShell({
     const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("spells"):undefined;
     const edge=spellsPointerRouterRef.current.cancel();
     try { if(edge)spellsPointerCallbacksRef.current.onBevySpellsPointer?.(edge); }
-    finally { if(combatHold)endCombatUiHold("spells",combatHold);if(edge||combatHold){heldScenePointerRef.current=null;onViewportDirectionStop();} }
+    finally { if(combatHold)endCombatUiHold("spells",combatHold);if(edge||combatHold){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();} }
   }
   function handleSharedSpellsPointer(event:{target:EventTarget|null;pointerId:number;pointerType:string;button:number;clientX:number;clientY:number;preventDefault:()=>void},phase:"down"|"move"|"up"|"cancel"):boolean {
     const router=spellsPointerRouterRef.current,prior=router.held;
@@ -3583,7 +3787,7 @@ export function OriginalClientShell({
     if(phase==="down"){
       const onCanvas=event.target instanceof HTMLElement&&event.target.id===sharedUiCanvasId(webGl2SharedCanvasPrototype);
       if(!onCanvas||!bevySpellsPageReady)return false;
-      if(context.modal){cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();heldScenePointerRef.current=null;onViewportDirectionStop();}
+      if(context.modal){cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}
       const bag=bagPointerCallbacksRef.current.getBevyBagPointerContext?.()??null;
       const bagForeground=!context.modal&&bag?.inputRegions.some(r=>point.sceneX>=r.left&&point.sceneY>=r.top&&point.sceneX<r.left+r.width&&point.sceneY<r.top+r.height);
       if(bagForeground||bagPointerRouterRef.current.held||hudPointerRouterRef.current.held||characterPointerRouterRef.current.held)return false;
@@ -3594,7 +3798,7 @@ export function OriginalClientShell({
     const edge=phase==="down"?router.down(context,event.pointerId,point.sceneX,point.sceneY):router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
     if(!edge)return Boolean(prior)||context.modal;
     if(typeof onCombatUiHeld==="function"&&phase==="down"&&router.held)beginCombatUiHold("spells",event.pointerId);
-    event.preventDefault();heldScenePointerRef.current=null;onViewportDirectionStop();
+    event.preventDefault();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();
     const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("spells"):undefined;
     const callbackLease=router.held;let accepted=false;
     try { accepted=Boolean(spellsPointerCallbacksRef.current.onBevySpellsPointer?.(edge)); }
@@ -3609,7 +3813,7 @@ export function OriginalClientShell({
     finally {
       if (hold) endCombatUiHold("npcShop", hold);
       if ((edge || hold) && (!router.held || router.held === prior) && heldScenePointerRef.current === sceneHold) {
-        heldScenePointerRef.current = null; onViewportDirectionStop();
+        cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
       }
     }
   }
@@ -3686,7 +3890,7 @@ export function OriginalClientShell({
       || !questWorldControlAt(controls, point.sceneX * controls.logicalWidth / width, point.sceneY * controls.logicalHeight / height))) return false;
     held.add(event.pointerId);
     // Bevy receives the ordinary pointer event; platform world routers must not consume that gesture.
-    event.preventDefault(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    event.preventDefault(); cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
     return true;
   }
 
@@ -3779,7 +3983,7 @@ export function OriginalClientShell({
       callbacks.onCancelBagToBeltGesture?.(proof); event.preventDefault(); return true;
     }
     bagBeltPointerRef.current = lease; rememberBagBeltClick(event.pointerId, event.timeStamp, node);
-    event.preventDefault(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    event.preventDefault(); cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
     if (owner === "react") {
       try { node.setPointerCapture(event.pointerId); } catch { cancelBagBeltPointer(lease); return true; }
       beginCombatUiHold("bag", event.pointerId); lease.hold = combatUiHoldRef.current.get("bag");
@@ -3887,7 +4091,7 @@ export function OriginalClientShell({
     npcRepairPointerRef.current = lease;
     try { event.currentTarget.setPointerCapture(event.pointerId); }
     catch { cancelNpcRepairPointer(lease); return; }
-    heldScenePointerRef.current = null; onViewportDirectionStop();
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
     beginCombatUiHold("bag", event.pointerId); lease.hold = combatUiHoldRef.current.get("bag");
     if (npcRepairPointerRef.current !== lease && lease.hold) endCombatUiHold("bag", lease.hold);
   }
@@ -3980,7 +4184,7 @@ export function OriginalClientShell({
     finally {
       if (hold) endCombatUiHold("storage", hold);
       if ((edge || hold) && (!router.held || router.held === prior) && heldScenePointerRef.current === sceneHold) {
-        heldScenePointerRef.current = null; onViewportDirectionStop();
+        cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
       }
     }
   }
@@ -4021,17 +4225,17 @@ export function OriginalClientShell({
     if (router.held && router.held !== lease || heldScenePointerRef.current !== sceneHold) return true;
     if (phase === "down") {
       try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window release is also routed. */ }
-      heldScenePointerRef.current = edge.origin === "world" && event.pointerType === "mouse"
+      heldScenePointerRef.current = edge.origin === "world" && (event.pointerType === "mouse" || event.pointerType === "touch")
         ? { button: edge.button, sceneX: edge.x, sceneY: edge.y, startedAt: Date.now(), dispatched: false } : null;
       if (edge.origin === "storage") onViewportDirectionStop();
     } else if (phase === "move" && edge.origin === "world" && heldScenePointerRef.current) {
       heldScenePointerRef.current.sceneX = edge.x; heldScenePointerRef.current.sceneY = edge.y;
-    } else if (phase === "up") { if (edge.origin === "world") stopHeldScenePointer(); else heldScenePointerRef.current = null; onViewportDirectionStop(); }
-    else if (phase === "cancel") { heldScenePointerRef.current = null; onViewportDirectionStop(); }
+    } else if (phase === "up") { if (edge.origin === "world") stopHeldScenePointer(); else cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop(); }
+    else if (phase === "cancel") { cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop(); }
     return true;
   }
   function cancelSharedComposePointer(){if(heldComposePointerRef.current!==null){heldComposePointerRef.current=null;
-    mailComposePointerCallbacksRef.current.onBevyMailComposePointerCancel?.();heldScenePointerRef.current=null;onViewportDirectionStop();}}
+    mailComposePointerCallbacksRef.current.onBevyMailComposePointerCancel?.();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}}
   function handleSharedComposePointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:'down'|'move'|'up'|'cancel'):boolean{
     const held=heldComposePointerRef.current,context=bevyMailTextContext;
     if(phase==='cancel'){if(held!==null){event.preventDefault();cancelSharedComposePointer();return true;}return false;}
@@ -4055,13 +4259,13 @@ export function OriginalClientShell({
       cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();
     }
     const accepted=mailComposePointerCallbacksRef.current.onBevyMailComposePointer?.(event.pointerId,phase,x,y,event.shiftKey===true)??false;
-    event.preventDefault();heldScenePointerRef.current=null;onViewportDirectionStop();
+    event.preventDefault();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();
     if(phase==='down'&&accepted){heldComposePointerRef.current=event.pointerId;
       try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window terminal edge also cancels. */}}
     if(phase==='up'||!accepted)heldComposePointerRef.current=null;
     return true;
   }
-  function cancelSharedMailPointer(){const edge=mailPointerRouterRef.current.cancel();if(edge){mailPointerCallbacksRef.current.onBevyMailPointer?.(edge);heldScenePointerRef.current=null;onViewportDirectionStop();}}
+  function cancelSharedMailPointer(){const edge=mailPointerRouterRef.current.cancel();if(edge){mailPointerCallbacksRef.current.onBevyMailPointer?.(edge);cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}}
   function handleSharedMailPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"):boolean{
     const router=mailPointerRouterRef.current,prior=router.held,context=mailPointerCallbacksRef.current.getBevyMailPointerContext?.()??null;
     if(prior&&(!router.matches(context)||phase==="down"&&prior.pointerId!==event.pointerId)){event.preventDefault();cancelSharedMailPointer();return true;}
@@ -4078,7 +4282,7 @@ export function OriginalClientShell({
     }
     const edge=phase==="down"?router.down(context,event.pointerId,point.sceneX,point.sceneY):router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
     if(!edge)return Boolean(prior)||context.modal;
-    event.preventDefault();heldScenePointerRef.current=null;onViewportDirectionStop();const lease=router.held;let accepted=false;
+    event.preventDefault();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();const lease=router.held;let accepted=false;
     try{accepted=Boolean(mailPointerCallbacksRef.current.onBevyMailPointer?.(edge));}finally{if(!accepted&&router.held===lease)cancelSharedMailPointer();}
     if(phase==="down")try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window listeners own the terminal. */}return true;
   }
@@ -4086,7 +4290,7 @@ export function OriginalClientShell({
     const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("character"):undefined;
     const edge = characterPointerRouterRef.current.cancel();
     try { if(edge)characterPointerCallbacksRef.current.onBevyCharacterPointer?.(edge); }
-    finally { if(combatHold)endCombatUiHold("character",combatHold);if(edge||combatHold){heldScenePointerRef.current=null;onViewportDirectionStop();} }
+    finally { if(combatHold)endCombatUiHold("character",combatHold);if(edge||combatHold){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();} }
   }
   function handleSharedCharacterPointer(event: {
     target: EventTarget | null; pointerId: number; pointerType: string; button: number;
@@ -4117,7 +4321,7 @@ export function OriginalClientShell({
       : router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
     if (!edge) return Boolean(prior);
     if(typeof onCombatUiHeld==="function"&&phase==="down"&&router.held)beginCombatUiHold("character",event.pointerId);
-    event.preventDefault(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    event.preventDefault(); cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
     const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("character"):undefined;
     const callbackLease=router.held;let accepted=false;
     try { accepted=Boolean(characterPointerCallbacksRef.current.onBevyCharacterPointer?.(edge)); }
@@ -4131,7 +4335,7 @@ export function OriginalClientShell({
     const prior=hudPointerRouterRef.current.cancel();
     if(combatHold)endCombatUiHold("hud",combatHold);
     if(!prior&&!combatHold)return;
-    heldScenePointerRef.current = null; onViewportDirectionStop();
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
   }
   function handleSharedHudPointer(event: {
     target: EventTarget | null; pointerId: number; pointerType: string; button: number;
@@ -4226,23 +4430,23 @@ export function OriginalClientShell({
     const callbackLease=router.held;let accepted=false;
     try { accepted=Boolean(bagPointerCallbacksRef.current.onBevyBagPointer?.(edge)); }
     finally { if(!accepted&&ownsHeld&&router.held===callbackLease)cancelSharedBagPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("bag",combatHold); }
-    if(!accepted){cancelBagBeltPointer(bagBeltArmedSharedRef.current);if(ownsHeld){heldScenePointerRef.current=null;onViewportDirectionStop();}return;}
+    if(!accepted){cancelBagBeltPointer(bagBeltArmedSharedRef.current);if(ownsHeld){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}return;}
     if (phase !== "down" && (!wasHeld || wasHeld.pointerId !== event.pointerId)) return;
     // Both owners see the same ordered edge, but only its down-origin owner
     // may act. In particular a world drag entering the painted bag stays world.
     if (phase === "down") {
       try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window release still cancels. */ }
-      heldScenePointerRef.current = edge.origin === "world" && event.pointerType === "mouse"
+      heldScenePointerRef.current = edge.origin === "world" && (event.pointerType === "mouse" || event.pointerType === "touch")
         ? { button: edge.button, sceneX: edge.x, sceneY: edge.y, startedAt: Date.now(), dispatched: false } : null;
     } else if (edge.origin === "world" && phase === "move" && heldScenePointerRef.current) {
       heldScenePointerRef.current.sceneX = edge.x;
       heldScenePointerRef.current.sceneY = edge.y;
     } else if (phase === "up") {
       if (edge.origin === "world" && event.pointerType === "mouse") stopHeldScenePointer();
-      else heldScenePointerRef.current = null;
+      else cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       onViewportDirectionStop();
     } else if (phase === "cancel") {
-      heldScenePointerRef.current = null;
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       onViewportDirectionStop();
     }
   }
@@ -4279,7 +4483,7 @@ export function OriginalClientShell({
     cancelSharedBagPointer();
     // The preceding owner may have started an ordinary world mouse hold
     // before the shared canvas became interactive.
-    heldScenePointerRef.current = null;
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
     onViewportDirectionStop();
   }, [npcRepairView?.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
   useEffect(() => {
@@ -4354,7 +4558,7 @@ export function OriginalClientShell({
     if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
     if (isSharedBagCompatibilityMouse(event)) return;
     if (screen !== "game" || !player || !sceneInteractionReady || bevyQuestUiCapturesPointer) {
-      heldScenePointerRef.current = null;
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       return;
     }
 
@@ -4380,6 +4584,9 @@ export function OriginalClientShell({
       dispatched: false,
     };
     heldScenePointerRef.current = pointer;
+    const sources = [...worldFishingPointersRef.current.values()].filter(source => source.pointerType === "mouse"
+      && source.button === 0 && source.target === event.target && event.timeStamp >= source.timeStamp);
+    if (sources.length === 1) attachWorldFishingPhysical(pointer, sources[0]);
   }
 
   function handleScenePointerMove(event: MouseEvent<HTMLDivElement>) {
@@ -4389,7 +4596,7 @@ export function OriginalClientShell({
     const blocked=event.target instanceof Element&&Boolean(event.target.closest(".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar"));
     updateSceneCombatPointer(blocked||!tileForCombat?null:[tileForCombat.x,tileForCombat.y],blocked?null:hoverTarget?.dataset.objectId??null);
     if (isSharedBagCompatibilityMouse(event)) return;
-    if (bevyQuestUiCapturesPointer) { heldScenePointerRef.current = null; return; }
+    if (bevyQuestUiCapturesPointer) { cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; return; }
     const held = heldScenePointerRef.current;
       if (!held || screen !== "game" || !sceneInteractionReady) {
         return;
@@ -4403,17 +4610,22 @@ export function OriginalClientShell({
     };
   }
 
-  function stopHeldScenePointer() {
+  function stopHeldScenePointer(event?: { timeStamp: number }) {
+    const physical = worldFishingPhysicalRef.current;
+    if (physical) {
+      if (event && event.timeStamp < physical.startedAt) return;
+      finishWorldFishingPhysical(physical, true); return;
+    }
     if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     const held = heldScenePointerRef.current;
-    heldScenePointerRef.current = null;
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
     if (!held || held.dispatched || bevyQuestUiCapturesPointer) return;
     dispatchSceneClickInput(held);
   }
 
   useEffect(() => {
     if (screen !== "game" || bevyQuestUiCapturesPointer) {
-      heldScenePointerRef.current = null;
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       return;
     }
 
@@ -4428,8 +4640,10 @@ export function OriginalClientShell({
       dispatchSceneMoveInput(held);
     }, CRYSTAL_MOVE_INPUT_INTERVAL_MS);
 
-    const stop = () => {
-      heldScenePointerRef.current = null;
+    const stop = (event?: Event) => {
+      const physical = worldFishingPhysicalRef.current;
+      if (event?.type === "mouseup" && physical && event.timeStamp < physical.startedAt) return;
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       onViewportDirectionStop();
     };
     window.addEventListener("mouseup", stop);
@@ -4566,7 +4780,9 @@ export function OriginalClientShell({
           data-experience-bar-owner={experienceDrawPlanOwner ? "canvas2d" : experienceBarOwner ? "bevy" : "react"}
           data-weight-bar-owner={weightDrawPlanOwner ? "canvas2d" : weightBarOwner ? "bevy" : "react"}
           data-bag-owner-revision={bevyBagOwnerRevision}
-          onPointerDownCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "down")}
+          onPointerDownCapture={(event: ReactPointerEvent<HTMLDivElement>) => {
+             const before = heldScenePointerRef.current; handleSharedUiPointer(event, "down"); handleSceneWorldPointerDown(event, before);
+           }}
           onPointerMoveCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "move")}
           onLostPointerCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "cancel")}
           onWheelCapture={event=>{if(bevyMailComposeReady&&bevyMailTextContext?.status.modal){event.preventDefault();
@@ -4582,7 +4798,7 @@ export function OriginalClientShell({
           }}
           onMouseDown={handleScenePointerAction}
           onMouseMove={handleScenePointerMove}
-          onMouseUp={(event) => { if (!isSharedBagCompatibilityMouse(event)) stopHeldScenePointer(); }}
+          onMouseUp={(event) => { if (!isSharedBagCompatibilityMouse(event)) stopHeldScenePointer(event); }}
           onMouseLeave={()=>updateSceneCombatPointer(null,null)}
           onContextMenuCapture={(event) => {
             if (screen === "game") {

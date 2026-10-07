@@ -1512,6 +1512,11 @@ pub fn resolve_mir2_entity_animation_poses(snapshot_json: String) -> String {
     entity_animation_bridge::resolve_json(&snapshot_json)
 }
 
+#[wasm_bindgen(js_name = getMir2EntityActionPose)]
+pub fn get_mir2_entity_action_pose(query_json: String) -> String {
+    entity_animation_bridge::action_pose_json(&query_json)
+}
+
 #[wasm_bindgen(js_name = resetMir2EntityAnimations)]
 pub fn reset_mir2_entity_animations() {
     entity_animation_bridge::reset();

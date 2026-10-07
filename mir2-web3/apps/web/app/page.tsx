@@ -88,6 +88,12 @@ import { readSharedItemTooltip, readSharedItemCatalogInfo, type CrystalTooltipRu
 import { readSharedCharacterStats, type CrystalStatsRuntime } from "../lib/shared-character-stats";
 import { readSharedSkillBarDocument, parseCrystalSkillBarPositions, serializeCrystalSkillBarPositions, CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY, DEFAULT_CRYSTAL_SKILL_BAR_POSITIONS, type CrystalSkillBarRuntime, type CrystalSkillBarRow, type CrystalSkillBarPositions } from "../lib/shared-skill-bar";
 import type { SkillBarLease } from "./components/original-client-skill-bars";
+import type { EntityAnimationRuntime } from "../lib/client-presentation-runtime";
+import { WorldFishingSource, sameOwner as sameWorldFishingOwner, type WorldFishingOwner,
+  type WorldFishingSourceRecord } from "../lib/world-fishing-source";
+import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationContext,
+  WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
+import { readCrystalEntityActionPose, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
 import { SharedCombatModeKeys, isCrystalCombatModeFunction, nextCombatModePhysicalGeneration, type CombatModeRuntime, type CombatModeOwner, type CombatModeProof } from "../lib/shared-combat-mode-keys";
 import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
 import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, HeroUiOrigin, HeroUiLease } from "./components/original-client-hero-management-window";
@@ -142,6 +148,19 @@ type SocialTradeSendProof = Readonly<{owner: SocialReplyOwner; incarnation: numb
 import { projectBevyStorageModel } from "../lib/bevy-storage-model";
 import { type StorageRuntime, type StorageIntent, type StorageCommandProof } from "../lib/bevy-storage-ui";
 type EquipmentOwnerProof = SharedEquipmentOwnerProof | StorageCommandProof;
+type WorldFishingLease = {
+  gesture: WorldFishingGesture; pointer: WorldFishingPointer; owner: WorldFishingOwner;
+  core: ClientCoreRuntime; runtime: EntityAnimationRuntime; sourceKey: string; continuityRevision: number;
+  rodSignature: string; valid: boolean; busy: boolean;
+};
+type WorldFishingFinalProof = Readonly<{ token: object }>;
+type WorldFishingAttempt = {
+  lease: WorldFishingLease; source: WorldFishingSourceRecord; world: WorldState; region: OriginalMapRegion;
+  rodSignature: string; layoutSignature: string; equipment: EquipmentGatewaySnapshot;
+  commit: WorldFishingAnimationCommit | null; pose: CrystalEntityActionPose | null;
+  direction: string; command: Readonly<Record<string, unknown>>; priorCastMs: number;
+  castMs: number | null; entered: boolean;
+};
 import { loadClientCoreRuntime, type AuthUiRuntime, type ClientCoreRuntime, type QuestActionDecision,
   type ChatUiRuntime, type ChatUiDocument, type ChatUiControls, type CashPreviewLayerDocument } from "../lib/client-core-runtime";
 import { EquipmentSessionController, type EquipmentSessionStatus } from "../lib/equipment-session-controller";
@@ -628,6 +647,8 @@ type GatewayWorldEntity = {
   light?: number | null;
   nameColourArgb?: number | null;
   dead: boolean;
+  fishing?: boolean | null;
+  transformType?: number | null;
   disposition: EntityDisposition;
   sprite?: GatewayWorldEntitySprite | null;
   questIds?: number[];
@@ -2221,6 +2242,29 @@ export default function HomePage() {
     Map<string, StorageTransferReservation>
   >(new Map());
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  const worldFishingSourceRef = useRef(new WorldFishingSource());
+  const [worldFishingRecord, setWorldFishingRecord] = useState<WorldFishingSourceRecord | null>(null);
+  const worldFishingRuntimeRef = useRef<{ core: ClientCoreRuntime; runtime: EntityAnimationRuntime } | null>(null);
+  const worldFishingCommitRef = useRef<WorldFishingAnimationCommit | null>(null);
+  const worldFishingGestureRegistryRef = useRef(new WeakMap<WorldFishingGesture, WorldFishingLease>());
+  const worldFishingActiveGestureRef = useRef<WorldFishingLease | null>(null);
+  const worldFishingSendProofsRef = useRef(new WeakMap<WorldFishingFinalProof, WorldFishingAttempt>());
+  const worldFishingQueuedRef = useRef<{ queued: QueuedMoveIntent; gesture: WorldFishingGesture } | null>(null);
+  const worldFishingCastClockRef = useRef<{ owner: WorldFishingOwner; lastCastMs: number } | null>(null);
+  const worldFishingCallbacksRef = useRef<WorldFishingCallbacks>({});
+  useLayoutEffect(() => { worldFishingCallbacksRef.current = {
+    onWorldFishingAnimationCommit: commitWorldFishingAnimation,
+    onBeginWorldFishingGesture: beginWorldFishingGesture,
+    onCancelWorldFishingGesture: cancelWorldFishingGesture,
+  }; });
+  const worldFishingStableCallbacks: WorldFishingCallbacks = {
+    onWorldFishingAnimationCommit: useCallback((commit: WorldFishingAnimationCommit | null, previous?: object) =>
+      worldFishingCallbacksRef.current.onWorldFishingAnimationCommit?.(commit, previous), []),
+    onBeginWorldFishingGesture: useCallback((pointer: WorldFishingPointer) =>
+      worldFishingCallbacksRef.current.onBeginWorldFishingGesture?.(pointer) ?? null, []),
+    onCancelWorldFishingGesture: useCallback((gesture: WorldFishingGesture) =>
+      worldFishingCallbacksRef.current.onCancelWorldFishingGesture?.(gesture), []),
+  };
   const bagBeltGeometryRef = useRef<BagBeltGeometry | null>(null);
   const bagBeltGestureRegistryRef = useRef(new WeakMap<BagBeltGestureProof, BagBeltGestureRecord>());
   const bagBeltArmedGestureRef = useRef<BagBeltGestureProof | null>(null);
@@ -2600,18 +2644,39 @@ export default function HomePage() {
   const [realmInfo, setRealmInfo] = useState<GatewayRealmInfo | null>(null);
   const [questCoreStatus, setQuestCoreStatus] = useState<"loading" | "ready" | "error">("loading");
   const [questCoreLoadAttempt, setQuestCoreLoadAttempt] = useState(0);
+  const worldFishingAnimation = useMemo<WorldFishingAnimationContext | null>(() => {
+    const binding = worldFishingRuntimeRef.current;
+    return questCoreStatus === "ready" && binding && binding.core === questCoreRuntimeRef.current && worldFishingRecord
+      ? Object.freeze({ runtime: binding.runtime, record: worldFishingRecord }) : null;
+  }, [questCoreStatus, worldFishingRecord]);
+  useLayoutEffect(() => {
+    const lease = worldFishingActiveGestureRef.current;
+    if (lease) worldFishingLeaseCurrent(lease);
+  });
+  useEffect(() => {
+    const retire = () => { retireWorldFishingGesture(); worldFishingCommitRef.current = null; };
+    const hidden = () => { if (document.visibilityState !== "visible") retire(); };
+    window.addEventListener("blur", retire); window.addEventListener("pagehide", retire);
+    document.addEventListener("visibilitychange", hidden);
+    return () => { window.removeEventListener("blur", retire); window.removeEventListener("pagehide", retire);
+      document.removeEventListener("visibilitychange", hidden); retire(); };
+  }, []);
   const [, setQuestActionRevision] = useState(0);
   useEffect(() => {
     let active = true;
     questCoreEvaluationFailedRef.current = false;
     npcBuyDispatcherRef.current?.withdraw();
     questCoreRuntimeRef.current = null;
+    retireWorldFishingGesture(); worldFishingRuntimeRef.current = null; worldFishingCommitRef.current = null;
     setQuestCoreStatus("loading");
     authCoreRef.current?.dispose(); authCoreRef.current = null; setAuthCoreReady(false);
     disposeChatUi();
     loadClientCoreRuntime().then((runtime) => {
       if (!active) return;
       questCoreRuntimeRef.current = runtime;
+      try { const animation = runtime.getEntityAnimationRuntime();
+        worldFishingRuntimeRef.current = animation ? { core: runtime, runtime: animation } : null;
+      } catch { worldFishingRuntimeRef.current = null; }
       setQuestCoreStatus("ready");
       authCoreRef.current?.dispose();
       try { authCoreRef.current = runtime.createAuthUi(BigInt(Date.now()) * 1_000_000n); setAuthCoreReady(true); }
@@ -2629,6 +2694,7 @@ export default function HomePage() {
     }).catch((error: unknown) => {
       if (!active) return;
       questCoreRuntimeRef.current = null;
+    retireWorldFishingGesture(); worldFishingRuntimeRef.current = null; worldFishingCommitRef.current = null;
       setQuestCoreStatus("error");
       console.error("[mir2] shared quest client unavailable", error);
       appendLog(t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry."), "system");
@@ -6014,6 +6080,7 @@ export default function HomePage() {
   }
 
   function suspendEquipmentConnection(reason: "socketClosed" | "logoutPending" | "connectionUnavailable") {
+    retireWorldFishingGesture(); worldFishingSourceRef.current.retire(); worldFishingCommitRef.current = null;
     if (reason !== "logoutPending") { retireSocialRequests(); retireSocialItemConnection(); }
     else { storageRentalRef.current.retire(); setStorageRentalPrompt(null); }
     npcGoldBuyInventoryRef.current.invalidate();
@@ -6031,6 +6098,7 @@ export default function HomePage() {
   }
 
   function retireEquipmentSession() {
+    retireWorldFishingGesture(); worldFishingSourceRef.current.retire(); worldFishingCommitRef.current = null;
     retireSocialRequests();
     observePreferenceRef.current = null; observeBootstrapRef.current = null;
     combatModeRawRef.current = null;
@@ -6150,6 +6218,7 @@ export default function HomePage() {
       if (!operation || !controller || !session) return rejectEquipmentCommand("notReady");
       const source = operation.kind === "remove" ? "equipment" : operation.grid;
       if (!currentEquipmentCommandItem(worldRef.current, operation.uniqueId, source)) return rejectEquipmentCommand("invalidIdentity");
+      retireWorldFishingGesture();
       const reservation = controller.reserve({ ...session, ownerRevision: options.ownerToken!.ownerRevision, operation });
       if (!reservation.ok || !reservation.ticket) return rejectEquipmentCommand(reservation.error ?? "notReady");
       try {
@@ -6176,11 +6245,16 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
     if (isSpectatorBrowserMode()) return false;
+    if (command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof) return false;
+    // A newly submitted item/combat/UI operation ends a pre-existing world hold.
+    if (!options?.worldFishingProof && (isMailItemMutation(command)
+      || ["attack", "rangeAttack", "magic", "harvest", "logout", "collectParcel", "buyItem", "gameShopBuy", "tradeConfirm", "guildStorageItemChange"].includes(String(command.type)))) retireWorldFishingGesture();
+    if (options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)) return false;
     if (command.type === "moveItem" && String(command.grid).toLowerCase() === "belt"
       && typeof command.from === "number" && command.from >= 6 && !options?.bagBeltProof) return false;
     if (options?.bagBeltProof && !bagBeltFinalCurrent(options.bagBeltProof, command)) return false;
@@ -6406,6 +6480,7 @@ export default function HomePage() {
         || !bagBeltFinalCurrent(proof, wireCommand)
         || !bagBeltMovesRef.current.enter(proof.reservation, owner, wireCommand)) return false;
     }
+    if (options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)) return false;
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
@@ -7629,12 +7704,283 @@ export default function HomePage() {
       }));
   }
 
-  function queueCrystalMoveIntent(intent: QueuedMoveIntent) {
+  function worldFishingOwner(playerObjectId = Number(worldRef.current.playerObjectId), map = worldRef.current.mapFileName): WorldFishingOwner | null {
+    const socket = socketRef.current, owner = currentSpellsOwner(playerObjectId), mapFileName = normalizeQuestMapFileName(map);
+    if (!socket || !owner || !mapFileName || !Number.isSafeInteger(questSceneRevisionRef.current) || questSceneRevisionRef.current <= 0) return null;
+    return Object.freeze({ socket, connectionGeneration: owner.connectionGeneration, sessionGeneration: owner.sessionGeneration,
+      sceneRevision: questSceneRevisionRef.current, playerObjectId: owner.playerObjectId, mapFileName });
+  }
+  function cancelWorldFishingGesture(gesture: WorldFishingGesture) {
+    const lease = worldFishingGestureRegistryRef.current.get(gesture);
+    if (!lease) return;
+    lease.valid = false; worldFishingGestureRegistryRef.current.delete(gesture);
+    if (worldFishingActiveGestureRef.current === lease) worldFishingActiveGestureRef.current = null;
+    if (worldFishingQueuedRef.current?.gesture === gesture) worldFishingQueuedRef.current = null;
+  }
+  function retireWorldFishingGesture() {
+    const lease = worldFishingActiveGestureRef.current;
+    if (lease) cancelWorldFishingGesture(lease.gesture);
+  }
+  function publishWorldFishingSource(owner: WorldFishingOwner | null) {
+    const record = owner ? worldFishingSourceRef.current.current(owner) : null, lease = worldFishingActiveGestureRef.current;
+    if (lease && (!record || !record.animationKnown || !record.self || record.fishing === null || record.transformType === null
+      || !sameWorldFishingOwner(lease.owner, record.owner) || lease.sourceKey !== record.sourceKey
+      || lease.continuityRevision !== record.continuityRevision)) retireWorldFishingGesture();
+    setWorldFishingRecord(previous => previous === record ? previous : record);
+    const clock = worldFishingCastClockRef.current;
+    if (owner && (!clock || clock.owner.socket !== owner.socket || clock.owner.connectionGeneration !== owner.connectionGeneration
+      || clock.owner.sessionGeneration !== owner.sessionGeneration || clock.owner.playerObjectId !== owner.playerObjectId)) {
+      worldFishingCastClockRef.current = { owner, lastCastMs: 0 };
+    }
+  }
+  function captureWorldFishingGatewayEvent(event: GatewayEvent) {
+    if (event.type !== "packet" || typeof event.packet !== "string") return;
+    if (event.packet === "MapChanged" || event.packet === "MapInformation") {
+      worldFishingSourceRef.current.retire(); worldFishingCommitRef.current = null; retireWorldFishingGesture();
+      publishWorldFishingSource(null); return;
+    }
+    const owner = worldFishingOwner();
+    if (!owner) { retireWorldFishingGesture(); publishWorldFishingSource(null); return; }
+    worldFishingSourceRef.current.observePacket(owner, event.packet, event.payload ?? {}, Date.now());
+    publishWorldFishingSource(owner);
+  }
+  function captureWorldFishingSnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number) {
+    const owner = worldFishingOwner(snapshot.playerObjectId ?? 0, snapshot.mapFileName);
+    if (!owner || owner.connectionGeneration !== connectionGeneration) {
+      worldFishingSourceRef.current.retire(); retireWorldFishingGesture(); publishWorldFishingSource(null); return;
+    }
+    // Preserve exact typed raw values; a label, UI fishing panel or rendered pose is not a snapshot fact.
+    try { const captured = JSON.parse(JSON.stringify(snapshot)) as GatewayWorldSnapshot;
+      if (typeof captured.mapFileName === "string" && normalizeQuestMapFileName(captured.mapFileName) === owner.mapFileName) captured.mapFileName = owner.mapFileName;
+      worldFishingSourceRef.current.observeSnapshot(owner, captured); }
+    catch { worldFishingSourceRef.current.retire(); }
+    publishWorldFishingSource(owner);
+  }
+  function commitWorldFishingAnimation(commit: WorldFishingAnimationCommit | null, previous?: object) {
+    if (!commit) {
+      if (!previous || worldFishingCommitRef.current?.token === previous) worldFishingCommitRef.current = null;
+      return;
+    }
+    const owner = worldFishingOwner(), binding = worldFishingRuntimeRef.current;
+    if (!owner || !binding || binding.runtime !== commit.context.runtime || binding.core !== questCoreRuntimeRef.current
+      || worldFishingSourceRef.current.current(owner) !== commit.context.record) return;
+    worldFishingCommitRef.current = commit;
+  }
+  function readWorldFishingRod() {
+    const owner = worldFishingOwner(), baseline = equipmentSnapshotRef.current, inventory = bagBeltInventoryReadyRef.current;
+    if (!owner || !baseline || !inventory || inventory.layout !== baseline.snapshot
+      || baseline.connectionGeneration !== owner.connectionGeneration || baseline.sessionGeneration !== owner.sessionGeneration) return null;
+    const placements = baseline.snapshot.placements, cells = placements.filter(row => row.container === 2 && row.slot === 0);
+    if (cells.length !== 1 || cells[0].uniqueId === null || !Number.isSafeInteger(cells[0].uniqueId) || cells[0].uniqueId! < 0
+      || placements.filter(row => row.uniqueId === cells[0].uniqueId).length !== 1) return null;
+    const uid = cells[0].uniqueId!, rawRows = inventory.raw.equipmentItems.filter(row => row.slot === "weapon" && row.uniqueId === uid);
+    const liveRows = worldRef.current.equipmentItems.filter(row => row.slot === "weapon" && row.authoritativeUniqueId === uid);
+    if (rawRows.length !== 1 || liveRows.length !== 1) return null;
+    const raw = rawRows[0], live = ownedItemTooltipRequest(liveRows[0]);
+    const record = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value);
+    if (!live || !record(raw.tooltipSource) || JSON.stringify(live.tooltipSource) !== JSON.stringify(raw.tooltipSource)) return null;
+    const carrier = raw.tooltipSource, user = carrier.userItem, info = carrier.realInfo ?? carrier.info;
+    if (!record(user) || !record(info) || user.unique_id !== uid || user.item_index !== info.item_index
+      || info.item_type !== 1 || info.shape !== 49 && info.shape !== 50 || !Array.isArray(user.slots) || user.slots.length < 5) return null;
+    const signature = JSON.stringify([cells[0], raw]);
+    if (signature.length > 262144) return null;
+    return { uniqueId: uid, signature, equipment: baseline.snapshot, layoutSignature: JSON.stringify(baseline.snapshot) };
+  }
+  function worldFishingPureUiBlocked(): boolean {
+    const windows = playerReferenceWindowsRef.current;
+    return windows.help || windows.hotkeys || windows.options || windows.capture
+      || mapRouteLocalModalRef.current || mapRoutePageBlockedRef.current || skillBarPointerHeldRef.current
+      || heroManagementOpenRef.current || questWindowOpenRef.current || bevyHpLocalOverlayOpenRef.current || questReactModalOpenRef.current
+      || bagOpenRef.current || characterOpenRef.current || questLogOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
+      || socialItemWindowsRef.current.guild || socialItemWindowsRef.current.trade || socialReplyWindowsRef.current.group
+      || socialReplyWindowsRef.current.bonds || socialRosterWindowsRef.current.friends || rankingWindowRef.current
+      || marketOpenRef.current || conquestOpenRef.current || buffsOpenRef.current || mailUiOpenRef.current || worldMapOpenRef.current
+      || chatSettingsOpenRef.current || tutorialOpenRef.current
+      || Boolean(worldRef.current.activeNpcDialog || npcShopServiceRef.current || npcRepairServiceRef.current)
+      || storageServiceActiveRef.current;
+  }
+  function worldFishingInputAllowed(): boolean {
+    return screenRef.current === "game" && worldRef.current.connected && !isSpectatorBrowserMode()
+      && initialSceneAssetsReadyRef.current && equipmentHostSuspendReasonRef.current === null
+      && document.visibilityState === "visible" && document.hasFocus() && !mapRouteInputBlocked()
+      && !skillBarPointerHeldRef.current && !otherPlayerUiBlocksInput()
+      && (equipmentControllerRef.current?.status().pending ?? 1) === 0 && pendingStorageRequestsRef.current.size === 0
+      && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending && !mailCollectBarrierRef.current
+      && !heroOperationsRef.current.pending && !bagBeltMovesRef.current.pending && !npcBuyDispatcherRef.current?.status()?.flight
+      && !mailDispatcherRef.current?.composer.pending(currentSpellsOwner(Number(worldRef.current.playerObjectId)))
+      && (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) === 0;
+  }
+  function worldFishingLeaseCurrent(lease: WorldFishingLease, expected?: WorldFishingSourceRecord): WorldFishingSourceRecord | null {
+    const owner = worldFishingOwner(), binding = worldFishingRuntimeRef.current;
+    const source = owner ? worldFishingSourceRef.current.current(owner) : null;
+    if (!lease.valid || worldFishingActiveGestureRef.current !== lease || worldFishingGestureRegistryRef.current.get(lease.gesture) !== lease
+      || !owner || !binding || binding.core !== lease.core || binding.runtime !== lease.runtime || questCoreRuntimeRef.current !== lease.core
+      || !sameWorldFishingOwner(lease.owner, owner) || !source || expected && source !== expected
+      || !source.animationKnown || !source.self || source.self.dead || source.fishing === null || source.transformType === null
+      || source.sourceKey !== lease.sourceKey || source.continuityRevision !== lease.continuityRevision) {
+      cancelWorldFishingGesture(lease.gesture); return null;
+    }
+    // The DOM custody callback can reenter; callers recheck the captured references afterward.
+    try { if (!lease.pointer.current() || !worldFishingInputAllowed()) { cancelWorldFishingGesture(lease.gesture); return null; } }
+    catch { cancelWorldFishingGesture(lease.gesture); return null; }
+    const rod = readWorldFishingRod(), finalOwner = worldFishingOwner();
+    if (!finalOwner || !rod || rod.signature !== lease.rodSignature || !lease.valid || worldFishingActiveGestureRef.current !== lease
+      || socketRef.current !== owner.socket || questCoreRuntimeRef.current !== lease.core || worldFishingRuntimeRef.current !== binding
+      || worldFishingSourceRef.current.current(owner) !== source || !sameWorldFishingOwner(finalOwner, owner)) {
+      cancelWorldFishingGesture(lease.gesture); return null;
+    }
+    return source;
+  }
+  function beginWorldFishingGesture(pointer: WorldFishingPointer): WorldFishingGesture | null {
+    retireWorldFishingGesture();
+    const owner = worldFishingOwner(), binding = worldFishingRuntimeRef.current, rod = readWorldFishingRod();
+    const source = owner ? worldFishingSourceRef.current.current(owner) : null;
+    if (!owner || !binding || !rod || !source || !source.animationKnown || !source.self || source.self.dead
+      || source.fishing === null || source.transformType === null || questCoreRuntimeRef.current !== binding.core
+      || !Number.isSafeInteger(pointer.pointerId) || pointer.pointerId < 0 || !Number.isFinite(pointer.startedAt)
+      || pointer.startedAt < 0 || pointer.pointerType !== "mouse" && pointer.pointerType !== "touch") return null;
+    const gesture = Object.freeze({ token: Object.freeze({}) });
+    const lease: WorldFishingLease = { gesture, pointer, owner, core: binding.core, runtime: binding.runtime,
+      sourceKey: source.sourceKey, continuityRevision: source.continuityRevision, rodSignature: rod.signature, valid: true, busy: false };
+    worldFishingGestureRegistryRef.current.set(gesture, lease); worldFishingActiveGestureRef.current = lease;
+    return worldFishingLeaseCurrent(lease, source) ? gesture : null;
+  }
+  function worldFishingMapCell(region: OriginalMapRegion, point: { x: number; y: number }) {
+    if (!Number.isSafeInteger(point.x) || !Number.isSafeInteger(point.y) || !originalMapRegionContainsTile(region, point.x, point.y)) return null;
+    const cells = region.cells.filter(cell => cell.x === point.x && cell.y === point.y);
+    if (cells.length > 1) return null;
+    const cell = cells[0];
+    if (cell && (cell.blocked !== undefined && typeof cell.blocked !== "boolean" || cell.closedDoor !== undefined && typeof cell.closedDoor !== "boolean"
+      || cell.light !== undefined && (!Number.isInteger(cell.light) || cell.light < 0 || cell.light > 255))) return null;
+    // The complete region uses sparse cells for zero light / unblocked tiles.
+    return { cell, light: cell?.light ?? 0 };
+  }
+  function worldFishingFinalCurrent(proof: WorldFishingFinalProof, command: Record<string, unknown>): boolean {
+    const attempt = worldFishingSendProofsRef.current.get(proof);
+    if (!attempt || attempt.entered || !attempt.lease.busy || JSON.stringify(command) !== JSON.stringify(attempt.command)) return false;
+    const source = worldFishingLeaseCurrent(attempt.lease, attempt.source), rod = readWorldFishingRod(), clock = worldFishingCastClockRef.current;
+    if (!source || !rod || rod.signature !== attempt.rodSignature || rod.equipment !== attempt.equipment
+      || rod.layoutSignature !== attempt.layoutSignature || worldRef.current !== attempt.world || worldRef.current.originalMapRegion !== attempt.region
+      || clock?.lastCastMs !== attempt.priorCastMs || worldFishingCommitRef.current !== attempt.commit) return false;
+    if (attempt.castMs !== null) {
+      if (!attempt.pose || !attempt.commit) return false;
+      const pose = readCrystalEntityActionPose(attempt.lease.runtime, attempt.commit, source, Date.now());
+      if (!pose) { cancelWorldFishingGesture(attempt.lease.gesture); return false; }
+      if (JSON.stringify(pose) !== JSON.stringify(attempt.pose) || pose.action !== "standing" || pose.direction !== attempt.direction) return false;
+    }
+    // Finish every ABI / ingress / DOM read before the final pure custody checks.
+    // New equipment, shop and composer reservations synchronously retire this gesture.
+    try { if (!attempt.lease.pointer.current()) { cancelWorldFishingGesture(attempt.lease.gesture); return false; } }
+    catch { cancelWorldFishingGesture(attempt.lease.gesture); return false; }
+    const equipment = equipmentControllerRef.current, npc = npcBuyDispatcherRef.current, mail = mailDispatcherRef.current;
+    const npcUi = npcShopUiIngressRef.current, combat = combatIngressRef.current, spells = spellsIngressRef.current;
+    const storage = storageUiIngressRef.current;
+    let inputBlocked: boolean, equipmentPending: number, npcPending: boolean, mailPending: boolean;
+    try {
+      inputBlocked = isSpectatorBrowserMode() || document.visibilityState !== "visible" || !document.hasFocus()
+        || npcUi?.blocksInput() === true || combat?.hasUiHeld() === true || spells?.pointerContext()?.modal === true;
+      equipmentPending = equipment?.status().pending ?? 1;
+      npcPending = Boolean(npc?.status()?.flight);
+      mailPending = Boolean(mail?.composer.pending(currentSpellsOwner(Number(worldRef.current.playerObjectId))));
+    } catch { cancelWorldFishingGesture(attempt.lease.gesture); return false; }
+    const finalRod = readWorldFishingRod(), finalOwner = worldFishingOwner();
+    // This tail reads product-owned data only; no status, ABI or DOM callback follows.
+    return !inputBlocked && equipmentPending === 0 && !npcPending && !mailPending
+      && equipmentControllerRef.current === equipment && npcBuyDispatcherRef.current === npc && mailDispatcherRef.current === mail
+      && npcShopUiIngressRef.current === npcUi && combatIngressRef.current === combat && spellsIngressRef.current === spells
+      && storageUiIngressRef.current === storage && storage?.active !== true && storage?.transitioning !== true
+      && !!finalOwner && sameWorldFishingOwner(finalOwner, attempt.lease.owner) && attempt.lease.valid
+      && worldFishingActiveGestureRef.current === attempt.lease && worldFishingGestureRegistryRef.current.get(attempt.lease.gesture) === attempt.lease
+      && socketRef.current === attempt.lease.owner.socket && socketRef.current?.readyState === WebSocket.OPEN
+      && questCoreRuntimeRef.current === attempt.lease.core && worldFishingRuntimeRef.current?.runtime === attempt.lease.runtime
+      && worldFishingSourceRef.current.current(attempt.lease.owner) === attempt.source
+      && worldFishingCommitRef.current === attempt.commit && worldRef.current === attempt.world
+      && worldRef.current.originalMapRegion === attempt.region && worldRef.current.connected
+      && equipmentSnapshotRef.current?.snapshot === attempt.equipment && worldFishingCastClockRef.current === clock
+      && clock.lastCastMs === attempt.priorCastMs && finalRod?.signature === attempt.rodSignature
+      && finalRod.layoutSignature === attempt.layoutSignature && equipmentHostSuspendReasonRef.current === null
+      && screenRef.current === "game" && initialSceneAssetsReadyRef.current
+      && pendingStorageRequestsRef.current.size === 0 && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending
+      && !heroOperationsRef.current.pending && !mailCollectBarrierRef.current && !bagBeltMovesRef.current.pending
+      && (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) === 0 && !worldFishingPureUiBlocked();
+  }
+  function enterWorldFishingSend(proof: WorldFishingFinalProof, command: Record<string, unknown>, socket: WebSocket): boolean {
+    if (!worldFishingFinalCurrent(proof, command)) return false;
+    const attempt = worldFishingSendProofsRef.current.get(proof), clock = worldFishingCastClockRef.current;
+    if (!attempt || !clock || socketRef.current !== socket || socket !== attempt.lease.owner.socket || socket.readyState !== WebSocket.OPEN) return false;
+    attempt.entered = true; worldFishingSendProofsRef.current.delete(proof);
+    // The pure shared decision supplied this clock. Transport uncertainty keeps it consumed.
+    if (attempt.castMs !== null) clock.lastCastMs = attempt.castMs;
+    return true;
+  }
+  function tryWorldFishingBlockedClick(queued: QueuedMoveIntent, gesture: WorldFishingGesture, self: WorldEntity, nowMs: number): boolean {
+    const lease = worldFishingGestureRegistryRef.current.get(gesture);
+    if (!lease || lease.busy || queued.requestedMode !== "walk" || questRouteRunRef.current?.queued === queued || mapImageRouteRef.current?.queued === queued) return false;
+    const source = worldFishingLeaseCurrent(lease), world = worldRef.current, region = world.originalMapRegion, rod = readWorldFishingRod();
+    if (!source?.self || !region || !rod || normalizeQuestMapFileName(region.mapFileName) !== source.owner.mapFileName
+      || source.self.x !== self.x || source.self.y !== self.y || source.self.direction !== self.direction) {
+      cancelWorldFishingGesture(gesture); return false;
+    }
+    const direction = queued.kind === "direction" ? queued.direction : queued.targetX !== undefined && queued.targetY !== undefined
+      && (queued.targetX !== self.x || queued.targetY !== self.y) ? crystalMovementActionToward(self,
+        { x: queued.targetX, y: queued.targetY }, "walk", 1).direction : null;
+    const compass = ["Up", "UpRight", "Right", "DownRight", "Down", "DownLeft", "Left", "UpLeft"], index = direction ? compass.indexOf(direction) : -1;
+    if (index < 0 || !Number.isSafeInteger(nowMs) || nowMs < 0) { cancelWorldFishingGesture(gesture); return false; }
+    lease.busy = true;
+    let proof: WorldFishingFinalProof | null = null;
+    try {
+      const targets = lease.core.fishingClickTargets({ origin: { x: self.x, y: self.y }, direction: index });
+      if (!targets) { cancelWorldFishingGesture(gesture); return false; }
+      if (worldFishingLeaseCurrent(lease, source) !== source || worldRef.current !== world || readWorldFishingRod()?.signature !== rod.signature) return false;
+      const blocked = targets.walkCandidates.map(candidate => {
+        const data = worldFishingMapCell(region, candidate.cell);
+        if (!data) return null;
+        return originalMapCellBlocksMovement(region, candidate.cell.x, candidate.cell.y)
+          || world.entities.some(entity => entity.objectId !== world.playerObjectId && !entity.dead && entity.x === candidate.cell.x && entity.y === candidate.cell.y);
+      });
+      if (blocked.some(value => value === null)) { cancelWorldFishingGesture(gesture); return false; }
+      if (!blocked.every(value => value === true)) return false;
+      const water = worldFishingMapCell(region, targets.waterTarget), facingMatches = source.self.direction === direction;
+      const commit = worldFishingCommitRef.current;
+      const pose = facingMatches && commit ? readCrystalEntityActionPose(lease.runtime, commit, source, nowMs) : null;
+      // A required fact becoming unknown retires this physical gesture permanently.
+      // Wrong-facing clicks keep the shared Turn-before-pose precedence.
+      if (!water || facingMatches && (!commit || !pose)) { cancelWorldFishingGesture(gesture); return true; }
+      const priorCastMs = worldFishingCastClockRef.current?.lastCastMs;
+      if (priorCastMs === undefined) { cancelWorldFishingGesture(gesture); return true; }
+      const decision = lease.core.decideFishingClick({ origin: { x: self.x, y: self.y }, direction: index,
+        requestedWalk: true, autoRoute: false, walkBlocked: blocked as [boolean, boolean, boolean], rodPresent: true,
+        water: water ? { cell: targets.waterTarget, light: water.light } : null, facingMatches,
+        standing: pose ? pose.action === "standing" : null, fishing: source.fishing, transformType: source.transformType,
+        nowMs, lastCastMs: priorCastMs });
+      if (!decision) { cancelWorldFishingGesture(gesture); return true; }
+      if (decision.type === "none") return true;
+      const command = decision.type === "turn" ? Object.freeze({ type: "turn", direction: compass[decision.direction] })
+        : Object.freeze({ type: "fishingCast", castOut: true });
+      const attempt: WorldFishingAttempt = { lease, source, world, region, rodSignature: rod.signature,
+        equipment: rod.equipment, layoutSignature: rod.layoutSignature, commit, pose, direction: direction!, command,
+        priorCastMs, castMs: decision.type === "cast" ? decision.lastCastMs : null, entered: false };
+      proof = Object.freeze({ token: Object.freeze({}) }); worldFishingSendProofsRef.current.set(proof, attempt);
+      if (!worldFishingFinalCurrent(proof, command)) return true;
+      if (queuedMoveIntentRef.current === queued) queuedMoveIntentRef.current = null;
+      if (decision.type === "turn") {
+        if (sendCrystalTurn(compass[decision.direction], proof)) nextMoveSendAtRef.current = Math.max(nextMoveSendAtRef.current, nowMs + decision.delayMs);
+      } else {
+        try { sendRaw(command, { worldFishingProof: proof, quiet: true }); }
+        catch (error) { console.error("[mir2] fishing send outcome is unknown", error); }
+      }
+      return true;
+    } catch { cancelWorldFishingGesture(gesture); return true; }
+    finally { if (proof) worldFishingSendProofsRef.current.delete(proof); lease.busy = false; }
+  }
+
+  function queueCrystalMoveIntent(intent: QueuedMoveIntent, gesture?: WorldFishingGesture) {
     if (mapImageRouteRef.current?.queued !== intent) cancelMapImageRoute();
     if (questRouteRunRef.current?.queued !== intent) cancelQuestRoute();
     if (pendingPickupRef.current?.queued !== intent) cancelPendingPickup();
     questAttackHandoffRef.current = null;
     queuedMoveIntentRef.current = intent;
+    worldFishingQueuedRef.current = gesture ? { queued: intent, gesture } : null;
     movementPlanRef.current = null;
     queuedDirectionStepRef.current = null;
     queuedDirectionStepBacklogRef.current = [];
@@ -7642,7 +7988,7 @@ export default function HomePage() {
     void trySendQueuedCrystalMove();
   }
 
-  function sendCrystalTurn(direction: string) {
+  function sendCrystalTurn(direction: string, worldFishingProof?: WorldFishingFinalProof) {
     const now = Date.now();
     if (!canSendMovement(readSelfMovementControllerState(), now)) {
       scheduleMovementConfirmTick();
@@ -7656,7 +8002,7 @@ export default function HomePage() {
       setPredictedPlayerMotion({ x: serverSelf.x, y: serverSelf.y, direction }, visualUntil);
     }
     nextMoveSendAtRef.current = now + movementCommandDelayMs("walk");
-    const sent = send({ type: "turn", direction });
+    const sent = worldFishingProof ? sendRaw({ type: "turn", direction }, { worldFishingProof }) : send({ type: "turn", direction });
     if (!sent) {
       nextMoveSendAtRef.current = now;
       clearLocalSelfPrediction();
@@ -7736,6 +8082,12 @@ export default function HomePage() {
 
     const requestedMode = queued.requestedMode;
     const effectiveMode = crystalEffectiveMovementMode(requestedMode, now);
+    const fishing = worldFishingQueuedRef.current;
+    if (fishing?.queued === queued && tryWorldFishingBlockedClick(queued, fishing.gesture, serverSelf, now)) {
+      if (queuedMoveIntentRef.current === queued) queuedMoveIntentRef.current = null;
+      if (worldFishingQueuedRef.current === fishing) worldFishingQueuedRef.current = null;
+      return true;
+    }
     // The sticky blocked-direction memory (movementBlockedStepsRef) is route-hint state for
     // click-to-TARGET A* detours only. A HELD/discrete DIRECTION intent re-attempts the
     // direct step every input tick (CRYSTAL_MOVE_INPUT_INTERVAL_MS) and must be gated solely
@@ -7998,6 +8350,7 @@ export default function HomePage() {
     mode: "walk" | "run",
     _packetMode: "target" | "direction" = "direction",
     source: "manual" | "locked-monster" = "manual",
+    gesture?: WorldFishingGesture,
   ) {
     if (source !== "locked-monster") {
       cancelLockedMonsterAttack();
@@ -8017,7 +8370,7 @@ export default function HomePage() {
       consumeAfterSend: false,
     };
     if (source === "locked-monster") combatApproachIntentRef.current = intent;
-    queueCrystalMoveIntent(intent);
+    queueCrystalMoveIntent(intent, gesture);
   }
 
   function attackTarget(objectId: string) {
@@ -8454,6 +8807,7 @@ export default function HomePage() {
   }
 
   function invalidateBagBeltInventory() {
+    retireWorldFishingGesture();
     bagBeltInventoryReadyRef.current = null;
     if (bagBeltInventoryEpochRef.current < Number.MAX_SAFE_INTEGER) bagBeltInventoryEpochRef.current += 1;
     const proof = bagBeltArmedGestureRef.current;
@@ -8999,6 +9353,7 @@ export default function HomePage() {
     if (!source.eligible || !source.presentation || !source.open || !source.showBuy) return false;
     if (intent.action.type === "buy") {
       if (!intent.command || !npcShopIntentMatchesCommand(intent, intent.command)) return false;
+      retireWorldFishingGesture();
       const prepared = dispatcher.prepare(captured, intent.quantity);
       if (!prepared) return false;
       try {
@@ -9048,6 +9403,7 @@ export default function HomePage() {
     if (!good) return;
     if (good.requires_gold_buy_plan) {
       const dispatcher = npcBuyDispatcherRef.current;
+      retireWorldFishingGesture();
       const prepared = dispatcher?.prepare(captured, quantity);
       if (prepared) {
         try { sendRaw(prepared.wire, { npcBuyProof: prepared.proof }); }
@@ -9415,6 +9771,7 @@ export default function HomePage() {
     return windows.help || windows.hotkeys || windows.options || windows.capture;
   }
   function cancelPlayerUiWorldIntent() {
+    retireWorldFishingGesture();
     cancelQuestRoute(); cancelPendingPickup(); cancelLockedMonsterAttack();
     handleViewportDirectionStop();
     // These are unsent local intents. A sent movement receipt keeps its owner.
@@ -10294,6 +10651,7 @@ export default function HomePage() {
     queueMicrotask(() => {
       if (!questCoreEvaluationFailedRef.current) return;
       questCoreRuntimeRef.current = null;
+    retireWorldFishingGesture(); worldFishingRuntimeRef.current = null; worldFishingCommitRef.current = null;
       setQuestCoreStatus("error");
       appendLog(t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry."), "system");
     });
@@ -11125,6 +11483,7 @@ export default function HomePage() {
       gold:draft.gold??0,attachmentUniqueIds:ids,stamped});}
     catch{sender.error("Shared mail rules are unavailable; draft kept");setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
     if(!decision?.ok){sender.error(decision?.error??"Shared mail rules are loading; please retry");setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
+    retireWorldFishingGesture();
     const proof=sender.reserve(owner,mailPresentation.key,decision.payload);
     if(!proof){setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
     let outcome:MailOutcome;
@@ -11420,7 +11779,7 @@ export default function HomePage() {
     return { accepted: useItem(item, token) };
   }
 
-  function handleViewportTileAction(x: number, y: number, mode: "walk" | "run") {
+  function handleViewportTileAction(x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture) {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
@@ -11468,7 +11827,7 @@ export default function HomePage() {
       moveToTile(x, y, mode);
       return;
     }
-    moveToTile(x, y, mode);
+    moveToTile(x, y, mode, "direction", "manual", gesture);
   }
 
   function handleViewportTileStepAction(x: number, y: number, mode: "walk" | "run") {
@@ -11527,7 +11886,7 @@ export default function HomePage() {
     moveToTile(nextPoint.x, nextPoint.y, mode, "direction");
   }
 
-  function handleViewportDirectionStep(x: number, y: number, mode: "walk" | "run") {
+  function handleViewportDirectionStep(x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture) {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
@@ -11540,7 +11899,7 @@ export default function HomePage() {
       requestedMode: mode,
       requestedAt: Date.now(),
       consumeAfterSend: true,
-    });
+    }, gesture);
   }
 
   function handleViewportDirectionIntent(
@@ -12233,6 +12592,7 @@ export default function HomePage() {
     captureQuestMapGatewayEvent(event,connectionGeneration);
     captureSpellsGatewayEvent(event,connectionGeneration);
     captureMailGatewayEvent(event,connectionGeneration,source);
+    captureWorldFishingGatewayEvent(event);
     const debugWindow = window as typeof window & {
       __mir2LastGatewayEvent?: Record<string, unknown>;
       __mir2GatewayEventHistory?: Array<Record<string, unknown>>;
@@ -16365,6 +16725,7 @@ export default function HomePage() {
     // Equipment ACK barriers must observe this raw full layout even when the
     // movement fast path below skips React's ordinary model reconstruction.
     observeEquipmentSnapshot(snapshot, connectionGeneration);
+    captureWorldFishingSnapshot(snapshot, connectionGeneration);
     const socialOwner = currentSocialReceiveOwner(), socialBaseline = equipmentSnapshotRef.current;
     if (socialOwner && socialBaseline && socialBaseline.connectionGeneration === connectionGeneration
       && socialBaseline.sessionGeneration === socialOwner.sessionGeneration && snapshot.playerObjectId === socialOwner.playerObjectId) {
@@ -18222,9 +18583,9 @@ export default function HomePage() {
   };
   const onPrimaryTargetAction = useCallback(() => onPrimaryTargetActionRef.current(), []);
 
-  const onViewportTileClickRef = useRef<(x: number, y: number) => void>(() => undefined);
-  onViewportTileClickRef.current = (x, y) => handleViewportTileAction(x, y, "walk");
-  const onViewportTileClick = useCallback((x: number, y: number) => onViewportTileClickRef.current(x, y), []);
+  const onViewportTileClickRef = useRef<(x: number, y: number, gesture?: WorldFishingGesture) => void>(() => undefined);
+  onViewportTileClickRef.current = (x, y, gesture) => handleViewportTileAction(x, y, "walk", gesture);
+  const onViewportTileClick = useCallback((x: number, y: number, gesture?: WorldFishingGesture) => onViewportTileClickRef.current(x, y, gesture), []);
 
   const onViewportTileSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
   onViewportTileSecondaryActionRef.current = (x, y) => playerUiPreferencesRef.current.newMove
@@ -18871,6 +19232,8 @@ export default function HomePage() {
       onCrystalDropViewHeldChange={changeDropViewHeld}
       skillBars={{ skills: currentSkillBarDocument?.rows ?? [], bindings: crystalKeyBindings, visible: screen === "game" && playerUiPreferences.skillBar, positions: skillBarPositions, onPositionsChange: changeSkillBarPositions, inputBlocked: skillBarInputBlocked(), sourceKey: currentSkillBarDocument?.sourceKey ?? null, onCastSlot: castSkillBarLease, onPointerHeldChange: changeSkillBarPointerHeld }}
       parityUiBlocksGameplay={() => skillBarPointerHeldRef.current || heroManagementOpenRef.current || cashShopOpenRef.current || referenceWindowsBlockGameplay()}
+      worldFishingAnimation={worldFishingAnimation}
+      {...worldFishingStableCallbacks}
       onSendClientCommand={sendClientCommand}
       onStartTutorial={startTutorial}
       onToggleCharacter={toggleCharacterWindow}

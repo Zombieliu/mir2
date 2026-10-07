@@ -756,6 +756,7 @@ test("actual Page queued movement preserves replacement intent and retires stale
     const sends = [], marker = {}, ref = current => ({ current });
     const route = { queued, lifetime, action: { mapIndex: 39 } };
     const deps = {
+      worldFishingQueuedRef: ref(null),
       queuedMoveIntentRef: ref(queued), questRouteRunRef: ref(route), mapImageRouteRef: ref(null), pendingPickupRef: ref(null),
       questAttackHandoffRef: ref(null), questMapAuthorityRef: ref({ ...questIdentity, mapIndex: 39 }),
       movementPlanRef: ref(marker), worldRef: ref({ entities: [], groundDrops: [], mapTransfers: [], mapFileName: "0" }),

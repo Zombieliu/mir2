@@ -925,6 +925,11 @@ impl ZoneRuntime {
         self.players.get(session_id).map(|player| player.direction)
     }
 
+    /// Reads the retained raw transform discriminant without inferring a default.
+    pub fn player_transform_type(&self, session_id: &SessionId) -> Option<i16> {
+        self.players.get(session_id).map(|player| player.transform_type)
+    }
+
     pub fn player_chat_profile(&self, session_id: &SessionId) -> Option<super::ZoneChatProfile> {
         self.players
             .get(session_id)
