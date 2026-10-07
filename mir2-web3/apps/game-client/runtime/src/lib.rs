@@ -3293,32 +3293,44 @@ fn ingest_pending_storage_model(
     );
 }
 
-fn ingest_pending_hero_model(world:&mut World) {
-    let mut messages=Vec::new();
+fn ingest_pending_hero_model(world: &mut World) {
+    let mut messages = Vec::new();
     world.resource::<native_ingest::NativeInbound>().drain_matching(
-        |message| {
-            matches!(
-                message,
-                native_ingest::NativeInboundMessage::HeroModel(_)
-                    | native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_)
-                    | native_ingest::NativeInboundMessage::HeroModelReceipt(_)
-            )
+        |message| match message {
+            native_ingest::NativeInboundMessage::HeroModel(_)
+            | native_ingest::NativeInboundMessage::HeroModelReceipt(_) => true,
+            #[cfg(not(target_arch = "wasm32"))]
+            native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_) => true,
+            _ => false,
         },
         |message| messages.push(message),
     );
     for message in messages {
-            if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update)=message {
-                npc_purchase_economy::apply_native_hero_owner_update(world,update);
-                continue;
-            }
-            if let native_ingest::NativeInboundMessage::HeroModel(json)
-            | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
-            {
-                match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
-                    Ok(model) => npc_purchase_economy::apply_native_hero_packet_model(world,model),
-                    Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
+        #[cfg(not(target_arch = "wasm32"))]
+        if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update) = message {
+            npc_purchase_economy::apply_native_hero_owner_update(world, update);
+            continue;
+        }
+        if let native_ingest::NativeInboundMessage::HeroModel(json)
+        | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
+        {
+            match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
+                Ok(model) => {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    npc_purchase_economy::apply_native_hero_packet_model(world, model);
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        if model.skill_key_ack.is_some() {
+                            if let Some(mut receipts) = world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
+                                receipts.0.push_back(model.clone());
+                            }
+                        }
+                        world.insert_resource(model);
+                    }
                 }
+                Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
             }
+        }
     }
 }
 

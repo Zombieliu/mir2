@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+## Source34：三 renderer 静态编译及 WASM/JS 体积通过，完整交付待验证（2026-10-08）
+
+原 WebGPU 构建实际发现4个 WASM 编译错误：普通 Hero ingress 引用了 Native-only owner 消息和 NPC economy 模块。Root 只改 runtime/src/lib.rs 的条件编译边界，保留 Native 三类消息、owner checkpoint 与 packet 回执；独立逆替换恢复旧文件 SHA，897 声明输入1改/896保护。WASM 不再引用 Native owner/module，普通 Hero model/ACK 路径保留；但 wasm adapter drain 原本为空且无 Hero setter ABI/TS 接线，本修复不证明新 Bevy Hero 实时输入，普通 Web React/owner 投影未改。
+
+修复后原 Cargo 参数实际完成 webgpu、webgl2、webgl2-shared 三种 wasm-release 构建。原 wasm-bindgen0.2.118 与 Binaryen131 静态 CLI 转换/优化各3次实际 exit0；-O1/--strip-debug 顺序、原工具 SHA 与预算未改。optimized WASM为30888672/17749024/31850513 B，JS为134346/117176/132320 B，均满足原 inclusive WASM≤32505856 / JS≤204800。现有6项 Native Hero 内存/受控队列回归实际6/6通过；没有新增具名测试。四次成功 Cargo＋一次保留初始失败共5次原 Guard/25份 nonce 文件，实际 C≥53687091200 B、freshness上界最大86ms、PolicyB全部 completed/exited/disposed。声明输入在实际调用前后匹配，不等于全 workspace/工具链覆盖。
+
+原 full-module validation/name/normalized imports-exports 及 renderer default-gzip≤7340032 尚未运行；静态 CLI 分解不替代原完整 helper，原 helper 的 WASM API 当前仍禁止。未交换或发布未校验产物，public Core/renderer manifests字节保持；最新 Web 交付仍Source25 Next08/Thin08，不含Source26–34。Source33 Core/PUI/NPC尺寸与严格TSC只按未改变的有效输入子集限定承接，不称当前广泛快照未漂移或重新跑TSC。下一步继续完整三包/三renderer校验与 matching Next/Thin，待允许的验证成立后再交付候选包。
+
+用户“继续代码，暂不操作界面”保持；资源/WASM初始化、登录→战斗→保存→重登、移动真机及玩家验收 not-run。Shared SkillModel同行数不同内容、Native整个写入 deadline、仓库宽i64输入及宽UID动作ABI仍是未完成或共同限制；本轮不关闭这些问题。Matrix11保持103 shared/206 legacy/8 common/0 raw open，309/317≈97.5%有界代码记录，overallPercentage=null、Candidate100=false、goal active，无可信试玩日期。首次编译失败、未执行plan01参数次序纠正、Root纯数据reader跨realm数组比较及两次未启动命令的配置桥接错误均保留，不计产品/测试通过或改原断言。
+
+Source33已实际提交推送核验262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04，本轮携带其事后publication；Source34发布以Root后续实际Git结果为准。[Source34实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-finite-result01.json)。下面Source33及更旧段落为历史，当前以上述Source34为准。
+
+
 ## Source33：三包体积达标，完整 Web 交付与实际可玩验收仍待验证（2026-10-08）
 
 Core / Presentation / NPC Purchase 已按同一 Rust crate 的三个互斥生产 feature 拆分；原严格 JSON visitor 逐字迁移、Core/PUI 已发布 JS 保持字节一致，永久购买 facade 绑定独立 NPC 包版本且不因重试重建 ledger。原 optimizer、预算与 publication gates 保持；三包全部校验后才允许 immutable leaves 和 manifest-last。
