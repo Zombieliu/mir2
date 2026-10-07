@@ -22,6 +22,8 @@ mod motion;
 mod movement_shadow;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native_ingest;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod npc_purchase_economy;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
@@ -2006,6 +2008,14 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 .in_set(RuntimePresentationSet),
         );
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(Update, npc_purchase_economy::apply_pending_native_npc_economy
+        .after(ingest_pending_chat_line)
+        .after(ingest_pending_lighting_render_state)
+        .after(NativeMailServiceIngestSet)
+        .before(PendingLifecycleSet::UiReset)
+        .before(RuntimePresentationSet)
+        .in_set(PendingLifecycleSet::Ingest));
     combat_input_host::install(&mut app);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(Last, render_diagnostics::capture_committed_frame);

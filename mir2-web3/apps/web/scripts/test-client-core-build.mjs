@@ -3,13 +3,14 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { test } from "node:test";
 
 const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const webPath = "apps/web";
 const bridgePath = "apps/game-client/platform-web";
 const corePath = "apps/game-client/client-core";
+const wirePath = "apps/game-client/client-wire";
 const manifestRelative = `${webPath}/lib/generated/client_core_runtime.json`;
 const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, manifestRelative), "utf8"));
 
@@ -28,6 +29,7 @@ function fixture(t) {
     `${webPath}/public/client-core/${manifest.version}`,
     ...(manifest.presentation ? [`${webPath}/public/client-core/${manifest.presentation.version}`] : []),
     `${corePath}/Cargo.toml`, `${corePath}/src`,
+    `${wirePath}/Cargo.toml`, `${wirePath}/src`,
     `${bridgePath}/Cargo.toml`, `${bridgePath}/Cargo.lock`,
     `${bridgePath}/rust-toolchain.toml`, `${bridgePath}/src`,
   ]) {
@@ -64,6 +66,19 @@ test("stale shared source cannot reuse a prebuilt package", (t) => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Shared client source changed/);
 });
+
+// Source fingerprints are data-only. These do not reuse or bless the stale
+// compiled packages copied by fixture; the complete package checks require a
+// subsequent matching guarded dual build.
+for (const relative of [`${wirePath}/Cargo.toml`, `${wirePath}/src/lib.rs`]) {
+  test(`wire fingerprint changes when ${relative} changes`, async (t) => {
+    const root = fixture(t);
+    const builder = await import(pathToFileURL(path.join(root, webPath, "scripts/build-client-core.mjs")).href);
+    const before = builder.sourceFingerprint();
+    fs.appendFileSync(path.join(root, relative), relative.endsWith(".rs") ? "\n// wire drift\n" : "\n# wire drift\n");
+    assert.notEqual(builder.sourceFingerprint(), before);
+  });
+}
 
 test("corrupted WASM is rejected before publication", (t) => {
   const root = fixture(t);

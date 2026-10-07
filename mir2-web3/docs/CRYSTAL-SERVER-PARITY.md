@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+## Source30：Web 购买回执实际接线通过代码回归，Native 整体应用有限回归通过（2026-10-07）
+
+Web 原始 owner frame 在普通日期/数值 decoder 前进入永久 Core host；仅明确购买手势走 Quote→Reserve→Enter→单次 socket send，重连只查询原 operation。完整经济来源同步替换钱包、背包/装备、邮件及 Stage5，并绕过 movement-only 和 packetRefresh 旧投影；随后才提供 Applied。修正真实非空英雄装备 WorldItem 格式、钱包相同值的目录 custody、过期/重入 Enter 保留 Unknown、fraction/exponent 舍入边界。wire Cargo.toml/src 已纳入实际 Core/PUI 构建指纹。
+
+Root 实际原 NPC 脚本 128/128（原106＋新增22，含两个纯模块严格 no-emit 类型检查），构建指纹2/2，共130次最终选定 Node 测试；144＋64输入前后复核零漂移。本机原 Web/root依赖已缺失，仅复用已安装官方 TypeScript5.9.2 的121普通文件用于有限源代码测试，不等于项目原工具链、Page全量类型检查或生产构建。首轮126/128失败保留并修正；一次配置仍引用旧快照而被前置哈希拒绝，修正配置后通过。
+
+Native 已新增永久购买 client、整体预解码经济 bundle、独占 World 应用及有类型的 Applied 回传；修正 same revision 正常移动/时钟误判、稀疏14装备槽、公开 Hero/city/Character 领域和 mail reserve 展开容量。877 Rust 输入已冻结，Root 实际 Native14/14＋Runtime30/30＝44个唯一 Rust 测试，加 Node130 共174次最终选定执行，新增68个 distinct（44 Rust＋22 NPC＋2指纹）。两个原 CargoGuard 实际 GetVolume C≥50GiB，sampleEnd→childStarted 实际毫秒截断上界分别78.5672ms/75.501ms<2000ms，PolicyB Completed/Exited/Dispose；877 Rust 输入前后零漂移。实际 Native gateway receiver/source projector/Applied pump、只读 Quote 保持原 UI proof 和最终 Purchase sender 仍未接线；Hero/Social、邮件内容与 tooltip 的同源投影也须在该入口落实。
+
+大整数 UID/i64 日期 Web 投影仍 fail closed，英雄可视经验/maxXP 仍有旧包缓存来源；下一步继续无损快照与实际 Native 接线，再恢复匹配依赖、重建两端候选包。当前实际包仍 Source25 Next08/Thin08，不含 Source26–30。Matrix11保持309/317≈97.5%有界代码记录，不是可玩或全项目完成率；overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持有效，登录→战斗→保存→重登、资源/WASM、移动真机及玩家验收均 not-run，尚无可承诺试玩日期。Source29已实际提交推送并核验 a04462cb48e1d22acff1a2c532ba8faaabb5e474，本轮发布另以实际Git结果为准。
+
+证据：[Source30完整有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-finite-result01.json)、[Source30 Web实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-web-finite-result01.json)、[Source29发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-publication01.json)。以下历史正文保留。
+
+
 ## Source29：严格购买 wire、永久 Core host 与 Web ABI 已通过，实际客户端应用继续接线（2026-10-07）
 
 新增独立轻量 client-wire，外部 u64 采用 canonical decimal string，保留 UID0 与 MAX selector；递归拒 duplicate/escaped duplicate、unknown 和数值型 ID。control request ID 与完整 actor/scope/sequence/intent 分开关联，producer/snapshot/authority 必须同对；terminal revision 不能取 MAX，快照 JSON 本身不证明客户端完整应用。

@@ -33,7 +33,7 @@ function sameScene(a: NpcPearlPhysicalOwner, b: NpcPearlPhysicalOwner): boolean 
   return samePersonal(a, b) && a.sceneRevision === b.sceneRevision && a.mapFileName === b.mapFileName;
 }
 export type NpcPearlUnitPriceValidator = (infoPrice: number, rate: number, projectedPrice: number) => boolean;
-const rowFields = new Set<string>([...crystalUserItemFields, "id", "uniqueId", "itemIndex", "name", "icon", "price", "tooltipSource", "grade", "description"]);
+const rowFields = new Set<string>([...crystalUserItemFields, "id", "uniqueId", "itemIndex", "purchaseItemIndex", "name", "icon", "price", "tooltipSource", "grade", "description"]);
 const boundedText = (v: unknown, max: number): v is string => typeof v === "string"
   && new TextEncoder().encode(v).length <= max && !v.includes("\0");
 function freezeCatalogRaw<T>(value: T): T {
@@ -54,6 +54,8 @@ function catalogGoods(payload: unknown, validateUnitPrice: NpcPearlUnitPriceVali
     const ids = new Set<number>(), goods: NpcPearlGood[] = [];
     for (const row of raw.list) {
       if (!record(row) || Object.keys(row).some(key => !rowFields.has(key))
+        || Object.hasOwn(row, "purchaseItemIndex") && (typeof row.purchaseItemIndex !== "string"
+          || !/^(?:0|[1-9][0-9]{0,19})$/.test(row.purchaseItemIndex) || BigInt(row.purchaseItemIndex) > 18446744073709551615n)
         || !integer(row.unique_id, 0, Number.MAX_SAFE_INTEGER) || row.id !== row.unique_id
         || row.uniqueId !== row.unique_id || !integer(row.item_index, -2147483648, 2147483647)
         || row.itemIndex !== row.item_index || !integer(row.price, 0, 0xffff_ffff)

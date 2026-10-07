@@ -255,6 +255,11 @@ export class NpcGoldBuyDispatcher {
     return result.ok && result.matched && this.active && this.slot === slot && this.producer === producer ? result.state : null;
    } catch { return null; } finally { this.busy = false; }
   }
+  /** The durable adapter may not cross an existing legacy economic flight. */
+  hasRetainedAttempt(): boolean {
+   const state = this.status();
+   return state === null || state.flight !== null;
+  }
   /** Retire only current pre-entry work before the common UI changes locally. */
   withdrawAt(authorityRevision: string): boolean {
    if (this.busy || !this.active || !this.slot || typeof authorityRevision !== "string" || !/^[1-9][0-9]{0,19}$/.test(authorityRevision)

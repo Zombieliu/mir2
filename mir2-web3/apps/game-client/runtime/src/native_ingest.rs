@@ -60,6 +60,8 @@ pub(crate) struct NativeInboundDiagnostics {
 /// A snapshot JSON pushed from a background native task.
 #[derive(Debug, Clone)]
 pub(crate) enum NativeInboundMessage {
+    /// Complete owner economic checkpoint. Never coalesce, split or evict it.
+    NpcEconomyBundle(crate::npc_purchase_economy::NativeNpcEconomyBundle),
     WorldState(String),
     EntityRenderState(String),
     EffectRenderState(String),
@@ -129,6 +131,7 @@ pub(crate) enum NativeInboundMessage {
 #[derive(Default)]
 struct NativeInboundBuffer {
     active: bool,
+    npc_economy_gate: Option<crate::npc_purchase_economy::NativeNpcEconomyGate>,
     pending: VecDeque<NativeInboundMessage>,
     /// Highest-priority single-slot receipt reserve. It is outside the normal
     /// critical FIFO so no snapshot/ACK/social flood can evict it.
@@ -182,6 +185,8 @@ impl NativeInboundBuffer {
         if message_bytes > max_message_bytes {
             return false;
         }
+        if matches!(message, NativeInboundMessage::NpcEconomyBundle(_))
+            && self.message_count() >= MAX_NATIVE_MESSAGES { return false; }
         // Ordinary traffic leaves room for the tagged terminal Cost reserve.
         // Its epoch is retained/accounted even under payload byte pressure.
         let max_buffer_bytes = if self.mail_stream_epoch.is_some()
@@ -198,6 +203,15 @@ impl NativeInboundBuffer {
             max_buffer_bytes.saturating_sub(2_usize.saturating_sub(receipts)*std::mem::size_of::<MailSendReceipt>()).saturating_sub(1_usize.saturating_sub(acks)*std::mem::size_of::<MailSendAcknowledgement>())
         }else{max_buffer_bytes};
 
+        // A bundle seals dedicated terminal payloads into the normal FIFO.
+        // Cost's dedicated representation is smaller than MailServiceDelivery;
+        // reserve that materialization delta before any eviction or mutation.
+        if matches!(message, NativeInboundMessage::NpcEconomyBundle(_)) {
+            let sealed_bytes = self.mail_terminal_tail.iter().fold(self.pending_bytes(), |bytes, terminal|
+                bytes.saturating_add(native_message_bytes(terminal).saturating_sub(mail_reserved_bytes(terminal))));
+            if sealed_bytes.saturating_add(message_bytes) > max_buffer_bytes { return false; }
+        }
+
         let message = match message {
             NativeInboundMessage::GameShopReceipt(json) => {
                 return self.enqueue_game_shop_receipt(json, message_bytes, max_buffer_bytes);
@@ -209,6 +223,7 @@ impl NativeInboundBuffer {
                 let Ok(json) = serde_json::to_string(&receipt) else {
                     return false;
                 };
+                self.retire_npc_economy();
                 self.pending.retain(|queued| is_process_lifetime_asset_message(queued) || is_protected_mail_terminal(queued));
                 self.game_shop_receipt = Some(json);
                 self.pending.push_back(
@@ -254,12 +269,14 @@ impl NativeInboundBuffer {
         // native host sends them only once per process.
         match &message {
             NativeInboundMessage::DataReset => {
+                self.retire_npc_economy();
                 self.pending.retain(|queued| is_process_lifetime_asset_message(queued) || is_protected_mail_terminal(queued));
                 self.game_shop_receipt = None;
                 self.pending.push_back(message);
                 return true;
             }
             NativeInboundMessage::SceneReset => {
+                self.retire_npc_economy();
                 self.pending.retain(|queued| {
                     !is_scene_resettable_message(queued)
                         && !matches!(queued, NativeInboundMessage::SceneReset)
@@ -290,6 +307,7 @@ impl NativeInboundBuffer {
                     matches!(
                         queued,
                         NativeInboundMessage::DataReset
+                            | NativeInboundMessage::NpcEconomyBundle(_)
                             | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
                             | NativeInboundMessage::SceneReset
                     )
@@ -360,8 +378,32 @@ impl NativeInboundBuffer {
             }
         }
 
+        if let NativeInboundMessage::NpcEconomyBundle(bundle) = &message {
+            if let Some(previous) = &self.npc_economy_gate {
+                if !previous.same_gate(bundle.gate()) { previous.retire(); }
+            }
+            self.npc_economy_gate = Some(bundle.gate().clone());
+            // Seal all earlier dedicated reserves into the prefix. Subsequent
+            // reserves remain outside the FIFO until this barrier is consumed.
+            if let Some(marker) = self.mail_stream_marker.take() {
+                self.pending.push_front(NativeInboundMessage::MailServiceStreamStarted(marker));
+            }
+            if let Some(json) = self.game_shop_receipt.take() {
+                self.pending.push_back(NativeInboundMessage::GameShopReceipt(json));
+            }
+            self.pending.append(&mut self.mail_terminal_tail);
+            self.mail_cost_reserve = None;
+            self.mail_quote_receipt_reserve = None;
+        }
         self.pending.push_back(message);
         true
+    }
+
+    fn retire_npc_economy(&mut self) {
+        if let Some(gate) = self.npc_economy_gate.take() { gate.retire(); }
+        for message in &self.pending {
+            if let NativeInboundMessage::NpcEconomyBundle(bundle) = message { bundle.retire(); }
+        }
     }
 
     fn start_mail_stream(&mut self, marker: MailServiceStreamStarted, max_buffer_bytes: usize) -> bool {
@@ -387,7 +429,7 @@ impl NativeInboundBuffer {
             if !is_operation_ack(message) && !matches!(message,NativeInboundMessage::MailService(_)|NativeInboundMessage::MailQuoteReceipt(_)|NativeInboundMessage::MailSendReceipt(_)|NativeInboundMessage::MailSendAcknowledgement(_)
                 | NativeInboundMessage::DataReset | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
                 | NativeInboundMessage::SceneReset | NativeInboundMessage::MailServiceStreamStarted(_)
-                | NativeInboundMessage::GameShopReceipt(_)) {
+                | NativeInboundMessage::GameShopReceipt(_) | NativeInboundMessage::NpcEconomyBundle(_)) {
                 retained_bytes=retained_bytes.saturating_sub(native_message_bytes(message));
                 evicted.push(index);
             }
@@ -520,6 +562,9 @@ impl NativeInboundBuffer {
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
+                        | NativeInboundMessage::NpcEconomyBundle(_)
+                        | NativeInboundMessage::GameShopReceipt(_)
+                        | NativeInboundMessage::MailServiceStreamStarted(_)
                         | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
                         | NativeInboundMessage::SceneReset
                 )
@@ -536,6 +581,9 @@ impl NativeInboundBuffer {
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
+                        | NativeInboundMessage::NpcEconomyBundle(_)
+                        | NativeInboundMessage::GameShopReceipt(_)
+                        | NativeInboundMessage::MailServiceStreamStarted(_)
                         | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
                         | NativeInboundMessage::SceneReset
                 )
@@ -561,6 +609,7 @@ fn mail_terminal_quota(message:&NativeInboundMessage)->(usize,usize){let count=m
 fn make_buffer() -> Arc<Mutex<NativeInboundBuffer>> {
     let buffer = Arc::new(Mutex::new(NativeInboundBuffer {
         active: true,
+        npc_economy_gate: None,
         pending: VecDeque::new(),
         game_shop_receipt: None,
         mail_cost_reserve: None,
@@ -573,10 +622,10 @@ fn make_buffer() -> Arc<Mutex<NativeInboundBuffer>> {
         .lock()
         .expect("native queue mutex should not be poisoned");
     if let Some(previous) = slot.replace(Arc::clone(&buffer)) {
-        previous
-            .lock()
-            .expect("native inbound buffer mutex should not be poisoned")
-            .active = false;
+        let mut previous = previous.lock().expect("native inbound buffer mutex should not be poisoned");
+        previous.active = false;
+        previous.retire_npc_economy();
+        previous.pending.clear();
     }
     buffer
 }
@@ -657,6 +706,7 @@ fn is_critical_message(message: &NativeInboundMessage) -> bool {
     matches!(
         message,
         NativeInboundMessage::InventoryOperationAck(_)
+            | NativeInboundMessage::NpcEconomyBundle(_)
             | NativeInboundMessage::DataReset
             | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
             | NativeInboundMessage::SceneReset
@@ -688,6 +738,7 @@ fn is_operation_ack(message: &NativeInboundMessage) -> bool {
 
 fn native_message_bytes(message: &NativeInboundMessage) -> usize {
     match message {
+        NativeInboundMessage::NpcEconomyBundle(bundle) => bundle.retained_bytes(),
         NativeInboundMessage::WorldState(json)
         | NativeInboundMessage::EntityRenderState(json)
         | NativeInboundMessage::EffectRenderState(json)
@@ -735,6 +786,12 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
 /// `false` when no runtime app is currently running (queue not registered).
 pub fn push_native_world_state(json: String) -> bool {
     send_native(NativeInboundMessage::WorldState(json))
+}
+
+/// Admission only. The gate completion is emitted after all economic models
+/// have been committed by the main-thread exclusive consumer.
+pub fn push_native_npc_economy_bundle(bundle: crate::npc_purchase_economy::NativeNpcEconomyBundle) -> bool {
+    send_native(NativeInboundMessage::NpcEconomyBundle(bundle))
 }
 
 /// Native-host entry point: push an entity-render-state snapshot JSON.
@@ -1021,12 +1078,13 @@ impl NativeInbound {
                 .expect("native inbound mutex should not be poisoned");
 
             let mut matched = Vec::new();
-            if let Some(marker) = state.mail_stream_marker.take() {
+            let barrier_pending = state.pending.iter().any(|message| matches!(message, NativeInboundMessage::NpcEconomyBundle(_)));
+            if let Some(marker) = if barrier_pending { None } else { state.mail_stream_marker.take() } {
                 let message = NativeInboundMessage::MailServiceStreamStarted(marker);
                 if matches(&message) { matched.push(message); }
                 else { state.mail_stream_marker = Some(marker); }
             }
-            if let Some(json) = state.game_shop_receipt.take() {
+            if let Some(json) = if barrier_pending { None } else { state.game_shop_receipt.take() } {
                 let receipt = NativeInboundMessage::GameShopReceipt(json);
                 if matches(&receipt) {
                     matched.push(receipt);
@@ -1035,8 +1093,16 @@ impl NativeInbound {
                 }
             }
             let mut retained = VecDeque::new();
-            let mut mail_blocked=state.mail_stream_marker.is_some();
+            let mut mail_blocked=!barrier_pending && state.mail_stream_marker.is_some();
             while let Some(message) = state.pending.pop_front() {
+                // A typed consumer must not skip the complete checkpoint and
+                // drain a later model before the exclusive bundle consumer.
+                if matches!(message, NativeInboundMessage::NpcEconomyBundle(_)) {
+                    retained.push_back(message);
+                    retained.append(&mut state.pending);
+                    mail_blocked = true;
+                    break;
+                }
                 let selected=matches(&message);
                 if is_mail_message(&message)&&!selected{mail_blocked=true;}
                 if selected && !(mail_blocked
@@ -1061,6 +1127,15 @@ impl NativeInbound {
 
         for message in matched {
             on_message(message);
+        }
+    }
+
+    pub(crate) fn take_npc_economy_front(&self) -> Option<crate::npc_purchase_economy::NativeNpcEconomyBundle> {
+        let mut state = self.buffer.lock().ok()?;
+        if !matches!(state.pending.front(), Some(NativeInboundMessage::NpcEconomyBundle(_))) { return None; }
+        match state.pending.pop_front()? {
+            NativeInboundMessage::NpcEconomyBundle(bundle) => Some(bundle),
+            _ => unreachable!(),
         }
     }
 
@@ -1112,6 +1187,7 @@ impl Drop for NativeInbound {
             .lock()
             .expect("native inbound mutex should not be poisoned");
         buffer.active = false;
+        buffer.retire_npc_economy();
         buffer.pending.clear();
         buffer.game_shop_receipt = None;
         buffer.mail_cost_reserve = None;
@@ -1124,6 +1200,7 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
     matches!(
         message,
         NativeInboundMessage::WorldState(_)
+            | NativeInboundMessage::NpcEconomyBundle(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
             | NativeInboundMessage::LightingRenderState(_)
@@ -1139,6 +1216,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
     matches!(
         message,
         NativeInboundMessage::WorldState(_)
+            | NativeInboundMessage::NpcEconomyBundle(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
             | NativeInboundMessage::LightingRenderState(_)
@@ -1189,6 +1267,7 @@ mod tests {
     fn active_buffer() -> NativeInboundBuffer {
         NativeInboundBuffer {
             active: true,
+            npc_economy_gate: None,
             pending: VecDeque::new(),
             game_shop_receipt: None,
             mail_cost_reserve: None,
@@ -1196,6 +1275,111 @@ mod tests {
             mail_stream_epoch: None,
             mail_stream_marker: None,
         }
+    }
+
+    fn npc_bundle() -> (crate::npc_purchase_economy::NativeNpcEconomyGate, NativeInboundMessage) {
+        let (gate, witness, projection) = crate::npc_purchase_economy::tests::fixture();
+        let bundle = gate.prepare(witness, projection).unwrap();
+        (gate, NativeInboundMessage::NpcEconomyBundle(bundle))
+    }
+
+    #[test]
+    fn native_npc_economy_queue_barrier_prevents_later_typed_models_overtaking() {
+        let (gate, bundle) = npc_bundle();
+        let mut state = active_buffer();
+        assert!(state.enqueue(NativeInboundMessage::InventoryModel("old".into())));
+        assert!(state.enqueue(bundle));
+        assert!(state.enqueue(NativeInboundMessage::UiReadModel("future-ui".into())));
+        assert!(state.enqueue(NativeInboundMessage::InventoryModel("future".into())));
+        let inbound = NativeInbound { buffer: Arc::new(Mutex::new(state)) };
+        let mut drained = Vec::new();
+        inbound.drain_matching(|m| matches!(m, NativeInboundMessage::UiReadModel(_)), |m| drained.push(m));
+        assert!(drained.is_empty());assert!(inbound.take_npc_economy_front().is_none());
+        inbound.drain_matching(|m| matches!(m, NativeInboundMessage::InventoryModel(_)), |m| drained.push(m));
+        assert!(matches!(&drained[..], [NativeInboundMessage::InventoryModel(s)] if s == "old"));
+        assert_eq!(gate.try_recv_applied(),None);
+        let mut world = bevy::prelude::World::new(); world.insert_resource(inbound);
+        crate::npc_purchase_economy::apply_pending_native_npc_economy(&mut world);
+        assert!(gate.try_recv_applied().is_some());
+        let inbound = world.resource::<NativeInbound>();
+        let mut future = Vec::new();
+        inbound.drain_matching(|m| matches!(m, NativeInboundMessage::InventoryModel(_)), |m| future.push(m));
+        assert!(matches!(&future[..], [NativeInboundMessage::InventoryModel(s)] if s == "future"));
+    }
+
+    #[test]
+    fn native_npc_economy_queue_bundle_is_protected_under_snapshot_and_ack_pressure() {
+        let (_,bundle)=npc_bundle();let mut state=active_buffer();assert!(state.enqueue(bundle));
+        for n in 0..(MAX_NATIVE_MESSAGES*2) {
+            let _=state.enqueue(NativeInboundMessage::NpcShopService(n.to_string()));
+            let _=state.enqueue(NativeInboundMessage::InventoryModel(n.to_string()));
+            let _=state.enqueue(NativeInboundMessage::InventoryOperationAck(n.to_string()));
+        }
+        assert_eq!(state.pending.iter().filter(|m| matches!(m,NativeInboundMessage::NpcEconomyBundle(_))).count(),1);
+        assert!(state.message_count()<=MAX_NATIVE_MESSAGES);
+        assert!(state.pending_bytes()<=MAX_NATIVE_BUFFER_BYTES);
+        assert!(!state.evict_oldest_non_boundary() || state.pending.iter().any(|m|matches!(m,NativeInboundMessage::NpcEconomyBundle(_))));
+    }
+
+    #[test]
+    fn native_npc_economy_queue_byte_limit_rejects_whole_bundle_without_ack() {
+        let (gate,bundle)=npc_bundle();let mut state=active_buffer();let bytes=native_message_bytes(&bundle);
+        assert!(!state.enqueue_with_limits(bundle.clone(),bytes-1,bytes*2));assert!(state.pending.is_empty());
+        assert!(!state.enqueue_with_limits(bundle,bytes,bytes-1));assert!(state.pending.is_empty());
+        assert_eq!(gate.try_recv_applied(),None);
+    }
+
+    #[test]
+    fn native_npc_economy_queue_reserved_cost_materialization_obeys_exact_byte_cap() {
+        let (gate,bundle)=npc_bundle();let mut state=active_buffer();start_mail(&mut state);
+        assert!(state.reserve_mail_cost((MAIL_EPOCH,70),MAX_NATIVE_BUFFER_BYTES));
+        let before_bytes=state.pending_bytes();let before_count=state.message_count();
+        let delta=std::mem::size_of::<MailServiceDelivery>()-std::mem::size_of::<(MailServiceStreamEpoch,u32)>();
+        assert!(delta>0);
+        let bundle_bytes=native_message_bytes(&bundle);
+        let unused_quotas=std::mem::size_of::<MailQuoteReceipt>()+2*std::mem::size_of::<MailSendReceipt>()+std::mem::size_of::<MailSendAcknowledgement>();
+        let exact_cap=before_bytes+bundle_bytes+delta+unused_quotas;
+        assert!(!state.enqueue_with_limits(bundle.clone(),bundle_bytes,exact_cap-1));
+        assert_eq!(state.pending_bytes(),before_bytes);assert_eq!(state.message_count(),before_count);
+        assert_eq!(state.mail_cost_reserve,Some((MAIL_EPOCH,70)));assert_eq!(state.mail_terminal_tail.len(),1);
+        assert!(state.pending.is_empty());assert!(state.mail_stream_marker.is_some());assert_eq!(gate.try_recv_applied(),None);
+        assert!(state.enqueue_with_limits(bundle,bundle_bytes,exact_cap));
+        assert_eq!(state.pending_bytes(),exact_cap-unused_quotas);
+        assert!(state.pending_bytes()<=exact_cap);assert_eq!(state.mail_cost_reserve,None);assert!(state.mail_terminal_tail.is_empty());
+        assert!(matches!(&state.pending[0],NativeInboundMessage::MailServiceStreamStarted(_)));
+        assert!(is_valid_mail_cost(&state.pending[1]));assert!(matches!(&state.pending[2],NativeInboundMessage::NpcEconomyBundle(_)));
+        assert_eq!(gate.try_recv_applied(),None);
+    }
+
+    #[test]
+    fn native_npc_economy_queue_data_and_scene_reset_drop_bundle_without_completion() {
+        for reset in [NativeInboundMessage::DataReset,NativeInboundMessage::SceneReset] {
+            let (gate,bundle)=npc_bundle();let mut state=active_buffer();assert!(state.enqueue(bundle));
+            assert!(state.enqueue(reset));assert!(!state.pending.iter().any(|m|matches!(m,NativeInboundMessage::NpcEconomyBundle(_))));
+            assert_eq!(gate.try_recv_applied(),None);
+            let (_,witness,p)=crate::npc_purchase_economy::tests::fixture();
+            assert_eq!(gate.prepare(witness,p).unwrap_err(),crate::npc_purchase_economy::NativeNpcEconomyError::Retired);
+        }
+    }
+
+    #[test]
+    fn native_npc_economy_queue_drop_retires_queued_custody_gracefully() {
+        let (gate,bundle)=npc_bundle();let mut state=active_buffer();assert!(state.enqueue(bundle));
+        let buffer=Arc::new(Mutex::new(state));let inbound=NativeInbound{buffer:Arc::clone(&buffer)};drop(inbound);
+        let state=buffer.lock().unwrap();assert!(!state.active);assert!(state.pending.is_empty());
+        assert_eq!(gate.try_recv_applied(),None);
+    }
+
+    #[test]
+    fn native_npc_economy_queue_later_receipt_reserve_waits_for_barrier() {
+        let (_,bundle)=npc_bundle();let mut state=active_buffer();assert!(state.enqueue(bundle));
+        assert!(state.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt("later"))));
+        let inbound=NativeInbound{buffer:Arc::new(Mutex::new(state))};
+        let mut receipt=None;
+        inbound.drain_matching(|m|matches!(m,NativeInboundMessage::GameShopReceipt(_)),|m|receipt=Some(m));
+        assert!(receipt.is_none());assert!(inbound.take_npc_economy_front().is_some());
+        inbound.drain_matching(|m|matches!(m,NativeInboundMessage::GameShopReceipt(_)),|m|receipt=Some(m));
+        assert!(receipt.is_some());
     }
 
     const MAIL_EPOCH: MailServiceStreamEpoch = MailServiceStreamEpoch { run: 1, connection: 1 };

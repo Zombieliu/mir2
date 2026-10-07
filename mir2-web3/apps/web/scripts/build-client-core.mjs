@@ -19,11 +19,13 @@ const manifestPath = path.join(webRoot, "lib/generated/client_core_runtime.json"
 const files = ["mir2_platform_web.js", "mir2_platform_web_bg.wasm"];
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
-function sourceFingerprint() {
+export function sourceFingerprint() {
   const coreRoot = path.resolve(crateRoot, "../client-core");
+  const wireRoot = path.resolve(crateRoot, "../client-wire");
   const projectRoot = path.resolve(webRoot, "../..");
   const sources = [path.join(crateRoot, "Cargo.toml"), path.join(crateRoot, "Cargo.lock"),
     path.join(crateRoot, "rust-toolchain.toml"), path.join(coreRoot, "Cargo.toml"),
+    path.join(wireRoot, "Cargo.toml"),
     fileURLToPath(import.meta.url), fileURLToPath(new URL("./lib/renderer-wasm-opt.mjs", import.meta.url)),
     fileURLToPath(new URL("./lib/client-core-release-files.mjs", import.meta.url))];
   function collect(directory) {
@@ -34,6 +36,7 @@ function sourceFingerprint() {
     }
   }
   collect(path.join(coreRoot, "src"));
+  collect(path.join(wireRoot, "src"));
   collect(path.join(crateRoot, "src"));
   const entries = sources.map((filename) => ({
     name: path.relative(projectRoot, filename).split(path.sep).join("/"),
@@ -166,9 +169,11 @@ if (process.argv[2] === "--verify" || (process.argv.length === 2 && prebuilt)) {
   verify();
 }
 }
-try { main(); }
-catch (error) {
-  // Do not let default inspection serialize arbitrary child result/env objects.
-  console.error(formatRendererOptimizationError(error));
-  process.exitCode = 1;
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try { main(); }
+  catch (error) {
+    // Do not let default inspection serialize arbitrary child result/env objects.
+    console.error(formatRendererOptimizationError(error));
+    process.exitCode = 1;
+  }
 }
