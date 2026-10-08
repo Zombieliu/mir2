@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## Source37 客户端进展（2026-10-08）
+
+Native准备/刷新/普通连接握手/keepalive已接真实写入deadline；进入前保持unsent，进入后保留原操作Unknown并只Query恢复。当前选定53/53、新11均执行，独立复核原Guard/完整5nonce/897源码通过。只改两Native客户端文件，后端/共享Zone/协议parity不变。台账309/317≈97.5%含206 legacy，仅实现记录；最新完整Web仍Source25，新Web可玩包及实际登录→战斗→保存→重登待验证，无可信试玩日期。详见[当前路线与限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。
+
 ## Source36 客户端进展（2026-10-08）
 
 完整技能checkpoint与Native操作准入已修复；当前选定57项通过（35在最终Source02执行，22按有效正文未变限定承接），新9项均执行。只改客户端4文件，本轮后端/共享Zone/协议parity不变。台账309/317≈97.5%含206 legacy，不代表整个目标或实际可玩；最新完整Web包仍Source25，登录→战斗→保存→重登和玩家验收未运行。详见[当前路线及限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。

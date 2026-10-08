@@ -905,13 +905,88 @@ fn apply_flushed_control_context(proof:Option<&OwnedGatewayCommand>,wire:&Native
     }
 }
 
+// One absolute transport budget covers readiness, local entry and flush.
+// A timeout never constitutes an acknowledgement or permission to replay.
+const NATIVE_TRANSPORT_TIMEOUT: Duration = Duration::from_secs(10);
+const NATIVE_TRANSPORT_TIMEOUT_ERROR: &str = "native gateway transport deadline expired";
+
+trait NativeWriteBudget {
+    fn expired(&self) -> bool;
+    fn poll_expired(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<()>;
+}
+struct TokioNativeWriteBudget {
+    deadline: tokio::time::Instant,
+    sleep: std::pin::Pin<Box<tokio::time::Sleep>>,
+}
+impl TokioNativeWriteBudget {
+    fn new() -> Self {
+        let deadline = tokio::time::Instant::now() + NATIVE_TRANSPORT_TIMEOUT;
+        Self { deadline, sleep: Box::pin(tokio::time::sleep_until(deadline)) }
+    }
+}
+impl NativeWriteBudget for TokioNativeWriteBudget {
+    fn expired(&self) -> bool { tokio::time::Instant::now() >= self.deadline }
+    fn poll_expired(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<()> {
+        use std::future::Future;
+        self.sleep.as_mut().poll(cx)
+    }
+}
+#[derive(Debug)]
+struct NativeWriteExpired;
+async fn await_native_write_phase<T>(budget: &mut impl NativeWriteBudget,
+    mut poll_phase: impl FnMut(&mut std::task::Context<'_>) -> std::task::Poll<T>) -> Result<T,NativeWriteExpired> {
+    std::future::poll_fn(|cx| {
+        // Expiry wins equality even if the sink becomes ready on the same poll.
+        if budget.expired() || budget.poll_expired(cx).is_ready() {
+            return std::task::Poll::Ready(Err(NativeWriteExpired));
+        }
+        poll_phase(cx).map(Ok)
+    }).await
+}
+
+#[cfg(test)]
+#[derive(Clone)]
+struct ManualNativeWriteBudget {
+    now: Arc<std::sync::atomic::AtomicU64>,
+    deadline: u64,
+    waker: Arc<Mutex<Option<std::task::Waker>>>,
+}
+#[cfg(test)]
+impl ManualNativeWriteBudget {
+    fn new(deadline: u64) -> Self {
+        Self { now: Arc::new(std::sync::atomic::AtomicU64::new(0)), deadline,
+            waker: Arc::new(Mutex::new(None)) }
+    }
+    fn advance_to(&self, now: u64) {
+        self.now.store(now,std::sync::atomic::Ordering::SeqCst);
+        let waker = self.waker.lock().unwrap().take();
+        if let Some(waker) = waker { waker.wake(); }
+    }
+}
+#[cfg(test)]
+impl NativeWriteBudget for ManualNativeWriteBudget {
+    fn expired(&self) -> bool {
+        self.now.load(std::sync::atomic::Ordering::SeqCst) >= self.deadline
+    }
+    fn poll_expired(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<()> {
+        *self.waker.lock().unwrap() = Some(cx.waker().clone());
+        if self.expired() { std::task::Poll::Ready(()) } else { std::task::Poll::Pending }
+    }
+}
+
 /// Real production writer helper: readiness may await, the ownership/claim/
 /// start_send interval cannot. A sequence is consumed even if start_send fails.
-async fn commit_owned_frame<S>(sink:&mut S, proof:Option<&OwnedGatewayCommand>,frame:Message) -> NativeSinkCommit
+async fn commit_owned_frame<S>(sink:&mut S,proof:Option<&OwnedGatewayCommand>,frame:Message) -> NativeSinkCommit
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    let mut budget=TokioNativeWriteBudget::new();
+    commit_owned_frame_with_budget(sink,proof,frame,&mut budget).await
+}
+
+async fn commit_owned_frame_with_budget<S>(sink:&mut S, proof:Option<&OwnedGatewayCommand>,frame:Message,budget:&mut impl NativeWriteBudget) -> NativeSinkCommit
 where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
     use std::pin::Pin;
     if let Some(owned)=proof{if matches!(&owned.command,GatewayCommand::Wire(NativeOutboundCommand::SendMail{..}))&&owned.mail_send.is_none(){owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;}}
-    let ready=std::future::poll_fn(|cx| {
+    let ready=await_native_write_phase(budget,|cx| {
         if let Some(owned)=proof {
             let Ok(mut state)=owned.fence.0.lock() else{return std::task::Poll::Ready(None);};
             if state.outstanding.get(&owned.sequence)!=Some(&owned.stamp)
@@ -929,9 +1004,10 @@ where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
     }).await;
     if let Some(owned)=proof {if let Ok(mut state)=owned.fence.0.lock(){state.waiters.remove(&owned.sequence);}if let Some(buy)=&owned.npc_gold_buy{buy.gate.forget_waiter(buy.ticket);}}
     match ready {
-        None=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::DefinitelyUnsent;},
-        Some(Err(error))=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::Unavailable(error.to_string());},
-        Some(Ok(()))=>{},
+        Err(_)=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());},
+        Ok(None)=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::DefinitelyUnsent;},
+        Ok(Some(Err(error)))=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::Unavailable(error.to_string());},
+        Ok(Some(Ok(())))=>{},
     }
     let (start_result,entered_at_ms)=if let Some(owned)=proof {
         let Ok(mut state)=owned.fence.0.lock() else {return NativeSinkCommit::DefinitelyUnsent;};
@@ -953,6 +1029,7 @@ where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
                 drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
             }
         }
+        if budget.expired(){drop(state);owned.fence.retire(owned);return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
         state.outstanding.remove(&owned.sequence);
         // Final authorization and the local irreversible phase precede the
         // call with no await/callback between them. Calling start_send itself
@@ -966,7 +1043,7 @@ where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
             };result
         } else {Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string())};
         (result,entered_at_ms)
-    } else {(Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string()),None)};
+    } else {if budget.expired(){return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}(Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string()),None)};
     if let (Some(owned),Some(at_ms))=(proof,entered_at_ms) {
         if !owned.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms}){return NativeSinkCommit::MailQuoteReceiptUnavailable;}
     }
@@ -974,8 +1051,9 @@ where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
     let send=proof.and_then(|owned|owned.mail_send.as_ref());
     if send.is_some_and(|send|!send.publish(mir2_client_bevy::mail_service::MailSendOutcome::Entered)){return NativeSinkCommit::MailQuoteReceiptUnavailable;}
     if let Err(error)=start_result{if let Some(buy)=buy{buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Unknown);}if send.is_some_and(|send|!send.publish(mir2_client_bevy::mail_service::MailSendOutcome::Unknown)){return NativeSinkCommit::MailQuoteReceiptUnavailable;}return NativeSinkCommit::Unknown(error);}
-    let outcome=match std::future::poll_fn(|cx|Pin::new(&mut *sink).poll_flush(cx)).await {
-        Ok(())=>NativeSinkCommit::Flushed,Err(error)=>NativeSinkCommit::Unknown(error.to_string()),
+    let outcome=match await_native_write_phase(budget,|cx|Pin::new(&mut *sink).poll_flush(cx)).await {
+        Ok(Ok(()))=>NativeSinkCommit::Flushed,Ok(Err(error))=>NativeSinkCommit::Unknown(error.to_string()),
+        Err(_)=>NativeSinkCommit::Unknown(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),
     };
     if let Some(send)=send{let written=if matches!(&outcome,NativeSinkCommit::Flushed){mir2_client_bevy::mail_service::MailSendOutcome::Flushed}else{mir2_client_bevy::mail_service::MailSendOutcome::Unknown};if !send.publish(written){return NativeSinkCommit::MailQuoteReceiptUnavailable;}}
     if let Some(buy)=buy{buy.publish(if matches!(&outcome,NativeSinkCommit::Flushed){mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Flushed}else{mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Unknown});}
@@ -3594,9 +3672,9 @@ type GatewaySocket =
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 
 /// Every operation inside a native resume attempt is governed by the same
-/// absolute deadline and command fence.  A regular first connection retains
-/// its existing behavior; only a reconnect with a live credential enters this
-/// lifecycle.
+/// absolute deadline and command fence. Regular startup has a separate bounded
+/// transport budget; only a reconnect with a live credential consumes the
+/// recovery command queue and recovery deadline.
 #[derive(Debug)]
 enum ResumeLifecycle<T> {
     Complete(T),
@@ -3652,6 +3730,68 @@ where
     ResumeLifecycle::Complete(())
 }
 
+/// Normal startup watches Shutdown without consuming queued Login/StartGame.
+/// Resume keeps its existing, earlier absolute recovery deadline and queue policy.
+struct NativeStartupWaiter(Option<NativeCommandFence>);
+impl Drop for NativeStartupWaiter {
+    fn drop(&mut self) {
+        if let Some(fence)=&self.0 {if let Ok(mut state)=fence.0.lock(){state.waiters.remove(&0);}}
+    }
+}
+async fn await_native_startup_phase<T>(budget:&mut impl NativeWriteBudget,
+    fence:Option<&NativeCommandFence>,
+    mut poll_phase:impl FnMut(&mut std::task::Context<'_>)->std::task::Poll<T>) -> ResumeLifecycle<T> {
+    let _waiter=NativeStartupWaiter(fence.cloned());
+    match await_native_write_phase(budget,|cx| {
+        if let Some(fence)=fence {
+            let Ok(mut state)=fence.0.lock() else {return std::task::Poll::Ready(ResumeLifecycle::Failed("native ownership fence unavailable".into()));};
+            if state.retired {return std::task::Poll::Ready(ResumeLifecycle::Shutdown);}
+            state.waiters.insert(0,cx.waker().clone());
+        }
+        poll_phase(cx).map(ResumeLifecycle::Complete)
+    }).await {
+        Ok(result)=>result,
+        Err(_) if fence.is_some_and(NativeCommandFence::is_retired)=>ResumeLifecycle::Shutdown,
+        Err(_)=>ResumeLifecycle::Failed(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),
+    }
+}
+async fn send_native_unowned_frame_with_budget<S>(sink:&mut S,frame:Message,
+    fence:Option<&NativeCommandFence>,budget:&mut impl NativeWriteBudget)->ResumeLifecycle<()>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    use std::pin::Pin;
+    match await_native_startup_phase(budget,fence,|cx|Pin::new(&mut *sink).poll_ready(cx)).await {
+        ResumeLifecycle::Complete(Ok(()))=>{},
+        ResumeLifecycle::Complete(Err(error))=>return ResumeLifecycle::Failed(error.to_string()),
+        ResumeLifecycle::Shutdown=>return ResumeLifecycle::Shutdown,
+        ResumeLifecycle::Failed(error)=>return ResumeLifecycle::Failed(error),
+        _=>unreachable!("normal startup only completes, fails or shuts down"),
+    }
+    // Final Shutdown and deadline check precede the local entry without awaits.
+    let start={
+        let guard=match fence {
+            Some(fence)=>match fence.0.lock(){Ok(state)=>Some(state),Err(_)=>return ResumeLifecycle::Failed("native ownership fence unavailable".into())},
+            None=>None,
+        };
+        if guard.as_ref().is_some_and(|state|state.retired){return ResumeLifecycle::Shutdown;}
+        if budget.expired(){return ResumeLifecycle::Failed(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
+        Pin::new(&mut *sink).start_send(frame)
+    };
+    if let Err(error)=start{return ResumeLifecycle::Failed(error.to_string());}
+    match await_native_startup_phase(budget,fence,|cx|Pin::new(&mut *sink).poll_flush(cx)).await {
+        ResumeLifecycle::Complete(Ok(()))=>ResumeLifecycle::Complete(()),
+        ResumeLifecycle::Complete(Err(error))=>ResumeLifecycle::Failed(error.to_string()),
+        ResumeLifecycle::Shutdown=>ResumeLifecycle::Shutdown,
+        ResumeLifecycle::Failed(error)=>ResumeLifecycle::Failed(error),
+        _=>unreachable!("normal startup only completes, fails or shuts down"),
+    }
+}
+async fn send_native_unowned_frame<S>(sink:&mut S,frame:Message,
+    fence:Option<&NativeCommandFence>)->ResumeLifecycle<()>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    let mut budget=TokioNativeWriteBudget::new();
+    send_native_unowned_frame_with_budget(sink,frame,fence,&mut budget).await
+}
+
 async fn connect_gateway_with_resume_controls<R: CommandSource>(
     base_url: &str,
     commands: &mut R,
@@ -3665,10 +3805,18 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
         Err(error) => return ResumeLifecycle::Failed(error),
     };
     if !attempting_resume {
-        return tokio_tungstenite::connect_async(request)
-            .await
-            .map(|(socket, _)| ResumeLifecycle::Complete(socket))
-            .unwrap_or_else(|error| ResumeLifecycle::Failed(error.to_string()));
+        use std::future::Future;
+        let mut budget=TokioNativeWriteBudget::new();
+        let fence=commands.ownership_fence();
+        let connect=tokio_tungstenite::connect_async(request);
+        tokio::pin!(connect);
+        return match await_native_startup_phase(&mut budget,fence.as_ref(),|cx|connect.as_mut().poll(cx)).await {
+            ResumeLifecycle::Complete(Ok((socket,_)))=>ResumeLifecycle::Complete(socket),
+            ResumeLifecycle::Complete(Err(error))=>ResumeLifecycle::Failed(error.to_string()),
+            ResumeLifecycle::Shutdown=>ResumeLifecycle::Shutdown,
+            ResumeLifecycle::Failed(error)=>ResumeLifecycle::Failed(error),
+            _=>unreachable!("normal connect only completes, fails or shuts down"),
+        };
     }
 
     let connect = tokio_tungstenite::connect_async(request);
@@ -3802,10 +3950,11 @@ async fn send_resume_frame_with_controls<R: CommandSource>(
     }
 }
 
-async fn send_resume_handshake(
-    socket: &mut GatewaySocket,
-    credential: Option<&str>,
-) -> Result<(), String> {
+async fn send_native_handshake_with_budget<S>(
+    socket: &mut S,credential: Option<&str>,fence:Option<&NativeCommandFence>,
+    budget:&mut impl NativeWriteBudget,
+) -> ResumeLifecycle<()>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
     let capability = NativeOutboundCommand::ClientCapabilities {
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
@@ -3815,24 +3964,23 @@ async fn send_resume_handshake(
         ],
     }
     .to_wire_json();
-    socket
-        .send(Message::Text(capability.to_string().into()))
-        .await
-        .map_err(|error| format!("gateway capability send failed: {error}"))?;
+    match send_native_unowned_frame_with_budget(socket,Message::Text(capability.to_string().into()),fence,budget).await {
+        ResumeLifecycle::Complete(())=>{},
+        ResumeLifecycle::Shutdown=>return ResumeLifecycle::Shutdown,
+        ResumeLifecycle::Failed(error)=>return ResumeLifecycle::Failed(format!("gateway capability send failed: {error}")),
+        _=>unreachable!("normal capability only completes, fails or shuts down"),
+    }
     if let Some(credential) = credential {
         if credential.len() > MAX_CREDENTIAL_LENGTH {
-            return Err("native resume credential rejected".to_owned());
+            return ResumeLifecycle::Failed("native resume credential rejected".to_owned());
         }
         let payload = NativeOutboundCommand::ResumeSession {
             credential: credential.to_owned(),
         }
         .to_wire_json();
-        socket
-            .send(Message::Text(payload.to_string().into()))
-            .await
-            .map_err(|error| format!("gateway resume send failed: {error}"))?;
+        return send_native_unowned_frame_with_budget(socket,Message::Text(payload.to_string().into()),fence,budget).await;
     }
-    Ok(())
+    ResumeLifecycle::Complete(())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3873,10 +4021,9 @@ async fn send_resume_handshake_with_resume_controls<R: CommandSource>(
     game_shop_receipt_gate: &mut GameShopReceiptGate,
 ) -> ResumeLifecycle<()> {
     if !attempting_resume {
-        return send_resume_handshake(socket, credential)
-            .await
-            .map(|()| ResumeLifecycle::Complete(()))
-            .unwrap_or_else(ResumeLifecycle::Failed);
+        let mut budget=TokioNativeWriteBudget::new();
+        let fence=commands.ownership_fence();
+        return send_native_handshake_with_budget(socket,credential,fence.as_ref(),&mut budget).await;
     }
     let capability = NativeOutboundCommand::ClientCapabilities {
         capabilities: vec![
@@ -4034,15 +4181,15 @@ where
                     .map(|duration| duration.as_millis() as i64)
                     .unwrap_or(0);
                 let keepalive = json!({ "type": "keepAlive", "time": now_ms });
-                if let Err(error) = socket
-                    .send(Message::Text(keepalive.to_string().into()))
-                    .await
-                {
-                    let _ = terminate_written_game_shop_unknown(
-                        game_shop_receipt_gate,
-                        mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                    );
-                    return Err(format!("gateway keepalive failed: {error}"));
+                let fence=commands.ownership_fence();
+                match send_native_unowned_frame(&mut socket,Message::Text(keepalive.to_string().into()),fence.as_ref()).await {
+                    ResumeLifecycle::Complete(())=>{},
+                    ResumeLifecycle::Shutdown=>return Ok(ConnectedExit::Shutdown),
+                    ResumeLifecycle::Failed(error)=>{
+                        let _=terminate_written_game_shop_unknown(game_shop_receipt_gate,mir2_bevy_runtime::native_ingest::push_native_data_reset);
+                        return Err(format!("gateway keepalive failed: {error}"));
+                    },
+                    _=>unreachable!("normal keepalive only completes, fails or shuts down"),
                 }
             }
             _ = input_poll.tick() => {
@@ -13646,14 +13793,14 @@ mod ownership_tests {
     use bevy::prelude::IntoScheduleConfigs;
     use std::{pin::Pin,task::{Context,Poll},sync::{Arc,Mutex}};
     #[derive(Default)]
-    struct SinkState {pending:bool,ready_error:bool,flush_pending:bool,flush_waker:Option<std::task::Waker>,start_error:bool,flush_error:bool,starts:usize,flushes:usize,frames:Vec<Message>,after_start:Option<Box<dyn FnOnce()+Send>>}
+    struct SinkState {pending:bool,ready_error:bool,flush_pending:bool,flush_waker:Option<std::task::Waker>,start_error:bool,flush_error:bool,starts:usize,flushes:usize,frames:Vec<Message>,after_start:Option<Box<dyn FnOnce()+Send>>,after_ready:Option<Box<dyn FnOnce()+Send>>,after_flush:Option<Box<dyn FnOnce()+Send>>}
     #[derive(Clone,Default)]
     struct ControlledSink(Arc<Mutex<SinkState>>);
     impl Sink<Message> for ControlledSink {
         type Error=&'static str;
-        fn poll_ready(self:Pin<&mut Self>,_:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let state=self.0.lock().unwrap();if state.pending{Poll::Pending}else{Poll::Ready(if state.ready_error{Err("ready failure")}else{Ok(())})}}
+        fn poll_ready(self:Pin<&mut Self>,_:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let mut state=self.0.lock().unwrap();if state.pending{return Poll::Pending;}let result=if state.ready_error{Err("ready failure")}else{Ok(())};let hook=state.after_ready.take();drop(state);if let Some(hook)=hook{hook();}Poll::Ready(result)}
         fn start_send(self:Pin<&mut Self>,frame:Message)->Result<(),Self::Error>{let mut s=self.0.lock().unwrap();s.starts+=1;s.frames.push(frame);let result=if s.start_error{Err("start failure")}else{Ok(())};let hook=s.after_start.take();drop(s);if let Some(hook)=hook{hook();}result}
-        fn poll_flush(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let mut s=self.0.lock().unwrap();s.flushes+=1;if s.flush_pending{s.flush_waker=Some(cx.waker().clone());Poll::Pending}else{Poll::Ready(if s.flush_error{Err("flush failure")}else{Ok(())})}}
+        fn poll_flush(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let mut s=self.0.lock().unwrap();s.flushes+=1;if s.flush_pending{s.flush_waker=Some(cx.waker().clone());return Poll::Pending;}let result=if s.flush_error{Err("flush failure")}else{Ok(())};let hook=s.after_flush.take();drop(s);if let Some(hook)=hook{hook();}Poll::Ready(result)}
         fn poll_close(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{self.poll_flush(cx)}
     }
     fn prepared_world()->(GatewayCommandSender,GatewayCommandReceiver,NativeCommandFence,NativeCommandStamp){
@@ -13669,6 +13816,132 @@ mod ownership_tests {
     fn mail_send_command()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::SendMail{name:"R".into(),message:"body".into(),gold:0,items_idx:[0;5],stamped:false})}
     fn mail_send_publisher(fence:NativeCommandFence,messages:Arc<Mutex<Vec<mir2_client_bevy::mail_service::MailServiceInboxMessage>>>)->NativeMailSendPublisher{
         NativeMailSendPublisher(Arc::new(move|message|{assert!(fence.0.try_lock().is_ok(),"Send receipt/ACK callback is outside the short fence lock");messages.lock().unwrap().push(message);true}))
+    }
+    struct BudgetWake(std::sync::atomic::AtomicUsize);
+    impl futures_util::task::ArcWake for BudgetWake {
+        fn wake_by_ref(this:&Arc<Self>){this.0.fetch_add(1,std::sync::atomic::Ordering::SeqCst);}
+    }
+    fn budget_context_waker()->(Arc<BudgetWake>,std::task::Waker){
+        let wake=Arc::new(BudgetWake(std::sync::atomic::AtomicUsize::new(0)));
+        let waker=futures_util::task::waker(wake.clone());(wake,waker)
+    }
+    #[test]
+    fn transport_budget_mail_ready_expiry_is_exact_unsent_and_wakes_without_sink_progress(){
+        use std::future::Future;
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+        let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().pending=true;
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let (wake,waker)=budget_context_waker();let mut cx=Context::from_waker(&waker);
+        let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));
+        assert!(future.as_mut().poll(&mut cx).is_pending());assert!(fence.0.lock().unwrap().waiters.contains_key(&proof.sequence));
+        clock.advance_to(10);assert!(wake.0.load(std::sync::atomic::Ordering::SeqCst)>0);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unavailable(_))));drop(future);
+        let expected=vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::DefinitelyUnsent})];
+        assert_eq!(*messages.lock().unwrap(),expected);assert_eq!(state.lock().unwrap().starts,0);
+        assert!(fence.0.lock().unwrap().waiters.is_empty());assert!(fence.0.lock().unwrap().mail_send_flight.is_none());
+        fence.retire(&proof);assert_eq!(*messages.lock().unwrap(),expected);
+    }
+    #[test]
+    fn transport_budget_mail_flush_expiry_retains_original_barrier_and_cannot_clear_successor(){
+        use std::future::Future;
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        let stream=controlled_mail_service_publisher(|_|true).start_socket(Some(&fence),1).unwrap();
+        let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+        let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+        let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());
+        assert_eq!(state.lock().unwrap().starts,1);assert!(stream.has_send_flight());clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unknown(_))));drop(future);
+        assert_eq!(*messages.lock().unwrap(),vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::Entered}),
+            MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::Unknown})]);
+        assert!(stream.has_send_flight());assert!(fence.0.lock().unwrap().waiters.is_empty());
+        let mut fresh_budget=ManualNativeWriteBudget::new(10);
+        assert_eq!(futures_util::FutureExt::now_or_never(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut fresh_budget)).unwrap(),NativeSinkCommit::DefinitelyUnsent);
+        assert_eq!(state.lock().unwrap().starts,1);assert!(stream.acknowledge_send(1));assert!(!stream.has_send_flight());
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),30,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let next=owned(receiver.try_recv().unwrap());state.lock().unwrap().flush_pending=false;
+        assert_eq!(futures_util::FutureExt::now_or_never(commit_owned_frame_with_budget(&mut sink,Some(&next),frame(),&mut fresh_budget)).unwrap(),NativeSinkCommit::Flushed);
+        let count=messages.lock().unwrap().len();assert!(proof.mail_send.as_ref().unwrap().publish(MailSendOutcome::Unknown));fence.retire(&proof);
+        assert_eq!(messages.lock().unwrap().len(),count);assert!(stream.has_send_flight());
+        assert_eq!(fence.0.lock().unwrap().mail_send_flight.as_ref().unwrap().ticket,next.mail_send.as_ref().unwrap().ticket);
+    }
+    #[test]
+    fn transport_budget_mail_quote_expiry_and_unvisited_batch_tails_are_exact(){
+        use std::future::Future;
+        use mir2_client_bevy::mail_service::{MailQuoteReceipt,MailQuoteOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        let first=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let tail=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().flush_pending=true;
+        for command in unsent_command_batch(drain_command_batch(&mut receiver,8)) {
+            let proof=owned(command);let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);
+            assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unknown(_))));break;
+        }
+        assert_eq!(sink.0.lock().unwrap().starts,1);let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),2);
+        assert_eq!(receipts[0].ticket,first);assert!(matches!(receipts[0].outcome,MailQuoteOutcome::Entered{..}));
+        assert_eq!(receipts[1],MailQuoteReceipt{ticket:tail,outcome:MailQuoteOutcome::DefinitelyUnsent});assert!(fence.0.lock().unwrap().waiters.is_empty());
+    }
+    #[test]
+    fn transport_budget_one_deadline_spans_readiness_flush_and_final_entry(){
+        use std::future::Future;
+        for expire_before_entry in [false,true] {
+            let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+            let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().pending=true;state.lock().unwrap().flush_pending=true;
+            let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());
+            clock.advance_to(if expire_before_entry{10}else{9});state.lock().unwrap().pending=false;
+            if expire_before_entry {assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unavailable(_))));}
+            else {assert!(future.as_mut().poll(&mut cx).is_pending());assert_eq!(state.lock().unwrap().starts,1);clock.advance_to(10);assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unknown(_))));}
+            drop(future);assert_eq!(state.lock().unwrap().starts,usize::from(!expire_before_entry));assert!(fence.0.lock().unwrap().waiters.is_empty());
+        }
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();
+        sink.0.lock().unwrap().after_ready=Some(Box::new(move||clock.advance_to(10)));
+        assert!(matches!(futures_util::FutureExt::now_or_never(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget)).unwrap(),NativeSinkCommit::Unavailable(_)));
+        assert_eq!(sink.0.lock().unwrap().starts,0);
+    }
+    #[test]
+    fn transport_budget_normal_startup_shutdown_preserves_ordinary_queue_and_expiry_is_failure(){
+        use std::future::Future;
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::StartGame{character_index:3}),Some(stamp)).unwrap();
+        let mut budget=ManualNativeWriteBudget::new(10);let mut pending=Box::pin(std::future::pending::<()>());let (wake,waker)=budget_context_waker();let mut cx=Context::from_waker(&waker);
+        let mut future=Box::pin(await_native_startup_phase(&mut budget,Some(&fence),|cx|pending.as_mut().poll(cx)));assert!(future.as_mut().poll(&mut cx).is_pending());
+        let queued=receiver.try_recv().unwrap();assert!(matches!(queued.payload(),GatewayCommand::Wire(NativeOutboundCommand::StartGame{character_index:3})));
+        sender.send_with_stamp(GatewayCommand::Shutdown,Some(stamp)).unwrap();assert!(wake.0.load(std::sync::atomic::Ordering::SeqCst)>0);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Shutdown)));drop(future);assert!(fence.0.lock().unwrap().waiters.is_empty());
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut pending=Box::pin(std::future::pending::<()>());
+        let mut future=Box::pin(await_native_startup_phase(&mut budget,None,|cx|pending.as_mut().poll(cx)));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Failed(error)) if error==NATIVE_TRANSPORT_TIMEOUT_ERROR));drop(future);
+        let (sender,_receiver,fence,stamp)=prepared_world();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut pending=Box::pin(std::future::pending::<()>());
+        let mut future=Box::pin(await_native_startup_phase(&mut budget,Some(&fence),|cx|pending.as_mut().poll(cx)));assert!(future.as_mut().poll(&mut cx).is_pending());
+        clock.advance_to(10);sender.send_with_stamp(GatewayCommand::Shutdown,Some(stamp)).unwrap();
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Shutdown)));drop(future);assert!(fence.0.lock().unwrap().waiters.is_empty());
+    }
+    #[test]
+    fn transport_budget_handshake_shares_capability_credential_deadline_and_keepalive_is_bounded(){
+        use std::future::Future;
+        let mut sink=ControlledSink::default();let state=sink.0.clone();let hook_state=state.clone();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let hook_clock=clock.clone();
+        state.lock().unwrap().after_flush=Some(Box::new(move||{hook_clock.advance_to(9);hook_state.lock().unwrap().pending=true;}));
+        let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());let mut future=Box::pin(send_native_handshake_with_budget(&mut sink,Some("controlled-credential"),None,&mut budget));
+        assert!(future.as_mut().poll(&mut cx).is_pending());assert_eq!(state.lock().unwrap().starts,1);clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Failed(_))));drop(future);
+        assert_eq!(state.lock().unwrap().starts,1);let capability:Value=serde_json::from_str(state.lock().unwrap().frames[0].to_text().unwrap()).unwrap();
+        assert_eq!(capability,NativeOutboundCommand::ClientCapabilities{capabilities:vec![NATIVE_RESUME_PROTOCOL.into(),NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.into(),mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.into(),CATALOG_GZIP_CAPABILITY.into()]}.to_wire_json());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();
+        let mut future=Box::pin(send_native_unowned_frame_with_budget(&mut sink,Message::Text(json!({"type":"keepAlive","time":1}).to_string().into()),None,&mut budget));
+        assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Failed(_))));drop(future);assert_eq!(state.lock().unwrap().starts,1);
+        let mut sink=ControlledSink::default();let mut budget=ManualNativeWriteBudget::new(10);
+        assert!(matches!(futures_util::FutureExt::now_or_never(send_native_handshake_with_budget(&mut sink,Some("controlled-credential"),None,&mut budget)).unwrap(),ResumeLifecycle::Complete(())));
+        assert_eq!(sink.0.lock().unwrap().starts,2);
+    }
+    #[tokio::test]
+    async fn transport_budget_real_timer_wakes_a_sink_that_never_reports_ready(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();sink.0.lock().unwrap().pending=true;
+        let deadline=tokio::time::Instant::now()+Duration::from_millis(1);let mut budget=TokioNativeWriteBudget{deadline,sleep:Box::pin(tokio::time::sleep_until(deadline))};
+        let outcome=tokio::time::timeout(Duration::from_millis(100),commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget)).await.unwrap();
+        assert!(matches!(outcome,NativeSinkCommit::Unavailable(_)));assert_eq!(sink.0.lock().unwrap().starts,0);assert!(fence.0.lock().unwrap().waiters.is_empty());
     }
     #[tokio::test]
     async fn mail_send_actual_sink_prebind_entry_and_write_outcomes_are_exact(){

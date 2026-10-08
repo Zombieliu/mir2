@@ -339,14 +339,19 @@ impl NativeNpcPurchaseGateway {
     pub(super) fn cancel_quote(&mut self) {
         if let Some(held) = self.held.take() { held.owned.fence.retire(&held.owned); }
     }
-    pub(super) async fn purchase_if_ready<S>(&mut self, sink: &mut S) -> Option<NativeSinkCommit>
+    pub(super) async fn purchase_if_ready<S>(&mut self,sink: &mut S) -> Option<NativeSinkCommit>
+    where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+        let mut budget=TokioNativeWriteBudget::new();
+        self.purchase_if_ready_with_budget(sink,&mut budget).await
+    }
+    async fn purchase_if_ready_with_budget<S>(&mut self, sink: &mut S,budget: &mut impl NativeWriteBudget) -> Option<NativeSinkCommit>
     where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
         let held = self.held.as_ref()?;
         let (_, required) = held.quoted.as_ref()?;
         if !self.applied.is_some_and(|applied| applied.actor == required.actor
             && applied.producer_scope == required.producer_scope && applied.server_revision >= required.server_revision) { return None; }
         let held = self.held.take().expect("ready original Quote");
-        let (outcome,_) = commit_purchase(sink,&mut self.client,&held,self.gate.as_ref(),&mut self.entered_ui).await;
+        let (outcome,_) = commit_purchase_with_budget(sink,&mut self.client,&held,self.gate.as_ref(),&mut self.entered_ui,budget).await;
         Some(outcome)
     }
 }
@@ -375,13 +380,20 @@ fn publish_applied_ui_source(fence: &NativeCommandFence, stamp: NativeCommandSta
 
 /// No UI sequence/gate claim occurs for Begin/Quote/Query. The exact physical
 /// generation is checked after readiness, immediately before start_send.
-pub(super) async fn commit_control<S>(sink: &mut S, fence: &NativeCommandFence,
-    stamp: NativeCommandStamp, dispatch: Dispatch) -> NativeSinkCommit
+pub(super) async fn commit_control<S>(sink: &mut S,fence: &NativeCommandFence,
+    stamp: NativeCommandStamp,dispatch: Dispatch) -> NativeSinkCommit
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    let mut budget=TokioNativeWriteBudget::new();
+    commit_control_with_budget(sink,fence,stamp,dispatch,&mut budget).await
+}
+
+async fn commit_control_with_budget<S>(sink: &mut S, fence: &NativeCommandFence,
+    stamp: NativeCommandStamp, dispatch: Dispatch, budget: &mut impl NativeWriteBudget) -> NativeSinkCommit
 where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     struct Waiter(NativeCommandFence);
     impl Drop for Waiter { fn drop(&mut self) { if let Ok(mut state) = self.0.0.lock() { state.waiters.remove(&0); } } }
     let waiter = Waiter(fence.clone());
-    let ready = std::future::poll_fn(|cx| {
+    let ready = await_native_write_phase(budget,|cx| {
         let Ok(mut state) = fence.0.lock() else { return std::task::Poll::Ready(None); };
         if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World) { return std::task::Poll::Ready(None); }
         // Command sequences are nonzero; zero is the sole owner's control waiter.
@@ -391,23 +403,26 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     }).await;
     drop(waiter);
     match ready {
-        None => return NativeSinkCommit::DefinitelyUnsent,
-        Some(Err(error)) => return NativeSinkCommit::Unavailable(error.to_string()),
-        Some(Ok(())) => {}
+        Err(_) => return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),
+        Ok(None) => return NativeSinkCommit::DefinitelyUnsent,
+        Ok(Some(Err(error))) => return NativeSinkCommit::Unavailable(error.to_string()),
+        Ok(Some(Ok(()))) => {}
     }
     let started = {
         let Ok(state) = fence.0.lock() else { return NativeSinkCommit::DefinitelyUnsent; };
         if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World) { return NativeSinkCommit::DefinitelyUnsent; }
+        if budget.expired() {return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
         Pin::new(&mut *sink).start_send(Message::Text(dispatch.body.into()))
     };
     if let Err(error) = started { return NativeSinkCommit::Unknown(error.to_string()); }
-    match std::future::poll_fn(|cx| Pin::new(&mut *sink).poll_flush(cx)).await {
-        Ok(()) => NativeSinkCommit::Flushed, Err(error) => NativeSinkCommit::Unknown(error.to_string())
+    match await_native_write_phase(budget,|cx| Pin::new(&mut *sink).poll_flush(cx)).await {
+        Ok(Ok(())) => NativeSinkCommit::Flushed, Ok(Err(error)) => NativeSinkCommit::Unknown(error.to_string()),
+        Err(_) => NativeSinkCommit::Unknown(NATIVE_TRANSPORT_TIMEOUT_ERROR.into())
     }
 }
 
-async fn commit_purchase<S>(sink: &mut S, client: &mut NativeNpcPurchaseClient, held: &HeldQuote,
-    gate: Option<&NativeNpcEconomyGate>, entered_ui: &mut BTreeMap<ActorKey,EnteredUiProof>) -> (NativeSinkCommit,Option<wire::Operation>)
+async fn commit_purchase_with_budget<S>(sink: &mut S, client: &mut NativeNpcPurchaseClient, held: &HeldQuote,
+    gate: Option<&NativeNpcEconomyGate>, entered_ui: &mut BTreeMap<ActorKey,EnteredUiProof>, budget: &mut impl NativeWriteBudget) -> (NativeSinkCommit,Option<wire::Operation>)
 where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     struct PurchaseWaiter<'a>(&'a OwnedGatewayCommand);
     impl Drop for PurchaseWaiter<'_> {fn drop(&mut self){
@@ -418,7 +433,7 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     let valid = || gate.is_some_and(|gate| gate.is_current(held.binding))
         && client.connection() == Some(held.token) && client.current_binding() == Some(held.binding);
     if !valid() { held.owned.fence.retire(&held.owned); return (NativeSinkCommit::DefinitelyUnsent,None); }
-    let ready = std::future::poll_fn(|cx| {
+    let ready = await_native_write_phase(budget,|cx| {
         let Ok(mut state) = held.owned.fence.0.lock() else { return std::task::Poll::Ready(None); };
         if !held.source.matches(&state,&held.owned) || !valid()
             || held.owned.npc_gold_buy.as_ref().is_some_and(|proof| !proof.gate.watch(proof.ticket,cx.waker())) {
@@ -429,15 +444,17 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     }).await;
     drop(waiter);
     match ready {
-        None => { held.owned.fence.retire(&held.owned); return (NativeSinkCommit::DefinitelyUnsent,None); }
-        Some(Err(error)) => { held.owned.fence.retire(&held.owned); return (NativeSinkCommit::Unavailable(error.to_string()),None); }
-        Some(Ok(())) => {}
+        Err(_) => {held.owned.fence.retire(&held.owned);return (NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),None);}
+        Ok(None) => { held.owned.fence.retire(&held.owned); return (NativeSinkCommit::DefinitelyUnsent,None); }
+        Ok(Some(Err(error))) => { held.owned.fence.retire(&held.owned); return (NativeSinkCommit::Unavailable(error.to_string()),None); }
+        Ok(Some(Ok(()))) => {}
     }
     let (start,operation) = {
         let Ok(mut state) = held.owned.fence.0.lock() else { return (NativeSinkCommit::DefinitelyUnsent,None); };
         if !held.source.matches(&state,&held.owned) || !valid() {
             drop(state); held.owned.fence.retire(&held.owned); return (NativeSinkCommit::DefinitelyUnsent,None);
         }
+        if budget.expired() {drop(state);held.owned.fence.retire(&held.owned);return (NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),None);}
         let intent = held.quoted.as_ref().expect("ready server quote").0.clone();
         let operation = match client.reserve(held.token,held.binding,intent) {
             Ok(operation) => operation,
@@ -447,6 +464,8 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
             Ok(prepared) => prepared,
             Err(_) => { client.cancel_unsent(held.token,held.binding,&operation);drop(state);held.owned.fence.retire(&held.owned);return (NativeSinkCommit::DefinitelyUnsent,None); }
         };
+        // Recheck after synchronous durable preflight, before either local claim.
+        if budget.expired() {client.cancel_unsent(held.token,held.binding,&operation);drop(state);held.owned.fence.retire(&held.owned);return (NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),None);}
         let mut entered = false;
         let send = || -> Result<(),String> {
             let dispatch = client.commit_prepared_entry(prepared).map_err(str::to_owned)?;
@@ -487,8 +506,9 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
         proof:held.owned.npc_gold_buy.as_deref(),completed:false};
     let outcome = match start {
         Err(error) => NativeSinkCommit::Unknown(error),
-        Ok(()) => match std::future::poll_fn(|cx| Pin::new(&mut *sink).poll_flush(cx)).await {
-            Ok(()) => NativeSinkCommit::Flushed, Err(error) => NativeSinkCommit::Unknown(error.to_string())
+        Ok(()) => match await_native_write_phase(budget,|cx| Pin::new(&mut *sink).poll_flush(cx)).await {
+            Ok(Ok(())) => NativeSinkCommit::Flushed, Ok(Err(error)) => NativeSinkCommit::Unknown(error.to_string()),
+            Err(_) => NativeSinkCommit::Unknown(NATIVE_TRANSPORT_TIMEOUT_ERROR.into())
         }
     };
     if matches!(&outcome,NativeSinkCommit::Unknown(_)) { entered.client.unknown(held.token,held.binding,&operation); }
@@ -528,6 +548,14 @@ mod tests {
             else {Poll::Ready(if state.flush_error {Err("local flush failure")}else{Ok(())})}
         }
         fn poll_close(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>> {self.poll_flush(cx)}
+    }
+    async fn control_local(sink:&mut LocalSink,fence:&NativeCommandFence,stamp:NativeCommandStamp,dispatch:Dispatch)->NativeSinkCommit {
+        let mut budget=ManualNativeWriteBudget::new(u64::MAX);
+        commit_control_with_budget(sink,fence,stamp,dispatch,&mut budget).await
+    }
+    async fn purchase_local(gateway:&mut NativeNpcPurchaseGateway,sink:&mut LocalSink)->Option<NativeSinkCommit> {
+        let mut budget=ManualNativeWriteBudget::new(u64::MAX);
+        gateway.purchase_if_ready_with_budget(sink,&mut budget).await
     }
     fn opaque(value:u8)->wire::Opaque32 {wire::Opaque32::from_bytes([value;32]).unwrap()}
     fn producer(scope:u8,revision:u64)->wire::Producer {
@@ -581,7 +609,7 @@ mod tests {
     }
     fn quote_local(gateway:&mut NativeNpcPurchaseGateway,owned:OwnedGatewayCommand,fence:&NativeCommandFence,sink:&mut LocalSink)->wire::ClientRequest {
         let (dispatch,stamp)=gateway.quote(owned).unwrap();let request=dispatch.request.clone();
-        assert_eq!(commit_control(sink,fence,stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+        assert_eq!(control_local(sink,fence,stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
         let wire::Action::Quote {request:purchase}=request.action.clone() else {panic!("readonly quote")};
         let intent=wire::Intent {request:purchase,currency:wire::Currency::Gold,source:wire::Source::Trade,service_catalog_proof:opaque(7)};
         assert!(receive_local(gateway,fence,&server(&request,wire::ServerReply::Quote {intent},None,None)).is_empty());request
@@ -665,13 +693,13 @@ mod tests {
                 let source=source_profile(service);let (mut gateway,sender,mut receiver,fence,stamp,mut world)=ready_profile(&source);
                 let owned=profile_buy(service,&sender,&mut receiver,&fence,stamp);
                 let (dispatch,quote_stamp)=gateway.quote(owned).unwrap();let request=dispatch.request.clone();let mut sink=LocalSink::default();
-                assert_eq!(commit_control(&mut sink,&fence,quote_stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+                assert_eq!(control_local(&mut sink,&fence,quote_stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
                 let wire::Action::Quote {request:purchase}=request.action.clone() else {panic!("read-only Quote")};
                 let intent=wire::Intent {request:purchase,currency:if service=="PEARLBUY" {wire::Currency::Pearls}else{wire::Currency::Gold},
                     source:match service {"BUYUSED"=>wire::Source::Used,"BUYBACK"=>wire::Source::BuyBack,_=>wire::Source::Trade},service_catalog_proof:opaque(7)};
                 assert!(receive_local(&mut gateway,&fence,&server(&request,wire::ServerReply::Quote {intent},None,None)).is_empty());
                 apply_source_local(&mut world,&mut gateway,&fence,stamp,&change_source(&source,field),11);
-                assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::DefinitelyUnsent),"{service}/{field}");
+                assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::DefinitelyUnsent),"{service}/{field}");
                 assert!(gateway.client.pending_current().is_none());assert!(gateway.entered_ui.is_empty());
                 let sink_state=sink.0.lock().unwrap();assert_eq!(sink_state.frames.len(),1);
                 assert!(matches!(wire::parse_client_request(&sink_state.frames[0]).unwrap().action,wire::Action::Quote {..}));
@@ -683,7 +711,7 @@ mod tests {
         let (mut gateway,sender,mut receiver,fence,stamp,mut world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
         let owned=owned_buy(&sender,&mut receiver,&fence,stamp,&ui);let revision=owned.npc_purchase_source.as_ref().unwrap().revision;
         let (dispatch,quote_stamp)=gateway.quote(owned).unwrap();let request=dispatch.request.clone();
-        assert_eq!(commit_control(&mut sink,&fence,quote_stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+        assert_eq!(control_local(&mut sink,&fence,quote_stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
         let wire::Action::Quote {request:purchase}=request.action.clone() else {panic!("read-only Quote")};
         let intent=wire::Intent {request:purchase,currency:wire::Currency::Gold,source:wire::Source::Trade,service_catalog_proof:opaque(7)};
         let bundles=receive_local(&mut gateway,&fence,&server(&request,wire::ServerReply::Quote {intent},Some(owner()),Some(producer(2,10))));
@@ -691,9 +719,9 @@ mod tests {
         let state=fence.0.lock().unwrap();assert_eq!(state.npc_gold_buy.revision,revision);
         let held=gateway.held.as_ref().unwrap();assert!(held.source.matches(&state,&held.owned));drop(state);
         assert_eq!(ui.feedback().phase,Some(NpcGoldBuyAttemptPhase::Bound));
-        assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
         assert_eq!(sink.0.lock().unwrap().frames.len(),2);
-        assert!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap().is_none());
+        assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());
     }
     fn terminal(request:&wire::ClientRequest,scope:u8,revision:u64,snapshot:Option<Value>)->String {
         let operation=request.action.operation().unwrap().clone();
@@ -702,6 +730,72 @@ mod tests {
         let authority=snapshot.as_ref().map(|_|producer(scope,revision));
         let reply=match &request.action {wire::Action::Query {..}=>wire::ServerReply::Recovery {receipt:Some(receipt)},_=>wire::ServerReply::Purchase {receipt,replayed:false}};
         server(request,reply,snapshot,authority)
+    }
+    #[test]
+    fn native_npc_gateway_transport_readiness_expiry_never_reserves_gold_or_pearl_operation() {
+        for service in ["BUY","PEARLBUY"] {
+            let source=source_profile(service);let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready_profile(&source);
+            let owned=profile_buy(service,&sender,&mut receiver,&fence,stamp);let sequence=owned.sequence;let ui=owned.npc_gold_buy.as_ref().map(|proof|proof.gate.clone());
+            let (quote,quote_stamp)=gateway.quote(owned).unwrap();let request=quote.request.clone();let mut sink=LocalSink::default();
+            assert_eq!(control_local(&mut sink,&fence,quote_stamp,quote).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+            let wire::Action::Quote{request:purchase}=request.action.clone() else{panic!("readonly Quote")};
+            let intent=wire::Intent{request:purchase,currency:if service=="BUY"{wire::Currency::Gold}else{wire::Currency::Pearls},source:wire::Source::Trade,service_catalog_proof:opaque(7)};
+            receive_local(&mut gateway,&fence,&server(&request,wire::ServerReply::Quote{intent},None,None));
+            sink.0.lock().unwrap().ready_pending=true;let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(gateway.purchase_if_ready_with_budget(&mut sink,&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());
+            assert!(fence.0.lock().unwrap().waiters.contains_key(&sequence));clock.advance_to(10);
+            assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(Some(NativeSinkCommit::Unavailable(_)))));drop(future);
+            assert!(gateway.client.pending_current().is_none());assert!(gateway.entered_ui.is_empty());assert!(gateway.held.is_none());
+            assert_eq!(sink.0.lock().unwrap().frames.len(),1);assert!(fence.0.lock().unwrap().waiters.is_empty());assert!(!fence.0.lock().unwrap().outstanding.contains_key(&sequence));
+            if let Some(ui)=ui{assert!(!ui.feedback().pending);}
+        }
+    }
+    #[test]
+    fn native_npc_gateway_transport_flush_expiry_retains_gold_ui_and_queries_original_after_reconnect() {
+        let (mut gateway,sender,mut receiver,fence,stamp,mut world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
+        quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);sink.0.lock().unwrap().flush_pending=true;
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+        let mut future=Box::pin(gateway.purchase_if_ready_with_budget(&mut sink,&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(Some(NativeSinkCommit::Unknown(_)))));drop(future);
+        let original=wire::parse_client_request(&sink.0.lock().unwrap().frames[1]).unwrap().action.operation().unwrap().clone();
+        assert_eq!(gateway.client.pending_current().unwrap().phase,mir2_client_core::npc_purchase_receipt::PurchasePhase::Unknown);
+        assert_eq!(ui.feedback().phase,Some(NpcGoldBuyAttemptPhase::Unknown));assert!(ui.feedback().pending);assert_eq!(gateway.entered_ui.len(),1);
+        assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());assert_eq!(sink.0.lock().unwrap().frames.len(),2);
+        gateway.disconnect();gateway.open_connection().unwrap();let fresh=fence.test_reconnect(3,0);
+        let bundles=begin_local(&mut gateway,&fence,fresh,3,10);apply_local(&mut world,&mut gateway,&fence,bundles);
+        let (query,_)=gateway.recovery_if_ready().unwrap().unwrap();assert!(matches!(&query.request.action,wire::Action::Query{..}));assert_eq!(query.request.action.operation(),Some(&original));
+        assert!(gateway.recovery_if_ready().unwrap().is_none());assert_eq!(gateway.entered_ui.len(),1);
+        let bundles=receive_local(&mut gateway,&fence,&terminal(&query.request,3,11,Some(owner())));assert!(gateway.client.pending_current().is_some());
+        apply_local(&mut world,&mut gateway,&fence,bundles);assert!(gateway.client.pending_current().is_none());assert!(gateway.entered_ui.is_empty());assert_eq!(sink.0.lock().unwrap().frames.len(),2);
+    }
+    #[test]
+    fn native_npc_gateway_transport_one_budget_spans_readiness_and_pearl_flush() {
+        let source=source_profile("PEARLBUY");let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready_profile(&source);
+        let owned=profile_buy("PEARLBUY",&sender,&mut receiver,&fence,stamp);let (quote,quote_stamp)=gateway.quote(owned).unwrap();let request=quote.request.clone();let mut sink=LocalSink::default();
+        assert_eq!(control_local(&mut sink,&fence,quote_stamp,quote).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+        let wire::Action::Quote{request:purchase}=request.action.clone() else{panic!("readonly Quote")};
+        let intent=wire::Intent{request:purchase,currency:wire::Currency::Pearls,source:wire::Source::Trade,service_catalog_proof:opaque(7)};
+        receive_local(&mut gateway,&fence,&server(&request,wire::ServerReply::Quote{intent},None,None));
+        sink.0.lock().unwrap().ready_pending=true;sink.0.lock().unwrap().flush_pending=true;let state=sink.0.clone();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+        let mut future=Box::pin(gateway.purchase_if_ready_with_budget(&mut sink,&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(9);state.lock().unwrap().ready_pending=false;
+        assert!(future.as_mut().poll(&mut cx).is_pending());assert_eq!(state.lock().unwrap().frames.len(),2);clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(Some(NativeSinkCommit::Unknown(_)))));drop(future);
+        assert_eq!(gateway.client.pending_current().unwrap().phase,mir2_client_core::npc_purchase_receipt::PurchasePhase::Unknown);assert!(gateway.entered_ui.is_empty());
+        assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());assert_eq!(state.lock().unwrap().frames.len(),2);assert!(fence.0.lock().unwrap().waiters.is_empty());
+    }
+    #[test]
+    fn native_npc_gateway_transport_control_expiry_has_no_ui_claim_or_purchase() {
+        for after_entry in [false,true] {
+            let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let ui=ui_gate(&fence,stamp);
+            let owned=owned_buy(&sender,&mut receiver,&fence,stamp,&ui);let sequence=owned.sequence;let (quote,quote_stamp)=gateway.quote(owned).unwrap();let mut sink=LocalSink::default();let state=sink.0.clone();
+            state.lock().unwrap().ready_pending=!after_entry;state.lock().unwrap().flush_pending=after_entry;
+            let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(commit_control_with_budget(&mut sink,&fence,quote_stamp,quote,&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);
+            let result=future.as_mut().poll(&mut cx);if after_entry{assert!(matches!(result,Poll::Ready(NativeSinkCommit::Unknown(_))));}else{assert!(matches!(result,Poll::Ready(NativeSinkCommit::Unavailable(_))));}drop(future);
+            assert_eq!(state.lock().unwrap().frames.len(),usize::from(after_entry));assert!(gateway.client.pending_current().is_none());assert!(gateway.entered_ui.is_empty());
+            assert!(fence.0.lock().unwrap().outstanding.contains_key(&sequence));assert!(fence.0.lock().unwrap().waiters.is_empty());assert_eq!(ui.feedback().phase,Some(NpcGoldBuyAttemptPhase::Bound));
+            gateway.disconnect();assert!(!ui.feedback().pending);assert!(!fence.0.lock().unwrap().outstanding.contains_key(&sequence));
+        }
     }
     #[test]
     fn native_npc_gateway_raw_marker_catches_escaped_and_duplicate_type_before_decoder() {
@@ -728,7 +822,7 @@ mod tests {
         let owned=owned_buy(&sender,&mut receiver,&fence,stamp,&ui);let sequence=owned.sequence;
         quote_local(&mut gateway,owned,&fence,&mut sink);
         assert!(fence.0.lock().unwrap().outstanding.contains_key(&sequence));assert_eq!(ui.feedback().phase,Some(NpcGoldBuyAttemptPhase::Bound));
-        assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
         let purchase=wire::parse_client_request(&sink.0.lock().unwrap().frames[1]).unwrap();
         assert!(matches!(&purchase.action,wire::Action::Purchase {operation} if operation.intent.request.item_index.get()==0));
         assert!(!fence.0.lock().unwrap().outstanding.contains_key(&sequence));assert_eq!(ui.feedback().phase,Some(NpcGoldBuyAttemptPhase::Flushed));
@@ -737,10 +831,10 @@ mod tests {
         apply_local(&mut world,&mut gateway,&fence,bundles);
         assert!(!ui.feedback().pending);assert!(gateway.client.pending_current().is_none());
         let next=owned_buy(&sender,&mut receiver,&fence,stamp,&ui);quote_local(&mut gateway,next,&fence,&mut sink);
-        assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
         let second=wire::parse_client_request(&sink.0.lock().unwrap().frames[3]).unwrap();
         assert!(second.action.operation().unwrap().sequence.get()>purchase.action.operation().unwrap().sequence.get());
-        assert!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap().is_none());
+        assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());
         assert_eq!(sink.0.lock().unwrap().frames.len(),4);
     }
     #[test]
@@ -749,7 +843,7 @@ mod tests {
             let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
             quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);
             sink.0.lock().unwrap().ready_pending=true;
-            let mut future=Box::pin(gateway.purchase_if_ready(&mut sink));let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(purchase_local(&mut gateway,&mut sink));let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
             assert!(future.as_mut().poll(&mut cx).is_pending());
             if scene {fence.test_scene_boundary(0);}else{fence.0.lock().unwrap().npc_gold_buy.inventory.as_mut().unwrap().gold-=1;}
             assert_eq!(future.as_mut().poll(&mut cx),Poll::Ready(Some(NativeSinkCommit::DefinitelyUnsent)));drop(future);
@@ -761,7 +855,7 @@ mod tests {
     fn native_npc_gateway_unknown_reconnect_queries_original_without_purchase_retry() {
         let (mut gateway,sender,mut receiver,fence,stamp,mut world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
         quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);sink.0.lock().unwrap().start_error=true;
-        assert!(matches!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Unknown(_))));
+        assert!(matches!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Unknown(_))));
         let original=wire::parse_client_request(&sink.0.lock().unwrap().frames[1]).unwrap().action.operation().unwrap().clone();
         gateway.disconnect();gateway.open_connection().unwrap();let fresh=fence.test_reconnect(3,0);
         let bundles=begin_local(&mut gateway,&fence,fresh,3,10);apply_local(&mut world,&mut gateway,&fence,bundles);
@@ -789,7 +883,7 @@ mod tests {
         sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::BuyItem {item_index:u64::MAX,count:3,panel_type:0}),Some(stamp)).unwrap();
         let owned=receiver.try_recv().unwrap().into_parts().1.unwrap();assert!(owned.npc_gold_buy.is_none());
         let (quote,quote_stamp)=gateway.quote(owned).unwrap();let quote_request=quote.request.clone();let mut sink=LocalSink::default();
-        assert_eq!(commit_control(&mut sink,&fence,quote_stamp,quote).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+        assert_eq!(control_local(&mut sink,&fence,quote_stamp,quote).now_or_never().unwrap(),NativeSinkCommit::Flushed);
         let wire::Action::Quote {request}=quote_request.action.clone() else{panic!("read-only quote")};
         let intent=wire::Intent {request,currency:wire::Currency::Gold,source:wire::Source::Used,service_catalog_proof:opaque(7)};
         for invalid in 0..5 {
@@ -798,17 +892,17 @@ mod tests {
             assert!(!gateway.held.as_ref().unwrap().source.allows_intent(&wrong));
         }
         receive_local(&mut gateway,&fence,&server(&quote_request,wire::ServerReply::Quote {intent:intent.clone()},None,None));
-        assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
         let purchase=wire::parse_client_request(&sink.0.lock().unwrap().frames[1]).unwrap();
         assert_eq!(purchase.action.operation().unwrap().intent,intent);
         assert_eq!(purchase.action.operation().unwrap().intent.request.panel_type,0);
-        assert!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap().is_none());assert_eq!(sink.0.lock().unwrap().frames.len(),2);
+        assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());assert_eq!(sink.0.lock().unwrap().frames.len(),2);
     }
     #[test]
     fn native_npc_gateway_healthy_unknown_queries_original_once_without_purchase_retry() {
         let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
         quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);
-        assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
         assert!(gateway.recovery_if_ready().unwrap().is_none());
         let purchase=wire::parse_client_request(&sink.0.lock().unwrap().frames[1]).unwrap();
         receive_local(&mut gateway,&fence,&server(&purchase,wire::ServerReply::Failure {state:wire::FailureState::Unknown,receipt:None},None,None));
@@ -822,10 +916,10 @@ mod tests {
     fn native_npc_gateway_dropped_flush_keeps_original_ui_and_durable_unknown_custody() {
         let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
         quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);sink.0.lock().unwrap().flush_pending=true;
-        {let mut future=Box::pin(gateway.purchase_if_ready(&mut sink));let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());assert!(future.as_mut().poll(&mut cx).is_pending());}
+        {let mut future=Box::pin(purchase_local(&mut gateway,&mut sink));let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());assert!(future.as_mut().poll(&mut cx).is_pending());}
         assert_eq!(gateway.client.pending_current().unwrap().phase,mir2_client_core::npc_purchase_receipt::PurchasePhase::Unknown);
         assert_eq!(ui.feedback().phase,Some(NpcGoldBuyAttemptPhase::Unknown));assert_eq!(gateway.entered_ui.len(),1);
-        assert!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap().is_none());assert_eq!(sink.0.lock().unwrap().frames.len(),2);
+        assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());assert_eq!(sink.0.lock().unwrap().frames.len(),2);
     }
     #[test]
     fn native_npc_gateway_pending_entry_retires_bundle_before_world_and_refuses_late_owner() {
@@ -842,7 +936,7 @@ mod tests {
         use mir2_client_core::npc_purchase_receipt::{PurchaseSettlement,EconomicResult,ActorKey,OwnerScope,RequestId,PurchaseCurrency,PurchaseSource,ServiceCatalogProof};
         let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
         quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);
-        assert_eq!(gateway.purchase_if_ready(&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
         let pending=gateway.client.pending_current().unwrap();
         let original=PurchaseSettlement {key:pending.key,intent:pending.intent,result:EconomicResult::Rejected {server_revision:11}};
         for field in 0..9 {

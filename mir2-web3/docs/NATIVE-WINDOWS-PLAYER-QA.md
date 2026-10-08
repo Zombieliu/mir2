@@ -1,5 +1,17 @@
 # Windows 原生可玩闭环验收清单
 
+## Source37：Native 通信超时修复，53 项选定回归通过；完整 Web 可玩包仍待交付（2026-10-08）
+
+Native owned/control/Purchase 使用真实 Tokio 单次10秒绝对时限覆盖 readiness→最终准入→flush。未进入发送的超时精确退役原 envelope 并返回 Unavailable；已进入则发布 Unknown、保留原购买/UI/durable custody，重连只 Query 原操作。普通 connect 另有10秒预算，整个普通 capabilities＋credential handshake 共用另一10秒，keepalive有界；Shutdown观察原 fence，不消费排队Login/StartGame。同时关闭优先；原 resume 绝对deadline、Origin/TLS、credential校验及协议保持。不是 connect＋handshake 合计10秒。
+
+当前Source02实际53/53、0失败/0ignored、53唯一名称，新11均具名执行。原Gateway153和NPC17测试/业务断言保持，纯NPC测试显式手动时钟调用同一生产body；旧模块经有限逆替换逐字恢复。独立复核发现的MutexGuard跨await来源风险已在同步block修正。897声明Rust输入2改/895保护，原Guard单次/完整5份nonce，实际C≥50GiB、freshness保守上界65ms，PolicyB全部关闭。整次Guard耗时373317ms、测试0.29s均为实际记录；10秒写入预算不限制Cargo编译。仅受控Sink/本地队列/裸World/最小App与真实1ms timer，不证明实际WebSocket卡住10秒。
+
+台账103 shared＋206 legacy＋8 common＝309/317≈97.5%仅实现记录覆盖率；Matrix11原字节保持，overallPercentage=null、Candidate100=false、goal active。可分发Web仍Source25 Next08/Thin08，不含Source26–37；本轮无生产EXE/Core/PUI/NPC/renderer/完整Web构建。严格TSC未重跑，只保留Source35按未变有效TS输入的限定历史结果，不能称整个当前Web已构建通过。公开manifests未替换。实际登录→战斗→保存→重登、资源初始化、移动设备、玩家验收not-run；用户“继续代码，暂不操作界面”保持，无可信试玩日期。
+
+下一项补Web shared Hero入口、完整物品/精确ACK生命周期及portable painter：现有React Hero功能仍在，不能将缺setter说成全部英雄操作不可用，也不能仅补setter就关闭共享面板。宽UID动作ABI、旧引擎宽日期限制、NewMagic定义变更待匹配完整producer，以及原metadata/name/normalized ABI/default-gzip/初始化/源码匹配打包仍未关闭；原helper当前禁止的WASM API未调用或绕过。本轮只改两Native客户端文件，服务器/共享Zone/协议parity不变。Source36已实际提交推送04d8780054e0fdfb66a5783679953ccc11c342b1；本轮发布以后续真实Git结果为准。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json)、[原始20文件含完整5份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json)、[Source36真实发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json)。原数据reader误将4个mail_夹具函数计入测试，执行前拒绝并保留修正记录，不计产品测试失败。下面Source36及更旧段落为历史。
+
 ## Source36：完整技能与操作准入修复；最新可玩 Web 包未交付（2026-10-08）
 
 Native 技能 projector 移入现有 Runtime 供 producer 与 owner checkpoint 共用，保留原 null/0/catalog/alias 语义。完整快照核对 learned 行和绑定内容，显式 owner authority/ACK 才强匹配，保留独立宿主 epoch 刷新。Native 操作权限核对 learned 身份、顺序和不可变定义；真实后续 Cast/Delay/Leveled/Toggle、数字热键与 exact ACK 保留，不回滚 live model。NewMagic 改变定义仍等待匹配的完整 producer。
