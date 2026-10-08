@@ -324,12 +324,13 @@ pub struct SocialModel {
 impl SocialModel {
     pub fn begin_pending(&mut self, operation: SocialPendingOperation) -> bool {
         if let SocialPendingOperation::GuildRankRename(request) = &operation {
-            if self.pending.iter().any(|pending| matches!(pending,
+            if self.pending.iter().any(|pending| {
+                matches!(pending,
                 SocialPendingOperation::GuildRankRename(existing)
                 if existing.scope_epoch == request.scope_epoch
                     && existing.guild_name == request.guild_name
-                    && existing.rank_index == request.rank_index))
-            {
+                    && existing.rank_index == request.rank_index)
+            }) {
                 return false;
             }
         }
@@ -353,7 +354,11 @@ impl SocialModel {
         let guild_name = self.guild.name.clone()?;
         if requester.is_empty()
             || !valid_rank_rename_name(rank_name)
-            || !self.guild.ranks.iter().any(|rank| rank.index == i32::from(rank_index))
+            || !self
+                .guild
+                .ranks
+                .iter()
+                .any(|rank| rank.index == i32::from(rank_index))
         {
             return None;
         }
@@ -363,7 +368,11 @@ impl SocialModel {
             requester: requester.to_owned(),
             rank_index,
             rank_name: rank_name.to_owned(),
-            observed_change_revision: self.guild.rank_change.as_ref().map_or(0, |change| change.revision),
+            observed_change_revision: self
+                .guild
+                .rank_change
+                .as_ref()
+                .map_or(0, |change| change.revision),
             deadline_ms,
         })
     }
@@ -540,7 +549,10 @@ impl SocialModel {
                     } else {
                         self.guild.scope_epoch
                     };
-                    self.guild = GuildModel { scope_epoch, ..Default::default() };
+                    self.guild = GuildModel {
+                        scope_epoch,
+                        ..Default::default()
+                    };
                     success = Some(true);
                     self.last_event = Some(SocialAuthoritativeEvent {
                         packet: packet.to_owned(),
@@ -558,7 +570,8 @@ impl SocialModel {
                 let Some(name) = clean_name(Some(&Value::String(raw_name.to_owned()))) else {
                     return false;
                 };
-                let Some(rank_name) = raw_rank_name(Some(&Value::String(raw_rank.to_owned()))) else {
+                let Some(rank_name) = raw_rank_name(Some(&Value::String(raw_rank.to_owned())))
+                else {
                     return false;
                 };
                 if self.guild.name.as_deref() != Some(name.as_str()) {
@@ -633,10 +646,12 @@ impl SocialModel {
                 let mut all = Vec::new();
                 let mut parsed_ranks = Vec::new();
                 for rank in ranks {
-                    if is_rank_delta && (value_i32(rank.get("index"))
-                        .and_then(|index| u8::try_from(index).ok()).is_none()
-                        || value_u8(rank.get("options")).is_none()
-                        || !rank.get("members").is_some_and(Value::is_array))
+                    if is_rank_delta
+                        && (value_i32(rank.get("index"))
+                            .and_then(|index| u8::try_from(index).ok())
+                            .is_none()
+                            || value_u8(rank.get("options")).is_none()
+                            || !rank.get("members").is_some_and(Value::is_array))
                     {
                         return false;
                     }
@@ -676,29 +691,53 @@ impl SocialModel {
                     let Some(actor) = clean_name(payload.get("name")) else {
                         return false;
                     };
-                    let matching = self.guild.ranks.iter().enumerate()
+                    let matching = self
+                        .guild
+                        .ranks
+                        .iter()
+                        .enumerate()
                         .filter(|(_, rank)| rank.index == updated.index)
-                        .map(|(index, _)| index).collect::<Vec<_>>();
+                        .map(|(index, _)| index)
+                        .collect::<Vec<_>>();
                     if matching.len() != 1 {
                         return false;
                     }
                     let target = matching[0];
-                    let count = self.guild.ranks.iter().enumerate()
+                    let count = self
+                        .guild
+                        .ranks
+                        .iter()
+                        .enumerate()
                         .filter(|(index, _)| *index != target)
-                        .map(|(_, rank)| rank.members.len()).sum::<usize>() + updated.members.len();
+                        .map(|(_, rank)| rank.members.len())
+                        .sum::<usize>()
+                        + updated.members.len();
                     if count > MAX_GUILD_MEMBERS {
                         return false;
                     }
-                    let Some(revision) = self.guild.rank_change.as_ref().map_or(0, |change| change.revision).checked_add(1) else {
+                    let Some(revision) = self
+                        .guild
+                        .rank_change
+                        .as_ref()
+                        .map_or(0, |change| change.revision)
+                        .checked_add(1)
+                    else {
                         return false;
                     };
                     self.guild.rank_change = Some(GuildRankChange {
-                        revision, scope_epoch: self.guild.scope_epoch, actor,
-                        rank_index, rank_name: updated.name.clone(),
+                        revision,
+                        scope_epoch: self.guild.scope_epoch,
+                        actor,
+                        rank_index,
+                        rank_name: updated.name.clone(),
                     });
                     self.guild.ranks[target] = updated;
-                    self.guild.members = self.guild.ranks.iter()
-                        .flat_map(|rank| rank.members.iter().cloned()).collect();
+                    self.guild.members = self
+                        .guild
+                        .ranks
+                        .iter()
+                        .flat_map(|rank| rank.members.iter().cloned())
+                        .collect();
                 } else {
                     self.guild.ranks = parsed_ranks;
                     self.guild.members = all;
@@ -2105,7 +2144,13 @@ mod tests {
         assert!(model.apply_packet("GuildStatus", &json!({"guildName":"","guildRankName":""})));
         let incoming = model.clone();
         model.apply_authoritative(incoming);
-        assert_eq!(model.guild, GuildModel { scope_epoch: 1, ..GuildModel::default() });
+        assert_eq!(
+            model.guild,
+            GuildModel {
+                scope_epoch: 1,
+                ..GuildModel::default()
+            }
+        );
         assert!(model.pending.is_empty());
     }
 

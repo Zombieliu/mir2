@@ -568,14 +568,23 @@ fn capture_portuguese_panels(
 #[test]
 #[ignore = "explicit monthly card nine-language offline GPU fixture; owned output and real asset root required"]
 fn monthly_card_nine_language_modal_renders_offscreen() {
-    let assets = PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("explicit asset root")).canonicalize().unwrap();
-    let output = PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_OUTPUT").expect("explicit fresh output"));
+    let assets = PathBuf::from(
+        std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("explicit asset root"),
+    )
+    .canonicalize()
+    .unwrap();
+    let output =
+        PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_OUTPUT").expect("explicit fresh output"));
     assert!(output.is_absolute() && !output.starts_with(&assets));
     fs::create_dir_all(&output).unwrap();
     let output = output.canonicalize().unwrap();
     assert!(!output.starts_with(&assets));
     let report = output.join("monthly-card-visual-report.json");
-    OpenOptions::new().write(true).create_new(true).open(&report).unwrap();
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&report)
+        .unwrap();
     fs::write(&report, b"{\"passed\":false}").unwrap();
     let (mut app, target, _) = i18n_offscreen_app(&assets, true);
     let mut cases = Vec::new();
@@ -589,20 +598,40 @@ fn monthly_card_nine_language_modal_renders_offscreen() {
         model.monthly_card.open = true;
         model.monthly_card.code = format!("MC1-{}", "A".repeat(43));
         model.monthly_card.status = Some(crate::native_monthly_card::MonthlyCardStatus {
-            required: true, active: false, expires_at_ms: Some(1_800_000_000_000),
-            server_now_ms: 1_800_000_000_000, remaining_ms: 0, can_enter_game: false,
+            required: true,
+            active: false,
+            expires_at_ms: Some(1_800_000_000_000),
+            server_now_ms: 1_800_000_000_000,
+            remaining_ms: 0,
+            can_enter_game: false,
         });
         model.monthly_card.message = Some("monthlyCardResultUnconfirmed".into());
         app.insert_resource(model.clone());
         warm_i18n_images(&mut app);
         let layouts = i18n_text_layouts(&mut app);
-        for title in ["Monthly Card", "Check status", "Redeem", "monthlyCardResultUnconfirmed"] {
-            assert!(layouts.iter().any(|row| row["text"] == native_i18n::tr(title)), "missing {title} in {locale:?}");
+        for title in [
+            "Monthly Card",
+            "Check status",
+            "Redeem",
+            "monthlyCardResultUnconfirmed",
+        ] {
+            assert!(
+                layouts
+                    .iter()
+                    .any(|row| row["text"] == native_i18n::tr(title)),
+                "missing {title} in {locale:?}"
+            );
         }
         for row in &layouts {
             assert_eq!(row["missingGlyphs"], 0, "missing monthly glyph: {row}");
-            assert_eq!(row["layoutExceedsNode"], false, "monthly text overflow: {row}");
-            assert_eq!(row["nodeOutsideViewport"], false, "monthly node outside viewport: {row}");
+            assert_eq!(
+                row["layoutExceedsNode"], false,
+                "monthly text overflow: {row}"
+            );
+            assert_eq!(
+                row["nodeOutsideViewport"], false,
+                "monthly node outside viewport: {row}"
+            );
         }
         assert_eq!(app.world().resource::<NativeShellModel>(), &model);
         let filename = format!("monthly-card-{}.png", locale.code());
@@ -611,7 +640,11 @@ fn monthly_card_nine_language_modal_renders_offscreen() {
             "monthly modal must change the actual rendered frame; layout alone cannot prove visibility");
         cases.push(json!({"locale":locale.code(),"image":filename,"visibleFrameChanged":true,"texts":layouts}));
     }
-    fs::write(report, serde_json::to_vec_pretty(&json!({"passed":true,"cases":cases})).unwrap()).unwrap();
+    fs::write(
+        report,
+        serde_json::to_vec_pretty(&json!({"passed":true,"cases":cases})).unwrap(),
+    )
+    .unwrap();
 }
 
 #[test]

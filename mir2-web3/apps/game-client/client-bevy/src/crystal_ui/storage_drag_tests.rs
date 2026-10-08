@@ -72,19 +72,30 @@ fn storage_drag_app() -> (App, Entity) {
             Update,
             (sync_storage_inventory_location, process_inventory_item_drag).chain(),
         );
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::Storage;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Storage;
     {
         let mut storage = app.world_mut().resource_mut::<StorageModel>();
         *storage = StorageModel::new();
         storage.size = STORAGE_BASE_SIZE;
     }
     app.update();
-    assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .inventory_open());
     assert_eq!(
         (
-            app.world().resource::<NativePlayerUiState>().inventory_window.left,
-            app.world().resource::<NativePlayerUiState>().inventory_window.top,
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window
+                .left,
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window
+                .top,
         ),
         (393.0, 0.0),
     );
@@ -126,17 +137,18 @@ fn ordered_move(app: &mut App, window: Entity, point: Vec2) {
 }
 
 fn ordered_left(app: &mut App, window: Entity, pressed: bool) {
-    app.world_mut().write_message(bevy::window::WindowEvent::MouseButtonInput(
-        bevy::input::mouse::MouseButtonInput {
-            window,
-            button: MouseButton::Left,
-            state: if pressed {
-                bevy::input::ButtonState::Pressed
-            } else {
-                bevy::input::ButtonState::Released
+    app.world_mut()
+        .write_message(bevy::window::WindowEvent::MouseButtonInput(
+            bevy::input::mouse::MouseButtonInput {
+                window,
+                button: MouseButton::Left,
+                state: if pressed {
+                    bevy::input::ButtonState::Pressed
+                } else {
+                    bevy::input::ButtonState::Released
+                },
             },
-        },
-    ));
+        ));
 }
 
 fn ordered_drag(app: &mut App, window: Entity, source: Vec2, target: Vec2) {
@@ -292,14 +304,21 @@ fn ordered_warehouse_storage_drag_uses_exact_take_back_v2_target_and_compatible_
 
 #[test]
 fn ordered_warehouse_storage_drag_moves_empty_and_incompatible_or_full_targets() {
-    for target in [None, Some(storage_item(6, 8002, 101, 4)), Some(storage_item(6, 8002, 100, 20))] {
+    for target in [
+        None,
+        Some(storage_item(6, 8002, 101, 4)),
+        Some(storage_item(6, 8002, 100, 20)),
+    ] {
         let (mut app, window) = storage_drag_app();
         app.world_mut()
             .resource_mut::<StorageModel>()
             .items
             .push(storage_item(5, 8001, 100, 2));
         if let Some(target) = target {
-            app.world_mut().resource_mut::<StorageModel>().items.push(target);
+            app.world_mut()
+                .resource_mut::<StorageModel>()
+                .items
+                .push(target);
         }
         ordered_drag(&mut app, window, storage_point(5), storage_point(6));
         assert_eq!(
@@ -322,7 +341,10 @@ fn ordered_warehouse_storage_drag_merges_only_nonfull_compatible_target_and_same
         .items
         .extend([storage_item(5, 8001, 100, 2), storage_item(6, 8002, 100, 4)]);
     ordered_drag(&mut app, window, storage_point(5), storage_point(5));
-    assert!(drain(&mut app).is_empty(), "same source and target must not enqueue");
+    assert!(
+        drain(&mut app).is_empty(),
+        "same source and target must not enqueue"
+    );
 
     ordered_drag(&mut app, window, storage_point(5), storage_point(6));
     assert_eq!(
@@ -395,7 +417,9 @@ fn pending_storage_move_locks_source_and_target_cells_until_exact_ack() {
     let mut feedback = InventoryOperationFeedback::default();
     assert_eq!(
         apply_inventory_operation_ack(
-            app.world_mut().resource_mut::<PendingOperations>().into_inner(),
+            app.world_mut()
+                .resource_mut::<PendingOperations>()
+                .into_inner(),
             &mut feedback,
             InventoryOperationAck::Move {
                 grid: "Storage".to_owned(),
@@ -567,23 +591,41 @@ fn warehouse_open_close_and_npc_reopen_keep_their_source_bag_positions() {
             Update,
             sync_npc_dialog_inventory_location.before(sync_storage_inventory_location),
         );
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::None;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::None;
     app.update();
     app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::NpcShop;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::NpcShop;
     app.update();
-    assert_eq!(app.world().resource::<NativePlayerUiState>().inventory_window.left, 445.0);
+    assert_eq!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .inventory_window
+            .left,
+        445.0
+    );
 
     app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::Storage;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Storage;
     app.update();
     assert_eq!(
         (
-            app.world().resource::<NativePlayerUiState>().inventory_window.left,
-            app.world().resource::<NativePlayerUiState>().inventory_window.top,
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window
+                .left,
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window
+                .top,
         ),
         (393.0, 0.0),
     );

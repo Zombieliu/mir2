@@ -320,20 +320,48 @@ pub fn spawn_crystal_image_button<T: Bundle>(
             if let Some(caption) = crystal_button_caption(spec) {
                 let caption = match (spec.library, spec.normal) {
                     ("Title", 774 | 775) => crate::native_i18n::key("game.extra.035", caption),
-                    ("Title", 851..=853) => crate::native_i18n::key("game.option.new_movement", caption),
-                    ("Title", 848..=850) => crate::native_i18n::key("game.option.old_movement", caption),
+                    ("Title", 851..=853) => {
+                        crate::native_i18n::key("game.option.new_movement", caption)
+                    }
+                    ("Title", 848..=850) => {
+                        crate::native_i18n::key("game.option.old_movement", caption)
+                    }
                     _ => crate::native_i18n::tr(caption),
                 };
                 // Keep the hit rectangle exact; allow two lines for Portuguese
                 // on the narrow original buttons, instead of clipping letters.
-                button.spawn((
-                    LocalizedButtonFace,
-                    Node { width: Val::Percent(100.0), height: Val::Percent(100.0), border: UiRect::all(Val::Px(1.0)), padding: UiRect::axes(Val::Px(2.0), Val::Px(1.0)), align_items: AlignItems::Center, justify_content: JustifyContent::Center, overflow: Overflow::clip(), ..default() },
-                    BackgroundColor(localized_button_colour(resolve_button_visual_state(None, focused, enabled))),
-                    BorderColor::all(Color::srgb(0.61, 0.49, 0.28)), FocusPolicy::Pass,
-                )).with_children(|face| {
-                    face.spawn((Text::new(caption), crystal_text_font(if spec.rect.height < 21.0 { 9.0 } else { 10.0 }), TextColor(if enabled { CRYSTAL_HINT_TEXT } else { Color::srgb(0.48,0.45,0.37) }), TextLayout::new(Justify::Center, LineBreak::WordBoundary), FocusPolicy::Pass));
-                });
+                button
+                    .spawn((
+                        LocalizedButtonFace,
+                        Node {
+                            width: Val::Percent(100.0),
+                            height: Val::Percent(100.0),
+                            border: UiRect::all(Val::Px(1.0)),
+                            padding: UiRect::axes(Val::Px(2.0), Val::Px(1.0)),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            overflow: Overflow::clip(),
+                            ..default()
+                        },
+                        BackgroundColor(localized_button_colour(resolve_button_visual_state(
+                            None, focused, enabled,
+                        ))),
+                        BorderColor::all(Color::srgb(0.61, 0.49, 0.28)),
+                        FocusPolicy::Pass,
+                    ))
+                    .with_children(|face| {
+                        face.spawn((
+                            Text::new(caption),
+                            crystal_text_font(if spec.rect.height < 21.0 { 9.0 } else { 10.0 }),
+                            TextColor(if enabled {
+                                CRYSTAL_HINT_TEXT
+                            } else {
+                                Color::srgb(0.48, 0.45, 0.37)
+                            }),
+                            TextLayout::new(Justify::Center, LineBreak::WordBoundary),
+                            FocusPolicy::Pass,
+                        ));
+                    });
                 return;
             }
         }
@@ -800,9 +828,8 @@ fn hint_ui_coordinates(
     if native_stage {
         // Fullscreen UI is drawn inside the same centered viewport as the world.
         // Bevy hit testing subtracts this origin; self-positioned hints must too.
-        let (origin, size) = crate::native_display::stage_viewport(
-            window.resolution.physical_size(),
-        );
+        let (origin, size) =
+            crate::native_display::stage_viewport(window.resolution.physical_size());
         return ((cursor - origin.as_vec2()) / scale, size.as_vec2() / scale);
     }
     (
@@ -971,7 +998,9 @@ fn paint_rebuilt_crystal_buttons(
         let state = resolve_button_visual_state(Some(interaction), button.focused, button.enabled);
         let image = assets.load(state.asset_path(&button.assets).to_owned());
         for child in children.iter() {
-            if let Ok(mut face) = faces.get_mut(child) { face.0 = localized_button_colour(state); }
+            if let Ok(mut face) = faces.get_mut(child) {
+                face.0 = localized_button_colour(state);
+            }
             if let Ok(mut sprite) = sprites.get_mut(child) {
                 if sprite.image != image {
                     sprite.image = image.clone();
@@ -1481,19 +1510,24 @@ mod tests {
     #[test]
     fn fullscreen_hints_use_the_centered_stage_instead_of_letterbox_bars() {
         for physical in [
-            UVec2::new(1920, 1080), UVec2::new(3840, 2160),
-            UVec2::new(2560, 1600), UVec2::new(1080, 1920),
+            UVec2::new(1920, 1080),
+            UVec2::new(3840, 2160),
+            UVec2::new(2560, 1600),
+            UVec2::new(1080, 1920),
         ] {
             let mut window = Window::default();
             window.resolution.set_scale_factor_override(Some(1.0));
-            window.resolution.set_physical_resolution(physical.x, physical.y);
+            window
+                .resolution
+                .set_physical_resolution(physical.x, physical.y);
             let (origin, size) = crate::native_display::stage_viewport(physical);
             let scale = size.x as f32 / STAGE_WIDTH;
             let physical_cursor = origin.as_vec2() + Vec2::new(1000.0, 750.0) * scale;
             let (cursor, bounds) = hint_ui_coordinates(&window, physical_cursor, scale, true);
             assert_eq!(cursor, Vec2::new(1000.0, 750.0));
             assert_eq!(bounds, Vec2::new(STAGE_WIDTH, STAGE_HEIGHT));
-            let hint = crystal_item_hint_position_for_bounds(cursor, Vec2::new(140.0, 55.0), bounds);
+            let hint =
+                crystal_item_hint_position_for_bounds(cursor, Vec2::new(140.0, 55.0), bounds);
             assert!(hint.x >= 0.0 && hint.y >= 0.0);
             assert!(hint.x + 140.0 <= STAGE_WIDTH && hint.y + 55.0 <= STAGE_HEIGHT);
             let (generic_cursor, generic_bounds) =
@@ -1502,5 +1536,4 @@ mod tests {
             assert_eq!(generic_bounds, physical.as_vec2());
         }
     }
-
 }

@@ -84,7 +84,10 @@ validity). The simulation correctly retains the fourth doorway. The test and
 controller now prefer an authored source that the real runtime publishes.
 The original three bad records remain unchanged.
 
-Current complete 228-story run: **in progress, not yet accepted**.
+Complete prepared doorway run: **228/228 passed** (one aggregate test), with
+Warrior, Wizard, and Taoist each completing all 76 directed doorway cases,
+including normal save/relogin at each destination. The aggregate test finished
+in 3660.44 seconds; it was not skipped or shortened after the retained failures.
 Command:
 
 ```powershell
@@ -93,7 +96,7 @@ cargo +1.89.0 test -p mir2-simulation --test classic_late_route_story -- --test-
 ```
 
 Local logs are `C:/mir2-build/p2-late-doorway-story-20261008-01.log` (compile),
-`-02.log` (retained source-choice failure), and `-03.log` (current full run).
+`-02.log` (retained source-choice failure), and `-03.log` (complete green run).
 
 ## Separate gates still required
 
@@ -101,7 +104,10 @@ The existing `classic_late_route_gates` fixtures exercise 13 prepared ordinary
 NPC/item cases: source-bound StoneHeart quest/level/count gates, exact one-item
 debit, wrong object/distance rejection, Big Taoist pages, learned-book NewMagic
 and one debit, normal relog, and rejection of the unbound Great Taoist entrance.
-Their prepared items and levels do not establish natural acquisition.
+Their prepared items and levels do not establish natural acquisition. The
+current adjacent rerun passed **13/13** in 342.60 seconds, using normal
+`ClientPacket` NPC/item paths; local log:
+`C:/mir2-build/p2-late-gates-adjacent-20261008-01.log`.
 
 `D10051 (178,53) -> D10061` is a supplied `NeedMove` without a matching default
 NPC page. It remains unbound. `D710A`–`D713A` have internal authored connections

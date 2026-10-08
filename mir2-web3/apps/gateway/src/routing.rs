@@ -30187,6 +30187,17 @@ mod tests {
         account_inventory_service: SharedAccountInventoryServiceHandle,
         npc_world_service: SharedNpcWorldServiceHandle,
     ) -> SharedInProcessZoneSessionRuntime {
+        // Every personal fixture sharing this Zone must use the same durable
+        // authority, including accounts created by another fixture session.
+        let config = {
+            let mut state = zone_state
+                .lock()
+                .expect("shared fixture Zone mutex should not be poisoned");
+            state
+                .experience_authority
+                .get_or_insert_with(GatewayConfig::default)
+                .clone()
+        };
         let movement_sender = super::spawn_shared_zone_owner_with_cadence(
             &ZoneId::new("test-shared-zone"),
             zone_state.clone(),
@@ -30197,7 +30208,7 @@ mod tests {
         ));
         let shared_social_generation = shared_mentors.lock().unwrap().generation.clone();
         SharedInProcessZoneSessionRuntime {
-            inner: InProcessWorldRuntime::new(GatewayConfig::default()),
+            inner: InProcessWorldRuntime::new(config),
             shared_social_generation,
             last_social_refresh: None,
             last_experience_projection: None,

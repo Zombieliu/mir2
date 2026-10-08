@@ -228,7 +228,10 @@ impl MailModel {
     }
 
     pub fn unread_count(&self) -> usize {
-        self.mails.iter().filter(|m| m.operation.is_none() && !m.read).count()
+        self.mails
+            .iter()
+            .filter(|m| m.operation.is_none() && !m.read)
+            .count()
     }
 
     pub fn visible_mails(&self) -> Vec<&MailMessage> {
@@ -319,9 +322,13 @@ pub fn mail_date_label(binary: i64) -> String {
     let Some(date) = chrono::DateTime::from_timestamp(
         unix_ticks.div_euclid(10_000_000),
         (unix_ticks.rem_euclid(10_000_000) * 100) as u32,
-    ) else { return String::new(); };
+    ) else {
+        return String::new();
+    };
     if bits >> 62 >= 2 {
-        date.with_timezone(&chrono::Local).format("%d/%m/%y %-H:%M:%S").to_string()
+        date.with_timezone(&chrono::Local)
+            .format("%d/%m/%y %-H:%M:%S")
+            .to_string()
     } else {
         date.format("%d/%m/%y %-H:%M:%S").to_string()
     }
@@ -345,16 +352,26 @@ mod tests {
         assert_eq!(mail_date_label(i64::MAX), "");
         assert_eq!(mail_date_label(-1), "");
         assert_eq!(mail_date_label(621_355_968_000_000_000), "01/01/70 0:00:00");
-        assert_eq!(mail_date_label(621_355_968_000_000_000 | (1i64 << 62)), "01/01/70 0:00:00");
-        let parsed: MailMessage = serde_json::from_str(r#"{"id":3,"canReply":true,"dateSentBinaryDatetime":621355968000000000}"#).unwrap();
+        assert_eq!(
+            mail_date_label(621_355_968_000_000_000 | (1i64 << 62)),
+            "01/01/70 0:00:00"
+        );
+        let parsed: MailMessage = serde_json::from_str(
+            r#"{"id":3,"canReply":true,"dateSentBinaryDatetime":621355968000000000}"#,
+        )
+        .unwrap();
         assert!(parsed.can_reply);
         assert_eq!(parsed.date_sent_binary_datetime, 621_355_968_000_000_000);
     }
 
     #[test]
     fn full_mailbox_keeps_appended_receipt_without_evicting_real_mail() {
-        use crate::pending_operations::{reconcile_mail_refresh, PendingOperationKey, PendingOperations};
-        let rows: Vec<_> = (0..MAX_MAIL_MESSAGES).map(|id| serde_json::json!({"id":id,"read":true})).collect();
+        use crate::pending_operations::{
+            reconcile_mail_refresh, PendingOperationKey, PendingOperations,
+        };
+        let rows: Vec<_> = (0..MAX_MAIL_MESSAGES)
+            .map(|id| serde_json::json!({"id":id,"read":true}))
+            .collect();
         let old: MailModel = serde_json::from_value(serde_json::json!({"mails":rows})).unwrap();
         let mut rows = rows;
         rows.push(serde_json::json!({"id":u64::MAX,"operation":{"kind":"collect","success":false,"mailId":255}}));
@@ -382,7 +399,10 @@ mod tests {
         let model: MailModel = serde_json::from_value(serde_json::json!({"mails":rows})).unwrap();
         assert_eq!(model.mails.len(), MAX_MAIL_MESSAGES + 1);
         assert_eq!(model.visible_mails().len(), MAX_MAIL_MESSAGES);
-        assert_eq!(model.mails.iter().filter(|m| m.operation.is_some()).count(), 1);
+        assert_eq!(
+            model.mails.iter().filter(|m| m.operation.is_some()).count(),
+            1
+        );
         assert_eq!(model.unread_count(), MAX_MAIL_MESSAGES);
     }
 

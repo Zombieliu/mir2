@@ -85,9 +85,17 @@ pub fn quest_objective(source: &str) -> String {
 /// the caller's authoritative QuestObjective current/target values.
 pub fn quest_objective_label(quest_index: i32, objective_index: usize, source: &str) -> String {
     if let Some(kill) = mir2_game_data::periodic_quests::quest(quest_index)
-        .and_then(|definition| definition.kills.get(objective_index)) {
-        let display_name = crate::native_i18n::key(&format!("content.monster.{}.name",kill.monster_index), &name(&kill.monster));
-        return format_named("quest.objective.kill", "Kill {name}", &[("name", &display_name)]);
+        .and_then(|definition| definition.kills.get(objective_index))
+    {
+        let display_name = crate::native_i18n::key(
+            &format!("content.monster.{}.name", kill.monster_index),
+            &name(&kill.monster),
+        );
+        return format_named(
+            "quest.objective.kill",
+            "Kill {name}",
+            &[("name", &display_name)],
+        );
     }
     quest_objective(source)
 }
@@ -95,30 +103,65 @@ pub fn quest_objective_label(quest_index: i32, objective_index: usize, source: &
 /// Original Crystal paragraphs may be split in the middle of a sentence on
 /// the wire. Resolve the whole authored section by ID before wrapping it.
 pub fn quest_section(id: i32, field: &str, source: &[String]) -> Vec<String> {
-    if !crate::native_i18n::active() { return source.to_vec(); }
-    let fallback = source.iter().map(|line| text(line)).collect::<Vec<_>>().join("\n");
+    if !crate::native_i18n::active() {
+        return source.to_vec();
+    }
+    let fallback = source
+        .iter()
+        .map(|line| text(line))
+        .collect::<Vec<_>>()
+        .join("\n");
     crate::native_i18n::key(&format!("content.quest.{id}.{field}"), &fallback)
-        .lines().map(str::to_owned).collect()
+        .lines()
+        .map(str::to_owned)
+        .collect()
 }
 
 pub fn quest_reward(reward: &crate::quest_model::QuestReward) -> String {
     use crate::quest_model::QuestReward;
-    if !crate::native_i18n::active() { return reward.label(); }
+    if !crate::native_i18n::active() {
+        return reward.label();
+    }
     match reward {
-        QuestReward::Gold { amount } => format_named("quest.reward.gold", "{amount} Gold", &[("amount", &amount.to_string())]),
-        QuestReward::Experience { amount } => format_named("quest.reward.experience", "{amount} Exp", &[("amount", &amount.to_string())]),
-        QuestReward::Item { name: source, quantity, .. } => {
+        QuestReward::Gold { amount } => format_named(
+            "quest.reward.gold",
+            "{amount} Gold",
+            &[("amount", &amount.to_string())],
+        ),
+        QuestReward::Experience { amount } => format_named(
+            "quest.reward.experience",
+            "{amount} Exp",
+            &[("amount", &amount.to_string())],
+        ),
+        QuestReward::Item {
+            name: source,
+            quantity,
+            ..
+        } => {
             let display = name(source);
-            if *quantity == 1 { display } else { format!("{display} x{quantity}") }
+            if *quantity == 1 {
+                display
+            } else {
+                format!("{display} x{quantity}")
+            }
         }
         QuestReward::Unknown { label } => text(label),
     }
 }
 
 pub fn quest_rewards(quest: &crate::quest_model::Quest) -> String {
-    if !crate::native_i18n::active() { return quest.rewards_label(); }
-    if quest.rewards.is_empty() { return text("No reward"); }
-    quest.rewards.iter().map(quest_reward).collect::<Vec<_>>().join(list_separator())
+    if !crate::native_i18n::active() {
+        return quest.rewards_label();
+    }
+    if quest.rewards.is_empty() {
+        return text("No reward");
+    }
+    quest
+        .rewards
+        .iter()
+        .map(quest_reward)
+        .collect::<Vec<_>>()
+        .join(list_separator())
 }
 
 pub fn supply_size(source: &str) -> String {
@@ -161,8 +204,11 @@ pub fn format_named(key: &str, fallback: &str, args: &[(&str, &str)]) -> String 
             return result;
         };
         let token = &rest[start + 1..end];
-        result.push_str(args.iter().find(|(name, _)| *name == token)
-            .map_or(&rest[start..=end], |(_, value)| *value));
+        result.push_str(
+            args.iter()
+                .find(|(name, _)| *name == token)
+                .map_or(&rest[start..=end], |(_, value)| *value),
+        );
         rest = &rest[end + 1..];
     }
     result.push_str(rest);
@@ -172,7 +218,11 @@ pub fn format_named(key: &str, fallback: &str, args: &[(&str, &str)]) -> String 
 pub fn list_separator() -> &'static str {
     if crate::native_i18n::active()
         && crate::native_i18n::locale() != crate::native_i18n::Locale::TraditionalChinese
-    { ", " } else { "、" }
+    {
+        ", "
+    } else {
+        "、"
+    }
 }
 
 fn native_text(source: &str) -> String {
@@ -181,48 +231,80 @@ fn native_text(source: &str) -> String {
         let translated = native_text(trimmed);
         if translated != trimmed {
             let start = source.find(trimmed).unwrap_or(0);
-            return format!("{}{}{}", &source[..start], translated, &source[start + trimmed.len()..]);
+            return format!(
+                "{}{}{}",
+                &source[..start],
+                translated,
+                &source[start + trimmed.len()..]
+            );
         }
     }
     // Process only trusted presentation grammars. Captured unknown strings are
     // not recursively translated; content-name translation is explicit here.
     if let Some((body, progress)) = split_progress(source) {
         let localized = native_text(body);
-        if localized != body { return format!("{localized} {progress}"); }
+        if localized != body {
+            return format!("{localized} {progress}");
+        }
     }
     let sentence = source.strip_suffix('.').unwrap_or(source);
     if let Some(target) = sentence.strip_prefix("Defeat ") {
         if let Some((count, monster)) = target.split_once(' ') {
             if is_unsigned(count) && known_monster(monster).is_some() {
-                return format_named("quest.objective.defeat", "Defeat {count} {name}.",
-                    &[("count", count), ("name", &name(monster))]);
+                return format_named(
+                    "quest.objective.defeat",
+                    "Defeat {count} {name}.",
+                    &[("count", count), ("name", &name(monster))],
+                );
             }
         }
     }
-    if let Some(monster) = sentence.strip_prefix("Kill ").filter(|value| known_monster(value).is_some()) {
-        return format_named("quest.objective.kill", "Kill {name}", &[("name", &name(monster))]);
+    if let Some(monster) = sentence
+        .strip_prefix("Kill ")
+        .filter(|value| known_monster(value).is_some())
+    {
+        return format_named(
+            "quest.objective.kill",
+            "Kill {name}",
+            &[("name", &name(monster))],
+        );
     }
     for (prefix, key, fallback) in [
         ("Return to ", "quest.action.return", "Return to {name}"),
         ("Report to ", "quest.action.report", "Report to {name}"),
         ("Talk to ", "quest.action.talk", "Talk to {name}"),
     ] {
-        if let Some(target) = sentence.strip_prefix(prefix).filter(|value| known_name(value).is_some()) {
+        if let Some(target) = sentence
+            .strip_prefix(prefix)
+            .filter(|value| known_name(value).is_some())
+        {
             return format_named(key, fallback, &[("name", &name(target))]);
         }
     }
     for prefix in ["Status: ", "Category: "] {
         if let Some(value) = source.strip_prefix(prefix) {
             let translated = crate::native_i18n::tr(value);
-            return format_named(if prefix == "Status: " { "quest.status" } else { "quest.category" },
-                if prefix == "Status: " { "Status: {value}" } else { "Category: {value}" },
-                &[("value", &translated)]);
+            return format_named(
+                if prefix == "Status: " {
+                    "quest.status"
+                } else {
+                    "quest.category"
+                },
+                if prefix == "Status: " {
+                    "Status: {value}"
+                } else {
+                    "Category: {value}"
+                },
+                &[("value", &translated)],
+            );
         }
     }
     let translated = crate::native_i18n::tr(source);
     if translated == source && sentence != source {
         let short = crate::native_i18n::tr(sentence);
-        if short != sentence { return short; }
+        if short != sentence {
+            return short;
+        }
     }
     translated
 }
@@ -849,8 +931,12 @@ mod tests {
     #[test]
     fn native_reward_names_translate_before_quantity_without_changing_reward_identity() {
         let reward = crate::quest_model::QuestReward::Item {
-            item_id: "658".into(), name: "(HP)DrugSmall".into(), quantity: 7,
-            icon: None, selection_index: Some(2), tooltip_source: None,
+            item_id: "658".into(),
+            name: "(HP)DrugSmall".into(),
+            quantity: 7,
+            icon: None,
+            selection_index: Some(2),
+            tooltip_source: None,
         };
         let original = reward.clone();
         for locale in crate::native_i18n::Locale::ALL {
@@ -874,7 +960,10 @@ mod tests {
                     assert!(!title.contains("WRONG") && !description.contains("WRONG"));
                     assert!(title.len() > 3 && description.len() > 20, "{}", copy.id);
                     if locale != Locale::TraditionalChinese {
-                        assert!(!title.chars().chain(description.chars()).any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c)));
+                        assert!(!title
+                            .chars()
+                            .chain(description.chars())
+                            .any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c)));
                     }
                 }
                 let mine = quest_description(2_110_016, "Zombie3");
@@ -892,9 +981,16 @@ mod tests {
         for locale in Locale::ALL {
             with_locale(locale, || {
                 let name = "Accept {count} 玩家";
-                let line = format_named("quest.tracker.current", "Current quest · {name}", &[("name", name)]);
+                let line = format_named(
+                    "quest.tracker.current",
+                    "Current quest · {name}",
+                    &[("name", name)],
+                );
                 assert!(line.ends_with(name));
-                assert_eq!(text("a1 says: Accept {count} 玩家"), "a1 says: Accept {count} 玩家");
+                assert_eq!(
+                    text("a1 says: Accept {count} 玩家"),
+                    "a1 says: Accept {count} 玩家"
+                );
                 assert_eq!(quest_title(-93, "UserTitle_42"), "UserTitle_42");
             });
         }

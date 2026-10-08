@@ -43,12 +43,18 @@ impl Fingerprint {
         inventory: &InventoryModel,
         stamped: bool,
     ) -> Option<Self> {
-        let attachment_unique_ids = valid_mail_attachment_ids(inventory, &draft.attachment_unique_ids)?;
+        let attachment_unique_ids =
+            valid_mail_attachment_ids(inventory, &draft.attachment_unique_ids)?;
         let attachment_pricing = attachment_unique_ids
             .iter()
             .map(|unique_id| attachment_pricing(inventory, *unique_id))
             .collect::<Option<Vec<_>>>()?;
-        Some(Self { gold: draft.gold, attachment_unique_ids, attachment_pricing, stamped })
+        Some(Self {
+            gold: draft.gold,
+            attachment_unique_ids,
+            attachment_pricing,
+            stamped,
+        })
     }
 }
 
@@ -64,7 +70,10 @@ fn attachment_pricing(inventory: &InventoryModel, unique_id: u64) -> Option<Atta
     })?;
     let source = item.tooltip_source.as_ref()?;
     let user = source.user_item.as_ref()?;
-    if user.unique_id != unique_id || user.item_index != source.info.item_index || item.quantity == 0 {
+    if user.unique_id != unique_id
+        || user.item_index != source.info.item_index
+        || item.quantity == 0
+    {
         return None;
     }
     if source.info.durability > 0 {
@@ -108,7 +117,10 @@ pub(super) struct MailParcelWindow {
 
 impl Default for MailParcelWindow {
     fn default() -> Self {
-        Self { position: MAIL_PARCEL_DEFAULT_POSITION, drag: None }
+        Self {
+            position: MAIL_PARCEL_DEFAULT_POSITION,
+            drag: None,
+        }
     }
 }
 
@@ -163,7 +175,10 @@ impl MailParcelUi {
     }
 
     pub(super) fn postage(&self) -> Option<u32> {
-        self.quote.as_ref().map(|quote| quote.cost).filter(|cost| *cost != u32::MAX)
+        self.quote
+            .as_ref()
+            .map(|quote| quote.cost)
+            .filter(|cost| *cost != u32::MAX)
     }
 
     pub(super) fn quote_error(&self) -> Option<&str> {
@@ -248,7 +263,11 @@ impl MailParcelUi {
     }
 
     pub(super) fn slot_limit(&self) -> usize {
-        if self.stamped { MAX_MAIL_ATTACHMENTS } else { 1 }
+        if self.stamped {
+            MAX_MAIL_ATTACHMENTS
+        } else {
+            1
+        }
     }
 
     /// Revalidate the source item IDs before each quote. Snapshot changes may
@@ -268,7 +287,8 @@ impl MailParcelUi {
         }
         let mut seen = BTreeSet::new();
         draft.attachment_unique_ids.retain(|unique_id| {
-            let current = seen.insert(*unique_id) && mail_attachment_is_current(inventory, *unique_id);
+            let current =
+                seen.insert(*unique_id) && mail_attachment_is_current(inventory, *unique_id);
             if !current {
                 changed = true;
                 if self.selected_ids.remove(unique_id) {
@@ -279,7 +299,10 @@ impl MailParcelUi {
             current
         });
         while draft.attachment_unique_ids.len() > self.slot_limit() {
-            let unique_id = draft.attachment_unique_ids.pop().expect("bounded by length");
+            let unique_id = draft
+                .attachment_unique_ids
+                .pop()
+                .expect("bounded by length");
             changed = true;
             if self.selected_ids.remove(&unique_id) {
                 self.locked_ids.remove(&unique_id);
@@ -306,7 +329,9 @@ impl MailParcelUi {
         let Some(current) = Fingerprint::from_draft(draft, inventory, self.stamped) else {
             return false;
         };
-        self.quote.as_ref().is_some_and(|quote| quote.fingerprint == current && quote.cost != u32::MAX)
+        self.quote
+            .as_ref()
+            .is_some_and(|quote| quote.fingerprint == current && quote.cost != u32::MAX)
             && self.pending_cost.is_none()
     }
 
@@ -330,10 +355,18 @@ impl MailParcelUi {
                 self.quote_error = None;
             }
         }
-        if self.pending_cost.is_some() || self.quote.as_ref().is_some_and(|quote| quote.fingerprint == desired) {
+        if self.pending_cost.is_some()
+            || self
+                .quote
+                .as_ref()
+                .is_some_and(|quote| quote.fingerprint == desired)
+        {
             return None;
         }
-        self.pending_cost = Some(PendingCost { fingerprint: desired.clone(), requested_at_ms: now_ms });
+        self.pending_cost = Some(PendingCost {
+            fingerprint: desired.clone(),
+            requested_at_ms: now_ms,
+        });
         Some(desired)
     }
 
@@ -367,9 +400,13 @@ impl MailParcelUi {
         // request directly with the live compose data, rather than the
         // previous frame's cached `desired` fingerprint: an edit and a reply
         // can be ingested in the same update.
-        let current = draft.and_then(|draft| Fingerprint::from_draft(draft, inventory, self.stamped));
+        let current =
+            draft.and_then(|draft| Fingerprint::from_draft(draft, inventory, self.stamped));
         if current.as_ref() == Some(&pending.fingerprint) {
-            self.quote = Some(Quote { fingerprint: pending.fingerprint, cost });
+            self.quote = Some(Quote {
+                fingerprint: pending.fingerprint,
+                cost,
+            });
             self.quote_error = (cost == u32::MAX).then(|| "Postage quote unavailable".to_owned());
         }
     }
@@ -410,7 +447,10 @@ impl MailParcelUi {
     }
 
     pub(super) fn session_reset(&mut self, revision: u64) -> Option<Vec<u64>> {
-        if self.reset_revision.is_some_and(|previous| previous != revision) {
+        if self
+            .reset_revision
+            .is_some_and(|previous| previous != revision)
+        {
             self.window = default();
             self.reset_revision = Some(revision);
             let released = self.release_all();
@@ -431,7 +471,10 @@ pub(super) fn is_live_stamp(item: &ItemModel) -> bool {
             source.info.item_index == 838
                 && source.info.item_type == 0
                 && source.info.shape == 1
-                && source.user_item.as_ref().is_some_and(|user| user.unique_id != 0 && user.count > 0)
+                && source
+                    .user_item
+                    .as_ref()
+                    .is_some_and(|user| user.unique_id != 0 && user.count > 0)
         })
 }
 
@@ -451,8 +494,12 @@ pub(super) fn slot_at_cursor(ui: &MailParcelUi, cursor: Vec2) -> Option<usize> {
 pub(super) fn drag_surface(ui: &MailParcelUi, point: Vec2) -> bool {
     let local = point - ui.window.position;
     let contains = |rect: CrystalRect| rect.contains(local.x, local.y);
-    contains(CrystalRect::new(0.0, 0.0, MAIL_PARCEL_SIZE.x, MAIL_PARCEL_SIZE.y))
-        && !contains(CrystalRect::new(209.0, 3.0, 24.0, 21.0))
+    contains(CrystalRect::new(
+        0.0,
+        0.0,
+        MAIL_PARCEL_SIZE.x,
+        MAIL_PARCEL_SIZE.y,
+    )) && !contains(CrystalRect::new(209.0, 3.0, 24.0, 21.0))
         && !contains(MAIL_PARCEL_BODY_RECT)
         && !contains(CrystalRect::new(73.0, 56.0, 20.0, 20.0))
         && !contains(CrystalRect::new(63.0, 269.0, 143.0, 36.0))
@@ -541,31 +588,89 @@ pub(super) fn render(
 ) {
     let quote_ready = parcel.quote_is_current(draft, inventory);
     if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(parent, asset_server, "original-ui/Title/674.png", MAIL_PARCEL_SIZE.x, MAIL_PARCEL_SIZE.y);
-        spawn_overlay_crystal_button(parent, asset_server, "Prguse2", 360, 361, 362,
-            CrystalRect::new(209.0, 3.0, 24.0, 21.0), OverlayButton::CancelMailCompose);
+        spawn_overlay_frame(
+            parent,
+            asset_server,
+            "original-ui/Title/674.png",
+            MAIL_PARCEL_SIZE.x,
+            MAIL_PARCEL_SIZE.y,
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(209.0, 3.0, 24.0, 21.0),
+            OverlayButton::CancelMailCompose,
+        );
         // Crystal UpdateParcel keeps every interaction frame on the current
         // stamped state; these are checkbox states, not hover/pressed sprites.
         let stamp_frame = if parcel.stamped() { 204 } else { 203 };
-        spawn_overlay_crystal_button_enabled(parent, asset_server, "Prguse2", stamp_frame, stamp_frame, stamp_frame,
-            CrystalRect::new(73.0, 56.0, 20.0, 20.0), OverlayButton::MailParcelStamp,
-            parcel.stamp_available(inventory));
-        spawn_overlay_crystal_button_enabled(parent, asset_server, "Title", 607, 608, 609,
-            CrystalRect::new(30.0, 350.0, 76.0, 25.0), OverlayButton::SubmitMail,
-            quote_ready && !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty());
-        spawn_overlay_crystal_button(parent, asset_server, "Title", 193, 194, 195,
-            CrystalRect::new(135.0, 350.0, 68.0, 25.0), OverlayButton::CancelMailCompose);
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            stamp_frame,
+            stamp_frame,
+            stamp_frame,
+            CrystalRect::new(73.0, 56.0, 20.0, 20.0),
+            OverlayButton::MailParcelStamp,
+            parcel.stamp_available(inventory),
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Title",
+            607,
+            608,
+            609,
+            CrystalRect::new(30.0, 350.0, 76.0, 25.0),
+            OverlayButton::SubmitMail,
+            quote_ready && !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Title",
+            193,
+            194,
+            195,
+            CrystalRect::new(135.0, 350.0, 68.0, 25.0),
+            OverlayButton::CancelMailCompose,
+        );
     }
-    overlay_text_at(parent, &draft.recipient, CrystalRect::new(70.0, 35.0, 150.0, 15.0),
-        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX, TEXT);
+    overlay_text_at(
+        parent,
+        &draft.recipient,
+        CrystalRect::new(70.0, 35.0, 150.0, 15.0),
+        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+        TEXT,
+    );
     if let Some(editor) = editor {
         editor.render_at(parent, MAIL_PARCEL_BODY_RECT);
     } else {
-        overlay_text_at(parent, &draft.message, MAIL_PARCEL_BODY_RECT,
-            crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX, TEXT);
+        overlay_text_at(
+            parent,
+            &draft.message,
+            MAIL_PARCEL_BODY_RECT,
+            crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+            TEXT,
+        );
     }
-    overlay_text_at(parent, &crate::native_i18n::tr(&format!("Postage: {}", parcel.postage().map_or("…".to_owned(), |cost| cost.to_string()))),
-        CrystalRect::new(63.0, 269.0, 143.0, 15.0), 9.0, TEXT);
+    overlay_text_at(
+        parent,
+        &crate::native_i18n::tr(&format!(
+            "Postage: {}",
+            parcel
+                .postage()
+                .map_or("…".to_owned(), |cost| cost.to_string())
+        )),
+        CrystalRect::new(63.0, 269.0, 143.0, 15.0),
+        9.0,
+        TEXT,
+    );
     overlay_absolute_button(
         parent,
         "",
@@ -573,29 +678,84 @@ pub(super) fn render(
         OverlayButton::MailGoldFocus,
         true,
     );
-    overlay_text_at(parent, &crate::native_i18n::tr(&format!("Gold: {}", draft.gold)), CrystalRect::new(63.0, 290.0, 143.0, 15.0), 9.0, TEXT);
+    overlay_text_at(
+        parent,
+        &crate::native_i18n::tr(&format!("Gold: {}", draft.gold)),
+        CrystalRect::new(63.0, 290.0, 143.0, 15.0),
+        9.0,
+        TEXT,
+    );
     if let Some(error) = parcel.quote_error() {
-        overlay_text_at(parent, &crate::native_i18n::tr(error), CrystalRect::new(15.0, 78.0, 202.0, 15.0), 8.0, Color::srgb(0.95, 0.34, 0.28));
+        overlay_text_at(
+            parent,
+            &crate::native_i18n::tr(error),
+            CrystalRect::new(15.0, 78.0, 202.0, 15.0),
+            8.0,
+            Color::srgb(0.95, 0.34, 0.28),
+        );
     }
     if !parcel.stamped() {
         if let Some(asset_server) = asset_server {
-            spawn_static_overlay_sprite(parent, asset_server, "original-ui/Title/676.png".to_owned(),
-                CrystalRect::new(63.0, 310.0, 144.0, 33.0));
+            spawn_static_overlay_sprite(
+                parent,
+                asset_server,
+                "original-ui/Title/676.png".to_owned(),
+                CrystalRect::new(63.0, 310.0, 144.0, 33.0),
+            );
         }
     }
     for slot in 0..parcel.slot_limit() {
         let left = MAIL_PARCEL_SLOT_ORIGIN.x + slot as f32 * MAIL_PARCEL_SLOT_STEP;
-        let rect = CrystalRect::new(left, MAIL_PARCEL_SLOT_ORIGIN.y, MAIL_PARCEL_SLOT_SIZE.x, MAIL_PARCEL_SLOT_SIZE.y);
-        overlay_absolute_button(parent, "", rect, OverlayButton::MailParcelSlot(slot as u8), true);
-        let Some(unique_id) = draft.attachment_unique_ids.get(slot).copied() else { continue; };
-        let Some(item) = inventory.items.iter().find(|item| item.unique_id == Some(unique_id) && item.container == 0) else { continue; };
-        if let (Some(asset_server), Some(image)) = (asset_server, concrete_item_image_index(item.icon, item.quantity, item.tooltip_source.as_ref())) {
-            parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(left), top: Val::Px(MAIL_PARCEL_SLOT_ORIGIN.y), width: Val::Px(35.0), height: Val::Px(31.0), ..default() }, FocusPolicy::Pass))
+        let rect = CrystalRect::new(
+            left,
+            MAIL_PARCEL_SLOT_ORIGIN.y,
+            MAIL_PARCEL_SLOT_SIZE.x,
+            MAIL_PARCEL_SLOT_SIZE.y,
+        );
+        overlay_absolute_button(
+            parent,
+            "",
+            rect,
+            OverlayButton::MailParcelSlot(slot as u8),
+            true,
+        );
+        let Some(unique_id) = draft.attachment_unique_ids.get(slot).copied() else {
+            continue;
+        };
+        let Some(item) = inventory
+            .items
+            .iter()
+            .find(|item| item.unique_id == Some(unique_id) && item.container == 0)
+        else {
+            continue;
+        };
+        if let (Some(asset_server), Some(image)) = (
+            asset_server,
+            concrete_item_image_index(item.icon, item.quantity, item.tooltip_source.as_ref()),
+        ) {
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(left),
+                        top: Val::Px(MAIL_PARCEL_SLOT_ORIGIN.y),
+                        width: Val::Px(35.0),
+                        height: Val::Px(31.0),
+                        ..default()
+                    },
+                    FocusPolicy::Pass,
+                ))
                 .with_children(|cell| spawn_original_item_image(cell, asset_server, image, 35, 31));
         }
         let count = item.crystal_stack_label();
         if !count.is_empty() {
-            overlay_text_at(parent, &count, CrystalRect::new(left + 18.0, MAIL_PARCEL_SLOT_ORIGIN.y + 17.0, 16.0, 12.0), 9.0, Color::srgb(1.0, 1.0, 0.0));
+            overlay_text_at(
+                parent,
+                &count,
+                CrystalRect::new(left + 18.0, MAIL_PARCEL_SLOT_ORIGIN.y + 17.0, 16.0, 12.0),
+                9.0,
+                Color::srgb(1.0, 1.0, 0.0),
+            );
         }
     }
 }
@@ -648,19 +808,38 @@ mod tests {
     #[test]
     fn slots_follow_source_cover_and_use_live_identities() {
         let mut ui = MailParcelUi::default();
-        let inventory = InventoryModel { items: vec![item(9, 0)], ..default() };
+        let inventory = InventoryModel {
+            items: vec![item(9, 0)],
+            ..default()
+        };
         let mut draft = mir2_ui_core::state::MailComposeDraft::default();
-        assert_eq!(slot_at_cursor(&ui, MAIL_PARCEL_DEFAULT_POSITION + MAIL_PARCEL_SLOT_ORIGIN + Vec2::new(2.0, 2.0)), Some(0));
-        assert!(slot_at_cursor(&ui, MAIL_PARCEL_DEFAULT_POSITION + MAIL_PARCEL_SLOT_ORIGIN + Vec2::new(38.0, 2.0)).is_none());
+        assert_eq!(
+            slot_at_cursor(
+                &ui,
+                MAIL_PARCEL_DEFAULT_POSITION + MAIL_PARCEL_SLOT_ORIGIN + Vec2::new(2.0, 2.0)
+            ),
+            Some(0)
+        );
+        assert!(slot_at_cursor(
+            &ui,
+            MAIL_PARCEL_DEFAULT_POSITION + MAIL_PARCEL_SLOT_ORIGIN + Vec2::new(38.0, 2.0)
+        )
+        .is_none());
         assert!(ui.attach(&mut draft, &inventory, 9));
-        assert!(!ui.attach(&mut draft, &inventory, 10), "stale IDs cannot occupy source cells");
+        assert!(
+            !ui.attach(&mut draft, &inventory, 10),
+            "stale IDs cannot occupy source cells"
+        );
         assert_eq!(ui.detach_at(&mut draft, 0), Some(9));
     }
 
     #[test]
     fn refresh_drops_replaced_attachment_and_releases_only_its_exact_identity() {
         let mut ui = MailParcelUi::default();
-        let initial = InventoryModel { items: vec![item(9, 0)], ..default() };
+        let initial = InventoryModel {
+            items: vec![item(9, 0)],
+            ..default()
+        };
         let mut draft = mir2_ui_core::state::MailComposeDraft::default();
         assert!(ui.attach(&mut draft, &initial, 9));
 
@@ -673,7 +852,10 @@ mod tests {
     #[test]
     fn timed_out_cost_reserves_its_fingerprint_until_the_delayed_reply_arrives() {
         let mut ui = MailParcelUi::default();
-        let inventory = InventoryModel { items: vec![item(9, 0)], ..default() };
+        let inventory = InventoryModel {
+            items: vec![item(9, 0)],
+            ..default()
+        };
         let mut draft = mir2_ui_core::state::MailComposeDraft {
             gold: 5,
             attachment_unique_ids: vec![9],
@@ -682,19 +864,32 @@ mod tests {
         assert!(ui.begin_quote(&draft, &inventory, 1).is_some());
         ui.tick_quote_timeout(COST_TIMEOUT_MS + 2);
         assert_eq!(ui.quote_error(), Some("Postage quote unavailable"));
-        assert!(ui.pending_cost.is_some(), "the uncorrelated request stays reserved");
+        assert!(
+            ui.pending_cost.is_some(),
+            "the uncorrelated request stays reserved"
+        );
 
         draft.gold = 7;
-        assert!(ui.begin_quote(&draft, &inventory, COST_TIMEOUT_MS + 3).is_none());
+        assert!(ui
+            .begin_quote(&draft, &inventory, COST_TIMEOUT_MS + 3)
+            .is_none());
         ui.apply_cost(12, Some(&draft), &inventory);
-        assert!(ui.pending_cost.is_none(), "the delayed old reply is consumed and rejected");
-        assert!(ui.begin_quote(&draft, &inventory, COST_TIMEOUT_MS + 4).is_some());
+        assert!(
+            ui.pending_cost.is_none(),
+            "the delayed old reply is consumed and rejected"
+        );
+        assert!(ui
+            .begin_quote(&draft, &inventory, COST_TIMEOUT_MS + 4)
+            .is_some());
     }
 
     #[test]
     fn local_close_keeps_an_unanswered_cost_request_reserved() {
         let mut ui = MailParcelUi::default();
-        let inventory = InventoryModel { items: vec![item(9, 0)], ..default() };
+        let inventory = InventoryModel {
+            items: vec![item(9, 0)],
+            ..default()
+        };
         let draft = mir2_ui_core::state::MailComposeDraft {
             gold: 5,
             attachment_unique_ids: vec![9],
@@ -709,8 +904,15 @@ mod tests {
     #[test]
     fn cost_response_is_ignored_when_the_draft_changed_in_flight() {
         let mut ui = MailParcelUi::default();
-        let inventory = InventoryModel { items: vec![item(9, 0)], ..default() };
-        let mut draft = mir2_ui_core::state::MailComposeDraft { gold: 5, attachment_unique_ids: vec![9], ..default() };
+        let inventory = InventoryModel {
+            items: vec![item(9, 0)],
+            ..default()
+        };
+        let mut draft = mir2_ui_core::state::MailComposeDraft {
+            gold: 5,
+            attachment_unique_ids: vec![9],
+            ..default()
+        };
         assert!(ui.begin_quote(&draft, &inventory, 1).is_some());
         draft.gold = 7;
         // The cached desired fingerprint still describes the previous quote.

@@ -20,25 +20,38 @@ pub fn quest_targets_monster(quest: &Quest, monster_name: &str) -> bool {
     }
     if let Some(definition) = mir2_game_data::periodic_quests::quest(quest.quest_index) {
         return definition.kills.iter().enumerate().any(|(index, kill)| {
-            quest.objectives.get(index).is_some_and(|objective| {
-                objective.target > 0 && !objective.is_complete()
-            }) && monster_name_matches(&kill.monster, monster_name)
+            quest
+                .objectives
+                .get(index)
+                .is_some_and(|objective| objective.target > 0 && !objective.is_complete())
+                && monster_name_matches(&kill.monster, monster_name)
         });
     }
-    if let Some(definition) = crate::quest_destination::authored_quest_definition(quest.quest_index) {
+    if let Some(definition) = crate::quest_destination::authored_quest_definition(quest.quest_index)
+    {
         // V2 snapshots order kill objectives before flags. Arrival/equipment/
         // practice descriptions are not monster identities, even if their text
         // includes a name such as "Oma Cave". Missing progress never implies a kill.
-        return definition["kills"].as_array().into_iter().flatten().enumerate()
+        return definition["kills"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .enumerate()
             .any(|(index, kill)| {
-                quest.objectives.get(index).is_some_and(|objective| {
-                    objective.target > 0 && !objective.is_complete()
-                }) && kill["monster"].as_str().is_some_and(|configured| {
-                    let expected = normalized_words(configured);
-                    let actual = normalized_words(monster_name);
-                    !expected.is_empty() && expected.len() == actual.len()
-                        && expected.iter().zip(&actual).all(|(a, b)| equivalent_word(a, b))
-                })
+                quest
+                    .objectives
+                    .get(index)
+                    .is_some_and(|objective| objective.target > 0 && !objective.is_complete())
+                    && kill["monster"].as_str().is_some_and(|configured| {
+                        let expected = normalized_words(configured);
+                        let actual = normalized_words(monster_name);
+                        !expected.is_empty()
+                            && expected.len() == actual.len()
+                            && expected
+                                .iter()
+                                .zip(&actual)
+                                .all(|(a, b)| equivalent_word(a, b))
+                    })
             });
     }
     quest.status == QuestStatus::InProgress
@@ -52,8 +65,12 @@ pub fn quest_targets_monster(quest: &Quest, monster_name: &str) -> bool {
 fn monster_name_matches(expected: &str, actual: &str) -> bool {
     let expected = normalized_words(expected);
     let actual = normalized_words(actual);
-    !expected.is_empty() && expected.len() == actual.len()
-        && expected.iter().zip(&actual).all(|(a, b)| equivalent_word(a, b))
+    !expected.is_empty()
+        && expected.len() == actual.len()
+        && expected
+            .iter()
+            .zip(&actual)
+            .all(|(a, b)| equivalent_word(a, b))
 }
 
 /// Whether any current quest still needs this monster.
@@ -237,8 +254,12 @@ mod tests {
         let mut arrival = quest("Reach the Oma Cave entrance", 0, 1);
         arrival.quest_index = 2_110_009;
         assert!(!quest_targets_monster(&arrival, "Oma"));
-        let tracker = QuestTracker { active_quests: vec![arrival] };
-        let entities = EntityModelSet { entities: vec![monster("20", "Oma", 420, 91)] };
+        let tracker = QuestTracker {
+            active_quests: vec![arrival],
+        };
+        let entities = EntityModelSet {
+            entities: vec![monster("20", "Oma", 420, 91)],
+        };
         assert!(nearest_quest_monster(&tracker, Some(2_110_009), &entities, 429, 82).is_none());
         assert!(!tracker_targets_monster(&tracker, "Oma"));
     }
@@ -248,14 +269,23 @@ mod tests {
         let mut cats = quest("已击败稻草人", 2, 2);
         cats.quest_index = 2_110_003;
         cats.objectives.push(QuestObjective {
-            objective_id: "2110003:1".into(), text: "击败钉耙猫".into(), current: 0, target: 2,
+            objective_id: "2110003:1".into(),
+            text: "击败钉耙猫".into(),
+            current: 0,
+            target: 2,
         });
         cats.objectives.push(QuestObjective {
-            objective_id: "flag".into(), text: "Reach the Oma Cave entrance".into(), current: 0, target: 1,
+            objective_id: "flag".into(),
+            text: "Reach the Oma Cave entrance".into(),
+            current: 0,
+            target: 1,
         });
         assert!(!quest_targets_monster(&cats, "Scarecrow"));
         assert!(quest_targets_monster(&cats, "RakingCat"));
-        assert!(!quest_targets_monster(&cats, "Cat"), "a partial configured name is not the target species");
+        assert!(
+            !quest_targets_monster(&cats, "Cat"),
+            "a partial configured name is not the target species"
+        );
         assert!(!quest_targets_monster(&cats, "Oma"));
         cats.objectives[1].current = 2;
         assert!(!quest_targets_monster(&cats, "RakingCat"));

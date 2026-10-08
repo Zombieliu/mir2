@@ -426,9 +426,9 @@ mod tests {
         let mut unlocked = storage;
         unlocked.unlocked = true;
         assert!(storage_deposit_enabled(&unlocked, &inv));
-        unlocked.items.extend(
-            (0..STORAGE_BASE_SIZE).map(|slot| item(u32::from(slot), 4)),
-        );
+        unlocked
+            .items
+            .extend((0..STORAGE_BASE_SIZE).map(|slot| item(u32::from(slot), 4)));
         assert!(!storage_deposit_enabled(&unlocked, &inv)); // no free slot
     }
 
@@ -512,7 +512,10 @@ mod tests {
         assert!(model.is_valid_slot(78));
         assert!(!model.is_valid_slot(79));
         assert!(!model.page(1).locked);
-        assert!(!model.page(1).rental_locked, "expanded authority has no rental cover");
+        assert!(
+            !model.page(1).rental_locked,
+            "expanded authority has no rental cover"
+        );
     }
 
     #[test]

@@ -11,13 +11,6 @@ use std::collections::VecDeque;
 
 #[path = "quest_multi_guidance.rs"]
 mod multi_guidance;
-#[path = "quest_route.rs"]
-pub(crate) mod route;
-#[path = "quest_turn_in.rs"]
-mod turn_in;
-#[cfg(test)]
-#[path = "quest_supply_visual_tests.rs"]
-mod supply_visual_tests;
 #[cfg(test)]
 #[path = "quest_multilingual_visual_tests.rs"]
 mod multilingual_visual_tests;
@@ -27,9 +20,18 @@ mod nonmodal_input_tests;
 #[cfg(test)]
 #[path = "periodic_quest_ui_tests.rs"]
 mod periodic_quest_ui_tests;
-pub use turn_in::{PendingQuestTurnIn, begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
-    quest_turn_in_ui_allows_interaction};
+#[path = "quest_route.rs"]
+pub(crate) mod route;
+#[cfg(test)]
+#[path = "quest_supply_visual_tests.rs"]
+mod supply_visual_tests;
+#[path = "quest_turn_in.rs"]
+mod turn_in;
 pub use multi_guidance::primary_quest_index;
+pub use turn_in::{
+    begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
+    quest_turn_in_ui_allows_interaction, PendingQuestTurnIn,
+};
 
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -343,7 +345,10 @@ const CRYSTAL_TARGET_PANEL_VISIBLE: bool = false;
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum QuestUiIntent {
     /// Detail-window action, separately scoped from world-click interaction.
-    InteractQuestNpc { quest_index: i32, npc_object_id: u32 },
+    InteractQuestNpc {
+        quest_index: i32,
+        npc_object_id: u32,
+    },
     InteractNpc {
         npc_object_id: u32,
     },
@@ -390,10 +395,19 @@ pub enum QuestUiIntent {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuestRouteTarget {
     Entrance,
-    TaskNpc { object_id: u32 },
-    MapNpc { object_id: u32 },
-    HuntRegion { monster_index: i32, radius: i32 },
-    Supply { vendor: crate::quest_supplies::SupplyVendor },
+    TaskNpc {
+        object_id: u32,
+    },
+    MapNpc {
+        object_id: u32,
+    },
+    HuntRegion {
+        monster_index: i32,
+        radius: i32,
+    },
+    Supply {
+        vendor: crate::quest_supplies::SupplyVendor,
+    },
 }
 
 impl QuestRouteTarget {
@@ -406,8 +420,6 @@ impl QuestRouteTarget {
             Self::Supply { .. } => "补给地点",
         }
     }
-
-
 }
 
 /// One request to begin ordinary local walk/run toward an authored destination.
@@ -427,47 +439,86 @@ impl QuestRouteNavigationIntent {
     /// Big Map GO TO shares the ordinary movement controller. The selected
     /// server-provided NPC and coordinates must still match when it is used.
     pub fn matches_big_map_npc_destination(self, model: &crate::big_map::BigMapModel) -> bool {
-        let QuestRouteTarget::MapNpc { object_id } = self.target else { return false; };
+        let QuestRouteTarget::MapNpc { object_id } = self.target else {
+            return false;
+        };
         self.quest_index == 0
             && model.reset_epoch == self.reset_epoch
             && model.current_map_index == Some(self.map_index)
             && model.selected_navigation_npc().is_some_and(|npc| {
-                npc.object_id == object_id && npc.map_index == self.map_index
-                    && npc.location.x == self.x && npc.location.y == self.y
+                npc.object_id == object_id
+                    && npc.map_index == self.map_index
+                    && npc.location.x == self.x
+                    && npc.location.y == self.y
             })
     }
 
     /// A town approach is valid only for a displayed periodic task endpoint.
     /// This never authorizes accepting or granting a reward remotely.
     pub fn matches_task_npc_destination(self, tracker: &QuestTracker) -> bool {
-        let QuestRouteTarget::TaskNpc { object_id } = self.target else { return false; };
-        let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == self.quest_index) else {
+        let QuestRouteTarget::TaskNpc { object_id } = self.target else {
+            return false;
+        };
+        let Some(quest) = tracker
+            .active_quests
+            .iter()
+            .find(|quest| quest.quest_index == self.quest_index)
+        else {
             return false;
         };
         mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
             && turn_in::destination_on_map(quest, Some(self.map_index)).is_some_and(|npc| {
-                npc.object_id == object_id && npc.map_index == self.map_index
-                    && npc.x == self.x && npc.y == self.y
+                npc.object_id == object_id
+                    && npc.map_index == self.map_index
+                    && npc.x == self.x
+                    && npc.y == self.y
             })
     }
 
     pub fn matches_supply_destination(self) -> bool {
-        let QuestRouteTarget::Supply { vendor } = self.target else { return false; };
-        self.quest_index == 0 && vendor.route(self.map_index).is_some_and(|route| route.x == self.x && route.y == self.y)
+        let QuestRouteTarget::Supply { vendor } = self.target else {
+            return false;
+        };
+        self.quest_index == 0
+            && vendor
+                .route(self.map_index)
+                .is_some_and(|route| route.x == self.x && route.y == self.y)
     }
 
     /// Shared UI/host validation against one specific unfinished kill and its
     /// imported area. Coordinates or a remaining unrelated flag are not enough.
     pub fn matches_active_hunt_region(self, tracker: &QuestTracker) -> bool {
-        let QuestRouteTarget::HuntRegion { monster_index, radius } = self.target else { return false; };
-        let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == self.quest_index) else {
+        let QuestRouteTarget::HuntRegion {
+            monster_index,
+            radius,
+        } = self.target
+        else {
+            return false;
+        };
+        let Some(quest) = tracker
+            .active_quests
+            .iter()
+            .find(|quest| quest.quest_index == self.quest_index)
+        else {
             return false;
         };
         crate::quest_hunt_regions::active_hunt_regions(
-            &QuestTracker { active_quests: vec![quest.clone()] }, self.map_index,
-            crate::big_map::BigMapPoint { x: self.x, y: self.y },
-        ).iter().any(|region| region.monster_index == monster_index && region.radius == radius
-            && region.center.x == self.x && region.center.y == self.y)
+            &QuestTracker {
+                active_quests: vec![quest.clone()],
+            },
+            self.map_index,
+            crate::big_map::BigMapPoint {
+                x: self.x,
+                y: self.y,
+            },
+        )
+        .iter()
+        .any(|region| {
+            region.monster_index == monster_index
+                && region.radius == radius
+                && region.center.x == self.x
+                && region.center.y == self.y
+        })
     }
 }
 
@@ -510,14 +561,18 @@ fn quest_route_intent_is_current(
     let Some(big_map) = big_map else {
         return false;
     };
-    if big_map.reset_epoch != intent.reset_epoch || big_map.current_map_index != Some(intent.map_index) {
+    if big_map.reset_epoch != intent.reset_epoch
+        || big_map.current_map_index != Some(intent.map_index)
+    {
         return false;
     }
     if matches!(intent.target, QuestRouteTarget::MapNpc { .. }) {
         return intent.matches_big_map_npc_destination(big_map);
     }
     if let QuestRouteTarget::Supply { vendor } = intent.target {
-        return state.supply_open && state.supply_vendor == Some(vendor) && intent.matches_supply_destination();
+        return state.supply_open
+            && state.supply_vendor == Some(vendor)
+            && intent.matches_supply_destination();
     }
     if primary_quest_index(tracker, state, journey) != Some(intent.quest_index) {
         return false;
@@ -528,12 +583,25 @@ fn quest_route_intent_is_current(
     if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {
         return intent.matches_task_npc_destination(tracker);
     }
-    let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == intent.quest_index) else { return false; };
+    let Some(quest) = tracker
+        .active_quests
+        .iter()
+        .find(|quest| quest.quest_index == intent.quest_index)
+    else {
+        return false;
+    };
     let targets = if mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
-        && matches!(quest.status, crate::quest_model::QuestStatus::NotStarted | crate::quest_model::QuestStatus::ReadyToTurnIn) {
+        && matches!(
+            quest.status,
+            crate::quest_model::QuestStatus::NotStarted
+                | crate::quest_model::QuestStatus::ReadyToTurnIn
+        ) {
         turn_in::destination_on_map(quest, big_map.current_map_index)
-            .map(|npc| vec![npc.map_index]).unwrap_or_default()
-    } else { crate::quest_destination::active_target_map_indices(quest) };
+            .map(|npc| vec![npc.map_index])
+            .unwrap_or_default()
+    } else {
+        crate::quest_destination::active_target_map_indices(quest)
+    };
     let crate::quest_ui::route::QuestRoute::NextStep(step) =
         crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
     else {
@@ -664,10 +732,18 @@ impl QuestUiIntentQueue {
     /// requests. Keep quest and NPC operations in their original FIFO order.
     pub fn clear_attack_intents(&mut self) -> usize {
         let before = self.len();
-        self.retry_intents
-            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }));
-        self.intents
-            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }));
+        self.retry_intents.retain(|intent| {
+            !matches!(
+                intent,
+                QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+            )
+        });
+        self.intents.retain(|intent| {
+            !matches!(
+                intent,
+                QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+            )
+        });
         before - self.len()
     }
 
@@ -675,8 +751,10 @@ impl QuestUiIntentQueue {
     /// monster selection or unrelated NPC/quest operations.
     pub fn clear_directional_attack_intents(&mut self) -> usize {
         let before = self.len();
-        self.retry_intents.retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
-        self.intents.retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
+        self.retry_intents
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
+        self.intents
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
         before - self.len()
     }
 
@@ -774,7 +852,13 @@ pub enum GuidedDiaryTab {
 }
 
 impl GuidedDiaryTab {
-    const ALL: [Self; 5] = [Self::Main, Self::Ready, Self::Side, Self::Daily, Self::Weekly];
+    const ALL: [Self; 5] = [
+        Self::Main,
+        Self::Ready,
+        Self::Side,
+        Self::Daily,
+        Self::Weekly,
+    ];
 
     const fn label(self) -> &'static str {
         match self {
@@ -854,10 +938,13 @@ impl QuestUiState {
     /// the Diary does not hide its independently opened Detail window.
     pub fn captures_world_pointer_at(&self, x: f32, y: f32, diary_open: bool) -> bool {
         let contains = |rect: QuestLogRect| {
-            x >= rect.left && x < rect.left + rect.width
-                && y >= rect.top && y < rect.top + rect.height
+            x >= rect.left
+                && x < rect.left + rect.width
+                && y >= rect.top
+                && y < rect.top + rect.height
         };
-        !x.is_finite() || !y.is_finite()
+        !x.is_finite()
+            || !y.is_finite()
             || self.blocks_world_input()
             || self.npc_quest_list_open
             || (diary_open && contains(quest_diary_layout(1.0).frame))
@@ -1072,7 +1159,10 @@ impl QuestUiState {
             self.clear_diary_selection();
         }
         if self.abandon_confirmation_quest_index.is_some_and(|index| {
-            !tracker.active_quests.iter().any(|quest| quest.quest_index == index)
+            !tracker
+                .active_quests
+                .iter()
+                .any(|quest| quest.quest_index == index)
         }) {
             self.close_abandon_confirmation();
         }
@@ -1177,8 +1267,12 @@ enum QuestUiButton {
     ToggleSupplies,
     ShowSupplyInventory,
     SelectSupplyVendor(crate::quest_supplies::SupplyVendor),
-    PrepareQuestFinish { quest_index: i32 },
-    MakePrimary { quest_index: i32 },
+    PrepareQuestFinish {
+        quest_index: i32,
+    },
+    MakePrimary {
+        quest_index: i32,
+    },
     OpenDestinationMap,
     NavigateQuestRoute(QuestRouteNavigationIntent),
     SelectNpcDialog {
@@ -1389,15 +1483,25 @@ fn quest_belongs_to_current_npc(dialog: &NpcDialogModel, quest: &Quest) -> bool 
         return false;
     };
     if mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
-        && mir2_game_data::periodic_quests::npc(npc_index).is_some() {
-        return dialog.options.iter().any(|option| option.enabled && match quest.status {
-            crate::quest_model::QuestStatus::NotStarted => option.option_id.trim()
-                .eq_ignore_ascii_case(&format!("@quest:accept:{}", quest.quest_index)),
-            crate::quest_model::QuestStatus::InProgress => option.option_id.trim()
-                .eq_ignore_ascii_case(&format!("@quest:show:{}", quest.quest_index)),
-            crate::quest_model::QuestStatus::ReadyToTurnIn => option.option_id.trim()
-                .eq_ignore_ascii_case(&format!("@quest:finish:{}", quest.quest_index)),
-            _ => false,
+        && mir2_game_data::periodic_quests::npc(npc_index).is_some()
+    {
+        return dialog.options.iter().any(|option| {
+            option.enabled
+                && match quest.status {
+                    crate::quest_model::QuestStatus::NotStarted => option
+                        .option_id
+                        .trim()
+                        .eq_ignore_ascii_case(&format!("@quest:accept:{}", quest.quest_index)),
+                    crate::quest_model::QuestStatus::InProgress => option
+                        .option_id
+                        .trim()
+                        .eq_ignore_ascii_case(&format!("@quest:show:{}", quest.quest_index)),
+                    crate::quest_model::QuestStatus::ReadyToTurnIn => option
+                        .option_id
+                        .trim()
+                        .eq_ignore_ascii_case(&format!("@quest:finish:{}", quest.quest_index)),
+                    _ => false,
+                }
         });
     }
     match &quest.status {
@@ -1461,7 +1565,13 @@ fn npc_list_accept_is_current(
             quest.quest_index == quest_index
                 && if mir2_game_data::periodic_quests::is_periodic(quest_index) {
                     mir2_game_data::periodic_quests::npc(npc_index).is_some()
-                        && dialog_exposes_quest_operation(dialog, Some(npc_index), quest_index, false, None)
+                        && dialog_exposes_quest_operation(
+                            dialog,
+                            Some(npc_index),
+                            quest_index,
+                            false,
+                            None,
+                        )
                 } else {
                     quest.accept_npc_index == Some(npc_index)
                 }
@@ -1583,8 +1693,12 @@ impl Plugin for Mir2QuestUiPlugin {
                     .in_set(NativePlayerUiSet::Mutate),
             )
             .add_systems(Update, render_quest_ui.in_set(NativePlayerUiSet::Read))
-            .add_systems(Update, multi_guidance::scroll_tracker
-                .before(render_quest_ui).in_set(NativePlayerUiSet::Mutate))
+            .add_systems(
+                Update,
+                multi_guidance::scroll_tracker
+                    .before(render_quest_ui)
+                    .in_set(NativePlayerUiSet::Mutate),
+            )
             .add_systems(
                 Update,
                 sync_quest_ui_button_visuals
@@ -1998,25 +2112,46 @@ fn process_quest_ui_input(
     let quest_log_open = player_ui.quest_open();
     let dialog_open = dialog.is_open;
     let turn_in_blocked = !quest_turn_in_ui_allows_interaction(Some(&player_ui))
-        || models.notice.as_deref().is_some_and(crate::crystal_ui::notice::NoticeDialogState::is_open)
-        || models.read_model.as_deref().is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+        || models
+            .notice
+            .as_deref()
+            .is_some_and(crate::crystal_ui::notice::NoticeDialogState::is_open)
+        || models
+            .read_model
+            .as_deref()
+            .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let mut route_navigation = models.route_navigation;
     let guidance = models.guidance.as_deref();
     let tracker: &QuestTracker = &models.tracker;
-    let journey = models.catalog.as_deref().zip(guidance)
-        .zip(models.completed.as_deref()).zip(models.read_model.as_deref())
+    let journey = models
+        .catalog
+        .as_deref()
+        .zip(guidance)
+        .zip(models.completed.as_deref())
+        .zip(models.read_model.as_deref())
         .and_then(|(((catalog, guidance), completed), read_model)| {
             catalog.derive(guidance, tracker, completed, &read_model.player)
         });
     if let Some(navigation) = route_navigation.as_deref_mut() {
-        if navigation.pending.is_some_and(|intent| !quest_route_intent_is_current(
-            intent, tracker, &quest_state, journey.as_ref(), models.big_map.as_deref(),
-        )) {
+        if navigation.pending.is_some_and(|intent| {
+            !quest_route_intent_is_current(
+                intent,
+                tracker,
+                &quest_state,
+                journey.as_ref(),
+                models.big_map.as_deref(),
+            )
+        }) {
             navigation.clear();
             quest_state.set_feedback("任务导航已更新，请重新选择目标", true);
         }
     }
-    if quest_state.pinned_primary_quest_index.is_some_and(|id| !tracker.active_quests.iter().any(|q| q.quest_index == id && q.status.is_active())) {
+    if quest_state.pinned_primary_quest_index.is_some_and(|id| {
+        !tracker
+            .active_quests
+            .iter()
+            .any(|q| q.quest_index == id && q.status.is_active())
+    }) {
         quest_state.pinned_primary_quest_index = None;
     }
     let npc_quest_indices = npc_available_quest_indices(&dialog, tracker, guidance);
@@ -2070,13 +2205,23 @@ fn process_quest_ui_input(
             QuestUiButton::PrepareQuestFinish { quest_index } => {
                 if turn_in_blocked {
                     quest_state.pending_turn_in = None;
-                    quest_state.set_feedback("当前状态无法交付，请关闭其他弹窗并确认角色存活", true);
+                    quest_state
+                        .set_feedback("当前状态无法交付，请关闭其他弹窗并确认角色存活", true);
                     continue;
                 }
-                turn_in::begin(quest_index, &turn_in::TurnInContext {
-                    tracker, dialog: &dialog, map: models.map.as_deref(),
-                    entities: models.entities.as_deref(), big_map: models.big_map.as_deref(),
-                }, &mut quest_state, &mut queue, &mut pending);
+                turn_in::begin(
+                    quest_index,
+                    &turn_in::TurnInContext {
+                        tracker,
+                        dialog: &dialog,
+                        map: models.map.as_deref(),
+                        entities: models.entities.as_deref(),
+                        big_map: models.big_map.as_deref(),
+                    },
+                    &mut quest_state,
+                    &mut queue,
+                    &mut pending,
+                );
             }
             QuestUiButton::ToggleQuestGroup { group } => {
                 quest_state.toggle_group(group);
@@ -2091,19 +2236,23 @@ fn process_quest_ui_input(
                 quest_state.clear_diary_selection();
             }
             QuestUiButton::GuidedDiaryNext => {
-                let page_count = guided_diary_quests(
-                    tracker, guidance, journey.as_ref(), quest_state.diary_tab,
-                )
-                    .len()
-                    .div_ceil(GUIDED_DIARY_PAGE_SIZE);
-                quest_state.diary_page = (quest_state.diary_page + 1)
-                    .min(page_count.saturating_sub(1));
+                let page_count =
+                    guided_diary_quests(tracker, guidance, journey.as_ref(), quest_state.diary_tab)
+                        .len()
+                        .div_ceil(GUIDED_DIARY_PAGE_SIZE);
+                quest_state.diary_page =
+                    (quest_state.diary_page + 1).min(page_count.saturating_sub(1));
                 quest_state.clear_diary_selection();
             }
             QuestUiButton::SelectGraduationDirection { direction } => {
                 if quest_state.toggle_graduation_direction(direction) {
-                    quest_state
-                        .set_feedback(format!("Goal selected: {}", crate::player_text::text(direction.label())), false);
+                    quest_state.set_feedback(
+                        format!(
+                            "Goal selected: {}",
+                            crate::player_text::text(direction.label())
+                        ),
+                        false,
+                    );
                 } else {
                     quest_state.set_feedback("Goal cleared", false);
                 }
@@ -2269,7 +2418,11 @@ fn process_quest_ui_input(
                 }
             }
             QuestUiButton::MakePrimary { quest_index } => {
-                if tracker.active_quests.iter().any(|q| q.quest_index == quest_index && q.status.is_active()) {
+                if tracker
+                    .active_quests
+                    .iter()
+                    .any(|q| q.quest_index == quest_index && q.status.is_active())
+                {
                     quest_state.pinned_primary_quest_index = Some(quest_index);
                     quest_state.set_feedback("已设为当前引导任务", false);
                 }
@@ -2295,7 +2448,11 @@ fn process_quest_ui_input(
             }
             QuestUiButton::QuestDetailScrollDown => {
                 if let Some(quest) = quest_state.detail_quest(tracker) {
-                    let class_name = models.read_model.as_deref().and_then(|model| model.player.class_name.as_deref()).unwrap_or("");
+                    let class_name = models
+                        .read_model
+                        .as_deref()
+                        .and_then(|model| model.player.class_name.as_deref())
+                        .unwrap_or("");
                     let line_count = quest_detail_lines(quest, guidance, class_name).len();
                     quest_state.scroll_detail_down(line_count);
                 }
@@ -2553,7 +2710,8 @@ fn process_quest_ui_input(
             }
             QuestUiButton::OpenDestinationMap => {
                 dispatch_ui_action(
-                    &mut player_ui.core, &mut effects,
+                    &mut player_ui.core,
+                    &mut effects,
                     mir2_ui_core::action::UiAction::OpenBigMap,
                 );
             }
@@ -2565,11 +2723,22 @@ fn process_quest_ui_input(
                     journey.as_ref(),
                     models.big_map.as_deref(),
                 ) {
-                    quest_state.set_feedback(format!("{}引导已更新，请使用当前任务路线", crate::player_text::text(intent.target.label())), true);
+                    quest_state.set_feedback(
+                        format!(
+                            "{}引导已更新，请使用当前任务路线",
+                            crate::player_text::text(intent.target.label())
+                        ),
+                        true,
+                    );
                 } else if let Some(route_navigation) = route_navigation.as_deref_mut() {
                     if route_navigation.push(intent) {
                         quest_state.set_feedback(
-                            format!("前往{} ({},{})", crate::player_text::text(intent.target.label()), intent.x, intent.y),
+                            format!(
+                                "前往{} ({},{})",
+                                crate::player_text::text(intent.target.label()),
+                                intent.x,
+                                intent.y
+                            ),
                             false,
                         );
                     } else {
@@ -2634,10 +2803,18 @@ fn process_quest_ui_input(
     if keys.just_pressed(KeyCode::Escape) || turn_in_blocked {
         quest_state.pending_turn_in = None;
     } else {
-        turn_in::advance(&turn_in::TurnInContext {
-            tracker, dialog: &dialog, map: models.map.as_deref(),
-            entities: models.entities.as_deref(), big_map: models.big_map.as_deref(),
-        }, &mut quest_state, &mut queue, &mut pending);
+        turn_in::advance(
+            &turn_in::TurnInContext {
+                tracker,
+                dialog: &dialog,
+                map: models.map.as_deref(),
+                entities: models.entities.as_deref(),
+                big_map: models.big_map.as_deref(),
+            },
+            &mut quest_state,
+            &mut queue,
+            &mut pending,
+        );
     }
 
     // Crystal `MirMessageBox` owns Escape/Enter while visible. It is the only
@@ -2659,10 +2836,13 @@ fn process_quest_ui_input(
 
     // The Diary keeps its Escape/Q close binding without capturing unrelated
     // keys. Its independent Detail remains visible when the Diary closes.
-    if quest_log_open && (keys.just_pressed(KeyCode::Escape)
-        || crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
-            &player_ui.keyboard, &keys, "Quests",
-        ))
+    if quest_log_open
+        && (keys.just_pressed(KeyCode::Escape)
+            || crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
+                &player_ui.keyboard,
+                &keys,
+                "Quests",
+            ))
     {
         dispatch_ui_action(
             &mut player_ui.core,
@@ -2832,8 +3012,14 @@ fn render_quest_ui(
         && !target.is_changed()
         && !journey_models.entities.is_changed()
         && !journey_models.map.is_changed()
-        && !journey_models.big_map.as_ref().is_some_and(|model| model.is_changed())
-        && !journey_models.skills.as_ref().is_some_and(|model| model.is_changed())
+        && !journey_models
+            .big_map
+            .as_ref()
+            .is_some_and(|model| model.is_changed())
+        && !journey_models
+            .skills
+            .as_ref()
+            .is_some_and(|model| model.is_changed())
         && !pickups.is_changed()
         && !ui_model.is_changed()
         && !inventory.is_changed()
@@ -2854,8 +3040,12 @@ fn render_quest_ui(
         &journey_models.completed,
         &ui_model.player,
     );
-    let supply_plan = crate::quest_supplies::plan(&ui_model.player, &inventory,
-        journey_models.skills.as_deref(), primary_quest_index(&tracker, &quest_state, journey.as_ref()));
+    let supply_plan = crate::quest_supplies::plan(
+        &ui_model.player,
+        &inventory,
+        journey_models.skills.as_deref(),
+        primary_quest_index(&tracker, &quest_state, journey.as_ref()),
+    );
     let available_npc_quests =
         npc_available_quests(&dialog, &tracker, Some(&journey_models.guidance));
     let has_npc_quests = !available_npc_quests.is_empty();
@@ -3103,7 +3293,11 @@ fn render_quest_tracker_panel(
         multi_guidance::render_supplies(parent, state, big_map, supplies);
         return;
     }
-    if journey.is_some() && multi_guidance::render(parent, tracker, state, journey, entities, map_model, big_map, class_name, supplies) {
+    if journey.is_some()
+        && multi_guidance::render(
+            parent, tracker, state, journey, entities, map_model, big_map, class_name, supplies,
+        )
+    {
         return;
     }
     if primary_quest_index(tracker, state, journey) == Some(2_110_005)
@@ -3123,7 +3317,11 @@ fn render_quest_tracker_panel(
         let journey_text_size = 10.0;
         quest_log_text_at(
             parent,
-            &format!("{}级  {}", journey.level_range, crate::player_text::text(&journey.chapter_title)),
+            &format!(
+                "{}级  {}",
+                journey.level_range,
+                crate::player_text::text(&journey.chapter_title)
+            ),
             QuestLogRect::new(5.0, 20.0, 300.0, 15.0),
             journey_text_size,
             PANEL_HIGHLIGHT,
@@ -3140,7 +3338,13 @@ fn render_quest_tracker_panel(
         if let Some(next) = &journey.next {
             quest_log_text_at(
                 parent,
-                &format!("下一步：{}", truncate_chars(&crate::player_text::quest_title(next.quest_id, &next.title), 38)),
+                &format!(
+                    "下一步：{}",
+                    truncate_chars(
+                        &crate::player_text::quest_title(next.quest_id, &next.title),
+                        38
+                    )
+                ),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
                 Color::srgb(0.20, 1.0, 0.10),
@@ -3148,7 +3352,10 @@ fn render_quest_tracker_panel(
             );
             quest_log_text_at(
                 parent,
-                &format!("   {}", truncate_chars(&crate::player_text::text(&next.action), 42)),
+                &format!(
+                    "   {}",
+                    truncate_chars(&crate::player_text::text(&next.action), 42)
+                ),
                 QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
                 journey_text_size,
                 Color::WHITE,
@@ -3170,7 +3377,10 @@ fn render_quest_tracker_panel(
             if let Some(objective) = &next.objective {
                 quest_log_text_at(
                     parent,
-                    &format!("   {}", truncate_chars(&crate::player_text::quest_objective(objective), 42)),
+                    &format!(
+                        "   {}",
+                        truncate_chars(&crate::player_text::quest_objective(objective), 42)
+                    ),
                     QuestLogRect::new(5.0, 80.0 + detail_offset, 300.0, 15.0),
                     journey_text_size,
                     Color::WHITE,
@@ -3212,7 +3422,10 @@ fn render_quest_tracker_panel(
             if !reward.trim().is_empty() {
                 quest_log_text_at(
                     parent,
-                    &format!("   奖励：{}", truncate_chars(&crate::player_text::text(reward), 32)),
+                    &format!(
+                        "   奖励：{}",
+                        truncate_chars(&crate::player_text::text(reward), 32)
+                    ),
                     QuestLogRect::new(5.0, 95.0 + detail_offset + target_offset, 300.0, 15.0),
                     journey_text_size,
                     PANEL_TEXT,
@@ -3231,7 +3444,10 @@ fn render_quest_tracker_panel(
         } else {
             quest_log_text_at(
                 parent,
-                &format!("下一步：{}", truncate_chars(&crate::player_text::text(&journey.goal), 38)),
+                &format!(
+                    "下一步：{}",
+                    truncate_chars(&crate::player_text::text(&journey.goal), 38)
+                ),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
                 Color::srgb(0.20, 1.0, 0.10),
@@ -3311,7 +3527,10 @@ fn render_quest_tracker_panel(
         if let Some(class_hint) = &journey.class_hint {
             quest_log_text_at(
                 parent,
-                &format!("   提示：{}", truncate_chars(&crate::player_text::text(class_hint), 38)),
+                &format!(
+                    "   提示：{}",
+                    truncate_chars(&crate::player_text::text(class_hint), 38)
+                ),
                 QuestLogRect::new(
                     5.0,
                     110.0 + graduation_offset + location_offset + target_offset,
@@ -3339,7 +3558,13 @@ fn render_quest_tracker_panel(
         if let Some(optional) = journey.optional.first() {
             quest_log_text_at(
                 parent,
-                &format!("可选任务：{}", truncate_chars(&crate::player_text::quest_title(optional.quest_id, &optional.title), 34)),
+                &format!(
+                    "可选任务：{}",
+                    truncate_chars(
+                        &crate::player_text::quest_title(optional.quest_id, &optional.title),
+                        34
+                    )
+                ),
                 QuestLogRect::new(
                     5.0,
                     125.0 + graduation_offset + location_offset + target_offset,
@@ -3378,8 +3603,13 @@ fn render_quest_tracker_panel(
             0.0
         };
         y = 135.0 + graduation_offset + location_offset + target_offset + optional_target_offset;
-        quest_log_text_button_at(parent, QuestLogRect::new(8.0, y + 20.0, 286.0, 25.0),
-            "补给检查与购买地点", QuestUiButton::ToggleSupplies, true);
+        quest_log_text_button_at(
+            parent,
+            QuestLogRect::new(8.0, y + 20.0, 286.0, 25.0),
+            "补给检查与购买地点",
+            QuestUiButton::ToggleSupplies,
+            true,
+        );
         y += 30.0;
     }
     let tracked_limit = if compact_journey {
@@ -3445,42 +3675,88 @@ fn render_bichon_arrival_tracker(parent: &mut ChildSpawnerCommands, map: &MapMod
         font_size: FontSize::Px(14.0),
         ..default()
     };
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(5.0), padding: UiRect::all(Val::Px(12.0)),
-            border: UiRect::all(Val::Px(1.0)), ..default()
-        },
-        BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.88)),
-        BorderColor::all(PANEL_HIGHLIGHT),
-    )).with_children(|card| {
-        for (text, color) in [
-            ("主线 · 前往比奇城".to_owned(), PANEL_HIGHLIGHT),
-            ("目的地：比奇城安全区".to_owned(), Color::srgb(0.3, 1.0, 0.3)),
-            (format!("比奇省 · 坐标 ({},{})", crate::quest_destination::BICHON_SAFE_X, crate::quest_destination::BICHON_SAFE_Y), Color::WHITE),
-            ("从新手村向北，前往北部大城。".to_owned(), Color::WHITE),
-            ("进入城内安全区后，任务进度会更新。".to_owned(), Color::WHITE),
-            ("注意：新手村安全区不算此任务目标。".to_owned(), PANEL_HIGHLIGHT),
-            (format!("当前位置：({},{})", map.center_x, map.center_y), PANEL_TEXT),
-            ("路途较长，出发前补充血药。".to_owned(), PANEL_TEXT),
-        ] {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(8.0),
+                top: Val::Px(16.0),
+                width: Val::Px(304.0),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(5.0),
+                padding: UiRect::all(Val::Px(12.0)),
+                border: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.88)),
+            BorderColor::all(PANEL_HIGHLIGHT),
+        ))
+        .with_children(|card| {
+            for (text, color) in [
+                ("主线 · 前往比奇城".to_owned(), PANEL_HIGHLIGHT),
+                (
+                    "目的地：比奇城安全区".to_owned(),
+                    Color::srgb(0.3, 1.0, 0.3),
+                ),
+                (
+                    format!(
+                        "比奇省 · 坐标 ({},{})",
+                        crate::quest_destination::BICHON_SAFE_X,
+                        crate::quest_destination::BICHON_SAFE_Y
+                    ),
+                    Color::WHITE,
+                ),
+                ("从新手村向北，前往北部大城。".to_owned(), Color::WHITE),
+                (
+                    "进入城内安全区后，任务进度会更新。".to_owned(),
+                    Color::WHITE,
+                ),
+                (
+                    "注意：新手村安全区不算此任务目标。".to_owned(),
+                    PANEL_HIGHLIGHT,
+                ),
+                (
+                    format!("当前位置：({},{})", map.center_x, map.center_y),
+                    PANEL_TEXT,
+                ),
+                ("路途较长，出发前补充血药。".to_owned(), PANEL_TEXT),
+            ] {
+                card.spawn((
+                    Node {
+                        width: Val::Percent(100.0),
+                        min_height: Val::Px(20.0),
+                        flex_shrink: 0.0,
+                        ..default()
+                    },
+                    Text::new(crate::player_text::text(&text)),
+                    font.clone(),
+                    TextColor(color),
+                    TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+                ));
+            }
             card.spawn((
-                Node { width: Val::Percent(100.0), min_height: Val::Px(20.0), flex_shrink: 0.0, ..default() },
-                Text::new(crate::player_text::text(&text)), font.clone(), TextColor(color),
-                TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
-            ));
-        }
-        card.spawn((
-            Button, QuestUiButton::OpenDestinationMap, QuestUiButtonVisual { enabled: true },
-            Node { height: Val::Px(30.0), width: Val::Percent(100.0), align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center, flex_shrink: 0.0, ..default() },
-            BackgroundColor(BUTTON_BG), FocusPolicy::Block,
-        )).with_children(|button| {
-            button.spawn((Text::new(crate::player_text::text("打开大地图 · 查看目的地")), font, TextColor(PANEL_HIGHLIGHT)));
+                Button,
+                QuestUiButton::OpenDestinationMap,
+                QuestUiButtonVisual { enabled: true },
+                Node {
+                    height: Val::Px(30.0),
+                    width: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BackgroundColor(BUTTON_BG),
+                FocusPolicy::Block,
+            ))
+            .with_children(|button| {
+                button.spawn((
+                    Text::new(crate::player_text::text("打开大地图 · 查看目的地")),
+                    font,
+                    TextColor(PANEL_HIGHLIGHT),
+                ));
+            });
         });
-    });
 }
 
 fn npc_dialog_weighted_width(text: &str) -> usize {
@@ -3791,10 +4067,15 @@ fn render_quest_log_panel_legacy(
         let marker = if selected { "▶" } else { " " };
         let tracking = if state.is_tracked(quest.quest_index) {
             crate::player_text::text(" [Tracking]")
-        } else { String::new() };
+        } else {
+            String::new()
+        };
         let label = format!(
             "{marker} {} [{}]{tracking}",
-            truncate_chars(&crate::player_text::quest_title(quest.quest_index, &quest.title), 28),
+            truncate_chars(
+                &crate::player_text::quest_title(quest.quest_index, &quest.title),
+                28
+            ),
             crate::player_text::text(&quest.status.label())
         );
         action_button(
@@ -3819,7 +4100,10 @@ fn render_quest_log_panel_legacy(
             BackgroundColor(PANEL_HIGHLIGHT),
         ));
 
-        detail_title(parent, &crate::player_text::quest_title(quest.quest_index, &quest.title));
+        detail_title(
+            parent,
+            &crate::player_text::quest_title(quest.quest_index, &quest.title),
+        );
         body_line(parent, &format!("Status: {}", quest.status.label()));
         if let Some(npc) = &quest.npc_name {
             body_line(parent, &format!("NPC: {}", crate::player_text::name(npc)));
@@ -3849,15 +4133,21 @@ fn render_quest_log_panel_legacy(
         } else {
             body_line(
                 parent,
-                &format!("Reward: {}", truncate_chars(&crate::player_text::quest_rewards(quest), 64)),
+                &format!(
+                    "Reward: {}",
+                    truncate_chars(&crate::player_text::quest_rewards(quest), 64)
+                ),
             );
             // Reward selection when multiple rewards and ReadyToTurnIn
             if quest.rewards.len() > 1 {
                 body_line(parent, "Choose reward:");
                 for (idx, reward) in quest.rewards.iter().enumerate() {
                     let chosen = state.selected_reward_index == Some(idx as i32);
-                    let label =
-                        format!("{} {}", if chosen { "[x]" } else { "[ ]" }, crate::player_text::quest_reward(reward));
+                    let label = format!(
+                        "{} {}",
+                        if chosen { "[x]" } else { "[ ]" },
+                        crate::player_text::quest_reward(reward)
+                    );
                     action_button(
                         parent,
                         &label,
@@ -4020,7 +4310,9 @@ fn quest_diary_group_name(quest: &Quest, guidance: Option<&QuestGuidance>) -> St
     // Cadence belongs to the server: the same quest can be a one-time task
     // in Crystal mode and a weekly task in an explicit content profile.
     if guidance.is_some_and(QuestGuidance::is_enabled) {
-        if let Some(group @ ("Daily" | "Weekly" | "Repeatable" | "Daily Tasks" | "Weekly Tasks")) = quest.group.as_deref() {
+        if let Some(group @ ("Daily" | "Weekly" | "Repeatable" | "Daily Tasks" | "Weekly Tasks")) =
+            quest.group.as_deref()
+        {
             return group.to_owned();
         }
     }
@@ -4079,16 +4371,24 @@ fn guided_diary_quests<'a>(
                         || mir2_game_data::periodic_quests::is_periodic(quest.quest_index)))
         })
         .filter(|(_, quest)| match tab {
-            GuidedDiaryTab::Main => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_some(),
-            GuidedDiaryTab::Ready => {
-                quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn
+            GuidedDiaryTab::Main => guidance
+                .and_then(|guide| guide.entry(quest.quest_index))
+                .is_some(),
+            GuidedDiaryTab::Ready => quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn,
+            GuidedDiaryTab::Side => {
+                guidance
+                    .and_then(|guide| guide.entry(quest.quest_index))
+                    .is_none()
+                    && !mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
             }
-            GuidedDiaryTab::Side => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_none()
-                && !mir2_game_data::periodic_quests::is_periodic(quest.quest_index),
             GuidedDiaryTab::Daily => mir2_game_data::periodic_quests::quest(quest.quest_index)
-                .is_some_and(|quest| quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Daily),
+                .is_some_and(|quest| {
+                    quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Daily
+                }),
             GuidedDiaryTab::Weekly => mir2_game_data::periodic_quests::quest(quest.quest_index)
-                .is_some_and(|quest| quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Weekly),
+                .is_some_and(|quest| {
+                    quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Weekly
+                }),
         })
         .collect::<Vec<_>>();
     quests.sort_by_key(|(position, quest)| {
@@ -4101,9 +4401,10 @@ fn guided_diary_quests<'a>(
             GuidedDiaryTab::Main => guidance
                 .map(|guide| guide.sort_key(quest.quest_index, *position).1)
                 .unwrap_or(i32::MAX),
-            GuidedDiaryTab::Ready | GuidedDiaryTab::Side | GuidedDiaryTab::Daily | GuidedDiaryTab::Weekly => {
-                -quest.min_level_needed.max(0)
-            }
+            GuidedDiaryTab::Ready
+            | GuidedDiaryTab::Side
+            | GuidedDiaryTab::Daily
+            | GuidedDiaryTab::Weekly => -quest.min_level_needed.max(0),
         };
         (
             u8::from(tab == GuidedDiaryTab::Main && next_id != Some(quest.quest_index)),
@@ -4132,14 +4433,29 @@ fn render_guided_quest_diary_panel(
             _ => "本章 --/--".to_owned(),
         },
     );
-    quest_log_text_at(parent, &count_label, layout.taken_count, 8.0, PANEL_TEXT, Justify::Left);
-    quest_log_image_button_at(
-        parent, asset_server, QUEST_DIARY_TOP_CLOSE_ASSET, layout.top_close,
-        QuestUiButton::CloseQuestLog, true,
+    quest_log_text_at(
+        parent,
+        &count_label,
+        layout.taken_count,
+        8.0,
+        PANEL_TEXT,
+        Justify::Left,
     );
     quest_log_image_button_at(
-        parent, asset_server, QUEST_DIARY_BOTTOM_CLOSE_ASSET, layout.bottom_close,
-        QuestUiButton::CloseQuestLog, true,
+        parent,
+        asset_server,
+        QUEST_DIARY_TOP_CLOSE_ASSET,
+        layout.top_close,
+        QuestUiButton::CloseQuestLog,
+        true,
+    );
+    quest_log_image_button_at(
+        parent,
+        asset_server,
+        QUEST_DIARY_BOTTOM_CLOSE_ASSET,
+        layout.bottom_close,
+        QuestUiButton::CloseQuestLog,
+        true,
     );
 
     for (index, tab) in GuidedDiaryTab::ALL.into_iter().enumerate() {
@@ -4147,7 +4463,9 @@ fn render_guided_quest_diary_panel(
         let label = format!("{} {count}", tab.localized_label());
         let (x, y, width) = if index < 3 {
             (15.0 + index as f32 * 96.0, 37.0, 92.0)
-        } else { (15.0 + (index - 3) as f32 * 144.0, 63.0, 140.0) };
+        } else {
+            (15.0 + (index - 3) as f32 * 144.0, 63.0, 140.0)
+        };
         quest_log_text_button_at(
             parent,
             QuestLogRect::new(x, y, width, 23.0),
@@ -4157,28 +4475,49 @@ fn render_guided_quest_diary_panel(
         );
         if state.diary_tab == tab {
             quest_log_text_at(
-                parent, "●", QuestLogRect::new(x + 3.0, y + 5.0, 12.0, 12.0),
-                8.0, PANEL_HIGHLIGHT, Justify::Left,
+                parent,
+                "●",
+                QuestLogRect::new(x + 3.0, y + 5.0, 12.0, 12.0),
+                8.0,
+                PANEL_HIGHLIGHT,
+                Justify::Left,
             );
         }
     }
 
     let heading = match state.diary_tab {
         GuidedDiaryTab::Main => journey
-            .map(|view| format!("当前章节 · {}", truncate_chars(&crate::player_text::text(&view.chapter_title), 20)))
+            .map(|view| {
+                format!(
+                    "当前章节 · {}",
+                    truncate_chars(&crate::player_text::text(&view.chapter_title), 20)
+                )
+            })
             .unwrap_or_else(|| "当前主线".to_owned()),
         GuidedDiaryTab::Ready => "已完成目标 · 可前往交付".to_owned(),
         GuidedDiaryTab::Side => "其他任务 · 可自行选择完成".to_owned(),
-        GuidedDiaryTab::Daily => crate::native_i18n::key("periodic.diary.reset.daily", "Daily, 00:00 (UTC+8)"),
-        GuidedDiaryTab::Weekly => crate::native_i18n::key("periodic.diary.reset.weekly", "Monday, 00:00 (UTC+8)"),
+        GuidedDiaryTab::Daily => {
+            crate::native_i18n::key("periodic.diary.reset.daily", "Daily, 00:00 (UTC+8)")
+        }
+        GuidedDiaryTab::Weekly => {
+            crate::native_i18n::key("periodic.diary.reset.weekly", "Monday, 00:00 (UTC+8)")
+        }
     };
     quest_log_text_at(
-        parent, &heading, QuestLogRect::new(19.0, 92.0, 276.0, 15.0),
-        9.0, PANEL_HIGHLIGHT, Justify::Left,
+        parent,
+        &heading,
+        QuestLogRect::new(19.0, 92.0, 276.0, 15.0),
+        9.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
     );
     quest_log_text_at(
-        parent, "左键查看详情 · 右键跟踪任务", QuestLogRect::new(19.0, 111.0, 276.0, 15.0),
-        8.0, PANEL_TEXT, Justify::Left,
+        parent,
+        "左键查看详情 · 右键跟踪任务",
+        QuestLogRect::new(19.0, 111.0, 276.0, 15.0),
+        8.0,
+        PANEL_TEXT,
+        Justify::Left,
     );
 
     let quests = guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab);
@@ -4192,17 +4531,22 @@ fn render_guided_quest_diary_panel(
     {
         let y = 133.0 + index as f32 * 33.0;
         let quest_index = quest.quest_index;
-        let current = journey.and_then(|view| view.next.as_ref())
+        let current = journey
+            .and_then(|view| view.next.as_ref())
             .is_some_and(|step| step.quest_id == quest_index);
         if state.selected_quest_index == Some(quest_index) {
             quest_log_image_at(
-                parent, asset_server, QUEST_DIARY_SELECTED_ASSET,
+                parent,
+                asset_server,
+                QUEST_DIARY_SELECTED_ASSET,
                 QuestLogRect::new(23.0, y, 252.0, 16.0),
             );
         }
         if state.is_tracked(quest_index) {
             quest_log_image_at(
-                parent, asset_server, QUEST_DIARY_TRACKED_ASSET,
+                parent,
+                asset_server,
+                QUEST_DIARY_TRACKED_ASSET,
                 QuestLogRect::new(17.0, y + 18.0, 16.0, 12.0),
             );
         }
@@ -4212,48 +4556,81 @@ fn render_guided_quest_diary_panel(
             _ => "进行中",
         };
         let area = if state.diary_tab == GuidedDiaryTab::Main {
-            journey.map(|view| view.chapter_title.as_str()).unwrap_or("主线")
+            journey
+                .map(|view| view.chapter_title.as_str())
+                .unwrap_or("主线")
         } else {
             quest.group.as_deref().unwrap_or("其他地图")
         };
-        let subtitle = format!("{}级 · {} · {}", quest.min_level_needed.max(0), crate::player_text::text(status),
-            truncate_chars(&crate::player_text::text(area), 24));
-        parent.spawn((
-            Button,
-            QuestUiButton::SelectQuest { quest_index },
-            QuestDiaryRow { quest_index },
-            RelativeCursorPosition::default(),
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(25.0), top: Val::Px(y),
-                width: Val::Px(270.0), height: Val::Px(33.0),
-                ..default()
-            },
-            BackgroundColor(Color::NONE),
-            FocusPolicy::Block,
-        )).with_children(|row| {
-            quest_log_text_at(
-                row, &truncate_chars(&crate::player_text::quest_title(quest.quest_index, &quest.title), 31),
-                QuestLogRect::new(6.0, 0.0, 220.0, 15.0),
-                9.0, if current { PANEL_HIGHLIGHT } else { PANEL_TEXT }, Justify::Left,
-            );
-            if current {
+        let subtitle = format!(
+            "{}级 · {} · {}",
+            quest.min_level_needed.max(0),
+            crate::player_text::text(status),
+            truncate_chars(&crate::player_text::text(area), 24)
+        );
+        parent
+            .spawn((
+                Button,
+                QuestUiButton::SelectQuest { quest_index },
+                QuestDiaryRow { quest_index },
+                RelativeCursorPosition::default(),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(25.0),
+                    top: Val::Px(y),
+                    width: Val::Px(270.0),
+                    height: Val::Px(33.0),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+                FocusPolicy::Block,
+            ))
+            .with_children(|row| {
                 quest_log_text_at(
-                    row, "当前", QuestLogRect::new(225.0, 0.0, 40.0, 15.0),
-                    8.0, FEEDBACK_OK, Justify::Left,
+                    row,
+                    &truncate_chars(
+                        &crate::player_text::quest_title(quest.quest_index, &quest.title),
+                        31,
+                    ),
+                    QuestLogRect::new(6.0, 0.0, 220.0, 15.0),
+                    9.0,
+                    if current { PANEL_HIGHLIGHT } else { PANEL_TEXT },
+                    Justify::Left,
                 );
-            }
-            quest_log_text_at(
-                row, &subtitle, QuestLogRect::new(6.0, 17.0, 255.0, 15.0),
-                8.0, PANEL_TEXT, Justify::Left,
-            );
-        });
+                if current {
+                    quest_log_text_at(
+                        row,
+                        "当前",
+                        QuestLogRect::new(225.0, 0.0, 40.0, 15.0),
+                        8.0,
+                        FEEDBACK_OK,
+                        Justify::Left,
+                    );
+                }
+                quest_log_text_at(
+                    row,
+                    &subtitle,
+                    QuestLogRect::new(6.0, 17.0, 255.0, 15.0),
+                    8.0,
+                    PANEL_TEXT,
+                    Justify::Left,
+                );
+            });
     }
 
-    if matches!(state.diary_tab, GuidedDiaryTab::Daily | GuidedDiaryTab::Weekly)
-        && guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab).is_empty() {
-        quest_log_text_at(parent, "Visit a Task Steward in Bichon or Mongchon to view available tasks.",
-            QuestLogRect::new(22.0, 133.0, 274.0, 54.0), 9.0, PANEL_TEXT, Justify::Left);
+    if matches!(
+        state.diary_tab,
+        GuidedDiaryTab::Daily | GuidedDiaryTab::Weekly
+    ) && guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab).is_empty()
+    {
+        quest_log_text_at(
+            parent,
+            "Visit a Task Steward in Bichon or Mongchon to view available tasks.",
+            QuestLogRect::new(22.0, 133.0, 274.0, 54.0),
+            9.0,
+            PANEL_TEXT,
+            Justify::Left,
+        );
     }
 
     if state.diary_tab == GuidedDiaryTab::Main {
@@ -4263,38 +4640,60 @@ fn render_guided_quest_diary_panel(
                 quest_log_text_button_at(
                     parent,
                     QuestLogRect::new(22.0, 138.0 + index as f32 * 72.0, 272.0, 27.0),
-                    &format!("{} {}", if selected { "●" } else { "+" },
-                        truncate_chars(&crate::player_text::text(&option.title), 29)),
-                    QuestUiButton::SelectGraduationDirection { direction: option.direction },
+                    &format!(
+                        "{} {}",
+                        if selected { "●" } else { "+" },
+                        truncate_chars(&crate::player_text::text(&option.title), 29)
+                    ),
+                    QuestUiButton::SelectGraduationDirection {
+                        direction: option.direction,
+                    },
                     true,
                 );
                 quest_log_text_at(
-                    parent, &truncate_chars(&crate::player_text::text(&option.summary), 42),
+                    parent,
+                    &truncate_chars(&crate::player_text::text(&option.summary), 42),
                     QuestLogRect::new(27.0, 169.0 + index as f32 * 72.0, 264.0, 30.0),
-                    8.0, PANEL_TEXT, Justify::Left,
+                    8.0,
+                    PANEL_TEXT,
+                    Justify::Left,
                 );
             }
-        } else if page_count == 1 && guided_diary_quests(tracker, Some(guidance), journey,
-            GuidedDiaryTab::Main).is_empty() {
+        } else if page_count == 1
+            && guided_diary_quests(tracker, Some(guidance), journey, GuidedDiaryTab::Main)
+                .is_empty()
+        {
             quest_log_text_at(
-                parent, "暂无可显示的主线，完成前置任务后刷新。",
+                parent,
+                "暂无可显示的主线，完成前置任务后刷新。",
                 QuestLogRect::new(22.0, 133.0, 274.0, 32.0),
-                9.0, PANEL_TEXT, Justify::Left,
+                9.0,
+                PANEL_TEXT,
+                Justify::Left,
             );
         }
     }
     quest_log_text_button_at(
-        parent, QuestLogRect::new(22.0, 408.0, 62.0, 22.0), "上一页",
-        QuestUiButton::GuidedDiaryPrevious, page > 0,
+        parent,
+        QuestLogRect::new(22.0, 408.0, 62.0, 22.0),
+        "上一页",
+        QuestUiButton::GuidedDiaryPrevious,
+        page > 0,
     );
     quest_log_text_at(
-        parent, &format!("{}/{page_count}", page + 1),
+        parent,
+        &format!("{}/{page_count}", page + 1),
         QuestLogRect::new(131.0, 412.0, 54.0, 15.0),
-        9.0, PANEL_TEXT, Justify::Center,
+        9.0,
+        PANEL_TEXT,
+        Justify::Center,
     );
     quest_log_text_button_at(
-        parent, QuestLogRect::new(228.0, 408.0, 62.0, 22.0), "下一页",
-        QuestUiButton::GuidedDiaryNext, page + 1 < page_count,
+        parent,
+        QuestLogRect::new(228.0, 408.0, 62.0, 22.0),
+        "下一页",
+        QuestUiButton::GuidedDiaryNext,
+        page + 1 < page_count,
     );
 }
 
@@ -4407,7 +4806,10 @@ fn render_quest_diary_panel(
             }
 
             let level = quest.min_level_needed.max(0);
-            let quest_label = format!("{level}级 {}", crate::player_text::quest_title(quest.quest_index, &quest.title));
+            let quest_label = format!(
+                "{level}级 {}",
+                crate::player_text::quest_title(quest.quest_index, &quest.title)
+            );
             let state_label = quest_diary_status_label(quest);
             let quest_index = quest.quest_index;
             parent
@@ -4453,7 +4855,10 @@ fn render_quest_diary_panel(
         next_y += QUEST_DIARY_ROW_HEIGHT;
         quest_log_text_at(
             parent,
-            &format!("{} · Choose your next goal", crate::player_text::text(&graduation.title)),
+            &format!(
+                "{} · Choose your next goal",
+                crate::player_text::text(&graduation.title)
+            ),
             QuestLogRect::new(
                 QUEST_DIARY_GROUP_LEFT,
                 next_y,
@@ -4578,12 +4983,18 @@ fn push_quest_guidance(
     push_quest_detail_section(lines, "Newcomer Guide", detail);
 }
 
-fn quest_objective_detail_text(quest_index: i32, objective_index: usize, objective: &crate::quest_model::QuestObjective) -> String {
+fn quest_objective_detail_text(
+    quest_index: i32,
+    objective_index: usize,
+    objective: &crate::quest_model::QuestObjective,
+) -> String {
     let compact = format!("{}/{}", objective.current, objective.target);
     let spaced = objective.progress_label();
-    let label = crate::player_text::quest_objective_label(quest_index, objective_index, &objective.text);
+    let label =
+        crate::player_text::quest_objective_label(quest_index, objective_index, &objective.text);
     if mir2_game_data::periodic_quests::quest(quest_index)
-        .is_some_and(|definition| definition.kills.get(objective_index).is_some()) {
+        .is_some_and(|definition| definition.kills.get(objective_index).is_some())
+    {
         return format!("{label} ({spaced})");
     }
     if objective.target == 0
@@ -4597,38 +5008,86 @@ fn quest_objective_detail_text(quest_index: i32, objective_index: usize, objecti
 }
 
 fn localized_quest_detail_lines(lines: Vec<QuestDetailLine>) -> Vec<QuestDetailLine> {
-    lines.into_iter().flat_map(|line| {
-        let text = crate::player_text::text(&line.text);
-        if line.kind == QuestDetailLineKind::Body
-            || (crate::native_i18n::active() && line.kind != QuestDetailLineKind::Blank) {
-            multi_guidance::wrap_card_text(&text).into_iter().map(|text| QuestDetailLine { text, kind: line.kind }).collect()
-        } else { vec![QuestDetailLine { text, kind: line.kind }] }
-    }).collect()
+    lines
+        .into_iter()
+        .flat_map(|line| {
+            let text = crate::player_text::text(&line.text);
+            if line.kind == QuestDetailLineKind::Body
+                || (crate::native_i18n::active() && line.kind != QuestDetailLineKind::Blank)
+            {
+                multi_guidance::wrap_card_text(&text)
+                    .into_iter()
+                    .map(|text| QuestDetailLine {
+                        text,
+                        kind: line.kind,
+                    })
+                    .collect()
+            } else {
+                vec![QuestDetailLine {
+                    text,
+                    kind: line.kind,
+                }]
+            }
+        })
+        .collect()
 }
 
 fn localized_quest_description(quest: &Quest) -> Vec<String> {
     if crate::native_i18n::active() {
-        return crate::player_text::quest_description(quest.quest_index,
-            &quest.detail.description_lines.join("\n")).lines().map(str::to_owned).collect();
+        return crate::player_text::quest_description(
+            quest.quest_index,
+            &quest.detail.description_lines.join("\n"),
+        )
+        .lines()
+        .map(str::to_owned)
+        .collect();
     }
     let config = crate::quest_practice::newcomer_config();
-    if ["quests", "growthRewards"].iter().any(|key| config[key].as_array().is_some_and(|quests|
-        quests.iter().any(|definition| definition["id"].as_i64() == Some(i64::from(quest.quest_index))))) {
-        vec![crate::player_text::quest_description(quest.quest_index, &quest.detail.description_lines.join("\n"))]
-    } else { quest.detail.description_lines.clone() }
+    if ["quests", "growthRewards"].iter().any(|key| {
+        config[key].as_array().is_some_and(|quests| {
+            quests
+                .iter()
+                .any(|definition| definition["id"].as_i64() == Some(i64::from(quest.quest_index)))
+        })
+    }) {
+        vec![crate::player_text::quest_description(
+            quest.quest_index,
+            &quest.detail.description_lines.join("\n"),
+        )]
+    } else {
+        quest.detail.description_lines.clone()
+    }
 }
 
-fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str) -> Vec<QuestDetailLine> {
+fn quest_detail_lines(
+    quest: &Quest,
+    guidance: Option<&QuestGuidance>,
+    class_name: &str,
+) -> Vec<QuestDetailLine> {
     let mut lines = vec![QuestDetailLine {
         text: crate::player_text::quest_title(quest.quest_index, &quest.title),
         kind: QuestDetailLineKind::Title,
     }];
 
     if let Some(practice) = crate::quest_practice::practice_guide(quest.quest_index, class_name) {
-        let complete = quest.objectives.get(practice.objective_index)
+        let complete = quest
+            .objectives
+            .get(practice.objective_index)
             .is_some_and(|objective| objective.target > 0 && objective.current >= objective.target);
-        let details = practice.instructions.into_iter().flat_map(|text| multi_guidance::wrap_card_text(&text)).collect::<Vec<_>>();
-        push_quest_detail_section(&mut lines, if complete { "职业练习（已完成）" } else { "职业练习要求（全部完成）" }, details);
+        let details = practice
+            .instructions
+            .into_iter()
+            .flat_map(|text| multi_guidance::wrap_card_text(&text))
+            .collect::<Vec<_>>();
+        push_quest_detail_section(
+            &mut lines,
+            if complete {
+                "职业练习（已完成）"
+            } else {
+                "职业练习要求（全部完成）"
+            },
+            details,
+        );
     }
 
     let mut description = localized_quest_description(quest);
@@ -4660,13 +5119,21 @@ fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_nam
             .map(|objective| objective.text.clone())
             .collect()
     } else {
-        crate::player_text::quest_section(quest.quest_index, "task", &quest.detail.task_description_lines)
+        crate::player_text::quest_section(
+            quest.quest_index,
+            "task",
+            &quest.detail.task_description_lines,
+        )
     };
     push_quest_detail_section(&mut lines, "Tasks", task_lines);
     push_quest_detail_section(
         &mut lines,
         "Return",
-        crate::player_text::quest_section(quest.quest_index, "return", &quest.detail.return_description_lines),
+        crate::player_text::quest_section(
+            quest.quest_index,
+            "return",
+            &quest.detail.return_description_lines,
+        ),
     );
     if let Some(time_limit) = quest
         .detail
@@ -4684,12 +5151,16 @@ fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_nam
                 .objectives
                 .iter()
                 .enumerate()
-                .map(|(index, objective)| quest_objective_detail_text(quest.quest_index, index, objective))
+                .map(|(index, objective)| {
+                    quest_objective_detail_text(quest.quest_index, index, objective)
+                })
                 .collect::<Vec<_>>(),
         );
     }
-    let supplies = crate::quest_practice::supply_instructions(quest.quest_index, class_name).into_iter()
-        .flat_map(|text| multi_guidance::wrap_card_text(&text)).collect::<Vec<_>>();
+    let supplies = crate::quest_practice::supply_instructions(quest.quest_index, class_name)
+        .into_iter()
+        .flat_map(|text| multi_guidance::wrap_card_text(&text))
+        .collect::<Vec<_>>();
     push_quest_detail_section(&mut lines, "回城补给", supplies);
     localized_quest_detail_lines(lines)
 }
@@ -4712,13 +5183,17 @@ fn quest_list_message_lines(
         && !quest.detail.completion_description_lines.is_empty()
     {
         lines.extend(
-            crate::player_text::quest_section(quest.quest_index, "completion", &quest.detail.completion_description_lines)
-                .into_iter()
-                .filter(|line| !line.trim().is_empty())
-                .map(|text| QuestDetailLine {
-                    text,
-                    kind: QuestDetailLineKind::Body,
-                }),
+            crate::player_text::quest_section(
+                quest.quest_index,
+                "completion",
+                &quest.detail.completion_description_lines,
+            )
+            .into_iter()
+            .filter(|line| !line.trim().is_empty())
+            .map(|text| QuestDetailLine {
+                text,
+                kind: QuestDetailLineKind::Body,
+            }),
         );
         push_quest_guidance(&mut lines, quest, guidance);
         return localized_quest_detail_lines(lines);
@@ -4752,13 +5227,21 @@ fn quest_list_message_lines(
             .map(|objective| objective.text.clone())
             .collect()
     } else {
-        crate::player_text::quest_section(quest.quest_index, "task", &quest.detail.task_description_lines)
+        crate::player_text::quest_section(
+            quest.quest_index,
+            "task",
+            &quest.detail.task_description_lines,
+        )
     };
     push_quest_detail_section(&mut lines, "Tasks", task_lines);
     push_quest_detail_section(
         &mut lines,
         "Return",
-        crate::player_text::quest_section(quest.quest_index, "return", &quest.detail.return_description_lines),
+        crate::player_text::quest_section(
+            quest.quest_index,
+            "return",
+            &quest.detail.return_description_lines,
+        ),
     );
     if let Some(time_limit) = quest
         .detail
@@ -5132,11 +5615,25 @@ fn render_quest_detail_panel(
 ) {
     let layout = quest_detail_layout(1.0);
     if guidance.is_enabled() && quest.status.is_active() {
-        quest_log_text_button_at(parent, QuestLogRect::new(125.0, 436.0, 70.0, 25.0),
-            if state.pinned_primary_quest_index == Some(quest.quest_index) { "当前引导" } else { "设为当前" },
-            QuestUiButton::MakePrimary { quest_index: quest.quest_index }, true);
+        quest_log_text_button_at(
+            parent,
+            QuestLogRect::new(125.0, 436.0, 70.0, 25.0),
+            if state.pinned_primary_quest_index == Some(quest.quest_index) {
+                "当前引导"
+            } else {
+                "设为当前"
+            },
+            QuestUiButton::MakePrimary {
+                quest_index: quest.quest_index,
+            },
+            true,
+        );
     }
-    let lines = quest_detail_lines(quest, Some(guidance), player.class_name.as_deref().unwrap_or(""));
+    let lines = quest_detail_lines(
+        quest,
+        Some(guidance),
+        player.class_name.as_deref().unwrap_or(""),
+    );
     let max_top = lines.len().saturating_sub(QUEST_DETAIL_LINE_COUNT);
     let scroll_top = state.detail_scroll_top.min(max_top);
 
@@ -5288,13 +5785,24 @@ fn render_quest_detail_panel(
             quest_finish_enabled(quest, state.selected_reward_index) && !pending,
         );
     } else if can_finish_quest(quest) {
-        let waiting = state.pending_turn_in.as_ref().is_some_and(|request| request.quest_index == quest.quest_index)
+        let waiting = state
+            .pending_turn_in
+            .as_ref()
+            .is_some_and(|request| request.quest_index == quest.quest_index)
             || pending.contains(&PendingOperationKey::QuestFinish {
                 quest_index: quest.quest_index,
                 selected_item_index: state.selected_reward_index.unwrap_or(-1),
             });
-        quest_log_image_button_at(parent, asset_server, QUEST_LIST_FINISH_ASSET, layout.share,
-            QuestUiButton::PrepareQuestFinish { quest_index: quest.quest_index }, !waiting);
+        quest_log_image_button_at(
+            parent,
+            asset_server,
+            QUEST_LIST_FINISH_ASSET,
+            layout.share,
+            QuestUiButton::PrepareQuestFinish {
+                quest_index: quest.quest_index,
+            },
+            !waiting,
+        );
     } else {
         quest_log_image_button_at(
             parent,
@@ -5692,7 +6200,10 @@ fn render_quest_log_panel_legacy_v2(
                     let label = format!(
                         "{} {}{}",
                         if selected { "▶" } else { " " },
-                        truncate_chars(&crate::player_text::quest_title(quest.quest_index, &quest.title), 25),
+                        truncate_chars(
+                            &crate::player_text::quest_title(quest.quest_index, &quest.title),
+                            25
+                        ),
                         if tracking { "  •" } else { "" }
                     );
                     let row =
@@ -5765,7 +6276,10 @@ fn render_quest_log_panel_legacy_v2(
                 return;
             };
 
-            detail_title(detail, &crate::player_text::quest_title(quest.quest_index, &quest.title));
+            detail_title(
+                detail,
+                &crate::player_text::quest_title(quest.quest_index, &quest.title),
+            );
             body_line(detail, &format!("Status: {}", quest.status.label()));
             if let Some(npc) = &quest.npc_name {
                 body_line(detail, &format!("Return to: {npc}"));
@@ -5787,7 +6301,10 @@ fn render_quest_log_panel_legacy_v2(
             }
             body_line(
                 detail,
-                &format!("Reward: {}", truncate_chars(&crate::player_text::quest_rewards(quest), 52)),
+                &format!(
+                    "Reward: {}",
+                    truncate_chars(&crate::player_text::quest_rewards(quest), 52)
+                ),
             );
             if quest.rewards.len() > 1 {
                 for (index, reward) in quest.rewards.iter().enumerate().take(3) {
@@ -5915,8 +6432,13 @@ fn quest_log_pretranslated_text_at(
     justify: Justify,
 ) {
     let rendered = if crate::native_i18n::active() && rect.height < font_size * 2.0 {
-        truncate_display_columns(text, (rect.width / (font_size * 0.6)).floor().max(1.0) as usize)
-    } else { text.to_owned() };
+        truncate_display_columns(
+            text,
+            (rect.width / (font_size * 0.6)).floor().max(1.0) as usize,
+        )
+    } else {
+        text.to_owned()
+    };
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -6097,8 +6619,11 @@ fn render_combat_target_panel(
     };
 
     // The same panel can target a player: player-chosen names are opaque.
-    let target_label = if target.is_player { target.name.clone() }
-        else { crate::player_text::name(&target.name) };
+    let target_label = if target.is_player {
+        target.name.clone()
+    } else {
+        crate::player_text::name(&target.name)
+    };
     panel_text_resolved(parent, &target_label, 16.0, PANEL_HIGHLIGHT, Justify::Left);
     if let Some((ratio, label)) = combat_target_health(target) {
         parent
@@ -6215,7 +6740,10 @@ fn quest_target_is_visible(
 }
 
 fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
-    tracker_title_line(parent, &crate::player_text::quest_title(quest.quest_index, &quest.title));
+    tracker_title_line(
+        parent,
+        &crate::player_text::quest_title(quest.quest_index, &quest.title),
+    );
     if quest.status.is_active() && !quest.objectives.is_empty() {
         for objective in quest.objectives.iter().take(1) {
             tracker_body_line(
@@ -6244,7 +6772,10 @@ fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
             if !quest.rewards.is_empty() {
                 tracker_body_line(
                     parent,
-                    &format!("   Reward: {}", truncate_chars(&crate::player_text::quest_rewards(quest), 44)),
+                    &format!(
+                        "   Reward: {}",
+                        truncate_chars(&crate::player_text::quest_rewards(quest), 44)
+                    ),
                 );
             }
         }
@@ -6269,9 +6800,18 @@ fn visible_tracker_quests<'a>(tracker: &'a QuestTracker, state: &QuestUiState) -
 fn render_player_hud_panel(parent: &mut ChildSpawnerCommands, model: &UiReadModel) {
     let name = model.player.name.as_deref().unwrap_or("Adventurer");
     let map = model.player.map_name.as_deref().unwrap_or("Unknown map");
-    panel_text_resolved(parent,
-        &format!("{}  Lv.{} - {}", name, model.player.level, crate::player_text::name(map)),
-        18.0, PANEL_HIGHLIGHT, Justify::Left);
+    panel_text_resolved(
+        parent,
+        &format!(
+            "{}  Lv.{} - {}",
+            name,
+            model.player.level,
+            crate::player_text::name(map)
+        ),
+        18.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
     stat_bar(
         parent,
         &format!("HP  {}", model.player.hp_label()),
@@ -6300,7 +6840,11 @@ fn render_control_hint_panel(
     } else if let Some(npc) = nearby.nearest() {
         highlight_line(
             parent,
-            &format!("Nearby: {} ({} tiles)", crate::player_text::name(&npc.name), npc.distance),
+            &format!(
+                "Nearby: {} ({} tiles)",
+                crate::player_text::name(&npc.name),
+                npc.distance
+            ),
         );
     }
 }
@@ -6372,24 +6916,35 @@ fn truncate_display_columns(text: &str, columns: usize) -> String {
     use unicode_segmentation::UnicodeSegmentation;
     use unicode_width::UnicodeWidthChar;
     let width = |grapheme: &str| {
-        grapheme.chars().map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0)).sum::<usize>()
+        grapheme
+            .chars()
+            .map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0))
+            .sum::<usize>()
     };
-    if text.graphemes(true).map(width).sum::<usize>() <= columns { return text.to_owned(); }
+    if text.graphemes(true).map(width).sum::<usize>() <= columns {
+        return text.to_owned();
+    }
     let budget = columns.saturating_sub(1);
     let mut result = String::new();
     let mut used = 0;
     for grapheme in text.graphemes(true) {
         let next = width(grapheme);
-        if used + next > budget { break; }
+        if used + next > budget {
+            break;
+        }
         result.push_str(grapheme);
         used += next;
     }
-    if columns > 0 { result.push('…'); }
+    if columns > 0 {
+        result.push('…');
+    }
     result
 }
 
 fn truncate_chars(text: &str, max_chars: usize) -> String {
-    if crate::native_i18n::active() { return truncate_display_columns(text, max_chars); }
+    if crate::native_i18n::active() {
+        return truncate_display_columns(text, max_chars);
+    }
     if text.chars().count() <= max_chars {
         return text.to_owned();
     }
@@ -6473,11 +7028,22 @@ fn panel_text(
     color: Color,
     justify: Justify,
 ) {
-    panel_text_resolved(parent, &crate::player_text::text(text), font_size, color, justify);
+    panel_text_resolved(
+        parent,
+        &crate::player_text::text(text),
+        font_size,
+        color,
+        justify,
+    );
 }
 
-fn panel_text_resolved(parent: &mut ChildSpawnerCommands, text: &str,
-    font_size: f32, color: Color, justify: Justify) {
+fn panel_text_resolved(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+) {
     parent.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -6618,17 +7184,40 @@ mod tests {
                         }],
                     };
                     let rows = npc_dialog_rows(&dialog);
-                    assert!(rows.iter().any(|(text, target, _)| text == opaque && target.is_none()));
-                    assert!(rows.iter().any(|(text, target, _)| text == opaque && target.as_deref() == Some("@opaque-target")));
+                    assert!(rows
+                        .iter()
+                        .any(|(text, target, _)| text == opaque && target.is_none()));
+                    assert!(rows.iter().any(|(text, target, _)| text == opaque
+                        && target.as_deref() == Some("@opaque-target")));
                     assert!(rows.len() <= NPC_DIALOG_VISIBLE_ROWS);
                     let mut world = World::new();
                     let mut queue = bevy::ecs::world::CommandQueue::default();
-                    Commands::new(&mut queue, &world).spawn(Node::default()).with_children(|parent| {
-                        render_dialog_panel(parent, &dialog, &NpcDialogNav::default(), &QuestUiState::default(), &PendingOperations::default(), false, None);
-                    });
+                    Commands::new(&mut queue, &world)
+                        .spawn(Node::default())
+                        .with_children(|parent| {
+                            render_dialog_panel(
+                                parent,
+                                &dialog,
+                                &NpcDialogNav::default(),
+                                &QuestUiState::default(),
+                                &PendingOperations::default(),
+                                false,
+                                None,
+                            );
+                        });
                     queue.apply(&mut world);
-                    assert_eq!(world.query::<&Text>().iter(&world).filter(|text| text.0 == opaque).count(), 2);
-                    assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
+                    assert_eq!(
+                        world
+                            .query::<&Text>()
+                            .iter(&world)
+                            .filter(|text| text.0 == opaque)
+                            .count(),
+                        2
+                    );
+                    assert!(world
+                        .query::<&QuestUiButton>()
+                        .iter(&world)
+                        .any(|button| matches!(button,
                         QuestUiButton::SelectNpcDialog { target } if target == "@opaque-target")));
                 }
             });
@@ -6640,8 +7229,14 @@ mod tests {
         use crate::native_i18n::{with_locale, Locale};
         for (locale, expected) in [
             (Locale::English, ["All", "Active", "Ready", "New", "Done"]),
-            (Locale::TraditionalChinese, ["全部", "進行中", "可提交", "新任務", "已完成"]),
-            (Locale::BrazilianPortuguese, ["Todas", "Ativas", "Prontas", "Novas", "Concluídas"]),
+            (
+                Locale::TraditionalChinese,
+                ["全部", "進行中", "可提交", "新任務", "已完成"],
+            ),
+            (
+                Locale::BrazilianPortuguese,
+                ["Todas", "Ativas", "Prontas", "Novas", "Concluídas"],
+            ),
         ] {
             with_locale(locale, || {
                 for (filter, label) in super::QuestStageFilter::ALL.into_iter().zip(expected) {
@@ -6658,11 +7253,20 @@ mod tests {
                 let mut world = World::new();
                 let mut queue = bevy::ecs::world::CommandQueue::default();
                 let target = crate::quest_model::CombatTarget {
-                    object_id: 91, name: "Accept".into(), hp: 10, max_hp: 20, is_player: true,
+                    object_id: 91,
+                    name: "Accept".into(),
+                    hp: 10,
+                    max_hp: 20,
+                    is_player: true,
                 };
-                Commands::new(&mut queue, &world).spawn_empty().with_children(|parent| render_combat_target_panel(parent, Some(&target)));
+                Commands::new(&mut queue, &world)
+                    .spawn_empty()
+                    .with_children(|parent| render_combat_target_panel(parent, Some(&target)));
                 queue.apply(&mut world);
-                assert!(world.query::<&Text>().iter(&world).any(|text| text.0 == "Accept"));
+                assert!(world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .any(|text| text.0 == "Accept"));
             });
         }
     }
@@ -6672,11 +7276,25 @@ mod tests {
         for locale in crate::native_i18n::Locale::ALL {
             crate::native_i18n::with_locale(locale, || {
                 let full = crate::player_text::quest_title(2_120_030, "WRONG");
-                let rows = localized_quest_detail_lines(vec![QuestDetailLine { text: full.clone(), kind: QuestDetailLineKind::Title }]);
-                assert!(!rows.is_empty() && rows.iter().all(|row| row.kind == QuestDetailLineKind::Title));
+                let rows = localized_quest_detail_lines(vec![QuestDetailLine {
+                    text: full.clone(),
+                    kind: QuestDetailLineKind::Title,
+                }]);
+                assert!(
+                    !rows.is_empty()
+                        && rows
+                            .iter()
+                            .all(|row| row.kind == QuestDetailLineKind::Title)
+                );
                 let short = truncate_display_columns(&full, 12);
                 assert!(short.ends_with('…'));
-                assert!(short.chars().map(|c| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0)).sum::<usize>() <= 12);
+                assert!(
+                    short
+                        .chars()
+                        .map(|c| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0))
+                        .sum::<usize>()
+                        <= 12
+                );
                 assert!(!full.contains("WRONG"));
             });
         }
@@ -6686,13 +7304,19 @@ mod tests {
     fn localized_detail_title_uses_only_the_unused_header_strip() {
         for scale in [1.0, 1.25, 1.5] {
             let layout = quest_detail_layout(scale);
-            assert_eq!(quest_detail_rendered_title_rect(layout, false), layout.title);
+            assert_eq!(
+                quest_detail_rendered_title_rect(layout, false),
+                layout.title
+            );
             let title = quest_detail_rendered_title_rect(layout, true);
             assert_eq!(
                 title,
                 QuestLogRect::new(18.0 * scale, 9.0 * scale, 263.0 * scale, 17.0 * scale)
             );
-            assert_eq!(title.left + title.width + 8.0 * scale, layout.top_close.left);
+            assert_eq!(
+                title.left + title.width + 8.0 * scale,
+                layout.top_close.left
+            );
             assert!(title.top + title.height < layout.message.top);
             // The original source geometry remains available unchanged for
             // non-native hosts and the Crystal parity geometry assertions.
@@ -6708,22 +7332,25 @@ mod tests {
                 let expected = crate::player_text::text("任务详情");
                 let mut world = World::new();
                 let mut queue = bevy::ecs::world::CommandQueue::default();
-                Commands::new(&mut queue, &world).spawn(Node::default()).with_children(|parent| {
-                    render_quest_detail_panel(
-                        parent,
-                        &quest(99, QuestStatus::InProgress),
-                        &QuestGuidance::from_profile_name(""),
-                        &QuestUiState::default(),
-                        &PendingOperations::default(),
-                        None,
-                        &crate::read_model::PlayerStats::default(),
-                    );
-                });
+                Commands::new(&mut queue, &world)
+                    .spawn(Node::default())
+                    .with_children(|parent| {
+                        render_quest_detail_panel(
+                            parent,
+                            &quest(99, QuestStatus::InProgress),
+                            &QuestGuidance::from_profile_name(""),
+                            &QuestUiState::default(),
+                            &PendingOperations::default(),
+                            None,
+                            &crate::read_model::PlayerStats::default(),
+                        );
+                    });
                 queue.apply(&mut world);
                 let mut query = world.query::<(&Text, &Node, &TextFont)>();
-                let titles: Vec<_> = query.iter(&world).filter(|(_, node, _)| {
-                    node.left == Val::Px(18.0) && node.top == Val::Px(9.0)
-                }).collect();
+                let titles: Vec<_> = query
+                    .iter(&world)
+                    .filter(|(_, node, _)| node.left == Val::Px(18.0) && node.top == Val::Px(9.0))
+                    .collect();
                 assert_eq!(titles.len(), 1, "{}", locale.code());
                 let (text, node, font) = titles[0];
                 assert_eq!(text.0, expected, "{}", locale.code());
@@ -6739,9 +7366,12 @@ mod tests {
         use unicode_segmentation::UnicodeSegmentation;
         use unicode_width::UnicodeWidthChar;
         let columns = |text: &str| {
-            text.chars().map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0)).sum::<usize>()
+            text.chars()
+                .map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0))
+                .sum::<usize>()
         };
-        for cluster in ["क्षि", "กิ้", "a\u{0301}", "👩\u{200d}💻", "ن\u{0651}"] {
+        for cluster in ["क्षि", "กิ้", "a\u{0301}", "👩\u{200d}💻", "ن\u{0651}"]
+        {
             let text = format!("{cluster}{cluster}XYZ");
             let boundaries: std::collections::HashSet<_> = text
                 .grapheme_indices(true)
@@ -6752,7 +7382,10 @@ mod tests {
                 let shortened = truncate_display_columns(&text, budget);
                 let prefix = shortened.strip_suffix('…').unwrap_or(&shortened);
                 assert!(text.starts_with(prefix));
-                assert!(boundaries.contains(&prefix.len()), "split {cluster:?} at {budget}");
+                assert!(
+                    boundaries.contains(&prefix.len()),
+                    "split {cluster:?} at {budget}"
+                );
                 assert!(columns(&shortened) <= budget);
             }
             assert_eq!(truncate_display_columns(&text, columns(&text)), text);
@@ -6761,59 +7394,149 @@ mod tests {
 
     #[test]
     fn hunt_navigation_ready_status_means_turn_in_not_reward_already_claimed() {
-        assert_eq!(quest_diary_status_label(&quest(2_110_012, QuestStatus::ReadyToTurnIn)), "可交付");
+        assert_eq!(
+            quest_diary_status_label(&quest(2_110_012, QuestStatus::ReadyToTurnIn)),
+            "可交付"
+        );
     }
 
     #[test]
     fn hunt_navigation_click_checks_the_specific_unfinished_kill_and_authoritative_region() {
         let mut hunt = quest(2_110_010, QuestStatus::InProgress);
         hunt.objectives = vec![crate::quest_model::QuestObjective {
-            objective_id: "2110010:0".into(), text: "Defeat 4 Skeleton.".into(), current: 0, target: 4,
+            objective_id: "2110010:0".into(),
+            text: "Defeat 4 Skeleton.".into(),
+            current: 0,
+            target: 4,
         }];
-        let tracker = QuestTracker { active_quests: vec![hunt] };
-        let region = crate::quest_hunt_regions::active_hunt_regions(&tracker, 39,
-            crate::big_map::BigMapPoint { x: 211, y: 320 }).remove(0);
-        let intent = QuestRouteNavigationIntent {
-            target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: region.radius },
-            quest_index: 2_110_010, reset_epoch: 12, map_index: 39, x: 250, y: 260,
+        let tracker = QuestTracker {
+            active_quests: vec![hunt],
         };
-        let big_map = crate::big_map::BigMapModel { current_map_index: Some(39), reset_epoch: 12, ..default() };
+        let region = crate::quest_hunt_regions::active_hunt_regions(
+            &tracker,
+            39,
+            crate::big_map::BigMapPoint { x: 211, y: 320 },
+        )
+        .remove(0);
+        let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::HuntRegion {
+                monster_index: region.monster_index,
+                radius: region.radius,
+            },
+            quest_index: 2_110_010,
+            reset_epoch: 12,
+            map_index: 39,
+            x: 250,
+            y: 260,
+        };
+        let big_map = crate::big_map::BigMapModel {
+            current_map_index: Some(39),
+            reset_epoch: 12,
+            ..default()
+        };
         let state = QuestUiState::default();
-        assert!(quest_route_intent_is_current(intent, &tracker, &state, None, Some(&big_map)));
+        assert!(quest_route_intent_is_current(
+            intent,
+            &tracker,
+            &state,
+            None,
+            Some(&big_map)
+        ));
         for invalid in [
-            QuestRouteNavigationIntent { target: QuestRouteTarget::Entrance, ..intent },
-            QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion { monster_index: -1, radius: 30 }, ..intent },
-            QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: 31 }, ..intent },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::Entrance,
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::HuntRegion {
+                    monster_index: -1,
+                    radius: 30,
+                },
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::HuntRegion {
+                    monster_index: region.monster_index,
+                    radius: 31,
+                },
+                ..intent
+            },
             QuestRouteNavigationIntent { x: 251, ..intent },
-            QuestRouteNavigationIntent { reset_epoch: 13, ..intent },
-            QuestRouteNavigationIntent { map_index: 1, ..intent },
+            QuestRouteNavigationIntent {
+                reset_epoch: 13,
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                map_index: 1,
+                ..intent
+            },
         ] {
-            assert!(!quest_route_intent_is_current(invalid, &tracker, &state, None, Some(&big_map)), "{invalid:?}");
+            assert!(
+                !quest_route_intent_is_current(invalid, &tracker, &state, None, Some(&big_map)),
+                "{invalid:?}"
+            );
         }
         let mut finished = tracker.clone();
         finished.active_quests[0].objectives[0].current = 4;
-        assert!(!quest_route_intent_is_current(intent, &finished, &state, None, Some(&big_map)));
+        assert!(!quest_route_intent_is_current(
+            intent,
+            &finished,
+            &state,
+            None,
+            Some(&big_map)
+        ));
         finished.active_quests[0].objectives.clear();
-        assert!(!quest_route_intent_is_current(intent, &finished, &state, None, Some(&big_map)));
+        assert!(!quest_route_intent_is_current(
+            intent,
+            &finished,
+            &state,
+            None,
+            Some(&big_map)
+        ));
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(tracker);
         app.insert_resource(big_map);
-        app.init_resource::<NpcDialogModel>().init_resource::<NpcDialogNav>()
-            .init_resource::<QuestUiState>().init_resource::<QuestUiIntentQueue>()
-            .init_resource::<QuestRouteNavigationIntentQueue>().init_resource::<PendingOperations>();
-        app.world_mut().spawn((Button, QuestUiButton::NavigateQuestRoute(intent), Interaction::Pressed));
+        app.init_resource::<NpcDialogModel>()
+            .init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<QuestRouteNavigationIntentQueue>()
+            .init_resource::<PendingOperations>();
+        app.world_mut().spawn((
+            Button,
+            QuestUiButton::NavigateQuestRoute(intent),
+            Interaction::Pressed,
+        ));
         app.add_systems(Update, process_quest_ui_input);
         app.update();
-        assert_eq!(app.world().resource::<QuestRouteNavigationIntentQueue>().pending, Some(intent));
-        assert!(app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().message.contains("前往狩猎区域"));
+        assert_eq!(
+            app.world()
+                .resource::<QuestRouteNavigationIntentQueue>()
+                .pending,
+            Some(intent)
+        );
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .feedback
+            .as_ref()
+            .unwrap()
+            .message
+            .contains("前往狩猎区域"));
         // Completion while the pointer still holds the button invalidates the
         // queued walk before release. No command is sent to claim a kill.
         app.world_mut().resource_mut::<QuestTracker>().active_quests[0].objectives[0].current = 4;
         app.update();
-        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app
+            .world()
+            .resource::<QuestRouteNavigationIntentQueue>()
+            .is_empty());
         assert!(app.world().resource::<QuestUiIntentQueue>().is_empty());
     }
 
@@ -6829,15 +7552,22 @@ mod tests {
         };
         let mut queue = QuestRouteNavigationIntentQueue::default();
         assert!(queue.push(intent));
-        assert!(!queue.push(QuestRouteNavigationIntent { x: 151, y: 362, ..intent }));
+        assert!(!queue.push(QuestRouteNavigationIntent {
+            x: 151,
+            y: 362,
+            ..intent
+        }));
         assert_eq!(queue.take(), Some(intent));
         assert!(queue.is_empty());
     }
 
     #[test]
     fn pressed_d401_route_button_enqueues_the_current_oma_entrance() {
-        let d401 = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
-            .find(|map| map.map_file_name == "D401").expect("imported D401 map");
+        let d401 = mir2_game_data::crystal_respawn_manifest_ref()
+            .maps
+            .iter()
+            .find(|map| map.map_file_name == "D401")
+            .expect("imported D401 map");
         assert_eq!(d401.map_index, 47);
         let intent = QuestRouteNavigationIntent {
             target: QuestRouteTarget::Entrance,
@@ -6849,9 +7579,14 @@ mod tests {
         };
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
         app.insert_resource(NativePlayerUiState::default());
-        app.insert_resource(QuestTracker { active_quests: vec![quest(2_110_010, QuestStatus::InProgress)] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![quest(2_110_010, QuestStatus::InProgress)],
+        });
         app.insert_resource(crate::big_map::BigMapModel {
             reset_epoch: 7,
             current_map_index: Some(d401.map_index),
@@ -6871,7 +7606,9 @@ mod tests {
         app.add_systems(Update, process_quest_ui_input);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().take(),
+            app.world_mut()
+                .resource_mut::<QuestRouteNavigationIntentQueue>()
+                .take(),
             Some(intent),
         );
     }
@@ -6888,7 +7625,10 @@ mod tests {
         };
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::Login, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..default()
+        });
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(QuestTracker::default());
         app.init_resource::<NpcDialogModel>()
@@ -6897,10 +7637,16 @@ mod tests {
             .init_resource::<QuestUiIntentQueue>()
             .init_resource::<QuestRouteNavigationIntentQueue>()
             .init_resource::<PendingOperations>();
-        assert!(app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent));
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestRouteNavigationIntentQueue>()
+            .push(intent));
         app.add_systems(Update, process_quest_ui_input);
         app.update();
-        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app
+            .world()
+            .resource::<QuestRouteNavigationIntentQueue>()
+            .is_empty());
     }
 
     #[test]
@@ -6913,22 +7659,42 @@ mod tests {
             x: 147,
             y: 33,
         };
-        let tracker = QuestTracker { active_quests: vec![
-            quest(2_110_010, QuestStatus::InProgress),
-            quest(42, QuestStatus::InProgress),
-        ] };
+        let tracker = QuestTracker {
+            active_quests: vec![
+                quest(2_110_010, QuestStatus::InProgress),
+                quest(42, QuestStatus::InProgress),
+            ],
+        };
         let state = QuestUiState::default();
         let big_map = crate::big_map::BigMapModel {
             reset_epoch: 7,
             current_map_index: Some(1),
             ..default()
         };
-        assert!(quest_route_intent_is_current(intent, &tracker, &state, None, Some(&big_map)));
-        let pinned = QuestUiState { pinned_primary_quest_index: Some(42), ..default() };
-        assert!(!quest_route_intent_is_current(intent, &tracker, &pinned, None, Some(&big_map)));
+        assert!(quest_route_intent_is_current(
+            intent,
+            &tracker,
+            &state,
+            None,
+            Some(&big_map)
+        ));
+        let pinned = QuestUiState {
+            pinned_primary_quest_index: Some(42),
+            ..default()
+        };
+        assert!(!quest_route_intent_is_current(
+            intent,
+            &tracker,
+            &pinned,
+            None,
+            Some(&big_map)
+        ));
         assert!(!quest_route_intent_is_current(
             QuestRouteNavigationIntent { x: 148, ..intent },
-            &tracker, &state, None, Some(&big_map),
+            &tracker,
+            &state,
+            None,
+            Some(&big_map),
         ));
     }
 
@@ -6943,10 +7709,19 @@ mod tests {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins).add_systems(Startup, spawn);
         app.update();
-        let texts: Vec<String> = app.world_mut().query::<&Text>().iter(app.world()).map(|t| t.0.clone()).collect();
+        let texts: Vec<String> = app
+            .world_mut()
+            .query::<&Text>()
+            .iter(app.world())
+            .map(|t| t.0.clone())
+            .collect();
         assert!(texts.iter().any(|t| t.contains("(328,264)")));
         assert!(texts.iter().any(|t| t.contains("新手村安全区不算")));
-        assert!(app.world_mut().query::<&QuestUiButton>().iter(app.world()).any(|b| matches!(b, QuestUiButton::OpenDestinationMap)));
+        assert!(app
+            .world_mut()
+            .query::<&QuestUiButton>()
+            .iter(app.world())
+            .any(|b| matches!(b, QuestUiButton::OpenDestinationMap)));
         for font in app.world_mut().query::<&TextFont>().iter(app.world()) {
             assert_eq!(font.font, FontSource::Family("Microsoft YaHei".into()));
         }
@@ -7234,23 +8009,39 @@ mod tests {
         queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id: 10 });
         assert_eq!(queue.clear_attack_intents(), 2);
         assert_eq!(queue.retry_len(), 1);
-        assert_eq!(queue.drain_intents(), vec![
-            QuestUiIntent::PickUpObject { object_id: 8 },
-            QuestUiIntent::InteractNpc { npc_object_id: 10 },
-        ]);
+        assert_eq!(
+            queue.drain_intents(),
+            vec![
+                QuestUiIntent::PickUpObject { object_id: 8 },
+                QuestUiIntent::InteractNpc { npc_object_id: 10 },
+            ]
+        );
     }
 
     #[test]
     fn mining_directional_cancellation_clears_both_lanes_without_losing_npc_work() {
-        let mining = QuestUiIntent::AttackDirection {direction: "left".into(), mining: true, gesture_id: 1};
+        let mining = QuestUiIntent::AttackDirection {
+            direction: "left".into(),
+            mining: true,
+            gesture_id: 1,
+        };
         let mut queue = QuestUiIntentQueue::default();
-        queue.retain_failed_intents([mining.clone(), QuestUiIntent::InteractNpc {npc_object_id: 10}]);
+        queue.retain_failed_intents([
+            mining.clone(),
+            QuestUiIntent::InteractNpc { npc_object_id: 10 },
+        ]);
         queue.push_intent(mining.clone());
-        queue.push_intent(QuestUiIntent::AttackTarget {object_id: 20});
+        queue.push_intent(QuestUiIntent::AttackTarget { object_id: 20 });
         assert_eq!(queue.clear_directional_attack_intents(), 2);
-        assert_eq!(queue.drain_intents(), vec![QuestUiIntent::InteractNpc {npc_object_id: 10},
-            QuestUiIntent::AttackTarget {object_id: 20}]);
-        queue.retain_failed_intents([mining.clone()]); queue.push_intent(mining);
+        assert_eq!(
+            queue.drain_intents(),
+            vec![
+                QuestUiIntent::InteractNpc { npc_object_id: 10 },
+                QuestUiIntent::AttackTarget { object_id: 20 }
+            ]
+        );
+        queue.retain_failed_intents([mining.clone()]);
+        queue.push_intent(mining);
         queue.push_intent(QuestUiIntent::PickUpTile);
         assert_eq!(queue.clear_attack_intents(), 2);
         assert_eq!(queue.drain_intents(), vec![QuestUiIntent::PickUpTile]);
@@ -8191,8 +8982,12 @@ mod tests {
         app.update();
         assert!(!app.world().resource::<NpcDialogModel>().is_open);
         assert!(!app.world().resource::<NpcDialogNav>().can_return());
-        assert!(app.world().resource::<NativePlayerUiState>().npc_service_exit_requested,
-            "an accepted explicit close must also exit an active NPC service");
+        assert!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .npc_service_exit_requested,
+            "an accepted explicit close must also exit an active NPC service"
+        );
         assert_eq!(
             app.world_mut()
                 .resource_mut::<QuestUiIntentQueue>()
@@ -8209,7 +9004,10 @@ mod tests {
         for target in ["@exit", "@Exit", "@EXIT"] {
             let mut app = App::new();
             app.insert_resource(ButtonInput::<KeyCode>::default())
-                .insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() })
+                .insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..default()
+                })
                 .init_resource::<NativePlayerUiState>()
                 .init_resource::<QuestTracker>()
                 .init_resource::<NpcDialogNav>()
@@ -8222,15 +9020,30 @@ mod tests {
             let mut dialog = dialog_with_option(99, target);
             dialog.npc_name = Some("Alchemist Samuel".into());
             app.insert_resource(dialog);
-            app.world_mut().spawn((Button,
-                QuestUiButton::SelectNpcDialog { target: target.into() }, Interaction::Pressed));
+            app.world_mut().spawn((
+                Button,
+                QuestUiButton::SelectNpcDialog {
+                    target: target.into(),
+                },
+                Interaction::Pressed,
+            ));
             app.add_systems(Update, process_quest_ui_input);
             app.update();
-            assert!(app.world().resource::<NativePlayerUiState>().npc_service_exit_requested);
+            assert!(
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .npc_service_exit_requested
+            );
             assert!(!app.world().resource::<NpcDialogModel>().is_open);
             assert!(!app.world().resource::<NpcDialogNav>().can_return());
-            assert_eq!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
-                vec![QuestUiIntent::SelectNpcDialog { target: target.into() }]);
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents(),
+                vec![QuestUiIntent::SelectNpcDialog {
+                    target: target.into()
+                }]
+            );
         }
     }
 
@@ -9229,15 +10042,23 @@ mod tests {
         let tracker = QuestTracker { active_quests: all };
 
         let main_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Main);
-        assert_eq!(main_rows.iter().map(|quest| quest.quest_index).collect::<Vec<_>>(),
-            vec![2_110_013]);
+        assert_eq!(
+            main_rows
+                .iter()
+                .map(|quest| quest.quest_index)
+                .collect::<Vec<_>>(),
+            vec![2_110_013]
+        );
         let side_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Side);
         assert_eq!(side_rows.len(), 11);
         assert_eq!(side_rows.len().div_ceil(GUIDED_DIARY_PAGE_SIZE), 2);
         assert_eq!(side_rows[0].status, QuestStatus::ReadyToTurnIn);
-        let ready_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Ready);
+        let ready_rows =
+            guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Ready);
         assert_eq!(ready_rows.len(), 2);
-        assert!(ready_rows.iter().all(|quest| quest.status == QuestStatus::ReadyToTurnIn));
+        assert!(ready_rows
+            .iter()
+            .all(|quest| quest.status == QuestStatus::ReadyToTurnIn));
     }
 
     #[test]
@@ -9258,21 +10079,26 @@ mod tests {
             };
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                render_guided_quest_diary_panel(
-                    parent, &tracker, &guidance, None, &state, None,
-                );
+                render_guided_quest_diary_panel(parent, &tracker, &guidance, None, &state, None);
             });
             queue.apply(&mut world);
-            let rows = world.query::<(&QuestDiaryRow, &Node)>().iter(&world)
+            let rows = world
+                .query::<(&QuestDiaryRow, &Node)>()
+                .iter(&world)
                 .collect::<Vec<_>>();
             assert_eq!(rows.len(), expected_rows);
             assert!(rows.iter().all(|(_, node)| match (node.top, node.height) {
                 (Val::Px(top), Val::Px(height)) => top + height <= 408.0,
                 _ => false,
             }));
-            assert_eq!(world.query::<&QuestUiButton>().iter(&world)
-                .filter(|button| matches!(button, QuestUiButton::SelectGuidedDiaryTab(_)))
-                .count(), GuidedDiaryTab::ALL.len());
+            assert_eq!(
+                world
+                    .query::<&QuestUiButton>()
+                    .iter(&world)
+                    .filter(|button| matches!(button, QuestUiButton::SelectGuidedDiaryTab(_)))
+                    .count(),
+                GuidedDiaryTab::ALL.len()
+            );
         }
     }
 
@@ -9309,12 +10135,16 @@ mod tests {
     #[test]
     fn newcomer_detail_wraps_hint_into_scrollable_logical_lines() {
         let guidance = QuestGuidance::from_profile_name("newcomer-v1");
-        let lines = quest_detail_lines(&quest(1, QuestStatus::InProgress), Some(&guidance), "Warrior");
+        let lines = quest_detail_lines(
+            &quest(1, QuestStatus::InProgress),
+            Some(&guidance),
+            "Warrior",
+        );
         assert!(lines.iter().any(|line| line.text == "新手引导"));
-        assert!(lines
-            .iter()
-            .any(|line| line.text == "分类：推荐任务"));
-        let hint_lines = multi_guidance::wrap_card_text(&crate::player_text::text(guidance.entry(1).unwrap().hint.as_str()));
+        assert!(lines.iter().any(|line| line.text == "分类：推荐任务"));
+        let hint_lines = multi_guidance::wrap_card_text(&crate::player_text::text(
+            guidance.entry(1).unwrap().hint.as_str(),
+        ));
         assert!(hint_lines.len() > 1);
         assert!(hint_lines.iter().all(|line| line.chars().count() <= 46));
         assert!(hint_lines

@@ -66,19 +66,19 @@ fn attachment_delete_opens_a_confirm_but_plain_mail_stays_direct_and_locked_mail
         let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
         state.core.panel = mir2_ui_core::state::UiPanel::Mail;
     }
-    app.world_mut()
-        .resource_mut::<MailModel>()
-        .mails
-        .extend([
-            mail(10, 0, None, false),
-            mail(11, 0, Some("Potion"), false),
-            mail(12, 1, None, true),
-        ]);
+    app.world_mut().resource_mut::<MailModel>().mails.extend([
+        mail(10, 0, None, false),
+        mail(11, 0, Some("Potion"), false),
+        mail(12, 1, None, true),
+    ]);
 
     press_button(&mut app, OverlayButton::DeleteMail(11));
     let state = app.world().resource::<NativePlayerUiState>();
     assert_eq!(
-        state.mail_delete_prompt.as_ref().map(|prompt| prompt.mail_id),
+        state
+            .mail_delete_prompt
+            .as_ref()
+            .map(|prompt| prompt.mail_id),
         Some(11),
         "items or gold use MailDialog's source warning"
     );
@@ -90,7 +90,9 @@ fn attachment_delete_opens_a_confirm_but_plain_mail_stays_direct_and_locked_mail
         .drain_intents()
         .is_empty());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_delete_prompt = None;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_delete_prompt = None;
     press_button(&mut app, OverlayButton::DeleteMail(10));
     assert_eq!(
         app.world_mut()
@@ -179,22 +181,31 @@ fn attachment_confirm_rechecks_identity_contents_and_lock_before_queueing() {
         &mut NativePlayerUiIntentQueue::default(),
         &mut PendingOperations::default(),
     ));
-    assert!(state.mail_delete_prompt.is_none(), "a deleted row cannot be retargeted");
+    assert!(
+        state.mail_delete_prompt.is_none(),
+        "a deleted row cannot be retargeted"
+    );
 }
 
 #[test]
 fn yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm() {
     let mut app = delete_test_app();
-    app.world_mut().resource_mut::<MailModel>().mails.extend([
-        mail(20, 0, Some("Potion"), false),
-        mail(21, 0, None, false),
-    ]);
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_delete_prompt =
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .extend([mail(20, 0, Some("Potion"), false), mail(21, 0, None, false)]);
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_delete_prompt =
         mail_delete_prompt_for_message(&app.world().resource::<MailModel>().mails[0]);
 
     let yes = app
         .world_mut()
-        .spawn((Interaction::Pressed, OverlayButton::MailDeleteConfirm, Button))
+        .spawn((
+            Interaction::Pressed,
+            OverlayButton::MailDeleteConfirm,
+            Button,
+        ))
         .id();
     let covered_delete = app
         .world_mut()
@@ -203,10 +214,11 @@ fn yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm()
     app.update();
     app.world_mut().despawn(yes);
     app.world_mut().despawn(covered_delete);
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_delete_input_consumed);
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_delete_input_consumed
+    );
     assert_eq!(
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
@@ -222,15 +234,19 @@ fn yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm()
         state.mail_delete_input_consumed = false;
     }
     press_button(&mut app, OverlayButton::MailDeleteConfirm);
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_delete_prompt
-        .is_none(), "a new explicit confirmation may retry after a silent rejection");
-    assert_eq!(app
-        .world_mut()
-        .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents(), vec![NativePlayerUiIntent::DeleteMail { mail_id: 20 }]);
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_delete_prompt
+            .is_none(),
+        "a new explicit confirmation may retry after a silent rejection"
+    );
+    assert_eq!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents(),
+        vec![NativePlayerUiIntent::DeleteMail { mail_id: 20 }]
+    );
 
     let mut keyboard_app = delete_test_app();
     keyboard_app
@@ -241,9 +257,8 @@ fn yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm()
     keyboard_app
         .world_mut()
         .resource_mut::<NativePlayerUiState>()
-        .mail_delete_prompt = mail_delete_prompt_for_message(
-        &keyboard_app.world().resource::<MailModel>().mails[0],
-    );
+        .mail_delete_prompt =
+        mail_delete_prompt_for_message(&keyboard_app.world().resource::<MailModel>().mails[0]);
     let covered_delete = keyboard_app
         .world_mut()
         .spawn((Interaction::Pressed, OverlayButton::DeleteMail(31), Button))
@@ -267,8 +282,13 @@ fn yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm()
 #[test]
 fn no_escape_close_and_session_reset_clear_the_prompt_without_sending() {
     let mut app = delete_test_app();
-    app.world_mut().resource_mut::<MailModel>().mails.push(mail(40, 0, Some("Potion"), false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_delete_prompt =
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(mail(40, 0, Some("Potion"), false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_delete_prompt =
         mail_delete_prompt_for_message(&app.world().resource::<MailModel>().mails[0]);
     press_button(&mut app, OverlayButton::MailDeleteCancel);
     assert!(app
@@ -282,7 +302,9 @@ fn no_escape_close_and_session_reset_clear_the_prompt_without_sending() {
         .drain_intents()
         .is_empty());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_delete_prompt =
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_delete_prompt =
         mail_delete_prompt_for_message(&app.world().resource::<MailModel>().mails[0]);
     app.world_mut()
         .resource_mut::<ButtonInput<KeyCode>>()
@@ -319,13 +341,13 @@ fn no_escape_close_and_session_reset_clear_the_prompt_without_sending() {
 #[test]
 fn rendered_warning_uses_a_modal_source_frame_and_blocks_pointer_input() {
     let mut app = super::tests::overlay_render_test_app();
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_delete_prompt = Some(
-        MailDeletePrompt {
-            mail_id: 50,
-            gold: 1,
-            items: vec![],
-        },
-    );
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_delete_prompt = Some(MailDeletePrompt {
+        mail_id: 50,
+        gold: 1,
+        items: vec![],
+    });
     app.update();
     let world = app.world_mut();
     let (node, focus) = world
@@ -340,7 +362,10 @@ fn rendered_warning_uses_a_modal_source_frame_and_blocks_pointer_input() {
 
 #[test]
 fn unacknowledged_mail_status_commands_deduplicate_only_until_queue_drain() {
-    for intent in [NativePlayerUiIntent::ReadMail { mail_id: 70 }, NativePlayerUiIntent::DeleteMail { mail_id: 70 }] {
+    for intent in [
+        NativePlayerUiIntent::ReadMail { mail_id: 70 },
+        NativePlayerUiIntent::DeleteMail { mail_id: 70 },
+    ] {
         let mut queue = NativePlayerUiIntentQueue::default();
         let mut pending = PendingOperations::default();
         assert!(intent.pending_key().is_none());
@@ -359,8 +384,14 @@ fn unacknowledged_mail_status_commands_deduplicate_only_until_queue_drain() {
 #[test]
 fn mail_status_retry_preserves_authority_and_claim_pending_protection() {
     let mut app = delete_test_app();
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::Mail;
-    app.world_mut().resource_mut::<MailModel>().mails.push(mail(70, 0, None, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Mail;
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(mail(70, 0, None, false));
     let before = app.world().resource::<MailModel>().mails.clone();
     for button in [OverlayButton::ReadMail(70), OverlayButton::DeleteMail(70)] {
         for _ in 0..2 {
@@ -371,7 +402,13 @@ fn mail_status_retry_preserves_authority_and_claim_pending_protection() {
             state.mail_reader_input_consumed = false;
             drop(state);
             press_button(&mut app, button);
-            assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().len(), 1);
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents()
+                    .len(),
+                1
+            );
         }
         assert_eq!(app.world().resource::<MailModel>().mails, before);
     }

@@ -58,6 +58,9 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-simulation --features test-support --test shared_pet_pvp --test shared_original_party_experience --test shared_guild_normal_kill --test shared_crowded_escape --test market_refine_custody --test refine_oven_custody -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --test shared_guild_management --test shared_guild_rank_management --test shared_guild_rank_terminal --test shared_guild_wars -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib owner_packet_normalization_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib live_owner_wire_ids_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib shared_player_kill_source_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --test shared_pet_source_transport --test shared_mentor_source_transport -- --test-threads=1
           node --test tools/generate-crystal-default-npc-scripts.test.mjs
 
       - name: Package Gateway

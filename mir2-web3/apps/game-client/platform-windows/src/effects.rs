@@ -3717,7 +3717,11 @@ impl NativeEffects {
         }) {
             return;
         }
-        self.queue_immediate_sound(provenance, MINE_HIT_WALL_SOUND_CUE, MINE_HIT_WALL_SOUND_FILE);
+        self.queue_immediate_sound(
+            provenance,
+            MINE_HIT_WALL_SOUND_CUE,
+            MINE_HIT_WALL_SOUND_FILE,
+        );
     }
 
     fn apply_object_spell(

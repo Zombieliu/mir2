@@ -1,0 +1,169 @@
+{
+  "schema": "mir2.classic.focused-evidence.v1",
+  "fullAccepted": false,
+  "pressureCohortAccepted": false,
+  "sourceCommit": "c9fdd117f9669ea208c44a38206020db4f3497e3",
+  "note": "Subsequent fixture, formatting, test-schedule and refine-wrap corrections are identified in the delivery record.",
+  "files": [
+    {
+      "file": "46-normal-tcp-web-party-both-death-and-xp.log",
+      "sha256": "5ea9c1dc5fb50b45dcb16df1d851750b4fc7e30c50f173ec7311f3c73f9b3c38",
+      "bytes": 34432
+    },
+    {
+      "file": "52-real-safe-potion-npc-delayed-selection.log",
+      "sha256": "b20aea8791f3acf98fe18bbf6df1b0eb17892c4dd5941dd237833e6d1b273a6c",
+      "bytes": 39945
+    },
+    {
+      "file": "53-can-gain-source-math-and-legacy-bytes.log",
+      "sha256": "1489691db91b7db2470f0bf3f79f1e0dcc7c33e8ab8a39649075723a00396671",
+      "bytes": 39418
+    },
+    {
+      "file": "54-can-gain-native-party-guild.log",
+      "sha256": "aeba95c771c2b50ed24df9fa9a309a8557971d3721fb67755239d3bb91c6235f",
+      "bytes": 33267
+    },
+    {
+      "file": "69-player-pet-source-collection-boundary.log",
+      "sha256": "e69cec2f11b653a51557cbc31d44a6f4f6ca30dd9677ef129ace4d1d676b9700",
+      "bytes": 32257
+    },
+    {
+      "file": "70-pet-source-normal-conservation-observer-alias.log",
+      "sha256": "2cefbb07c19614317963e7fca111e52aeab854b5cffeb17a3fcd834318beb91b",
+      "bytes": 34077
+    },
+    {
+      "file": "74-mentor-source-normal-fresh-login-after-logout.log",
+      "sha256": "be228cddec717fc3d93ade1c042905eab4f46ba23c2c5cc216c7c3c76bd232b8",
+      "bytes": 34079
+    },
+    {
+      "file": "classic-current-cold-network-03.log",
+      "sha256": "96262f3712a2583491ee5185a07a80431ef9f61515d457dd05429fe963e185fc",
+      "bytes": 33270
+    },
+    {
+      "file": "classic-current-default_npc_events_tests-01.log",
+      "sha256": "0d79e1439999d7524a0ece435a309963ba42bafc97e5b722ca3c599918b33435",
+      "bytes": 40983
+    },
+    {
+      "file": "classic-current-guild-management-01.log",
+      "sha256": "afc58851dc458451292ff75c6d1bd91b91c8be977d8b12d91d597ecf8de9db78",
+      "bytes": 37942
+    },
+    {
+      "file": "classic-current-mentor_reward_tests-01.log",
+      "sha256": "212baf840640f11a6d59d9f103281ec54abba96c9bf146eb46dfe5fc4f0d3364",
+      "bytes": 39549
+    },
+    {
+      "file": "classic-current-owner-wire-01.log",
+      "sha256": "b98f711e4fd68a7ca118318b0d95451eb4eab4e14c037658805949f6cd6f0221",
+      "bytes": 37791
+    },
+    {
+      "file": "classic-current-refine_durable_tests-01.log",
+      "sha256": "395502246abd1de5d5a4d8af33f700b675a693e7174680cb3964f4b489446e23",
+      "bytes": 39356
+    },
+    {
+      "file": "classic-current-shared_player_kill_tests-01.log",
+      "sha256": "543cde781cb918bc7f494013e8a4e56ced30db26c4e999884c7fa6e16eb5f2dd",
+      "bytes": 38501
+    },
+    {
+      "file": "cold-network-03/Taoist/report.json",
+      "sha256": "f362a376981c6d180943786474d8f740b47aaef978882c76b11ca94db218d62e",
+      "bytes": 171664
+    },
+    {
+      "file": "cold-network-03/Taoist/trace.jsonl",
+      "sha256": "7b0ab5483986361b19f5ffea127bb63e7ffdb85037ba04679dacf2db3e8e075c",
+      "bytes": 4210519
+    },
+    {
+      "file": "cold-network-03/Warrior/report.json",
+      "sha256": "51b7b2d5ae877c42a569b57b053f5785e24fe00d777772a6c15ec2677dc193dd",
+      "bytes": 347647
+    },
+    {
+      "file": "cold-network-03/Warrior/trace.jsonl",
+      "sha256": "8b65f8dac0627e6ca1e9d2fbd6cb161b90a4bfa4eda40901d0733064fc70aa3c",
+      "bytes": 7841868
+    },
+    {
+      "file": "cold-network-03/Wizard/report.json",
+      "sha256": "72dcebbb6b1d2a081cfa0b4730e76ebc31f23071013bcec018d0eee71608567f",
+      "bytes": 184227
+    },
+    {
+      "file": "cold-network-03/Wizard/trace.jsonl",
+      "sha256": "474506c33bd6c36e282059da96e5da85400cc130b3780516ccae469d983458ae",
+      "bytes": 4281818
+    },
+    {
+      "file": "input-full-regression-02.log",
+      "sha256": "ab3d8052d863de212275b371381fdf090ecc7323dd2c5ad99a1ca2dffcb1d10a",
+      "bytes": 62581
+    },
+    {
+      "file": "p2-late-doorway-story-20261008-03.log",
+      "sha256": "0c3327106eb33c68024558307069db4ca5809d513d59f9349c1d0be93f0d3559",
+      "bytes": 32453
+    },
+    {
+      "file": "p2-late-gates-adjacent-20261008-01.log",
+      "sha256": "3ec622d51bf0d73baa5d29566b6e540259dc23c043f3e9ce55ee8803db00332c",
+      "bytes": 31905
+    },
+    {
+      "file": "p4-owned-pet-86-owned-custom-mode-handoff.log",
+      "sha256": "0cd9a451d2f37f2d1381db67ecf9f1f0967ac7cf8582512962500b4786418cbf",
+      "bytes": 119084
+    },
+    {
+      "file": "p4-owned-pet-90-p6-market-oven-escape.log",
+      "sha256": "41556004a0431ae59b58590764349e1d6b8ad53de336fd73f68f7a72035bba59",
+      "bytes": 34135
+    },
+    {
+      "file": "p4-owned-pet-91-gateway-live-owner-wire.log",
+      "sha256": "6fad4e1d026f331f4cde3e5742f4bce0229c58969cc03f346a0e22a6f4f48ee2",
+      "bytes": 39086
+    },
+    {
+      "file": "p4-owned-pet-92-conquest-palace-red.log",
+      "sha256": "42b9664085ba04a50ad2b0bd6adb7aee21020d8e75866c5cba79a08f3781158d",
+      "bytes": 39139
+    },
+    {
+      "file": "p4-owned-pet-94-conquest-ci-flags-green.log",
+      "sha256": "25a94e0853c5420b4361440a2a9d38e1814f8076017a40c89a690c9d7e1bb057",
+      "bytes": 49890
+    },
+    {
+      "file": "p6-refine-native-20261008-03.log",
+      "sha256": "8b20cba5ce71e618691ffef674a853f21c021f2804cab026f6b5b721e4ec201e",
+      "bytes": 29638
+    },
+    {
+      "file": "p6-refine-wrap-20261008-01.log",
+      "sha256": "e40eb3beb8ba89eb1de9367d2ca5a14b64eb133b4134e8cfea5cd308371c5318",
+      "bytes": 38658
+    },
+    {
+      "file": "p6-refine-wrap-durable-20261008-01.log",
+      "sha256": "823f70af40022080233975303c610b16d373eeb9f1b72d2c5a5dac11f4fb6b84",
+      "bytes": 39353
+    },
+    {
+      "file": "p6-refine-wrap-oven-20261008-01.log",
+      "sha256": "c25557db4df8ca9efaf919a53e000add55835bef540ef85ed838d451ee5bbbb0",
+      "bytes": 31675
+    }
+  ]
+}

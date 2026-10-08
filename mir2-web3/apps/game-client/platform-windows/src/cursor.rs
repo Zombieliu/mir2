@@ -108,14 +108,23 @@ pub(crate) fn sync_native_crystal_cursor(
         && !is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
         && window.cursor_position().is_some_and(|cursor| {
             let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-                window.resolution.width(), window.resolution.height(),
+                window.resolution.width(),
+                window.resolution.height(),
             );
-            if !transform.contains_physical_point(cursor.x, cursor.y) { return false; }
+            if !transform.contains_physical_point(cursor.x, cursor.y) {
+                return false;
+            }
             let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-            player_ui.as_deref().is_none_or(|ui| !ui.blocks_world_pointer_at(x, y))
-                && quest.as_deref().is_none_or(|quest| !quest.captures_world_pointer_at(
-                    x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
-                ))
+            player_ui
+                .as_deref()
+                .is_none_or(|ui| !ui.blocks_world_pointer_at(x, y))
+                && quest.as_deref().is_none_or(|quest| {
+                    !quest.captures_world_pointer_at(
+                        x,
+                        y,
+                        player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                    )
+                })
         });
 
     let hovered_kind = world_cursor_enabled

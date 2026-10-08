@@ -826,7 +826,10 @@ pub(super) fn rank_name_available(
     guild: &crate::social::GuildModel,
 ) -> bool {
     state.selected_guild_rank.is_some_and(|index| {
-        guild.ranks.iter().any(|rank| rank.index == i32::from(index))
+        guild
+            .ranks
+            .iter()
+            .any(|rank| rank.index == i32::from(index))
             && guild.my_rank_id >= 0
             && i32::from(index) >= guild.my_rank_id
     }) && social_has_permission(guild, "changeRank")
@@ -840,23 +843,31 @@ pub(super) fn reconcile_rank_rename_editor(
     social: &mut crate::social::SocialModel,
 ) {
     if let Some(request) = state.guild_panel.rank_name_submission.clone() {
-        let pending = social.pending.contains(
-            &crate::social::SocialPendingOperation::GuildRankRename(request.clone()),
-        );
+        let pending =
+            social
+                .pending
+                .contains(&crate::social::SocialPendingOperation::GuildRankRename(
+                    request.clone(),
+                ));
         let current_scope = social.guild.rank_rename_scope_matches(&request);
         // In the ordinary path only exact status-7 reconciliation can retire
         // this key before its deadline. Scope/reset and local send failure are
         // handled separately; this releases an editor, never grants success.
         if !current_scope || !pending || state.guild_panel.now_ms > request.deadline_ms {
-            let expired = current_scope && pending && state.guild_panel.now_ms > request.deadline_ms;
+            let expired =
+                current_scope && pending && state.guild_panel.now_ms > request.deadline_ms;
             state.guild_panel.rank_name_submission = None;
             state.guild_panel.rank_name_ready_ms = 0;
             state.guild_panel.rank_name_unconfirmed = expired;
-            if current_scope && !pending
+            if current_scope
+                && !pending
                 && state.selected_guild_rank == Some(request.rank_index)
                 && state.guild_rank_name_draft == request.rank_name
             {
-                if let Some(rank) = social.guild.ranks.iter()
+                if let Some(rank) = social
+                    .guild
+                    .ranks
+                    .iter()
                     .find(|rank| rank.index == i32::from(request.rank_index))
                 {
                     state.guild_rank_name_draft = rank.name.clone();
@@ -884,7 +895,10 @@ pub(super) fn save_rank_name(
         return;
     };
     let Some(request) = social.guild_rank_rename_request(
-        &state.guild_panel.owner_name, rank_index, &name, deadline_ms,
+        &state.guild_panel.owner_name,
+        rank_index,
+        &name,
+        deadline_ms,
     ) else {
         return;
     };

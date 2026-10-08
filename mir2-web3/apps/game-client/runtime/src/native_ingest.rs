@@ -1051,7 +1051,9 @@ mod tests {
         for index in 0..MAX_NATIVE_MESSAGES {
             assert!(push_native_social_model(index.to_string()));
         }
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":125}"#.to_owned()
+        ));
 
         let mut costs = Vec::new();
         inbound.drain_matching(
@@ -1069,12 +1071,18 @@ mod tests {
     fn queued_mail_cost_survives_full_fifo_game_shop_receipt_and_keeps_its_position() {
         let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
-        assert!(!push_native_mail_service(r#"{"kind":"cost","cost":250}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":125}"#.to_owned()
+        ));
+        assert!(!push_native_mail_service(
+            r#"{"kind":"cost","cost":250}"#.to_owned()
+        ));
         for index in 0..MAX_NATIVE_MESSAGES - 1 {
             assert!(push_native_social_model(index.to_string()));
         }
-        assert!(push_native_game_shop_receipt(valid_receipt("gs-queued-cost")));
+        assert!(push_native_game_shop_receipt(valid_receipt(
+            "gs-queued-cost"
+        )));
 
         let mut costs = Vec::new();
         inbound.drain_matching(
@@ -1102,11 +1110,15 @@ mod tests {
     fn queued_mail_cost_survives_full_fifo_operation_ack() {
         let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":125}"#.to_owned()
+        ));
         for index in 0..MAX_NATIVE_MESSAGES - 1 {
             assert!(push_native_social_model(index.to_string()));
         }
-        assert!(push_native_inventory_operation_ack(r#"{"kind":"item","id":7}"#.to_owned()));
+        assert!(push_native_inventory_operation_ack(
+            r#"{"kind":"item","id":7}"#.to_owned()
+        ));
 
         let mut costs = Vec::new();
         inbound.drain_matching(
@@ -1136,7 +1148,11 @@ mod tests {
             r#"{"kind":"cost","cost":125}"#.to_owned(),
         )));
         assert_eq!(buffer.mail_cost_reserve, Some(125));
-        assert!(buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt("gs-mail"))));
+        assert!(
+            buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt(
+                "gs-mail"
+            )))
+        );
         assert!(buffer
             .game_shop_receipt
             .as_deref()
@@ -1151,7 +1167,9 @@ mod tests {
         for index in 0..MAX_NATIVE_MESSAGES {
             assert!(push_native_social_model(format!("old-{index}")));
         }
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":1}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":1}"#.to_owned()
+        ));
         assert!(push_native_data_reset());
 
         // The barrier itself occupies one normal slot. Refill the new session
@@ -1160,7 +1178,9 @@ mod tests {
         for index in 0..MAX_NATIVE_MESSAGES - 1 {
             assert!(push_native_social_model(format!("new-{index}")));
         }
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":2}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":2}"#.to_owned()
+        ));
         inbound.discard_stale_data_before_latest_reset();
 
         let mut resets = 0;

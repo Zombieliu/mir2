@@ -442,11 +442,7 @@ pub fn apply_inventory_operation_ack(
                 unique_id: pending_id,
                 to: pending_to,
             },
-        ) => {
-            grid.eq_ignore_ascii_case(pending_grid)
-                && unique_id == pending_id
-                && to == pending_to
-        }
+        ) => grid.eq_ignore_ascii_case(pending_grid) && unique_id == pending_id && to == pending_to,
         (
             InventoryOperationAck::Remove {
                 grid,
@@ -459,11 +455,7 @@ pub fn apply_inventory_operation_ack(
                 unique_id: pending_id,
                 to: pending_to,
             },
-        ) => {
-            grid.eq_ignore_ascii_case(pending_grid)
-                && unique_id == pending_id
-                && to == pending_to
-        }
+        ) => grid.eq_ignore_ascii_case(pending_grid) && unique_id == pending_id && to == pending_to,
         _ => false,
     });
     feedback.last = Some(ack);
@@ -820,20 +812,20 @@ fn storage_transfer_slot_conflicts(
 /// the two live item identities. This keeps independent warehouse gestures
 /// concurrent while preventing a second release from retargeting an item that
 /// is still awaiting an authoritative result.
-fn storage_drag_conflicts(
-    pending: &PendingOperationKey,
-    candidate: &PendingOperationKey,
-) -> bool {
+fn storage_drag_conflicts(pending: &PendingOperationKey, candidate: &PendingOperationKey) -> bool {
     let pending_cells = storage_drag_cells(pending);
     let candidate_cells = storage_drag_cells(candidate);
-    let cells_conflict = pending_cells.iter().flatten().any(|(pending_grid, pending_slot)| {
-        candidate_cells
-            .iter()
-            .flatten()
-            .any(|(candidate_grid, candidate_slot)| {
-                pending_grid == candidate_grid && pending_slot == candidate_slot
-            })
-    });
+    let cells_conflict = pending_cells
+        .iter()
+        .flatten()
+        .any(|(pending_grid, pending_slot)| {
+            candidate_cells
+                .iter()
+                .flatten()
+                .any(|(candidate_grid, candidate_slot)| {
+                    pending_grid == candidate_grid && pending_slot == candidate_slot
+                })
+        });
     cells_conflict || storage_drag_item_conflicts(pending, candidate)
 }
 
@@ -872,9 +864,7 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
         }
         PendingOperationKey::Move {
             grid, unique_id, ..
-        } if matches!(grid.as_str(), "inventory" | "storage") => {
-            [Some((grid, *unique_id)), None]
-        }
+        } if matches!(grid.as_str(), "inventory" | "storage") => [Some((grid, *unique_id)), None],
         PendingOperationKey::Equip {
             grid, unique_id, ..
         } if grid == "storage" => [Some(("storage", *unique_id)), None],
@@ -888,9 +878,7 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
         | PendingOperationKey::Repair(unique_id)
         | PendingOperationKey::SpecialRepair(unique_id)
         | PendingOperationKey::DeleteItem { unique_id, .. }
-        | PendingOperationKey::Drop { unique_id, .. } => {
-            [Some(("inventory", *unique_id)), None]
-        }
+        | PendingOperationKey::Drop { unique_id, .. } => [Some(("inventory", *unique_id)), None],
         PendingOperationKey::Merge {
             grid_from,
             grid_to,
@@ -904,7 +892,10 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
                 | ("storage", "storage")
                 | ("equipment", "storage")
                 | ("storage", "equipment")
-        ) => [Some((grid_from, *id_from)), Some((grid_to, *id_to))],
+        ) =>
+        {
+            [Some((grid_from, *id_from)), Some((grid_to, *id_to))]
+        }
         _ => [None, None],
     }
 }
@@ -917,12 +908,11 @@ fn storage_drag_item_conflicts(
         .iter()
         .flatten()
         .any(|(pending_grid, pending_id)| {
-            storage_drag_item_endpoints(candidate)
-                .iter()
-                .flatten()
-                .any(|(candidate_grid, candidate_id)| {
+            storage_drag_item_endpoints(candidate).iter().flatten().any(
+                |(candidate_grid, candidate_id)| {
                     pending_grid == candidate_grid && pending_id == candidate_id
-                })
+                },
+            )
         })
 }
 
@@ -1278,7 +1268,8 @@ pub fn reconcile_storage_refresh(
         PendingOperationKey::StorageSetPassword => !old.has_password && new.has_password,
         PendingOperationKey::StorageRemovePassword => old.has_password && !new.has_password,
         PendingOperationKey::StorageExpand => {
-            (!old.has_expanded && new.has_expanded) || new.size > old.size
+            (!old.has_expanded && new.has_expanded)
+                || new.size > old.size
                 || (new.has_expanded
                     && ((new.expiry as u64) & 0x3fff_ffff_ffff_ffff)
                         > ((old.expiry as u64) & 0x3fff_ffff_ffff_ffff))
@@ -2528,15 +2519,27 @@ mod tests {
         let key = PendingOperationKey::StorageExpand;
         assert!(pending.try_begin(key.clone()));
         let inventory = crate::inventory::InventoryModel::default();
-        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &old), 0);
+        assert_eq!(
+            reconcile_storage_refresh(&mut pending, &inventory, &old, &old),
+            0
+        );
         let mut new = old.clone();
         new.expiry = 999;
-        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        assert_eq!(
+            reconcile_storage_refresh(&mut pending, &inventory, &old, &new),
+            0
+        );
         // DateTime kind bits are not elapsed time or renewal evidence.
         new.expiry = ((1u64 << 63) | 1000) as i64;
-        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        assert_eq!(
+            reconcile_storage_refresh(&mut pending, &inventory, &old, &new),
+            0
+        );
         new.expiry = ((1u64 << 63) | 1001) as i64;
-        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 1);
+        assert_eq!(
+            reconcile_storage_refresh(&mut pending, &inventory, &old, &new),
+            1
+        );
         assert!(!pending.contains(&key));
     }
 
@@ -2595,7 +2598,10 @@ mod tests {
         );
         assert!(!pending.contains(&equip));
         assert!(pending.contains(&other_slot));
-        assert_eq!(feedback.last.as_ref().map(InventoryOperationAck::label), Some("Equip"));
+        assert_eq!(
+            feedback.last.as_ref().map(InventoryOperationAck::label),
+            Some("Equip")
+        );
     }
 
     #[test]

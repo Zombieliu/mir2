@@ -361,12 +361,10 @@ mod tests {
             LOGIN_ELEMENT_SPECS[1].rect,
             CrystalRect::new(348.0, 274.0, 328.0, 220.0)
         );
-        assert!(
-            LOGIN_ELEMENT_SPECS
-                .iter()
-                .any(|element| element.kind == LoginElementKind::CancelButton
-                    && element.rect == spec::login::CANCEL.rect)
-        );
+        assert!(LOGIN_ELEMENT_SPECS
+            .iter()
+            .any(|element| element.kind == LoginElementKind::CancelButton
+                && element.rect == spec::login::CANCEL.rect));
     }
 
     #[test]

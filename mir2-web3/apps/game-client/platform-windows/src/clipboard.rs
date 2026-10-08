@@ -753,18 +753,29 @@ mod tests {
         };
         assert!(mail_paste_is_current(&target, Some(&target)));
         for stale in [
-            MailTextTarget { recipient: "Other".into(), ..target.clone() },
+            MailTextTarget {
+                recipient: "Other".into(),
+                ..target.clone()
+            },
             MailTextTarget {
                 kind: mir2_client_bevy::crystal_ui::overlays::MailComposeKind::Parcel,
                 ..target.clone()
             },
-            MailTextTarget { draft_epoch: 8, ..target.clone() },
-            MailTextTarget { editor_revision: 12, ..target.clone() },
-            MailTextTarget { session_revision: 4, ..target.clone() },
+            MailTextTarget {
+                draft_epoch: 8,
+                ..target.clone()
+            },
+            MailTextTarget {
+                editor_revision: 12,
+                ..target.clone()
+            },
+            MailTextTarget {
+                session_revision: 4,
+                ..target.clone()
+            },
         ] {
             assert!(!mail_paste_is_current(&target, Some(&stale)));
         }
         assert!(!mail_paste_is_current(&target, None));
     }
-
 }

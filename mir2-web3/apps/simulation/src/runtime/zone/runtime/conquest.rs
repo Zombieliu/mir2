@@ -1792,6 +1792,16 @@ mod tests {
     fn palace_pk_exemption_requires_real_actors_and_active_deadline() {
         let mut palace =
             ZoneRuntime::new_with_collision(ZoneKey::for_map("0150"), ZoneCollision::unbounded());
+        // Isolate the siege WarZone clock with explicit non-Fight metadata.
+        // Actual Crystal 0150 is Fight: AtWar exempts it independently of the
+        // battle deadline (PlayerObject.cs:10365), covered separately below.
+        let map = palace
+            .npc_teleport_config
+            .maps
+            .get_mut("0150")
+            .expect("canonical palace map metadata");
+        assert!(map.fight, "original palace is a Fight map");
+        map.fight = false;
         let attacker = join(
             &mut palace,
             "attacker",
@@ -1806,7 +1816,22 @@ mod tests {
             Point { x: 20, y: 23 },
             Some(THIRD),
         );
-        apply(&mut palace, &record(true), &[attacker.clone(), victim]);
+        apply(
+            &mut palace,
+            &record(true),
+            &[attacker.clone(), victim.clone()],
+        );
+        let deadline = palace.conquest.as_ref().unwrap().war_deadline_zone_ms;
+        assert_eq!(deadline, ZONE_NOW + 100_000);
+        let target = &palace.players[&victim.session_id];
+        assert!(palace.conquest_player_is_in_war_region(target, deadline - 1));
+        assert!(!palace.conquest_player_is_in_war_region(target, deadline));
+        assert!(palace.conquest_player_kill_is_lawful(
+            &attacker.session_id,
+            100,
+            101,
+            deadline - 1,
+        ));
         assert!(palace.conquest_player_kill_is_lawful(&attacker.session_id, 100, 101, ZONE_NOW));
         assert!(!palace.conquest_player_kill_is_lawful(&attacker.session_id, 999, 101, ZONE_NOW));
         assert!(!palace.conquest_player_kill_is_lawful(&attacker.session_id, 100, 999, ZONE_NOW));
@@ -1837,6 +1862,79 @@ mod tests {
             101,
             ZONE_NOW + 100_000
         ));
+    }
+
+    #[test]
+    fn canonical_fight_palace_pk_exemption_survives_siege_cutoff_but_requires_real_actors() {
+        let mut palace =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0150"), ZoneCollision::unbounded());
+        assert!(palace.npc_teleport_config.map("0150").unwrap().fight);
+        let attacker = join(
+            &mut palace,
+            "attacker",
+            100,
+            Point { x: 1, y: 1 },
+            Some(ATTACKER),
+        );
+        let victim = join(
+            &mut palace,
+            "third",
+            101,
+            Point { x: 20, y: 23 },
+            Some(THIRD),
+        );
+        apply(
+            &mut palace,
+            &record(true),
+            &[attacker.clone(), victim.clone()],
+        );
+        let deadline = palace.conquest.as_ref().unwrap().war_deadline_zone_ms;
+        let target = &palace.players[&victim.session_id];
+        assert!(palace.conquest_player_is_in_war_region(target, deadline - 1));
+        assert!(!palace.conquest_player_is_in_war_region(target, deadline));
+        assert!(palace.conquest_player_kill_is_lawful(&attacker.session_id, 100, 101, deadline));
+
+        // Fight is trusted map policy even without any siege projection. It
+        // must never turn absent, stale, or self actor IDs into valid killers.
+        palace.conquest = None;
+        for mode in 0..=5 {
+            palace
+                .players
+                .get_mut(&attacker.session_id)
+                .unwrap()
+                .chat_profile
+                .attack_mode = mode;
+            assert!(palace.conquest_player_kill_is_lawful(
+                &attacker.session_id,
+                100,
+                101,
+                deadline
+            ));
+            assert!(!palace.conquest_player_kill_is_lawful(
+                &attacker.session_id,
+                999,
+                101,
+                deadline
+            ));
+            assert!(!palace.conquest_player_kill_is_lawful(
+                &attacker.session_id,
+                100,
+                999,
+                deadline
+            ));
+            assert!(!palace.conquest_player_kill_is_lawful(
+                &attacker.session_id,
+                100,
+                100,
+                deadline
+            ));
+            assert!(!palace.conquest_player_kill_is_lawful(
+                &SessionId::new("stale"),
+                100,
+                101,
+                deadline,
+            ));
+        }
     }
 
     #[test]

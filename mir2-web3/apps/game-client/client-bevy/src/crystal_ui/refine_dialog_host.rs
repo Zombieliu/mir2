@@ -402,12 +402,11 @@ mod tests {
         button(&mut app, window, ButtonState::Released);
         app.update();
         assert!(drain(&mut app).is_empty());
-        assert!(
-            !app.world()
-                .resource::<NativePlayerUiState>()
-                .refine
-                .pending()
-        );
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .refine
+            .pending());
     }
 
     #[test]
@@ -434,12 +433,11 @@ mod tests {
         button(&mut app, window, ButtonState::Pressed);
         app.update();
         assert!(drain(&mut app).is_empty());
-        assert!(
-            !app.world()
-                .resource::<NativePlayerUiState>()
-                .refine
-                .pending()
-        );
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .refine
+            .pending());
         button(&mut app, window, ButtonState::Released);
         app.update();
         assert_eq!(

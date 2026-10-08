@@ -156,24 +156,44 @@ fn random_1_99() -> Result<i32, ()> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CheckOutcome {
+    Applied { stat: u8, added: i32 },
+    Broken,
+    UnchangedAfterWrap { refined_value: u8 },
+}
+
 fn checked_outcome(
     value: u8,
     chance: i32,
     added: u8,
     success_roll: i32,
     crit_roll: i32,
-) -> Option<(u8, i32)> {
-    if success_roll > chance {
-        return None;
-    }
-    let stat = decoded_stat(value)?;
+) -> CheckOutcome {
+    // Crystal PlayerObject.CheckRefine first clears RefinedValue on a failed
+    // success roll, then independently applies the byte-cast critical bonus.
+    let value = if success_roll > chance { 0 } else { value };
     // Crystal casts its critical bonus back to the byte RefineAdded field.
     let added = if crit_roll < 10 {
         added.wrapping_mul(2)
     } else {
         added
     };
-    (added != 0).then_some((stat, i32::from(added)))
+    // In PlayerObject.cs:12965-13007 every stat/smash branch requires
+    // RefineAdded > 0. A wrapped zero falls through to ItemUpgraded and keeps
+    // the item and its chance; it must not share the broken-weapon branch.
+    if added == 0 {
+        CheckOutcome::UnchangedAfterWrap {
+            refined_value: value,
+        }
+    } else if let Some(stat) = decoded_stat(value) {
+        CheckOutcome::Applied {
+            stat,
+            added: i32::from(added),
+        }
+    } else {
+        CheckOutcome::Broken
+    }
 }
 
 fn carried_item_index(inventory: &InventoryResource, unique_id: u64) -> Option<(bool, usize)> {
@@ -476,7 +496,7 @@ pub(super) fn check(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
     let Some((belt, index)) = carried_item_index(inventory, unique_id) else {
         return failed();
     };
-    let mut item = if belt {
+    let item = if belt {
         &inventory.belt_items[index]
     } else {
         &inventory.inventory_items[index]
@@ -492,50 +512,86 @@ pub(super) fn check(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
     let (Ok(success_roll), Ok(crit_roll)) = (random_1_99(), random_1_99()) else {
         return failed();
     };
-    if let Some((stat, added)) = checked_outcome(
+    let outcome = checked_outcome(
         wire.refined_value,
         wire.refine_success_chance,
         wire.refine_added,
         success_roll,
         crit_roll,
-    ) {
-        apply_refine_success(&mut item, stat, added);
-        let Some(metadata) = item.user_item_metadata.as_mut() else {
-            return failed();
-        };
-        metadata.refine_added = 0;
-        metadata.refined_value = 0;
-        metadata.refine_success_chance = 0;
-        let Ok(item_wire) = try_user_item_from_item_state(&item) else {
-            return failed();
-        };
-        let key = match stat {
-            CRYSTAL_STAT_MAX_DC => "server.CongratulationsExtraDC",
-            CRYSTAL_STAT_MAX_MC => "server.CongratulationsExtraMC",
-            _ => "server.CongratulationsExtraSC",
-        };
-        let notice = system_message_key_args(world, key, [item.name.clone(), added.to_string()]);
-        if belt {
-            world.resource_mut::<InventoryResource>().belt_items[index] = item;
-        } else {
-            world.resource_mut::<InventoryResource>().inventory_items[index] = item;
+    );
+    apply_check_outcome(world, unique_id, belt, index, item, outcome)
+}
+
+// This remains private: service, live UID and entropy validation above are the
+// sole ordinary caller. Deterministic tests exercise the same item transition
+// without injecting random rolls into a production packet or public QA path.
+fn apply_check_outcome(
+    world: &mut World,
+    unique_id: u64,
+    belt: bool,
+    index: usize,
+    mut item: ItemState,
+    outcome: CheckOutcome,
+) -> Vec<ServerPacket> {
+    match outcome {
+        CheckOutcome::Applied { stat, added } => {
+            apply_refine_success(&mut item, stat, added);
+            let Some(metadata) = item.user_item_metadata.as_mut() else {
+                return failed();
+            };
+            metadata.refine_added = 0;
+            metadata.refined_value = 0;
+            metadata.refine_success_chance = 0;
+            let Ok(item_wire) = try_user_item_from_item_state(&item) else {
+                return failed();
+            };
+            let key = match stat {
+                CRYSTAL_STAT_MAX_DC => "server.CongratulationsExtraDC",
+                CRYSTAL_STAT_MAX_MC => "server.CongratulationsExtraMC",
+                _ => "server.CongratulationsExtraSC",
+            };
+            let notice =
+                system_message_key_args(world, key, [item.name.clone(), added.to_string()]);
+            if belt {
+                world.resource_mut::<InventoryResource>().belt_items[index] = item;
+            } else {
+                world.resource_mut::<InventoryResource>().inventory_items[index] = item;
+            }
+            vec![notice, ServerPacket::ItemUpgraded { item: item_wire }]
         }
-        vec![notice, ServerPacket::ItemUpgraded { item: item_wire }]
-    } else {
-        let notice =
-            system_message_key_args(world, "server.ItemSmashedOnTest", [item.name.clone()]);
-        if belt {
-            world
-                .resource_mut::<InventoryResource>()
-                .belt_items
-                .remove(index);
-        } else {
-            world
-                .resource_mut::<InventoryResource>()
-                .inventory_items
-                .remove(index);
+        CheckOutcome::Broken => {
+            let notice =
+                system_message_key_args(world, "server.ItemSmashedOnTest", [item.name.clone()]);
+            if belt {
+                world
+                    .resource_mut::<InventoryResource>()
+                    .belt_items
+                    .remove(index);
+            } else {
+                world
+                    .resource_mut::<InventoryResource>()
+                    .inventory_items
+                    .remove(index);
+            }
+            vec![notice, ServerPacket::RefineItem { unique_id }]
         }
-        vec![notice, ServerPacket::RefineItem { unique_id }]
+        CheckOutcome::UnchangedAfterWrap { refined_value } => {
+            let Some(metadata) = item.user_item_metadata.as_mut() else {
+                return failed();
+            };
+            metadata.refine_added = 0;
+            metadata.refined_value = refined_value;
+            // No original branch clears RefineSuccessChance for a wrapped zero.
+            let Ok(item_wire) = try_user_item_from_item_state(&item) else {
+                return failed();
+            };
+            if belt {
+                world.resource_mut::<InventoryResource>().belt_items[index] = item;
+            } else {
+                world.resource_mut::<InventoryResource>().inventory_items[index] = item;
+            }
+            vec![ServerPacket::ItemUpgraded { item: item_wire }]
+        }
     }
 }
 
@@ -559,29 +615,167 @@ mod tests {
     fn source_check_rolls_use_exclusive_success_failure_and_nine_crit_faces() {
         assert_eq!(
             checked_outcome(1, 20, 1, 20, 9),
-            Some((CRYSTAL_STAT_MAX_DC, 2))
+            CheckOutcome::Applied {
+                stat: CRYSTAL_STAT_MAX_DC,
+                added: 2
+            }
         );
         assert_eq!(
             checked_outcome(1, 20, 1, 20, 10),
-            Some((CRYSTAL_STAT_MAX_DC, 1))
+            CheckOutcome::Applied {
+                stat: CRYSTAL_STAT_MAX_DC,
+                added: 1
+            }
         );
-        assert_eq!(checked_outcome(1, 20, 1, 21, 1), None);
-        assert_eq!(checked_outcome(1, 0, 1, 1, 1), None);
+        assert_eq!(checked_outcome(1, 20, 1, 21, 1), CheckOutcome::Broken);
+        assert_eq!(checked_outcome(1, 0, 1, 1, 1), CheckOutcome::Broken);
         assert_eq!(
             checked_outcome(2, 99, 3, 99, 99),
-            Some((CRYSTAL_STAT_MAX_MC, 3))
+            CheckOutcome::Applied {
+                stat: CRYSTAL_STAT_MAX_MC,
+                added: 3
+            }
         );
         assert_eq!(
             checked_outcome(3, 100, 2, 99, 1),
-            Some((CRYSTAL_STAT_MAX_SC, 4))
+            CheckOutcome::Applied {
+                stat: CRYSTAL_STAT_MAX_SC,
+                added: 4
+            }
         );
-        assert_eq!(checked_outcome(0, 100, 1, 1, 1), None);
-        assert_eq!(checked_outcome(1, 100, 128, 1, 1), None);
+        assert_eq!(checked_outcome(0, 100, 1, 1, 1), CheckOutcome::Broken);
+        assert_eq!(
+            checked_outcome(1, 100, 128, 1, 1),
+            CheckOutcome::UnchangedAfterWrap { refined_value: 1 }
+        );
+        assert_eq!(
+            checked_outcome(1, 0, 128, 1, 1),
+            CheckOutcome::UnchangedAfterWrap { refined_value: 0 }
+        );
         assert_eq!(
             checked_outcome(1, 100, 200, 1, 1),
-            Some((CRYSTAL_STAT_MAX_DC, 144))
+            CheckOutcome::Applied {
+                stat: CRYSTAL_STAT_MAX_DC,
+                added: 144
+            }
         );
         assert_eq!(ready_minutes(1), "0");
         assert_eq!(ready_minutes(60_001), "1");
+    }
+
+    #[test]
+    fn default_increase_one_keeps_all_original_success_and_critical_roll_faces() {
+        for value in 0..=3 {
+            for chance in [0, 20, 99] {
+                let mut applied = 0;
+                let mut broken = 0;
+                let mut critical = 0;
+                for success_roll in 1..=99 {
+                    for crit_roll in 1..=99 {
+                        match checked_outcome(value, chance, 1, success_roll, crit_roll) {
+                            CheckOutcome::Applied { stat, added } => {
+                                assert_eq!(Some(stat), decoded_stat(value));
+                                assert!(success_roll <= chance);
+                                applied += 1;
+                                if added == 2 {
+                                    critical += 1;
+                                } else {
+                                    assert_eq!(added, 1);
+                                }
+                            }
+                            CheckOutcome::Broken => broken += 1,
+                            CheckOutcome::UnchangedAfterWrap { .. } => {
+                                panic!("increase one cannot wrap")
+                            }
+                        }
+                    }
+                }
+                // C# has exactly nine critical faces (1..9) and success is
+                // inclusive of the configured chance (Next(1,100) is 1..99).
+                let successful_faces = if value == 0 { 0 } else { chance };
+                assert_eq!(applied, successful_faces * 99);
+                assert_eq!(critical, successful_faces * 9);
+                assert_eq!(broken, 99 * 99 - applied);
+            }
+        }
+    }
+
+    #[test]
+    fn wrapped_zero_keeps_same_bag_and_belt_weapon_wire_and_never_emits_smash() {
+        use crate::config::ItemContainer;
+        use mir2_protocol::UserItemStat;
+        let template = mir2_game_data::crystal_item_by_name("Dagger").unwrap();
+        for belt in [false, true] {
+            for value in 0..=3 {
+                for success_roll in [37, 38] {
+                    let mut item = super::super::items::embedded_item_state_from_template(
+                        &template,
+                        if belt {
+                            ItemContainer::Belt
+                        } else {
+                            ItemContainer::Bag1
+                        },
+                        if belt { 5 } else { 0 },
+                    );
+                    item.unique_id = 900_001;
+                    item.durability_current = Some(7);
+                    item.durability_max = Some(23);
+                    item.gem_count = 3;
+                    item.cursed = true;
+                    let mut wire = try_user_item_from_item_state(&item).unwrap();
+                    wire.refined_value = value;
+                    wire.refine_added = 128;
+                    wire.refine_success_chance = 37;
+                    wire.added_stats = vec![UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_DC,
+                        value: 4,
+                    }];
+                    item = try_item_state_from_user_item(item, &wire).unwrap();
+                    let before_wire = try_user_item_from_item_state(&item).unwrap();
+                    let mut expected_wire = before_wire.clone();
+                    expected_wire.refine_added = 0;
+                    expected_wire.refined_value = if success_roll > 37 { 0 } else { value };
+                    let mut inventory = InventoryResource::new(80);
+                    if belt {
+                        inventory.belt_items.push(item.clone());
+                    } else {
+                        inventory.inventory_items.push(item.clone());
+                    }
+                    let mut world = World::new();
+                    world.insert_resource(inventory);
+                    let outcome = checked_outcome(value, 37, 128, success_roll, 9);
+                    let packets = apply_check_outcome(&mut world, 900_001, belt, 0, item, outcome);
+                    assert_eq!(
+                        packets,
+                        vec![ServerPacket::ItemUpgraded {
+                            item: expected_wire.clone()
+                        }]
+                    );
+                    let inventory = world.resource::<InventoryResource>();
+                    let retained = if belt {
+                        &inventory.belt_items
+                    } else {
+                        &inventory.inventory_items
+                    };
+                    assert_eq!(retained.len(), 1);
+                    assert_eq!(
+                        try_user_item_from_item_state(&retained[0]).unwrap(),
+                        expected_wire
+                    );
+                    assert_eq!(retained[0].slot, if belt { 5 } else { 0 });
+                    assert_eq!(retained[0].unique_id, before_wire.unique_id);
+                    assert_eq!(expected_wire.added_stats, before_wire.added_stats);
+                    assert_eq!(expected_wire.refine_success_chance, 37);
+                    // The zero makes another source CheckRefine ineligible.
+                    assert_eq!(expected_wire.refine_added, 0);
+                    let encoded = serde_json::to_string(&retained[0]).unwrap();
+                    let restored: ItemState = serde_json::from_str(&encoded).unwrap();
+                    assert_eq!(
+                        try_user_item_from_item_state(&restored).unwrap(),
+                        expected_wire
+                    );
+                }
+            }
+        }
     }
 }

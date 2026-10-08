@@ -51,7 +51,14 @@ class Client extends ProtocolClient {
   }
   observeGatewayMessage(message) {
     this.snapshot = applyDenseObservation(this.snapshot, message, Date.now());
-    this.record('received', message);
+    const event = this.record('received', message);
+    // React to the real owner commitment in the same receive callback. A
+    // polling delay can consume the entire original bat impact window.
+    if (this.onOwnerAttack && message.packet === 'ObjectAttack'
+      && Number(message.payload?.objectId) === Number(this.snapshot?.playerObjectId)) {
+      const callback = this.onOwnerAttack; this.onOwnerAttack = null;
+      callback(event);
+    }
     if (message.type === 'error') this.failure = new Error(`Gateway rejected normal command: ${message.message ?? 'unknown'}`);
     if (message.packet === 'DamageIndicator' && Number(message.payload?.objectId) === this.snapshot?.playerObjectId) this.scheduleDamageVitalsRefresh();
   }
@@ -135,35 +142,43 @@ try {
   report.formationObservations = observations;
   report.qualification = q ?? { status: 'inconclusive', reason: 'No qualified observation inside budget' };
   if (q?.status === 'qualified') {
-    const phaseSequence = c.sequence;
-    // One real newly observed source windup, followed by an ordinary wait.
-    // No deadline writes, favourable roll retry, or fabricated damage.
-    // The normal 15-second StartGame grace defers the personal combat flush.
-    // Keep ordinary snapshot refreshes, as in formation, rather than assuming
-    // monster ObjectAttack is on the dedicated movement live channel. The
-    // source clocks and receipt/death classifier remain unchanged.
-    const windupDeadline = Date.now() + 5000;
-    let windup;
-    while (Date.now() < windupDeadline) {
-      await c.refresh();
-      windup = after(phaseSequence, 'ObjectAttack', p => q.attackerIds.includes(p.objectId));
-      if (windup) break;
-      if (self(c.snapshot)?.dead || c.snapshot.playerHp === 0) throw new Error('Owner died before next actual bat windup');
-      await delay(200);
-    }
-    if (!windup) throw new Error('Timeout waiting for next actual bat windup with ordinary snapshot refresh');
-    await delay(200);
+    // Declare this single prospective phase from already observed real bat
+    // windups. The -350 ms phase is a test schedule, not a source deadline.
+    // No stat/clock writes, receipt replay, or favourable-roll retry occur.
+    const cycles = q.attackerIds.map(objectId => {
+      const rows = c.events.filter(e => e.direction === 'received' && e.packet === 'ObjectAttack'
+        && Number(e.payload?.objectId) === Number(objectId));
+      const latest = rows.at(-1), previous = rows.at(-2);
+      if (!latest || !previous) throw new Error('Qualified bat lost actual cycle receipts');
+      return { objectId, previousSequence: previous.sequence, lastSequence: latest.sequence,
+        measuredPeriodMs: latest.tsMs - previous.tsMs,
+        predictedNextWindupMs: latest.tsMs + latest.tsMs - previous.tsMs };
+    });
+    const predictedWindups = cycles.map(row => row.predictedNextWindupMs).sort((a, b) => a - b);
+    const predictedNextWindupMs = predictedWindups[Math.floor(predictedWindups.length / 2)];
+    const scheduledAttackMs = predictedNextWindupMs - 350;
+    report.prospectivePhase = { declaredAtMs: Date.now(), offsetFromPredictedWindupMs: -350,
+      predictedNextWindupMs, scheduledAttackMs, cycles, realOwnerCommitCallback: true };
+    if (scheduledAttackMs <= Date.now()) throw new Error('Declared single attack phase already expired');
+    await delay(scheduledAttackMs - Date.now());
     const target = c.snapshot.entities.find(e => q.attackerIds.includes(e.objectId) && !e.dead);
-    const seq = c.sequence;
+    if (!target) throw new Error('No surviving originally qualified attack target');
+    let escapeInput;
+    c.onOwnerAttack = committed => {
+      const refreshed = qualifySeven(c.events, c.snapshot, map, metadata, Date.now());
+      if (refreshed.status !== 'qualified') {
+        escapeInput = { committed, refreshed }; return;
+      }
+      const before = location(c.snapshot), sentMs = Date.now();
+      c.send({ type: 'walk', direction: refreshed.exit.direction });
+      escapeInput = { committed, refreshed, before, sentMs, sentSequence: c.sequence };
+    };
     c.send({ type: 'attack', objectId: target.objectId });
-    const committed = await c.wait(() => after(seq, 'ObjectAttack', p => p.objectId === c.snapshot.playerObjectId), 'real owner attack commitment', 2500);
-    await c.refresh();
-    const refreshed = qualifySeven(c.events, c.snapshot, map, metadata, Date.now());
+    await c.wait(() => escapeInput, 'real owner attack commitment callback', 2500);
+    const { committed, refreshed, before, sentMs, sentSequence } = escapeInput;
     if (refreshed.status !== 'qualified') {
       report.escape = { status: 'inconclusive', reason: 'Pressure/exit expired after real attack', qualification: refreshed, committedAckSequence: committed.sequence };
     } else {
-      const before = location(c.snapshot), sentMs = Date.now();
-      c.send({ type: 'walk', direction: refreshed.exit.direction }); const sentSequence = c.sequence;
       let ackWaitError = null;
       try { await c.wait(() => after(sentSequence, 'UserLocation', p => {
         const tile = p.location ?? p; return tile.x === refreshed.exit.target.x && tile.y === refreshed.exit.target.y;
@@ -172,7 +187,10 @@ try {
       const proof = escapeProof(c.events, { qualification: refreshed, sentSequence, sentMs,
         endMs: Date.now(), ownerId: c.snapshot.playerObjectId, before, target: refreshed.exit.target,
         boundMs: 1500, committedKind: 'attack', committedAckSequence: committed.sequence });
-      proof.windupSequence = windup.sequence; proof.ackWaitError = ackWaitError;
+      proof.observedIncomingWindupSequences = c.events.filter(e => e.direction === 'received'
+        && e.packet === 'ObjectAttack' && q.attackerIds.includes(e.payload?.objectId)
+        && e.tsMs >= report.prospectivePhase.declaredAtMs && e.tsMs <= Date.now()).map(e => e.sequence);
+      proof.ackWaitError = ackWaitError;
       const ack = c.events.find(e => e.sequence === proof.ackSequence);
       const anchor = ack?.state ?? before, anchorSequence = ack?.sequence ?? c.sequence, anchorMs = ack?.tsMs ?? Date.now();
       const quietEnd = Date.now() + 5200;

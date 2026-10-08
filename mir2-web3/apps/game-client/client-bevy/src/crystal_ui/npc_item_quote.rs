@@ -24,13 +24,13 @@ pub(crate) struct NpcRepairQuote {
 pub(crate) fn crystal_npc_sale_quote(item: &ItemModel, selected_count: u16) -> Option<u32> {
     let (source, user) = concrete_tooltip_source(item)?;
     let selected_count = u32::from(selected_count);
-    if selected_count == 0
-        || selected_count > item.quantity.min(u32::from(u16::MAX))
-    {
+    if selected_count == 0 || selected_count > item.quantity.min(u32::from(u16::MAX)) {
         return None;
     }
     let unit_price = crystal_current_unit_price(item, source, user)?;
-    unit_price.checked_mul(selected_count).map(|total| total / 2)
+    unit_price
+        .checked_mul(selected_count)
+        .map(|total| total / 2)
 }
 
 /// Mirrors Crystal's active `UserItem.Price` / `RepairPrice` arithmetic and
@@ -104,7 +104,8 @@ fn concrete_tooltip_source(
     let source = item.tooltip_source.as_ref()?;
     let user = source.user_item.as_ref()?;
     let unique_id = item.unique_id?;
-    (user.unique_id == unique_id && user.item_index == source.info.item_index).then_some((source, user))
+    (user.unique_id == unique_id && user.item_index == source.info.item_index)
+        .then_some((source, user))
 }
 
 /// Crystal `UserItem.Price` with source metadata plus live inventory dura.
@@ -128,9 +129,8 @@ fn crystal_current_unit_price(
         return None;
     }
     let max_dura_f = max_dura as f32;
-    let max_value = source_u32(
-        max_dura_f * ((template_price / 2.0) / source.info.durability as f32),
-    )?;
+    let max_value =
+        source_u32(max_dura_f * ((template_price / 2.0) / source.info.durability as f32))?;
     // Crystal treats a zero live MaxDura as a zero ratio rather than an
     // unavailable value. Its resulting `Price` is the base half-price.
     let durability_ratio = if max_dura == 0 {
@@ -138,9 +138,10 @@ fn crystal_current_unit_price(
     } else {
         current_dura as f32 / max_dura_f
     };
-    let current_base =
-        (max_value as f32 / 2.0 + (max_value as f32 / 2.0) * durability_ratio + template_price / 2.0)
-            .floor();
+    let current_base = (max_value as f32 / 2.0
+        + (max_value as f32 / 2.0) * durability_ratio
+        + template_price / 2.0)
+        .floor();
     source_u32(current_base * factor)
 }
 

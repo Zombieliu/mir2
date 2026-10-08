@@ -628,9 +628,17 @@ impl BigMapModel {
         let npc = self.selected_npc()?;
         if npc.object_id == 0
             || npc.map_index != current
-            || npc.location.x < 0 || npc.location.x >= map.info.width
-            || npc.location.y < 0 || npc.location.y >= map.info.height
-            || map.info.npcs.iter().filter(|row| row.object_id == npc.object_id).count() != 1
+            || npc.location.x < 0
+            || npc.location.x >= map.info.width
+            || npc.location.y < 0
+            || npc.location.y >= map.info.height
+            || map
+                .info
+                .npcs
+                .iter()
+                .filter(|row| row.object_id == npc.object_id)
+                .count()
+                != 1
         {
             return None;
         }
@@ -1038,7 +1046,17 @@ mod tests {
 
     #[test]
     fn ordinary_npc_navigation_rejects_ambiguous_hidden_foreign_and_outside_destinations() {
-        for invalid in ["world", "remote", "npc-map", "hidden", "zero", "negative", "width", "height", "duplicate"] {
+        for invalid in [
+            "world",
+            "remote",
+            "npc-map",
+            "hidden",
+            "zero",
+            "negative",
+            "width",
+            "height",
+            "duplicate",
+        ] {
             let mut model = BigMapModel::default();
             model.apply_new_map_info(1, info(vec![npc(42, "Blacksmith", false)]));
             model.set_current_map(1);
@@ -1056,7 +1074,13 @@ mod tests {
                 "width" => model.maps.get_mut(&1).unwrap().info.npcs[0].location.x = 700,
                 "height" => model.maps.get_mut(&1).unwrap().info.npcs[0].location.y = 700,
                 "duplicate" => {
-                    model.maps.get_mut(&1).unwrap().info.npcs.push(npc(42, "Other", false));
+                    model
+                        .maps
+                        .get_mut(&1)
+                        .unwrap()
+                        .info
+                        .npcs
+                        .push(npc(42, "Other", false));
                 }
                 _ => unreachable!(),
             }

@@ -5,8 +5,8 @@
 
 pub mod amount_input;
 pub mod assets;
-pub mod chat;
 pub(crate) mod change_password;
+pub mod chat;
 pub mod guild_storage;
 pub mod hud;
 mod item_image;

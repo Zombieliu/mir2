@@ -1141,8 +1141,9 @@ mod tests {
     #[test]
     fn mining_real_clip_loads_and_spawns_one_gameplay_player() {
         let _guard = AUDIO_ENV_LOCK.lock().unwrap();
-        let path = discover_audio_file("91.wav")
-            .expect("real original SoundList 10091 clip must be available for this acceptance test");
+        let path = discover_audio_file("91.wav").expect(
+            "real original SoundList 10091 clip must be available for this acceptance test",
+        );
         let mut app = app();
         let source = read_wav_source(
             &path,
@@ -1178,12 +1179,14 @@ mod tests {
             .resource_mut::<NativeGameplayAudioQueue>()
             .push(event.clone()));
         app.update();
-        let mut query = app
-            .world_mut()
-            .query::<(&AudioPlayer<AudioSource>, &NativeGameplaySoundEffectTrack, &PlaybackSettings)>();
+        let mut query = app.world_mut().query::<(
+            &AudioPlayer<AudioSource>,
+            &NativeGameplaySoundEffectTrack,
+            &PlaybackSettings,
+        )>();
         let players = query.iter(app.world()).collect::<Vec<_>>();
         assert_eq!(players.len(), 1);
-        assert_eq!(players[0].0.0, source);
+        assert_eq!(players[0].0 .0, source);
         assert!(matches!(players[0].2.mode, PlaybackMode::Despawn));
         assert!(!app
             .world_mut()

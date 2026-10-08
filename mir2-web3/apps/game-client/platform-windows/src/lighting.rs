@@ -8,8 +8,8 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::{Arc, Mutex, OnceLock};
 use std::sync::atomic::{AtomicBool, Ordering as AtomicOrdering};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use serde_json::{json, Value};
 
@@ -40,7 +40,11 @@ pub(crate) fn force_daylight_enabled() -> bool {
 }
 
 pub(crate) fn presentation_light_setting(setting: Option<u8>, force_daylight: bool) -> Option<u8> {
-    if force_daylight { Some(2) } else { setting }
+    if force_daylight {
+        Some(2)
+    } else {
+        setting
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -704,12 +708,19 @@ mod tests {
             payload["mapFileName"] = json!(if generation == 1 { "0" } else { "D401" });
             bridge.observe_world_snapshot(&payload);
             bridge.observe_packet("TimeOfDay", &json!({"lights": 4}));
-            bridge.observe_packet("MapInformation", &json!({
-                "fileName": payload["mapFileName"], "lights": 4, "mapDarkLight": 2
-            }));
+            bridge.observe_packet(
+                "MapInformation",
+                &json!({
+                    "fileName": payload["mapFileName"], "lights": 4, "mapDarkLight": 2
+                }),
+            );
             let render = bridge.build_render_state_with_effects(
-                &payload, None, &HashMap::new(), &NativeLightingMotion::default(),
-                &NativeLightAssets::default(), &[],
+                &payload,
+                None,
+                &HashMap::new(),
+                &NativeLightingMotion::default(),
+                &NativeLightAssets::default(),
+                &[],
             );
             assert_eq!(render["enabled"], true);
             assert_eq!(render["timeOfDayLightSetting"], 2);
@@ -720,13 +731,19 @@ mod tests {
             assert_eq!(bridge.map_light_setting, Some(4));
             assert_eq!(bridge.map_dark_light, 2);
             assert_eq!(payload["lightSetting"], 4);
-            assert_eq!(capture_light_state_slug(Some(&bridge), payload["mapFileName"].as_str().unwrap()),
-                Some("setting=2;mapDarkLight=0;forceDaylight=true".to_owned()));
+            assert_eq!(
+                capture_light_state_slug(Some(&bridge), payload["mapFileName"].as_str().unwrap()),
+                Some("setting=2;mapDarkLight=0;forceDaylight=true".to_owned())
+            );
         }
         bridge.set_force_daylight(false);
         let restored = bridge.build_render_state_with_effects(
-            &payload, None, &HashMap::new(), &NativeLightingMotion::default(),
-            &NativeLightAssets::complete_fixture(), &[],
+            &payload,
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+            &[],
         );
         assert_eq!(restored["timeOfDayLightSetting"], 4);
         assert_eq!(restored["mapLightSetting"], 4);

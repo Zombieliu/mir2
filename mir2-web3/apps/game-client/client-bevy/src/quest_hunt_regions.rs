@@ -43,18 +43,29 @@ pub fn active_hunt_regions_for_primary(
         }
         if let Some(definition) = mir2_game_data::periodic_quests::quest(quest.quest_index) {
             for (index, kill) in definition.kills.iter().enumerate() {
-                let Some(progress) = quest.objectives.get(index) else { continue; };
-                if progress.target == 0 || progress.is_complete()
+                let Some(progress) = quest.objectives.get(index) else {
+                    continue;
+                };
+                if progress.target == 0
+                    || progress.is_complete()
                     || !kill.maps.contains(&map.map_file_name)
-                    || regions.iter().any(|region: &QuestHuntRegion| region.monster_index == kill.monster_index) {
+                    || regions
+                        .iter()
+                        .any(|region: &QuestHuntRegion| region.monster_index == kill.monster_index)
+                {
                     continue;
                 }
                 // This catalog's point identifies an authored hunting foothold.
                 // A whole-map imported spread is not a useful arrival radius.
                 regions.push(QuestHuntRegion {
                     primary: Some(quest.quest_index) == primary,
-                    monster_index: kill.monster_index, name: kill.monster.clone(),
-                    center: BigMapPoint { x: kill.x, y: kill.y }, radius: 8,
+                    monster_index: kill.monster_index,
+                    name: kill.monster.clone(),
+                    center: BigMapPoint {
+                        x: kill.x,
+                        y: kill.y,
+                    },
+                    radius: 8,
                     remaining: progress.target.saturating_sub(progress.current),
                 });
             }
@@ -74,10 +85,18 @@ pub fn active_hunt_regions_for_primary(
             continue;
         }
         let kills = definition["kills"].as_array();
-        let practice_pending = definition["flags"].as_array().into_iter().flatten().enumerate()
-            .any(|(index, flag)| flag["kind"] == "classPractice"
-                && quest.objectives.get(kills.map_or(0, Vec::len) + index)
-                    .is_some_and(|progress| progress.current < progress.target));
+        let practice_pending = definition["flags"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .enumerate()
+            .any(|(index, flag)| {
+                flag["kind"] == "classPractice"
+                    && quest
+                        .objectives
+                        .get(kills.map_or(0, Vec::len) + index)
+                        .is_some_and(|progress| progress.current < progress.target)
+            });
         for (index, kill) in definition["kills"]
             .as_array()
             .into_iter()
@@ -98,29 +117,48 @@ pub fn active_hunt_regions_for_primary(
             else {
                 continue;
             };
-            if regions.iter().any(|region: &QuestHuntRegion| region.monster_index == monster_index) {
+            if regions
+                .iter()
+                .any(|region: &QuestHuntRegion| region.monster_index == monster_index)
+            {
                 continue;
             }
             // V2 has explicit training footholds. The imported whole-map
             // spawn (250,250), spread 250 is not a useful arrival destination.
-            let mut training = config["trainingSpawns"].as_array().into_iter().flatten()
-                .filter(|spawn| spawn["sourceQuestId"].as_i64() == Some(i64::from(quest.quest_index))
-                    && spawn["mapFileName"].as_str() == Some(map.map_file_name.as_str())
-                    && spawn["monsterIndex"].as_i64() == Some(i64::from(monster_index))
-                    && spawn["count"].as_u64().unwrap_or(0) > 0)
-                .filter_map(|spawn| Some(QuestHuntRegion {
-                    primary: Some(quest.quest_index) == primary,
-                    monster_index,
-                    name: spawn["monster"].as_str()?.to_owned(),
-                    center: BigMapPoint {
-                        x: i32::try_from(spawn["position"]["x"].as_i64()?).ok()?,
-                        y: i32::try_from(spawn["position"]["y"].as_i64()?).ok()?,
-                    },
-                    radius: spawn["spread"].as_i64().unwrap_or(0).clamp(2, i64::from(i32::MAX)) as i32,
-                    remaining: progress.target.saturating_sub(progress.current),
-                })).collect::<Vec<_>>();
+            let mut training = config["trainingSpawns"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter(|spawn| {
+                    spawn["sourceQuestId"].as_i64() == Some(i64::from(quest.quest_index))
+                        && spawn["mapFileName"].as_str() == Some(map.map_file_name.as_str())
+                        && spawn["monsterIndex"].as_i64() == Some(i64::from(monster_index))
+                        && spawn["count"].as_u64().unwrap_or(0) > 0
+                })
+                .filter_map(|spawn| {
+                    Some(QuestHuntRegion {
+                        primary: Some(quest.quest_index) == primary,
+                        monster_index,
+                        name: spawn["monster"].as_str()?.to_owned(),
+                        center: BigMapPoint {
+                            x: i32::try_from(spawn["position"]["x"].as_i64()?).ok()?,
+                            y: i32::try_from(spawn["position"]["y"].as_i64()?).ok()?,
+                        },
+                        radius: spawn["spread"]
+                            .as_i64()
+                            .unwrap_or(0)
+                            .clamp(2, i64::from(i32::MAX)) as i32,
+                        remaining: progress.target.saturating_sub(progress.current),
+                    })
+                })
+                .collect::<Vec<_>>();
             if !training.is_empty() {
-                training.sort_by_key(|region| player.x.abs_diff(region.center.x).max(player.y.abs_diff(region.center.y)));
+                training.sort_by_key(|region| {
+                    player
+                        .x
+                        .abs_diff(region.center.x)
+                        .max(player.y.abs_diff(region.center.y))
+                });
                 regions.extend(training);
                 continue;
             }
@@ -165,18 +203,39 @@ mod tests {
 
     #[test]
     fn wooma_practice_uses_three_actual_footholds_even_after_kill_quota() {
-        let mut tracker = QuestTracker { active_quests: vec![Quest {
-            quest_index: 2110021, status: QuestStatus::InProgress,
-            objectives: vec![
-                QuestObjective { objective_id: "2110021:0".into(), text: "WoomaFighter".into(), current: 1, target: 3 },
-                QuestObjective { objective_id: "2110021:1".into(), text: "Complete your class practice".into(), current: 0, target: 1 },
-            ],
-            accept_npc_index: None, finish_npc_index: None, title: "Prove your class tactics".into(),
-            npc_name: None, group: None, min_level_needed: 28, detail: Default::default(), rewards: vec![], unknown_text: None,
-        }] };
+        let mut tracker = QuestTracker {
+            active_quests: vec![Quest {
+                quest_index: 2110021,
+                status: QuestStatus::InProgress,
+                objectives: vec![
+                    QuestObjective {
+                        objective_id: "2110021:0".into(),
+                        text: "WoomaFighter".into(),
+                        current: 1,
+                        target: 3,
+                    },
+                    QuestObjective {
+                        objective_id: "2110021:1".into(),
+                        text: "Complete your class practice".into(),
+                        current: 0,
+                        target: 1,
+                    },
+                ],
+                accept_npc_index: None,
+                finish_npc_index: None,
+                title: "Prove your class tactics".into(),
+                npc_name: None,
+                group: None,
+                min_level_needed: 28,
+                detail: Default::default(),
+                rewards: vec![],
+                unknown_text: None,
+            }],
+        };
         let map = mir2_game_data::crystal_map_respawns_ref("D022").unwrap();
         let player = BigMapPoint { x: 109, y: 196 };
-        let regions = active_hunt_regions_for_primary(&tracker, map.map_index, player, Some(2110021));
+        let regions =
+            active_hunt_regions_for_primary(&tracker, map.map_index, player, Some(2110021));
         assert_eq!(regions.len(), 3);
         assert_eq!(regions[0].center, BigMapPoint { x: 280, y: 340 });
         for region in &regions {
@@ -186,7 +245,11 @@ mod tests {
             assert_ne!(region.center, BigMapPoint { x: 250, y: 250 });
         }
         tracker.active_quests[0].objectives[0].current = 3;
-        assert_eq!(active_hunt_regions(&tracker, map.map_index, player).len(), 3, "practice still needs monsters");
+        assert_eq!(
+            active_hunt_regions(&tracker, map.map_index, player).len(),
+            3,
+            "practice still needs monsters"
+        );
         tracker.active_quests[0].objectives[1].current = 1;
         assert!(active_hunt_regions(&tracker, map.map_index, player).is_empty());
     }
@@ -230,7 +293,8 @@ mod tests {
         assert_eq!(regions[0].center, BigMapPoint { x: 340, y: 550 });
         assert_eq!(regions[0].remaining, 2);
         assert!(!regions[0].primary);
-        let focused = active_hunt_regions_for_primary(&tracker, map.map_index, player, Some(2110003));
+        let focused =
+            active_hunt_regions_for_primary(&tracker, map.map_index, player, Some(2110003));
         assert!(focused[0].primary);
         assert_eq!(focused[0].center, regions[0].center);
         assert_eq!(focused[0].remaining, regions[0].remaining);

@@ -214,12 +214,25 @@ impl NativeEntityPresentation {
     }
 
     pub(crate) fn mark_local_mining_request(
-        &mut self, object_id: &str, origin: (i32, i32), direction: &str, now_ms: u64,
+        &mut self,
+        object_id: &str,
+        origin: (i32, i32),
+        direction: &str,
+        now_ms: u64,
     ) {
-        let Some(map_file) = self.current_map_file_name().map(str::to_owned) else { return; };
+        let Some(map_file) = self.current_map_file_name().map(str::to_owned) else {
+            return;
+        };
         self.local_mining_request = Some(LocalMiningRequest {
-            object_id: object_id.to_owned(), map_file, origin, direction: direction.to_owned(),
-            source_sequence_floor: self.last_source_sequence.get(object_id).copied().unwrap_or(0),
+            object_id: object_id.to_owned(),
+            map_file,
+            origin,
+            direction: direction.to_owned(),
+            source_sequence_floor: self
+                .last_source_sequence
+                .get(object_id)
+                .copied()
+                .unwrap_or(0),
             expires_ms: now_ms.saturating_add(3_000),
         });
     }
@@ -229,19 +242,31 @@ impl NativeEntityPresentation {
     }
 
     fn map_confirmed_local_mine(&mut self, payload: &mut Value, now_ms: u64) {
-        let Some(request) = self.local_mining_request.as_ref() else { return; };
+        let Some(request) = self.local_mining_request.as_ref() else {
+            return;
+        };
         if now_ms >= request.expires_ms
             || payload.get("mapFileName").and_then(Value::as_str) != Some(request.map_file.as_str())
         {
             self.local_mining_request = None;
             return;
         }
-        let Some(owner) = payload.get_mut("entities").and_then(Value::as_array_mut)
-            .and_then(|entities| entities.iter_mut().find(|entity| {
-                entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
-                    && entity.get("objectId").and_then(value_object_id).as_deref() == Some(request.object_id.as_str())
-            })) else { return; };
-        let position = owner.get("x").and_then(Value::as_i64)
+        let Some(owner) = payload
+            .get_mut("entities")
+            .and_then(Value::as_array_mut)
+            .and_then(|entities| {
+                entities.iter_mut().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        && entity.get("objectId").and_then(value_object_id).as_deref()
+                            == Some(request.object_id.as_str())
+                })
+            })
+        else {
+            return;
+        };
+        let position = owner
+            .get("x")
+            .and_then(Value::as_i64)
             .zip(owner.get("y").and_then(Value::as_i64));
         if position != Some((i64::from(request.origin.0), i64::from(request.origin.1)))
             || owner.get("dead").and_then(Value::as_bool) == Some(true)
@@ -251,7 +276,9 @@ impl NativeEntityPresentation {
         }
         if owner.get("_nativeAnimationAction").and_then(Value::as_str) == Some("attack1")
             && owner.get("direction").and_then(Value::as_str) == Some(request.direction.as_str())
-            && owner.get("_nativeAnimationSequence").and_then(Value::as_u64)
+            && owner
+                .get("_nativeAnimationSequence")
+                .and_then(Value::as_u64)
                 .is_some_and(|sequence| sequence > request.source_sequence_floor)
         {
             // Crystal's own Mine action uses the exact Attack2 body/weapon
@@ -359,7 +386,9 @@ impl NativeEntityPresentation {
         Some(entities.iter().any(|entity| {
             let kind = entity.get("kind").and_then(Value::as_str);
             let is_sabuk_gate = kind == Some("monster")
-                && self.current_map_file_name().is_some_and(|map| map.trim_end_matches(".map").eq_ignore_ascii_case("3"))
+                && self
+                    .current_map_file_name()
+                    .is_some_and(|map| map.trim_end_matches(".map").eq_ignore_ascii_case("3"))
                 && entity.get("ai").and_then(Value::as_u64) == Some(81)
                 && entity.get("image").and_then(Value::as_u64) == Some(950)
                 && entity.get("name").and_then(Value::as_str) == Some("SabukGate")
@@ -367,12 +396,27 @@ impl NativeEntityPresentation {
                 && entity.get("y").and_then(Value::as_i64) == Some(330);
             if is_sabuk_gate {
                 if entity.get("dead").and_then(Value::as_bool) == Some(true)
-                    || entity.get("direction").and_then(Value::as_str).is_some_and(|direction| direction.eq_ignore_ascii_case("left")) {
+                    || entity
+                        .get("direction")
+                        .and_then(Value::as_str)
+                        .is_some_and(|direction| direction.eq_ignore_ascii_case("left"))
+                {
                     return false;
                 }
                 // Source AI81, effect 1: center plus the eight closed cells.
-                return [(0,0),(0,-1),(0,-2),(1,-1),(1,-2),(-1,0),(-2,0),(-1,-1),(-1,1)].iter()
-                    .any(|(dx,dy)| point == (672+dx,330+dy));
+                return [
+                    (0, 0),
+                    (0, -1),
+                    (0, -2),
+                    (1, -1),
+                    (1, -2),
+                    (-1, 0),
+                    (-2, 0),
+                    (-1, -1),
+                    (-1, 1),
+                ]
+                .iter()
+                .any(|(dx, dy)| point == (672 + dx, 330 + dy));
             }
             matches!(kind, Some("selfPlayer" | "player" | "monster" | "npc"))
                 && entity.get("dead").and_then(Value::as_bool) != Some(true)
@@ -390,7 +434,8 @@ impl NativeEntityPresentation {
     }
 
     pub(crate) fn self_motion_remaining_ms(&self, now_ms: u64) -> u64 {
-        self.self_object_id.as_deref()
+        self.self_object_id
+            .as_deref()
             .and_then(|object_id| self.motion_windows.get(object_id))
             .map_or(0, |window| window.expires_ms.saturating_sub(now_ms))
     }
@@ -471,14 +516,11 @@ impl NativeEntityPresentation {
             .copied()
             .unwrap_or(0)
             .saturating_add(1);
-        let Ok(update) = self
-            .world
-            .apply_latest_locomotion_event(
-                &key,
-                AnimationEvent::new(animation_sequence, action, direction),
-                animation_now_ms,
-            )
-        else {
+        let Ok(update) = self.world.apply_latest_locomotion_event(
+            &key,
+            AnimationEvent::new(animation_sequence, action, direction),
+            animation_now_ms,
+        ) else {
             return false;
         };
         if update.disposition == QueueDisposition::Started
@@ -691,7 +733,9 @@ impl NativeEntityPresentation {
                     .and_then(parse_action)?;
                 Some((
                     entity.get("objectId").and_then(value_object_id)?,
-                    entity.get("_nativeAnimationSequence").and_then(Value::as_u64)?,
+                    entity
+                        .get("_nativeAnimationSequence")
+                        .and_then(Value::as_u64)?,
                 ))
             })
             .collect::<HashMap<_, _>>();
@@ -788,7 +832,9 @@ impl NativeEntityPresentation {
                 .get(&entity.object_id)
                 .copied()
                 .unwrap_or(normalized_sequence);
-            if self.last_source_sequence.get(&entity.object_id)
+            if self
+                .last_source_sequence
+                .get(&entity.object_id)
                 .is_some_and(|previous| source_sequence <= *previous)
             {
                 continue;
@@ -797,12 +843,17 @@ impl NativeEntityPresentation {
                 continue;
             };
             if stale_source_echoes.contains(&entity.object_id) && !update.spawned {
-                self.last_source_sequence.insert(entity.object_id, source_sequence);
+                self.last_source_sequence
+                    .insert(entity.object_id, source_sequence);
                 continue;
             }
             let sequence_floor = source_sequence.max(normalized_sequence);
-            let sequence = self.last_applied_sequence.get(&entity.object_id)
-                .map_or(sequence_floor, |previous| sequence_floor.max(previous.saturating_add(1)));
+            let sequence = self
+                .last_applied_sequence
+                .get(&entity.object_id)
+                .map_or(sequence_floor, |previous| {
+                    sequence_floor.max(previous.saturating_add(1))
+                });
             let revival_barrier = action == AnimationAction::Revive
                 || (entity.kind == EntityKind::Player
                     && action == AnimationAction::Standing
@@ -837,7 +888,9 @@ impl NativeEntityPresentation {
                 && self.world.state(&update.key).is_ok_and(|state| {
                     matches!(
                         state.pose().action,
-                        AnimationAction::Walking | AnimationAction::Running | AnimationAction::Struck
+                        AnimationAction::Walking
+                            | AnimationAction::Running
+                            | AnimationAction::Struck
                     )
                 });
             if coalesces_active_player_motion {
@@ -862,14 +915,11 @@ impl NativeEntityPresentation {
                 }
                 continue;
             }
-            if let Ok(update) = self
-                .world
-                .apply_event(
-                    &update.key,
-                    AnimationEvent::new(sequence, action, entity.direction),
-                    animation_now_ms,
-                )
-            {
+            if let Ok(update) = self.world.apply_event(
+                &update.key,
+                AnimationEvent::new(sequence, action, entity.direction),
+                animation_now_ms,
+            ) {
                 if update.disposition == QueueDisposition::Coalesced
                     && self.self_object_id.as_deref() == Some(entity.object_id.as_str())
                 {
@@ -896,8 +946,10 @@ impl NativeEntityPresentation {
         animation_sequence: u64,
         action: AnimationAction,
     ) {
-        self.last_source_sequence.insert(object_id.to_owned(), source_sequence);
-        self.last_applied_sequence.insert(object_id.to_owned(), animation_sequence);
+        self.last_source_sequence
+            .insert(object_id.to_owned(), source_sequence);
+        self.last_applied_sequence
+            .insert(object_id.to_owned(), animation_sequence);
         if matches!(action, AnimationAction::Walking | AnimationAction::Running) {
             if let Some(window) = self.motion_windows.get_mut(object_id) {
                 // The packet's raw number is not an AnimationWorld number
@@ -907,7 +959,11 @@ impl NativeEntityPresentation {
         }
     }
 
-    fn attach_native_motion_windows(&mut self, payload: &mut Value, now_ms: u64) -> HashSet<String> {
+    fn attach_native_motion_windows(
+        &mut self,
+        payload: &mut Value,
+        now_ms: u64,
+    ) -> HashSet<String> {
         let mut stale_source_echoes = HashSet::new();
         let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) else {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
@@ -992,7 +1048,10 @@ impl NativeEntityPresentation {
                 })
                 .is_some();
             let previous = if stale_self_source_echo_applied
-                && self.motion_windows.get(&object_id).is_some_and(|window| window.locally_settled)
+                && self
+                    .motion_windows
+                    .get(&object_id)
+                    .is_some_and(|window| window.locally_settled)
             {
                 self.last_positions.get(&object_id).copied()
             } else {
@@ -1130,9 +1189,8 @@ impl NativeEntityPresentation {
 
         // An animation deadline is not an authoritative ACK. Retain one local
         // receipt until confirmation/correction, while settling its pixels once.
-        self.motion_windows.retain(|object_id, window| {
-            !expired.contains(object_id) || window.locally_predicted
-        });
+        self.motion_windows
+            .retain(|object_id, window| !expired.contains(object_id) || window.locally_predicted);
         if let Some(entities) = self
             .latest_payload
             .as_mut()
@@ -1172,14 +1230,13 @@ impl NativeEntityPresentation {
                 }
             }
         }
-        if self
-            .self_object_id
-            .as_ref()
-            .is_some_and(|object_id| {
-                expired.contains(object_id)
-                    && !self.motion_windows.get(object_id).is_some_and(|window| window.locally_predicted)
-            })
-        {
+        if self.self_object_id.as_ref().is_some_and(|object_id| {
+            expired.contains(object_id)
+                && !self
+                    .motion_windows
+                    .get(object_id)
+                    .is_some_and(|window| window.locally_predicted)
+        }) {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
         }
         self.payload_dirty = true;
@@ -1294,7 +1351,9 @@ impl NativeEntityPresentation {
                 .then_some((object_id, *window, action))
         });
         if let Some((object_id, window, action)) = overlap {
-            let action_sequence = self.world.active_state(object_id)
+            let action_sequence = self
+                .world
+                .active_state(object_id)
                 .and_then(|state| state.pose().last_started_event_sequence)
                 .unwrap_or(0);
             let overlap_key = (window.started_ms, action_sequence);
@@ -1464,9 +1523,14 @@ fn native_hover_cursor(
     }
     let point = transform.physical_to_logical(cursor.x, cursor.y);
     if player_ui.is_some_and(|ui| ui.blocks_world_pointer_at(point.0, point.1))
-        || quest.is_some_and(|quest| quest.captures_world_pointer_at(
-            point.0, point.1, player_ui.is_some_and(|ui| ui.quest_open()),
-        )) {
+        || quest.is_some_and(|quest| {
+            quest.captures_world_pointer_at(
+                point.0,
+                point.1,
+                player_ui.is_some_and(|ui| ui.quest_open()),
+            )
+        })
+    {
         return None;
     }
     Some(point)
@@ -1816,30 +1880,54 @@ mod tests {
         attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
         attack["entities"][0]["_nativeAnimationSequence"] = json!(2);
         let mut observer = attack["entities"][0].clone();
-        observer["kind"] = json!("player"); observer["objectId"] = json!(2);
+        observer["kind"] = json!("player");
+        observer["objectId"] = json!(2);
         attack["entities"].as_array_mut().unwrap().push(observer);
         presentation.replace_payload(attack);
         presentation.sync_pending_payload_with(1_001, |_, _, _| AnimationCatalog::crystal_player());
-        assert_eq!(presentation.world.active_state("1").unwrap().pose().action, AnimationAction::Attack2);
-        assert_eq!(presentation.world.active_state("1").unwrap().pose().draw_frame_index, 208,
-            "Crystal Mine = 184 + direction(Down) * 6");
-        assert_eq!(presentation.world.active_state("2").unwrap().pose().action, AnimationAction::Attack1);
-        assert_eq!(presentation.latest_payload.as_ref().unwrap()["entities"][1]["_nativeAnimationAction"], "attack1");
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().pose().action,
+            AnimationAction::Attack2
+        );
+        assert_eq!(
+            presentation
+                .world
+                .active_state("1")
+                .unwrap()
+                .pose()
+                .draw_frame_index,
+            208,
+            "Crystal Mine = 184 + direction(Down) * 6"
+        );
+        assert_eq!(
+            presentation.world.active_state("2").unwrap().pose().action,
+            AnimationAction::Attack1
+        );
+        assert_eq!(
+            presentation.latest_payload.as_ref().unwrap()["entities"][1]["_nativeAnimationAction"],
+            "attack1"
+        );
         assert!(presentation.local_mining_request.is_none());
-        let mut next = initial; next["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        let mut next = initial;
+        next["entities"][0]["_nativeAnimationAction"] = json!("attack1");
         next["entities"][0]["_nativeAnimationSequence"] = json!(3);
         presentation.map_confirmed_local_mine(&mut next, 1_002);
-        assert_eq!(next["entities"][0]["_nativeAnimationAction"], "attack1", "only one matching confirmation consumes the marker");
+        assert_eq!(
+            next["entities"][0]["_nativeAnimationAction"], "attack1",
+            "only one matching confirmation consumes the marker"
+        );
     }
 
     #[test]
     fn mining_animation_marker_cannot_reuse_stale_or_moved_or_canceled_attack() {
         for case in ["stale", "move", "map", "cancel", "timeout"] {
             let mut presentation = NativeEntityPresentation::default();
-            let mut initial = player_payload(1); initial["mapFileName"] = json!("D401");
+            let mut initial = player_payload(1);
+            initial["mapFileName"] = json!("D401");
             initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
             presentation.replace_payload(initial.clone());
-            presentation.sync_pending_payload_with(900, |_, _, _| AnimationCatalog::crystal_player());
+            presentation
+                .sync_pending_payload_with(900, |_, _, _| AnimationCatalog::crystal_player());
             presentation.mark_local_mining_request("1", (10, 10), "down", 1_000);
             let mut attack = initial;
             attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
@@ -1849,10 +1937,17 @@ mod tests {
                 "move" => attack["entities"][0]["x"] = json!(11),
                 "map" => attack["mapFileName"] = json!("D402"),
                 "cancel" => presentation.clear_local_mining_request(),
-                "timeout" => (), _ => unreachable!(),
+                "timeout" => (),
+                _ => unreachable!(),
             }
-            presentation.map_confirmed_local_mine(&mut attack, if case == "timeout" {4_000} else {1_001});
-            assert_eq!(attack["entities"][0]["_nativeAnimationAction"], "attack1", "{case}");
+            presentation.map_confirmed_local_mine(
+                &mut attack,
+                if case == "timeout" { 4_000 } else { 1_001 },
+            );
+            assert_eq!(
+                attack["entities"][0]["_nativeAnimationAction"], "attack1",
+                "{case}"
+            );
         }
     }
 
@@ -1980,29 +2075,64 @@ mod tests {
         let mut payload = player_payload(1);
         payload["mapFileName"] = json!("3.map");
         payload["entities"].as_array_mut().unwrap().push(json!({"objectId":2,"kind":"monster","name":"SabukGate","ai":81,"image":950,"x":672,"y":330,"direction":"up","dead":false}));
-        let cells = [(672,330),(672,329),(672,328),(673,329),(673,328),(671,330),(670,330),(671,329),(671,331)];
+        let cells = [
+            (672, 330),
+            (672, 329),
+            (672, 328),
+            (673, 329),
+            (673, 328),
+            (671, 330),
+            (670, 330),
+            (671, 329),
+            (671, 331),
+        ];
         let mut presentation = NativeEntityPresentation::default();
         presentation.latest_payload = Some(payload.clone());
-        for cell in cells { assert_eq!(presentation.tile_has_blocking_entity("1",cell),Some(true)); }
-        assert_eq!(presentation.tile_has_blocking_entity("1",(674,330)),Some(false));
-        for direction in ["Left","left"] {
+        for cell in cells {
+            assert_eq!(presentation.tile_has_blocking_entity("1", cell), Some(true));
+        }
+        assert_eq!(
+            presentation.tile_has_blocking_entity("1", (674, 330)),
+            Some(false)
+        );
+        for direction in ["Left", "left"] {
             payload["entities"][1]["direction"] = json!(direction);
             presentation.latest_payload = Some(payload.clone());
-            for cell in cells { assert_eq!(presentation.tile_has_blocking_entity("1",cell),Some(false)); }
+            for cell in cells {
+                assert_eq!(
+                    presentation.tile_has_blocking_entity("1", cell),
+                    Some(false)
+                );
+            }
         }
         payload["entities"][1]["direction"] = json!("up");
         payload["entities"][1]["dead"] = json!(true);
         presentation.latest_payload = Some(payload.clone());
-        for cell in cells { assert_eq!(presentation.tile_has_blocking_entity("1",cell),Some(false)); }
+        for cell in cells {
+            assert_eq!(
+                presentation.tile_has_blocking_entity("1", cell),
+                Some(false)
+            );
+        }
         payload["entities"][1]["dead"] = json!(false);
         payload["entities"][1]["direction"] = json!("left");
-        payload["entities"].as_array_mut().unwrap().push(json!({"objectId":3,"kind":"npc","x":672,"y":330,"dead":false}));
+        payload["entities"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"objectId":3,"kind":"npc","x":672,"y":330,"dead":false}));
         presentation.latest_payload = Some(payload.clone());
-        assert_eq!(presentation.tile_has_blocking_entity("1",(672,330)),Some(true));
+        assert_eq!(
+            presentation.tile_has_blocking_entity("1", (672, 330)),
+            Some(true)
+        );
         payload["entities"].as_array_mut().unwrap().pop();
         payload["mapFileName"] = json!("0.map");
         presentation.latest_payload = Some(payload);
-        assert_eq!(presentation.tile_has_blocking_entity("1",(672,330)),Some(true),"ordinary actors on other maps retain collision");
+        assert_eq!(
+            presentation.tile_has_blocking_entity("1", (672, 330)),
+            Some(true),
+            "ordinary actors on other maps retain collision"
+        );
     }
 
     #[test]
@@ -2136,8 +2266,15 @@ mod tests {
         }
         let state = presentation.world.active_state("1").unwrap();
         assert_eq!(state.pose().action, AnimationAction::Attack1);
-        assert_eq!(state.queue_depth(), 1, "48 real hit packets must not become 48 flinches");
-        assert_eq!(state.queued_actions().next().unwrap().action, AnimationAction::Struck);
+        assert_eq!(
+            state.queue_depth(),
+            1,
+            "48 real hit packets must not become 48 flinches"
+        );
+        assert_eq!(
+            state.queued_actions().next().unwrap().action,
+            AnimationAction::Struck
+        );
     }
 
     #[test]
@@ -2151,11 +2288,27 @@ mod tests {
             payload["entities"][0]["_nativeAnimationSequence"] = json!(sequence);
             presentation.observe_packet_payload(payload.clone(), 50);
         }
-        assert!(presentation.begin_local_self_motion("1", (10, 10), (11, 10), "right", false, 100, 1_100));
+        assert!(presentation.begin_local_self_motion(
+            "1",
+            (10, 10),
+            (11, 10),
+            "right",
+            false,
+            100,
+            1_100
+        ));
         let state = presentation.world.active_state("1").unwrap();
-        assert_eq!(state.pose().action, AnimationAction::Walking, "fresh escape was queued behind stale hits");
+        assert_eq!(
+            state.pose().action,
+            AnimationAction::Walking,
+            "fresh escape was queued behind stale hits"
+        );
         assert_eq!(state.queue_depth(), 0);
-        assert_eq!(presentation.overlay_payload().unwrap()["entities"][0]["x"], json!(10), "pixels cannot forge tile authority");
+        assert_eq!(
+            presentation.overlay_payload().unwrap()["entities"][0]["x"],
+            json!(10),
+            "pixels cannot forge tile authority"
+        );
         let before_ack = presentation.motion_windows["1"];
         assert!(before_ack.locally_predicted);
         let mut acknowledged = player_payload(51);
@@ -2168,7 +2321,10 @@ mod tests {
         assert!(!after_ack.locally_predicted);
         assert_eq!(after_ack.started_ms, before_ack.started_ms);
         assert_eq!(after_ack.expires_ms, before_ack.expires_ms);
-        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 0);
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().queue_depth(),
+            0
+        );
     }
 
     #[test]
@@ -2213,9 +2369,21 @@ mod tests {
                 presentation.replace_payload(payload.clone());
                 presentation.sync_pending_payload(animation_ms, motion_ms);
             }
-            assert!(presentation.begin_local_self_motion("1", (x, 10), (x + 1, 10), "right", false, animation_ms, motion_ms));
+            assert!(presentation.begin_local_self_motion(
+                "1",
+                (x, 10),
+                (x + 1, 10),
+                "right",
+                false,
+                animation_ms,
+                motion_ms
+            ));
             let state = presentation.world.active_state("1").unwrap();
-            assert_eq!(state.pose().action, AnimationAction::Walking, "escape step {step}");
+            assert_eq!(
+                state.pose().action,
+                AnimationAction::Walking,
+                "escape step {step}"
+            );
             assert_eq!(state.queue_depth(), 0, "escape step {step}");
             sequence += 1; // The real packet adapter does not count local predictions.
             payload["entities"][0]["_nativeAnimationAction"] = json!("walking");
@@ -2457,18 +2625,31 @@ mod tests {
     #[test]
     fn late_self_run_ack_never_replays_completed_prediction_or_blocks_correction() {
         let render = |p: &mut NativeEntityPresentation, time| {
-            p.render_state_if_changed_with_clocks(time - 1000, time, true, |payload, _, _| Some(payload.clone()));
+            p.render_state_if_changed_with_clocks(time - 1000, time, true, |payload, _, _| {
+                Some(payload.clone())
+            });
         };
         let mut p = NativeEntityPresentation::default();
         let mut initial = player_payload(7);
         initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
         p.replace_payload(initial.clone());
         render(&mut p, 1000);
-        assert!(p.begin_local_self_motion("1", (10,10), (12,10), "right", true, 100, 1100));
+        assert!(p.begin_local_self_motion("1", (10, 10), (12, 10), "right", true, 100, 1100));
         render(&mut p, 1700);
-        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(10), "unacknowledged render coordinates must remain coherent with the source map");
-        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(10));
-        assert_eq!(p.last_positions["1"], (12,10), "receipt remembers the already-played endpoint");
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(10),
+            "unacknowledged render coordinates must remain coherent with the source map"
+        );
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(10)
+        );
+        assert_eq!(
+            p.last_positions["1"],
+            (12, 10),
+            "receipt remembers the already-played endpoint"
+        );
         assert!(p.motion_windows["1"].locally_settled);
         let mut ack = player_payload(9);
         ack["entities"][0]["x"] = json!(12);
@@ -2477,29 +2658,57 @@ mod tests {
         ack["sceneView"]["center"]["x"] = json!(12);
         p.replace_payload(ack.clone());
         render(&mut p, 1850);
-        assert!(!p.has_active_motion(1850), "late ACK cannot restart movement");
-        assert_eq!(p.world.active_state("1").unwrap().pose().action, AnimationAction::Standing);
-        assert_eq!(p.last_positions["1"], (12,10));
-        assert!(p.begin_local_self_motion("1", (12,10), (14,10), "right", true, 900, 1900));
-        for time in [2000,2100,2300] {
+        assert!(
+            !p.has_active_motion(1850),
+            "late ACK cannot restart movement"
+        );
+        assert_eq!(
+            p.world.active_state("1").unwrap().pose().action,
+            AnimationAction::Standing
+        );
+        assert_eq!(p.last_positions["1"], (12, 10));
+        assert!(p.begin_local_self_motion("1", (12, 10), (14, 10), "right", true, 900, 1900));
+        for time in [2000, 2100, 2300] {
             p.replace_payload(ack.clone());
             render(&mut p, time);
-            assert_eq!(p.motion_windows["1"].started_ms,1900,"source echoes cannot restart second run");
-            assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
-            assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12));
+            assert_eq!(
+                p.motion_windows["1"].started_ms, 1900,
+                "source echoes cannot restart second run"
+            );
+            assert_eq!(
+                p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+                json!(12)
+            );
+            assert_eq!(
+                p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+                json!(12)
+            );
         }
         render(&mut p, 2500);
         p.replace_payload(ack.clone());
         render(&mut p, 2600);
-        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12), "render center stays source until ACK");
-        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
-        assert_eq!(p.last_positions["1"], (14,10));
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(12),
+            "render center stays source until ACK"
+        );
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(12)
+        );
+        assert_eq!(p.last_positions["1"], (14, 10));
         assert!(p.motion_windows["1"].locally_predicted);
-        p.cancel_local_self_prediction("1", (12,10), "left");
+        p.cancel_local_self_prediction("1", (12, 10), "left");
         assert!(!p.motion_windows.contains_key("1"));
-        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12));
-        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
-        assert_eq!(p.last_positions["1"], (12,10));
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(12)
+        );
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(12)
+        );
+        assert_eq!(p.last_positions["1"], (12, 10));
     }
 
     #[test]
@@ -2576,7 +2785,13 @@ mod tests {
         presentation.replace_payload(initial);
         presentation.sync_pending_payload(0, 1_000);
         assert!(presentation.begin_local_self_motion(
-            "1", (10, 10), (11, 10), "right", false, 100, 1_100,
+            "1",
+            (10, 10),
+            (11, 10),
+            "right",
+            false,
+            100,
+            1_100,
         ));
         assert_eq!(presentation.motion_windows["1"].animation_sequence, 8);
         presentation
@@ -2593,15 +2808,30 @@ mod tests {
         presentation.replace_payload(death.clone());
         presentation.sync_pending_payload(200, 1_200);
         let state = presentation.world.active_state("1").unwrap();
-        assert_eq!(state.queued_actions().map(|event| event.action).collect::<Vec<_>>(),
-            vec![AnimationAction::Die], "a source Death must retain its life barrier");
-        assert_eq!(presentation.overlay_payload().unwrap()["entities"][0]["x"], json!(10));
+        assert_eq!(
+            state
+                .queued_actions()
+                .map(|event| event.action)
+                .collect::<Vec<_>>(),
+            vec![AnimationAction::Die],
+            "a source Death must retain its life barrier"
+        );
+        assert_eq!(
+            presentation.overlay_payload().unwrap()["entities"][0]["x"],
+            json!(10)
+        );
         presentation.replace_payload(death);
         presentation.sync_pending_payload(250, 1_250);
-        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 1,
-            "repeated Death projections cannot queue a second life barrier");
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().queue_depth(),
+            1,
+            "repeated Death projections cannot queue a second life barrier"
+        );
         presentation.world.tick(700).unwrap();
-        assert_eq!(presentation.world.active_state("1").unwrap().pose().action, AnimationAction::Die);
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().pose().action,
+            AnimationAction::Die
+        );
     }
 
     #[test]
@@ -2612,14 +2842,26 @@ mod tests {
         presentation.replace_payload(spell.clone());
         presentation.sync_pending_payload(200, 1_200);
         let state = presentation.world.active_state("1").unwrap();
-        assert_eq!(state.queued_actions().map(|event| event.action).collect::<Vec<_>>(),
-            vec![AnimationAction::Spell], "a source cast must retain its FIFO barrier");
+        assert_eq!(
+            state
+                .queued_actions()
+                .map(|event| event.action)
+                .collect::<Vec<_>>(),
+            vec![AnimationAction::Spell],
+            "a source cast must retain its FIFO barrier"
+        );
         presentation.replace_payload(spell);
         presentation.sync_pending_payload(250, 1_250);
-        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 1,
-            "repeated cast projections cannot replay the spell");
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().queue_depth(),
+            1,
+            "repeated cast projections cannot replay the spell"
+        );
         presentation.world.tick(700).unwrap();
-        assert_eq!(presentation.world.active_state("1").unwrap().pose().action, AnimationAction::Spell);
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().pose().action,
+            AnimationAction::Spell
+        );
     }
 
     #[test]
@@ -2639,17 +2881,35 @@ mod tests {
         let state = presentation.world.active_state("1").unwrap();
         assert_eq!(state.pose().action, AnimationAction::Walking);
         assert_eq!(state.queue_depth(), 0);
-        assert_eq!(state.last_started_event_sequence(), Some(confirmed.animation_sequence),
-            "the motion window and active animation must use one presentation sequence");
+        assert_eq!(
+            state.last_started_event_sequence(),
+            Some(confirmed.animation_sequence),
+            "the motion window and active animation must use one presentation sequence"
+        );
         let last_enqueued = state.last_enqueued_event_sequence();
         presentation.replace_payload(ack.clone());
         presentation.sync_pending_payload(250, 1_250);
-        assert_eq!(presentation.motion_windows["1"].started_ms, prediction.started_ms);
-        assert_eq!(presentation.world.active_state("1").unwrap().last_enqueued_event_sequence(), last_enqueued);
-        presentation.render_state_if_changed_with_clocks(700, 1_700, true, |payload, _, _| Some(payload.clone()));
+        assert_eq!(
+            presentation.motion_windows["1"].started_ms,
+            prediction.started_ms
+        );
+        assert_eq!(
+            presentation
+                .world
+                .active_state("1")
+                .unwrap()
+                .last_enqueued_event_sequence(),
+            last_enqueued
+        );
+        presentation.render_state_if_changed_with_clocks(700, 1_700, true, |payload, _, _| {
+            Some(payload.clone())
+        });
         presentation.replace_payload(ack);
         presentation.sync_pending_payload(800, 1_800);
-        assert!(!presentation.has_active_motion(1_800), "a completed movement cannot replay on its repeated ACK");
+        assert!(
+            !presentation.has_active_motion(1_800),
+            "a completed movement cannot replay on its repeated ACK"
+        );
         let state = presentation.world.active_state("1").unwrap();
         assert_eq!(state.pose().action, AnimationAction::Standing);
         assert_eq!(state.queue_depth(), 0);
@@ -2665,15 +2925,27 @@ mod tests {
         presentation.replace_payload(first_ack.clone());
         presentation.sync_pending_payload(200, 1_200);
         assert!(presentation.begin_local_self_motion(
-            "1", (11, 10), (12, 10), "right", false, 700, 1_700,
+            "1",
+            (11, 10),
+            (12, 10),
+            "right",
+            false,
+            700,
+            1_700,
         ));
         let prediction = presentation.motion_windows["1"];
         // Reconciliation rewrites this old source echo with the second
         // prediction's higher animation number. That is not its packet number.
         presentation.replace_payload(first_ack);
         presentation.sync_pending_payload(750, 1_750);
-        assert_eq!(presentation.motion_windows["1"].started_ms, prediction.started_ms);
-        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 0);
+        assert_eq!(
+            presentation.motion_windows["1"].started_ms,
+            prediction.started_ms
+        );
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().queue_depth(),
+            0
+        );
         let mut death = player_payload(9);
         death["entities"][0]["x"] = json!(11);
         death["sceneView"]["center"]["x"] = json!(11);
@@ -2681,9 +2953,17 @@ mod tests {
         death["entities"][0]["dead"] = json!(true);
         presentation.replace_payload(death);
         presentation.sync_pending_payload(800, 1_800);
-        assert_eq!(presentation.world.active_state("1").unwrap().queued_actions()
-            .map(|event| event.action).collect::<Vec<_>>(), vec![AnimationAction::Die],
-            "normalizing a stale receipt cannot consume the next real Death");
+        assert_eq!(
+            presentation
+                .world
+                .active_state("1")
+                .unwrap()
+                .queued_actions()
+                .map(|event| event.action)
+                .collect::<Vec<_>>(),
+            vec![AnimationAction::Die],
+            "normalizing a stale receipt cannot consume the next real Death"
+        );
     }
 
     #[test]
@@ -2692,11 +2972,19 @@ mod tests {
         let mut initial = player_payload(7);
         initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
         presentation.replace_payload(initial);
-        presentation.render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
-            Some(payload.clone())
-        }).expect("initial player");
+        presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial player");
         assert!(presentation.begin_local_self_motion(
-            "1", (10, 10), (12, 10), "right", true, 100, 1_100,
+            "1",
+            (10, 10),
+            (12, 10),
+            "right",
+            true,
+            100,
+            1_100,
         ));
 
         let mut attack = player_payload(9);
@@ -2705,18 +2993,22 @@ mod tests {
         attack["entities"][0]["direction"] = json!("right");
         attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
         presentation.replace_payload(attack);
-        presentation.render_state_if_changed_with_clocks(200, 1_200, true, |payload, frames, _| {
-            assert_eq!(frames["1"].1, AnimationAction::Running);
-            assert!(payload["entities"][0].get("motionStartedMs").is_some());
-            Some(payload.clone())
-        }).expect("run still visible while early attack is queued");
+        presentation
+            .render_state_if_changed_with_clocks(200, 1_200, true, |payload, frames, _| {
+                assert_eq!(frames["1"].1, AnimationAction::Running);
+                assert!(payload["entities"][0].get("motionStartedMs").is_some());
+                Some(payload.clone())
+            })
+            .expect("run still visible while early attack is queued");
         assert!(presentation.last_attack_motion_overlap.is_none());
 
-        presentation.render_state_if_changed_with_clocks(700, 1_700, true, |payload, frames, _| {
-            assert_eq!(frames["1"].1, AnimationAction::Attack1);
-            assert!(payload["entities"][0].get("motionStartedMs").is_none());
-            Some(payload.clone())
-        }).expect("attack starts only after run pixels settle");
+        presentation
+            .render_state_if_changed_with_clocks(700, 1_700, true, |payload, frames, _| {
+                assert_eq!(frames["1"].1, AnimationAction::Attack1);
+                assert!(payload["entities"][0].get("motionStartedMs").is_none());
+                Some(payload.clone())
+            })
+            .expect("attack starts only after run pixels settle");
         assert!(presentation.last_attack_motion_overlap.is_none());
     }
 
@@ -2724,30 +3016,44 @@ mod tests {
     fn mismatched_animation_and_motion_clocks_detect_attack_motion_overlap_once() {
         let mut presentation = NativeEntityPresentation::default();
         presentation.replace_payload(player_payload(7));
-        presentation.render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
-            Some(payload.clone())
-        }).expect("initial player");
+        presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial player");
         assert!(presentation.begin_local_self_motion(
-            "1", (10, 10), (12, 10), "right", true, 100, 1_100,
+            "1",
+            (10, 10),
+            (12, 10),
+            "right",
+            true,
+            100,
+            1_100,
         ));
         let mut attack = player_payload(9);
         attack["entities"][0]["x"] = json!(12);
         attack["sceneView"]["center"]["x"] = json!(12);
         attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
         presentation.replace_payload(attack);
-        presentation.render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
-            Some(payload.clone())
-        }).expect("attack queued behind run");
+        presentation
+            .render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("attack queued behind run");
 
         // Deliberately advance the animation clock ahead of the wall-clock
         // motion window: this is the exact visual anomaly the sparse trace
         // must distinguish from a harmless delayed network ACK.
-        presentation.render_state_if_changed_with_clocks(700, 1_300, true, |payload, frames, _| {
-            assert_eq!(frames["1"].1, AnimationAction::Attack1);
-            assert!(payload["entities"][0].get("motionStartedMs").is_some());
-            Some(payload.clone())
-        }).expect("skewed attack pose overlaps active motion");
-        let first = presentation.last_attack_motion_overlap.expect("overlap recorded");
+        presentation
+            .render_state_if_changed_with_clocks(700, 1_300, true, |payload, frames, _| {
+                assert_eq!(frames["1"].1, AnimationAction::Attack1);
+                assert!(payload["entities"][0].get("motionStartedMs").is_some());
+                Some(payload.clone())
+            })
+            .expect("skewed attack pose overlaps active motion");
+        let first = presentation
+            .last_attack_motion_overlap
+            .expect("overlap recorded");
         presentation.render_state_if_changed_with_clocks(750, 1_350, true, |payload, _, _| {
             Some(payload.clone())
         });
@@ -3137,7 +3443,10 @@ mod tests {
         window.set_cursor_position(Some(Vec2::new(100.0, 360.0)));
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::InGame;
-        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None, None), None);
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
+            None
+        );
 
         window.set_cursor_position(Some(Vec2::new(640.0, 360.0)));
         assert_eq!(
@@ -3145,10 +3454,16 @@ mod tests {
             Some((512.0, 384.0))
         );
         shell.screen = NativeShellScreen::Login;
-        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None, None), None);
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
+            None
+        );
         shell.screen = NativeShellScreen::InGame;
         window.focused = false;
-        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None, None), None);
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
+            None
+        );
     }
 
     #[test]
@@ -3889,18 +4204,26 @@ mod tests {
         assert!(!layers.is_empty());
         for layer in layers {
             assert_eq!(layer["path"], "/original-ui/Monster/005/136.png");
-            assert_eq!((layer["width"].as_f64(), layer["height"].as_f64()),
-                (Some(96.0), Some(76.0)), "fallback retains real source geometry");
+            assert_eq!(
+                (layer["width"].as_f64(), layer["height"].as_f64()),
+                (Some(96.0), Some(76.0)),
+                "fallback retains real source geometry"
+            );
         }
 
         // A missing atlas rect alone is no longer missing source geometry:
         // complete packs can supply individual monster PNGs. This frame is
         // outside the source library, so neither valid source can resolve it.
-        assert!(crate::assets::asset_path("original-ui/Monster/005/2147483647.png")
-            .is_none_or(|path| !path.is_file()));
+        assert!(
+            crate::assets::asset_path("original-ui/Monster/005/2147483647.png")
+                .is_none_or(|path| !path.is_file())
+        );
         let missing_rect = crate::atlas::build_entity_render_state_with_manifest_for_test(
             &payload,
-            &HashMap::from([("2005".to_owned(), (i64::from(i32::MAX), AnimationAction::Struck))]),
+            &HashMap::from([(
+                "2005".to_owned(),
+                (i64::from(i32::MAX), AnimationAction::Struck),
+            )]),
             true,
             &crate::atlas::routing_atlas_manifest_fixture(&[]),
         )
@@ -3989,20 +4312,37 @@ mod tests {
         };
         let layers = rendered["layers"].as_array().expect("rendered layers");
         let expected_layers = checkpoint["layers"].as_array().expect("checkpoint layers");
-        let redraws = layers.iter().filter(|layer| layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+        let redraws = layers
+            .iter()
+            .filter(|layer| layer["key"].as_str().unwrap().contains(":self-occlusion:"))
+            .collect::<Vec<_>>();
         let expected_redraw_roles = if rendered["isSelf"] == true {
-            expected_layers.iter().filter_map(|layer| {
-                let key = layer["key"].as_str()?;
-                let role = key.rsplit(':').next()?;
-                matches!(role, "body" | "hair" | "wings").then_some(role)
-            }).collect::<Vec<_>>()
-        } else { Vec::new() };
+            expected_layers
+                .iter()
+                .filter_map(|layer| {
+                    let key = layer["key"].as_str()?;
+                    let role = key.rsplit(':').next()?;
+                    matches!(role, "body" | "hair" | "wings").then_some(role)
+                })
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
         assert_eq!(redraws.len(), expected_redraw_roles.len());
         for role in expected_redraw_roles {
-            let source = layers.iter().find(|v| v["key"] == format!("{object_id}:{role}")).unwrap();
-            let redraw = redraws.iter().find(|v| v["key"] == format!("{object_id}:self-occlusion:{role}")).unwrap();
+            let source = layers
+                .iter()
+                .find(|v| v["key"] == format!("{object_id}:{role}"))
+                .unwrap();
+            let redraw = redraws
+                .iter()
+                .find(|v| v["key"] == format!("{object_id}:self-occlusion:{role}"))
+                .unwrap();
             for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
-                assert_eq!(source[field], redraw[field], "redraw preserves {role} {field}");
+                assert_eq!(
+                    source[field], redraw[field],
+                    "redraw preserves {role} {field}"
+                );
             }
             assert_eq!(redraw["opacity"], json!(0.4));
             assert_eq!(redraw["additive"], json!(role == "wings"));
