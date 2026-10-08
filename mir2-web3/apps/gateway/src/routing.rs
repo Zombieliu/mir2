@@ -2266,9 +2266,12 @@ impl fmt::Debug for SharedZoneLiveOutboundRegistration {
 
 impl Drop for SharedZoneLiveOutboundRegistration {
     fn drop(&mut self) {
+        let started = Instant::now();
+        eprintln!("gateway transport_registration registration_id={} stage=unregister phase=begin", self.registration_id);
         if let Ok(mut zone_state) = self.zone_state.lock() {
             zone_state.unregister_live_zone_outbound(&self.key, self.registration_id);
         }
+        eprintln!("gateway transport_registration registration_id={} stage=unregister phase=end elapsed_ms={}", self.registration_id, started.elapsed().as_millis());
     }
 }
 
@@ -9017,7 +9020,7 @@ pub(crate) fn prepare_zone_teardown_checkpoint(
         return Ok(None);
     };
     let checkpoint = runtime
-        .active_character_checkpoint()
+        .active_character_teardown_checkpoint()
         .ok_or_else(|| "teardown identity has no active character checkpoint".to_string())?;
     let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
     prepared.validate_identity_checkpoint()?;
@@ -9035,8 +9038,7 @@ pub(crate) fn persist_zone_teardown_checkpoint(
     if identity != prepared.identity {
         return Err("teardown persist active identity changed after preparation".to_string());
     }
-    runtime.restore_active_character_checkpoint(prepared.checkpoint())?;
-    runtime.save_active_character_for_logout()
+    runtime.save_frozen_character_checkpoint_for_logout(prepared.checkpoint())
 }
 
 pub(crate) fn release_zone_teardown_fence(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
@@ -10385,11 +10387,29 @@ impl SharedInProcessZoneSessionRuntime {
                 .lock()
                 .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
             zone_state.begin_teardown_fence(&key)?;
+            // A reply timeout does not remove a movement request from the
+            // bounded owner queue. Retire its transport epoch while holding
+            // the same Zone -> movement-state lock order as owner execution.
+            // Thawing this saved presence must not revive those old requests.
+            {
+                let mut movement = self.movement_ingress.session_state.lock()
+                    .map_err(|_| "shared movement session state is poisoned".to_string())?;
+                movement.presence_epoch = movement.presence_epoch.checked_add(1)
+                    .ok_or_else(|| "shared movement presence epoch exhausted".to_string())?;
+                movement.pending_zone_player_movement = false;
+                movement.recent_zone_player_movement_until_ms = 0;
+            }
             let session_id = zone_state
                 .zone_sessions
                 .get(&key)
                 .cloned()
                 .ok_or_else(|| "fenced shared Zone presence has no session id".to_string())?;
+            // Requests already accepted into the authoritative action clock
+            // are a second queue. Preserve completed movement, but never thaw
+            // pending Walk/Run intents from the disconnected transport.
+            let _ = zone_state.zone_manager.handle(ZoneCommand::CancelPendingMovement {
+                session_id: session_id.clone(),
+            });
             let pending = (
                 zone_state.take_pending_zone_packets(&key),
                 zone_state.take_pending_zone_transform(&key),
@@ -10485,7 +10505,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.force_authoritative_player_life(authoritative_dead);
         let checkpoint = self
             .inner
-            .active_character_checkpoint()
+            .active_character_teardown_checkpoint()
             .ok_or_else(|| "teardown drain produced no active checkpoint".to_string())?;
         let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
         prepared.validate_identity_checkpoint()?;
@@ -15525,6 +15545,21 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character_for_logout()
+    }
+
+    fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let key = self.current_presence_key()
+            .ok_or("frozen shared teardown requires its prepared presence")?;
+        let fenced = self.zone_state.lock()
+            .map_err(|_| "cannot verify frozen teardown fence: Zone mutex poisoned")?
+            .teardown_fenced(&key);
+        if !fenced {
+            return Err("frozen shared teardown requires its prepared fence".into());
+        }
+        self.inner.save_frozen_character_checkpoint_for_logout(checkpoint)
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {

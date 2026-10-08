@@ -8,8 +8,8 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use hmac::{Hmac, KeyInit, Mac};
-use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
-use mir2_simulation::{CharacterSaveRecord, SimulationConfig, SimulationSession};
+use mir2_protocol::{MirDirection, Point};
+use mir2_simulation::{CharacterSaveRecord, RecoveryCharacterLoadError, SimulationConfig, SimulationSession};
 use rand::{rngs::OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -1137,22 +1137,10 @@ fn replay_envelope(
     let payload = &envelope.payload;
     let mut session = SimulationSession::new(config.clone());
     session
-        .select_account_for_recovery(&payload.account_id)
-        .map_err(|error| replay_conflict(format!("recovery account selection failed: {error}")))?;
-    let packets = session.handle_packet(ClientPacket::StartGame {
-        character_index: payload.character_index,
-    });
-    if !packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. }))
-    {
-        return Err(replay_conflict(
-            "recovery StartGame did not select the journal character".to_string(),
-        ));
-    }
-    let current = session.active_character_checkpoint().ok_or_else(|| {
-        replay_conflict("recovery runtime produced no active checkpoint".to_string())
-    })?;
+        .bind_account_for_recovery(&payload.account_id)
+        .map_err(recovery_load_error)?;
+    let current = session.select_character_for_recovery(payload.character_index)
+        .map_err(recovery_load_error)?;
     let journal_revision = payload.checkpoint.revision;
     if current.revision > journal_revision {
         if checkpoints_equivalent(&current, &payload.checkpoint)? {
@@ -1170,15 +1158,9 @@ fn replay_envelope(
         )));
     }
 
-    session
-        .restore_active_character_checkpoint(&payload.checkpoint)
-        .map_err(|error| replay_conflict(format!("restore recovery checkpoint: {error}")))?;
-    session
-        .save_active_character_for_logout()
+    let committed = session
+        .persist_character_for_recovery(&payload.checkpoint)
         .map_err(|error| format!("recovery DB save failed; journal retained: {error}"))?;
-    let committed = session.active_character_checkpoint().ok_or_else(|| {
-        "recovery DB save returned success but active checkpoint disappeared".to_string()
-    })?;
     if committed.revision <= journal_revision
         || !checkpoints_equivalent(&committed, &payload.checkpoint)?
     {
@@ -1189,19 +1171,19 @@ fn replay_envelope(
     Ok(ReplayDecision::Replayed)
 }
 
+fn recovery_load_error(error: RecoveryCharacterLoadError) -> String {
+    match error {
+        RecoveryCharacterLoadError::Conflict(error) => replay_conflict(error),
+        RecoveryCharacterLoadError::Deferred(error) =>
+            format!("recovery source or access unavailable; journal retained: {error}"),
+    }
+}
+
 fn checkpoints_equivalent(
     left: &CharacterSaveRecord,
     right: &CharacterSaveRecord,
 ) -> Result<bool, String> {
-    let mut left = left.clone();
-    let mut right = right.clone();
-    left.revision = 0;
-    right.revision = 0;
-    let left = serde_json::to_vec(&left)
-        .map_err(|error| format!("encode current recovery checkpoint: {error}"))?;
-    let right = serde_json::to_vec(&right)
-        .map_err(|error| format!("encode journal recovery checkpoint: {error}"))?;
-    Ok(left == right)
+    SimulationSession::recovery_checkpoints_equivalent(left, right)
 }
 
 fn replay_conflict(message: String) -> String {

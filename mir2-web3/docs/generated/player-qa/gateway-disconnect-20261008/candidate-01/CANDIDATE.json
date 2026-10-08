@@ -1,0 +1,467 @@
+{
+  "schema": "mir2.gateway.disconnect-candidate.v1",
+  "createdUtc": "2026-10-08T16:21:23.018523+00:00",
+  "sourceBase": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "sourceFiles": [
+    {
+      "file": ".github/workflows/gateway-release.yml",
+      "bytes": 6437,
+      "sha256": "dd3b8e597a7c6a61f5cc24983935d2ce155556bc352327662cdb701c0c1ab670"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/abnormal_teardown_persistence_tests.rs",
+      "bytes": 17015,
+      "sha256": "e18aa7d32e95689398500a8ad94bd874f30be11ecc0fd97ba179ecdfeac8d46a"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/abnormal_teardown_zone_drain_tests.rs",
+      "bytes": 12509,
+      "sha256": "f05f2c2f3782dd74f50b9b2d9ccdafe668a002a6f7c9abb8f3b6d7c31a55ea8b"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1228490,
+      "sha256": "9d01566e85573274dafdf528cab399b6a7e105dea1589106bde42f37d0b2b7c3"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/save_recovery.rs",
+      "bytes": 88026,
+      "sha256": "00a5c254a187bf37a625cef1ff73366acb2441aaac406cfc2faa53f00e202284"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/save_recovery_tests.rs",
+      "bytes": 43993,
+      "sha256": "d3e8c5d3f7afe600bf9892b3ce7ed1b3f3ffec5490c8266548bbaf4798c9f6e2"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/session.rs",
+      "bytes": 98853,
+      "sha256": "5de39ed41200d96bd14f716e3b89d45410b62f529470a1f36481b4e5ca2ae4cb"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 771033,
+      "sha256": "c2846c734883a7e861a385f09ea5bf8e42f41ed64739908701ebc41c587fac55"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_explicit_leave_route_tests.rs",
+      "bytes": 9145,
+      "sha256": "1bb76fb9f7f7f623d24ca15e4879dfbd9376c536e1407649779d92958ee88c59"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 21552,
+      "sha256": "b8e9c3ab92b1c9f12edcf39dad00f7bb2bc3b0769a81e5e238cd4d0d70ad1ab7"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_monthly_card.rs",
+      "bytes": 7178,
+      "sha256": "dfb88ef87946b6e1711d818e9f8e12823093696f8f95b81c9100cbdfe7574ada"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_save_fail_closed_tests.rs",
+      "bytes": 20563,
+      "sha256": "092e249f9b87a86d63419f0f04af5fa1ab84794b1b7a998fe99a157de7aa4a54"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_transport.rs",
+      "bytes": 11094,
+      "sha256": "6fada44504db2ca4baadef862213d83298ee73ef2d09d0a6742938af5c6a98d0"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5776,
+      "sha256": "9f0070900a4e1d5872d66195925ba38860a9b6a7f3cc305b795dabdb7152a3ac"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 5383,
+      "sha256": "6e67ca14e9598f1cad7cda1bbbc3d164f4a2c502727b5cfbb803588f34079f48"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "bytes": 6986,
+      "sha256": "ab41f4dcef557a5da94b16d1935c8eae3e8cb4d1250b4914a02f65215de52dc5"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/packets.rs",
+      "bytes": 395198,
+      "sha256": "6d772905727b158ae0463a9370c45220d52465c0bbbfd348582f69be705c4f81"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/recovery.rs",
+      "bytes": 17743,
+      "sha256": "04da8fa9afe01e89bca1a7ac6535ad773d341270de2de3952a81ff074fd2f6e4"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "bytes": 171141,
+      "sha256": "636b874b2f69624829d58c6d023a8163f4a63a896f0943453ef177fb94c8bf4c"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 93879,
+      "sha256": "c34043e8317ab6692f787668ceebe2735abf13b3dec581859fb0cd03a8822505"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "bytes": 62548,
+      "sha256": "f169bf582106a2cb60b37c818be7350af7dae8a3f88f83e9227fc10069c367a0"
+    }
+  ],
+  "localGates": [
+    {
+      "suite": "recovery-load",
+      "run": "22",
+      "startedUtc": "2026-10-08T15:36:04.4939845Z",
+      "completedUtc": "2026-10-08T15:37:24.8858453Z",
+      "exitCode": 0,
+      "executable": "cargo",
+      "arguments": [
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "runtime::recovery::",
+        "--",
+        "--test-threads=1"
+      ],
+      "project": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3",
+      "target": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-target-04",
+      "log": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-evidence-01\\22-recovery-load.log",
+      "logSha256": "0d1d71fc9bdd9386a1f96f2fa2cd184e62d24daf8d788a211ff90c86ecc6ca06",
+      "passedTests": 7
+    },
+    {
+      "suite": "qualification",
+      "run": "26",
+      "startedUtc": "2026-10-08T16:05:22.1657900Z",
+      "completedUtc": "2026-10-08T16:08:04.8966973Z",
+      "exitCode": 0,
+      "executable": "cargo",
+      "arguments": [
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "web::",
+        "abnormal_teardown_",
+        "rpc_zone_owner_command_client",
+        "save_recovery::tests"
+      ],
+      "project": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3",
+      "target": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-target-05",
+      "log": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-evidence-01\\26-qualification.log",
+      "logSha256": "c10b7879d00093c9f3d67d1ea64cc3e623e0d07ebf0a78c268244cf93c52fdde",
+      "passedTests": 270
+    },
+    {
+      "suite": "build",
+      "run": "27",
+      "startedUtc": "2026-10-08T16:10:13.3218513Z",
+      "completedUtc": "2026-10-08T16:11:26.8838922Z",
+      "exitCode": 0,
+      "executable": "cargo",
+      "arguments": [
+        "+1.95.0",
+        "build",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-gateway",
+        "--bin",
+        "mir2-gateway"
+      ],
+      "project": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3",
+      "target": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-target-05",
+      "log": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-evidence-01\\27-build.log",
+      "logSha256": "354f78270f4ed5c50760df35a21f66632e54aa9a9d9afd1ab4b4486b581be596"
+    }
+  ],
+  "archive": {
+    "file": "original-evidence.zip",
+    "bytes": 200467,
+    "sha256": "c6bda25af0f0c512f899893e5904493af1e389b2a325a605b9ce56580fb9120c",
+    "entries": [
+      {
+        "file": "raw/05-focused.log",
+        "bytes": 33773,
+        "sha256": "2cd16efe6fa5ded59b33e84934118a70ed0b6010ebe57d945cd66f83027d109f"
+      },
+      {
+        "file": "raw/05-focused.log.json",
+        "bytes": 711,
+        "sha256": "b519a115ff1eefc219bbc32455110cabe2ef55e6e19f08384518bb3176b650de"
+      },
+      {
+        "file": "raw/06-adjacent.log",
+        "bytes": 59581,
+        "sha256": "2d52755e0f2d651cb0c69e057e155ef05058591c92e664bc5a8aac08086951d3"
+      },
+      {
+        "file": "raw/06-adjacent.log.json",
+        "bytes": 775,
+        "sha256": "009cc4753f3d5762671eb88e0d3427bc5d7bdf0356974c607e0f99a49fbff701"
+      },
+      {
+        "file": "raw/08-baseline.log",
+        "bytes": 42759,
+        "sha256": "ca94c349268ce909a32261783793cea2bd827727835cc6d2894357e5bd426a5a"
+      },
+      {
+        "file": "raw/08-baseline.log.json",
+        "bytes": 1310,
+        "sha256": "1876cd02a0e944e83620e0aa4a95eb8f13352297dc20c1bca6eff0c897822d76"
+      },
+      {
+        "file": "raw/09-baseline.log",
+        "bytes": 41894,
+        "sha256": "1a5b1e2af93ed65e2f35cc304ef9dac540092d9fdb2b6276f82eee153b6e1f6b"
+      },
+      {
+        "file": "raw/09-baseline.log.json",
+        "bytes": 1310,
+        "sha256": "fe755414e069b87e6b8b9130a4dcccffb1bf19caa3d1f0388c09577cb560d80f"
+      },
+      {
+        "file": "raw/10-baseline.log",
+        "bytes": 42280,
+        "sha256": "0b46326ba3087188c50a23c6eadd91be29258223b928a2a5bbd54d0dea9bb7a3"
+      },
+      {
+        "file": "raw/10-baseline.log.json",
+        "bytes": 1319,
+        "sha256": "38a6882d22530d3a22cbaf546963ad720a7ee5c2a83ac8659b8e4e76f8af8162"
+      },
+      {
+        "file": "raw/11-baseline.log",
+        "bytes": 36634,
+        "sha256": "db5dd72034e0765607f5fd78559eab6427f6164c6ae894424596d08145f1e610"
+      },
+      {
+        "file": "raw/11-baseline.log.json",
+        "bytes": 1319,
+        "sha256": "a2adf716ee1eafe4f2f1f1342c3aeaaf267379bc830e0a4b86434189f1a60973"
+      },
+      {
+        "file": "raw/12-qualification.log",
+        "bytes": 64821,
+        "sha256": "63e77ff3f6cfe149e9ffbfe00cb2f300f4d5e5a89cf640b621d8092e694084a3"
+      },
+      {
+        "file": "raw/12-qualification.log.json",
+        "bytes": 814,
+        "sha256": "ba2fa3eb4957733b498a584653cf30da2c77a8ade0b89c1bc86de368cd5106f8"
+      },
+      {
+        "file": "raw/15-qualification.log",
+        "bytes": 62578,
+        "sha256": "f84af358cfdc3bfb1586dfc17231362066bfc48566a2d14a9f02378e99d2046a"
+      },
+      {
+        "file": "raw/15-qualification.log.json",
+        "bytes": 812,
+        "sha256": "5cee807065bfafbb6ac881ef7e0bed265d1348e177b1feb2bf6858bc81f17451"
+      },
+      {
+        "file": "raw/16-recovery-load.log",
+        "bytes": 40219,
+        "sha256": "4c7b280a13507ede6aca85199194c9accb4a2608aa580b6f64c43db949e28291"
+      },
+      {
+        "file": "raw/16-recovery-load.log.json",
+        "bytes": 735,
+        "sha256": "c6039a660fd711f85ddc287452d027a28999158e2d05aaa2056a12941cdcced2"
+      },
+      {
+        "file": "raw/17-build.log",
+        "bytes": 33908,
+        "sha256": "a52dba87e086fbade95c1fefd594336adfbc692d542f40fe689b32ef5219dcfd"
+      },
+      {
+        "file": "raw/17-build.log.json",
+        "bytes": 674,
+        "sha256": "5a07993c1a3b50115097ae2da1c9757666338f37c267b1d17027966e329e3ac0"
+      },
+      {
+        "file": "raw/18-recovery-load.log",
+        "bytes": 39960,
+        "sha256": "43b4c5fb8975b48a1807dcc38ad60d257135297d6a53660260611b33033037a0"
+      },
+      {
+        "file": "raw/18-recovery-load.log.json",
+        "bytes": 737,
+        "sha256": "d5bb57388911359e899484e5f6f0bd8d654a6e092fd951d33236d56595006f3a"
+      },
+      {
+        "file": "raw/19-qualification.log",
+        "bytes": 40529,
+        "sha256": "5a7f47d2260ada813ed11e94ce2b47e79bcc0b83f5be8f5be56b4bda28a2d64c"
+      },
+      {
+        "file": "raw/19-qualification.log.json",
+        "bytes": 814,
+        "sha256": "3645f306238460299855519ea754355f79f0c49c7ee8661375ce67a446b72457"
+      },
+      {
+        "file": "raw/22-recovery-load.log",
+        "bytes": 41343,
+        "sha256": "0d1d71fc9bdd9386a1f96f2fa2cd184e62d24daf8d788a211ff90c86ecc6ca06"
+      },
+      {
+        "file": "raw/22-recovery-load.log.json",
+        "bytes": 735,
+        "sha256": "e894fdefe16b653b30ea0c1fb0793bd64041118595817f2db034986ac9f6eafa"
+      },
+      {
+        "file": "raw/23-qualification.log",
+        "bytes": 63932,
+        "sha256": "9db0e7b3725ab68ec5c5a3fb466b49d42d876f69b069ed66713f013dcba5310d"
+      },
+      {
+        "file": "raw/23-qualification.log.json",
+        "bytes": 814,
+        "sha256": "4eaa9690bb932016f0be9eeac45d29ddc0f824b43d8e449df2c6ac6f38de82c1"
+      },
+      {
+        "file": "raw/25-qualification.log",
+        "bytes": 37519,
+        "sha256": "b5cfdfd5cb9e1c479bdfcd1cbc5d238f0956de2baec5bd0805bcc2767bc5e918"
+      },
+      {
+        "file": "raw/25-qualification.log.json",
+        "bytes": 814,
+        "sha256": "9c478aaf20d6f6783e36a78d8bb18e171d3c192776e15715e4d2a28864d529b5"
+      },
+      {
+        "file": "raw/26-qualification.log",
+        "bytes": 57126,
+        "sha256": "c10b7879d00093c9f3d67d1ea64cc3e623e0d07ebf0a78c268244cf93c52fdde"
+      },
+      {
+        "file": "raw/26-qualification.log.json",
+        "bytes": 812,
+        "sha256": "654fc05f0dbfdd1f5ac8a23be455d981cd7a9dc70b85ac33432a53445f9a1322"
+      },
+      {
+        "file": "raw/27-build.log",
+        "bytes": 33913,
+        "sha256": "354f78270f4ed5c50760df35a21f66632e54aa9a9d9afd1ab4b4486b581be596"
+      },
+      {
+        "file": "raw/27-build.log.json",
+        "bytes": 674,
+        "sha256": "c03c3e06752b832676eb1e570dc9d7c0a13b9703986703b81b273d379ee13829"
+      },
+      {
+        "file": "raw/gateway-lifecycle-close-diagnostic-04.log",
+        "bytes": 32359,
+        "sha256": "3e4fe13a9f82eef256663ce9d38a062d648010f8559ecdd36f4937f91d644394"
+      },
+      {
+        "file": "raw/gateway-lifecycle-transport-02.log",
+        "bytes": 34384,
+        "sha256": "ba045457554dd1a96e1142f24c020ea5e998794a670ea01788b4516ec7c84953"
+      },
+      {
+        "file": "raw/gateway-lifecycle-transport-03.log",
+        "bytes": 34156,
+        "sha256": "35877c632f241dda18369711151d9483027dcbaa18695e19e6e6f421d2bc7403"
+      },
+      {
+        "file": "raw/target04-cache-.fingerprint.log",
+        "bytes": 1240,
+        "sha256": "d051d1d623a34573e593434be72145ec89624ae6ff1456e16c9e76c394107970"
+      },
+      {
+        "file": "raw/target04-cache-build.log",
+        "bytes": 1228,
+        "sha256": "9e3cec4b5e614dc78462d4d45e1779a91b007cffe97bc6339000b9f49077ddc5"
+      },
+      {
+        "file": "raw/target04-cache-deps.log",
+        "bytes": 1232,
+        "sha256": "2c7d08afdae147377d9bf3dd00649b328d41b537f95d9225511db1d2fbca595c"
+      },
+      {
+        "file": "raw/target05-cache-.fingerprint.log",
+        "bytes": 1240,
+        "sha256": "c8e2ee8f273ceb16cf341c4549b36ec2f424fe104a040232179060ae1352da5e"
+      },
+      {
+        "file": "raw/target05-cache-build.log",
+        "bytes": 1228,
+        "sha256": "25c805527a6e1d6ae04052dbcfb99ddd0f79f44902efb8e9c4e9088d62400c8d"
+      },
+      {
+        "file": "raw/target05-cache-deps.log",
+        "bytes": 1232,
+        "sha256": "49657bd84c16074c26f11afec2d5d359e7d8dd118df90a3a6ff11ba82a962415"
+      },
+      {
+        "file": "runners/Run-GatewayLifecycleBaseline.ps1",
+        "bytes": 1864,
+        "sha256": "ca3c6822aec815d5ba0f03a04c858db898c7eeebe83c9f326c8fbd18d82f7227"
+      },
+      {
+        "file": "runners/Run-GatewayLifecycleChecks-target03.ps1",
+        "bytes": 2252,
+        "sha256": "8e81fab2de07f8e95e8f5cdaf209f6a91a233d7757cf0c40d1d77377ed30557b"
+      },
+      {
+        "file": "runners/Run-GatewayLifecycleChecks-target04.ps1",
+        "bytes": 2252,
+        "sha256": "ce5cd22430fcbe0a2319ccfbefbbd8edb07b345087042eb6e2e88363c8cca636"
+      },
+      {
+        "file": "runners/Run-GatewayLifecycleChecks.ps1",
+        "bytes": 2252,
+        "sha256": "ded1e152e0af8cb5c21227672591784244c09e35ec240737bc66c58fdafcd0e4"
+      },
+      {
+        "file": "source/new/mir2-web3/apps/gateway/src/web_transport.rs",
+        "bytes": 11094,
+        "sha256": "6fada44504db2ca4baadef862213d83298ee73ef2d09d0a6742938af5c6a98d0"
+      },
+      {
+        "file": "source/new/mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+        "bytes": 5776,
+        "sha256": "9f0070900a4e1d5872d66195925ba38860a9b6a7f3cc305b795dabdb7152a3ac"
+      },
+      {
+        "file": "source/new/mir2-web3/apps/simulation/src/runtime/recovery.rs",
+        "bytes": 17743,
+        "sha256": "04da8fa9afe01e89bca1a7ac6535ad773d341270de2de3952a81ff074fd2f6e4"
+      },
+      {
+        "file": "source/tracked.patch",
+        "bytes": 65795,
+        "sha256": "9ea64154dccc4930a688a6f5905e8e962dda715ca3f0765a2947ec91dd593a54"
+      }
+    ]
+  },
+  "debugBinary": {
+    "bytes": 112870400,
+    "sha256": "a45b2959c0dc93350ba36fe04b65f72178d63ed0112e4aeda8af23b5e42a4f07"
+  },
+  "publicStateObserved": {
+    "gatewayRevision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+    "feedSequence": 17,
+    "gameSource": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+    "changedByThisSlice": false
+  },
+  "limits": [
+    "Not Linux release CI or an online rollout receipt.",
+    "Not native or full P1-P7 acceptance.",
+    "Legacy journals without a capture clock cannot reconstruct their original tick domain.",
+    "Generic remote/test WorldRuntime fallback retains prior save behavior."
+  ]
+}

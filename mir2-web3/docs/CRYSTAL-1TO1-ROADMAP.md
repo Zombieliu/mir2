@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-08 disconnect-lock Candidate: transport close/read failure is observed
+> independently of the saturated player input queue. Shared socket writes have
+> one10-second budget including lock/ready/flush; real admitted movement work
+> drains before the original save/journal/resume/lease decision. Prepared saves
+> preserve frozen buff/refine bytes and original durable skill clocks; trusted
+> recovery reads do not execute StartGame/DefaultNPC or revive a dead character.
+> Local Gateway270, recovery7 and debug build pass. Raw failures/baseline, exact
+> source-file hashes and full outputs are retained. Public R22/feed17/Gatewaya41
+> was published separately; this fix still requires exact-source Linux CI and
+> drained test-server rollout. Native and fullP1-P7/100% acceptance remain open.
+> [Scope and evidence](GATEWAY-DISCONNECT-LIFECYCLE-20261008.md).
+
+
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
 > typed shared pets and saved growth, ordinary Guild management/war, native

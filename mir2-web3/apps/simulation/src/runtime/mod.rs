@@ -50,6 +50,8 @@ pub(crate) use quests::periodic_quests::target_is_periodic as periodic_quest_tar
 mod refine_oven;
 mod rental;
 mod resources;
+mod recovery;
+pub use recovery::RecoveryCharacterLoadError;
 mod save;
 mod session;
 mod shared_guilds;

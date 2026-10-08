@@ -38,6 +38,7 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    RecoveryCharacterLoadError,
     DefaultNpcEvent, DefaultNpcEventSnapshot, QueuedDefaultNpcEvent, DefaultNpcEnterMapTicket,
     ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample,
     SharedMonsterKillCommitFailure,

@@ -329,6 +329,127 @@ fn newer_durable_state_is_quarantined_instead_of_overwritten() {
 }
 
 #[test]
+fn transport_recovery_lost_save_ack_keeps_dead_character_and_learned_skill_exactly_once() {
+    let state = TestState::new("transport-lost-save-ack");
+    let mut original = SimulationSession::new(state.config.clone());
+    original.select_account_for_recovery("demo").unwrap();
+    original.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut checkpoint = original.active_character_checkpoint().unwrap();
+    checkpoint.hp = 0;
+    checkpoint.gold += 777;
+    checkpoint.skill_states_json = vec![serde_json::json!({
+        "key":"FireBall", "name":"FireBall", "description":"Learned recovery skill",
+        "level":2, "experience":321, "hotkey":4, "cooldown_ticks":2,
+        "delay_ms":1800, "cooldown_ends_at":123, "cast_time_ms":2000,
+    }).to_string()];
+    original.restore_active_character_checkpoint(&checkpoint).unwrap();
+    // Journaling captures the actual runtime snapshot, never a hand-written
+    // JSON string with a different field order than the SkillState encoder.
+    checkpoint = original.active_character_checkpoint().unwrap();
+    let learned: serde_json::Value = serde_json::from_str(&checkpoint.skill_states_json[0]).unwrap();
+    assert_eq!(learned["experience"], 321);
+    assert_eq!(learned["hotkey"], 4);
+    assert_eq!(learned["cooldown_ends_at"], 123);
+    assert_eq!(checkpoint.hp, 0);
+    // Keep the checkpoint from before this CAS, as a lost publication receipt
+    // would. Durable skill metadata must not make this a different character.
+    original.save_active_character_for_logout().unwrap();
+    let durable = state.persisted_checkpoint();
+    assert_eq!(durable.revision, checkpoint.revision + 1);
+    let skill: serde_json::Value = serde_json::from_str(&durable.skill_states_json[0]).unwrap();
+    assert!(skill.get("_runtimeCooldownClock").is_some());
+    journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
+    let before_bytes = serde_json::to_vec(&durable).unwrap();
+
+    let summary = replay_startup(&state.config).unwrap();
+    assert_eq!(summary.replayed, 0);
+    assert_eq!(summary.already_committed, 1);
+    assert_eq!(summary.quarantined, 0);
+    let after = state.persisted_checkpoint();
+    assert_eq!(serde_json::to_vec(&after).unwrap(), before_bytes);
+    assert_eq!(after.hp, 0);
+    assert_eq!(after.map_file_name, checkpoint.map_file_name);
+    assert_eq!(after.position, checkpoint.position);
+    assert_eq!(after.default_npc_events, checkpoint.default_npc_events);
+    assert!(journal_files(&state).is_empty());
+    let again = replay_startup(&state.config).unwrap();
+    assert_eq!(again.replayed, 0);
+    assert_eq!(again.already_committed, 0);
+    assert_eq!(state.persisted_checkpoint().revision, durable.revision);
+}
+
+#[test]
+fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_save_and_replay() {
+    for primary_save in [false, true] {
+        let state = TestState::new(if primary_save { "timer-primary-save" } else { "timer-replay" });
+        let mut original = SimulationSession::new(state.config.clone());
+        original.select_account_for_recovery("demo").unwrap();
+        original.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let mut checkpoint = original.active_character_checkpoint().unwrap();
+        // Isolated but valid held-weapon fixture: preserve the real carrier and
+        // UID, removing it from the bag before assigning sole oven custody.
+        let mut weapon: serde_json::Value = checkpoint.inventory_items_json.iter()
+            .map(|encoded| serde_json::from_str::<serde_json::Value>(encoded).unwrap())
+            .find(|item| item["key"] == "dagger").unwrap();
+        let uid = weapon["unique_id"].as_u64().unwrap();
+        weapon["user_item_metadata"] = serde_json::json!({
+            "item_index": mir2_game_data::crystal_item_by_name("Dagger").unwrap().item_index,
+            "refine_added": 1, "refined_value": 1, "refine_success_chance": 50,
+        });
+        checkpoint.inventory_items_json.retain(|encoded| {
+            serde_json::from_str::<serde_json::Value>(encoded).unwrap()["unique_id"] != uid
+        });
+        let mut systems: mir2_simulation::Stage5SystemsState =
+            serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
+        systems.refine = mir2_simulation::Stage5RefineState {
+            oven_item_state_json: Some(weapon.to_string()), current_item: Some("dagger".into()),
+            refining: true, ready: false, remaining_ms: 60_000,
+            ..Default::default()
+        };
+        checkpoint.stage5_systems_json = Some(serde_json::to_string(&systems).unwrap());
+        checkpoint.buff_states_json = vec![serde_json::json!({
+            "key":"exp", "name":"Timed experience buff", "description":"Recovery fixture",
+            "expires_at_tick":60, "real_time_duration":60_000,
+            "attack_bonus":0, "defence_bonus":0, "stats":[],
+        }).to_string()];
+        original.restore_active_character_checkpoint(&checkpoint).unwrap();
+        checkpoint = original.active_character_teardown_checkpoint().unwrap();
+        let frozen_systems: mir2_simulation::Stage5SystemsState =
+            serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(frozen_systems.refine.clock_epoch.is_some());
+        assert!(frozen_systems.refine.remaining_ms > 0);
+        assert!(frozen_systems.refine.remaining_ms <= 60_000);
+        journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
+        if primary_save {
+            original.save_frozen_character_checkpoint_for_logout(&checkpoint).unwrap();
+        }
+        // Let the actual monotonic oven/buff clocks advance. Verification must
+        // compare the frozen source bytes, not a newly generated World snapshot.
+        std::thread::sleep(std::time::Duration::from_millis(25));
+        let summary = replay_startup(&state.config).unwrap();
+        assert_eq!(summary.replayed, usize::from(!primary_save));
+        assert_eq!(summary.already_committed, usize::from(primary_save));
+        assert_eq!(summary.quarantined, 0);
+        let durable = state.persisted_checkpoint();
+        assert_eq!(durable.revision, checkpoint.revision + 1);
+        assert_eq!(durable.buff_states_json, checkpoint.buff_states_json);
+        assert_eq!(durable.stage5_systems_json, checkpoint.stage5_systems_json);
+        assert_eq!(durable.inventory_items_json, checkpoint.inventory_items_json);
+        assert!(journal_files(&state).is_empty());
+        // Reproduce a lost commit/cleanup ACK: same authenticated pre-CAS
+        // journal, now with a committed source, must not save a second time.
+        journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(25));
+        let again = replay_startup(&state.config).unwrap();
+        assert_eq!(again.replayed, 0);
+        assert_eq!(again.already_committed, 1);
+        assert_eq!(again.quarantined, 0);
+        assert_eq!(serde_json::to_vec(&state.persisted_checkpoint()).unwrap(), serde_json::to_vec(&durable).unwrap());
+        assert!(journal_files(&state).is_empty());
+    }
+}
+
+#[test]
 fn entry_limit_rejects_without_silent_eviction() {
     let state = TestState::new("capacity");
     let journal =

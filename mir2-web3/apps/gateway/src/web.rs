@@ -33,9 +33,7 @@ use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
-use tokio::sync::{
-    mpsc, Mutex as AsyncMutex, OwnedSemaphorePermit, RwLock as AsyncRwLock, Semaphore,
-};
+use tokio::sync::{mpsc, OwnedSemaphorePermit, RwLock as AsyncRwLock, Semaphore};
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
@@ -82,7 +80,9 @@ use crate::tcp::chat_broadcast::{
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
-type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
+type SharedWebSocketSender = Arc<transport::SocketSender<WebSocketSender>>;
+#[path = "web_transport.rs"]
+mod transport;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
@@ -4566,37 +4566,43 @@ async fn handle_socket(
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
     let mut session = new_gateway_session_for_web(&state);
+    let session_id = session.session_id().to_owned();
+    let _lifecycle = crate::session::GatewayLifecycleStage::start(&session_id, "connection.work");
     let mut active_session_permit: Option<GatewayCapacityPermit> = None;
     let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
     let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
     let mut native_resume = NativeResumeConnectionState::new();
     let mut explicit_world_leave = ExplicitWorldLeaveState::default();
-    handle_socket_inner(
-        socket,
-        &mut session,
-        Arc::clone(&state.session_cache),
-        Arc::clone(&state.reconnect_sessions),
-        Arc::clone(&state.capacity),
-        Arc::clone(&state.identity),
-        &mut active_session_permit,
-        &mut save_queue,
-        &mut route_refresh,
-        &mut native_resume,
-        &mut explicit_world_leave,
-        state.injector.clone(),
-        realm_info,
-        state.chat_hub.clone(),
-        state.spectator.clone(),
-        state.ai_live.clone(),
-        tcp_peer_ip,
-        peer_address,
-        user_agent,
-    )
-    .await;
+    {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "transport.work");
+        handle_socket_inner(
+            socket,
+            &mut session,
+            Arc::clone(&state.session_cache),
+            Arc::clone(&state.reconnect_sessions),
+            Arc::clone(&state.capacity),
+            Arc::clone(&state.identity),
+            &mut active_session_permit,
+            &mut save_queue,
+            &mut route_refresh,
+            &mut native_resume,
+            &mut explicit_world_leave,
+            state.injector.clone(),
+            realm_info,
+            state.chat_hub.clone(),
+            state.spectator.clone(),
+            state.ai_live.clone(),
+            tcp_peer_ip,
+            peer_address,
+            user_agent,
+        )
+        .await;
+    }
     if explicit_world_leave.completed {
         native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
         // LogOut has already cleared active_identity. Keep the original owner
         // captured before execution so cache failures can still be retried.
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "explicit.release");
         if let Err(error) = tokio::task::block_in_place(|| {
             explicit_world_leave.retry_release(state.session_cache.as_ref())
         }) {
@@ -4604,8 +4610,10 @@ async fn handle_socket(
         }
         return;
     }
-    let persistence_outcome =
-        persist_web_session_before_teardown(&mut session, &mut save_queue).await;
+    let persistence_outcome = {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "persist");
+        persist_web_session_before_teardown(&mut session, &mut save_queue).await
+    };
     let recovery_account_id = tokio::task::block_in_place(|| {
         session
             .active_identity()
@@ -4624,6 +4632,7 @@ async fn handle_socket(
         return;
     }
     let release_result = tokio::task::block_in_place(|| {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "resume.thaw");
         catch_gateway_panic("web release saved teardown fence for resume", || {
             session.release_teardown_for_resume()
         })
@@ -4636,6 +4645,7 @@ async fn handle_socket(
         return;
     }
     if let Some(key) = session_cache_key(&session) {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "resume.retain");
         let grace_seconds = reconnect_grace_ttl_seconds();
         if let Err(error) = refresh_session_cache_with_route_lease(
             state.session_cache.as_ref(),
@@ -4792,6 +4802,7 @@ async fn try_handle_zone_movement_from_reader(
     sender: &SharedWebSocketSender,
     movement_ingress: &SharedZoneMovementIngressSlot,
     serial_execution_gate: &SharedSerialExecutionGate,
+    movement_drain: &Arc<transport::MovementDrain>,
     authenticated: bool,
     pending_serial_actions: usize,
 ) -> Result<bool, String> {
@@ -4812,7 +4823,13 @@ async fn try_handle_zone_movement_from_reader(
         return Ok(false);
     };
     let move_log = move_log_for_action(action);
-    let execution = tokio::task::spawn_blocking(move || ingress.try_execute(packet))
+    let Some(call) = movement_drain.begin() else {
+        return Err("socket movement ingress has ended".to_string());
+    };
+    let execution = tokio::task::spawn_blocking(move || {
+        let _call = call;
+        ingress.try_execute(packet)
+    })
         .await
         .map_err(|error| format!("zone movement ingress task failed: {error}"))??;
     let Some(execution) = execution else {
@@ -4974,6 +4991,9 @@ fn spawn_socket_reader(
     movement_ingress: SharedZoneMovementIngressSlot,
     serial_execution_gate: SharedSerialExecutionGate,
     authenticated: Arc<AtomicBool>,
+    terminal: transport::TransportSignal,
+    movement_drain: Arc<transport::MovementDrain>,
+    session_id: String,
 ) -> (
     mpsc::Receiver<SocketInbound>,
     SocketReaderTask,
@@ -4989,18 +5009,21 @@ fn spawn_socket_reader(
     let reader_pending_count = Arc::clone(&pending_count);
     let reader_buffered_bytes = Arc::clone(&buffered_bytes);
     let handle = tokio::spawn(async move {
+        let _reader_lifetime = transport::ReaderLifetime(terminal.clone());
         loop {
             let message = match receiver.next().await {
                 Some(Ok(Message::Text(text))) => text,
                 Some(Ok(Message::Close(_))) | None => {
-                    let _ = input_tx.send(SocketInbound::Closed).await;
+                    terminal.end(transport::TransportEnd::Closed);
+                    let _ = input_tx.try_send(SocketInbound::Closed);
                     return;
                 }
                 Some(Ok(_)) => continue,
                 Some(Err(error)) => {
+                    eprintln!("web receive error: {error} session_id={session_id}");
+                    terminal.end(transport::TransportEnd::ReadError);
                     let _ = input_tx
-                        .send(SocketInbound::ReadError(error.to_string()))
-                        .await;
+                        .try_send(SocketInbound::ReadError(error.to_string()));
                     return;
                 }
             };
@@ -5117,6 +5140,7 @@ fn spawn_socket_reader(
                 &sender,
                 &movement_ingress,
                 &serial_execution_gate,
+                &movement_drain,
                 authenticated.load(Ordering::Acquire),
                 reader_pending_count.load(Ordering::Acquire),
             )
@@ -5213,8 +5237,11 @@ async fn handle_socket_inner(
     peer_address: String,
     user_agent: String,
 ) {
+    let session_id = session.session_id().to_owned();
     let (overload_tx, overload_rx) = tokio::sync::watch::channel(0);
     let active_registration_id = Arc::new(AtomicU64::new(0));
+    let terminal = transport::TransportSignal::new();
+    let movement_drain = Arc::new(transport::MovementDrain::default());
     let work = handle_socket_work(
         socket,
         session,
@@ -5237,29 +5264,46 @@ async fn handle_socket_inner(
         user_agent,
         overload_tx,
         Arc::clone(&active_registration_id),
+        terminal.clone(),
+        Arc::clone(&movement_drain),
     );
-    if let Err(registration_id) =
-        run_until_zone_overload(work, overload_rx, active_registration_id).await
+    if let Err(reason) =
+        run_until_transport_end(work, overload_rx, active_registration_id, terminal.clone()).await
     {
         // Dropping work aborts both socket workers and releases every socket
         // half, even when a network send is pending forever. No protocol
         // LogOut/Disconnect is fabricated: handle_socket keeps its ordinary
         // abnormal teardown, authoritative save and native resume credential.
-        eprintln!(
-            "web transport closed after Zone viewport overload registration_id={registration_id}"
-        );
+        terminal.end(reason);
+        eprintln!("web transport ended session_id={session_id} reason={reason:?}");
     }
+    terminal.end(transport::TransportEnd::ReaderStopped);
+    let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "movement.drain");
+    movement_drain.close_and_wait().await;
 }
 
-async fn run_until_zone_overload<T>(
+async fn run_until_transport_end<T>(
     work: impl std::future::Future<Output = T>,
     overloads: tokio::sync::watch::Receiver<u64>,
     active_registration_id: Arc<AtomicU64>,
-) -> Result<T, u64> {
+    terminal: transport::TransportSignal,
+) -> Result<T, transport::TransportEnd> {
     tokio::select! {
         biased;
-        registration_id = wait_for_active_zone_overload(overloads, active_registration_id) => Err(registration_id),
-        result = work => Ok(result),
+        reason = transport::wait_for_end(terminal.subscribe()) => Err(reason),
+        reason = async {
+            let registration_id = wait_for_active_zone_overload(overloads, active_registration_id).await;
+            let reason = transport::TransportEnd::ZoneOverload(registration_id);
+            terminal.end(reason);
+            terminal.reason().unwrap_or(reason)
+        } => Err(reason),
+        // A reader can latch Close on another executor between the watch poll
+        // and the work poll. Preserve that first cause even if a sender then
+        // immediately returns BrokenPipe and work completes in this poll.
+        result = work => match terminal.reason() {
+            Some(reason) => Err(reason),
+            None => Ok(result),
+        },
     }
 }
 
@@ -5312,13 +5356,12 @@ async fn handle_socket_work(
     user_agent: String,
     overload_tx: tokio::sync::watch::Sender<u64>,
     active_zone_outbound_registration_id: Arc<AtomicU64>,
+    terminal: transport::TransportSignal,
+    movement_drain: Arc<transport::MovementDrain>,
 ) {
     let (sender, receiver) = socket.split();
-    let sender = Arc::new(AsyncMutex::new(sender));
-    if sender
-        .lock()
-        .await
-        .send(Message::Text(realm_info.to_string().into()))
+    let sender = Arc::new(transport::SocketSender::new(sender, terminal.clone()));
+    if sender.send(Message::Text(realm_info.to_string().into()))
         .await
         .is_err()
     {
@@ -5411,6 +5454,9 @@ async fn handle_socket_work(
         Arc::clone(&movement_ingress),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&socket_authenticated),
+        terminal,
+        movement_drain,
+        session.session_id().to_owned(),
     );
 
     loop {
@@ -5650,7 +5696,7 @@ async fn handle_socket_work(
                         session, &identity, active_identity_session.as_ref(), authenticated,
                         authenticated_account_id.as_deref(), &action,
                     ));
-                    if sender.lock().await.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                    if sender.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
                     continue;
                 }
                 let native_game_shop_request = if native_game_shop.opted_in {
@@ -6465,10 +6511,7 @@ async fn handle_socket_work(
                     && latest_segment_id.is_some()
                     && latest_segment_id != last_ai_live_segment_id
                 {
-                    if sender
-                        .lock()
-                        .await
-                        .send(Message::Text(
+                    if sender.send(Message::Text(
                             json!({
                                 "type": "aiLiveStatus",
                                 "payload": status
@@ -8846,10 +8889,7 @@ async fn send_world_snapshot_with_receipts(
             serde_json::to_value(ack).map_err(|error| error.to_string())?,
         );
     }
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             json!({
                 "type": "worldSnapshot",
                 "payload": payload
@@ -8913,10 +8953,7 @@ async fn send_server_packet(
     sender: &SharedWebSocketSender,
     packet: &ServerPacket,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             server_packet_to_event(packet).to_string().into(),
         ))
         .await
@@ -8926,10 +8963,7 @@ async fn send_native_game_shop_receipt(
     sender: &SharedWebSocketSender,
     receipt: &Value,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(receipt.to_string().into()))
+    sender.send(Message::Text(receipt.to_string().into()))
         .await
 }
 
@@ -9129,10 +9163,7 @@ async fn send_error_message(
     sender: &SharedWebSocketSender,
     message: &str,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             json!({
                 "type": "error",
                 "message": message
@@ -9172,10 +9203,7 @@ async fn send_session_action_error(
     is_login: bool,
     leaves_world: bool,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             session_action_error_event(is_login, leaves_world)
                 .to_string()
                 .into(),
@@ -9188,10 +9216,7 @@ async fn send_fixed_error_event(
     code: &'static str,
     message: &'static str,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             json!({
                 "type": "error",
                 "code": code,
@@ -9204,10 +9229,7 @@ async fn send_fixed_error_event(
 }
 
 async fn send_resume_rejected(sender: &SharedWebSocketSender) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(resume_rejected_event().to_string().into()))
+    sender.send(Message::Text(resume_rejected_event().to_string().into()))
         .await
 }
 
@@ -9222,10 +9244,7 @@ async fn send_resume_credential(
     sender: &SharedWebSocketSender,
     issued: &IssuedResumeCredential,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             resume_credential_event(issued).to_string().into(),
         ))
         .await
@@ -9246,10 +9265,7 @@ async fn send_session_resumed(
     character_index: i32,
     generation: u64,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             session_resumed_event(character_index, generation)
                 .to_string()
                 .into(),
@@ -9630,10 +9646,7 @@ async fn send_identity_session_grant(
     sender: &SharedWebSocketSender,
     grant: &crate::identity::IdentitySessionGrant,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             json!({
                 "type": "identitySession",
                 "token": grant.token,
@@ -12608,6 +12621,10 @@ mod web_auth_peer_bucket_tests;
 mod web_live_overflow_tests;
 
 #[cfg(test)]
+#[path = "web_transport_close_tests.rs"]
+mod web_transport_close_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
@@ -12797,7 +12814,7 @@ mod tests {
         assert_eq!(event["type"], "realmInfo");
         assert_eq!(event["payload"]["schema"], "mir2-realm-handshake/1");
         assert_eq!(event["payload"]["profileId"], "platinum_176");
-        assert_eq!(event["payload"]["profileVersion"], 26);
+        assert_eq!(event["payload"]["profileVersion"], 27);
         assert_eq!(event["payload"]["acceptanceLevel"], 50);
         assert_eq!(
             event["payload"]["ratePolicy"]["monsterExperienceTiers"][0]["multiplier"],

@@ -398,11 +398,13 @@ fn db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibilit
             if characters.iter().any(|character|
                 character.index == 0 && character.last_access_binary_datetime != 0)
     ));
-    recovered.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Inspect the restored checkpoint without a second real login's
+    // DefaultNPC event/save. The ordinary authenticated roster above remains
+    // checked, including its recovered last-access value.
+    recovered.select_account_for_recovery("demo").unwrap();
+    let recovered_checkpoint = recovered.select_character_for_recovery(0).unwrap();
     let mut recovered = serde_json::to_value(
-        recovered
-            .active_character_checkpoint()
-            .expect("replayed checkpoint"),
+        recovered_checkpoint,
     )
     .expect("serialize replayed checkpoint");
     let prepared_revision = prepared["revision"].as_u64().expect("prepared revision");

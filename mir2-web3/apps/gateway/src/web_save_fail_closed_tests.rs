@@ -552,8 +552,8 @@ fn dev_and_production_web_leave_paths_propagate_stale_save_and_keep_identity() {
     for production in [false, true] {
         for packet in [ClientPacket::LogOut, ClientPacket::Disconnect] {
             let config = SimulationConfig::default();
-            let mut current = started_gateway_session(&config);
             let mut stale = started_gateway_session(&config);
+            let mut current = started_gateway_session(&config);
             current.save_active_character().unwrap();
 
             let error =

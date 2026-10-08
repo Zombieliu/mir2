@@ -677,6 +677,7 @@ impl SimulationSession {
     }
 
     pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
+        super::recovery::clear_binding(self.app.world_mut());
         let config = self
             .app
             .world()
@@ -862,6 +863,7 @@ impl SimulationSession {
     /// or retaining authentication material. This is deliberately not exposed
     /// through `ClientPacket`; callers must validate the journal first.
     pub fn select_account_for_recovery(&mut self, account_id: &str) -> Result<(), String> {
+        super::recovery::clear_binding(self.app.world_mut());
         let config = self
             .app
             .world()
@@ -876,11 +878,16 @@ impl SimulationSession {
             .get(account_id)
             .map(|account| account.characters.clone())
             .ok_or_else(|| "recovery account does not exist".to_string())?;
-        let mut session = self.app.world_mut().resource_mut::<SessionResource>();
-        session.account_id = Some(account_id.to_string());
-        session.characters = characters;
-        session.selected_character = None;
-        session.clear_active_save_revision();
+        {
+            let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+            session.account_id = Some(account_id.to_string());
+            session.characters = characters;
+            session.selected_character = None;
+            session.clear_active_save_revision();
+        }
+        self.app.world_mut().insert_resource(
+            super::recovery::TrustedRecoveryAccount(account_id.to_string()),
+        );
         Ok(())
     }
 

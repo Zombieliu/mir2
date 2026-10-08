@@ -9033,6 +9033,8 @@ impl SimulationSession {
     }
 
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        // Journal capabilities must never survive into a client packet flow.
+        super::recovery::clear_binding(self.app.world_mut());
         if matches!(
             packet,
             ClientPacket::Disconnect | ClientPacket::LogOut | ClientPacket::StartGame { .. }
