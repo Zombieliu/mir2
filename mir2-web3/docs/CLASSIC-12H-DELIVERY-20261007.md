@@ -4,7 +4,35 @@ Started 2026-10-07 15:13:35 UTC. Delivery checkpoint is 2026-10-08
 03:13:35 UTC / 11:13 Asia/Shanghai. Work remains active; this document does
 not mark the older blocked Goal API record complete.
 
-## Current status — 2026-10-08 01:05 UTC
+## Current delivery checkpoint — 2026-10-08 02:56 UTC
+
+Gameplay/evidence source7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc is pushed.
+Windows37712122111 passed; artifact11523774584 has263037676 authenticated bytes
+and SHA256e619172fdc25e8448611203e3d170516719d49d0676d3ad6044d3f40592a8d43.
+Current local download is incomplete, so no R22 Candidate/package/CMS/feed17
+exists. Stalled streams, bounded read deadlines and incorrect Range offsets
+remain RED. Partial ZIPs or old executables are never promoted.
+
+Linux37712122808 passed appearance, Linux save-recovery/security, and the original
+siege competing-PostgreSQL writer/clock gate. Rank17 and terminal3 passed; two
+ordinary-war cases passed before45-minute cancellation. Server retry37716453313
+usesa41dfe72d7e5858f11169adf88673dc44ed24200; its sole diff from game7fea is
+workflow45-to-105-minute timeout. All original release gates remain.
+
+Current scope audit passes208 runtime/209 resources at actual respawn907db052.
+Genuine Prguse1002/Title18 frames have exact originalLib/full-pack crop/pixel
+proof in separate new resource staging; they must enter the next new manifest
+and CMS. Old signedR20 bytes and clean frozen game checkout remain intact.
+
+User requested native mining launch. InstalledD/R19 was launched; the first
+helper supplied empty login fields and failed configuration validation. Explicit
+child-environment removal opens the normal login window and publicWSS. Screenshot
+shows father50874 gold. Shop wheel is absent fromR19 and was added inR20; this
+root version-selection error is recorded. Verified localR20 staging is in
+progress; the user must normally logout before a client-only switch. The current
+public Gateway staysc6; never interrupt the user's active play session.
+
+## Historical Candidate status — 2026-10-08 01:05 UTC
 
 The new shared gameplay implementation is a committed Candidate pending successful exact-source
 CI and paired publication. Commit c9fdd117f9669ea208c44a38206020db4f3497e3 is pushed;
@@ -20,10 +48,10 @@ Original production realm, real saves and D/F installations are preserved.
 | --- | --- | --- |
 | P1 movement/combat | Inclusive combat RNG no longer aliases 300/600/2500ms cadence; native owner-Struck2500ms/HP10 walking fallback; native input171 and shared escape14 checks; live owner-wire ID mapping fixes the normal notification path | Strict real seven-monster pressure/attack/escape/quiet cohort is still inconclusive; native held-right-button/human acceptance and paired publication |
 | P2 late maps/Boss/loot | Source-pinned controller51 checks;228/228 actual prepared canonical doorway collision/Walk/save/relogin stories across three classes;13/13 prepared entrance/book gates; original invalid Zuma destinations are rejected and fourth legal doorway is selected | Natural three-class full progression, real Boss/source-linked drops/books, original odds, conditional instance entrances and native resources/rendering acceptance |
-| P3 XP/drop ownership | Original party16-grid/level/f32 allocation; native kills use trusted Store-to-Zone profile admission; real TCP/WS party story; EXP potion safe-zone pause/resume/expiry and CANGAINEXP source gate; generic Boss owner and causal PK source settlement | Remaining original Hero/Pet group-health refresh, broad natural Boss/PK/drop ownership and published-process recovery acceptance |
+| P3 XP/drop ownership | Original party16-grid/level/f32 allocation; native kills use trusted Store-to-Zone profile admission; real TCP/WS party story; EXP potion safe-zone pause/resume/expiry and CANGAINEXP source gate; generic Boss owner and causal PK source settlement | Original event-driven Hero/Pet group-health recipient selection, broad natural Boss/PK/drop ownership and published-process recovery acceptance |
 | P4 pets/PK | Typed shared player targets, modes/focus/retaliation, group/Guild/safe/Brown/life guards; original Taoist growth, source PetSave, recall/NoPets/logout/cold restore; actual Vampire bite/death and Toad flight.99 focused checks, plus real TCP/WS Source-save/rollback/cold restore story | Source NPC ordered shared-pet/world outbox, unsupported Totem owner chain, native human/public-process acceptance |
-| P5 Guild/war | Normal rank insert/options/promotion/kick/leave/disband, notice and rank rename; symmetric paid ordinary wars and authority clock; normal earned Guild XP in the same Source CAS; bounded TCP/WS party+Guild story;31 current Guild management/rank/terminal/war checks | Clean Linux CI and competing PostgreSQL writer/clock gate, native management/war acceptance, paired publication |
-| P6 mining/refining | Original raw0..5 Belt/6..85 Bag wire,16 material cells, UID custody/fee/check/collect; Source rollback/retry/full-bag/deadline tests10; market9/oven10/shared escape14 regression; native wire3 and Bevy refine19 including unknown-outcome recovery; original byte-wrap zero preserves the concrete weapon, verified by4 transition tests plus durable10/oven10 regressions | Final native bridge timeout regression, actual ordinary Carlos workflow in published pair and human visual acceptance |
+| P5 Guild/war | Normal rank insert/options/promotion/kick/leave/disband, notice and rank rename; symmetric paid ordinary wars and authority clock; normal earned Guild XP in the same Source CAS; bounded TCP/WS party+Guild story;31 current Guild management/rank/terminal/war checks | Complete Linux release workflow; competing PostgreSQL writer/clock GREEN; native management/war and paired publication |
+| P6 mining/refining | Original raw0..5 Belt/6..85 Bag wire,16 material cells, UID custody/fee/check/collect; Source rollback/retry/full-bag/deadline tests10; market9/oven10/shared escape14 regression; native wire3 and Bevy refine19 including unknown-outcome recovery; original byte-wrap zero preserves the concrete weapon, verified by4 transition tests plus durable10/oven10 regressions | Actual ordinary Carlos workflow in published pair and human visual acceptance; bridge recovery19 GREEN |
 | P7 map events | Actual default NPC call sites,26 source files/169 expanded sections, exact parser omissions, queue128/budget32, Login/LevelUp/Quest/client/NPC/map/death/script-item hooks, Save/rollback/idempotent recovery and Guild leave same-CAS ordering;24 tests and generator4 | Shared authoritative GIVEPET/REMOVE/CLEAR/MONGEN/MONCLEAR/GROUPTELEPORT/CHECKHUM, ground-hole caller; original18 general event filenames have no identified original scheduler caller and cannot be presented as implemented scheduled events |
 | Mentor | Source-owned final-XP bank, original expiry/graduation/logout settlement, bounded recipient-owned once-only credit; complete source rollback/cold/revision tests11; normal two-account TCP/WS story covers rollback/retry, pupil logout, teacher cancel/payout, automatic graduation and cold-file no-replay | Paired publication and native human acceptance |
 
@@ -95,3 +123,23 @@ packaging/CMS/CDN stage, same-commit separate promotion and fresh normal session
 drain precede any actual public cutover. If players are online, finish staging
 and defer the switch; do not kick players to satisfy a deadline. No full100%
 claim is made while the remaining gates above are open.
+
+## Original group-health audit correction
+
+Source health is event driven, not a five-second group heartbeat. Expire5 is a
+client display lifetime. Group accept publishes player/Hero/Pet immediately;
+HP/MP/spawn/AOI events use owner and same-map original16-tile group recipients.
+Current shared-pet health still uses broader AOI recipients; Hero lacks an
+independent shared dispatcher. Source floating percent can truncate live health
+to0, while current percent0 paths infer death. This end-to-end interpretation
+must be fixed before changing emitters. These Source parity items remain open.
+
+## Updater behavior audit
+
+Current check_update stages/verifies/applies before normal launch. A worker
+thread/progress UI alone does not permit playing a compatible old client while
+background downloading. Future signed minimum-compatible-client metadata,
+verified-current launch, separate download cache, normal-exit atomic apply and
+failure retaining the current valid installation are required. First install
+and incompatible versions still need completion. This policy is not implemented
+or claimed byR20/R22.

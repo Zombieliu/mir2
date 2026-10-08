@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
+> is committed and pushed. Native Windows CI37712122111 is GREEN, but local
+> retrieval of its263037676-byte authenticated ZIP is incomplete: no R22
+> EXE/package/CMS or signed17 is claimed. Linux37712122808 hit its45-minute
+> budget after rank17 and terminal3 passed; retry37716453313 retains every
+> gate at a41dfe72 (only the workflow45-to-105-minute budget differs).
+> Current scope audit passes208 runtime/209 resource maps. Two real missing
+> refine PNGs are exported with sourceLib/full-pack/crop/output hash evidence.
+> Public remainsR20/feed16 and Gatewayc6. The requested mining launch usedD/R19;
+> empty login env removal now opens normal publicWSS. father50874 confirms gold.
+> Shop wheel was introduced inR20, absent fromR19: this root launch-version
+> error is retained. VerifiedR20 client-only staging is pending normal exit.
+> [Exact completed work and unfinished gates](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
 > typed shared pets and saved growth, ordinary Guild management/war, native
