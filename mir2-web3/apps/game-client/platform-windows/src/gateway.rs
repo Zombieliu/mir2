@@ -7078,131 +7078,7 @@ fn wallet_value(payload: &Value, field: &str) -> Option<u32> {
 }
 
 pub(crate) fn transform_skill_model(payload: &Value) -> Value {
-    let skills = payload
-        .get("knownSkills")
-        .or_else(|| payload.get("known_skills"))
-        .or_else(|| payload.get("skills"))
-        .and_then(Value::as_array)
-        .map(|skills| {
-            skills
-                .iter()
-                .take(MAX_LEARNED_SKILLS)
-                .enumerate()
-                .map(|(idx, skill)| {
-                    let id = value_u32(skill.get("id")).unwrap_or(idx as u32);
-                    let key = skill.get("key").and_then(Value::as_str).map(str::to_owned);
-                    let name = skill
-                        .get("magicName")
-                        .and_then(Value::as_str)
-                        .filter(|v| !v.is_empty())
-                        .or_else(|| skill.get("name").and_then(Value::as_str))
-                        .unwrap_or_default()
-                        .to_owned();
-                    let level = value_u32(skill.get("level"))
-                        .and_then(|value| u8::try_from(value).ok())
-                        .unwrap_or(0);
-                    let delay_ms = value_i64(
-                        skill
-                            .get("delayMs")
-                            .or_else(|| skill.get("delay_ms"))
-                            .or_else(|| skill.get("cooldownMs")),
-                    )
-                    .unwrap_or(0);
-                    let mut transformed = serde_json::Map::new();
-                    transformed.insert("id".to_owned(), json!(id));
-                    transformed.insert(
-                        "castSequence".to_owned(),
-                        skill.get("castSequence").cloned().unwrap_or(json!(0)),
-                    );
-                    transformed.insert(
-                        "icon".to_owned(),
-                        value_u32(skill.get("icon"))
-                            .and_then(|v| u8::try_from(v).ok())
-                            .map(|v| json!(v))
-                            .unwrap_or(Value::Null),
-                    );
-                    let definition = skill
-                        .get("spell")
-                        .and_then(Value::as_str)
-                        .and_then(mir2_game_data::crystal_magic_by_spell);
-                    for (field, fallback) in [
-                        ("experience", None),
-                        ("need1", definition.as_ref().map(|v| v.need1)),
-                        ("need2", definition.as_ref().map(|v| v.need2)),
-                        ("need3", definition.as_ref().map(|v| v.need3)),
-                    ] {
-                        let value = skill
-                            .get(field)
-                            .map(|v| value_u32(Some(v)).and_then(|n| u16::try_from(n).ok()))
-                            .unwrap_or(fallback);
-                        transformed.insert(
-                            field.to_owned(),
-                            value.map(|v| json!(v)).unwrap_or(Value::Null),
-                        );
-                    }
-                    transformed.insert("name".to_owned(), json!(name));
-                    transformed.insert("level".to_owned(), json!(level));
-                    transformed.insert("key".to_owned(), json!(key));
-                    transformed.insert("cooldown_ms".to_owned(), json!(delay_ms.max(0)));
-                    transformed.insert(
-                        "spell".to_owned(),
-                        optional_non_empty_string_value(skill.get("spell")),
-                    );
-                    transformed.insert(
-                        "castKind".to_owned(),
-                        optional_non_empty_string_value(skill.get("castKind")),
-                    );
-                    transformed.insert(
-                        "canUse".to_owned(),
-                        skill.get("canUse").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "offensive".to_owned(),
-                        skill.get("offensive").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "hotkey".to_owned(),
-                        skill.get("hotkey").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "cooldownRemainingTicks".to_owned(),
-                        value_u32(
-                            skill
-                                .get("cooldownRemainingTicks")
-                                .or_else(|| skill.get("cooldown_remaining_ticks")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or_else(|| json!(0)),
-                    );
-                    transformed.insert(
-                        "mpCost".to_owned(),
-                        value_u32(skill.get("mpCost").or_else(|| skill.get("mp_cost")))
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "castTimeMs".to_owned(),
-                        value_i64(
-                            skill
-                                .get("castTimeMs")
-                                .or_else(|| skill.get("cast_time_ms")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "experience".to_owned(),
-                        value_u32(skill.get("experience"))
-                            .and_then(|value| u16::try_from(value).ok())
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    Value::Object(transformed)
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    json!({ "skills": skills,"skillKeyAck":payload.get("skillKeyAck").cloned().unwrap_or(Value::Null), "authority":payload.get("_nativeSkillAuthority").cloned().unwrap_or(json!({"sessionEpoch":0,"snapshotSerial":0,"playerObjectId":0})) })
+    mir2_bevy_runtime::npc_purchase_economy::project_owner_skill_model(payload)
 }
 
 fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
@@ -14191,6 +14067,154 @@ mod ownership_tests {
         assert_eq!(state.lock().unwrap().starts,1);assert!(receiver.try_recv().is_err());
     }
 
+
+
+    // Controlled memory fixtures only: no renderer, window, socket or gateway.
+    fn source36_skill_readiness_fixture() -> (
+        bevy::prelude::App, GatewayCommandReceiver, Value, SkillPacketCursor,
+    ) {
+        use mir2_client_bevy::{read_model::UiReadModel, entities::EntityModelSet,
+            map::MapModel, skill_model::SkillModel};
+        let (sender, receiver) = command_channel(8);
+        let fence = sender.ownership_fence().unwrap();
+        fence.begin_connection().unwrap();
+        fence.0.lock().unwrap().entry_requested = true;
+        fence.authorize_entry(false);
+        fence.observe_scene(0, false);
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.command_fence = Some(fence);
+        let mut payload = json!({"tick":7,"mapIndex":0,"mapFileName":"scene-zero",
+            "playerObjectId":7,"entities":[{"kind":"selfPlayer","objectId":7,
+                "name":"authority","x":10,"y":20,"direction":"right"}],
+            "knownSkills":[
+                {"id":1,"name":"Fire Ball","key":"fire","spell":"FireBall",
+                    "hotkey":1,"icon":3,"level":1,"experience":2,"need1":11,
+                    "need2":22,"need3":33,"castKind":"Active","offensive":true,
+                    "canUse":true,"mpCost":5,"delayMs":50,"castTimeMs":200},
+                {"id":2,"name":"Healing","key":"heal","spell":"Healing",
+                    "hotkey":2,"icon":4,"level":1,"experience":3,"need1":12,
+                    "need2":23,"need3":34,"castKind":"Active","offensive":false,
+                    "canUse":true,"mpCost":6,"delayMs":60,"castTimeMs":250}
+            ]});
+        let mut cursor = SkillPacketCursor::default();
+        cursor.observe_snapshot(&mut payload);
+        let mut snapshot = adapter.snapshot(&payload);
+        attach_native_producer_provenance(&mut snapshot, &adapter, &payload,
+            &transform_ui_read_model(&payload), &transform_map_model(&payload),
+            &transform_entity_model_set(&payload), Some(&transform_skill_model(&payload)),
+            true).unwrap();
+        let stamp = snapshot.command_stamp.unwrap();
+        let models = snapshot.producer_models.unwrap();
+        let commands = crate::input::GatewayCommands::new(sender);
+        *commands.pending_provenance.lock().unwrap() = Some((stamp, models.clone()));
+        let mut app = bevy::prelude::App::new();
+        app.insert_resource(commands);
+        app.init_resource::<UiReadModel>();
+        app.init_resource::<EntityModelSet>();
+        app.init_resource::<MapModel>();
+        app.init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>();
+        app.insert_resource(serde_json::from_value::<SkillModel>(models.skills.unwrap()).unwrap());
+        app.add_systems(bevy::app::Update,
+            crate::gameplay_bridge::activate_native_command_provenance);
+        (app, receiver, payload, cursor)
+    }
+
+    #[test]
+    fn source36_skill_correct_authority_wrong_descriptors_keep_source_pending() {
+        use mir2_client_bevy::skill_model::SkillModel;
+        let (mut app, mut receiver, _, _) = source36_skill_readiness_fixture();
+        let original = app.world().resource::<SkillModel>().clone();
+        let (stamp, models) = app.world().resource::<crate::input::GatewayCommands>()
+            .pending_provenance.lock().unwrap().as_ref().unwrap().clone();
+        for field in ["id", "name", "key", "spell", "icon", "need1", "need2", "need3",
+            "cast_kind", "offensive", "skill_id", "row_order", "binding_order"] {
+            let mut wrong = original.clone();
+            match field {
+                "id" => wrong.skills[0].id = 99,
+                "name" => wrong.skills[0].name = "other learned skill".into(),
+                "key" => wrong.skills[0].key = Some("other".into()),
+                "spell" => wrong.bindings[0].spell = Some("Healing".into()),
+                "icon" => wrong.bindings[0].icon = Some(99),
+                "need1" => wrong.bindings[0].need1 = Some(99),
+                "need2" => wrong.bindings[0].need2 = Some(99),
+                "need3" => wrong.bindings[0].need3 = Some(99),
+                "cast_kind" => wrong.bindings[0].cast_kind = Some("Passive".into()),
+                "offensive" => wrong.bindings[0].offensive = Some(false),
+                "skill_id" => wrong.bindings[0].skill_id = 2,
+                "row_order" => wrong.skills.reverse(),
+                "binding_order" => wrong.bindings.reverse(),
+                _ => unreachable!(),
+            }
+            assert_eq!(wrong.authority, original.authority);
+            assert_eq!(wrong.skills.len(), original.skills.len());
+            app.insert_resource(wrong);
+            for _ in 0..3 {
+                app.update();
+                let commands = app.world().resource::<crate::input::GatewayCommands>();
+                assert!(commands.applied_world_stamp().is_none(), "{field}");
+                let pending = commands.pending_provenance.lock().unwrap();
+                let (current_stamp, current_models) = pending.as_ref().expect("retain complete source");
+                assert_eq!(*current_stamp, stamp);
+                assert_eq!(current_models.ui, models.ui);
+                assert_eq!(current_models.entities, models.entities);
+                assert_eq!(current_models.map, models.map);
+                assert_eq!(current_models.skills, models.skills);
+                assert!(!commands.send_command(attack()));
+                assert!(receiver.try_recv().is_err());
+            }
+        }
+        app.insert_resource(original);
+        app.update();
+        let commands = app.world().resource::<crate::input::GatewayCommands>();
+        assert_eq!(commands.applied_world_stamp(), Some(stamp));
+        assert!(commands.pending_provenance.lock().unwrap().is_none());
+        assert!(commands.send_command(attack()));
+        assert!(receiver.try_recv().is_ok());
+    }
+
+    #[test]
+    fn source36_skill_later_packets_and_exact_ack_activate_without_rewind() {
+        use mir2_client_bevy::skill_model::SkillModel;
+        let (mut app, mut receiver, mut payload, mut cursor) = source36_skill_readiness_fixture();
+        let original = app.world().resource::<SkillModel>().clone();
+        let stamp = app.world().resource::<crate::input::GatewayCommands>()
+            .pending_provenance.lock().unwrap().as_ref().unwrap().0;
+        for (packet, patch) in [
+            ("MagicCast", json!({"spell":"FireBall"})),
+            ("MagicDelay", json!({"objectId":7,"spell":"FireBall","delay":900,"mpCost":7})),
+            ("MagicLeveled", json!({"objectId":7,"spell":"FireBall","level":3,"experience":17})),
+            ("SpellToggle", json!({"objectId":7,"spell":"FireBall","canUse":false})),
+        ] {
+            assert!(cursor.apply_packet(packet, &patch, 7), "{packet}");
+        }
+        // Exact controlled server snapshot: the ACK and its hotkey travel together.
+        payload["knownSkills"][0]["hotkey"] = json!(16);
+        payload["skillKeyAck"] = json!({"requestId":73,"spell":"FireBall","key":16,
+            "oldKey":1,"accepted":true});
+        cursor.observe_snapshot(&mut payload);
+        let live = serde_json::from_value::<SkillModel>(transform_skill_model(&payload)).unwrap();
+        assert!(live.has_same_learned_descriptors(&original));
+        assert!(live.authority.snapshot_serial > original.authority.snapshot_serial);
+        assert_eq!(live.skills[0].level, 3);
+        assert_eq!(live.skills[0].mp_cost, 7);
+        assert_eq!(live.skills[0].cooldown_ms, 900);
+        assert_eq!(live.bindings[0].experience, Some(17));
+        assert_eq!(live.bindings[0].hotkey, Some(16));
+        assert_eq!(live.bindings[0].cast_sequence, 1);
+        assert_eq!(live.bindings[0].can_use, Some(false));
+        let live_value = serde_json::to_value(&live).unwrap();
+        app.insert_resource(live);
+        app.update();
+        let commands = app.world().resource::<crate::input::GatewayCommands>();
+        assert_eq!(commands.applied_world_stamp(), Some(stamp));
+        assert!(commands.pending_provenance.lock().unwrap().is_none());
+        assert_eq!(serde_json::to_value(app.world().resource::<SkillModel>()).unwrap(), live_value);
+        let ack = app.world().resource::<SkillModel>().skill_key_ack.as_ref().unwrap();
+        assert_eq!((ack.request_id, ack.spell.as_str(), ack.key, ack.old_key, ack.accepted),
+            (73, "FireBall", 16, 1, true));
+        assert!(commands.send_command(attack()));
+        assert!(receiver.try_recv().is_ok());
+    }
 
     #[tokio::test]
     async fn handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities(){

@@ -16,6 +16,167 @@ use serde_json::Value;
 fn decode_source<T: DeserializeOwned>(raw: Value) -> Result<T, NativeNpcEconomyError> {
     serde_json::from_value(raw).map_err(|_| NativeNpcEconomyError::Incomplete)
 }
+/// One canonical learned projection for the Native producer and sealed owner decoder.
+/// Preserve legacy aliases, explicit null/zero and Native catalog fallback semantics.
+#[cfg(feature = "native-npc-economy")]
+pub fn project_owner_skill_model(payload: &Value) -> Value {
+    use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
+    use serde_json::json;
+    fn value_u32(value: Option<&Value>) -> Option<u32> {
+        value.and_then(|value| value.as_u64().and_then(|n| u32::try_from(n).ok())
+            .or_else(|| value.as_str()?.parse::<u32>().ok()))
+    }
+    fn value_i64(value: Option<&Value>) -> Option<i64> {
+        value.and_then(|value| value.as_i64().or_else(|| value.as_str()?.parse::<i64>().ok()))
+    }
+    fn optional_non_empty_string_value(value: Option<&Value>) -> Value {
+        value.and_then(Value::as_str).map(str::trim).filter(|s| !s.is_empty())
+            .map(|s| json!(s)).unwrap_or(Value::Null)
+    }
+    let skills = payload
+        .get("knownSkills")
+        .or_else(|| payload.get("known_skills"))
+        .or_else(|| payload.get("skills"))
+        .and_then(Value::as_array)
+        .map(|skills| {
+            skills
+                .iter()
+                .take(MAX_LEARNED_SKILLS)
+                .enumerate()
+                .map(|(idx, skill)| {
+                    let id = value_u32(skill.get("id")).unwrap_or(idx as u32);
+                    let key = skill.get("key").and_then(Value::as_str).map(str::to_owned);
+                    let name = skill
+                        .get("magicName")
+                        .and_then(Value::as_str)
+                        .filter(|v| !v.is_empty())
+                        .or_else(|| skill.get("name").and_then(Value::as_str))
+                        .unwrap_or_default()
+                        .to_owned();
+                    let level = value_u32(skill.get("level"))
+                        .and_then(|value| u8::try_from(value).ok())
+                        .unwrap_or(0);
+                    let delay_ms = value_i64(
+                        skill
+                            .get("delayMs")
+                            .or_else(|| skill.get("delay_ms"))
+                            .or_else(|| skill.get("cooldownMs")),
+                    )
+                    .unwrap_or(0);
+                    let mut transformed = serde_json::Map::new();
+                    transformed.insert("id".to_owned(), json!(id));
+                    transformed.insert(
+                        "castSequence".to_owned(),
+                        skill.get("castSequence").cloned().unwrap_or(json!(0)),
+                    );
+                    transformed.insert(
+                        "icon".to_owned(),
+                        value_u32(skill.get("icon"))
+                            .and_then(|v| u8::try_from(v).ok())
+                            .map(|v| json!(v))
+                            .unwrap_or(Value::Null),
+                    );
+                    let definition = skill
+                        .get("spell")
+                        .and_then(Value::as_str)
+                        .and_then(mir2_game_data::crystal_magic_by_spell);
+                    for (field, fallback) in [
+                        ("experience", None),
+                        ("need1", definition.as_ref().map(|v| v.need1)),
+                        ("need2", definition.as_ref().map(|v| v.need2)),
+                        ("need3", definition.as_ref().map(|v| v.need3)),
+                    ] {
+                        let value = skill
+                            .get(field)
+                            .map(|v| value_u32(Some(v)).and_then(|n| u16::try_from(n).ok()))
+                            .unwrap_or(fallback);
+                        transformed.insert(
+                            field.to_owned(),
+                            value.map(|v| json!(v)).unwrap_or(Value::Null),
+                        );
+                    }
+                    transformed.insert("name".to_owned(), json!(name));
+                    transformed.insert("level".to_owned(), json!(level));
+                    transformed.insert("key".to_owned(), json!(key));
+                    transformed.insert("cooldown_ms".to_owned(), json!(delay_ms.max(0)));
+                    transformed.insert(
+                        "spell".to_owned(),
+                        optional_non_empty_string_value(skill.get("spell")),
+                    );
+                    transformed.insert(
+                        "castKind".to_owned(),
+                        optional_non_empty_string_value(skill.get("castKind")),
+                    );
+                    transformed.insert(
+                        "canUse".to_owned(),
+                        skill.get("canUse").cloned().unwrap_or(Value::Null),
+                    );
+                    transformed.insert(
+                        "offensive".to_owned(),
+                        skill.get("offensive").cloned().unwrap_or(Value::Null),
+                    );
+                    transformed.insert(
+                        "hotkey".to_owned(),
+                        skill.get("hotkey").cloned().unwrap_or(Value::Null),
+                    );
+                    transformed.insert(
+                        "cooldownRemainingTicks".to_owned(),
+                        value_u32(
+                            skill
+                                .get("cooldownRemainingTicks")
+                                .or_else(|| skill.get("cooldown_remaining_ticks")),
+                        )
+                        .map(|value| json!(value))
+                        .unwrap_or_else(|| json!(0)),
+                    );
+                    transformed.insert(
+                        "mpCost".to_owned(),
+                        value_u32(skill.get("mpCost").or_else(|| skill.get("mp_cost")))
+                            .map(|value| json!(value))
+                            .unwrap_or(Value::Null),
+                    );
+                    transformed.insert(
+                        "castTimeMs".to_owned(),
+                        value_i64(
+                            skill
+                                .get("castTimeMs")
+                                .or_else(|| skill.get("cast_time_ms")),
+                        )
+                        .map(|value| json!(value))
+                        .unwrap_or(Value::Null),
+                    );
+                    transformed.insert(
+                        "experience".to_owned(),
+                        value_u32(skill.get("experience"))
+                            .and_then(|value| u16::try_from(value).ok())
+                            .map(|value| json!(value))
+                            .unwrap_or(Value::Null),
+                    );
+                    Value::Object(transformed)
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    json!({ "skills": skills,"skillKeyAck":payload.get("skillKeyAck").cloned().unwrap_or(Value::Null), "authority":payload.get("_nativeSkillAuthority").cloned().unwrap_or(json!({"sessionEpoch":0,"snapshotSerial":0,"playerObjectId":0})) })
+}
+
+/// A complete owner cannot silently truncate or turn non-object learned rows into defaults.
+#[cfg(feature = "native-npc-economy")]
+pub fn owner_skill_model(owner: &Value) -> Result<SkillModel, NativeNpcEconomyError> {
+    let rows = source_array(owner, "knownSkills")?;
+    if rows.len() > mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS
+        || rows.iter().any(|row| !row.is_object()) {
+        return Err(NativeNpcEconomyError::Incomplete);
+    }
+    decode_source(project_owner_skill_model(owner))
+}
+
+// A host without the Native catalog capability cannot seal complete owner skills.
+#[cfg(not(feature = "native-npc-economy"))]
+pub fn owner_skill_model(_owner: &Value) -> Result<SkillModel, NativeNpcEconomyError> {
+    Err(NativeNpcEconomyError::Incomplete)
+}
+
 fn inventory_matches(left: &InventoryModel, right: &InventoryModel) -> Result<bool, NativeNpcEconomyError> {
     let left = serde_json::to_value(left).map_err(|_| NativeNpcEconomyError::Decode)?;
     let right = serde_json::to_value(right).map_err(|_| NativeNpcEconomyError::Decode)?;
@@ -827,7 +988,14 @@ impl Decoded {
             return Err(NativeNpcEconomyError::Projection);
         }
         check_owner_shop(&owner,&shop)?;
-        if skill.skills.len() != owner["knownSkills"].as_array().unwrap().len() { return Err(NativeNpcEconomyError::Projection); }
+        let expected_skill = owner_skill_model(&owner)?;
+        // This compares the fresh checkpoint, not a live model with later packet overlays.
+        // Model epochs/ACK are independent host state when absent from the public owner.
+        if skill.skills != expected_skill.skills || skill.bindings != expected_skill.bindings
+            || owner.get("_nativeSkillAuthority").is_some() && skill.authority != expected_skill.authority
+            || owner.get("skillKeyAck").is_some() && skill.skill_key_ack != expected_skill.skill_key_ack {
+            return Err(NativeNpcEconomyError::Projection);
+        }
         Ok(Self { owner, world, ui, inventory, mail, storage, shop, skill, hero, social })
     }
 }
@@ -1606,5 +1774,146 @@ pub(crate) mod tests {
         assert!(fingerprint["stage5Systems"].get("refine").is_none());
         assert_eq!(fingerprint["stage5Systems"]["mentor"]["menteeExp"],5);
         assert_eq!(fingerprint["stage5Systems"]["relationship"]["marriedDays"],10);
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    fn source36_skill_fixture() -> (NativeNpcEconomyGate, SnapshotWitness, NativeNpcEconomyProjection) {
+        let (gate,witness,mut projection)=fixture();
+        let mut owner:Value=serde_json::from_str(&projection.owner_json).unwrap();
+        owner["knownSkills"]=json!([
+            {"id":1,"name":"FireBall","key":"fireball","spell":"FireBall","level":1,"experience":5,
+             "icon":0,"need1":0,"need2":200,"need3":300,"hotkey":1,"castKind":"target","offensive":true,
+             "canUse":true,"delayMs":1000,"mpCost":5,"castTimeMs":100,"castSequence":2,"cooldownRemainingTicks":3},
+            {"id":2,"name":"Healing","key":"healing","spell":"Healing","level":2,"experience":6,
+             "icon":1,"need1":100,"need2":200,"need3":300,"hotkey":2,"castKind":"target","offensive":false,
+             "canUse":true,"delayMs":500,"mpCost":3,"castTimeMs":90,"castSequence":4,"cooldownRemainingTicks":2}
+        ]);
+        projection.owner_json=owner.to_string();
+        projection.skill_json=project_owner_skill_model(&owner).to_string();
+        (gate,witness,projection)
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn source36_skill_checkpoint_same_count_wrong_content_never_applies_or_acknowledges() {
+        let (gate,witness,projection)=source36_skill_fixture();
+        let mut world=World::new();
+        assert!(apply_bundle(&mut world,prepare(&gate,witness,projection.clone())));
+        assert!(gate.try_recv_applied().is_some());
+        let previous=serde_json::to_value(world.resource::<SkillModel>()).unwrap();
+        let raw_source=world.resource::<NativeNpcEconomySource>().owner_json().to_owned();
+        for (field,replacement) in [
+            ("id",json!(8)),("name",json!("old learned name")),("key",json!("old-string-key")),
+            ("spell",json!("Lightning")),("hotkey",json!(16)),("icon",json!(9)),
+            ("level",json!(3)),("experience",json!(99)),("need1",Value::Null),("need2",json!(0)),("need3",json!(0)),
+            ("castKind",json!("self")),("offensive",json!(false)),("canUse",json!(false)),
+            ("cooldown_ms",json!(2200)),("mpCost",json!(0)),("castTimeMs",json!(0)),
+            ("castSequence",json!(0)),("cooldownRemainingTicks",json!(0))
+        ] {
+            let mut bad=projection.clone();let mut skills:Value=serde_json::from_str(&bad.skill_json).unwrap();
+            assert_eq!(skills["skills"].as_array().unwrap().len(),2);
+            skills["skills"][0][field]=replacement;bad.skill_json=skills.to_string();
+            assert_eq!(gate.prepare(witness,bad.clone()).unwrap_err(),NativeNpcEconomyError::Projection,"{field}");
+            let mut sealed=prepare(&gate,witness,projection.clone());sealed.projection=Arc::new(bad);
+            assert!(!apply_bundle(&mut world,sealed),"{field}");
+            assert_eq!(serde_json::to_value(world.resource::<SkillModel>()).unwrap(),previous,"{field}");
+            assert_eq!(world.resource::<NativeNpcEconomySource>().owner_json(),raw_source);
+            assert!(gate.try_recv_applied().is_none(),"{field}");
+        }
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn source36_skill_checkpoint_sidecar_reassociation_and_row_order_are_verified() {
+        let (gate,witness,projection)=source36_skill_fixture();
+        let model:SkillModel=serde_json::from_str(&projection.skill_json).unwrap();
+        for (field,replacement) in [("skillId",json!(2)),("spell",json!("Lightning")),("hotkey",json!(16)),
+            ("icon",Value::Null),("experience",json!(99)),("need1",Value::Null),("need2",json!(0)),("need3",json!(0)),
+            ("castKind",json!("self")),("offensive",json!(false)),("canUse",json!(false)),
+            ("delayMs",json!(2200)),("mpCost",json!(0)),("castTimeMs",json!(0)),
+            ("castSequence",json!(0)),("cooldownRemainingTicks",json!(0))] {
+            let mut bad=projection.clone();let mut typed=serde_json::to_value(&model).unwrap();
+            typed["bindings"][0][field]=replacement;bad.skill_json=typed.to_string();
+            assert_eq!(gate.prepare(witness,bad).unwrap_err(),NativeNpcEconomyError::Projection,"binding {field}");
+        }
+        let mut wrong_order=projection.clone();let mut typed=serde_json::to_value(&model).unwrap();
+        typed["skills"].as_array_mut().unwrap().reverse();wrong_order.skill_json=typed.to_string();
+        assert_eq!(gate.prepare(witness,wrong_order).unwrap_err(),NativeNpcEconomyError::Projection);
+        // Sidecar source order is compatible: it is associated by skill ID before comparison.
+        let mut same=projection;let mut typed=serde_json::to_value(&model).unwrap();
+        typed["bindings"].as_array_mut().unwrap().reverse();same.skill_json=typed.to_string();
+        assert!(gate.prepare(witness,same).is_ok());
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn source36_skill_owner_bounds_and_native_null_zero_catalog_contract_are_preserved() {
+        let definition=mir2_game_data::crystal_magic_by_spell("FireBall").unwrap();
+        let owner=json!({"knownSkills":[
+            {"spell":"FireBall","name":"fallback-name","magicName":null,"delayMs":-1},
+            {"spell":"FireBall","name":"zero","icon":0,"experience":0,"need1":0,"need2":null,"need3":0,"mpCost":0},
+            {"spell":"FireBall","name":"unknown","icon":null,"experience":null,"mpCost":null}
+        ]});
+        let model=owner_skill_model(&owner).unwrap();
+        assert_eq!(model.skills[0].name,"fallback-name");assert_eq!(model.skills[0].cooldown_ms,0);
+        assert_eq!(model.bindings[0].icon,None);assert_eq!(model.bindings[0].delay_ms,Some(0));
+        assert_eq!((model.bindings[0].need1,model.bindings[0].need2,model.bindings[0].need3),
+            (Some(definition.need1),Some(definition.need2),Some(definition.need3)));
+        assert_eq!((model.bindings[1].icon,model.bindings[1].experience,model.bindings[1].need1,
+            model.bindings[1].need2,model.bindings[1].need3,model.bindings[1].mp_cost),
+            (Some(0),Some(0),Some(0),None,Some(0),Some(0)));
+        assert_eq!(model.bindings[2].mp_cost,None);
+        assert!(owner_skill_model(&json!({})).is_err());
+        assert!(owner_skill_model(&json!({"knownSkills":null})).is_err());
+        assert!(owner_skill_model(&json!({"knownSkills":[null]})).is_err());
+        assert_eq!(owner_skill_model(&json!({"knownSkills":[]})).unwrap().skills.len(),0);
+        for count in [512,513] {
+            let rows=(0..count).map(|id|json!({"id":id,"spell":format!("Spell{id}")})).collect::<Vec<_>>();
+            let result=owner_skill_model(&json!({"knownSkills":rows}));
+            if count==512 {let model=result.unwrap();assert_eq!(model.skills.len(),512);assert_eq!(model.bindings.len(),512);}
+            else {assert!(result.is_err());}
+        }
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn source36_skill_checkpoint_explicit_authority_ack_match_but_absent_epoch_is_not_zeroed() {
+        let (gate,witness,mut projection)=source36_skill_fixture();
+        let mut owner:Value=serde_json::from_str(&projection.owner_json).unwrap();
+        owner["_nativeSkillAuthority"]=json!({"sessionEpoch":11,"snapshotSerial":12,"playerObjectId":3});
+        owner["skillKeyAck"]=json!({"requestId":73,"spell":"FireBall","key":1,"oldKey":0,"accepted":true});
+        projection.owner_json=owner.to_string();projection.skill_json=project_owner_skill_model(&owner).to_string();
+        assert!(gate.prepare(witness,projection.clone()).is_ok());
+        for field in ["authority","ack"] {
+            let mut bad=projection.clone();let mut skill:Value=serde_json::from_str(&bad.skill_json).unwrap();
+            if field=="authority" {skill["authority"]["snapshotSerial"]=13.into();}
+            else {skill["skillKeyAck"]["requestId"]=74.into();}
+            bad.skill_json=skill.to_string();
+            assert_eq!(gate.prepare(witness,bad).unwrap_err(),NativeNpcEconomyError::Projection);
+        }
+        owner.as_object_mut().unwrap().remove("_nativeSkillAuthority");
+        projection.owner_json=owner.to_string();projection.skill_json=project_owner_skill_model(&owner).to_string();
+        let mut skill:Value=serde_json::from_str(&projection.skill_json).unwrap();
+        skill["authority"]=json!({"sessionEpoch":11,"snapshotSerial":12,"playerObjectId":3});
+        projection.skill_json=skill.to_string();
+        let mut world=World::new();assert!(apply_bundle(&mut world,prepare(&gate,witness,projection)));
+        assert_eq!(world.resource::<SkillModel>().authority.session_epoch,11);
+        assert_eq!(world.resource::<SkillModel>().authority.snapshot_serial,12);
+        assert_eq!(world.resource::<SkillModel>().skill_key_ack.as_ref().unwrap().request_id,73);
+        assert!(gate.try_recv_applied().is_some());assert!(gate.try_recv_applied().is_none());
+    }
+
+
+    #[cfg(not(feature = "native-npc-economy"))]
+    #[test]
+    fn source36_skill_disabled_native_catalog_rejects_owner_checkpoint() {
+        for owner in [json!({"knownSkills":[]}), json!({"knownSkills":[
+            {"id":1,"name":"Fire Ball","spell":"FireBall","hotkey":1}
+        ]})] {
+            assert!(matches!(owner_skill_model(&owner), Err(NativeNpcEconomyError::Incomplete)));
+        }
+        let (gate, witness, projection) = fixture();
+        assert!(matches!(gate.prepare(witness, projection), Err(NativeNpcEconomyError::Incomplete)));
+        assert!(gate.try_recv_applied().is_none());
     }
 }

@@ -1,5 +1,11 @@
 # Crystal Server Parity
 
+## Source36 客户端进展（2026-10-08）
+
+完整技能checkpoint与Native操作准入已修复；当前选定57项通过（35在最终Source02执行，22按有效正文未变限定承接），新9项均执行。只改客户端4文件，本轮后端/共享Zone/协议parity不变。台账309/317≈97.5%含206 legacy，不代表整个目标或实际可玩；最新完整Web包仍Source25，登录→战斗→保存→重登和玩家验收未运行。详见[当前路线及限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。
+
+
+
 ## Source35：共享仓库日期修复；代码覆盖97.5%，实际可玩待验证（2026-10-08）
 
 共享 Storage 现在接受精确 canonical signed i64 日期字符串；兼容原安全 Number、Rust i64 数值序列化、默认0与 expiryTimeBinaryDatetime 别名。Web projector/direct host 使用同一原有谓词，拒绝 unsafe Number、溢出及非规范字符串；UID、authority与日历规则保持。本轮仅客户端和测试，未改变 simulation、gateway、协议或后端 parity。

@@ -1811,7 +1811,8 @@ pub(crate) fn activate_native_command_provenance(
         // exact receipt. Never rewind that live model to the earlier snapshot.
         if actual.authority.session_epoch!=expected.authority.session_epoch
             || actual.authority.player_object_id!=expected.authority.player_object_id
-            || actual.authority.snapshot_serial<expected.authority.snapshot_serial{return;}
+            || actual.authority.snapshot_serial<expected.authority.snapshot_serial
+            || !actual.has_same_learned_descriptors(expected){return;}
     }
     // Actual source-model application, even if all serialized values happen to
     // equal the previous scene. No packet-only/receipt-only snapshot gets here.
