@@ -300,7 +300,7 @@ pub fn cell_action(m:&HeroUiReadModel,from:HeroCell,to:HeroCell,source:&ItemMode
 pub fn input_regions(c:&HeroUiContext,state:&HeroUiState,m:&HeroUiReadModel)->Vec<CrystalRect>{
     if state.ui.modal() {return c.presentation.map(|p|vec![CrystalRect::new(0.,0.,p.logical_width,p.logical_height)]).unwrap_or_default();}
     let mut regions=[HeroWindow::Inventory,HeroWindow::Character,HeroWindow::Belt].into_iter().filter_map(|w|hero_dialog::geometry::window_rect(&state.ui,w)).collect::<Vec<_>>();
-    if c.windows.inventory_open && state.personal_open && m.personal.is_some(){regions.push(CrystalRect::new(state.personal_position[0] as f32,state.personal_position[1] as f32,316.,236.));}regions
+    if state.ui.inventory_open && state.personal_open && m.personal.is_some(){regions.push(CrystalRect::new(state.personal_position[0] as f32,state.personal_position[1] as f32,316.,236.));}regions
 }
 /// Preload all Hero controls and real item/appearance variants before takeover.
 pub fn required_assets(m: &HeroUiReadModel) -> Vec<String> {
@@ -331,7 +331,7 @@ pub fn appearance_materials_ready(m:&HeroUiReadModel,materials:Option<&CrystalCh
         layer.blend!=crate::crystal_ui::character_page::CrystalCharacterBlend::DrawBlend || materials.is_some_and(|materials|materials.get(layer.frame.index).is_some()))
 }
 #[derive(Component,Debug,Clone)]
-pub struct SharedHeroRoot { pub stamp:HeroStamp,pub revision:u64 }
+pub struct SharedHeroRoot { pub stamp:HeroStamp,pub revision:u64,pub frame_sequence:u64,pub regions:Vec<CrystalRect> }
 #[derive(Component)]
 pub struct HeroPersonalRoot;
 #[derive(SystemSet,Debug,Clone,Copy,PartialEq,Eq,Hash)]
@@ -344,13 +344,13 @@ fn render(mut commands:Commands,c:Res<HeroUiContext>,m:Res<HeroUiReadModel>,stat
     for entity in &old{commands.entity(entity).despawn();}
     let (Some(server),Some(surface))=(server,surface) else{return;};if !c.active{return;}let Some(p)=c.presentation.filter(|p|p.fits()) else{return;};
     let font=TextFont{font:FontSource::Handle(surface.font.clone()),font_size:FontSize::Px(32./3.),..default()};
-    let root=commands.spawn((SharedHeroRoot{stamp:c.stamp.clone(),revision:c.revision},absolute_node(CrystalRect::new(0.,0.,p.logical_width,p.logical_height)),
+    let root=commands.spawn((SharedHeroRoot{stamp:c.stamp.clone(),revision:c.revision,frame_sequence:c.frame_sequence,regions:input_regions(&c,&state,&m)},absolute_node(CrystalRect::new(0.,0.,p.logical_width,p.logical_height)),
         UiTargetCamera(surface.camera),FocusPolicy::Pass,Visibility::Hidden)).id();
     hero_dialog::render::paint(&mut commands,root,&state.ui,&m.hero,&server,wings.as_deref(),&font,c.now_ms);
     if c.pending {commands.entity(root).with_children(|parent|{parent.spawn((
         absolute_node(CrystalRect::new(12.,8.,216.,20.)),GlobalZIndex(1002),FocusPolicy::Pass,
         Text::new("英雄操作处理中…"),font.clone(),TextColor(Color::srgb(1.,0.85,0.2))));});}
-    if state.personal_open && c.windows.inventory_open {if let Some(personal)=m.personal.as_ref(){
+    if state.personal_open && state.ui.inventory_open {if let Some(personal)=m.personal.as_ref(){
         commands.entity(root).with_children(|parent|{parent.spawn((HeroPersonalRoot,absolute_node(CrystalRect::new(state.personal_position[0] as f32,state.personal_position[1] as f32,316.,236.)),
             GlobalZIndex(if state.ui.cross.player_front {984}else{979}),FocusPolicy::Block)).with_children(|body|{
             let options=BagPaintOptions{page:state.personal_page,delete_mode:false,weight_ratio:None,free_slots:None,font:font.clone(),stack_split_hint:Default::default()};
@@ -384,6 +384,24 @@ mod tests {
     }
     fn intent(c:&HeroUiContext,confirmed:bool)->HeroUiIntent {HeroUiIntent {stamp:c.stamp.clone(),intent_sequence:1,
         body:HeroIntentBody::Action {origin:HeroOrigin::Inventory,action:HeroSemanticAction::Use {slot:2,confirmed},old_key:None}}}
+
+    #[test]
+    fn close_hero_inventory_removes_personal_hit_region_in_the_same_reducer_frame() {
+        let c = context(); let m = model();
+        let mut state = HeroUiState::default(); let mut q = HeroIntentQueue::default();
+        state.reconcile(&c, &m);
+        assert!(input_regions(&c, &state, &m).iter().any(|r| r.width == 316.));
+        assert!(state.process(&c, &m, edge(&c, 1, 7, "down", 304., 8., 0), &mut q));
+        assert!(state.process(&c, &m, edge(&c, 2, 7, "up", 304., 8., 0), &mut q));
+        assert!(!state.ui.inventory_open);
+        assert!(c.windows.inventory_open);
+        assert!(input_regions(&c, &state, &m).is_empty());
+        assert_eq!(q.0.len(), 1);
+        assert!(matches!(&q.0[0].body, HeroIntentBody::Windows { windows } if !windows.inventory_open));
+        state.reconcile(&c, &m);
+        assert!(input_regions(&c, &state, &m).iter().any(|r| r.width == 316.));
+    }
+
     #[test]
     fn secondary_pointer_does_not_consume_primary_button_or_drag() {
         let c=context();let m=model();let mut state=HeroUiState::default();let mut q=HeroIntentQueue::default();state.reconcile(&c,&m);

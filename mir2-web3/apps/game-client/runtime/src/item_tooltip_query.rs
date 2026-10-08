@@ -291,6 +291,38 @@ fn catalog_instance_source(raw: &Value, item: &QueryItem, player: &PlayerStats,
     Ok(Value::Object(source))
 }
 
+
+/// Crystal new UserItem(info) display previews. UID zero carries no custody.
+/// This uses only an unambiguous packaged catalogue entry, never owner defaults.
+pub(crate) fn hero_auto_pot_catalog_view(hero: &mir2_client_bevy::hero_model::HeroModel)
+    -> mir2_client_bevy::inventory::InventoryModel
+{
+    let mut model = mir2_client_bevy::inventory::InventoryModel::default();
+    let Some(packet) = hero.info.as_ref() else { return model; };
+    if !packet.auto_pot { return model; }
+    let viewer = (packet.level, packet.class);
+    for (slot,index) in [(0,packet.hp_item_index),(1,packet.mp_item_index)] {
+        let Some(info) = unique_catalog_info(index) else { continue; };
+        if usize::from(info.slots) > MAX_SOCKETS { continue; }
+        let user = CrystalUserItemModel {
+            unique_id:0,item_index:info.item_index,current_dura:info.durability,
+            max_dura:info.durability,count:1,identified:false,
+            slots:vec![None;usize::from(info.slots)],..Default::default()
+        };
+        let source = CrystalItemTooltipSourceModel {
+            real_info:catalog_real_info(&info,Some(viewer)),
+            info:info.clone(),user_item:Some(user),..Default::default()
+        };
+        model.items.push(ItemModel {
+            key:format!("hero-auto-pot-preview:{slot}:{index}"),unique_id:Some(0),
+            name:info.name.clone(),icon:info.image,quantity:1,slot,container:0,
+            durability_current:Some(info.durability),durability_max:Some(info.durability),
+            tooltip_source:Some(source),..Default::default()
+        });
+    }
+    model
+}
+
 fn catalog_preview_source(raw: &Value, item: &QueryItem, player: &PlayerStats,
     reasons: &mut Vec<&'static str>) -> Result<Value, &'static str>
 {

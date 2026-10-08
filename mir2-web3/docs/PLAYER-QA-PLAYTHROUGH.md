@@ -1,5 +1,19 @@
 # Player-QA playthrough loop
 
+## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
+
+本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。
+
+Ready 代码现在读取实际 PostLayout 坐标、面板/控制/个人格子的完整集合、当前角色页图像、字体 glyph、物品 image 0、材质与传播后的可见性；未绑定当前 sink 或未消费 reset 时撤回接管。关闭 Hero 库存同帧移除个人包/输入区域，提示框按实际接管及字体加载选择。上述是接入代码与有限数据回归，尚无真实界面 Ready 验收。
+
+最终 Source02 实际 Runtime15/15＋portable46/46＋Native24/24，共85次通过、0失败/ignored；跨 feature 同一原函数去重72项，新增16项。WebGL2 shared与WebGPU两个 WASM cargo check实际exit0，仅静态编译，不是新renderer/Core/EXE/完整Web产物。900声明Rust输入5改/895保护，五次实际转发全部原Guard PolicyB completed/exited/disposed；C最低256589996032 B、freshness保守上界最大67ms。首次Guard exit90没有转发Cargo、0测试/0nonce/无C采样；Root错误的普通authority布尔字段按原Flat字符串接口修正，完整失败输出保留，Guard/探针/模板/预算未改。
+
+当前固定状态：Runtime接入已实现并有限编译；Page/TS Hero hook、真实验证过的npcPurchaseOwner raw extractor、renderer checkpoint/replay、输入仲裁、fallback接管和现有唯一Hero账本仍待接线。后续必须分开bootstrap source查询与完整matchingReady；禁止把新Rust revision自动绑定旧TS模型，动作来源须可比较；换图直接activate保留私有Hero bootstrap，不先withdraw；send boolean只表示传输接受，精确receipt及后续完整authority仍按原ledger结算。继续全goal，不能将其缩小为本轮Host。
+
+Matrix11不变：103 shared＋206 legacy＋8 common，309/317≈97.5%仅为含旧实现的功能记录覆盖，103/317≈32.5%仅为shared分类覆盖；overallPercentage=null、Candidate100=false。完整公开Web仍Source25 Next08/Thin08，不含Source26–40；本轮无新TSC/MJS/Core/PUI/EXE/renderer包/完整Web，公开manifest及用户tsconfig保持。原metadata/name/normalized ABI/default-gzip/初始化/源码匹配门槛全部保留，未绕过原helper的WASM API限制。登录→战斗→保存→重登、移动真机及玩家验收not-run，无可信试玩日期。用户“继续代码，暂不操作界面”与全goal active保持；未改后端/共享Zone/协议parity。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-finite-result01.json)、[原始完整输出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-raw-evidence01.json)、[原Guard拒绝记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-guard-refusal01.json)、[Source39实际提交与推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-publication01.json)。下面各Source记录保留为历史。
+
 ## Source39：Hero 共享原始数据与面板模块完成有限验证；完整 Web 接线仍待交付（2026-10-08）
 
 共享库新增严格 raw Hero ingress 和 portable Hero painter/reducer，Native 与 Web 共用同一 Crystal 绘制及物品规划。保留原始 u64/i64、首次到达的相对技能时钟、scope/scene/run 退休门槛和 bounded FIFO；未消费回执禁止 checkpoint 交接。UID0 只读并保留真实目标占位，动态实例 metadata 不一致等新 owner；Native 默认入口、控件及操作逻辑保留。多指针、过期反馈、背包重开/锁定页/前景、模态全 stage 拦截和缺失布局保护均有回归。

@@ -12,6 +12,8 @@ mod entity_animation_bridge;
 mod fallback_hierarchy_tests;
 #[cfg(feature = "web-quest-ui")]
 pub mod hud_ui_host;
+#[cfg(all(feature = "web-quest-ui", any(target_arch = "wasm32", test)))]
+pub mod hero_ui_host;
 mod interpolation;
 mod lighting;
 mod local_motion;

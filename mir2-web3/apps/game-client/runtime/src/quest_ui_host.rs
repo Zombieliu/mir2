@@ -673,16 +673,19 @@ fn install_supported(app: &mut App, shared_webgl2: bool) {
     app.add_plugins(Mir2CrystalHintPlugin);
     crate::bag_ui_host::install(app, ui_window, ui_camera);
     crate::character_ui_host::install(app);
+    crate::hero_ui_host::install(app);
     crate::spells_ui_host::install(app);
     crate::mail_ui_host::install(app);
     app.configure_sets(
         Update,
-        CrystalHintSet::Sync.after(PendingLifecycleSet::Ingest),
+        CrystalHintSet::Sync.after(PendingLifecycleSet::Ingest)
+            .after(mir2_client_bevy::portable_hero_ui::HeroPaintSet),
     );
     app.add_systems(
         Update,
         sync_quest_hint_surface
             .after(NativePlayerUiSet::Read)
+            .after(mir2_client_bevy::portable_hero_ui::HeroPaintSet)
             .before(CrystalHintSet::Sync),
     );
     app.add_systems(
@@ -1006,17 +1009,24 @@ fn sync_quest_hint_surface(
     dialog: Res<NpcDialogModel>,
     font: Res<QuestUiFont>,
     bag: Res<mir2_client_bevy::portable_bag_ui::BagUiHostContext>,
+    hero: Res<mir2_client_bevy::portable_hero_ui::HeroUiContext>,
+    hud: Res<mir2_client_bevy::crystal_ui::hud::SharedHudSurface>,
+    assets: Res<AssetServer>,
     mut surface: ResMut<CrystalHintSurface>,
 ) {
+    let hero_hint_owner = hero.active && hero.ready && hero.input_enabled
+        && matches!(assets.get_load_state(hud.font.id()), Some(bevy::asset::LoadState::Loaded));
     let active = (context.in_game
         && context.host_visible
         && quest_ui_has_open_surface(&player_ui, &quest_state, &dialog))
-        || (bag.bag_open && bag.input_enabled && bag.presentation_ready);
+        || (bag.bag_open && bag.input_enabled && bag.presentation_ready)
+        || hero_hint_owner;
     if surface.active != active {
         surface.active = active;
     }
-    if surface.font != font.0 {
-        surface.font = font.0.clone();
+    let hint_font = if hero_hint_owner { &hud.font } else { &font.0 };
+    if surface.font != *hint_font {
+        surface.font = hint_font.clone();
     }
 }
 
