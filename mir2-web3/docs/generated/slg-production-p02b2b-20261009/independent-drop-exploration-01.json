@@ -1,0 +1,152 @@
+{
+  "schema": "mir2.production-drop-exploration.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T17:32:24.6068682Z",
+  "preparationOnly": true,
+  "sourceReviewAcceptance": false,
+  "testResultAcceptance": false,
+  "parentCommit": "488ec6f034182977fec03ad2952cccfd76b06eb2",
+  "sourceNotYetFrozen": true,
+  "scope": "Next bounded private File/personal fresh ground-drop pickup UID migration and whole-custody preservation; PostgreSQL/shared durable receipts and public gateway are excluded.",
+  "recommendedProductPaths": [
+    "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+    "mir2-web3/apps/simulation/src/runtime/exact_drop_uid_tests.rs"
+  ],
+  "optionalThirdPath": "mir2-web3/apps/simulation/src/runtime/drops.rs only for narrowly scoped failure feedback if needed",
+  "findings": [
+    {
+      "severity": "Concrete design risk",
+      "location": "items.rs:866,888,953,1050,1061",
+      "detail": "Hydration captures child (unique_id,item_index) identities and rejects duplicates. Two same-template fresh children both UID0 cause AmbiguousSocketIdentity before global issuance. Keep existing carrier validation. A pure clone-only deterministic placeholder tree with distinct recursive identities can support structural roundtrip; alternatively explicitly reject and document this unsupported fresh case. Do not mint merely to make preview succeed."
+    },
+    {
+      "severity": "Required invariant",
+      "location": "inventory.rs:2178,2392,2406,2456; drops.rs:2263,2688",
+      "detail": "Current preview/candidate checks call the same planner as actual add. Split a pure structural/capacity plan from commit-only historical floor refresh and mint. Repeated preview must leave File bytes, high-water, live resources and ground objects untouched, including malformed data and unavailable authority."
+    },
+    {
+      "severity": "Required invariant",
+      "location": "items.rs:953-1054,1405-1501; inventory.rs:1425",
+      "detail": "Canonical raw UserItem.slots, hydrated ItemState.socketed, captured_socket_positions and metadata.slots mirror the same physical tree. Issue once per original canonical node in parent-first order, then fully rehydrate from assigned raw tree. Updating root or hydrated children alone leaves stale captured identities or doubles issuance. Strip only IDs/count for comparison; preserve sparse slot positions and every other frozen protocol field."
+    },
+    {
+      "severity": "Existing custody flaw worth closing",
+      "location": "inventory.rs:2221-2302",
+      "detail": "Current assigned source collision normalization/exact equality runs after the full-absorption merge branch. Move collision detection before any merge so collisions with a target stack, equipment, storage, reserved or nested IDs cannot be swallowed. Assigned insertion keeps exact root/children; complete absorption may retire incoming identity while retaining destination stack IDs, and never reissues."
+    },
+    {
+      "severity": "Required invariant",
+      "location": "inventory.rs:2305-2318,2373-2387,2728; drops.rs:2700-2743",
+      "detail": "Only real legal Crystal grid slots may be chosen; remove preferred-slot/out-of-range fallback. Plan all merge and new stacks before mint. Authority exhaustion may burn an issued prefix but must publish no partial merge/items, no GainedItem/success notification, and must leave the ground entity. Local pickup already despawns after add success."
+    },
+    {
+      "severity": "Required invariant",
+      "location": "item_uid_issuance.rs:118,191; inventory.rs new unassigned branch",
+      "detail": "Fresh shadow/fenced requests reject even if fully absorbed and requiring no fresh root. Commit a Durable fresh merge-only operation only after validating the bound authority/history refresh; corrupt File must not allow asset growth without any mint call. Whole assigned custody does not require a fresh allocator and must not read/repair/rebuild it."
+    },
+    {
+      "severity": "Bounded rollout limitation",
+      "location": "drops.rs:3420; session.rs:351,595; gateway economy.rs:2045-2087; routing.rs:11579-11617",
+      "detail": "Simulation commit_shared_ground_drop_pickup_transaction is a live mutator. PG persists the quantity receipt/intent then projects into a character save; unassigned payload there does not freeze future minted IDs. Do not add UID issuance to unknown receipt replay/materialization or restore unresolved claims to another player. PG/shared immutable identity receipt migration remains separate and public File opt-in stays disabled."
+    }
+  ],
+  "crystalSource": [
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 7517,
+      "observed": "Dead/owner/same-cell checks; CanGainItem first, then GainItem, then remove/despawn ground object."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 7462,
+      "observed": "Whole player drop passes original UserItem; partial drop at7483 uses CreateFreshItem and preserves source remaining stack."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/HumanObject.cs",
+      "line": 1577,
+      "observed": "AddItem preserves destination stack identity, merges and routes potion/scroll/script/amulet to designated belt ranges; remainder uses available inventory."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/HumanObject.cs",
+      "line": 7586,
+      "observed": "CanGainItem checks free grid/merge capacity. No added reject-overweight rule belongs to this UID slice."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/HumanObject.cs",
+      "line": 7824,
+      "observed": "GainItem clones wire item, AddItem mutates inventory, then RefreshBagWeight."
+    },
+    {
+      "path": "Crystal/Server/MirEnvir/Envir.cs",
+      "line": 4396,
+      "observed": "CreateFreshItem and CreateDropItem(4413) already issue ++NextUserItemID at generation. Current Rust deferred pickup mint is a compatibility migration slice, not full timing parity."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/ItemObject.cs",
+      "line": 53,
+      "observed": "ItemObject holds the original UserItem, including UID and frozen metadata."
+    }
+  ],
+  "preserveOldAssertions": [
+    "drops::ground_drop_identity_tests::assigned_ground_drop_uid_collision_fails_closed_without_mutation",
+    "drops::ground_drop_identity_tests::assigned_ground_drop_stack_merges_when_bag_is_full",
+    "drops::ground_drop_identity_tests::exact_ground_drop_multi_stack_pickup_emits_each_changed_stack",
+    "drops::ground_drop_identity_tests::whole_player_drop_roundtrip_preserves_assigned_uid_tree",
+    "drops::ground_drop_identity_tests::partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication",
+    "drops::ground_drop_identity_tests::shared_pickup_preserves_frozen_identity_without_rerolling_metadata",
+    "drops::ground_drop_identity_tests::shared_quest_pickup_preserves_exact_identity",
+    "drops::ground_drop_identity_tests::local_pickup_preserves_frozen_identity_without_rerolling_metadata"
+  ],
+  "proposedNewTests": [
+    {
+      "name": "preview_and_candidate_checks_never_touch_uid_authority",
+      "assert": "Repeat direct can_gain and current-cell candidate checks, with a corrupt sidecar; exact File bytes/high-water/live inventory/ground payload remain unchanged."
+    },
+    {
+      "name": "fresh_personal_pickup_issues_once_and_keeps_frozen_wire_fields",
+      "assert": "Real pickup issues global UID, packet equals frozen raw item except assigned UID/final count, then removes ground object; repeated pickup issues nothing."
+    },
+    {
+      "name": "fresh_sparse_nested_tree_rehydrates_each_node_once",
+      "assert": "Sparse slots with same-template children plus nested descendant retain raw fields/positions; all physical nodes get distinct global IDs and no preview/old/temp IDs survive metadata or packet."
+    },
+    {
+      "name": "capacity_failure_after_tentative_merge_has_no_publication_or_mint",
+      "assert": "Partial compatible stack then full legal grid; no tentative growth/GainedItem/ground removal/high-water advance."
+    },
+    {
+      "name": "mid_tree_uid_exhaustion_burns_prefix_without_losing_drop",
+      "assert": "Two-or-more nodes at u64 exhaustion; earlier UID stays retired, entire live inventory and original ground entity unchanged."
+    },
+    {
+      "name": "fresh_merge_only_fault_and_fences_fail_closed",
+      "assert": "Fresh request could fully merge; corrupt File, Unavailable and Fenced cannot increase stack or generate success."
+    },
+    {
+      "name": "assigned_custody_returns_exact_tree_without_mint_authority",
+      "assert": "Whole assigned raw root/children preserved under unavailable/corrupt allocator; original File bytes untouched, no new IDs."
+    },
+    {
+      "name": "assigned_collision_is_rejected_before_whole_stack_absorption",
+      "assert": "A root collision with merge target or a child collision with equipment/storage/reserved prevents both preview and add, retaining payload and quantities."
+    },
+    {
+      "name": "partial_player_drop_preserves_source_and_distinct_new_remainder",
+      "assert": "Original remaining stack UID stays; dropped partial stays unassigned; merging back preserves original UID without duplicate, while a new receiver stack is minted independently."
+    },
+    {
+      "name": "legal_grid_limits_and_legacy_identity_regressions_remain",
+      "assert": "No preferred_slot200 or slot beyond actual Bag/Quest grid; valid Legacy local-normalization behavior and existing exact tree/metadata assertions remain."
+    }
+  ],
+  "fixtureGuidance": "Use actual manifest names such as (HP)DrugSmall, GoldOre and existing exact mount/carrier fixtures. Do not reuse nonexistent HealthPotion(S), alter old assertions, remove carrier checks, or widen UID/quantity expectations to hide a failure.",
+  "remaining": [
+    "Full source-time ground UID issuance parity and shared world floor/census",
+    "Distinct PlayerPartialDrop versus MonsterDrop origin reason without changing payload schema",
+    "PG/shared claim durable receipt UID freezing and recovery",
+    "Normal gateway opt-in, frontend gameplay and account atomic publication"
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductEdits": true
+}

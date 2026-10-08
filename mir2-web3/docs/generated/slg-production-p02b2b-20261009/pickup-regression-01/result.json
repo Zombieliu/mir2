@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "pickup-regression",
+  "startedUtc": "2026-10-08T18:52:31.7549559Z",
+  "finishedUtc": "2026-10-08T18:52:46.5316479Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "pickup",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "9e2e6f0b466e4af3bbbd0b83435b5910dbd68f21ab3afc953e67646b20bb1db5",
+  "declaredInputs": 461,
+  "sourceDrift": [],
+  "cargoLogSha256": "e0bf373caa87f729871d68080d8c910b25d4416f7d9c882fbf639dbeae296937",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

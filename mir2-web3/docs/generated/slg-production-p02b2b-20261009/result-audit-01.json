@@ -1,0 +1,934 @@
+{
+  "schema": "mir2.production-drops-actual-audit.v1",
+  "createdUtc": "2026-10-08T22:40:58.7516213Z",
+  "accepted": true,
+  "actualPassingExecutions": 168.0,
+  "distinctNamedPassingTests": 151,
+  "newUniqueTests": 11,
+  "newTestNames": [
+    "runtime::inventory::exact_drop_uid_tests::nested_drop_preview_is_pure_and_commit_mints_each_raw_node_once",
+    "runtime::inventory::exact_drop_uid_tests::fresh_drop_sessions_share_authority_without_using_planning_ids_as_history",
+    "runtime::inventory::exact_drop_uid_tests::fresh_raw_preflight_keeps_original_shape_and_committed_carrier_limits",
+    "runtime::inventory::exact_drop_uid_tests::failed_capacity_discards_earlier_merge_and_never_mints",
+    "runtime::inventory::exact_drop_uid_tests::local_pickup_uid_failure_keeps_ground_object_and_emits_no_gain",
+    "runtime::inventory::exact_drop_uid_tests::actual_pickup_emits_final_uid_and_normal_relogin_preserves_it",
+    "runtime::inventory::exact_drop_uid_tests::mid_tree_exhaustion_burns_prefix_without_delivering_any_item",
+    "runtime::inventory::exact_drop_uid_tests::assigned_custody_preserves_entire_nested_tree_without_new_issuance",
+    "runtime::inventory::exact_drop_uid_tests::custody_conflicts_cannot_hide_inside_full_stack_absorption",
+    "runtime::inventory::exact_drop_uid_tests::absorbed_custody_source_raises_retired_id_floor_without_minting",
+    "runtime::inventory::exact_drop_uid_tests::fresh_merge_only_is_fenced_and_full_bag_never_uses_out_of_range_preference"
+  ],
+  "checks": [
+    {
+      "run": "drop-uid-tests-02",
+      "actualPassingExecutions": 11,
+      "declaredInputs": 461,
+      "sourceDrift": 0,
+      "remainingCBytes": "179538550784",
+      "freshnessUpperBoundMs": 91.8557,
+      "nonce": "ffa5dee1de2446ea8890d917fcd71ddc",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "drop-regression-01",
+      "actualPassingExecutions": 21,
+      "declaredInputs": 461,
+      "sourceDrift": 0,
+      "remainingCBytes": "179530711040",
+      "freshnessUpperBoundMs": 85.3674,
+      "nonce": "67363a4fc378494d95ff0c73d40e967e",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "inventory-regression-01",
+      "actualPassingExecutions": 48,
+      "declaredInputs": 461,
+      "sourceDrift": 0,
+      "remainingCBytes": "179529523200",
+      "freshnessUpperBoundMs": 88.2038,
+      "nonce": "45b4f4a71e5d45b48e56f69381e321ac",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "pickup-regression-01",
+      "actualPassingExecutions": 29,
+      "declaredInputs": 461,
+      "sourceDrift": 0,
+      "remainingCBytes": "178157662208",
+      "freshnessUpperBoundMs": 97.6059,
+      "nonce": "95e8dda3e13a4d0e9ffef3d1bb6210c5",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "save-regression-01",
+      "actualPassingExecutions": 59,
+      "declaredInputs": 461,
+      "sourceDrift": 0,
+      "remainingCBytes": "178135175168",
+      "freshnessUpperBoundMs": 89.3698,
+      "nonce": "8f924820e43c489e9f0a52c6cbd595a3",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    }
+  ],
+  "roster": [
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::absorbed_custody_source_raises_retired_id_floor_without_minting",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::actual_pickup_emits_final_uid_and_normal_relogin_preserves_it",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::assigned_custody_preserves_entire_nested_tree_without_new_issuance",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::custody_conflicts_cannot_hide_inside_full_stack_absorption",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::failed_capacity_discards_earlier_merge_and_never_mints",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::fresh_drop_sessions_share_authority_without_using_planning_ids_as_history",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::fresh_merge_only_is_fenced_and_full_bag_never_uses_out_of_range_preference",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::fresh_raw_preflight_keeps_original_shape_and_committed_carrier_limits",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::local_pickup_uid_failure_keeps_ground_object_and_emits_no_gain",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::mid_tree_exhaustion_burns_prefix_without_delivering_any_item",
+      "result": "ok"
+    },
+    {
+      "run": "drop-uid-tests-02",
+      "test": "runtime::inventory::exact_drop_uid_tests::nested_drop_preview_is_pure_and_commit_mints_each_raw_node_once",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::deterministic_drop_tests::deterministic_drop_roll_is_stable_and_bounded",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::deterministic_drop_tests::half_chance_roll_does_not_lock_to_fixed_tick_object_parity",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::ambiguous_legacy_display_name_fails_closed_without_inventory_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::assigned_ground_drop_stack_merges_when_bag_is_full",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::assigned_ground_drop_uid_collision_fails_closed_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::assigned_zero_uid_fails_the_same_preflight_used_before_durable_commit",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::exact_ground_drop_multi_stack_pickup_emits_each_changed_stack",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::exact_ground_drop_schema_round_trips_and_old_json_defaults_to_legacy",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::legacy_display_name_key_freezes_and_inserts_as_canonical_exact_item",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::legacy_drop_full_bag_partial_stack_preserves_frozen_metadata",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::local_pickup_preserves_frozen_identity_without_rerolling_metadata",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::malformed_exact_payload_fails_preflight_without_inventory_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::shared_pickup_preserves_frozen_identity_without_rerolling_metadata",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::shared_quest_pickup_preserves_exact_identity",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::unassigned_exact_stack_merges_when_the_bag_has_no_empty_slot",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::whole_player_drop_roundtrip_preserves_assigned_uid_tree",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::qa_natural_kill_experience_multiplier_tests::defaults_to_exact_source_experience_and_bounds_explicit_qa_acceleration",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::qa_natural_kill_experience_multiplier_tests::defaults_to_one_drop_sample_and_bounds_explicit_qa_acceleration",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::zone_harvest_drop_tests::zone_deer_death_never_materializes_harvest_drops",
+      "result": "ok"
+    },
+    {
+      "run": "drop-regression-01",
+      "test": "runtime::drops::zone_harvest_drop_tests::zone_non_harvest_monster_death_drops_remain_enabled",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::absorbed_custody_source_raises_retired_id_floor_without_minting",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::actual_pickup_emits_final_uid_and_normal_relogin_preserves_it",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::assigned_custody_preserves_entire_nested_tree_without_new_issuance",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::custody_conflicts_cannot_hide_inside_full_stack_absorption",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::failed_capacity_discards_earlier_merge_and_never_mints",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::fresh_drop_sessions_share_authority_without_using_planning_ids_as_history",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::fresh_merge_only_is_fenced_and_full_bag_never_uses_out_of_range_preference",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::fresh_raw_preflight_keeps_original_shape_and_committed_carrier_limits",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::local_pickup_uid_failure_keeps_ground_object_and_emits_no_gain",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::mid_tree_exhaustion_burns_prefix_without_delivering_any_item",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::nested_drop_preview_is_pure_and_commit_mints_each_raw_node_once",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::actual_snapshot_serializes_capacity_and_accepts_missing_or_null_legacy_field",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::captured_and_reserved_root_conflicts_block_the_whole_roster",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::conflicting_raw_template_identity_is_not_a_compatible_row",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::evidence_never_mutates_inventory_or_allocates_live_identity",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::full_roster_without_any_gain_capacity_still_reports_valid_identity",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::functional_carrier_differences_are_not_erased_by_equal_user_item",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::invalid_carried_cells_and_own_quantities_publish_false",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::legacy_cross_grid_roots_stay_occupied_but_unlisted",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::metadata_durability_and_socket_differences_are_not_fresh_compatible",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::modern_roots_are_listed_independently_of_current_slack",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::packed_capacity_deserialization_is_strict_bounded_and_lossless",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::quest_root_and_nested_conflicts_block_without_quest_capacity",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::npc_gold_trade_evidence_tests::sidecarless_canonical_root_is_not_merge_evidence",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::belt_move_grid_missing_source_is_transactional",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::default_optional_rental_or_sealed_presence_rejects_merge",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::equipped_root_uids_are_reserved_for_allocation_and_incoming_rekeys",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::exact_item_index_difference_rejects_merge",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::fresh_and_equipment_metadata_only_children_cannot_reuse_existing_uids",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::fully_compatible_across_merge_succeeds",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::fully_compatible_within_merge_succeeds",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::known_healing_metadata_only_fills_legacy_missing_values",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::known_healing_metadata_preserves_crystal_checkpoint_roundtrip",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::live_socket_authority_difference_rejects_merge",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::metadata_difference_rejects_across_merge_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::metadata_difference_rejects_within_merge_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::metadata_only_child_uids_participate_in_usage_high_water_and_normalization",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::move_item_packet_belt_grid_moves_raw_bag_slot_to_belt",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::nested_item_uid_or_count_difference_rejects_merge",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::normalization_preserves_metadata_exact_zero_and_rekeys_legacy_zero",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::normalization_rekeys_cross_container_zero_and_nonzero_collisions_globally",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::seeded_legacy_packet_items_remain_addressable_after_global_normalization",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::split_conversion_error_preserves_inventory_and_storage_state",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::split_rejects_nested_socket_identity_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "inventory-regression-01",
+      "test": "runtime::inventory::stack_identity_tests::storage_split_rejects_nested_socket_identity_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::exact_ground_drop_multi_stack_pickup_emits_each_changed_stack",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::local_pickup_preserves_frozen_identity_without_rerolling_metadata",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::shared_pickup_preserves_frozen_identity_without_rerolling_metadata",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::drops::ground_drop_identity_tests::shared_quest_pickup_preserves_exact_identity",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::actual_pickup_emits_final_uid_and_normal_relogin_preserves_it",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::inventory::exact_drop_uid_tests::local_pickup_uid_failure_keeps_ground_object_and_emits_no_gain",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::crystal_pickup_packet_collects_ground_drop_on_current_cell",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::crystal_pickup_packet_ignores_adjacent_ground_drop",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::direct_pickup_missing_drop_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::direct_pickup_non_ground_target_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::direct_pickup_out_of_cell_rejects_without_runtime_chat_or_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_allows_crystal_drop_owner_group_member",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_allows_overweight_item_like_crystal",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_before_start_game_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_can_stack_into_full_inventory_when_stack_has_room",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_emits_crystal_group_pickup_notice_for_marked_items",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_packet_skips_full_bag_item_and_collects_later_gold",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_packet_skips_owner_blocked_drop_and_collects_next_current_cell_drop",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_places_crystal_potion_in_belt_when_bag_is_full",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_preserves_gold_drop_when_gold_cap_is_full",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_preserves_ground_drop_when_inventory_is_full",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_preserves_random_added_stats_in_gained_item_payload",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::pickup_respects_crystal_drop_owner_window",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::shared_ground_drop_pickup_advances_matching_crystal_item_task",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::session::tests::shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::zone::intelligent_creatures::tests::attack_precedes_pickup_by_500ms_and_transaction_is_not_reissued",
+      "result": "ok"
+    },
+    {
+      "run": "pickup-regression-01",
+      "test": "runtime::zone::intelligent_creatures::tests::maintenance_sync_preserves_pending_manual_pickup_but_policy_and_hunger_cancel",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::committed_zero_quantity_persisted_roots_and_children_reject_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::crystal_buff_state_survives_save_preflight_and_apply",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::duplicate_exact_equipment_root_uid_rejects_start_game_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_key_with_conflicting_exact_index_is_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_keys_migrate_across_stage5_item_carriers",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legal_legacy_item_save_without_metadata_carrier_still_applies",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_item_carrier_rejects_before_mutating_the_world",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_npc_buy_back_json_rejects_before_world_session_or_disk_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_quest_and_skill_state_fail_preflight_instead_of_clearing",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_stage5_json_rejects_before_mutating_world_or_session",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::overbudget_mail_attachment_is_rejected_before_disk_or_world_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::overbudget_npc_used_goods_item_rejects_before_world_session_or_disk_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::oversized_item_carrier_start_game_returns_result_two_without_partial_state",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::six_legacy_candidate_keys_migrate_once_to_exact_crystal_templates",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::start_game_legacy_item_migration_is_persisted_and_idempotent",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::zero_quantity_live_inventory_rejects_active_save_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::zero_quantity_persisted_inventory_rejects_start_game_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::account_creation_persistence_failure_returns_crystal_failure_and_rolls_back_live_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::active_snapshot_without_account_identity_is_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_account_switch_with_colliding_index_cannot_refresh_foreign_mail",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_cross_account_send_mail_commits_sender_and_exact_target",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_identity_still_commits_mail_transaction_and_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_select_missing_character_returns_crystal_result_two_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::delete_character_persistence_failure_keeps_character",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::delete_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::disconnect_persistence_failure_still_clears_gm_permissions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::existing_only_passkey_login_does_not_provision_missing_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::first_time_passkey_provision_is_durable_and_locked",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_all_private_mail_transactions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_normal_revision_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_stale_revision_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::gm_password_binding_login_switch_and_successful_disconnect_clear_permissions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::in_game_character_lifecycle_requests_are_silent_and_leave_world_and_store_unchanged",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::legal_gm_and_ranking_paths_sync_exact_authorized_levels",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::local_missing_account_start_returns_none_without_recreating_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::malformed_empty_and_switched_identities_cannot_reuse_gm_or_leak_private_packets",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::new_character_persistence_failure_returns_crystal_failure_and_keeps_roster",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::new_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::noncanonical_bound_identity_cannot_alias_or_mutate_either_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::noncanonical_live_identity_cannot_read_merge_or_mutate_either_mailbox",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::passkey_provision_persistence_failure_rolls_back_live_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::password_change_persistence_failure_returns_crystal_failure_and_keeps_old_hash",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::recovery_password_reset_persistence_failure_keeps_old_hash",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::send_mail_target_durable_identity_mismatch_is_silent_and_atomic",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::source_of_truth_start_requires_authoritative_refresh_and_does_not_recreate_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::standard_and_passkey_recovery_preflight_fail_closed_for_source_states",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::start_normalization_persistence_failure_returns_crystal_failure_and_keeps_live_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::trusted_select_account_for_recovery_still_starts_game",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::durable_cooldown_rebase_uses_elapsed_wall_time_and_authoritative_cap",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::inactive_skill_encoding_is_deterministic_across_wall_clock_samples",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::legacy_absolute_skill_deadline_expires_instead_of_becoming_an_hour_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::new_session_restore_rebases_remaining_skill_cooldown_and_keeps_progression",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::same_session_checkpoint_restore_preserves_active_skill_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_can_only_strengthen_mail_lock",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_cannot_remove_newer_durable_mail_lock",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_unlocked_snapshot_cannot_delete_newer_durable_locked_mail",
+      "result": "ok"
+    }
+  ],
+  "liveGameplayAccepted": false,
+  "accountAtomicPersistenceAccepted": false,
+  "allIssuerMigrationAccepted": false,
+  "postgresAccepted": false
+}

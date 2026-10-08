@@ -1,0 +1,65 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T18:14:27.8917304Z",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\authored-source-06.json",
+  "authoredSourceSha256": "9b0d2cbf2671add8b64110762296621211f58702060ffbec44412b07c1808a04",
+  "authoredFileCount": 2,
+  "shaAndLengthMismatches": 0,
+  "authoredFiles": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "8400a25e3767fcffdcd8dad5a2d1c9cd62ebed78c25b38f7ef8ba2781875d151",
+      "length": 194377
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/exact_drop_uid_tests.rs",
+      "sha256": "dee6fb6e50e367bf988065798d4f21b3ed2d203afeacf8d4fbeb9132af77d1c4",
+      "length": 17551
+    }
+  ],
+  "baselineCommit": "488ec6f034182977fec03ad2952cccfd76b06eb2",
+  "priorReviewPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\independent-source-review-05.json",
+  "priorReviewSha256": "24311dbe0e6779e7cd630aa68cad95685292f938995de0b8754d94dd4cafb145",
+  "priorRejectedBlockerClosed": true,
+  "otherTenTestsExactInverseToSource05": true,
+  "originalItemsValidatorParentUnchanged": true,
+  "newTestFunctions": 11,
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Accepted for original CargoGuard focused tests, with no actual compile or test success asserted. Source06 fixes the sole Source05 blocker: a borrow-only bounded traversal rejects unsafe original fresh tree shapes before any clone/normalization; a temporary raw clone receives distinct local identities; the unchanged complete committed UserItem validator then validates template, quantity, bounded carrier and socket identity before hydration. Assigned custody raw remains exact and is fully validated before planning. The existing items.rs validator matches the parent Git blob. Removing the sole new negative test block exactly restores the previous ten-test Source05 SHA256 and length. Complete planning remains pure and staged; only after capacity planning does the original live roster refresh historical floor and mint each fresh raw root/child parent-first from the shared File authority, then rehydrate and publish final cells once. Whole custody collision checks precede merge; retirement raises floor without reissuing source IDs. Mid-tree mint failure may burn a prefix but publishes no item. New malformed-tree tests preserve inventory/floor assertions. Both current source hashes and lengths match the frozen Source06 manifest.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\run-check.ps1",
+    "sha256": "76c018ce15c35513f9dfb31024b3f2700b23ff6c3c1242089b7d67936dd8ccef",
+    "priorRunnerPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\run-check.ps1",
+    "allowedDeltaOnly": true,
+    "delta": "Three drop test filters, current independent review path, constrained drop scope; original Guard invocation, source pin preflights, serial process gate, target-relative private cache, toolchain/offline/jobs/budgets and policy template unchanged.",
+    "originalToolPinsChecked": 7,
+    "originalToolPinMismatches": 0,
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "postChildPolicy": "B"
+  },
+  "privateCache": {
+    "receiptPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\private-cache.json",
+    "receiptSha256": "a29bc495ddaf34042cb9fb15ebd8447324e7acafe884fc67648122cc0c430dfe",
+    "sourceAndDestinationWithinWorkspace": true,
+    "copiedNonExecutableFiles": 2353,
+    "copiedBytes": 2285717852,
+    "sourceDeleted": false,
+    "userGameClosed": false,
+    "cacheBytesNotIndividuallyHashed": true
+  },
+  "limits": [
+    "Static source acceptance permits focused original CargoGuard tests only; current compilation and test results remain unverified.",
+    "Controlled File opt-in personal exact pickup and staged inventory publication only.",
+    "Normal memory-account logout/relogin test is not an atomic durable account transaction.",
+    "Fresh UID generation timing remains pickup-time; partial-drop origin reason remains MonsterDrop in this slice.",
+    "No shared/PG durable claim receipt, unknown-publication reconciliation, all-issuer migration, full external UID census, normal gateway, UI, or installer acceptance.",
+    "Fresh shadow/fenced commit remains rejected; Legacy is compatibility behavior, not a global identity authority.",
+    "Historical Source05 rejection remains preserved."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}
