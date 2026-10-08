@@ -22,6 +22,7 @@ bevy_tasks = { version = "0.17", features = ["multi_threaded"] }
 libc = "0.2"
 mir2-game-data = { path = "../../packages/game-data" }
 mir2-protocol = { path = "../../packages/protocol" }
+mir2-production = { path = "../../packages/production" }
 postgres = { version = "0.19", features = ["with-serde_json-1"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
 serde = { version = "1", features = ["derive"] }

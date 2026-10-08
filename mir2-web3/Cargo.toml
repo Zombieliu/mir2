@@ -6,6 +6,7 @@ members = [
     "apps/simulation",
     "apps/game-client/ui-core",
     "packages/game-data",
+    "packages/production",
     "packages/protocol",
     "vendor/dubhe-network-core",
 ]

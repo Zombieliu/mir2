@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 制作加工 P01：规则代码及限定验证完成，正式入口待接线（2026-10-08）
+
+新增 `mir2-production` 同步模块并接入 simulation 编译：组合配方、全链材料/设施开放条件、批量缺料计划、服务器离线工期、直接投入退款、精确重试与有界记录恢复已通过 19/19 测试；simulation cargo check 实际 exit 0。当前只生成经济事务方案，不代表真实扣料、发物品或多人领取已经落地。内置新材料/配方继续禁用；个人持久事务、资源正常获取、共用作坊 NPC、客户端、建造/食品闭环和行会公共资产仍待完成。本批不增加 Crystal 1:1 已验收比例，也未重启服务或发布安装包。详见[制作加工代码进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)及[实际检查记录](generated/slg-production-20261008/README.md)。
+
 ## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
 
 本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。

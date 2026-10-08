@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 制作加工 P01（2026-10-08）
+
+新增同步制作规则与只读计划，19/19 选定测试通过、simulation 编译 exit 0；不改原 Crystal 即时合成/精炼和既有玩家网络协议。离线任务当前只产生待经济事务持久提交的方案。正常背包扣料、交付、并发领取、NPC/UI、公共领地资产及来源闭环仍开放，内置配方继续禁用。本批没有游戏/网关实机验收，不提高原版 parity 验收比例。详见[制作加工代码进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)。
+
 ## Source39 客户端进展（2026-10-08）
 
 Hero raw ingress与共享面板模块通过portable45＋Native24实际回归（69执行、去重56原函数、新21）及WASM静态cargo check；仅共享库准备，实际Runtime/Page接线、匹配源码完整Web包与游戏循环实测仍未完成。本轮没有后端/共享Zone/协议parity变化。功能记录309/317≈97.5%含旧实现；shared分类103/317≈32.5%也不代表整体验收。Goal active、Candidate100=false，无可信试玩日期。详见[当前路线与限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。

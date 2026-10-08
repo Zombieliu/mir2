@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+## 制作加工新增任务（2026-10-08）
+
+- [x] P01：组合配方、缺料计划、离线任务、取消/领取方案、版本重试及有界恢复；19/19 测试与 simulation 编译检查通过。
+- [ ] P02：接原个人经济持久事务，真实物品保护、空间/重量、全球 UID、断线查询与双会话竞争验收。
+- [ ] P03：真实采集/种植材料与物品模板、共用作坊 NPC/UI、建材施工及补给用药闭环。
+- [ ] P04：食品/钓鱼/专用盐矿、领地公共工坊和保留资产/重放的持久归档。
+
+以上为新增 SLG 生产线，当前配方禁用；不替代下面原版 parity 与客户端全队列。详见[代码进度与开放条件](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)。
+
 ## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
 
 本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。

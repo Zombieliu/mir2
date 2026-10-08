@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## 制作加工 P01（2026-10-08）
+
+可组合制作规则模块已写入并通过 19 项数据测试与 simulation 编译检查。新增实现属于 SLG 制作基础，尚无普通玩家 RPC/NPC 路由或真实资产原子提交，原版合成/精炼、共享 Zone 和既有 parity 统计保持。后续按不可复用角色身份、原账号事务、容量/重量检查和全球 Crafting UID 分配接通正常背包；行会制作另接领地与公共仓库事务。详见[当前实现与剩余接线](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)。
+
 ## Source39 客户端进展（2026-10-08）
 
 Hero raw ingress与共享面板模块通过portable45＋Native24实际回归（69执行、去重56原函数、新21）及WASM静态cargo check；仅共享库准备，实际Runtime/Page接线、匹配源码完整Web包与游戏循环实测仍未完成。本轮没有后端/共享Zone/协议parity变化。功能记录309/317≈97.5%含旧实现；shared分类103/317≈32.5%也不代表整体验收。Goal active、Candidate100=false，无可信试玩日期。详见[当前路线与限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。
