@@ -10789,6 +10789,7 @@ export default function HomePage() {
     }
     if (["GuildStatus","GuildBuffList","GuildStorageGoldChange"].includes(packet)) renderParityServices(n => n + 1);
     if (packet === "HeroInformation") heroAuthorityRef.current.receiveInformation(payload, owner);
+    else if (packet === "HeroHealthChanged") heroAuthorityRef.current.receiveHealthChanged(payload, owner);
     else heroAuthorityRef.current.receiveActor(packet, payload, owner);
     if (heroOperationsRef.current.receipt(packet, payload, owner, heroAuthorityRef.current.authoritySerial)) renderParityServices(n => n + 1);
     syncObservePreference(owner);

@@ -1,4 +1,5 @@
 /** Original raw custody survives renderer lifetimes. No operation ledger lives here. */
+import { createHeroSourceWitness, type HeroPlayerModel } from "./hero-player-ui";
 export type HeroPhysical = Readonly<{ socket: object; connectionGeneration: number; sessionGeneration: number }>;
 export type HeroScene = Readonly<{ sceneRevision: number; playerObjectId: number; mapFileName: string }>;
 export type HeroScope = Omit<HeroPhysical, "socket"> & HeroScene & Readonly<{ runGeneration: number }>;
@@ -8,6 +9,10 @@ export type VerifiedHeroOwner = Readonly<{ requestId: string; actor: string; pro
 export type HeroRawDelivery = HeroPhysical & Readonly<{ raw: string; sequence: number; receivedAtMs: number }>;
 export type HeroRawHighWater = HeroPhysical & Readonly<{sequence:number}>;
 export type HeroBootstrap = Readonly<{ source: HeroSource | null; acceptedFrameSequence: number; closed: boolean }>;
+export type HeroSourceWitness = Readonly<{ source: HeroSource; witness: string }>;
+export type HeroUiReady = HeroSourceWitness & Readonly<{acceptedFrameSequence:number;controlRevision:number;
+  sinkGeneration:number;webLeaseToken:string;frame:number;modal:boolean;inputEnabled:boolean;
+  inputRegions:readonly Readonly<{left:number;top:number;width:number;height:number}>[]}>;
 export type HeroRuntime = {
   getMir2HeroUiAbiVersion?: () => number;
   activateMir2HeroIngress?: (scope: string) => boolean;
@@ -18,6 +23,9 @@ export type HeroRuntime = {
   restoreMir2HeroIngressCheckpoint?: (scope: string, heldCheckpoint: string) => boolean;
   getMir2HeroUiStatus?: () => string;
   getMir2HeroActionBasisVersion?: () => number;
+  getMir2HeroSourceWitnessVersion?: () => number;
+  getMir2HeroSourceWitness?: () => string | null | undefined;
+  setMir2HeroUiControlWithWitness?: (scope:string,control:string,witness:string) => boolean;
   setMir2HeroUiControl?: (scope:string,control:string) => boolean;
   setMir2HeroUiInputEdge?: (scope:string,edge:string) => boolean;
   setMir2HeroUiIntentSink?: (scope:string,sink:(raw:string)=>boolean) => number;
@@ -70,11 +78,102 @@ export function supportsHeroIngress(runtime: HeroRuntime | null): runtime is Her
 }
 /** Bootstrap accepts source before control exists. It does not prove UI Ready. */
 export function readHeroBootstrap(runtime: HeroRuntime): HeroBootstrap | null {
-  try { const value: unknown = JSON.parse(runtime.getMir2HeroUiStatus?.() ?? "null");
+  try { const raw=runtime.getMir2HeroUiStatus?.();
+    if(typeof raw!=="string"||raw.length===0||raw.length>MAX_HERO_STATUS_BYTES||bytes(raw)>MAX_HERO_STATUS_BYTES)return null;
+    const value: unknown = JSON.parse(raw);
     if (!row(value) || value.version !== 1 || !safe(value.acceptedFrameSequence) || typeof value.closed !== "boolean"
       || !(value.source === null || validSource(value.source))
       || value.source && (value.source as HeroSource).frameSequence > value.acceptedFrameSequence) return null;
     return { source:value.source as HeroSource | null, acceptedFrameSequence:value.acceptedFrameSequence,closed:value.closed };
+  } catch { return null; }
+}
+const MAX_HERO_SOURCE_WITNESS_BYTES = 65_536;
+const MAX_HERO_WITNESS_ENVELOPE_BYTES = 2 * MAX_HERO_SOURCE_WITNESS_BYTES + 4096;
+const MAX_HERO_STATUS_BYTES = 2 * MAX_HERO_SOURCE_WITNESS_BYTES + 65_536;
+/** Raw ingress capability alone cannot transfer shared Hero UI ownership. */
+export function supportsHeroSharedUi(runtime:HeroRuntime|null):runtime is HeroRuntime {
+  try { return supportsHeroIngress(runtime) && runtime?.getMir2HeroActionBasisVersion?.()===1
+    && runtime.getMir2HeroSourceWitnessVersion?.()===1
+    && [runtime.getMir2HeroSourceWitness,runtime.setMir2HeroUiControlWithWitness,
+      runtime.setMir2HeroUiInputEdge,runtime.setMir2HeroUiIntentSink,runtime.clearMir2HeroUiIntentSink]
+      .every(fn=>typeof fn==="function"); } catch { return false; }
+}
+function sourceOwnsHeroModel(source:HeroSource,model:HeroPlayerModel):boolean {
+  const owner=model.owner,scope=source.scope;
+  return !!owner&&typeof owner.socket==="object"&&owner.socket!==null
+    &&source.heroObjectId===model.actor.objectId
+    &&scope.connectionGeneration===owner.connectionGeneration&&scope.sessionGeneration===owner.sessionGeneration
+    &&scope.playerObjectId===owner.playerObjectId&&scope.sceneRevision===owner.sceneRevision&&scope.mapFileName===owner.mapFileName;
+}
+/** The Web witness is derived from its own frozen model before inspecting Rust.
+ * Source/cursor bracketing rejects reentry; no ABI string is adopted as Web data. */
+export function readHeroSourceWitness(runtime:HeroRuntime,model:HeroPlayerModel):HeroSourceWitness|null {
+  try {
+    if (!supportsHeroSharedUi(runtime)) return null;
+    const expected=createHeroSourceWitness(model);if(expected===null)return null;
+    const before=readHeroBootstrap(runtime);if(!before?.source||before.closed||!sourceOwnsHeroModel(before.source,model))return null;
+    const raw=runtime.getMir2HeroSourceWitness?.();
+    if(typeof raw!=="string"||raw.length===0||raw.length>MAX_HERO_WITNESS_ENVELOPE_BYTES
+      ||bytes(raw)>MAX_HERO_WITNESS_ENVELOPE_BYTES)return null;
+    const value:unknown=JSON.parse(raw),after=readHeroBootstrap(runtime);
+    if(!row(value)||!fields(value,["version","source","witness"])||value.version!==1
+      ||!validSource(value.source)||typeof value.witness!=="string"||value.witness.length===0
+      ||bytes(value.witness)>MAX_HERO_SOURCE_WITNESS_BYTES||value.witness!==expected
+      ||!after?.source||after.closed||after.acceptedFrameSequence!==before.acceptedFrameSequence
+      ||!sameHeroSource(before.source,after.source)||!sameHeroSource(value.source,after.source)
+      ||!sourceOwnsHeroModel(value.source,model)||!sourceOwnsHeroModel(after.source,model))return null;
+    return Object.freeze({source:Object.freeze({...value.source,scope:Object.freeze({...value.source.scope})}),witness:expected});
+  } catch { return null; }
+}
+/** Accepted control is only a binding request. Actual consumed paint is checked
+ * separately by readHeroUiReady; this function never creates UI Ready. */
+export function bindHeroUiControl(runtime:HeroRuntime,control:Readonly<Record<string,unknown>>,
+  model:HeroPlayerModel):HeroSourceWitness|null {
+  try {
+    const binding=readHeroSourceWitness(runtime,model);
+    if(!binding||!validSource(control.source)||!sameHeroSource(control.source,binding.source))return null;
+    const raw=JSON.stringify(control);if(bytes(raw)>8192)return null;
+    if(runtime.setMir2HeroUiControlWithWitness?.(JSON.stringify(binding.source.scope),raw,binding.witness)!==true)return null;
+    const after=readHeroSourceWitness(runtime,model);
+    return after&&sameHeroSource(after.source,binding.source)&&after.witness===binding.witness?binding:null;
+  } catch { return null; }
+}
+/** Requires the exact witness installed by the actual Rust World consumer and
+ * the subsequent ready frame. A getter or setter echo alone has no authority. */
+export function readHeroUiReady(runtime:HeroRuntime,binding:HeroSourceWitness,model:HeroPlayerModel,
+  controlRevision:number,webLeaseToken:string,sinkGeneration:number):HeroUiReady|null {
+  try {
+    if(!supportsHeroSharedUi(runtime)||!positive(controlRevision)||!positive(sinkGeneration)
+      ||typeof webLeaseToken!=="string"||!webLeaseToken||bytes(webLeaseToken)>512||webLeaseToken.includes("\0")
+      ||!validSource(binding.source)||typeof binding.witness!=="string"
+      ||createHeroSourceWitness(model)!==binding.witness)return null;
+    const before=readHeroSourceWitness(runtime,model);
+    if(!before||!sameHeroSource(before.source,binding.source)||before.witness!==binding.witness)return null;
+    const raw=runtime.getMir2HeroUiStatus?.();
+    if(typeof raw!=="string"||raw.length===0||raw.length>MAX_HERO_STATUS_BYTES||bytes(raw)>MAX_HERO_STATUS_BYTES)return null;
+    const value:unknown=JSON.parse(raw);
+    if(!row(value)||value.version!==1||value.closed!==false||value.ready!==true
+      ||typeof value.inputEnabled!=="boolean"||typeof value.modal!=="boolean"
+      ||!validSource(value.source)||!validSource(value.appliedSource)
+      ||!sameHeroSource(value.source,binding.source)||!sameHeroSource(value.appliedSource,binding.source)
+      ||value.appliedWitness!==binding.witness||value.controlRevision!==controlRevision
+      ||value.webLeaseToken!==webLeaseToken||value.sinkGeneration!==sinkGeneration||!positive(value.frame)
+      ||!safe(value.acceptedFrameSequence)||value.acceptedFrameSequence<binding.source.frameSequence
+      ||!Array.isArray(value.receiptFrames)||value.receiptFrames.length>4096||!value.receiptFrames.every(positive)
+      ||!Array.isArray(value.inputRegions)||value.inputRegions.length>256)return null;
+    const regions:Readonly<{left:number;top:number;width:number;height:number}>[]=[];
+    for(const region of value.inputRegions){
+      if(!row(region)||!fields(region,["left","top","width","height"])
+        ||![region.left,region.top,region.width,region.height].every(n=>typeof n==="number"&&Number.isFinite(n))
+        ||(region.width as number)<=0||(region.height as number)<=0)return null;
+      regions.push(Object.freeze({left:region.left as number,top:region.top as number,
+        width:region.width as number,height:region.height as number}));
+    }
+    const after=readHeroSourceWitness(runtime,model);
+    if(!after||!sameHeroSource(after.source,binding.source)||after.witness!==binding.witness)return null;
+    return Object.freeze({...binding,acceptedFrameSequence:value.acceptedFrameSequence,
+      controlRevision,sinkGeneration,webLeaseToken,frame:value.frame,modal:value.modal,
+      inputEnabled:value.inputEnabled,inputRegions:Object.freeze(regions)});
   } catch { return null; }
 }
 const decimal = (value: unknown): value is string => typeof value === "string" && /^(?:0|[1-9][0-9]{0,19})$/.test(value)

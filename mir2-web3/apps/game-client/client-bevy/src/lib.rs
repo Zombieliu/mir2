@@ -68,6 +68,8 @@ pub mod portable_hero_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod hero_action_basis;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod hero_source_witness;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_experience_bar_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_hp_orb_ui;

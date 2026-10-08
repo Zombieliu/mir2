@@ -1,0 +1,172 @@
+{
+  "owner": "Root",
+  "kind": "Source42 actual scoped Git publication",
+  "recordedAtUtc": "2026-10-08 09:57:29 UTC",
+  "commit": "0a2bb7cee34fb3e330d087eaa3ad363598ab49db",
+  "parent": "1ff247c37bb9c420cfff6b5e7c280691fe949c02",
+  "branch": "codex/windows-player-journey",
+  "repositoryRemote": "git@github.com:Zombieliu/mir2.git",
+  "commitToolResult": {
+    "chunk_id": "a2fb7d",
+    "wall_time_seconds": 0.3778137,
+    "exit_code": 0,
+    "original_token_count": 240,
+    "output": "[codex/windows-player-journey 0a2bb7cee3] Bind Hero actions to planner basis and pre-send source\n 19 files changed, 2637 insertions(+), 21 deletions(-)\n create mode 100644 mir2-web3/apps/game-client/client-bevy/src/hero_action_basis.rs\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-actual-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json\n"
+  },
+  "committedStat": {
+    "chunk_id": "45e0d4",
+    "wall_time_seconds": 0.1810276,
+    "exit_code": 0,
+    "original_token_count": 395,
+    "output": "commit 0a2bb7cee34fb3e330d087eaa3ad363598ab49db\nAuthor:     Web3henry <50917820+Zombieliu@users.noreply.github.com>\nAuthorDate: Thu Oct 8 17:48:02 2026 +0800\nCommit:     Web3henry <50917820+Zombieliu@users.noreply.github.com>\nCommitDate: Thu Oct 8 17:48:02 2026 +0800\n\n    Bind Hero actions to planner basis and pre-send source\n\n .../client-bevy/src/hero_action_basis.rs           |  406 ++++++\n mir2-web3/apps/game-client/client-bevy/src/lib.rs  |    2 +\n .../client-bevy/src/portable_hero_ui.rs            |   58 +-\n .../apps/game-client/runtime/src/hero_ui_host.rs   |    8 +-\n mir2-web3/apps/web/app/page.tsx                    |   24 +-\n mir2-web3/apps/web/lib/bevy-hero-ui.ts             |   19 +\n mir2-web3/apps/web/lib/hero-player-ui.ts           |   62 +\n .../apps/web/scripts/test-stage5-adapters.mjs      |   96 +-\n mir2-web3/docs/AGENT-ORCHESTRATION.md              |   14 +\n mir2-web3/docs/AGENT-TASK-QUEUE.md                 |   14 +\n mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md             |   14 +\n mir2-web3/docs/FRONTEND-1TO1-GAPS.md               |   14 +\n mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md         |   14 +\n mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md            |   14 +\n .../web-hero-source41-publication01.json           |   85 ++\n .../web-hero-source42-actual-review01.json         |   54 +\n .../web-hero-source42-finite-result01.json         | 1290 ++++++++++++++++++++\n .../web-hero-source42-historical-failures01.json   |   98 ++\n .../web-hero-source42-raw-evidence01.json          |  372 ++++++\n 19 files changed, 2637 insertions(+), 21 deletions(-)\n"
+  },
+  "stagedStatBeforeCommit": {
+    "chunk_id": "301afd",
+    "wall_time_seconds": 0.2235971,
+    "exit_code": 0,
+    "original_token_count": 313,
+    "output": " .../client-bevy/src/hero_action_basis.rs           |  406 ++++++\n mir2-web3/apps/game-client/client-bevy/src/lib.rs  |    2 +\n .../client-bevy/src/portable_hero_ui.rs            |   58 +-\n .../apps/game-client/runtime/src/hero_ui_host.rs   |    8 +-\n mir2-web3/apps/web/app/page.tsx                    |   24 +-\n mir2-web3/apps/web/lib/bevy-hero-ui.ts             |   19 +\n mir2-web3/apps/web/lib/hero-player-ui.ts           |   62 +\n .../apps/web/scripts/test-stage5-adapters.mjs      |   96 +-\n mir2-web3/docs/AGENT-ORCHESTRATION.md              |   14 +\n mir2-web3/docs/AGENT-TASK-QUEUE.md                 |   14 +\n mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md             |   14 +\n mir2-web3/docs/FRONTEND-1TO1-GAPS.md               |   14 +\n mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md         |   14 +\n mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md            |   14 +\n .../web-hero-source41-publication01.json           |   85 ++\n .../web-hero-source42-actual-review01.json         |   54 +\n .../web-hero-source42-finite-result01.json         | 1290 ++++++++++++++++++++\n .../web-hero-source42-historical-failures01.json   |   98 ++\n .../web-hero-source42-raw-evidence01.json          |  372 ++++++\n 19 files changed, 2637 insertions(+), 21 deletions(-)\n"
+  },
+  "ownedPaths": [
+    "mir2-web3/apps/game-client/client-bevy/src/hero_action_basis.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/portable_hero_ui.rs",
+    "mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs",
+    "mir2-web3/apps/web/app/page.tsx",
+    "mir2-web3/apps/web/lib/bevy-hero-ui.ts",
+    "mir2-web3/apps/web/lib/hero-player-ui.ts",
+    "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+    "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+    "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+    "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+    "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+    "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+    "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-actual-review01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json"
+  ],
+  "ownedFileCount": 19,
+  "firstPushAttempt": {
+    "exitCode": 1,
+    "observedFailure": "Connection to ssh.github.com closed by remote host.\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n",
+    "remoteAfterFailure": {
+      "chunk_id": "4b1c37",
+      "wall_time_seconds": 3.921226,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "1ff247c37bb9c420cfff6b5e7c280691fe949c02\trefs/heads/codex/windows-player-journey\n"
+    }
+  },
+  "acceptedPushToolResult": {
+    "chunk_id": "ee9975",
+    "wall_time_seconds": 0.0000067,
+    "exit_code": 0,
+    "original_token_count": 34,
+    "output": "To github.com:Zombieliu/mir2.git\n   1ff247c37b..0a2bb7cee3  0a2bb7cee34fb3e330d087eaa3ad363598ab49db -> codex/windows-player-journey\n"
+  },
+  "independentRemoteToolResult": {
+    "chunk_id": "d0f2c5",
+    "wall_time_seconds": 0.0000076,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "0a2bb7cee34fb3e330d087eaa3ad363598ab49db\trefs/heads/codex/windows-player-journey\n"
+  },
+  "postCommitIndexToolResult": {
+    "chunk_id": "69c75e",
+    "wall_time_seconds": 0.1329004,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "transport": "Original Git SSH through temporary core.sshCommand: port443 ssh.github.com, HostKeyAlias github.com, StrictHostKeyChecking yes, BatchMode yes. No force, persistent config change or security bypass.",
+  "gitNetworkUsed": true,
+  "finiteTestNetworkUsed": false,
+  "documentsOwnPrefixLines": 14,
+  "foreignManufacturingAndUserTsconfigExcluded": true,
+  "fullPackagesBuilt": false,
+  "playerAcceptance": "not-run",
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalStatus": "active",
+  "qualification": "Actual code/evidence scoped commit and nonforced push with independent exact remote proof. Full shared Hero control/sink/Ready/input, current-source full packages and real player journey remain open. This publication record is an uncommitted ordinary QA carry for the following scoped batch.",
+  "finiteResult": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-finite-result01.json",
+    "bytes": 77475,
+    "sha256": "ea8c852376a86f7a926df4eec4cd2749dcb25da1ee419a0e8270f9d404d8b625"
+  },
+  "rawEvidence": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-raw-evidence01.json",
+    "bytes": 221008,
+    "sha256": "ca4a729c8f9df2bab4c2107b640af63ee36578300bdbdccc1848491c21d96bbd"
+  },
+  "actualReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-actual-review01.json",
+    "bytes": 2108,
+    "sha256": "ee155401bccdfffbd0ae90f8b7f5c530b5d6cbc4f5ea36107ddcfeda69126879"
+  },
+  "historicalFailures": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-historical-failures01.json",
+    "bytes": 4939,
+    "sha256": "4dbeaa217effd6c306a3289f81b00842ed6f8b07e54f3252a72d52ee2f642158"
+  },
+  "testedOwnSourcePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\lib.rs",
+      "bytes": 4845,
+      "sha256": "8d434f7955f97ecc5a565302acea1a040a5e5fd825c659d20e9a296a51eff329",
+      "relativePath": "apps/game-client/client-bevy/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hero_ui.rs",
+      "bytes": 46962,
+      "sha256": "9c9aae3b071920ed91fad713e7555309a3d3abbe44204b942bfc1aa4a0b8b063",
+      "relativePath": "apps/game-client/client-bevy/src/portable_hero_ui.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hero_action_basis.rs",
+      "bytes": 30883,
+      "sha256": "a7935d5bf3bf0e5781a5527cb43b0e19d7ea24fe111cb0a3d730a168f43f7496",
+      "relativePath": "apps/game-client/client-bevy/src/hero_action_basis.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hero_ui_host.rs",
+      "bytes": 72812,
+      "sha256": "6760d76f56501dafe455ccfff909bba8401d3b1451aac644d020353e5fae76bc",
+      "relativePath": "apps/game-client/runtime/src/hero_ui_host.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1051693,
+      "sha256": "143827473208185809c01f83fa51f3d3363b975f9854d78e57a037b1293a0dc9",
+      "relativePath": "apps/web/app/page.tsx"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-ui.ts",
+      "bytes": 17655,
+      "sha256": "0d2ead83ac5ffe3bee7a0a552841aa9709021eb876cafe3170d56501655828b6",
+      "relativePath": "apps/web/lib/bevy-hero-ui.ts"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\hero-player-ui.ts",
+      "bytes": 44304,
+      "sha256": "c4359158ba06c9094426f0cd48028419a6d188a00ba8e5f68e4a0c185ee41be8",
+      "relativePath": "apps/web/lib/hero-player-ui.ts"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 663315,
+      "sha256": "11e771baeac73f419ba2c1438a9c1f75b55be4eeb24f7dff9759befc1db12753",
+      "relativePath": "apps/web/scripts/test-stage5-adapters.mjs"
+    }
+  ],
+  "workingTreeOwnSourcesMatchTestPins": true,
+  "userTsconfigPin": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  }
+}

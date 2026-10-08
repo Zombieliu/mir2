@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use mir2_client_bevy::{
     hero_ingress::{HeroIngress, HeroScope, VerifiedHeroOwner},
     hero_model::HeroModel,
+    hero_source_witness::{capture_hero_source_witness, MAX_HERO_SOURCE_WITNESS_BYTES},
     portable_hero_ui::{
         HeroInputEdge, HeroInputQueue, HeroIntentQueue, HeroPresentation, HeroStamp,
         HeroUiContext, HeroUiIntent, HeroUiReadModel, HeroUiState, HeroWindows,
@@ -92,6 +93,7 @@ pub struct HeroBridge {
     ingress: HeroIngress,
     source_sequence: u64,
     control: Option<HeroControl>,
+    control_witness: Option<String>,
     control_high: u64,
     input_high: u64,
     inputs: VecDeque<HeroInputEdge>,
@@ -102,7 +104,7 @@ pub struct HeroBridge {
 }
 impl Default for HeroBridge {
     fn default() -> Self {
-        Self { ingress: HeroIngress::default(), source_sequence: 0, control: None,
+        Self { ingress: HeroIngress::default(), source_sequence: 0, control: None, control_witness: None,
             control_high: 0, input_high: 0, inputs: VecDeque::new(),
             input_closed: false, input_reset: false, sink_present: false, sink_generation: 0 }
     }
@@ -115,6 +117,7 @@ impl HeroBridge {
         if self.ingress.activate(scope).is_err() { return false; }
         self.source_sequence = 0;
         self.control = None;
+        self.control_witness = None;
         self.control_high = 0;
         self.input_high = 0;
         self.inputs.clear();
@@ -127,6 +130,7 @@ impl HeroBridge {
     pub fn withdraw(&mut self, scope: &HeroScope) -> bool {
         if !self.ingress.withdraw(scope) { return false; }
         self.control = None;
+        self.control_witness = None;
         self.inputs.clear();
         self.input_closed = true;
         self.input_reset = true;
@@ -169,28 +173,62 @@ impl HeroBridge {
             rust_model_revision: model.revision,
         })
     }
+    /// Capture only the current authoritative read model. This does not drain
+    /// receipts, rebuild raw custody, or advance the first packet clock.
+    pub fn source_witness(&self) -> Option<String> {
+        self.source()?;
+        capture_hero_source_witness(&HeroUiReadModel {
+            hero: self.ingress.model(), personal: self.ingress.personal().cloned(),
+            ..Default::default()
+        }).ok()
+    }
+    fn witness_current(&self, witness: &str) -> bool {
+        !witness.is_empty() && witness.len() <= MAX_HERO_SOURCE_WITNESS_BYTES
+            && self.control_witness.as_deref() == Some(witness)
+            && self.source_witness().as_deref() == Some(witness)
+    }
     pub fn control_current(&self, control: &HeroControl) -> bool {
         !self.input_closed && !self.ingress.status().closed
             && self.source().as_ref() == Some(&control.source)
+            && self.control_witness.as_deref().is_some_and(|witness| self.witness_current(witness))
             && self.control.as_ref().is_some_and(|current|
                 current.control_revision == control.control_revision
                     && current.web_lease_token == control.web_lease_token
                     && current.stamp() == control.stamp())
     }
+    /// Compatibility bootstrap cannot authorize shared input or UI Ready.
     pub fn set_control(&mut self, scope: &HeroScope, raw: &str) -> bool {
+        self.set_control_inner(scope, raw, None)
+    }
+    pub fn set_control_with_witness(&mut self, scope: &HeroScope, raw: &str, witness: &str) -> bool {
+        self.set_control_inner(scope, raw, Some(witness))
+    }
+    fn set_control_inner(&mut self, scope: &HeroScope, raw: &str, witness: Option<&str>) -> bool {
         if raw.is_empty() || raw.len() > MAX_CONTROL_BYTES { return false; }
         let Ok(control) = serde_json::from_str::<HeroControl>(raw) else { return false; };
         if !control.valid() || control.source.scope != *scope
             || !self.ingress.is_current(scope) || self.input_closed
             || self.source().as_ref() != Some(&control.source)
             || control.control_revision <= self.control_high { return false; }
+        if let Some(witness) = witness {
+            if witness.is_empty() || witness.len() > MAX_HERO_SOURCE_WITNESS_BYTES
+                || self.source_witness().as_deref() != Some(witness) {
+                // A current control with disagreeing data revokes input, but
+                // never consumes its revision or retires ingress/receipt custody.
+                self.control_witness = None;
+                self.inputs.clear(); self.input_reset = true;
+                return false;
+            }
+        }
+        let same_witness = witness.is_some() && self.control_witness.as_deref() == witness;
         let same_lease = self.control.as_ref().is_some_and(|old|
             old.stamp() == control.stamp() && old.web_lease_token == control.web_lease_token
                 && old.windows == control.windows);
-        if !same_lease || !control.in_game || !control.host_visible || !control.input_enabled {
+        if !same_lease || !same_witness || !control.in_game || !control.host_visible || !control.input_enabled {
             self.inputs.clear(); self.input_reset = true;
         }
         self.control_high = control.control_revision;
+        self.control_witness = witness.map(str::to_owned);
         self.control = Some(control);
         true
     }
@@ -243,6 +281,7 @@ impl HeroBridge {
         if self.ingress.restore_checkpoint(scope, &checkpoint.ingress_checkpoint).is_err() { return false; }
         self.source_sequence = checkpoint.source_sequence;
         self.control = None;
+        self.control_witness = None;
         self.inputs.clear();
         self.input_reset = true;
         true
@@ -275,6 +314,7 @@ thread_local! {
 #[derive(Resource, Default)]
 struct AppliedHero {
     source: Option<HeroSource>,
+    witness: Option<String>,
     control: Option<HeroControl>,
     receipt_frames: Vec<u64>,
     #[cfg(target_arch = "wasm32")]
@@ -288,6 +328,14 @@ pub struct HeroConsumeSet;
 /// One ordered consumer, called by the actual Web schedule and bare-World tests.
 /// Applying a receipt here never settles the browser's operation ledger.
 fn apply_bridge_to_world(bridge: &mut HeroBridge, world: &mut World, now_ms: u64) {
+    let previous_witness = world.get_resource::<HeroUiReadModel>().and_then(|read| {
+        // The real UiReset clears HeroModel and can leave this UI read resource.
+        // Both previous resources must still agree with the consumed witness.
+        let hero=world.get_resource::<HeroModel>()?;
+        let witness=capture_hero_source_witness(read).ok()?;
+        capture_hero_source_witness(&HeroUiReadModel { hero:hero.clone(),personal:read.personal.clone(),
+            ..Default::default() }).ok().filter(|actual| actual==&witness)
+    });
     let mut receipt_frames = Vec::new();
     if let Ok(Some(batch)) = bridge.ingress.take_batch() {
         if bridge.ingress.batch_is_current(&batch) {
@@ -308,13 +356,21 @@ fn apply_bridge_to_world(bridge: &mut HeroBridge, world: &mut World, now_ms: u64
     world.insert_resource(model.clone());
     let personal = bridge.ingress.personal().cloned();
     world.insert_resource(HeroUiReadModel { hero: model, personal, player });
-    let control = bridge.control.as_ref().filter(|c| bridge.control_current(c)).cloned();
+    // This proof belongs to the model actually installed after UiReset and FIFO.
+    // Neither the ABI getter nor accepting a control may fill AppliedHero.
+    let applied_witness = capture_hero_source_witness(world.resource::<HeroUiReadModel>()).ok();
+    let control = bridge.control.as_ref().filter(|c| bridge.control_current(c)
+        && applied_witness.as_deref().is_some_and(|witness| bridge.witness_current(witness))).cloned();
     let prior_ready = !bridge.input_reset && bridge.sink_present
         && world.get_resource::<HeroUiContext>().is_some_and(|c|
             control.as_ref().is_some_and(|control| c.stamp == control.stamp()
                 && c.frame_sequence == control.source.frame_sequence && c.ready))
-        && world.get_resource::<AppliedHero>().and_then(|a| a.control.as_ref())
-            .zip(control.as_ref()).is_some_and(|(old, next)| old.web_lease_token == next.web_lease_token);
+        && world.get_resource::<AppliedHero>().is_some_and(|applied|
+            applied.witness.as_deref() == previous_witness.as_deref()
+                && applied.witness.as_deref() == applied_witness.as_deref()
+                && applied.witness.as_deref().is_some_and(|witness| bridge.witness_current(witness))
+                && applied.control.as_ref().zip(control.as_ref())
+                    .is_some_and(|(old, next)| old.web_lease_token == next.web_lease_token));
     let mut context = HeroUiContext::default();
     if let Some(control) = control.as_ref() {
         context = HeroUiContext {
@@ -331,7 +387,7 @@ fn apply_bridge_to_world(bridge: &mut HeroBridge, world: &mut World, now_ms: u64
         world.insert_resource(HeroInputQueue::default());
     }
     world.resource_mut::<HeroInputQueue>().0.clear();
-    if std::mem::take(&mut bridge.input_reset) {
+    if std::mem::take(&mut bridge.input_reset) || !prior_ready {
         if let Some(mut state) = world.get_resource_mut::<HeroUiState>() { state.cancel(); }
     }
     if control.is_some() && !bridge.input_closed && bridge.sink_present {
@@ -346,6 +402,7 @@ fn apply_bridge_to_world(bridge: &mut HeroBridge, world: &mut World, now_ms: u64
     world.resource_mut::<HeroIntentQueue>().0.clear();
     let mut applied = world.get_resource_mut::<AppliedHero>().expect("Hero host installed");
     applied.source = current_source;
+    applied.witness = applied_witness;
     applied.control = control;
     applied.receipt_frames = receipt_frames;
 }
@@ -558,6 +615,7 @@ mod web {
         version: u32,
         source: Option<HeroSource>,
         applied_source: &'a Option<HeroSource>,
+        applied_witness: &'a Option<String>,
         accepted_frame_sequence: u64,
         control_revision: u64,
         sink_generation: u64,
@@ -652,7 +710,9 @@ mod web {
             for (_, _, _, _, mut visibility) in &mut roots { *visibility = Visibility::Hidden; }
             return;
         };
-        let current = bound_sink_current(control);
+        let current = bound_sink_current(control)
+            && applied.witness.as_deref().is_some_and(|witness| BRIDGE.with(|b| b.borrow().witness_current(witness)))
+            && capture_hero_source_witness(&read).ok().as_deref() == applied.witness.as_deref();
         let assets = !applied.assets.is_empty()
             && matches!(server.get_load_state(surface.font.id()), Some(LoadState::Loaded))
             && applied.assets.iter().all(|h|
@@ -771,10 +831,12 @@ mod web {
         frame.0=frame.0.saturating_add(1);
         let Some(control)=applied.control.as_ref() else {
             context.ready=false;intents.0.clear();
-            STATUS.with(|s|*s.borrow_mut()=serde_json::json!({"version":1,"frame":frame.0,"ready":false,"inputEnabled":false,"inputRegions":[],"appliedSource":applied.source}).to_string());
+            STATUS.with(|s|*s.borrow_mut()=serde_json::json!({"version":1,"frame":frame.0,"ready":false,"inputEnabled":false,"inputRegions":[],"appliedSource":applied.source,"appliedWitness":applied.witness}).to_string());
             return;
         };
-        let current=bound_sink_current(control);
+        let current=bound_sink_current(control)
+            && applied.witness.as_deref().is_some_and(|witness| BRIDGE.with(|b| b.borrow().witness_current(witness)))
+            && capture_hero_source_witness(&read).ok().as_deref()==applied.witness.as_deref();
         let visible=roots.single().ok().is_some_and(|(root,visible)|root.stamp==context.stamp
             &&root.revision==context.revision&&root.frame_sequence==context.frame_sequence&&visible.get());
         let ready=candidate.0&&current&&visible&&applied.source.as_ref()==Some(&control.source);
@@ -786,7 +848,7 @@ mod web {
             let bridge=bridge.borrow();bridge.input_closed || bridge.ingress.status().closed
         });
         let status = Status {
-            version:1, source, applied_source:&applied.source, accepted_frame_sequence,
+            version:1, source, applied_source:&applied.source, applied_witness:&applied.witness, accepted_frame_sequence,
             control_revision:control.control_revision,
             sink_generation:SINK.with(|s|s.borrow().as_ref().map_or(0,|(_,generation,_)|*generation)),
             modal:state.ui.modal(),web_lease_token:&control.web_lease_token,
@@ -820,6 +882,14 @@ mod web {
     }
     #[wasm_bindgen(js_name=getMir2HeroActionBasisVersion)]
     pub fn action_basis_version()->u32 {abi_version()}
+    #[wasm_bindgen(js_name=getMir2HeroSourceWitnessVersion)]
+    pub fn source_witness_version()->u32 {abi_version()}
+    #[wasm_bindgen(js_name=getMir2HeroSourceWitness)]
+    pub fn source_witness()->Option<String> {
+        BRIDGE.with(|b| { let b=b.borrow();
+            Some(serde_json::json!({"version":1,"source":b.source()?,"witness":b.source_witness()?}).to_string())
+        })
+    }
     #[wasm_bindgen(js_name=activateMir2HeroIngress)]
     pub fn activate(raw:String)->bool {
         let Some(scope)=parse_scope(&raw) else{return false;};
@@ -864,6 +934,11 @@ mod web {
         let Some(scope)=parse_scope(&scope) else{return false;};
         BRIDGE.with(|b|b.borrow_mut().set_control(&scope,&control))
     }
+    #[wasm_bindgen(js_name=setMir2HeroUiControlWithWitness)]
+    pub fn control_with_witness(scope:String,control:String,witness:String)->bool {
+        let Some(scope)=parse_scope(&scope) else{return false;};
+        BRIDGE.with(|b|b.borrow_mut().set_control_with_witness(&scope,&control,&witness))
+    }
     #[wasm_bindgen(js_name=setMir2HeroUiInputEdge)]
     pub fn input(scope:String,edge:String)->bool {
         let Some(scope)=parse_scope(&scope) else{return false;};
@@ -900,7 +975,8 @@ mod web {
                 .is_some_and(|(scope,generation)| scope==&c.source.scope && b.feedback_current(c,*generation))
                 &&value["controlRevision"].as_u64()==Some(c.control_revision)
                 &&value["webLeaseToken"].as_str()==Some(c.web_lease_token.as_str())
-                &&serde_json::from_value::<HeroSource>(value["appliedSource"].clone()).ok().as_ref()==Some(&c.source));
+                &&serde_json::from_value::<HeroSource>(value["appliedSource"].clone()).ok().as_ref()==Some(&c.source)
+                &&value["appliedWitness"].as_str().is_some_and(|witness| b.witness_current(witness)));
             if !matching {value["ready"]=serde_json::json!(false);value["inputEnabled"]=serde_json::json!(false);value["inputRegions"]=serde_json::json!([]);}
         });
         value.to_string()
@@ -949,6 +1025,10 @@ mod tests {
                 "beltVisible":false,"beltVertical":false},
             "presentation":{"logicalWidth":1024,"logicalHeight":768,"stageCssScale":1,"touch":false},
             "inGame":true,"hostVisible":true,"inputEnabled":true,"pending":false}).to_string()
+    }
+    fn set_bound_control(bridge:&mut HeroBridge,scope:&HeroScope,raw:&str)->bool {
+        let witness=bridge.source_witness().expect("complete source fixture");
+        bridge.set_control_with_witness(scope,raw,&witness)
     }
     fn edge(control:&HeroControl,sequence:u64)->String {
         json!({"sinkGeneration":2,"controlRevision":control.control_revision,"webLeaseToken":control.web_lease_token,
@@ -1001,7 +1081,7 @@ mod tests {
     fn hero_host_separates_rust_source_from_web_counters_and_ignored_raw_cursor() {
         let (mut bridge,scope)=start();let source=bridge.source().unwrap();
         assert_ne!(source.hero_generation,19);
-        assert!(bridge.set_control(&scope,&control(&source,1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source,1)));
         let actual=bridge.control.as_ref().unwrap();
         assert_eq!(actual.web_model_revision,9);
         assert_eq!(actual.stamp().hero_generation,source.hero_generation);
@@ -1012,7 +1092,7 @@ mod tests {
     #[test]
     fn hero_host_stale_control_and_duplicate_json_do_not_poison_current_owner() {
         let (mut bridge,scope)=start();let source=bridge.source().unwrap();
-        let valid=control(&source,1);assert!(bridge.set_control(&scope,&valid));
+        let valid=control(&source,1);assert!(set_bound_control(&mut bridge, &scope, &valid));
         let mut stale:Value=serde_json::from_str(&control(&source,2)).unwrap();
         stale["source"]["rustModelRevision"]=json!(source.rust_model_revision+1);
         assert!(!bridge.set_control(&scope,&stale.to_string()));
@@ -1037,7 +1117,7 @@ mod tests {
             "payload":{"uniqueId":u64::MAX,"grid":"HeroInventory","success":false}}).to_string(),102));
         assert_eq!(bridge.ingress.status().receipt_count,1);
         let source=bridge.source().unwrap();
-        assert!(bridge.set_control(&scope,&control(&source,1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source,1)));
         let control=bridge.control.as_ref().unwrap().clone();
         assert!(bridge.advance_sink(&scope).is_some());
         for sequence in 1..=MAX_INPUTS as u64 {assert!(bridge.push_edge(&scope,&edge(&control,sequence)));}
@@ -1052,7 +1132,7 @@ mod tests {
     #[test]
     fn hero_host_consumer_reapplies_current_projection_after_unscoped_world_reset() {
         let (mut bridge,scope)=start();let source=bridge.source().unwrap();
-        assert!(bridge.set_control(&scope,&control(&source,1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source,1)));
         let mut world=world();apply_bridge_to_world(&mut bridge,&mut world,102);
         assert_eq!(world.resource::<HeroModel>().info.as_ref().unwrap().object_id,12);
         world.insert_resource(HeroModel::default());
@@ -1101,12 +1181,12 @@ mod tests {
     #[test]
     fn hero_host_reentrant_scope_or_sink_change_invalidates_acceptance_feedback() {
         let (mut bridge,scope)=start();let source=bridge.source().unwrap();
-        assert!(bridge.set_control(&scope,&control(&source,1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source,1)));
         let captured=bridge.control.as_ref().unwrap().clone();let sink=bridge.advance_sink(&scope).unwrap();
         assert!(bridge.feedback_current(&captured,sink));
         assert!(bridge.advance_sink(&scope).is_some());assert!(!bridge.feedback_current(&captured,sink));
         let new_sink=bridge.sink_generation;
-        assert!(bridge.set_control(&scope,&control(&source,2)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source,2)));
         assert!(!bridge.feedback_current(&captured,new_sink));
         assert!(bridge.activate(super::tests::scope(2)));
         assert!(!bridge.feedback_current(&captured,new_sink));
@@ -1117,7 +1197,7 @@ mod tests {
         let (mut bridge, scope) = start();
         let source = bridge.source().unwrap();
         assert!(bridge.advance_sink(&scope).is_some());
-        assert!(bridge.set_control(&scope, &control(&source, 1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 1)));
         let first = bridge.control.as_ref().unwrap().clone();
         let mut world = world();
         apply_bridge_to_world(&mut bridge, &mut world, 102);
@@ -1134,7 +1214,7 @@ mod tests {
         assert!(bridge.push_edge(&scope, &edge(&first, 2)));
         let mut next: Value = serde_json::from_str(&control(&source, 2)).unwrap();
         next["webLeaseToken"] = json!("web-authority:5:hero:20");
-        assert!(bridge.set_control(&scope, &next.to_string()));
+        assert!(set_bound_control(&mut bridge, &scope, &next.to_string()));
         assert_eq!(bridge.control.as_ref().unwrap().stamp(), first.stamp());
         assert!(bridge.inputs.is_empty());
         assert!(!bridge.push_edge(&scope, &edge(&first, 3)));
@@ -1152,7 +1232,7 @@ mod tests {
     fn hero_host_clearing_current_sink_revokes_input_but_old_cleanup_cannot() {
         let (mut bridge, scope) = start();
         let source = bridge.source().unwrap();
-        assert!(bridge.set_control(&scope, &control(&source, 1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 1)));
         let control = bridge.control.as_ref().unwrap().clone();
         assert!(!bridge.push_edge(&scope, &edge(&control, 1)));
         let sink = bridge.advance_sink(&scope).unwrap();
@@ -1177,7 +1257,7 @@ mod tests {
     fn hero_host_actual_layout_rejects_missing_duplicate_misplaced_and_wrong_page_cells() {
         let (mut bridge, scope) = start();
         let source = bridge.source().unwrap();
-        assert!(bridge.set_control(&scope, &control(&source, 1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 1)));
         let mut world = world();
         apply_bridge_to_world(&mut bridge, &mut world, 102);
         let read = world.resource::<HeroUiReadModel>().clone();
@@ -1256,7 +1336,7 @@ mod tests {
     fn hero_host_old_same_scope_sink_cleanup_and_input_cannot_touch_replacement_binding() {
         let (mut bridge, scope) = start();
         let source = bridge.source().unwrap();
-        assert!(bridge.set_control(&scope, &control(&source, 1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 1)));
         let control = bridge.control.as_ref().unwrap().clone();
         let old_sink = bridge.advance_sink(&scope).unwrap();
         assert!(bridge.push_edge(&scope, &edge(&control, 1)));
@@ -1280,7 +1360,7 @@ mod tests {
         let (mut bridge, scope) = start();
         let source = bridge.source().unwrap();
         assert!(bridge.advance_sink(&scope).is_some());
-        assert!(bridge.set_control(&scope, &control(&source, 1)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 1)));
         let first = bridge.control.as_ref().unwrap().clone();
         let mut world = world();
         apply_bridge_to_world(&mut bridge, &mut world, 102);
@@ -1296,9 +1376,9 @@ mod tests {
         assert!(bridge.push_edge(&scope, &edge(&first, 2)));
         let mut disabled: Value = serde_json::from_str(&control(&source, 2)).unwrap();
         disabled["inputEnabled"] = json!(false);
-        assert!(bridge.set_control(&scope, &disabled.to_string()));
+        assert!(set_bound_control(&mut bridge, &scope, &disabled.to_string()));
         assert!(bridge.inputs.is_empty());
-        assert!(bridge.set_control(&scope, &control(&source, 3)));
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 3)));
         assert_eq!(bridge.control.as_ref().unwrap().stamp(), first.stamp());
         assert!(bridge.input_reset);
         apply_bridge_to_world(&mut bridge, &mut world, 103);
@@ -1310,6 +1390,137 @@ mod tests {
         up.phase = "up".into();
         assert!(!world.resource_mut::<HeroUiState>().process(&context, &read, up, &mut intents));
         assert!(intents.0.is_empty());
+    }
+
+    #[test]
+    fn hero_host_legacy_control_cannot_authorize_input_or_installed_ready_proof() {
+        let (mut bridge,scope)=start();let source=bridge.source().unwrap();
+        let mut world=world();assert!(world.resource::<AppliedHero>().witness.is_none());
+        let witness=bridge.source_witness().unwrap();
+        assert!(bridge.set_control(&scope,&control(&source,1)));
+        let control=bridge.control.as_ref().unwrap().clone();let sink=bridge.advance_sink(&scope).unwrap();
+        assert!(!bridge.control_current(&control));assert!(!bridge.feedback_current(&control,sink));
+        assert!(!bridge.push_edge(&scope,&edge(&control,1)));
+        assert!(world.resource::<AppliedHero>().witness.is_none());
+        apply_bridge_to_world(&mut bridge,&mut world,102);
+        assert_eq!(world.resource::<AppliedHero>().witness.as_deref(),Some(witness.as_str()));
+        assert!(world.resource::<AppliedHero>().control.is_none());
+        assert!(!world.resource::<HeroUiContext>().active);assert!(!world.resource::<HeroUiContext>().ready);
+        assert!(world.resource::<HeroInputQueue>().0.is_empty());
+    }
+    #[test]
+    fn hero_host_copied_source_with_old_health_data_is_rejected_until_real_consume() {
+        let (mut bridge,scope)=start();let source=bridge.source().unwrap();
+        let old_witness=bridge.source_witness().unwrap();
+        assert!(bridge.set_control_with_witness(&scope,&control(&source,1),&old_witness));
+        let sink=bridge.advance_sink(&scope).unwrap();let mut world=world();
+        apply_bridge_to_world(&mut bridge,&mut world,102);
+        let mut context=world.resource::<HeroUiContext>().clone();context.ready=true;world.insert_resource(context);
+        let old_control=bridge.control.as_ref().unwrap().clone();
+        assert!(bridge.push_edge(&scope,&edge(&old_control,1)));
+        assert!(bridge.push_raw(&scope,3,&json!({"type":"packet","packet":"HeroHealthChanged",
+            "payload":{"hp":7,"mp":2}}).to_string(),103));
+        let next=bridge.source().unwrap();let next_witness=bridge.source_witness().unwrap();
+        assert_ne!(old_witness,next_witness);assert_ne!(source,next);
+        let data:Value=serde_json::from_str(&next_witness).unwrap();
+        assert_eq!(data["planner"]["hp"],7);assert_eq!(data["display"]["hp"],7);
+        assert_eq!(data["display"]["maxHp"],30);assert_eq!(data["display"]["experience"],"77");
+        assert!(!bridge.set_control_with_witness(&scope,&control(&next,2),&old_witness));
+        assert_eq!(bridge.control_high,1);assert!(bridge.control_witness.is_none());
+        assert!(bridge.inputs.is_empty());assert!(bridge.input_reset);
+        assert!(!bridge.feedback_current(&old_control,sink));
+        assert_eq!(world.resource::<AppliedHero>().witness.as_deref(),Some(old_witness.as_str()));
+        assert!(bridge.set_control_with_witness(&scope,&control(&next,2),&next_witness));
+        assert_eq!(world.resource::<AppliedHero>().source.as_ref(),Some(&source));
+        assert_eq!(world.resource::<AppliedHero>().witness.as_deref(),Some(old_witness.as_str()));
+        apply_bridge_to_world(&mut bridge,&mut world,104);
+        assert_eq!(world.resource::<AppliedHero>().source.as_ref(),Some(&next));
+        assert_eq!(world.resource::<AppliedHero>().witness.as_deref(),Some(next_witness.as_str()));
+        assert_eq!(world.resource::<HeroUiReadModel>().hero.info.as_ref().unwrap().hp,7);
+        assert!(!world.resource::<HeroUiContext>().ready);assert!(world.resource::<HeroInputQueue>().0.is_empty());
+    }
+    #[test]
+    fn hero_host_witness_queries_and_rejection_preserve_receipt_fifo_and_original_clock() {
+        let (mut bridge,scope)=start();let mut info=information();
+        info.magics.push(serde_json::from_value(json!({"name":"Fire Ball","spell":"FireBall",
+            "base_cost":1,"level_cost":0,"icon":1,"level1":1,"level2":2,"level3":3,
+            "need1":1,"need2":2,"need3":3,"level":1,"key":17,"experience":0,
+            "delay":3400,"range":8,"cast_time":-1000})).unwrap());
+        assert!(bridge.push_raw(&scope,3,&json!({"type":"packet","packet":"HeroInformation",
+            "payload":{"info":info}}).to_string(),1000));
+        let mut learned=owner();learned["stage5Systems"]["heroLearnedMagics"]=json!([
+            {"spell":"FireBall","level":1,"key":17,"experience":0}]);
+        assert!(bridge.push_raw(&scope,4,&json!({"type":"worldSnapshot","payload":learned}).to_string(),1001));
+        for (sequence,id) in [(5,u64::MAX),(6,u64::MAX-1)] {
+            assert!(bridge.push_raw(&scope,sequence,&json!({"type":"packet","packet":"UseItem",
+                "payload":{"uniqueId":id,"grid":"HeroInventory","success":false}}).to_string(),1000+sequence));
+        }
+        let source=bridge.source().unwrap();let witness=bridge.source_witness().unwrap();
+        assert_eq!(bridge.source_witness().as_deref(),Some(witness.as_str()));
+        assert_eq!(bridge.ingress.frame_sequence(),6);assert_eq!(bridge.ingress.status().receipt_count,2);
+        assert_eq!(bridge.ingress.model().magic_clocks[0].received_ms,1000);
+        assert!(!bridge.set_control_with_witness(&scope,&control(&source,1),&"界".repeat(22_000)));
+        assert_eq!(bridge.control_high,0);assert_eq!(bridge.ingress.status().receipt_count,2);
+        assert_eq!(bridge.ingress.model().magic_clocks[0].received_ms,1000);
+        assert!(bridge.ingress.is_current(&scope));assert!(bridge.checkpoint(&scope).is_none());
+        assert!(bridge.set_control_with_witness(&scope,&control(&source,1),&witness));
+        let mut world=world();apply_bridge_to_world(&mut bridge,&mut world,1100);
+        assert_eq!(world.resource::<AppliedHero>().receipt_frames,vec![5,6]);
+        assert_eq!(bridge.ingress.status().receipt_count,0);
+        assert_eq!(world.resource::<HeroUiReadModel>().hero.magic_clocks[0].received_ms,1000);
+        assert_eq!(world.resource::<HeroUiReadModel>().hero.magic_clocks[0].remaining_ms(1100),2300);
+        assert!(bridge.checkpoint(&scope).is_some());
+    }
+    #[test]
+    fn hero_host_unscoped_reset_cannot_preserve_old_ready_or_held_press_with_same_witness() {
+        let (mut bridge,scope)=start();let source=bridge.source().unwrap();
+        assert!(bridge.advance_sink(&scope).is_some());
+        assert!(set_bound_control(&mut bridge,&scope,&control(&source,1)));
+        let control=bridge.control.as_ref().unwrap().clone();let mut world=world();
+        apply_bridge_to_world(&mut bridge,&mut world,102);
+        let witness=world.resource::<AppliedHero>().witness.clone();
+        let mut context=world.resource::<HeroUiContext>().clone();context.ready=true;
+        let read=world.resource::<HeroUiReadModel>().clone();
+        let mut state=world.remove_resource::<HeroUiState>().unwrap();state.reconcile(&context,&read);
+        let mut intents=HeroIntentQueue::default();
+        assert!(state.process(&context,&read,serde_json::from_str::<HostInput>(&edge(&control,1)).unwrap().edge,&mut intents));
+        assert_eq!(state.ui.armed,Some(HeroAction::CloseInventory));
+        world.insert_resource(state);world.insert_resource(context);
+        // The actual UiReset clears HeroModel only, leaving the UI resource alive.
+        assert_eq!(capture_hero_source_witness(world.resource::<HeroUiReadModel>()).ok(),witness);
+        world.insert_resource(HeroModel::default());
+        apply_bridge_to_world(&mut bridge,&mut world,103);
+        assert_eq!(world.resource::<AppliedHero>().witness,witness);
+        assert!(!world.resource::<HeroUiContext>().ready);assert_eq!(world.resource::<HeroUiState>().ui.armed,None);
+        assert_eq!(world.resource::<HeroUiReadModel>().hero.info.as_ref().unwrap().object_id,12);
+        assert!(bridge.ingress.is_current(&scope));
+    }
+    #[test]
+    fn hero_host_malformed_or_stale_witness_control_cannot_poison_current_bound_source() {
+        let (mut bridge,scope)=start();let source=bridge.source().unwrap();let witness=bridge.source_witness().unwrap();
+        assert!(bridge.set_control_with_witness(&scope,&control(&source,1),&witness));
+        let mut stale:Value=serde_json::from_str(&control(&source,2)).unwrap();
+        stale["source"]["rustModelRevision"]=json!(source.rust_model_revision+1);
+        assert!(!bridge.set_control_with_witness(&scope,&stale.to_string(),"invalid"));
+        assert!(!bridge.set_control_with_witness(&scope,"{",&witness));
+        assert_eq!(bridge.control_high,1);assert_eq!(bridge.control_witness.as_deref(),Some(witness.as_str()));
+        assert!(bridge.control_current(bridge.control.as_ref().unwrap()));
+        assert!(!bridge.set_control_with_witness(&scope,&control(&source,2),&(witness.clone()+" ")));
+        assert_eq!(bridge.control_high,1);assert!(bridge.control_witness.is_none());
+        assert!(bridge.set_control_with_witness(&scope,&control(&source,2),&witness));
+        assert_eq!(bridge.control_high,2);assert!(bridge.control_current(bridge.control.as_ref().unwrap()));
+    }
+
+    #[test]
+    fn hero_host_independent_web_and_rust_empty_source_share_one_exact_golden() {
+        let (mut bridge,scope)=start();
+        assert!(bridge.push_raw(&scope,3,&json!({"type":"worldSnapshot","payload":owner()}).to_string(),102));
+        let expected=r#"{"actor":{"class":"Warrior","gender":"Male","name":"Hero","objectId":12,"spawned":true},"config":{"autoPot":false,"hpItemIndex":0,"hpPercent":30,"mpItemIndex":0,"mpPercent":40},"display":{"experience":"77","hair":3,"hp":20,"level":2,"maxExperience":"200","maxHp":30,"maxMp":15,"mp":10},"equipment":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],"inventory":[null,null,null,null,null,null,null,null,null,null],"inventoryCapacity":10,"keys":[],"personalCapacity":40,"personalInventory":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"planner":{"experience":"77","hp":20,"level":2,"maxExperience":"200","mp":10},"riding":null,"skills":[],"stats":[],"version":1,"weights":{"bag":1,"hand":3,"wear":2}}"#;
+        assert_eq!(bridge.source_witness().as_deref(),Some(expected));
+        let mut world=world();apply_bridge_to_world(&mut bridge,&mut world,103);
+        assert_eq!(world.resource::<AppliedHero>().witness.as_deref(),Some(expected));
+        assert_eq!(capture_hero_source_witness(world.resource::<HeroUiReadModel>()).ok().as_deref(),Some(expected));
+        assert!(!world.resource::<HeroUiContext>().ready);
     }
 
     #[test]

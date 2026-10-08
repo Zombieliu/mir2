@@ -7460,7 +7460,7 @@ check("Ranking active Inspect blocks actual older Hero and Fishing Page paths th
 
 
 // Source41 exercises the Page-owned custody with finite runtime ports, never WASM.
-const heroIngressDocument=loadTypeScriptModule(new URL("../lib/bevy-hero-ui.ts",import.meta.url));
+const heroIngressDocument=loadTypeScriptModule(new URL("../lib/bevy-hero-ui.ts",import.meta.url),{"./hero-player-ui":heroUi});
 function heroRawFixture({bound=true,checkpoint=true}={}){
   const physical={socket:{},connectionGeneration:1,sessionGeneration:2};
   const scene={sceneRevision:1,playerObjectId:1,mapFileName:"D000"};
@@ -7731,6 +7731,171 @@ check("Hero maximum 42-cell bag keeps valid use witness within the unchanged act
   const basis=heroUi.captureHeroActionBasis(model,{kind:"use",slot:0},heroBasisWindows42);assert(basis);assert.equal(basis.cells.length,42);
   assert.equal(basis.facts.policies.length,1,"scan-only occupancy must not duplicate unused item policy");assert(new TextEncoder().encode(JSON.stringify(basis)).byteLength<=16384);
   assert.equal(basis.facts.restock.from,2);assert.equal(basis.facts.restock.itemIndex,2147483647);
+});
+
+// Source43 compares independent real projectors through finite ports, never WASM.
+const heroWitnessGolden43="{\"actor\":{\"class\":\"Warrior\",\"gender\":\"Male\",\"name\":\"Hero\",\"objectId\":12,\"spawned\":true},\"config\":{\"autoPot\":false,\"hpItemIndex\":0,\"hpPercent\":30,\"mpItemIndex\":0,\"mpPercent\":40},\"display\":{\"experience\":\"77\",\"hair\":3,\"hp\":20,\"level\":2,\"maxExperience\":\"200\",\"maxHp\":30,\"maxMp\":15,\"mp\":10},\"equipment\":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],\"inventory\":[null,null,null,null,null,null,null,null,null,null],\"inventoryCapacity\":10,\"keys\":[],\"personalCapacity\":40,\"personalInventory\":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],\"planner\":{\"experience\":\"77\",\"hp\":20,\"level\":2,\"maxExperience\":\"200\",\"mp\":10},\"riding\":null,\"skills\":[],\"stats\":[],\"version\":1,\"weights\":{\"bag\":1,\"hand\":3,\"wear\":2}}";
+function heroWitnessFixture43(){
+  const base=heroFixture(),owner={...base.owner,playerObjectId:42,mapFileName:"TestMap"};
+  const info={...base.info,object_id:12,level:2,hair:3,hp:20,mp:10,experience:77,max_experience:200,
+    inventory:Array(10).fill(null),equipment:Array(14).fill(null),magics:[],auto_pot:false,
+    auto_hp_percent:30,auto_mp_percent:40,hp_item_index:0,mp_item_index:0};
+  const world={...base.world,playerObjectId:42,mapFileName:"TestMap",inventoryItems:[],beltItems:[],heroInventoryItems:[],heroEquipmentItems:[],
+    heroMaxExperience:200,heroStats:[],heroWeights:{bag:1,wear:2,hand:3},heroVitals:{hp:20,maxHp:30,mp:10,maxMp:15},
+    stage5Systems:{hero:{name:"Hero",class:"Warrior",gender:"Male",level:2,experience:77,behaviour:0,spawned:true,
+      autoPot:false,autoHpPercent:30,autoMpPercent:40,hpItemIndex:0,mpItemIndex:0},heroLearnedMagics:[]}};
+  const authority=new heroUi.HeroPlayerAuthority();assert(authority.receiveInformation({info},owner));assert(authority.receiveSnapshot(world,owner));
+  return {owner,info,world,authority,get model(){const model=authority.read(owner);assert(model);return model;}};
+}
+function freezeHeroWitnessFixture43(value){
+  if(value&&typeof value==="object"){for(const v of Object.values(value))freezeHeroWitnessFixture43(v);Object.freeze(value);}return value;
+}
+function heroWitnessPort43(f=heroWitnessFixture43()){
+  const owner=f.owner,state={source:{scope:{runGeneration:1,connectionGeneration:owner.connectionGeneration,sessionGeneration:owner.sessionGeneration,
+    sceneRevision:owner.sceneRevision,playerObjectId:owner.playerObjectId,mapFileName:owner.mapFileName},frameSequence:2,heroObjectId:f.model.actor.objectId,
+    heroGeneration:1,rustModelRevision:1},witness:heroUi.createHeroSourceWitness(f.model),cursor:2,closed:false,control:null,ready:false,
+    appliedSource:null,appliedWitness:null,sinkGeneration:2,frame:0};assert(state.witness);
+  const controls=[],runtime={getMir2HeroUiAbiVersion:()=>1,getMir2HeroActionBasisVersion:()=>1,getMir2HeroSourceWitnessVersion:()=>1,
+    activateMir2HeroIngress:()=>true,pushMir2HeroRawFrame:()=>true,pushMir2HeroVerifiedOwnerFrame:()=>true,withdrawMir2HeroIngress:()=>true,
+    getMir2HeroIngressCheckpoint:()=>null,restoreMir2HeroIngressCheckpoint:()=>true,
+    getMir2HeroSourceWitness:()=>JSON.stringify({version:1,source:state.source,witness:state.witness}),
+    getMir2HeroUiStatus:()=>JSON.stringify({version:1,source:state.source,acceptedFrameSequence:state.cursor,closed:state.closed,
+      appliedSource:state.appliedSource,appliedWitness:state.appliedWitness,controlRevision:state.control?.controlRevision??0,
+      webLeaseToken:state.control?.webLeaseToken??"",sinkGeneration:state.sinkGeneration,frame:state.frame,modal:false,
+      ready:state.ready,inputEnabled:state.ready,inputRegions:state.ready?[{left:0,top:0,width:316,height:236}]:[],receiptFrames:[]}),
+    setMir2HeroUiControlWithWitness(scope,raw,witness){controls.push({scope,raw,witness});state.control=JSON.parse(raw);return true;},
+    setMir2HeroUiInputEdge:()=>true,setMir2HeroUiIntentSink:()=>state.sinkGeneration,clearMir2HeroUiIntentSink:()=>true};
+  const control={source:state.source,controlRevision:1,webLeaseToken:"web-authority:43:hero:1",hudGeneration:8,webModelRevision:9,
+    presentationRevision:10,windowEpochs:[1,2,3],windows:{inventoryOpen:true,characterOpen:false,characterPage:"equipment",beltVisible:false,beltVertical:false},
+    presentation:{logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false},inGame:true,hostVisible:true,inputEnabled:true,pending:false};
+  return {f,state,controls,runtime,control,publish(){state.appliedSource=state.source;state.appliedWitness=state.witness;state.frame++;state.ready=true;}};
+}
+check("Hero independent Authority witness matches actual Rust golden bytes without adopting runtime data",()=>{
+  const f=heroWitnessFixture43(),witness=heroUi.createHeroSourceWitness(f.model);assert.equal(witness,heroWitnessGolden43);
+  assert(heroUi.heroSourceWitnessMatches(witness,f.model));assert.equal(Object.isFrozen(f.model.plannerSource),true);
+  assert.equal(Object.isFrozen(f.model.displaySource),true);assert.equal(heroUi.createHeroSourceWitness(heroFixture().model),null);
+  const changed=Object.freeze({...f.model,authoritySerial:900,informationSerial:900,snapshotSerial:900,personalSerial:900,skillSnapshotSerial:900,
+    actor:Object.freeze({...f.model.actor,generation:900})});assert.equal(heroUi.createHeroSourceWitness(changed),witness);
+});
+check("Hero live HP keeps actual owner inventory and all full-source ACK barriers",()=>{
+  const f=heroWitnessFixture43();f.world.heroInventoryItems=[heroWorldRowFixture(heroItemFixture(501),2)];
+  f.world.stage5Systems.hero.autoHpPercent=55;assert(f.authority.receiveSnapshot(f.world,f.owner));const before=f.model;
+  const ledger=new heroUi.HeroPlayerOperations(),proof=ledger.reserve(before,{kind:"move",from:2,to:3});assert(proof);assert(ledger.claim(proof,before,proof.wire));
+  const witness=heroUi.createHeroSourceWitness(before);assert(witness);
+  assert(f.authority.receiveHealthChanged({hp:7,mp:2},f.owner));const after=f.model;
+  for(const name of ["informationSerial","snapshotSerial","personalSerial","skillSnapshotSerial"])assert.equal(after[name],before[name]);
+  assert(after.authoritySerial>before.authoritySerial);assert.equal(after.inventory[2].uniqueId,501);assert.equal(after.hpPercent,55);
+  assert.equal(after.plannerSource.hp,7);assert.equal(after.displaySource.hp,7);assert.equal(after.displaySource.maxHp,30);
+  assert.notEqual(heroUi.createHeroSourceWitness(after),witness);assert.equal(after.experience,77);
+  assert.equal(ledger.receipt("HeroHealthChanged",{hp:7,mp:2},f.owner,after.authoritySerial),false);ledger.observe(after);
+  assert.equal(ledger.pending.state,"entered");assert.equal(ledger.cancelDefinitelyUnsent(proof),false);
+  assert(ledger.receipt("MoveItem",{grid:"HeroInventory",from:2,to:3,success:true},f.owner,after.authoritySerial));
+  assert(f.authority.receiveHealthChanged({hp:6,mp:1},f.owner));const afterAck=f.model;
+  assert.equal(afterAck.snapshotSerial,before.snapshotSerial);assert.equal(ledger.observe(afterAck),false);
+  assert.equal(ledger.pending.state,"acknowledged");assert.equal(ledger.cancelDefinitelyUnsent(proof),false);
+});
+check("Hero owner packet and new Information keep planner and painter level XP domains distinct",()=>{
+  const f=heroWitnessFixture43();assert(f.authority.receiveHealthChanged({hp:7,mp:2},f.owner));
+  const info={...f.info,level:9,hair:7,hp:5,mp:1,experience:88,max_experience:300};
+  assert(f.authority.receiveInformation({info},f.owner));const newer=f.model,witness=JSON.parse(heroUi.createHeroSourceWitness(newer));
+  assert.equal(witness.planner.level,9);assert.equal(witness.planner.experience,"88");assert.equal(witness.planner.maxExperience,"300");
+  assert.equal(witness.display.level,2);assert.equal(witness.display.experience,"77");assert.equal(witness.display.maxExperience,"200");
+  assert.equal(witness.display.hp,5);assert.equal(witness.display.maxHp,30);assert.equal(witness.display.hair,7);
+  assert(f.authority.receiveHealthChanged({hp:0,mp:-2},f.owner));const hp=f.model;
+  assert.equal(hp.plannerSource.level,9);assert.equal(hp.displaySource.level,2);assert.equal(hp.plannerSource.hp,0);
+  assert.equal(hp.informationSerial,newer.informationSerial);assert.equal(hp.snapshotSerial,newer.snapshotSerial);
+  f.world.stage5Systems.hero.level=3;f.world.stage5Systems.hero.experience=90;f.world.heroMaxExperience=250;f.world.heroVitals.hp=12;
+  assert(f.authority.receiveSnapshot(f.world,f.owner));const owner=f.model;
+  assert.equal(owner.plannerSource.hp,12);assert.equal(owner.plannerSource.level,3);assert.equal(owner.plannerSource.experience,90);
+  assert.equal(owner.displaySource.level,3);assert.equal(owner.displaySource.maxExperience,250);assert.equal(owner.displaySource.hair,7);
+});
+check("Hero invalid or foreign health cannot alter model clocks counters or physical source",()=>{
+  const f=heroWitnessFixture43(),before=f.model,witness=heroUi.createHeroSourceWitness(before);
+  for(const payload of [{hp:7},{hp:1.5,mp:2},{hp:2147483648,mp:2},{hp:NaN,mp:2},{hp:7,mp:Infinity}])assert.equal(f.authority.receiveHealthChanged(payload,f.owner),false);
+  for(const owner of [{...f.owner,socket:{}},{...f.owner,sessionGeneration:f.owner.sessionGeneration+1},
+    {...f.owner,sceneRevision:f.owner.sceneRevision+1},{...f.owner,mapFileName:"OtherMap"}])assert.equal(f.authority.receiveHealthChanged({hp:7,mp:2},owner),false);
+  assert.equal(f.model.authoritySerial,before.authoritySerial);assert.equal(heroUi.createHeroSourceWitness(f.model),witness);
+});
+check("Hero source witness preserves exact wide signed and zero UID data without mutation custody",()=>{
+  const f=heroWitnessFixture43(),wide="18446744073709551615";
+  f.info.inventory[2]=heroItemFixture(wide,2147483647,65535);f.info.inventory[3]=heroItemFixture(0);
+  f.world.heroInventoryItems=[heroWorldRowFixture(f.info.inventory[2],2),heroWorldRowFixture(f.info.inventory[3],3)];
+  f.info.experience="-9223372036854775808";f.info.max_experience="9223372036854775807";
+  f.world.stage5Systems.hero.experience=f.info.experience;f.world.heroMaxExperience=f.info.max_experience;
+  assert(f.authority.receiveInformation(f.info,f.owner));assert(f.authority.receiveSnapshot(f.world,f.owner));const model=f.model;
+  const witness=JSON.parse(heroUi.createHeroSourceWitness(model));assert.equal(witness.inventory[2].uid,wide);
+  assert.equal(witness.inventory[2].count,65535);assert.equal(witness.inventory[3].uid,"0");assert.equal(witness.planner.experience,f.info.experience);
+  assert.equal(heroUi.planHeroAction(model,{kind:"move",from:3,to:4}),null);assert.equal(heroUi.planHeroAction(model,{kind:"move",from:2,to:3}),null);
+  assert.equal(heroUi.planHeroAction(model,{kind:"use",slot:2}),null);assert.equal(heroUi.captureHeroActionBasis(model,{kind:"move",from:3,to:4},heroBasisWindows42),null);
+});
+check("Hero full 42 plus14 plus80 cells and all actual protocol skills fit the 64KiB source cap",()=>{
+  const f=heroWitnessFixture43(),uid=18446744073709551615n;
+  f.info.inventory=Array.from({length:42},(_,slot)=>heroItemFixture(String(uid-BigInt(slot)),2147483647,65535));
+  f.info.equipment=Array.from({length:14},(_,slot)=>heroItemFixture(String(uid-42n-BigInt(slot)),2147483647,65535));
+  f.world.heroInventoryCapacity=42;f.world.heroInventoryItems=f.info.inventory.map((item,slot)=>heroWorldRowFixture(item,slot));
+  f.world.heroEquipmentItems=f.info.equipment.map((item,slot)=>heroWorldRowFixture(item,slot));
+  f.world.inventoryCapacity=86;f.world.maxBagSlots=80;
+  f.world.inventoryItems=Array.from({length:80},(_,slot)=>heroWorldRowFixture(heroItemFixture(String(uid-56n-BigInt(slot)),2147483647,65535),slot%40,slot<40?"bag1":"bag2"));
+  const protocol=readFileSync(new URL("../../../packages/protocol/src/types.rs",import.meta.url),"utf8");
+  const spellBody=protocol.match(/pub enum Spell\s*\{([\s\S]*?)\n\}/)?.[1];assert(spellBody);
+  const spells=Array.from(spellBody.matchAll(/^\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*\d+\s*,/gm),match=>match[1]);assert(spells.length>1);
+  const seed=heroFixture().info.magics[0];f.info.magics=spells.map(spell=>({...seed,spell,name:spell,key:0}));
+  f.world.stage5Systems.heroLearnedMagics=f.info.magics.map(m=>({spell:m.spell,level:m.level,key:m.key,experience:m.experience}));
+  assert(f.authority.receiveInformation(f.info,f.owner));assert(f.authority.receiveSnapshot(f.world,f.owner));
+  const raw=heroUi.createHeroSourceWitness(f.model);assert(raw);assert(new TextEncoder().encode(raw).byteLength<=65536);const value=JSON.parse(raw);
+  assert.equal(value.inventory.length,42);assert.equal(value.equipment.length,14);assert.equal(value.personalInventory.length,80);assert.equal(value.skills.length,spells.length);
+});
+check("Hero canonical source cap counts UTF8 and rejects malformed canonical input",()=>{
+  const f=heroWitnessFixture43(),seed=heroFixture().info.magics[0];f.info.magics=[seed];f.world.stage5Systems.heroLearnedMagics=[{spell:seed.spell,level:1,key:17,experience:0}];
+  assert(f.authority.receiveInformation(f.info,f.owner));assert(f.authority.receiveSnapshot(f.world,f.owner));const model=f.model;
+  const base=heroUi.createHeroSourceWitness(model);assert(base);const make=name=>{
+    const raw=Object.freeze({...model.magics[0].raw,name}),magic=Object.freeze({...model.magics[0],name,raw});return Object.freeze({...model,magics:Object.freeze([magic])});};
+  const overhead=new TextEncoder().encode(base).byteLength-seed.name.length;
+  const exact=heroUi.createHeroSourceWitness(make("a".repeat(65536-overhead)));assert(exact);assert.equal(new TextEncoder().encode(exact).byteLength,65536);
+  assert.equal(heroUi.createHeroSourceWitness(make("a".repeat(65537-overhead))),null);
+  assert.equal(heroUi.createHeroSourceWitness(make("界".repeat(22000))),null);assert.equal(heroUi.createHeroSourceWitness(make("\ud800")),null);
+  assert.equal(heroUi.heroSourceWitnessMatches(base+" ",model),false);assert.equal(heroUi.heroSourceWitnessMatches(JSON.stringify({...JSON.parse(base),extra:true}),model),false);
+  assert.equal(heroUi.createHeroSourceWitness({...model}),null);assert.equal(heroUi.createHeroSourceWitness(Object.freeze({...model,plannerSource:undefined})),null);
+});
+check("Hero bridge requires independent model data and exact owner scope before requesting control",()=>{
+  const f=heroWitnessPort43(),binding=heroIngressDocument.readHeroSourceWitness(f.runtime,f.f.model);assert(binding);assert(heroIngressDocument.supportsHeroSharedUi(f.runtime));
+  assert.equal(heroIngressDocument.bindHeroUiControl(f.runtime,f.control,f.f.model)?.witness,binding.witness);assert.equal(f.controls.length,1);
+  assert.equal(f.state.ready,false);assert.equal(f.state.appliedWitness,null);
+  assert.equal(heroIngressDocument.readHeroUiReady(f.runtime,binding,f.f.model,1,f.control.webLeaseToken,2),null);
+  for(const name of ["connectionGeneration","sessionGeneration","playerObjectId","sceneRevision","mapFileName"]){
+    const port=heroWitnessPort43(),scope=port.state.source.scope;port.state.source={...port.state.source,scope:{...scope,[name]:typeof scope[name]==="string"?"OtherMap":scope[name]+1}};
+    assert.equal(heroIngressDocument.readHeroSourceWitness(port.runtime,port.f.model),null);assert.equal(port.controls.length,0);
+  }
+  const wrongActor=heroWitnessPort43();wrongActor.state.source={...wrongActor.state.source,heroObjectId:13};
+  assert.equal(heroIngressDocument.readHeroSourceWitness(wrongActor.runtime,wrongActor.f.model),null);
+  f.state.witness=heroWitnessGolden43.replace('"hp":20','"hp":19');assert.equal(heroIngressDocument.readHeroSourceWitness(f.runtime,f.f.model),null);
+});
+check("Hero source reads reject cursor reentry unsupported capabilities and unbounded bootstrap status",()=>{
+  const f=heroWitnessPort43(),getter=f.runtime.getMir2HeroSourceWitness;
+  f.runtime.getMir2HeroSourceWitness=()=>{const value=getter();f.state.cursor++;return value;};assert.equal(heroIngressDocument.readHeroSourceWitness(f.runtime,f.f.model),null);
+  const g=heroWitnessPort43();for(const runtime of [{...g.runtime,getMir2HeroSourceWitnessVersion:()=>0},
+    {...g.runtime,setMir2HeroUiControlWithWitness:undefined},{...g.runtime,getMir2HeroActionBasisVersion:()=>{throw Error("capability");}}])assert.equal(heroIngressDocument.supportsHeroSharedUi(runtime),false);
+  g.runtime.getMir2HeroUiStatus=()=>" ".repeat(196609);assert.equal(heroIngressDocument.readHeroBootstrap(g.runtime),null);
+  assert.equal(heroIngressDocument.readHeroSourceWitness(g.runtime,g.f.model),null);
+});
+check("Hero UI Ready requires actual applied source witness control lease sink and paint frame",()=>{
+  const f=heroWitnessPort43(),binding=heroIngressDocument.bindHeroUiControl(f.runtime,f.control,f.f.model);assert(binding);f.publish();
+  assert(heroIngressDocument.readHeroUiReady(f.runtime,binding,f.f.model,1,f.control.webLeaseToken,2));
+  const raw=f.runtime.getMir2HeroUiStatus(),status=JSON.parse(raw);
+  for(const delta of [{appliedWitness:null},{appliedWitness:binding.witness+" "},{appliedSource:{...binding.source,rustModelRevision:2}},
+    {controlRevision:2},{webLeaseToken:"other"},{sinkGeneration:3},{frame:0},{ready:false},{closed:true},
+    {inputRegions:[{left:0,top:0,width:-1,height:1}]},{receiptFrames:[1.5]}]){
+    f.runtime.getMir2HeroUiStatus=()=>JSON.stringify({...status,...delta});assert.equal(heroIngressDocument.readHeroUiReady(f.runtime,binding,f.f.model,1,f.control.webLeaseToken,2),null);
+  }
+});
+check("Hero actual Page routes health into independent Authority without settling entered operations",()=>{
+  const f=heroWitnessFixture43();f.world.heroInventoryItems=[heroWorldRowFixture(heroItemFixture(501),2)];assert(f.authority.receiveSnapshot(f.world,f.owner));
+  const before=f.model,page=parityPageFixture(f.owner,f.world);page.scope.heroAuthorityRef.current=f.authority;
+  const proof=page.scope.heroOperationsRef.current.reserve(before,{kind:"move",from:2,to:3});assert(proof);
+  assert(page.scope.heroOperationsRef.current.claim(proof,before,proof.wire));page.api.captureParityPacket("HeroHealthChanged",{hp:7,mp:2});
+  const after=f.model;assert.equal(after.plannerSource.hp,7);assert.equal(after.displaySource.hp,7);assert.equal(after.inventory[2].uniqueId,501);
+  for(const name of ["informationSerial","snapshotSerial","personalSerial","skillSnapshotSerial"])assert.equal(after[name],before[name]);
+  assert.equal(page.scope.heroOperationsRef.current.pending.state,"entered");assert.equal(page.sent.length,0);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);
