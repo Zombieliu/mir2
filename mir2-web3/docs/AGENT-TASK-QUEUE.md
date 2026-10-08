@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-10-08 additive Bilibili / Windows playtest spectator task: implementation
+> and preparation checks pass in its own branch. Next: user normal-exit reply,
+> fresh fingerprint/drain checks, bounded proxy/feature activation, genuine
+> read-only frames, then official LiveHime capture and platform reception.
+> Keep the active classic integration lane and its public release unchanged.
+> [Runbook](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
+
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
 > typed shared pets and saved growth, ordinary Guild management/war, native

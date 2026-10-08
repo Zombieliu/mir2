@@ -21,6 +21,8 @@ import {
   type MailComposeDraft,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
+import { spectatorWebSocketUrl } from "../lib/spectator-endpoint";
+import { SpectatorLiveStateBadge } from "./components/spectator-live-state";
 import {
   SpectatorOverlay,
   type SpectatorStatus,
@@ -1227,6 +1229,7 @@ const CRYSTAL_MOVEMENT_DIRECTIONS = [
   "UpLeft",
 ];
 const CONFIGURED_GATEWAY_WS_URL = process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim();
+const CONFIGURED_SPECTATOR_WS_URL = process.env.NEXT_PUBLIC_MIR2_SPECTATOR_WS_URL?.trim();
 const LOCAL_GATEWAY_WS_URL = "ws://127.0.0.1:7110/ws";
 const HOSTED_GATEWAY_WS_URL = "wss://165.154.65.136.sslip.io/ws";
 // ── On-chain smart mine (M4, WF-6) — testnet vertical slice, OFF unless the flag is set.
@@ -1309,26 +1312,7 @@ function resolveGatewayWebSocketUrl() {
   }
   resolved ??= CONFIGURED_GATEWAY_WS_URL || (onLocalHost ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL);
   if (!isSpectatorBrowserMode()) return resolved;
-
-  const pageQuery = new URLSearchParams(window.location.search);
-  const spectatorUrl = new URL(resolved, window.location.href);
-  spectatorUrl.pathname = spectatorUrl.pathname.replace(/\/ws\/?$/, "/spectator/ws");
-  if (!spectatorUrl.pathname.endsWith("/spectator/ws")) {
-    spectatorUrl.pathname = "/spectator/ws";
-  }
-  const mappings = [
-    ["spectateMap", "map"],
-    ["spectateTarget", "target"],
-    ["spectateDelayMs", "delayMs"],
-    ["spectateMode", "mode"],
-    ["spectateToken", "token"],
-    ["replayId", "replayId"],
-  ] as const;
-  for (const [source, target] of mappings) {
-    const value = pageQuery.get(source);
-    if (value) spectatorUrl.searchParams.set(target, value);
-  }
-  return spectatorUrl.toString();
+  return spectatorWebSocketUrl(resolved, CONFIGURED_SPECTATOR_WS_URL, window.location.href);
 }
 
 function safeGatewayUrlForDiagnostics(url: string) {
@@ -5061,6 +5045,9 @@ export default function HomePage() {
   }, [world.entities, world.selectedObjectId]);
 
   useEffect(() => {
+    // Spectator transport has its own protocol and server-driven frames; player
+    // keepAlive packets are invalid controls on the read-only socket.
+    if (isSpectatorBrowserMode()) return;
     if (!world.connected || wsState !== "open") return;
     const keepAliveTimer = window.setInterval(() => {
       if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -14236,6 +14223,7 @@ export default function HomePage() {
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
+    {spectatorMode ? <SpectatorLiveStateBadge status={spectatorStatus} connectionState={wsState} /> : null}
     {spectatorMode && !aiLiveBrowserMode ? (
       <SpectatorOverlay
         status={spectatorStatus}

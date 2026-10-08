@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> 2026-10-08 spectator connection reuses the deployed shared-Zone projections;
+> no simulation or Gateway binary is replaced. Feature configuration is staged
+> only, with recording OFF and 30s delay. Python19 and real Caddy adaptation /
+> desired service fingerprint checks pass. Live restart, current frame privacy /
+> performance acceptance and Bilibili delivery remain open.
+> [Scope and limits](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
+
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
 > typed shared pets and saved growth, ordinary Guild management/war, native

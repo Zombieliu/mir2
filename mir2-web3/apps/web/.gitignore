@@ -33,3 +33,5 @@ docs/generated/vfx-qa/
 # instead: lib/generated/localization_bundle.json, lib/generated/i18n-glossary.json,
 # lib/generated/i18n-native-review.json, and packages/game-data/data/i18n-overrides.json.
 docs/generated/i18n-work/
+.dependency-link-not-used
+/artifacts/spectator-readiness/

@@ -1,8 +1,21 @@
 #!/bin/sh
 set -eu
+umask 077
 
 render_url="${MIR2_AI_LIVE_RENDER_URL:-http://host.docker.internal:3002/spectate?aiLive=1&spectateMode=director}"
 output_url="${MIR2_AI_LIVE_OUTPUT_URL:-}"
+output_url_file="${MIR2_AI_LIVE_OUTPUT_URL_FILE:-}"
+if [ -n "$output_url_file" ]; then
+  if [ -n "$output_url" ]; then
+    echo "Use only one RTMP output source" >&2
+    exit 64
+  fi
+  if [ ! -f "$output_url_file" ] || [ ! -r "$output_url_file" ]; then
+    echo "The private RTMP output file is unavailable" >&2
+    exit 64
+  fi
+  output_url="$(cat "$output_url_file")"
+fi
 output_format="${MIR2_AI_LIVE_OUTPUT_FORMAT:-auto}"
 video_size="${MIR2_AI_LIVE_VIDEO_SIZE:-1920x1080}"
 frame_rate="${MIR2_AI_LIVE_FRAME_RATE:-30}"
@@ -70,10 +83,20 @@ elif [ -z "$output_url" ]; then
   echo "MIR2_AI_LIVE_OUTPUT_URL is required for RTMP" >&2
   exit 64
 fi
+if [ "$output_format" = "rtmp" ]; then
+  case "$output_url" in
+    rtmp://*|rtmps://*) ;;
+    *) echo "RTMP output must use rtmp:// or rtmps://" >&2; exit 64 ;;
+  esac
+fi
 
 export DISPLAY=:99
 export PULSE_SERVER=unix:/run/ai-live/pulse/native
 mkdir -p /run/ai-live/pulse /tmp/chromium-ai-live
+for private_log in /tmp/xvfb.log /tmp/pulseaudio.log /tmp/chromium.log /tmp/ffmpeg.log; do
+  touch "$private_log"
+  chmod 0600 "$private_log"
+done
 
 Xvfb "$DISPLAY" -screen 0 "${video_size}x24" -nolisten tcp -ac >/tmp/xvfb.log 2>&1 &
 xvfb_pid=$!

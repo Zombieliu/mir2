@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { gatewayHttpBase } from "../../../../lib/spectator-endpoint";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -6,16 +7,12 @@ export const runtime = "nodejs";
 const ALLOWED_PATHS = new Set(["status", "metrics", "control", "distribution"]);
 
 function gatewayBase() {
-  const direct = process.env.MIR2_GATEWAY_HTTP_URL?.trim();
+  const direct = process.env.MIR2_SPECTATOR_HTTP_URL?.trim() || process.env.MIR2_GATEWAY_HTTP_URL?.trim();
   if (direct) return direct.replace(/\/+$/, "");
-  const websocket = process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim();
+  const websocket = process.env.NEXT_PUBLIC_MIR2_SPECTATOR_WS_URL?.trim()
+    || process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim();
   if (websocket) {
-    const url = new URL(websocket);
-    url.protocol = url.protocol === "wss:" ? "https:" : "http:";
-    url.pathname = "";
-    url.search = "";
-    url.hash = "";
-    return url.toString().replace(/\/+$/, "");
+    try { return gatewayHttpBase(websocket); } catch { return null; }
   }
   return process.env.NODE_ENV === "development" ? "http://127.0.0.1:7110" : null;
 }

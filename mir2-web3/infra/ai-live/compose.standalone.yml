@@ -1,0 +1,31 @@
+# This launches only an encoder, never the developer DB / gameplay stack.
+# Run on a separate encoding host. External publishing requires official
+# account permission and a private RTMP secret file supplied by the operator.
+services:
+  encoder:
+    build:
+      context: ../..
+      dockerfile: infra/ai-live/Dockerfile
+    restart: unless-stopped
+    shm_size: 512m
+    mem_limit: 2g
+    cpus: 2
+    environment:
+      MIR2_AI_LIVE_RENDER_URL: ${MIR2_AI_LIVE_RENDER_URL:?A configured spectator page is required}
+      MIR2_AI_LIVE_OUTPUT_FORMAT: rtmp
+      MIR2_AI_LIVE_OUTPUT_URL_FILE: /run/secrets/rtmp-output-url
+      MIR2_AI_LIVE_VIDEO_SIZE: ${MIR2_AI_LIVE_VIDEO_SIZE:-1280x720}
+      MIR2_AI_LIVE_FRAME_RATE: ${MIR2_AI_LIVE_FRAME_RATE:-30}
+      MIR2_AI_LIVE_VIDEO_BITRATE: ${MIR2_AI_LIVE_VIDEO_BITRATE:-3000k}
+      MIR2_AI_LIVE_AUDIO_BITRATE: ${MIR2_AI_LIVE_AUDIO_BITRATE:-128k}
+      MIR2_AI_DISTRIBUTION_RTMP_PLATFORM: bilibili
+    secrets:
+      - rtmp-output-url
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+secrets:
+  rtmp-output-url:
+    file: ${MIR2_BILIBILI_SECRET_FILE:?Supply a private file outside the repository}

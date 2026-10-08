@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-08 playtest spectator frontend retains /playtest independently from
+> player credentials and shows waiting/buffering/live/stale/replay states.
+> Initial public-delay buffering and spectator keepAlive bugs are corrected;
+> Node6, strictTS and isolated headless waiting UI pass. Actual current map,
+> character rendering and Bilibili capture remain unaccepted until activation.
+> [Evidence and runbook](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
+
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
 > typed shared pets and saved growth, ordinary Guild management/war, native

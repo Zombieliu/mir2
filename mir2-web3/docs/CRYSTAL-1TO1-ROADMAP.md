@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-08 Windows playtest / Bilibili spectator integration is staged in an
+> isolated branch: independent realm URL, freshness states, read-only browser,
+> guarded operational activation and optional secret-file encoder. Node6,
+> Python19, strictTS, waiting-browser and actual Caddy validate/adapt pass.
+> No live proxy reload, Gateway restart or Bilibili publishing has happened;
+> normal-exit confirmation, genuine current frames and platform delivery remain
+> open. This does not change the classic Goal or imply 100% parity.
+> [Operator steps and bounded evidence](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
+
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
 > typed shared pets and saved growth, ordinary Guild management/war, native

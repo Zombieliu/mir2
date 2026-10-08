@@ -105,6 +105,7 @@
     "smoke:passkey-start-game": "node ./scripts/smoke-passkey-start-game.mjs",
     "smoke:spectator": "node ./scripts/smoke-spectator.mjs",
     "smoke:spectator-ui": "node ./scripts/smoke-spectator-ui.mjs",
+    "test:spectator-endpoint": "node --test ./scripts/test-spectator-endpoint.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
     "smoke:gateway-capacity": "node ./scripts/load-gateway-ws.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",
