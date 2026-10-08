@@ -1,0 +1,69 @@
+{
+  "schema": "mir2.windows.ci-pickup.v1",
+  "candidate": "WN-CANDIDATE-20261008-invited-22",
+  "repository": "Zombieliu/mir2",
+  "runId": 37712122111,
+  "jobId": 113100236188,
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "sourceClean": true,
+  "workflowRunSuccess": true,
+  "windowsJobSuccess": true,
+  "artifactId": 11523774584,
+  "artifactName": "mir2-windows-x86_64-unpublished-build",
+  "artifactZipSha256": "e619172fdc25e8448611203e3d170516719d49d0676d3ad6044d3f40592a8d43",
+  "artifactZipBytes": 263037676,
+  "attestationSha256": "4900E283FCAE1112CEC678CAC98E0ACCA0BDC348229966ACE28F69717F6FBF64",
+  "exeSha256": "8EBB7E8E32FBF2A577B90E2341767CC34B467A021E23406003D55597B077BC22",
+  "exeBytes": 111275520,
+  "originalExe": "C:\\mir2-playtest-releases\\20261008-classic-r22\\ci-input-01\\artifact-11523774584-payload\\mir2-platform-windows.exe",
+  "releaseExe": "C:\\mir2-playtest-releases\\20261008-classic-r22\\release\\mir2-platform-windows.exe",
+  "exeBytesUnmodified": true,
+  "signerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+  "cmsSha256CapabilityVerified": true,
+  "publicRelease": false,
+  "authenticodeClaimed": false,
+  "githubRunMetadataSha256": "FDA054317AB786187FC9102E7798AAE43B9EDFFC1D9AF7A8524F4EF65A74D913",
+  "githubJobMetadataSha256": "C2C35CF281EE4008FA86305599D522256CBB90D934E80846F42D1EB4E0A2364E",
+  "githubArtifactMetadataSha256": "32519D8DD75ED13E81866847C871E3589DBE570ABE9893E615165BD2B3F91EA4",
+  "workflowSourceSha256": "8CE7CDC4FEB90788F7D7616F19FEF4E723CB64CA7DF056B469AFDB1AA86F41BD"
+}
+{
+  "ok": true,
+  "mapCount": 209,
+  "referenceCount": 54041,
+  "emittedEntryCount": 52333,
+  "keyedEntryCount": 51257,
+  "additiveEntryCount": 1076,
+  "fullPackEntryCount": 41569,
+  "noDrawReferenceCount": 531,
+  "missingSourceCount": 1177,
+  "removedArtifacts": 0,
+  "imageBytes": 250336128,
+  "manifestHash": "42cc002dd0f7c211916a976fadcc91af5c16cf2aa851200e464ac80aeeccb5b9",
+  "manifestPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\native-keyed-map-candidate-82a4548b637b40408a9bffa64b0da3d2\\manifest.json",
+  "releaseManifestPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\native-keyed-map-candidate-82a4548b637b40408a9bffa64b0da3d2\\manifest.42cc002dd0f7c211916a976fadcc91af5c16cf2aa851200e464ac80aeeccb5b9.json"
+}
+node:internal/fs/promises:639
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\Administrator\.codex\worktrees\remote-player-appearance\mir2-player-journey\mir2-web3\apps\web\public\generated\map-atlas\manifest.json'
+    at async open (node:internal/fs/promises:639:25)
+    at async readFile (node:internal/fs/promises:1243:14)
+    at async json (file:///C:/Users/Administrator/.codex/worktrees/remote-player-appearance/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs:131:39)
+    at async auditCandidateMapCoverage (file:///C:/Users/Administrator/.codex/worktrees/remote-player-appearance/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs:154:15)
+    at async file:///C:/Users/Administrator/.codex/worktrees/remote-player-appearance/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs:332:95 {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Administrator\\.codex\\worktrees\\remote-player-appearance\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\generated\\map-atlas\\manifest.json'
+}
+
+Node.js v22.18.0
+Candidate floor atlas completion failed
+At C:\mir2-playtest-releases\20261008-classic-r22\recipes-01\package-windows-candidate-external.ps1:818 char:32
++ ... STEXITCODE -ne 0) { throw 'Candidate floor atlas completion failed' }
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Candidate floor atlas completion failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Candidate floor atlas completion failed
+ 

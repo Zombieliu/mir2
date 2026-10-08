@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-08 03:32 UTC: the12-hour checkpoint was missed; fullP1–P7 is not
+> complete. Both exact-source release workflows are GREEN and their full
+> Windows/Linux artifacts are locally authenticated. The first external R22
+> packager failed its atlas lookup; the supported external --atlasRoot fix
+> preserves all13 core validators and is being retried. Published R20 runtime
+> and154564 resources are verified, awaiting normal user logout for the
+> client-only shop-wheel switch. No R22 CMS/feed17 or paired public rollout
+> is claimed. Public Gatewayc6/feed16 and the active father session remain.
+> Publication preparation93b23cc3 is pushed; shared events, strict crowded
+> escape and natural Boss/drop/native acceptance still remain open.
+> [Actual checkpoint and hashes](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
 > is committed and pushed. Native Windows CI37712122111 is GREEN, but local
 > retrieval of its263037676-byte authenticated ZIP is incomplete: no R22

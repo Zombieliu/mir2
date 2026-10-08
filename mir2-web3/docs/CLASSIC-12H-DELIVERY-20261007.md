@@ -1,10 +1,54 @@
 # Classic gameplay delivery — 12-hour resumed work
 
 Started 2026-10-07 15:13:35 UTC. Delivery checkpoint is 2026-10-08
-03:13:35 UTC / 11:13 Asia/Shanghai. Work remains active; this document does
-not mark the older blocked Goal API record complete.
+03:13:35 UTC / 11:13 Asia/Shanghai. The checkpoint was missed: the seven
+requested tracks are not fully completed or accepted. Delivery work continues;
+The03:36 Goal API read returned no active goal, not a completed result;
+the authorized unfinished scope was subsequently recorded as an active Goal.
+That does not reset the original12-hour deadline or imply completion.
 
-## Current delivery checkpoint — 2026-10-08 02:56 UTC
+## Current delivery checkpoint — 2026-10-08 03:32 UTC
+
+Both release workflows have now completed successfully. Windows37712122111
+at clean game7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc produced the authenticated
+263037676-byte ZIP11523774584; its complete local SHA256 matches the original
+GitHub digest. The unmodified111275520-byte EXE is
+8ebb7e8e32fbf2a577b90e2341767cc34b467a021e23406003d55597b077bc22.
+The original v2 attestation and clean source/build contract are verified. This
+is the unpublished build artifact, not an Authenticode/public-release claim.
+
+Linux37716453313 at a41dfe72d7e5858f11169adf88673dc44ed24200 passed both complete
+jobs, including the unchanged ordinary-war and competing-PostgreSQL gates.
+Artifact11525323477 is fully downloaded and authenticated; the34144131-byte
+archive SHA256 is a5b563efa5b65ffc005df307c39a4ed0947b0809d101f7d14a668b70cb88e60b.
+Its83362336-byte binary SHA256 is
+1ba51402a76f4c454674836f869751d63848b5370083a4cf7b71e0654fbf10d3.
+The only server/game source difference remains the workflow45-to-105-minute
+budget. All original tests remain. No service cutover has occurred.
+
+The first local R22 packaging attempt generated209 native maps but failed:
+the audit still defaulted to the absent atlas under the frozen source tree.
+The derived external recipe now supplies its supported --atlasRoot explicitly,
+preserving13 byte-identical core validation functions. The failed log/output
+are retained, and a fresh local retry is pending. No completed R22 package,
+CMS/feed17, CDN stage or public promotion is claimed yet. Subsequent GitHub
+metadata EOFs are separate retained retrieval failures, not failed game tests.
+
+Published R20 ordinary-client staging is ready: original signed metadata and
+two runtime files match their original manifest; all154564 resources and
+875088956 bytes pass exact SHA/size, with no missing/extra/linked entries.
+Shop wheel was introduced inR20 and is absent from the D/R19 mistakenly
+launched earlier. The normal-exit question is pending; father remains online
+and no process is forcibly closed. Public Gatewayc6, feed16 and D/F are intact.
+The50000 test gold is already claimed (father50874); it is not issued again.
+
+Publication preparation93b23cc3 is pushed separately. Its9 offline tests pass;
+new R22 fixed admission generation still awaits genuine completed package/CMS
+bytes. Server operators are prepared and a private staging directory created;
+this is preparation, not deployment. Shared-event execution, strict crowded
+escape and natural Boss/drop/native acceptance remain open as listed below.
+
+## Historical delivery checkpoint — 2026-10-08 02:56 UTC
 
 Gameplay/evidence source7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc is pushed.
 Windows37712122111 passed; artifact11523774584 has263037676 authenticated bytes
@@ -50,7 +94,7 @@ Original production realm, real saves and D/F installations are preserved.
 | P2 late maps/Boss/loot | Source-pinned controller51 checks;228/228 actual prepared canonical doorway collision/Walk/save/relogin stories across three classes;13/13 prepared entrance/book gates; original invalid Zuma destinations are rejected and fourth legal doorway is selected | Natural three-class full progression, real Boss/source-linked drops/books, original odds, conditional instance entrances and native resources/rendering acceptance |
 | P3 XP/drop ownership | Original party16-grid/level/f32 allocation; native kills use trusted Store-to-Zone profile admission; real TCP/WS party story; EXP potion safe-zone pause/resume/expiry and CANGAINEXP source gate; generic Boss owner and causal PK source settlement | Original event-driven Hero/Pet group-health recipient selection, broad natural Boss/PK/drop ownership and published-process recovery acceptance |
 | P4 pets/PK | Typed shared player targets, modes/focus/retaliation, group/Guild/safe/Brown/life guards; original Taoist growth, source PetSave, recall/NoPets/logout/cold restore; actual Vampire bite/death and Toad flight.99 focused checks, plus real TCP/WS Source-save/rollback/cold restore story | Source NPC ordered shared-pet/world outbox, unsupported Totem owner chain, native human/public-process acceptance |
-| P5 Guild/war | Normal rank insert/options/promotion/kick/leave/disband, notice and rank rename; symmetric paid ordinary wars and authority clock; normal earned Guild XP in the same Source CAS; bounded TCP/WS party+Guild story;31 current Guild management/rank/terminal/war checks | Complete Linux release workflow; competing PostgreSQL writer/clock GREEN; native management/war and paired publication |
+| P5 Guild/war | Normal rank insert/options/promotion/kick/leave/disband, notice and rank rename; symmetric paid ordinary wars and authority clock; normal earned Guild XP in the same Source CAS; bounded TCP/WS party+Guild story;31 current Guild management/rank/terminal/war checks; complete Linux release and competing PostgreSQL writer/clock GREEN | Native management/war and paired publication |
 | P6 mining/refining | Original raw0..5 Belt/6..85 Bag wire,16 material cells, UID custody/fee/check/collect; Source rollback/retry/full-bag/deadline tests10; market9/oven10/shared escape14 regression; native wire3 and Bevy refine19 including unknown-outcome recovery; original byte-wrap zero preserves the concrete weapon, verified by4 transition tests plus durable10/oven10 regressions | Actual ordinary Carlos workflow in published pair and human visual acceptance; bridge recovery19 GREEN |
 | P7 map events | Actual default NPC call sites,26 source files/169 expanded sections, exact parser omissions, queue128/budget32, Login/LevelUp/Quest/client/NPC/map/death/script-item hooks, Save/rollback/idempotent recovery and Guild leave same-CAS ordering;24 tests and generator4 | Shared authoritative GIVEPET/REMOVE/CLEAR/MONGEN/MONCLEAR/GROUPTELEPORT/CHECKHUM, ground-hole caller; original18 general event filenames have no identified original scheduler caller and cannot be presented as implemented scheduled events |
 | Mentor | Source-owned final-XP bank, original expiry/graduation/logout settlement, bounded recipient-owned once-only credit; complete source rollback/cold/revision tests11; normal two-account TCP/WS story covers rollback/retry, pupil logout, teacher cancel/payout, automatic graduation and cold-file no-replay | Paired publication and native human acceptance |

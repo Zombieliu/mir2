@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.windows.bounded-resume-artifact-download.v1",
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "runId": 37712122111,
+  "jobId": 113100236188,
+  "artifactId": 11523774584,
+  "archive": "C:\\mir2-playtest-releases\\20261008-classic-r22\\ci-input-01\\download10\\artifact-11523774584.zip",
+  "archiveBytes": 263037676,
+  "archiveSha256": "e619172fdc25e8448611203e3d170516719d49d0676d3ad6044d3f40592a8d43",
+  "authenticatedMetadataVerified": true,
+  "everyContentRangeVerified": true,
+  "authorizationForwardedToBlob": false,
+  "tokenOrSignedUrlPrinted": false,
+  "elapsedSeconds": 69.24,
+  "passed": true
+}

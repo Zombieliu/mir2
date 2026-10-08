@@ -1,5 +1,15 @@
 # Player-QA playthrough loop
 
+> 2026-10-08 03:32 UTC: user's shop-wheel report was on the D/R19 client
+> mistakenly launched by root; R20 introduced that handler. Published R20
+> is now locally verified against original signed metadata and all154564
+> resource hashes, awaiting normal father logout for a client-only switch.
+> No force-close, Gateway restart, D/F overwrite or duplicate gold grant.
+> Genuine Windows build is GREEN, but R22 external atlas packaging failed;
+> retained failure and supported path retry do not count as gameplay passes.
+> Native wheel/held-right escape/refining and natural late-map acceptance
+> remain pending. [Actual status](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
 > is committed and pushed. Native Windows CI37712122111 is GREEN, but local
 > retrieval of its263037676-byte authenticated ZIP is incomplete: no R22

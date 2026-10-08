@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-08 03:32 UTC: complete Linux37716453313 passes at a41dfe72, including
+> ordinary Guild war and competing PostgreSQL gates; its authenticated binary
+> is locally verified. The only difference from game7fea is the CI timeout
+> budget. No server cutover has occurred. The12-hour checkpoint was missed:
+> ordered shared-world script effects and broad natural Boss/drop/native
+> acceptance remain open. Windows build passes; local R22 atlas packaging
+> failed and its external path fix is being retried without relaxed checks.
+> [Actual results and artifact hashes](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
 > is committed and pushed. Native Windows CI37712122111 is GREEN, but local
 > retrieval of its263037676-byte authenticated ZIP is incomplete: no R22

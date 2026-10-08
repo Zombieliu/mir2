@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> 2026-10-08 03:32 UTC: paired Windows/Linux release workflows are GREEN and
+> complete downloaded artifacts match authenticated GitHub SHA digests.
+> Full Linux37716453313/a41dfe72 retains the original war/PostgreSQL gates.
+> Private server staging alone is started; public Gatewayc6, capacity and
+> original realm are unchanged. The12-hour checkpoint did not reach full
+> completion: shared ordered events, crowded escape and natural progression
+> acceptance remain open. No R22 CMS/feed17/public rollout is claimed while
+> the external-map-atlas packaging retry and user normal-exit handoff remain.
+> [Exact checkpoint and unfinished gates](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
 > is committed and pushed. Native Windows CI37712122111 is GREEN, but local
 > retrieval of its263037676-byte authenticated ZIP is incomplete: no R22

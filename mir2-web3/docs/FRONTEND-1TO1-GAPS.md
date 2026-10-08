@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-08 03:32 UTC: Windows37712122111/7fea and complete artifact pickup
+> pass. R22 external packaging failed at a stale atlas path; a fresh retry
+> preserves the original validators. No packaged/CMS/public R22 is claimed.
+> User's unscrollable merchant was mistakenly launched D/R19; verified
+> published R20 includes wheel handling and is ready pending normal logout.
+> All154564 assets match the original signed manifest. Actual native wheel,
+> crowd escape/refining and natural progression acceptance remain open;
+> the12-hour checkpoint missed full completion. No human acceptance or
+> overall100% is inferred. [Actual status](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
 > is committed and pushed. Native Windows CI37712122111 is GREEN, but local
 > retrieval of its263037676-byte authenticated ZIP is incomplete: no R22
