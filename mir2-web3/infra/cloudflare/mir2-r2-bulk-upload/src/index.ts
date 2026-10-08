@@ -2,6 +2,7 @@ import { nativeR17Fetch } from "./native-r17-publication.mjs";
 import { nativeR17S14Fetch } from "./native-r17-s14-publication.mjs";
 import { nativeR19S15Fetch } from "./native-r19-s15-publication.mjs";
 import { nativeR20S16Fetch } from "./native-r20-s16-publication.mjs";
+import { nativeR22S17Fetch } from "./native-r22-s17-publication.mjs";
 
 export interface Env {
   MIR2_ASSETS: R2Bucket;
@@ -13,6 +14,9 @@ const MAX_OBJECT_BYTES = 300 * 1024 * 1024;
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname;
+    if (path === "/upload/native-r22-s17" || path.startsWith("/upload/native-r22-s17/")) {
+      return nativeR22S17Fetch(request, env);
+    }
     if (path === "/upload/native-r20-s16" || path.startsWith("/upload/native-r20-s16/")) {
       return nativeR20S16Fetch(request, env);
     }
