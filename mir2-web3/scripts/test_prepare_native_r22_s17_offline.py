@@ -5,6 +5,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import unittest
@@ -96,7 +97,10 @@ class OfflineGuards(unittest.TestCase):
                 G.owned_output(path)
 
     def test_origin_writer_retains_root_permissions_and_rejects_template_drift(self):
-        writer = O.read(O.OLD / 'operators-01/origin_r20_s16.py', O.OLD_WRITER_SHA).decode()
+        # Check the original pinned bytes in this checkout on both CI platforms.
+        # The production generator still consumes its fixed local release input.
+        writer = O.read(HERE / 'fixtures/native-r22-s17/templates/origin_r20_s16.py',
+                        O.OLD_WRITER_SHA).decode()
         tail = O.read(O.HERE / 'origin_r22_tail.py.in', O.TEMPLATE_PINS['origin_r22_tail.py.in']).decode()
         # In-memory rendering only: no output directory and no false receipt.
         rendered = O.render_writer({'unitTestOnly': True}, writer, tail)
@@ -136,7 +140,8 @@ class OfflineGuards(unittest.TestCase):
         self.assertIn('same(original.expectedCurrent, candidate.knownPrevious)', module)
         for marker in ('onlyIf', 'OPERATION_POLICY', 'fixedLengthStream', 'noProgressMs'):
             self.assertTrue(marker.lower() in module.lower(), marker + ' missing')
-        node = 'C:/Program Files/nodejs/node.exe'
+        node = shutil.which('node')
+        self.assertIsNotNone(node, 'Node is required for the original module syntax check')
         result = subprocess.run([node, '--check', '--input-type=module'], input=module.encode(),
                                 capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr.decode())
