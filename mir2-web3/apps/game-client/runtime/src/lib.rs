@@ -3320,7 +3320,7 @@ fn ingest_pending_hero_model(world: &mut World) {
                     npc_purchase_economy::apply_native_hero_packet_model(world, model);
                     #[cfg(target_arch = "wasm32")]
                     {
-                        if model.skill_key_ack.is_some() {
+                        if model.skill_key_ack.is_some() || model.item_result_receipt {
                             if let Some(mut receipts) = world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
                                 receipts.0.push_back(model.clone());
                             }

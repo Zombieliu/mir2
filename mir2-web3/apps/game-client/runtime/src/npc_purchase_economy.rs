@@ -194,40 +194,21 @@ fn source_array<'a>(source: &'a Value, key: &str) -> Result<&'a Vec<Value>, Nati
 
 // WorldItemTooltipSource intentionally omits absent optional carriers. Require
 // complete present Info/UserItem rows before tolerant presentation defaults.
+fn owner_hero_projection_error(error: mir2_client_bevy::hero_model::HeroOwnerProjectionError) -> NativeNpcEconomyError {
+    use mir2_client_bevy::hero_model::HeroOwnerProjectionError;
+    match error {
+        HeroOwnerProjectionError::Incomplete => NativeNpcEconomyError::Incomplete,
+        HeroOwnerProjectionError::Decode => NativeNpcEconomyError::Decode,
+        HeroOwnerProjectionError::Projection => NativeNpcEconomyError::Projection,
+    }
+}
+
 fn owner_tooltip(raw: Option<&Value>) -> Result<Option<mir2_client_bevy::inventory::CrystalItemTooltipSourceModel>, NativeNpcEconomyError> {
-    let Some(raw) = raw else { return Ok(None); };
-    if !raw.is_object() { return Err(NativeNpcEconomyError::Incomplete); }
-    fn info(raw: &Value) -> Result<(), NativeNpcEconomyError> {
-        let parsed: mir2_client_bevy::inventory::CrystalItemInfoModel = decode_source(raw.clone())?;
-        let shape = serde_json::to_value(parsed).map_err(|_| NativeNpcEconomyError::Decode)?;
-        if shape.as_object().unwrap().keys().any(|key| raw.get(key).is_none())
-            || source_array(raw,"stats")?.iter().any(|s| s.get("stat").and_then(Value::as_u64).is_none()
-                || s.get("value").and_then(Value::as_i64).is_none()) { return Err(NativeNpcEconomyError::Incomplete); }
-        Ok(())
-    }
-    info(raw.get("info").ok_or(NativeNpcEconomyError::Incomplete)?)?;
-    if let Some(real) = raw.get("realInfo").filter(|v| !v.is_null()) { info(real)?; }
-    if let Some(user) = raw.get("userItem").filter(|v| !v.is_null()) {
-        if !mir2_client_bevy::npc_shop_buy::full_npc_gold_user_item(user) { return Err(NativeNpcEconomyError::Incomplete); }
-    }
-    for key in ["socketInfos","realSocketInfos"] {
-        if let Some(rows) = raw.get(key) {
-            for row in rows.as_array().ok_or(NativeNpcEconomyError::Incomplete)? {
-                if !row.is_null() { info(row)?; }
-            }
-        }
-    }
-    decode_source(raw.clone()).map(Some)
+    mir2_client_bevy::hero_model::project_owner_item_tooltip(raw).map_err(owner_hero_projection_error)
 }
 
 fn owner_item(raw: &Value, container: u8, slot: u64) -> Result<ItemModel, NativeNpcEconomyError> {
-    let mut item = raw.as_object().cloned().ok_or(NativeNpcEconomyError::Incomplete)?;
-    item.insert("container".into(), container.into());item.insert("slot".into(), slot.into());
-    let mut projected: ItemModel = decode_source(Value::Object(item))?;
-    projected.tooltip_source = owner_tooltip(raw.get("tooltipSource"))?;
-    if let Some(source) = &projected.tooltip_source { projected.icon = source.user_item_image(projected.quantity); }
-    check_item_metadata(raw,&projected,false,false)?;
-    Ok(projected)
+    mir2_client_bevy::hero_model::project_owner_item(raw, container, slot).map_err(owner_hero_projection_error)
 }
 
 /// Complete public Stage5 mailbox, including concrete attachment state when
@@ -273,50 +254,7 @@ pub fn owner_mail_model(owner: &Value) -> Result<MailModel, NativeNpcEconomyErro
 /// Fresh Hero checkpoint projection. Packet-only object identity/max-XP are
 /// deliberately unknown; the exact Stage5 Hero identity/XP remains in Source.
 pub fn owner_hero_model(owner: &Value) -> Result<HeroModel, NativeNpcEconomyError> {
-    let stage = owner.get("stage5Systems").ok_or(NativeNpcEconomyError::Incomplete)?;
-    let mut hero = HeroModel::default();
-    let maximum=owner.get("heroMaxExperience").ok_or(NativeNpcEconomyError::Incomplete)?;
-    let identity=stage.get("hero").ok_or(NativeNpcEconomyError::Incomplete)?;
-    if identity.is_null() {
-        if !maximum.is_null() { return Err(NativeNpcEconomyError::Incomplete); }
-    } else if maximum.as_i64().is_none_or(|xp|xp<0) { return Err(NativeNpcEconomyError::Incomplete); }
-    let keys = source_array(stage,"heroLearnedMagics")?;
-    if keys.len()>256 || keys.iter().any(|key| key.get("spell").and_then(Value::as_str).is_none()
-        || key.get("key").and_then(Value::as_u64).is_none_or(|key| key != 0 && !(17..=24).contains(&key))) {
-        return Err(NativeNpcEconomyError::Incomplete);
-    }
-    let _: Vec<mir2_client_bevy::hero_model::HeroLearnedKey> = decode_source(Value::Array(keys.clone()))?;
-    for stat in source_array(owner,"heroStats")? {
-        if stat.get("stat").and_then(Value::as_u64).is_none() || stat.get("value").and_then(Value::as_i64).is_none() {
-            return Err(NativeNpcEconomyError::Incomplete);
-        }
-    }
-    let weights = owner.get("heroWeights").ok_or(NativeNpcEconomyError::Incomplete)?;
-    let _: mir2_client_bevy::hero_model::HeroWeights = decode_source(weights.clone())?;
-    if let Some(identity) = stage.get("hero").filter(|v| !v.is_null()) {
-        for key in ["name","class","gender"] { required_string(identity,key)?; }
-        for key in ["level","behaviour","autoHpPercent","autoMpPercent"] { field_unsigned(identity,key)?; }
-        for key in ["spawned","autoPot"] { required_bool(identity,key)?; }
-        for key in ["experience","hpItemIndex","mpItemIndex"] {
-            if identity.get(key).and_then(Value::as_i64).is_none() { return Err(NativeNpcEconomyError::Incomplete); }
-        }
-    }
-    hero.observe_snapshot(owner);
-    if !identity.is_null() && hero.snapshot_identity.is_none() { return Err(NativeNpcEconomyError::Incomplete); }
-    hero.inventory_view.capacity = u16::try_from(field_unsigned(owner,"heroInventoryCapacity")?).map_err(|_| NativeNpcEconomyError::Incomplete)?;
-    for raw in source_array(owner,"heroInventoryItems")? {
-        let slot = field_unsigned(raw,"slot")?;
-        if raw.get("container").and_then(Value::as_str) != Some("bag1") || slot >= u64::from(hero.inventory_view.capacity) {
-            return Err(NativeNpcEconomyError::Incomplete);
-        }
-        hero.inventory_view.items.push(owner_item(raw,0,slot)?);
-    }
-    for raw in source_array(owner,"heroEquipmentItems")? {
-        let slot = field_unsigned(raw,"slot")?;
-        if slot>=14 || raw.get("container").and_then(Value::as_str)!=Some("bag1") { return Err(NativeNpcEconomyError::Incomplete); }
-        hero.inventory_view.items.push(owner_item(raw,2,slot)?);
-    }
-    Ok(hero)
+    mir2_client_bevy::hero_model::project_owner_hero(owner).map_err(owner_hero_projection_error)
 }
 
 /// Native producer provenance for display updates. This never authorizes a
@@ -404,7 +342,7 @@ pub(crate) fn merge_fresh_native_hero_checkpoint(world:&World,incoming:&mut Hero
 /// World. Source identity and display clocks are reconciled before replacement.
 pub fn apply_native_hero_packet_model(world:&mut World,mut model:HeroModel) {
     merge_fresh_native_hero_checkpoint(world,&mut model);
-    if model.skill_key_ack.is_some() {
+    if model.skill_key_ack.is_some() || model.item_result_receipt {
         if let Some(mut receipts)=world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
             receipts.0.push_back(model.clone());
         }
@@ -1034,54 +972,7 @@ fn check_items(owner: &Value, projected: &[ItemModel], fields: &[&str]) -> Resul
 }
 
 fn check_item_metadata(source: &Value, projected: &ItemModel, equipment: bool, storage: bool) -> Result<(), NativeNpcEconomyError> {
-    for field in ["key", "name", "description", "grade"] {
-        if source.get(field).and_then(Value::as_str).is_none() { return Err(NativeNpcEconomyError::Incomplete); }
-    }
-    if source.get("icon").and_then(Value::as_u64).is_none_or(|n| n > u64::from(u16::MAX)) {
-        return Err(NativeNpcEconomyError::Incomplete);
-    }
-    let expected_key = if storage { field_unsigned(source, "uniqueId")?.to_string() }
-        else { source["key"].as_str().unwrap().to_owned() };
-    if projected.key != expected_key || Some(projected.name.as_str()) != source["name"].as_str()
-        || Some(projected.description.as_str()) != source["description"].as_str()
-        || projected.grade.as_deref() != source["grade"].as_str() {
-        return Err(NativeNpcEconomyError::Projection);
-    }
-    // The gateway derives count-dependent icons from tooltip Info when it is
-    // present. Raw icon equality only applies to the legacy direct mapping.
-    if source.get("tooltipSource").is_none() && Some(u64::from(projected.icon)) != source["icon"].as_u64() {
-        return Err(NativeNpcEconomyError::Projection);
-    }
-    let tooltip=owner_tooltip(source.get("tooltipSource"))?;
-    if tooltip.as_ref().and_then(|tooltip|tooltip.user_item.as_ref()).is_some_and(|user|
-        source.get("uniqueId").and_then(unsigned).is_some_and(|id|id!=user.unique_id)
-        || source.get("quantity").and_then(unsigned)!=Some(u64::from(user.count))) {
-        return Err(NativeNpcEconomyError::Incomplete);
-    }
-    if projected.tooltip_source!=tooltip || tooltip.as_ref().is_some_and(|source|projected.icon!=source.user_item_image(projected.quantity)) {
-        return Err(NativeNpcEconomyError::Projection);
-    }
-    let model = serde_json::to_value(projected).map_err(|_| NativeNpcEconomyError::Decode)?;
-    for field in ["durabilityCurrent", "durabilityMax"] {
-        let raw = source.get(field).ok_or(NativeNpcEconomyError::Incomplete)?;
-        if !(raw.is_null() && !equipment) && raw.as_u64().is_none_or(|n| n > u64::from(u16::MAX)) {
-            return Err(NativeNpcEconomyError::Incomplete);
-        }
-        if model[field] != *raw { return Err(NativeNpcEconomyError::Projection); }
-    }
-    for field in ["addedAttack", "addedDefence"] {
-        let raw = source.get(field).ok_or(NativeNpcEconomyError::Incomplete)?;
-        if raw.as_i64().is_none_or(|n| i32::try_from(n).is_err()) { return Err(NativeNpcEconomyError::Incomplete); }
-        if model[field] != *raw { return Err(NativeNpcEconomyError::Projection); }
-    }
-    let extra: &[&str] = if equipment { &["stateImage", "shape", "attack", "defence", "addedLuck", "socketSlots"] }
-        else { &["sellValue"] };
-    for field in extra {
-        let raw = source.get(*field).ok_or(NativeNpcEconomyError::Incomplete)?;
-        if model[*field] != *raw { return Err(NativeNpcEconomyError::Projection); }
-    }
-    if source.get("equipSlot").is_some_and(|raw| model["equipSlot"] != *raw) { return Err(NativeNpcEconomyError::Projection); }
-    Ok(())
+    mir2_client_bevy::hero_model::validate_owner_item_metadata(source, projected, equipment, storage).map_err(owner_hero_projection_error)
 }
 
 // EquipmentSlot serializes names (including sparse/reordered arrays). These

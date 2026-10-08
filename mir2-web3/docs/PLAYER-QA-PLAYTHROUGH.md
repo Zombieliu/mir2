@@ -1,5 +1,18 @@
 # Player-QA playthrough loop
 
+## Source38：英雄共享数据基础及物品回执保留修复，50项回归通过；新版可玩包仍待交付（2026-10-08）
+
+完整Hero owner projector与item/tooltip校验移入client-bevy::hero_model；Native原签名用Incomplete/Decode/Projection三错误映射调用同一实现。完整inventory、Info/realInfo/UserItem/socket、UID0/u64MAX、i64 XP、容量/稀疏装备/keys/null配对保持原语义，gate/World/Applied/结算仍在Native。两个现有Hero consumer分支均保留item_result_receipt或skill ACK再应用最新模型，修复同批后续状态覆盖物品回执的问题。这不是完整WASM Hero adapter或共享面板完成。
+
+实际精确50/50、0失败/0ignored、50唯一名称：Bevy默认Hero11、Runtime Native economy/消费链38、Runtime默认配置1；新4均具名执行，原断言保持。独立只读复核10个迁移helper body、四文件逆替恢复及冻结pins通过。897声明Rust输入4改/893保护；原3次Guard/完整15份nonce，实际C最低269566263296 B、freshness保守上界最大102ms、PolicyB全部completed/exited/disposed。整次Guard耗时18831/35334/25942ms、测试0.01/0.20/0.00s，仅纯JSON/裸World/本地受控队列；未启动渲染器/游戏/界面/网络/WASM API，不声称强制Cargo deadline。
+
+Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅功能实现记录覆盖率；overallPercentage=null、Candidate100=false、goal active。本轮基础层不额外关闭共享Hero界面行。完整可分发Web仍Source25 Next08/Thin08，不含Source26–38；本轮无生产EXE/Core/PUI/NPC/renderer/完整Web构建，公开manifest未替换。TS输入未改且未新跑TSC，Source35仅按有效TS子集保留限定历史结果。实际资源初始化、登录→战斗→保存→重登、移动设备及玩家验收not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+下一步仍须完成Hero原raw ingress、owner/scene/run/reset与相对cast_time生命周期、bounded receipt、portable painter/字体/tooltip/input、Page独立ABI/ready/fallback及原Web单操作账本。现有React Hero操作仍在；setter接受不等于ready，精确ACK还须等待新完整快照。宽UID动作ABI、旧引擎宽日期、NewMagic定义变化的匹配完整producer，以及原metadata/name/normalized ABI/default-gzip/初始化/源码匹配完整打包仍开放；未绕过原helper的WASM API限制。未改后端/共享Zone/协议parity。
+
+Source37已实际提交推送并独立核验6116c2e640227b2408b98682a66ebdafa092ea18；Source38发布以随后真实Git结果为准。证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json)、[原始38文件含完整15份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json)、[Source37真实发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json)。数据reader路径/字符串唯一性/跨realm比较等修正未改产品断言，不计产品测试失败或通过。下面Source37及更旧段落为历史。
+
+
 ## Source37：Native 通信超时修复，53 项选定回归通过；完整 Web 可玩包仍待交付（2026-10-08）
 
 Native owned/control/Purchase 使用真实 Tokio 单次10秒绝对时限覆盖 readiness→最终准入→flush。未进入发送的超时精确退役原 envelope 并返回 Unavailable；已进入则发布 Unknown、保留原购买/UI/durable custody，重连只 Query 原操作。普通 connect 另有10秒预算，整个普通 capabilities＋credential handshake 共用另一10秒，keepalive有界；Shutdown观察原 fence，不消费排队Login/StartGame。同时关闭优先；原 resume 绝对deadline、Origin/TLS、credential校验及协议保持。不是 connect＋handshake 合计10秒。

@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+## Source38 客户端进展（2026-10-08）
+
+Hero纯owner/item/tooltip校验已移入共享client-bevy，Native保留原错误映射及全部gate/结算；现有consumer补保留物品回执。精确50/50、新4均实际执行，独立静态复核原语义及897声明源码4改/893保护通过。未改后端/共享Zone/协议parity。台账309/317≈97.5%仅含旧实现的功能记录；最新完整Web仍Source25，完整共享Hero及新包/登录→战斗→保存→重登待验证，无可信试玩日期。详见[当前路线及限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。
+
+
 ## Source37 客户端进展（2026-10-08）
 
 Native准备/刷新/普通连接握手/keepalive已接真实写入deadline；进入前保持unsent，进入后保留原操作Unknown并只Query恢复。当前选定53/53、新11均执行，独立复核原Guard/完整5nonce/897源码通过。只改两Native客户端文件，后端/共享Zone/协议parity不变。台账309/317≈97.5%含206 legacy，仅实现记录；最新完整Web仍Source25，新Web可玩包及实际登录→战斗→保存→重登待验证，无可信试玩日期。详见[当前路线与限定证据](CRYSTAL-1TO1-ROADMAP.md)。下面旧轮次为历史。

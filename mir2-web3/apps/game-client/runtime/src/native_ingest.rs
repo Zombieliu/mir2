@@ -2390,4 +2390,53 @@ mod tests {
             Some(NativeInboundMessage::LightingRenderState(json)) if json == "new"
         ));
     }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn hero_item_and_skill_receipts_survive_actual_consumer_before_later_model() {
+        use bevy::ecs::system::RunSystemOnce;
+        use mir2_client_bevy::hero_model::{HeroModel, HeroModelReceipts};
+        let packet = mir2_protocol::HeroUserInformation {
+            object_id:12, name:"Hero".into(), class:mir2_protocol::MirClass::Warrior,
+            gender:mir2_protocol::MirGender::Male, level:2, hair:0, hp:10, mp:5,
+            experience:1, max_experience:100, inventory:Some(vec![None;10]),
+            equipment:Some(vec![None;14]), magics:vec![], auto_pot:false,
+            auto_hp_percent:30, auto_mp_percent:30, hp_item_index:0, mp_item_index:0,
+        };
+        let mut model = HeroModel::default();
+        assert!(model.apply_packet_at("HeroInformation", &serde_json::json!({"info":packet}), 100));
+        model.session_epoch = 7;
+        let mut local = active_buffer();
+        assert!(model.apply_packet_at("UseItem", &serde_json::json!({"grid":"HeroInventory","uniqueId":u64::MAX,"success":false}), 110));
+        assert!(model.item_result_receipt && model.skill_key_ack.is_none());
+        assert!(local.enqueue(NativeInboundMessage::HeroModelReceipt(serde_json::to_string(&model).unwrap())));
+        assert!(model.apply_packet_at("SetAutoPotValue", &serde_json::json!({"stat":12,"value":35}), 120));
+        assert!(local.enqueue(NativeInboundMessage::HeroModelReceipt(serde_json::to_string(&model).unwrap())));
+        assert!(model.observe_snapshot(&serde_json::json!({"stage5Systems":{"heroLearnedMagics":[{"spell":"FireBall","key":17}]},
+            "skillKeyAck":{"requestId":51,"spell":"FireBall","key":17,"oldKey":0,"accepted":true}})));
+        assert!(!model.item_result_receipt && model.skill_key_ack.is_some());
+        assert!(local.enqueue(NativeInboundMessage::HeroModelReceipt(serde_json::to_string(&model).unwrap())));
+        assert!(model.apply_packet_at("HeroHealthChanged", &serde_json::json!({"hp":9,"mp":4}), 130));
+        assert!(!model.item_result_receipt && model.skill_key_ack.is_none());
+        assert!(local.enqueue(NativeInboundMessage::HeroModel(serde_json::to_string(&model).unwrap())));
+        let mut world = bevy::prelude::World::new();
+        world.insert_resource(HeroModel::default());
+        world.insert_resource(HeroModelReceipts::default());
+        world.insert_resource(NativeInbound { buffer:Arc::new(Mutex::new(local)) });
+        world.run_system_once(crate::ingest_pending_hero_model).unwrap();
+        let receipts = &world.resource::<HeroModelReceipts>().0;
+        assert_eq!(receipts.len(), 3);
+        assert_eq!(receipts[0].last_item_result.as_ref().unwrap().0, "UseItem");
+        assert_eq!(receipts[0].last_item_result.as_ref().unwrap().1["uniqueId"].as_u64(), Some(u64::MAX));
+        assert_eq!(receipts[0].last_item_result.as_ref().unwrap().1["success"].as_bool(), Some(false));
+        assert_eq!(receipts[1].last_item_result.as_ref().unwrap().0, "SetAutoPotValue");
+        assert_eq!(receipts[1].item_result_serial, 2);
+        assert_eq!(receipts[2].skill_key_ack.as_ref().unwrap().request_id, 51);
+        assert!(receipts.iter().all(|receipt| receipt.session_epoch == 7));
+        let latest = world.resource::<HeroModel>();
+        assert!(!latest.item_result_receipt && latest.skill_key_ack.is_none());
+        assert_eq!(latest.info.as_ref().unwrap().hp, 9);
+        assert_eq!(latest.item_result_serial, 2);
+        assert!(world.resource::<NativeInbound>().buffer.lock().unwrap().pending.is_empty());
+    }
 }
