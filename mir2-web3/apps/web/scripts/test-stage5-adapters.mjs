@@ -41,7 +41,8 @@ const adapters = loadTypeScriptModule(
 const socialReplies = loadTypeScriptModule(new URL("../lib/social-incoming-replies.ts", import.meta.url));
 const socialOperations = loadTypeScriptModule(new URL("../lib/social-window-operations.ts", import.meta.url));
 const socialParityActions = loadTypeScriptModule(new URL("../lib/social-parity-actions.ts", import.meta.url));
-const extendedPackets = loadTypeScriptModule(new URL("../lib/extended-server-packets.ts", import.meta.url));
+const stageNpcRaw = loadTypeScriptModule(new URL("../lib/npc-purchase-client.ts", import.meta.url));
+const extendedPackets = loadTypeScriptModule(new URL("../lib/extended-server-packets.ts", import.meta.url), {"./npc-purchase-client":stageNpcRaw});
 const heroUi = loadTypeScriptModule(new URL("../lib/hero-player-ui.ts", import.meta.url));
 const guildBuffUi = loadTypeScriptModule(new URL("../lib/guild-buff-ui.ts", import.meta.url));
 const crystalItemSource = loadTypeScriptModule(new URL("../lib/crystal-item-source.ts", import.meta.url));
@@ -61,7 +62,7 @@ const cashShopUi = loadTypeScriptModule(new URL("../lib/cash-game-shop-ui.ts", i
   "./social-incoming-replies": socialReplies, "./creature-player-ui": creatureUi,
 });
 const storageRental = loadTypeScriptModule(new URL("../lib/storage-rental-confirmation.ts", import.meta.url), {
-  "./social-incoming-replies": socialReplies,
+  "./social-incoming-replies": socialReplies,"./npc-purchase-client":stageNpcRaw,
 });
 const itemIdentity = loadTypeScriptModule(new URL("../lib/world-model/item-identity.ts", import.meta.url));
 const bagModel = loadTypeScriptModule(new URL("../lib/bevy-bag-model.ts", import.meta.url), {
@@ -7455,6 +7456,187 @@ check("Ranking active Inspect blocks actual older Hero and Fishing Page paths th
   fishing.scope.rankingInspectOpenRef.current=true;
   assert.equal(fishing.api.worldFishingPureUiBlocked(),true);
   assert.equal(fishing.api.beginWorldFishingGesture(fishing.pointer),null);assert.equal(fishing.sent.length,0);assert.equal(fishing.requests.length,0);
+});
+
+
+// Source41 exercises the Page-owned custody with finite runtime ports, never WASM.
+const heroIngressDocument=loadTypeScriptModule(new URL("../lib/bevy-hero-ui.ts",import.meta.url));
+function heroRawFixture({bound=true,checkpoint=true}={}){
+  const physical={socket:{},connectionGeneration:1,sessionGeneration:2};
+  const scene={sceneRevision:1,playerObjectId:1,mapFileName:"D000"};
+  const ingress=new heroIngressDocument.HeroRawIngress(),checkpoints=new Map(),trace=[];
+  let serial=0,now=10;
+  function renderer({checkpointAvailable=checkpoint}={}){
+    const calls=[],options={checkpointAvailable,throwPush:false,rejectPush:false},state={scope:null,cursor:0,hero:false,firstClock:null};
+    const runtime={getMir2HeroUiAbiVersion:()=>1,
+      activateMir2HeroIngress(raw){state.scope=JSON.parse(raw);calls.push({kind:"activate",scope:state.scope});return true;},
+      pushMir2HeroRawFrame(scope,sequence,raw,receivedAtMs){return push("raw",scope,sequence,raw,receivedAtMs,null);},
+      pushMir2HeroVerifiedOwnerFrame(scope,sequence,raw,receivedAtMs,expected){return push("verified",scope,sequence,raw,receivedAtMs,expected);},
+      withdrawMir2HeroIngress(scope){calls.push({kind:"withdraw",scope});return true;},
+      getMir2HeroIngressCheckpoint(){if(!options.checkpointAvailable)return null;
+        const raw='{ "opaque" : 18446744073709551615, "cursor" : '+state.cursor+', "serial" : '+(++serial)+' }';
+        checkpoints.set(raw,{cursor:state.cursor,hero:state.hero,firstClock:state.firstClock});calls.push({kind:"checkpoint",raw});return raw;},
+      restoreMir2HeroIngressCheckpoint(scope,raw){calls.push({kind:"restore",scope:JSON.parse(scope),raw});
+        const held=checkpoints.get(raw);assert(held,"original held string must exist");Object.assign(state,held);return true;},
+      getMir2HeroUiStatus(){return JSON.stringify({version:1,source:state.hero?{scope:state.scope,frameSequence:state.cursor,
+        heroObjectId:2,heroGeneration:1,rustModelRevision:1}:null,acceptedFrameSequence:state.cursor,closed:false,
+        control:null,ready:false,frameSequence:0});}};
+    function push(kind,scope,sequence,raw,receivedAtMs,expected){
+      calls.push({kind,scope:JSON.parse(scope),sequence,raw,receivedAtMs,expected});trace.push({kind,sequence,raw,receivedAtMs});
+      if(options.throwPush)throw Error("controlled renderer failure");if(options.rejectPush)return false;
+      assert(sequence>state.cursor,"a restored receiver must not get its prefix twice");state.cursor=sequence;
+      if(raw.includes("HeroInformation")){state.hero=true;state.firstClock??=receivedAtMs;}return true;}
+    return {runtime,calls,options,state};
+  }
+  const first=renderer();ingress.sync(bound?first.runtime:null,physical,bound?scene:null);
+  function capture(raw,at=now++,identity=physical){const delivery=ingress.capture(raw,identity,at);assert(delivery);return delivery;}
+  function deliver(raw,expected=null){const delivery=capture(raw);assert(ingress.offer(delivery,expected));return delivery;}
+  return {physical,scene,ingress,renderer,first,trace,capture,deliver};
+}
+const heroOpaque={requestId:"18446744073709551615",actor:"a".repeat(64),producerScope:"b".repeat(64),serverRevision:"0"};
+const heroWideOriginal=' {"type":"packet","packet":"HeroInformation","payload":{"uniqueId":18446744073709551615,"xp":9007199254740993}} ';
+check("Hero ingress preserves original wide raw floating first clock and verified metadata",()=>{
+  const f=heroRawFixture({checkpoint:false}),d=f.capture(heroWideOriginal,10.375);assert(f.ingress.offer(d));
+  const owner=' {"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"18446744073709551615","reply":{},"snapshot":{"uniqueId":18446744073709551615},"authority":{"actor":"'+heroOpaque.actor+'","producerScope":"'+heroOpaque.producerScope+'","serverRevision":"0"}} ';
+  const expected=heroIngressDocument.verifiedHeroOwnerFromFrame(owner);assert.deepEqual(expected,heroOpaque);
+  const receipt=f.capture(owner,10.875);assert(f.ingress.offer(receipt,expected));
+  assert.equal(f.trace[0].raw,heroWideOriginal);assert.equal(f.trace[0].receivedAtMs,10.375);assert.equal(f.trace[1].raw,owner);
+  assert.equal(f.trace[1].receivedAtMs,10.875);assert.deepEqual(JSON.parse(f.first.calls.find(c=>c.kind==="verified").expected),heroOpaque);
+  assert(f.ingress.caughtUp());assert.equal(f.ingress.offer(receipt),false);
+});
+check("Hero bootstrap source can precede control but never manufactures UI Ready",()=>{
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);const bootstrap=f.ingress.bootstrap();
+  assert.equal(bootstrap.source.heroObjectId,2);assert.equal(bootstrap.acceptedFrameSequence,f.trace[0].sequence);
+  assert.equal(JSON.parse(f.first.runtime.getMir2HeroUiStatus()).ready,false);assert.equal(JSON.parse(f.first.runtime.getMir2HeroUiStatus()).control,null);
+  for(const bad of [{version:2,source:null,acceptedFrameSequence:1,closed:false},{version:1,source:null,acceptedFrameSequence:0.5,closed:false},
+    {version:1,source:{...bootstrap.source,scope:{...bootstrap.source.scope,unknown:1}},acceptedFrameSequence:bootstrap.acceptedFrameSequence,closed:false},
+    {version:1,source:{...bootstrap.source,frameSequence:bootstrap.acceptedFrameSequence+1},acceptedFrameSequence:bootstrap.acceptedFrameSequence,closed:false}]){
+    assert.equal(heroIngressDocument.readHeroBootstrap({getMir2HeroUiStatus:()=>JSON.stringify(bad)}),null);}
+});
+check("Hero ingress captures before bootstrap without dropping ignored original frames",()=>{
+  const f=heroRawFixture({bound:false,checkpoint:false});const ignored=f.capture('{"type":"notice","text":"first"}',10.25);
+  assert(f.ingress.offer(ignored));const info=f.capture(heroWideOriginal,10.75);assert(f.ingress.offer(info));assert.equal(f.trace.length,0);
+  f.ingress.sync(f.first.runtime,f.physical,f.scene);assert.deepEqual(f.trace.map(p=>p.sequence),[ignored.sequence,info.sequence]);
+  assert.deepEqual(f.trace.map(p=>p.receivedAtMs),[10.25,10.75]);assert.equal(f.first.state.firstClock,10.75);assert(f.ingress.caughtUp());
+});
+check("Hero captured high water blocks until classification and delivery finish",()=>{
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);assert(f.ingress.caughtUp());
+  const d=f.capture('{"type":"notice"}');assert.equal(f.ingress.caughtUp(),false);assert(f.ingress.offer(d));assert(f.ingress.caughtUp());
+});
+check("Hero reentrant offer cannot overtake earlier captured raw or report caught up",()=>{
+  const f=heroRawFixture({checkpoint:false}),a=f.capture(heroWideOriginal,10.125),b=f.capture('{"type":"notice"}',10.625);
+  assert(f.ingress.offer(b));assert.equal(f.trace.length,0);assert.equal(f.ingress.caughtUp(),false);assert(f.ingress.offer(a));
+  assert.deepEqual(f.trace.map(p=>p.sequence),[a.sequence,b.sequence]);assert.deepEqual(f.trace.map(p=>p.receivedAtMs),[10.125,10.625]);
+  assert(f.ingress.caughtUp());assert.equal(f.ingress.offer(a),false);
+});
+check("Hero tail retains every accepted frame when renderer cannot checkpoint",()=>{
+  const f=heroRawFixture({checkpoint:false}),a=f.deliver(heroWideOriginal),b=f.deliver('{"type":"notice"}');
+  assert.equal(f.ingress.status().tailFrames,2);const next=f.renderer({checkpointAvailable:false});f.ingress.detachRenderer(f.first.runtime);
+  f.ingress.sync(next.runtime,f.physical,f.scene);assert.equal(next.calls.filter(c=>c.kind==="restore").length,0);
+  assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[a.sequence,b.sequence]);assert(f.ingress.caughtUp());
+});
+check("Hero handoff restores exact held string then each retained tail once with new run",()=>{
+  const f=heroRawFixture(),a=f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  const held=f.first.calls.filter(c=>c.kind==="checkpoint").at(-1).raw,oldRun=f.ingress.status().scope.runGeneration;
+  f.first.options.checkpointAvailable=false;const b=f.deliver('{"type":"notice"}'),next=f.renderer({checkpointAvailable:false});
+  f.ingress.detachRenderer(f.first.runtime);f.ingress.sync(next.runtime,f.physical,f.scene);
+  assert.equal(next.calls.find(c=>c.kind==="restore").raw,held);assert(next.calls[0].scope.runGeneration>oldRun);
+  assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[b.sequence]);assert.equal(next.state.firstClock,a.receivedAtMs);
+  f.ingress.sync(next.runtime,f.physical,f.scene);assert.equal(next.calls.filter(c=>c.kind==="raw").length,1);assert(f.ingress.caughtUp());
+});
+check("Hero no renderer cross map restores old scene and tail before activating current scene",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  f.first.options.checkpointAvailable=false;f.ingress.sync(null,f.physical,f.scene);const oldTail=f.deliver('{"type":"notice","map":"old"}');
+  const changed={...f.scene,sceneRevision:2,mapFileName:"D001"};f.ingress.sync(null,f.physical,changed);
+  const mapTail=f.deliver('{"type":"packet","packet":"MapChanged","payload":{"mapFileName":"D001"}}'),next=f.renderer({checkpointAvailable:false});
+  f.ingress.sync(next.runtime,f.physical,changed);assert.equal(next.calls[0].scope.mapFileName,"D000");
+  assert.equal(next.calls.find(c=>c.kind==="restore").scope.mapFileName,"D000");
+  const raw=next.calls.filter(c=>c.kind==="raw");assert.deepEqual(raw.map(c=>c.sequence),[oldTail.sequence,mapTail.sequence]);
+  assert.deepEqual(raw.map(c=>c.scope.mapFileName),["D000","D001"]);assert.equal(f.ingress.status().scope.mapFileName,"D001");assert(f.ingress.caughtUp());
+});
+check("Hero failed checkpoint keeps last successful original plus full newer tail",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  const held=f.first.calls.filter(c=>c.kind==="checkpoint").at(-1).raw;
+  f.first.runtime.getMir2HeroIngressCheckpoint=()=>{throw Error("controlled checkpoint refusal");};
+  const b=f.deliver('{"type":"notice","n":1}'),c=f.deliver('{"type":"notice","n":2}');f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,f.scene);
+  assert.equal(next.calls.find(c=>c.kind==="restore").raw,held);assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[b.sequence,c.sequence]);
+});
+check("Hero renderer refusal permits a new runtime to recover the unchanged held and tail",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  f.first.options.throwPush=true;const b=f.capture('{"type":"notice","n":1}');assert(f.ingress.offer(b));assert.equal(f.ingress.status().closed,true);
+  assert.equal(f.ingress.caughtUp(),false);const c=f.capture('{"type":"notice","n":2}');assert(f.ingress.offer(c));
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,f.scene);
+  assert.equal(f.ingress.status().closed,false);assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[b.sequence,c.sequence]);assert(f.ingress.caughtUp());
+});
+check("Hero physical session and socket replacement never restore previous private held",()=>{
+  for(const change of [p=>({...p,sessionGeneration:p.sessionGeneration+1}),p=>({...p,socket:{}})]){
+    const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+    const physical=change(f.physical),next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,physical,f.scene);
+    assert.equal(next.calls.filter(c=>c.kind==="restore").length,0);assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);
+    assert.equal(f.ingress.offer(f.capture('{"type":"notice"}',100,physical)),true);assert.equal(next.calls.filter(c=>c.kind==="raw").length,1);
+  }
+});
+check("Hero same runtime scene activation and stale cleanup preserve the live receiver",()=>{
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);const changed={...f.scene,sceneRevision:2,mapFileName:"D001"};
+  f.ingress.sync(f.first.runtime,f.physical,changed);assert.equal(f.first.calls.filter(c=>c.kind==="withdraw").length,0);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,changed);const before=next.calls.length;
+  f.ingress.detachRenderer(f.first.runtime);assert.equal(next.calls.length,before);assert.equal(f.ingress.status().scope.mapFileName,"D001");
+});
+check("Hero raw custody overflow and rejection remain closed across renderer replacement",()=>{
+  const f=heroRawFixture({bound:false,checkpoint:false});for(let i=0;i<4096;i++)f.capture('{"type":"notice"}',i+10);
+  assert.equal(f.ingress.capture('{}',f.physical,5000),null);assert.equal(f.ingress.status().closed,true);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,f.scene);assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);
+  assert.equal(f.ingress.caughtUp(),false);
+  const rejected=heroRawFixture({checkpoint:false}),d=rejected.capture(heroWideOriginal);rejected.ingress.reject(d);
+  assert.equal(rejected.ingress.offer(d),false);assert.equal(rejected.ingress.caughtUp(),false);
+});
+check("Hero unsupported ABI and unsafe owner metadata cannot grant raw authority",()=>{
+  const f=heroRawFixture({checkpoint:false});for(const runtime of [null,{...f.first.runtime,getMir2HeroUiAbiVersion:()=>0},
+    {...f.first.runtime,pushMir2HeroVerifiedOwnerFrame:undefined},{...f.first.runtime,getMir2HeroUiAbiVersion:()=>{throw Error("ABI");}}]){
+    assert.equal(heroIngressDocument.supportsHeroIngress(runtime),false);}
+  for(const bad of [{...heroOpaque,requestId:"0"},{...heroOpaque,requestId:"01"},{...heroOpaque,requestId:"18446744073709551616"},
+    {...heroOpaque,actor:"1"},{...heroOpaque,actor:"0".repeat(64)},{...heroOpaque,producerScope:"B".repeat(64)},
+    {...heroOpaque,serverRevision:"18446744073709551615"},{...heroOpaque,unknown:true}])assert.equal(heroIngressDocument.validVerifiedHeroOwner(bad),false);
+  assert.equal(heroIngressDocument.verifiedHeroOwnerFromFrame('{"type":"npcPurchaseOwner"}'),null);
+});
+check("Hero original Page message captures first clock before synchronous ingress work",()=>{
+  const handlers=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==='socket.addEventListener'
+    &&node.arguments[0]?.getText(parityPageAst)==='"message"'&&node.arguments[1]?.getText(parityPageAst).includes('heroRawIngressRef.current?.capture'))handlers.push(node.arguments[1]);
+    ts.forEachChild(node,visit);})(parityPageAst);assert.equal(handlers.length,1);
+  const compiled=ts.transpileModule('const originalHandler='+handlers[0].getText(parityPageAst)+';',
+    {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+  const socket={},physical={socket,connectionGeneration:1,sessionGeneration:2},calls=[];let now=10.375;
+  const scope={socket,socketRef:{current:socket},connectionGeneration:1,equipmentConnectionGenerationRef:{current:1},
+    performance:{now(){calls.push("clock");return now;}},syncHeroRawIngress(){calls.push("sync");now=999;},
+    currentHeroRawPhysical:()=>physical,heroRawIngressRef:{current:{capture(raw,p,at){calls.push({raw,p,at});return {raw,at};},reject(){throw Error("unexpected reject");}}},
+    receiveNpcPurchaseGatewayFrame(event,generation,s,d){calls.push({received:d});},appendLog(){throw Error("unexpected Page log");},t:()=>"log"};
+  const handler=new Function('scope','with(scope){'+compiled+'return originalHandler;}')(scope);handler({data:heroWideOriginal});
+  assert.equal(calls[0],"clock");assert.equal(calls[1],"sync");assert.equal(calls[2].at,10.375);assert.equal(calls[3].received.at,10.375);
+  scope.socketRef.current={};const before=calls.length;handler({data:heroWideOriginal});assert.equal(calls.length,before);
+});
+
+
+check("Hero nontext invalid clock and oversized source close custody before stale readiness",()=>{
+  for(const [raw,clock] of [[{},100],[null,100],[new Uint8Array(1),100],["{}",NaN],["{}",Infinity],["{}",-1],["{}",Number.MAX_SAFE_INTEGER+1]]){
+    const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);assert(f.ingress.caughtUp());
+    assert.equal(f.ingress.capture(raw,f.physical,clock),null);assert.equal(f.ingress.status().closed,true);assert.equal(f.ingress.caughtUp(),false);
+  }
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);assert.equal(f.ingress.capture("a".repeat(16*1024*1024+1),f.physical,100),null);
+  assert.equal(f.ingress.status().closed,true);assert.equal(f.ingress.caughtUp(),false);
+});
+
+
+check("Hero cross scene reentry closes instead of relabelling earlier unfinished raw",()=>{
+  for(const bound of [true,false]){
+  const f=heroRawFixture({bound,checkpoint:false}),a=f.capture('{"type":"worldSnapshot","payload":{"mapFileName":"D000"}}',10.25),
+    b=f.capture('{"type":"packet","packet":"MapChanged","payload":{"mapFileName":"D001"}}',10.75);
+  f.ingress.sync(f.first.runtime,f.physical,{...f.scene,sceneRevision:2,mapFileName:"D001"});
+  assert.equal(f.ingress.offer(b),false);assert.equal(f.ingress.offer(a),false);assert.equal(f.trace.length,0);
+  assert.equal(f.ingress.status().closed,true);assert.equal(f.ingress.caughtUp(),false);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,{...f.scene,sceneRevision:2,mapFileName:"D001"});
+  assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);assert.equal(f.ingress.caughtUp(),false);
+  }
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

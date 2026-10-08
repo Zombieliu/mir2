@@ -47,6 +47,7 @@ import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, proj
   type BevyQuestUiIntent, type BevyQuestUiIntentResult, type BevyQuestUiRuntime } from "../lib/bevy-quest-ui";
 import { useBevyHudUi } from "../lib/use-bevy-hud-ui";
 import { useBevyCharacterUi } from "../lib/use-bevy-character-ui";
+import { HeroRawIngress, sameHeroPhysical, verifiedHeroOwnerFromFrame, type HeroRawDelivery, type HeroPhysical, type HeroRuntime } from "../lib/bevy-hero-ui";
 import { useBevySpellsUi } from "../lib/use-bevy-spells-ui";
 import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
 import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
@@ -472,7 +473,7 @@ function useImmediateUiState<T>(initial: T) {
   return [state, set, current] as const;
 }
 
-type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
+type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & HeroRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
   default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
@@ -2140,6 +2141,10 @@ export default function HomePage() {
   const socialRepliesRef = useRef(new SocialIncomingReplies());
   const guildBuffAuthorityRef = useRef(new GuildBuffAuthority());
   const guildBuffOperationsRef = useRef(new GuildBuffOperations());
+  const heroRawIngressRef = useRef<HeroRawIngress | null>(null);
+  if (heroRawIngressRef.current === null) heroRawIngressRef.current = new HeroRawIngress();
+  const heroRawOwnerRef = useRef<(HeroPhysical & Readonly<{ playerObjectId: number }>) | null>(null);
+  const heroVerifiedDeliveryRef = useRef<HeroRawDelivery | null>(null);
   const heroAuthorityRef = useRef(new HeroPlayerAuthority());
   const heroOperationsRef = useRef(new HeroPlayerOperations());
   const heroManagementOpenRef = useRef(false);
@@ -5703,6 +5708,13 @@ export default function HomePage() {
   }, [bevyRuntimeGeneration, bevyRuntimeStarted]);
 
   useEffect(() => {
+    const runtime = runtimeRef.current;
+    syncHeroRawIngress();
+    const timer = window.setInterval(syncHeroRawIngress,50);
+    return () => {window.clearInterval(timer);heroRawIngressRef.current?.detachRenderer(runtime);};
+  }, [bevyRuntimeGeneration]);
+
+  useEffect(() => {
     if (!world.originalMapRegion) return;
     const sceneKey = `${normalizeMapFileName(world.originalMapRegion.mapFileName)}:${world.originalMapRegion.regionBounds.minX}:${world.originalMapRegion.regionBounds.minY}:${world.originalMapRegion.regionBounds.maxX}:${world.originalMapRegion.regionBounds.maxY}`;
     if (sceneSpritesReadyKeyRef.current === sceneKey) return;
@@ -7230,10 +7242,15 @@ export default function HomePage() {
     });
 
     socket.addEventListener("message", (event) => {
-      if (socketRef.current !== socket) return;
+      if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+      const receivedAtMs=performance.now();
+      syncHeroRawIngress();
+      const physical = currentHeroRawPhysical();
+      const delivery = heroRawIngressRef.current?.capture(event.data, physical, receivedAtMs) ?? null;
       try {
-        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket);
+        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket, delivery);
       } catch (error) {
+        heroRawIngressRef.current?.reject(delivery);
         appendLog(t("log.invalidGatewayPayload", [String(error)]), "system");
       }
     });
@@ -9496,6 +9513,15 @@ export default function HomePage() {
           npcPurchaseDisplaySourceRef.current = Object.freeze({ socket, session, rawFrame, snapshot: rawSnapshot,
             fingerprint: npcPurchaseDisplayFingerprint(worldRef.current) });
           npcPurchaseUnavailableRef.current = false;
+          const delivery = heroVerifiedDeliveryRef.current;
+          const expected = delivery && delivery.raw === rawFrame && sameHeroPhysical(delivery,currentHeroRawPhysical())
+            ? verifiedHeroOwnerFromFrame(rawFrame) : null;
+          if (delivery && expected) {
+            observeHeroRawOwner(delivery,rawSnapshot);syncHeroRawIngress();
+            // Display only; the caller still performs Core Applied and all
+            // operation/receipt settlement through the established paths.
+            heroRawIngressRef.current?.offer(delivery,expected);
+          }
           return true;
         },
       });
@@ -13015,6 +13041,29 @@ export default function HomePage() {
     return {connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration,
       ownerRevision:equipmentBagOwnerRef.current.ownerRevision,playerObjectId};
   }
+  function currentHeroRawPhysical(): HeroPhysical | null {
+    const socket = socketRef.current, session = equipmentStartGameRef.current;
+    return socket && socket.readyState === WebSocket.OPEN && session
+      && session.connectionGeneration === equipmentConnectionGenerationRef.current
+      && session.sessionGeneration === equipmentSessionGenerationRef.current && session.sessionGeneration > 0
+      ? {socket,connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration} : null;
+  }
+  function observeHeroRawOwner(delivery: HeroRawDelivery, snapshot: GatewayWorldSnapshot | Readonly<Record<string, unknown>>) {
+    const physical = currentHeroRawPhysical(), id = snapshot.playerObjectId;
+    if (sameHeroPhysical(delivery,physical) && physical && typeof id === "number" && Number.isSafeInteger(id)
+      && id > 0 && id <= 0xffffffff && typeof snapshot.mapFileName === "string"
+      && worldRef.current.playerObjectId === String(id) && worldRef.current.mapFileName === snapshot.mapFileName) {
+      heroRawOwnerRef.current = Object.freeze({...physical,playerObjectId:id});
+    }
+  }
+  function syncHeroRawIngress() {
+    const physical = currentHeroRawPhysical(), owner = heroRawOwnerRef.current, current = worldRef.current;
+    const scene = physical && owner && sameHeroPhysical(physical,owner) && current.playerObjectId === String(owner.playerObjectId)
+      && typeof current.mapFileName === "string" && current.mapFileName.length > 0
+      && Number.isSafeInteger(questSceneRevisionRef.current) && questSceneRevisionRef.current > 0
+      ? {sceneRevision:questSceneRevisionRef.current,playerObjectId:owner.playerObjectId,mapFileName:current.mapFileName} : null;
+    heroRawIngressRef.current?.sync(runtimeRef.current,physical,scene);
+  }
   function currentQuestWorldIdentity(): QuestWorldIdentity | null {
     const current = worldRef.current;
     const owner = currentSpellsOwner(Number(current.playerObjectId));
@@ -13212,21 +13261,36 @@ export default function HomePage() {
     }
   }
 
-  function receiveNpcPurchaseGatewayFrame(event: { data: unknown }, connectionGeneration: number, socket: WebSocket) {
+  function receiveNpcPurchaseGatewayFrame(event: { data: unknown }, connectionGeneration: number, socket: WebSocket, delivery: HeroRawDelivery | null = null) {
     if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
     let strictWorld = false;
+    const apply = (decoded: GatewayEvent, rawWorld?: string) => {
+      handleGatewayEvent(decoded,connectionGeneration,socket,rawWorld);
+      if (delivery) {
+        if (decoded.type === "worldSnapshot") observeHeroRawOwner(delivery,decoded.payload as GatewayWorldSnapshot);
+        syncHeroRawIngress();heroRawIngressRef.current?.offer(delivery);
+      }
+    };
     try {
       // New bounded raw-source policy. The previous generic decoder was
       // uncapped; reject before either marker or decoder to prevent fallback.
       if (typeof event.data !== "string" || event.data.length > 16 * 1024 * 1024) { strictWorld = true; throw Error("Invalid gateway raw frame size"); }
       if (isNpcPurchaseOwnerFrame(event.data)) {
         const adapter = npcPurchaseClientRef.current;
-        if (adapter?.socket === socket && adapter.core === questCoreRuntimeRef.current) adapter.client.receive(event.data);
+        if (adapter?.socket === socket && adapter.core === questCoreRuntimeRef.current) {
+          if (delivery) {
+            const prior = heroVerifiedDeliveryRef.current;heroVerifiedDeliveryRef.current=delivery;
+            try {adapter.client.receive(event.data);} finally {heroVerifiedDeliveryRef.current=prior;}
+          } else adapter.client.receive(event.data);
+        }
+        // Failed/unpaired owner envelopes remain ordinary ignored raw input. A
+        // successful callback already queued this same delivery with its witness.
+        if (delivery) {syncHeroRawIngress();heroRawIngressRef.current?.offer(delivery);}
         return;
       }
       strictWorld = isNpcPurchaseWorldFrame(event.data);
       if (strictWorld) {
-        handleGatewayEvent(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, connectionGeneration, socket, event.data);
+        apply(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, event.data);
         return;
       }
       // The final world check also prevents a failed structural marker from
@@ -13234,8 +13298,8 @@ export default function HomePage() {
       const decoded = parseGatewayMailDates(event.data as string) as GatewayEvent;
       if (decoded.type === "worldSnapshot") {
         strictWorld = true;
-        handleGatewayEvent(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, connectionGeneration, socket, event.data);
-      } else handleGatewayEvent(decoded, connectionGeneration, socket);
+        apply(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, event.data);
+      } else apply(decoded);
     } catch (error) {
       if (strictWorld) {
         npcPurchaseUnavailableRef.current = true;

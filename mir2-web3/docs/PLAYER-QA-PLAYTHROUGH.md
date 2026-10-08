@@ -1,5 +1,19 @@
 # Player-QA playthrough loop
 
+## Source41：Page Hero 原始数据接线通过代码回归；完整可玩包仍未交付（2026-10-08）
+
+Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首次物理消息 performance 时钟在应用前捕获；不把 Hero snapshot 经过 JS 重编码。实际验证通过的 NPC purchase owner 回调以独立关联 tuple 加原文进入严格 Rust 接口，保留精确 u64/i64、noHero 清除和 receipt FIFO。Socket/connection/session、renderer run 与 scene 分开；恢复 held checkpoint 后按顺序补齐完整尾队列，未完成旧帧不可被后帧越过。Renderer 缺失/故障保留 Page custody，换图直接 activate；同步跨 scene 重入明确拒绝。
+
+当前 Source02 实际 Runtime16/16＋portable52/52＋Native24/24，共92次通过、0失败/ignored；跨 feature 原函数去重79项，新Rust函数7项。Web05 原有限脚本实际184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑457组另列，新17组；surface新增1组真实 ordinary 快照委托/旧物理owner拒绝。严格 TypeScript5.9.3 no-emit/nonincremental 实际exit0、零诊断。WebGL2 shared与WebGPU两个 WASM cargo check exit0，仅静态编译，未生成或初始化新的完整生产包。
+
+905声明Rust输入、17123声明Web输入、去重17132输入在各实际调用前后冻结检查匹配，Root初次去重复核也匹配；最终审阅时其他任务继续编辑7个simulation/production输入，当前整checkout不再完全匹配。七个本轮源码仍匹配，后续其他任务变更另列保留并排除本轮提交，原测试冻结与工具/源码门槛不变；当前5次Cargo原Guard均PolicyB completed/exited/disposed，25份nonce，C最低236199809024 B、freshness保守上界最大122ms（门槛50GiB/2000ms）。原Source01 portable51通过/1失败、新测试误解available的noHero语义，修正新测试后当前全部通过；旧2Cargo和3CLI失败输出完整保留。原测试业务断言保留，NPCsurface26块原文不变、1块静态调用断言移至真实委托链；不替换原Guard、探针、模板、政策、预算或发布门槛，不声称强制Cargo/CLI deadline。
+
+本轮只接数据来源，不关闭Hero整条操作链：实际Rust planner动作依据须与独立捕获TS模型比较；控制、sink、布局、matching Ready及Shell输入仲裁尚待接线，bootstrap source不能当Ready，也不能据setter成功隐藏React。沿用唯一原Hero操作账本，原Core Applied、精确ACK后完整快照屏障及Unknown custody保持。下一轮继续这些功能、源码匹配的完整renderer/Core/EXE/Web包，以及默认共享入口和任务整链；宽UID操作、旧引擎宽日期与NewMagic完整producer限制仍开放。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–41；公开manifest和用户tsconfig未替换。未改后端/共享Zone/协议parity，其他制作加工/Cargo/simulation/production工作保持且排除本轮提交。登录→任务/战斗→保存→重登、移动真机及玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信试玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留，未绕过原helper WASM API限制。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json)、[完整原始71文件与35nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json)、[晚期其他任务源码资格](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json)、[历史失败与修正记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json)、[Source40真实提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-publication01.json)。Source40已核验推送8e64c987849137b56a67fda4b64f18b0645917eb；本轮Git发布以随后实际结果为准。下方旧记录保留为历史。
+
 ## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
 
 本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。

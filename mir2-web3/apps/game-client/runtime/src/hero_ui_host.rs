@@ -3,7 +3,7 @@
 use std::{cell::RefCell, collections::VecDeque};
 use bevy::prelude::*;
 use mir2_client_bevy::{
-    hero_ingress::{HeroIngress, HeroScope},
+    hero_ingress::{HeroIngress, HeroScope, VerifiedHeroOwner},
     hero_model::HeroModel,
     portable_hero_ui::{
         HeroInputEdge, HeroInputQueue, HeroIntentQueue, HeroPresentation, HeroStamp,
@@ -137,6 +137,19 @@ impl HeroBridge {
     pub fn push_raw(&mut self, scope: &HeroScope, sequence: u64, raw: &str, at: u64) -> bool {
         if self.input_closed { return false; }
         match self.ingress.receive_frame(scope, sequence, raw, at) {
+            Ok(changed) => {
+                if changed { self.source_sequence = sequence; }
+                true
+            }
+            Err(_) => false,
+        }
+    }
+    /// Display only: the browser has already applied this verified economic owner.
+    /// No Core Applied, ACK or browser operation bookkeeping originates here.
+    pub fn push_verified_owner(&mut self, scope: &HeroScope, sequence: u64, raw: &str,
+        at: u64, expected: &VerifiedHeroOwner) -> bool {
+        if self.input_closed { return false; }
+        match self.ingress.receive_verified_owner_frame(scope, sequence, raw, at, expected) {
             Ok(changed) => {
                 if changed { self.source_sequence = sequence; }
                 true
@@ -812,6 +825,15 @@ mod web {
             monotonic_millis(received_at_ms)) else{return false;};
         BRIDGE.with(|b|b.borrow_mut().push_raw(&scope,sequence,&raw,at))
     }
+    #[wasm_bindgen(js_name=pushMir2HeroVerifiedOwnerFrame)]
+    pub fn verified_owner_frame(scope:String,sequence:f64,raw:String,received_at_ms:f64,expected:String)->bool {
+        let (Some(scope),Some(sequence),Some(at))=(parse_scope(&scope),safe_integer(sequence),
+            monotonic_millis(received_at_ms)) else{return false;};
+        if expected.is_empty() || expected.len() > MAX_CONTROL_BYTES { return false; }
+        let Ok(expected)=serde_json::from_str::<VerifiedHeroOwner>(&expected) else{return false;};
+        if !expected.valid() { return false; }
+        BRIDGE.with(|b|b.borrow_mut().push_verified_owner(&scope,sequence,&raw,at,&expected))
+    }
     #[wasm_bindgen(js_name=withdrawMir2HeroIngress)]
     pub fn withdraw(raw:String)->bool {
         let Some(scope)=parse_scope(&raw) else{return false;};
@@ -933,6 +955,42 @@ mod tests {
         world.init_resource::<HeroUiContext>();world.init_resource::<HeroUiState>();
         world
     }
+
+    #[test]
+    fn hero_host_verified_owner_is_display_source_without_core_or_ledger_side_effects() {
+        let (mut bridge,scope)=start();let before=bridge.source().unwrap();
+        let expected=VerifiedHeroOwner {request_id:u64::MAX.to_string(),actor:"1".repeat(64),
+            producer_scope:"2".repeat(64),server_revision:"0".into()};
+        let mut next=owner();next["heroVitals"]["hp"]=json!(7);
+        let raw=json!({"type":"npcPurchaseOwner","protocolVersion":1,"requestId":expected.request_id,
+            "reply":{"kind":"producer","producer":{"actor":expected.actor,
+                "producerScope":expected.producer_scope,"serverRevision":expected.server_revision}},
+            "snapshot":next,"authority":{"actor":expected.actor,
+                "producerScope":expected.producer_scope,"serverRevision":expected.server_revision}}).to_string();
+        let mut wrong=expected.clone();wrong.actor="3".repeat(64);
+        assert!(!bridge.push_verified_owner(&scope,3,&raw,102,&wrong));
+        assert_eq!(bridge.source(),Some(before.clone()));assert_eq!(bridge.ingress.frame_sequence(),2);
+        assert!(bridge.push_verified_owner(&scope,3,&raw,102,&expected));
+        let source=bridge.source().unwrap();assert_eq!(source.frame_sequence,3);
+        assert!(source.rust_model_revision>before.rust_model_revision);
+        assert_eq!(source.hero_object_id,before.hero_object_id);
+        assert_eq!(bridge.ingress.status().receipt_count,0);
+        let mut world=world();apply_bridge_to_world(&mut bridge,&mut world,103);
+        assert_eq!(world.resource::<HeroUiReadModel>().hero.info.as_ref().unwrap().hp,7);
+        assert!(world.resource::<HeroUiReadModel>().hero.skill_key_ack.is_none());
+        assert_eq!(world.resource::<AppliedHero>().receipt_frames.len(),0);
+        let mut absent:Value=serde_json::from_str(&raw).unwrap();
+        absent["snapshot"]["stage5Systems"]["hero"]=Value::Null;
+        absent["snapshot"]["heroMaxExperience"]=Value::Null;
+        assert!(bridge.push_verified_owner(&scope,4,&absent.to_string(),104,&expected));
+        assert!(bridge.ingress.available());assert!(bridge.source().is_none());
+        apply_bridge_to_world(&mut bridge,&mut world,105);
+        assert!(world.resource::<HeroUiReadModel>().hero.info.is_none());
+        assert!(world.resource::<AppliedHero>().source.is_none());
+        assert!(!world.resource::<HeroUiContext>().ready);
+        assert_eq!(world.resource::<AppliedHero>().receipt_frames.len(),0);
+    }
+
     #[test]
     fn hero_host_separates_rust_source_from_web_counters_and_ignored_raw_cursor() {
         let (mut bridge,scope)=start();let source=bridge.source().unwrap();

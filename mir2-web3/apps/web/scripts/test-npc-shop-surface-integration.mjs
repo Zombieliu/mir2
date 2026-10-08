@@ -18,15 +18,17 @@ function declaration(ast, name) {
   assert.equal(found.length, 1, "sole actual function: " + name); return found[0];
 }
 function actualFunctions(ast, names, scope) {
-  const input = names.map(n => declaration(ast, n).getText(ast)).join("\n");
+  const input = names.map(n => declaration(ast, n).getText(ast).replace(/^export\s+/, "")).join("\n");
   const code = ts.transpileModule(input, { compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 } }).outputText;
   return new Function(...Object.keys(scope), code + "\nreturn {" + names.join(",") + "};")(...Object.values(scope));
 }
 const modules = new Map(), pureFiles = { spells:"../lib/bevy-spells-ui.ts", combat:"../lib/bevy-combat-input.ts", npcBuy:"../lib/bevy-npc-shop-buy.ts",
   modeKeys:"../lib/shared-combat-mode-keys.ts", hero:"../lib/hero-player-ui.ts", operations:"../lib/social-window-operations.ts", equipment:"../lib/equipment-gateway-adapter.ts",
   parcel:"../lib/mail-parcel-gateway-adapter.ts", storage:"../lib/storage-gateway-adapter.ts",
-  questWorld:"../lib/bevy-quest-world-context.ts", questControls:"../lib/bevy-quest-world-controls.ts", bagModel:"../lib/bevy-bag-model.ts" };
-const pureRequires = { modeKeys:{}, hero:{}, spells:{}, combat:{"./bevy-spells-ui":"spells"}, npcBuy:{}, operations:{},
+  questWorld:"../lib/bevy-quest-world-context.ts", questControls:"../lib/bevy-quest-world-controls.ts", bagModel:"../lib/bevy-bag-model.ts",
+  npcPearl:"../lib/npc-pearl-buy.ts",npcPearlSource:"../lib/npc-pearl-buy-source.ts",crystalSource:"../lib/crystal-item-source.ts" };
+const pureRequires = { modeKeys:{}, hero:{}, spells:{}, combat:{"./bevy-spells-ui":"spells"}, npcBuy:{"./npc-pearl-buy":"npcPearl"}, operations:{},
+  npcPearl:{"./npc-pearl-buy-source":"npcPearlSource"},npcPearlSource:{"./crystal-item-source":"crystalSource"},crystalSource:{},
   equipment:{"./world-model/item-identity":"identity"}, parcel:{"./equipment-gateway-adapter":"equipment"},
   storage:{"./equipment-gateway-adapter":"equipment","./world-model/item-identity":"identity","./mail-parcel-gateway-adapter":"parcel"},
   questWorld:{"./bevy-bag-model":"bagModel"}, questControls:{"./bevy-quest-world-context":"questWorld"},
@@ -81,11 +83,15 @@ const bagProjection = (() => {
   });return module.exports.projectBevyBagModel;
 })();
 pureFiles.identity="../lib/world-model/item-identity.ts";pureRequires.identity={};modules.set("identity",identityModule);
-pureFiles.bag="../lib/bevy-bag-ui.ts";pureRequires.bag={"./world-model/item-identity":"identity"};
+pureFiles.bag="../lib/bevy-bag-ui.ts";pureRequires.bag={"./world-model/item-identity":"identity","./bag-belt-gesture":"bagBelt"};
+pureFiles.bagBelt="../lib/bag-belt-gesture.ts";pureRequires.bagBelt={};
+pureFiles.bagBeltMove="../lib/bag-belt-move-dispatcher.ts";pureRequires.bagBeltMove={"./mail-parcel-gateway-adapter":"parcel"};
+const npcAuthSelectors=actualFunctions(tree(source("../lib/client-login-runtime.ts"),"actual-login-runtime.ts"),
+  ["preauthCommandKind","isSensitiveGatewayCommand"],{});
 const pageNames=["npcGoldBuyCurrent","readNpcGoldBuyCurrent","currentNpcShopTab","setNpcShopCompatibilityTab",
   "readNpcShopUiInput","npcShopIntentMatchesStatus","npcShopIntentMatchesCommand","npcShopUiSendCurrent",
   "dispatchBevyNpcShopIntent","retireNpcShopService","sendRaw","itemCommandRequiresOwner",
-  "invalidateNpcGoldBuyGatewayPacket","applyNpcGoldBuyGatewaySnapshot","socialItemMutationAllowed", "parityItemMutationAllowed",
+  "invalidateNpcGoldBuyGatewayPacket","applyNpcGoldBuyGatewaySnapshot","npcPurchaseSessionKey","applyNpcPurchaseOrdinarySnapshot","socialItemMutationAllowed", "parityItemMutationAllowed",
   "currentSpellsOwner","currentEquipmentOwner","currentSocialReplyOwner","currentSocialReceiveOwner","sameSocialPhysicalOwner","captureParitySnapshot",
   "referenceWindowsBlockGameplay","syncObservePreference","currentQuestWorldIdentity","currentCombatModeOwner",
   "nextCombatModeRevision","captureCombatModeSnapshot"];
@@ -136,7 +142,19 @@ function pageFixture() {
   const inventoryOwner = { connectionGeneration:1, sessionGeneration:2, playerObjectId:1 };
   inventoryReadiness.finish(inventoryReadiness.begin(inventoryOwner), inventoryOwner, true, bagProjection(world).model);
   const scope={projectBevyBagModel:bagProjection,npcGoldBuyInventoryMutationPacket,
-    playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},
+    playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},rankingInspectOpenRef:{current:false},
+    npcPurchaseUnavailableRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
+    npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},
+    accountIdRef:{current:"finite-fixture-account"},socialCharacterIndexRef:{current:{requested:null,current:0}},
+    npcPearlSendEpochRef:{current:0},npcPearlShopSourceRef:{current:new (loadPure("npcPearlSource").NpcPearlShopSource)()},
+    bagBeltMovesRef:{current:new (loadPure("bagBeltMove").BagBeltMoveDispatcher)()},bagBeltInventoryReadyRef:{current:null},
+    preauthCommandKind:npcAuthSelectors.preauthCommandKind,isSensitiveGatewayCommand:npcAuthSelectors.isSensitiveGatewayCommand,
+    // These inactive repair, wallet, fishing and Bag notifications are external
+    // ports. The actual NPC readiness, owner, claim and socket gates remain below.
+    retireWorldFishingGesture:()=>{},closeNpcRepairService:()=>{},
+    invalidateBagBeltInventory:()=>{},observeBagBeltInventorySnapshot:()=>{},observeNpcPearlWallet:()=>{},
+    readNpcRepairOwner:()=>null,captureNpcRepairDialog:()=>{},npcRepairDialogBindingRef:{current:null},
+    npcRepairAuthorityRef:{current:{prepareSnapshot:()=>{},invalidateInventory:()=>{},observeSnapshot:()=>{}}},
     observeBootstrapRef:{current:null},observePreferenceRef:{current:null},
     combatModePhysicalRef:{current:null},combatModeRawRef:{current:null},combatModeRevisionRef:{current:0},
     nextCombatModePhysicalGeneration:loadPure("modeKeys").nextCombatModePhysicalGeneration,
@@ -291,7 +309,7 @@ test("actual shared Page denies naked legacy mixed DTO and stale current status 
 pureFiles.npc="../lib/bevy-npc-shop-ui.ts";pureRequires.npc={"./bevy-bag-ui":"bag"};
 const {NpcShopPointerRouter}=loadPure("npc");
 const shellNames=["npcShopBlocksWorldInput","stopNpcShopWorldInput","guardNpcShopGameplay","dispatchKeyboardMoveInput",
-  "beginCombatUiHold","endCombatUiHold","cancelSharedNpcShopPointer","handleSharedNpcShopPointer","handleSharedQuestWorldPointer","handleSharedUiPointer","updateSceneCombatPointer"];
+  "cancelWorldFishingHeldPointer","beginCombatUiHold","endCombatUiHold","cancelSharedNpcShopPointer","handleSharedNpcShopPointer","handleSharedQuestWorldPointer","handleSharedUiPointer","updateSceneCombatPointer"];
 function shellFixture() {
   let blocked=true,context=null,behavior=()=>true,stops=0,focus=0,downstream=0;const edges=[],holds=[],combatPointers=[];
   const router=new NpcShopPointerRouter();
@@ -303,7 +321,9 @@ function shellFixture() {
   class Element {constructor(id){this.id=id;}setPointerCapture(id){this.capture=id;}closest(){return null;}}
   const callbacks={getBevyNpcShopInputBlocked:()=>blocked,getBevyNpcShopPointerContext:()=>context,
     onBevyNpcShopPointer:edge=>{edges.push(edge);return behavior(edge);}};
-  const scope={parityUiBlocksGameplay:undefined,onHeroShortcut:undefined,npcShopPointerRouterRef:{current:router},npcShopPointerCallbacksRef:{current:callbacks},
+  const scope={parityUiBlocksGameplay:undefined,onHeroShortcut:undefined,
+    handleNpcRepairPointer:()=>false,handleBagBeltPointer:()=>false,worldFishingPhysicalRef:{current:null},
+    npcShopPointerRouterRef:{current:router},npcShopPointerCallbacksRef:{current:callbacks},
     sceneHoveredObjectIdRef:{current:null},setSceneHoveredObjectId:()=>{},
     heldQuestControlPointersRef:{current:new Set()},screen:"game",bevyBagUiActive:false,
     bagPointerCallbacksRef:{current:{getBevyBagPointerContext:()=>null}},readBevyHudStatus:()=>null,
@@ -312,7 +332,7 @@ function shellFixture() {
     heldKeyboardMoveKeysRef:{current:new Set(["right"])},heldKeyboardRunModeRef:{current:true},heldScenePointerRef:{current:{button:0}},
     onViewportDirectionStop:()=>stops++,onCombatPointer:(...args)=>combatPointers.push(args),
     combatUiHoldRef:{current:new Map()},onCombatUiHeld:(...args)=>holds.push(args),
-    stageFrameRef:{current:{focus:()=>focus++}},sceneInteractionReady:true,questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
+    stageFrameRef:{current:{focus:()=>focus++,dataset:{viewportSceneWidth:"1024",viewportSceneHeight:"768"}}},sceneInteractionReady:true,questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
     HTMLElement:Element,sharedUiCanvasId:()=>"shared-ui",webGl2SharedCanvasPrototype:false,
     scenePointFromMouseEvent:e=>({sceneX:e.clientX,sceneY:e.clientY}),
     bagPointerRouterRef:{current:{held:null}},storagePointerRouterRef:{current:{held:null}},characterPointerRouterRef:{current:{held:null}},
@@ -506,7 +526,11 @@ test("actual Page full snapshot and every Native inventory invalidator revoke We
   assert(packets.length>=45); for(const packet of packets)assert.equal(npcGoldBuyInventoryMutationPacket(packet),true,packet);
   const body=declaration(pageTree,"handleGatewayEvent").getText(pageTree);
   assert(body.indexOf("invalidateNpcGoldBuyGatewayPacket(event)")<body.indexOf("captureSpellsGatewayEvent(event,connectionGeneration)"));
-  assert(body.includes("applyNpcGoldBuyGatewaySnapshot(event.payload as GatewayWorldSnapshot, connectionGeneration)"));
+  assert(body.includes("applyNpcPurchaseOrdinarySnapshot(event.payload as GatewayWorldSnapshot, rawWorldFrame, connectionGeneration, source)"));
+  const ordinary=declaration(pageTree,"applyNpcPurchaseOrdinarySnapshot").getText(pageTree);
+  const unqualified=ordinary.slice(ordinary.indexOf("if (!qualified) {"),ordinary.indexOf("const prior ="));
+  assert(unqualified.includes("applyNpcGoldBuyGatewaySnapshot(snapshot, connectionGeneration);"));
+  assert(unqualified.includes("return;"),"unqualified snapshot returns with original full-economy/display defaults");
   const f=pageFixture();f.api.invalidateNpcGoldBuyGatewayPacket({type:"worldSnapshot",payload:{}});
   assert.equal(f.api.readNpcGoldBuyCurrent().blocked,true);
 });
@@ -573,4 +597,24 @@ test("actual Page collected mail barrier needs same physical receiver and a stri
   f.api.captureParitySnapshot(snapshot);assert.strictEqual(f.scope.mailCollectBarrierRef.current,oldPhysical,"another physical sender cannot retire old custody");
   f.scope.mailCollectBarrierRef.current=barrier;f.api.captureParitySnapshot(snapshot);
   assert.equal(f.scope.mailCollectBarrierRef.current,null,"only the actual same-owner later full snapshot releases the confirmed collection");
+});
+
+
+test("actual ordinary unqualified snapshot delegates readiness while stale physical owners stay blocked",()=>{
+  const snapshot=f=>({...clone(f.world),playerObjectId:1,npcGoldTradeCapacity:{rosterValid:true,freshCompatibleUniqueIds:[]}});
+  const f=pageFixture(); f.api.invalidateNpcGoldBuyGatewayPacket({type:"worldSnapshot",payload:{}});
+  assert.equal(f.api.readNpcGoldBuyCurrent().blocked,true);
+  f.api.applyNpcPurchaseOrdinarySnapshot(snapshot(f),undefined,1,f.socket);
+  assert.equal(f.api.readNpcGoldBuyCurrent().blocked,false);
+  assert.deepEqual(f.api.readNpcGoldBuyCurrent().inventory.npcGoldTradeCapacity,snapshot(f).npcGoldTradeCapacity);
+  assert.equal(f.scope.npcPurchaseDisplaySourceRef.current,null);
+  for(const boundary of ["generation","socket","economy"]){
+    const x=pageFixture(); x.api.invalidateNpcGoldBuyGatewayPacket({type:"worldSnapshot",payload:{}});
+    const before=clone(x.scope.worldRef.current),trace=[...x.trace];
+    if(boundary==="economy")x.scope.npcPurchaseApplyingEconomyRef.current=true;
+    x.api.applyNpcPurchaseOrdinarySnapshot({...snapshot(x),gold:999},undefined,boundary==="generation"?2:1,boundary==="socket"?{}:x.socket);
+    assert.equal(x.api.readNpcGoldBuyCurrent().blocked,true,boundary);
+    assert.deepEqual(x.scope.worldRef.current,before,boundary);
+    assert.deepEqual(x.trace,trace,boundary);
+  }
 });
