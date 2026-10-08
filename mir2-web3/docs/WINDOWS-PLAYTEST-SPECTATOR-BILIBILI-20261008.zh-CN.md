@@ -55,8 +55,22 @@ $env:MIR2_ASSET_BASE_URL=$env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL
 node node_modules/next/dist/bin/next dev --webpack --hostname 127.0.0.1 --port 3211
 ```
 
-可在基础验收通过后追加 `aiLive=1&aiLiveAudio=0` 隐藏观战控制面板供直播采集。
-这不会启用 AI 解说，也不代表解说服务已部署。
+2026-10-09：观战设置默认收起，只保留右上角小按钮。展开后可选择地图或玩家，
+再点同一按钮收起。直播姬采集建议用以下页面，连设置按钮也隐藏：
+
+`http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0&capture=1`
+
+展开设置中的“直播画面”链接也会进入这个模式；用浏览器返回可恢复设置。
+采集模式保留真实实时/停更提示，不影响只读连接或服务端延迟。
+`aiLive=1&aiLiveAudio=0` 会显示独立 AI 节目层，不用于这次干净画面采集，
+也不会自动启用解说服务。30 秒是公开观战的配置策略，用来降低实时位置泄露
+影响 PK 或攻城的风险，不是网络耗时。本次界面调整未改服务器延迟或重启网关。
+
+收起→展开→收起、采集页面无面板/按钮、真实递增帧与地图人物显示均通过隔离
+浏览器验证，严格 TypeScript 通过；无玩家命令或资源 HTTP 错误。
+证据见 [收起模式](generated/player-qa/spectator-playtest-20261008/panel-collapsed-20261009.json)
+和 [直播采集模式](generated/player-qa/spectator-playtest-20261008/panel-capture-20261009.json)。
+无需 Windows 客户端重新编译或下载新安装包；刷新当前开发观战页面即可使用。
 
 ## 启用和验收
 

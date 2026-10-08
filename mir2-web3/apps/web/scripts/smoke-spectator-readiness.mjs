@@ -7,6 +7,7 @@ import os from 'node:os';
 const url = process.env.MIR2_SPECTATOR_UI_URL
   || 'http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0';
 const expectLive = process.env.MIR2_SPECTATOR_EXPECT_LIVE === '1';
+const captureMode = new URL(url).searchParams.get('capture') === '1';
 const output = path.resolve(process.env.MIR2_SPECTATOR_UI_OUTPUT || 'artifacts/spectator-readiness');
 const chrome = process.env.MIR2_CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const port = 9810 + (process.pid % 150);
@@ -42,6 +43,15 @@ async function main() {
     const result = await send('Runtime.evaluate', { expression, returnByValue: true });
     if (result.exceptionDetails) throw new Error('Browser evaluation failed');
     return result.result?.value;
+  };
+  const click = async (testId) => {
+    const point = await evaluate(`(() => {
+      const box = document.querySelector('[data-testid="${testId}"]')?.getBoundingClientRect();
+      return box && { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    })()`);
+    assert.ok(point, `Missing clickable control: ${testId}`);
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', clickCount: 1 });
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 });
   };
   try {
     await until(async () => (await fetch(`http://127.0.0.1:${port}/json/version`)).ok);
@@ -119,6 +129,21 @@ async function main() {
         throw error;
       }
     }
+    const controls = { captureMode, defaultCollapsed: true, expandedAndClosed: false };
+    assert.equal(await evaluate("!!document.querySelector('[data-testid=spectator-overlay]')"), false);
+    if (captureMode) {
+      assert.equal(await evaluate("!!document.querySelector('[data-testid=spectator-controls-toggle]')"), false);
+    } else {
+      assert.equal(await evaluate("document.querySelector('[data-testid=spectator-controls-toggle]')?.getAttribute('aria-expanded')"), 'false');
+      await click('spectator-controls-toggle');
+      await until(async () => await evaluate("!!document.querySelector('[data-testid=spectator-overlay]')"));
+      assert.ok(await evaluate("document.querySelector('[data-testid=spectator-read-only]')?.textContent?.includes('只读安全')"));
+      const captureHref = await evaluate("document.querySelector('[data-testid=spectator-capture-link]')?.href");
+      assert.equal(new URL(captureHref).searchParams.get('capture'), '1');
+      await click('spectator-controls-toggle');
+      await until(async () => !(await evaluate("!!document.querySelector('[data-testid=spectator-overlay]')")));
+      controls.expandedAndClosed = true;
+    }
     for (const key of ['ArrowRight', 'w', '1']) {
       await send('Input.dispatchKeyEvent', { type: 'keyDown', key });
       await send('Input.dispatchKeyEvent', { type: 'keyUp', key });
@@ -132,7 +157,7 @@ async function main() {
       sceneGate: window.__mir2SceneGate,
       render: JSON.parse(window.render_game_to_text?.() || '{}')
     }))()`);
-    assert.equal(state.overlay, true);
+    assert.equal(state.overlay, false);
     assert.equal(state.state, expectLive ? 'live' : 'waiting');
     assert.deepEqual(errors, []);
     for (const type of ['login', 'startGame', 'walk', 'run', 'attack', 'magic', 'useItem', 'keepAlive']) {
@@ -146,7 +171,7 @@ async function main() {
     const report = { schema: 'mir2.playtest-spectator-readiness.v1', generatedAt: new Date().toISOString(),
       url: safeUrl.toString(), expectLive, actualLiveFrameAcceptance: !!liveFrames,
       visualSceneAcceptance: expectLive && state.sceneGate?.sceneInteractionReady === true,
-      liveFrames, state, resourceFailures,
+      liveFrames, state, controls, resourceFailures,
       playerCommandsSent: [], screenshot, platformPublishing: 'not-run' };
     await fs.writeFile(path.join(output, 'readiness.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify({ expectLive, state: state.state, screenshot, platformPublishing: 'not-run' }));

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useId, useState } from "react";
+
 export type SpectatorTarget = {
   objectId: number;
   name: string;
@@ -78,22 +80,48 @@ function formatClock(value: number | null) {
 }
 
 export function SpectatorOverlay({ status, connectionState, onControl }: SpectatorOverlayProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [captureMode, setCaptureMode] = useState(false);
+  const [captureHref, setCaptureHref] = useState<string | null>(null);
+  const panelId = useId();
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    setCaptureMode(url.searchParams.get("capture") === "1");
+    url.searchParams.set("capture", "1");
+    setCaptureHref(url.pathname + url.search);
+  }, []);
   const replay = status?.replay;
   const start = replay?.startAtMs ?? 0;
   const end = replay?.endAtMs ?? start;
   const cursor = replay?.currentAtMs ?? start;
   const camera = status?.camera;
 
+  if (captureMode) return null;
+
   return (
+    <>
+    <button
+      type="button"
+      data-testid="spectator-controls-toggle"
+      aria-expanded={expanded}
+      aria-controls={expanded ? panelId : undefined}
+      onClick={() => setExpanded((value) => !value)}
+      style={{ ...controlStyle, position: "fixed", zIndex: 3501, top: 12, right: 18,
+        fontFamily: '"PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 12 }}
+    >
+      {expanded ? "收起设置" : "观战设置"}
+    </button>
+    {expanded ? (
     <aside
+      id={panelId}
       data-testid="spectator-overlay"
       aria-label="观战控制台"
       style={{
         position: "fixed",
         zIndex: 3500,
-        inset: "18px 18px auto auto",
+        inset: "50px 18px auto auto",
         width: "min(380px, calc(100vw - 36px))",
-        maxHeight: "calc(100vh - 36px)",
+        maxHeight: "calc(100vh - 68px)",
         overflow: "auto",
         pointerEvents: "auto",
         borderRadius: 12,
@@ -122,6 +150,14 @@ export function SpectatorOverlay({ status, connectionState, onControl }: Spectat
           {status ? "● 只读安全" : `● ${connectionState}`}
         </span>
       </header>
+
+      {captureHref ? (
+        <a data-testid="spectator-capture-link" href={captureHref}
+          style={{ ...controlStyle, display: "block", marginTop: 12, textAlign: "center",
+            textDecoration: "none" }}>
+          直播画面 · 隐藏观战设置
+        </a>
+      ) : null}
 
       <div
         style={{
@@ -272,5 +308,7 @@ export function SpectatorOverlay({ status, connectionState, onControl }: Spectat
         观众连接与玩家 Session 完全隔离，无法发送移动、战斗、交易或聊天指令。
       </footer>
     </aside>
+    ) : null}
+    </>
   );
 }

@@ -1,0 +1,264 @@
+{
+  "schema": "mir2.playtest-spectator-readiness.v1",
+  "generatedAt": "2026-10-08T16:07:36.345Z",
+  "url": "http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0&capture=1",
+  "expectLive": true,
+  "actualLiveFrameAcceptance": true,
+  "visualSceneAcceptance": true,
+  "liveFrames": {
+    "firstSequence": 1346,
+    "nextSequence": 1347,
+    "capturedAtMs": 1791475625433,
+    "mapFileName": "0"
+  },
+  "state": {
+    "badge": "即時觀戰 · 延遲 30 秒",
+    "state": "live",
+    "overlay": false,
+    "sceneGate": {
+      "screen": "game",
+      "sceneInteractionReady": true,
+      "sceneSpriteLibrariesReady": true,
+      "pendingSceneSpriteLibraryCount": 0,
+      "pendingSceneSpriteLibraryKeys": [],
+      "desiredSceneSpriteLibraryCount": 8,
+      "preloadStatus": "timeout",
+      "preloadInteractionReady": true,
+      "preloadReady": true,
+      "preloadFailed": 0,
+      "hasRenderPlayer": true,
+      "hasMapRegion": true,
+      "gpuEntityRendererRuntimePending": false,
+      "useGpuEntityRenderer": false
+    },
+    "render": {
+      "mode": "spectator",
+      "connection": "open",
+      "status": {
+        "camera": null,
+        "capturedAtMs": 1791475625433,
+        "delayMs": 30000,
+        "director": false,
+        "directorAuthorized": false,
+        "events": [],
+        "map": "0",
+        "matches": [
+          {
+            "entityCount": 6,
+            "latestCapturedAtMs": 1791475655433,
+            "latestSequence": 1367,
+            "mapFileName": "0",
+            "mapTitle": "BichonProvince",
+            "playerCount": 1,
+            "recordingId": "0-497632"
+          }
+        ],
+        "readOnly": true,
+        "recordingId": "0-497632",
+        "replay": {
+          "active": false,
+          "currentAtMs": null,
+          "endAtMs": null,
+          "playing": false,
+          "speed": 1,
+          "startAtMs": null
+        },
+        "sequence": 1347,
+        "target": null,
+        "targets": [
+          {
+            "hp": 35,
+            "maxHp": 35,
+            "name": "father",
+            "objectId": 1000,
+            "x": 331,
+            "y": 267
+          }
+        ]
+      },
+      "aiLive": {
+        "distribution": {
+          "channels": [
+            {
+              "channel": "gameOverlay",
+              "configured": true,
+              "deadLettersTotal": 0,
+              "deliveredTotal": 0,
+              "deliveryMode": "inProcess",
+              "enabled": true,
+              "failureTotal": 0,
+              "label": "游戏内节目层",
+              "lastError": null,
+              "lastFailureAtMs": null,
+              "lastSuccessAtMs": null,
+              "launchRequired": true,
+              "queued": 0,
+              "runtime": null,
+              "state": "ready",
+              "target": null
+            },
+            {
+              "channel": "webBroadcast",
+              "configured": false,
+              "deadLettersTotal": 0,
+              "deliveredTotal": 0,
+              "deliveryMode": "pull",
+              "enabled": false,
+              "failureTotal": 0,
+              "label": "Web / HLS",
+              "lastError": null,
+              "lastFailureAtMs": null,
+              "lastSuccessAtMs": null,
+              "launchRequired": true,
+              "queued": 0,
+              "runtime": null,
+              "state": "unconfigured",
+              "target": null
+            },
+            {
+              "channel": "rtmpBroadcast",
+              "configured": false,
+              "deadLettersTotal": 0,
+              "deliveredTotal": 0,
+              "deliveryMode": "relay",
+              "enabled": false,
+              "failureTotal": 0,
+              "label": "RTMP / RTMPS",
+              "lastError": null,
+              "lastFailureAtMs": null,
+              "lastSuccessAtMs": null,
+              "launchRequired": true,
+              "queued": 0,
+              "runtime": null,
+              "state": "unconfigured",
+              "target": "youtube"
+            },
+            {
+              "channel": "discordWebhook",
+              "configured": false,
+              "deadLettersTotal": 0,
+              "deliveredTotal": 0,
+              "deliveryMode": "push",
+              "enabled": false,
+              "failureTotal": 0,
+              "label": "Discord 高光",
+              "lastError": null,
+              "lastFailureAtMs": null,
+              "lastSuccessAtMs": null,
+              "launchRequired": true,
+              "queued": 0,
+              "runtime": null,
+              "state": "unconfigured",
+              "target": null
+            },
+            {
+              "channel": "discordGoLive",
+              "configured": false,
+              "deadLettersTotal": 0,
+              "deliveredTotal": 0,
+              "deliveryMode": "push",
+              "enabled": false,
+              "failureTotal": 0,
+              "label": "Discord Go Live Relay",
+              "lastError": null,
+              "lastFailureAtMs": null,
+              "lastSuccessAtMs": null,
+              "launchRequired": false,
+              "queued": 0,
+              "runtime": null,
+              "state": "unconfigured",
+              "target": null
+            },
+            {
+              "channel": "clipExport",
+              "configured": false,
+              "deadLettersTotal": 0,
+              "deliveredTotal": 0,
+              "deliveryMode": "push",
+              "enabled": false,
+              "failureTotal": 0,
+              "label": "短视频导出",
+              "lastError": null,
+              "lastFailureAtMs": null,
+              "lastSuccessAtMs": null,
+              "launchRequired": false,
+              "queued": 0,
+              "runtime": null,
+              "state": "unconfigured",
+              "target": null
+            }
+          ],
+          "launch": {
+            "blockers": [
+              "Web / HLS: unconfigured",
+              "RTMP / RTMPS: unconfigured",
+              "Discord 高光: unconfigured"
+            ],
+            "profile": "launch-v1",
+            "readyChannels": 1,
+            "readyForLaunch": false,
+            "requiredChannels": 4
+          },
+          "metrics": {
+            "deadLettersTotal": 0,
+            "deliveredTotal": 0,
+            "failureTotal": 0,
+            "queuedDeliveries": 0
+          },
+          "recentReceipts": [],
+          "schema": "obelisk.mir2.ai-distribution.v1"
+        },
+        "enabled": false,
+        "latestSegment": null,
+        "metrics": {
+          "discordDeadLettersTotal": 0,
+          "discordFailureTotal": 0,
+          "discordSuccessTotal": 0,
+          "distributionDeadLettersTotal": 0,
+          "distributionFailureTotal": 0,
+          "distributionSuccessTotal": 0,
+          "enabled": false,
+          "generatedSegmentsTotal": 0,
+          "mode": "shadow",
+          "modelFailureTotal": 0,
+          "modelSuccessTotal": 0,
+          "persistedSegmentsTotal": 0,
+          "persistenceErrorsTotal": 0,
+          "processedFramesTotal": 0,
+          "queuedDiscordDeliveries": 0,
+          "queuedDistributionDeliveries": 0,
+          "running": false,
+          "scoredHighlightsTotal": 0,
+          "ttsFailureTotal": 0,
+          "ttsSuccessTotal": 0
+        },
+        "mode": "shadow",
+        "providers": {
+          "broadcastUrlConfigured": false,
+          "discordConfigured": false,
+          "textConfigured": false,
+          "ttsConfigured": false
+        },
+        "recentSegments": [],
+        "running": false,
+        "schema": "obelisk.mir2.ai-live.v1"
+      },
+      "world": {
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "tick": 2739,
+        "playerObjectId": "1000",
+        "entityCount": 6
+      }
+    }
+  },
+  "controls": {
+    "captureMode": true,
+    "defaultCollapsed": true,
+    "expandedAndClosed": false
+  },
+  "resourceFailures": [],
+  "playerCommandsSent": [],
+  "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\playtest-bilibili-spectator\\mir2-player-journey\\mir2-web3\\apps\\web\\artifacts\\spectator-readiness\\panel-capture-20261009\\spectator-live.png",
+  "platformPublishing": "not-run"
+}

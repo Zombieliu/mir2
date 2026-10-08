@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-09 local spectator panel no longer covers the live game by default.
+> Settings collapse to a small button; capture=1 removes both panel and button.
+> Actual public read-only browser frames/map/avatar, expand-close interaction,
+> capture UI and strictTS pass with no player commands or HTTP resource errors.
+> No Gateway restart, delay change or Windows package update; Bilibili reception
+> remains a human account-side gate. [Evidence](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
+
 > 2026-10-08 playtest spectator frontend retains /playtest independently from
 > player credentials and shows waiting/buffering/live/stale/replay states.
 > Initial public-delay buffering and spectator keepAlive bugs are corrected;
