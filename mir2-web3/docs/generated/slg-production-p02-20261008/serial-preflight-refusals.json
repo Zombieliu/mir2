@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.production-preflight-refusal.v1",
+  "timeUtc": "2026-10-08T09:22:31.2272031Z",
+  "attempts": 2,
+  "phase": "npc-regression preflight",
+  "cargoSpawned": false,
+  "productTestsExecuted": 0,
+  "reason": "Original wrapper serial-Cargo check found another Cargo/rustc invocation. No guard or probe was spawned and no threshold changed.",
+  "observedProcesses": []
+}

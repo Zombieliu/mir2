@@ -39,6 +39,8 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    PersonalProductionState, PersonalProductionConfig, PersonalProductionFacility,
+    ProductionDurableExecution, ProductionDurableError,
     RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence, RankingInspectRequest,
     SharedMonsterKillCommitFailure,
     NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,

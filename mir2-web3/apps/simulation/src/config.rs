@@ -1756,6 +1756,9 @@ pub struct CharacterSaveRecord {
     /// Absent on legacy saves; never projected through WorldSnapshot or mail.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
+    /// Private personal jobs; published with the same inventory/wallet checkpoint.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_production: Option<crate::runtime::PersonalProductionState>,
     #[serde(default, skip_serializing_if = "GuildExperienceJournal::is_empty")]
     pub guild_experience_journal: GuildExperienceJournal,
     /// Optimistic revision for the complete private character snapshot.
@@ -1873,6 +1876,7 @@ impl CharacterSaveRecord {
             revision: 0,
             guild_experience_journal: GuildExperienceJournal::default(),
             npc_purchase_journal: None,
+            personal_production: None,
             character,
             map_file_name: String::new(),
             map_title: String::new(),

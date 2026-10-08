@@ -150,6 +150,48 @@ impl ProductionLedger {
     pub fn job(&self, id: &str, owner: &ProductionOwner) -> Option<&ProductionJob> {
         self.jobs.get(id).filter(|j| &j.owner == owner)
     }
+    /// Private server checkpoint inspection. Never project other owners' jobs.
+    pub fn jobs_for<'a>(
+        &'a self,
+        owner: &'a ProductionOwner,
+    ) -> impl Iterator<Item = &'a ProductionJob> {
+        self.jobs.values().filter(move |job| &job.owner == owner)
+    }
+    pub fn belongs_to(&self, owner: &ProductionOwner) -> bool {
+        self.jobs.values().all(|job| &job.owner == owner)
+            && self.receipts.iter().all(|row| &row.owner == owner)
+    }
+    /// Recovery precedes range, current catalog, capacity, fees and UID issuance.
+    pub fn query(
+        &self,
+        owner: &ProductionOwner,
+        command: &ProductionCommand,
+    ) -> Result<Option<ProductionReceipt>, ProductionError> {
+        if !valid_owner(owner) || !valid_request(&command.request_id) {
+            return Err(ProductionError::InvalidRequest);
+        }
+        match self
+            .receipts
+            .iter()
+            .find(|row| &row.owner == owner && row.command.request_id == command.request_id)
+        {
+            Some(row) if row.command == *command => Ok(Some(row.receipt.clone())),
+            Some(_) => Err(ProductionError::RequestConflict),
+            None => Ok(None),
+        }
+    }
+    /// Ordinary saves can carry an older prefix, but cannot invent or rewrite
+    /// committed history. Restore has already checked each receipt transition.
+    pub fn is_history_prefix_of(&self, newer: &Self) -> bool {
+        newer.receipts.starts_with(&self.receipts)
+            && self.jobs.iter().all(|(id, job)| {
+                newer.jobs.get(id).is_some_and(|new_job| {
+                    let mut frozen = new_job.clone();
+                    frozen.status = job.status.clone();
+                    frozen == *job
+                })
+            })
+    }
     pub fn checkpoint_json(&self) -> Result<String, ProductionError> {
         // Bound the encoded bytes, including JSON escapes, before returning a save proposal.
         struct Writer {

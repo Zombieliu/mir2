@@ -27,6 +27,12 @@ pub enum ProductionError {
     LedgerFull,
     InvalidCheckpoint,
 }
+impl std::fmt::Display for ProductionError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(formatter, "{self:?}")
+    }
+}
+impl std::error::Error for ProductionError {}
 pub(crate) fn add(a: u64, b: u64) -> Result<u64, ProductionError> {
     a.checked_add(b).ok_or(ProductionError::Overflow)
 }
