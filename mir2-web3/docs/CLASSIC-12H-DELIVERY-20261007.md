@@ -1,10 +1,42 @@
 # Classic gameplay delivery — 12-hour resumed work
 
 Started 2026-10-07 15:13:35 UTC. Delivery checkpoint is 2026-10-08
-03:13:35 UTC / 11:13 Asia/Shanghai. Work remains active; this document does
-not mark the older blocked Goal API record complete.
+03:13:35 UTC / 11:13 Asia/Shanghai. That12-hour checkpoint was missed.
+Its expired automatic follow-up is stopped as instructed; the broader Goal is
+not complete and no older blocked Goal is presented as complete.
 
-## Current status — 2026-10-08 01:05 UTC
+## Actual delivery checkpoint — 2026-10-09
+
+The published Windows client is R22/source7fea, signed feed17. The playtest
+Gateway now runs536b4a59f3, replacinga41 with the compatible disconnect/frozen-save
+fix after strict session/TCP/spectator drain. Successful exact-source Linux
+CI37810114063 covers the original classic source, save/recovery, PostgreSQL and
+siege gates. Fresh public protocol acceptance is44 ordinary appearance/movement/
+relogin checks plus18 native-resume checks, with14 acknowledged normal logouts.
+Three actual transport losses preserve the exact acknowledged actor/item/gold
+state and reject used-ticket replay. Original realm, source saves, current
+spectator configuration and service resource limits were preserved and rechecked.
+There is no client reinstall for this server-only fix.
+
+| Priority | Actual implementation/test/release state | Still required before complete gameplay acceptance |
+| --- | --- | --- |
+| P1 movement/combat | Earlier escape/old-intent changes are in R22. New independent transport-close signaling, real movement-work drain and frozen save/recovery are in the published Gateway536; local Gateway270/recovery7, Linux CI and public disconnect/relogin gates pass. | Strict all-class seven-monster held-right escape, continued attack and no-drift native acceptance remains RED/inconclusive; ordinary WSS smoke does not replace it. |
+| P2 late maps/Boss/loot | R22 includes the previously verified208 runtime maps/209 native resource maps and bounded controller/doorway/book rules. Source implementation is included in the published pair. | Natural three-class progression, conditional entrances, actual Boss/equipment/book acquisition at original odds and native resource/render acceptance. |
+| P3 XP/drop ownership | Original party distance/level/f32 allocation, Source CAS and bounded Boss/PK/potion ownership work are included; exact-source Linux classic/source gates pass. | Remaining original Hero/Pet group-health refresh and broad natural Boss/PK/group ownership, cross-zone/death/save recovery acceptance. |
+| P4 Taoist pets/PK | Shared typed targets/modes/group/Guild/safe/life guards, growth/save/recall/logout/cold restore and bounded TCP/WS source stories are included. | Source NPC shared-pet/world outbox, unsupported Totem owner chain and natural native/public lifecycle acceptance. |
+| P5 Guild/ordinary war | Management/ranks/notices, symmetric paid wars and earned Guild XP in Source CAS are included. Linux PostgreSQL competing-writer/clock and live bridge gates pass. | Native two-account management/war/restart gameplay acceptance and broader natural ordinary-war/earned-XP validation. |
+| P6 mining/weapon upgrade | Source mining/refine/custody/material/fee/rollback/cold-state implementation and bounded regression are included; R22 client carries its NPC/wire/UI work. | Complete normal published Windows Carlos deposit/start/check/collect/failure workflow and human mining/refining acceptance. |
+| P7 map events | Parsed source/default NPC hooks, bounded queue, same-CAS rollback/replay and selected trigger tests are included. | Shared authoritative GIVEPET/REMOVE/CLEAR/MONGEN/MONCLEAR/GROUPTELEPORT/CHECKHUM outbox, ground-hole caller and source-supported general event scheduling remain unimplemented/unverified. |
+| Mentor | Source final-XP bank, expiry/graduation/logout once-only recipient settlement and bounded two-account TCP/WS/cold/rollback stories are included. | Published pair's normal native two-account complete workflow and human acceptance. |
+
+No overall completion percentage or100% Candidate claim is inferred from builds,
+data imports or test counts. P7 still has implementation gaps, and the other
+rows retain their stated natural/native gates. The deadline's heartbeat is
+PAUSED; the main Goal is not marked complete. Full raw CI output, deployment
+receipts, rejected attempts and complete sanitized public traces are linked in
+[the released disconnect-fix evidence](GATEWAY-DISCONNECT-LIFECYCLE-20261008.md).
+
+## Historical checkpoint — 2026-10-08 01:05 UTC
 
 The new shared gameplay implementation is a committed Candidate pending successful exact-source
 CI and paired publication. Commit c9fdd117f9669ea208c44a38206020db4f3497e3 is pushed;

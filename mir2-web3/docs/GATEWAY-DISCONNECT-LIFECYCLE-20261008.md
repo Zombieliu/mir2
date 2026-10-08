@@ -1,4 +1,4 @@
-# Gateway disconnect lifecycle Candidate — 2026-10-08
+# Gateway disconnect lifecycle — released fix, 2026-10-09
 
 The native character-select error `character is already online or route lease
 is unavailable` can persist when transport closure waits behind a full input
@@ -49,7 +49,7 @@ are not hidden by equality checks or broad schema/packet changes.
   remaining deadline101, replay and ordinary cold login, clock alteration rejection.
 - Running valid refine target UID and timed buff: primary save, journal replay,
   lost cleanup ACK, revision+1 and exact frozen bytes; no second source save.
-- Gateway debug build passes. This is not the Linux release binary or native QA.
+- Gateway debug build and exact-source Linux release pass. Native rendering and gameplay acceptance remain open.
 
 The immutable evidence receipt binds base7fea plus all changed/new code file
 hashes, the unabridged output archive, source patch/new files and debug binary.
@@ -60,11 +60,43 @@ removed or replaced with weaker gameplay thresholds.
 
 [Candidate receipt and full originals](generated/player-qa/gateway-disconnect-20261008/candidate-01/README.md).
 
-Public R22/source7fea, signed feed17 and Gatewaya41 were published by a separate
-delivery slice. The last direct health read observed no sessions/route leases.
-This Candidate has not yet changed that server or the installed client. Next:
-commit/push, exact-source Linux release/security/PostgreSQL gates, strict drained
-test-server rollout and normal public reconnect/save/relogin verification.
+Source536b4a59f3a8af43f6d4484238e2847573dfb106 is committed and pushed on
+codex/gateway-disconnect-lifecycle-20261008. Exact-source [Linux CI37810114063](https://github.com/Zombieliu/mir2/actions/runs/37810114063)
+passed both build-linux-x64 and siege-acceptance jobs, including the original
+appearance, trusted recovery, classic source, PostgreSQL competing-writer/clock
+and live protocol boundaries. The actual Gateway ELF is83430592 bytes with SHA256
+755b02a845869551c79017ecb6392a1faee8007ebc117001443a294feb050dba.
+
+The playtest Gateway changed froma41 to536 only after all six capacity counters,
+native TCP connections and spectator viewers were zero. Private DB/state/config
+backups precede normal old/Candidate stops and cold start. The source-pinned
+running binary, original realm PID/release, environment, base unit, independently
+changed spectator drop-in and resource limits were checked again afterward.
+The first stale spectator-config preflight refused the switch and mutated no
+service. Current spectator settings were preserved in the accepted second preflight.
+
+Public WSS ordinary44 and final native-resume18 checks pass, with14 normal logout
+acknowledgements. Three real socket terminations use native resume rather than
+fresh StartGame; each verifies rotation, used-ticket refusal, one actor copy,
+exact acknowledged position/direction/gold/full item fields, resumed live authority,
+normal logout and fresh saved login. TLS/authentication stay enabled; existing
+owned actors use no admin/QA grants, registrations or new character creation.
+The first resume run completed15 checks before an unspecified WSS connection
+failure; it is retained and excluded from the62 accepted checks. Retry02 changes
+only its output directory and error diagnostics, preserving all business checks.
+The intervening sandbox DNS failure ran no public tests. Its cause does not prove
+the cause of the earlier WSS failure. No full saturated-queue public/native render
+acceptance is claimed by this protocol verification.
+
+The complete sanitized trace export also redacts historical credentialId metadata
+without removing any events; original local file hashes and replacement paths are
+recorded. Private ledger/config/database contents are never copied into Git.
+[Release receipts and unabridged CI/sanitized traces](generated/player-qa/gateway-disconnect-20261008/release-01/README.md).
+
+Windows R22/source7fea and signed feed17 were published separately and remain the
+client pair. This is a compatible server-only fix; no reinstall is required.
+The expired12-hour heartbeat is now PAUSED because its instructed deadline passed,
+not because the broader Goal is complete. [Actual delivery and remaining gates](CLASSIC-12H-DELIVERY-20261007.md).
 
 The original12-hour checkpoint was missed. The P1-P7 Goal remains active and is
 not100%: dense-monster native escape, natural late-map/Boss/loot, shared NPC event

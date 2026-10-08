@@ -1,16 +1,17 @@
 # Agent Orchestration
 
-> 2026-10-08 disconnect-lock Candidate: transport close/read failure is observed
-> independently of the saturated player input queue. Shared socket writes have
-> one10-second budget including lock/ready/flush; real admitted movement work
-> drains before the original save/journal/resume/lease decision. Prepared saves
-> preserve frozen buff/refine bytes and original durable skill clocks; trusted
-> recovery reads do not execute StartGame/DefaultNPC or revive a dead character.
-> Local Gateway270, recovery7 and debug build pass. Raw failures/baseline, exact
-> source-file hashes and full outputs are retained. Public R22/feed17/Gatewaya41
-> was published separately; this fix still requires exact-source Linux CI and
-> drained test-server rollout. Native and fullP1-P7/100% acceptance remain open.
-> [Scope and evidence](GATEWAY-DISCONNECT-LIFECYCLE-20261008.md).
+> 2026-10-09 disconnect fix released: source536b4a59f3 is committed/pushed and
+> exact-source Linux CI37810114063 passed the original appearance, trusted
+> recovery, classic source, PostgreSQL and siege gates. The playtest Gateway
+> changed froma41 only after six capacity counters, TCP connections and spectator
+> viewers drained to zero, with private backups and successful normal/cold stops.
+> Public ordinary44 and final native-resume18 checks pass, including three actual
+> socket losses, ticket rotation/replay refusal and exact position/item/gold state;
+>14 normal logout acknowledgements. The first15-check WSS failure remains retained
+> and is excluded. Original realm/config/resources remain verified; R22/feed17
+> client needs no reinstall. Native dense-monster/human and fullP1-P7/Mentor gates
+> remain open; no100% claim. The expired12-hour heartbeat is stopped as instructed.
+> [Released scope and evidence](GATEWAY-DISCONNECT-LIFECYCLE-20261008.md).
 
 
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
