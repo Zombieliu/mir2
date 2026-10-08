@@ -1,0 +1,46 @@
+{
+  "schema": "mir2.classic.checkpoint-observation.v1",
+  "utc": "2026-10-08T05:13:32.361985+00:00",
+  "scope": "bounded NPC Source semantics and completed local R22 package; not full P1-P7 acceptance",
+  "npcPatchNotIncludedInFrozenR22": true,
+  "delivery01Failure": {
+    "source": "original tool stderr observed by release lead; stdout log is retained separately",
+    "message": "delivery build failed: alternate data stream rejected: D:\\",
+    "outputRetained": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-01",
+    "recovery": "fresh delivery-02 with only independently verified plain R20 base; no stream removed or gate relaxed"
+  },
+  "npcTests": {
+    "semanticRed": {
+      "passed": 1,
+      "failed": 8,
+      "log": "npc-pet-source-semantics-03.log"
+    },
+    "focusedGreen": {
+      "passed": 9,
+      "failed": 0,
+      "log": "npc-pet-source-semantics-09-final-focused.log"
+    },
+    "defaultHooks": {
+      "passed": 24,
+      "failed": 0,
+      "log": "npc-pet-source-semantics-06-default-hooks-adjacent.log"
+    },
+    "ordinaryQuest": {
+      "passed": 1,
+      "failed": 0,
+      "log": "npc-pet-source-semantics-07-normal-quest-adjacent.log"
+    },
+    "adjacent": {
+      "passed": 54,
+      "failed": 2,
+      "log": "npc-pet-source-semantics-05-npc-adjacent.log"
+    },
+    "exactBaseline": {
+      "passed": 54,
+      "failed": 2,
+      "log": "npc-pet-source-semantics-08-exact-baseline-adjacent.log"
+    }
+  },
+  "publicCutoverClaimed": false,
+  "nativeShopWheelAcceptanceClaimed": false
+}

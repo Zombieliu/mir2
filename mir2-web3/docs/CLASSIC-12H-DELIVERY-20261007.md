@@ -7,7 +7,55 @@ The03:36 Goal API read returned no active goal, not a completed result;
 the authorized unfinished scope was subsequently recorded as an active Goal.
 That does not reset the original12-hour deadline or imply completion.
 
-## Current delivery checkpoint — 2026-10-08 03:32 UTC
+## Current local package and bounded Source slice — 2026-10-08
+
+R22 final local package at frozen7fea passes original packaging and verification:
+154579 payload files,986493911 bytes; manifest31538315 bytes is within the
+unchanged32MiB updater bound. Manifest SHA256 is
+00967a994d9586c574ca89d5ea4046b25f0a79c346d63fe76f261c0c23735916;
+unmodified EXE and v2 build attestation remain bound to their authentic CI bytes.
+Original package CMS and both missing refine PNGs pass. This external package
+has original sourceRepoCheck=unavailable by design; a separately retained call
+to the original source/build-contract functions verifies the exact clean7fea
+checkout. No inner verifier source check is falsely reported.
+
+Earlier atlas-path, metadata retrieval, private provenance and PowerShell5.1
+43.75MB-manifest failures remain retained. Fresh PowerShell7.6.5 packaging uses
+the unchanged13 core validation functions and32MiB bound. Public provenance
+keeps source hashes/crops and the digest of its retained private original.
+
+Fresh delivery-02 original build passes:15 bundles totaling841850618 bytes and
+the verified R20 base delta25720210 bytes. Descriptor SHA256 is
+d8588a95aaa384b4fb5cc3e27f3f4b7648cdd39616fc81c699f2fc865af56f4f.
+Delivery-01's second D:R19 base was correctly rejected for an ADS on the drive;
+its outputs are retained and no stream was deleted. Delivery-02 uses only the
+plain verified R20 base; other clients can use the complete EXE bundle.
+Decoded delivery validation and the separate external CMS/signing gate pass;
+the Python decoded receipt still correctly says cmsVerified=false because it
+delegates signatures to the original Windows wrapper. Locally signed feed17
+has SHA256e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f.
+Admission/CDN and public paired rollout are still pending. Private gateway
+stage/extraction/seal are verified;
+no service mutation has occurred. Public c6/feed16 and the active R19 client
+are unchanged. The pending normal-exit question permits a verified R20 client
+switch without restarting the gateway. Native wheel acceptance remains open.
+
+Separately, the personal NPC compatibility runtime now matches original
+NPCSegment.cs GIVEPET: explicit0 is legal; the5 cap is per action; only newly
+created pets receive grade; birth uses the owner's exact tile/facing and the
+original1000ms initial action delay. Short CHECKHUM lines below4 total tokens
+are omitted by the parser, including the actual expanded quest149 hook.
+Root independently checked original byte parsing/caps and the9 focused tests;
+24 trusted DefaultNPC and1 ordinary quest tests pass. The adjacent NPC suite
+has54 pass/2 failures, both reproduced with the exact baseline file and not
+suppressed. Original03 RED1/8 and all04–09 logs are archived byte-for-byte.
+This new slice is outside frozen7fea/R22. It does not deliver shared Zone pets,
+delayed CLEARPETS, world outbox or scheduled P7 events; those remain open.
+
+[Actual proof and retained logs](generated/player-qa/classic-20261008/delivery-checkpoint-02/ARCHIVE.json).
+The original12-hour deadline and unfinished overall scope are unchanged.
+
+## Historical delivery checkpoint — 2026-10-08 03:32 UTC
 
 Both release workflows have now completed successfully. Windows37712122111
 at clean game7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc produced the authenticated

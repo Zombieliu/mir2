@@ -1,0 +1,55 @@
+{
+  "schema": "mir2.windows.final-frozen-source-attestation.v1",
+  "utc": "2026-10-08T04:46:37.3238071Z",
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "sourceClean": true,
+  "sourceRepoCheck": "checked",
+  "sourceRoot": "C:/Users/Administrator/.codex/worktrees/remote-player-appearance/mir2-player-journey/mir2-web3",
+  "packageRoot": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22",
+  "originalPackagerSha256": "0D414EF1B8494859C773CF6C0BE293EE5A9050E745C99D7F8FD683B5FFD380B6",
+  "originalFunctionTextsUsed": [
+    {
+      "name": "Get-WorktreeState",
+      "originalTextUsedWithoutChange": true,
+      "sha256": "0669B6D45B0E5470B3C8A7E093C84A15AE2556081EEC0C1634FE450CE3DEC7BD"
+    },
+    {
+      "name": "Read-BuildAttestation",
+      "originalTextUsedWithoutChange": true,
+      "sha256": "E6ADA53ADE3C3F79ACC5C620384D0E81CBE150A369636D422709F4D6AA848126"
+    },
+    {
+      "name": "Assert-Attestation",
+      "originalTextUsedWithoutChange": true,
+      "sha256": "3DAB6F8F7918EBB363B4D332F9113C7B7761D14489D7E5B5D57E45AC1E8CC0EF"
+    },
+    {
+      "name": "Test-StructuredBuildContract",
+      "originalTextUsedWithoutChange": true,
+      "sha256": "D3B788E4E38433538AB16D76B988798DA09F9F93D06B4DDFA23F26B643A2BD50"
+    }
+  ],
+  "worktree": {
+    "revision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+    "dirty": false,
+    "statusLineCount": 0,
+    "statusScope": "git-status-z+diff+all-untracked-content-v2",
+    "statusSha256": "A19D254553D8171F90749200E797D4AF7F72056851E0E8849B0496CA46522AD7"
+  },
+  "attested": {
+    "exeSha256": "8EBB7E8E32FBF2A577B90E2341767CC34B467A021E23406003D55597B077BC22",
+    "cargoVersion": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+    "rustcVersion": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "buildCompletedUtc": "2026-10-08T02:20:35.1009823Z",
+    "attestationSha256": "4900E283FCAE1112CEC678CAC98E0ACCA0BDC348229966ACE28F69717F6FBF64"
+  },
+  "exactStructuredBuildContractPassed": true,
+  "exactWorktreeDigestMatched": true,
+  "exactToolchainMatched": true,
+  "originalExeAndAttestationUnmodified": true,
+  "originalNonvisualVerifierSourceRepoCheck": "unavailable",
+  "originalVerifierSkippedRepoCheckBecausePackageIsExternal": true,
+  "originalVerifierReportUnmodified": true,
+  "auditScriptSha256": "65947702D731768A3F84EEECDF8E11602946DDA669CF2880461FEDB320C57722",
+  "allPassed": true
+}
