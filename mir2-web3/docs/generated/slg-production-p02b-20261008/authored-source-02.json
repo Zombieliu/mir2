@@ -1,0 +1,78 @@
+{
+  "schema": "mir2.production-p02b-authored-source.v1",
+  "createdUtc": "2026-10-08T11:52:48.5744884Z",
+  "parent": "fde81a0de5084d02b3daaa30bac4d4f1fde411f4",
+  "scope": "Controlled File UID binding, staged NPC purchases, splits and production. Public catalog stays disabled; remaining issuers and PostgreSQL pending.",
+  "files": [
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "f9f7ca7fbb54d01f0edb29f9e1cb02ae3de4219448660c3ffed0c5853477e894",
+      "length": 300129
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "9b641a438dfd5155a1f9d7d5619d3c02f5eeedfc7f3c2b5a4d4b4e3f40829d83",
+      "length": 43379
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "sha256": "96a84c942253ae5c03b4ec61987b8254a6ab6cf06e75d359d291c1e92303be73",
+      "length": 7221
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/resources.rs",
+      "sha256": "13a0bbec2221ff8717d3d314deba7ab015056fa34b6e99fefa07bf839228f90d",
+      "length": 39340
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "b6651bd7cb9a094a2c1dc526b24f7dcb763c47108fe292e4dca058466e261eae",
+      "length": 90281
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "342fdc12cba69a42236bde6b8fdaf168e17a41d075526e0876c6ef7a47abfb45",
+      "length": 165805
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "3ff20a99220bad7b586313ff1aa9cd00c478c28323ac2ff65023225006122ce8",
+      "length": 183632
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "sha256": "1f704851da549d099684152ca87520b237790eca0a7799858f26b84f2bf46cba",
+      "length": 51869
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+      "sha256": "1ddfc16001f1516011809ba1ac583c092f9db5932ebc1fb575c269077581915e",
+      "length": 41045
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "sha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a",
+      "length": 32768
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production_tests.rs",
+      "sha256": "c807963008c37e74af3162a2a7cb884fc223616c10ffbb40b73e88fc37a3f89d",
+      "length": 29871
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "sha256": "36692abb9a7b3437c39932a3a0de67ce45c9ad68fb3cee493dca20880d2bb4c5",
+      "length": 8231
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance_tests.rs",
+      "sha256": "b118b831c32b981fbb5f73c33cd98f52abd05765fdf7afd4f3ac16dd24a08332",
+      "length": 13455
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_uid_tests.rs",
+      "sha256": "47550355d37288acd7ce27be8751a7d98d114c04b6ec912f1a7a53105da8a215",
+      "length": 7347
+    }
+  ]
+}

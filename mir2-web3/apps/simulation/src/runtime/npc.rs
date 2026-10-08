@@ -1117,6 +1117,9 @@ fn prepare_npc_purchase_checked(world: &World, request: NpcPurchaseRequest, ordi
     let pearls = world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls;
     let balance = if uses_pearls { pearls.max(0) as u32 } else { gold };
     if balance < cost { reject!(NpcGoldBuyRejection::InsufficientGold); }
+    if super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+        reject!(NpcGoldBuyRejection::InvalidDelivery);
+    }
     let resources = world.resource::<InventoryResource>();
     let (inventory, incoming) = if source == NpcPurchaseSource::Trade && !uses_pearls {
         let Some(now_utc_ticks) = npc_gold_trade_utc_ticks(world, &service) else { reject!(NpcGoldBuyRejection::ClockUnavailable); };

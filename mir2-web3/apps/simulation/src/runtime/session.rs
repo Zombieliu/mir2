@@ -227,6 +227,7 @@ impl SimulationSession {
         super::mining::rebuild_mine_spots(app.world_mut());
         app.insert_resource(super::hazard::MapHazardResource::default());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.item_uid_issuance = config.item_uid_issuance.clone();
         inventory.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();
@@ -271,6 +272,8 @@ impl SimulationSession {
             .resource_mut::<RuntimeConfigResource>()
             .config
             .rebind_account_store_from(authoritative);
+        let issuance = self.app.world().resource::<RuntimeConfigResource>().config.item_uid_issuance.clone();
+        self.app.world_mut().resource_mut::<InventoryResource>().item_uid_issuance = issuance;
     }
 
     pub fn set_language(&mut self, language: LanguageCode) {

@@ -3776,6 +3776,7 @@ pub struct SimulationConfig {
     pub onchain_mine_nodes: Vec<OnchainMineNodeRecord>,
     pub map_hazards: Vec<MapHazardRecord>,
     pub account_store: SharedAccountStore,
+    pub(crate) item_uid_issuance: crate::runtime::item_uid_issuance::ItemUidIssuance,
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
     pub account_store_database_mode: AccountStoreDatabaseMode,
@@ -3845,6 +3846,9 @@ impl SimulationConfig {
             .clone();
         let mut fork = self.clone();
         fork.account_store = Arc::new(Mutex::new(account_store));
+        if matches!(fork.item_uid_issuance, crate::runtime::item_uid_issuance::ItemUidIssuance::Durable(_)) {
+            fork.item_uid_issuance = crate::runtime::item_uid_issuance::ItemUidIssuance::Unavailable;
+        }
         fork.guild_clock_driver = Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default()));
         fork.guild_clock_updates = Arc::new(std::sync::atomic::AtomicU64::new(0));
         fork.account_store_persist_lock = Arc::new(Mutex::new(()));
@@ -3875,6 +3879,7 @@ impl SimulationConfig {
     /// world state while future character saves use the live host repository.
     pub fn rebind_account_store_from(&mut self, authoritative: &Self) {
         self.file_authority = authoritative.file_authority.clone();
+        self.item_uid_issuance = self.item_uid_issuance.rebind_from(&authoritative.item_uid_issuance);
         self.guild_clock_driver = Arc::clone(&authoritative.guild_clock_driver);
         self.guild_clock_updates = Arc::clone(&authoritative.guild_clock_updates);
         self.account_store = Arc::clone(&authoritative.account_store);
@@ -3969,6 +3974,7 @@ impl SimulationConfig {
             onchain_mine_nodes: Vec::new(),
             map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
+            item_uid_issuance: Default::default(),
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,

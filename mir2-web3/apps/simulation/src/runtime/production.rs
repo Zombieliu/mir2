@@ -326,43 +326,6 @@ fn input_lots(
     Ok(lots)
 }
 
-/// Conservative high-water scan of the locked complete image. Encoded custody
-/// and stage5 JSON strings are included; field names never substitute templates.
-fn uid_floor(value: &serde_json::Value, depth: usize) -> Result<u64, String> {
-    if depth > 64 {
-        return Err("production UID inventory scan depth exceeded".into());
-    }
-    let mut floor = 0;
-    match value {
-        serde_json::Value::Object(fields) => {
-            for (key, value) in fields {
-                if matches!(
-                    key.as_str(),
-                    "unique_id" | "uniqueId" | "uid" | "user_item_unique_id"
-                ) {
-                    if let Some(uid) = value.as_u64() {
-                        floor = floor.max(uid);
-                    }
-                }
-                floor = floor.max(uid_floor(value, depth + 1)?);
-            }
-        }
-        serde_json::Value::Array(rows) => {
-            for row in rows {
-                floor = floor.max(uid_floor(row, depth + 1)?);
-            }
-        }
-        serde_json::Value::String(encoded)
-            if encoded.trim_start().starts_with('{') || encoded.trim_start().starts_with('[') =>
-        {
-            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(encoded) {
-                floor = floor.max(uid_floor(&parsed, depth + 1)?);
-            }
-        }
-        _ => {}
-    }
-    Ok(floor)
-}
 struct InventoryPlan {
     inventory: InventoryResource,
     gold: u32,
@@ -517,6 +480,26 @@ impl SimulationSession {
             }
             plain_output_template(*index).map_err(before)?;
         }
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .item_uid_issuance
+            .require_same(&cfg.global_uid_allocator)
+            .map_err(before)?;
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .item_uid_issuance
+            .require_same(&cfg.global_uid_allocator)
+            .map_err(before)?;
+        self.app
+            .world()
+            .resource::<InventoryResource>()
+            .item_uid_issuance
+            .require_same(&cfg.global_uid_allocator)
+            .map_err(before)?;
         self.app.world_mut().insert_resource(cfg);
         Ok(())
     }
@@ -595,6 +578,17 @@ impl SimulationSession {
             .get_resource::<PersonalProductionConfig>()
             .cloned()
             .ok_or_else(|| before("production is not configured"))?;
+        world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .item_uid_issuance
+            .require_same(&cfg.global_uid_allocator)
+            .map_err(before)?;
+        world
+            .resource::<InventoryResource>()
+            .item_uid_issuance
+            .require_same(&cfg.global_uid_allocator)
+            .map_err(before)?;
         let facility = cfg
             .facilities
             .iter()
@@ -669,15 +663,16 @@ impl SimulationSession {
                         let mut save = active.clone();
                         merge_persisted_mail_into_character_save(&mut save, durable)?;
                         if !plan.fresh_indices.is_empty() {
-                            let floor = uid_floor(
+                            let floor = super::item_uid_issuance::historical_uid_floor(
                                 &serde_json::to_value(&store).map_err(|error| error.to_string())?,
                                 0,
                             )?
-                            .max(uid_floor(
+                            .max(super::item_uid_issuance::historical_uid_floor(
                                 &serde_json::to_value(&active)
                                     .map_err(|error| error.to_string())?,
                                 0,
-                            )?);
+                            )?)
+                            .max(super::inventory::inventory_max_unique_id(&plan.inventory));
                             cfg.global_uid_allocator
                                 .ensure_issued_through_at_least(floor)
                                 .map_err(|error| error.to_string())?;

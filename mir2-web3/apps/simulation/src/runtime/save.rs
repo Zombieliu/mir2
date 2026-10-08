@@ -2635,6 +2635,8 @@ fn apply_character_save_with_timing(
         if !custody_ids.insert(id) {return Err("saved Hero UID collides with market/refine custody".into());}
     }
     let mut restored_inventory = world.resource::<InventoryResource>().clone();
+    restored_inventory.item_uid_issuance = world.resource::<RuntimeConfigResource>().config.item_uid_issuance.clone();
+    restored_inventory.item_uid_issuance.raise_serialized_floor(save)?;
     restored_inventory.reserved_item_unique_ids.clear();
     restored_inventory.inventory_capacity = save.inventory_capacity;
     restored_inventory.inventory_items = inventory_items;

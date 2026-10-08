@@ -1285,7 +1285,7 @@ fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeS
     }
 }
 
-fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
+pub(super) fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
     resources
         .belt_items
         .iter()
@@ -2020,7 +2020,16 @@ pub(super) fn plan_npc_gold_trade_gain(
     staged.reserved_item_unique_ids.insert(catalog_uid);
     staged.reserved_item_unique_ids.insert(0);
     let (canonical, incoming) = canonical_npc_gold_trade_fresh(
-        template, count, allocate_item_unique_id(&staged, ItemContainer::Bag1, 0), expire_info,
+        template, count, match &resources.item_uid_issuance {
+            super::item_uid_issuance::ItemUidIssuance::Legacy => allocate_item_unique_id(&staged, ItemContainer::Bag1, 0),
+            _ => {
+                let mut uid = super::item_uid_issuance::issue_for_staged_inventory(resources, crate::UserItemUidReason::NpcTradePurchase, ItemContainer::Bag1, 0).ok()?;
+                if uid == catalog_uid {
+                    uid = super::item_uid_issuance::issue_for_staged_inventory(resources, crate::UserItemUidReason::NpcTradePurchase, ItemContainer::Bag1, 0).ok()?;
+                }
+                uid
+            }
+        }, expire_info,
     )?;
     if incoming.unique_id == 0 || incoming.unique_id == catalog_uid {
         return None;
@@ -2096,7 +2105,7 @@ pub(super) fn plan_npc_resale_or_pearl_gain(
         name: template.name.clone(),
         icon: item_icon_for_key(&key),
         slot,
-        unique_id: allocate_item_unique_id(resources, container, slot),
+        unique_id: super::item_uid_issuance::issue_for_staged_inventory(resources, crate::UserItemUidReason::NpcTradePurchase, container, slot).ok()?,
         container,
         quantity,
         description: template.tooltip.as_deref().unwrap_or("Crystal NPC shop item.").to_string(),
@@ -3968,7 +3977,10 @@ pub(super) fn split_item_impl(
         return vec![failed_packet];
     }
 
-    let mut resources = world.resource_mut::<InventoryResource>();
+    if super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+        return vec![failed_packet];
+    }
+    let mut resources = world.resource::<InventoryResource>().clone();
     let split_packet_item = match grid {
         MirGridType::Storage => {
             let Some(index) = resources
@@ -3997,10 +4009,12 @@ pub(super) fn split_item_impl(
             // the empty slot is therefore the canonical ID even when another
             // grid uses the same numeric value.
             let preferred = default_item_unique_id(split.container, next_slot);
-            split.unique_id = if resources.reserved_item_unique_ids.contains(&preferred) {
-                allocate_item_unique_id(&resources, split.container, next_slot)
-            } else {
-                preferred
+            split.unique_id = match &resources.item_uid_issuance {
+                super::item_uid_issuance::ItemUidIssuance::Legacy if !resources.reserved_item_unique_ids.contains(&preferred) => preferred,
+                _ => match super::item_uid_issuance::issue_for_staged_inventory(&resources, crate::UserItemUidReason::ItemStackSplit, split.container, next_slot) {
+                    Ok(uid) => uid,
+                    Err(_) => return vec![failed_packet],
+                },
             };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
@@ -4038,7 +4052,10 @@ pub(super) fn split_item_impl(
             let mut split = resources.inventory_items[index].clone();
             split.container = next_container;
             split.slot = next_slot;
-            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
+            split.unique_id = match super::item_uid_issuance::issue_for_staged_inventory(&resources, crate::UserItemUidReason::ItemStackSplit, split.container, next_slot) {
+                Ok(uid) => uid,
+                Err(_) => return vec![failed_packet],
+            };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
                 return vec![failed_packet];
@@ -4053,6 +4070,7 @@ pub(super) fn split_item_impl(
         }
         _ => unreachable!("unsupported SplitItem grids return early"),
     };
+    *world.resource_mut::<InventoryResource>() = resources;
 
     vec![
         ServerPacket::SplitItem1 {

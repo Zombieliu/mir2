@@ -11,6 +11,79 @@ use std::{
 };
 static SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
+#[test]
+fn production_collect_raises_live_numeric_custody_reservation_floor() {
+    let mut f = Fixture::new("reserved-floor");
+    let started = f.execute(f.start.clone(), 1000).unwrap();
+    f.session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .reserved_item_unique_ids
+        .insert(9_000_001);
+    let collect = f.finish_command(&started.receipt.job_id, false);
+    let delivered = f.execute(collect, 61_000).unwrap();
+    let incoming = delivered
+        .packets
+        .iter()
+        .find_map(|p| match p {
+            ServerPacket::GainedItem { item } => Some(item),
+            _ => None,
+        })
+        .unwrap();
+    assert!(incoming.unique_id > 9_000_001);
+    assert_eq!(
+        f.cfg.global_uid_allocator.issued_through().unwrap(),
+        incoming.unique_id
+    );
+}
+
+#[test]
+fn production_rejects_a_second_uid_service_without_replacing_config_or_assets() {
+    let mut f = Fixture::new("authority-mismatch");
+    let before = serde_json::to_value(f.durable()).unwrap();
+    let other =
+        UserItemUidAllocator::initialize_file(f.path.parent().unwrap().join("other-uids.json"), 0)
+            .unwrap();
+    let mut cfg = f.cfg.clone();
+    cfg.global_uid_allocator = other.clone();
+    assert!(matches!(
+        f.session.configure_personal_production(cfg),
+        Err(ProductionDurableError::BeforeExecution(_))
+    ));
+    assert_eq!(serde_json::to_value(f.durable()).unwrap(), before);
+    assert_eq!(other.issued_through().unwrap(), 0);
+    assert!(f.execute(f.start.clone(), 1000).is_ok());
+}
+
+#[test]
+fn production_rebind_cannot_mint_with_old_service_but_original_receipt_stays_queryable() {
+    let mut f = Fixture::new("authority-rebind");
+    let started = f.execute(f.start.clone(), 1000).unwrap();
+    let before = serde_json::to_value(f.durable()).unwrap();
+    let high = f.cfg.global_uid_allocator.issued_through().unwrap();
+    let other = UserItemUidAllocator::initialize_file(
+        f.path.parent().unwrap().join("replacement-uids.json"),
+        0,
+    )
+    .unwrap();
+    let replacement = SimulationConfig::default()
+        .with_account_store_path(&f.path)
+        .with_item_uid_allocator(other.clone())
+        .unwrap();
+    let other_high = other.issued_through().unwrap();
+    f.session.rebind_account_store(&replacement);
+    assert!(f.execute(f.start.clone(), 1001).unwrap().replayed);
+    let cancel = f.finish_command(&started.receipt.job_id, true);
+    assert!(matches!(
+        f.execute(cancel, 1002),
+        Err(ProductionDurableError::BeforeExecution(_))
+    ));
+    assert_eq!(serde_json::to_value(f.durable()).unwrap(), before);
+    assert_eq!(f.cfg.global_uid_allocator.issued_through().unwrap(), high);
+    assert_eq!(other.issued_through().unwrap(), other_high);
+}
+
 fn login(config: SimulationConfig) -> SimulationSession {
     let mut session = SimulationSession::new(config);
     assert!(session
@@ -44,7 +117,12 @@ impl Fixture {
         assert!(directory.starts_with(&root));
         fs::create_dir(&directory).unwrap();
         let path = directory.join("accounts.json");
-        let config = SimulationConfig::default().with_account_store_path(&path);
+        let allocator =
+            UserItemUidAllocator::initialize_file(directory.join("uids.json"), 0).unwrap();
+        let config = SimulationConfig::default()
+            .with_account_store_path(&path)
+            .with_item_uid_allocator(allocator.clone())
+            .unwrap();
         let mut session = login(config.clone());
         // Real Crystal carriers, synthetic isolated recipe/bindings only. This
         // fixture does not enable or mislabel bundled production resources.
@@ -119,11 +197,7 @@ impl Fixture {
                 radius: 3,
             }],
             ordinary_ore_purity_caps: BTreeMap::new(),
-            global_uid_allocator: UserItemUidAllocator::initialize_file(
-                directory.join("uids.json"),
-                0,
-            )
-            .unwrap(),
+            global_uid_allocator: allocator,
         };
         session.configure_personal_production(cfg.clone()).unwrap();
         Self {
@@ -463,11 +537,15 @@ fn production_full_bag_rejects_whole_delivery_without_uid_or_job_loss() {
     let job = f.execute(f.start.clone(), 1000).unwrap().receipt.job_id;
     let collect = f.finish_command(&job, false);
     let before = fs::read(&f.path).unwrap();
+    let uid_before = f.cfg.global_uid_allocator.issued_through().unwrap();
     assert!(
         matches!(f.execute(collect.clone(), 61_000), Err(ProductionDurableError::BeforeExecution(detail)) if detail.contains("bag full"))
     );
     assert_eq!(fs::read(&f.path).unwrap(), before);
-    assert_eq!(f.cfg.global_uid_allocator.issued_through().unwrap(), 0);
+    assert_eq!(
+        f.cfg.global_uid_allocator.issued_through().unwrap(),
+        uid_before
+    );
     assert_eq!(
         f.session.personal_production_jobs().unwrap()[0].status,
         JobStatus::Running
@@ -493,11 +571,15 @@ fn production_overweight_rejects_whole_batch_before_global_uid_issuance() {
     f.rebind_recipe();
     let job = f.execute(f.start.clone(), 1000).unwrap().receipt.job_id;
     let before = fs::read(&f.path).unwrap();
+    let uid_before = f.cfg.global_uid_allocator.issued_through().unwrap();
     assert!(
         matches!(f.execute(f.finish_command(&job, false), 61_000), Err(ProductionDurableError::BeforeExecution(detail)) if detail.contains("overweight"))
     );
     assert_eq!(fs::read(&f.path).unwrap(), before);
-    assert_eq!(f.cfg.global_uid_allocator.issued_through().unwrap(), 0);
+    assert_eq!(
+        f.cfg.global_uid_allocator.issued_through().unwrap(),
+        uid_before
+    );
 }
 #[test]
 fn production_double_session_cas_and_original_request_recovery() {

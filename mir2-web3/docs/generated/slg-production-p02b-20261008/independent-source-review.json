@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.production-p02b-independent-source-review.v1",
+  "acceptedForFocusedTests": true,
+  "reviewer": "/root/production_review",
+  "authoredSourcePath": "work/slg-production-p02b-20261008/authored-source.json",
+  "authoredSourceSha256": "ac33b34c437acd5e0eac27d29a3d2eb35340126b613608b79739a28250f389b5",
+  "baselineCommit": "fde81a0de5084d02b3daaa30bac4d4f1fde411f4",
+  "verifiedSourceFileCount": 14,
+  "allDeclaredSourceHashesAndLengthsMatch": true,
+  "confirmedP0P1Blockers": [],
+  "resolvedBlockers": [
+    "The two CharacterSaveRecord comparisons now compare complete serde_json::Value rather than requiring an absent PartialEq implementation.",
+    "Production Collect raises its File UID floor using complete account and active-save history plus inventory_max_unique_id of the staged inventory, including numeric reserved_item_unique_ids; an actual Collect regression is authored.",
+    "Invalid live authority replacement or removal becomes Fenced, persists across repeated rebind and isolated forks, and cannot be unblocked through the allocator builder; trusted Unavailable shadow promotion remains separate."
+  ],
+  "rawFinal": "Accepted for focused testing under the original CargoGuard, bound to the current 14-file authored-source manifest. The bounded static review found no confirmed P0/P1 blocker after the reported fixes. Reviewed visibility, clone/restore binding, staged purchase and split failures, exact historical incomingUniqueId floors, production authority matching, and original-receipt replay. No Cargo or UI was run by this reviewer. This is source acceptance for controlled File-authority tests, not a claim that compilation or tests passed and not public gameplay or rollout acceptance. Normal gateway/catalog activation remains disabled; all remaining fresh-item issuers, deployment-wide census and PostgreSQL authority are explicit prerequisites.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true,
+  "scope": "Read-only review of the 14 pinned P02b source paths; only this work-directory review record was written."
+}

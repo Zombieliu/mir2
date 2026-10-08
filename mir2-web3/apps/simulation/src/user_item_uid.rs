@@ -73,6 +73,7 @@ impl fmt::Display for UserItemUid {
 pub enum UserItemUidReason {
     CharacterStartItem,
     PlayerPartialDrop,
+    ItemStackSplit,
     MonsterDrop,
     QuestReward,
     QuestCarryItem,
@@ -264,6 +265,11 @@ impl UserItemUidAllocator {
         Ok(Self {
             inner: Arc::new(FileUserItemUidAuthority::open_existing(state_path)?),
         })
+    }
+
+    /// True only for clones of the same server-owned service handle.
+    pub fn shares_authority_with(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.inner, &other.inner)
     }
 
     pub fn issue(&self, reason: UserItemUidReason) -> Result<UserItemUid, UserItemUidError> {
