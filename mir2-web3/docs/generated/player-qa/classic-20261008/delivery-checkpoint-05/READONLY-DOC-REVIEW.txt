@@ -1,0 +1,10 @@
+Root transcript of second read-only review /root/health_zero_review_01.
+This is not a reviewer-authored disk artifact. Findings precede the root correction.
+
+字节与计数核对通过：33个文件，ARCHIVE列32个且只排除自身；26份原始复制、smoke ZIP的11个条目和promotion ZIP的4个条目，均与原文件及记录的长度/SHA一致。-text -diff 覆盖正确。
+
+有两处需收窄措辞：
+- README 和 CLASSIC 的8 actual/acknowledged walks、8 saved-position relogins实际是两个移动保存重登故事产生的8条观察者移动关系和8条重登外观关系。7份共有状态块的eight logout/relogin lifecycles也应区分8次正常logout与2个实际relogin故事。
+- ROOT-FINAL 的manualLogin=true、共有状态块的with manual login容易被理解为已人工登录。建议写launched for manual login，并明确autoLogin=false/nativeLoginObserved=false。
+
+其余边界清楚：40对象全字节验证属于stage，promotion不重验CMS；人工验收开放，b235未部署，原12小时期限已错过且未重置。未发现发布行为或原始证据的新阻断。

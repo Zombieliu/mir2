@@ -1,6 +1,17 @@
 # Rounded health display and life authority — 2026-10-08
 
-## Current Session lifecycle and Source arithmetic follow-up
+## Current delivery boundary — 2026-10-08
+
+Actual R22/game7fea, invited Gatewaya41 and signed feed17 are now public on
+origin and R2/CDN. Strict drain, normal service stops, cold restart, exact aliases
+and44 ordinary public WSS checks pass. The packaged native R22 process187896
+was observed through first_main_update for manual login; human wheel/visual
+and natural crowded-combat acceptance remain open. See the
+[actual rollout evidence](generated/player-qa/classic-20261008/delivery-checkpoint-05/README.md).
+The health changes below are in the separate mutable b235 lane and remain
+outside frozen R22. Publication of R22 does not deploy or fully accept them.
+
+## Session lifecycle and Source arithmetic follow-up at b235 — unpublished
 
 The personal `SimulationSession` mirror also consumed `ObjectHealth(0)` as
 death. That production route is now removed: only actual `ObjectDied`, explicit
@@ -40,8 +51,9 @@ Full Source health recipients, HP/MP owner packets, trusted unique shared Hero
 identity, retained healing/expiry refresh, revival packet ordering and the Web
 percentage0-to-exact-HP0 path remain open. Primary Web edits are unrelated and
 were not changed. This backend follow-up is outside frozen R22/7fea and is not
-deployed. At 10:23 UTC R20 was observed running with one WebSocket connection;
-strict public drain and human shop-wheel acceptance still have not passed.
+deployed. Historically at10:23 UTC, R20 was observed running with one WebSocket
+connection. The subsequent R22 rollout above passed strict drain; human
+shop-wheel acceptance remains open.
 
 ## Historical Zone/Gateway/native cache slice at parent937ac636
 

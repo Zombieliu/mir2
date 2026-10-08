@@ -7,7 +7,56 @@ The03:36 Goal API read returned no active goal, not a completed result;
 the authorized unfinished scope was subsequently recorded as an active Goal.
 That does not reset the original12-hour deadline or imply completion.
 
-## Current Session and Source arithmetic follow-up — 2026-10-08
+## Current actual R22 paired public delivery — 2026-10-08
+
+The invited playtest now runs Gateway
+`a41dfe72d7e5858f11169adf88673dc44ed24200` with the frozen R22 Windows
+game `7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc`. Signed sequence17 is
+public on both origin and `assets.mir2.obelisk.build`. The prior R20 native
+process181324 has an actual normal event-loop exit0. The subsequent strict
+six-counter/TCP preflight drained; the operator privately backed up the DB,
+state and configuration, changed only the invited ExecStart, and verified
+both normal stops and the Candidate cold restart without a shutdown panic.
+Original production PID3855184/release79ba, environment, map root, auth,
+capacity51/66/51 and resource limits were preserved.
+
+Origin feed16-to17 promotion and authenticated R2 promote37772462840 at
+publisher `e7850e9aef9ea038907bee621f331f3286c1ac9b` passed. The promotion
+artifact has6839 bytes, SHA256
+`9baa2c67aa176f5e6e2d9b1d9b3ede0142e4e3bfc16751c9d94337a419f6d73c`.
+The promotion verifies the private pointer and public aliases; its full-object
+and CMS verification flags remain false. The complete40-object/1052247716-byte
+verification belongs to stage37739769708, and CMS verification belongs to the
+retained Windows packaging/signing gates. Independent root HTTPS requests
+verify the exact prepared signed17 JSON/signature bytes at all four aliases,
+with normal TLS,200 and no-store. No Worker redeployment or immutable-object
+replacement is claimed.
+
+The actual ordinary public WSS smoke passes44 observer relation checks:
+20 initial appearances,8 gender-switch appearances,8 movement relations and
+8 relogin appearance relations. Two actors actually walk, save through normal
+logout and relogin at their acknowledged position; each has four observers.
+All six class/gender variants appear, and eight ordinary logouts are confirmed.
+It reuses five owned accounts and six existing characters with zero registrations,
+new characters, QA/admin state preparation or copied credentials. Full sprite,
+AOI removal and saved-position assertions remain. These are basic shared-player
+and lifecycle checks, not natural combat, mining, Boss/drop or capacity acceptance.
+
+The exact packaged R22 EXE was launched visibly for manual login at12:15 UTC.
+PID187896 was observed alive and responding, with diagnostics through
+first_main_update. Child auto-login variables were removed; the unchanged
+D installation, other games and saves were not replaced. Native screenshots,
+human shop-wheel and visual/feel acceptance remain open. The50000 test gold
+already claimed by father is not issued again. The later b235 Session/Source
+health correction is outside frozen R22 and is not deployed.
+
+[Original-byte rollout archive and read-only review](generated/player-qa/classic-20261008/delivery-checkpoint-05/README.md),
+[corrected bound root proof](generated/player-qa/classic-20261008/delivery-checkpoint-05/ROOT-FINAL-06.json).
+FullP1–P7, natural acceptance and the original missed12-hour deadline remain
+unfinished. Real-payment recharge is not integrated; monthly cards use operator
+codes and public paid-access enforcement remains OFF.
+
+## Historical Session and Source arithmetic follow-up — 2026-10-08
 
 The reachable personal monster mirror no longer interprets display0 as death
 or Harvest eligibility. Actual death/revive and trusted absolute vitals retain
