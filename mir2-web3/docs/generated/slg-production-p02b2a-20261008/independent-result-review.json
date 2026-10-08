@@ -1,0 +1,520 @@
+{
+  "schema": "mir2.production-independent-result-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T16:56:56.8914770Z",
+  "accepted": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\authored-source-03.json",
+  "authoredSourceSha256": "e3feb1606ff8b0dbe8f647fbb1acb700297f03992513f8c1a386903f93e3699d",
+  "authoredFiles": 9,
+  "authoredSourceReviewPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\independent-source-review-03.json",
+  "authoredSourceReviewSha256": "c2c4960bb496c36b6f41b978017e5a44a585a3b7a764758ea7838d767365019e",
+  "testCounts": {
+    "total": 208,
+    "unique": 204,
+    "new": 16,
+    "failed": 0,
+    "ignored": 0
+  },
+  "newUniqueTests": 16,
+  "newTestNames": [
+    "runtime::fishing::uid_tests::fishing_issuance_failure_cancels_autocast_without_success_event_or_reel_cost",
+    "runtime::fishing::uid_tests::fishing_source_loot_has_same_authority_uid_and_final_packet_count",
+    "runtime::item_grants::tests::batch_capacity_failure_does_not_keep_an_earlier_merge_or_mint",
+    "runtime::item_grants::tests::batch_mints_unique_roots_and_projects_final_wire_items",
+    "runtime::item_grants::tests::bound_or_cursed_stack_never_absorbs_plain_reward",
+    "runtime::item_grants::tests::fresh_batch_cannot_import_custody_or_nested_objects",
+    "runtime::item_grants::tests::quest_slots_are_independent_and_fresh_grant_never_overwrites_a_full_slot",
+    "runtime::item_grants::tests::same_batch_plain_grants_share_new_stack_and_emit_its_final_count_once",
+    "runtime::item_grants::tests::shadow_and_fenced_batches_cannot_grow_an_existing_stack",
+    "runtime::item_grants::tests::uid_exhaustion_after_one_mint_burns_id_without_partial_delivery",
+    "runtime::mining::uid_tests::failed_mine_issuance_keeps_stones_pickaxe_and_inventory",
+    "runtime::mining::uid_tests::guaranteed_mine_uses_shared_uid_and_keeps_ore_purity_and_original_swing_cost",
+    "runtime::quests::uid_tests::carry_batch_failure_keeps_accept_stage_and_success_uses_quest_grid",
+    "runtime::quests::uid_tests::crystal_reward_mid_batch_exhaustion_has_no_partial_completion",
+    "runtime::quests::uid_tests::crystal_reward_uid_failure_preserves_quest_items_currency_and_experience",
+    "runtime::quests::uid_tests::ordinary_finish_quest_issues_rewards_once_and_keeps_saved_stage"
+  ],
+  "currentDeclaredSourceRowsRehashed": 2760,
+  "originalToolAndAuthorityPinsChecked": 60,
+  "finalOriginalNonces": 6,
+  "finalReceiptFiles": 30,
+  "finalRunsSerial": true,
+  "policy": {
+    "originalTemplatePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-transport-source37-native-transport-test01.policy.json",
+    "originalTemplateSha256": "0510be32e885c39302f7d4f278b651c7c949eddcff40b7a4e5a797833eb92ca9",
+    "actualGetVolumeC": true,
+    "thresholdBytes": 53687091200,
+    "minimumRemainingCBytes": 195130953728,
+    "freshnessMs": 2000,
+    "maximumSampleBeginConservativeUpperBoundMs": 945.92,
+    "maximumSampleEndConservativeUpperBoundMs": 84.842,
+    "postChildPolicy": "B",
+    "allForward": true,
+    "allCompletedExitedDisposed": true,
+    "allFinalExitCodesZero": true
+  },
+  "protectedParent": {
+    "parent": "4644753b78c201cfa7dccc6cf6d694ce10021235",
+    "paths": 451,
+    "mismatches": 0,
+    "method": "Independent read-only git hash-object --stdin-paths and git cat-file --batch-check; no -w",
+    "rootQualificationSha256": "1bdb85b519c6bffeb6094aff93e3fef923a5127078dc0e771239a39ef86da251"
+  },
+  "checks": [
+    {
+      "run": "grant-tests-03",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "declaredInputs": 460,
+      "sourceDrift": 0,
+      "resultSha256": "76cae21fae7785eac298ae93d8adb082d0375f2075b1d2ab2a4a3eaee490695c",
+      "logSha256": "34c464b04597f483de7a66bb6dea28ecb875cfd8b7b6d4b9b7687feb08ec34f5",
+      "sourceSnapshotSha256": "fe1dfae3f66b4d48941c242bda68a49746366fcf1aabdcae13681c24425e7a3c",
+      "guardPolicySha256": "63dd503c5f65754d129c4687bf0a781f672a7722c9388fb9c7fb17c53f60dfc6",
+      "nonce": "45e72e27f7e84a1cb31dd406df895837",
+      "remainingCBytes": 195130953728,
+      "freshnessSampleBeginUpperBoundMs": 945.92,
+      "freshnessSampleEndUpperBoundMs": 81.1047,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "summary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 2120 filtered out; finished in 2.94s"
+    },
+    {
+      "run": "quest-regression-01",
+      "passed": 115,
+      "failed": 0,
+      "ignored": 0,
+      "declaredInputs": 460,
+      "sourceDrift": 0,
+      "resultSha256": "e37bb468ad4a6fd59726c5e51cd1a7c5a15879395093f9e8b4e04d27b4abf812",
+      "logSha256": "9f40b7fb22d37939ff89abcaa68a440d2fdd77fbf94cc674524d8b540327826c",
+      "sourceSnapshotSha256": "4d3acff1eba46fae4463188d8217b429ee4131fc8270cf48afb52465d4a46083",
+      "guardPolicySha256": "528ebbe7345f46d485374d2276f376819e27698f587c524f7bcae2a35ed04605",
+      "nonce": "752b5dbf36b04ab89a2744361a88eb8b",
+      "remainingCBytes": 195286155264,
+      "freshnessSampleBeginUpperBoundMs": 869.182,
+      "freshnessSampleEndUpperBoundMs": 84.842,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "summary": "test result: ok. 115 passed; 0 failed; 0 ignored; 0 measured; 2013 filtered out; finished in 94.48s"
+    },
+    {
+      "run": "mining-regression-01",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "declaredInputs": 460,
+      "sourceDrift": 0,
+      "resultSha256": "e0156508b6f3d5f3ddfd4c23d880ad81c957ed4dcc7f028d1cb9608f55344e53",
+      "logSha256": "443e964910ed76c08bd8cf19b636c1f3e382f37d1580b3ae304897cbb2546306",
+      "sourceSnapshotSha256": "e92fc7d834d39f772ab9105caaf83bae1ed26c636962dfd6bd2bf3593c690219",
+      "guardPolicySha256": "d33563030c23b92d5a351997777cd20fd2c476405f73047749098e4b3fb04e2a",
+      "nonce": "bfab7b901f224a3694332dbf88ccff88",
+      "remainingCBytes": 195277717504,
+      "freshnessSampleBeginUpperBoundMs": 915.4995,
+      "freshnessSampleEndUpperBoundMs": 82.4098,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "summary": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 2119 filtered out; finished in 3.02s"
+    },
+    {
+      "run": "fishing-regression-01",
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0,
+      "declaredInputs": 460,
+      "sourceDrift": 0,
+      "resultSha256": "a86032e4ac5fad15ad6c7a28f4051b1cf939279fcdea1cf85071484a735e0dd9",
+      "logSha256": "bdd780423e57748b2d0fb7282980774f93bd1c9061f1c30b033e8f204789e116",
+      "sourceSnapshotSha256": "b979bb2a61402878d077edf1450cbca31d640ddfb233c3a40ad78b587b0d983d",
+      "guardPolicySha256": "cd91aecebf32a97d6eb14ba979671ed961fc9b43ee935dc74ed2aab940e660b3",
+      "nonce": "b82cff82bd584078bdb21df36bc9b187",
+      "remainingCBytes": 195277705216,
+      "freshnessSampleBeginUpperBoundMs": 859.5558,
+      "freshnessSampleEndUpperBoundMs": 72.2154,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "summary": "test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 2105 filtered out; finished in 8.44s"
+    },
+    {
+      "run": "npc-regression-01",
+      "passed": 35,
+      "failed": 0,
+      "ignored": 0,
+      "declaredInputs": 460,
+      "sourceDrift": 0,
+      "resultSha256": "a06c7124afe82e261526ff1d88e4a894a35b104619b8708b1596750544e80865",
+      "logSha256": "369359b0c1253cb24f65c344080cfdb08c2cd79ea059f1bef5084d991a52e111",
+      "sourceSnapshotSha256": "8f97fb24de85e2ac933c0fc9495ad5690ba710259a22248f6f169ee306225542",
+      "guardPolicySha256": "b8a0846146d5e36f4fbabba456ed8e15a68c11ba97b91e0c6baf9b1f1bf125c1",
+      "nonce": "f20220d35b2648b1897d63ddae8de329",
+      "remainingCBytes": 195277037568,
+      "freshnessSampleBeginUpperBoundMs": 829.5265,
+      "freshnessSampleEndUpperBoundMs": 74.1849,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "summary": "test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 2093 filtered out; finished in 34.16s"
+    },
+    {
+      "run": "simulation-tests-01",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "declaredInputs": 460,
+      "sourceDrift": 0,
+      "resultSha256": "04c6ce2d49922b5d10598cb11f873c759da2b83a50a92bade180a4d0a265d8cf",
+      "logSha256": "dc01dc92ddaa204af51c7f3dba5693d73f7aef9f9bf41bec7fb2a5e552c7db95",
+      "sourceSnapshotSha256": "1404cba03fc854029e058546ec6274b0ec0ea61b649607f412cf2814ba261780",
+      "guardPolicySha256": "a14df5b37964fe57619e63b5c34810bb45e7fefdd00454b9654a0e702fae1b02",
+      "nonce": "7bd877c5a27240db976276f5218db423",
+      "remainingCBytes": 195259600896,
+      "freshnessSampleBeginUpperBoundMs": 802.6393,
+      "freshnessSampleEndUpperBoundMs": 79.6294,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "summary": "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 2110 filtered out; finished in 9.50s"
+    }
+  ],
+  "finalReceiptPins": [
+    {
+      "run": "grant-tests-03",
+      "nonce": "45e72e27f7e84a1cb31dd406df895837",
+      "name": "after.json",
+      "length": 320,
+      "sha256": "77368f4588c88c34d11cc713817b83985b06b9334b7b3fdef5fea2c43c7851d3"
+    },
+    {
+      "run": "grant-tests-03",
+      "nonce": "45e72e27f7e84a1cb31dd406df895837",
+      "name": "before.json",
+      "length": 958,
+      "sha256": "b78205ea06bbf777c11dfef297e4937b4759f7ab503732adc850546e7eb9d807"
+    },
+    {
+      "run": "grant-tests-03",
+      "nonce": "45e72e27f7e84a1cb31dd406df895837",
+      "name": "probe-process.json",
+      "length": 432,
+      "sha256": "2471ae63a2f73e9e33028f77a471b9a5fc9e5793c50c58a2d72ae3d44e5a2088"
+    },
+    {
+      "run": "grant-tests-03",
+      "nonce": "45e72e27f7e84a1cb31dd406df895837",
+      "name": "probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "run": "grant-tests-03",
+      "nonce": "45e72e27f7e84a1cb31dd406df895837",
+      "name": "probe.stdout.bin",
+      "length": 197,
+      "sha256": "b777365e4149107bb5937fab27acfbe72cae4c0befa95962c43510988ef6366c"
+    },
+    {
+      "run": "quest-regression-01",
+      "nonce": "752b5dbf36b04ab89a2744361a88eb8b",
+      "name": "after.json",
+      "length": 320,
+      "sha256": "4efe524192497d788fe1e58b0a1066a697ffdc247d6127eab214389e98bd86b2"
+    },
+    {
+      "run": "quest-regression-01",
+      "nonce": "752b5dbf36b04ab89a2744361a88eb8b",
+      "name": "before.json",
+      "length": 938,
+      "sha256": "957dd11479a5fe14de9b1586de7263f62b654cf1e1ddeb88e0d23a09ec85eda2"
+    },
+    {
+      "run": "quest-regression-01",
+      "nonce": "752b5dbf36b04ab89a2744361a88eb8b",
+      "name": "probe-process.json",
+      "length": 431,
+      "sha256": "6d60fdcd8ba7967bea5dc8ce480c358ef02b822a5dd65ca1ef0073ac3ca14b23"
+    },
+    {
+      "run": "quest-regression-01",
+      "nonce": "752b5dbf36b04ab89a2744361a88eb8b",
+      "name": "probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "run": "quest-regression-01",
+      "nonce": "752b5dbf36b04ab89a2744361a88eb8b",
+      "name": "probe.stdout.bin",
+      "length": 197,
+      "sha256": "30ad1763378b9071b7e6c44b7cff451b3beafb49b085c1e9450708e27f87fb22"
+    },
+    {
+      "run": "mining-regression-01",
+      "nonce": "bfab7b901f224a3694332dbf88ccff88",
+      "name": "after.json",
+      "length": 328,
+      "sha256": "ffa16c9b5ab151c8e28075e383ae4c40adea40a28f498c906c22a1bb5a69ba7c"
+    },
+    {
+      "run": "mining-regression-01",
+      "nonce": "bfab7b901f224a3694332dbf88ccff88",
+      "name": "before.json",
+      "length": 941,
+      "sha256": "e763264fcd317d354a40945b3d1444ae032e58672200e360b4c8a913b7f84987"
+    },
+    {
+      "run": "mining-regression-01",
+      "nonce": "bfab7b901f224a3694332dbf88ccff88",
+      "name": "probe-process.json",
+      "length": 432,
+      "sha256": "76c101631de10f5607243c6c382fa3aa1bd26be33bc0f36658d3ff98b695a3f8"
+    },
+    {
+      "run": "mining-regression-01",
+      "nonce": "bfab7b901f224a3694332dbf88ccff88",
+      "name": "probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "run": "mining-regression-01",
+      "nonce": "bfab7b901f224a3694332dbf88ccff88",
+      "name": "probe.stdout.bin",
+      "length": 197,
+      "sha256": "04b05d1bbc0224e80baa008a04b297b34b40c00071df92f959dc2596be49c79b"
+    },
+    {
+      "run": "fishing-regression-01",
+      "nonce": "b82cff82bd584078bdb21df36bc9b187",
+      "name": "after.json",
+      "length": 328,
+      "sha256": "8dd5a715bb20e39c93c695bc071931f4cd81531bba507e884c56d42f6b3231e0"
+    },
+    {
+      "run": "fishing-regression-01",
+      "nonce": "b82cff82bd584078bdb21df36bc9b187",
+      "name": "before.json",
+      "length": 944,
+      "sha256": "a21ef4acb4063f38b4df435105989b61a6ce677151d71e884540842b4fcd306e"
+    },
+    {
+      "run": "fishing-regression-01",
+      "nonce": "b82cff82bd584078bdb21df36bc9b187",
+      "name": "probe-process.json",
+      "length": 433,
+      "sha256": "280f60d05f6f973d5fb559e4344099c75a685d29dfc7ece91abc4446467f3c49"
+    },
+    {
+      "run": "fishing-regression-01",
+      "nonce": "b82cff82bd584078bdb21df36bc9b187",
+      "name": "probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "run": "fishing-regression-01",
+      "nonce": "b82cff82bd584078bdb21df36bc9b187",
+      "name": "probe.stdout.bin",
+      "length": 197,
+      "sha256": "0206c544eb635f95690a8b21128fc0c86038f9783c08a6921e2fbc83bdfa1978"
+    },
+    {
+      "run": "npc-regression-01",
+      "nonce": "f20220d35b2648b1897d63ddae8de329",
+      "name": "after.json",
+      "length": 329,
+      "sha256": "df7336ed7fdf678f32ef894b48540b70774c03fb2d3793545725cbeee16cc5a3"
+    },
+    {
+      "run": "npc-regression-01",
+      "nonce": "f20220d35b2648b1897d63ddae8de329",
+      "name": "before.json",
+      "length": 974,
+      "sha256": "05f3a326b700987a926d6c3b48704893e654658d600a4eca8fd1f4d9a18e7ade"
+    },
+    {
+      "run": "npc-regression-01",
+      "nonce": "f20220d35b2648b1897d63ddae8de329",
+      "name": "probe-process.json",
+      "length": 432,
+      "sha256": "00a9e12d7c4aee54ca12507a0d1b75d6127589185552f57b6359df8a8b34dcf5"
+    },
+    {
+      "run": "npc-regression-01",
+      "nonce": "f20220d35b2648b1897d63ddae8de329",
+      "name": "probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "run": "npc-regression-01",
+      "nonce": "f20220d35b2648b1897d63ddae8de329",
+      "name": "probe.stdout.bin",
+      "length": 197,
+      "sha256": "5049c390aeaec0d47c4da435099b77cb6ab44f477d414f66ad995b6283c8a107"
+    },
+    {
+      "run": "simulation-tests-01",
+      "nonce": "7bd877c5a27240db976276f5218db423",
+      "name": "after.json",
+      "length": 320,
+      "sha256": "8dfe9e16a5a0a9e8908023a4a822eba5165c1bb92b216b6668567730f35a88eb"
+    },
+    {
+      "run": "simulation-tests-01",
+      "nonce": "7bd877c5a27240db976276f5218db423",
+      "name": "before.json",
+      "length": 973,
+      "sha256": "c03e81b5bb9f928448ea89d1415a46d5079308af0d3d9734079234a82c0def37"
+    },
+    {
+      "run": "simulation-tests-01",
+      "nonce": "7bd877c5a27240db976276f5218db423",
+      "name": "probe-process.json",
+      "length": 443,
+      "sha256": "71e1bb3f8f096a84609bc6184cac6358dd9d132a724418bc620fe8ed4b13d9ee"
+    },
+    {
+      "run": "simulation-tests-01",
+      "nonce": "7bd877c5a27240db976276f5218db423",
+      "name": "probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "run": "simulation-tests-01",
+      "nonce": "7bd877c5a27240db976276f5218db423",
+      "name": "probe.stdout.bin",
+      "length": 197,
+      "sha256": "a84305fc284435844145d559cd58caf920980f4c46d407fc703ccc6f098af429"
+    }
+  ],
+  "historicalFailures": [
+    {
+      "run": "grant-tests-01",
+      "exitCode": 101,
+      "executedTests": 0,
+      "passed": 0,
+      "failed": 0,
+      "reason": "E0433 compile failure",
+      "nonce": "2c495e45546c44fd8b10f18c38b8d53f",
+      "resultSha256": "8507de7da7a5dc6ad7b5cb521889ee15721d564d070f4339725473a88cc9d492",
+      "logSha256": "605c55e2fc160438e8822d3a06dbf404bd77d8ddacbec9795f287d22b02c5aef",
+      "sourceSnapshotSha256": "3474d731df10c00d4320d049696e42fbbf417920ab5a5156fe72d7d8eba3fb3b",
+      "receiptFiles": [
+        {
+          "name": "after.json",
+          "length": 333,
+          "sha256": "be60407aafc3f60d6d991e3d2f86d68b4d2be0836a95df169f1cbe2ff1e55ad6"
+        },
+        {
+          "name": "before.json",
+          "length": 955,
+          "sha256": "7f36df57d80cba067d7fcc00342a34fb76f766f2f15579665e740c135ca44b9f"
+        },
+        {
+          "name": "probe-process.json",
+          "length": 429,
+          "sha256": "4bedb8796e72f26feb0e4439b442b948c15b689c6b6f241b77b2ca80cae439f8"
+        },
+        {
+          "name": "probe.stderr.bin",
+          "length": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "probe.stdout.bin",
+          "length": 197,
+          "sha256": "895b59ea01c08f6238225483fd79a65216b433080242ab949041aa3fe7235fa3"
+        }
+      ],
+      "includedInFinalPassingTotal": false
+    },
+    {
+      "run": "grant-tests-02",
+      "exitCode": 101,
+      "executedTests": 8,
+      "passed": 4,
+      "failed": 4,
+      "reason": "Nonexistent potion fixture",
+      "nonce": "df922c77b4f84678b7dd4248c9f3eb3f",
+      "resultSha256": "84f32817f207d6e09f63404368884956ff584071f7af0db13fe5aa7fa0b79ffc",
+      "logSha256": "02c311a06735001a70f87b366be158c3db7f924b99a16711f1034c71a3aff6cd",
+      "sourceSnapshotSha256": "93f8f450742d9b343c86022ea4b6df5d9ad0a758f063d6369619f7b5df9514ef",
+      "receiptFiles": [
+        {
+          "name": "after.json",
+          "length": 341,
+          "sha256": "01034269cdb8f1dd175003414ec2707ce601961fdb7dff0fe781bf54bcb3a719"
+        },
+        {
+          "name": "before.json",
+          "length": 958,
+          "sha256": "39720cd22fba7690d9100f4b4d1f4b27e658c53cf62af7fd80a31ff4b2cde109"
+        },
+        {
+          "name": "probe-process.json",
+          "length": 432,
+          "sha256": "083d403b1c0cfe8d69e10c917e482606301de54558868bb26a250dee721fe2d2"
+        },
+        {
+          "name": "probe.stderr.bin",
+          "length": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "probe.stdout.bin",
+          "length": 197,
+          "sha256": "47735306631bc38f9b7c4e05ffa629546452ac7a45d6d73b073e14c8fb46282e"
+        }
+      ],
+      "includedInFinalPassingTotal": false
+    }
+  ],
+  "serialBlocks": [
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\serial-wait-01.json",
+      "sha256": "6b87cf39905e3879843068aaba682b87d5c5f32341154b60041493abdab6464d",
+      "cargoStarted": false,
+      "testsExecuted": 0,
+      "nonces": 0,
+      "includedInFinalPassingTotal": false
+    },
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\serial-preflight-01.json",
+      "sha256": "2fd0832ad3a4300eb22ff3317dfb6229f2cc38d527d47136ab137e0cdf248042",
+      "cargoStarted": false,
+      "testsExecuted": 0,
+      "nonces": 0,
+      "includedInFinalPassingTotal": false
+    }
+  ],
+  "rootAuditPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\result-audit-01.json",
+  "rootAuditSha256": "d5da69de202864f1a8c2cd3f6c82a2889649c10b1c5c9bdfa10d5c1997b54eb7",
+  "rawFinal": "Accepted bounded actual result only if accepted=true. Six original CargoGuard runs independently checked from raw logs, named functions, original nonce before/after/probe files, all declared current SHA256+length pins, unchanged original tools/policy, and serial timestamps. Actual passing executions208;204 distinct named functions because broad filters overlap;16 authored new tests actually executed by name. Every final run has zero failures/ignored and exit0, actual C>=50GiB, <=2000ms conservative sampleBegin freshness, FORWARD and PolicyB completed/exited/disposed. All451 protected Git-clean paths independently match parent4644753. The source01 compile failure0tests, source02 actual4pass4fail and two no-Cargo/no-nonce serial blocks are preserved and excluded. Only controlled in-memory batch publication plus File UID issuance protections are accepted; quest/mining/fishing account atomic persistence, full issuer migration, PostgreSQL, normal gateway, public production catalog, UI and installers remain unaccepted.",
+  "scope": {
+    "controlledInMemoryBatchPublication": true,
+    "fileUidProtection": true,
+    "accountAtomicPersistenceAccepted": false,
+    "allIssuerMigrationAccepted": false,
+    "postgresAccepted": false,
+    "liveGameplayAccepted": false,
+    "publicGatewayAccepted": false,
+    "frontendAccepted": false
+  },
+  "discrepancies": [],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductSourceEdits": true
+}

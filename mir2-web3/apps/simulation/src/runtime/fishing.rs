@@ -14,7 +14,8 @@ use super::equipment::{
     equipment_slot_unique_id, equipment_state_from_item_state, item_state_from_equipment_state,
     user_item_from_equipment_state, validated_item_state_user_item, EquipmentState,
 };
-use super::inventory::{add_or_increment_item_with_random_metadata, can_gain_item_quantity};
+use super::inventory::can_gain_item_quantity;
+use super::item_grants::{FreshItemGrant, publish_world_grants};
 use super::items::{
     crystal_item_template_for_item_key, item_unique_id, try_item_state_from_user_item,
     user_item_from_item_state, user_item_stat_total, ItemState,
@@ -599,8 +600,14 @@ fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
         };
     }
 
+    let mut outcome = match award_fishing_loot(world) {
+        Ok(outcome) => outcome,
+        Err(_) => return FishingReelOutcome {
+            packets: vec![fishing_chat(world, "server.ItemDeliveryUnavailable", "Item delivery is temporarily unavailable. Please try again.")],
+            cancel_autocast: true,
+        },
+    };
     world.resource_mut::<FishingResource>().chance_counter = 0;
-    let mut outcome = award_fishing_loot(world);
     maybe_spawn_fishing_monster_event(world);
     if fishing_has_reel(world) {
         if fishing_slot_model_available(world) {
@@ -654,27 +661,27 @@ pub(super) fn fishing_reel_succeeds(world: &World) -> bool {
         <= chance
 }
 
-fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
+fn award_fishing_loot(world: &mut World) -> Result<FishingReelOutcome, String> {
     let Some(drop) = resolved_fishing_drop(world) else {
-        return FishingReelOutcome {
+        return Ok(FishingReelOutcome {
             packets: vec![fishing_chat(world, "server.FishGotAway", "FishGotAway")],
             cancel_autocast: false,
-        };
+        });
     };
 
     match drop {
         ResolvedDropTemplate::Gold { amount, .. } => {
             if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), amount) {
-                return FishingReelOutcome {
+                return Ok(FishingReelOutcome {
                     packets: vec![fishing_chat(world, "server.NoBagSpace", "NoBagSpace")],
                     cancel_autocast: true,
-                };
+                });
             }
             world.resource_mut::<PlayerRuntimeResource>().gold += amount;
-            FishingReelOutcome {
+            Ok(FishingReelOutcome {
                 packets: vec![ServerPacket::GainedGold { gold: amount }],
                 cancel_autocast: false,
-            }
+            })
         }
         ResolvedDropTemplate::Item {
             key,
@@ -694,14 +701,13 @@ fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
             {
                 let inventory = world.resource::<InventoryResource>();
                 if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &key, quantity) {
-                    return FishingReelOutcome {
+                    return Ok(FishingReelOutcome {
                         packets: vec![fishing_chat(world, "server.NoBagSpace", "NoBagSpace")],
                         cancel_autocast: true,
-                    };
+                    });
                 }
             }
-            let item = add_or_increment_item_with_random_metadata(
-                world,
+            let mut grant = FreshItemGrant::plain(
                 ItemContainer::Bag1,
                 &key,
                 &name,
@@ -709,23 +715,29 @@ fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
                 30,
                 quantity,
                 weight,
-                durability_current,
-                durability_max,
-                added_attack,
-                added_defence,
-                added_stats,
-                cursed,
-                socket_slots,
-            );
-            FishingReelOutcome {
-                packets: vec![ServerPacket::GainedItem {
-                    item: user_item_from_item_state(&item),
-                }],
+                crate::UserItemUidReason::Fishing,
+            )?;
+            grant.prototype.durability_current = durability_current.or(grant.prototype.durability_current);
+            grant.prototype.durability_max = durability_max.or(grant.prototype.durability_max);
+            grant.prototype.added_attack = added_attack;
+            grant.prototype.added_defence = added_defence;
+            grant.prototype.added_stats = added_stats;
+            grant.prototype.cursed = cursed;
+            grant.prototype.socket_slots = grant.prototype.socket_slots.max(socket_slots);
+            let changed = publish_world_grants(world, &[grant])?;
+            Ok(FishingReelOutcome {
+                packets: changed.iter().map(|item| ServerPacket::GainedItem {
+                    item: user_item_from_item_state(item),
+                }).collect(),
                 cancel_autocast: false,
-            }
+            })
         }
     }
 }
+
+#[cfg(test)]
+#[path = "fishing_uid_tests.rs"]
+mod uid_tests;
 
 pub(super) fn resolved_fishing_drop(world: &World) -> Option<ResolvedDropTemplate> {
     let fishing_attribute = world.resource::<FishingResource>().fishing_attribute;
