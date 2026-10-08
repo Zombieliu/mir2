@@ -1322,7 +1322,9 @@ impl SimulationSession {
     /// retains only the personal Crystal harvest/drop projection.
     /// Mirroring death prevents the still-live private entity from immediately
     /// respawning a Zone corpse; mirroring explicit revive clears the previous
-    /// incarnation's harvest state.
+    /// incarnation's harvest state. ObjectHealth contains a rounded display
+    /// percentage, so even zero cannot change exact vitals or grant corpse
+    /// harvesting eligibility.
     pub fn apply_shared_monster_lifecycle_packets(&mut self, packets: &[ServerPacket]) {
         if !is_in_world(self.app.world()) {
             return;
@@ -1331,7 +1333,6 @@ impl SimulationSession {
         for packet in packets {
             let object_id = match packet {
                 ServerPacket::ObjectDied { info } => info.object_id,
-                ServerPacket::ObjectHealth { info } if info.percent == 0 => info.object_id,
                 ServerPacket::ObjectRevived { info } => info.object_id,
                 _ => continue,
             };
@@ -1349,9 +1350,6 @@ impl SimulationSession {
                         Some(&info.location),
                         Some(info.direction),
                     );
-                }
-                ServerPacket::ObjectHealth { .. } => {
-                    apply_shared_monster_death_state(world, entity, None, None);
                 }
                 ServerPacket::ObjectRevived { .. } => {
                     apply_shared_monster_revive_state(world, entity);

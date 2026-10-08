@@ -7,7 +7,34 @@ The03:36 Goal API read returned no active goal, not a completed result;
 the authorized unfinished scope was subsequently recorded as an active Goal.
 That does not reset the original12-hour deadline or imply completion.
 
-## Current reviewed health follow-up — 2026-10-08
+## Current Session and Source arithmetic follow-up — 2026-10-08
+
+The reachable personal monster mirror no longer interprets display0 as death
+or Harvest eligibility. Actual death/revive and trusted absolute vitals retain
+their authority. C# single-precision health/mana percentage and expiry byte
+cast order now share helpers across personal and Zone output, group entry,
+Revelation, same-life teleport and zombie revival.
+
+Session3/0, independent C# wrapper vectors5/0, death6/0, Revelation1/0,
+mirror5/0, group8/0, real TCP/WS health-zero7/0 and gateway projection2/0 pass.
+Adjacent revival6/2, special AI2/2 and settlement10/1 have the same five failing
+test names/counts on parent937ac636 without assertion changes. Their raw logs,
+initial compile failures and two zero-test selections are preserved. These
+bounded checks do not constitute full Harvest rewards, PvP or natural battle
+acceptance. Source recipient/ordering, shared Hero identity, retained healing
+and Web percentage0-to-HP0 gaps remain open.
+
+[Bound scope](HEALTH-ZERO-AUTHORITY-20261008.md),
+[source/test proof05](generated/player-qa/classic-20261008/health-authority-05/ROOT-FINAL-05.json),
+[original-byte archive05](generated/player-qa/classic-20261008/health-authority-05/ARCHIVE.json).
+This mutable backend correction is outside frozen R22. At10:23 UTC the actual
+R20 process was alive and Gatewayc6 retained one connection, so no strict drain,
+paired restart, feed promotion or human shop-wheel acceptance is claimed.
+The public version remains R20/feed16/Gatewayc6. The staged R22 receipt and
+original missed12-hour deadline remain unchanged; P1–P7 is not complete.
+Monthly cards still use operator codes; real-payment recharge is not integrated.
+
+## Historical raw-only native health follow-up — 2026-10-08
 
 The native adapter now retires an older revived/live packet marker only after
 a raw, current-map server snapshot confirms positive root/self HP and dead=false.

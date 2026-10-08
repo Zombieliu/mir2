@@ -214,7 +214,6 @@ impl ZoneRuntime {
         let ServerPacket::ObjectMonster { info } = &object.packet else {
             return Vec::new();
         };
-        let health_expire = object.health.as_ref().map(|h| h.expire).unwrap_or(0);
         let mut info = info.clone();
         info.location = destination.clone();
         let old_recipients: Vec<_> = self
@@ -253,8 +252,8 @@ impl ZoneRuntime {
         // those even though teleportation is the same monster incarnation.
         let health = ObjectHealthInfo {
             object_id: id,
-            percent: ((i64::from(m.hp) * 100 / i64::from(m.max_hp.max(1))).clamp(0, 100)) as u8,
-            expire: health_expire,
+            percent: native_monster_health_percent(m.hp, m.max_hp),
+            expire: crate::crystal_health::crystal_health_expire(m.revelation_until_ms, now_ms),
         };
         let object = self
             .objects

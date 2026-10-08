@@ -6840,7 +6840,10 @@ impl ZoneRuntime {
                 info: ObjectHealthInfo {
                     object_id,
                     percent: native_player_health_percent(monster.hp, monster.max_hp),
-                    expire: u8::try_from(duration_seconds.clamp(5, 255)).unwrap_or(u8::MAX),
+                    expire: crate::crystal_health::crystal_health_expire(
+                        monster.revelation_until_ms,
+                        now_ms,
+                    ),
                 },
             }];
         }
@@ -16411,15 +16414,11 @@ fn native_summon_spawn_packet(
 }
 
 fn native_monster_health_percent(hp: i32, max_hp: i32) -> u8 {
-    if max_hp <= 0 || hp <= 0 {
-        return 0;
-    }
-    ((hp.saturating_mul(100) + max_hp - 1) / max_hp).clamp(1, 100) as u8
+    crate::crystal_health::crystal_health_percent(hp, max_hp)
 }
 
 fn native_player_health_percent(hp: i32, max_hp: i32) -> u8 {
-    let max_hp = max_hp.max(1);
-    ((hp.max(0) * 100) / max_hp).clamp(0, 100) as u8
+    crate::crystal_health::crystal_health_percent(hp, max_hp)
 }
 
 fn ground_drop_spawn_packet(drop: &GroundDropSnapshot) -> ServerPacket {
@@ -18052,3 +18051,6 @@ mod player_action_cadence_tests;
 
 #[cfg(test)]
 mod health_zero_authority_tests;
+
+#[cfg(test)]
+mod health_display_source_tests;

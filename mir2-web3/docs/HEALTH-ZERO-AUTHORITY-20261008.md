@@ -1,5 +1,50 @@
 # Rounded health display and life authority — 2026-10-08
 
+## Current Session lifecycle and Source arithmetic follow-up
+
+The personal `SimulationSession` mirror also consumed `ObjectHealth(0)` as
+death. That production route is now removed: only actual `ObjectDied`, explicit
+`ObjectRevived` and trusted absolute vitals can change its monster life state.
+Ordinary authentication and entry tests cover all three classes, unchanged
+positive HP under display0, real death/revive, and the Harvest eligibility
+boundary. The Harvest fixture supplies a trusted shared deer and position;
+it is not a natural kill/drop/repeated-reward end-to-end acceptance.
+
+Source single-precision percentage and expiry byte conversion are centralized.
+The actual C# expressions independently produce the committed golden vectors:
+53/100 displays52, 1/1000 displays0, and expiry minimum-five is applied before
+the byte cast (256 seconds becomes0). Personal HP/Hero MP wrappers, Zone player
+and monster wrappers, party entry, Revelation, same-life monster teleport and
+zombie revival use these numerical helpers. Invalid pools, universal zero-MaxMP
+conversion, full Revelation caster SC/RevTime state and full recipient/ordering
+parity are not established by these vectors. Authoritative death, drops, reward
+deduplication, delayed-action invalidation and PK guards are unchanged.
+
+Final bounded checks: Session lifecycle3/0, C# vector wrappers5/0, Zone death6/0,
+personal Revelation1/0, mirror projection5/0, group reducer8/0, genuine TCP/WS
+health-zero transport7/0 and gateway monster projection2/0. Adjacent revival6/2,
+special AI2/2 and player settlement10/1 retain five failures that reproduce at
+the unmodified parent937ac636. Failure names and counts match; process-specific
+checkpoint payloads are not asserted byte-identical. Initial compile failures
+and two zero-test selections remain retained and do not count as coverage.
+
+The baseline archive's 1375 selected tracked files remain byte-identical to
+their extracted tar members and match parent Git content after declared text
+EOL conversion. This is not a claim that Git archive CRLF bytes equal LF blobs.
+Source hashes, commands, original logs and independent vectors are bound in
+[root proof05](generated/player-qa/classic-20261008/health-authority-05/ROOT-FINAL-05.json)
+and [archive05](generated/player-qa/classic-20261008/health-authority-05/ARCHIVE.json).
+Read-only review found no new lifecycle/reward blocker within this scope.
+
+Full Source health recipients, HP/MP owner packets, trusted unique shared Hero
+identity, retained healing/expiry refresh, revival packet ordering and the Web
+percentage0-to-exact-HP0 path remain open. Primary Web edits are unrelated and
+were not changed. This backend follow-up is outside frozen R22/7fea and is not
+deployed. At 10:23 UTC R20 was observed running with one WebSocket connection;
+strict public drain and human shop-wheel acceptance still have not passed.
+
+## Historical Zone/Gateway/native cache slice at parent937ac636
+
 This bounded slice fixes a low-health defect in shared Zone/Gateway and native
 packet caches. Crystal can display0% while an actor still has positive absolute
 HP. ObjectHealth carries display information; treating its percentage as death
@@ -85,8 +130,10 @@ not claimed. Timeout or snapshot-count guesses must not replace real authority.
 The terminal corpse animation without Death has not been verified; a retained
 Revived standing animation hint may still affect that presentation.
 
-Exact Source f32 health percentage and event-driven GroupHero/PetHealth recipient
-selection remain separate work. No protocol schema, signature, security gate,
+At this historical checkpoint, exact Source f32 health percentage and
+event-driven GroupHero/PetHealth recipient selection remained separate work;
+the current follow-up above closes only the bounded numerical part. No protocol
+schema, signature, security gate,
 online account/save, D/F installation or Gateway is changed by this slice.
 The code is outside frozen R22 game7fea and its attested binaries. A later matched
 client/Gateway build and publication is required before claiming it is live.

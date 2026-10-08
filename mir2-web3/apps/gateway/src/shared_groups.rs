@@ -568,6 +568,30 @@ mod tests {
     }
 
     #[test]
+    fn shared_party_join_health_uses_source_float_percentage() {
+        let mut online = presences(2);
+        online[0].hp = 53;
+        online[0].max_hp = 100;
+        online[1].hp = 1;
+        online[1].max_hp = 1_000;
+        let mut groups = registered(&online);
+        execute(&mut groups, &online, 0, GroupAction::Add("Party1"), 2_000);
+        let accepted = execute(&mut groups, &online, 1, GroupAction::Reply(true), 2_000);
+        for (recipient, subject, expected) in [(0, 1, 0), (1, 0, 52)] {
+            let info = accepted.packets[&online[recipient].live.key]
+                .iter()
+                .find_map(|p| match p {
+                    ServerPacket::ObjectHealth { info }
+                        if info.object_id == online[subject].live.object_id => Some(info),
+                    _ => None,
+                })
+                .expect("nearby ordinary group acceptance exchanges health");
+            assert_eq!(info.percent, expected);
+            assert_eq!(info.expire, 5);
+        }
+    }
+
+    #[test]
     fn shared_party_accepts_across_map_without_range_and_auto_enables_leader() {
         let mut online = presences(2);
         online[1].map = ZoneKey::for_map("different-map");
@@ -770,9 +794,10 @@ fn append_current_roster_packets(
                     ServerPacket::ObjectHealth {
                         info: ObjectHealthInfo {
                             object_id: member.live.object_id,
-                            percent: (i64::from(member.hp.max(0)) * 100
-                                / i64::from(member.max_hp.max(1)))
-                            .clamp(0, 100) as u8,
+                            percent: mir2_simulation::crystal_health::crystal_health_percent(
+                                member.hp,
+                                member.max_hp,
+                            ),
                             expire: 5,
                         },
                     },

@@ -1,5 +1,20 @@
 # Crystal Server Parity
 
+> 2026-10-08 current health follow-up: the personal Session mirror now ignores
+> ObjectHealth for monster life/Harvest authority. Source float percentage and
+> expiry byte-cast order are centralized and checked against independent C#
+> vectors. Focused lifecycle, math, party and genuine transport checks pass.
+> Five adjacent failures reproduce by name/count at unmodified parent937ac636;
+> original assertions/logs and the zero-test selections remain retained.
+> Full recipients, owner HP/MP packets, shared Hero identity, retained healing
+> and Web percentage0-to-HP0 are open. This code is outside frozen R22.
+> At10:23 UTC R20 was observed alive with one Gatewayc6 connection; strict
+> drain, paired rollout, feed promotion and human wheel acceptance are pending.
+> Public R20/feed16/Gatewayc6 and the original missed12-hour deadline remain.
+> P1–P7 is unfinished; real-payment recharge is not integrated.
+> [Bound source and tests](HEALTH-ZERO-AUTHORITY-20261008.md),
+> [original evidence05](generated/player-qa/classic-20261008/health-authority-05/ARCHIVE.json).
+
 > 2026-10-08 stage-only checkpoint: R22/feed17 immutable origin and R2 objects
 > are prepared; CI37739769708 at publisher e7850e9 verifies all40 objects and
 > 1052247716 public bytes. The exact stage receipt is authenticated. Worker

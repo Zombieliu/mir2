@@ -7100,15 +7100,12 @@ pub(super) fn object_mana_info_for_entity(world: &World, entity: Entity) -> Opti
 }
 
 pub(super) fn health_percent(hp: i32, max_hp: i32) -> u8 {
-    let max_hp = max_hp.max(1);
-    let percent = ((hp.max(0) * 100) / max_hp).clamp(0, 100);
-    u8::try_from(percent).expect("health percent should fit")
+    crate::crystal_health::crystal_health_percent(hp, max_hp)
 }
 
 pub(super) fn mana_percent(mp: i32, max_mp: i32) -> u8 {
-    let max_mp = max_mp.max(1);
-    let percent = ((mp.max(0) * 100) / max_mp).clamp(0, 100);
-    u8::try_from(percent).expect("mana percent should fit")
+    // HeroObject.PercentMana uses the same float division/byte conversion.
+    crate::crystal_health::crystal_health_percent(mp, max_mp)
 }
 
 pub(super) fn object_died_info_for_entity(
