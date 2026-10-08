@@ -108,14 +108,16 @@ pub(super) fn can_take(inventory: &InventoryResource, item: &ItemState) -> bool 
         return false;
     };
     let mut remaining = inventory.clone();
-    let Some(index) = remaining
-        .inventory_items
+    let collection = if item.container == ItemContainer::Belt {
+        &mut remaining.belt_items
+    } else { &mut remaining.inventory_items };
+    let Some(index) = collection
         .iter()
         .position(|candidate| candidate.container == item.container && candidate.slot == item.slot)
     else {
         return false;
     };
-    remaining.inventory_items.remove(index);
+    collection.remove(index);
     // Old saves can contain aliases shared across grids. Never turn such an
     // ambiguous reference into custody while another live item still owns it.
     ids.iter()
@@ -198,6 +200,38 @@ pub(super) fn plan_return(
         changed.push(incoming);
     }
     Some((staged, changed))
+}
+
+/// Original Crystal Inventory[] addressing for refinement only: six belt
+/// cells followed by bag cells. Other services retain their bag-only indexes.
+pub(super) fn plan_return_crystal_array(
+    inventory: &InventoryResource, item: &ItemState, destination: Option<u8>,
+) -> Option<(InventoryResource, Vec<ItemState>)> {
+    let index = match destination {
+        Some(index) => index,
+        None => (0..inventory.inventory_capacity.min(86)).find_map(|index| {
+            let wire = index as u8;
+            let occupied = if wire < 6 {
+                inventory.belt_items.iter().any(|item|item.slot == wire)
+            } else {
+                let pair = inventory_container_and_slot_for_index(wire - 6)?;
+                inventory.inventory_items.iter().any(|item|(item.container,item.slot) == pair)
+            };
+            (!occupied).then_some(wire)
+        })?,
+    };
+    if u16::from(index) >= inventory.inventory_capacity || index >= 86 { return None; }
+    if index >= 6 { return plan_return(inventory, item, Some(index - 6), false); }
+    if inventory.belt_items.iter().any(|item|item.slot == index) { return None; }
+    let ids = item_ids(item).ok()?;
+    let mut staged = inventory.clone();
+    for id in &ids { staged.reserved_item_unique_ids.remove(id); }
+    if ids.iter().any(|id|inventory_unique_id_is_used(&staged,*id)) { return None; }
+    let mut incoming = item.clone();
+    incoming.container = ItemContainer::Belt;
+    incoming.slot = index;
+    staged.belt_items.push(incoming.clone());
+    Some((staged,vec![incoming]))
 }
 pub(super) fn returned_packets(
     before: &InventoryResource,

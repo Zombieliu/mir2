@@ -812,7 +812,8 @@ impl ZoneRuntime {
         else {
             return false;
         };
-        self.conquest_player_is_in_war_region(target, now_ms)
+        self.npc_teleport_config.map(&self.key.map_file_name).is_some_and(|map| map.fight)
+            || self.conquest_player_is_in_war_region(target, now_ms)
             || attacker
                 .chat_profile
                 .guild_name
@@ -881,9 +882,14 @@ impl ZoneRuntime {
         target: &ZonePlayer,
         now_ms: u64,
     ) -> bool {
-        zone_player_can_attack_player(attacker, target)
-            || (attacker.chat_profile.attack_mode == 3
-                && self.conquest_players_are_war_enemies(attacker, target, now_ms))
+        // Crystal PlayerObject.IsAttackTarget(HumanObject):4684. This is not
+        // used by the independent MonsterObject attacker (owned pet) branch.
+        if self.npc_teleport_config.map(&self.key.map_file_name).is_some_and(|map| map.no_fight) {
+            return false;
+        }
+        zone_player_can_attack_player_at(attacker, target, now_ms,
+            self.owned_pet_brown_until(target),
+            self.conquest_players_are_war_enemies(attacker, target, now_ms))
     }
 
     /// Recheck launch and impact: ownership may change before an arrow lands.

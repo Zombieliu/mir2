@@ -31,12 +31,12 @@ use mir2_client_bevy::quest_model::{
     NearbyNpcModel, NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestDetailText,
     QuestObjective, QuestReward, QuestStatus, QuestTracker, RecentPickup,
 };
-use mir2_client_bevy::quest_ui::{
-    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction,
-    QuestUiIntent, QuestUiIntentQueue, QuestUiState,
-};
 #[cfg(test)]
 use mir2_client_bevy::quest_ui::begin_detail_quest_turn_in;
+use mir2_client_bevy::quest_ui::{
+    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction, QuestUiIntent,
+    QuestUiIntentQueue, QuestUiState,
+};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::social::{GuildRankRenameRequest, SocialModel, SocialPendingOperation};
 use serde_json::Value;
@@ -50,10 +50,10 @@ use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
 #[path = "guild_rank_wire_tests.rs"]
 mod guild_rank_wire_tests;
 use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate};
+use mir2_client_bevy::crystal_ui::overlays::social_bond_dialog::GuildCreationContext;
 use mir2_client_bevy::crystal_ui::overlays::{
     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
 };
-use mir2_client_bevy::crystal_ui::overlays::social_bond_dialog::GuildCreationContext;
 
 const MAX_NEARBY_NPCS: usize = 8;
 const MAX_GROUND_DROPS: usize = 4;
@@ -88,6 +88,7 @@ pub struct NativeGameplayAdapter {
     damage_events: VecDeque<NativeDamageEvent>,
     effect_sequence: u64,
     effect_events: VecDeque<NativeEffectEvent>,
+    owner_struck: Option<NativeOwnerStruck>,
     notice_sequence: u64,
     notice_update: Option<NoticePacketUpdate>,
     /// Latest authoritative actor payloads used only to resolve Crystal's
@@ -395,6 +396,16 @@ pub struct NativeEffectEvent {
     pub payload: Value,
 }
 
+/// Receipt of Crystal's compact owner-only Struck packet. This is kept apart
+/// from the retained VFX buffer: replaying a snapshot must not extend NextRunTime.
+#[derive(Debug, Clone)]
+pub(crate) struct NativeOwnerStruck {
+    pub generation: u64,
+    pub sequence: u64,
+    pub object_id: u32,
+    pub received_at: std::time::Instant,
+}
+
 /// Upper bound on buffered transient effect events. Too many simultaneous
 /// casts could otherwise grow the queue without limit; the newest events are
 /// kept and the oldest dropped.
@@ -403,6 +414,8 @@ pub const MAX_BUFFERED_EFFECT_EVENTS: usize = 96;
 /// One complete replacement of native gameplay presentation state.
 #[derive(Debug, Clone, Default)]
 pub struct NativeGameplaySnapshot {
+    pub refine_packet: Option<mir2_protocol::ServerPacket>,
+    pub refine_custody: Option<mir2_client_bevy::crystal_ui::overlays::refine_dialog::RefineCustodyReadback>,
     pub player_inspect: Option<mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback>,
     pub equipment_creature_packet: Option<mir2_protocol::ServerPacket>,
     pub equipment_owner_id: Option<u32>,
@@ -434,6 +447,7 @@ pub struct NativeGameplaySnapshot {
     pub damage_events: Vec<NativeDamageEvent>,
     /// Monotonic authoritative effect events since the last drain, in order.
     pub effect_events: Vec<NativeEffectEvent>,
+    pub(crate) owner_struck: Option<NativeOwnerStruck>,
     /// Authoritative objectId -> (x, y) tile map for effect anchoring (caster,
     /// projectile source/destination, ObjectEffect target tiles). Derived from
     /// zone packets, never fabricated by the client.
@@ -756,6 +770,12 @@ impl NativeGameplayAdapter {
                 "ObjectMonster" | "NewMonsterInfo" => self.upsert_zone_entity(payload, "monster"),
                 "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc"),
                 "ObjectPlayer" | "ObjectHero" => self.upsert_zone_entity(payload, "player"),
+                "ColourChanged" => {
+                    self.patch_zone_name_colour(payload, self.latest_player_object_id)
+                }
+                "ObjectColourChanged" => {
+                    self.patch_zone_name_colour(payload, packet_object_id(payload))
+                }
                 "MountUpdate" => self.patch_zone_entity_mount(payload),
                 "ObjectWalk" | "ObjectRun" => {
                     let changed = self.patch_zone_entity_transform(
@@ -913,6 +933,14 @@ impl NativeGameplayAdapter {
                         player_object_id,
                         packet_body(payload).get("attackerId").and_then(value_u32),
                     );
+                    if let Some(object_id) = player_object_id.filter(|id| *id != 0) {
+                        self.owner_struck = Some(NativeOwnerStruck {
+                            generation: self.generation,
+                            sequence: self.effect_sequence,
+                            object_id,
+                            received_at: std::time::Instant::now(),
+                        });
+                    }
                     true
                 }
                 "IntelligentCreaturePickup" => {
@@ -1126,6 +1154,7 @@ impl NativeGameplayAdapter {
         self.zone_tombstones.clear();
         self.damage_events.clear();
         self.effect_events.clear();
+        self.owner_struck = None;
         self.actor_sound_contexts.clear();
         self.latest_player_object_id = None;
         self.pending_local_magic_echo = None;
@@ -1396,6 +1425,25 @@ impl NativeGameplayAdapter {
             }
         }
         patch_location_fields(body, overlay);
+        true
+    }
+
+    fn patch_zone_name_colour(&mut self, payload: &Value, object_id: Option<u32>) -> bool {
+        let Some(object_id) = object_id.filter(|id| !self.zone_tombstones.contains(id)) else {
+            return false;
+        };
+        let Some(colour) = packet_body(payload)
+            .get("nameColourArgb")
+            .and_then(value_i32)
+        else {
+            return false;
+        };
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        if overlay.get("nameColourArgb").and_then(value_i32) == Some(colour) {
+            return false;
+        }
+        overlay.insert("objectId".into(), Value::from(object_id));
+        overlay.insert("nameColourArgb".into(), Value::from(colour));
         true
     }
 
@@ -1732,11 +1780,14 @@ impl NativeGameplayAdapter {
             entity_render_payload: Some(payload.clone()),
             damage_events: self.damage_events.iter().cloned().collect(),
             effect_events: self.effect_events.iter().cloned().collect(),
+            owner_struck: self.owner_struck.clone(),
             zone_entity_tiles: self.zone_entity_tiles(payload),
             big_map: self.big_map.clone(),
             authoritative_self_movement: None,
             notice_update: self.notice_update.clone(),
             equipment_creature_packet: None,
+            refine_packet: None,
+            refine_custody: None,
             equipment_owner_id: None,
             ranking_packet: None,
             friend_packet: None,
@@ -1934,28 +1985,51 @@ fn native_guild_creation_context(
 ) -> Option<GuildCreationContext> {
     let dialog = dialog?;
     if !dialog.is_open
-        || !dialog.options.iter().any(|option| option.enabled
-            && option.option_id.eq_ignore_ascii_case("@CREATEGUILD"))
+        || !dialog
+            .options
+            .iter()
+            .any(|option| option.enabled && option.option_id.eq_ignore_ascii_case("@CREATEGUILD"))
     {
         return None;
     }
     let npc_object_id = dialog.npc_object_id.filter(|id| *id != 0)?;
     let big_map = big_map?;
     big_map.current_map_index?;
-    Some(GuildCreationContext { npc_object_id, map_epoch: big_map.reset_epoch })
+    Some(GuildCreationContext {
+        npc_object_id,
+        map_epoch: big_map.reset_epoch,
+    })
 }
 
 fn observe_native_social_snapshot(ui: &mut NativePlayerUiState, snapshot: &NativeGameplaySnapshot) {
+    ui.refine.retain_context(
+        (!snapshot.big_map_only)
+            .then_some(snapshot.dialog.npc_object_id)
+            .flatten(),
+        snapshot.big_map.reset_epoch,
+    );
+    if !ui.accepts_npc_service_reply() {
+        ui.refine.invalidate_service();
+    }
+    if let Some(custody) = &snapshot.refine_custody {
+        ui.refine.observe_custody(custody);
+    }
+    if let Some(packet) = &snapshot.refine_packet {
+        ui.refine.observe(packet);
+    }
     // Fold boundaries in network order. A later NPC/map change in the same
     // drain must retire an earlier GuildNameRequest before presentation.
     if !ui.accepts_npc_service_reply() {
         ui.social_bonds.invalidate_guild_creation();
     } else if snapshot.big_map_only {
-        ui.social_bonds.retain_guild_creation_map(snapshot.big_map.reset_epoch);
+        ui.social_bonds
+            .retain_guild_creation_map(snapshot.big_map.reset_epoch);
     } else {
-        ui.social_bonds.retain_guild_creation_context(native_guild_creation_context(
-            Some(&snapshot.dialog), Some(&snapshot.big_map),
-        ));
+        ui.social_bonds
+            .retain_guild_creation_context(native_guild_creation_context(
+                Some(&snapshot.dialog),
+                Some(&snapshot.big_map),
+            ));
     }
     if let Some(packet) = snapshot.social_bond_packet.as_ref() {
         ui.social_bonds.observe(packet);
@@ -1980,6 +2054,7 @@ pub(crate) struct GameplayDrainModels<'w> {
     revisions: ResMut<'w, AuthoritativeModelRevisions>,
     pending: ResMut<'w, PendingOperations>,
     click_state: Option<ResMut<'w, NativeWorldClickState>>,
+    movement: Option<ResMut<'w, crate::input::WorldPointerMovementState>>,
 }
 
 pub fn drain_gameplay_events(
@@ -1988,10 +2063,16 @@ pub fn drain_gameplay_events(
     mut models: GameplayDrainModels,
     mut ecs_commands: Commands,
     time: Res<bevy::prelude::Time>,
+    real_time: Option<Res<bevy::prelude::Time<bevy::time::Real>>>,
 ) {
     let (snapshots, transport_advanced) = inbox.drain();
+    let movement_now_ms = crate::input::movement_now_ms(Some(&time), real_time.as_deref());
+    if let (Some(movement), Some(latest)) = (models.movement.as_deref_mut(), snapshots.last()) {
+        movement.observe_gameplay_generation(latest.generation, movement_now_ms);
+    }
     if transport_advanced {
         if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.refine = Default::default();
             ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
@@ -2010,7 +2091,11 @@ pub fn drain_gameplay_events(
         models.completed_quests.reset();
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
+        if let Some(movement) = models.movement.as_deref_mut() {
+            movement.clear_owner_struck_guard();
+        }
         if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.refine = Default::default();
             ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
@@ -2037,8 +2122,23 @@ pub fn drain_gameplay_events(
         models.notice.reset_session();
         return;
     }
+    if let Some(ui) = models.player_ui.as_deref_mut() {
+        // A missing receipt is an unknown outcome, never proof that the server
+        // rolled back. Retire this connection's request lease so the player
+        // can explicitly reopen the same NPC and read authoritative custody.
+        ui.refine.expire_request_outcome(
+            std::time::Instant::now(),
+            std::time::Duration::from_secs(15),
+        );
+    }
     if snapshots.is_empty() {
         return;
+    }
+    if let Some(movement) = models.movement.as_deref_mut() {
+        let receipt_now = std::time::Instant::now();
+        for snapshot in &snapshots {
+            movement.observe_owner_struck_snapshot(snapshot, movement_now_ms, receipt_now);
+        }
     }
     if let Some(ui) = models.player_ui.as_deref_mut() {
         ui.creature.bootstrap_allowed = true;
@@ -2308,9 +2408,17 @@ fn queued_guild_rank_rename(
     social: Option<&SocialModel>,
 ) -> Option<GuildRankRenameRequest> {
     let NativePlayerUiIntent::GuildEditMember {
-        change_type: 3, rank_index, name, rank_name,
-    } = intent else { return None; };
-    if !name.is_empty() { return None; }
+        change_type: 3,
+        rank_index,
+        name,
+        rank_name,
+    } = intent
+    else {
+        return None;
+    };
+    if !name.is_empty() {
+        return None;
+    }
     social?.pending.iter().find_map(|pending| match pending {
         SocialPendingOperation::GuildRankRename(request)
             if request.rank_index == *rank_index && request.rank_name == *rank_name =>
@@ -2327,8 +2435,10 @@ fn release_unsent_guild_rank_rename(
     ui: Option<&mut NativePlayerUiState>,
 ) {
     if let Some(social) = social {
-        social.pending.retain(|pending| !matches!(pending,
-            SocialPendingOperation::GuildRankRename(current) if current == request));
+        social.pending.retain(|pending| {
+            !matches!(pending,
+            SocialPendingOperation::GuildRankRename(current) if current == request)
+        });
     }
     if let Some(ui) = ui {
         if ui.guild_panel.rank_name_submission.as_ref() == Some(request) {
@@ -2380,7 +2490,9 @@ pub fn forward_quest_ui_intents(
         for intent in &player_pending {
             if let Some(request) = queued_guild_rank_rename(intent, social.as_deref()) {
                 release_unsent_guild_rank_rename(
-                    &request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
+                    &request,
+                    social.as_deref_mut(),
+                    player_ui_state.as_deref_mut(),
                 );
             }
         }
@@ -2426,8 +2538,11 @@ pub fn forward_quest_ui_intents(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     if let Some(ui) = player_ui_state.as_deref_mut() {
-        let context = if dead || !ui.accepts_npc_service_reply()
-            || social.as_deref().is_some_and(|model| model.guild.name.is_some())
+        let context = if dead
+            || !ui.accepts_npc_service_reply()
+            || social
+                .as_deref()
+                .is_some_and(|model| model.guild.name.is_some())
         {
             None
         } else {
@@ -2435,7 +2550,9 @@ pub fn forward_quest_ui_intents(
         };
         ui.social_bonds.retain_guild_creation_context(context);
     }
-    let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
+    let quest_modal = quest_ui_state
+        .as_deref()
+        .is_some_and(QuestUiState::blocks_world_input);
     let world_actions_blocked = quest_modal
         || big_map_ui.as_deref().is_some_and(|map| map.search_focused)
         || notice.as_deref().is_some_and(NoticeDialogState::is_open)
@@ -2448,12 +2565,17 @@ pub fn forward_quest_ui_intents(
     // Combat selection expresses the latest target, not a FIFO of attacks.
     // A burst of UI/world input can cross this bridge in one batch; only the
     // most recent target is still the player's selected intent.
-    let latest_attack_index = pending
-        .iter()
-        .rposition(|intent| matches!(intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }));
+    let latest_attack_index = pending.iter().rposition(|intent| {
+        matches!(
+            intent,
+            QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+        )
+    });
     for (index, intent) in pending.into_iter().enumerate() {
-        if matches!(&intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. })
-            && Some(index) != latest_attack_index
+        if matches!(
+            &intent,
+            QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+        ) && Some(index) != latest_attack_index
         {
             continue;
         }
@@ -2609,28 +2731,55 @@ pub fn forward_quest_ui_intents(
                     direction: direction.to_owned(),
                 }
             }
-            QuestUiIntent::AttackDirection { direction, mining, gesture_id } => {
+            QuestUiIntent::AttackDirection {
+                direction,
+                mining,
+                gesture_id,
+            } => {
                 if world_actions_blocked
-                    || !read_model.as_deref().is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)
-                    || !click_state.as_deref().is_some_and(|state| state.riding_mount == Some(false)
-                        && state.dazed == Some(false) && state.fishing == Some(false))
+                    || !read_model
+                        .as_deref()
+                        .is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)
+                    || !click_state.as_deref().is_some_and(|state| {
+                        state.riding_mount == Some(false)
+                            && state.dazed == Some(false)
+                            && state.fishing == Some(false)
+                    })
                 {
                     continue;
                 }
-                let Some(gesture) = movement.as_deref().and_then(WorldPointerMovementState::current_directional_attack) else {
+                let Some(gesture) = movement
+                    .as_deref()
+                    .and_then(WorldPointerMovementState::current_directional_attack)
+                else {
                     continue;
                 };
-                let current_map = presentation.as_deref().and_then(|model| model.current_map_file_name());
-                let Some(current_origin) = entities.as_deref().and_then(|model| model.entities.iter()
-                    .find(|entity| entity.kind == EntityKind::SelfPlayer)
-                    .map(|entity| (entity.x, entity.y))) else { continue; };
-                if gesture.id != gesture_id || gesture.direction != direction || gesture.mining() != mining
+                let current_map = presentation
+                    .as_deref()
+                    .and_then(|model| model.current_map_file_name());
+                let Some(current_origin) = entities.as_deref().and_then(|model| {
+                    model
+                        .entities
+                        .iter()
+                        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                        .map(|entity| (entity.x, entity.y))
+                }) else {
+                    continue;
+                };
+                if gesture.id != gesture_id
+                    || gesture.direction != direction
+                    || gesture.mining() != mining
                     || !gesture.remains_current(current_map, current_origin, inventory.as_deref())
                 {
                     continue;
                 }
-                let Some(direction) = crystal_harvest_direction(&direction) else { continue; };
-                NativeOutboundCommand::AttackDirection { direction: direction.to_owned(), spell: None }
+                let Some(direction) = crystal_harvest_direction(&direction) else {
+                    continue;
+                };
+                NativeOutboundCommand::AttackDirection {
+                    direction: direction.to_owned(),
+                    spell: None,
+                }
             }
             QuestUiIntent::AttackTarget { object_id } => {
                 // Passive HUD hover can occur while a selected monster is
@@ -2639,19 +2788,18 @@ pub fn forward_quest_ui_intents(
                 let ongoing_target = movement
                     .as_deref()
                     .is_some_and(|state| state.attack_target() == Some(object_id));
-                let attack_actions_blocked = notice
-                    .as_deref()
-                    .is_some_and(NoticeDialogState::is_open)
-                    || quest_modal
-                    || dialog_open
-                    || dead
-                    || player_ui_state.as_deref().is_some_and(|ui| {
-                        if ongoing_target {
-                            ui.blocks_route_navigation()
-                        } else {
-                            ui.blocks_world_action(false, false)
-                        }
-                    });
+                let attack_actions_blocked =
+                    notice.as_deref().is_some_and(NoticeDialogState::is_open)
+                        || quest_modal
+                        || dialog_open
+                        || dead
+                        || player_ui_state.as_deref().is_some_and(|ui| {
+                            if ongoing_target {
+                                ui.blocks_route_navigation()
+                            } else {
+                                ui.blocks_world_action(false, false)
+                            }
+                        });
                 if attack_actions_blocked {
                     crate::movement_trace::record(serde_json::json!({
                         "type": "attackForwardBlocked",
@@ -2766,29 +2914,72 @@ pub fn forward_quest_ui_intents(
         let guild_creation_request = if matches!(&command,
             NativeOutboundCommand::SelectNpcDialog { target } if target.eq_ignore_ascii_case("@CREATEGUILD"))
         {
-            let Some(context) = native_guild_creation_context(dialog.as_deref(), big_map.as_deref()) else {
+            let Some(context) =
+                native_guild_creation_context(dialog.as_deref(), big_map.as_deref())
+            else {
                 continue;
             };
-            if dead || !player_ui_state.as_deref().is_some_and(|ui|
-                ui.social_bonds.can_request_guild_creation(context))
+            if dead
+                || !player_ui_state
+                    .as_deref()
+                    .is_some_and(|ui| ui.social_bonds.can_request_guild_creation(context))
             {
                 continue;
             }
             Some(context)
-        } else { None };
+        } else {
+            None
+        };
+        let refine_service_request = match &command {
+            NativeOutboundCommand::SelectNpcDialog { target } => dialog
+                .as_deref()
+                .and_then(|d| d.npc_object_id)
+                .zip(big_map.as_deref())
+                .map(|(npc_object_id, map)| {
+                    (
+                        mir2_client_bevy::crystal_ui::overlays::refine_dialog::RefineContext {
+                            npc_object_id,
+                            map_epoch: map.reset_epoch,
+                        },
+                        target.clone(),
+                    )
+                }),
+            _ => None,
+        };
         let sent = commands.send_command(GatewayCommand::Wire(command));
-        if sent && matches!(&retry_intent, QuestUiIntent::AttackDirection { mining: true, .. }) {
+        if sent
+            && matches!(
+                &retry_intent,
+                QuestUiIntent::AttackDirection { mining: true, .. }
+            )
+        {
             if let (Some(gesture), Some(presentation), Some(object_id)) = (
-                movement.as_deref().and_then(WorldPointerMovementState::current_directional_attack),
+                movement
+                    .as_deref()
+                    .and_then(WorldPointerMovementState::current_directional_attack),
                 presentation.as_deref_mut(),
-                entities.as_deref().and_then(|model| model.entities.iter()
-                    .find(|entity| entity.kind == EntityKind::SelfPlayer).map(|entity| entity.object_id.as_str())),
+                entities.as_deref().and_then(|model| {
+                    model
+                        .entities
+                        .iter()
+                        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                        .map(|entity| entity.object_id.as_str())
+                }),
             ) {
-                presentation.mark_local_mining_request(object_id, gesture.origin, gesture.direction,
-                    crate::entity_presentation::native_motion_clock_ms());
+                presentation.mark_local_mining_request(
+                    object_id,
+                    gesture.origin,
+                    gesture.direction,
+                    crate::entity_presentation::native_motion_clock_ms(),
+                );
             }
         }
         if let Some(ui) = player_ui_state.as_deref_mut() {
+            if sent {
+                if let Some((context, key)) = refine_service_request {
+                    ui.refine.begin_service_request(context, &key);
+                }
+            }
             if exits_npc_service {
                 ui.social_bonds.invalidate_guild_creation();
                 // Exit was already accepted by the local FIFO. Preserve it
@@ -2825,7 +3016,12 @@ pub fn forward_quest_ui_intents(
                 );
             }
         }
-        if !sent && !matches!(&retry_intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }) {
+        if !sent
+            && !matches!(
+                &retry_intent,
+                QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+            )
+        {
             retry_intents.push(retry_intent);
         }
     }
@@ -2844,16 +3040,25 @@ pub fn forward_quest_ui_intents(
 
     for intent in player_pending {
         let guild_rank_rename = queued_guild_rank_rename(&intent, social.as_deref());
-        if matches!(&intent, NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }) {
-            let can_dispatch = guild_rank_rename.as_ref().is_some_and(|request|
-                social.as_deref().is_some_and(|social| social.guild.rank_rename_scope_matches(request))
-                    && player_ui_state.as_deref().is_some_and(|ui|
+        if matches!(
+            &intent,
+            NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
+        ) {
+            let can_dispatch = guild_rank_rename.as_ref().is_some_and(|request| {
+                social
+                    .as_deref()
+                    .is_some_and(|social| social.guild.rank_rename_scope_matches(request))
+                    && player_ui_state.as_deref().is_some_and(|ui| {
                         ui.guild_panel.owner_name == request.requester
-                            && ui.guild_panel.now_ms <= request.deadline_ms));
+                            && ui.guild_panel.now_ms <= request.deadline_ms
+                    })
+            });
             if !can_dispatch {
                 if let Some(request) = guild_rank_rename.as_ref() {
                     release_unsent_guild_rank_rename(
-                        request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
+                        request,
+                        social.as_deref_mut(),
+                        player_ui_state.as_deref_mut(),
                     );
                 }
                 continue;
@@ -2869,6 +3074,10 @@ pub fn forward_quest_ui_intents(
         };
         let equipment_request = match &intent {
             NativePlayerUiIntent::EquipmentCreaturePacket(packet) => Some(packet.clone()),
+            _ => None,
+        };
+        let refine_request = match &intent {
+            NativePlayerUiIntent::RefinePacket(packet) => Some(packet.clone()),
             _ => None,
         };
         let trade_item_pending = trade_item_pending_operation(&intent);
@@ -2901,6 +3110,30 @@ pub fn forward_quest_ui_intents(
             _ => None,
         };
         let command = match intent {
+            NativePlayerUiIntent::RefinePacket(packet) => {
+                let can_dispatch = inventory
+                    .as_deref()
+                    .zip(player_ui_state.as_deref())
+                    .zip(big_map.as_deref())
+                    .is_some_and(|((inventory, ui), map)| {
+                        ui.refine.can_dispatch(
+                            &packet,
+                            inventory,
+                            dialog.as_deref().and_then(|d| d.npc_object_id),
+                            map.reset_epoch,
+                        )
+                    });
+                let command = can_dispatch
+                    .then(|| crate::refine_wire::command(&packet))
+                    .flatten();
+                let Some(command) = command else {
+                    if let Some(ui) = player_ui_state.as_deref_mut() {
+                        ui.refine.release_unsent(&packet);
+                    }
+                    continue;
+                };
+                command
+            }
             NativePlayerUiIntent::GuildBuffUpdate(request) => {
                 NativeOutboundCommand::GuildBuffUpdate {
                     action: request.action,
@@ -2909,8 +3142,9 @@ pub fn forward_quest_ui_intents(
             }
             NativePlayerUiIntent::SocialBondPacket(packet) => {
                 if matches!(packet, mir2_protocol::ClientPacket::GuildNameReturn { .. })
-                    && !player_ui_state.as_deref().is_some_and(|ui|
-                        ui.social_bonds.can_dispatch_guild_name(&packet))
+                    && !player_ui_state
+                        .as_deref()
+                        .is_some_and(|ui| ui.social_bonds.can_dispatch_guild_name(&packet))
                 {
                     continue;
                 }
@@ -3337,8 +3571,18 @@ pub fn forward_quest_ui_intents(
             NativeOutboundCommand::Inspect { ranking: true, .. }
         );
         let sent = commands.send_command(GatewayCommand::Wire(command));
+        if let (Some(ui), Some(packet)) = (player_ui_state.as_deref_mut(), refine_request.as_ref())
+        {
+            if sent {
+                ui.refine.mark_sent(packet);
+            } else {
+                ui.refine.release_unsent(packet);
+            }
+        }
         if sent {
-            if let (Some(ui), Some(packet)) = (player_ui_state.as_deref_mut(), bond_request.as_ref()) {
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), bond_request.as_ref())
+            {
                 ui.social_bonds.guild_name_dispatched(packet);
             }
         }
@@ -3352,9 +3596,14 @@ pub fn forward_quest_ui_intents(
                 .transport_result(request_id, &spell, key, old_key, sent);
         }
         if !sent {
+            if refine_request.is_some() {
+                continue;
+            }
             if let Some(request) = guild_rank_rename.as_ref() {
                 release_unsent_guild_rank_rename(
-                    request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
+                    request,
+                    social.as_deref_mut(),
+                    player_ui_state.as_deref_mut(),
                 );
             }
             if let Some(notice) = guild_notice_request {
@@ -3373,7 +3622,9 @@ pub fn forward_quest_ui_intents(
                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildMember{change_type:t,rank_index:i,name:n} if *t==change_type && *i==rank_index && n==&name));
                 }
                 if let Some(ui) = player_ui_state.as_deref_mut() {
-                    if change_type != 3 { ui.guild_panel.create_ready_ms = 0; }
+                    if change_type != 3 {
+                        ui.guild_panel.create_ready_ms = 0;
+                    }
                     match change_type {
                         0 if ui.guild_recruit_draft.is_empty() => {
                             ui.guild_recruit_draft = name;
@@ -5092,13 +5343,17 @@ mod tests {
                     ["@Exit", "@BuySell"]
                 };
                 for target in targets {
-                    app.world_mut().resource_mut::<QuestUiIntentQueue>().push_intent(
-                        QuestUiIntent::SelectNpcDialog { target: target.into() },
-                    );
+                    app.world_mut()
+                        .resource_mut::<QuestUiIntentQueue>()
+                        .push_intent(QuestUiIntent::SelectNpcDialog {
+                            target: target.into(),
+                        });
                 }
                 app.update();
                 assert_eq!(
-                    app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply(),
+                    app.world()
+                        .resource::<NativePlayerUiState>()
+                        .accepts_npc_service_reply(),
                     send_succeeds && !exit_last,
                     "exit_last={exit_last}, send_succeeds={send_succeeds}",
                 );
@@ -5117,8 +5372,18 @@ mod tests {
     fn npc_service_reopen_requires_an_accepted_new_outbound_request() {
         for (intent, allows_reply) in [
             (QuestUiIntent::InteractNpc { npc_object_id: 7 }, true),
-            (QuestUiIntent::SelectNpcDialog { target: "@BuySell".into() }, true),
-            (QuestUiIntent::SelectNpcDialog { target: "@Exit".into() }, false),
+            (
+                QuestUiIntent::SelectNpcDialog {
+                    target: "@BuySell".into(),
+                },
+                true,
+            ),
+            (
+                QuestUiIntent::SelectNpcDialog {
+                    target: "@Exit".into(),
+                },
+                false,
+            ),
         ] {
             for send_succeeds in [true, false] {
                 let mut ui = NativePlayerUiState::default();
@@ -5127,10 +5392,16 @@ mod tests {
                 assert!(!ui.accepts_npc_service_reply());
                 let (mut app, receiver) = quest_gate_app(ui, NpcDialogModel::default());
                 let receiver = send_succeeds.then_some(receiver);
-                app.world_mut().resource_mut::<QuestUiIntentQueue>().push_intent(intent.clone());
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .push_intent(intent.clone());
                 app.update();
-                assert_eq!(app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply(),
-                    send_succeeds && allows_reply);
+                assert_eq!(
+                    app.world()
+                        .resource::<NativePlayerUiState>()
+                        .accepts_npc_service_reply(),
+                    send_succeeds && allows_reply
+                );
                 if let Some(receiver) = receiver {
                     assert!(receiver.try_recv().is_ok());
                 }
@@ -5139,7 +5410,8 @@ mod tests {
     }
 
     fn ready_detail_turn_in_app() -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
-        let (mut app, receiver) = quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
+        let (mut app, receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
         let tracker = QuestTracker {
             active_quests: vec![Quest {
                 quest_index: 2110012,
@@ -5200,8 +5472,10 @@ mod tests {
             .insert_resource(state)
             .insert_resource(queue)
             .insert_resource(pending);
-        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-            mir2_ui_core::state::UiPanel::QuestLog;
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::QuestLog;
         (app, receiver)
     }
 
@@ -5216,9 +5490,17 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_command(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact { object_id: 24 }))
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact {
+                object_id: 24
+            }))
         ));
-        assert!(matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)), "ordinary world interaction stays blocked");
+        assert!(
+            matches!(
+                receiver.try_command(),
+                Err(std::sync::mpsc::TryRecvError::Empty)
+            ),
+            "ordinary world interaction stays blocked"
+        );
     }
 
     #[test]
@@ -5260,7 +5542,10 @@ mod tests {
             }
             app.update();
             assert!(
-                matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)),
+                matches!(
+                    receiver.try_command(),
+                    Err(std::sync::mpsc::TryRecvError::Empty)
+                ),
                 "{rejection} must not send an NPC interaction"
             );
         }
@@ -6001,40 +6286,60 @@ mod tests {
         let mut movement = WorldPointerMovementState::default();
         movement.pursue_attack_target(42);
         app.insert_resource(movement);
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 42 }))
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                object_id: 42
+            }))
         ));
 
-        app.world_mut().resource_mut::<NativePlayerUiState>().toggle_options();
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_options();
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
-        assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Wire(
-            NativeOutboundCommand::Attack { object_id: 42 }
-        ))), "the ordinary options view must preserve combat");
-        app.world_mut().resource_mut::<NativePlayerUiState>().skill_assign.open = true;
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        assert!(
+            matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                    object_id: 42
+                }))
+            ),
+            "the ordinary options view must preserve combat"
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .skill_assign
+            .open = true;
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
-        assert!(receiver.try_recv().is_err(), "a real assignment prompt still blocks combat");
+        assert!(
+            receiver.try_recv().is_err(),
+            "a real assignment prompt still blocks combat"
+        );
     }
 
     #[test]
     fn combat_batch_keeps_latest_target_and_saturated_lane_never_replays_old_attack() {
         let (sender, mut receiver) = crate::gateway::command_channel(8);
-        let (mut app, _unused_receiver) = quest_gate_app(
-            NativePlayerUiState::default(), NpcDialogModel::default(),
-        );
+        let (mut app, _unused_receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
         app.insert_resource(GatewayCommands::new(sender.clone()));
         app.insert_resource(WorldPointerMovementState::default());
         for _ in 0..8 {
-            assert!(sender.send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
-                direction: "up".to_owned(),
-            })).is_ok());
+            assert!(sender
+                .send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
+                    direction: "up".to_owned(),
+                }))
+                .is_ok());
         }
         {
             let mut queue = app.world_mut().resource_mut::<QuestUiIntentQueue>();
@@ -6042,21 +6347,42 @@ mod tests {
             queue.push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         }
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(42));
-        assert!(app.world().resource::<QuestUiIntentQueue>().is_empty(),
-            "failed attacks must not remain ahead of the next target");
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target(),
+            Some(42)
+        );
+        assert!(
+            app.world().resource::<QuestUiIntentQueue>().is_empty(),
+            "failed attacks must not remain ahead of the next target"
+        );
         assert_eq!(app.world().resource::<QuestUiIntentQueue>().retry_len(), 0);
 
         assert!(receiver.try_command().is_ok());
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 43 });
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(43));
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target(),
+            Some(43)
+        );
         let forwarded: Vec<_> = std::iter::from_fn(|| receiver.try_command().ok()).collect();
-        assert_eq!(forwarded.iter().filter(|command| matches!(command,
-            GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
-        )).count(), 1);
-        assert!(!forwarded.iter().any(|command| matches!(command,
+        assert_eq!(
+            forwarded
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
+                ))
+                .count(),
+            1
+        );
+        assert!(!forwarded.iter().any(|command| matches!(
+            command,
             GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 41 | 42 })
         )));
     }
@@ -6103,6 +6429,84 @@ mod tests {
             },
             "groundDrops": [{"objectId":9001,"name":"GingerTea","quantity":1,"x":288,"y":616,"sourceMonster":"Scarecrow"}]
         })
+    }
+
+    #[test]
+    fn name_colour_packets_update_self_and_brown_expiry_without_stale_snapshot_override() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.latest_player_object_id = Some(1000);
+        for colour in [-5952982_i32, -65536, -1] {
+            assert!(adapter.observe_packet(&PacketEvent::Other {
+                packet: "ColourChanged".into(),
+                payload: json!({"nameColourArgb":colour}),
+            }));
+            let mut payload = gameplay_payload();
+            payload["entities"][0]["nameColourArgb"] = json!(-1);
+            adapter.apply_authoritative_overlay(&mut payload);
+            assert_eq!(payload["entities"][0]["nameColourArgb"], json!(colour));
+        }
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "ColourChanged".into(),
+            payload: json!({"nameColourArgb":-1}),
+        }));
+    }
+
+    #[test]
+    fn name_colour_remote_delta_keeps_body_and_never_resurrects_removed_objects() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let delta = PacketEvent::Other {
+            packet: "ObjectColourChanged".into(),
+            payload: json!({"objectId":2001,"nameColourArgb":-5952982}),
+        };
+        assert!(adapter.observe_packet(&delta));
+        let mut payload = gameplay_payload();
+        let count = payload["entities"].as_array().unwrap().len();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"].as_array().unwrap().len(), count);
+        assert_eq!(payload["entities"][3]["nameColourArgb"], json!(-5952982));
+        assert_eq!(
+            payload["entities"][3]["sprite"]["bodyLibrary"],
+            json!("Monster/005")
+        );
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRemove".into(),
+            payload: json!({"objectId":2001}),
+        });
+        assert!(!adapter.observe_packet(&delta));
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert!(!payload["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["objectId"] == json!(2001)));
+    }
+
+    #[test]
+    fn name_colour_map_and_generation_boundaries_preserve_only_current_owner() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.latest_player_object_id = Some(1000);
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ColourChanged".into(),
+            payload: json!({"nameColourArgb":-65536}),
+        });
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectColourChanged".into(),
+            payload: json!({"objectId":2001,"nameColourArgb":-5952982}),
+        });
+        adapter.clear_zone_state_for_map_change();
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"][0]["nameColourArgb"], json!(-65536));
+        assert!(payload["entities"][3].get("nameColourArgb").is_none());
+        adapter.set_generation(2);
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "ColourChanged".into(),
+            payload: json!({"nameColourArgb":-65536})
+        }));
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert!(payload["entities"][0].get("nameColourArgb").is_none());
     }
 
     fn definition_packet() -> PacketEvent {
@@ -7910,12 +8314,14 @@ mod tests {
         );
         assert_eq!(
             crate::atlas::native_frame_geometry("/original-ui/NPC/45", 0)
-                .expect("Board geometry").width,
+                .expect("Board geometry")
+                .width,
             140
         );
         assert_eq!(
             crate::atlas::native_frame_geometry("/original-ui/NPC/08", 0)
-                .expect("Peter geometry").width,
+                .expect("Peter geometry")
+                .width,
             60
         );
     }
@@ -7937,7 +8343,10 @@ mod tests {
             "sprite": {"bodyLibrary": "NPC/08"}
         }]});
         adapter.apply_authoritative_overlay(&mut snapshot);
-        assert_eq!(snapshot["entities"][0]["sprite"]["bodyLibrary"], json!("NPC/08"));
+        assert_eq!(
+            snapshot["entities"][0]["sprite"]["bodyLibrary"],
+            json!("NPC/08")
+        );
 
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "NewNpcInfo".to_owned(),

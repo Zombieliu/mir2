@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { sha256, SOURCE_HASHES, ROUTES, EXPECTED_DIRECTED_HOPS, SOURCE_ONLY_ROOM, PRESERVED_DEFECT,
-  BOSSES, CLASSES, LATE_BOOKS, assertCommand, assertPair, loadClassicSources, exactNpc, npcLink, bagCount, bossCatalog } from './classic-late-route-policy.mjs';
+  BOSSES, CLASSES, LATE_BOOKS, assertCommand, assertPair, loadClassicSources, exactNpc, npcLink, bagCount, groundItemIdentity, bossCatalog } from './classic-late-route-policy.mjs';
 
 const requireValue=(condition,message)=>{if(!condition)throw new Error(message);};
 const transitionName=event=>event?.payload?.info?.fileName??event?.payload?.fileName;
@@ -137,7 +137,8 @@ function verifyAcquisition(report,indexed,events,sources) {
     const attempt=report.bossAttempts.find(attempt=>attempt.id===pickup.attemptId);
     requireValue(attempt?.outcome==='observedKill'&&pickup.provenance==='fresh-kill-associated-ground-item','Pickup has no real kill/drop provenance ledger');
     const ground=snapshot(indexed,pickup.groundSnapshotSequence,attempt.map).groundDrops?.find(drop=>drop.objectId===pickup.groundObjectId);
-    requireValue(ground?.loot?.kind==='item'&&ground.sourceMonster===attempt.name,'Gold/preexisting/vendor item cannot count as a natural gear/book drop');
+    requireValue(ground?.loot?.kind==='inventoryItem'&&ground.sourceMonster===attempt.name,'Gold/preexisting/vendor item cannot count as a natural gear/book drop');
+    const identity=groundItemIdentity(ground);
     const before=snapshot(indexed,pickup.beforeSnapshotSequence,attempt.map),after=snapshot(indexed,pickup.afterSnapshotSequence,attempt.map);
     requireValue(events.some(event=>event.direction==='sent'&&event.type==='pickUp'&&Number(event.objectId)===Number(ground.objectId)
       &&event.sequence>pickup.beforeSnapshotSequence&&event.sequence<pickup.afterSnapshotSequence),'Missing ordinary actual ground pickup intent');
@@ -145,6 +146,10 @@ function verifyAcquisition(report,indexed,events,sources) {
     requireValue(!pickup.ownershipAccepted||owner,'Wrong live drop ownership');
     if(pickup.status==='pickedUp') {
       requireValue(bagCount(before,pickup.uniqueId)===0&&bagCount(after,pickup.uniqueId)===Number(pickup.quantity),'Natural new unique-ID/count delta absent');
+      const acquired=after.inventoryItems?.find(item=>String(item.uniqueId)===String(pickup.uniqueId));
+      requireValue(acquired?.key===ground.loot.key,'Acquired item does not match the authoritative ground template');
+      requireValue(identity?.uniqueId == null || identity.uniqueId===String(pickup.uniqueId),
+        'Assigned ground UID does not match the actual picked-up UID');
       const learned=(report.books??[]).some(book=>book.pickupId===pickup.id&&book.status==='learned');
       if(report.save&&!learned)requireValue(bagCount(snapshot(indexed,report.save.reloginSnapshotSequence),pickup.uniqueId)===Number(pickup.quantity),'Acquired gear/book was not retained through normal save');
     }
@@ -152,8 +157,11 @@ function verifyAcquisition(report,indexed,events,sources) {
     // Require a real linked ID in the authoritative ground snapshot; do not
     // grant an inferred nearby monster or a report-only server flag.
     const exactKillLink=Number(ground.sourceMonsterObjectId)===Number(attempt.objectId);
+    const exactItemUid=identity?.uniqueId != null && identity.uniqueId===String(pickup.uniqueId);
+    requireValue(!pickup.sourceItemUidAccepted||exactItemUid,'Ground UID allocation was not actually exposed');
     requireValue(!pickup.sourceKillIdentityAccepted||exactKillLink,'Exact kill link is absent from public authoritative ground evidence');
-    pickups.push({id:pickup.id,pickupObserved:pickup.status==='pickedUp',ownershipAccepted:owner,naturalAcquisitionAccepted:owner&&exactKillLink&&pickup.status==='pickedUp'});
+    pickups.push({id:pickup.id,pickupObserved:pickup.status==='pickedUp',ownershipAccepted:owner,
+      sourceItemUidAccepted:exactItemUid,naturalAcquisitionAccepted:owner&&exactKillLink&&pickup.status==='pickedUp'});
   }
   const books=[];
   for(const book of report.books??[]) {
@@ -182,6 +190,9 @@ export function verifyClassicEvidence({report,events,pair,sources,pairReceiptSha
   for(const [key,hash]of Object.entries(SOURCE_HASHES))requireValue(report.sourceHashes?.[key]===hash&&sources.hashes?.[key]===hash,`Actual source hash mismatch:${key}`);
   requireValue(report.pairedReceiptSha256===pairReceiptSha256,'Changed paired deployment receipt');
   assertPair(pair,report.health,report);
+  const connection=events.find(event=>event.direction==='lifecycle'&&event.type==='connection');
+  if(connection)requireValue(connection.url===report.gatewayUrl&&connection.webOrigin===report.webOrigin,
+    'Recorded transport Origin differs from its paired allowed origin');
   requireValue(report.freshLevelJourneyAccepted===false&&report.runtimeGameplayAccepted===false&&report.nativeVisualAccepted===false,'Bounded/prepared/static evidence cannot claim whole gameplay, fresh levels or visuals');
   requireValue(report.startingState?.preparedLevel===true||report.startingState?.preparedLevel===false,'Starting-state provenance absent');
   requireValue(report.timeoutMs<=120*60_000&&report.spawnWaitMs<=150*60_000&&report.declaredNaturalKillLimit<=3,'Frozen route/sample deadline widened');

@@ -35,7 +35,13 @@ impl ZoneRuntime {
         self.players.iter().filter_map(|(sid, player)| {
             let owner = book.owner(sid).filter(|owner|owner.matches_player(player))?.clone();
             Some((sid.clone(), OnlinePresence { owner, key: self.key.clone(), dead: player.dead,
-                name: player.name.clone(), group_members: player.chat_profile.group_members.clone() }))
+                owned_pet_clock: self.player_owned_pet_clock(sid),
+                life_generation: player.life_generation, guild_name: player.chat_profile.guild_name.clone(),
+                chat_profile: Some(player.chat_profile.clone()), brown_until_ms: self.owned_pet_brown_until(player),
+                position: player.position.clone(), level: player.level,
+                experience_profile: player.experience_profile.clone(),
+                name: player.name.clone(), group_members: player.chat_profile.group_members.clone(),
+                mentor_bank: player.mentor_bank.clone() }))
         }).collect()
     }
     pub(super) fn refresh_local_online_presence(&mut self) {

@@ -775,6 +775,7 @@ mod tests {
         let index = store.accounts["demo"].characters[0].index;
         let character = &store.accounts["demo"].characters[0];
         let guild = SharedGuildRecord {
+        active_wars: Default::default(),
             id: GUILD.into(),
             name: "Knights".into(),
             revision: 1,

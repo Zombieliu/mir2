@@ -947,6 +947,7 @@ impl SimulationSession {
                 free_map_shout: permissions.free_map_shout,
                 free_server_shout: permissions.free_server_shout,
                 attack_mode: stage5.stage5_systems.attack_mode,
+                pet_mode: stage5.stage5_systems.pet_mode,
                 pk_points: player_runtime.pk_points,
                 in_safe_zone: snapshot.in_safe_zone,
             },
@@ -960,6 +961,7 @@ impl SimulationSession {
         direction: mir2_protocol::MirDirection,
     ) {
         let world = self.app.world_mut();
+        let previous_position = world.resource::<PlayerRuntimeResource>().player_position.clone();
         if let Some(player) = player_entity(world) {
             world
                 .entity_mut(player)
@@ -971,6 +973,7 @@ impl SimulationSession {
             runtime.player_direction = direction;
         }
         super::map::refresh_player_bind_at_position(world, &position);
+        super::default_npc_events::observe_movement(world,&previous_position,&position);
         advance_runtime_tick(world);
     }
 
@@ -1011,6 +1014,7 @@ impl SimulationSession {
             runtime.player_vitals = vitals;
             runtime.player_dead |= vitals.hp <= 0;
             drop(runtime);
+            let _ = super::default_npc_events::observe_life(world);
             advance_runtime_tick(world);
         }
     }
@@ -1053,6 +1057,7 @@ impl SimulationSession {
             runtime.player_vitals = vitals;
             runtime.player_dead |= vitals.hp <= 0;
             drop(runtime);
+            let _ = super::default_npc_events::observe_life(world);
             advance_runtime_tick(world);
         }
     }
@@ -1068,6 +1073,7 @@ impl SimulationSession {
             .and_then(|entity| entity_player_vitals(world, entity))
             .is_some_and(|vitals| vitals.hp <= 0);
         world.resource_mut::<PlayerRuntimeResource>().player_dead = dead || hp_zero;
+        let _ = super::default_npc_events::observe_life(world);
     }
 
     /// Land chain-confirmed ore in the active player's bag (M3, WF-4) and re-render the
@@ -1114,6 +1120,7 @@ impl SimulationSession {
         // replication. Only mirror the settlement and report its first local
         // alive->dead transition for the gateway's existing penalty path.
         let outcome = apply_settled_damage_to_current_player(world, damage, &mut Vec::new());
+        let _ = super::default_npc_events::observe_life(world);
         if outcome.applied {
             advance_runtime_tick(world);
         }

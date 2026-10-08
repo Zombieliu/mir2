@@ -140,6 +140,9 @@ pub(super) fn apply_or_refresh_buff(world: &mut World, next: BuffState) {
 }
 
 pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if let Some(position)=player_entity(world).and_then(|entity|super::components::entity_position(world,entity)) {
+        packets.extend(refresh_player_safe_duration_buffs(world,&position));
+    }
     let tick = super::session::runtime_tick(world);
     let object_id = player_entity(world)
         .and_then(|player| {
@@ -220,7 +223,7 @@ pub(super) fn client_buff_for_state(world: &World, buff: &BuffState) -> Option<C
         object_id,
         expire_time: if infinite { 0 } else { buff.remaining_ms(tick).min(i64::MAX as u64) as i64 },
         infinite,
-        paused: false,
+        paused: buff.real_time_duration.as_ref().is_some_and(RealTimeBuffDuration::is_paused),
         stats,
         values: Vec::new(),
     })
@@ -628,6 +631,12 @@ pub(super) fn crystal_template_consumable_buffs(
             "Crystal experience potion buff is active.",
             CRYSTAL_STAT_LUCK,
         )
+        .map(|mut buff| {
+            // Crystal consumes Luck as the VALUE, then stores ExpRatePercent.
+            for stat in &mut buff.stats { stat.stat = 100; }
+            buff.real_time_duration = Some(RealTimeBuffDuration::new(duration_ticks.saturating_mul(1_000)));
+            buff
+        })
         .into_iter()
         .collect(),
         CRYSTAL_POTION_SHAPE_DROP => buff_from_stat(
@@ -636,6 +645,11 @@ pub(super) fn crystal_template_consumable_buffs(
             "Crystal drop-rate potion buff is active.",
             CRYSTAL_STAT_LUCK,
         )
+        .map(|mut buff| {
+            for stat in &mut buff.stats { stat.stat = 101; }
+            buff.real_time_duration = Some(RealTimeBuffDuration::new(duration_ticks.saturating_mul(1_000)));
+            buff
+        })
         .into_iter()
         .collect(),
         _ => Vec::new(),
@@ -682,9 +696,37 @@ pub(super) fn apply_crystal_template_consumable_buffs(
 
     let mut packets = Vec::new();
     for buff in buffs {
-        let applied = apply_or_stack_duration_buff(world, buff);
+        let mut applied = apply_or_stack_duration_buff(world, buff);
+        if let Some(position)=player_entity(world).and_then(|entity|super::components::entity_position(world,entity)) {
+            let _=refresh_player_safe_duration_buffs(world,&position);
+            if let Some(current)=world.resource::<BuffResource>().buffs.iter().find(|current|current.key==applied.key) {applied=current.clone();}
+        }
         if let Some(packet) = client_buff_packet_for_state(world, &applied) {
             packets.push(packet);
+        }
+    }
+    packets
+}
+
+pub(super) fn refresh_player_safe_duration_buffs(world:&mut World,position:&mir2_protocol::Point)->Vec<ServerPacket> {
+    let (Some(config),Some(map))=(world.get_resource::<super::resources::RuntimeConfigResource>(),world.get_resource::<super::resources::MapRuntimeResource>()) else{return vec![];};
+    let safe=super::map::is_safe_zone_point(&config.config,map,position);
+    let object_id=player_entity(world).and_then(|entity|world.get::<super::components::ObjectId>(entity)).map(|id|id.0);
+    let tick=super::resources::runtime_tick(world);
+    let mut packets=Vec::new();
+    let Some(mut buffs)=world.get_resource_mut::<BuffResource>() else{return packets;};
+    for buff in &mut buffs.buffs {
+        if !matches!(buff.key.as_str(),"exp"|"drop"){continue;}
+        if buff.real_time_duration.is_none() && buff.expires_at_tick!=u64::MAX {
+            buff.real_time_duration=Some(RealTimeBuffDuration::new(buff.remaining_ms(tick)));
+        }
+        if let Some(duration)=&mut buff.real_time_duration {
+            if duration.is_paused()!=safe {
+                duration.set_paused(safe);
+                if let (Some(object_id),Some(buff_type))=(object_id,crystal_buff_type_for_key(&buff.key)) {
+                    packets.push(ServerPacket::PauseBuff{object_id,buff_type,paused:safe});
+                }
+            }
         }
     }
     packets

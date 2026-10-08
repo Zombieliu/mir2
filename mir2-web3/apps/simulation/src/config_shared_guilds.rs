@@ -52,6 +52,10 @@ pub struct SharedGuildRecord {
     pub experience_receipts: BTreeSet<String>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub experience_receipt_payloads: BTreeMap<String, String>,
+    /// Symmetric ordinary wars, keyed by the opponent's stable Guild ID.
+    /// Zero remains active until the next admitted minute, as in Crystal.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub active_wars: BTreeMap<String, i64>,
 }
 impl SharedGuildRecord {
     /// Symmetric canonical key deliberately closes Crystal's asymmetric space lookup.
@@ -62,6 +66,18 @@ impl SharedGuildRecord {
         self.members
             .iter()
             .find(|member| &member.identity == identity)
+    }
+    /// Called for every Guild in the existing atomic durable minute transaction.
+    /// Advancing both endpoints together preserves reciprocal authority.
+    pub(crate) fn advance_shared_guild_war_minutes(&mut self, minutes: u64) {
+        self.active_wars.retain(|_, remaining| {
+            let Ok(current) = u64::try_from(*remaining) else { return false; };
+            if minutes > current {
+                return false;
+            }
+            *remaining = (current - minutes) as i64;
+            true
+        });
     }
 }
 pub(super) fn canonical_guild_name(name: &str) -> String {
@@ -297,6 +313,17 @@ pub(super) fn validate_guild_state(store: &AccountStore) -> Result<(), String> {
         if guild.storage.keys().any(|slot| *slot >= 112) {
             return Err("guild storage slot outside 112 cells".into());
         }
+        for (enemy_id, remaining) in &guild.active_wars {
+            if enemy_id == id
+                || *remaining < 0
+                || *remaining > mir2_game_data::crystal_guild_settings().war_time
+                || !store.shared_guilds.get(enemy_id).is_some_and(|enemy| {
+                    enemy.active_wars.get(id) == Some(remaining)
+                })
+            {
+                return Err("invalid or asymmetric ordinary guild war".into());
+            }
+        }
         let ranks: BTreeSet<u8> = guild.ranks.iter().map(|rank| rank.index).collect();
         if ranks.len() != guild.ranks.len() || !ranks.contains(&0) {
             return Err("invalid guild ranks".into());
@@ -482,10 +509,71 @@ mod tests {
             buffs: BTreeMap::new(),
             last_buff_tick_ms: 0,
             experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+            active_wars: Default::default(),
         }
     }
     const ID: &str = "0123456789abcdef0123456789abcdef";
     const OTHER: &str = "1123456789abcdef0123456789abcdef";
+    #[test]
+    fn ordinary_guild_war_state_rejects_asymmetric_self_missing_and_negative_endpoints() {
+        let config = SimulationConfig::default();
+        let mut store = config.account_store.lock().unwrap().clone();
+        let mut peer = store.accounts["demo"].clone();
+        peer.characters[0].name = "RivalPlayer".into();
+        let peer_index = peer.characters[0].index;
+        if let Some(save) = peer.saves.get_mut(&peer_index) { save.character.name = "RivalPlayer".into(); }
+        store.accounts.insert("peer".into(), peer);
+        let mut own = guild(&store, ID, "Knights");
+        let mut enemy = guild(&store, OTHER, "Rivals");
+        enemy.members[0].identity.account_id = "peer".into();
+        enemy.members[0].name = "RivalPlayer".into();
+        own.active_wars.insert(OTHER.into(), 180);
+        enemy.active_wars.insert(ID.into(), 180);
+        store.shared_guilds.insert(ID.into(), own);
+        store.shared_guilds.insert(OTHER.into(), enemy);
+        validate_guild_state(&store).unwrap();
+        let valid = store.clone();
+        for remaining in [-1, 181, 179] {
+            store = valid.clone();
+            store.shared_guilds.get_mut(ID).unwrap().active_wars.insert(OTHER.into(), remaining);
+            assert!(validate_guild_state(&store).is_err());
+        }
+        store = valid.clone(); store.shared_guilds.get_mut(ID).unwrap().active_wars.insert(ID.into(), 180);
+        assert!(validate_guild_state(&store).is_err());
+        store = valid.clone(); store.shared_guilds.remove(OTHER);
+        assert!(validate_guild_state(&store).is_err());
+        store = valid; store.shared_guilds.get_mut(OTHER).unwrap().active_wars.clear();
+        assert!(validate_guild_state(&store).is_err());
+    }
+
+    #[test]
+    fn ordinary_guild_war_minutes_keep_zero_until_the_following_minute_and_handle_large_intervals() {
+        let config = SimulationConfig::default();
+        let store = config.account_store.lock().unwrap();
+        let mut own = guild(&store, ID, "Knights");
+        let mut enemy = guild(&store, OTHER, "Rivals");
+        own.active_wars.insert(OTHER.into(), 180); enemy.active_wars.insert(ID.into(), 180);
+        for minutes in [179, 1] {
+            own.advance_shared_guild_war_minutes(minutes); enemy.advance_shared_guild_war_minutes(minutes);
+        }
+        assert_eq!(own.active_wars.get(OTHER), Some(&0)); assert_eq!(enemy.active_wars.get(ID), Some(&0));
+        own.advance_shared_guild_war_minutes(0); assert_eq!(own.active_wars.get(OTHER), Some(&0));
+        own.advance_shared_guild_war_minutes(1); enemy.advance_shared_guild_war_minutes(1);
+        assert!(own.active_wars.is_empty() && enemy.active_wars.is_empty());
+        own.active_wars.insert(OTHER.into(), 180); own.advance_shared_guild_war_minutes(u64::MAX);
+        assert!(own.active_wars.is_empty());
+    }
+
+    #[test]
+    fn empty_ordinary_guild_wars_preserve_existing_serialized_record_bytes() {
+        let config = SimulationConfig::default();
+        let store = config.account_store.lock().unwrap();
+        let record = guild(&store, ID, "Knights");
+        let bytes = serde_json::to_vec(&record).unwrap();
+        assert!(!String::from_utf8(bytes.clone()).unwrap().contains("activeWars"));
+        let restored: SharedGuildRecord = serde_json::from_slice(&bytes).unwrap();
+        assert!(restored.active_wars.is_empty()); assert_eq!(serde_json::to_vec(&restored).unwrap(), bytes);
+    }
     #[test]
     fn guild_legacy_public_index_collision_rejects_join_and_file_without_repairing_assets(){
         let config=SimulationConfig::default();
@@ -917,6 +1005,7 @@ mod postgres_tests {
             buffs: BTreeMap::new(),
             last_buff_tick_ms: 0,
             experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+            active_wars: Default::default(),
         };
         let mut staged = original.clone();
         staged.shared_guilds.insert(
@@ -1140,5 +1229,11 @@ impl SimulationConfig {
             .values()
             .find(|guild| guild.member(identity).is_some())
             .cloned())
+    }
+    pub fn shared_guild_for_name(&self, name: &str) -> Result<Option<SharedGuildRecord>, String> {
+        self.ensure_account_store_writable()?;
+        let name_key = canonical_guild_name(name);
+        let store = self.account_store.lock().map_err(|_| "guild authority mutex poisoned")?;
+        Ok(store.shared_guilds.values().find(|guild| guild.name_key() == name_key).cloned())
     }
 }

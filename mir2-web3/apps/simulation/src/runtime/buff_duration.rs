@@ -1,28 +1,53 @@
 //! Monotonic online duration. Persistence stores only time remaining, never an Instant.
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::time::Instant;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::OnceLock;
+use rand_core::{OsRng,RngCore};
+static NEXT_BUFF_DURATION_INSTANCE:OnceLock<AtomicU64>=OnceLock::new();
+fn next_duration_instance()->u64 {
+    NEXT_BUFF_DURATION_INSTANCE.get_or_init(||AtomicU64::new((OsRng.next_u64() & (u64::MAX >> 1)) | 1))
+        .fetch_update(Ordering::Relaxed,Ordering::Relaxed,|value|value.checked_add(1))
+        .expect("buff duration instance counter exhausted")
+}
 
 #[derive(Debug, Clone)]
 pub(in super::super) struct RealTimeBuffDuration {
     remaining_at_anchor_ms: u64,
     anchor: Instant,
+    paused: bool,
+    instance_id:u64,
 }
 impl RealTimeBuffDuration {
     pub(in super::super) fn new(remaining_ms: u64) -> Self {
         Self {
             remaining_at_anchor_ms: remaining_ms,
             anchor: Instant::now(),
+            paused:false,
+            instance_id:next_duration_instance(),
         }
     }
     pub(in super::super) fn remaining_ms(&self) -> u64 {
         self.remaining_at(Instant::now())
     }
     fn remaining_at(&self, now: Instant) -> u64 {
+        if self.paused { return self.remaining_at_anchor_ms; }
         self.remaining_at_anchor_ms.saturating_sub(
             now.saturating_duration_since(self.anchor)
                 .as_millis()
                 .min(u128::from(u64::MAX)) as u64,
         )
+    }
+    pub(in super::super) fn is_paused(&self)->bool{self.paused}
+    pub(in super::super) fn instance_id(&self)->u64{self.instance_id}
+    pub(in super::super) fn set_remaining_and_paused(&mut self,remaining_ms:u64,paused:bool) {
+        self.remaining_at_anchor_ms=remaining_ms;
+        self.anchor=Instant::now();
+        self.paused=paused;
+    }
+    pub(in super::super) fn set_paused(&mut self,paused:bool) {
+        if self.paused==paused{return;}
+        self.set_remaining_and_paused(self.remaining_ms(),paused);
     }
     #[cfg(test)]
     pub(in super::super) fn elapse_for_test(&mut self, ms: u64) {

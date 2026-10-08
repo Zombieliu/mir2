@@ -2069,6 +2069,16 @@ pub struct CrystalRespawnMap {
     pub map_file_name: String,
     pub map_title: String,
     #[serde(default)]
+    pub fight: bool,
+    #[serde(default)]
+    pub no_fight: bool,
+    #[serde(default)]
+    pub no_experience: bool,
+    #[serde(default)]
+    pub no_group: bool,
+    #[serde(default)]
+    pub no_pets: bool,
+    #[serde(default)]
     pub mini_map: u16,
     #[serde(default)]
     pub big_map: u16,

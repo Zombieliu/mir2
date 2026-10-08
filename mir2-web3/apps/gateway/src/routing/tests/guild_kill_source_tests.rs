@@ -8,7 +8,7 @@ fn award() -> ZoneMonsterKillAward {
         experience: 6,
         drops: vec![],
         boss_audit: None,
-        experience_selection: None,
+        mentor_bank: None, experience_selection: None,
         source_receipt_key: None,
     }
 }

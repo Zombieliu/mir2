@@ -695,6 +695,7 @@ pub(super) fn step_player(world: &mut World, amount: i32) -> bool {
         {
             world.entity_mut(player).insert(Position(destination.clone()));
             refresh_player_bind_at_position(world, &destination);
+            super::default_npc_events::observe_movement(world,&position,&destination);
             return true;
         }
     }
@@ -716,6 +717,9 @@ fn player_directional_destination(
             return None;
         }
         current = next;
+        if super::default_npc_events::is_active_map_coord(&world.resource::<MapRuntimeResource>().current_map.file_name,&current) {
+            break;
+        }
     }
     Some(current)
 }
@@ -922,6 +926,7 @@ impl SimulationSession {
                             .entity_mut(player_entity)
                             .insert((Position(next_step.clone()), Facing(direction)));
                         refresh_player_bind_at_position(self.app.world_mut(), &next_step);
+                        super::default_npc_events::observe_movement(self.app.world_mut(),&next_position,&next_step);
 
                         packets.push(player_motion_packet(self.app.world(), running));
                         follow_player_with_stage5_hero(

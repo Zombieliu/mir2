@@ -5,10 +5,10 @@ import { createHash } from 'node:crypto';
 // diagnostic, not a new balance profile, original-C# parity or visual approval.
 export const sha256 = value => createHash('sha256').update(value).digest('hex');
 export const SOURCE_HASHES = Object.freeze({
-  profile: 'f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9',
+  profile: '7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d',
   npcScripts: '7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93',
   npcs: 'dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105',
-  maps: '5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3',
+  maps: '907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2',
   mapEvents: 'd68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29',
   monsters: '5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec',
   drops: 'c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7',
@@ -70,6 +70,24 @@ export function validateEndpoint(url) {
   requireValue(endpoint.protocol === 'wss:' || (endpoint.protocol === 'ws:' && ['localhost','127.0.0.1','[::1]'].includes(endpoint.hostname)), 'Use WSS or explicit loopback WS');
   return endpoint;
 }
+export function validateWebOrigin(value) {
+  requireValue(typeof value === 'string' && !/[\r\n]/.test(value), 'Explicit allowed Web Origin required');
+  const origin = new URL(value);
+  requireValue(['https:', 'http:'].includes(origin.protocol) && !origin.username && !origin.password
+    && !origin.search && !origin.hash && origin.pathname === '/' && value === origin.origin,
+  'Web Origin must be an exact HTTP(S) origin without credentials/path/query/fragment');
+  return origin.origin;
+}
+export function profileMapNames(profile) {
+  requireValue(Array.isArray(profile?.mapWhitelist), 'Missing typed classic map whitelist');
+  const names = profile.mapWhitelist.map(entry => {
+    requireValue(entry && typeof entry === 'object' && typeof entry.fileName === 'string'
+      && entry.fileName.length > 0, 'Invalid typed classic map whitelist entry');
+    return entry.fileName;
+  });
+  requireValue(new Set(names).size === names.length, 'Duplicate classic runtime map name');
+  return new Set(names);
+}
 export function assertLegacySource(script) {
   const proof = LEGACY_POLICY.find(candidate => candidate.key === script?.script_key);
   requireValue(proof && script.relative_path === proof.path && sha256(script.raw_text) === proof.rawSha256
@@ -87,13 +105,15 @@ export async function loadClassicSources(urls = SOURCE_URLS) {
     return [key, JSON.parse(bytes)];
   }));
   const sources = Object.fromEntries(entries);
+  const runtimeMaps = profileMapNames(sources.profile);
   requireValue(sources.profile.profileId === 'platinum_176' && sources.profile.version === 27
-    && sources.profile.mapWhitelist.length === 208 && !sources.profile.mapWhitelist.includes(SOURCE_ONLY_ROOM), 'Wrong classic runtime profile identity/scope');
+    && runtimeMaps.size === 208 && !runtimeMaps.has(SOURCE_ONLY_ROOM), 'Wrong classic runtime profile identity/scope');
   for (const proof of LEGACY_POLICY) assertLegacySource(sources.npcScripts.scripts.find(script => script.script_key === proof.key));
   sources.hashes = {...SOURCE_HASHES};
   sources.portals = Object.fromEntries(Object.entries(ROUTES).map(([id, chain]) => [id, chain.slice(0,-1).map((from,index) => {
     const map = sources.maps.maps.find(map => map.map_file_name === from);
     const to = chain[index+1];
+    requireValue(runtimeMaps.has(from) && runtimeMaps.has(to), `Route outside current runtime profile ${from}->${to}`);
     const destination = sources.maps.maps.find(map => map.map_file_name === to);
     const portals = (map?.movements ?? []).filter(move => move.map_index === destination?.map_index && !move.need_hole && !move.need_move);
     requireValue(portals.length > 0, `Missing ordinary source route ${from}->${to}`);
@@ -107,6 +127,7 @@ export function validateScenario(input) {
   requireValue(typeof input.characterName === 'string' && input.characterName.length, 'Exact character name required');
   requireValue(Number.isSafeInteger(input.characterIndex) && input.characterIndex >= 0, 'Character index required');
   validateEndpoint(input.gatewayUrl);
+  validateWebOrigin(input.webOrigin);
   requireValue(input.startingState?.preparedLevel === true || input.startingState?.preparedLevel === false, 'Declare starting level provenance');
   requireValue(Number.isInteger(input.startingState?.level) && input.startingState.level > 0 && input.startingState.level <= 255, 'Declare exact starting level');
   requireValue(['main-round-trips','stone-entry','great-tao-defect'].includes(input.lane), 'Unknown bounded classic route lane');
@@ -124,6 +145,7 @@ export function assertPair(pair, health, scenario) {
   requireValue(/^[a-f0-9]{40}$/.test(pair.sourceRevision) && /^[a-f0-9]{64}$/.test(pair.gatewayExecutableSha256), 'Missing source/executable pair identity');
   requireValue(health?.ok === true && health.ws === 'ready' && health.revision === pair.sourceRevision, 'Live health revision differs from paired deployment receipt');
   requireValue(pair.gatewayUrl === scenario.gatewayUrl && pair.profileId === 'platinum_176' && pair.profileVersion === 27, 'Paired endpoint/profile identity mismatch');
+  requireValue(validateWebOrigin(scenario.webOrigin) === pair.webOrigin, 'Paired allowed Web Origin mismatch');
   for (const [key, hash] of Object.entries(SOURCE_HASHES)) requireValue(pair.sourceHashes?.[key] === hash, `Paired source hash mismatch: ${key}`);
   requireValue(pair.qaNaturalKillDropMultiplier === 1 && pair.profileDropMultiplier === 1 && pair.debugWorldMutationEnabled === false, 'Unverified natural-drop/QA configuration');
   requireValue(pair.namedLegacyPolicy === 'source-bound-stone-big-taoist-v1', 'Pair predates reviewed named legacy repair');
@@ -150,6 +172,27 @@ export function npcLink(snapshot, id, target) {
 }
 export function bagCount(snapshot, uid) {
   return (snapshot?.inventoryItems ?? []).filter(item => String(item.uniqueId) === String(uid)).reduce((n,item) => n+Number(item.quantity),0);
+}
+// GroundDropLootSnapshot::InventoryItem is serialized with camelCase kind and
+// payload fields; its nested protocol UserItem deliberately retains snake_case.
+// Fresh monster items have UID zero until the ordinary pickup assigns one.
+export function groundItemIdentity(drop) {
+  if(drop?.loot?.kind !== 'inventoryItem') return null;
+  const payload=drop.loot.exactItem;
+  if(payload == null) return null; // Legacy ground checkpoints are observable only.
+  const item=payload.item;
+  requireValue(typeof payload.uidAssigned === 'boolean' && item && Number.isInteger(item.item_index)
+    && item.item_index >= 0 && Number.isInteger(item.count) && item.count > 0 && item.count <= 65535
+    && item.count === Number(drop.quantity) && drop.loot.key === `crystal-item-${item.item_index}`,
+    'Ground item has inconsistent exact source template/count');
+  const uid=item.unique_id;
+  const canonical=typeof uid === 'string' && /^(0|[1-9][0-9]*)$/.test(uid) ? uid
+    : Number.isSafeInteger(uid) && uid >= 0 ? String(uid) : null;
+  requireValue(canonical !== null && BigInt(canonical) <= 18446744073709551615n,
+    'Ground UID is not an exact unsigned wire identity');
+  requireValue(payload.uidAssigned ? canonical !== '0' : canonical === '0',
+    'Ground UID allocation state is inconsistent');
+  return {itemIndex:item.item_index,count:item.count,uniqueId:payload.uidAssigned ? canonical : null};
 }
 export function redactEvidence(value, secrets = []) {
   const visit = (value, key='') => {

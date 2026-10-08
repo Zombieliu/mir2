@@ -127,7 +127,7 @@ impl SimulationSession {
         };
         self.app
             .world_mut()
-            .insert_resource(SharedKillExperiencePermit(permit));
+            .insert_resource(SharedKillExperiencePermit(permit, award.mentor_bank.clone()));
         let receipt = self.commit_shared_monster_kill_award_transaction_impl(
             award.monster_object_id,
             &award.monster_name,

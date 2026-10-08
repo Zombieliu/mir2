@@ -687,6 +687,8 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         // the zone melee/range path matches the per-session path's Luck handling.
         luck: stats.luck(),
         poison_resist: stats.poison_resist(),
+        poison_attack: stats.get(23),
+        poison_recovery: stats.get(34),
         magic_resist: stats.magic_resist(),
         gm_never_die: world.resource::<GmRuntimeResource>().gm_never_die,
     }

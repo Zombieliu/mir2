@@ -35,6 +35,24 @@ impl OnlineOwner {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct OnlinePresence {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owned_pet_clock: Option<super::runtime::owned_pet_combat::OwnedPetPlayerClock>,
+    #[serde(default, skip_serializing_if = "online_presence_life_is_zero")]
+    pub life_generation: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guild_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chat_profile: Option<super::ZoneChatProfile>,
+    #[serde(default, skip_serializing_if = "online_presence_life_is_zero")]
+    pub brown_until_ms: u64,
+    #[serde(default = "online_presence_default_position", skip_serializing_if = "online_presence_position_is_zero")]
+    pub position: mir2_protocol::Point,
+    #[serde(default, skip_serializing_if = "online_presence_level_is_zero")]
+    pub level: u16,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_profile: Option<super::ZoneExperienceProfile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mentor_bank: Option<super::ZoneMentorBankAttribution>,
     pub owner: OnlineOwner,
     pub key: ZoneKey,
     pub dead: bool,
@@ -42,6 +60,11 @@ pub(crate) struct OnlinePresence {
     pub group_members: Vec<String>,
 }
 pub(crate) type OnlinePresenceSnapshot = BTreeMap<SessionId, OnlinePresence>;
+
+fn online_presence_default_position() -> mir2_protocol::Point { mir2_protocol::Point { x: 0, y: 0 } }
+fn online_presence_position_is_zero(value: &mir2_protocol::Point) -> bool { value.x == 0 && value.y == 0 }
+fn online_presence_level_is_zero(value: &u16) -> bool { *value == 0 }
+fn online_presence_life_is_zero(value: &u64) -> bool { *value == 0 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct OnlineIdentityBook {

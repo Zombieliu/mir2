@@ -368,10 +368,12 @@ pub(super) fn crystal_player_social_exp_rate_percent(world: &World) -> i32 {
     rate
 }
 
-/// Legacy personal social approximation plus actual general EXP stats.
-/// TODO: replace the name-only social helper with authoritative gain context;
-/// source ordered arithmetic is `experience_rates::apply_crystal_experience_rates`.
+/// Shared sessions use admitted identity/range/rate context. Name compatibility
+/// applies only to the legacy personal world; source arithmetic stays ordered.
 pub(super) fn crystal_apply_social_exp_rate(world: &World, base_experience: u32) -> u32 {
+    if super::shared_guilds::enabled(world) {
+        return super::shared_experience_profile::apply_current_personal_experience_rates(world, base_experience);
+    }
     let rate = crystal_player_social_exp_rate_percent(world);
     let social_bonus = (u64::from(base_experience) * rate.max(0) as u64) / 100;
     let after_social = base_experience.saturating_add(u32::try_from(social_bonus).unwrap_or(u32::MAX));
@@ -387,6 +389,33 @@ pub(super) fn crystal_apply_social_exp_rate(world: &World, base_experience: u32)
 /// a stale snapshot mid-tick.
 pub(super) fn player_stats(world: &World) -> PlayerStats {
     compute_player_stats(world)
+}
+
+/// Own level/equipment rates before personal buffs and shared Guild inputs.
+/// EXP-family stats are not changed by combat percentage multipliers or caps.
+/// The trusted reward projection adds ordered live buffs and rebases Guild
+/// contributions at the same authority point as the actual source event.
+pub(super) fn player_experience_base_rates(world: &World) -> [i32; 3] {
+    let session = world.resource::<SessionResource>();
+    let (class, level) = session
+        .selected_character
+        .as_ref()
+        .map(|character| (character.class, i32::from(character.level)))
+        .unwrap_or((MirClass::Warrior, 1));
+    let mut stats = PlayerStats::default();
+    for entry in class_base_stats(class) {
+        stats.add(entry.stat, crystal_base_stat_value(entry, class, level));
+    }
+    let inventory = world.resource::<InventoryResource>();
+    accumulate_equipment(&mut stats, inventory);
+    accumulate_equipment_sets(
+        &mut stats,
+        inventory,
+        class,
+        level as u16,
+        world.resource::<super::resources::MountResource>().riding_mount,
+    );
+    [stats.get(100), stats.get(120), stats.get(123)]
 }
 
 /// Compute the full Crystal stat block from base class/level + equipment +
@@ -635,7 +664,7 @@ fn accumulate_equipment_sets(stats: &mut PlayerStats, inventory: &InventoryResou
 
 fn accumulate_buffs(stats: &mut PlayerStats, buffs: &BuffResource) {
     for buff in &buffs.buffs {
-        if buff.real_time_expired() { continue; }
+        if buff.real_time_expired() || buff.real_time_duration.as_ref().is_some_and(super::buffs::RealTimeBuffDuration::is_paused) { continue; }
         // Buff scalar attack/defence bonuses map onto MaxDC/MaxAC, mirroring the
         // historical `buff_attack_bonus`/`buff_defence_bonus` helpers.
         let attack_from_stats = buff

@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-08 classic Candidate integration is active under the user's12-hour
+> scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
+> typed shared pets and saved growth, ordinary Guild management/war, native
+> refining, default NPC hooks and mentor bank/settlement are implemented with
+> bounded evidence. Live owner-ID and first-life0 defects found by genuine
+> transport tests are fixed. Public R20/feed16 and Gatewayc6c3238 remain the
+> current baseline until exact-source CI and paired publication pass.
+> Seven-monster escape is still strict/inconclusive, Source NPC shared-world
+> ordered outbox and natural late-map/Boss/loot/native-human gates remain open.
+> No full100% completion is inferred from import/build/test counts.
+> [Current results and remaining gates](CLASSIC-12H-DELIVERY-20261007.md).
+
 > 2026-10-07 final client-only NPC map/shop publication: actual R20/source8fa
 > and signed16 are public. Strict complete packaging/CMS/decoded delivery,
 > stage37603327260 (41 objects / 1,077,405,420 full CDN bytes), same-commit

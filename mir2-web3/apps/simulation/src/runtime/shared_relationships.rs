@@ -154,6 +154,12 @@ impl SimulationConfig {
     ) -> Result<Vec<Stage5FriendIdentity>, String> {
         // Resolve cancellation's peer before entering the transaction, then
         // compare again inside; a concurrent relationship change cannot widen scope.
+        if matches!(&mutation, SharedMentorMutation::Cancel) {
+            let epoch = self.shared_mentor_profile_for(actor)?.mentor.ledger.relationship_epoch;
+            return self.settle_shared_mentor_bank(actor, epoch,
+                Some(crate::SharedMentorBreakReason::Manual), now_ms, false)
+                .map(|receipt| receipt.participants);
+        }
         let peer = match &mutation {
             SharedMentorMutation::Accept { student } => Some(student.clone()),
             SharedMentorMutation::Cancel => {
@@ -185,6 +191,11 @@ impl SimulationConfig {
                         owner.level = teacher_level;
                     }
                     validate_shared_mentor_request(&pupil, &owner, now_ms)?;
+                    for state in [&owner.mentor, &pupil.mentor] {
+                        if state.ledger.bank_earned != state.ledger.bank_settled || state.mentee_exp != 0 {
+                            return Err("previous mentor bank must be settled before a new relationship".into());
+                        }
+                    }
                     let epoch = owner
                         .mentor
                         .authority_revision
@@ -275,7 +286,8 @@ impl SimulationSession {
             character_index: active.character_index,
         };
         let durable = config.shared_mentor_profile_for(&identity).ok()?;
-        let mut mentor = durable.mentor;
+        let local = self.app.world().resource::<Stage5SystemsResource>().stage5_systems.mentor.clone();
+        let mut mentor = super::shared_mentor_rewards::merge_mentor_state(&local, &durable.mentor, false).ok()?;
         if let Some(peer) = mentor
             .partner_identity
             .as_ref()

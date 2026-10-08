@@ -406,6 +406,12 @@ impl InProcessWorldRuntime {
     pub fn shared_mentor_config(&self) -> Option<SimulationConfig> {
         self.session.shared_mentor_config()
     }
+    pub fn shared_group_permission(&self) -> Option<bool> {
+        self.session.shared_group_permission()
+    }
+    pub fn apply_shared_group_projection(&mut self, allow_group: bool, members: &[String]) -> Result<(), String> {
+        self.session.apply_shared_group_projection(allow_group, members)
+    }
     pub fn shared_conquest_config(&self) -> Option<SimulationConfig> {
         self.session.shared_mentor_config().filter(|config| !config.conquest_policies.is_empty())
     }
@@ -414,6 +420,24 @@ impl InProcessWorldRuntime {
     }
     pub fn social_experience_buff_rates(&self) -> (Option<i32>, Option<i32>) {
         self.session.social_experience_buff_rates()
+    }
+    pub fn consume_shared_mentor_credits(&mut self) -> Result<Vec<ServerPacket>, String> {
+        self.session.consume_shared_mentor_credits()
+    }
+
+    pub fn active_zone_experience_profile(&self) -> Result<Option<crate::ZoneExperienceProfile>, String> {
+        self.session.active_zone_experience_profile()
+    }
+
+    pub fn set_shared_personal_experience_context(&mut self,
+        profile: Option<crate::ZoneExperienceProfile>, zone: Option<crate::ZoneKey>,
+    ) -> Result<(), String> {
+        self.session.set_shared_personal_experience_context(profile, zone)
+    }
+
+    pub fn apply_shared_owned_pet_player_kill(&mut self, receipt: &crate::ZoneOwnedPetPlayerKillReceipt)
+        -> Result<Vec<ServerPacket>, String> {
+        self.session.apply_shared_owned_pet_player_kill(receipt)
     }
     pub fn refresh_shared_mentor(
         &mut self,
@@ -677,6 +701,25 @@ impl InProcessWorldRuntime {
     }
     pub fn enable_shared_guild_authority(&mut self) {
         self.session.enable_shared_guild_authority();
+    }
+    pub fn sync_shared_experience_buff_clocks(&mut self,profile:Option<&crate::ZoneExperienceProfile>,now_ms:u64)->Result<(),String> {
+        self.session.sync_shared_experience_buff_clocks(profile,now_ms)
+    }
+    pub fn set_shared_pet_experience_context(&mut self,snapshot:crate::ZoneSavedPetSnapshot,
+        admission:Option<crate::ZonePetExperienceAdmission>)->Result<(),String> {
+        self.session.set_shared_pet_experience_context(snapshot,admission)
+    }
+    pub fn take_shared_pet_experience_commit(&mut self)->Option<(crate::ZonePetExperienceAdmission,Vec<u32>)> {
+        self.session.take_shared_pet_experience_commit()
+    }
+    pub fn pending_shared_pet_experience_commit(&self)->Option<(crate::ZonePetExperienceAdmission,Vec<u32>)> {
+        self.session.pending_shared_pet_experience_commit()
+    }
+    pub fn acknowledge_shared_pet_experience_commit(&mut self,steps:&[u32])->Result<(),String> {
+        self.session.acknowledge_shared_pet_experience_commit(steps)
+    }
+    pub fn active_saved_pet_snapshot(&self)->crate::ZoneSavedPetSnapshot {
+        self.session.active_saved_pet_snapshot()
     }
     pub fn submit_shared_guild_name(&mut self, name: &str) -> Result<Vec<ServerPacket>, String> {
         self.session.submit_shared_guild_name(name)
@@ -1044,8 +1087,14 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::Interact{object_id} => mir2_game_data::periodic_quests::npc(*object_id).is_some(),
             _ => false,
         };
-        let before = if xp_source || force_periodic { self.session.begin_guild_experience_command(force_periodic)? } else { None };
-        let packets = match command {
+        let default_source = matches!(&command,WorldCommand::MoveTo{..}|WorldCommand::Attack{..}
+            |WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}
+            |WorldCommand::CastSkill{..}|WorldCommand::UseItem{..}|WorldCommand::TransferMap{..}
+            |WorldCommand::ApplyHandoffTransform{..}|WorldCommand::Stage5Command{..});
+        let before = if force_periodic { self.session.begin_guild_experience_command(true)? }
+            else if default_source { self.session.begin_default_npc_source_command()? }
+            else if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
+        let mut packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
             WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
                 self.session.replay_active_character_bootstrap(character_index)
@@ -1062,11 +1111,11 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::Attack { object_id } => self.session.attack(object_id),
             WorldCommand::Interact { object_id } => self.session.interact(object_id),
             WorldCommand::SelectNpcDialog { target } => {
-                self.session.select_npc_dialog_target(&target)
+                self.session.select_npc_dialog_from_source_command(&target)
             }
             WorldCommand::SubmitNpcInput { value } => self.session.submit_npc_input(&value),
             WorldCommand::PickUp { object_id } => self.session.pick_up(object_id),
-            WorldCommand::UseItem { key } => self.session.use_item(&key),
+            WorldCommand::UseItem { key } => self.session.use_item_from_source_command(&key),
             WorldCommand::DropItem { key } => self.session.drop_item(&key),
             WorldCommand::DeleteCharacter { character_index } => {
                 self.session.delete_character(character_index)
@@ -1116,6 +1165,7 @@ impl WorldRuntime for InProcessWorldRuntime {
             }
             WorldCommand::Tick => self.session.tick(),
         };
+        if default_source { self.session.dispatch_default_npc_source_packets(&mut packets); }
         self.session.finish_guild_experience_command(before,packets)
     }
 

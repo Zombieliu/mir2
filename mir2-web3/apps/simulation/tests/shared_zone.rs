@@ -179,6 +179,14 @@ fn zone_player_transform(
 
 fn enabled_npc_teleport_config(object_id: u32) -> ZoneNpcTeleportConfig {
     let map = ZoneMapMetadata {
+        no_pets: false,
+
+        no_group: false,
+
+        fight: false,
+        no_fight: false,
+        no_experience: false,
+
         map_index: 1,
         file_name: "0".to_string(),
         title: "BichonProvince".to_string(),
@@ -190,6 +198,9 @@ fn enabled_npc_teleport_config(object_id: u32) -> ZoneNpcTeleportConfig {
         weather: 0,
     };
     ZoneNpcTeleportConfig {
+        pet_save: false,
+        max_boss_tames: 1,
+
         enabled: true,
         cost: 3_000,
         maps: BTreeMap::from([("0".to_string(), map)]),
@@ -865,11 +876,22 @@ fn npc_teleport_rejections_preserve_transform_for_missing_ineligible_low_gold_an
         ZoneKey::for_map("0"),
         ZoneCollision::unbounded(),
         ZoneNpcTeleportConfig {
+            pet_save: false,
+            max_boss_tames: 1,
+
             enabled: true,
             cost: 3_000,
             maps: BTreeMap::from([(
                 "0".to_string(),
                 ZoneMapMetadata {
+                    no_pets: false,
+
+                    no_group: false,
+
+                    fight: false,
+                    no_fight: false,
+                    no_experience: false,
+
                     map_index: 1,
                     file_name: "0".to_string(),
                     title: "BichonProvince".to_string(),

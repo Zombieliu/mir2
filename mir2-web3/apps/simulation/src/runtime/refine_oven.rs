@@ -13,17 +13,17 @@ use super::crystal_compat::{
 use super::inventory::item_matches_inventory_unique_id;
 use super::item_custody;
 use super::items::{
-    item_has_crystal_or_rental_bind_flag, try_item_state_from_user_item,
+    item_has_crystal_or_rental_bind_flag, item_unique_id, try_item_state_from_user_item,
     try_user_item_from_item_state, ItemState,
 };
 use super::npc::current_crystal_npc_service_in_range;
 use super::packets::{
-    apply_refine_success, refine_components, refine_deterministic_1_99, refine_is_weapon,
-    refine_success_chance_crystal, refine_target_stat, refine_weapon_added_stat_sum,
-    refine_weapon_luck, refine_weapon_required,
+    apply_refine_success, refine_components, refine_is_weapon, refine_success_chance_crystal,
+    refine_target_stat, refine_weapon_added_stat_sum, refine_weapon_luck, refine_weapon_required,
+    system_message_key, system_message_key_args,
 };
 use super::resources::{
-    is_in_world, runtime_tick, InventoryResource, PlayerRuntimeResource, RuntimeConfigResource,
+    is_in_world, InventoryResource, PlayerRuntimeResource, RuntimeConfigResource,
     Stage5SystemsResource,
 };
 use crate::config::Stage5RefineState;
@@ -128,6 +128,68 @@ pub(super) fn service(world: &World, label: &str) -> bool {
 fn failed() -> Vec<ServerPacket> {
     vec![ServerPacket::NPCCollectRefine { success: false }]
 }
+fn failed_message(world: &World, key: &str, args: Vec<String>) -> Vec<ServerPacket> {
+    vec![
+        system_message_key_args(world, key, args),
+        ServerPacket::NPCCollectRefine { success: false },
+    ]
+}
+fn ready_minutes(remaining_ms: u64) -> String {
+    (remaining_ms / 60_000).to_string()
+}
+
+/// Crystal draws Next(1,100) twice. Rejection sampling preserves its uniform
+/// inclusive 1..=99 range without exposing predictable tick/UID outcomes.
+fn random_1_99() -> Result<i32, ()> {
+    use rand_core::RngCore;
+    const UPPER: u32 = 99;
+    let threshold = UPPER.wrapping_neg() % UPPER;
+    loop {
+        let mut bytes = [0u8; 4];
+        rand_core::OsRng
+            .try_fill_bytes(&mut bytes)
+            .map_err(|_| ())?;
+        let value = u32::from_le_bytes(bytes);
+        if value >= threshold {
+            return Ok((value % UPPER + 1) as i32);
+        }
+    }
+}
+
+fn checked_outcome(
+    value: u8,
+    chance: i32,
+    added: u8,
+    success_roll: i32,
+    crit_roll: i32,
+) -> Option<(u8, i32)> {
+    if success_roll > chance {
+        return None;
+    }
+    let stat = decoded_stat(value)?;
+    // Crystal casts its critical bonus back to the byte RefineAdded field.
+    let added = if crit_roll < 10 {
+        added.wrapping_mul(2)
+    } else {
+        added
+    };
+    (added != 0).then_some((stat, i32::from(added)))
+}
+
+fn carried_item_index(inventory: &InventoryResource, unique_id: u64) -> Option<(bool, usize)> {
+    inventory
+        .belt_items
+        .iter()
+        .position(|item| item_unique_id(item) == unique_id)
+        .map(|index| (true, index))
+        .or_else(|| {
+            inventory
+                .inventory_items
+                .iter()
+                .position(|item| item_matches_inventory_unique_id(item, unique_id))
+                .map(|index| (false, index))
+        })
+}
 fn encoded_stat(stat: Option<u8>) -> u8 {
     match stat {
         Some(CRYSTAL_STAT_MAX_DC) => 1,
@@ -223,23 +285,26 @@ pub(super) fn start(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
         return failed();
     }
     let inventory = world.resource::<InventoryResource>();
-    let Some(index) = inventory
-        .inventory_items
-        .iter()
-        .position(|i| item_matches_inventory_unique_id(i, unique_id))
-    else {
+    let Some((belt, index)) = carried_item_index(inventory, unique_id) else {
         return failed();
     };
-    let item = inventory.inventory_items[index].clone();
+    let item = if belt {
+        &inventory.belt_items[index]
+    } else {
+        &inventory.inventory_items[index]
+    }
+    .clone();
     let Ok(mut wire) = try_user_item_from_item_state(&item) else {
         return failed();
     };
+    if wire.refine_added != 0 {
+        return failed_message(world, "server.CheckBeforeRefine", vec![item.name.clone()]);
+    }
     if !refine_is_weapon(&item)
-        || wire.refine_added != 0
         || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_UPGRADE)
         || !item_custody::can_take(inventory, &item)
     {
-        return failed();
+        return failed_message(world, "server.ItemCannotBeRefined", vec![item.name.clone()]);
     }
     let ingredients: Result<Vec<_>, String> = state
         .slots
@@ -266,7 +331,11 @@ pub(super) fn start(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
         return failed();
     };
     if world.resource::<PlayerRuntimeResource>().gold < cost {
-        return failed();
+        return failed_message(
+            world,
+            "server.NotEnoughGoldToRefine",
+            vec![item.name.clone()],
+        );
     }
     let duration = config.refine_duration_ms;
     let Some(deadline) = now_ms().checked_add(duration) else {
@@ -307,16 +376,28 @@ pub(super) fn start(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
     if item_custody::reserved_ids(&staged).is_err() {
         return failed();
     }
-    world
-        .resource_mut::<InventoryResource>()
-        .inventory_items
-        .remove(index);
+    if belt {
+        world
+            .resource_mut::<InventoryResource>()
+            .belt_items
+            .remove(index);
+    } else {
+        world
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .remove(index);
+    }
     world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
     world.resource_mut::<Stage5SystemsResource>().stage5_systems = staged;
     item_custody::refresh(world).expect("validated oven custody");
     let mut packets = vec![
         ServerPacket::LoseGold { gold: cost },
         ServerPacket::RefineItem { unique_id },
+        system_message_key_args(
+            world,
+            "server.ItemRefiningCheckLater",
+            [target.name.clone(), ready_minutes(duration)],
+        ),
     ];
     if duration == 0 {
         packets.extend(collect_ready(world));
@@ -338,21 +419,33 @@ fn collect_ready(world: &mut World) -> Vec<ServerPacket> {
         .resource::<Stage5SystemsResource>()
         .stage5_systems
         .refine;
-    if remaining_at(state, &clock().0, now_ms()) != 0 {
-        return failed();
-    }
     let Some(item) = state
         .current_item
         .as_deref()
         .zip(state.oven_item_state_json.as_deref())
         .and_then(|(key, encoded)| item_custody::decode(key, encoded).ok())
     else {
-        return failed();
+        return vec![
+            system_message_key(world, "server.NotRefiningItems"),
+            ServerPacket::NPCCollectRefine { success: false },
+        ];
     };
+    let remaining = remaining_at(state, &clock().0, now_ms());
+    if remaining != 0 {
+        return failed_message(
+            world,
+            "server.ItemReadyInMinutes",
+            vec![item.name.clone(), ready_minutes(remaining)],
+        );
+    };
+    // HumanObject.AddItem puts a weapon in the bag first, then any empty belt
+    // cell if the bag is full. Never merge the concrete pending weapon.
+    let current_inventory = world.resource::<InventoryResource>();
     let Some((inventory, changed)) =
-        item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, false)
+        item_custody::plan_return(current_inventory, &item, None, false)
+            .or_else(|| item_custody::plan_return_crystal_array(current_inventory, &item, None))
     else {
-        return failed();
+        return failed_message(world, "server.BagNoRoomForItem", vec![item.name.clone()]);
     };
     let mut packets =
         item_custody::returned_packets(world.resource::<InventoryResource>(), &changed);
@@ -370,6 +463,7 @@ fn collect_ready(world: &mut World) -> Vec<ServerPacket> {
     state.refining = false;
     state.ready = false;
     item_custody::refresh(world).expect("validated oven collection");
+    packets.push(system_message_key(world, "server.ItemReturned"));
     packets.push(ServerPacket::NPCCollectRefine { success: true });
     packets
 }
@@ -379,33 +473,33 @@ pub(super) fn check(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
         return failed();
     }
     let inventory = world.resource::<InventoryResource>();
-    let Some(index) = inventory
-        .inventory_items
-        .iter()
-        .position(|i| item_matches_inventory_unique_id(i, unique_id))
-    else {
+    let Some((belt, index)) = carried_item_index(inventory, unique_id) else {
         return failed();
     };
-    let mut item = inventory.inventory_items[index].clone();
+    let mut item = if belt {
+        &inventory.belt_items[index]
+    } else {
+        &inventory.inventory_items[index]
+    }
+    .clone();
     let Ok(wire) = try_user_item_from_item_state(&item) else {
         return failed();
     };
     if wire.refine_added == 0 || wire.refined_value > 3 {
-        return failed();
+        return failed_message(world, "server.NoCheckNotRefined", vec![item.name.clone()]);
     }
-    let tick = runtime_tick(world);
-    let stat = if refine_deterministic_1_99(tick, unique_id, 0x05A1) > wire.refine_success_chance {
-        None
-    } else {
-        decoded_stat(wire.refined_value)
+    // Both draws precede any item mutation. Entropy failure preserves custody.
+    let (Ok(success_roll), Ok(crit_roll)) = (random_1_99(), random_1_99()) else {
+        return failed();
     };
-    if let Some(stat) = stat {
-        let multiplier = if refine_deterministic_1_99(tick, unique_id, 0xC817) < 10 {
-            2
-        } else {
-            1
-        };
-        apply_refine_success(&mut item, stat, i32::from(wire.refine_added) * multiplier);
+    if let Some((stat, added)) = checked_outcome(
+        wire.refined_value,
+        wire.refine_success_chance,
+        wire.refine_added,
+        success_roll,
+        crit_roll,
+    ) {
+        apply_refine_success(&mut item, stat, added);
         let Some(metadata) = item.user_item_metadata.as_mut() else {
             return failed();
         };
@@ -415,14 +509,33 @@ pub(super) fn check(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
         let Ok(item_wire) = try_user_item_from_item_state(&item) else {
             return failed();
         };
-        world.resource_mut::<InventoryResource>().inventory_items[index] = item;
-        vec![ServerPacket::ItemUpgraded { item: item_wire }]
+        let key = match stat {
+            CRYSTAL_STAT_MAX_DC => "server.CongratulationsExtraDC",
+            CRYSTAL_STAT_MAX_MC => "server.CongratulationsExtraMC",
+            _ => "server.CongratulationsExtraSC",
+        };
+        let notice = system_message_key_args(world, key, [item.name.clone(), added.to_string()]);
+        if belt {
+            world.resource_mut::<InventoryResource>().belt_items[index] = item;
+        } else {
+            world.resource_mut::<InventoryResource>().inventory_items[index] = item;
+        }
+        vec![notice, ServerPacket::ItemUpgraded { item: item_wire }]
     } else {
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .remove(index);
-        vec![ServerPacket::RefineItem { unique_id }]
+        let notice =
+            system_message_key_args(world, "server.ItemSmashedOnTest", [item.name.clone()]);
+        if belt {
+            world
+                .resource_mut::<InventoryResource>()
+                .belt_items
+                .remove(index);
+        } else {
+            world
+                .resource_mut::<InventoryResource>()
+                .inventory_items
+                .remove(index);
+        }
+        vec![notice, ServerPacket::RefineItem { unique_id }]
     }
 }
 
@@ -441,5 +554,34 @@ mod tests {
         assert_eq!(remaining_at(&state, "server-a", 1000), 0);
         assert_eq!(remaining_at(&state, "server-a", 2000), 0);
         assert_eq!(remaining_at(&state, "server-b", 2000), 500);
+    }
+    #[test]
+    fn source_check_rolls_use_exclusive_success_failure_and_nine_crit_faces() {
+        assert_eq!(
+            checked_outcome(1, 20, 1, 20, 9),
+            Some((CRYSTAL_STAT_MAX_DC, 2))
+        );
+        assert_eq!(
+            checked_outcome(1, 20, 1, 20, 10),
+            Some((CRYSTAL_STAT_MAX_DC, 1))
+        );
+        assert_eq!(checked_outcome(1, 20, 1, 21, 1), None);
+        assert_eq!(checked_outcome(1, 0, 1, 1, 1), None);
+        assert_eq!(
+            checked_outcome(2, 99, 3, 99, 99),
+            Some((CRYSTAL_STAT_MAX_MC, 3))
+        );
+        assert_eq!(
+            checked_outcome(3, 100, 2, 99, 1),
+            Some((CRYSTAL_STAT_MAX_SC, 4))
+        );
+        assert_eq!(checked_outcome(0, 100, 1, 1, 1), None);
+        assert_eq!(checked_outcome(1, 100, 128, 1, 1), None);
+        assert_eq!(
+            checked_outcome(1, 100, 200, 1, 1),
+            Some((CRYSTAL_STAT_MAX_DC, 144))
+        );
+        assert_eq!(ready_minutes(1), "0");
+        assert_eq!(ready_minutes(60_001), "1");
     }
 }

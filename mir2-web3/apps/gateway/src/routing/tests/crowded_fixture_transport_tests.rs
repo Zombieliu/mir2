@@ -355,6 +355,11 @@ async fn crowded_fixture_normal_websocket_three_class_attack_escape_cohort() {
             serde_json::from_slice(&std::fs::read(directory.join("report.json")).unwrap()).unwrap();
         println!("{class:?}: qualification={}, attackEscape={}, quiet={} (prepared geometry; native acceptance false)",
             report["qualification"]["status"], report["escape"]["status"], report["escape"]["stop"]["status"]);
+        if report["qualification"]["status"] != "qualified"
+            || report["escape"]["status"] != "passed"
+            || report["escape"]["stop"]["status"] != "passed" {
+            runner_failures.push(format!("{class:?}: missing qualified attack/escape/quiet proof; see retained report"));
+        }
         let drain_deadline = tokio::time::Instant::now() + Duration::from_secs(5);
         loop {
             let empty = {

@@ -10,7 +10,7 @@ fn prepared_kill_runtime_rejection_restores_complete_private_source() {
     let before = session.active_character_checkpoint().unwrap();
     let award = crate::runtime::zone::ZoneMonsterKillAward {
         monster_object_id: 912300, killed_at_ms: 1, monster_name:"Scarecrow".into(),
-        experience: 5, drops:vec![],boss_audit:None,experience_selection:None,
+        experience: 5, drops:vec![],boss_audit:None,mentor_bank: None, experience_selection:None,
         source_receipt_key:Some("prepared/runtime/1".into()),
     };
     let result = session.commit_shared_monster_kill_via_postgres::<(),_>("prepared/runtime/1",&award,|source|{
@@ -38,7 +38,7 @@ fn prepared_kill_runtime_missing_commit_receipt_freezes_instead_of_false_success
     session.app.world_mut().resource_mut::<RuntimeConfigResource>().config = config.clone();
     let award = crate::runtime::zone::ZoneMonsterKillAward {
         monster_object_id: 912300, killed_at_ms: 1, monster_name:"Scarecrow".into(),
-        experience: 5, drops:vec![],boss_audit:None,experience_selection:None,
+        experience: 5, drops:vec![],boss_audit:None,mentor_bank: None, experience_selection:None,
         source_receipt_key:Some("prepared/runtime/2".into()),
     };
     let result = session.commit_shared_monster_kill_via_postgres("prepared/runtime/2",&award,|_|Ok(crate::PreparedKillPublication::Written(())));
@@ -71,7 +71,7 @@ fn guild_xp_shared_kill_full_checkpoint_receipt_survives_failure_and_relogin() {
         drops: vec![],
         boss_audit: None,
         source_receipt_key: None,
-        experience_selection: Some(crate::runtime::zone::ZoneExperienceSelection {
+        mentor_bank: None, experience_selection: Some(crate::runtime::zone::ZoneExperienceSelection {
             source_zone: "primary/0/0/main".into(),
             monster_object_id: 987001,
             killed_at_ms: 400,
@@ -295,7 +295,7 @@ fn guild_xp_npc_gain_file_failure_rolls_back_source_and_reuses_only_uncommitted_
         drops: vec![],
         boss_audit: None,
         source_receipt_key: None,
-        experience_selection: Some(crate::runtime::zone::ZoneExperienceSelection {
+        mentor_bank: None, experience_selection: Some(crate::runtime::zone::ZoneExperienceSelection {
             source_zone: "primary/0/0/main".into(),
             monster_object_id: 987002,
             killed_at_ms: 500,

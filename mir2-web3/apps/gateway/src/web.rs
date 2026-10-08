@@ -6558,7 +6558,8 @@ async fn handle_socket_work(
                     return;
                 }
                 let monthly_expiry_pending = session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
-                if now < runtime_tick_deferred_until && !monthly_expiry_pending {
+                if now < runtime_tick_deferred_until && !monthly_expiry_pending
+                    && !session.has_pending_shared_personal_work() {
                     continue;
                 }
                 // Tick can complete a queued portal movement and rebuild the

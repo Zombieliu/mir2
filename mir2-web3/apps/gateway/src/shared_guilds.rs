@@ -13,6 +13,7 @@ pub(super) fn is_guild_command(command: &WorldCommand) -> bool {
     match command {
         WorldCommand::ClientPacket(ClientPacket::Chat { message, .. }) => {
             message.trim().eq_ignore_ascii_case("@ALLOWGUILD")
+                || message.trim().eq_ignore_ascii_case("@LEAVEGUILD")
         }
         WorldCommand::ClientPacket(
             ClientPacket::GuildNameReturn { .. }
@@ -51,12 +52,7 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(config) = self.inner.shared_mentor_config() else {
             return Vec::new();
         };
-        let error = |message: &str| {
-            vec![ServerPacket::Chat {
-                message: message.into(),
-                chat_type: mir2_protocol::ChatType::System,
-            }]
-        };
+        let error = management::error;
         if !matches!(packet, ClientPacket::GuildNameReturn { .. })
             && config.refresh_shared_guild_authority().is_err()
         {
@@ -79,6 +75,12 @@ impl SharedInProcessZoneSessionRuntime {
                     && invite.target_epoch.matches(p)
             })
         });
+        if let Some(packets) = management::execute(self, packet, &config, &key, &presences, &mut coordinator) {
+            return packets;
+        }
+        if let Some(packets) = wars::execute(packet, &config, &key, &presences, &mut coordinator) {
+            return packets;
+        }
         match packet {
             ClientPacket::Chat { .. } => {
                 let enabled = if coordinator.guild_permissions.remove(&key) {
@@ -116,6 +118,9 @@ impl SharedInProcessZoneSessionRuntime {
                     .any(|rank| rank.index == member.rank_index && rank.options & 2 != 0)
                 {
                     return error("Your rank cannot recruit members.");
+                }
+                if !guild.active_wars.is_empty() {
+                    return error("server.CannotRecruitDuringWar");
                 }
                 let targets = presences
                     .iter()
@@ -192,6 +197,8 @@ impl SharedInProcessZoneSessionRuntime {
                         }
                         error(if reason == "server.GuildFull" {
                             "The guild is full."
+                        } else if reason == "server.CannotRecruitDuringWar" {
+                            "server.CannotRecruitDuringWar"
                         } else {
                             "The guild invitation could not be saved."
                         })
@@ -426,3 +433,8 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 }
+
+#[path = "shared_guild_management.rs"]
+mod management;
+#[path = "shared_guild_wars.rs"]
+mod wars;

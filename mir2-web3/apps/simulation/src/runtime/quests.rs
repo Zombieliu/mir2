@@ -1012,6 +1012,16 @@ pub(super) fn set_quest_stage(world: &mut World, quest_id: i32, stage: QuestStag
 }
 
 pub(super) fn begin_quest(world: &mut World, quest_id: i32) -> QuestStage {
+    let previous = quest_stage(world,quest_id).unwrap_or(QuestStage::Available);
+    let stage = begin_quest_impl(world,quest_id);
+    if previous == QuestStage::Available && matches!(stage,QuestStage::InProgress|QuestStage::ReadyToTurnIn)
+        && super::resources::is_in_world(world) {
+        let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::OnAcceptQuest { quest_id });
+    }
+    stage
+}
+
+fn begin_quest_impl(world: &mut World, quest_id: i32) -> QuestStage {
     let stage = ensure_runtime_quest(world, quest_id);
     if stage != QuestStage::Available {
         return stage;
@@ -1099,6 +1109,16 @@ pub(super) fn complete_quest_with_selection(
     world: &mut World,
     quest_id: i32,
     selected_item_index: Option<i32>,
+) -> bool {
+    let success = complete_quest_with_selection_impl(world,quest_id,selected_item_index);
+    if success && super::resources::is_in_world(world) {
+        let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::OnFinishQuest { quest_id });
+    }
+    success
+}
+
+fn complete_quest_with_selection_impl(
+    world: &mut World, quest_id: i32, selected_item_index: Option<i32>,
 ) -> bool {
     // Keep reward settlement idempotent even when an ordinary FinishQuest
     // packet is retried or a caller bypasses the packet-layer stage check.
@@ -1198,7 +1218,7 @@ fn complete_crystal_quest(
     // the new level/exp/HP reach the client through the post-completion snapshot.
     let reward_exp = if mir2_game_data::periodic_quests::is_periodic(info.index) {
         info.reward_exp
-    } else { super::stats::crystal_apply_social_exp_rate(world, info.reward_exp) };
+    } else { super::shared_experience_profile::crystal_apply_quest_experience_source(world, info.reward_exp) };
     let _ = super::leveling::apply_experience_gain(world, i64::from(reward_exp));
 
     for reward in fixed_rewards.iter().chain(selected_reward.iter()) {

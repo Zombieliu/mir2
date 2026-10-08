@@ -668,6 +668,7 @@ mod tests {
             store.shared_guilds.insert(
                 GUILD.into(),
                 SharedGuildRecord {
+        active_wars: Default::default(),
                     id: GUILD.into(),
                     name: "Knights".into(),
                     revision: 1,

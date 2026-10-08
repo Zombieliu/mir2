@@ -56,18 +56,33 @@ mod shared_guilds;
 pub(crate) use shared_guilds::buffs::advance_minutes as advance_shared_guild_minutes;
 mod shared_marriage;
 mod shared_relationships;
+mod shared_experience_profile;
+mod shared_group_projection;
+mod shared_player_kills;
+mod shared_pet_progress;
+mod default_npc_events;
+mod npc_shared_guild_actions;
+#[cfg(test)]
+mod default_npc_events_tests;
+pub use default_npc_events::{DefaultNpcEvent, DefaultNpcEventSnapshot, QueuedDefaultNpcEvent, DefaultNpcEnterMapTicket};
+#[cfg(test)]
+mod shared_player_kill_tests;
+#[cfg(test)]
+mod refine_durable_tests;
 mod shared_social_buffs;
 pub use shared_marriage::{
     validate_shared_marriage_request, SharedMarriageMutation, SharedMarriageProfile,
 };
 pub use shared_relationships::{
     validate_shared_mentor_request, SharedMentorMutation, SharedMentorProfile,
+    SHARED_MENTOR_DURATION_MS, SHARED_MENTOR_LEVEL_GAP,
 };
 mod skills;
 mod social_economy;
 mod stage5;
 mod stats;
 pub mod zone;
+pub use zone::ZoneMentorBankAttribution;
 pub use zone::{ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample};
 
 /// Crystal's symmetric object-data/AOI radius around the local player.
@@ -101,6 +116,9 @@ pub use zone::{
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
     ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
+    ZoneOwnedPetPlayerKillReceipt, ZoneExperienceProfile, ZoneExperiencePartner,
+    ZoneExperienceSelection, ZoneGuildExperienceMembership, ZoneExperienceRateSource,
+    ZoneExperienceRateBuff, ZoneExperienceRateStat, ZoneSavedPetSnapshot, ZonePetExperienceAdmission,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(
@@ -155,7 +173,7 @@ mod mentor_reward_tests;
 
 mod shared_mentor_rewards;
 pub use shared_mentor_rewards::{
-    SharedMentorAccountingReceipt, SharedMentorBreakReason, SharedMentorLiveCheckpoint,
+    SharedMentorAccountingReceipt, SharedMentorBreakReason,
 };
 
 mod intelligent_creatures;

@@ -156,6 +156,7 @@ pub(super) fn is_safe_zone_point(
 /// player happened to occupy. The Zone calls this through its authoritative
 /// transform projection after an accepted step.
 pub(super) fn refresh_player_bind_at_position(world: &mut World, position: &Point) {
+    let _=super::buffs::refresh_player_safe_duration_buffs(world,position);
     let map_file_name = world
         .resource::<MapRuntimeResource>()
         .current_map
@@ -362,9 +363,25 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
         || crystal_map_coordinate_source_cells(&map.current_map.file_name)
             .any(|(x, y)| point.x == x && point.y == y)
+        || super::default_npc_events::is_active_map_coord(&map.current_map.file_name,point)
 }
 
 pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> Vec<ServerPacket> {
+    let map_file_name = world.resource::<MapRuntimeResource>().current_map.file_name.clone();
+    let position = player_entity(world).and_then(|player| entity_position(world,player));
+    if let Some(position) = position.filter(|position| super::default_npc_events::is_active_map_coord(&map_file_name,position)) {
+        let source_need_move = crystal_map_respawns_ref(&map_file_name).is_some_and(|map|
+            map.movements.iter().any(|movement| movement.source == position && movement.need_move && !movement.need_hole));
+        if source_need_move {
+            if super::default_npc_events::has_coordinate_ticket(world,&map_file_name,&position) {
+                // Only a newly accepted entry owns a pending coordinate hook.
+                // A failed script condition must let the next step leave the
+                // entrance rather than locking the character on that cell.
+                return vec![ServerPacket::NPCUpdate { npc_id:0 }];
+            }
+            return Vec::new();
+        }
+    }
     let Some(transfer) = transfer_for_current_player_position(world) else {
         return Vec::new();
     };
@@ -471,14 +488,20 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
 pub(crate) fn crystal_direct_movement_transfer_source_cells(
     map_file_name: &str,
 ) -> BTreeSet<(i32, i32)> {
-    crystal_movement_transfer_records_for_map(map_file_name)
+    let mut cells: BTreeSet<(i32,i32)> = crystal_movement_transfer_records_for_map(map_file_name)
         .into_iter()
         .flat_map(|transfer| {
             (transfer.from_bounds.min_y..=transfer.from_bounds.max_y).flat_map(move |y| {
                 (transfer.from_bounds.min_x..=transfer.from_bounds.max_x).map(move |x| (x, y))
             })
         })
-        .collect()
+        .collect();
+    if let Some(map) = crystal_map_respawns_ref(map_file_name) {
+        cells.extend(map.movements.iter().filter(|movement| movement.need_move && !movement.need_hole
+            && super::default_npc_events::is_active_map_coord(map_file_name,&movement.source))
+            .map(|movement| (movement.source.x,movement.source.y)));
+    }
+    cells
 }
 
 fn crystal_manifest_movement_destination_is_valid(
@@ -771,6 +794,10 @@ pub(super) fn relocate_player_to_map(
     // re-broadcast their stage on every swing — chain veins only update on a chain
     // settlement, so entering their map mid-session must seed the last known tier.
     packets.extend(super::onchain::onchain_mine_node_state_packets(world));
+    if super::resources::is_in_world(world) {
+        let map_file_name = world.resource::<MapRuntimeResource>().current_map.file_name.clone();
+        let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::MapEnter { map_file_name });
+    }
     packets
 }
 

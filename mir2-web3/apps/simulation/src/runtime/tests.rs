@@ -9009,6 +9009,8 @@ fn forged_harvest_packet_is_rejected_while_riding_mount() {
 fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -33321,6 +33323,8 @@ fn drop_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
 fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -33383,6 +33387,8 @@ fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
 fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -33433,6 +33439,8 @@ fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
 fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -37352,6 +37360,8 @@ fn crystal_use_item_packet_consumes_belt_slot() {
 fn use_item_packet_static_potion_rejects_on_no_drug_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -37603,6 +37613,8 @@ fn use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore() {
 fn use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -37923,6 +37935,8 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
 fn use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: true,
@@ -38024,6 +38038,8 @@ fn use_item_packet_dynamic_crystal_random_teleport_teleports_same_map() {
 fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38522,6 +38538,8 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
 fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38563,6 +38581,8 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
 
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38650,6 +38670,8 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
     let mut config = SimulationConfig::default();
     // Destination map "1" forbids mounts.
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "1".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -39093,6 +39115,8 @@ fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
 fn use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -45895,6 +45919,8 @@ fn town_teleport_returns_player_to_latest_safe_area_center() {
 fn town_teleport_packet_rejects_when_current_map_disallows_town_teleport() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: true,
         no_escape: false,
@@ -65749,6 +65775,8 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
 fn new_hero_on_no_hero_map_stays_unsummoned_with_crystal_system_message() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -65829,6 +65857,8 @@ fn new_hero_on_no_hero_map_stays_unsummoned_with_crystal_system_message() {
 fn hero_is_unsummoned_when_entering_crystal_no_hero_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "HF1.map".to_string(),
         no_town_teleport: false,
         no_escape: false,

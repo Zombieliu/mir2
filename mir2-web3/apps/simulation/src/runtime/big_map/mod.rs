@@ -60,6 +60,11 @@ struct BigMapCatalogEntry {
     light: u8,
     map_dark_light: u8,
     weather: u16,
+    fight: bool,
+    no_fight: bool,
+    no_experience: bool,
+    no_group: bool,
+    no_pets: bool,
     movements: Vec<CrystalMovementTemplate>,
 }
 
@@ -146,6 +151,47 @@ fn world_map_ini_candidates() -> Vec<PathBuf> {
 
 fn setup_ini_candidates() -> Vec<PathBuf> {
     config_ini_candidates("MIR2_CRYSTAL_SETUP_INI", "Setup.ini")
+}
+
+fn parse_pet_settings(text: &str) -> Result<(bool, u32), String> {
+    let mut pet_save = None;
+    let mut max_boss_tames = None;
+    for raw in text.lines() {
+        let line = raw.trim().trim_start_matches('\u{feff}');
+        if line.starts_with(';') || line.starts_with('#') { continue; }
+        let Some((key, raw_value)) = line.split_once('=') else { continue; };
+        let value = raw_value.split(';').next().unwrap_or("").trim();
+        if key.trim().eq_ignore_ascii_case("PetSave") {
+            if pet_save.is_some() { return Err("duplicate PetSave".into()); }
+            pet_save = Some(match value.to_ascii_lowercase().as_str() {
+                "true" => true, "false" => false,
+                _ => return Err("invalid PetSave".into()),
+            });
+        } else if key.trim().eq_ignore_ascii_case("MaxBossTames") {
+            if max_boss_tames.is_some() { return Err("duplicate MaxBossTames".into()); }
+            max_boss_tames = Some(value.parse::<u32>().map_err(|_| "invalid MaxBossTames")?);
+        }
+    }
+    Ok((pet_save.unwrap_or(false), max_boss_tames.unwrap_or(1)))
+}
+
+fn authoritative_pet_settings() -> (bool, u32) {
+    static SETTINGS: OnceLock<(bool, u32)> = OnceLock::new();
+    *SETTINGS.get_or_init(|| {
+        let explicit = env::var_os("MIR2_CRYSTAL_SETUP_INI").is_some();
+        for path in setup_ini_candidates() {
+            if !path.is_file() && !explicit { continue; }
+            return match fs::read_to_string(&path).map_err(|error| error.to_string())
+                .and_then(|text| parse_pet_settings(&text)) {
+                Ok(value) => value,
+                Err(error) => {
+                    eprintln!("[crystal-pet-settings] {}: {error}; taming disabled", path.display());
+                    (false, 0)
+                }
+            };
+        }
+        (false, 1)
+    })
 }
 
 fn config_ini_candidates(explicit_variable: &str, file_name: &str) -> Vec<PathBuf> {
@@ -326,6 +372,11 @@ fn catalog() -> &'static BigMapCatalog {
                 light: map.light,
                 map_dark_light: map.map_dark_light,
                 weather: map.weather_particles,
+                fight: map.fight,
+                no_fight: map.no_fight,
+                no_experience: map.no_experience,
+                no_group: map.no_group,
+                no_pets: map.no_pets,
                 movements: map.movements.clone(),
             })
             .collect::<Vec<_>>();
@@ -373,6 +424,11 @@ pub(super) fn authoritative_zone_npc_teleport_config() -> ZoneNpcTeleportConfig 
                         map_dark_light: map.map_dark_light,
                         music: 0,
                         weather: map.weather,
+                        fight: map.fight,
+                        no_fight: map.no_fight,
+                        no_experience: map.no_experience,
+                        no_group: map.no_group,
+                        no_pets: map.no_pets,
                     };
                     (map.map_file_name.to_ascii_lowercase(), metadata)
                 })
@@ -399,6 +455,8 @@ pub(super) fn authoritative_zone_npc_teleport_config() -> ZoneNpcTeleportConfig 
                 })
                 .collect();
             ZoneNpcTeleportConfig {
+                pet_save: authoritative_pet_settings().0,
+                max_boss_tames: authoritative_pet_settings().1,
                 enabled: setup.enabled,
                 cost: config.teleport_to_npc_cost as u32,
                 maps,

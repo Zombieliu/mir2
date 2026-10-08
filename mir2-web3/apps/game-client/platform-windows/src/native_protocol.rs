@@ -32,6 +32,23 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    DepositRefineItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveRefineItem {
+        from: i32,
+        to: i32,
+    },
+    RefineCancel,
+    RefineItem {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+    },
+    CheckRefine {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+    },
     AllowMentor,
     AddMentor {
         name: String,
@@ -132,7 +149,11 @@ pub enum NativeOutboundCommand {
     },
     ClientVersion,
     MonthlyCardStatus,
-    RedeemMonthlyCard { code: String, #[serde(rename = "requestId")] request_id: u64 },
+    RedeemMonthlyCard {
+        code: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -614,6 +635,11 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::DepositRefineItem { .. } => "depositRefineItem",
+            Self::RetrieveRefineItem { .. } => "retrieveRefineItem",
+            Self::RefineCancel => "refineCancel",
+            Self::RefineItem { .. } => "refineItem",
+            Self::CheckRefine { .. } => "checkRefine",
             Self::AllowMentor => "allowMentor",
             Self::AddMentor { .. } => "addMentor",
             Self::CancelMentor => "cancelMentor",
@@ -1018,8 +1044,11 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
-        "monthlyCard" => serde_json::from_value(payload).map(InboundEvent::MonthlyCard)
-            .map_err(|error| ParseInboundError::InvalidJson(format!("invalid monthly card response: {error}"))),
+        "monthlyCard" => serde_json::from_value(payload)
+            .map(InboundEvent::MonthlyCard)
+            .map_err(|error| {
+                ParseInboundError::InvalidJson(format!("invalid monthly card response: {error}"))
+            }),
         "packet" => parse_packet(packet.as_deref(), payload),
         "error" => {
             // The public Gateway sends flat error envelopes. Keep the older
@@ -2527,14 +2556,19 @@ mod tests {
     #[test]
     fn monthly_card_wire_keeps_request_correlation_and_redacts_vouchers() {
         let code = format!("MC1-{}", "A".repeat(43));
-        let command = NativeOutboundCommand::RedeemMonthlyCard { code: code.clone(), request_id: 7 };
+        let command = NativeOutboundCommand::RedeemMonthlyCard {
+            code: code.clone(),
+            request_id: 7,
+        };
         let wire = serde_json::to_value(&command).unwrap();
         assert_eq!(wire["type"], "redeemMonthlyCard");
         assert_eq!(wire["requestId"], 7);
         assert_eq!(wire["code"], code);
         assert!(!format!("{command:?}").contains(&code));
         let event = parse_inbound_event(r#"{"type":"monthlyCard","payload":{"operation":"redeem","requestId":7,"replayed":false,"status":{"required":true,"active":true,"expiresAtMs":9999,"serverNowMs":1,"remainingMs":9998,"canEnterGame":true}}}"#).unwrap();
-        let InboundEvent::MonthlyCard(reply) = event else { panic!("monthly card reply missing"); };
+        let InboundEvent::MonthlyCard(reply) = event else {
+            panic!("monthly card reply missing");
+        };
         assert_eq!(reply.request_id, Some(7));
         assert!(reply.status.unwrap().can_enter_game);
     }

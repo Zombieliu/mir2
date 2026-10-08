@@ -186,7 +186,8 @@ async fn handle_client_inner(
                     biased;
 
                     _ = monthly_access_tick.tick() => {
-                        if session.monthly_card_expiry_pending(authenticated_account_id.as_deref()) {
+                        if session.monthly_card_expiry_pending(authenticated_account_id.as_deref())
+                            || session.has_pending_shared_personal_work() {
                             let responses = gateway_blocking(|| session.execute_with_outcome(mir2_simulation::WorldCommand::Tick))
                                 .map_err(session_panic_io_error)?.packets;
                             if responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })) {

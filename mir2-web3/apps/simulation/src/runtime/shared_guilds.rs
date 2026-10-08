@@ -345,6 +345,7 @@ impl SimulationConfig {
                     buffs: BTreeMap::new(),
                     last_buff_tick_ms: 0,
                     experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+                    active_wars: Default::default(),
                 };
                 if store
                     .shared_guilds
@@ -407,6 +408,9 @@ impl SimulationConfig {
                 .ok_or("guild rank missing")?;
             if rank.options & 2 == 0 {
                 return Err("server.GuildPermissionDenied".into());
+            }
+            if !guild.active_wars.is_empty() {
+                return Err("server.CannotRecruitDuringWar".into());
             }
             if guild.members.iter().any(|member|member.identity.character_index==target.character_index){
                 return Err("ambiguous legacy public character index; account migration required".into());
@@ -515,6 +519,12 @@ pub(super) fn project_legacy_shape(world: &World) -> Option<Stage5GuildState> {
         .collect();
     view.notice = guild.notice.clone();
     view.storage_gold = guild.gold;
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    if let Ok(store) = config.account_store.lock() {
+        view.active_wars = guild.active_wars.keys().filter_map(|enemy_id| {
+            store.shared_guilds.get(enemy_id).map(|enemy| enemy.name.clone())
+        }).collect();
+    }
     for (bit, name) in [
         (1, "CanChangeRank"),
         (2, "CanRecruit"),
@@ -662,6 +672,7 @@ impl crate::SimulationSession {
     }
 
     pub fn enable_shared_guild_authority(&mut self) {
+        self.initialize_shared_experience_rate_clock();
         if !enabled(self.app.world()) {
             self.app.world_mut().insert_resource(SharedGuildSession {
                 enabled: true,
@@ -1029,6 +1040,12 @@ mod bank;
 
 #[path = "shared_guild_management.rs"]
 mod management;
+
+#[path = "shared_guild_management_commands.rs"]
+mod management_commands;
+
+#[path = "shared_guild_wars.rs"]
+mod wars;
 
 #[path = "shared_guild_buffs.rs"]
 pub(super) mod buffs;

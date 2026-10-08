@@ -275,6 +275,7 @@ fn fixture(seed_guild: bool) -> GatewayConfig {
             store.shared_guilds.insert(
                 ID.into(),
                 SharedGuildRecord {
+        active_wars: Default::default(),
                     id: ID.into(),
                     name: "Knights".into(),
                     revision: 1,

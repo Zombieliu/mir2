@@ -2475,6 +2475,7 @@ fn stage5_guild_end_war_packet(
 }
 
 fn tick_stage5_guild_wars(world: &mut World, tick: u64, packets: &mut Vec<ServerPacket>) {
+    if super::shared_guilds::enabled(world) { return; }
     if tick == 0 || tick % STAGE5_GUILD_WAR_TICK_INTERVAL != 0 {
         return;
     }
@@ -4464,27 +4465,25 @@ fn stage5_deposit_refine_item_packet(world: &mut World, from: i32, to: i32) -> V
         return failure();
     }
     let inventory = world.resource::<InventoryResource>();
-    if !is_valid_inventory_slot(from_slot, inventory.inventory_capacity) {
+    if u16::from(from_slot) >= inventory.inventory_capacity || from_slot >= 86 {
         return failure();
     }
-    let Some(index) = inventory
-        .inventory_items
-        .iter()
-        .position(|i| inventory_item_matches_index(i, from_slot))
+    let collection = if from_slot < 6 { &inventory.belt_items } else { &inventory.inventory_items };
+    let Some(index) = collection.iter().position(|item|
+        if from_slot < 6 { item.container == ItemContainer::Belt && item.slot == from_slot }
+        else { inventory_item_matches_index(item, from_slot - 6) })
     else {
         return failure();
     };
-    let item = inventory.inventory_items[index].clone();
+    let item = collection[index].clone();
     let Some(encoded) = item_custody::encode(&item) else {
         return failure();
     };
     if !item_custody::can_take(inventory, &item) {
         return failure();
     }
-    world
-        .resource_mut::<InventoryResource>()
-        .inventory_items
-        .remove(index);
+    if from_slot < 6 { world.resource_mut::<InventoryResource>().belt_items.remove(index); }
+    else { world.resource_mut::<InventoryResource>().inventory_items.remove(index); }
     let mut state = world.resource_mut::<Stage5SystemsResource>();
     state.stage5_systems.refine.slots.insert(to_slot, item.key);
     state
@@ -4530,11 +4529,10 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
     else {
         return failure();
     };
-    let Some((inventory, _)) = item_custody::plan_return(
+    let Some((inventory, _)) = item_custody::plan_return_crystal_array(
         world.resource::<InventoryResource>(),
         &item,
         Some(to_slot),
-        false,
     ) else {
         return failure();
     };
@@ -4577,11 +4575,12 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
             continue;
         };
         let Some((inventory, changed)) =
-            item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, false)
+            item_custody::plan_return_crystal_array(world.resource::<InventoryResource>(), &item, None)
         else {
             continue;
         };
-        let destination = inventory_index_for_item(&changed[0]).expect("bag destination");
+        let destination = if changed[0].container == ItemContainer::Belt { changed[0].slot }
+            else { inventory_index_for_item(&changed[0]).expect("bag destination") + 6 };
         *world.resource_mut::<InventoryResource>() = inventory;
         let mut state = world.resource_mut::<Stage5SystemsResource>();
         state.stage5_systems.refine.slots.remove(&slot);
@@ -4601,6 +4600,9 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
         .is_empty()
     {
         packets.push(ServerPacket::RefineCancel);
+    } else {
+        packets.push(system_message_key(world, "server.BagNoRoomForItem"));
+        packets.push(ServerPacket::NPCCollectRefine { success: false });
     }
     packets
 }
@@ -6438,6 +6440,17 @@ fn revalidate_cached_gm_authorization(world: &mut World) -> Option<ActiveGmAutho
     Some(identity)
 }
 
+pub(super) fn trusted_npc_is_gm(world: &World) -> bool {
+    let Some((identity,account_level))=strict_active_account_authorization(world) else { return false; };
+    let bound_password=world.get_resource::<AccountGmAuthorizationState>()
+        .and_then(|state| state.password_authorized_identity.as_ref()).is_some_and(|bound| bound == &identity);
+    let cached=world.resource::<PlayerPermissionResource>().gm_level;
+    // Require the already enabled, identity-bound command permission. An
+    // account role, a pending password prompt, or a test-server flag alone
+    // cannot turn an NPC condition into an administrator capability.
+    cached > 0 && cached <= account_level.max(u8::from(bound_password))
+}
+
 fn gm_command_keyword(message: &str) -> Option<&str> {
     message
         .trim_start()
@@ -6517,6 +6530,9 @@ pub(super) fn handle_chat_packet(
             bind_gm_login_prompt(world, identity);
         }
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
+            if let Some(name) = gm_command_keyword(&message).filter(|name| super::default_npc_events::is_custom_command(name)) {
+                let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::CustomCommand { name:name.to_string() });
+            }
             return packets;
         }
     }
@@ -8712,6 +8728,47 @@ pub(super) fn use_item_ack(
     })
 }
 
+// ItemType.Script is consumed by the ordinary inventory packet, then dispatches
+// the trusted DefaultNPC shape hook inside the enclosing source checkpoint.
+fn use_original_script_item_packet(
+    world: &mut World,
+    unique_id: u64,
+    grid: MirGridType,
+) -> Option<Vec<ServerPacket>> {
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Belt) {
+        return None;
+    }
+    let key = item_key_for_client_reference(world, unique_id, grid)?;
+    let location = find_use_item_location(world.resource::<InventoryResource>(), &key, Some((unique_id, grid)))?;
+    let item = item_at_use_location(world.resource::<InventoryResource>(), location)?;
+    let template = crystal_item_template_for_item_key(&item.key)
+        .or_else(|| crystal_item_template_for_dynamic_key(&item.key))?;
+    if template.item_type != 21 {
+        return None;
+    }
+    let ack = Some((unique_id, grid));
+    if !is_in_world(world)
+        || world.resource::<SessionResource>().account_id.is_none()
+        || current_player_is_dead(world)
+        || item.quantity == 0
+        || item_unique_id(&item) != unique_id
+        || validate_committed_item_state_carrier(&item).is_err()
+    {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), vec![]));
+    }
+    if let CrystalUseItemEligibility::Rejected(packet) = crystal_use_item_eligibility(world, &template) {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), packet.into_iter().collect()));
+    }
+    let Ok(shape) = u16::try_from(template.shape) else {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), vec![]));
+    };
+    if super::default_npc_events::enqueue(world, super::default_npc_events::DefaultNpcEvent::UseItem { shape }).is_err() {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), vec![]));
+    }
+    consume_item_at_use_location(world, location);
+    Some(prepend_optional_packet(use_item_ack(ack, true), vec![]))
+}
+
 #[derive(Debug, Clone)]
 struct RankingCandidate {
     account_id: String,
@@ -8896,6 +8953,35 @@ fn stage5_get_ranking_packet(
 }
 
 impl SimulationSession {
+    pub(crate) fn dispatch_default_npc_source_packets(&mut self, packets: &mut Vec<ServerPacket>) {
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(),packets);
+    }
+
+    pub(crate) fn use_item_from_source_command(&mut self,key:&str)->Vec<ServerPacket> {
+        let reference = {
+            let inventory=self.app.world().resource::<InventoryResource>();
+            inventory.inventory_items.iter().find(|item| item.key == key)
+                .map(|item| (item_unique_id(item),MirGridType::Inventory))
+                .or_else(|| inventory.belt_items.iter().find(|item| item.key == key)
+                    .map(|item| (item_unique_id(item),MirGridType::Belt)))
+        };
+        if let Some((unique_id,grid))=reference {
+            if let Some(packets)=use_original_script_item_packet(self.app.world_mut(),unique_id,grid) { return packets; }
+        }
+        self.use_item(key)
+    }
+
+    pub(crate) fn select_npc_dialog_from_source_command(&mut self,target:&str)->Vec<ServerPacket> {
+        if self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
+            .is_some_and(|dialog| dialog.npc_object_id == 0) {
+            return match super::default_npc_events::follow_up(self.app.world_mut(),target) {
+                Ok(Some(packets))=>packets,Ok(None)=>vec![],
+                Err(error)=>{super::shared_guild_experience::reject_source(self.app.world(),error);vec![]}
+            };
+        }
+        self.select_npc_dialog_target(target)
+    }
+
     pub fn friends_with_online_characters(
         &mut self,
         online_characters: &BTreeSet<(String, i32)>,
@@ -8971,6 +9057,13 @@ impl SimulationSession {
         }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);
+            let started = packets.iter().any(|packet| matches!(packet,ServerPacket::StartGame { result:4,.. }));
+            if started { super::default_npc_events::reset_transient(self.app.world_mut()); }
+            let before = if started { self.begin_guild_experience_command(true)? } else { None };
+            if started {
+                let _ = super::default_npc_events::enqueue(self.app.world_mut(),super::default_npc_events::DefaultNpcEvent::Login);
+                super::default_npc_events::dispatch_source_packets(self.app.world_mut(),&mut packets);
+            }
             let _ = refresh_quest_recurrence(self.app.world_mut());
             let completed_quests = completed_quest_ids(self.app.world());
             for packet in &mut packets {
@@ -8989,19 +9082,33 @@ impl SimulationSession {
                     }
                 }
             }
-            return Ok(packets);
+            return self.finish_guild_experience_command(before,packets);
         }
 
         let xp_source = matches!(&packet,
             ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
             |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
-        let force_periodic=super::quests::periodic_quests::packet_requires_checkpoint(&packet);
-        let before = if xp_source || force_periodic { self.begin_guild_experience_command(force_periodic)? } else { None };
+        let default_source = is_in_world(self.app.world())
+            && !matches!(&packet,ClientPacket::Disconnect|ClientPacket::LogOut)
+            && (super::default_npc_events::has_pending(self.app.world())
+                || super::default_npc_events::daily_due(self.app.world()) || xp_source
+                || matches!(&packet, ClientPacket::UseItem{..}|ClientPacket::Walk{..}|ClientPacket::Run{..}
+                    |ClientPacket::AcceptQuest{..}|ClientPacket::Chat{..}));
+        let force_periodic=super::quests::periodic_quests::packet_requires_checkpoint(&packet)
+            || matches!(&packet, ClientPacket::DepositRefineItem{..}
+                |ClientPacket::RetrieveRefineItem{..}|ClientPacket::RefineCancel
+                |ClientPacket::RefineItem{..}|ClientPacket::CheckRefine{..})
+            || matches!(&packet, ClientPacket::CallNpc{key,..}
+                if key.trim_start_matches('@').eq_ignore_ascii_case("REFINECOLLECT"));
+        let before = if force_periodic { self.begin_guild_experience_command(true)? }
+            else if default_source { self.begin_default_npc_source_command()? }
+            else if xp_source { self.begin_guild_experience_command(false)? } else { None };
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
         let mut packets = self.handle_packet_impl(packet);
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
             self.app.world_mut(), journey_context, &packets);
         packets.append(&mut journey_packets);
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(),&mut packets);
         recurrence_packets.append(&mut packets);
         let packets = self.finalize_packets(recurrence_packets);
         self.finish_guild_experience_command(before,packets)
@@ -9884,6 +9991,9 @@ impl SimulationSession {
                 if grid == MirGridType::Equipment {
                     return use_item(self.app.world_mut(), "", Some((unique_id, grid)));
                 }
+                if let Some(packets) = use_original_script_item_packet(self.app.world_mut(),unique_id,grid) {
+                    return packets;
+                }
                 let key = item_key_for_client_reference(self.app.world(), unique_id, grid);
                 match key {
                     Some(key) => use_item(self.app.world_mut(), &key, Some((unique_id, grid))),
@@ -9984,7 +10094,22 @@ impl SimulationSession {
                 self.range_attack_impl(direction, target_id, target_location)
             }
             ClientPacket::Harvest { direction } => self.harvest_impl(direction),
-            ClientPacket::CallNpc { object_id, key } => self.call_npc_impl(object_id, &key),
+            ClientPacket::CallNpc { object_id, key } => {
+                if object_id == u32::MAX {
+                    if is_in_world(self.app.world()) && strict_active_account_authorization(self.app.world()).is_some() && key.len() <= 30 {
+                        let _ = super::default_npc_events::enqueue(self.app.world_mut(),super::default_npc_events::DefaultNpcEvent::Client);
+                    }
+                    return Vec::new();
+                }
+                if object_id == 0 {
+                    return match super::default_npc_events::follow_up(self.app.world_mut(),&key) {
+                        Ok(Some(packets)) => packets,
+                        Ok(None) => Vec::new(),
+                        Err(error) => { super::shared_guild_experience::reject_source(self.app.world(),error); Vec::new() }
+                    };
+                }
+                self.call_npc_impl(object_id, &key)
+            }
             ClientPacket::NpcConfirmInput {
                 npc_id,
                 page_name,

@@ -117,7 +117,7 @@ impl SimulationSession {
             .ok_or_else(|| "prepared kill checkpoint unavailable".to_string())?;
         self.app
             .world_mut()
-            .insert_resource(SharedKillExperiencePermit(permit.clone()));
+            .insert_resource(SharedKillExperiencePermit(permit.clone(), award.mentor_bank.clone()));
         let receipt = self.commit_shared_monster_kill_award_transaction_impl(
             award.monster_object_id,
             &award.monster_name,
@@ -174,6 +174,7 @@ impl SimulationSession {
         // Keep original monotonic anchors when applying the merged, revisioned
         // full checkpoint. Rebuilding from serialized duration would extend buffs.
         let after = GuildExperienceCheckpoint {
+            force_save: true,
             save: self
                 .active_character_checkpoint()
                 .ok_or_else(|| "prepared after checkpoint missing".to_string())?,
@@ -185,6 +186,9 @@ impl SimulationSession {
             queue: self.app.world().resource::<RuntimeQueueResource>().clone(),
             tick: runtime_tick(self.app.world()),
             hero: crate::runtime::hero_ai::hero_transient::capture(self.app.world()),
+            npc_guild_actions: crate::runtime::npc_shared_guild_actions::capture(self.app.world()),
+            pet_progress: crate::runtime::shared_pet_progress::capture(self.app.world()),
+            default_transient: crate::runtime::default_npc_events::capture_transient(self.app.world()),
         };
         match config.publish_prepared_kill_source(&source, publish) {
             Ok(PreparedKillPublication::Written(value)) => {
@@ -194,6 +198,7 @@ impl SimulationSession {
                             config.freeze_prepared_kill_source(error),
                         )
                     })?;
+                crate::runtime::shared_pet_progress::acknowledge(self.app.world_mut());
                 Ok((value, self.finalize_packets(receipt.packets)))
             }
             Ok(PreparedKillPublication::AlreadyCommitted(value)) => {
@@ -244,6 +249,9 @@ impl SimulationSession {
         *self.app.world_mut().resource_mut::<BuffResource>() = snapshot.buffs.clone();
         *self.app.world_mut().resource_mut::<NpcStateResource>() = snapshot.npc.clone();
         *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = snapshot.queue.clone();
+        crate::runtime::npc_shared_guild_actions::restore(self.app.world_mut(), snapshot.npc_guild_actions.clone());
+        crate::runtime::shared_pet_progress::restore(self.app.world_mut(), snapshot.pet_progress.clone());
+        crate::runtime::default_npc_events::restore_transient(self.app.world_mut(),&snapshot.default_transient);
         set_runtime_tick(self.app.world_mut(), snapshot.tick);
         crate::runtime::hero_ai::hero_transient::restore(self.app.world_mut(), &snapshot.hero)?;
         self.visible_objects = snapshot.visible.clone();

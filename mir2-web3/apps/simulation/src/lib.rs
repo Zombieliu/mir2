@@ -38,6 +38,7 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    DefaultNpcEvent, DefaultNpcEventSnapshot, QueuedDefaultNpcEvent, DefaultNpcEnterMapTicket,
     ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample,
     SharedMonsterKillCommitFailure,
     CreatureOperation, CreatureOwner, CreaturePickupIntent,
@@ -54,7 +55,8 @@ pub use runtime::{
     SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedMarriageMutation,
     SharedMarriageProfile, SharedMentorAccountingReceipt, SharedMentorBreakReason,
-    SharedMentorLiveCheckpoint, SharedMentorMutation, SharedMentorProfile, SharedNpcSavedValue,
+    SharedMentorMutation, SharedMentorProfile, SharedNpcSavedValue, ZoneMentorBankAttribution,
+    SHARED_MENTOR_DURATION_MS, SHARED_MENTOR_LEVEL_GAP,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
     ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
     ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata, ZoneMonsterDefense,
@@ -65,6 +67,9 @@ pub use runtime::{
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
     ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
+    ZoneOwnedPetPlayerKillReceipt, ZoneExperienceProfile, ZoneExperiencePartner,
+    ZoneExperienceSelection, ZoneGuildExperienceMembership, ZoneExperienceRateSource,
+    ZoneExperienceRateBuff, ZoneExperienceRateStat, ZoneSavedPetSnapshot, ZonePetExperienceAdmission,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest,

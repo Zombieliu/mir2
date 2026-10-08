@@ -263,6 +263,7 @@ impl SimulationConfig {
             for (id, guild) in &mut staged.shared_guilds {
                 let before = guild.clone();
                 crate::runtime::advance_shared_guild_minutes(guild, minutes);
+            guild.advance_shared_guild_war_minutes(minutes);
                 if *guild != before {
                     guild.revision = guild
                         .revision

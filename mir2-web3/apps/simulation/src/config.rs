@@ -1800,6 +1800,12 @@ impl CurrencyKind {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterSaveRecord {
+    #[serde(default, skip_serializing_if = "crate::ZoneSavedPetSnapshot::is_empty")]
+    pub saved_pets: crate::ZoneSavedPetSnapshot,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub player_kill_receipts: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "default_npc_event_snapshot_is_empty")]
+    pub default_npc_events: crate::DefaultNpcEventSnapshot,
     #[serde(default, skip_serializing_if = "GuildExperienceJournal::is_empty")]
     pub guild_experience_journal: GuildExperienceJournal,
     /// Optimistic revision for the complete private character snapshot.
@@ -1886,6 +1892,10 @@ pub struct CharacterSaveRecord {
     pub stage5_systems_json: Option<String>,
 }
 
+fn default_npc_event_snapshot_is_empty(value: &crate::DefaultNpcEventSnapshot) -> bool {
+    value == &crate::DefaultNpcEventSnapshot::default()
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CharacterBindPoint {
     pub map_file_name: String,
@@ -1915,7 +1925,10 @@ impl CharacterSaveRecord {
         let (max_hp, mp) = crystal_base_vitals(character.class, character.level);
         Self {
             revision: 0,
+            saved_pets: crate::ZoneSavedPetSnapshot::default(),
             guild_experience_journal: GuildExperienceJournal::default(),
+            player_kill_receipts: BTreeMap::new(),
+            default_npc_events: crate::DefaultNpcEventSnapshot::default(),
             character,
             map_file_name: String::new(),
             map_title: String::new(),
@@ -3327,6 +3340,7 @@ pub struct SafeZoneRecord {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MapDropRuleRecord {
     pub map_file_name: String,
+    pub no_experience: bool,
     pub no_town_teleport: bool,
     pub no_escape: bool,
     pub no_random: bool,
@@ -3773,6 +3787,10 @@ fn default_crystal_login_notice() -> Notice {
 
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
+    /// Imported Crystal Setup.ini [Optional]/[Game] reward policy.
+    pub crystal_exp_mob_level_difference: bool,
+    pub crystal_world_experience_rate: f32,
+    pub crystal_newbie_guild_name: String,
     pub monthly_card_policy: crate::monthly_card::MonthlyCardPolicy,
     pub map: MapInformation,
     pub spawn: Point,
@@ -4007,6 +4025,9 @@ impl SimulationConfig {
             safe_zones: starter_safe_zones(),
             safe_zone_border_effects: imported_safe_zone_border_enabled(&scene.map.file_name),
             refine_duration_ms: 20 * 60_000,
+            crystal_exp_mob_level_difference: true,
+            crystal_world_experience_rate: 1.0,
+            crystal_newbie_guild_name: "NewbieGuild".into(),
             refine_cost: 125,
             login_notice: None,
             map_drop_rules: Vec::new(),
@@ -4693,6 +4714,39 @@ impl SimulationConfig {
     where
         F: FnOnce(&mut AccountStore) -> Result<T, String>,
     {
+        self.commit_account_store_transaction_authorized_post_inner(scope, permit, transaction, |_| Ok(()))
+    }
+
+    pub(crate) fn commit_source_with_guild_post<T, F, P>(
+        &self,
+        account_ids: &[String],
+        guild_ids: &[String],
+        permit: Option<&guild_experience::GuildExperienceCommitPermit>,
+        transaction: F,
+        post: P,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+        P: FnOnce(&mut AccountStore) -> Result<(), String>,
+    {
+        if guild_ids.is_empty() { return Err("source guild action requires explicit guild IDs".into()); }
+        self.commit_account_store_transaction_authorized_post_inner(
+            AccountStoreMutationScope::AccountsWithGuilds { account_ids, guild_ids },
+            permit, transaction, post,
+        )
+    }
+
+    fn commit_account_store_transaction_authorized_post_inner<T, F, P>(
+        &self,
+        scope: AccountStoreMutationScope<'_>,
+        permit: Option<&guild_experience::GuildExperienceCommitPermit>,
+        transaction: F,
+        post: P,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+        P: FnOnce(&mut AccountStore) -> Result<(), String>,
+    {
         let empty_account_scope = match scope {
             AccountStoreMutationScope::Accounts(account_ids)
             | AccountStoreMutationScope::AccountsWithGlobal(account_ids) => account_ids.is_empty(),
@@ -4748,6 +4802,10 @@ impl SimulationConfig {
         };
         let mut xp_guilds = if matches!(scope,AccountStoreMutationScope::FullRestore) { BTreeSet::new() }
             else { guild_experience::settle_authorized_sources(&original_store,&mut staged_store,xp_accounts,permit)? };
+        // Default-NPC actions happen after their preceding GainExp in Crystal.
+        // They share this publication and its explicit guild scope; there is no
+        // nested save/CAS and no window with XP committed but membership stale.
+        post(&mut staged_store)?;
         if let AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. }
             | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. }
             | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. }

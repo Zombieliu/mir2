@@ -67,33 +67,46 @@ mod death_tests {
         target.position = Point { x: 21, y: 20 };
         target.hp = 100;
         target.max_hp = 100;
+        // Prepare an AC-only target so MACAgility deterministically hits
+        // agility zero and subtracts zero MAC in this lifecycle fixture.
+        target.defense.min_ac = 1;
         assert!(z.spawn_authoritative_monster(&target, 0).0);
         (z, owner, target)
     }
     #[test]
-    fn ordinary_fatal_damage_bursts_once_even_when_owner_is_dead() {
+    fn ordinary_fatal_damage_releases_master_and_cannot_hit_uncontrolled_wild() {
         let (mut z, owner, _) = fixture();
-        z.handle(ZoneCommand::SyncPlayerVitals {
+        let death = z.handle(ZoneCommand::SyncPlayerVitals {
             session_id: owner,
             hp: 0,
             max_hp: 100,
             mp: 0,
         });
         assert!(
-            z.apply_native_monster_direct_damage(60, 200, None, 100)
-                .unwrap()
-                .2
+            z.native_monsters[&60].dead,
+            "actual Human death kills his pets"
         );
-        assert!(z.vampire_death_pending(60));
+        assert!(death.iter().any(|out| matches!(out, ZoneOutbound::ToMany { packets, .. }
+            if packets.iter().any(|packet| matches!(packet, ServerPacket::ObjectDied { info } if info.object_id == 60)))));
+        assert!(
+            z.apply_native_monster_direct_damage(60, 200, None, 100)
+                .is_none()
+        );
+        assert!(
+            !z.vampire_death_pending(60),
+            "death burst flushed in the same handle"
+        );
         let mut restored = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
         assert_eq!(z.flush_vampire_deaths(), restored.flush_vampire_deaths());
-        assert_eq!(z.native_monsters[&9001].hp, 80);
+        assert_eq!(z.native_monsters[&9001].hp, 100);
+        assert_eq!(z.native_monsters[&60].master_object_id, 0);
+        assert!(z.native_monsters[&60].owner_session_id.is_none());
         assert!(z.flush_vampire_deaths().is_empty());
         assert!(
             z.pet_special_world
                 .as_ref()
                 .is_none_or(|w| w.vampire.is_empty()),
-            "dead owner gets no healing reserve, but remains the burst's owner"
+            "Master-null death burst has no Human healing authority"
         );
     }
     #[test]
@@ -120,12 +133,35 @@ mod death_tests {
             }
         }
         assert!(selected);
+        z.native_monsters
+            .get_mut(&60)
+            .unwrap()
+            .hallucination_until_ms = 1000;
         let previous = z.native_monsters[&9001].incarnation;
         assert!(
             z.apply_native_monster_direct_damage(60, 200, None, 100)
                 .unwrap()
                 .2
         );
+        let proof = z.native_monsters[&60]
+            .special_ai
+            .as_ref()
+            .unwrap()
+            .vampire
+            .as_ref()
+            .unwrap()
+            .pending
+            .as_ref()
+            .unwrap();
+        assert!(proof.source.as_ref().unwrap().can_attack_wild);
+        assert!(
+            proof.victims.iter().any(|v| v.life.object_id() == 9001),
+            "source targets: {:?}; target position {:?}",
+            proof.victims,
+            z.native_monsters[&9001].position
+        );
+        assert_eq!(z.native_monsters[&9001].defense.agility, 0);
+        assert_eq!(z.native_monsters[&9001].defense.max_mac, 0);
         let mut control = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
         control.flush_vampire_deaths();
         assert_eq!(control.native_monsters[&9001].hp, 80);
@@ -148,11 +184,27 @@ mod death_tests {
         assert_ne!(z.native_monsters[&9001].incarnation, previous);
         let hp = z.native_monsters[&9001].hp;
         let mut restored = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
-        assert_eq!(z.flush_vampire_deaths(), restored.flush_vampire_deaths());
+        let live_out = z.flush_vampire_deaths();
+        let cold_out = restored.flush_vampire_deaths();
         assert_eq!(z.native_monsters[&9001].hp, hp);
+        assert_eq!(restored.native_monsters[&9001].hp, hp);
+        for output in [&live_out, &cold_out] {
+            assert!(output.iter().all(|o| !matches!(o, ZoneOutbound::ToMany { packets, .. }
+                if packets.iter().any(|p| matches!(p, ServerPacket::DamageIndicator { object_id: 9001, .. })))));
+        }
+        assert_eq!(
+            z.players[&SessionId::new("owner")].hp,
+            80,
+            "live original Human Node still receives its own burst"
+        );
+        assert_eq!(
+            restored.players[&SessionId::new("owner")].hp,
+            100,
+            "cold recovery revokes that Human Node"
+        );
     }
     #[test]
-    fn lethal_explosion_awards_its_real_owner_and_drop_exactly_once() {
+    fn lethal_released_explosion_preserves_only_a_preexisting_exp_owner_once() {
         let (mut z, owner, mut target) = fixture();
         z.despawn_world_event_monster(9001, 0);
         target.hp = 10;
@@ -171,10 +223,37 @@ mod death_tests {
             loot: crate::GroundDropLootSnapshot::Gold { amount: 9 },
         }];
         assert!(z.spawn_authoritative_monster(&target, 0).0);
+        assert_eq!(
+            z.apply_native_monster_direct_damage(9001, 1, Some(&owner), 90)
+                .unwrap()
+                .0,
+            1
+        );
+        z.native_monsters
+            .get_mut(&60)
+            .unwrap()
+            .hallucination_until_ms = 1000;
         assert!(
             z.apply_native_monster_direct_damage(60, 200, None, 100)
                 .unwrap()
                 .2
+        );
+        let proof = z.native_monsters[&60]
+            .special_ai
+            .as_ref()
+            .unwrap()
+            .vampire
+            .as_ref()
+            .unwrap()
+            .pending
+            .as_ref()
+            .unwrap();
+        assert!(proof.source.as_ref().unwrap().can_attack_wild);
+        assert!(
+            proof.victims.iter().any(|v| v.life.object_id() == 9001),
+            "source targets: {:?}; target position {:?}",
+            proof.victims,
+            z.native_monsters[&9001].position
         );
         let out = z.flush_vampire_deaths();
         let awards: Vec<_> = out
@@ -195,12 +274,159 @@ mod death_tests {
         assert!(restored.flush_vampire_deaths().is_empty());
         assert_eq!(restored.ground_drops.len(), 1);
     }
+
+    #[test]
+    fn released_burst_can_hit_former_safe_master_without_human_pk_or_vampirism() {
+        let (mut z, owner, _) = fixture();
+        let mut profile = z.players[&owner].chat_profile.clone();
+        profile.in_safe_zone = true;
+        z.handle(ZoneCommand::UpdateChatProfile {
+            session_id: owner.clone(),
+            profile,
+        });
+        assert!(
+            z.apply_native_monster_direct_damage(60, 200, None, 100)
+                .unwrap()
+                .2
+        );
+        let out = z.flush_vampire_deaths();
+        assert_eq!(z.players[&owner].hp, 80);
+        assert!(out.iter().any(|o| matches!(o, ZoneOutbound::PlayerDamaged { session_id, damage: 20, .. } if session_id == &owner)));
+        assert!(out.iter().all(|o| !matches!(
+            o,
+            ZoneOutbound::OwnedPetPlayerKill { .. } | ZoneOutbound::MonsterKillAward { .. }
+        )));
+        assert!(z.flush_vampire_deaths().is_empty());
+        assert!(z.tick_owned_human_vampirism(2000).is_empty());
+        assert_eq!(z.players[&owner].hp, 80);
+    }
+
+    #[test]
+    fn released_burst_rejects_cold_revoked_or_reborn_human_and_untyped_legacy_queue() {
+        for change in ["cold", "revive", "legacy"] {
+            let (mut z, owner, _) = fixture();
+            assert!(
+                z.apply_native_monster_direct_damage(60, 200, None, 100)
+                    .unwrap()
+                    .2
+            );
+            match change {
+                "cold" => {
+                    z = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap()
+                }
+                "revive" => {
+                    z.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                        session_id: owner.clone(),
+                        hp: 0,
+                        max_hp: 100,
+                        mp: 0,
+                        dead: true,
+                    });
+                    z.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                        session_id: owner.clone(),
+                        hp: 100,
+                        max_hp: 100,
+                        mp: 0,
+                        dead: false,
+                    });
+                }
+                _ => {
+                    let state = z
+                        .native_monsters
+                        .get_mut(&60)
+                        .unwrap()
+                        .special_ai
+                        .as_mut()
+                        .unwrap()
+                        .vampire
+                        .as_mut()
+                        .unwrap()
+                        .pending
+                        .as_mut()
+                        .unwrap();
+                    state.source = None;
+                    state.victims.clear();
+                }
+            }
+            z.flush_vampire_deaths();
+            assert_eq!(z.players[&owner].hp, 100, "{change}");
+            assert_eq!(z.native_monsters[&9001].hp, 100, "{change}");
+            assert!(z.flush_vampire_deaths().is_empty());
+        }
+    }
+
+    #[test]
+    fn fresh_authoritative_spawn_reuses_removed_id_but_rejects_old_burst_target_life() {
+        let (mut z, _, target) = fixture();
+        z.native_monsters
+            .get_mut(&60)
+            .unwrap()
+            .hallucination_until_ms = 1000;
+        assert!(
+            z.apply_native_monster_direct_damage(60, 200, None, 100)
+                .unwrap()
+                .2
+        );
+        let pending = z.native_monsters[&60]
+            .special_ai
+            .as_ref()
+            .unwrap()
+            .vampire
+            .as_ref()
+            .unwrap()
+            .pending
+            .as_ref()
+            .unwrap()
+            .clone();
+        let source = pending.source.unwrap();
+        let old = pending
+            .victims
+            .into_iter()
+            .find(|v| v.life.object_id() == target.object_id)
+            .unwrap();
+        z.despawn_world_event_monster(target.object_id, 101);
+        assert!(z.removed_object_ids.contains(&target.object_id));
+        let (spawned, out) = z.spawn_world_event_monster(&target, 102);
+        assert!(spawned);
+        assert!(out.iter().any(|o| matches!(o, ZoneOutbound::ToMany { packets, .. } | ZoneOutbound::ToSession { packets, .. }
+            if packets.iter().any(|p| matches!(p, ServerPacket::ObjectMonster { info } if info.object_id == target.object_id)))));
+        let fresh = z.native_entity_monster_ref(target.object_id).unwrap();
+        assert_ne!(fresh, old.life);
+        assert!(z.entity_ref_exists(&fresh, false));
+        assert!(!z.entity_ref_exists(&old.life, false));
+        assert!(
+            z.resolve_released_vampire_burst(&source, &old, 102)
+                .is_empty()
+        );
+        assert_eq!(z.native_monsters[&target.object_id].hp, 100);
+        assert!(!z.removed_object_ids.contains(&target.object_id));
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct VampireDeath {
     at: u64,
+    // Preserve the legacy checkpoint shape; old untyped queued IDs cannot
+    // acquire the authority of a newly issued death burst on cold recovery.
     targets: Vec<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    source: Option<VampireBurstSource>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    victims: Vec<VampireBurstVictim>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct VampireBurstSource {
+    life: super::entity_combat::ZoneCombatEntityRef,
+    can_attack_wild: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct VampireBurstVictim {
+    life: super::entity_combat::ZoneCombatEntityRef,
+    online: Option<super::super::online_identity::OnlineOwner>,
+    had_master: bool,
+}
+
 pub(in crate::runtime::zone) fn initialize_vampire(m: &mut ZoneNativeMonster) {
     if m.ai == 60 {
         m.special_ai
@@ -209,28 +435,36 @@ pub(in crate::runtime::zone) fn initialize_vampire(m: &mut ZoneNativeMonster) {
             .get_or_insert_with(Default::default);
     }
 }
+
 impl ZoneRuntime {
-    fn vampire_target_eligible(
-        &self,
-        source: &ZoneNativeMonster,
-        target: &ZoneNativeMonster,
-    ) -> bool {
-        target.hostile_to_player
-            && !target.dead
-            && target.hp > 0
-            && !matches!(target.ai, 57 | 68)
-            && monster_visibility_is_attackable(target)
-            && horned_encounter_is_attack_target(target)
-            && !source
-                .owner_session_id
-                .as_ref()
-                .and_then(|s| self.players.get(s))
-                .and_then(|p| p.chat_profile.guild_name.as_deref())
-                .zip(target.friendly_guild.as_deref())
-                .is_some_and(|(a, b)| a.eq_ignore_ascii_case(b))
+    /// MonsterObject.Die settles Master-dependent rewards before clearing
+    /// Master. This method runs after that decision and before subclass Die.
+    pub(super) fn release_vampire_master_after_death(&mut self, id: u32) {
+        if !self
+            .native_monsters
+            .get(&id)
+            .is_some_and(|m| m.ai == 60 && m.dead)
+        {
+            return;
+        }
+        self.retire_native_source_object(id);
+        let m = self.native_monsters.get_mut(&id).unwrap();
+        m.owner_session_id = None;
+        m.master_object_id = 0;
+        m.owner_player_object_id = 0;
+        if let Some(object) = self.objects.get_mut(&id) {
+            if let ServerPacket::ObjectMonster { info } = &mut object.packet {
+                info.master_object_id = 0;
+                info.name = m.name.clone();
+            }
+        }
     }
-    /// Central alive->dead hook. Capture targets before other actors can move.
+
+    /// Capture the real source/victim lives before retirement clears controls.
+    /// A corpse's burst has no former Human authority; Human/owned targets
+    /// still require their original live online Node at impact.
     pub(super) fn mark_vampire_death(&mut self, id: u32, now: u64) {
+        use super::entity_combat::ZoneCombatEntityRef;
         let Some(m) = self
             .native_monsters
             .get(&id)
@@ -251,18 +485,61 @@ impl ZoneRuntime {
         {
             return;
         }
-        let targets = self
+        let Some(life) = self.native_entity_monster_ref(id) else {
+            return;
+        };
+        let can_attack_wild =
+            now < m.hallucination_until_ms || self.owned_monster_rage_active(id, now);
+        let candidates = self
             .native_monsters
-            .iter()
-            .filter_map(|(&other, t)| {
-                (other != id
-                    && zone_tile_distance(&m.position, &t.position) <= 1
-                    && !self.collision.is_blocked(&t.position)
-                    && self.vampire_target_eligible(&m, t))
-                .then_some(other)
+            .keys()
+            .filter_map(|other| self.native_entity_monster_ref(*other))
+            .chain(
+                self.players
+                    .keys()
+                    .filter_map(|sid| self.native_entity_player_ref(sid)),
+            );
+        let victims: Vec<_> = candidates
+            .filter_map(|target| {
+                if target.object_id() == id || !self.entity_ref_exists(&target, false) {
+                    return None;
+                }
+                let (position, had_master, eligible) = match &target {
+                    ZoneCombatEntityRef::Player { session_id, .. } => {
+                        let p = &self.players[session_id];
+                        (p.position.clone(), false, !p.combat_stats.gm_never_die)
+                    }
+                    ZoneCombatEntityRef::Monster { object_id, .. } => {
+                        let t = &self.native_monsters[object_id];
+                        let mastered = t.master_object_id != 0 || t.owner_session_id.is_some();
+                        (
+                            t.position.clone(),
+                            mastered,
+                            !matches!(t.ai, 57 | 68)
+                                && monster_visibility_is_attackable(t)
+                                && horned_encounter_is_attack_target(t)
+                                && (mastered || can_attack_wild),
+                        )
+                    }
+                };
+                let online = self.owned_pet_target_online(&target);
+                if !eligible
+                    || zone_tile_distance(&m.position, &position) > 1
+                    || self.collision.is_blocked(&position)
+                    || ((had_master || matches!(&target, ZoneCombatEntityRef::Player { .. }))
+                        && online.is_none())
+                {
+                    return None;
+                }
+                Some(VampireBurstVictim {
+                    life: target,
+                    online,
+                    had_master,
+                })
             })
             .collect();
-        let s = self
+        let targets = victims.iter().map(|v| v.life.object_id()).collect();
+        let state = self
             .native_monsters
             .get_mut(&id)
             .unwrap()
@@ -272,12 +549,21 @@ impl ZoneRuntime {
             .vampire
             .as_mut()
             .unwrap();
-        s.death_marked = true;
-        s.pending = Some(VampireDeath { at: now, targets });
+        state.death_marked = true;
+        state.pending = Some(VampireDeath {
+            at: now,
+            targets,
+            source: Some(VampireBurstSource {
+                life,
+                can_attack_wild,
+            }),
+            victims,
+        });
         if let Some(object) = self.objects.get_mut(&id) {
-            object.expires_at_ms = Some(now.saturating_add(180000));
+            object.expires_at_ms = Some(now.saturating_add(180_000));
         }
     }
+
     pub(super) fn vampire_death_pending(&self, id: u32) -> bool {
         self.native_monsters
             .get(&id)
@@ -285,24 +571,28 @@ impl ZoneRuntime {
             .and_then(|s| s.vampire.as_ref())
             .is_some_and(|s| s.pending.is_some())
     }
+
     pub(super) fn invalidate_vampire_object(&mut self, id: u32) {
         for (&source, m) in self.native_monsters.iter_mut() {
             if let Some(s) = m.special_ai.as_mut().and_then(|s| s.vampire.as_mut()) {
-                if source == id {
+                // A newly born death burst survives source retirement; its
+                // typed corpse proof still fails if the object is removed.
+                if source == id && !m.dead {
                     s.pending = None;
-                } else if let Some(p) = s.pending.as_mut() {
-                    p.targets.retain(|target| *target != id);
+                } else if source != id {
+                    if let Some(p) = s.pending.as_mut() {
+                        p.targets.retain(|target| *target != id);
+                        p.victims.retain(|target| target.life.object_id() != id);
+                    }
                 }
             }
         }
     }
-    /// Flush before returning handle/tick output. Each living source can mark
-    /// once; processing takes the mark before damage, so chains terminate in
-    /// at most the number of native vampire lives present in this update.
+
+    /// Take before damage. A chain can process each source corpse only once.
     pub(super) fn flush_vampire_deaths(&mut self) -> Vec<ZoneOutbound> {
         let mut out = Vec::new();
-        let budget = self.native_monsters.len();
-        for _ in 0..budget {
+        for _ in 0..self.native_monsters.len() {
             let Some(id) = self.native_monsters.iter().find_map(|(&id, m)| {
                 m.special_ai
                     .as_ref()
@@ -325,213 +615,145 @@ impl ZoneRuntime {
                 .pending
                 .take()
                 .unwrap();
-            let source = self.native_monsters[&id].clone();
-            let damage = i32::from(source.summon_skill_level).saturating_mul(10);
-            for target in pending.targets {
-                out.extend(self.vampire_damage_monster(id, target, damage, pending.at));
+            let Some(source) = pending.source else {
+                continue;
+            };
+            self.release_vampire_master_after_death(id);
+            for target in pending.victims {
+                out.extend(self.resolve_released_vampire_burst(&source, &target, pending.at));
             }
         }
         out
     }
-    pub(super) fn try_tick_vampire_attack(
+
+    /// This is the only safe-zone exception for ordinary native player damage.
+    /// Its private issuer proves a dead, Master-null Vampire and both typed
+    /// lives. It never relaxes generic owned-entity combat admission.
+    fn resolve_released_vampire_burst(
         &mut self,
-        id: u32,
-        now: u64,
-    ) -> Option<Vec<ZoneOutbound>> {
-        let m = self.native_monsters.get(&id)?.clone();
-        if m.ai != 60 {
-            return None;
-        }
-        if m.dead {
-            return Some(Vec::new());
-        }
-        let owner = m
-            .owner_session_id
-            .as_ref()
-            .and_then(|s| self.players.get(s))
-            .filter(|p| !p.dead && p.object_id == zone_native_summon_owner_player_object_id(&m))?;
-        let _ = owner;
-        let target = self.nearest_native_summon_target(id, &m.position)?;
-        if zone_tile_distance(&m.position, &target.position) != 1 {
-            return None;
-        }
-        if super::entity_combat::native_entity_attack_blocked(&m, now) {
-            return Some(Vec::new());
-        }
-        if now < m.next_ai_ready_at_ms || now < m.next_attack_ready_at_ms {
-            return Some(Vec::new());
-        }
-        let direction = zone_direction_toward(&m.position, &target.position).unwrap_or(m.direction);
-        let t = crystal_monster_by_name(&m.name)?;
-        let damage = zone_roll_stat_range(
-            t.min_dc,
-            t.max_dc
-                .saturating_add(zone_native_monster_buff_stat_total(&m, CRYSTAL_STAT_MAX_DC)),
-            now,
-            id,
-            0x60,
-        );
-        let live = self.native_monsters.get_mut(&id)?;
-        live.direction = direction;
-        live.next_ai_ready_at_ms = now.saturating_add(300);
-        live.next_attack_ready_at_ms = now.saturating_add(live.attack_speed_ms);
-        let packet = ServerPacket::ObjectAttack {
-            info: ObjectAttackInfo {
-                object_id: id,
-                location: m.position.clone(),
-                direction,
-                spell: 0,
-                level: 0,
-                attack_type: 0,
-            },
-        };
-        self.apply_zone_object_packets(std::slice::from_ref(&packet), now);
-        let mut out = vec![ZoneOutbound::ToMany {
-            session_ids: self.native_monster_combat_recipients(
-                id,
-                target.object_id,
-                &target.position,
-            ),
-            packets: vec![packet],
-        }];
-        if target.position == offset_point(&m.position, direction, 1) {
-            out.extend(self.vampire_damage_monster(id, target.object_id, damage, now));
-        }
-        Some(out)
-    }
-    fn vampire_damage_monster(
-        &mut self,
-        id: u32,
-        target_id: u32,
-        raw: i32,
+        source: &VampireBurstSource,
+        victim: &VampireBurstVictim,
         now: u64,
     ) -> Vec<ZoneOutbound> {
-        if raw <= 0 {
-            return Vec::new();
-        }
-        let Some(source) = self.native_monsters.get(&id).cloned() else {
-            return Vec::new();
-        };
-        let Some(target) = self
-            .native_monsters
-            .get(&target_id)
-            .filter(|t| self.vampire_target_eligible(&source, t))
-            .cloned()
-        else {
-            return Vec::new();
-        };
-        let Some(owner) = source.owner_session_id.clone().filter(|s| {
-            self.players
-                .get(s)
-                .is_some_and(|p| p.object_id == zone_native_summon_owner_player_object_id(&source))
-        }) else {
-            return Vec::new();
-        };
-        let Some(t) = crystal_monster_by_name(&source.name) else {
-            return Vec::new();
-        };
-        if crate::runtime::combat::crystal_accuracy_roll(
-            now,
-            id,
-            target_id,
-            target.defense.agility.max(0) as u64 + 1,
-        ) > t.accuracy.max(0) as u64
+        use super::entity_combat::{EntityDefence, ZoneCombatEntityRef};
+        let id = source.life.object_id();
+        if !self.entity_ref_exists(&source.life, true)
+            || !self.entity_ref_exists(&victim.life, false)
+            || self.owned_pet_target_online(&victim.life) != victim.online
         {
             return Vec::new();
         }
-        let damage = zone_magic_damage_after_monster_armour(&target, raw, id, now);
-        if damage <= 0 {
+        let m = self.native_monsters[&id].clone();
+        if m.ai != 60 || !m.dead || m.master_object_id != 0 || m.owner_session_id.is_some() {
             return Vec::new();
         }
-        let Some((
-            damage,
-            percent,
-            killed,
-            name,
-            experience,
-            position,
-            direction,
-            reward_owner,
-            drops,
-            boss_audit,
-        )) = self.apply_native_monster_damage_internal(
-            target_id,
-            damage,
-            Some(&owner),
-            now,
-            NativeMonsterDamageCause::Direct,
-            Some(NativeExperienceActor::Object {
-                object_id: id,
-                force_owner: false,
-            }),
-        )
-        else {
-            return Vec::new();
+        let (position, agility, resist) = match &victim.life {
+            ZoneCombatEntityRef::Player { session_id, .. } => {
+                let p = &self.players[session_id];
+                if p.combat_stats.gm_never_die || victim.online.is_none() {
+                    return Vec::new();
+                }
+                (
+                    p.position.clone(),
+                    p.combat_stats.agility,
+                    p.combat_stats.magic_resist,
+                )
+            }
+            ZoneCombatEntityRef::Monster { object_id, .. } => {
+                let t = &self.native_monsters[object_id];
+                let mastered = t.master_object_id != 0 || t.owner_session_id.is_some();
+                if mastered != victim.had_master
+                    || (!mastered && !source.can_attack_wild)
+                    || matches!(t.ai, 57 | 68)
+                    || !monster_visibility_is_attackable(t)
+                    || !horned_encounter_is_attack_target(t)
+                {
+                    return Vec::new();
+                }
+                (
+                    t.position.clone(),
+                    t.defense
+                        .agility
+                        .saturating_add(zone_native_monster_buff_stat_total(t, 11)),
+                    zone_native_monster_buff_stat_total(t, 30),
+                )
+            }
         };
-        let mut packets = vec![
-            ServerPacket::ObjectStruck {
-                info: ObjectStruckInfo {
-                    object_id: target_id,
-                    attacker_id: id,
-                    location: position.clone(),
-                    direction,
-                },
-            },
-            ServerPacket::DamageIndicator {
-                damage,
-                damage_type: 0,
-                object_id: target_id,
-            },
-            ServerPacket::ObjectHealth {
-                info: ObjectHealthInfo {
-                    object_id: target_id,
-                    percent,
-                    expire: 0,
-                },
-            },
-        ];
-        if killed {
-            packets.push(ServerPacket::ObjectDied {
-                info: ObjectDiedInfo {
-                    object_id: target_id,
-                    location: position.clone(),
-                    direction,
-                    kind: 0,
-                },
-            });
+        if zone_tile_distance(&m.position, &position) > 1 || self.collision.is_blocked(&position) {
+            return Vec::new();
         }
-        if damage > 0 && self.queue_pet_vampire(id, damage, now) {
-            packets.push(ServerPacket::ObjectEffect {
-                info: ObjectEffectInfo {
-                    object_id: target_id,
-                    effect: CRYSTAL_SPELL_EFFECT_BLEEDING,
-                    effect_type: 0,
-                    delay_time: 0,
-                    time: 0,
-                },
-            });
+        let raw = i32::from(m.summon_skill_level) * 10;
+        if raw <= 0 {
+            return Vec::new();
         }
-        self.apply_zone_object_packets(&packets, now);
-        let mut out = vec![ZoneOutbound::ToMany {
-            session_ids: self.native_monster_action_recipients(&owner, id, target_id, &position),
-            packets,
-        }];
-        if killed {
-            out.extend(self.native_monster_kill_outbounds(
-                reward_owner,
-                &position,
-                ZoneMonsterKillAward {
-                    source_receipt_key: None,
-                    experience_selection: None,
-                    monster_object_id: target_id,
-                    killed_at_ms: now,
-                    monster_name: name,
-                    experience,
-                    drops,
-                    boss_audit,
-                },
-            ));
+        let accuracy = crystal_monster_by_name(&m.name)
+            .map_or(0, |t| t.accuracy)
+            .saturating_add(zone_native_monster_buff_stat_total(&m, 10))
+            .max(0);
+        if crate::runtime::combat::crystal_accuracy_roll(now, id, victim.life.object_id(), 10)
+            < resist.clamp(0, 10) as u64
+            || crate::runtime::combat::crystal_accuracy_roll(
+                now,
+                id,
+                victim.life.object_id().wrapping_add(0xEA),
+                agility.max(0) as u64 + 1,
+            ) > accuracy as u64
+        {
+            return self.entity_miss_packet(id, &victim.life);
         }
-        out
+        match &victim.life {
+            ZoneCombatEntityRef::Player {
+                session_id,
+                object_id,
+                ..
+            } => self.resolve_native_player_damage_kind(
+                PendingNativePlayerHit {
+                    ready_at_ms: now,
+                    attacker_object_id: id,
+                    attacker_ai: 60,
+                    target_session_id: session_id.clone(),
+                    target_object_id: *object_id,
+                    damage: raw,
+                    magic: true,
+                },
+                now,
+                false,
+                true,
+                false,
+                true,
+            ),
+            ZoneCombatEntityRef::Monster { object_id, .. } => {
+                let damage = super::entity_combat::entity_monster_defended_damage(
+                    &self.native_monsters[object_id],
+                    *object_id,
+                    raw,
+                    EntityDefence::MACAgility,
+                    id,
+                    now,
+                );
+                if damage <= 0 {
+                    return self.entity_miss_packet(id, &victim.life);
+                }
+                let Some(result) = self.apply_native_monster_damage_internal(
+                    *object_id,
+                    damage,
+                    None,
+                    now,
+                    NativeMonsterDamageCause::Direct,
+                    Some(NativeExperienceActor::Object {
+                        object_id: id,
+                        force_owner: false,
+                    }),
+                ) else {
+                    return Vec::new();
+                };
+                let (actual, mut out) =
+                    self.entity_monster_damage_outcome(id, *object_id, result, Some(id), now);
+                if actual > 0 {
+                    out.extend(self.release_owned_monster_shock(*object_id, now));
+                }
+                out
+            }
+        }
     }
 }

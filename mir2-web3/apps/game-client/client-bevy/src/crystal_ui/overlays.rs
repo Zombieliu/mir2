@@ -1,5 +1,7 @@
 //! Operable native player windows: bag, equipment, inspect, death, menu, chat, mail, bigmap, shop, storage.
 
+#[path = "big_map_coordinates.rs"]
+mod big_map_coordinates;
 #[path = "character_stats.rs"]
 pub mod character_stats;
 #[path = "game_shop_dialog.rs"]
@@ -8,18 +10,18 @@ pub mod game_shop_dialog;
 pub mod hero_dialog;
 #[path = "local_keyboard_ui.rs"]
 pub mod local_keyboard_ui;
+#[path = "localized_help.rs"]
+mod localized_help;
+#[path = "npc_item_service.rs"]
+mod npc_item_service;
+#[path = "npc_shop_scroll.rs"]
+mod npc_shop_scroll;
+#[path = "refine_dialog.rs"]
+pub mod refine_dialog;
 #[path = "skill_bars.rs"]
 pub mod skill_bars;
 #[path = "skill_page.rs"]
 mod skill_page;
-#[path = "npc_item_service.rs"]
-mod npc_item_service;
-#[path = "big_map_coordinates.rs"]
-mod big_map_coordinates;
-#[path = "npc_shop_scroll.rs"]
-mod npc_shop_scroll;
-#[path = "localized_help.rs"]
-mod localized_help;
 
 use std::collections::VecDeque;
 
@@ -81,25 +83,23 @@ use crate::storage::{
     storage_withdraw_enabled_for_selection, StorageItemSelection, StorageModel, StoragePageCursor,
 };
 #[cfg(test)]
-use crate::storage::{
-    storage_deposit_enabled, storage_expand_enabled, storage_withdraw_enabled,
-};
+use crate::storage::{storage_deposit_enabled, storage_expand_enabled, storage_withdraw_enabled};
 
 use super::amount_input::{AmountKeyAction, CrystalAmountInput};
-#[path = "mail_reader_drag.rs"]
-mod mail_reader_drag;
 #[path = "mail_compose_drag.rs"]
 mod mail_compose_drag;
 #[path = "mail_editor.rs"]
 pub mod mail_editor;
-#[path = "mail_text_adapter.rs"]
-pub mod mail_text_adapter;
-#[path = "mail_parcel.rs"]
-mod mail_parcel;
-#[path = "options_volume.rs"]
-mod options_volume;
 #[path = "mail_list.rs"]
 mod mail_list;
+#[path = "mail_parcel.rs"]
+mod mail_parcel;
+#[path = "mail_reader_drag.rs"]
+mod mail_reader_drag;
+#[path = "mail_text_adapter.rs"]
+pub mod mail_text_adapter;
+#[path = "options_volume.rs"]
+mod options_volume;
 use super::assets::CrystalButtonAssetSet;
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
@@ -120,12 +120,14 @@ use super::panel_layouts::{
     INVENTORY_GOLD_LABEL_SIZE, INVENTORY_GRID_ORIGIN, INVENTORY_GRID_STEP, INVENTORY_PAGE_COLUMNS,
     INVENTORY_PAGE_SIZE, INVENTORY_PANEL_ORIGIN, INVENTORY_PANEL_SIZE, INVENTORY_WEIGHT_BAR_ORIGIN,
     INVENTORY_WEIGHT_BAR_SIZE, NPC_DIALOG_PANEL_SIZE, NPC_DROP_PANEL_ORIGIN, NPC_DROP_PANEL_SIZE,
-    NPC_GOODS_PANEL_ORIGIN, NPC_GOODS_PANEL_SIZE, NPC_SERVICE_INVENTORY_ORIGIN,
-    SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
-    SKILL_ROW_STEP_Y,
+    NPC_GOODS_PANEL_ORIGIN, NPC_GOODS_PANEL_SIZE, NPC_SERVICE_INVENTORY_ORIGIN, SKILL_PAGE_SIZE,
+    SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
 };
-use super::storage_password::{Command as StoragePasswordCommand, Prompt as StoragePasswordPrompt, Stage as StoragePasswordStage};
 use super::spec::{CrystalButtonSpec, CrystalFrameSpec, CrystalRect};
+use super::storage_password::{
+    Command as StoragePasswordCommand, Prompt as StoragePasswordPrompt,
+    Stage as StoragePasswordStage,
+};
 use super::widget::{spawn_crystal_image_button, CrystalImageButton, CrystalItemHint};
 
 #[cfg(test)]
@@ -960,6 +962,7 @@ pub struct NativePlayerUiState {
     pub skill_authority: skill_assign_dialog::SkillAuthorityUi,
     pub leave_game: leave_game_dialog::LeaveGameDialog,
     pub social_bonds: social_bond_dialog::SocialBondDialogs,
+    pub refine: refine_dialog::RefineDialogUi,
     pub keyboard: keyboard_dialog::KeyboardDialogUi,
     pub guild_gold_ready_at_ms: u64,
     pub guild_storage: GuildStorageUi,
@@ -1050,7 +1053,9 @@ fn clear_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut Ma
     state.mail_recipient_prompt_active = false;
 }
 
-fn letter_draft(mut draft: mir2_ui_core::state::MailComposeDraft) -> mir2_ui_core::state::MailComposeDraft {
+fn letter_draft(
+    mut draft: mir2_ui_core::state::MailComposeDraft,
+) -> mir2_ui_core::state::MailComposeDraft {
     // LetterDialog has no gold or item controls. Never retain an adapter-only
     // parcel payload where the Letter surface cannot show it.
     draft.gold = 0;
@@ -1263,7 +1268,9 @@ pub(crate) struct StorageRentalConfirmation {
 
 impl StorageRentalConfirmation {
     fn from_storage(storage: &StorageModel) -> Self {
-        Self { renew: storage.has_expanded }
+        Self {
+            renew: storage.has_expanded,
+        }
     }
 
     fn message(self) -> &'static str {
@@ -1384,6 +1391,7 @@ impl Default for NativePlayerUiState {
             skill_authority: Default::default(),
             leave_game: Default::default(),
             social_bonds: Default::default(),
+            refine: Default::default(),
             keyboard: Default::default(),
             guild_gold_ready_at_ms: 0,
             guild_storage: GuildStorageUi::default(),
@@ -1438,6 +1446,7 @@ impl NativePlayerUiState {
         self.core.inventory_open()
             || (self.mail_open() && self.mail_inventory_visible)
             || (self.npc_shop_open() && !self.npc_inventory_hidden)
+            || self.refine.open
             || self.storage_open()
     }
     pub fn equipment_open(&self) -> bool {
@@ -1628,7 +1637,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.mail_delete_prompt.is_some()
+        self.refine.open
+            || self.refine.pending()
+            || self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
             || self.mail_feedback_prompt.is_some()
             || self.mail_feedback_input_consumed
@@ -1667,35 +1678,49 @@ impl NativePlayerUiState {
         use mir2_ui_core::state::UiPanel;
         match self.core.panel {
             UiPanel::Inventory => Some(CrystalRect::new(
-                self.inventory_window.left, self.inventory_window.top,
-                INVENTORY_PANEL_SIZE.width as f32, INVENTORY_PANEL_SIZE.height as f32,
+                self.inventory_window.left,
+                self.inventory_window.top,
+                INVENTORY_PANEL_SIZE.width as f32,
+                INVENTORY_PANEL_SIZE.height as f32,
             )),
             UiPanel::Character | UiPanel::Skill => Some(CRYSTAL_CHARACTER_PANEL_RECT),
             UiPanel::Options => Some(CRYSTAL_OPTIONS_PANEL_RECT),
             UiPanel::Menu => Some(CRYSTAL_MENU_PANEL_RECT),
             UiPanel::QuestLog => Some(CrystalRect::new(
-                crate::quest_ui::QUEST_DIARY_DESIGN_LEFT, crate::quest_ui::QUEST_DIARY_DESIGN_TOP,
-                crate::quest_ui::QUEST_DIARY_DESIGN_WIDTH, crate::quest_ui::QUEST_DIARY_DESIGN_HEIGHT,
+                crate::quest_ui::QUEST_DIARY_DESIGN_LEFT,
+                crate::quest_ui::QUEST_DIARY_DESIGN_TOP,
+                crate::quest_ui::QUEST_DIARY_DESIGN_WIDTH,
+                crate::quest_ui::QUEST_DIARY_DESIGN_HEIGHT,
             )),
             _ => None,
         }
     }
 
     pub fn captures_nonmodal_pointer_at(&self, x: f32, y: f32) -> bool {
-        x.is_finite() && y.is_finite() && (
-            self.nonmodal_panel_rect().is_some_and(|rect| rect.contains(x, y))
-            || (self.help.open && CrystalRect::new(
-                self.help.left, self.help.top,
-                CRYSTAL_HELP_PANEL_RECT.width, CRYSTAL_HELP_PANEL_RECT.height,
-            ).contains(x, y))
-        )
+        x.is_finite()
+            && y.is_finite()
+            && (self
+                .nonmodal_panel_rect()
+                .is_some_and(|rect| rect.contains(x, y))
+                || (self.help.open
+                    && CrystalRect::new(
+                        self.help.left,
+                        self.help.top,
+                        CRYSTAL_HELP_PANEL_RECT.width,
+                        CRYSTAL_HELP_PANEL_RECT.height,
+                    )
+                    .contains(x, y)))
     }
 
     pub fn blocks_world_pointer_at(&self, x: f32, y: f32) -> bool {
         let rect = self.nonmodal_panel_rect();
-        let panel_blocks = if rect.is_some() { self.core.chat_focused() }
-            else { self.core.blocks_world_click() };
-        !x.is_finite() || !y.is_finite()
+        let panel_blocks = if rect.is_some() {
+            self.core.chat_focused()
+        } else {
+            self.core.blocks_world_click()
+        };
+        !x.is_finite()
+            || !y.is_finite()
             || self.blocks_world_click_with_panel(panel_blocks)
             || self.captures_nonmodal_pointer_at(x, y)
             || self.help.dragging
@@ -1722,9 +1747,7 @@ impl NativePlayerUiState {
             | mir2_ui_core::state::UiPanel::Options
             | mir2_ui_core::state::UiPanel::Menu
             | mir2_ui_core::state::UiPanel::QuestLog
-            | mir2_ui_core::state::UiPanel::BigMap => {
-                self.core.chat_focused()
-            }
+            | mir2_ui_core::state::UiPanel::BigMap => self.core.chat_focused(),
             _ => self.core.blocks_world_click(),
         };
         self.blocks_world_click_with_panel_and_hover(panel_blocks, false)
@@ -1738,8 +1761,14 @@ impl NativePlayerUiState {
             || self.equipment_item_drag.is_some()
     }
 
-    fn blocks_world_click_with_panel_and_hover(&self, panel_blocks: bool, hover_blocks: bool) -> bool {
-        self.game_shop_dialog.confirmation.is_some()
+    fn blocks_world_click_with_panel_and_hover(
+        &self,
+        panel_blocks: bool,
+        hover_blocks: bool,
+    ) -> bool {
+        self.refine.open
+            || self.refine.pending()
+            || self.game_shop_dialog.confirmation.is_some()
             || self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
             || self.storage_rental_confirmation.is_some()
@@ -1800,6 +1829,7 @@ impl NativePlayerUiState {
         self.core.chat_focused()
     }
     pub fn close_windows(&mut self) {
+        self.refine.defer_cancel();
         if self.npc_shop_open() {
             self.request_npc_service_exit();
         }
@@ -2242,6 +2272,7 @@ pub enum NativePlayerUiIntent {
     HeroPacket(mir2_protocol::ClientPacket),
     GuildBuffUpdate(guild_buff_dialog::GuildBuffRequest),
     SocialBondPacket(mir2_protocol::ClientPacket),
+    RefinePacket(mir2_protocol::ClientPacket),
     RefreshFriends,
     RemoveFriend {
         character_index: i32,
@@ -2530,12 +2561,20 @@ impl NativePlayerUiIntent {
                 unique_id: *unique_id,
                 count: *count,
             }),
-            Self::EquipItem { unique_id, grid, to } => Some(PendingOperationKey::Equip {
+            Self::EquipItem {
+                unique_id,
+                grid,
+                to,
+            } => Some(PendingOperationKey::Equip {
                 grid: grid.clone(),
                 unique_id: *unique_id,
                 to: *to,
             }),
-            Self::RemoveItem { unique_id, grid, to } => Some(PendingOperationKey::Remove {
+            Self::RemoveItem {
+                unique_id,
+                grid,
+                to,
+            } => Some(PendingOperationKey::Remove {
                 grid: grid.clone(),
                 unique_id: *unique_id,
                 to: *to,
@@ -2585,6 +2624,7 @@ impl NativePlayerUiIntent {
             | Self::TradeCancel => None,
             Self::GuildBuffUpdate(_)
             | Self::SocialBondPacket(_)
+            | Self::RefinePacket(_)
             | Self::HeroPacket(_)
             | Self::EquipmentCreaturePacket(_)
             | Self::UseItem { .. }
@@ -2628,8 +2668,8 @@ impl NativePlayerUiIntentQueue {
             NativePlayerUiIntent::ReadMail { .. }
                 | NativePlayerUiIntent::DeleteMail { .. }
                 | NativePlayerUiIntent::LockMail { .. }
-        )
-            && (self.intents.len() >= MAX_QUEUED || self.intents.iter().any(|queued| queued == &intent))
+        ) && (self.intents.len() >= MAX_QUEUED
+            || self.intents.iter().any(|queued| queued == &intent))
         {
             return false;
         }
@@ -2650,6 +2690,7 @@ impl NativePlayerUiIntentQueue {
                 NativePlayerUiIntent::MagicKey { .. }
                     | NativePlayerUiIntent::GuildBuffUpdate(_)
                     | NativePlayerUiIntent::SocialBondPacket(_)
+                    | NativePlayerUiIntent::RefinePacket(_)
                     | NativePlayerUiIntent::HeroPacket(_)
                     | NativePlayerUiIntent::EquipmentCreaturePacket(_)
                     | NativePlayerUiIntent::GameShopBuy { .. }
@@ -2668,6 +2709,7 @@ impl NativePlayerUiIntentQueue {
                     NativePlayerUiIntent::MagicKey { .. }
                         | NativePlayerUiIntent::GuildBuffUpdate(_)
                         | NativePlayerUiIntent::SocialBondPacket(_)
+                        | NativePlayerUiIntent::RefinePacket(_)
                         | NativePlayerUiIntent::HeroPacket(_)
                         | NativePlayerUiIntent::EquipmentCreaturePacket(_)
                         | NativePlayerUiIntent::GameShopBuy { .. }
@@ -2709,7 +2751,10 @@ impl NativePlayerUiIntentQueue {
         }
         // Rename needs the actual editor/owner/scope context, absent from this
         // generic method. Other social pending contracts stay unchanged.
-        if matches!(&intent, NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }) {
+        if matches!(
+            &intent,
+            NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
+        ) {
             return false;
         }
         let operation = match &intent {
@@ -2835,7 +2880,9 @@ impl NativePlayerUiIntentQueue {
             || self.intents.iter().any(|queued| queued == &intent)
             || !social.guild.rank_rename_scope_matches(&request)
             || !crate::social::valid_rank_rename_name(&request.rank_name)
-            || !social.begin_pending(crate::social::SocialPendingOperation::GuildRankRename(request))
+            || !social.begin_pending(crate::social::SocialPendingOperation::GuildRankRename(
+                request,
+            ))
         {
             return false;
         }
@@ -3469,8 +3516,8 @@ fn process_mail_service_inbox(
                     compose.last_notice = Some("Sending mail…".to_owned());
                     continue;
                 }
-                let active_parcel = state.core.mail_compose.is_some()
-                    && compose.kind == MailComposeKind::Parcel;
+                let active_parcel =
+                    state.core.mail_compose.is_some() && compose.kind == MailComposeKind::Parcel;
                 let saved_parcel = compose.parcel_draft.as_ref().is_some_and(|draft| {
                     !draft.recipient.is_empty()
                         || !draft.message.is_empty()
@@ -3481,7 +3528,8 @@ fn process_mail_service_inbox(
                     // A second NPC request must not retarget or overwrite an
                     // unsent parcel whose hidden payload could be mailed to a
                     // different recipient.
-                    compose.last_notice = Some("Finish or cancel the current parcel first".to_owned());
+                    compose.last_notice =
+                        Some("Finish or cancel the current parcel first".to_owned());
                     continue;
                 }
                 let had_mail_parent = state.mail_open();
@@ -3613,11 +3661,23 @@ impl Plugin for Mir2CrystalOverlayPlugin {
         }
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<localized_help::HelpScrollState>()
-            .add_systems(Update, (localized_help::scroll_help, localized_help::capture_help_scroll).chain().before(render_overlays))
-            .add_systems(PostUpdate, localized_help::restore_help_scroll.before(bevy::ui::UiSystems::Layout))
+            .add_systems(
+                Update,
+                (
+                    localized_help::scroll_help,
+                    localized_help::capture_help_scroll,
+                )
+                    .chain()
+                    .before(render_overlays),
+            )
+            .add_systems(
+                PostUpdate,
+                localized_help::restore_help_scroll.before(bevy::ui::UiSystems::Layout),
+            )
             .init_resource::<keyboard_dialog::host::KeyboardHost>()
             .init_resource::<equipment_creature_host::MenuHost>()
             .init_resource::<social_bond_dialog::host::SocialHost>()
+            .init_resource::<refine_dialog::host::RefineHost>()
             .init_resource::<group_dialog::GroupHost>()
             .init_resource::<guild_panel::GuildHost>()
             .init_resource::<friend_dialog::host::FriendHost>()
@@ -3748,6 +3808,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     (
                         equipment_creature_host::process,
                         social_bond_dialog::host::process,
+                        refine_dialog::host::process,
                         leave_game_dialog::process,
                         group_dialog::process,
                         skill_assign_dialog::process,
@@ -3805,6 +3866,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     )
                         .chain(),
                     social_bond_dialog::host::render_system,
+                    refine_dialog::host::render_system,
                     leave_game_dialog::render,
                     group_dialog::render,
                     group_dialog::render_invitation,
@@ -3850,29 +3912,50 @@ fn sync_big_map_ui(
     gameplay: Option<Res<UiReadModel>>,
 ) {
     intents.sync_model(&model);
-    let journey = catalog.as_deref().zip(guidance.as_deref())
-        .zip(quests.as_deref()).zip(completed.as_deref()).zip(gameplay.as_deref())
+    let journey = catalog
+        .as_deref()
+        .zip(guidance.as_deref())
+        .zip(quests.as_deref())
+        .zip(completed.as_deref())
+        .zip(gameplay.as_deref())
         .and_then(|((((catalog, guidance), quests), completed), gameplay)| {
             catalog.derive(guidance, quests, completed, &gameplay.player)
         });
-    let primary = quests.as_deref().zip(quest_state.as_deref()).and_then(|(quests, state)| {
-        crate::quest_ui::primary_quest_index(quests, state, journey.as_ref())
-    });
-    let destination = model.active_map().is_some_and(|map| {
-        crate::quest_destination::is_bichon_map(map.map_index)
-    }) && quests.as_deref().is_some_and(crate::quest_destination::bichon_safe_arrival_pending)
+    let primary = quests
+        .as_deref()
+        .zip(quest_state.as_deref())
+        .and_then(|(quests, state)| {
+            crate::quest_ui::primary_quest_index(quests, state, journey.as_ref())
+        });
+    let destination = model
+        .active_map()
+        .is_some_and(|map| crate::quest_destination::is_bichon_map(map.map_index))
+        && quests
+            .as_deref()
+            .is_some_and(crate::quest_destination::bichon_safe_arrival_pending)
         && (quest_state.is_none() || primary == Some(2_110_005));
     if ui.bichon_safe_destination != destination {
         ui.bichon_safe_destination = destination;
     }
     let regions = if guidance.as_deref().and_then(|g| g.profile_name()) == Some("newcomer-v2") {
-        model.active_map().zip(quests.as_deref()).map(|(map, quests)| {
-            crate::quest_hunt_regions::active_hunt_regions_for_primary(
-                quests, map.map_index, model.player_location.unwrap_or_default(), primary,
-            )
-        }).unwrap_or_default()
-    } else { Vec::new() };
-    if ui.hunt_regions != regions { ui.hunt_regions = regions; }
+        model
+            .active_map()
+            .zip(quests.as_deref())
+            .map(|(map, quests)| {
+                crate::quest_hunt_regions::active_hunt_regions_for_primary(
+                    quests,
+                    map.map_index,
+                    model.player_location.unwrap_or_default(),
+                    primary,
+                )
+            })
+            .unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    if ui.hunt_regions != regions {
+        ui.hunt_regions = regions;
+    }
     if ui.last_reset_epoch != Some(model.reset_epoch) {
         ui.search_focused = false;
         ui.last_reset_epoch = Some(model.reset_epoch);
@@ -4822,7 +4905,10 @@ fn consume_hud_buttons(
                     unique_id,
                 }) = state.inventory_operation.clone()
                 {
-                    if parcel.as_ref().is_some_and(|parcel| parcel.blocks_item(unique_id)) {
+                    if parcel
+                        .as_ref()
+                        .is_some_and(|parcel| parcel.blocks_item(unique_id))
+                    {
                         state.inventory_operation = None;
                         continue;
                     }
@@ -4986,14 +5072,25 @@ fn process_mail_letter_editor_pointer(
             editor.set_selecting(false);
             return;
         };
-        (parcel.window.position, mail_parcel::MAIL_PARCEL_BODY_RECT, parcel.window.dragging())
+        (
+            parcel.window.position,
+            mail_parcel::MAIL_PARCEL_BODY_RECT,
+            parcel.window.dragging(),
+        )
     } else {
-        (frame.position, mail_editor::MAIL_LETTER_BODY_RECT, frame.dragging())
+        (
+            frame.position,
+            mail_editor::MAIL_LETTER_BODY_RECT,
+            frame.dragging(),
+        )
     };
     let visible = shell.screen == NativeShellScreen::InGame
         && state.mail_open()
         && state.core.mail_compose.is_some()
-        && matches!(compose.kind, MailComposeKind::Letter | MailComposeKind::Parcel);
+        && matches!(
+            compose.kind,
+            MailComposeKind::Letter | MailComposeKind::Parcel
+        );
     let message = state
         .core
         .mail_compose
@@ -5034,10 +5131,10 @@ fn process_mail_letter_editor_pointer(
         editor.set_selecting(false);
         return;
     };
-    let local = cursor - window_position - Vec2::new(
-        body_rect.left,
-        body_rect.top,
-    ) - mail_editor::MAIL_LETTER_CONTENT_INSET;
+    let local = cursor
+        - window_position
+        - Vec2::new(body_rect.left, body_rect.top)
+        - mail_editor::MAIL_LETTER_CONTENT_INSET;
     let inside = local.x >= 0.0
         && local.x < mail_editor::MAIL_LETTER_CONTENT_SIZE.x
         && local.y >= 0.0
@@ -5073,26 +5170,33 @@ fn process_mail_letter_editor_wheel(
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
     mut wheel: MessageReader<MouseWheel>,
 ) {
-    let Some((window_position, body_rect, frame_dragging)) = (if compose.kind == MailComposeKind::Parcel {
-        parcel.as_deref().map(|parcel| (
-            parcel.window.position,
-            mail_parcel::MAIL_PARCEL_BODY_RECT,
-            parcel.window.dragging(),
-        ))
-    } else {
-        Some((
-            frame.position,
-            mail_editor::MAIL_LETTER_BODY_RECT,
-            frame.dragging(),
-        ))
-    }) else {
+    let Some((window_position, body_rect, frame_dragging)) =
+        (if compose.kind == MailComposeKind::Parcel {
+            parcel.as_deref().map(|parcel| {
+                (
+                    parcel.window.position,
+                    mail_parcel::MAIL_PARCEL_BODY_RECT,
+                    parcel.window.dragging(),
+                )
+            })
+        } else {
+            Some((
+                frame.position,
+                mail_editor::MAIL_LETTER_BODY_RECT,
+                frame.dragging(),
+            ))
+        })
+    else {
         wheel.clear();
         return;
     };
     let interactive = shell.screen == NativeShellScreen::InGame
         && state.mail_open()
         && state.core.mail_compose.is_some()
-        && matches!(compose.kind, MailComposeKind::Letter | MailComposeKind::Parcel)
+        && matches!(
+            compose.kind,
+            MailComposeKind::Letter | MailComposeKind::Parcel
+        )
         && editor.focused()
         && !state.amount_modal_open()
         && state.mail_feedback_prompt.is_none()
@@ -5121,7 +5225,9 @@ fn process_mail_letter_editor_wheel(
         wheel.clear();
         return;
     };
-    let local = cursor - window_position - Vec2::new(body_rect.left, body_rect.top)
+    let local = cursor
+        - window_position
+        - Vec2::new(body_rect.left, body_rect.top)
         - mail_editor::MAIL_LETTER_CONTENT_INSET;
     let inside = local.x >= 0.0
         && local.x < mail_editor::MAIL_LETTER_CONTENT_SIZE.x
@@ -5164,13 +5270,13 @@ fn sync_mail_letter_editor(
         editor.clear();
     }
     *last_reset_revision = Some(revision);
-    let has_suspended_compose = compose
-        .recipient_prompt
-        .as_ref()
-        .is_some_and(|prompt| matches!(prompt.suspended_kind, MailComposeKind::Letter | MailComposeKind::Parcel));
-    if !state.mail_open()
-        || (state.core.mail_compose.is_none() && !has_suspended_compose)
-    {
+    let has_suspended_compose = compose.recipient_prompt.as_ref().is_some_and(|prompt| {
+        matches!(
+            prompt.suspended_kind,
+            MailComposeKind::Letter | MailComposeKind::Parcel
+        )
+    });
+    if !state.mail_open() || (state.core.mail_compose.is_none() && !has_suspended_compose) {
         editor.clear();
         return;
     }
@@ -5415,7 +5521,7 @@ fn complete_live_storage_template_index(item: &ItemModel) -> Option<i32> {
     (item.unique_id == Some(user_item.unique_id)
         && user_item.item_index == source.info.item_index
         && u16::try_from(item.quantity).ok() == Some(user_item.count))
-        .then_some(source.info.item_index)
+    .then_some(source.info.item_index)
 }
 
 fn compatible_storage_stack(source: &ItemModel, target: &ItemModel) -> bool {
@@ -5426,9 +5532,7 @@ fn compatible_storage_stack(source: &ItemModel, target: &ItemModel) -> bool {
                 && target
                     .tooltip_source
                     .as_ref()
-                    .is_some_and(|source| {
-                        target.quantity < u32::from(source.info.stack_size)
-                    })
+                    .is_some_and(|source| target.quantity < u32::from(source.info.stack_size))
         })
 }
 
@@ -5493,7 +5597,10 @@ fn enqueue_bag_to_storage_drag(
         return false;
     };
     let target = storage.item_in_storage(target_slot);
-    if let Some(target_id) = target.filter(|item| compatible_storage_stack(source, item)).and_then(item_unique_id) {
+    if let Some(target_id) = target
+        .filter(|item| compatible_storage_stack(source, item))
+        .and_then(item_unique_id)
+    {
         return push_storage_drag_merge(
             intents,
             pending,
@@ -5544,12 +5651,7 @@ fn enqueue_storage_to_storage_drag(
         .and_then(item_unique_id)
     {
         return push_storage_drag_merge(
-            intents,
-            pending,
-            "storage",
-            "storage",
-            source_id,
-            target_id,
+            intents, pending, "storage", "storage", source_id, target_id,
         );
     }
     let intent = NativePlayerUiIntent::MoveItem {
@@ -5589,7 +5691,10 @@ fn enqueue_storage_to_bag_drag(
         .items_in(0)
         .into_iter()
         .find(|item| item.slot == target_slot);
-    if let Some(target_id) = target.filter(|item| compatible_storage_stack(source, item)).and_then(item_unique_id) {
+    if let Some(target_id) = target
+        .filter(|item| compatible_storage_stack(source, item))
+        .and_then(item_unique_id)
+    {
         return push_storage_drag_merge(
             intents,
             pending,
@@ -5661,11 +5766,15 @@ fn enqueue_equipment_to_storage_drag(
     let Some(destination) = destination.and_then(|slot| i32::try_from(slot).ok()) else {
         return false;
     };
-    push_equipment_storage_pending_intent(intents, pending, NativePlayerUiIntent::RemoveItem {
-        unique_id,
-        grid: "storage".to_owned(),
-        to: destination,
-    })
+    push_equipment_storage_pending_intent(
+        intents,
+        pending,
+        NativePlayerUiIntent::RemoveItem {
+            unique_id,
+            grid: "storage".to_owned(),
+            to: destination,
+        },
+    )
 }
 
 /// Source ToEquipment sends the concrete destination slot and leaves wear,
@@ -5706,11 +5815,15 @@ fn enqueue_storage_to_equipment_drag(
             );
         }
     }
-    push_equipment_storage_pending_intent(intents, pending, NativePlayerUiIntent::EquipItem {
-        unique_id,
-        grid: "storage".to_owned(),
-        to: i32::try_from(target_slot).unwrap_or(i32::MAX),
-    })
+    push_equipment_storage_pending_intent(
+        intents,
+        pending,
+        NativePlayerUiIntent::EquipItem {
+            unique_id,
+            grid: "storage".to_owned(),
+            to: i32::try_from(target_slot).unwrap_or(i32::MAX),
+        },
+    )
 }
 
 fn finish_inventory_item_drag(
@@ -5732,9 +5845,11 @@ fn finish_inventory_item_drag(
         return;
     };
     state.inventory_item_pointer_consumed = true;
-    let Some(source) = inventory.items_in(0).into_iter().find(|item| {
-        item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id)
-    }) else {
+    let Some(source) = inventory
+        .items_in(0)
+        .into_iter()
+        .find(|item| item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id))
+    else {
         return;
     };
     if parcel
@@ -5811,18 +5926,24 @@ fn finish_inventory_item_drag(
         if to == drag.source_slot {
             return;
         }
-        let target = inventory.items_in(0).into_iter().find(|item| item.slot == to);
-        if target
-            .and_then(item_unique_id)
-            .is_some_and(|unique_id| parcel.as_deref().is_some_and(|parcel| parcel.blocks_item(unique_id)))
-        {
+        let target = inventory
+            .items_in(0)
+            .into_iter()
+            .find(|item| item.slot == to);
+        if target.and_then(item_unique_id).is_some_and(|unique_id| {
+            parcel
+                .as_deref()
+                .is_some_and(|parcel| parcel.blocks_item(unique_id))
+        }) {
             return;
         }
         // MirItemCell.MoveItem merges matching, non-full stacks; otherwise
         // MoveItem swaps occupied cells or moves into an empty cell.
         let merge_target = target
             .filter(|target| {
-                source.tooltip_source.as_ref()
+                source
+                    .tooltip_source
+                    .as_ref()
                     .zip(target.tooltip_source.as_ref())
                     .is_some_and(|(from, to)| {
                         from.info.item_index == to.info.item_index
@@ -5852,10 +5973,7 @@ fn finish_inventory_item_drag(
     };
     let queued = intents.push_pending_intent(pending, intent);
     belt_diagnostic(diagnostics, || {
-        format!(
-            "drag source={} move_queue={queued}",
-            drag.source_slot
-        )
+        format!("drag source={} move_queue={queued}", drag.source_slot)
     });
     if queued {
         state.inspect = None;
@@ -5876,9 +5994,10 @@ fn finish_storage_item_drag(
         return;
     };
     state.inventory_item_pointer_consumed = true;
-    let Some(source) = storage.item_in_storage(drag.source_slot).filter(|item| {
-        item_unique_id(item) == Some(drag.unique_id)
-    }) else {
+    let Some(source) = storage
+        .item_in_storage(drag.source_slot)
+        .filter(|item| item_unique_id(item) == Some(drag.unique_id))
+    else {
         return;
     };
     let Some(cursor) = cursor else {
@@ -5941,9 +6060,11 @@ fn finish_equipment_item_drag(
         return;
     };
     state.inventory_item_pointer_consumed = true;
-    let Some(source) = inventory.items_in(2).into_iter().find(|item| {
-        item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id)
-    }) else {
+    let Some(source) = inventory
+        .items_in(2)
+        .into_iter()
+        .find(|item| item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id))
+    else {
         return;
     };
     let Some(cursor) = cursor else {
@@ -5984,6 +6105,17 @@ fn process_inventory_item_drag(
         .as_ref()
         .map(|events| ordered_reader.read(events).cloned().collect())
         .unwrap_or_default();
+    // The refinement host owns bag/material selection while either panel or
+    // its one in-flight item operation is active. Do not reinterpret its click
+    // as inspect/move or queue another ordinary bag mutation before the ACK.
+    if state.refine.open || state.refine.pending() {
+        state.inventory_item_drag = None;
+        state.equipment_item_drag = None;
+        if let Some(storage_ui) = storage_ui.as_deref_mut() {
+            storage_ui.storage_item_drag = None;
+        }
+        return;
+    }
     // Crystal opens InventoryDialog alongside NPCDropDialog. The native core
     // currently represents the NPC panel as the active panel, so retain bag
     // drag input while the service frame is open.
@@ -6088,15 +6220,18 @@ fn process_inventory_item_drag(
                             });
                             state.equipment_item_drag = None;
                             if let Some(storage_ui) = storage_ui.as_deref_mut() {
-                                storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
-                                    storage.as_deref().and_then(|storage| {
-                                        cursor.and_then(|start| {
-                                            storage_item_drag_at_cursor(&state, storage, storage_ui, start)
+                                storage_ui.storage_item_drag =
+                                    if state.inventory_item_drag.is_none() {
+                                        storage.as_deref().and_then(|storage| {
+                                            cursor.and_then(|start| {
+                                                storage_item_drag_at_cursor(
+                                                    &state, storage, storage_ui, start,
+                                                )
+                                            })
                                         })
-                                    })
-                                } else {
-                                    None
-                                };
+                                    } else {
+                                        None
+                                    };
                             }
                             if state.inventory_item_drag.is_none()
                                 && storage_ui
@@ -6111,7 +6246,9 @@ fn process_inventory_item_drag(
                                 format!(
                                     "drag press bag={:?} storage={:?}",
                                     state.inventory_item_drag.map(|drag| drag.source_slot),
-                                    storage_ui.as_deref().and_then(|ui| ui.storage_item_drag.map(|drag| drag.source_slot)),
+                                    storage_ui.as_deref().and_then(|ui| ui
+                                        .storage_item_drag
+                                        .map(|drag| drag.source_slot)),
                                 )
                             });
                         }
@@ -6165,15 +6302,16 @@ fn process_inventory_item_drag(
 
     if mouse.just_pressed(MouseButton::Left) {
         let start = cursor_path.first().copied().or(cursor);
-        state.inventory_item_drag =
-            start.and_then(|start| {
-                inventory_item_drag_at_cursor(&state, &inventory, parcel.as_deref(), start)
-            });
+        state.inventory_item_drag = start.and_then(|start| {
+            inventory_item_drag_at_cursor(&state, &inventory, parcel.as_deref(), start)
+        });
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
                 storage.as_deref().and_then(|storage| {
-                    start.and_then(|start| storage_item_drag_at_cursor(&state, storage, storage_ui, start))
+                    start.and_then(|start| {
+                        storage_item_drag_at_cursor(&state, storage, storage_ui, start)
+                    })
                 })
             } else {
                 None
@@ -6184,8 +6322,8 @@ fn process_inventory_item_drag(
                 .as_deref()
                 .is_none_or(|ui| ui.storage_item_drag.is_none())
         {
-            state.equipment_item_drag = start
-                .and_then(|start| equipment_item_drag_at_cursor(&state, &inventory, start));
+            state.equipment_item_drag =
+                start.and_then(|start| equipment_item_drag_at_cursor(&state, &inventory, start));
         }
     }
 
@@ -6473,7 +6611,6 @@ fn clear_legacy_storage_password_drafts(storage: &mut StorageModel) {
     storage.confirm_password_draft.clear();
 }
 
-
 /// Keeps the Rent confirmation session-scoped. The authoritative ResizeStorage
 /// receipt, rather than this presentation prompt, changes rental state.
 fn sync_storage_rental_confirmation(
@@ -6541,10 +6678,7 @@ fn open_storage_password_prompt(
     true
 }
 
-fn cancel_storage_password_prompt(
-    state: &mut NativePlayerUiState,
-    storage: &mut StorageModel,
-) {
+fn cancel_storage_password_prompt(state: &mut NativePlayerUiState, storage: &mut StorageModel) {
     let close_storage = state
         .storage_password_prompt
         .as_ref()
@@ -6576,7 +6710,9 @@ fn submit_storage_password_prompt(
         return false;
     };
     let intent = match command {
-        StoragePasswordCommand::Unlock(password) => NativePlayerUiIntent::UnlockStorage { password },
+        StoragePasswordCommand::Unlock(password) => {
+            NativePlayerUiIntent::UnlockStorage { password }
+        }
         StoragePasswordCommand::Set { current, new } => NativePlayerUiIntent::SetStoragePassword {
             current,
             new_password: new,
@@ -6606,17 +6742,24 @@ fn sync_npc_dialog_inventory_location(
 ) {
     let explicit_exit = std::mem::take(&mut state.npc_service_exit_requested);
     let map_epoch = big_map.as_deref().map(|map| map.reset_epoch);
-    let map_changed = previous_map_epoch.is_some() && map_epoch.is_some()
-        && *previous_map_epoch != map_epoch;
+    let map_changed =
+        previous_map_epoch.is_some() && map_epoch.is_some() && *previous_map_epoch != map_epoch;
     *previous_map_epoch = map_epoch;
-    let is_open = !explicit_exit && !map_changed
+    let is_open = !explicit_exit
+        && !map_changed
         && npc_dialog.as_deref().is_some_and(|dialog| dialog.is_open);
-    let npc_id = npc_dialog.as_deref().filter(|dialog| dialog.is_open)
+    let npc_id = npc_dialog
+        .as_deref()
+        .filter(|dialog| dialog.is_open)
         .and_then(|dialog| dialog.npc_object_id);
     let npc_changed = matches!((*previous_npc, npc_id), (Some(old), Some(new)) if old != new);
     let closed_service = state.npc_shop_open()
-        && shop.as_deref().is_some_and(|shop| shop.service_mode == NpcShopServiceMode::Closed);
-    let fresh_service = signals.as_deref().is_some_and(|signals| signals.npc_shop_open_requested);
+        && shop
+            .as_deref()
+            .is_some_and(|shop| shop.service_mode == NpcShopServiceMode::Closed);
+    let fresh_service = signals
+        .as_deref()
+        .is_some_and(|signals| signals.npc_shop_open_requested);
     let discard_old_service = npc_changed && state.npc_shop_open() && !fresh_service;
     if explicit_exit || map_changed || closed_service || discard_old_service {
         state.npc_service_exit_latched = !discard_old_service;
@@ -6633,7 +6776,12 @@ fn sync_npc_dialog_inventory_location(
     if is_open && (!*was_open || npc_changed) {
         state.npc_service_exit_latched = false;
     }
-    if is_open == *was_open && !explicit_exit && !map_changed && !closed_service && !discard_old_service {
+    if is_open == *was_open
+        && !explicit_exit
+        && !map_changed
+        && !closed_service
+        && !discard_old_service
+    {
         return;
     }
     let was_npc_shop_open = state.npc_shop_open();
@@ -6648,8 +6796,11 @@ fn sync_npc_dialog_inventory_location(
         return;
     }
 
-    if !explicit_exit && was_npc_shop_open
-        && shop.as_deref().is_some_and(|shop| shop.service_mode != NpcShopServiceMode::Closed)
+    if !explicit_exit
+        && was_npc_shop_open
+        && shop
+            .as_deref()
+            .is_some_and(|shop| shop.service_mode != NpcShopServiceMode::Closed)
     {
         return;
     }
@@ -6721,28 +6872,37 @@ fn sync_npc_shop_inventory_location(
         INVENTORY_PANEL_SIZE.height as f32,
     );
     let dialog = CrystalRect::new(
-        0.0, 0.0,
-        NPC_DIALOG_PANEL_SIZE.width as f32, NPC_DIALOG_PANEL_SIZE.height as f32,
+        0.0,
+        0.0,
+        NPC_DIALOG_PANEL_SIZE.width as f32,
+        NPC_DIALOG_PANEL_SIZE.height as f32,
     );
     let service = if buy {
         CrystalRect::new(
-            NPC_GOODS_PANEL_ORIGIN.x as f32, NPC_GOODS_PANEL_ORIGIN.y as f32,
-            NPC_GOODS_PANEL_SIZE.width as f32, NPC_GOODS_PANEL_SIZE.height as f32,
+            NPC_GOODS_PANEL_ORIGIN.x as f32,
+            NPC_GOODS_PANEL_ORIGIN.y as f32,
+            NPC_GOODS_PANEL_SIZE.width as f32,
+            NPC_GOODS_PANEL_SIZE.height as f32,
         )
     } else {
         CrystalRect::new(
-            NPC_DROP_PANEL_ORIGIN.x as f32, NPC_DROP_PANEL_ORIGIN.y as f32,
-            NPC_DROP_PANEL_SIZE.width as f32, NPC_DROP_PANEL_SIZE.height as f32,
+            NPC_DROP_PANEL_ORIGIN.x as f32,
+            NPC_DROP_PANEL_ORIGIN.y as f32,
+            NPC_DROP_PANEL_SIZE.width as f32,
+            NPC_DROP_PANEL_SIZE.height as f32,
         )
     };
     let overlaps = |other: CrystalRect| {
-        bag.left < other.left + other.width && bag.left + bag.width > other.left
-            && bag.top < other.top + other.height && bag.top + bag.height > other.top
+        bag.left < other.left + other.width
+            && bag.left + bag.width > other.left
+            && bag.top < other.top + other.height
+            && bag.top + bag.height > other.top
     };
     if bag.is_valid_hit_target()
         && (0.0..=INVENTORY_MAX_LEFT).contains(&bag.left)
         && (0.0..=INVENTORY_MAX_TOP).contains(&bag.top)
-        && !overlaps(dialog) && !overlaps(service)
+        && !overlaps(dialog)
+        && !overlaps(service)
     {
         return;
     }
@@ -7171,13 +7331,8 @@ pub(crate) fn process_overlay_keyboard(
             return;
         }
         if keys.just_pressed(KeyCode::Enter) {
-            if confirm_inventory_delete(
-                &mut state,
-                &inventory,
-                parcel,
-                &mut intents,
-                &mut pending,
-            ) {
+            if confirm_inventory_delete(&mut state, &inventory, parcel, &mut intents, &mut pending)
+            {
                 ui_audio.push(crate::audio::NativeUiSound::ButtonB);
             }
             return;
@@ -7371,12 +7526,17 @@ pub(crate) fn process_overlay_keyboard(
                         continue;
                     }
                     let mut value = friend_dialog::text_editor::FriendTextEditor::new(
-                        draft.message.clone(), mail_editor::MAIL_LETTER_BODY_LIMIT, true,
+                        draft.message.clone(),
+                        mail_editor::MAIL_LETTER_BODY_LIMIT,
+                        true,
                     );
                     if matches!(event.key_code, KeyCode::Enter | KeyCode::NumpadEnter) {
                         value.newline();
                     } else if let Some(text) = event.text.as_deref() {
-                        value.insert_with_policy(text, friend_dialog::text_editor::InsertPolicy::FitPrefix);
+                        value.insert_with_policy(
+                            text,
+                            friend_dialog::text_editor::InsertPolicy::FitPrefix,
+                        );
                     }
                     draft.message = value.text().to_owned();
                 }
@@ -7454,8 +7614,11 @@ pub(crate) fn process_overlay_keyboard(
                 MailComposeFocus::Gold => {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
                         for digit in text.chars().filter(|ch| ch.is_ascii_digit()) {
-                            if let Some(value) = draft.gold.checked_mul(10)
-                                .and_then(|value| value.checked_add(digit as u32 - '0' as u32)) {
+                            if let Some(value) = draft
+                                .gold
+                                .checked_mul(10)
+                                .and_then(|value| value.checked_add(digit as u32 - '0' as u32))
+                            {
                                 draft.gold = value;
                             }
                         }
@@ -7726,7 +7889,8 @@ pub(crate) fn process_overlay_keyboard(
         && ui
             .as_deref()
             .is_some_and(|model| model.player.hp <= 0 && model.player.max_hp > 0);
-    if !v_revives_dead_player && keyboard_dialog::host::triggered(&state.keyboard, &keys, "Minimap") {
+    if !v_revives_dead_player && keyboard_dialog::host::triggered(&state.keyboard, &keys, "Minimap")
+    {
         state.toggle_minimap();
     }
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "GameShop") {
@@ -8013,7 +8177,10 @@ fn process_overlay_buttons(
             continue;
         }
         if mail_recipient_modal_was_open || compose_ui.recipient_prompt.is_some() {
-            if !matches!(button, OverlayButton::MailRecipientSubmit | OverlayButton::MailRecipientCancel) {
+            if !matches!(
+                button,
+                OverlayButton::MailRecipientSubmit | OverlayButton::MailRecipientCancel
+            ) {
                 continue;
             }
         } else if mail_feedback_modal_was_open || state.mail_feedback_prompt.is_some() {
@@ -8923,10 +9090,14 @@ fn process_overlay_buttons(
                 let pending = social.pending.iter().find_map(|pending| match pending {
                     crate::social::SocialPendingOperation::GuildRankRename(request)
                         if request.rank_index == rank_index
-                            && social.guild.rank_rename_scope_matches(request) => Some(request.clone()),
+                            && social.guild.rank_rename_scope_matches(request) =>
+                    {
+                        Some(request.clone())
+                    }
                     _ => None,
                 });
-                state.guild_panel.rank_name_ready_ms = pending.as_ref().map_or(0, |request| request.deadline_ms);
+                state.guild_panel.rank_name_ready_ms =
+                    pending.as_ref().map_or(0, |request| request.deadline_ms);
                 state.guild_panel.rank_name_unconfirmed = false;
                 if let Some(request) = &pending {
                     state.guild_rank_name_draft = request.rank_name.clone();
@@ -9143,7 +9314,8 @@ fn process_overlay_buttons(
                 if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
                     if let Some(item) = inspected_inventory_item(&state, &inventory) {
                         if let Some(unique_id) = item_unique_id(item) {
-                            let max = item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
+                            let max =
+                                item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
                             let count = state.split_count.clamp(1, max.max(1));
                             if max > 0 {
                                 intents.push_pending_intent(
@@ -9198,9 +9370,11 @@ fn process_overlay_buttons(
                 state.inventory_operation = None;
             }
             OverlayButton::InspectBag(_) if state.trade_dialog.open => {}
-            OverlayButton::InspectBag(_) if state.inventory_item_drag.is_some()
-                || state.inventory_item_pointer_consumed => {}
-            OverlayButton::InspectBag(slot) if bag_slot_is_mail_locked(parcel_ui, &inventory, slot) => {}
+            OverlayButton::InspectBag(_)
+                if state.inventory_item_drag.is_some() || state.inventory_item_pointer_consumed => {
+            }
+            OverlayButton::InspectBag(slot)
+                if bag_slot_is_mail_locked(parcel_ui, &inventory, slot) => {}
             OverlayButton::InspectBag(slot) if state.inventory_delete_mode => {
                 let _ = state.open_inventory_delete_for_slot(&inventory, slot);
             }
@@ -9444,8 +9618,9 @@ fn process_overlay_buttons(
             }
             OverlayButton::MailReaderClaim => {
                 let mail_id = mail_reader_message(&state, &mail).and_then(|message| {
-                    (mail_reader_kind(message) == MailReaderKind::Parcel && mail_claim_enabled(message))
-                        .then_some(message.id)
+                    (mail_reader_kind(message) == MailReaderKind::Parcel
+                        && mail_claim_enabled(message))
+                    .then_some(message.id)
                 });
                 if let Some(mail_id) = mail_id {
                     if intents.push_pending_intent(
@@ -9474,7 +9649,8 @@ fn process_overlay_buttons(
                     continue;
                 }
                 if state.core.mail_compose.is_some() && compose_ui.kind != MailComposeKind::Parcel {
-                    compose_ui.last_notice = Some("Finish or cancel the current mail first".to_owned());
+                    compose_ui.last_notice =
+                        Some("Finish or cancel the current mail first".to_owned());
                     continue;
                 }
                 begin_mail_recipient_prompt(&mut state, &mut compose_ui);
@@ -9486,7 +9662,8 @@ fn process_overlay_buttons(
                     continue;
                 }
                 if state.core.mail_compose.is_some() {
-                    compose_ui.last_notice = Some("Finish or cancel the current mail first".to_owned());
+                    compose_ui.last_notice =
+                        Some("Finish or cancel the current mail first".to_owned());
                     continue;
                 }
                 begin_mail_recipient_prompt_for(
@@ -9557,10 +9734,11 @@ fn process_overlay_buttons(
                 if compose_ui.kind == MailComposeKind::Parcel {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
                         if parcel_ui.attach(draft, &inventory, unique_id) {
-                            let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem {
-                                unique_id,
-                                locked: true,
-                            });
+                            let _ =
+                                intents.push_transient_unique(NativePlayerUiIntent::MailLockItem {
+                                    unique_id,
+                                    locked: true,
+                                });
                         }
                     }
                 } else if mail_attachment_is_current(&inventory, unique_id) {
@@ -9578,9 +9756,18 @@ fn process_overlay_buttons(
                 }
                 if compose_ui.kind == MailComposeKind::Parcel {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
-                        if let Some(slot) = draft.attachment_unique_ids.iter().position(|id| *id == unique_id) {
+                        if let Some(slot) = draft
+                            .attachment_unique_ids
+                            .iter()
+                            .position(|id| *id == unique_id)
+                        {
                             if let Some(unique_id) = parcel_ui.detach_at(draft, slot) {
-                                let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem { unique_id, locked: false });
+                                let _ = intents.push_transient_unique(
+                                    NativePlayerUiIntent::MailLockItem {
+                                        unique_id,
+                                        locked: false,
+                                    },
+                                );
                             }
                         }
                     }
@@ -9609,7 +9796,12 @@ fn process_overlay_buttons(
                             while draft.attachment_unique_ids.len() > parcel_ui.slot_limit() {
                                 let slot = draft.attachment_unique_ids.len() - 1;
                                 if let Some(unique_id) = parcel_ui.detach_at(draft, slot) {
-                                    let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem { unique_id, locked: false });
+                                    let _ = intents.push_transient_unique(
+                                        NativePlayerUiIntent::MailLockItem {
+                                            unique_id,
+                                            locked: false,
+                                        },
+                                    );
                                 }
                             }
                         }
@@ -9624,7 +9816,11 @@ fn process_overlay_buttons(
                 if compose_ui.kind == MailComposeKind::Parcel {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
                         if let Some(unique_id) = parcel_ui.detach_at(draft, usize::from(slot)) {
-                            let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem { unique_id, locked: false });
+                            let _ =
+                                intents.push_transient_unique(NativePlayerUiIntent::MailLockItem {
+                                    unique_id,
+                                    locked: false,
+                                });
                         }
                     }
                 }
@@ -9660,11 +9856,7 @@ fn process_overlay_buttons(
                     && (!parcel_ui.quote_is_current(&draft, &inventory)
                         || (parcel_ui.stamped() && !parcel_ui.stamp_available(&inventory)))
                 {
-                    show_mail_feedback(
-                        &mut state,
-                        &mut compose_ui,
-                        "Postage quote is not ready",
-                    );
+                    show_mail_feedback(&mut state, &mut compose_ui, "Postage quote is not ready");
                     continue;
                 }
                 let Some(ids) = valid_mail_attachment_ids(&inventory, &draft.attachment_unique_ids)
@@ -9702,7 +9894,8 @@ fn process_overlay_buttons(
                             message,
                             gold,
                             attachment_unique_ids: ids.clone(),
-                            stamped: compose_ui.kind == MailComposeKind::Parcel && parcel_ui.stamped(),
+                            stamped: compose_ui.kind == MailComposeKind::Parcel
+                                && parcel_ui.stamped(),
                         };
                         if !intents.push_pending_intent(&mut pending, intent) {
                             compose_ui.last_notice = Some("Mail is already being sent".to_owned());
@@ -9794,7 +9987,9 @@ fn process_overlay_buttons(
                     {
                         if let Some(npc) = big_map.selected_navigation_npc() {
                             let intent = crate::quest_ui::QuestRouteNavigationIntent {
-                                target: crate::quest_ui::QuestRouteTarget::MapNpc { object_id: npc.object_id },
+                                target: crate::quest_ui::QuestRouteTarget::MapNpc {
+                                    object_id: npc.object_id,
+                                },
                                 quest_index: 0,
                                 reset_epoch: big_map.reset_epoch,
                                 map_index: npc.map_index,
@@ -9982,7 +10177,13 @@ fn process_overlay_buttons(
                     _ => false,
                 };
                 if allowed {
-                    npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                    npc_item_service::submit_selection(
+                        &mut shop,
+                        &inventory,
+                        &mut state,
+                        &mut intents,
+                        &mut pending,
+                    );
                 }
             }
             OverlayButton::ShopQuantityInc => {
@@ -10019,9 +10220,17 @@ fn process_overlay_buttons(
                 if !state.npc_shop_open() {
                     continue;
                 }
-                if shop.allows_repair() || shop.allows_special_repair()
-                    || (shop.allows_sell() && (!shop.allows_buy() || !state.npc_shop_buy_tab)) {
-                    npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                if shop.allows_repair()
+                    || shop.allows_special_repair()
+                    || (shop.allows_sell() && (!shop.allows_buy() || !state.npc_shop_buy_tab))
+                {
+                    npc_item_service::submit_selection(
+                        &mut shop,
+                        &inventory,
+                        &mut state,
+                        &mut intents,
+                        &mut pending,
+                    );
                 } else if shop.allows_buy()
                     && shop_buy_enabled_with_pearls(
                         &shop,
@@ -10063,7 +10272,13 @@ fn process_overlay_buttons(
                     state.shop_service_drag_count = None;
                     state.shop_service_drag_unique_id = None;
                     if state.npc_service_hold == Some(shop.service_mode) {
-                        npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                        npc_item_service::submit_selection(
+                            &mut shop,
+                            &inventory,
+                            &mut state,
+                            &mut intents,
+                            &mut pending,
+                        );
                     }
                 }
             }
@@ -10075,7 +10290,13 @@ fn process_overlay_buttons(
                     state.shop_repair_container = 0;
                     state.shop_repair_slot = Some(slot);
                     if state.npc_service_hold == Some(shop.service_mode) {
-                        npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                        npc_item_service::submit_selection(
+                            &mut shop,
+                            &inventory,
+                            &mut state,
+                            &mut intents,
+                            &mut pending,
+                        );
                     }
                 }
             }
@@ -10248,9 +10469,11 @@ fn clear_mail_locked_inventory_interaction(
     }) {
         state.inventory_operation = None;
     }
-    if state.inventory_delete_prompt.as_ref().is_some_and(|prompt| {
-        parcel.blocks_item(prompt.target().unique_id)
-    }) {
+    if state
+        .inventory_delete_prompt
+        .as_ref()
+        .is_some_and(|prompt| parcel.blocks_item(prompt.target().unique_id))
+    {
         state.cancel_inventory_delete();
     }
 }
@@ -10478,12 +10701,15 @@ fn mail_delete_prompt_for_message(message: &crate::mail::MailMessage) -> Option<
 }
 
 fn mail_delete_prompt_is_current(prompt: &MailDeletePrompt, mail: &MailModel) -> bool {
-    mail.mails.iter().find(|message| message.id == prompt.mail_id).is_some_and(|message| {
-        mail_delete_enabled(message)
-            && message.has_attachment()
-            && message.gold == prompt.gold
-            && message.items == prompt.items
-    })
+    mail.mails
+        .iter()
+        .find(|message| message.id == prompt.mail_id)
+        .is_some_and(|message| {
+            mail_delete_enabled(message)
+                && message.has_attachment()
+                && message.gold == prompt.gold
+                && message.items == prompt.items
+        })
 }
 
 fn confirm_mail_delete(
@@ -10668,7 +10894,10 @@ fn render_inventory_delete_modal(
                     }
                     overlay_text_at(
                         dialog,
-                        &crate::native_i18n::tr(&format!("Delete how many '{name}'?", name = target.name)),
+                        &crate::native_i18n::tr(&format!(
+                            "Delete how many '{name}'?",
+                            name = target.name
+                        )),
                         CrystalRect::new(19.0, 8.0, 158.0, 14.0),
                         10.0,
                         TEXT,
@@ -10773,10 +11002,7 @@ fn render_inventory_delete_modal(
 /// MailDialog's attachment warning uses the standard Crystal Yes/No
 /// MirMessageBox frame and wording, rather than the inventory's permanent
 /// item-delete message.
-fn render_mail_delete_modal(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-) {
+fn render_mail_delete_modal(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>) {
     parent
         .spawn((
             OverlayMailDeleteDialog,
@@ -10823,7 +11049,9 @@ fn render_mail_delete_modal(
             }
             overlay_text_at(
                 dialog,
-                &crate::native_i18n::tr("This parcel contains items or gold. Are you sure you want to delete it?"),
+                &crate::native_i18n::tr(
+                    "This parcel contains items or gold. Are you sure you want to delete it?",
+                ),
                 CrystalRect::new(35.0, 35.0, 390.0, 110.0),
                 10.0,
                 TEXT,
@@ -10948,7 +11176,11 @@ fn render_storage_password_modal(
                         ..default()
                     },
                     BackgroundColor(Color::BLACK),
-                    BorderColor::all(if prompt.mismatch { Color::srgb(0.85, 0.22, 0.18) } else { GOLD }),
+                    BorderColor::all(if prompt.mismatch {
+                        Color::srgb(0.85, 0.22, 0.18)
+                    } else {
+                        GOLD
+                    }),
                 ))
                 .with_children(|field| {
                     field.spawn((
@@ -11328,8 +11560,7 @@ fn render_overlays(
             state.inventory_window.top,
             // StorageDialog hides InventoryDialog while its password gate is
             // active, then restores the same positioned bag after unlock.
-            state.inventory_open()
-                && (!state.storage_open() || storage.transfers_unlocked()),
+            state.inventory_open() && (!state.storage_open() || storage.transfers_unlocked()),
             |parent| {
                 render_inventory(
                     parent,
@@ -11592,16 +11823,22 @@ fn render_overlays(
             &mut readers.p3(),
             parcel_ui
                 .as_deref()
-                .map_or(mail_parcel::MAIL_PARCEL_DEFAULT_POSITION.x, |parcel| parcel.window.position.x),
+                .map_or(mail_parcel::MAIL_PARCEL_DEFAULT_POSITION.x, |parcel| {
+                    parcel.window.position.x
+                }),
             parcel_ui
                 .as_deref()
-                .map_or(mail_parcel::MAIL_PARCEL_DEFAULT_POSITION.y, |parcel| parcel.window.position.y),
+                .map_or(mail_parcel::MAIL_PARCEL_DEFAULT_POSITION.y, |parcel| {
+                    parcel.window.position.y
+                }),
             OVERLAY_NPC_DIALOG_Z,
             state.mail_open()
                 && state.core.mail_compose.is_some()
                 && compose_ui.kind == MailComposeKind::Parcel,
             |parent| {
-                if let (Some(draft), Some(parcel)) = (state.core.mail_compose.as_ref(), parcel_ui.as_deref()) {
+                if let (Some(draft), Some(parcel)) =
+                    (state.core.mail_compose.as_ref(), parcel_ui.as_deref())
+                {
                     mail_parcel::render(
                         parent,
                         asset_server.as_deref(),
@@ -11809,7 +12046,11 @@ fn fill_mail_panel(
         cache.key = None;
         return;
     };
-    node.display = if visible { Display::Flex } else { Display::None };
+    node.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
     if !visible {
         if cache.key.take().is_some() {
             commands.entity(entity).despawn_children();
@@ -11873,7 +12114,11 @@ fn fill_game_shop_panel(
         cache.key = None;
         return;
     };
-    node.display = if visible { Display::Flex } else { Display::None };
+    node.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
     if !visible {
         if cache.key.take().is_some() {
             commands.entity(entity).despawn_children();
@@ -11914,8 +12159,8 @@ fn fill_game_shop_panel(
             ui.player.credit,
         )
     );
-    let inventory_key = serde_json::to_string(inventory)
-        .unwrap_or_else(|_| format!("{inventory:?}"));
+    let inventory_key =
+        serde_json::to_string(inventory).unwrap_or_else(|_| format!("{inventory:?}"));
     let key = GameShopRenderKey {
         root: entity,
         model: model.clone(),
@@ -12129,22 +12374,23 @@ fn render_inventory(
                             container != 0 || !trade_dialog::offered_bag_item(social, item)
                         });
                     let mail_locked = container == 0
-                        && item
-                            .and_then(item_unique_id)
-                            .is_some_and(|unique_id| parcel.is_some_and(|parcel| parcel.blocks_item(unique_id)));
-                    let enabled = !mail_locked && if container == 3 {
-                        item.is_some()
-                    } else {
-                        match &state.inventory_operation {
-                            Some(InventoryOperationDraft::Move { source_slot, .. }) => {
-                                *source_slot != slot
+                        && item.and_then(item_unique_id).is_some_and(|unique_id| {
+                            parcel.is_some_and(|parcel| parcel.blocks_item(unique_id))
+                        });
+                    let enabled = !mail_locked
+                        && if container == 3 {
+                            item.is_some()
+                        } else {
+                            match &state.inventory_operation {
+                                Some(InventoryOperationDraft::Move { source_slot, .. }) => {
+                                    *source_slot != slot
+                                }
+                                Some(InventoryOperationDraft::Merge { source_slot, .. }) => {
+                                    *source_slot != slot && item.and_then(item_unique_id).is_some()
+                                }
+                                None => item.is_some(),
                             }
-                            Some(InventoryOperationDraft::Merge { source_slot, .. }) => {
-                                *source_slot != slot && item.and_then(item_unique_id).is_some()
-                            }
-                            None => item.is_some(),
-                        }
-                    };
+                        };
                     let x =
                         (local_slot % INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.x as f32;
                     let y =
@@ -12184,7 +12430,10 @@ fn render_inventory(
     }
 
     title(parent, &crate::native_i18n::tr("Bag"));
-    body(parent, &crate::native_i18n::tr(&format!("{} Gold", inventory.gold)));
+    body(
+        parent,
+        &crate::native_i18n::tr(&format!("{} Gold", inventory.gold)),
+    );
     if let Some(draft) = &state.inventory_operation {
         let instruction = match draft {
             InventoryOperationDraft::Move { source_slot, .. } => {
@@ -12234,10 +12483,9 @@ fn render_inventory(
                         }
                     })
                     .unwrap_or_default();
-                let enabled = !item
-                    .and_then(item_unique_id)
-                    .is_some_and(|unique_id| parcel.is_some_and(|parcel| parcel.blocks_item(unique_id)))
-                    && match &state.inventory_operation {
+                let enabled = !item.and_then(item_unique_id).is_some_and(|unique_id| {
+                    parcel.is_some_and(|parcel| parcel.blocks_item(unique_id))
+                }) && match &state.inventory_operation {
                     Some(InventoryOperationDraft::Move { source_slot, .. }) => *source_slot != slot,
                     Some(InventoryOperationDraft::Merge { source_slot, .. }) => {
                         *source_slot != slot && item.and_then(item_unique_id).is_some()
@@ -12247,7 +12495,12 @@ fn render_inventory(
                 overlay_button(grid, &label, OverlayButton::InspectBag(slot), enabled);
             }
         });
-    overlay_button(parent, &crate::native_i18n::tr("Close"), OverlayButton::CloseWindows, true);
+    overlay_button(
+        parent,
+        &crate::native_i18n::tr("Close"),
+        OverlayButton::CloseWindows,
+        true,
+    );
 }
 
 fn format_crystal_gold(gold: u32) -> String {
@@ -12597,8 +12850,18 @@ fn render_equipment(
                 );
             }
             if crate::native_i18n::active() {
-                let caption = match page { CharacterPage::Character => "Equipment", CharacterPage::Stats1 => "Status", CharacterPage::Stats2 => "Statistics", CharacterPage::Spells => "Skills" };
-                localized_art_label(parent, caption, CrystalRect::new(left + 1.0, 71.0, 60.0, 18.0), 9.0);
+                let caption = match page {
+                    CharacterPage::Character => "Equipment",
+                    CharacterPage::Stats1 => "Status",
+                    CharacterPage::Stats2 => "Statistics",
+                    CharacterPage::Spells => "Skills",
+                };
+                localized_art_label(
+                    parent,
+                    caption,
+                    CrystalRect::new(left + 1.0, 71.0, 60.0, 18.0),
+                    9.0,
+                );
             }
         }
         spawn_overlay_crystal_button(
@@ -12660,12 +12923,44 @@ fn render_equipment(
             CharacterPage::Stats1 | CharacterPage::Stats2 => {
                 if crate::native_i18n::active() {
                     let labels: &[&str] = if state.character_page == CharacterPage::Stats2 {
-                        &["Experience", "Bag weight", "Equipment weight", "Hand weight", "Magic resistance", "Poison resistance", "Health recovery", "Mana recovery", "Poison recovery", "Holy Power", "Frost Power", "Poison Power"]
+                        &[
+                            "Experience",
+                            "Bag weight",
+                            "Equipment weight",
+                            "Hand weight",
+                            "Magic resistance",
+                            "Poison resistance",
+                            "Health recovery",
+                            "Mana recovery",
+                            "Poison recovery",
+                            "Holy Power",
+                            "Frost Power",
+                            "Poison Power",
+                        ]
                     } else {
-                        &["HP", "MP", "AC", "MAC", "DC", "MC", "SC", "Critical chance", "Critical damage", "Attack speed", "Accuracy", "Agility", "Luck"]
+                        &[
+                            "HP",
+                            "MP",
+                            "AC",
+                            "MAC",
+                            "DC",
+                            "MC",
+                            "SC",
+                            "Critical chance",
+                            "Critical damage",
+                            "Attack speed",
+                            "Accuracy",
+                            "Agility",
+                            "Luck",
+                        ]
                     };
                     for (row, label) in labels.iter().enumerate() {
-                        localized_art_label(parent, label, CrystalRect::new(14.0, 107.0 + row as f32 * 18.0, 115.0, 18.0), 9.0);
+                        localized_art_label(
+                            parent,
+                            label,
+                            CrystalRect::new(14.0, 107.0 + row as f32 * 18.0, 115.0, 18.0),
+                            9.0,
+                        );
                     }
                 }
                 let weights = ui
@@ -12746,7 +13041,12 @@ fn render_equipment(
             item.is_some(),
         );
     }
-    overlay_button(parent, &crate::native_i18n::tr("Close"), OverlayButton::CloseWindows, true);
+    overlay_button(
+        parent,
+        &crate::native_i18n::tr("Close"),
+        OverlayButton::CloseWindows,
+        true,
+    );
 }
 
 fn spawn_overlay_frame(
@@ -12776,7 +13076,14 @@ fn spawn_overlay_frame(
             "original-ui/Title/670.png" | "original-ui/Title/671.png" => Some("Mail"),
             _ => None,
         };
-        if let Some(caption) = caption { localized_art_label(parent, caption, CrystalRect::new(8.0, 4.0, width - 40.0, 22.0), 12.0); }
+        if let Some(caption) = caption {
+            localized_art_label(
+                parent,
+                caption,
+                CrystalRect::new(8.0, 4.0, width - 40.0, 22.0),
+                12.0,
+            );
+        }
     }
 }
 
@@ -12839,9 +13146,37 @@ fn overlay_text_at(
 
 /// Replace only a baked label rectangle; never alter the surrounding frame or
 /// the independent button action. This prevents two languages being overpainted.
-pub(super) fn localized_art_label(parent: &mut ChildSpawnerCommands, source: &str, rect: CrystalRect, size: f32) {
-    parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(rect.left), top: Val::Px(rect.top), width: Val::Px(rect.width), height: Val::Px(rect.height), align_items: AlignItems::Center, justify_content: JustifyContent::Center, overflow: Overflow::clip(), ..default() }, BackgroundColor(Color::srgb(0.055, 0.045, 0.03)), FocusPolicy::Pass))
-        .with_children(|label| { label.spawn((Text::new(crate::native_i18n::tr(source)), crate::crystal_ui::typography::crystal_text_font(size), TextColor(TEXT), TextLayout::new(Justify::Center, LineBreak::WordBoundary), FocusPolicy::Pass)); });
+pub(super) fn localized_art_label(
+    parent: &mut ChildSpawnerCommands,
+    source: &str,
+    rect: CrystalRect,
+    size: f32,
+) {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(rect.left),
+                top: Val::Px(rect.top),
+                width: Val::Px(rect.width),
+                height: Val::Px(rect.height),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.055, 0.045, 0.03)),
+            FocusPolicy::Pass,
+        ))
+        .with_children(|label| {
+            label.spawn((
+                Text::new(crate::native_i18n::tr(source)),
+                crate::crystal_ui::typography::crystal_text_font(size),
+                TextColor(TEXT),
+                TextLayout::new(Justify::Center, LineBreak::WordBoundary),
+                FocusPolicy::Pass,
+            ));
+        });
 }
 
 fn overlay_centered_text_at(
@@ -12909,7 +13244,11 @@ fn spawn_big_map_npc_row(
         row.spawn((
             Text::new(label.to_owned()),
             crate::crystal_ui::typography::crystal_text_font(9.0),
-            TextColor(if selected { Color::srgb(1.0, 0.84, 0.35) } else { TEXT }),
+            TextColor(if selected {
+                Color::srgb(1.0, 0.84, 0.35)
+            } else {
+                TEXT
+            }),
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
             FocusPolicy::Pass,
         ));
@@ -13363,7 +13702,10 @@ fn spawn_static_overlay_sprite(
             "original-ui/Title/517.png" => Some("Exp."),
             _ => None,
         };
-        if let Some(caption) = caption { localized_art_label(parent, caption, rect, 9.0); return; }
+        if let Some(caption) = caption {
+            localized_art_label(parent, caption, rect, 9.0);
+            return;
+        }
     }
     parent.spawn((
         Node {
@@ -13744,7 +14086,11 @@ fn render_help(
     );
     overlay_text_at(
         parent,
-        &crate::native_i18n::tr(&format!("{}. {}", page + 1, crate::native_i18n::tr(HELP_PAGE_TITLES[usize::from(page)]))),
+        &crate::native_i18n::tr(&format!(
+            "{}. {}",
+            page + 1,
+            crate::native_i18n::tr(HELP_PAGE_TITLES[usize::from(page)])
+        )),
         CrystalRect::new(147.0, 39.0, 242.0, 30.0),
         10.0,
         TEXT,
@@ -14785,7 +15131,12 @@ fn render_guild_status(
         CrystalRect::new(rect.left + 365.0, rect.top + 62.0, 208.0, 316.0),
     );
     if crate::native_i18n::active() {
-        localized_art_label(parent, "Guild Statistics", CrystalRect::new(rect.left + 373.0, rect.top + 66.0, 192.0, 26.0), 10.0);
+        localized_art_label(
+            parent,
+            "Guild Statistics",
+            CrystalRect::new(rect.left + 373.0, rect.top + 66.0, 192.0, 26.0),
+            10.0,
+        );
     }
     if social_has_permission(guild, "recruit") {
         overlay_text_at(
@@ -14975,8 +15326,18 @@ fn render_trade_panel(
         ))
         .with_children(|dialog| {
             title(dialog, &crate::native_i18n::tr("Trade"));
-            overlay_button(dialog, &crate::native_i18n::tr("Request trade"), OverlayButton::TradeRequest, true);
-            overlay_button(dialog, &crate::native_i18n::tr("Close"), OverlayButton::CloseSocial, true);
+            overlay_button(
+                dialog,
+                &crate::native_i18n::tr("Request trade"),
+                OverlayButton::TradeRequest,
+                true,
+            );
+            overlay_button(
+                dialog,
+                &crate::native_i18n::tr("Close"),
+                OverlayButton::CloseSocial,
+                true,
+            );
         });
 }
 
@@ -15002,11 +15363,15 @@ fn render_inspect(
                 inspect.slot
             )),
         );
-        let mail_locked = parcel.is_some_and(|parcel| {
-            inspected_bag_item_is_mail_locked(state, inventory, parcel)
-        });
+        let mail_locked = parcel
+            .is_some_and(|parcel| inspected_bag_item_is_mail_locked(state, inventory, parcel));
         let use_enabled = !mail_locked && inspected_use_intent(state, inventory).is_some();
-        overlay_button(parent, &crate::native_i18n::tr("Use (U)"), OverlayButton::UseInspected, use_enabled);
+        overlay_button(
+            parent,
+            &crate::native_i18n::tr("Use (U)"),
+            OverlayButton::UseInspected,
+            use_enabled,
+        );
         if inspect.container == 2 {
             overlay_button(
                 parent,
@@ -15035,7 +15400,12 @@ fn render_inspect(
                     ..default()
                 })
                 .with_children(|row| {
-                    overlay_button(row, &crate::native_i18n::tr("Drop all"), OverlayButton::DropInspected, drop_enabled);
+                    overlay_button(
+                        row,
+                        &crate::native_i18n::tr("Drop all"),
+                        OverlayButton::DropInspected,
+                        drop_enabled,
+                    );
                     overlay_button(
                         row,
                         &crate::native_i18n::tr("Split"),
@@ -15057,7 +15427,10 @@ fn render_inspect(
                         OverlayButton::SplitCountDec,
                         split_max > 0 && state.split_count > 1,
                     );
-                    body(row, &crate::native_i18n::tr(&format!("{}", state.split_count)));
+                    body(
+                        row,
+                        &crate::native_i18n::tr(&format!("{}", state.split_count)),
+                    );
                     overlay_button(
                         row,
                         &crate::native_i18n::tr("Split +"),
@@ -15069,7 +15442,10 @@ fn render_inspect(
                 let current = !mail_locked && drop_confirmation_is_current(confirmation, inventory);
                 body(
                     parent,
-                    &crate::native_i18n::tr(&format!("Drop {} x{}?", confirmation.key, confirmation.count)),
+                    &crate::native_i18n::tr(&format!(
+                        "Drop {} x{}?",
+                        confirmation.key, confirmation.count
+                    )),
                 );
                 overlay_button(
                     parent,
@@ -15105,7 +15481,12 @@ fn render_inspect(
                 );
             }
         }
-        overlay_button(parent, &crate::native_i18n::tr("Close"), OverlayButton::CloseInspect, true);
+        overlay_button(
+            parent,
+            &crate::native_i18n::tr("Close"),
+            OverlayButton::CloseInspect,
+            true,
+        );
     }
 }
 
@@ -15117,20 +15498,20 @@ fn render_death(parent: &mut ChildSpawnerCommands) {
 fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
     body(
         parent,
-        &crate::native_i18n::tr(&format!("Say: {}_", if draft.is_empty() { "" } else { draft })),
+        &crate::native_i18n::tr(&format!(
+            "Say: {}_",
+            if draft.is_empty() { "" } else { draft }
+        )),
     );
 }
 
 fn mail_attachment_is_current(inventory: &InventoryModel, unique_id: u64) -> bool {
     unique_id != 0
-        && inventory
-            .items
-            .iter()
-            .any(|item| {
-                item.container == 0
-                    && item.slot < u32::from(inventory.bag_slot_capacity())
-                    && item.unique_id == Some(unique_id)
-            })
+        && inventory.items.iter().any(|item| {
+            item.container == 0
+                && item.slot < u32::from(inventory.bag_slot_capacity())
+                && item.unique_id == Some(unique_id)
+        })
 }
 
 fn valid_mail_attachment_ids(inventory: &InventoryModel, ids: &[u64]) -> Option<Vec<u64>> {
@@ -15405,16 +15786,18 @@ fn render_mail_reader_parcel(
             asset_server,
             attachment.image.and_then(|image| u16::try_from(image).ok()),
         ) {
-            parent.spawn(Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(left),
-                top: Val::Px(311.0),
-                width: Val::Px(35.0),
-                height: Val::Px(31.0),
-                ..default()
-            }).with_children(|cell| {
-                spawn_original_item_image(cell, asset_server, image, 35, 31);
-            });
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(left),
+                    top: Val::Px(311.0),
+                    width: Val::Px(35.0),
+                    height: Val::Px(31.0),
+                    ..default()
+                })
+                .with_children(|cell| {
+                    spawn_original_item_image(cell, asset_server, image, 35, 31);
+                });
         }
         if attachment.count > 1 {
             overlay_text_at(
@@ -15496,13 +15879,34 @@ fn render_mail(
     }
     let page = mail.page(mail_ui.cursor.page);
     if let Some(assets) = asset_server {
-        spawn_static_overlay_sprite(parent, assets, "original-ui/Title/7.png".into(), CrystalRect::new(18.0, 9.0, 43.0, 14.0));
+        spawn_static_overlay_sprite(
+            parent,
+            assets,
+            "original-ui/Title/7.png".into(),
+            CrystalRect::new(18.0, 9.0, 43.0, 14.0),
+        );
     }
-    for (label, left, width) in [("Type", 8.0, 37.0), ("Sender", 47.0, 132.0), ("Message", 181.0, 122.0)] {
-        overlay_text_at(parent, &crate::native_i18n::tr(label), CrystalRect::new(left, 34.0, width, 19.0), 10.0, TEXT);
+    for (label, left, width) in [
+        ("Type", 8.0, 37.0),
+        ("Sender", 47.0, 132.0),
+        ("Message", 181.0, 122.0),
+    ] {
+        overlay_text_at(
+            parent,
+            &crate::native_i18n::tr(label),
+            CrystalRect::new(left, 34.0, width, 19.0),
+            10.0,
+            TEXT,
+        );
     }
     for (row, msg) in page.entries.iter().enumerate() {
-        mail_list::row(parent, asset_server, msg, row, mail.selected_id == Some(msg.id));
+        mail_list::row(
+            parent,
+            asset_server,
+            msg,
+            row,
+            mail.selected_id == Some(msg.id),
+        );
     }
 
     if let Some(asset_server) = asset_server {
@@ -15550,17 +15954,19 @@ fn render_mail(
             CrystalRect::new(75.0, 414.0, 28.0, 25.0),
             OverlayButton::OpenMailCompose,
         );
-        if selected.is_some_and(|message| message.can_reply) { spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse",
-            569,
-            570,
-            571,
-            CrystalRect::new(102.0, 414.0, 28.0, 25.0),
-            OverlayButton::MailReply(selected_id),
-            selected.is_some_and(|message| message.can_reply),
-        ); }
+        if selected.is_some_and(|message| message.can_reply) {
+            spawn_overlay_crystal_button_enabled(
+                parent,
+                asset_server,
+                "Prguse",
+                569,
+                570,
+                571,
+                CrystalRect::new(102.0, 414.0, 28.0, 25.0),
+                OverlayButton::MailReply(selected_id),
+                selected.is_some_and(|message| message.can_reply),
+            );
+        }
         spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
@@ -15584,8 +15990,17 @@ fn render_mail(
             selected.is_some_and(mail_delete_enabled),
         );
         for (index, left) in [(520, 183.0), (523, 210.0)] {
-            spawn_overlay_crystal_button_enabled(parent, asset_server, "Prguse", index, index + 1, index + 2,
-                CrystalRect::new(left, 414.0, 28.0, 25.0), OverlayButton::CloseMail, false);
+            spawn_overlay_crystal_button_enabled(
+                parent,
+                asset_server,
+                "Prguse",
+                index,
+                index + 1,
+                index + 2,
+                CrystalRect::new(left, 414.0, 28.0, 25.0),
+                OverlayButton::CloseMail,
+                false,
+            );
         }
     }
     // The explicit action is retained for ordinary mail access, but now uses
@@ -15604,7 +16019,10 @@ fn render_mail_compose(
     draft: &mir2_ui_core::state::MailComposeDraft,
     inventory: &InventoryModel,
 ) {
-    body(parent, &crate::native_i18n::tr("Write mail (Tab switches field; Esc cancels)"));
+    body(
+        parent,
+        &crate::native_i18n::tr("Write mail (Tab switches field; Esc cancels)"),
+    );
     let message_label = if draft.message.is_empty() {
         "<type>".to_owned()
     } else {
@@ -15637,13 +16055,21 @@ fn render_mail_compose(
             ..default()
         })
         .with_children(|row| {
-            overlay_button(row, &crate::native_i18n::tr(&format!("Gold: {}", draft.gold)), OverlayButton::MailGoldFocus, true);
+            overlay_button(
+                row,
+                &crate::native_i18n::tr(&format!("Gold: {}", draft.gold)),
+                OverlayButton::MailGoldFocus,
+                true,
+            );
             overlay_button(row, "-100", OverlayButton::MailGoldDec, draft.gold >= 100);
             overlay_button(row, "+100", OverlayButton::MailGoldInc, true);
         });
     body(
         parent,
-        &crate::native_i18n::tr(&format!("Attachments: {}/5", draft.attachment_unique_ids.len())),
+        &crate::native_i18n::tr(&format!(
+            "Attachments: {}/5",
+            draft.attachment_unique_ids.len()
+        )),
     );
     for id in &draft.attachment_unique_ids {
         if let Some(item) = inventory
@@ -15659,7 +16085,10 @@ fn render_mail_compose(
                     ..default()
                 })
                 .with_children(|row| {
-                    body(row, &crate::native_i18n::tr(&format!("{} ×{}", item.name, item.quantity)));
+                    body(
+                        row,
+                        &crate::native_i18n::tr(&format!("{} ×{}", item.name, item.quantity)),
+                    );
                     overlay_button(
                         row,
                         &crate::native_i18n::tr("Remove"),
@@ -15669,7 +16098,11 @@ fn render_mail_compose(
                 });
         }
     }
-    for item in inventory.items.iter().filter(|item| matches!(item.container, 0 | 1)) {
+    for item in inventory
+        .items
+        .iter()
+        .filter(|item| matches!(item.container, 0 | 1))
+    {
         let Some(id) = item.unique_id else { continue };
         if draft.attachment_unique_ids.contains(&id) {
             continue;
@@ -15681,7 +16114,10 @@ fn render_mail_compose(
             parent,
             &crate::native_i18n::tr(&format!(
                 "Attach {} ×{} (Bag{} slot {})",
-                item.name, item.quantity, item.container + 1, item.slot
+                item.name,
+                item.quantity,
+                item.container + 1,
+                item.slot
             )),
             OverlayButton::AddMailAttachment(id),
             true,
@@ -15706,7 +16142,13 @@ fn render_mail_compose_letter(
     letter_editor: Option<&mail_editor::MailLetterEditor>,
 ) {
     if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(parent, asset_server, "original-ui/Title/671.png", 236.0, 300.0);
+        spawn_overlay_frame(
+            parent,
+            asset_server,
+            "original-ui/Title/671.png",
+            236.0,
+            300.0,
+        );
         spawn_overlay_crystal_button(
             parent,
             asset_server,
@@ -15878,13 +16320,19 @@ fn render_bigmap(
         500.0,
     );
     if !renderer.hunt_regions.is_empty() && model.view != BigMapView::WorldMap {
-        parent.spawn((Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(16.0), top: Val::Px(30.0),
-            ..default()
-        }, Text::new(crate::native_i18n::tr("Cyan: current task · Amber: other tasks (possible spawn areas)")),
-           crate::crystal_ui::typography::crystal_text_font(10.0),
-           TextColor(Color::srgb(1.0, 0.82, 0.2))));
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(16.0),
+                top: Val::Px(30.0),
+                ..default()
+            },
+            Text::new(crate::native_i18n::tr(
+                "Cyan: current task · Amber: other tasks (possible spawn areas)",
+            )),
+            crate::crystal_ui::typography::crystal_text_font(10.0),
+            TextColor(Color::srgb(1.0, 0.82, 0.2)),
+        ));
     }
     parent.spawn((
         Node {
@@ -15994,61 +16442,113 @@ fn render_bigmap(
                     ));
                 }
                 for (index, region) in renderer.hunt_regions.iter().enumerate() {
-                    let color = if region.primary { Color::srgb(0.2, 0.9, 1.0) }
-                        else { Color::srgb(1.0, 0.72, 0.1) };
+                    let color = if region.primary {
+                        Color::srgb(0.2, 0.9, 1.0)
+                    } else {
+                        Color::srgb(1.0, 0.72, 0.1)
+                    };
                     let (left, top) = geometry.view_position(
-                        BigMapPoint { x: region.center.x - region.radius, y: region.center.y - region.radius },
-                        entry.info.width, entry.info.height,
+                        BigMapPoint {
+                            x: region.center.x - region.radius,
+                            y: region.center.y - region.radius,
+                        },
+                        entry.info.width,
+                        entry.info.height,
                     );
                     let (right, bottom) = geometry.view_position(
-                        BigMapPoint { x: region.center.x + region.radius, y: region.center.y + region.radius },
-                        entry.info.width, entry.info.height,
+                        BigMapPoint {
+                            x: region.center.x + region.radius,
+                            y: region.center.y + region.radius,
+                        },
+                        entry.info.width,
+                        entry.info.height,
                     );
-                    viewport.spawn((Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(left), top: Val::Px(top),
-                        width: Val::Px((right-left).max(4.0)), height: Val::Px((bottom-top).max(4.0)),
-                        border: UiRect::all(Val::Px(2.0)),
-                        ..default()
-                    }, BackgroundColor(Color::srgba(1.0, 0.65, 0.0, 0.18)),
-                       BorderColor::all(color)));
-                    viewport.spawn((Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(left.min(geometry.width - 180.0).max(0.0)),
-                        top: Val::Px(top.max(15.0) - 15.0 + index as f32 * 2.0),
-                        ..default()
-                    }, BackgroundColor(Color::srgba(0.02, 0.015, 0.0, 0.9)),
-                       Text::new(crate::native_i18n::tr(&format!("{}{}: {} left ({},{})", if region.primary { "[Tracked] " } else { "" }, region.name, region.remaining, region.center.x, region.center.y))),
-                       crate::crystal_ui::typography::crystal_text_font(11.0),
-                       TextColor(Color::srgb(1.0, 0.82, 0.2))));
+                    viewport.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(left),
+                            top: Val::Px(top),
+                            width: Val::Px((right - left).max(4.0)),
+                            height: Val::Px((bottom - top).max(4.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgba(1.0, 0.65, 0.0, 0.18)),
+                        BorderColor::all(color),
+                    ));
+                    viewport.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(left.min(geometry.width - 180.0).max(0.0)),
+                            top: Val::Px(top.max(15.0) - 15.0 + index as f32 * 2.0),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgba(0.02, 0.015, 0.0, 0.9)),
+                        Text::new(crate::native_i18n::tr(&format!(
+                            "{}{}: {} left ({},{})",
+                            if region.primary { "[Tracked] " } else { "" },
+                            region.name,
+                            region.remaining,
+                            region.center.x,
+                            region.center.y
+                        ))),
+                        crate::crystal_ui::typography::crystal_text_font(11.0),
+                        TextColor(Color::srgb(1.0, 0.82, 0.2)),
+                    ));
                 }
-                if renderer.bichon_safe_destination && model.view == BigMapView::CurrentMap
+                if renderer.bichon_safe_destination
+                    && model.view == BigMapView::CurrentMap
                     && crate::quest_destination::is_bichon_map(entry.map_index)
                 {
-                    use crate::quest_destination::{BICHON_SAFE_X, BICHON_SAFE_Y, BICHON_SAFE_RADIUS};
-                    let (left, top) = geometry.view_position(BigMapPoint {
-                        x: BICHON_SAFE_X - BICHON_SAFE_RADIUS, y: BICHON_SAFE_Y - BICHON_SAFE_RADIUS,
-                    }, entry.info.width, entry.info.height);
-                    let (right, bottom) = geometry.view_position(BigMapPoint {
-                        x: BICHON_SAFE_X + BICHON_SAFE_RADIUS, y: BICHON_SAFE_Y + BICHON_SAFE_RADIUS,
-                    }, entry.info.width, entry.info.height);
-                    viewport.spawn((BichonSafeDestinationArea, Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(left), top: Val::Px(top),
-                        width: Val::Px((right - left).max(4.0)),
-                        height: Val::Px((bottom - top).max(4.0)),
-                        border: UiRect::all(Val::Px(2.0)), ..default()
-                    }, BackgroundColor(Color::srgba(0.1, 0.85, 1.0, 0.2)),
-                        BorderColor::all(Color::srgb(0.2, 0.9, 1.0))));
-                    viewport.spawn((Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(left.min(geometry.width - 210.0).max(0.0)),
-                        top: Val::Px((top - 22.0).max(0.0)), ..default()
-                    }, BackgroundColor(Color::srgba(0.01, 0.03, 0.04, 0.95)),
+                    use crate::quest_destination::{
+                        BICHON_SAFE_RADIUS, BICHON_SAFE_X, BICHON_SAFE_Y,
+                    };
+                    let (left, top) = geometry.view_position(
+                        BigMapPoint {
+                            x: BICHON_SAFE_X - BICHON_SAFE_RADIUS,
+                            y: BICHON_SAFE_Y - BICHON_SAFE_RADIUS,
+                        },
+                        entry.info.width,
+                        entry.info.height,
+                    );
+                    let (right, bottom) = geometry.view_position(
+                        BigMapPoint {
+                            x: BICHON_SAFE_X + BICHON_SAFE_RADIUS,
+                            y: BICHON_SAFE_Y + BICHON_SAFE_RADIUS,
+                        },
+                        entry.info.width,
+                        entry.info.height,
+                    );
+                    viewport.spawn((
+                        BichonSafeDestinationArea,
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(left),
+                            top: Val::Px(top),
+                            width: Val::Px((right - left).max(4.0)),
+                            height: Val::Px((bottom - top).max(4.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgba(0.1, 0.85, 1.0, 0.2)),
+                        BorderColor::all(Color::srgb(0.2, 0.9, 1.0)),
+                    ));
+                    viewport.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(left.min(geometry.width - 210.0).max(0.0)),
+                            top: Val::Px((top - 22.0).max(0.0)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgba(0.01, 0.03, 0.04, 0.95)),
                         Text::new(crate::native_i18n::tr("比奇城安全区 (328,264)")),
-                        TextFont { font: FontSource::Family("Microsoft YaHei".into()),
-                            font_size: FontSize::Px(14.0), ..default() },
-                        TextColor(Color::srgb(0.4, 0.95, 1.0))));
+                        TextFont {
+                            font: FontSource::Family("Microsoft YaHei".into()),
+                            font_size: FontSize::Px(14.0),
+                            ..default()
+                        },
+                        TextColor(Color::srgb(0.4, 0.95, 1.0)),
+                    ));
                 }
                 for npc in entry.info.npcs.iter().filter(|npc| npc.show_on_big_map) {
                     let (x, y) =
@@ -16208,7 +16708,12 @@ fn render_bigmap(
     }
 
     for (row, npc) in rendered.npcs.iter().enumerate() {
-        let label = format!("{} [{},{}]", crate::player_text::name(&npc.name), npc.location.x, npc.location.y);
+        let label = format!(
+            "{} [{},{}]",
+            crate::player_text::name(&npc.name),
+            npc.location.x,
+            npc.location.y
+        );
         spawn_big_map_npc_row(
             parent,
             &label,
@@ -16403,7 +16908,6 @@ fn render_shop(
     }
 }
 
-
 fn native_skill_page_count(item_count: usize) -> usize {
     item_count
         .saturating_add(SKILL_PAGE_SIZE.saturating_sub(1))
@@ -16577,7 +17081,12 @@ fn render_storage(
         );
         if !page.rental_locked {
             let label = storage_expiry_label(page.expiry)
-                .map(|expiry| format!("{}{expiry}", crate::native_i18n::tr("Expanded Storage Expires On")))
+                .map(|expiry| {
+                    format!(
+                        "{}{expiry}",
+                        crate::native_i18n::tr("Expanded Storage Expires On")
+                    )
+                })
                 .unwrap_or_else(|| crate::native_i18n::tr("Expanded Storage Expires On"));
             overlay_centered_text_at(
                 parent,
@@ -16623,7 +17132,9 @@ fn storage_expiry_label(binary_datetime: i64) -> Option<String> {
     }
     let unix_ticks = ticks - DOTNET_UNIX_EPOCH_TICKS;
     let seconds = unix_ticks.div_euclid(DOTNET_TICKS_PER_SECOND);
-    let nanos = unix_ticks.rem_euclid(DOTNET_TICKS_PER_SECOND).saturating_mul(100);
+    let nanos = unix_ticks
+        .rem_euclid(DOTNET_TICKS_PER_SECOND)
+        .saturating_mul(100);
     let (Ok(seconds), Ok(nanos)) = (i64::try_from(seconds), u32::try_from(nanos)) else {
         return None;
     };
@@ -16749,11 +17260,47 @@ fn render_options(
         // Cover the baked English wording, preserving the original borders and
         // every source button/slider hit target. Locale preferences are separate
         // from gameplay options and are never sent to the server.
-        localized_art_label(parent, "Options", CrystalRect::new(12.0, 7.0, 214.0, 25.0), 13.0);
-        for (label, top) in [("Skill mode",68.0),("Skill bar",93.0),("Effects",118.0),("Ground items",143.0),("Names",168.0),("Health bars",193.0),("Sound",220.0),("Music",244.0),("Allow observation",271.0),("New movement",296.0)] {
-            localized_art_label(parent, label, CrystalRect::new(12.0, top - 2.0, 138.0, 23.0), 10.0);
+        localized_art_label(
+            parent,
+            "Options",
+            CrystalRect::new(12.0, 7.0, 214.0, 25.0),
+            13.0,
+        );
+        for (label, top) in [
+            ("Skill mode", 68.0),
+            ("Skill bar", 93.0),
+            ("Effects", 118.0),
+            ("Ground items", 143.0),
+            ("Names", 168.0),
+            ("Health bars", 193.0),
+            ("Sound", 220.0),
+            ("Music", 244.0),
+            ("Allow observation", 271.0),
+            ("New movement", 296.0),
+        ] {
+            localized_art_label(
+                parent,
+                label,
+                CrystalRect::new(12.0, top - 2.0, 138.0, 23.0),
+                10.0,
+            );
         }
-        parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(0.0), top: Val::Px(353.0), width: Val::Px(259.0), padding: UiRect::all(Val::Px(10.0)), row_gap: Val::Px(4.0), flex_direction: FlexDirection::Column, border: UiRect::all(Val::Px(1.0)), ..default() }, BackgroundColor(Color::srgb(0.055,0.045,0.03)), BorderColor::all(GOLD)))
+        parent
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(353.0),
+                    width: Val::Px(259.0),
+                    padding: UiRect::all(Val::Px(10.0)),
+                    row_gap: Val::Px(4.0),
+                    flex_direction: FlexDirection::Column,
+                    border: UiRect::all(Val::Px(1.0)),
+                    ..default()
+                },
+                BackgroundColor(Color::srgb(0.055, 0.045, 0.03)),
+                BorderColor::all(GOLD),
+            ))
             .with_children(|languages| {
                 title(languages, &crate::native_i18n::tr("Language"));
                 crate::native_i18n::spawn_language_choices(languages, 12.0);
@@ -17043,11 +17590,11 @@ mod mail_delete_tests;
 mod mail_feedback_tests;
 
 #[cfg(test)]
-#[path = "mail_reader_tests.rs"]
-mod mail_reader_tests;
-#[cfg(test)]
 #[path = "mail_compose_input_tests.rs"]
 mod mail_compose_input_tests;
+#[cfg(test)]
+#[path = "mail_reader_tests.rs"]
+mod mail_reader_tests;
 
 #[cfg(test)]
 #[path = "mail_compose_tests.rs"]
@@ -18531,7 +19078,10 @@ mod tests {
             .panel = mir2_ui_core::state::UiPanel::GameShop;
         app.update();
         let first = game_shop_child_ids(&mut app);
-        assert!(!first.is_empty(), "the open shop must have rendered children");
+        assert!(
+            !first.is_empty(),
+            "the open shop must have rendered children"
+        );
 
         app.update();
         assert_eq!(game_shop_child_ids(&mut app), first);
@@ -18539,13 +19089,18 @@ mod tests {
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
             state.game_shop_dialog.search_focused = true;
-            state.game_shop_dialog.search_input.modal =
-                Some(friend_dialog::FriendModal::Add { blocked: false, text: "Potion".into() });
+            state.game_shop_dialog.search_input.modal = Some(friend_dialog::FriendModal::Add {
+                blocked: false,
+                text: "Potion".into(),
+            });
             state.game_shop_dialog.search_input.sync_editor();
         }
         app.update();
         let editor = game_shop_child_ids(&mut app);
-        assert_ne!(editor, first, "opening the editor must rebuild the shop tree once");
+        assert_ne!(
+            editor, first,
+            "opening the editor must rebuild the shop tree once"
+        );
 
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
@@ -18557,7 +19112,10 @@ mod tests {
             .select_all();
         app.update();
         let selected = game_shop_child_ids(&mut app);
-        assert_ne!(selected, editor, "caret/selection changes must rebuild the editor tree");
+        assert_ne!(
+            selected, editor,
+            "caret/selection changes must rebuild the editor tree"
+        );
 
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
@@ -18571,7 +19129,11 @@ mod tests {
             .core
             .panel = mir2_ui_core::state::UiPanel::GameShop;
         app.update();
-        assert_ne!(game_shop_child_ids(&mut app), selected, "reopen must invalidate the retained tree");
+        assert_ne!(
+            game_shop_child_ids(&mut app),
+            selected,
+            "reopen must invalidate the retained tree"
+        );
 
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
@@ -18715,13 +19277,16 @@ mod tests {
             state.inventory_window.top = 0.0;
         }
         app.world_mut().resource_mut::<ShopModel>().service_mode = NpcShopServiceMode::Sell;
-        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
-            unique_id: Some(7),
-            container: 0,
-            slot: 2,
-            quantity: 1,
-            ..Default::default()
-        });
+        app.world_mut()
+            .resource_mut::<InventoryModel>()
+            .items
+            .push(ItemModel {
+                unique_id: Some(7),
+                container: 0,
+                slot: 2,
+                quantity: 1,
+                ..Default::default()
+            });
         app.update();
 
         let state = app.world().resource::<NativePlayerUiState>();
@@ -18730,14 +19295,20 @@ mod tests {
             !state.core.inventory_open(),
             "the shared core has only one active panel"
         );
-        assert!(state.inventory_open(), "NPC service exposes its ordinary bag");
+        assert!(
+            state.inventory_open(),
+            "NPC service exposes its ordinary bag"
+        );
         let inventory = app
             .world_mut()
             .query_filtered::<&Node, With<OverlayInventory>>()
             .single(app.world())
             .expect("visible inventory alongside NPC shop");
         assert_eq!(inventory.display, Display::Flex);
-        assert_eq!((inventory.left, inventory.top), (Val::Px(445.0), Val::Px(0.0)));
+        assert_eq!(
+            (inventory.left, inventory.top),
+            (Val::Px(445.0), Val::Px(0.0))
+        );
         assert_eq!(
             *app.world_mut()
                 .query_filtered::<&FocusPolicy, With<OverlayShop>>()
@@ -18757,8 +19328,14 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .toggle_inventory();
-        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
-        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .npc_shop_open());
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
         app.update();
         assert_eq!(
             app.world_mut()
@@ -18771,8 +19348,14 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .toggle_inventory();
-        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
-        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .npc_shop_open());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
         app.update();
         assert_eq!(
             app.world_mut()
@@ -18800,7 +19383,10 @@ mod tests {
             state.npc_inventory_hidden = true;
             state.toggle_npc_shop();
         }
-        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
     }
 
     #[test]
@@ -18814,8 +19400,14 @@ mod tests {
         app.update();
         assert_eq!(
             (
-                app.world().resource::<NativePlayerUiState>().inventory_window.left,
-                app.world().resource::<NativePlayerUiState>().inventory_window.top,
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .inventory_window
+                    .left,
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .inventory_window
+                    .top,
             ),
             (445.0, 0.0)
         );
@@ -18827,8 +19419,14 @@ mod tests {
         app.update();
         assert_eq!(
             (
-                app.world().resource::<NativePlayerUiState>().inventory_window.left,
-                app.world().resource::<NativePlayerUiState>().inventory_window.top,
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .inventory_window
+                    .left,
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .inventory_window
+                    .top,
             ),
             (500.0, 90.0),
             "an open parent dialogue must not overwrite a user bag drag"
@@ -18851,11 +19449,16 @@ mod tests {
             shop.selected_bag_slot_for_repair = Some(2);
         }
         app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
-        app.world_mut().resource_mut::<NativePlayerUiState>().npc_service_exit_requested = true;
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .npc_service_exit_requested = true;
         app.update();
         let state = app.world().resource::<NativePlayerUiState>();
         assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::Inventory);
-        assert_eq!((state.inventory_window.left, state.inventory_window.top), (0.0, 0.0));
+        assert_eq!(
+            (state.inventory_window.left, state.inventory_window.top),
+            (0.0, 0.0)
+        );
         assert_eq!(state.shop_service_drag_unique_id, None);
         assert_eq!(state.shop_repair_slot, None);
         assert_eq!(state.npc_service_hold, None);
@@ -19585,7 +20188,9 @@ mod tests {
                 .press(KeyCode::KeyV);
             app.update();
             assert_eq!(
-                app.world().resource::<NativePlayerUiState>().minimap_visible(),
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .minimap_visible(),
                 expected_visible,
                 "hp={hp}"
             );
@@ -19892,34 +20497,58 @@ mod tests {
     fn big_map_images_and_player_markers_use_centered_source_viewport() {
         for index in [8, 14, 101, i32::MAX] {
             let mut app = App::new();
-            app.add_plugins(MinimalPlugins).add_plugins(AssetPlugin::default())
-                .init_asset::<Image>().init_resource::<UiReadModel>()
+            app.add_plugins(MinimalPlugins)
+                .add_plugins(AssetPlugin::default())
+                .init_asset::<Image>()
+                .init_resource::<UiReadModel>()
                 .init_resource::<BigMapUiState>()
                 .add_systems(Startup, spawn_big_map_render_test);
             let mut model = BigMapModel::default();
             model.set_current_map(1);
-            model.apply_new_map_info(1, crate::big_map::BigMapInfo {
-                title: "Geometry".into(), width: 700, height: 700, big_map: index,
-                movements: vec![], npcs: vec![],
-            });
+            model.apply_new_map_info(
+                1,
+                crate::big_map::BigMapInfo {
+                    title: "Geometry".into(),
+                    width: 700,
+                    height: 700,
+                    big_map: index,
+                    movements: vec![],
+                    npcs: vec![],
+                },
+            );
             model.set_player_location(Some(1), BigMapPoint { x: 350, y: 350 });
             app.insert_resource(model);
             app.update();
             let world = app.world_mut();
-            let images = world.query::<(&BigMapImageEntity, &Node, &ChildOf)>()
-                .iter(world).map(|(_,node,parent)| (node.clone(), parent.parent())).collect::<Vec<_>>();
-            let players = world.query::<(&BigMapPlayerEntity, &Node)>()
-                .iter(world).map(|(_,node)| (node.left,node.top)).collect::<Vec<_>>();
+            let images = world
+                .query::<(&BigMapImageEntity, &Node, &ChildOf)>()
+                .iter(world)
+                .map(|(_, node, parent)| (node.clone(), parent.parent()))
+                .collect::<Vec<_>>();
+            let players = world
+                .query::<(&BigMapPlayerEntity, &Node)>()
+                .iter(world)
+                .map(|(_, node)| (node.left, node.top))
+                .collect::<Vec<_>>();
             let Some(g) = crate::big_map::BigMapImageGeometry::for_image(index as u32) else {
                 assert!(images.is_empty());
                 assert!(players.is_empty());
                 continue;
             };
-            assert_eq!(images.len(),1);
-            assert_eq!((images[0].0.width,images[0].0.height),(Val::Px(g.width),Val::Px(g.height)));
+            assert_eq!(images.len(), 1);
+            assert_eq!(
+                (images[0].0.width, images[0].0.height),
+                (Val::Px(g.width), Val::Px(g.height))
+            );
             let viewport = world.get::<Node>(images[0].1).unwrap();
-            assert_eq!((viewport.left,viewport.top),(Val::Px(g.left),Val::Px(g.top)));
-            assert_eq!(players,vec![(Val::Px(g.width/2.-6.),Val::Px(g.height/2.-5.))]);
+            assert_eq!(
+                (viewport.left, viewport.top),
+                (Val::Px(g.left), Val::Px(g.top))
+            );
+            assert_eq!(
+                players,
+                vec![(Val::Px(g.width / 2. - 6.), Val::Px(g.height / 2. - 5.))]
+            );
         }
     }
 
@@ -19939,24 +20568,47 @@ mod tests {
             })).unwrap();
             let mut app = App::new();
             app.add_plugins(MinimalPlugins)
-                .add_plugins(AssetPlugin::default()).init_asset::<Image>()
-                .init_resource::<UiReadModel>().init_resource::<NativePlayerUiState>()
-                .init_resource::<BigMapGatewayIntentQueue>().init_resource::<BigMapUiState>()
-                .insert_resource(QuestTracker { active_quests: vec![quest] })
+                .add_plugins(AssetPlugin::default())
+                .init_asset::<Image>()
+                .init_resource::<UiReadModel>()
+                .init_resource::<NativePlayerUiState>()
+                .init_resource::<BigMapGatewayIntentQueue>()
+                .init_resource::<BigMapUiState>()
+                .insert_resource(QuestTracker {
+                    active_quests: vec![quest],
+                })
                 .add_systems(Update, (sync_big_map_ui, spawn_big_map_render_test).chain());
             let mut model = BigMapModel::default();
             model.set_current_map(map_index);
-            model.apply_new_map_info(map_index, crate::big_map::BigMapInfo {
-                title: "BichonProvince".into(), width: 700, height: 700, big_map: 101,
-                movements: vec![], npcs: vec![],
-            });
+            model.apply_new_map_info(
+                map_index,
+                crate::big_map::BigMapInfo {
+                    title: "BichonProvince".into(),
+                    width: 700,
+                    height: 700,
+                    big_map: 101,
+                    movements: vec![],
+                    npcs: vec![],
+                },
+            );
             app.insert_resource(model);
             app.update();
-            assert_eq!(app.world().resource::<BigMapUiState>().bichon_safe_destination, visible);
-            let count = app.world_mut().query_filtered::<&Node, With<BichonSafeDestinationArea>>()
-                .iter(app.world()).count();
+            assert_eq!(
+                app.world()
+                    .resource::<BigMapUiState>()
+                    .bichon_safe_destination,
+                visible
+            );
+            let count = app
+                .world_mut()
+                .query_filtered::<&Node, With<BichonSafeDestinationArea>>()
+                .iter(app.world())
+                .count();
             assert_eq!(count, usize::from(visible));
-            let label = app.world_mut().query::<(&Text, &TextFont)>().iter(app.world())
+            let label = app
+                .world_mut()
+                .query::<(&Text, &TextFont)>()
+                .iter(app.world())
                 .find(|(text, _)| text.0 == "比奇城安全区 (328,264)");
             assert_eq!(label.is_some(), visible);
             if let Some((_, font)) = label {
@@ -19975,21 +20627,34 @@ mod tests {
             .add_systems(Startup, spawn_big_map_render_test);
         let mut model = BigMapModel::default();
         model.set_current_map(1);
-        model.apply_new_map_info(1, crate::big_map::BigMapInfo {
-            title: "BichonProvince".into(), width: 800, height: 800, big_map: 101,
-            movements: vec![], npcs: vec![],
-        });
+        model.apply_new_map_info(
+            1,
+            crate::big_map::BigMapInfo {
+                title: "BichonProvince".into(),
+                width: 800,
+                height: 800,
+                big_map: 101,
+                movements: vec![],
+                npcs: vec![],
+            },
+        );
         app.insert_resource(model);
         app.insert_resource(BigMapUiState {
             hunt_regions: vec![crate::quest_hunt_regions::QuestHuntRegion {
                 primary: false,
-                monster_index: 44, name: "RakingCat".into(),
-                center: BigMapPoint { x: 340, y: 550 }, radius: 50, remaining: 2,
+                monster_index: 44,
+                name: "RakingCat".into(),
+                center: BigMapPoint { x: 340, y: 550 },
+                radius: 50,
+                remaining: 2,
             }],
             ..Default::default()
         });
         app.update();
-        assert!(app.world_mut().query::<&Text>().iter(app.world())
+        assert!(app
+            .world_mut()
+            .query::<&Text>()
+            .iter(app.world())
             .any(|text| text.0 == "RakingCat: 2 left (340,550)"));
     }
 
@@ -20057,7 +20722,9 @@ mod tests {
             .collect::<Vec<_>>();
         assert_eq!(players.len(), 1);
         assert_eq!(players[0].0, BigMapPoint { x: 257, y: 594 });
-        let (player_x, player_y) = crate::big_map::BigMapImageGeometry::for_image(101).unwrap().view_position(BigMapPoint { x: 257, y: 594 }, 700, 700);
+        let (player_x, player_y) = crate::big_map::BigMapImageGeometry::for_image(101)
+            .unwrap()
+            .view_position(BigMapPoint { x: 257, y: 594 }, 700, 700);
         assert_eq!(players[0].1, Val::Px(player_x - 6.0));
         assert_eq!(players[0].2, Val::Px(player_y - 5.0));
 
@@ -21976,10 +22643,7 @@ mod tests {
         );
     }
 
-    fn npc_service_drag_app(
-        mode: NpcShopServiceMode,
-        hold: bool,
-    ) -> (App, Entity, Vec2, Vec2) {
+    fn npc_service_drag_app(mode: NpcShopServiceMode, hold: bool) -> (App, Entity, Vec2, Vec2) {
         let (mut app, window, _, _) = batched_inventory_drag_app();
         complete_repair_quote_metadata(
             app.world_mut()
@@ -22003,7 +22667,10 @@ mod tests {
         let source = {
             let state = app.world().resource::<NativePlayerUiState>();
             Vec2::new(
-                state.inventory_window.left + INVENTORY_GRID_ORIGIN.x as f32 + 2.0 * INVENTORY_GRID_STEP.x as f32 + 2.0,
+                state.inventory_window.left
+                    + INVENTORY_GRID_ORIGIN.x as f32
+                    + 2.0 * INVENTORY_GRID_STEP.x as f32
+                    + 2.0,
                 state.inventory_window.top + INVENTORY_GRID_ORIGIN.y as f32 + 2.0,
             )
         };
@@ -22033,7 +22700,9 @@ mod tests {
 
         app.update();
         assert_eq!(
-            app.world().resource::<ShopModel>().selected_bag_slot_for_sell,
+            app.world()
+                .resource::<ShopModel>()
+                .selected_bag_slot_for_sell,
             Some(2)
         );
         assert!(app
@@ -22059,7 +22728,9 @@ mod tests {
 
         app.update();
         assert_eq!(
-            app.world().resource::<ShopModel>().selected_bag_slot_for_sell,
+            app.world()
+                .resource::<ShopModel>()
+                .selected_bag_slot_for_sell,
             None
         );
         assert!(app
@@ -22079,7 +22750,9 @@ mod tests {
         ordered_inventory_drag_button(&mut app, window, false);
         app.update();
         assert_eq!(
-            app.world().resource::<NativePlayerUiState>().shop_service_drag_unique_id,
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .shop_service_drag_unique_id,
             Some(7003)
         );
 
@@ -22132,7 +22805,9 @@ mod tests {
             ordered_inventory_drag_button(&mut app, window, false);
             app.update();
             assert_eq!(
-                app.world().resource::<NativePlayerUiState>().shop_service_drag_unique_id,
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .shop_service_drag_unique_id,
                 Some(7003)
             );
 
@@ -22238,7 +22913,9 @@ mod tests {
             .drain_intents()
             .is_empty());
         assert_eq!(
-            app.world().resource::<ShopModel>().selected_bag_slot_for_repair,
+            app.world()
+                .resource::<ShopModel>()
+                .selected_bag_slot_for_repair,
             None
         );
     }
@@ -22258,8 +22935,10 @@ mod tests {
     #[test]
     fn inventory_item_drag_bag_destinations_use_source_merge_or_swap_rules() {
         for (target_index, target_count, expected_merge) in [
-            (None, 0, false), (Some(100), 3, true),
-            (Some(100), 20, false), (Some(101), 3, false),
+            (None, 0, false),
+            (Some(100), 3, true),
+            (Some(100), 20, false),
+            (Some(101), 3, false),
         ] {
             let (mut app, window, source, _) = batched_inventory_drag_app();
             app.init_resource::<MailComposeUi>()
@@ -22274,48 +22953,93 @@ mod tests {
                     ..Default::default()
                 });
             init_overlay_button_test_resources(&mut app);
-            app.add_systems(Update, process_overlay_buttons.after(process_inventory_item_drag));
+            app.add_systems(
+                Update,
+                process_overlay_buttons.after(process_inventory_item_drag),
+            );
             {
                 let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
-                inventory.items[0].tooltip_source = Some(surface_tooltip_source(100, "Drug", 1, 7003, 2));
+                inventory.items[0].tooltip_source =
+                    Some(surface_tooltip_source(100, "Drug", 1, 7003, 2));
                 if let Some(index) = target_index {
                     inventory.items.push(ItemModel {
-                        unique_id: Some(7004), slot: 12, container: 0,
+                        unique_id: Some(7004),
+                        slot: 12,
+                        container: 0,
                         quantity: target_count,
-                        tooltip_source: Some(surface_tooltip_source(index, "Drug", 1, 7004, target_count as u16)),
+                        tooltip_source: Some(surface_tooltip_source(
+                            index,
+                            "Drug",
+                            1,
+                            7004,
+                            target_count as u16,
+                        )),
                         ..Default::default()
                     });
                 }
             }
             let destination = Vec2::new(
-                INVENTORY_GRID_ORIGIN.x as f32 + (12 % INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.x as f32 + 2.0,
-                INVENTORY_GRID_ORIGIN.y as f32 + (12 / INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.y as f32 + 2.0,
+                INVENTORY_GRID_ORIGIN.x as f32
+                    + (12 % INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.x as f32
+                    + 2.0,
+                INVENTORY_GRID_ORIGIN.y as f32
+                    + (12 / INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.y as f32
+                    + 2.0,
             );
             ordered_inventory_drag_motion(&mut app, window, source);
             ordered_inventory_drag_button(&mut app, window, true);
-            let cell = app.world_mut().spawn((Button, Interaction::Pressed, OverlayButton::InspectBag(2))).id();
+            let cell = app
+                .world_mut()
+                .spawn((Button, Interaction::Pressed, OverlayButton::InspectBag(2)))
+                .id();
             app.update();
-            assert!(app.world().resource::<NativePlayerUiState>().inspect.is_none());
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .inspect
+                .is_none());
             app.world_mut().despawn(cell);
             ordered_inventory_drag_motion(&mut app, window, destination);
             ordered_inventory_drag_button(&mut app, window, false);
             // A batched pointer edge may also leave a pressed destination
             // interaction in this frame; it must not reopen the item menu.
-            let cell = app.world_mut().spawn((Button, Interaction::Pressed, OverlayButton::InspectBag(12))).id();
+            let cell = app
+                .world_mut()
+                .spawn((Button, Interaction::Pressed, OverlayButton::InspectBag(12)))
+                .id();
             app.update();
             app.world_mut().despawn(cell);
             let expected = if expected_merge {
-                NativePlayerUiIntent::MergeItem { grid_from: "inventory".into(), grid_to: "inventory".into(), id_from: 7003, id_to: 7004 }
+                NativePlayerUiIntent::MergeItem {
+                    grid_from: "inventory".into(),
+                    grid_to: "inventory".into(),
+                    id_from: 7003,
+                    id_to: 7004,
+                }
             } else {
-                NativePlayerUiIntent::MoveItem { grid: "inventory".into(), unique_id: 7003, from: 2, to: 12 }
+                NativePlayerUiIntent::MoveItem {
+                    grid: "inventory".into(),
+                    unique_id: 7003,
+                    from: 2,
+                    to: 12,
+                }
             };
-            assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(), vec![expected]);
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents(),
+                vec![expected]
+            );
             let state = app.world().resource::<NativePlayerUiState>();
             assert!(state.inspect.is_none());
             assert!(state.inventory_item_drag.is_none());
             assert!(state.inventory_item_pointer_consumed);
             app.update();
-            assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty());
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents()
+                .is_empty());
         }
     }
 
@@ -22329,7 +23053,11 @@ mod tests {
         ordered_inventory_drag_motion(&mut app, window, destination);
         ordered_inventory_drag_button(&mut app, window, false);
         app.update();
-        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty());
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]

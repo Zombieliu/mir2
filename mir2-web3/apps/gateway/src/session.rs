@@ -181,6 +181,9 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub(crate) fn has_pending_shared_personal_work(&self) -> bool {
+        crate::routing::runtime_has_pending_shared_personal_work(self.runtime.as_ref())
+    }
     pub(crate) fn monthly_card_config(&self) -> Result<&GatewayConfig, String> {
         self.routing_context.as_ref().map(|context| &context.config).ok_or_else(|| "monthlyCardServiceUnavailable".into())
     }

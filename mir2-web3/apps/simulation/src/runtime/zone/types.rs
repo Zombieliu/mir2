@@ -56,6 +56,16 @@ pub struct ZoneMapMetadata {
     pub map_dark_light: u8,
     pub music: u16,
     pub weather: u16,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub fight: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_fight: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_experience: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_group: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_pets: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -66,15 +76,23 @@ pub struct ZoneNpcTeleportDestination {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneNpcTeleportConfig {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub pet_save: bool,
+    #[serde(default = "zone_default_max_boss_tames")]
+    pub max_boss_tames: u32,
     pub enabled: bool,
     pub cost: u32,
     pub maps: BTreeMap<String, ZoneMapMetadata>,
     pub destinations: Vec<ZoneNpcTeleportDestination>,
 }
 
+fn zone_default_max_boss_tames() -> u32 { 1 }
+
 impl ZoneNpcTeleportConfig {
     pub fn disabled(cost: u32) -> Self {
         Self {
+            pet_save: false,
+            max_boss_tames: 1,
             enabled: false,
             cost,
             maps: BTreeMap::new(),
@@ -137,6 +155,8 @@ pub struct ZoneChatProfile {
     pub free_server_shout: bool,
     #[serde(default)]
     pub attack_mode: u8,
+    #[serde(default, skip_serializing_if = "zone_byte_is_zero")]
+    pub pet_mode: u8,
     #[serde(default)]
     pub pk_points: i32,
     #[serde(default)]
@@ -156,11 +176,14 @@ impl Default for ZoneChatProfile {
             free_map_shout: false,
             free_server_shout: false,
             attack_mode: 0,
+            pet_mode: 0,
             pk_points: 0,
             in_safe_zone: false,
         }
     }
 }
+
+fn zone_byte_is_zero(value: &u8) -> bool { *value == 0 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneChatItem {
@@ -213,6 +236,10 @@ pub struct ZonePlayerCombatStats {
     /// Crystal PoisonResist, supplied by the authoritative equipment/stat projection.
     #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
     pub poison_resist: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub poison_attack: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub poison_recovery: i32,
     #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
     pub magic_resist: i32,
     /// Trusted GM state; never decoded from a client movement/combat packet.
@@ -436,6 +463,39 @@ impl ZoneMonsterDefense {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneMentorBankAttribution {
+    pub pupil: crate::Stage5FriendIdentity,
+    pub teacher: crate::Stage5FriendIdentity,
+    pub relationship_epoch: u64,
+}
+
+/// Server-issued causal death receipt. It is never a client gameplay packet.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneOwnedPetPlayerKillReceipt {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub direct_player: bool,
+    pub zone_key: ZoneKey,
+    pub sequence: u64,
+    pub at_ms: u64,
+    pub owner_session_id: SessionId,
+    pub owner_account_id: String,
+    pub owner_character_index: i32,
+    pub owner_object_id: u32,
+    pub owner_life_generation: u64,
+    pub owner_online_identity: String,
+    pub pet_object_id: u32,
+    pub pet_incarnation: u64,
+    pub victim_session_id: SessionId,
+    pub victim_object_id: u32,
+    pub victim_life_generation: u64,
+    pub victim_name: String,
+    pub protected_by_law: bool,
+    pub unlawful: bool,
+    #[serde(default)]
+    pub curse_roll: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterKillAward {
     /// Gateway fixes this server-only namespace before first durable delivery.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -443,6 +503,9 @@ pub struct ZoneMonsterKillAward {
     /// Immutable server selection; legacy envelopes never infer a later Guild.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub experience_selection: Option<super::ZoneExperienceSelection>,
+    /// Source-captured server authority; absence never infers a later teacher.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mentor_bank: Option<ZoneMentorBankAttribution>,
     pub monster_object_id: u32,
     /// Authoritative time of this monster incarnation's death. Crystal reuses
     /// a spawn's object id after respawn, so the object id alone cannot be an
@@ -509,6 +572,11 @@ pub enum ZoneCommand {
     UpdatePlayerCombatStats {
         session_id: SessionId,
         stats: ZonePlayerCombatStats,
+    },
+    /// Server-only relationship projection used to attribute deferred XP.
+    UpdateMentorBank {
+        session_id: SessionId,
+        attribution: Option<ZoneMentorBankAttribution>,
     },
     /// Trusted server-to-zone admission update. This command is an internal
     /// API and must never be constructed from raw client JSON.
@@ -819,6 +887,9 @@ pub enum ZoneOutbound {
     /// suppression and the session bridge; packets never carry this data.
     JourneyEvent {
         receipt: ZoneJourneyEventReceipt,
+    },
+    OwnedPetPlayerKill {
+        receipt: ZoneOwnedPetPlayerKillReceipt,
     },
     PlayerDamaged {
         session_id: SessionId,
@@ -1268,6 +1339,10 @@ fn normalize_zone_monster_attack_speed_ms(value: u64) -> u64 {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZonePlayer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_profile: Option<super::ZoneExperienceProfile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mentor_bank: Option<ZoneMentorBankAttribution>,
     pub session_id: SessionId,
     pub account_id: String,
     pub character_index: i32,
@@ -1419,6 +1494,8 @@ impl ZonePlayer {
         Self {
             session_id: join.session_id,
             account_id: join.account_id,
+            mentor_bank: None,
+            experience_profile: None,
             character_index: join.character_index,
             object_id,
             name: join.name,

@@ -185,6 +185,17 @@ fn full_bag_collection_keeps_the_oven_target_until_retry() {
         .refine
         .oven_item_state_json;
     let mut save = s.active_character_checkpoint().unwrap();
+    // Crystal HumanObject.AddItem may use an empty Belt cell after all bag
+    // cells are full. Occupy the whole Inventory[] before testing custody.
+    save.belt_items_json = (0..6)
+        .map(|slot| {
+            let mut item = sample.clone();
+            item["unique_id"] = json!(930_000 + slot);
+            item["slot"] = json!(slot);
+            item["container"] = json!("belt");
+            item.to_string()
+        })
+        .collect();
     save.inventory_items_json = (0..save.inventory_capacity - 6)
         .map(|slot| {
             sample["unique_id"] = json!(920_000 + u64::from(slot));

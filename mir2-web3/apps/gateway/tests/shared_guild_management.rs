@@ -82,6 +82,7 @@ fn fixture() -> GatewayConfig {
                 notice: vec!["old notice".into()],
                 storage: BTreeMap::new(),
                 buffs: BTreeMap::new(),
+                active_wars: BTreeMap::new(),
                 last_buff_tick_ms: 0,
                 experience_receipts: Default::default(),
                 experience_receipt_payloads: Default::default(),

@@ -250,6 +250,9 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let mut saved_systems = stage5.stage5_systems.clone();
     super::refine_oven::snapshot_timer(&mut saved_systems.refine, true);
     Some(CharacterSaveRecord {
+        saved_pets: super::shared_pet_progress::saved_snapshot(world).for_durable_storage(),
+        player_kill_receipts: super::shared_player_kills::snapshot(world),
+        default_npc_events: super::default_npc_events::capture(world),
         guild_experience_journal: super::shared_guild_experience::snapshot(world),
         revision,
         character,
@@ -1027,6 +1030,23 @@ fn apply_full_character_save_mutation(store: &mut crate::config::AccountStore, a
             return Ok(PersistCharacterSaveResult::StaleMailStatusOnly);
         }
 
+        let local_systems = save.stage5_systems_json.as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>).transpose()
+            .map_err(|e| format!("invalid mentor source: {e}"))?.unwrap_or_default();
+        let durable_systems = persisted_save.stage5_systems_json.as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>).transpose()
+            .map_err(|e| format!("invalid durable mentor source: {e}"))?.unwrap_or_default();
+        if super::shared_mentor_rewards::has_novel_bank(&local_systems.mentor, &durable_systems.mentor) {
+            let peer = durable_systems.mentor.partner_identity.as_ref()
+                .ok_or("mentor source relationship changed")?;
+            let reciprocal = super::shared_relationships::profile(store, peer)?;
+            if !reciprocal.mentor.is_mentor
+                || reciprocal.mentor.partner_identity.as_ref() != Some(&crate::Stage5FriendIdentity {
+                    account_id: account_id.into(), character_index,
+                })
+                || reciprocal.mentor.ledger.relationship_epoch != durable_systems.mentor.ledger.relationship_epoch
+            { return Err("mentor source relationship is not reciprocal".into()); }
+        }
         merge_persisted_mail_into_character_save(&mut save, &persisted_save)?;
         validate_character_save_record(&save)?;
         let committed_revision = expected_revision
@@ -1081,33 +1101,9 @@ pub(super) fn merge_persisted_mail_into_character_save(
         }
     }
     let local_mentor = systems.mentor.clone();
-    if persisted_systems.mentor.authority_revision > systems.mentor.authority_revision {
-        systems.mentor = persisted_systems.mentor.clone();
-    }
-    let ledger = &mut systems.mentor.ledger;
-    let local = &local_mentor.ledger;
-    let durable = &persisted_systems.mentor.ledger;
-    ledger.bank_earned = local.bank_earned.max(durable.bank_earned);
-    ledger.bank_settled = local.bank_settled.max(durable.bank_settled);
-    ledger.local_event_sequence = local.local_event_sequence.max(durable.local_event_sequence);
-    ledger.bank_events.extend(local.bank_events.iter().cloned());
-    ledger
-        .bank_events
-        .extend(durable.bank_events.iter().cloned());
-    ledger.leveling_credit = local.leveling_credit.max(durable.leveling_credit);
-    ledger.balance_credit = local.balance_credit.max(durable.balance_credit);
-    let leveling_missing = ledger
-        .leveling_credit
-        .checked_sub(local.leveling_applied)
-        .ok_or("invalid mentor leveling credit")?;
-    let balance_missing = ledger
-        .balance_credit
-        .checked_sub(local.balance_applied)
-        .ok_or("invalid mentor balance credit")?;
-    super::shared_mentor_rewards::apply_saved_mentor_credit(save, leveling_missing, true)?;
-    super::shared_mentor_rewards::apply_saved_mentor_credit(save, balance_missing, false)?;
-    ledger.leveling_applied = ledger.leveling_credit;
-    ledger.balance_applied = ledger.balance_credit;
+    systems.mentor = super::shared_mentor_rewards::merge_mentor_state(
+        &local_mentor, &persisted_systems.mentor, true,
+    )?;
     let mentor_changed = systems.mentor != local_mentor;
     let marker_count = systems.economy_projection_event_ids.len();
     systems
@@ -2499,6 +2495,8 @@ struct DecodedCharacterSavePreflight {
 fn decode_and_validate_character_save(
     save: &CharacterSaveRecord,
 ) -> Result<DecodedCharacterSavePreflight, String> {
+    save.saved_pets.validate_canonical()?;
+    save.default_npc_events.validate()?;
     let (mut inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
     let mut hero_equipment = decode_saved_item_states("hero equipment", &save.hero_equipment_items_json)?;
@@ -2757,6 +2755,13 @@ fn apply_character_save_with_timing(
         super::map::refresh_player_bind_at_position(world, &position);
     }
     super::shared_guild_experience::restore(world, &save.guild_experience_journal);
+    super::shared_player_kills::restore(world, &save.player_kill_receipts);
+    if let Err(error)=super::shared_pet_progress::restore_saved_snapshot(world,&save.saved_pets) {
+        super::shared_guild_experience::reject_source(world,error);
+    }
+    if let Err(error) = super::default_npc_events::restore(world, &save.default_npc_events) {
+        super::shared_guild_experience::reject_source(world, error);
+    }
     *world.resource_mut::<InventoryResource>() = restored_inventory;
     refresh_mount_resource_from_equipment(world);
     *world.resource_mut::<HeroInventoryResource>() = hero_inventory;
@@ -2794,6 +2799,8 @@ fn apply_character_save_with_timing(
     super::quests::reconcile_effective_quest_states(world);
     world.resource_mut::<SkillResource>().skills = skill_states;
     world.resource_mut::<BuffResource>().buffs = buff_states;
+    let position=world.resource::<PlayerRuntimeResource>().player_position.clone();
+    let _=super::buffs::refresh_player_safe_duration_buffs(world,&position);
     {
         let mut rental = world.resource_mut::<ItemRentalResource>();
         rental.rented_items = decode_state_vec(&save.item_rental_records_json).unwrap_or_default();
@@ -3895,6 +3902,13 @@ impl SimulationSession {
             spawn_config_visible_npcs(self.app.world_mut());
         }
 
+        // Consume offline/pending mentor credit before UserInformation is
+        // built. A known failed publication leaves credit pending for retry.
+        if let Err(error) = self.consume_shared_mentor_credits() {
+            eprintln!("[mentor] login credit remains pending: {error}");
+        }
+        let character = self.app.world().resource::<SessionResource>()
+            .selected_character.clone().unwrap_or(character);
         self.build_active_character_bootstrap(&character)
     }
 

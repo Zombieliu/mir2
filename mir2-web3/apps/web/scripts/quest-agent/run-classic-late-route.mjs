@@ -10,8 +10,8 @@ import { clearTravelBlockingMonster } from './protocol-combat.mjs';
 import { combatAction, combatApproachRange, useSupplies, useClassRecovery } from './protocol-loadout.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import { sha256, SOURCE_HASHES, ROUTES, PRESERVED_DEFECT, SOURCE_ONLY_ROOM, BOSSES, LATE_BOOKS,
-  loadClassicSources, validateScenario, validateEndpoint, assertPair, assertCommand, freshSnapshot,
-  exactNpc, npcLink, bagCount, bossCatalog, redactEvidence } from './classic-late-route-policy.mjs';
+  loadClassicSources, validateScenario, validateEndpoint, validateWebOrigin, assertPair, assertCommand, freshSnapshot,
+  exactNpc, npcLink, bagCount, groundItemIdentity, bossCatalog, redactEvidence } from './classic-late-route-policy.mjs';
 
 const sleep = ms => new Promise(resolve=>setTimeout(resolve,ms));
 const mapName = client => String(client.snapshot?.mapFileName ?? '');
@@ -23,8 +23,9 @@ const skillKnown = (snapshot,name) => (snapshot?.knownSkills??[]).some(skill=>[s
  * limits itself to loopback. No fake URL or bypass of that class's guard. */
 export class ClassicProtocolClient {
   constructor(url, output, {WebSocketImpl=globalThis.WebSocket, appendFile=fs.appendFile, secrets=[], now=Date.now,
-    setTimeoutImpl=setTimeout,clearTimeoutImpl=clearTimeout}={}) {
+    setTimeoutImpl=setTimeout,clearTimeoutImpl=clearTimeout,webOrigin=new URL(url.replace(/^ws/,'http')).origin}={}) {
     validateEndpoint(url); this.url=url; this.output=output; this.WebSocketImpl=WebSocketImpl;
+    this.webOrigin=validateWebOrigin(webOrigin);
     this.appendFile=appendFile; this.secrets=secrets; this.now=now; this.events=[]; this.sequence=0;
     this.snapshot=null; this.writeQueue=Promise.resolve(); this.questDefinitions=new Map();
     this.scheduleTimeout=setTimeoutImpl;this.cancelTimeout=clearTimeoutImpl;this.lastVitalsRefreshAt=null;this.vitalsTimer=null;
@@ -53,8 +54,10 @@ export class ClassicProtocolClient {
   }
   questDefinition(id) {return this.questDefinitions.get(Number(id))??null;}
   async connect() {
-    this.record('lifecycle',{type:'connection',url:this.url});
-    this.ws=new this.WebSocketImpl(this.url);
+    this.record('lifecycle',{type:'connection',url:this.url,webOrigin:this.webOrigin});
+    // Node >=22 WebSocketInit supports headers. The ordinary server Origin
+    // allowlist remains enforced; its exact permitted origin is root-attested.
+    this.ws=new this.WebSocketImpl(this.url,{headers:{Origin:this.webOrigin}});
     this.ws.addEventListener('message',event=>{try{this.observeGatewayMessage(JSON.parse(event.data));}catch(error){this.failure=error;}});
     this.ws.addEventListener('error',()=>{this.failure=new Error('Classic Gateway transport failed');});
     this.ws.addEventListener('close',()=>{this.closed=true;});
@@ -105,7 +108,13 @@ export async function executeClassicHop(client,travel,edge,routeId,index) {
       portal.source.y>=transfer.bounds?.minY && portal.source.y<=transfer.bounds?.maxY));
   if(!transfers.length)throw new Error(`No live walking transfer ${edge.from}->${edge.to}`);
   const before=client.sequence;
-  const traversed=await travel(edge.to,{preferredTransferSource:edge.portals[0].source,resolveBlockingMonster:false,
+  // Some original manifest destinations are invalid terrain/out of bounds.
+  // Prefer a source the live ValidPoint-gated runtime actually publishes;
+  // an authored but unusable first record is not a doorway substitute.
+  const preferred=edge.portals.find(portal=>transfers.some(transfer=>
+    portal.source.x>=transfer.bounds?.minX && portal.source.x<=transfer.bounds?.maxX &&
+    portal.source.y>=transfer.bounds?.minY && portal.source.y<=transfer.bounds?.maxY));
+  const traversed=await travel(edge.to,{preferredTransferSource:preferred.source,resolveBlockingMonster:false,
     navigationOptions:{detectPositionCycles:true}});
   if(traversed.length!==1||traversed[0].fromMapFileName!==edge.from||traversed[0].toMapFileName!==edge.to)throw new Error('Unexpected intermediate route/landing cannot be credited');
   const transition=receivedAfter(client,before,event=>['MapChanged','MapInformation'].includes(event.packet)&&mapPacketName(event)===edge.to);
@@ -210,18 +219,22 @@ async function attemptNaturalBoss(client,navigate,name,sources,scenario,report,c
       attempt.settlementSnapshotSequence=settled.sequence;
       const drops=(settled.payload.groundDrops??[]).filter(drop=>!dropsBefore.has(String(drop.objectId))&&drop.sourceMonster===name);
       attempt.noDrop=drops.length===0;attempt.groundDropSequences=drops.map(drop=>({objectId:drop.objectId,snapshotSequence:settled.sequence,kind:drop.loot?.kind,name:drop.name}));
-      for(const drop of drops.filter(drop=>drop.loot?.kind==='item')) {
+      for(const drop of drops.filter(drop=>drop.loot?.kind==='inventoryItem')) {
         if(Number(drop.ownerObjectId)!==Number(client.snapshot.playerObjectId))continue; // outsider/group ownership is a separate lane
+        const identity=groundItemIdentity(drop);
         await navigate(drop,0);
         const before=await refreshSnapshot(client,catalog.policy.map);const beforeIds=new Set((before.payload.inventoryItems??[]).map(item=>String(item.uniqueId)));
         const pickAfter=client.sequence;client.send({type:'pickUp',objectId:drop.objectId});
         const after=await refreshSnapshot(client,catalog.policy.map);
-        const item=after.payload.inventoryItems?.find(item=>!beforeIds.has(String(item.uniqueId))&&(item.key===drop.loot?.key||item.name===drop.name)&&Number(item.quantity)===Number(drop.quantity));
+        const item=after.payload.inventoryItems?.find(item=>!beforeIds.has(String(item.uniqueId))
+          && (identity?.uniqueId == null || identity.uniqueId === String(item.uniqueId))
+          && (item.key===drop.loot?.key||item.name===drop.name)&&Number(item.quantity)===Number(drop.quantity));
         const pickup={id:`${attempt.id}-drop-${drop.objectId}`,attemptId:attempt.id,groundObjectId:drop.objectId,groundSnapshotSequence:settled.sequence,
           beforeSnapshotSequence:before.sequence,afterSnapshotSequence:after.sequence,beforeSequence:pickAfter,provenance:'fresh-kill-associated-ground-item',
           // Public name association is useful evidence but not exact source-kill
           // ownership proof. Root's independent server journal gate remains open.
-          sourceKillIdentityAccepted:false,ownershipAccepted:Number(drop.ownerObjectId)===Number(before.payload.playerObjectId),
+          sourceKillIdentityAccepted:false,sourceItemUidAccepted:identity?.uniqueId != null && identity.uniqueId === String(item?.uniqueId),
+          ownershipAccepted:Number(drop.ownerObjectId)===Number(before.payload.playerObjectId),
           status:item?'pickedUp':'failedPickup',uniqueId:item?.uniqueId??null,itemName:drop.name,quantity:drop.quantity};
         report.pickups.push(pickup);attempt.pickupIds.push(pickup.id);
         const itemTemplate=sources.items.items.find(template=>`crystal-item-${template.item_index}`===item?.key);
@@ -249,7 +262,7 @@ export async function runClassicLateRoute({input,output,mapPackRoot,pairReceiptF
   const reportFile=path.join(root,'report.json');
   try{await fs.access(reportFile);throw new Error('Use a NEW evidence directory; never overwrite an old run');}catch(error){if(error.code!=='ENOENT')throw error;}
   const report={schema:'mir2.classic-late-route-run.v1',className:scenario.className,lane:scenario.lane,startingState:scenario.startingState,
-    gatewayUrl:scenario.gatewayUrl,accountFingerprint:sha256(scenario.accountId),sourceHashes:{...SOURCE_HASHES},pairedReceiptSha256:pairReceiptSha256,pairIdentity,health,
+    gatewayUrl:scenario.gatewayUrl,webOrigin:scenario.webOrigin,accountFingerprint:sha256(scenario.accountId),sourceHashes:{...SOURCE_HASHES},pairedReceiptSha256:pairReceiptSha256,pairIdentity,health,
     declaredNaturalKillLimit:scenario.maxKillsPerTarget,spawnWaitMs:scenario.spawnWaitMs,timeoutMs:scenario.timeoutMs,
     startedAt:new Date().toISOString(),deadlineMs:Date.now()+scenario.timeoutMs,status:'running',
     freshLevelJourneyAccepted:false,runtimeGameplayAccepted:false,nativeVisualAccepted:false,
@@ -257,7 +270,7 @@ export async function runClassicLateRoute({input,output,mapPackRoot,pairReceiptF
   const redact=value=>redactEvidence(value,[scenario.password,scenario.accountId]);
   const write=()=>fs.writeFile(reportFile,JSON.stringify(redact(report),null,2));
   const checkDeadline=()=>{if(Date.now()>=report.deadlineMs)throw new Error('Original ordinary route deadline exhausted');};
-  const client=dependencies.client??new ClassicProtocolClient(scenario.gatewayUrl,path.join(root,'trace.jsonl'),{secrets:[scenario.password,scenario.accountId]});
+  const client=dependencies.client??new ClassicProtocolClient(scenario.gatewayUrl,path.join(root,'trace.jsonl'),{secrets:[scenario.password,scenario.accountId],webOrigin:scenario.webOrigin});
   const bounded=new Proxy(client,{get(target,key){
     if(['send','request','wait'].includes(key))return(...args)=>{checkDeadline();if(key!=='wait')assertCommand(args[0]);
       if(key==='wait')return target.wait(args[0],args[1],Math.min(args[2]??20000,Math.max(1,report.deadlineMs-Date.now())));

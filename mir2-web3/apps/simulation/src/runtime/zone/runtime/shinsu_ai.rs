@@ -132,6 +132,10 @@ pub(super) fn shinsu_can_act(m: &ZoneNativeMonster, now: u64) -> bool {
             .and_then(|s| s.shinsu.as_ref())
             .is_some_and(|s| now > s.action_until_ms)
 }
+
+pub(super) fn clear_owned_shinsu_recall_hits(state: &mut ShinsuState) {
+    state.hits.clear();
+}
 pub(super) fn sync_shinsu_packet(m: &ZoneNativeMonster, packet: &mut ServerPacket) {
     if m.ai != 18 {
         return;
@@ -159,7 +163,7 @@ fn shinsu_range(source: &Point, target: &Point) -> bool {
 }
 
 impl ZoneRuntime {
-    fn shinsu_not_expired(&self, id: u32, now: u64) -> bool {
+    pub(super) fn shinsu_not_expired(&self, id: u32, now: u64) -> bool {
         self.objects
             .get(&id)
             .is_some_and(|object| object.expires_at_ms.is_none_or(|deadline| now < deadline))
@@ -184,10 +188,8 @@ impl ZoneRuntime {
             }
             initialize_shinsu(self.native_monsters.get_mut(&id).unwrap(), now);
             let m = self.native_monsters[&id].clone();
-            let has_target = if let Some(owner) = m.owner_session_id.as_ref() {
-                self.players.get(owner).is_some_and(|p| {
-                    !p.dead && p.object_id == zone_native_summon_owner_player_object_id(&m)
-                }) && self.nearest_native_summon_target(id, &m.position).is_some()
+            let has_target = if m.owner_session_id.is_some() {
+                self.selected_owned_pet_target(id, now).is_some()
             } else {
                 m.hostile_to_player
                     && self
@@ -271,12 +273,13 @@ impl ZoneRuntime {
         }
         let direction = zone_direction_toward(&m.position, target)?;
         let template = crystal_monster_by_name(&m.name);
+        let pet_dc = if m.owner_session_id.is_some() { i32::from(m.summon_skill_level) } else { 0 };
         let damage = template
             .as_ref()
             .map(|t| {
                 zone_roll_stat_range(
-                    t.min_dc,
-                    t.max_dc.saturating_add(zone_native_monster_buff_stat_total(
+                    t.min_dc.saturating_add(pet_dc),
+                    t.max_dc.saturating_add(pet_dc).saturating_add(zone_native_monster_buff_stat_total(
                         &m,
                         CRYSTAL_STAT_MAX_DC,
                     )),
@@ -286,9 +289,6 @@ impl ZoneRuntime {
                 )
             })
             .unwrap_or(7);
-        // MonsterObject.RefreshBase copies Info.Stats; MapObject.GetArmour's
-        // AC Agility defence compares against Stat.Accuracy (manifest stat 10).
-        let accuracy = template.as_ref().map_or(0, |t| t.accuracy);
         let live = self.native_monsters.get_mut(&id)?;
         live.direction = direction;
         live.next_ai_ready_at_ms = now.saturating_add(300);
@@ -318,33 +318,11 @@ impl ZoneRuntime {
                 continue;
             }
             let due = now.saturating_add(500 + step as u64 * 50);
-            if let Some(owner) = m.owner_session_id.as_ref() {
-                let target = self.native_monsters.iter().find_map(|(&other, t)| {
-                    (other != id
-                        && !t.dead
-                        && t.hp > 0
-                        && t.position == cell
-                        && t.hostile_to_player
-                        && t.ai != 57
-                        && monster_visibility_is_attackable(t)
-                        && trap_rock_visible(t))
-                    .then_some(other)
-                });
+            if m.owner_session_id.is_some() {
+                let target = self.owned_pet_target_in_cell(id, &cell, now);
                 if let Some(target) = target {
-                    self.native_monsters
-                        .get_mut(&id)?
-                        .special_ai
-                        .as_mut()?
-                        .shinsu
-                        .as_mut()?
-                        .hits
-                        .push(ShinsuHit {
-                            due_ms: due,
-                            owner: owner.clone(),
-                            target,
-                            damage,
-                            accuracy,
-                        });
+                    self.queue_owned_pet_hit(id, &target, damage,
+                        super::entity_combat::EntityDefence::ACAgility, due, now);
                 }
             } else if let Some(t) = self.players.values().find(|p| {
                 !p.dead
@@ -385,6 +363,7 @@ impl ZoneRuntime {
         let mut out = Vec::new();
         for id in ids {
             let expired = !self.shinsu_not_expired(id, now);
+            let owned = self.native_monsters.get(&id).is_some_and(|m| m.owner_session_id.is_some());
             let Some(s) = self
                 .native_monsters
                 .get_mut(&id)
@@ -394,7 +373,9 @@ impl ZoneRuntime {
                 continue;
             };
             let pending = std::mem::take(&mut s.hits);
-            if expired {
+            // The former owned queue has no owner epoch or victim incarnation.
+            // New breaths use OwnedPetHit; never rebase old restored hits.
+            if expired || owned {
                 continue;
             }
             let mut remaining = Vec::new();

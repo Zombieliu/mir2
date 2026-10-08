@@ -1147,7 +1147,7 @@ fn entity_is_green_bit(bit: &u16) -> bool {
 pub(super) fn native_entity_attack_blocked(monster: &ZoneNativeMonster, _now: u64) -> bool {
     monster.entity_poison & 1024 != 0
 }
-fn entity_monster_defended_damage(
+pub(super) fn entity_monster_defended_damage(
     m: &ZoneNativeMonster,
     object_id: u32,
     raw_damage: i32,
@@ -1215,6 +1215,8 @@ struct EntitySlowPoison {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(super) struct ZoneEntityCombatState {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) owned_pet: Option<super::owned_pet_combat::OwnedPetCombatState>,
     hits: Vec<EntityHit>,
     poisons: Vec<EntityGreenPoison>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -1271,7 +1273,7 @@ impl ZoneRuntime {
         })
     }
 
-    fn entity_ref_exists(&self, reference: &ZoneCombatEntityRef, allow_dead: bool) -> bool {
+    pub(super) fn entity_ref_exists(&self, reference: &ZoneCombatEntityRef, allow_dead: bool) -> bool {
         match reference {
             ZoneCombatEntityRef::Player {
                 session_id,
@@ -1315,7 +1317,8 @@ impl ZoneRuntime {
         };
         let source_monster = &self.native_monsters[source_id];
         // Do not invent pet-versus-pet aggro or turn passive NPCs into attackers.
-        if source_monster.owner_session_id.is_some() || !source_monster.hostile_to_player {
+        if source_monster.owner_session_id.is_some()
+            || (!source_monster.hostile_to_player && !self.owned_monster_rage_active(*source_id,now)) {
             return false;
         }
         match target {
@@ -1353,6 +1356,9 @@ impl ZoneRuntime {
             }
             ZoneCombatEntityRef::Monster { object_id, .. } => {
                 let m = &self.native_monsters[object_id];
+                if m.owner_session_id.is_none() {
+                    return monster_visibility_is_attackable(m) && self.owned_monster_rage_active(*source_id,now);
+                }
                 let Some(owner_session) = m.owner_session_id.as_ref() else {
                     return false;
                 };
@@ -1396,7 +1402,7 @@ impl ZoneRuntime {
         }
     }
 
-    fn entity_cool_eye_sees(&self, source: &ZoneNativeMonster, target_level: u16) -> bool {
+    pub(super) fn entity_cool_eye_sees(&self, source: &ZoneNativeMonster, target_level: u16) -> bool {
         source.level >= target_level
             && crystal_monster_by_name(&source.name).is_some_and(|t| {
                 u64::from(t.cool_eye)
@@ -1607,6 +1613,12 @@ impl ZoneRuntime {
         }
     }
 
+    pub(super) fn entity_source_targets(&self, source_id: u32, target: &ZoneCombatEntityRef) -> bool {
+        self.entity_combat.as_ref().and_then(|s| s.targets.get(&source_id))
+            .is_some_and(|r| r.target == *target && self.entity_ref_exists(&r.source, false)
+                && self.entity_ref_exists(&r.target, false))
+    }
+
     pub(super) fn selected_native_entity_target(
         &self,
         source_id: u32,
@@ -1670,7 +1682,8 @@ impl ZoneRuntime {
         now: u64,
     ) -> Option<Vec<ZoneOutbound>> {
         let m = self.native_monsters.get(&object_id)?.clone();
-        if m.ai != 0 || m.owner_session_id.is_some() || !m.hostile_to_player {
+        if (m.ai != 0 && !self.owned_monster_rage_active(object_id,now)) || m.owner_session_id.is_some()
+            || (!m.hostile_to_player && !self.owned_monster_rage_active(object_id,now)) {
             return None;
         }
         let view = crystal_monster_by_name(&m.name)
@@ -1751,7 +1764,7 @@ impl ZoneRuntime {
         now: u64,
     ) -> Option<Vec<ZoneOutbound>> {
         let m = self.native_monsters.get(&object_id)?.clone();
-        if m.dead || m.owner_session_id.is_some() || !m.hostile_to_player {
+        if m.dead || m.owner_session_id.is_some() || (!m.hostile_to_player && !self.owned_monster_rage_active(object_id,now)) {
             return None;
         }
         if now < m.next_ai_ready_at_ms
@@ -1773,6 +1786,7 @@ impl ZoneRuntime {
             );
         if !ranged && !native_monster_adjacent_to(&m.position, &target.position) {
             if !monster_visibility_can_move(&m)
+                || self.owned_monster_shock_blocks_move(object_id,now)
                 || !sleep_monster_can_move(&m)
                 || !great_fox_can_move(&m)
                 || !great_fox_movement_ready(&m, now)
@@ -2027,6 +2041,7 @@ impl ZoneRuntime {
             Some(if struck { 0 } else { source_id }),
             now,
         );
+        if actual>0 && !struck {out.extend(self.release_owned_monster_shock(object_id,now));}
         if !struck {
             out.extend(self.snow_wolf_attacked(object_id, actual, false, now));
         }
@@ -2075,9 +2090,9 @@ impl ZoneRuntime {
         self.entity_monster_damage_outcome(0, id, result, Some(0), now)
     }
 
-    fn entity_miss_packet(
+    pub(super) fn entity_miss_packet(
         &self,
-        source_id: u32,
+        _source_id: u32,
         target: &ZoneCombatEntityRef,
     ) -> Vec<ZoneOutbound> {
         let position = match target {
@@ -2092,11 +2107,10 @@ impl ZoneRuntime {
         position
             .map(|p| {
                 vec![ZoneOutbound::ToMany {
-                    session_ids: self.native_monster_combat_recipients(
-                        source_id,
-                        target.object_id(),
-                        &p,
-                    ),
+                    session_ids: match target {
+                        ZoneCombatEntityRef::Player { .. } => self.player_status_recipients(target.object_id(), &p),
+                        ZoneCombatEntityRef::Monster { .. } => self.native_monster_visible_recipients(target.object_id(), &p),
+                    },
                     packets: vec![ServerPacket::DamageIndicator {
                         damage: 0,
                         damage_type: 1,
@@ -2107,9 +2121,9 @@ impl ZoneRuntime {
             .unwrap_or_default()
     }
 
-    fn entity_monster_damage_outcome(
+    pub(super) fn entity_monster_damage_outcome(
         &mut self,
-        source_id: u32,
+        _source_id: u32,
         object_id: u32,
         result: NativeMonsterDamageResult,
         struck_attacker: Option<u32>,
@@ -2152,7 +2166,7 @@ impl ZoneRuntime {
         }
         self.apply_zone_object_packets(&packets, now);
         let mut out = vec![ZoneOutbound::ToMany {
-            session_ids: self.native_monster_combat_recipients(source_id, object_id, &position),
+            session_ids: self.native_monster_visible_recipients(object_id, &position),
             packets,
         }];
         // A real Master target has no wild rewards. Environmental Struck may
@@ -2163,7 +2177,7 @@ impl ZoneRuntime {
                 &position,
                 ZoneMonsterKillAward {
                     source_receipt_key: None,
-                    experience_selection: None,
+                    mentor_bank: None, experience_selection: None,
                     monster_object_id: object_id,
                     killed_at_ms: now,
                     monster_name: name,

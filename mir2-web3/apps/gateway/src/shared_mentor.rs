@@ -9,6 +9,7 @@ pub(super) struct SharedMentorCoordinator {
     pub(super) guild_permissions: BTreeSet<ZonePresenceKey>,
     pub(super) marriages: BTreeMap<ZonePresenceKey, super::shared_marriage::MarriageInvitation>,
     pub(super) divorces: BTreeMap<ZonePresenceKey, super::shared_marriage::MarriageInvitation>,
+    pub(super) groups: super::shared_groups::SharedGroupCoordinator,
 }
 
 #[derive(Debug, Clone)]
@@ -252,6 +253,9 @@ impl SharedInProcessZoneSessionRuntime {
                 );
                 match result {
                     Ok(_) => {
+                        if let Err(error) = self.project_mentor_bank_participants(
+                            &config, &[owner_id.clone(), identity(&student.key)], &presences,
+                        ) { eprintln!("[mentor] accepted projection pending: {error}"); }
                         coordinator.changed();
                         coordinator.forget(&key);
                         coordinator.forget(&student.key);
@@ -289,12 +293,21 @@ impl SharedInProcessZoneSessionRuntime {
                 }
                 Err(reason) => vec![error(reason)],
             },
-            ClientPacket::CancelMentor => match config.commit_shared_mentor_mutation(
-                &owner_id,
-                SharedMentorMutation::Cancel,
-                now,
-            ) {
-                Ok(_) => {
+            ClientPacket::CancelMentor => match config.shared_mentor_profile_for(&owner_id)
+                .and_then(|profile| {
+                    let teacher = if profile.mentor.is_mentor { Some(owner_id.clone()) }
+                        else { profile.mentor.partner_identity.clone() };
+                    let online = teacher.as_ref().is_some_and(|id|
+                        presences.iter().any(|p| identity(&p.key) == *id));
+                    config.settle_shared_mentor_bank(&owner_id, profile.mentor.ledger.relationship_epoch,
+                        Some(mir2_simulation::SharedMentorBreakReason::Manual), now, online)
+                })
+            {
+                Ok(receipt) => {
+                    if let Err(error) = self.project_mentor_bank_participants(&config, &receipt.participants, &presences) {
+                        eprintln!("[mentor] ended projection pending: {error}");
+                    }
+                    self.notify_mentor_end(&receipt, &presences);
                     coordinator.changed();
                     coordinator.forget(&key);
                     vec![msg("server.YouHaveMentorshipCooldown", &["7".into()])]

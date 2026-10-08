@@ -3,8 +3,9 @@ mod aoi_grid;
 mod collision;
 mod ecs;
 mod experience;
-pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+pub use experience::{ZoneExperienceProfile,ZoneExperiencePartner,ZoneExperienceSelection,ZoneGuildExperienceMembership, ZoneExperienceRateSource, ZoneExperienceRateBuff, ZoneExperienceRateStat};
 mod manager;
+pub use types::ZoneMentorBankAttribution;
 mod online_identity;
 mod movement;
 mod packets;
@@ -24,6 +25,7 @@ pub use replay::{
 };
 pub use replication::{ZoneReplicaCheckpoint, ZoneStandbyReplica};
 pub use runtime::ZoneRuntime;
+pub use runtime::owned_pet_combat::{ZoneSavedPetSnapshot, ZonePetExperienceAdmission};
 pub use runtime::mining::{ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing};
 pub use runtime::conquest::{ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample};
 pub use types::{
@@ -34,4 +36,5 @@ pub use types::{
     ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique, ZoneMagicPracticeReceipt,
     ZoneMagicPracticeSpell,
     ZoneVitalSettlement, ZonePlayerAppearance,
+    ZoneOwnedPetPlayerKillReceipt,
 };

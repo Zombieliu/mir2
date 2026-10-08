@@ -104,6 +104,7 @@ struct Fixture {
 
 fn guild(id: &str, name: &str, members: &[(&str, i32, &str, u8)]) -> SharedGuildRecord {
     SharedGuildRecord {
+        active_wars: Default::default(),
         id: id.into(),
         name: name.into(),
         revision: 1,

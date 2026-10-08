@@ -388,7 +388,7 @@ fn runtime_award(runtime: &InProcessWorldRuntime) -> SharedAccountInventoryComma
                 experience: 5,
                 drops: vec![],
                 boss_audit: None,
-                experience_selection: None,
+                mentor_bank: None, experience_selection: None,
                 source_receipt_key: None,
             },
         ),

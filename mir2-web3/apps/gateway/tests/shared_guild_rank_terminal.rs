@@ -47,6 +47,7 @@ fn fixture() -> GatewayConfig {
         store.accounts.insert(account_id.into(), account);
     }
     let guild = SharedGuildRecord {
+        active_wars: Default::default(),
         id: GUILD_ID.into(),
         name: "Rank Guild".into(),
         revision: 7,

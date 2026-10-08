@@ -151,6 +151,7 @@ pub(in crate::config) fn commit_postgres_tick_checked_with_lease(
         for (id, before) in &view.shared_guilds {
             let mut guild = before.clone();
             crate::runtime::advance_shared_guild_minutes(&mut guild, admitted_minutes);
+            guild.advance_shared_guild_war_minutes(admitted_minutes);
             if guild == *before {
                 continue;
             }

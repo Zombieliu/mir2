@@ -12,7 +12,7 @@
 )]
 
 use bevy::prelude::IntoScheduleConfigs;
-use mir2_bevy_runtime::{RuntimeWindowSpec, build_runtime_app};
+use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 
 mod assets;
 mod atlas;
@@ -38,6 +38,7 @@ mod native_display;
 mod native_fonts;
 mod native_locale;
 mod native_protocol;
+mod refine_wire;
 mod session_config;
 mod shell_bridge;
 mod social_bond_wire;

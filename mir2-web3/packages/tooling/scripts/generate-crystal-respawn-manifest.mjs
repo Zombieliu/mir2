@@ -118,6 +118,40 @@ function main() {
   }
 
   const maps = parseMaps(reader);
+  // Repair omitted gameplay rule bits without rewriting any spawn/content.
+  if (process.env.MIR2_CRYSTAL_PK_MAP_RULES_ONLY) {
+    const fields = ["fight", "no_fight", "no_experience", "no_group", "no_pets"];
+    const byIndex = new Map(maps.map(map => [map.map_index, map]));
+    const strip = text => JSON.stringify(JSON.parse(text), (key, value) => fields.includes(key) ? undefined : value);
+    const outputs = [respawnOutputPath, webRespawnOutputPath].map(path => {
+      const original = readFileSync(path, "utf8");
+      const manifest = JSON.parse(original);
+      if (manifest.crystal_db_version !== version || manifest.crystal_db_custom_version !== customVersion
+          || manifest.maps.length !== maps.length) throw new Error("Map rule repair requires the same complete source DB");
+      for (const map of manifest.maps) {
+        const source = byIndex.get(map.map_index);
+        if (!source || map.map_file_name !== source.map_file_name || map.map_title !== source.map_title)
+          throw new Error(`Map source identity mismatch: ${map.map_index}`);
+      }
+      let cursor = 0;
+      const repaired = original.replace(/^\s*"(?:fight|no_fight|no_experience|no_group|no_pets)": (?:true|false),\r?\n/gm, "")
+        .replace(/(^[ \t]*)"fire":/gm, (match, indent) => {
+          const source = byIndex.get(manifest.maps[cursor++].map_index);
+          return fields.map(field => `${indent}"${field}": ${source[field]},\n`).join("") + match;
+        });
+      if (cursor !== maps.length || strip(original) !== strip(repaired))
+        throw new Error("Map rule repair changed unrelated content");
+      if (process.env.MIR2_CRYSTAL_PK_MAP_RULES_ONLY === "check" && repaired !== original)
+        throw new Error(`Gameplay map rule fields differ: ${path}`);
+      return [path, repaired];
+    });
+    if (process.env.MIR2_CRYSTAL_PK_MAP_RULES_ONLY !== "check")
+      for (const [path, text] of outputs) writeFileSync(path, text);
+    console.log(JSON.stringify({ sourceMapCount: maps.length,
+      sourceDbSha256: createHash("sha256").update(readFileSync(serverDbPath)).digest("hex"),
+      ...Object.fromEntries(fields.map(field => [field, maps.filter(map => map[field]).length])) }));
+    return;
+  }
   // Export the original mining metadata independently: no respawn, item or
   // timestamp rewrites are needed when repairing this previously omitted field.
   if (process.env.MIR2_CRYSTAL_MINING_ONLY) {
@@ -294,6 +328,11 @@ function main() {
         map_dark_light: map.map_dark_light,
         weather_particles: map.weather_particles,
         music: map.music,
+        fight: map.fight,
+        no_fight: map.no_fight,
+        no_experience: map.no_experience,
+        no_group: map.no_group,
+        no_pets: map.no_pets,
         fire: map.fire,
         fire_damage: map.fire_damage,
         lightning: map.lightning,
@@ -522,7 +561,7 @@ function parseMaps(reader) {
     const no_drop_player = reader.readBoolean();
     const no_drop_monster = reader.readBoolean();
     reader.readBoolean();
-    reader.readBoolean();
+    const fight = reader.readBoolean();
     const fire = reader.readBoolean();
     const fire_damage = reader.readInt32();
     const lightning = reader.readBoolean();
@@ -539,16 +578,16 @@ function parseMaps(reader) {
     const mine_index = reader.readUInt8();
     const no_mount = reader.readBoolean();
     const need_bridle = reader.readBoolean();
-    reader.readBoolean();
+    const no_fight = reader.readBoolean();
     const music = reader.readUInt16();
     reader.readBoolean();
     reader.readBoolean();
     const weather_particles = reader.readUInt16();
     reader.readBoolean();
     reader.readUInt8();
-    reader.readBoolean();
-    reader.readBoolean();
-    reader.readBoolean();
+    const no_experience = reader.readBoolean();
+    const no_group = reader.readBoolean();
+    const no_pets = reader.readBoolean();
     const no_intelligent_creatures = reader.readBoolean();
     const no_hero = reader.readBoolean();
     reader.readInt32();
@@ -568,6 +607,11 @@ function parseMaps(reader) {
       map_dark_light,
       weather_particles,
       music,
+      fight,
+      no_fight,
+      no_experience,
+      no_group,
+      no_pets,
       fire,
       fire_damage,
       lightning,

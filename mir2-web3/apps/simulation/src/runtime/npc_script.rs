@@ -523,6 +523,9 @@ pub(super) fn collect_quoted_segments(line: &str) -> Vec<String> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct CrystalLocalTimeSnapshot {
+    pub(super) year: u16,
+    pub(super) month: u16,
+    pub(super) day: u16,
     pub(super) day_of_week: &'static str,
     pub(super) hour: u16,
     pub(super) minute: u16,
@@ -556,6 +559,9 @@ pub(super) fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> 
     };
 
     Some(CrystalLocalTimeSnapshot {
+        year: system_time.year,
+        month: system_time.month,
+        day: system_time.day,
         day_of_week,
         hour: system_time.hour,
         minute: system_time.minute,
@@ -590,6 +596,9 @@ pub(super) fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> 
     };
 
     Some(CrystalLocalTimeSnapshot {
+        year: u16::try_from(local_time.tm_year + 1900).ok()?,
+        month: u16::try_from(local_time.tm_mon + 1).ok()?,
+        day: u16::try_from(local_time.tm_mday).ok()?,
         day_of_week,
         hour: u16::try_from(local_time.tm_hour).ok()?,
         minute: u16::try_from(local_time.tm_min).ok()?,
@@ -869,6 +878,27 @@ pub(super) fn run_crystal_npc_script_impl(
     script: &CrystalNpcScript,
     start_label: &str,
 ) -> Option<CrystalNpcRunResult> {
+    run_crystal_npc_script_impl_with_default_keys(world, context, script, start_label, false)
+        .map(|(result, _)| result)
+}
+
+pub(super) fn run_crystal_default_npc_script(
+    world: &mut World,
+    context: &NpcInteractionContext,
+    script: &CrystalNpcScript,
+    start_label: &str,
+) -> Option<(CrystalNpcRunResult, Vec<String>)> {
+    if context.object_id != 0 || script.script_key != "00Default" { return None; }
+    run_crystal_npc_script_impl_with_default_keys(world, context, script, start_label, true)
+}
+
+fn run_crystal_npc_script_impl_with_default_keys(
+    world: &mut World,
+    context: &NpcInteractionContext,
+    script: &CrystalNpcScript,
+    start_label: &str,
+    default_keys: bool,
+) -> Option<(CrystalNpcRunResult, Vec<String>)> {
     // Candidate playability repair: inferred legacy Jev numeric intent for
     // ONLY these two supplied route scripts. This is not the modern C# rule
     // (which treats all non-ACTIVE CHECKQUEST tokens as Completed), and does
@@ -888,7 +918,11 @@ pub(super) fn run_crystal_npc_script_impl(
     };
 
     for _ in 0..CRYSTAL_NPC_MAX_SECTION_HOPS {
-        let section = crystal_npc_section(&script, &label)?;
+        // NPCPage.ArgumentParse explicitly retains full @_ default signatures.
+        // A request for UseItem(500) must never hit the first UseItem(1) page.
+        let section = if default_keys && label.starts_with("@_") {
+            script.sections.iter().find(|section| section.label.eq_ignore_ascii_case(&label))?
+        } else { crystal_npc_section(&script, &label)? };
         execution_state.section_label = Some(section.label.clone());
         process_crystal_npc_goods_expiry(world);
         let buy_back_items = crystal_npc_buy_back_items_for_script(world, &script.script_key);
@@ -917,10 +951,10 @@ pub(super) fn run_crystal_npc_script_impl(
             } else {
                 packets.extend(service_packets);
             }
-            return Some(CrystalNpcRunResult {
+            return Some((CrystalNpcRunResult {
                 dialog: None,
                 packets,
-            });
+            }, vec![]));
         }
         let outcome =
             execute_crystal_npc_section(world, section, &context_state, &mut execution_state);
@@ -934,23 +968,23 @@ pub(super) fn run_crystal_npc_script_impl(
         }
 
         if outcome.close_dialog {
-            return Some(CrystalNpcRunResult {
+            return Some((CrystalNpcRunResult {
                 dialog: None,
                 packets,
-            });
+            }, outcome.raw_page));
         }
 
         if outcome.body.is_empty() && outcome.links.is_empty() {
-            if packets.is_empty() {
+            if packets.is_empty() && !default_keys {
                 return None;
             }
-            return Some(CrystalNpcRunResult {
+            return Some((CrystalNpcRunResult {
                 dialog: None,
                 packets,
-            });
+            }, outcome.raw_page));
         }
 
-        return Some(CrystalNpcRunResult {
+        return Some((CrystalNpcRunResult {
             dialog: Some(ActiveNpcDialogState {
                 npc_object_id: context.object_id,
                 npc_name: context.name.clone(),
@@ -969,7 +1003,7 @@ pub(super) fn run_crystal_npc_script_impl(
                 input: None,
             }),
             packets,
-        });
+        }, outcome.raw_page));
     }
 
     execution_state.section_label = Some(label);
@@ -980,15 +1014,16 @@ pub(super) fn run_crystal_npc_script_impl(
         "GOTO",
         format!("Crystal NPC script exceeded section hop limit of {CRYSTAL_NPC_MAX_SECTION_HOPS}"),
     );
-    Some(CrystalNpcRunResult {
+    Some((CrystalNpcRunResult {
         dialog: None,
         packets,
-    })
+    }, vec![]))
 }
 
 #[derive(Debug, Clone, Default)]
 pub(super) struct CrystalNpcSectionOutcome {
     body: Vec<String>,
+    raw_page: Vec<String>,
     links: Vec<NpcDialogLinkState>,
     packets: Vec<ServerPacket>,
     goto_label: Option<String>,
@@ -1109,6 +1144,7 @@ pub(super) fn execute_crystal_npc_section(
         ) || (!line.starts_with('#') && matches!(mode, CrystalNpcParseMode::None))
         {
             let resolved_line = resolve_crystal_npc_runtime_tokens(world, line, execution_state);
+            outcome.raw_page.push(resolved_line.clone());
             outcome
                 .links
                 .extend(parse_crystal_npc_links(&resolved_line));
@@ -1371,10 +1407,8 @@ pub(super) fn evaluate_crystal_npc_condition(
         "HOUR" => crystal_npc_check_hour(&parts[1..]),
         "MIN" => crystal_npc_check_minute(&parts[1..]),
         "LEVEL" => crystal_npc_compare_numeric(world, player_level(world), &parts[1..]),
-        "CHECKGOLD" => crystal_npc_compare_numeric(
-            world,
-            i32::try_from(world.resource::<PlayerRuntimeResource>().gold).unwrap_or(i32::MAX),
-            &parts[1..],
+        "CHECKGOLD" => crystal_npc_compare_gold(
+            world.resource::<PlayerRuntimeResource>().gold, &parts[1..],
         ),
         "CHECKPKPOINT" => crystal_npc_compare_numeric(
             world,
@@ -1525,6 +1559,22 @@ pub(super) fn crystal_npc_compare_numeric(_world: &World, left: i32, parts: &[&s
     }
 }
 
+/// NPCSegment.CheckGold parses both operands as uint32. Default GoldBar,
+/// GoldBarBundle and GoldChest guards legitimately exceed i32::MAX.
+fn crystal_npc_compare_gold(left: u32, parts: &[&str]) -> bool {
+    let [operator, right] = parts else { return false; };
+    let Ok(right) = right.parse::<u32>() else { return false; };
+    match *operator {
+        ">" => left > right,
+        "<" => left < right,
+        ">=" => left >= right,
+        "<=" => left <= right,
+        "=" | "==" => left == right,
+        "<>" | "!=" => left != right,
+        _ => false,
+    }
+}
+
 pub(super) fn crystal_npc_check_day_of_week(parts: &[&str]) -> bool {
     let [expected_day] = parts else {
         return false;
@@ -1556,8 +1606,8 @@ pub(super) fn crystal_npc_check_minute(parts: &[&str]) -> bool {
     crystal_local_time_snapshot().is_some_and(|snapshot| snapshot.minute == expected_minute)
 }
 
-pub(super) fn crystal_npc_is_admin(_world: &World) -> bool {
-    false
+pub(super) fn crystal_npc_is_admin(world: &World) -> bool {
+    super::packets::trusted_npc_is_gm(world)
 }
 
 pub(super) fn crystal_npc_check_map_light(parts: &[&str]) -> bool {
@@ -2216,6 +2266,13 @@ pub(super) fn execute_crystal_npc_action_line(
             }
             CrystalNpcActionControl::Continue
         }
+        "ENTERMAP" => {
+            match super::default_npc_events::consume_enter_map(world) {
+                Ok(entry_packets) => packets.extend(entry_packets),
+                Err(error) => super::shared_guild_experience::reject_source(world,error),
+            }
+            CrystalNpcActionControl::Continue
+        }
         "TAKEGOLD" => {
             if let Some(amount) = parts.get(1).and_then(|value| value.parse::<u32>().ok()) {
                 let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
@@ -2242,6 +2299,33 @@ pub(super) fn execute_crystal_npc_action_line(
         }
         "GIVEGOLD" => {
             crystal_npc_give_gold(world, &parts[1..]);
+            CrystalNpcActionControl::Continue
+        }
+        "REDUCEPKPOINT" => {
+            if let Some(amount) = parts.get(1).and_then(|value| value.parse::<i32>().ok()) {
+                let mut player = world.resource_mut::<PlayerRuntimeResource>();
+                player.pk_points = player.pk_points.saturating_sub(amount).max(0);
+            }
+            CrystalNpcActionControl::Continue
+        }
+        "CANGAINEXP" => {
+            // The original parser omits a missing argument. bool.TryParse
+            // assigns false for malformed supplied text, including numeric 1.
+            if let Some(value) = parts.get(1) {
+                super::default_npc_events::set_can_gain_experience(world,
+                    value.eq_ignore_ascii_case("true"));
+            }
+            CrystalNpcActionControl::Continue
+        }
+        "CHANGEGENDER" => {
+            // Original changes CharacterInfo only: the page explicitly tells
+            // the player to relog before the live actor appearance changes.
+            if let Some(character) = world.resource_mut::<SessionResource>().selected_character.as_mut() {
+                character.gender = match character.gender {
+                    MirGender::Male => MirGender::Female,
+                    MirGender::Female => MirGender::Male,
+                };
+            }
             CrystalNpcActionControl::Continue
         }
         "GIVEPEARLS" | "TAKEPEARLS" => {
@@ -2416,6 +2500,32 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_add_to_guild(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }
+        "REMOVEFROMGUILD" => {
+            let guild = super::shared_guilds::project_legacy_shape(world)
+                .unwrap_or_else(|| world.resource::<Stage5SystemsResource>().stage5_systems.guild.clone());
+            let player_name = stage5_player_name(world);
+            if !guild.name.is_empty() && guild.members.iter().any(|name| name.eq_ignore_ascii_case(&player_name)) {
+                let newbie = world.resource::<RuntimeConfigResource>().config.crystal_newbie_guild_name == guild.name;
+                let removed_types: Vec<u8> = world.resource::<BuffResource>().buffs.iter()
+                    .filter_map(|buff| crystal_buff_type_for_key(&buff.key))
+                    .filter(|kind| *kind == 110 || (newbie && *kind == 115)).collect();
+                world.resource_mut::<BuffResource>().buffs.retain(|buff|
+                    !crystal_buff_type_for_key(&buff.key).is_some_and(|kind| kind == 110 || (newbie && kind == 115)));
+                for buff_type in removed_types {
+                    packets.push(ServerPacket::RemoveBuff { buff_type,object_id:current_player_object_id(world).unwrap_or_default() });
+                }
+                if super::shared_guilds::enabled(world) {
+                    if let Err(error) = super::npc_shared_guild_actions::queue_source_shared_guild_leave(world) {
+                        super::shared_guild_experience::reject_source(world,error);
+                    }
+                } else if !(guild.members.len() > 1 && matches!(guild.rank.to_ascii_lowercase().as_str(),"leader"|"chief"|"guildmaster")) {
+                    let current = &mut world.resource_mut::<Stage5SystemsResource>().stage5_systems.guild;
+                    current.members.retain(|name| !name.eq_ignore_ascii_case(&player_name));
+                    current.name.clear(); current.rank.clear(); current.permissions.clear();
+                }
+            }
+            CrystalNpcActionControl::Continue
+        }
         "ADDNAMELIST" => {
             crystal_npc_name_list(world, &parts[1..], true);
             CrystalNpcActionControl::Continue
@@ -2433,7 +2543,25 @@ pub(super) fn execute_crystal_npc_action_line(
             CrystalNpcActionControl::Continue
         }
         "GIVEBUFF" => {
-            crystal_npc_give_buff(world, &parts[1..]);
+            if let Some(buff) = crystal_npc_give_buff(world, &parts[1..]) {
+                packets.push(buff);
+            }
+            CrystalNpcActionControl::Continue
+        }
+        "REMOVEBUFF" => {
+            if let Some(source_name) = parts.get(1) {
+                let key = normalize_stage5_key(source_name);
+                if let Some(buff_type) = crystal_buff_type_for_key(&key) {
+                    let mut buffs = world.resource_mut::<BuffResource>();
+                    let count = buffs.buffs.len();
+                    buffs.buffs.retain(|buff| crystal_buff_type_for_key(&buff.key) != Some(buff_type));
+                    if buffs.buffs.len() != count {
+                        packets.push(ServerPacket::RemoveBuff {
+                            buff_type, object_id:current_player_object_id(world).unwrap_or_default(),
+                        });
+                    }
+                }
+            }
             CrystalNpcActionControl::Continue
         }
         "REVIVEHERO" => {
@@ -3326,19 +3454,8 @@ pub(super) fn crystal_npc_change_level(world: &mut World, parts: &[&str]) {
     else {
         return;
     };
-    {
-        let mut session = world.resource_mut::<SessionResource>();
-        if let Some(character) = session.selected_character.as_mut() {
-            character.level = level;
-        }
-    }
-    if let Some(player) = player_entity(world) {
-        if let Ok(mut entry) = world.get_entity_mut(player) {
-            if let Some(mut body) = entry.get_mut::<CharacterBody>() {
-                body.level = level;
-            }
-        }
-    }
+    world.resource_mut::<PlayerRuntimeResource>().experience = 0;
+    super::leveling::apply_level_change(world,level);
 }
 
 pub(super) fn crystal_npc_change_hair(world: &mut World, parts: &[&str]) {
@@ -3352,30 +3469,33 @@ pub(super) fn crystal_npc_change_hair(world: &mut World, parts: &[&str]) {
         .hair = hair;
 }
 
-pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) {
-    let [key, duration @ ..] = parts else {
-        return;
-    };
-    let key = normalize_stage5_key(key);
-    let duration_ticks = duration
-        .first()
-        .and_then(|value| value.parse::<u64>().ok())
-        .unwrap_or(60)
-        .max(1);
+pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) -> Option<ServerPacket> {
+    let [source_key, duration, _visible, _rest @ ..] = parts else { return None; };
+    let key = normalize_stage5_key(source_key);
+    crystal_buff_type_for_key(&key)?;
+    let seconds = duration.parse::<i32>().unwrap_or(0);
     let tick = runtime_tick(world);
-    apply_or_refresh_buff(
-        world,
-        BuffState {
-            real_time_duration: None,
-            key: key.clone(),
-            name: stage5_item_name(&key),
-            description: "Crystal NPC buff.".to_string(),
-            expires_at_tick: tick.saturating_add(duration_ticks),
-            attack_bonus: 0,
-            defence_bonus: 0,
-            stats: Vec::new(),
-        },
-    );
+    // The pinned NPCSegment source deliberately passes empty Stats and does
+    // not forward parsed infinite/stackable values to AddBuff. Keep that
+    // behavior rather than inventing the percentages shown in sample text.
+    let infinite = matches!(key.as_str(),"mentee"|"mentor"|"guild"|"skill"|"clear-ring"|"lover"|"newbie"|"mental-state");
+    let previous=world.resource::<BuffResource>().buffs.iter().find(|buff| buff.key == key).cloned();
+    let stacked=matches!(key.as_str(),"exp"|"drop"|"gold"|"bag-weight"|"impact"|"magic"|"taoist"|"storm"|"health-aid"|"mana-aid"|"defence"|"magic-defence"|"wonder-drug"|"knapsack");
+    let duration_ms=u64::try_from(seconds).unwrap_or(0).saturating_mul(1000)
+        .saturating_add(if stacked { previous.as_ref().map_or(0,|buff| buff.remaining_ms(tick)) } else {0});
+    let buff = BuffState {
+        real_time_duration:(!infinite).then(|| RealTimeBuffDuration::new(duration_ms)),
+        key:key.clone(),name:stage5_item_name(&key),description:"Crystal NPC buff.".into(),
+        expires_at_tick:if infinite {u64::MAX} else {tick.saturating_add(duration_ms.div_ceil(1000))},
+        attack_bonus:previous.as_ref().map_or(0,|buff| buff.attack_bonus),
+        defence_bonus:previous.as_ref().map_or(0,|buff| buff.defence_bonus),
+        stats:previous.as_ref().map_or_else(Vec::new,|buff| buff.stats.clone()),
+    };
+    // That last bool is AddBuff.refreshStats, not ClientBuff.Visible. The
+    // original BuffInfo supplies visibility and the infinite stack type.
+    let packet=client_buff_packet_for_state(world,&buff)?;
+    apply_or_refresh_buff(world,buff);
+    Some(packet)
 }
 
 pub(super) fn crystal_npc_revive_hero(world: &mut World) {
@@ -3548,7 +3668,7 @@ impl SimulationSession {
         npc: &WorldEntitySnapshot,
         key: &str,
     ) -> Vec<ServerPacket> {
-        let before=match if mir2_game_data::periodic_quests::npc(npc.object_id).is_some() {self.begin_guild_experience_command(true)} else {Ok(None)} {
+        let before=match self.begin_guild_experience_command(mir2_game_data::periodic_quests::npc(npc.object_id).is_some()) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
@@ -3557,7 +3677,7 @@ impl SimulationSession {
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
-        let before=match if mir2_game_data::periodic_quests::npc(object_id).is_some() {self.begin_guild_experience_command(true)} else {Ok(None)} {
+        let before=match self.begin_guild_experience_command(mir2_game_data::periodic_quests::npc(object_id).is_some()) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.call_npc_impl(object_id, key);
@@ -3570,7 +3690,7 @@ impl SimulationSession {
             .map(|dialog| dialog.npc_object_id);
         let force=object_id.is_some_and(|id|mir2_game_data::periodic_quests::npc(id).is_some())
             || super::quests::periodic_quests::target_is_periodic(target);
-        let before=match if force {self.begin_guild_experience_command(true)} else {Ok(None)} {
+        let before=match self.begin_guild_experience_command(force) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.select_npc_dialog_target_impl(target);

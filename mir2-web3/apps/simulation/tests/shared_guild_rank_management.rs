@@ -43,6 +43,7 @@ fn fixture() -> SimulationConfig {
     }
     let guild = SharedGuildRecord {
         id: GUILD_ID.into(),
+        active_wars: Default::default(),
         name: "Rank Guild".into(),
         revision: 7,
         level: 0,

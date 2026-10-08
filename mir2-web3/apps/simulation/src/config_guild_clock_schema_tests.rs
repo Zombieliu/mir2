@@ -16,6 +16,7 @@ fn path() -> PathBuf {
 pub(in crate::config) fn fixture_guild(store: &AccountStore) -> SharedGuildRecord {
     let character = &store.accounts["demo"].characters[0];
     SharedGuildRecord {
+        active_wars: Default::default(),
         id: "123456789abcdef0123456789abcdef0".into(),
         name: "SchemaQA".into(),
         revision: 1,

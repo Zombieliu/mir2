@@ -22,8 +22,8 @@ use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel, QuestTracker};
 use mir2_client_bevy::quest_ui::{
-    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestRouteTarget, QuestUiIntent, QuestUiIntentQueue,
-    QuestUiState,
+    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestRouteTarget, QuestUiIntent,
+    QuestUiIntentQueue, QuestUiState,
 };
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
@@ -35,7 +35,9 @@ use winit::window::WindowId;
 
 use crate::effects::{NativeEffects, CELL_HEIGHT, CELL_WIDTH};
 use crate::entity_presentation::NativeEntityPresentation;
-use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck, NativeWorldClickState};
+use crate::gameplay_bridge::{
+    GameplayEventInbox, NativeGameplaySnapshot, NativeSelfMovementAck, NativeWorldClickState,
+};
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
 use crate::native_protocol::NativeOutboundCommand;
 
@@ -242,7 +244,7 @@ enum WorldPointerMovementMode {
 
 // Gameplay deadlines must follow elapsed wall time, not Bevy's clamped
 // virtual animation clock. The fallback supports minimal headless fixtures.
-fn movement_now_ms(time: Option<&Time>, real: Option<&Time<bevy::time::Real>>) -> f64 {
+pub(crate) fn movement_now_ms(time: Option<&Time>, real: Option<&Time<bevy::time::Real>>) -> f64 {
     real.map(|time| time.elapsed_secs_f64() * 1000.0)
         .or_else(|| time.map(|time| time.elapsed_secs_f64() * 1000.0))
         .unwrap_or(0.0)
@@ -250,6 +252,8 @@ fn movement_now_ms(time: Option<&Time>, real: Option<&Time<bevy::time::Real>>) -
 
 const CRYSTAL_MOVE_PRESENTATION_MS: f64 = 600.0;
 const CRYSTAL_RUN_PRIME_MS: f64 = 1_200.0;
+// Crystal GameScene.Struck refreshes NextRunTime before de-duplicating flinch.
+const CRYSTAL_STRUCK_NO_RUN_MS: f64 = 2_500.0;
 const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
 const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
 
@@ -335,6 +339,10 @@ pub struct WorldPointerMovementState {
     authoritative_direction: Option<String>,
     next_move_send_at_ms: f64,
     run_primed_until_ms: f64,
+    owner_struck_generation: Option<u64>,
+    owner_struck_object_id: Option<u32>,
+    last_owner_struck_sequence: u64,
+    run_allowed_after_ms: Option<f64>,
     input_blocked_until_ms: f64,
     last_packet_ack_at_ms: Option<f64>,
     last_npc_object_id: Option<u32>,
@@ -464,7 +472,104 @@ impl WorldPointerMovementState {
             "atMs": at_ms,
             "reason": reason,
         }));
-        *self = Self::default();
+        // A local reset must not let an already-consumed packet re-arm the
+        // guard if its retained snapshot is delivered again in this connection.
+        *self = Self {
+            owner_struck_generation: self.owner_struck_generation,
+            last_owner_struck_sequence: self.last_owner_struck_sequence,
+            ..Self::default()
+        };
+    }
+
+    pub(crate) fn observe_gameplay_generation(&mut self, generation: u64, now_ms: f64) -> bool {
+        if let Some(current) = self.owner_struck_generation {
+            if generation < current {
+                return false;
+            }
+            if generation > current {
+                self.reset_controller(now_ms, "transportAdvanced");
+                self.last_owner_struck_sequence = 0;
+            }
+        }
+        self.owner_struck_generation = Some(generation);
+        true
+    }
+
+    pub(crate) fn clear_owner_struck_guard(&mut self) {
+        self.owner_struck_object_id = None;
+        self.run_allowed_after_ms = None;
+    }
+
+    pub(crate) fn observe_owner_struck_snapshot(
+        &mut self,
+        snapshot: &NativeGameplaySnapshot,
+        now_ms: f64,
+        receipt_now: std::time::Instant,
+    ) {
+        if !self.observe_gameplay_generation(snapshot.generation, now_ms) || snapshot.big_map_only {
+            return;
+        }
+        let Some(owner) = snapshot
+            .entity_render_payload
+            .as_ref()
+            .and_then(|payload| payload.get("playerObjectId"))
+            .and_then(|id| id.as_u64().or_else(|| id.as_str()?.parse().ok()))
+            .and_then(|id| u32::try_from(id).ok())
+            .filter(|id| *id != 0)
+        else {
+            return;
+        };
+        if self.owner_struck_object_id != Some(owner) {
+            self.clear_owner_struck_guard();
+            self.owner_struck_object_id = Some(owner);
+        }
+        let Some(struck) = snapshot.owner_struck.as_ref() else {
+            return;
+        };
+        if struck.generation != snapshot.generation
+            || struck.sequence <= self.last_owner_struck_sequence
+            || !now_ms.is_finite()
+        {
+            return;
+        }
+        let Some(queue_delay) = receipt_now.checked_duration_since(struck.received_at) else {
+            return;
+        };
+        self.last_owner_struck_sequence = struck.sequence;
+        if struck.object_id != owner {
+            return;
+        }
+        // Both input paths use the same real movement clock. Subtract network
+        // queue time so a delayed/repeated world snapshot never starts a fresh
+        // 2500 ms guard at the time it happens to reach the presentation thread.
+        let deadline = now_ms - queue_delay.as_secs_f64() * 1000.0 + CRYSTAL_STRUCK_NO_RUN_MS;
+        self.run_allowed_after_ms = Some(
+            self.run_allowed_after_ms
+                .map_or(deadline, |previous| previous.max(deadline)),
+        );
+    }
+
+    fn permitted_run_mode(
+        &self,
+        requested: WorldPointerMovementMode,
+        now_ms: f64,
+        player_hp: Option<i32>,
+    ) -> WorldPointerMovementMode {
+        let after_struck_deadline = self
+            .run_allowed_after_ms
+            .is_none_or(|deadline| now_ms > deadline);
+        if requested == WorldPointerMovementMode::Run
+            && (!after_struck_deadline || player_hp.is_some_and(|hp| hp < 10))
+        {
+            WorldPointerMovementMode::Walk
+        } else {
+            requested
+        }
+    }
+
+    fn input_owner_is_current(&self, object_id: &str) -> bool {
+        self.owner_struck_object_id
+            .is_none_or(|owner| object_id.parse::<u32>().ok() == Some(owner))
     }
 
     fn trace_plan_blocked(
@@ -509,8 +614,11 @@ impl WorldPointerMovementState {
         &self,
         requested: WorldPointerMovementMode,
         now_ms: f64,
+        player_hp: Option<i32>,
     ) -> WorldPointerMovementMode {
-        if requested == WorldPointerMovementMode::Run && now_ms < self.run_primed_until_ms {
+        if self.permitted_run_mode(requested, now_ms, player_hp) == WorldPointerMovementMode::Run
+            && now_ms < self.run_primed_until_ms
+        {
             WorldPointerMovementMode::Run
         } else {
             WorldPointerMovementMode::Walk
@@ -584,6 +692,12 @@ impl WorldPointerMovementState {
         self.active = None;
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
+        // The gameplay drain may have already accepted this new owner's Struck
+        // before the input system sees its first entity model. Keep that guard,
+        // but never carry another player's deadline across an identity change.
+        if self.owner_struck_object_id != object_id.parse::<u32>().ok() {
+            self.clear_owner_struck_guard();
+        }
         self.input_blocked_until_ms = 0.0;
         self.last_npc_object_id = None;
         self.npc_click_blocked_until_ms = 0.0;
@@ -678,7 +792,11 @@ fn gameplay_input_enabled(
     if quest.is_some_and(QuestUiState::blocks_world_input) {
         return false;
     }
-    if is_world_click_blocked(player_ui, npc_dialog.is_some_and(|dialog| dialog.is_open), false) {
+    if is_world_click_blocked(
+        player_ui,
+        npc_dialog.is_some_and(|dialog| dialog.is_open),
+        false,
+    ) {
         return false;
     }
     true
@@ -752,15 +870,23 @@ fn cursor_over_nonmodal_view_hud_button(window: &Window, minimap_expanded: bool)
         return false;
     };
     let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-        window.resolution.width(), window.resolution.height(),
+        window.resolution.width(),
+        window.resolution.height(),
     );
     if !transform.contains_physical_point(cursor.x, cursor.y) {
         return false;
     }
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    [spec::hud::CHARACTER.rect, spec::hud::INVENTORY.rect, spec::hud::SKILL.rect,
-        spec::hud::OPTION.rect, spec::hud::MENU.rect, spec::hud::QUEST.rect]
-        .into_iter().any(|rect| rect.contains(x, y))
+    [
+        spec::hud::CHARACTER.rect,
+        spec::hud::INVENTORY.rect,
+        spec::hud::SKILL.rect,
+        spec::hud::OPTION.rect,
+        spec::hud::MENU.rect,
+        spec::hud::QUEST.rect,
+    ]
+    .into_iter()
+    .any(|rect| rect.contains(x, y))
 }
 
 pub fn is_world_click_blocked(
@@ -771,7 +897,9 @@ pub fn is_world_click_blocked(
     // This is the pointer-independent action gate. Visible nonmodal windows
     // are hit-tested separately by the caller; they must not disable F-keys,
     // belt items or keyboard movement everywhere on the screen.
-    player_ui.map_or(dialog_open || dead, |ui| ui.blocks_world_action(dialog_open, dead))
+    player_ui.map_or(dialog_open || dead, |ui| {
+        ui.blocks_world_action(dialog_open, dead)
+    })
 }
 
 pub fn is_pointer_captured_for_movement(
@@ -821,24 +949,31 @@ fn hovered_actor_reserves_right_inspection(
     let Some(hovered) = hovered_object_id.filter(|id| *id != self_object_id) else {
         return false;
     };
-    if entities.entities.iter().any(|entity| {
-        entity.object_id == hovered && entity.kind == EntityKind::Player
-    }) {
+    if entities
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == hovered && entity.kind == EntityKind::Player)
+    {
         return true;
     }
     // Hero projections are not part of the renderer-neutral EntityKind enum.
     // They still own Crystal's Ctrl+right inspection gesture.
-    presentation.overlay_payload()
+    presentation
+        .overlay_payload()
         .and_then(|payload| payload.get("entities"))
         .and_then(serde_json::Value::as_array)
-        .is_some_and(|all| all.iter().any(|entity| {
-            entity.get("kind").and_then(serde_json::Value::as_str) == Some("hero")
-                && entity.get("objectId").is_some_and(|id| {
-                    id.as_str() == Some(hovered)
-                        || id.as_u64().zip(hovered.parse::<u64>().ok())
-                            .is_some_and(|(id, hovered)| id == hovered)
-                })
-        }))
+        .is_some_and(|all| {
+            all.iter().any(|entity| {
+                entity.get("kind").and_then(serde_json::Value::as_str) == Some("hero")
+                    && entity.get("objectId").is_some_and(|id| {
+                        id.as_str() == Some(hovered)
+                            || id
+                                .as_u64()
+                                .zip(hovered.parse::<u64>().ok())
+                                .is_some_and(|(id, hovered)| id == hovered)
+                    })
+            })
+        })
 }
 
 fn hovered_harvest_target(
@@ -989,8 +1124,11 @@ fn auto_path_step_blocked(
         || movement.step_was_rejected(origin, direction, WorldPointerMovementMode::Run)
         || entity_blocks_movement(entities, presentation, self_object_id, destination)
         || map_file_name.is_some_and(|map_file_name| {
-            crate::map_parser::map_cell_blocks_player_movement(map_file_name, destination.0, destination.1)
-                == Some(true)
+            crate::map_parser::map_cell_blocks_player_movement(
+                map_file_name,
+                destination.0,
+                destination.1,
+            ) == Some(true)
         })
 }
 
@@ -1171,6 +1309,7 @@ fn plan_crystal_pointer_move(
     run_distance: i32,
     now_ms: f64,
 ) -> Option<PlannedPointerMove> {
+    let requested_mode = movement.permitted_run_mode(requested_mode, now_ms, None);
     movement.prune_blocked_steps(now_ms);
     if !movement_step_blocked(
         movement,
@@ -1251,10 +1390,14 @@ fn send_pointer_move(
     origin: (i32, i32),
     direction: &'static str,
     requested_mode: WorldPointerMovementMode,
+    player_hp: Option<i32>,
     now_ms: f64,
     presentation_now_ms: u64,
 ) -> bool {
-    let effective_mode = movement.effective_mode(requested_mode, now_ms);
+    if !movement.input_owner_is_current(object_id) {
+        return false;
+    }
+    let effective_mode = movement.effective_mode(requested_mode, now_ms, player_hp);
     let distance = if effective_mode == WorldPointerMovementMode::Run {
         presentation.self_run_distance(object_id).max(2)
     } else {
@@ -1403,8 +1546,7 @@ fn quest_route_matches_current_map(
     model: Option<&mir2_client_bevy::big_map::BigMapModel>,
 ) -> bool {
     model.is_some_and(|model| {
-        model.reset_epoch == intent.reset_epoch
-            && model.current_map_index == Some(intent.map_index)
+        model.reset_epoch == intent.reset_epoch && model.current_map_index == Some(intent.map_index)
     })
 }
 
@@ -1424,13 +1566,17 @@ fn begin_quest_route_navigation(
     if !quest_route_matches_current_map(intent, big_map) {
         return Err(match intent.target {
             QuestRouteTarget::Entrance => "入口导航已过期；请按当前地图重新选择。",
-            QuestRouteTarget::TaskNpc { .. } => "Task Steward route expired. Select the task again.",
+            QuestRouteTarget::TaskNpc { .. } => {
+                "Task Steward route expired. Select the task again."
+            }
             QuestRouteTarget::MapNpc { .. } => "NPC destination changed. Select the NPC again.",
             QuestRouteTarget::Supply { .. } => "补给导航已过期；请按当前地图重新选择。",
             QuestRouteTarget::HuntRegion { .. } => "狩猎区域导航已过期；请按当前地图重新选择。",
         });
     }
-    if matches!(intent.target, QuestRouteTarget::Supply { .. }) && !intent.matches_supply_destination() {
+    if matches!(intent.target, QuestRouteTarget::Supply { .. })
+        && !intent.matches_supply_destination()
+    {
         return Err("补给地点已更新，请重新选择商店。");
     }
     if matches!(intent.target, QuestRouteTarget::HuntRegion { .. })
@@ -1441,11 +1587,13 @@ fn begin_quest_route_navigation(
     }
     if matches!(intent.target, QuestRouteTarget::TaskNpc { .. })
         && (pinned_primary.is_some_and(|primary| primary != intent.quest_index)
-            || !tracker.is_some_and(|tracker| intent.matches_task_npc_destination(tracker))) {
+            || !tracker.is_some_and(|tracker| intent.matches_task_npc_destination(tracker)))
+    {
         return Err("Task Steward destination changed. Select the task again.");
     }
     if matches!(intent.target, QuestRouteTarget::MapNpc { .. })
-        && !big_map.is_some_and(|model| intent.matches_big_map_npc_destination(model)) {
+        && !big_map.is_some_and(|model| intent.matches_big_map_npc_destination(model))
+    {
         return Err("NPC destination changed. Select the NPC again.");
     }
     let map_file = presentation
@@ -1468,22 +1616,53 @@ fn begin_quest_route_navigation(
     );
     let destination = (intent.x, intent.y);
     let hunt_area = match intent.target {
-        QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } | QuestRouteTarget::TaskNpc { .. }
-            | QuestRouteTarget::MapNpc { .. } => None,
-        QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea { center: destination, radius }),
+        QuestRouteTarget::Entrance
+        | QuestRouteTarget::Supply { .. }
+        | QuestRouteTarget::TaskNpc { .. }
+        | QuestRouteTarget::MapNpc { .. } => None,
+        QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea {
+            center: destination,
+            radius,
+        }),
     };
     let supply_area = match intent.target {
-        QuestRouteTarget::Supply { vendor } => vendor.route(intent.map_index)
+        QuestRouteTarget::Supply { vendor } => vendor
+            .route(intent.map_index)
             .filter(|route| !route.is_entrance)
-            .map(|_| big_map_input::HuntArea { center: destination, radius: 2 }),
-        QuestRouteTarget::TaskNpc { .. } => Some(big_map_input::HuntArea { center: destination, radius: 2 }),
-        QuestRouteTarget::MapNpc { .. } => Some(big_map_input::HuntArea { center: destination, radius: 2 }),
+            .map(|_| big_map_input::HuntArea {
+                center: destination,
+                radius: 2,
+            }),
+        QuestRouteTarget::TaskNpc { .. } => Some(big_map_input::HuntArea {
+            center: destination,
+            radius: 2,
+        }),
+        QuestRouteTarget::MapNpc { .. } => Some(big_map_input::HuntArea {
+            center: destination,
+            radius: 2,
+        }),
         _ => None,
     };
     let steps = if let Some(area) = hunt_area.or(supply_area) {
-        big_map_input::plan_hunt_region(movement, entities, presentation, self_id, map_file, origin, area)?
+        big_map_input::plan_hunt_region(
+            movement,
+            entities,
+            presentation,
+            self_id,
+            map_file,
+            origin,
+            area,
+        )?
     } else {
-        big_map_input::plan(movement, entities, presentation, self_id, map_file, origin, destination)?
+        big_map_input::plan(
+            movement,
+            entities,
+            presentation,
+            self_id,
+            map_file,
+            origin,
+            destination,
+        )?
     };
     movement.stop_hold(now_ms, "questRouteStarted");
     movement.stop_auto_path(now_ms, "questRouteStarted");
@@ -1520,7 +1699,10 @@ fn begin_quest_route_navigation(
     Ok(destination)
 }
 
-fn quest_hunt_arrival_feedback(movement: &mut WorldPointerMovementState, state: Option<&mut QuestUiState>) {
+fn quest_hunt_arrival_feedback(
+    movement: &mut WorldPointerMovementState,
+    state: Option<&mut QuestUiState>,
+) {
     if let Some(route) = movement.map_auto_path.as_ref() {
         if let Some(area) = route.hunt_area {
             movement.hunt_arrival = Some(HuntArrival {
@@ -1561,7 +1743,8 @@ fn hunt_arrival_is_valid(
         || big_map.and_then(|map| map.current_map_index) != Some(arrival.map_index)
         || (position.0 - arrival.area.center.0)
             .abs()
-            .max((position.1 - arrival.area.center.1).abs()) > arrival.area.radius
+            .max((position.1 - arrival.area.center.1).abs())
+            > arrival.area.radius
     {
         return false;
     }
@@ -1580,7 +1763,9 @@ fn clear_stale_hunt_arrival_feedback(
     position: (i32, i32),
     tracker: Option<&QuestTracker>,
 ) {
-    let pinned_primary = state.as_ref().and_then(|state| state.pinned_primary_quest_index);
+    let pinned_primary = state
+        .as_ref()
+        .and_then(|state| state.pinned_primary_quest_index);
     if movement.hunt_arrival.as_ref().is_some_and(|arrival| {
         !hunt_arrival_is_valid(
             arrival,
@@ -1595,7 +1780,11 @@ fn clear_stale_hunt_arrival_feedback(
     }
     if movement.hunt_arrival.is_none() {
         if let Some(state) = state {
-            if state.feedback.as_ref().is_some_and(|feedback| feedback.message == HUNT_ARRIVAL_FEEDBACK) {
+            if state
+                .feedback
+                .as_ref()
+                .is_some_and(|feedback| feedback.message == HUNT_ARRIVAL_FEEDBACK)
+            {
                 state.clear_feedback();
             }
         }
@@ -1614,7 +1803,16 @@ pub fn mouse_world_interaction_system(
     mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
-    (ui_read_model, click_state, big_map, mut map_chat, big_map_ui, mini_map_view, map_model, inventory): (
+    (
+        ui_read_model,
+        click_state,
+        big_map,
+        mut map_chat,
+        big_map_ui,
+        mini_map_view,
+        map_model,
+        inventory,
+    ): (
         Option<Res<UiReadModel>>,
         Option<Res<NativeWorldClickState>>,
         Option<Res<mir2_client_bevy::big_map::BigMapModel>>,
@@ -1650,9 +1848,15 @@ pub fn mouse_world_interaction_system(
     let cancels_directional_attack = !mouse.pressed(MouseButton::Left)
         || mouse.pressed(MouseButton::Right)
         || modifiers.alt
-        || keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape)
-            || walk_key_map().iter().any(|(key, _)| keys.pressed(*key)
-                && player_ui.as_deref().is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key))));
+        || keys.is_some_and(|keys| {
+            keys.just_pressed(KeyCode::Escape)
+                || walk_key_map().iter().any(|(key, _)| {
+                    keys.pressed(*key)
+                        && player_ui
+                            .as_deref()
+                            .is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key))
+                })
+        });
     if cancels_directional_attack || left_pressed || right_pressed {
         movement.directional_attack = None;
         if let Some(presentation) = presentation.as_deref_mut() {
@@ -1782,6 +1986,11 @@ pub fn mouse_world_interaction_system(
         }
         return;
     };
+    // The personal entity model can trail a new transport's packet projection
+    // by one frame. Do not let that old model clear the new owner's guard.
+    if !movement.input_owner_is_current(&object_id) {
+        return;
+    }
     if movement.observe_identity(&object_id, entity_position, entity_direction.as_str()) {
         if let Some(queue) = queue.as_deref_mut() {
             queue.clear_attack_intents();
@@ -1910,8 +2119,12 @@ pub fn mouse_world_interaction_system(
             .and_then(|model| big_map_input::image_position(window, model))
             .is_some();
     let mini_map_image_press = (left_pressed || right_pressed)
-        && player_ui.as_deref().zip(map_model.as_deref())
-            .is_some_and(|(ui, map)| minimap_input::contains(window, ui, map, mini_map_view.as_deref()));
+        && player_ui
+            .as_deref()
+            .zip(map_model.as_deref())
+            .is_some_and(|(ui, map)| {
+                minimap_input::contains(window, ui, map, mini_map_view.as_deref())
+            });
     if movement.map_auto_path.as_ref().is_some_and(|route| {
         presentation.current_map_file_name() != Some(route.map_file.as_str())
             || !big_map.as_deref().is_some_and(|model| {
@@ -1939,13 +2152,18 @@ pub fn mouse_world_interaction_system(
     let minimap_expanded = player_ui.as_deref().is_none_or(|ui| {
         map_model.as_deref().map_or(ui.minimap_visible(), |map| {
             mir2_client_bevy::crystal_ui::hud::minimap_is_expanded(
-                ui.minimap_visible(), map.mini_map_index, map.map_width, map.map_height,
+                ui.minimap_visible(),
+                map.mini_map_index,
+                map.map_width,
+                map.map_height,
             )
         })
     });
     if (left_pressed || right_pressed) && cursor_over_native_hud_button(window, minimap_expanded) {
         presentation.clear_local_mining_request();
-        if let Some(queue) = queue.as_deref_mut() { queue.clear_directional_attack_intents(); }
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_directional_attack_intents();
+        }
         movement.stop_hold(now_ms, "hudButtonPress");
         // Crystal view buttons consume their own pointer edge. Opening the
         // Character/Spells/bag/options/menu view doesn't select a new world
@@ -1988,10 +2206,11 @@ pub fn mouse_world_interaction_system(
     let over_hero_window = player_ui.as_deref().is_some_and(|ui| {
         ui.hero.interactive
             && window.cursor_position().is_some_and(|cursor| {
-                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
-                    window.resolution.width(),
-                    window.resolution.height(),
-                );
+                let transform =
+                    mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
+                        window.resolution.width(),
+                        window.resolution.height(),
+                    );
                 let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
                 mir2_client_bevy::crystal_ui::overlays::hero_dialog::geometry::hit(
                     &ui.hero,
@@ -2029,7 +2248,9 @@ pub fn mouse_world_interaction_system(
         && !over_skill_bar
         && !over_hero_window
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        && !quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input)
+        && !quest_ui_state
+            .as_deref()
+            .is_some_and(QuestUiState::blocks_world_input)
         && !dialog_open
         && !dead
         && !map_open
@@ -2051,17 +2272,21 @@ pub fn mouse_world_interaction_system(
                 if !quest_ui_state.as_deref().is_some_and(|state| state.supply_open && state.supply_vendor == Some(vendor)));
             let result = if stale_supply {
                 Err("补给选择已变更，请重新选择商店。")
-            } else { begin_quest_route_navigation(
-                &mut movement,
-                &entities,
-                presentation,
-                &object_id,
-                big_map.as_deref(),
-                intent,
-                quest_tracker.as_deref(),
-                quest_ui_state.as_deref().and_then(|state| state.pinned_primary_quest_index),
-                now_ms,
-            ) };
+            } else {
+                begin_quest_route_navigation(
+                    &mut movement,
+                    &entities,
+                    presentation,
+                    &object_id,
+                    big_map.as_deref(),
+                    intent,
+                    quest_tracker.as_deref(),
+                    quest_ui_state
+                        .as_deref()
+                        .and_then(|state| state.pinned_primary_quest_index),
+                    now_ms,
+                )
+            };
             crate::movement_trace::record(serde_json::json!({
                 "type": "questRouteNavigation", "atMs": now_ms,
                 "questIndex": intent.quest_index, "mapIndex": intent.map_index,
@@ -2081,18 +2306,32 @@ pub fn mouse_world_interaction_system(
                         }
                     }
                     if let Some(state) = quest_ui_state.as_deref_mut() {
-                        let target_label = if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {
-                            mir2_client_bevy::player_text::text(intent.target.label())
-                        } else {
-                            intent.target.label().to_owned()
-                        };
-                        state.set_feedback(if movement.map_auto_path.is_none() {
-                            format!("已到达{}{}", target_label, if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
-                                "，请选择怪物战斗"
-                            } else { "" })
-                        } else {
-                            format!("已设置{}路线 ({},{}) · 按 Esc 可停止", target_label, destination.0, destination.1)
-                        }, false);
+                        let target_label =
+                            if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {
+                                mir2_client_bevy::player_text::text(intent.target.label())
+                            } else {
+                                intent.target.label().to_owned()
+                            };
+                        state.set_feedback(
+                            if movement.map_auto_path.is_none() {
+                                format!(
+                                    "已到达{}{}",
+                                    target_label,
+                                    if matches!(intent.target, QuestRouteTarget::HuntRegion { .. })
+                                    {
+                                        "，请选择怪物战斗"
+                                    } else {
+                                        ""
+                                    }
+                                )
+                            } else {
+                                format!(
+                                    "已设置{}路线 ({},{}) · 按 Esc 可停止",
+                                    target_label, destination.0, destination.1
+                                )
+                            },
+                            false,
+                        );
                     }
                 }
                 Err(message) => {
@@ -2122,60 +2361,89 @@ pub fn mouse_world_interaction_system(
         && !mouse.pressed(MouseButton::Right);
     let continuing_auto_action = continuing_map_route || continuing_attack;
     let keyboard_movement_requested = keys.is_some_and(|keys| {
-        walk_key_map().iter().any(|(key, _)| keys.pressed(*key)
-            && player_ui.as_deref().is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key)))
+        walk_key_map().iter().any(|(key, _)| {
+            keys.pressed(*key)
+                && player_ui
+                    .as_deref()
+                    .is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key))
+        })
     });
     let ui_state_blocks = player_ui.as_deref().is_some_and(|ui| {
-            if keyboard_movement_requested {
-                return ui.blocks_world_action(false, false);
-            }
-            if continuing_auto_action {
-                return ui.blocks_route_navigation();
-            }
-            if map_open && (map_image_press || mini_map_image_press || movement.map_auto_path.is_some()) {
-                return big_map_input::ui_blocks_except_map(ui);
-            }
-            window.cursor_position().map_or_else(
-                || ui.blocks_world_click(),
-                |cursor| {
-                    let transform =
-                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
-                            window.resolution.width(),
-                            window.resolution.height(),
-                        );
-                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-                    ui.blocks_world_pointer_at(x, y)
-                },
-            )
-        }) || (!continuing_auto_action && !keyboard_movement_requested
-            && quest_ui_state.as_deref().is_some_and(|quest| {
-                window.cursor_position().is_some_and(|cursor| {
-                    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-                        window.resolution.width(), window.resolution.height(),
+        if keyboard_movement_requested {
+            return ui.blocks_world_action(false, false);
+        }
+        if continuing_auto_action {
+            return ui.blocks_route_navigation();
+        }
+        if map_open && (map_image_press || mini_map_image_press || movement.map_auto_path.is_some())
+        {
+            return big_map_input::ui_blocks_except_map(ui);
+        }
+        window.cursor_position().map_or_else(
+            || ui.blocks_world_click(),
+            |cursor| {
+                let transform =
+                    mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
+                        window.resolution.width(),
+                        window.resolution.height(),
                     );
-                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-                    quest.captures_world_pointer_at(x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()))
-                })
-            }));
-    let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                ui.blocks_world_pointer_at(x, y)
+            },
+        )
+    }) || (!continuing_auto_action
+        && !keyboard_movement_requested
+        && quest_ui_state.as_deref().is_some_and(|quest| {
+            window.cursor_position().is_some_and(|cursor| {
+                let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+                    window.resolution.width(),
+                    window.resolution.height(),
+                );
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                quest.captures_world_pointer_at(
+                    x,
+                    y,
+                    player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                )
+            })
+        }));
+    let quest_modal = quest_ui_state
+        .as_deref()
+        .is_some_and(QuestUiState::blocks_world_input);
     // A pointer edge in an ordinary view is consumed by that view. It isn't
     // a new world destination and must not revoke an existing target/route.
     let over_nonmodal_view = window.cursor_position().is_some_and(|cursor| {
         let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-            window.resolution.width(), window.resolution.height(),
+            window.resolution.width(),
+            window.resolution.height(),
         );
         let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-        player_ui.as_deref().is_some_and(|ui| ui.captures_nonmodal_pointer_at(x, y))
-            || quest_ui_state.as_deref().is_some_and(|quest| quest.captures_world_pointer_at(
-                x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
-            ))
+        player_ui
+            .as_deref()
+            .is_some_and(|ui| ui.captures_nonmodal_pointer_at(x, y))
+            || quest_ui_state.as_deref().is_some_and(|quest| {
+                quest.captures_world_pointer_at(
+                    x,
+                    y,
+                    player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                )
+            })
     });
-    if ui_state_blocks && over_nonmodal_view && !keyboard_movement_requested && !dead && !dialog_open && !quest_modal
+    if ui_state_blocks
+        && over_nonmodal_view
+        && !keyboard_movement_requested
+        && !dead
+        && !dialog_open
+        && !quest_modal
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        && player_ui.as_deref().is_some_and(|ui| !ui.blocks_world_action(false, false))
+        && player_ui
+            .as_deref()
+            .is_some_and(|ui| !ui.blocks_world_action(false, false))
     {
         presentation.clear_local_mining_request();
-        if let Some(queue) = queue.as_deref_mut() { queue.clear_directional_attack_intents(); }
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_directional_attack_intents();
+        }
         movement.stop_hold(now_ms, "nonmodalPanelPointer");
         return;
     }
@@ -2193,7 +2461,8 @@ pub fn mouse_world_interaction_system(
         Some("heroPointer")
     } else if (!continuing_auto_action && !keyboard_movement_requested && over_skill_bar)
         || player_ui.as_deref().is_some_and(|ui| {
-            (!continuing_auto_action && !keyboard_movement_requested && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
+            (!continuing_auto_action && !keyboard_movement_requested && ui.skill_bars.hovered)
+                || ui.skill_bars.dragging.is_some()
         })
     {
         Some("skillPointer")
@@ -2224,8 +2493,11 @@ pub fn mouse_world_interaction_system(
             }));
             if let Some(state) = quest_ui_state.as_deref_mut() {
                 state.set_feedback(
-                    if dead { "自动寻路已停止：角色已死亡。" }
-                    else { "自动寻路已停止：界面正在接收操作，结束操作后可重新点击前往入口。" },
+                    if dead {
+                        "自动寻路已停止：角色已死亡。"
+                    } else {
+                        "自动寻路已停止：界面正在接收操作，结束操作后可重新点击前往入口。"
+                    },
                     true,
                 );
             }
@@ -2304,9 +2576,15 @@ pub fn mouse_world_interaction_system(
 
     // Title, frame and coordinates are UI surfaces too. A failed/hidden map
     // image must never start a world gesture through the HUD beneath it.
-    if (left_pressed || right_pressed) && !mini_map_image_press
-        && minimap_input::frame_contains(window, minimap_expanded
-            || mini_map_view.as_deref().is_some_and(|view| view.displayed.is_some()))
+    if (left_pressed || right_pressed)
+        && !mini_map_image_press
+        && minimap_input::frame_contains(
+            window,
+            minimap_expanded
+                || mini_map_view
+                    .as_deref()
+                    .is_some_and(|view| view.displayed.is_some()),
+        )
     {
         movement.stop_hold(now_ms, "miniMapFrame");
         movement.stop_auto_path(now_ms, "miniMapFrame");
@@ -2319,7 +2597,11 @@ pub fn mouse_world_interaction_system(
     if map_image_press || mini_map_image_press {
         // Consume the image press before interpreting world actors beneath it.
         // Crystal BigMap.OnMouseClick accepts both left and right buttons.
-        let reason = if mini_map_image_press { "miniMapClick" } else { "bigMapClick" };
+        let reason = if mini_map_image_press {
+            "miniMapClick"
+        } else {
+            "bigMapClick"
+        };
         movement.stop_hold(now_ms, reason);
         movement.stop_auto_path(now_ms, reason);
         movement.attack_target = None;
@@ -2333,21 +2615,35 @@ pub fn mouse_world_interaction_system(
             let model = big_map.as_deref().ok_or("地图信息尚未加载。");
             let model = model?;
             let (map_index, destination, dimensions) = if mini_map_image_press {
-                if player_ui.as_deref().is_some_and(|ui| !ui.minimap_visible() || ui.local_keys.camera_hidden) {
+                if player_ui
+                    .as_deref()
+                    .is_some_and(|ui| !ui.minimap_visible() || ui.local_keys.camera_hidden)
+                {
                     return Err("小地图已隐藏。");
                 }
                 let map = map_model.as_deref().ok_or("小地图信息尚未加载。");
                 let map = map?;
-                let (index, tile) = minimap_input::destination(
-                    window, mini_map_view.as_deref(), map, model,
-                )?;
-                (index, tile, (i32::from(map.map_width.unwrap()), i32::from(map.map_height.unwrap())))
+                let (index, tile) =
+                    minimap_input::destination(window, mini_map_view.as_deref(), map, model)?;
+                (
+                    index,
+                    tile,
+                    (
+                        i32::from(map.map_width.unwrap()),
+                        i32::from(map.map_height.unwrap()),
+                    ),
+                )
             } else {
                 let tile = big_map_input::destination(
-                    model, big_map_input::image_position(window, model).unwrap(),
+                    model,
+                    big_map_input::image_position(window, model).unwrap(),
                 )?;
                 let info = &model.active_map().unwrap().info;
-                (model.current_map_index.unwrap(), tile, (info.width, info.height))
+                (
+                    model.current_map_index.unwrap(),
+                    tile,
+                    (info.width, info.height),
+                )
             };
             let map_file = presentation
                 .current_map_file_name()
@@ -2471,7 +2767,8 @@ pub fn mouse_world_interaction_system(
             ui.local_keys.set_auto_run(false);
         }
     }
-    if !right_pressed && !mouse.pressed(MouseButton::Right)
+    if !right_pressed
+        && !mouse.pressed(MouseButton::Right)
         && mining_input::handle_directional_attack(
             &mut movement,
             queue.as_deref_mut(),
@@ -2502,9 +2799,14 @@ pub fn mouse_world_interaction_system(
         // monster/NPC sprite covers the pointer. Occupancy belongs to the
         // movement planner, not the sprite hit test. Only Ctrl+other-player
         // or Hero inspection owns this press instead of an escape hold.
-        if modifiers.control && hovered_actor_reserves_right_inspection(
-            presentation.hovered_object_id(), &object_id, &entities, presentation,
-        ) {
+        if modifiers.control
+            && hovered_actor_reserves_right_inspection(
+                presentation.hovered_object_id(),
+                &object_id,
+                &entities,
+                presentation,
+            )
+        {
             movement.stop_hold(now_ms, "rightClickInspect");
             return;
         }
@@ -2915,6 +3217,11 @@ pub fn mouse_world_interaction_system(
             },
         )
     };
+    let player_hp = ui_read_model
+        .as_deref()
+        .filter(|model| model.player.max_hp > 0)
+        .map(|model| model.player.hp);
+    let requested_mode = movement.permitted_run_mode(requested_mode, now_ms, player_hp);
     let Some(planned) = plan_crystal_pointer_move(
         &mut movement,
         &entities,
@@ -2975,6 +3282,7 @@ pub fn mouse_world_interaction_system(
         origin,
         planned.direction,
         planned.mode,
+        player_hp,
         now_ms,
         crate::entity_presentation::native_motion_clock_ms(),
     );
@@ -3040,6 +3348,7 @@ pub fn keyboard_movement_system(
         Option<Res<NpcDialogModel>>,
     ),
     entities: Option<Res<EntityModelSet>>,
+    ui_read_model: Option<Res<UiReadModel>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
     windows: Query<&Window>,
@@ -3094,6 +3403,9 @@ pub fn keyboard_movement_system(
     else {
         return;
     };
+    if !movement.input_owner_is_current(&object_id) {
+        return;
+    }
     if movement.observe_identity(&object_id, entity_position, entity_direction.as_str()) {
         push_movement_shadow_reset(
             now_ms,
@@ -3111,6 +3423,11 @@ pub fn keyboard_movement_system(
     } else {
         WorldPointerMovementMode::Walk
     };
+    let player_hp = ui_read_model
+        .as_deref()
+        .filter(|model| model.player.max_hp > 0)
+        .map(|model| model.player.hp);
+    let requested_mode = movement.permitted_run_mode(requested_mode, now_ms, player_hp);
     let map_file_name = presentation.current_map_file_name().map(ToOwned::to_owned);
     let run_distance = presentation.self_run_distance(&object_id).max(2);
     let Some(planned) = plan_crystal_pointer_move(
@@ -3137,6 +3454,7 @@ pub fn keyboard_movement_system(
         origin,
         planned.direction,
         planned.mode,
+        player_hp,
         now_ms,
         presentation_now_ms,
     );
@@ -3267,7 +3585,15 @@ pub fn keyboard_hero_skill_system(
     if !HERO_SHARED_MANUAL_CAST_VERIFIED {
         return;
     }
-    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), quest.as_deref(), big_map.as_deref(), npc_dialog.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        ui.as_deref(),
+        notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
+        &windows,
+    ) {
         return;
     }
     let (Some(hero), Some(ui), Some(presentation)) = (hero, ui, presentation) else {
@@ -3481,14 +3807,13 @@ pub fn keyboard_skill_system(
                 .as_deref()
                 .is_none_or(|queue| queue.use_item_ready(now))
             {
-                let sent = commands.send_command(GatewayCommand::Wire(
-                    NativeOutboundCommand::UseItem {
+                let sent =
+                    commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::UseItem {
                         key,
                         unique_id,
                         slot,
                         grid,
-                    },
-                ));
+                    }));
                 if sent {
                     if let Some(queue) = item_intents.as_deref_mut() {
                         queue.commit_item_use(now, 300);
@@ -3572,17 +3897,19 @@ pub fn keyboard_skill_system(
         let Some(spell) = selection.spell.filter(|spell| !spell.trim().is_empty()) else {
             continue;
         };
-        let persistent_toggle = selection.cast_kind.as_deref() == Some("toggle")
-            && persistent_weapon_toggle(&spell);
+        let persistent_toggle =
+            selection.cast_kind.as_deref() == Some("toggle") && persistent_weapon_toggle(&spell);
         if !persistent_toggle {
             let clocks = player_ui
                 .as_deref()
                 .map_or(&*fallback_skill_clocks, |ui| &ui.skill_bars);
-            if skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
-                clocks.readiness_remaining_ms(skill.id, skills, now) > 0
-            }) || selection.mp_cost.is_some_and(|mp_cost| {
-                ui.player.mp < i32::try_from(mp_cost).unwrap_or(i32::MAX)
-            }) {
+            if skills
+                .skill_for_shortcut(skill_slot)
+                .is_some_and(|skill| clocks.readiness_remaining_ms(skill.id, skills, now) > 0)
+                || selection.mp_cost.is_some_and(|mp_cost| {
+                    ui.player.mp < i32::try_from(mp_cost).unwrap_or(i32::MAX)
+                })
+            {
                 continue;
             }
         }
@@ -3608,9 +3935,11 @@ pub fn keyboard_skill_system(
             } else {
                 1
             };
-            let sent = commands.send_command(GatewayCommand::Wire(
-                NativeOutboundCommand::SpellToggle { spell, toggle_state },
-            ));
+            let sent =
+                commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::SpellToggle {
+                    spell,
+                    toggle_state,
+                }));
             if sent {
                 if let Some(delay_ms) = toggle_delay_ms {
                     toggle_debounce.commit(toggle_now_ms, delay_ms);
@@ -3797,6 +4126,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 
 #[cfg(test)]
 mod tests {
+    mod struck_run_guard {
+        include!("struck_run_guard.rs");
+    }
     mod mining_input_tests {
         include!("mining_input_tests.rs");
     }
@@ -5131,15 +5463,18 @@ mod tests {
         ui.skill_bars.hovered = true;
         app.insert_resource(ui);
         let mut click_state = NativeWorldClickState::default();
-        click_state.targets.insert(2001, crate::gameplay_bridge::CrystalWorldClickTarget {
-            kind: EntityKind::Monster,
-            object_id: 2001,
-            x: 10,
-            y: 11,
-            dead: None, // a partial refresh is not evidence the monster died
-            ai: Some(0),
-            harvestable: Some(false),
-        });
+        click_state.targets.insert(
+            2001,
+            crate::gameplay_bridge::CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 10,
+                y: 11,
+                dead: None, // a partial refresh is not evidence the monster died
+                ai: Some(0),
+                harvestable: Some(false),
+            },
+        );
         app.insert_resource(click_state);
         app.init_resource::<QuestUiIntentQueue>();
         {
@@ -5147,7 +5482,10 @@ mod tests {
             state.observe_identity("1000", (10, 10), "right");
             state.attack_target = Some(2001);
             state.pending.push_back(pending_test_move(
-                (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+                (10, 10),
+                (11, 10),
+                WorldPointerMovementMode::Walk,
+                0.0,
             ));
             state.next_move_send_at_ms = 600.0;
         }
@@ -5155,28 +5493,59 @@ mod tests {
         advance_movement_clock(&mut app, 600);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
             vec![QuestUiIntent::AttackTarget { object_id: 2001 }],
             "a delayed movement ACK and passive HUD hover must not freeze combat"
         );
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, Some(2001));
-        assert!(receiver.try_recv().is_err(), "do not resend an unconfirmed move");
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            Some(2001)
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "do not resend an unconfirmed move"
+        );
 
         // The old walk stays owned by the server; subsequent attacks obey
         // attack speed and stop once the target is explicitly dead.
         advance_movement_clock(&mut app, 1400);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
             vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
         );
-        app.world_mut().resource_mut::<NativeWorldClickState>()
-            .targets.get_mut(&2001).unwrap().dead = Some(true);
+        app.world_mut()
+            .resource_mut::<NativeWorldClickState>()
+            .targets
+            .get_mut(&2001)
+            .unwrap()
+            .dead = Some(true);
         advance_movement_clock(&mut app, 1400);
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
-        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            None
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]
@@ -5197,17 +5566,40 @@ mod tests {
             }]
         }), 0);
         assert!(presentation.begin_local_self_motion(
-            "1000", (10, 10), (12, 10), "right", true, 100, 1_000,
+            "1000",
+            (10, 10),
+            (12, 10),
+            "right",
+            true,
+            100,
+            1_000,
         ));
         let mut movement = WorldPointerMovementState::default();
         movement.next_move_send_at_ms = 600.0;
         movement.pending.push_back(pending_test_move(
-            (10, 10), (12, 10), WorldPointerMovementMode::Run, 0.0,
+            (10, 10),
+            (12, 10),
+            WorldPointerMovementMode::Run,
+            0.0,
         ));
-        assert!(!attack_request_ready(&movement, &presentation, 599.0, 1_599));
-        assert!(!attack_request_ready(&movement, &presentation, 600.0, 1_599));
+        assert!(!attack_request_ready(
+            &movement,
+            &presentation,
+            599.0,
+            1_599
+        ));
+        assert!(!attack_request_ready(
+            &movement,
+            &presentation,
+            600.0,
+            1_599
+        ));
         assert!(attack_request_ready(&movement, &presentation, 600.0, 1_600));
-        assert_eq!(movement.pending.len(), 1, "ACK remains outstanding when visual motion ends");
+        assert_eq!(
+            movement.pending.len(),
+            1,
+            "ACK remains outstanding when visual motion ends"
+        );
     }
 
     #[test]
@@ -5223,19 +5615,42 @@ mod tests {
             state.observe_identity("1000", (10, 10), "right");
             state.attack_target = Some(2001);
             state.pending.push_back(pending_test_move(
-                (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+                (10, 10),
+                (11, 10),
+                WorldPointerMovementMode::Walk,
+                0.0,
             ));
         }
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
             .press(MouseButton::Right);
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
         app.update();
-        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
-        assert!(receiver.try_recv().is_err(), "old movement still awaits server ACK");
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            None
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .len(),
+            1
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "old movement still awaits server ACK"
+        );
     }
 
     #[test]
@@ -5634,7 +6049,9 @@ mod tests {
         }
     }
 
-    fn crowded_escape_input_app(new_move: bool) -> (
+    fn crowded_escape_input_app(
+        new_move: bool,
+    ) -> (
         bevy::prelude::App,
         std::sync::mpsc::Receiver<GatewayCommand>,
     ) {
@@ -5662,27 +6079,41 @@ mod tests {
             for hovered in ["2001", "77"] {
                 let (mut app, receiver) = crowded_escape_input_app(new_move);
                 {
-                    let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                    let mut presentation =
+                        app.world_mut().resource_mut::<NativeEntityPresentation>();
                     // A sprite can cover clear ground beside its occupied tile.
                     presentation.set_hover_grid_context_for_test((10, 10), (336., 352.));
                     presentation.set_hovered_object_id_for_test(Some(hovered));
                 }
-                app.world_mut().resource_mut::<WorldPointerMovementState>().attack_target = Some(2001);
-                app.world_mut().resource_mut::<QuestUiIntentQueue>()
+                app.world_mut()
+                    .resource_mut::<WorldPointerMovementState>()
+                    .attack_target = Some(2001);
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
                     .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
-                app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                app.world_mut()
+                    .resource_mut::<ButtonInput<MouseButton>>()
                     .press(MouseButton::Right);
 
                 app.update();
 
-                assert!(matches!(receiver.try_recv(),
+                assert!(
+                    matches!(receiver.try_recv(),
                     Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "left"),
-                    "right escape was discarded for {hovered}, NewMove={new_move}");
+                    "right escape was discarded for {hovered}, NewMove={new_move}"
+                );
                 let movement = app.world().resource::<WorldPointerMovementState>();
                 assert_eq!(movement.attack_target, None);
                 assert_eq!(movement.pending.front().unwrap().to, (9, 10));
-                assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
-                assert!(receiver.try_recv().is_err(), "escape must emit only one movement intent");
+                assert!(app
+                    .world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty());
+                assert!(
+                    receiver.try_recv().is_err(),
+                    "escape must emit only one movement intent"
+                );
             }
         }
     }
@@ -5694,8 +6125,18 @@ mod tests {
                 let (mut app, receiver) = crowded_escape_input_app(new_move);
                 let mut entities = movement_entities();
                 for (index, direction) in [
-                    "up", "upright", "right", "downright", "down", "downleft", "left", "upleft",
-                ].iter().enumerate() {
+                    "up",
+                    "upright",
+                    "right",
+                    "downright",
+                    "down",
+                    "downleft",
+                    "left",
+                    "upleft",
+                ]
+                .iter()
+                .enumerate()
+                {
                     let point = movement_target((10, 10), direction, 1);
                     entities.entities.push(EntityModel {
                         object_id: (3000 + index).to_string(),
@@ -5709,29 +6150,51 @@ mod tests {
                 }
                 app.insert_resource(entities);
                 {
-                    let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                    let mut presentation =
+                        app.world_mut().resource_mut::<NativeEntityPresentation>();
                     presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
                     presentation.set_hovered_object_id_for_test(Some("3002"));
                 }
-                app.world_mut().resource_mut::<WorldPointerMovementState>().attack_target = Some(2001);
-                app.world_mut().resource_mut::<QuestUiIntentQueue>()
+                app.world_mut()
+                    .resource_mut::<WorldPointerMovementState>()
+                    .attack_target = Some(2001);
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
                     .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
-                app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                app.world_mut()
+                    .resource_mut::<ButtonInput<MouseButton>>()
                     .press(MouseButton::Right);
                 app.update();
-                assert!(receiver.try_recv().is_err(), "live surrounding actors remain solid");
-                assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
-                assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+                assert!(
+                    receiver.try_recv().is_err(),
+                    "live surrounding actors remain solid"
+                );
+                assert_eq!(
+                    app.world()
+                        .resource::<WorldPointerMovementState>()
+                        .attack_target,
+                    None
+                );
+                assert!(app
+                    .world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty());
                 assert_eq!(app.world().resource::<WorldPointerMovementState>().active,
                     Some(WorldPointerMovementMode::Run),
                     "blocked world press must retain escape hold: {hovered_kind:?}, NewMove={new_move}");
 
-                app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                app.world_mut()
+                    .resource_mut::<ButtonInput<MouseButton>>()
                     .clear_just_pressed(MouseButton::Right);
-                assert!(app.world().resource::<ButtonInput<MouseButton>>().pressed(MouseButton::Right));
+                assert!(app
+                    .world()
+                    .resource::<ButtonInput<MouseButton>>()
+                    .pressed(MouseButton::Right));
                 app.insert_resource(movement_entities());
                 {
-                    let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                    let mut presentation =
+                        app.world_mut().resource_mut::<NativeEntityPresentation>();
                     presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
                     presentation.set_hovered_object_id_for_test(None);
                 }
@@ -5749,28 +6212,49 @@ mod tests {
     fn crowded_ctrl_other_player_inspect_press_cannot_become_a_later_escape_hold() {
         for new_move in [false, true] {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
-            app.world_mut().resource_mut::<EntityModelSet>().entities.push(EntityModel {
-                object_id: "4000".to_owned(), kind: EntityKind::Player,
-                name: "Other player".to_owned(), x: 11, y: 10,
-                level: Some(10), direction: Some("left".to_owned()),
-            });
+            app.world_mut()
+                .resource_mut::<EntityModelSet>()
+                .entities
+                .push(EntityModel {
+                    object_id: "4000".to_owned(),
+                    kind: EntityKind::Player,
+                    name: "Other player".to_owned(),
+                    x: 11,
+                    y: 10,
+                    level: Some(10),
+                    direction: Some("left".to_owned()),
+                });
             {
                 let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
                 presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
                 presentation.set_hovered_object_id_for_test(Some("4000"));
             }
-            app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::ControlLeft);
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::ControlLeft);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Right);
             app.update();
             assert!(receiver.try_recv().is_err());
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().active, None);
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+            assert_eq!(
+                app.world().resource::<WorldPointerMovementState>().active,
+                None
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
                 .clear_just_pressed(MouseButton::Right);
-            app.world_mut().resource_mut::<ButtonInput<KeyCode>>().release(KeyCode::ControlLeft);
-            app.world_mut().resource_mut::<NativeEntityPresentation>()
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .release(KeyCode::ControlLeft);
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
                 .set_hovered_object_id_for_test(None);
             app.update();
-            assert!(receiver.try_recv().is_err(), "inspect-owned press leaked into held movement");
+            assert!(
+                receiver.try_recv().is_err(),
+                "inspect-owned press leaked into held movement"
+            );
         }
     }
 
@@ -5779,17 +6263,27 @@ mod tests {
         for new_move in [false, true] {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
             app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
-            app.world_mut().resource_mut::<NativeEntityPresentation>()
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
                 .set_hover_grid_context_for_test((10, 10), (672., 352.));
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Right);
             app.update();
             assert!(receiver.try_recv().is_err());
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
                 .clear_just_pressed(MouseButton::Right);
             app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
             app.update();
-            assert!(receiver.try_recv().is_err(), "modal-owned press leaked into held movement");
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().active, None);
+            assert!(
+                receiver.try_recv().is_err(),
+                "modal-owned press leaked into held movement"
+            );
+            assert_eq!(
+                app.world().resource::<WorldPointerMovementState>().active,
+                None
+            );
         }
     }
 
@@ -5797,25 +6291,46 @@ mod tests {
     fn crowded_expired_rejections_are_removed_before_new_move_path_search() {
         let (mut app, receiver) = crowded_escape_input_app(true);
         app.insert_resource(movement_entities());
-        app.world_mut().resource_mut::<NativeEntityPresentation>()
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
             .set_hover_grid_context_for_test((10, 10), (672., 352.));
         for direction in [
-            "up", "upright", "right", "downright", "down", "downleft", "left", "upleft",
+            "up",
+            "upright",
+            "right",
+            "downright",
+            "down",
+            "downleft",
+            "left",
+            "upleft",
         ] {
-            app.world_mut().resource_mut::<WorldPointerMovementState>().blocked_steps.push(BlockedSelfMove {
-                from: (10, 10), direction, mode: WorldPointerMovementMode::Walk,
-                observed_at_ms: 0.,
-            });
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .blocked_steps
+                .push(BlockedSelfMove {
+                    from: (10, 10),
+                    direction,
+                    mode: WorldPointerMovementMode::Walk,
+                    observed_at_ms: 0.,
+                });
         }
         // All eight exits were temporarily rejected by live crowd occupancy.
         // The crowd has now moved away and every hint is older than its TTL.
         advance_movement_clock(&mut app, 3_001);
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
         app.update();
-        assert!(matches!(receiver.try_recv(),
+        assert!(
+            matches!(receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
-            "expired rejection hints still starved NewMove A* before planner pruning");
-        assert!(app.world().resource::<WorldPointerMovementState>().blocked_steps.is_empty());
+            "expired rejection hints still starved NewMove A* before planner pruning"
+        );
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .blocked_steps
+            .is_empty());
         assert!(receiver.try_recv().is_err());
     }
 
@@ -5961,15 +6476,21 @@ mod tests {
     #[test]
     fn native_hud_pointer_geometry_uses_source_button_rectangles_and_leaves_empty_world_open() {
         let (menu_x, menu_y) = spec::hud::MENU.rect.center();
-        assert!(cursor_over_native_hud_button(&stage_window(
-            bevy::prelude::Vec2::new(menu_x, menu_y),
-        ), true));
-        assert!(!cursor_over_native_hud_button(&stage_window(
-            bevy::prelude::Vec2::new(spec::hud::MENU.rect.left - 0.1, menu_y),
-        ), true));
-        assert!(!cursor_over_native_hud_button(&stage_window(
-            bevy::prelude::Vec2::new(512.0, 400.0),
-        ), true));
+        assert!(cursor_over_native_hud_button(
+            &stage_window(bevy::prelude::Vec2::new(menu_x, menu_y),),
+            true
+        ));
+        assert!(!cursor_over_native_hud_button(
+            &stage_window(bevy::prelude::Vec2::new(
+                spec::hud::MENU.rect.left - 0.1,
+                menu_y
+            ),),
+            true
+        ));
+        assert!(!cursor_over_native_hud_button(
+            &stage_window(bevy::prelude::Vec2::new(512.0, 400.0),),
+            true
+        ));
     }
 
     #[test]
@@ -6595,7 +7116,7 @@ mod tests {
         let mut movement = WorldPointerMovementState::default();
         movement.run_primed_until_ms = 1200.0;
         assert_eq!(
-            movement.effective_mode(WorldPointerMovementMode::Run, now),
+            movement.effective_mode(WorldPointerMovementMode::Run, now, None),
             WorldPointerMovementMode::Walk
         );
     }
@@ -6621,7 +7142,7 @@ mod tests {
             MovementAckOutcome::Confirmed
         );
         assert_eq!(
-            movement.effective_mode(WorldPointerMovementMode::Run, 2000.0),
+            movement.effective_mode(WorldPointerMovementMode::Run, 2000.0, None),
             WorldPointerMovementMode::Walk
         );
     }

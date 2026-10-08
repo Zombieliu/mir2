@@ -162,6 +162,7 @@ fn server_fixture() -> (GatewayConfig, u64) {
         store.shared_guilds.insert(
             GUILD.into(),
             SharedGuildRecord {
+        active_wars: Default::default(),
                 id: GUILD.into(),
                 name: "Knights".into(),
                 revision: 1,

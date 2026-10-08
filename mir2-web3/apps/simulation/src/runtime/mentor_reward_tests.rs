@@ -45,167 +45,171 @@ fn mentor_bank_overflow_fails_without_consuming_receipt_or_sequence() {
     assert!(!bank_mentor_gain(&mut state, 100, Some("teacher-gain")).unwrap());
 }
 
-fn accounting_fixture() -> (
-    crate::SimulationConfig,
-    Stage5FriendIdentity,
-    Stage5FriendIdentity,
-    crate::SharedMentorLiveCheckpoint,
-) {
+
+fn accounting_fixture() -> (crate::SimulationConfig, Stage5FriendIdentity, Stage5FriendIdentity) {
     let config = crate::SimulationConfig::default();
-    let teacher = Stage5FriendIdentity {
-        account_id: "teacher".into(),
-        character_index: 7,
-    };
-    let pupil = Stage5FriendIdentity {
-        account_id: "demo".into(),
-        character_index: 0,
-    };
-    let mut record = config.default_character.clone();
-    record.index = 7;
-    record.name = "Teacher".into();
-    record.level = 30;
-    config
-        .account_store
-        .lock()
-        .unwrap()
-        .accounts
-        .insert("teacher".into(), crate::AccountRecord::new(record));
-    config
-        .commit_shared_mentor_mutation(&teacher, crate::SharedMentorMutation::TogglePermission, 1)
-        .unwrap();
-    config
-        .commit_shared_mentor_mutation(
-            &teacher,
-            crate::SharedMentorMutation::Accept {
-                student: pupil.clone(),
-            },
-            10,
-        )
-        .unwrap();
-    let mut save = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
-    let mut state: crate::Stage5SystemsState =
-        serde_json::from_str(save.stage5_systems_json.as_deref().unwrap()).unwrap();
-    bank_mentor_gain(&mut state.mentor, 300, Some("kill:stable:1")).unwrap();
-    state.economy_projection_event_ids.insert("a".repeat(64));
-    save.experience += 300;
-    save.stage5_systems_json = Some(serde_json::to_string(&state).unwrap());
-    let checkpoint = crate::SharedMentorLiveCheckpoint {
-        identity: pupil.clone(),
-        save,
-    };
-    (config, pupil, teacher, checkpoint)
+    let teacher = Stage5FriendIdentity { account_id: "teacher".into(), character_index: 7 };
+    let pupil = Stage5FriendIdentity { account_id: "demo".into(), character_index: 0 };
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let source = store.accounts.get_mut("demo").unwrap();
+        source.characters[0].level = 10;
+        let save = source.saves.get_mut(&0).unwrap();
+        save.character.level = 10;
+        save.experience = 0;
+        save.max_experience = super::leveling::crystal_max_experience_for_level(10);
+        let mut record = config.default_character.clone();
+        record.index = 7; record.name = "Teacher".into(); record.level = 20;
+        store.accounts.insert("teacher".into(), crate::AccountRecord::new(record));
+    }
+    config.commit_shared_mentor_mutation(&teacher, crate::SharedMentorMutation::TogglePermission, 1).unwrap();
+    config.commit_shared_mentor_mutation(&teacher, crate::SharedMentorMutation::Accept { student:pupil.clone() }, 10).unwrap();
+    (config, pupil, teacher)
+}
+fn login(config: &crate::SimulationConfig, id: &Stage5FriendIdentity) -> crate::SimulationSession {
+    use mir2_protocol::{ClientPacket,ServerPacket};
+    let mut session=crate::SimulationSession::new(config.clone());
+    assert!(session.handle_packet(ClientPacket::Login {account_id:id.account_id.clone(),password:"demo".into()})
+        .iter().any(|p|matches!(p,ServerPacket::LoginSuccess{..})));
+    let packets=session.handle_packet(ClientPacket::StartGame{character_index:id.character_index});
+    assert!(packets.iter().any(|p|matches!(p,ServerPacket::UserInformation{..})),"{packets:?}");
+    session
+}
+fn gain(session:&mut crate::SimulationSession,amount:i64)->Result<Vec<mir2_protocol::ServerPacket>,String>{
+    let before=session.begin_guild_experience_command(false)?;
+    assert!(before.is_some(),"non-Guild mentor source must be captured");
+    let packets=super::leveling::apply_experience_gain(session.app.world_mut(),amount);
+    session.finish_guild_experience_command(before,packets)
+}
+#[test]
+fn mentor_normal_xp_source_bank_and_sub100_receipts_commit_without_guild(){
+    let (config,pupil,_)=accounting_fixture();let mut s=login(&config,&pupil);
+    gain(&mut s,99).unwrap();gain(&mut s,99).unwrap();gain(&mut s,300).unwrap();
+    let bank=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger;
+    assert_eq!(bank.bank_earned,3);assert_eq!(bank.local_event_sequence,3);
+    assert_eq!(config.account_store.lock().unwrap().accounts["demo"].saves[&0].experience,498);
+}
+#[test]
+fn mentor_xp_failure_rolls_back_receipt_xp_and_bank_then_retries(){
+    let (config,pupil,_)=accounting_fixture();let mut s=login(&config,&pupil);
+    let before=s.active_character_checkpoint().unwrap();
+    config.inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
+    assert!(gain(&mut s,300).is_err());
+    assert_eq!(s.active_character_checkpoint().unwrap().experience,before.experience);
+    assert_eq!(config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.bank_earned,0);
+    gain(&mut s,300).unwrap();
+    assert_eq!(config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.bank_earned,3);
+}
+#[test]
+fn mentor_transfer_does_not_invalidate_peer_revision_and_end_pays_once(){
+    let (config,pupil,teacher)=accounting_fixture();let mut s=login(&config,&pupil);let mut t=login(&config,&teacher);
+    gain(&mut s,300).unwrap();
+    let epoch=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
+    let rev=t.active_character_checkpoint().unwrap().revision;
+    config.settle_shared_mentor_bank(&pupil,epoch,None,20,true).unwrap();
+    assert_eq!(config.account_store.lock().unwrap().accounts["teacher"].saves[&7].revision,rev);
+    assert_eq!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.mentee_exp,3);
+    config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Manual),22,true).unwrap();
+    assert_eq!(config.account_store.lock().unwrap().accounts["teacher"].saves[&7].experience,0);
+    t.consume_shared_mentor_credits().unwrap();
+    assert_eq!(t.active_character_checkpoint().unwrap().experience,3);
+    assert!(t.consume_shared_mentor_credits().unwrap().is_empty());
+    assert!(config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Manual),23,true).is_err());
+    assert_eq!(config.account_store.lock().unwrap().accounts["teacher"].saves[&7].experience,3);
+    assert!(config.shared_mentor_profile_for(&pupil).unwrap().mentor.cooldown_until_ms>22);
+    assert_eq!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.cooldown_until_ms,0);
+}
+#[test]
+fn mentor_pair_persist_failure_and_credit_consume_failure_are_retryable(){
+    let (config,pupil,teacher)=accounting_fixture();let mut s=login(&config,&pupil);let mut t=login(&config,&teacher);
+    gain(&mut s,300).unwrap();
+    let epoch=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
+    let before=serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap();
+    config.inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
+    assert!(config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Manual),22,true).is_err());
+    assert_eq!(serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(),before);
+    config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Manual),23,true).unwrap();
+    config.inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
+    assert!(t.consume_shared_mentor_credits().is_err());
+    assert_eq!(t.active_character_checkpoint().unwrap().experience,0);
+    assert_eq!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.ledger.leveling_applied,0);
+    t.consume_shared_mentor_credits().unwrap();assert_eq!(t.active_character_checkpoint().unwrap().experience,3);
+}
+#[test]
+fn mentor_offline_credit_is_in_login_bootstrap_and_does_not_force_levelup(){
+    let (config,pupil,teacher)=accounting_fixture();let mut s=login(&config,&pupil);
+    gain(&mut s,300).unwrap();
+    let epoch=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
+    config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Manual),22,false).unwrap();
+    let t=login(&config,&teacher);let save=t.active_character_checkpoint().unwrap();
+    assert_eq!(save.experience,3);assert_eq!(save.character.level,20);
+    assert_eq!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.ledger.balance_applied,3);
+}
+#[test]
+fn mentor_expiry_is_strict_and_graduation_uses_latest_committed_level(){
+    let (config,pupil,teacher)=accounting_fixture();
+    let epoch=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
+    let deadline=10+crate::SHARED_MENTOR_DURATION_MS;
+    assert!(config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::LoginExpired),deadline,true).is_err());
+    assert!(config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Graduated),20,true).is_err());
+    let mut s=login(&config,&pupil);let amount=s.active_character_checkpoint().unwrap().max_experience;
+    gain(&mut s,amount).unwrap();assert_eq!(s.active_character_checkpoint().unwrap().character.level,11);
+    config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::Graduated),21,true).unwrap();
+    assert!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.partner_identity.is_none());
+    assert_eq!(config.shared_mentor_profile_for(&pupil).unwrap().mentor.cooldown_until_ms,0);
+    let (config,pupil,_)=accounting_fixture();
+    let epoch=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
+    config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::LoginExpired),deadline+1,false).unwrap();
+}
+#[test]
+fn mentor_closed_source_and_unminted_credit_merge_are_guarded(){
+    use super::shared_mentor_rewards::merge_mentor_state;
+    let mut durable=student();let mut local=durable.clone();
+    bank_mentor_gain(&mut local,99,None).unwrap();durable.partner_identity=None;
+    assert!(merge_mentor_state(&local,&durable,true).is_err());
+    let mut forged=durable.clone();forged.ledger.leveling_credit=99;
+    assert_eq!(merge_mentor_state(&forged,&durable,true).unwrap().ledger.leveling_credit,0);
+    forged.ledger.leveling_applied=99;assert!(merge_mentor_state(&forged,&durable,true).is_err());
+    durable.ledger.leveling_credit=15;let mut local=durable.clone();local.ledger.leveling_credit=10;local.ledger.leveling_applied=10;
+    let merged=merge_mentor_state(&local,&durable,true).unwrap();assert_eq!(merged.ledger.leveling_credit,15);assert_eq!(merged.ledger.leveling_applied,10);
 }
 
 #[test]
-fn mentor_bank_transfer_saves_source_xp_marker_and_bank_in_one_transaction() {
-    let (config, pupil, teacher, checkpoint) = accounting_fixture();
-    let epoch = config
-        .shared_mentor_profile_for(&pupil)
-        .unwrap()
-        .mentor
-        .ledger
-        .relationship_epoch;
-    config
-        .commit_shared_mentor_accounting(&pupil, epoch, &[checkpoint.clone()], None, 20, None)
-        .unwrap();
-    let source = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
-    assert_eq!(source.experience, checkpoint.save.experience);
-    let mut state: crate::Stage5SystemsState =
-        serde_json::from_str(source.stage5_systems_json.as_deref().unwrap()).unwrap();
-    assert!(state.economy_projection_event_ids.contains(&"a".repeat(64)));
-    assert_eq!(state.mentor.ledger.bank_earned, 3);
-    assert_eq!(state.mentor.ledger.bank_settled, 3);
-    assert!(!bank_mentor_gain(&mut state.mentor, 300, Some("kill:stable:1")).unwrap());
-    assert_eq!(
-        config
-            .shared_mentor_profile_for(&teacher)
-            .unwrap()
-            .mentor
-            .mentee_exp,
-        3
-    );
-    assert!(config
-        .commit_shared_mentor_accounting(&pupil, epoch, &[checkpoint], None, 21, None)
-        .is_err());
-    config
-        .commit_shared_mentor_accounting(
-            &pupil,
-            epoch,
-            &[],
-            Some(crate::SharedMentorBreakReason::Manual),
-            22,
-            None,
-        )
-        .unwrap();
-    let teacher_save = config.account_store.lock().unwrap().accounts["teacher"].saves[&7].clone();
-    assert_eq!(teacher_save.experience, 3);
-    assert_eq!(teacher_save.character.level, 30);
-    let mentor = config.shared_mentor_profile_for(&teacher).unwrap().mentor;
-    assert_eq!(mentor.mentee_exp, 0);
-    assert_eq!(mentor.ledger.balance_credit, 3);
-    assert_eq!(mentor.ledger.balance_applied, 3);
-    assert!(config
-        .commit_shared_mentor_accounting(
-            &pupil,
-            epoch,
-            &[],
-            Some(crate::SharedMentorBreakReason::Manual),
-            23,
-            None
-        )
-        .is_err());
-    assert_eq!(
-        config.account_store.lock().unwrap().accounts["teacher"].saves[&7].experience,
-        3
-    );
+fn mentor_large_credit_is_consumed_in_bounded_owner_turns() {
+    let (config, _, teacher) = accounting_fixture();
+    let mut t = login(&config, &teacher);
+    let credit = u64::from(u32::MAX) * 5;
+    config.commit_account_store_transaction(&[teacher.account_id.clone()], |store| {
+        let mut mentor = super::shared_relationships::profile(store, &teacher)?.mentor;
+        mentor.ledger.leveling_credit = credit;
+        super::shared_relationships::write_mentor(store, &teacher, mentor)
+    }).unwrap();
+    let packets = t.consume_shared_mentor_credits().unwrap();
+    assert!(packets.iter().filter(|p| matches!(p,
+        mir2_protocol::ServerPacket::GainExperience { .. })).count() <= 4);
+    let applied = config.shared_mentor_profile_for(&teacher).unwrap().mentor.ledger.leveling_applied;
+    assert!(applied > 0 && applied < credit, "remaining durable credit must survive a bounded turn");
+    t.consume_shared_mentor_credits().unwrap();
+    assert_eq!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.ledger.leveling_applied, credit);
+    assert!(t.consume_shared_mentor_credits().unwrap().is_empty());
 }
 
 #[test]
-fn mentor_source_checkpoint_and_both_banks_roll_back_on_persist_failure() {
-    let (config, pupil, teacher, checkpoint) = accounting_fixture();
-    let epoch = config
-        .shared_mentor_profile_for(&pupil)
-        .unwrap()
-        .mentor
-        .ledger
-        .relationship_epoch;
-    let before = serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap();
-    config
-        .inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
-    assert!(config
-        .commit_shared_mentor_accounting(
-            &pupil,
-            epoch,
-            &[checkpoint.clone()],
-            Some(crate::SharedMentorBreakReason::Manual),
-            20,
-            None
-        )
-        .is_err());
-    assert_eq!(
-        serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(),
-        before
-    );
-    assert_eq!(
-        config
-            .shared_mentor_profile_for(&teacher)
-            .unwrap()
-            .mentor
-            .mentee_exp,
-        0
-    );
-    config
-        .commit_shared_mentor_accounting(
-            &pupil,
-            epoch,
-            &[checkpoint],
-            Some(crate::SharedMentorBreakReason::Manual),
-            21,
-            None,
-        )
-        .unwrap();
-    assert_eq!(
-        config.account_store.lock().unwrap().accounts["teacher"].saves[&7].experience,
-        3
-    );
+fn mentor_recipient_credit_does_not_authorize_revive_and_failure_keeps_dead() {
+    let (config, _, teacher) = accounting_fixture();
+    let mut t = login(&config, &teacher);
+    let credit = t.active_character_checkpoint().unwrap().max_experience as u64;
+    config.commit_account_store_transaction(&[teacher.account_id.clone()], |store| {
+        let mut mentor = super::shared_relationships::profile(store, &teacher)?.mentor;
+        mentor.ledger.leveling_credit = credit;
+        super::shared_relationships::write_mentor(store, &teacher, mentor)
+    }).unwrap();
+    t.force_authoritative_player_life(true);
+    config.inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
+    assert!(t.consume_shared_mentor_credits().is_err());
+    assert!(super::components::current_player_is_dead(t.app.world()));
+    let packets = t.consume_shared_mentor_credits().unwrap();
+    assert!(packets.iter().any(|p| matches!(p, mir2_protocol::ServerPacket::LevelChanged { .. })));
+    assert!(super::components::current_player_is_dead(t.app.world()));
+    assert!(!packets.iter().any(|p| matches!(p, mir2_protocol::ServerPacket::ObjectRevived { .. })));
 }

@@ -97,6 +97,7 @@ fn fixture() -> GatewayConfig {
         last_buff_tick_ms: 0,
         experience_receipts: Default::default(),
         experience_receipt_payloads: Default::default(),
+        active_wars: Default::default(),
     };
     let mut other = guild.clone();
     other.id = OTHER_GUILD_ID.into();
@@ -435,4 +436,375 @@ fn file_reopen_and_new_factory_keep_exact_rank_revision_and_membership_epochs() 
     ));
     assert_eq!(persisted(&reopened), after);
     // The isolated file is retained for failure inspection; no user store is used.
+}
+
+fn management(change_type: u8, rank_index: u8, name: &str, rank_name: &str) -> ClientPacket {
+    ClientPacket::EditGuildMember {
+        change_type,
+        rank_index,
+        name: name.into(),
+        rank_name: rank_name.into(),
+    }
+}
+
+fn leave() -> ClientPacket {
+    ClientPacket::Chat {
+        message: "@LEAVEGUILD".into(),
+        linked_items: Vec::new(),
+    }
+}
+
+fn has_management_event(
+    packets: &[ServerPacket],
+    expected_status: u8,
+    expected_name: &str,
+) -> bool {
+    packets.iter().any(|packet| {
+        matches!(packet, ServerPacket::GuildMemberChange { status, name, .. }
+        if *status == expected_status && name == expected_name)
+    })
+}
+
+#[test]
+fn ordinary_new_rank_inserts_before_lowest_and_shifts_existing_member_without_rejoining() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("new-rank-a"));
+    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("new-rank-b"));
+    let mut foreign = factory.create_runtime(config.clone(), &ZoneId::new("new-rank-b"));
+    login(&mut leader, "leader", 0);
+    login(&mut member, "member", 2);
+    login(&mut foreign, "other-leader", 4);
+    let before = persisted(&config);
+    let reply = send(&mut leader, management(4, 0, "Forged Actor", "Ignored"));
+    let after = persisted(&config);
+    assert_eq!(after.revision, before.revision + 1);
+    assert_eq!(
+        after
+            .ranks
+            .iter()
+            .map(|rank| (rank.index, rank.name.as_str()))
+            .collect::<Vec<_>>(),
+        vec![(0, "Leader"), (1, "Officer"), (2, "Rank-2"), (3, "Members")]
+    );
+    let old_member = before.member(&identity("member", 2)).unwrap();
+    let member_after = after.member(&identity("member", 2)).unwrap();
+    assert_eq!(member_after.rank_index, 3);
+    assert_eq!(member_after.membership_epoch, old_member.membership_epoch);
+    assert_eq!(
+        (after.gold, after.experience, after.notice.clone()),
+        (before.gold, before.experience, before.notice)
+    );
+    assert!(
+        has_management_event(&reply, 6, "Leader"),
+        "missing actor terminal: {reply:?}"
+    );
+    let member_seen = member.execute(WorldCommand::Tick).unwrap();
+    assert!(has_management_event(&member_seen, 6, "Leader"));
+    assert!(member_seen
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GuildStatus { my_rank_id: 3, .. })));
+    assert!(!has_management_event(
+        &foreign.execute(WorldCommand::Tick).unwrap(),
+        6,
+        "Leader"
+    ));
+}
+
+#[test]
+fn ordinary_rank_options_require_strict_hierarchy_and_preserve_source_false_xor() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("options-a"));
+    let mut officer = factory.create_runtime(config.clone(), &ZoneId::new("options-b"));
+    login(&mut leader, "leader", 0);
+    login(&mut officer, "officer", 1);
+    let before = persisted(&config);
+    for packet in [
+        management(5, 0, "true", "2"),
+        management(5, 2, "true", "-1"),
+        management(5, 2, "true", "8"),
+        management(5, 2, "True", "2"),
+        management(5, 2, "true", "bad"),
+    ] {
+        send(&mut leader, packet);
+        assert_eq!(persisted(&config), before);
+    }
+    send(&mut officer, management(5, 1, "true", "2"));
+    assert_eq!(persisted(&config), before);
+    for (value, options) in [("true", 4), ("false", 0), ("false", 4)] {
+        let before = persisted(&config);
+        let reply = send(&mut leader, management(5, 2, value, "2"));
+        let after = persisted(&config);
+        assert_eq!(after.ranks[2].options, options);
+        assert_eq!(after.revision, before.revision + 1);
+        assert!(
+            has_management_event(&reply, 7, "Leader"),
+            "missing option terminal: {reply:?}"
+        );
+        assert!(has_management_event(
+            &officer.execute(WorldCommand::Tick).unwrap(),
+            7,
+            "Leader"
+        ));
+    }
+}
+
+#[test]
+fn ordinary_promotion_reaches_target_and_keeps_membership_epoch_and_character_checkpoint() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("promotion-a"));
+    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("promotion-b"));
+    login(&mut leader, "leader", 0);
+    login(&mut member, "member", 2);
+    let before = persisted(&config);
+    let save_before = config.account_store.lock().unwrap().accounts["member"].saves[&2].clone();
+    let reply = send(&mut leader, management(2, 1, "Member", "Forged Actor"));
+    let after = persisted(&config);
+    let target = after.member(&identity("member", 2)).unwrap();
+    assert_eq!(target.rank_index, 1);
+    assert_eq!(
+        target.membership_epoch,
+        before
+            .member(&identity("member", 2))
+            .unwrap()
+            .membership_epoch
+    );
+    assert_eq!(after.revision, before.revision + 1);
+    assert_eq!(
+        serde_json::to_value(&config.account_store.lock().unwrap().accounts["member"].saves[&2])
+            .unwrap(),
+        serde_json::to_value(&save_before).unwrap()
+    );
+    assert!(has_management_event(&reply, 5, "Member"));
+    let seen = member.execute(WorldCommand::Tick).unwrap();
+    assert!(seen.iter().any(|packet| matches!(packet, ServerPacket::GuildMemberChange { status: 8, name, ranks, .. }
+        if name == "Leader" && ranks.len() == 1 && ranks[0].index == 1 && ranks[0].members.iter().any(|member| member.name == "Member" && member.online))));
+    send(&mut member, ClientPacket::LogOut);
+    let mut rejoined = factory.create_runtime(config.clone(), &ZoneId::new("promotion-c"));
+    login(&mut rejoined, "member", 2);
+    assert!(send(&mut rejoined, ClientPacket::RequestGuildInfo { info_type: 1 }).iter()
+        .any(|packet| matches!(packet, ServerPacket::GuildStatus { guild_rank_name, .. } if guild_rank_name == "Officer")));
+}
+
+#[test]
+fn source_promotion_inequality_and_two_leader_guard_are_not_kick_rules() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("promotion-source"));
+    let mut officer = factory.create_runtime(config.clone(), &ZoneId::new("promotion-source"));
+    login(&mut leader, "leader", 0);
+    login(&mut officer, "officer", 1);
+    let before = persisted(&config);
+    // GuildObject.cs261 denies a nonleader moving a current lower/equal member.
+    send(&mut officer, management(2, 1, "Member", ""));
+    assert_eq!(persisted(&config), before);
+    send(&mut leader, management(2, 0, "Officer", ""));
+    let before = persisted(&config);
+    assert_eq!(
+        before
+            .members
+            .iter()
+            .filter(|member| member.rank_index == 0)
+            .count(),
+        2
+    );
+    let denied = send(&mut leader, management(2, 1, "Officer", ""));
+    assert_eq!(persisted(&config), before);
+    assert!(denied.iter().any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message == "A guild needs at least 2 leaders.")));
+}
+
+#[test]
+fn ordinary_kick_checks_current_permission_hierarchy_and_last_leader_then_clears_online_target() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("kick-a"));
+    let mut officer = factory.create_runtime(config.clone(), &ZoneId::new("kick-a"));
+    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("kick-b"));
+    login(&mut leader, "leader", 0);
+    login(&mut officer, "officer", 1);
+    login(&mut member, "member", 2);
+    let before = persisted(&config);
+    send(&mut officer, management(1, 0, "Member", ""));
+    assert_eq!(persisted(&config), before);
+    send(&mut leader, management(1, 0, "Leader", ""));
+    assert_eq!(persisted(&config), before);
+    send(&mut leader, management(5, 1, "true", "2")); // durable grant, not a cached fixture permission
+    let before = persisted(&config);
+    send(&mut officer, management(1, 0, "Leader", ""));
+    assert_eq!(persisted(&config), before);
+    let save_before = config.account_store.lock().unwrap().accounts["member"].saves[&2].clone();
+    let reply = send(&mut officer, management(1, 0, "Member", ""));
+    let after = persisted(&config);
+    assert!(after.member(&identity("member", 2)).is_none());
+    assert_eq!(after.revision, before.revision + 1);
+    assert_eq!(
+        serde_json::to_value(&config.account_store.lock().unwrap().accounts["member"].saves[&2])
+            .unwrap(),
+        serde_json::to_value(&save_before).unwrap()
+    );
+    assert!(has_management_event(&reply, 3, "Member"));
+    let seen = member.execute(WorldCommand::Tick).unwrap();
+    assert!(seen.iter().any(|packet| matches!(packet, ServerPacket::GuildStatus { guild_name, .. } if guild_name.is_empty())));
+    assert!(seen.iter().any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message == "You have been removed from your guild.")));
+    assert!(has_management_event(
+        &leader.execute(WorldCommand::Tick).unwrap(),
+        3,
+        "Member"
+    ));
+    let before = persisted(&config);
+    send(&mut leader, management(5, 1, "false", "2"));
+    let after_revoke = persisted(&config);
+    assert_eq!(after_revoke.revision, before.revision + 1);
+    // Recruit the target again through a current ordinary invitation, then verify
+    // the officer's formerly granted permission cannot survive its durable revoke.
+    send(
+        &mut member,
+        ClientPacket::Chat {
+            message: "@ALLOWGUILD".into(),
+            linked_items: Vec::new(),
+        },
+    );
+    send(&mut leader, management(0, 0, "Member", ""));
+    send(
+        &mut member,
+        ClientPacket::GuildInvite {
+            accept_invite: true,
+        },
+    );
+    let before = persisted(&config);
+    assert!(before.member(&identity("member", 2)).is_some());
+    send(&mut officer, management(1, 0, "Member", ""));
+    assert_eq!(persisted(&config), before);
+}
+
+#[test]
+fn ordinary_leave_bypasses_kick_option_but_last_leader_is_retained_and_single_member_disbands() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("leave-a"));
+    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("leave-b"));
+    let mut foreign = factory.create_runtime(config.clone(), &ZoneId::new("leave-b"));
+    login(&mut leader, "leader", 0);
+    login(&mut member, "member", 2);
+    login(&mut foreign, "other-leader", 4);
+    let before = persisted(&config);
+    send(&mut leader, leave());
+    assert_eq!(persisted(&config), before);
+    send(&mut member, management(1, 0, "Member", ""));
+    assert_eq!(persisted(&config), before);
+    let reply = send(&mut member, leave());
+    assert!(persisted(&config).member(&identity("member", 2)).is_none());
+    assert!(reply.iter().any(|packet| matches!(packet, ServerPacket::GuildStatus { guild_name, .. } if guild_name.is_empty())));
+    assert!(has_management_event(
+        &leader.execute(WorldCommand::Tick).unwrap(),
+        4,
+        "Member"
+    ));
+    let disband = send(&mut foreign, leave());
+    assert!(!config
+        .account_store
+        .lock()
+        .unwrap()
+        .shared_guilds
+        .contains_key(OTHER_GUILD_ID));
+    assert!(disband.iter().any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message == "You have disbanded the guild")));
+}
+
+#[test]
+fn new_management_known_failure_sends_no_peer_terminal_and_retry_commits_once() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("management-fault-a"));
+    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("management-fault-b"));
+    login(&mut leader, "leader", 0);
+    login(&mut member, "member", 2);
+    let before = persisted(&config);
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
+    let rejected = send(&mut leader, management(1, 0, "Member", ""));
+    assert_eq!(persisted(&config), before);
+    assert!(!has_management_event(&rejected, 3, "Member"));
+    let peer = member.execute(WorldCommand::Tick).unwrap();
+    assert!(!peer.iter().any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message == "You have been removed from your guild.")));
+    send(&mut leader, management(1, 0, "Member", ""));
+    let after = persisted(&config);
+    assert_eq!(after.revision, before.revision + 1);
+    assert!(after.member(&identity("member", 2)).is_none());
+}
+
+#[test]
+fn moving_an_existing_leader_requires_three_before_move_and_another_online_leader() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("leader-demotion-a"));
+    let mut officer = factory.create_runtime(config.clone(), &ZoneId::new("leader-demotion-b"));
+    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("leader-demotion-c"));
+    login(&mut leader, "leader", 0);
+    login(&mut officer, "officer", 1);
+    login(&mut member, "member", 2);
+    send(&mut leader, management(2, 0, "Officer", ""));
+    send(&mut leader, management(2, 0, "Member", ""));
+    send(&mut officer, ClientPacket::LogOut);
+    send(&mut member, ClientPacket::LogOut);
+    let before = persisted(&config);
+    assert_eq!(
+        before
+            .members
+            .iter()
+            .filter(|member| member.rank_index == 0)
+            .count(),
+        3
+    );
+    let rejected = send(&mut leader, management(2, 1, "Leader", ""));
+    assert_eq!(persisted(&config), before);
+    assert!(rejected.iter().any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message == "You need at least 1 leader online.")));
+    login(&mut officer, "officer", 1);
+    send(&mut leader, management(2, 1, "Leader", ""));
+    let after = persisted(&config);
+    assert_eq!(after.member(&identity("leader", 0)).unwrap().rank_index, 1);
+    assert_eq!(
+        after
+            .members
+            .iter()
+            .filter(|member| member.rank_index == 0)
+            .count(),
+        2
+    );
+    assert_eq!(after.revision, before.revision + 1);
+}
+
+#[test]
+fn new_management_unauthenticated_and_pre_startgame_packets_cannot_mutate() {
+    let config = fixture();
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut runtime = factory.create_runtime(config.clone(), &ZoneId::new("management-auth"));
+    let before = persisted(&config);
+    for packet in [
+        management(1, 0, "Member", ""),
+        management(2, 1, "Member", ""),
+        management(4, 0, "", ""),
+        management(5, 2, "true", "2"),
+        leave(),
+    ] {
+        let _ = runtime.execute(WorldCommand::ClientPacket(packet));
+        assert_eq!(persisted(&config), before);
+    }
+    send(
+        &mut runtime,
+        ClientPacket::Login {
+            account_id: "leader".into(),
+            password: "demo".into(),
+        },
+    );
+    for packet in [
+        management(1, 0, "Member", ""),
+        management(2, 1, "Member", ""),
+        management(4, 0, "", ""),
+        management(5, 2, "true", "2"),
+        leave(),
+    ] {
+        let _ = runtime.execute(WorldCommand::ClientPacket(packet));
+        assert_eq!(persisted(&config), before);
+    }
 }

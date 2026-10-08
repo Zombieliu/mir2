@@ -60,6 +60,47 @@ impl ZoneManager {
         let snapshot = self.online_snapshot();
         for zone in self.zones.values_mut() { zone.ingest_online_presence(snapshot.clone(), true); }
     }
+    pub fn refresh_online_pets_at(&mut self,now_ms:u64)->Vec<ZoneOutbound> {
+        self.refresh_online_presence();
+        let mut recalls=Vec::new();
+        let mut out=Vec::new();
+        for zone in self.zones.values_mut() {
+            let (next,packets)=zone.drain_online_pet_recalls(now_ms);
+            recalls.extend(next); out.extend(packets);
+        }
+        for recall in recalls {
+            if let Some(destination)=self.zones.get_mut(recall.destination()) {
+                out.extend(destination.adopt_online_pet_recall(recall,now_ms));
+            }
+        }
+        out
+    }
+    pub fn capture_player_saved_pets(&self,session:&SessionId,now_ms:u64)->super::ZoneSavedPetSnapshot {
+        let mut snapshot=super::ZoneSavedPetSnapshot::default();
+        if self.online_identities.owner(session).is_none(){return snapshot;}
+        for zone in self.zones.values(){snapshot.append_other_zone(zone.capture_player_saved_pets(session,now_ms));}
+        snapshot
+    }
+    pub fn capture_player_pet_experience(&self,session:&SessionId,now_ms:u64)->Option<super::ZonePetExperienceAdmission> {
+        let current=self.session_zones.get(session)?;
+        let mut admission=self.zones.get(current)?.capture_player_pet_experience(session,now_ms)?;
+        for (key,zone) in &self.zones {
+            if key==current {continue;}
+            if let Some(other)=zone.capture_player_pet_experience(session,now_ms) {
+                if !admission.append_other_zone(other){return None;}
+            }
+        }
+        Some(admission)
+    }
+    pub fn restore_player_saved_pets(&mut self,session:&SessionId,snapshot:&super::ZoneSavedPetSnapshot,now_ms:u64)
+        ->Result<Vec<ZoneOutbound>,String> {
+        let current=self.session_zones.get(session).ok_or("pet restore requires active Zone")?;
+        self.zones.get_mut(current).ok_or("pet restore Zone missing")?.restore_player_saved_pets(session,snapshot,now_ms)
+    }
+    pub fn mirror_player_pet_earned_steps(&mut self,session:&SessionId,admission:&super::ZonePetExperienceAdmission,steps:&[u32],now_ms:u64)->Vec<ZoneOutbound> {
+        self.session_zones.get(session).and_then(|key|self.zones.get_mut(key))
+            .map(|zone|zone.mirror_earned_steps(session,admission,steps,now_ms)).unwrap_or_default()
+    }
     /// Server-only proof: no packet handler admits or chooses its epoch.
     pub fn online_owner_proof_is_current(&self, encoded: &str) -> bool {
         self.online_identities.validates_encoded(encoded)
@@ -183,6 +224,35 @@ impl ZoneManager {
         self.zones
             .get(self.session_zones.get(session_id)?)?
             .intelligent_creature_object_id(session_id)
+    }
+
+    pub fn update_experience_profile(&mut self, session_id: &SessionId,
+        profile: Option<super::ZoneExperienceProfile>) -> bool {
+        let updated = self.session_zones.get(session_id).and_then(|key| self.zones.get_mut(key))
+            .is_some_and(|zone| zone.update_experience_profile(session_id, profile));
+        if updated { self.refresh_online_presence(); }
+        updated
+    }
+
+    pub fn player_experience_profile(&self, session_id: &SessionId) -> Option<super::ZoneExperienceProfile> {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+            .and_then(|zone| zone.player_experience_profile(session_id))
+    }
+
+    pub fn current_social_experience_profile(&self, session_id: &SessionId)
+        -> Result<Option<super::ZoneExperienceProfile>, String> {
+        match self.session_zones.get(session_id).and_then(|key|self.zones.get(key)) {
+            Some(zone) => zone.current_social_experience_profile(session_id),
+            None => Ok(None),
+        }
+    }
+
+    pub fn issued_owned_pet_kill_is_current(&self, receipt: &super::ZoneOwnedPetPlayerKillReceipt) -> bool {
+        self.zones.get(&receipt.zone_key).is_some_and(|zone| zone.issued_owned_pet_kill_is_current(receipt))
+    }
+
+    pub fn acknowledge_owned_pet_kill(&mut self, receipt: &super::ZoneOwnedPetPlayerKillReceipt) {
+        if let Some(zone) = self.zones.get_mut(&receipt.zone_key) { zone.acknowledge_owned_pet_kill(receipt); }
     }
     pub fn intelligent_creature_intent_is_current(
         &self,
@@ -386,6 +456,7 @@ impl ZoneManager {
             | ZoneCommand::TeleportToNpc { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+            | ZoneCommand::UpdateMentorBank { session_id, .. }
             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
@@ -534,18 +605,30 @@ impl ZoneManager {
             let mut transferred_clock = None;
             let mut transferred_action_clock = None;
             let mut transferred_poison_clock = None;
+            let mut transferred_owned_pet_clock = None;
+            let mut transferred_owned_human_poisons = None;
             let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
             let retain_online = online_map_transfer && self.online_identities.owner(&session_id)
                 .is_some_and(|owner|owner.matches_join(&join));
             if !retain_online {
                 self.online_identities.revoke(&session_id);
-                for zone in self.zones.values_mut() { zone.revoke_online_session(&session_id); }
+                for zone in self.zones.values_mut() {
+                    outbounds.extend(zone.remove_player_detached_pets(&session_id));
+                    zone.revoke_online_session(&session_id);
+                }
             }
             if self.online_identities.admit(&join, retain_online).is_none() { return Vec::new(); }
             // Retain the same trusted snapshot across the atomic map detach /
             // attach gap. There is no global despawn in that interval.
             let snapshot = self.online_snapshot();
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                if retain_online {
+                    if let Some(zone)=self.zones.get_mut(&previous_key) { zone.prepare_player_online_pet_transfer(&session_id); }
+                    transferred_owned_human_poisons = self.zones.get(&previous_key)
+                        .map(|zone| zone.capture_player_owned_human_poisons(&session_id));
+                    transferred_owned_pet_clock = self.zones.get(&previous_key)
+                        .and_then(|zone| zone.player_owned_pet_clock(&session_id));
+                }
                 transferred_poison_clock = self.zones.get(&previous_key)
                     .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
                 transferred_action_clock = self.zones.get(&previous_key)
@@ -575,6 +658,12 @@ impl ZoneManager {
             if let Some(clock) = transferred_poison_clock {
                 zone.restore_player_finite_control_poison_clock(&session_id, clock);
             }
+            if let Some(clock) = transferred_owned_pet_clock {
+                zone.restore_player_owned_pet_clock(&session_id, clock);
+            }
+            if let Some(poisons) = transferred_owned_human_poisons {
+                zone.restore_player_owned_human_poisons(&session_id, poisons);
+            }
             if online_map_transfer {
                 // A same-character destination needs an explicit current mask,
                 // including zero; neither missing snapshot fields nor the old
@@ -589,7 +678,15 @@ impl ZoneManager {
             ZoneCommand::Leave { session_id } => {
                 self.session_zones.remove(session_id);
                 self.online_identities.revoke(session_id);
-                for zone in self.zones.values_mut() { zone.revoke_online_session(session_id); }
+                let mut pet_outbounds=Vec::new();
+                for zone in self.zones.values_mut() {
+                    pet_outbounds.extend(zone.remove_player_detached_pets(session_id));
+                    zone.revoke_online_session(session_id);
+                }
+                self.refresh_online_presence();
+                if let Some(zone)=self.zones.get_mut(&key){pet_outbounds.extend(zone.handle(command));}
+                self.refresh_online_presence();
+                return pet_outbounds;
             }
             _ => {}
         }
@@ -614,10 +711,10 @@ impl ZoneManager {
     /// threshold (the common case, including today's single "primary" zone) it
     /// ticks inline to avoid task overhead.
     pub fn tick_all(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        self.refresh_online_presence();
+        let mut pet_outbounds=self.refresh_online_pets_at(now_ms);
         let zone_count = self.zones.len();
         if zone_count < PARALLEL_TICK_MIN_ZONES {
-            return self.tick_all_sequential(now_ms);
+            pet_outbounds.extend(self.tick_all_sequential(now_ms)); return pet_outbounds;
         }
 
         let pool = ComputeTaskPool::get_or_init(TaskPool::default);
@@ -638,7 +735,7 @@ impl ZoneManager {
                 });
             }
         });
-        per_chunk.into_iter().flatten().collect()
+        pet_outbounds.extend(per_chunk.into_iter().flatten());pet_outbounds
     }
 
     pub fn zone(&self, key: &ZoneKey) -> Option<&ZoneRuntime> {
@@ -708,11 +805,11 @@ impl ZoneManager {
     /// used to force single-threaded execution (constrained environments) and as
     /// the benchmark baseline that proves the parallel path's speedup.
     pub fn tick_all_sequential(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        self.refresh_online_presence();
-        self.zones
+        let mut out=self.refresh_online_pets_at(now_ms);
+        out.extend(self.zones
             .values_mut()
             .flat_map(|zone| zone.tick(now_ms))
-            .collect()
+            .collect::<Vec<_>>());out
     }
 
     pub fn player_transform(&self, session_id: &SessionId) -> Option<(Point, MirDirection)> {
@@ -736,6 +833,18 @@ impl ZoneManager {
             .get(session_id)
             .and_then(|key| self.zones.get(key))
             .is_some_and(|zone| zone.melee_primary_target_present(session_id, direction, materialized))
+    }
+
+    pub fn player_can_attack_owned_pet(&self, session_id: &SessionId, pet: u32, now_ms: u64) -> bool {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.player_can_attack_owned_pet(session_id, pet, now_ms))
+    }
+
+    pub fn melee_primary_target_present_at(&self, session_id: &SessionId,
+        direction: MirDirection, materialized: Option<&super::types::ZoneMonsterSpawn>, now_ms: u64,
+    ) -> bool {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.melee_primary_target_present_at(session_id, direction, materialized, now_ms))
     }
 
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {

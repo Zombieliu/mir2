@@ -208,6 +208,7 @@ fn guild_clock_postgres_guild_expiry_and_receipt_compensation_are_atomic() {
     seeded.shared_guilds.insert(
         id.clone(),
         SharedGuildRecord {
+        active_wars: Default::default(),
             id: id.clone(),
             name: "ClockQA".into(),
             revision: 1,
