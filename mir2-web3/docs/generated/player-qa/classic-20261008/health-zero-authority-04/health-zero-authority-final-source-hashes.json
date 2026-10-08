@@ -1,0 +1,51 @@
+{
+  "baseline": "724e64dcf50e1119bf0d142f99274d96b6f38cd3",
+  "project": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3",
+  "formulas_unchanged": [
+    "native_monster_health_percent",
+    "native_player_health_percent",
+    "health_from_percent"
+  ],
+  "files": [
+    {
+      "sha256": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs"
+    },
+    {
+      "sha256": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\packets.rs"
+    },
+    {
+      "sha256": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs"
+    },
+    {
+      "sha256": "dd809bd54fb2941e6c7baa1dd348e5c27554163124591dfae438b220dc9b1edc",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gameplay_bridge.rs"
+    },
+    {
+      "sha256": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\entity_health.rs"
+    },
+    {
+      "sha256": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\shared_zone.rs"
+    },
+    {
+      "sha256": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\health_zero_authority_tests.rs"
+    },
+    {
+      "sha256": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\health_zero_authority_tests.rs"
+    },
+    {
+      "sha256": "73838fa8f7727e49031c7d1d19b72765ed662b2f1518677f8ffa5b1d2456b467",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\health_zero_authority_tests.rs"
+    },
+    {
+      "sha256": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098",
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-gateway-budget-20261008\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\health_zero_display_tests.rs"
+    }
+  ]
+}

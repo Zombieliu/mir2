@@ -63,3 +63,7 @@ mir2-web3/docs/generated/player-qa/periodic-quests-20261002/backend/** -text -di
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/fixtures/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/controller/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/postgres/** -text -diff
+mir2-web3/docs/generated/player-qa/classic-20261008/health-zero-authority-03/** -text -diff
+mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-03/** -text -diff
+mir2-web3/docs/generated/player-qa/classic-20261008/health-zero-authority-04/** -text -diff
+mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-04/** -text -diff

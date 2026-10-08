@@ -13428,21 +13428,15 @@ impl ZoneRuntime {
 
     fn apply_zone_object_packets(&mut self, packets: &[ServerPacket], now_ms: u64) {
         for packet in packets {
-            // A DragonStatue sleeps at zero HP without dying. Generic retained
-            // health-zero handling would otherwise poison its AOI/corpse cache.
+            // Preserve the statue's source sleep presentation without letting
+            // a display percentage clear a genuine death/harvest incarnation.
             if let ServerPacket::ObjectHealth { info } = packet {
-                if self
-                    .native_monsters
-                    .get(&info.object_id)
-                    .is_some_and(|m| m.ai == 54 && !m.dead && !sleep_monster_accepts_hp_change(m))
+                if self.native_monsters.get(&info.object_id).is_some_and(|m| {
+                    m.ai == 54 && !m.dead && !sleep_monster_accepts_hp_change(m)
+                }) && !self.dead_object_ids.contains_key(&info.object_id)
                 {
-                    self.dead_object_ids.remove(&info.object_id);
-                    self.harvested_object_ids.remove(&info.object_id);
                     if let Some(object) = self.objects.get_mut(&info.object_id) {
                         object.health = Some(info.clone());
-                        if let ServerPacket::ObjectMonster { info } = &mut object.packet {
-                            info.dead = false;
-                        }
                     }
                     continue;
                 }
@@ -16578,13 +16572,6 @@ fn retained_zone_object_dead_state(packet: &ServerPacket) -> Option<(u32, ZoneOb
                 direction: Some(info.direction),
             },
         )),
-        ServerPacket::ObjectHealth { info } if info.percent == 0 => Some((
-            info.object_id,
-            ZoneObjectDeadState {
-                position: None,
-                direction: None,
-            },
-        )),
         ServerPacket::ObjectMonster { info } if info.dead => Some((
             info.object_id,
             ZoneObjectDeadState {
@@ -16621,6 +16608,15 @@ fn apply_retained_dead_state(object: &mut ZoneObject, dead_state: &ZoneObjectDea
             },
         );
     } else {
+        // A retained real-death marker may lack its transform in an older
+        // checkpoint. Its life authority comes from the marker, not Percent.
+        match &mut object.packet {
+            ServerPacket::ObjectMonster { info } => info.dead = true,
+            ServerPacket::ObjectPlayer { info } | ServerPacket::ObjectHero { info, .. } => {
+                info.dead = true;
+            }
+            _ => {}
+        }
         apply_retained_zone_object_packet(
             object,
             &ServerPacket::ObjectHealth {
@@ -18053,3 +18049,6 @@ mod player_magic_cooldown_tests;
 
 #[cfg(test)]
 mod player_action_cadence_tests;
+
+#[cfg(test)]
+mod health_zero_authority_tests;

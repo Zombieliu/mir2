@@ -764,6 +764,16 @@ impl NativeGameplayAdapter {
                     self.authoritative_player_animation =
                         Some(self.next_animation_hint("standing"));
                     let player_object_id = self.latest_player_object_id;
+                    if let Some(object_id) = player_object_id {
+                        // Move the current self overlay into the same revived
+                        // life. Its old ObjectDied must not discard the next
+                        // ObjectHealth before the personal snapshot catches up.
+                        self.patch_zone_entity_death(
+                            &serde_json::json!({"objectId": object_id}),
+                            false,
+                            false,
+                        );
+                    }
                     self.record_actor_effect("Revived", payload, player_object_id, None);
                     true
                 }
@@ -1032,6 +1042,28 @@ impl NativeGameplayAdapter {
     /// transform until save/disconnect.
     pub fn apply_authoritative_overlay(&self, payload: &mut Value) {
         let player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        // Read typed life/HP authority before a display-only health overlay
+        // approximates the self entity's fields. Actual Revived/new-life
+        // packets still take precedence over an older personal snapshot.
+        let snapshot_player =
+            payload
+                .get("entities")
+                .and_then(Value::as_array)
+                .and_then(|entities| {
+                    entities.iter().find(|entity| {
+                        entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                            || (player_object_id.is_some()
+                                && entity.get("objectId").and_then(value_u32) == player_object_id)
+                    })
+                });
+        let snapshot_dead = snapshot_player
+            .and_then(|player| player.get("dead"))
+            .and_then(Value::as_bool);
+        let snapshot_zero_hp = payload.get("playerHp").and_then(value_i32) == Some(0)
+            || snapshot_player
+                .and_then(|player| player.get("hp"))
+                .and_then(value_i32)
+                == Some(0);
 
         if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
             entities.retain(|entity| {
@@ -1100,6 +1132,8 @@ impl NativeGameplayAdapter {
             player_object_id,
             self.authoritative_player_dead,
             player_object_id.and_then(|object_id| self.zone_entities.get(&object_id)),
+            snapshot_dead,
+            snapshot_zero_hp,
         );
 
         if let Some(hint) = &self.authoritative_player_animation {
@@ -1542,6 +1576,13 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        if self
+            .zone_entities
+            .get(&object_id)
+            .is_some_and(|entity| entity.get("dead").and_then(Value::as_bool) == Some(true))
+        {
+            return true;
+        }
         self.health_sequence = self.health_sequence.saturating_add(1);
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
@@ -1569,7 +1610,6 @@ impl NativeGameplayAdapter {
                 "_packetHealthPercent".to_owned(),
                 Value::from(percent.clamp(0, 100)),
             );
-            overlay.insert("dead".to_owned(), Value::from(percent <= 0));
         }
         true
     }
@@ -1721,6 +1761,53 @@ impl NativeGameplayAdapter {
                 };
                 self.zone_snapshot_dispositions
                     .insert(object_id, disposition.to_owned());
+            }
+        }
+    }
+
+    /// Called only for a raw, current-map network worldSnapshot, before any
+    /// overlay. Packet-first replay uses apply_authoritative_overlay alone.
+    pub fn observe_world_snapshot_life(&mut self, payload: &Value) {
+        let Some(player_object_id) = payload.get("playerObjectId").and_then(value_u32) else {
+            return;
+        };
+        let player = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .and_then(|entities| {
+                entities.iter().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || entity.get("objectId").and_then(value_u32) == Some(player_object_id)
+                })
+            });
+        let confirms_live = player
+            .and_then(|player| player.get("dead"))
+            .and_then(Value::as_bool)
+            == Some(false)
+            && payload
+                .get("playerHp")
+                .and_then(value_i32)
+                .is_some_and(|hp| hp > 0)
+            && player
+                .and_then(|player| player.get("hp"))
+                .and_then(value_i32)
+                .is_some_and(|hp| hp > 0);
+        if !confirms_live {
+            return;
+        }
+        // A raw typed live snapshot acknowledges the packet's new incarnation.
+        // Retire only alive precedence; real Death still rejects stale live data.
+        if self.authoritative_player_dead == Some(false) {
+            self.authoritative_player_dead = None;
+        }
+        if let Some(overlay) = self
+            .zone_entities
+            .get_mut(&player_object_id)
+            .filter(|overlay| overlay.get("dead").and_then(Value::as_bool) == Some(false))
+        {
+            overlay.remove("dead");
+            if overlay.get("hp").and_then(value_i32) == Some(0) {
+                overlay.remove("hp");
             }
         }
     }
@@ -3878,9 +3965,9 @@ fn ensure_zone_entity_disposition(entity: &mut Value, snapshot_disposition: Opti
     entity["disposition"] = Value::from(snapshot_disposition.unwrap_or(fallback));
 }
 
-/// `ObjectHealth` always carries an authoritative percentage, while exact HP
-/// fields are optional. Preserve exact max HP when known; otherwise expose the
-/// authoritative percentage on a normalized 0..100 scale to the UI.
+/// `ObjectHealth` carries display percentage, while exact HP fields are optional.
+/// Positive percentages retain the existing approximation for the UI; zero
+/// leaves exact HP and life state alone and renders through `_healthPercent`.
 fn normalize_packet_health(entity: &mut Value) {
     let Some(object) = entity.as_object_mut() else {
         return;
@@ -3892,6 +3979,11 @@ fn normalize_packet_health(entity: &mut Value) {
     else {
         return;
     };
+    // ObjectHealth contains a rounded percentage, not exact HP or a life event.
+    // Preserve actual HP0/death as well as positive HP behind a displayed0%.
+    if percent <= 0 || object.get("dead").and_then(Value::as_bool) == Some(true) {
+        return;
+    }
     let max_hp = object.get("maxHp").and_then(value_i32).unwrap_or(0);
     if max_hp > 0 {
         object.insert(
@@ -3902,18 +3994,19 @@ fn normalize_packet_health(entity: &mut Value) {
         object.insert("hp".to_owned(), Value::from(percent));
         object.insert("maxHp".to_owned(), Value::from(100));
     }
-    object.insert("dead".to_owned(), Value::from(percent <= 0));
 }
 
 /// Fold shared-Zone self health/death packets into the personal snapshot fields
 /// consumed by the HUD. The personal session snapshot can lag behind Zone
-/// combat, while `ObjectHealth` and `Death` are already authoritative on the
-/// WebSocket. Without this overlay a dead player can still render as full HP.
+/// combat. Death is a life event; ObjectHealth only supplies a rounded display
+/// percentage and cannot establish exact HP0 or revive an actor.
 fn apply_authoritative_player_vitals(
     payload: &mut Value,
     player_object_id: Option<u32>,
     explicit_dead: Option<bool>,
     overlay: Option<&serde_json::Map<String, Value>>,
+    snapshot_dead: Option<bool>,
+    snapshot_zero_hp: bool,
 ) {
     let packet_percent = overlay
         .and_then(|overlay| overlay.get("_packetHealthPercent"))
@@ -3922,16 +4015,22 @@ fn apply_authoritative_player_vitals(
     let overlay_dead = overlay
         .and_then(|overlay| overlay.get("dead"))
         .and_then(Value::as_bool);
-    let dead = explicit_dead.or(overlay_dead);
+    let packet_dead = explicit_dead.or(overlay_dead);
+    let dead = packet_dead.or(snapshot_dead);
     let max_hp = payload
         .get("playerMaxHp")
         .and_then(value_i32)
         .unwrap_or(0)
         .max(0);
-    let hp = if dead == Some(true) {
+    // HP0 alone does not create death. Preserve exact typed zero unless an
+    // actual life packet says this is a revived/new incarnation; a positive
+    // display percentage has neither death nor revival authority.
+    let hp = if dead == Some(true) || (snapshot_zero_hp && packet_dead != Some(false)) {
         Some(0)
     } else {
-        packet_percent.map(|percent| health_from_percent(max_hp, percent))
+        packet_percent
+            .filter(|percent| *percent > 0)
+            .map(|percent| health_from_percent(max_hp, percent))
     };
 
     if let Some(hp) = hp {
@@ -3959,7 +4058,7 @@ fn apply_authoritative_player_vitals(
     if max_hp > 0 {
         player["maxHp"] = Value::from(max_hp);
     }
-    if let Some(dead) = dead.or_else(|| packet_percent.map(|percent| percent <= 0)) {
+    if let Some(dead) = dead {
         player["dead"] = Value::from(dead);
     }
 }
@@ -3970,6 +4069,10 @@ fn health_from_percent(max_hp: i32, percent: i32) -> i32 {
     }
     (max_hp.saturating_mul(percent).saturating_add(99) / 100).clamp(1, max_hp)
 }
+
+#[cfg(test)]
+#[path = "health_zero_authority_tests.rs"]
+mod health_zero_authority_tests;
 
 fn parse_quest_definition(payload: &Value) -> QuestDefinition {
     let info = payload.get("info");
@@ -8052,6 +8155,7 @@ mod tests {
         let mut payload = gameplay_payload();
         payload["playerHp"] = json!(18);
         payload["playerMaxHp"] = json!(18);
+        payload["entities"][0]["dead"] = json!(false);
         adapter.apply_authoritative_overlay(&mut payload);
 
         assert_eq!(payload["playerHp"], json!(9));

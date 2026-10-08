@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.evidence.byte-archive.v1",
+  "files": [
+    {
+      "file": "artifact-11533237847.zip",
+      "bytes": 5380,
+      "sha256": "2874f1d32aa09dd70629ad4287d81365169690d807e6ba324c48a560331ee545"
+    },
+    {
+      "file": "ARTIFACT-METADATA.json",
+      "bytes": 1469,
+      "sha256": "6fb66d9758ee5176da7d92769733e880afe2f544ba4d69b11b5a3dd643a0a6d8"
+    },
+    {
+      "file": "receipt.json",
+      "bytes": 43978,
+      "sha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f"
+    },
+    {
+      "file": "receipt.sha256",
+      "bytes": 125,
+      "sha256": "0fa840613d21a85779622aa41426a6ab6d6b9225d34c6b00cd3c0421f7048b6f"
+    },
+    {
+      "file": "INDEPENDENT-ROOT-02.json",
+      "bytes": 789,
+      "sha256": "2d48542c0e707a19d20129283918c99f1c52929df7787873893f0da47b142863"
+    }
+  ],
+  "fileCount": 5,
+  "pointerPromoted": false
+}

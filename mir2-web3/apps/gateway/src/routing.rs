@@ -5093,52 +5093,20 @@ impl SharedInProcessZoneState {
         for packet in packets {
             match packet {
                 ServerPacket::ObjectHealth { info } => {
-                    let mut died = false;
                     if let Some(entity) = map.entities.get_mut(&info.object_id) {
                         if entity.dead {
                             continue;
                         }
-                        if info.percent == 0 {
-                            entity.hp = Some(0);
-                            entity.dead = true;
-                            died = true;
-                        } else if let Some(max_hp) = entity.max_hp {
-                            let percent = i32::from(info.percent).clamp(0, 100);
-                            let hp = (max_hp.saturating_mul(percent).saturating_add(99)) / 100;
-                            let hp = hp.clamp(0, max_hp);
-                            entity.hp = Some(entity.hp.map_or(hp, |current| current.min(hp)));
+                        // Rounded display percentages cannot overwrite exact
+                        // living HP with zero or establish a corpse incarnation.
+                        if info.percent > 0 {
+                            if let Some(max_hp) = entity.max_hp {
+                                let percent = i32::from(info.percent).clamp(0, 100);
+                                let hp = (max_hp.saturating_mul(percent).saturating_add(99)) / 100;
+                                let hp = hp.clamp(0, max_hp);
+                                entity.hp = Some(entity.hp.map_or(hp, |current| current.min(hp)));
+                            }
                         }
-                    }
-                    if died {
-                        map.revived_entity_ids.remove(&info.object_id);
-                        // A live -> dead transition starts a new corpse
-                        // incarnation. A retained Harvest marker belongs to an
-                        // older incarnation and must not reject this corpse.
-                        map.harvested_entity_ids.remove(&info.object_id);
-                        let location = map.entities.get(&info.object_id).map(|entity| Point {
-                            x: entity.x,
-                            y: entity.y,
-                        });
-                        let direction = map
-                            .entities
-                            .get(&info.object_id)
-                            .map(|entity| entity.direction);
-                        map.dead_entity_ids.insert(
-                            info.object_id,
-                            SharedDeadEntityState {
-                                location,
-                                direction,
-                            },
-                        );
-                    } else if info.percent == 0 {
-                        map.revived_entity_ids.remove(&info.object_id);
-                        map.dead_entity_ids.insert(
-                            info.object_id,
-                            SharedDeadEntityState {
-                                location: None,
-                                direction: None,
-                            },
-                        );
                     }
                 }
                 ServerPacket::ObjectDied { info } => {
@@ -7735,25 +7703,6 @@ fn death_drop_anchors(
                     .map(|entity| entity.name.clone()),
                 info.location.clone(),
             )),
-            ServerPacket::ObjectHealth { info } if info.percent == 0 => map
-                .entities
-                .get(&info.object_id)
-                .map(|entity| {
-                    (
-                        info.object_id,
-                        Some(entity.name.clone()),
-                        Point {
-                            x: entity.x,
-                            y: entity.y,
-                        },
-                    )
-                })
-                .or_else(|| {
-                    map.dead_entity_ids
-                        .get(&info.object_id)
-                        .and_then(|dead| dead.location.clone())
-                        .map(|location| (info.object_id, None, location))
-                }),
             _ => None,
         })
         .collect()
@@ -8035,10 +7984,9 @@ fn packet_belongs_to_world_viewport(packet: &ServerPacket) -> bool {
 }
 
 fn packets_may_commit_shared_death_drops(packets: &[ServerPacket]) -> bool {
-    packets.iter().any(|packet| {
-        matches!(packet, ServerPacket::ObjectDied { .. })
-            || matches!(packet, ServerPacket::ObjectHealth { info } if info.percent == 0)
-    })
+    packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectDied { .. }))
 }
 
 fn is_live_shared_social_packet(packet: &ServerPacket) -> bool {
@@ -8139,7 +8087,6 @@ fn stale_dead_shared_entity_packet_object_id(packet: &ServerPacket) -> Option<u3
 
 fn owner_dead_entity_marker_object_id(packet: &ServerPacket) -> Option<u32> {
     match packet {
-        ServerPacket::ObjectHealth { info } if info.percent == 0 => Some(info.object_id),
         ServerPacket::ObjectDied { info } => Some(info.object_id),
         ServerPacket::ObjectMonster { info } if info.dead => Some(info.object_id),
         ServerPacket::ObjectPlayer { info } if info.dead => Some(info.object_id),
@@ -15917,6 +15864,7 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    mod health_zero_authority_tests;
     #[path = "shared_player_appearance_tests.rs"]
     mod shared_player_appearance_tests;
     #[path = "mining_tests.rs"]
@@ -18624,6 +18572,14 @@ mod tests {
                     expire: 0,
                 },
             },
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 77,
+                    location: Point { x: 329, y: 269 },
+                    direction: MirDirection::Down,
+                    kind: 0,
+                },
+            },
             ServerPacket::ObjectWalk {
                 movement: ObjectMovement {
                     object_id: 77,
@@ -18636,14 +18592,6 @@ mod tests {
                     object_id: 77,
                     percent: 80,
                     expire: 0,
-                },
-            },
-            ServerPacket::ObjectDied {
-                info: ObjectDiedInfo {
-                    object_id: 77,
-                    location: Point { x: 329, y: 269 },
-                    direction: MirDirection::Down,
-                    kind: 0,
                 },
             },
             ServerPacket::ObjectWalk {
@@ -22533,7 +22481,7 @@ mod tests {
     }
 
     #[test]
-    fn shared_zone_state_treats_zero_health_as_dead() {
+    fn shared_zone_state_treats_object_died_as_dead() {
         let mut state = SharedInProcessZoneState::new();
         let mut entity = shared_monster_entity(77);
         entity.hp = Some(100);
@@ -22548,11 +22496,12 @@ mod tests {
         );
         state.apply_shared_entity_packets(
             "0",
-            &[ServerPacket::ObjectHealth {
-                info: ObjectHealthInfo {
+            &[ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
                     object_id: 77,
-                    percent: 0,
-                    expire: 0,
+                    location: Point { x: 331, y: 270 },
+                    direction: MirDirection::Down,
+                    kind: 0,
                 },
             }],
         );
@@ -22574,7 +22523,7 @@ mod tests {
     }
 
     #[test]
-    fn shared_zone_state_treats_zero_health_without_max_hp_as_dead() {
+    fn shared_zone_state_treats_object_died_without_max_hp_as_dead() {
         let mut state = SharedInProcessZoneState::new();
         let mut entity = shared_monster_entity(77);
         entity.hp = None;
@@ -22589,11 +22538,12 @@ mod tests {
         );
         state.apply_shared_entity_packets(
             "0",
-            &[ServerPacket::ObjectHealth {
-                info: ObjectHealthInfo {
+            &[ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
                     object_id: 77,
-                    percent: 0,
-                    expire: 0,
+                    location: Point { x: 331, y: 270 },
+                    direction: MirDirection::Down,
+                    kind: 0,
                 },
             }],
         );
@@ -22718,7 +22668,7 @@ mod tests {
     }
 
     #[test]
-    fn shared_zone_state_commits_zero_health_monster_drops_once() {
+    fn shared_zone_state_commits_death_after_zero_health_monster_drops_once() {
         let mut state = SharedInProcessZoneState::new();
         let entity = shared_monster_entity(77);
         state.sync_map_layer(
@@ -22729,13 +22679,23 @@ mod tests {
             BTreeSet::new(),
         );
 
-        let death_packets = vec![ServerPacket::ObjectHealth {
-            info: ObjectHealthInfo {
-                object_id: 77,
-                percent: 0,
-                expire: 0,
+        let death_packets = vec![
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: 77,
+                    percent: 0,
+                    expire: 0,
+                },
             },
-        }];
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 77,
+                    location: Point { x: 331, y: 270 },
+                    direction: MirDirection::Down,
+                    kind: 0,
+                },
+            },
+        ];
         state.apply_shared_entity_packets("0", &death_packets);
         let committed = state.commit_death_drops(
             "0",

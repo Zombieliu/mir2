@@ -3812,6 +3812,7 @@ where
                 )?;
                 return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
             }
+            gameplay_adapter.observe_world_snapshot_life(&payload);
             map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);

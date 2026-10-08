@@ -1,0 +1,70 @@
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	﻿2026-10-08T06:34:43.0448454Z ##[group]Run python3 -B scripts/test_prepare_native_r22_s17_offline.py
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0449128Z ^[[36;1mpython3 -B scripts/test_prepare_native_r22_s17_offline.py^[[0m
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0449719Z ^[[36;1mnode --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r22-s17-publication.test.mjs^[[0m
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0450295Z ^[[36;1mpython3 -B scripts/test_native_r22_s17_r2_delivery.py^[[0m
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0450653Z ^[[36;1mpython3 -B scripts/test_native_r22_s17_interrupt.py^[[0m
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0506067Z shell: /usr/bin/bash -e {0}
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0506247Z env:
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0506413Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0506662Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.15/x64/lib/pkgconfig
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0506898Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0507113Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0507329Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.15/x64
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0507813Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.15/x64/lib
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.0508125Z ##[endgroup]
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3123017Z ...E.E...
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3123374Z ======================================================================
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3123937Z ERROR: test_origin_writer_retains_root_permissions_and_rejects_template_drift (__main__.OfflineGuards.test_origin_writer_retains_root_permissions_and_rejects_template_drift)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3124570Z ----------------------------------------------------------------------
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3124841Z Traceback (most recent call last):
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3125335Z   File "/home/runner/work/mir2/mir2/mir2-web3/scripts/test_prepare_native_r22_s17_offline.py", line 99, in test_origin_writer_retains_root_permissions_and_rejects_template_drift
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3125841Z     writer = O.read(O.OLD / 'operators-01/origin_r20_s16.py', O.OLD_WRITER_SHA).decode()
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3126160Z              ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3126547Z   File "/home/runner/work/mir2/mir2/mir2-web3/scripts/classic-r22-publication/prepare_origin_r22_s17.py", line 93, in read
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3126859Z     before = ordinary(path)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3127203Z   File "/home/runner/work/mir2/mir2/mir2-web3/scripts/classic-r22-publication/prepare_origin_r22_s17.py", line 82, in ordinary
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3127624Z     need(path.is_absolute() and '..' not in path.parts, 'absolute-local-source-required')
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3127913Z     ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3128278Z   File "/home/runner/work/mir2/mir2/mir2-web3/scripts/classic-r22-publication/prepare_origin_r22_s17.py", line 52, in need
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3128594Z     raise RuntimeError(label)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3128789Z RuntimeError: absolute-local-source-required
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3128912Z 
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3129029Z ======================================================================
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3129479Z ERROR: test_runtime_render_changes_identity_preserves_cas_and_limits (__main__.OfflineGuards.test_runtime_render_changes_identity_preserves_cas_and_limits)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3129903Z ----------------------------------------------------------------------
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3130120Z Traceback (most recent call last):
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3130552Z   File "/home/runner/work/mir2/mir2/mir2-web3/scripts/test_prepare_native_r22_s17_offline.py", line 140, in test_runtime_render_changes_identity_preserves_cas_and_limits
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3131036Z     result = subprocess.run([node, '--check', '--input-type=module'], input=module.encode(),
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3131302Z                             capture_output=True)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3131596Z   File "/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/subprocess.py", line 554, in run
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3131878Z     with Popen(*popenargs, **kwargs) as process:
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3132577Z          ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3132863Z   File "/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/subprocess.py", line 1039, in __init__
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3133178Z     self._execute_child(args, executable, preexec_fn, close_fds,
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3133401Z     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3133593Z                         pass_fds, cwd, env,
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3133763Z                         ^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3133914Z     ...<5 lines>...
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3134060Z                         gid, gids, uid, umask,
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3134232Z                         ^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3134574Z                         start_new_session, process_group)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3134851Z                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3135163Z   File "/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/subprocess.py", line 1876, in _execute_child
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3135512Z     self._posix_spawn(args, executable, env, restore_signals, close_fds,
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3135753Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3135944Z                       p2cread, p2cwrite,
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3136103Z                       ^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3136265Z                       c2pread, c2pwrite,
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3136423Z                       ^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3136578Z                       errread, errwrite)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3136733Z                       ^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3137019Z   File "/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/subprocess.py", line 1820, in _posix_spawn
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3137338Z     self.pid = os.posix_spawn(executable, args, env, **kwargs)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3137558Z                ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3137863Z FileNotFoundError: [Errno 2] No such file or directory: 'C:/Program Files/nodejs/node.exe'
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3138062Z 
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3138185Z ----------------------------------------------------------------------
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3138376Z Ran 9 tests in 0.108s
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3138457Z 
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3138516Z FAILED (errors=2)
+native-download-tooling-check	Check signed17 R22 admission and original immutable predecessor	2026-10-08T06:34:43.3299078Z ##[error]Process completed with exit code 1.

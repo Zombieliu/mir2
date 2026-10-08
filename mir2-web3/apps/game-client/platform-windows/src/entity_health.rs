@@ -30,6 +30,10 @@ pub(crate) struct MonsterHealthState {
     images: Option<[Handle<Image>; 2]>,
 }
 
+#[cfg(test)]
+#[path = "health_zero_display_tests.rs"]
+mod health_zero_display_tests;
+
 impl MonsterHealthState {
     fn visible(&mut self, entity: &Value, now_ms: u64) -> Option<(String, u8)> {
         let id = entity.get("objectId")?;
@@ -65,7 +69,6 @@ impl MonsterHealthState {
         // Expired revisions stay recorded until the actor leaves. A repeated
         // world snapshot must not restart the server's visibility deadline.
         if entity.get("dead").and_then(Value::as_bool) == Some(true)
-            || percent == 0
             || now_ms >= window.expires_at_ms.max(window.hit_expires_at_ms)
         {
             return None;
@@ -414,7 +417,9 @@ mod tests {
         assert!(state.visible(&entity, 9001).is_none());
         entity["dead"] = json!(false);
         entity["_healthPercent"] = json!(0);
-        assert!(state.visible(&entity, 9002).is_none());
+        assert_eq!(state.visible(&entity, 13002), Some(("77".to_owned(), 0)));
+        assert!(state.visible(&entity, 15999).is_some());
+        assert!(state.visible(&entity, 16000).is_none());
         assert!(state
             .visible(
                 &json!({"objectId": 78, "kind": "monster", "hp": 100, "maxHp": 100}),

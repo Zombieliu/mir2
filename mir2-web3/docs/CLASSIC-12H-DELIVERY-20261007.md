@@ -7,7 +7,61 @@ The03:36 Goal API read returned no active goal, not a completed result;
 the authorized unfinished scope was subsequently recorded as an active Goal.
 That does not reset the original12-hour deadline or imply completion.
 
-## Current local package and bounded Source slice — 2026-10-08
+## Current reviewed health follow-up — 2026-10-08
+
+The native adapter now retires an older revived/live packet marker only after
+a raw, current-map server snapshot confirms positive root/self HP and dead=false.
+The raw ingress check runs after previous-map rejection and before all overlays;
+packet-first replay remains a pure projection and cannot acknowledge new life.
+A later typed HP0/dead snapshot therefore wins after genuine acknowledgement.
+Actual Death still rejects stale typed live data; exact HP0 alone creates no death.
+
+Root regression evidence preserves RED14/2, the superseded GREEN16/0 and the
+read-only cache-replay finding. Final authority17/17, bridge102/102, display7/7
+and current-map ingress5/5 pass. The independent source/log binding covers all
+11 current source files and preserves the original receipts, RED attempts and
+sleep-baseline failure. Percentage formulas and health recipient rules are
+unchanged. No-live-ack causal ordering and absent-Death corpse animation remain
+open. This correction is outside frozen R22; no paired rollout is claimed.
+
+[Current root binding](generated/player-qa/classic-20261008/health-zero-authority-04/ROOT-FINAL-04.json),
+[original-byte evidence](generated/player-qa/classic-20261008/health-zero-authority-04/ARCHIVE.json).
+The original12-hour deadline and fullP1–P7 remain unfinished. Real payment
+recharge is not integrated; the separate monthly-card feature uses operator
+codes and public paid-access enforcement remains OFF.
+
+## Historical stage-only delivery and health authority — 2026-10-08 07:36 UTC
+
+R22 immutable origin append and authenticated R2/CDN stage are complete.
+CI37739769708 at publisher e7850e9aef9ea038907bee621f331f3286c1ac9b
+verifies40 objects /1052247716 public bytes. Stage receipt SHA256 is
+0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f.
+Worker508704-byte source/settings readback passes; no secret values are read.
+Public update aliases remain R20/feed16; the Gateway remains c6. Promote has
+not been dispatched. The failed first CI37738286145 and HTTP1010 probe remain;
+the actual CI User-Agent passes. The Linux repair changes two offline test
+paths only; production validators and Worker bytes are unchanged.
+
+In the separate mutable lane, display percentage0 no longer creates death,
+corpse/owner-drop authority, or native dead/HP0 state. Typed HP0/dead is captured
+before overlay normalization; actual Revived and subsequent Death retain their
+existing priority. Selected current evidence passes225 executions /224 unique
+names, including14 native authority,102 bridge and7 display cases. All earlier
+RED and the reproduced sleep-baseline failure remain. The baseline persistent
+Revived flag can still shadow a later dead snapshot without a new Death packet;
+no causal ordering fix or full life synchronization is claimed. Percentage math
+and Hero/Pet health recipients are unchanged. This slice is outside R22/7fea.
+
+The ordinary R20 client remains staged and signed bindings/resources verified;
+the mistaken D:R19 installation is unchanged. The pending normal-exit question
+has not been answered, so no user-client launch, replacement or Gateway restart
+is performed. Native shop-wheel and paired public acceptance remain open.
+
+[Actual stage archive](generated/player-qa/classic-20261008/delivery-checkpoint-03/ARCHIVE.json),
+[health review and limitations](HEALTH-ZERO-AUTHORITY-20261008.md).
+The original12-hour checkpoint remains missed; fullP1–P7 is not complete.
+
+## Historical local package and bounded Source slice — 2026-10-08
 
 R22 final local package at frozen7fea passes original packaging and verification:
 154579 payload files,986493911 bytes; manifest31538315 bytes is within the

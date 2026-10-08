@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.r22.http-prerequisites.v1",
+  "passed": false,
+  "createdUnix": 1791440768,
+  "readOnly": true,
+  "rows": [
+    {
+      "name": "origin-version",
+      "url": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261008-invited-22/VERSION.json",
+      "status": 200,
+      "bytes": 1221,
+      "sha256": "33de36e552668c358adc1ee5f7fea2ed8bd9d79aa387f4f231c5aa4ee7ba2935",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "passed": true
+    },
+    {
+      "name": "existing-cdn-feed",
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "status": 200,
+      "bytes": 1159,
+      "sha256": "fd8109231f6077405c410047fab94ea1a5797e9963e81fd9a80a0cb86cf95dca",
+      "cacheControl": "no-store",
+      "passed": true
+    },
+    {
+      "name": "private-route-unauthenticated",
+      "url": "https://assets.mir2.obelisk.build/upload/native-r22-s17/pointer",
+      "status": 403,
+      "bytes": 17,
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "cacheControl": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+      "passed": false
+    }
+  ]
+}

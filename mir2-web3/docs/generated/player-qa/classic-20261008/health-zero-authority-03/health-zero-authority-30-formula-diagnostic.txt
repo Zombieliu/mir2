@@ -1,0 +1,1 @@
+Formula comparison attempt 1 failed because its pattern excluded nested closing braces. No function match was extracted; no source formula change was found. Full tool output remains in the session.
