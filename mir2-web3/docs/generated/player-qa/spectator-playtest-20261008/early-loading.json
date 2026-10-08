@@ -1,0 +1,318 @@
+{
+  "schema": "mir2.playtest-spectator-readiness.v1",
+  "generatedAt": "2026-10-08T13:10:00.954Z",
+  "url": "http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0",
+  "expectLive": true,
+  "actualLiveFrameAcceptance": true,
+  "liveFrames": {
+    "firstSequence": 114,
+    "nextSequence": 115,
+    "capturedAtMs": 1791464969735,
+    "mapFileName": "0",
+    "entityCount": 31
+  },
+  "state": {
+    "badge": "即時觀戰 · 延遲 30 秒",
+    "state": "live",
+    "overlay": true,
+    "readOnly": "● 只读安全",
+    "render": {
+      "coordinateSystem": "tile coordinates; origin top-left; x right; y down",
+      "screen": "game",
+      "layout": "desktop",
+      "input": "keyboardMouse",
+      "wideMobile": false,
+      "viewport": {
+        "stageWidth": 1024,
+        "stageHeight": 768,
+        "rangeX": 16,
+        "rangeY": 17,
+        "origin": {
+          "tileLeft": 470,
+          "tileTop": 352,
+          "entityLeft": 480,
+          "entityTop": 352
+        }
+      },
+      "sceneInteractionReady": false,
+      "player": {
+        "objectId": "1000",
+        "x": 288,
+        "y": 616,
+        "direction": "Down",
+        "hp": 18,
+        "maxHp": 18
+      },
+      "selectedEntity": null,
+      "visibleEntities": [
+        {
+          "objectId": "1000",
+          "kind": "selfPlayer",
+          "name": "Watchc78c4e",
+          "x": 288,
+          "y": 616,
+          "dead": false
+        },
+        {
+          "objectId": "206641",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "dead": false
+        },
+        {
+          "objectId": "271801",
+          "kind": "monster",
+          "name": "Hen",
+          "x": 291,
+          "y": 616,
+          "dead": false
+        },
+        {
+          "objectId": "200716",
+          "kind": "monster",
+          "name": "Guard",
+          "x": 291,
+          "y": 620,
+          "dead": false
+        },
+        {
+          "objectId": "271806",
+          "kind": "monster",
+          "name": "Hen",
+          "x": 292,
+          "y": 613,
+          "dead": false
+        },
+        {
+          "objectId": "206302",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 287,
+          "y": 611,
+          "dead": false
+        },
+        {
+          "objectId": "206515",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 284,
+          "y": 611,
+          "dead": false
+        },
+        {
+          "objectId": "206644",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "dead": false
+        },
+        {
+          "objectId": "206632",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "dead": false
+        },
+        {
+          "objectId": "200325",
+          "kind": "monster",
+          "name": "ArcherGuard",
+          "x": 295,
+          "y": 624,
+          "dead": false
+        },
+        {
+          "objectId": "206339",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 280,
+          "y": 609,
+          "dead": false
+        },
+        {
+          "objectId": "206717",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 288,
+          "y": 624,
+          "dead": false
+        },
+        {
+          "objectId": "206524",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 294,
+          "y": 606,
+          "dead": false
+        },
+        {
+          "objectId": "206324",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 289,
+          "y": 604,
+          "dead": false
+        },
+        {
+          "objectId": "200339",
+          "kind": "monster",
+          "name": "Royal_Guard",
+          "x": 276,
+          "y": 604,
+          "dead": false
+        },
+        {
+          "objectId": "206626",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 628,
+          "dead": false
+        },
+        {
+          "objectId": "206530",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 288,
+          "y": 603,
+          "dead": false
+        },
+        {
+          "objectId": "206711",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 276,
+          "y": 603,
+          "dead": false
+        },
+        {
+          "objectId": "206714",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 275,
+          "y": 611,
+          "dead": false
+        },
+        {
+          "objectId": "206536",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 291,
+          "y": 600,
+          "dead": false
+        },
+        {
+          "objectId": "200340",
+          "kind": "monster",
+          "name": "Royal_Guard",
+          "x": 280,
+          "y": 600,
+          "dead": false
+        },
+        {
+          "objectId": "206604",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "dead": false
+        },
+        {
+          "objectId": "1",
+          "kind": "npc",
+          "name": "Teleport_Gilbert",
+          "x": 287,
+          "y": 615,
+          "dead": false
+        },
+        {
+          "objectId": "2",
+          "kind": "npc",
+          "name": "BorderVillage_Board",
+          "x": 284,
+          "y": 615,
+          "dead": false
+        },
+        {
+          "objectId": "4",
+          "kind": "npc",
+          "name": "CraftsLady_Jude",
+          "x": 294,
+          "y": 619,
+          "dead": false
+        },
+        {
+          "objectId": "42",
+          "kind": "npc",
+          "name": "Merchant_Scott",
+          "x": 291,
+          "y": 610,
+          "dead": false
+        },
+        {
+          "objectId": "5",
+          "kind": "npc",
+          "name": "Blacksmith_Smith",
+          "x": 296,
+          "y": 613,
+          "dead": false
+        },
+        {
+          "objectId": "8",
+          "kind": "npc",
+          "name": "Merchant_Ruben",
+          "x": 288,
+          "y": 608,
+          "dead": false
+        },
+        {
+          "objectId": "3",
+          "kind": "npc",
+          "name": "Assistant_Jane",
+          "x": 284,
+          "y": 606,
+          "dead": false
+        },
+        {
+          "objectId": "43",
+          "kind": "npc",
+          "name": "MaterialDealer_Reece",
+          "x": 295,
+          "y": 605,
+          "dead": false
+        },
+        {
+          "objectId": "6",
+          "kind": "npc",
+          "name": "Merchant_John",
+          "x": 292,
+          "y": 603,
+          "dead": false
+        }
+      ],
+      "groundDrops": [],
+      "panels": {
+        "inventory": false,
+        "character": false
+      },
+      "tutorial": null,
+      "gamepad": {
+        "connected": false,
+        "id": null,
+        "family": "generic",
+        "mapping": "",
+        "mappingMode": "unverified",
+        "supported": false,
+        "uiMode": false,
+        "movement": null
+      }
+    }
+  },
+  "playerCommandsSent": [],
+  "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\playtest-bilibili-spectator\\mir2-player-journey\\mir2-web3\\apps\\web\\artifacts\\spectator-readiness\\live-browser\\spectator-live.png",
+  "platformPublishing": "not-run"
+}

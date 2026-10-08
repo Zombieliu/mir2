@@ -67,3 +67,8 @@ test('empty buffers and historical replays are not labelled current live gamepla
   assert.equal(spectatorLiveState({ ...status, capturedAtMs: null }, clock + 45_000), 'stale');
   assert.equal(spectatorLiveState({ ...status, capturedAtMs: 1, matches: [], replay: { active: true } }, clock), 'replay');
 });
+
+test('resuming a map does not label its old delivered cache as current gameplay', () => {
+  assert.equal(spectatorLiveState({ ...status, capturedAtMs: clock - 180_000 }, clock), 'buffering');
+  assert.equal(spectatorLiveState({ ...status, capturedAtMs: clock - 180_000 }, clock + 20_000), 'stale');
+});

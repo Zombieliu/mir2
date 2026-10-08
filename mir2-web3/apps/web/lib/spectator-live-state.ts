@@ -19,5 +19,9 @@ export function spectatorLiveState(
   // already include the enforced public delay. Do not mistake that delay for a stall.
   const allowance = latest && status.capturedAtMs ? 10_000 : Math.max(0, status.delayMs) + 10_000;
   if (nowMs - reference > allowance) return 'stale';
+  // A returning player can resume a map that still holds an old cached frame.
+  // Do not call that delivered picture live while its new delay buffer fills.
+  if (latest && status.capturedAtMs
+      && nowMs - status.capturedAtMs > Math.max(0, status.delayMs) + 10_000) return 'buffering';
   return status.capturedAtMs ? 'live' : 'buffering';
 }

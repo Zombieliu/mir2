@@ -59,6 +59,30 @@ def fixture_response(url, **kwargs):
     payload = {'publicDelayMs': 30_000, 'matches': []} if url.endswith('/spectator/matches') else healthy()
     return io.BytesIO(json.dumps(payload).encode())
 
+def fingerprint_fixture(environment_files, file_contents):
+    """Exercise the real hash logic using a synthetic systemd readout."""
+    binary = '/opt/mir2-playtest/releases/source-a/mir2-gateway'
+    unit = '/etc/systemd/system/mir2-playtest.service'
+    descriptors = environment_files if isinstance(environment_files, list) else [environment_files]
+    properties = '\n'.join([
+        f'FragmentPath={unit}',
+        'DropInPaths=',
+        *(f'EnvironmentFiles={descriptor}' for descriptor in descriptors),
+        'User=ubuntu',
+        'WorkingDirectory=/var/lib/mir2-playtest',
+        f'ExecStart={{ path={binary}; argv[]={binary} web; ignore_errors=no; }}',
+    ]).encode()
+    files = {binary: b'owned binary fixture', unit: b'owned unit fixture', **file_contents}
+
+    def read_file(path, mode):
+        if mode != 'rb' or path not in files:
+            raise AssertionError(f'Unexpected host file access in fingerprint test: {path}')
+        return io.BytesIO(files[path])
+
+    with patch.object(stage.subprocess, 'check_output', return_value=properties), \
+         patch.object(stage.Path, 'glob', return_value=[]), patch('builtins.open', side_effect=read_file):
+        return stage.service_fingerprint()
+
 @contextmanager
 def prepared_fixture(proxy_applied=True):
     """Use actual stage records and temporary files, never real host services."""
@@ -314,11 +338,127 @@ class StageSafetyTests(unittest.TestCase):
             self.assertIn(b'@mir2_watch_maintenance', attempts[0])
             self.assertEqual(attempts[1], candidate)
             self.assertEqual(live.read_bytes(), candidate)
-            self.assertEqual(dropin.read_bytes(), stage.FEATURE.encode())
+            self.assertEqual(dropin.read_bytes(), stage.feature_dropin().encode())
             record = json.loads((stage.STAGE / 'status.json').read_text())
             self.assertTrue(record['gatewayActivated'])
             self.assertEqual(record['revision'], 'source-a')
             self.assertEqual(record['serviceFingerprint'], 'service-a')
+
+    def test_feature_dropin_ends_with_owned_environment_file_and_intended_values(self):
+        with prepared_fixture() as (_, _, _, _, _):
+            feature_file = stage.STAGE / 'spectator-feature.env'
+            staged_dropin = (stage.STAGE / '90-spectator-watch.conf').read_text()
+            self.assertEqual(staged_dropin.splitlines()[-1], f'EnvironmentFile={feature_file}')
+            self.assertEqual(staged_dropin, stage.feature_dropin())
+            self.assertEqual(feature_file.read_bytes(), stage.FEATURE_ENV.encode())
+            assignments = dict(line.split('=', 1) for line in feature_file.read_text().splitlines()
+                               if line and not line.startswith('#'))
+            self.assertEqual(assignments['MIR2_SPECTATOR_ENABLED'], '1')
+            self.assertEqual(assignments['MIR2_SPECTATOR_PUBLIC'], '1')
+            self.assertEqual(assignments['MIR2_SPECTATOR_RECORDING_ENABLED'], '0')
+            self.assertEqual(assignments['MIR2_SPECTATOR_PUBLIC_MAPS'], '0')
+            self.assertEqual(assignments['MIR2_SPECTATOR_CAPTURE_INTERVAL_MS'], '1000')
+            self.assertTrue(all(name.startswith('MIR2_SPECTATOR_') for name in assignments))
+
+    def test_identical_feature_environment_is_accepted_without_rewriting(self):
+        with prepared_fixture() as (_, _, _, _, _):
+            feature_file = stage.STAGE / 'spectator-feature.env'
+            with patch.object(stage, 'write_private') as write:
+                stage.prepare_feature_environment()
+                write.assert_not_called()
+            self.assertEqual(feature_file.read_bytes(), stage.FEATURE_ENV.encode())
+
+    def test_modified_feature_environment_is_never_overwritten(self):
+        with prepared_fixture() as (_, _, _, _, _):
+            feature_file = stage.STAGE / 'spectator-feature.env'
+            concurrent = b'MIR2_SPECTATOR_PUBLIC=0\nMIR2_DATABASE_URL=other-operator\n'
+            feature_file.write_bytes(concurrent)
+            with patch.object(stage, 'write_private') as write:
+                with self.assertRaisesRegex(RuntimeError, 'feature environment changed'):
+                    stage.prepare_feature_environment()
+                write.assert_not_called()
+            self.assertEqual(feature_file.read_bytes(), concurrent)
+
+    def test_feature_environment_changed_during_barrier_prevents_restart(self):
+        with prepared_fixture() as (_, live, dropin, _, candidate):
+            feature_file = stage.STAGE / 'spectator-feature.env'
+            concurrent = b'MIR2_SPECTATOR_PUBLIC=0\nMIR2_DATABASE_URL=other-operator\n'
+            attempts = []
+
+            def replace(content):
+                attempts.append(content)
+                live.write_bytes(content)
+                if len(attempts) == 1:
+                    feature_file.write_bytes(concurrent)
+
+            with patch.object(stage, 'replace_caddy', side_effect=replace), \
+                 patch.object(stage.subprocess, 'run') as service_command:
+                with self.assertRaisesRegex(RuntimeError, 'feature environment changed'):
+                    stage.activate()
+                service_command.assert_not_called()
+            self.assertEqual(feature_file.read_bytes(), concurrent)
+            self.assertFalse(dropin.exists())
+            self.assertEqual(live.read_bytes(), candidate)
+
+    def test_feature_environment_changed_during_daemon_reload_prevents_restart(self):
+        with prepared_fixture() as (_, live, dropin, _, candidate):
+            feature_file = stage.STAGE / 'spectator-feature.env'
+            concurrent = b'MIR2_SPECTATOR_ENABLED=1\nMIR2_DATABASE_URL=other-operator\n'
+            commands = []
+
+            def service_command(command, **kwargs):
+                commands.append(command)
+                if command == ['systemctl', 'daemon-reload']:
+                    feature_file.write_bytes(concurrent)
+                else:
+                    raise AssertionError('Changed feature environment must never reach Gateway restart')
+
+            with patch.object(stage, 'replace_caddy', side_effect=live.write_bytes), \
+                 patch.object(stage.subprocess, 'run', side_effect=service_command):
+                with self.assertRaisesRegex(RuntimeError, 'feature environment changed'):
+                    stage.activate()
+            self.assertTrue(commands)
+            self.assertTrue(all(command == ['systemctl', 'daemon-reload'] for command in commands))
+            self.assertEqual(feature_file.read_bytes(), concurrent)
+            self.assertFalse(dropin.exists())
+            self.assertEqual(live.read_bytes(), candidate)
+
+    def test_fingerprint_ignores_only_appended_owned_feature_environment(self):
+        base_file = '/etc/mir2-playtest/gateway.env'
+        base_descriptor = f'{base_file} (ignore_errors=no)'
+        files = {base_file: b'MIR2_REALM_ID=owned-realm\n'}
+        baseline = fingerprint_fixture(base_descriptor, files)
+        for flag in ['yes', 'no']:
+            with self.subTest(ignore_errors=flag):
+                descriptor = base_descriptor + f' {stage.STAGE / "spectator-feature.env"} (ignore_errors={flag})'
+                self.assertEqual(fingerprint_fixture(descriptor, files), baseline)
+
+    def test_repeated_environment_file_properties_retain_realm_before_owned_feature(self):
+        base_file = '/etc/mir2-playtest/gateway.env'
+        base_descriptor = f'{base_file} (ignore_errors=no)'
+        owned_descriptor = f'{stage.STAGE / "spectator-feature.env"} (ignore_errors=no)'
+        files = {base_file: b'MIR2_REALM_ID=owned-realm\n'}
+        baseline = fingerprint_fixture(base_descriptor, files)
+        repeated = [base_descriptor, owned_descriptor]
+        self.assertEqual(fingerprint_fixture(repeated, files), baseline)
+        changed = {base_file: b'MIR2_REALM_ID=changed-realm\n'}
+        self.assertNotEqual(fingerprint_fixture(repeated, changed), baseline)
+        other_file = '/etc/mir2-playtest/other.env'
+        self.assertNotEqual(
+            fingerprint_fixture([*repeated, f'{other_file} (ignore_errors=no)'],
+                                {**files, other_file: b'MIR2_GATEWAY_ID=other-unit\n'}),
+            baseline)
+
+    def test_fingerprint_keeps_other_environment_paths_contents_and_flags_pinned(self):
+        base_file = '/etc/mir2-playtest/gateway.env'
+        other_file = '/etc/mir2-playtest/other.env'
+        descriptor = f'{base_file} (ignore_errors=no)'
+        files = {base_file: b'MIR2_REALM_ID=owned-realm\n', other_file: b'MIR2_GATEWAY_ID=another-unit\n'}
+        baseline = fingerprint_fixture(descriptor, files)
+        self.assertNotEqual(fingerprint_fixture(descriptor + f' {other_file} (ignore_errors=no)', files), baseline)
+        changed = {**files, base_file: b'MIR2_REALM_ID=changed-realm\n'}
+        self.assertNotEqual(fingerprint_fixture(descriptor, changed), baseline)
+        self.assertNotEqual(fingerprint_fixture(f'{base_file} (ignore_errors=yes)', files), baseline)
 
     def test_adapted_barrier_requires_prefix_strip_before_both_ws_routes(self):
         routes = adapted_barrier_routes()

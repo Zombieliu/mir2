@@ -31,6 +31,8 @@ async function main() {
   const pending = new Map();
   const sent = [];
   const errors = [];
+  const resourceFailures = [];
+  let status = null;
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const id = next++;
     pending.set(id, { resolve, reject });
@@ -57,6 +59,18 @@ async function main() {
       if (message.method === 'Network.webSocketFrameSent') {
         try { sent.push(JSON.parse(message.params.response.payloadData)?.type); } catch { /* HMR/ping */ }
       }
+      if (message.method === 'Network.webSocketFrameReceived') {
+        try {
+          const frame = JSON.parse(message.params.response.payloadData);
+          if (frame.type === 'spectatorStatus') status = frame.payload;
+        } catch { /* HMR/ping */ }
+      }
+      if (message.method === 'Network.responseReceived' && message.params.response.status >= 400) {
+        const response = message.params.response;
+        const resourceUrl = new URL(response.url);
+        resourceUrl.searchParams.delete('spectateToken');
+        resourceFailures.push({ url: resourceUrl.toString(), status: response.status });
+      }
     });
     await new Promise((resolve, reject) => {
       socket.addEventListener('open', resolve, { once: true });
@@ -73,23 +87,37 @@ async function main() {
     }, expectLive ? 90_000 : 45_000);
     let liveFrames = null;
     if (expectLive) {
-      const first = await evaluate("JSON.parse(window.render_game_to_text?.() || '{}')");
-      assert.equal(first.status?.readOnly, true);
-      assert.equal(first.status?.replay?.active, false);
-      assert.ok(Number.isFinite(first.status?.sequence));
+      const first = status;
+      assert.equal(first?.readOnly, true);
+      assert.equal(first?.replay?.active, false);
+      assert.ok(Number.isFinite(first?.sequence));
       await until(async () => {
-        const nextState = await evaluate("JSON.parse(window.render_game_to_text?.() || '{}')");
-        const nextStatus = nextState.status;
-        if (nextStatus?.sequence > first.status.sequence
-            && nextStatus.capturedAtMs > first.status.capturedAtMs
-            && nextState.world?.entityCount > 0 && nextState.world?.mapFileName) {
-          liveFrames = { firstSequence: first.status.sequence,
+        const nextStatus = status;
+        if (nextStatus?.sequence > first.sequence
+            && nextStatus.capturedAtMs > first.capturedAtMs) {
+          liveFrames = { firstSequence: first.sequence,
             nextSequence: nextStatus.sequence, capturedAtMs: nextStatus.capturedAtMs,
-            mapFileName: nextState.world.mapFileName, entityCount: nextState.world.entityCount };
+            mapFileName: nextStatus.map };
           return true;
         }
         return false;
       }, 15_000);
+      try {
+        await until(async () => await evaluate(`(() => {
+          const gate = window.__mir2SceneGate;
+          return gate?.sceneInteractionReady && gate.hasRenderPlayer && gate.hasMapRegion;
+        })()`), 90_000);
+      } catch (error) {
+        const diagnostic = await evaluate(`({ gate: window.__mir2SceneGate,
+          render: JSON.parse(window.render_game_to_text?.() || '{}') })`);
+        const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+        await fs.writeFile(path.join(output, 'scene-not-ready.png'), Buffer.from(shot.data, 'base64'));
+        await fs.writeFile(path.join(output, 'scene-not-ready.json'), JSON.stringify({
+          actualLiveFrameAcceptance: true, visualSceneAcceptance: false,
+          liveFrames, diagnostic, resourceFailures, errors,
+        }, null, 2));
+        throw error;
+      }
     }
     for (const key of ['ArrowRight', 'w', '1']) {
       await send('Input.dispatchKeyEvent', { type: 'keyDown', key });
@@ -101,6 +129,7 @@ async function main() {
       state: document.querySelector('[data-testid="spectator-live-state"]')?.dataset.state,
       overlay: !!document.querySelector('[data-testid="spectator-overlay"]'),
       readOnly: document.querySelector('[data-testid="spectator-read-only"]')?.textContent,
+      sceneGate: window.__mir2SceneGate,
       render: JSON.parse(window.render_game_to_text?.() || '{}')
     }))()`);
     assert.equal(state.overlay, true);
@@ -115,7 +144,9 @@ async function main() {
     const safeUrl = new URL(url);
     safeUrl.searchParams.delete('spectateToken');
     const report = { schema: 'mir2.playtest-spectator-readiness.v1', generatedAt: new Date().toISOString(),
-      url: safeUrl.toString(), expectLive, actualLiveFrameAcceptance: !!liveFrames, liveFrames, state,
+      url: safeUrl.toString(), expectLive, actualLiveFrameAcceptance: !!liveFrames,
+      visualSceneAcceptance: expectLive && state.sceneGate?.sceneInteractionReady === true,
+      liveFrames, state, resourceFailures,
       playerCommandsSent: [], screenshot, platformPublishing: 'not-run' };
     await fs.writeFile(path.join(output, 'readiness.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify({ expectLive, state: state.state, screenshot, platformPublishing: 'not-run' }));

@@ -36,8 +36,28 @@ Environment="MIR2_SPECTATOR_RING_FRAMES=90"
 Environment="MIR2_SPECTATOR_MAX_ENTITIES=256"
 Environment="MIR2_SPECTATOR_ENTITY_STALE_MS=5000"
 '''
+FEATURE_ENV = MARKER + ''.join(line[len('Environment="'):-1] + '\n'
+    for line in FEATURE.splitlines() if line.startswith('Environment="'))
 COUNTERS = ('currentWsConnections', 'currentActiveSessions', 'currentReconnectLeases',
             'currentLoginInFlight', 'currentNewCharacterInFlight', 'currentStartGameInFlight')
+
+def feature_dropin():
+    # EnvironmentFile values override Environment, regardless of drop-in order.
+    # Append our bounded file after the existing realm file to take precedence.
+    return FEATURE + f'EnvironmentFile={STAGE / "spectator-feature.env"}\n'
+
+def prepare_feature_environment():
+    location = STAGE / 'spectator-feature.env'
+    content = FEATURE_ENV.encode()
+    if location.exists():
+        if location.read_bytes() != content:
+            raise RuntimeError('Spectator feature environment changed; do not overwrite it')
+    else: write_private(location, content)
+
+def require_owned_feature_environment():
+    location = STAGE / 'spectator-feature.env'
+    if not location.exists() or location.read_bytes() != FEATURE_ENV.encode():
+        raise RuntimeError('Spectator feature environment changed; refuse restart with modified values')
 
 def require_drained(observed, revision):
     if not observed.get('ok') or observed.get('revision') != revision:
@@ -84,6 +104,17 @@ def health():
     with urllib.request.urlopen('http://127.0.0.1:7210/health', timeout=8) as response:
         return json.load(response)
 
+def parse_service_properties(raw):
+    properties = {}
+    for line in raw.decode().splitlines():
+        if '=' not in line: continue
+        key, value = line.split('=', 1)
+        # systemctl emits some array entries as repeated property lines.
+        if key in {'EnvironmentFiles', 'DropInPaths'} and key in properties:
+            properties[key] += ' ' + value
+        else: properties[key] = value
+    return properties
+
 def require_legacy_drained():
     with urllib.request.urlopen('http://127.0.0.1:7110/health', timeout=8) as response:
         observed = json.load(response)
@@ -99,7 +130,11 @@ def service_fingerprint():
     raw = subprocess.check_output(['systemctl', 'show', 'mir2-playtest',
         '-p', 'FragmentPath', '-p', 'DropInPaths', '-p', 'EnvironmentFiles',
         '-p', 'User', '-p', 'WorkingDirectory', '-p', 'ExecStart'])
-    properties = dict(line.split('=', 1) for line in raw.decode().splitlines() if '=' in line)
+    properties = parse_service_properties(raw)
+    own_environment = re.compile(r'(?<!\S)' + re.escape(str(STAGE / 'spectator-feature.env'))
+        + r'(?: \(ignore_errors=(?:yes|no)\))?(?=\s|$)')
+    if own_environment.search(properties.get('EnvironmentFiles', '')):
+        properties['EnvironmentFiles'] = own_environment.sub('', properties['EnvironmentFiles']).strip()
     command = properties.get('ExecStart', '')
     stable_command = command.split('; ignore_errors=', 1)[0]
     if stable_command == command:
@@ -254,7 +289,8 @@ def prepare():
     candidate = original_route.sub(lambda match: match.group(1) + NEW_ROUTE, text).encode()
     write_private(STAGE / 'Caddyfile.before', original)
     write_private(STAGE / 'Caddyfile.candidate', candidate)
-    write_private(STAGE / '90-spectator-watch.conf', FEATURE.encode())
+    prepare_feature_environment()
+    write_private(STAGE / '90-spectator-watch.conf', feature_dropin().encode())
     caddy_command(['validate', '--config', str(STAGE / 'Caddyfile.candidate'), '--adapter', 'caddyfile'])
     validate_barrier(candidate)
     observed = health()
@@ -319,10 +355,12 @@ def activate():
         current_dropin = DROPIN.read_bytes() if DROPIN.exists() else None
         if current_dropin != previous:
             raise RuntimeError('Feature drop-in changed since staging; do not overwrite it')
-        write_private(DROPIN, FEATURE.encode())
+        prepare_feature_environment()
+        write_private(DROPIN, feature_dropin().encode())
         dropin_written = True
         subprocess.run(['systemctl', 'daemon-reload'], check=True, capture_output=True)
         require_unchanged_service(record)
+        require_owned_feature_environment()
         restart_attempted = True
         subprocess.run(['systemctl', 'restart', 'mir2-playtest'], check=True, capture_output=True)
         deadline = time.monotonic() + 30
@@ -330,6 +368,7 @@ def activate():
             try:
                 after = health()
                 if after.get('ok') and after.get('revision') == record['revision']:
+                    require_owned_feature_environment()
                     if after.get('spectator', {}).get('recordingEnabled') is not False:
                         raise RuntimeError('Recording must remain disabled')
                     with urllib.request.urlopen('http://127.0.0.1:7210/spectator/matches', timeout=8) as response:
@@ -338,13 +377,15 @@ def activate():
                         raise RuntimeError('Unexpected public spectator delay')
                     verified_after = after
                     break
+            except urllib.error.HTTPError:
+                raise RuntimeError('Spectator directory rejected the feature; verify effective process environment')
             except (OSError, urllib.error.URLError): pass
             time.sleep(1)
         if verified_after is None: raise RuntimeError('Gateway did not pass activation health check')
     except Exception:
         # Restore only this owned feature override; never switch the binary/DB.
         if dropin_written:
-            if not DROPIN.exists() or DROPIN.read_bytes() != FEATURE.encode():
+            if not DROPIN.exists() or DROPIN.read_bytes() != feature_dropin().encode():
                 raise RuntimeError('Feature override changed during activation; do not overwrite another operator')
             if previous is None: DROPIN.unlink(missing_ok=True)
             else: write_private(DROPIN, previous)

@@ -1,0 +1,106 @@
+{
+  "stage": {
+    "revision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+    "serviceFingerprint": "323a0a4c6a6244d0b790dea4df61da9ded41035cdd76f1ded0a21955dc27d74e",
+    "beforeSha256": "4f54f9ca961771de96efff9b24d983815cfbbf5c69369bed9da5e9c61dec4632",
+    "candidateSha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d",
+    "proxyApplied": true,
+    "gatewayActivated": true,
+    "preparedAtMs": 1791460813621,
+    "admissionBarrierOrderVerified": true,
+    "recordingEnabled": false,
+    "publicMaps": [
+      "0"
+    ],
+    "publicDelayMs": 30000,
+    "captureIntervalMs": 1000
+  },
+  "featureDropinExists": true,
+  "serviceFingerprint": "323a0a4c6a6244d0b790dea4df61da9ded41035cdd76f1ded0a21955dc27d74e",
+  "proxyDigest": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d",
+  "mir2-playtest": {
+    "MainPID": "3076272",
+    "Result": "success",
+    "NRestarts": "0",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "mir2-gateway": {
+    "MainPID": "3855184",
+    "Result": "success",
+    "NRestarts": "0",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "caddy": {
+    "MainPID": "2107428",
+    "Result": "success",
+    "NRestarts": "0",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "playtestHealth": {
+    "ok": true,
+    "revision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+    "spectator": {
+      "activeViewers": 1,
+      "activeMaps": 1,
+      "recordingEnabled": false,
+      "bufferedFrames": 90,
+      "publishedFramesTotal": 815,
+      "persistedFramesTotal": 0,
+      "droppedFramesTotal": 0,
+      "recordingErrorsTotal": 0,
+      "dataDir": ".mir2-data/spectator"
+    },
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  },
+  "legacyHealth": {
+    "ok": true,
+    "revision": null,
+    "spectator": {
+      "activeViewers": 0,
+      "activeMaps": 1,
+      "bufferedFrames": 2400,
+      "publishedFramesTotal": 32548,
+      "persistedFramesTotal": 32548,
+      "droppedFramesTotal": 0,
+      "recordingErrorsTotal": 0,
+      "dataDir": ".mir2-data/spectator"
+    },
+    "capacity": {
+      "maxWsConnections": 100,
+      "maxActiveSessions": 100,
+      "maxReconnectLeases": 100,
+      "maxLoginInFlight": 8,
+      "maxNewCharacterInFlight": 4,
+      "maxStartGameInFlight": 4,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  },
+  "generatedAt": "2026-10-08T14:58:22.052Z",
+  "humanExitConfirmation": "received",
+  "bilibiliPublishing": "not-run",
+  "aiCommentary": "disabled"
+}

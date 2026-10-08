@@ -1,10 +1,12 @@
 # Agent Task Queue
 
-> 2026-10-08 additive Bilibili / Windows playtest spectator task: implementation
-> and preparation checks pass in its own branch. Next: user normal-exit reply,
-> fresh fingerprint/drain checks, bounded proxy/feature activation, genuine
-> read-only frames, then official LiveHime capture and platform reception.
-> Keep the active classic integration lane and its public release unchanged.
+> 2026-10-08 additive Bilibili / Windows playtest spectator task is activated
+> after both human exit confirmations and fresh drain/fingerprint checks.
+> Current a41dfe7 binary is reused. Ordinary owned QA receives fresh frames
+> 444→445; actual browser map/avatar and read-only input pass, then normal logout.
+> Node7/Python27/strictTS pass. Next: official LiveHime capture and Bilibili
+> reception with the user's account; AI commentary and load acceptance remain open.
+> This lane does not complete or alter the active classic integration Goal.
 > [Runbook](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
 
 > 2026-10-08 classic Candidate integration is active under the user's12-hour

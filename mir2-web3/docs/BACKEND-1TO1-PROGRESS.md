@@ -1,10 +1,12 @@
 # Backend 1:1 Progress
 
 > 2026-10-08 spectator connection reuses the deployed shared-Zone projections;
-> no simulation or Gateway binary is replaced. Feature configuration is staged
-> only, with recording OFF and 30s delay. Python19 and real Caddy adaptation /
-> desired service fingerprint checks pass. Live restart, current frame privacy /
-> performance acceptance and Bilibili delivery remain open.
+> no simulation or Gateway binary is replaced. Authorized drained feature
+> activation on actual a41dfe7 passes; recording OFF, 30s delay and limits stay.
+> Python27, Caddy adaptation/fingerprint, current ordinary QA frames, principal
+> private-field redaction, non-director delay and invalid-input rejection pass.
+> Failed EnvironmentFile precedence activation rolled back and is corrected.
+> Original production PID stays. Load/complete privacy and Bilibili delivery remain open.
 > [Scope and limits](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
 
 > 2026-10-08 classic Candidate integration is active under the user's12-hour

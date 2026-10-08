@@ -3,8 +3,11 @@
 > 2026-10-08 playtest spectator frontend retains /playtest independently from
 > player credentials and shows waiting/buffering/live/stale/replay states.
 > Initial public-delay buffering and spectator keepAlive bugs are corrected;
-> Node6, strictTS and isolated headless waiting UI pass. Actual current map,
-> character rendering and Bilibili capture remain unaccepted until activation.
+> Node7, strictTS and isolated headless waiting/live UI pass. After authorized
+> activation, actual current map/avatar render with 16 loaded sprite libraries,
+> no HTTP resource errors and no player commands. Early loading screenshot and
+> preload timeout are retained; readiness is not inferred from the live badge.
+> Local watch page is available; Bilibili capture/reception and AI remain open.
 > [Evidence and runbook](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
 
 > 2026-10-08 classic Candidate integration is active under the user's12-hour

@@ -1,0 +1,14 @@
+{
+  "schema": "mir2.playtest-spectator-transport.v1",
+  "generatedAt": "2026-10-08T12:57:30.047Z",
+  "endpoint": "https://165.154.65.136.sslip.io/playtest",
+  "source": "ordinary-owned-QA-shared-zone",
+  "publishing": "not-run",
+  "checks": {
+    "publicRoutes": true,
+    "readOnlyAndDelayEnforced": true,
+    "normalOwnedQaLogout": true
+  },
+  "revision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+  "failure": "Owned QA packet wait timed out"
+}

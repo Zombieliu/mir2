@@ -1,10 +1,12 @@
 # Crystal Server Parity
 
-> 2026-10-08 playtest spectator wiring is a prepared operational integration,
+> 2026-10-08 playtest spectator wiring is an activated operational integration,
 > not a new Crystal parity claim. Real shared-Zone AOI is the source, with known
 > per-player projection, map/channel merge and stale-map limits. The live
-> c6c3238 Gateway, DB and proxy remain unchanged; activation and current-frame /
-> Bilibili acceptance await the next normal-exit gate.
+> a41dfe7 Gateway binary/DB stay; bounded proxy/feature activation follows human
+> exit and fresh drain checks. Genuine current read-only frames, redaction and
+> local visible map/avatar pass; platform delivery and complete load/privacy
+> acceptance remain open. A cached frame is no longer labelled live on return.
 > [Detailed status](WINDOWS-PLAYTEST-SPECTATOR-BILIBILI-20261008.zh-CN.md).
 
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
