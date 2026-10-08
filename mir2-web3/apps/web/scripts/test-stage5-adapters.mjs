@@ -2895,7 +2895,7 @@ function parityPageFixture(owner, world = {}) {
     marketOpenRef:ref(false), conquestOpenRef:ref(false), buffsOpenRef:ref(false), mailUiOpenRef:ref(false), worldMapOpenRef:ref(false),
     chatSettingsOpenRef:ref(false), tutorialOpenRef:ref(false), npcShopServiceRef:ref(null), npcRepairServiceRef:ref(null),
     storageServiceActiveRef:ref(false), npcShopUiIngressRef:ref(null), npcRepairAuthorityRef:ref({invalidateInventory:()=>{}}), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
-    skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()),
+    skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()), heroProofHighWaterRef:ref(new WeakMap()),
     heroWindowEpochsRef:ref({inventory:1,character:1,belt:1}), heroWindowsRef:ref({inventoryOpen:true,characterOpen:false,characterPage:"equipment",beltVisible:true,beltVertical:false}),
     heroWindowActorRef:ref(null), heroRestockScheduledRef:ref(false), setHeroWindows:()=>{}, sameHeroSession:heroUi.sameHeroSession,
     observeBootstrapRef:ref(null), observePreferenceRef:ref(null),
@@ -7637,6 +7637,100 @@ check("Hero cross scene reentry closes instead of relabelling earlier unfinished
   const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,{...f.scene,sceneRevision:2,mapFileName:"D001"});
   assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);assert.equal(f.ingress.caughtUp(),false);
   }
+});
+
+
+const heroBasisWindows42={inventoryOpen:true,characterOpen:true,characterPage:"equipment",beltVisible:true,beltVertical:false};
+check("Hero basis binds occupied destinations and exact canonical IDs independently",()=>{
+  const f=heroFixture(),action={kind:"move",from:2,to:0},basis=heroUi.captureHeroActionBasis(f.model,action,heroBasisWindows42);
+  assert(basis);assert.deepEqual(basis.cells.map(c=>[c.slot,c.item?.uid]),[[0,"501"],[2,"502"]]);
+  assert.equal(basis.resolvedWire.type,"moveItem");assert.equal(heroUi.heroActionBasisMatches(basis,f.model,action,heroBasisWindows42),true);
+  f.info.inventory[0].count=2;f.world.heroInventoryItems[0].quantity=2;f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);
+  assert.equal(heroUi.heroActionBasisMatches(basis,f.authority.read(f.owner),action,heroBasisWindows42),false);
+  assert.equal(heroUi.heroActionBasisMatches({...basis,untrusted:true},f.model,action,heroBasisWindows42),false);
+  assert.equal(Object.isFrozen(basis.facts.policies),true);assert.equal(Object.isFrozen(f.owner.socket),false);
+});
+check("Hero basis automatic remove preserves semantic omission and original bag-first target",()=>{
+  const f=heroFixture(),gear=heroItemFixture(503,12),info=heroInfoFixture(12,{item_type:12});
+  f.info.equipment[3]=gear;f.world.heroEquipmentItems=[heroWorldRowFixture(gear,3,"bag1",info)];
+  f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner),action={kind:"remove",from:3};
+  assert(model);const basis=heroUi.captureHeroActionBasis(model,action,heroBasisWindows42);assert(basis);
+  assert.equal("to" in action,false);assert.deepEqual(basis.facts.target,{mode:"automatic",slot:3});assert.equal(basis.resolvedWire.to,3);
+  assert.equal(basis.cells.length,11);assert.equal(basis.cells.filter(c=>c.grid==="HeroInventory").length,10);
+  const explicit=heroUi.captureHeroActionBasis(model,{...action,to:1},heroBasisWindows42);assert(explicit);
+  assert.equal(explicit.cells.length,2);assert.deepEqual(explicit.facts.target,{mode:"explicit",slot:1});
+});
+check("Hero basis retains both base and effective use policy and refuses differing Rust wire",()=>{
+  const f=heroFixture();f.world.heroInventoryItems[1].tooltipSource.realInfo=heroInfoFixture(777,{item_type:8,stack_size:30});
+  f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner),action={kind:"use",slot:2};
+  const basis=heroUi.captureHeroActionBasis(model,action,heroBasisWindows42);assert(basis);
+  const source=basis.facts.policies.find(p=>p.grid==="HeroInventory"&&p.slot===2);
+  assert.equal(source.base.itemIndex,10);assert.equal(source.effective.itemIndex,777);assert.equal(source.effective.stackSize,30);
+  assert.equal(basis.resolvedWire.type,"equipItem");assert.equal(basis.resolvedWire.uniqueId,"502");
+  const different={...basis,resolvedWire:{type:"mergeItem",gridFrom:"HeroInventory",gridTo:"HeroEquipment",idFrom:"502",idTo:"503"}};
+  assert.equal(heroUi.heroActionBasisMatches(different,model,action,heroBasisWindows42),false);
+  assert.equal(heroUi.planHeroAction(model,action).wire.type,"equipItem","witness rejection cannot rewrite the existing Web planner");
+});
+check("Hero basis carries belt restock authority and leaves request allocation in the sole ledger",()=>{
+  const f=heroFixture(),basis=heroUi.captureHeroActionBasis(f.model,{kind:"use",slot:0},heroBasisWindows42);assert(basis);
+  assert.equal(basis.cells.length,10);assert.deepEqual(basis.facts.restock,{belt:0,from:2,uid:"502",itemIndex:10});
+  const magic=heroUi.captureHeroActionBasis(f.model,{kind:"magicKey",spell:"FireBall",key:18},heroBasisWindows42);assert(magic);
+  assert.deepEqual(magic.facts.keys,[{spell:"FireBall",key:17}]);assert.equal(magic.resolvedWire.oldKey,17);assert.equal("requestId" in magic.resolvedWire,false);
+  const ledger=new heroUi.HeroPlayerOperations(),proof=ledger.reserve(f.model,{kind:"magicKey",spell:"FireBall",key:18});assert(proof);
+  assert(Number.isSafeInteger(proof.wire.requestId));assert.equal(proof.wire.oldKey,17);
+});
+check("Hero basis displays exact wide UID but does not widen legacy mutation wire",()=>{
+  const f=heroFixture(),id="9007199254740993";f.info.inventory[2].unique_id=id;f.world.heroInventoryItems[1].uniqueId=id;
+  f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner);assert(model);
+  const basis=heroUi.captureHeroActionBasis(model,{kind:"move",from:2,to:3},heroBasisWindows42);assert(basis);
+  assert.equal(basis.cells[0].item.uid,id);assert.equal(heroUi.captureHeroActionBasis(model,{kind:"use",slot:2},heroBasisWindows42),null);
+});
+check("Hero captured high-water changes even when identical raw has already been fully consumed",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);const before=f.ingress.highWater();assert(before);assert.equal(f.ingress.caughtUp(),true);
+  const next=f.capture(heroWideOriginal);assert.equal(heroIngressDocument.sameHeroHighWater(before,f.ingress.highWater()),false);
+  assert.equal(f.ingress.caughtUp(),false);assert(f.ingress.offer(next));assert.equal(f.ingress.caughtUp(),true);
+  assert.equal(heroIngressDocument.sameHeroHighWater(before,f.ingress.highWater()),false);
+  assert.equal(heroIngressDocument.sameHeroHighWater(before,{...before,socket:{}}),false);
+});
+const heroSubmitFunctions42=[];(function visit(node){if(ts.isFunctionDeclaration(node)&&["submitHeroAction","heroProofCurrent"].includes(node.name?.text))heroSubmitFunctions42.push(node.getText(parityPageAst));ts.forEachChild(node,visit);})(parityPageAst);
+assert.equal(heroSubmitFunctions42.length,2);const heroSubmitJs42=ts.transpileModule(heroSubmitFunctions42.join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+function heroSubmitFixture42(mode="accepted"){
+  const f=heroFixture(),raw=heroRawFixture(),ledger=new heroUi.HeroPlayerOperations();raw.deliver(heroWideOriginal);
+  let sends=0,enabled=true;const scope={currentHeroModel:()=>f.model,heroInputAllowed:()=>enabled,heroUiLeaseCurrent:()=>true,
+    heroOperationsRef:{current:ledger},heroUiProofLeasesRef:{current:new WeakMap()},heroBeltProofRef:{current:null},heroProofHighWaterRef:{current:new WeakMap()},
+    heroRawIngressRef:{current:raw.ingress},sameHeroHighWater:heroIngressDocument.sameHeroHighWater,renderParityServices(){},console:{error(){}},
+    sendRaw(wire,{heroProof}){
+      if(mode==="prethrow")throw Error("controlled preclaim exception");
+      if(mode==="captured"||mode==="consumed"){const d=raw.capture(heroWideOriginal);if(mode==="consumed")raw.ingress.offer(d);}
+      if(!api.current(heroProof,wire))return false;
+      if(mode==="preclaim")return false;
+      assert(ledger.claim(heroProof,f.model,wire));if(mode==="postclaim")return false;if(mode==="throw")throw Error("controlled send exception");sends++;return true;
+    }};
+  const api=new Function(...Object.keys(scope),heroSubmitJs42+"\nreturn {submit:submitHeroAction,current:heroProofCurrent};")(...Object.values(scope));
+  return {f,raw,ledger,api,get sends(){return sends;},disable(){enabled=false;}};
+}
+check("Hero actual Page submit returns true only after accepted send and cannot clear entered custody",()=>{
+  for(const mode of ["accepted","preclaim","prethrow","postclaim","throw"]){const f=heroSubmitFixture42(mode),dto=heroUi.captureHeroAction(f.f.model,{kind:"move",from:2,to:3});assert(dto);
+    assert.equal(f.api.submit(dto,false,{origin:"inventory",epoch:1}),mode==="accepted");assert.equal(f.sends,mode==="accepted"?1:0);
+    assert.equal(f.ledger.pending?.state??null,["preclaim","prethrow"].includes(mode)?null:mode==="accepted"?"entered":"unknown");
+    if(f.ledger.pending)assert.equal(f.ledger.cancelDefinitelyUnsent(f.ledger.pending.proof),false);
+  }
+  const blocked=heroSubmitFixture42();blocked.disable();assert.equal(blocked.api.submit(heroUi.captureHeroAction(blocked.f.model,{kind:"move",from:2,to:3}),false,{origin:"inventory",epoch:1}),false);assert.equal(blocked.ledger.pending,null);
+});
+check("Hero actual Page final gate rejects captured and already consumed same-content listener frames",()=>{
+  for(const mode of ["captured","consumed"]){const f=heroSubmitFixture42(mode),dto=heroUi.captureHeroAction(f.f.model,{kind:"move",from:2,to:3});
+    assert.equal(f.api.submit(dto,false,{origin:"inventory",epoch:1}),false);assert.equal(f.sends,0);assert.equal(f.ledger.pending,null);
+  }
+});
+
+
+check("Hero maximum 42-cell bag keeps valid use witness within the unchanged action bound",()=>{
+  const f=heroFixture(),info=heroInfoFixture(2147483647);f.info.inventory=Array.from({length:42},(_,slot)=>heroItemFixture(Number.MAX_SAFE_INTEGER-slot,2147483647,slot===0?1:3));
+  f.world.heroInventoryCapacity=42;f.world.heroInventoryItems=f.info.inventory.map((item,slot)=>heroWorldRowFixture(item,slot,"bag1",info));
+  f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner);assert(model);
+  const basis=heroUi.captureHeroActionBasis(model,{kind:"use",slot:0},heroBasisWindows42);assert(basis);assert.equal(basis.cells.length,42);
+  assert.equal(basis.facts.policies.length,1,"scan-only occupancy must not duplicate unused item policy");assert(new TextEncoder().encode(JSON.stringify(basis)).byteLength<=16384);
+  assert.equal(basis.facts.restock.from,2);assert.equal(basis.facts.restock.itemIndex,2147483647);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Source42：Hero 动作依据与发送前校验通过回归；完整接管和可玩包仍待完成（2026-10-08）
+
+真实 Rust Hero reducer 的动作现必带原 planner 依据，独立 TS 模型捕获相同字段后精确比较：原物品 UID/数量/槽位、基础与生效政策、要求、原自动目标、补药和快捷键配置均保留。16KiB 有界依据支持实际42格背包，宽 UID 仅用于精确比较，旧数值 mutation 限制不扩大。Page 原 submitHeroAction 改为严格 transport-accepted boolean；发送前失败仅撤销 definitely-unsent，进入原最终 claim 后的未知结果仍保留 custody。原唯一 ledger 的 proof 另捕获最初 raw high-water，同步 listener 后在原 claim 前重核，不把后来帧或新模型贴回旧动作。
+
+实际 Runtime16/16＋portable58/58＋Native24/24，共98次通过、0失败/ignored，归一化原函数85项，新Rust函数6项。Web02 原有限脚本184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑466组另列，原457组加9组。TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。WebGL2 shared 与 WebGPU cargo check exit0，仅静态编译，0次WASM API/初始化，不代表新完整生产包。
+
+908声明Rust输入、17126声明Web输入、去重17135输入在实际调用前后匹配，最终声明集重核亦匹配；原905/17123集合保留，另加真实Hero模块和两个当前制作加工simulation依赖，外来工作保留且排除本轮提交。5次Cargo原Guard均先PolicyB completed/exited/disposed后才开始下一Cargo，25份nonce，C最低221675769856 B、freshness保守上界最大72ms，原50GiB/2000ms门槛不变。首次Web01的旧纯Page夹具缺少新增WeakMap引用而失败；保留完整输出，仅补42B真实闭包依赖后重跑，原457组与新增9组断言不削弱。未执行的TSC01不计通过，原工具、探针、模板与发布门槛保持，不声称强制deadline。
+
+本轮完成动作依据及发送前保护基础，尚未启用共享Hero的Page control/sink/matching Ready/Shell输入全链。下一步须补独立冻结TS模型与真实Rust已消费模型的数据一致性门，尤其实时HeroHealthChanged与checkpoint显示可能不同；来源戳、bootstrap或setter成功均不能据此隐藏React。继续接完整布局、帧推进、源/租约/sink/输入清理及回退，再完成默认共享入口、九项任务动作整链和源码匹配的renderer/Core/EXE/Web完整包。精确ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail与原账本不变。
+
+Matrix11仍103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–42；公开manifest及用户tsconfig保持，未改后端/共享Zone/协议parity。登录→任务/战斗→保存→重登、移动真机及最终玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信可玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json)、[49份完整原始文件与25nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json)、[首次失败与修复](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json)、[Source41实际提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json)。Source41已核验推送1ff247c37bb9c420cfff6b5e7c280691fe949c02；本轮Git发布以随后实际记录为准。下方保留历史。
+
 ## Source41：Page Hero 原始数据接线通过代码回归；完整可玩包仍未交付（2026-10-08）
 
 Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首次物理消息 performance 时钟在应用前捕获；不把 Hero snapshot 经过 JS 重编码。实际验证通过的 NPC purchase owner 回调以独立关联 tuple 加原文进入严格 Rust 接口，保留精确 u64/i64、noHero 清除和 receipt FIFO。Socket/connection/session、renderer run 与 scene 分开；恢复 held checkpoint 后按顺序补齐完整尾队列，未完成旧帧不可被后帧越过。Renderer 缺失/故障保留 Page custody，换图直接 activate；同步跨 scene 重入明确拒绝。

@@ -38,6 +38,68 @@ export type HeroUiAction =
 export type HeroWire = Readonly<Record<string, string | number>>;
 export type HeroActionPlan = Readonly<{ wire: HeroWire; confirmationRequired: boolean; crossPlayer: boolean }>;
 export type HeroActionDto = Readonly<{ actor: HeroActor; owner: HeroUiOwner; sourceKey: string; action: HeroUiAction }>;
+
+export type HeroBasisWindows = Readonly<{inventoryOpen:boolean;characterOpen:boolean;characterPage:"equipment"|"status"|"state"|"skills";beltVisible:boolean;beltVertical:boolean}>;
+export type HeroActionBasis = Readonly<{version:1;actor:Readonly<{objectId:number;name:string;class:string;gender:string;spawned:boolean}>;
+  windows:HeroBasisWindows;cells:readonly Readonly<{grid:HeroGrid;slot:number;capacity:number;item:null|Readonly<{uid:string;itemIndex:number;count:number}>}>[];
+  facts:Readonly<Record<string,unknown>>;resolvedWire:Readonly<Record<string,string|number>>;confirmationRequired:boolean;crossPlayer:boolean}>;
+/** An action witness, independently derived from the frozen Web owner model.
+ * It never supplies a model to the Rust planner or broadens the legacy wire ABI. */
+export function captureHeroActionBasis(model:HeroPlayerModel,action:HeroUiAction,windows:HeroBasisWindows):HeroActionBasis|null {
+  try {
+    const plan=planHeroAction(model,action);if(!plan)return null;
+    const selected:HeroCell[]=[],policySelected:HeroCell[]=[];let target:{mode:"none"|"explicit"|"automatic";slot:number|null}={mode:"none",slot:null};
+    let requirement:Readonly<{passed:boolean;statValue:number|null}>|null=null;
+    let restock:Readonly<{belt:number;from:number;uid:string;itemIndex:number}>|null=null;
+    const add=(grid:HeroGrid,slot:number,usesPolicy=true)=>{const cell={grid,slot};if(!available(model,cell))throw Error("Hero basis cell unavailable");
+      if(!selected.some(c=>c.grid===grid&&c.slot===slot))selected.push(cell);
+      if(usesPolicy&&!policySelected.some(c=>c.grid===grid&&c.slot===slot))policySelected.push(cell);};
+    const policy=(item:HeroItem)=>{const base=item.tooltipSource.info as Row,effective=item.info;
+      return {base:{itemIndex:base.item_index,itemType:base.item_type,shape:base.shape,stackSize:base.stack_size},
+        effective:{itemIndex:effective.item_index,itemType:effective.item_type,shape:effective.shape,stackSize:effective.stack_size,
+          requiredClass:effective.required_class,requiredGender:effective.required_gender,requiredType:effective.required_type,requiredAmount:effective.required_amount}};};
+    const requireItem=(slot:number)=>{const item=at(model,{grid:"HeroInventory",slot});if(!item)throw Error("Hero basis source absent");
+      const stat=({1:1,2:3,3:5,4:7,5:9,7:0,8:2,9:4,10:6,11:8} as Record<number,number>)[item.info.required_type as number];
+      requirement={passed:heroRequirements(model,item),statValue:stat===undefined?null:model.stats.find(s=>s.stat===stat)?.value??0};return item;};
+    switch(action.kind){
+      case "move":case "equip":add("HeroInventory",action.from);add(action.kind==="move"?"HeroInventory":"HeroEquipment",action.to);
+        target={mode:"explicit",slot:action.to};if(action.kind==="equip")requireItem(action.from);break;
+      case "merge":add(action.from.grid,action.from.slot);add(action.to.grid,action.to.slot);target={mode:"explicit",slot:action.to.slot};break;
+      case "transfer":case "takeBack":add(action.kind==="transfer"?"Inventory":"HeroInventory",action.from);
+        add(action.kind==="transfer"?"HeroInventory":"Inventory",action.to);target={mode:"explicit",slot:action.to};break;
+      case "remove":add("HeroEquipment",action.from);target={mode:action.to===undefined?"automatic":"explicit",slot:plan.wire.to as number};
+        if(action.to===undefined){for(let slot=0;slot<model.inventory.length;slot++)add("HeroInventory",slot,false);}else add("HeroInventory",action.to);break;
+      case "use":{
+        add("HeroInventory",action.slot);const item=requireItem(action.slot),type=item.info.item_type;
+        if(type===6)add("HeroEquipment",6);if(type===7)add("HeroEquipment",8);
+        if(plan.wire.type==="equipItem"){target={mode:"automatic",slot:plan.wire.to as number};add("HeroEquipment",target.slot!);}
+        if(plan.wire.type==="mergeItem"){const slot=model.equipment.findIndex(i=>i&&String(i.uniqueId)===String(plan.wire.idTo));
+          if(slot<0)throw Error("Hero basis target absent");target={mode:"automatic",slot};add("HeroEquipment",slot);}
+        if(plan.wire.type==="useItem"&&action.slot<=1&&item.count===1){for(let slot=0;slot<model.inventory.length;slot++)add("HeroInventory",slot,false);
+          const candidate=heroRestockCandidate(model,action.slot);if(candidate)restock={belt:candidate.belt,from:candidate.from,uid:String(candidate.uniqueId),itemIndex:candidate.itemIndex};}
+        break;}
+      case "autoPotItem":if(action.slot!==null){add("HeroInventory",action.slot);target={mode:"explicit",slot:action.slot};}break;
+      case "autoPotValue":case "magicKey":break;
+    }
+    const rank={HeroInventory:0,HeroEquipment:1,Inventory:2};selected.sort((a,b)=>rank[a.grid]-rank[b.grid]||a.slot-b.slot);
+    const cells=selected.map(cell=>{const item=at(model,cell),list=cell.grid==="HeroInventory"?model.inventory:cell.grid==="HeroEquipment"?model.equipment:model.personalInventory!;
+      if(item&&!exactId(item.uniqueId))throw Error("Hero basis invalid UID");
+      return {...cell,capacity:list.length,item:item?{uid:String(item.uniqueId),itemIndex:item.itemIndex,count:item.count}:null};});
+    policySelected.sort((a,b)=>rank[a.grid]-rank[b.grid]||a.slot-b.slot);
+    const policies=policySelected.flatMap(cell=>{const item=at(model,cell);return item?[{...cell,...policy(item)}]:[];});
+    const keys=action.kind==="magicKey"?model.magics.map(m=>({spell:m.spell,key:m.key})).sort((a,b)=>a.spell<b.spell?-1:a.spell>b.spell?1:0):[];
+    const resolvedWire=Object.fromEntries(Object.entries(plan.wire).map(([k,v])=>[k,["uniqueId","idFrom","idTo"].includes(k)?String(v):v]));
+    const basis:HeroActionBasis={version:1,actor:{objectId:model.actor.objectId,name:model.actor.name,class:model.actor.class,gender:model.actor.gender,spawned:model.spawned},
+      windows:{...windows},cells,facts:{hp:model.hp,level:model.level,riding:model.riding,autoPot:model.autoPot,policies,requirement,target,keys,restock,confirmed:action.kind==="use"&&action.confirmed===true},
+      resolvedWire,confirmationRequired:plan.confirmationRequired,crossPlayer:plan.crossPlayer};
+    return new TextEncoder().encode(canonical(basis)).byteLength<=16384?freeze(basis):null;
+  }catch{return null;}
+}
+export function heroActionBasisMatches(basis:unknown,model:HeroPlayerModel,action:HeroUiAction,windows:HeroBasisWindows):boolean {
+  const expected=captureHeroActionBasis(model,action,windows);
+  try{return expected!==null&&canonical(basis)===canonical(expected);}catch{return false;}
+}
+
 export type HeroRestockCandidate = Readonly<{ actor: HeroActor; owner: HeroUiOwner; belt: number; from: number; uniqueId: number; itemIndex: number }>;
 
 const row = (v: unknown): v is Row => typeof v === "object" && v !== null && !Array.isArray(v);

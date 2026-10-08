@@ -47,7 +47,7 @@ import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, proj
   type BevyQuestUiIntent, type BevyQuestUiIntentResult, type BevyQuestUiRuntime } from "../lib/bevy-quest-ui";
 import { useBevyHudUi } from "../lib/use-bevy-hud-ui";
 import { useBevyCharacterUi } from "../lib/use-bevy-character-ui";
-import { HeroRawIngress, sameHeroPhysical, verifiedHeroOwnerFromFrame, type HeroRawDelivery, type HeroPhysical, type HeroRuntime } from "../lib/bevy-hero-ui";
+import { HeroRawIngress, sameHeroPhysical, sameHeroHighWater, verifiedHeroOwnerFromFrame, type HeroRawDelivery, type HeroPhysical, type HeroRawHighWater, type HeroRuntime } from "../lib/bevy-hero-ui";
 import { useBevySpellsUi } from "../lib/use-bevy-spells-ui";
 import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
 import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
@@ -2149,6 +2149,7 @@ export default function HomePage() {
   const heroOperationsRef = useRef(new HeroPlayerOperations());
   const heroManagementOpenRef = useRef(false);
   const heroBeltProofRef = useRef<HeroOperationProof | null>(null);
+  const heroProofHighWaterRef = useRef(new WeakMap<HeroOperationProof, HeroRawHighWater>());
   const heroWindowEpochsRef = useRef<Readonly<Record<HeroUiOrigin, number>>>({ inventory: 1, character: 1, belt: 1 });
   const heroUiProofLeasesRef = useRef(new WeakMap<HeroOperationProof, Readonly<{ kind: "window"; lease: HeroUiLease } | { kind: "keyboardBelt" | "acceptedRestock" }>>());
   const heroRestockInputWasAllowedRef = useRef(false);
@@ -10617,21 +10618,28 @@ export default function HomePage() {
     if (!model || !source || !heroInputAllowed()
       || (source.kind === "window" ? !heroUiLeaseCurrent(source.lease) : heroBeltProofRef.current !== proof)) return false;
     if (source.kind === "window" && source.lease.origin === "belt" && (proof.dto.action.kind !== "use" || proof.dto.action.slot > 1)) return false;
+    const captured = heroProofHighWaterRef.current.get(proof);
+    if (captured && !sameHeroHighWater(captured, heroRawIngressRef.current?.highWater() ?? null)) return false;
     return heroOperationsRef.current.allows(proof, model, command);
   }
-  function submitHeroAction(dto: HeroActionDto, beltIntent = false, lease?: HeroUiLease) {
+  function submitHeroAction(dto: HeroActionDto, beltIntent = false, lease?: HeroUiLease): boolean {
     const model = currentHeroModel();
     if (!model || !heroInputAllowed() || (lease ? !heroUiLeaseCurrent(lease) : !beltIntent)
-      || (beltIntent || lease?.origin === "belt") && (dto.action.kind !== "use" || dto.action.slot > 1)) return;
+      || (beltIntent || lease?.origin === "belt") && (dto.action.kind !== "use" || dto.action.slot > 1)) return false;
     const proof = heroOperationsRef.current.reserve(model, dto);
-    if (!proof) return;
+    if (!proof) return false;
+    const captured = heroRawIngressRef.current?.highWater();
+    if (captured) heroProofHighWaterRef.current.set(proof, captured);
     heroUiProofLeasesRef.current.set(proof, lease ? { kind: "window", lease: Object.freeze({ ...lease }) } : { kind: "keyboardBelt" });
     if (beltIntent) heroBeltProofRef.current = proof;
+    let sent = false;
     try {
-      if (!sendRaw({ ...proof.wire }, { heroProof: proof })) heroOperationsRef.current.cancelDefinitelyUnsent(proof);
-    } catch (error) { heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero operation outcome is unknown", error); }
+      sent = sendRaw({ ...proof.wire }, { heroProof: proof });
+      if (!sent) {heroOperationsRef.current.cancelDefinitelyUnsent(proof);heroOperationsRef.current.outcomeUnknown(proof);}
+    } catch (error) { heroOperationsRef.current.cancelDefinitelyUnsent(proof); heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero operation outcome is unknown", error); }
     finally { if (heroBeltProofRef.current === proof) heroBeltProofRef.current = null; }
     renderParityServices(n => n + 1);
+    return sent;
   }
   function changeHeroWindows(next: HeroManagementWindows) {
     if (!["equipment", "status", "state", "skills"].includes(next.characterPage)
@@ -10674,10 +10682,12 @@ export default function HomePage() {
       if (!heroInputAllowed()) return;
       const model = currentHeroModel(); if (!model) return;
       const proof = heroOperationsRef.current.reserveRestock(model); if (!proof) return;
+      const captured = heroRawIngressRef.current?.highWater();
+      if (captured) heroProofHighWaterRef.current.set(proof, captured);
       heroUiProofLeasesRef.current.set(proof, { kind: "acceptedRestock" });
       heroBeltProofRef.current = proof;
       try { if (!sendRaw({ ...proof.wire }, { heroProof: proof })) heroOperationsRef.current.cancelDefinitelyUnsent(proof); }
-      catch (error) { heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero restock outcome is unknown", error); }
+      catch (error) { heroOperationsRef.current.cancelDefinitelyUnsent(proof); heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero restock outcome is unknown", error); }
       finally { if (heroBeltProofRef.current === proof) heroBeltProofRef.current = null; }
       renderParityServices(n => n + 1);
     });

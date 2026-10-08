@@ -6,6 +6,7 @@ export type HeroSource = Readonly<{ scope: HeroScope; frameSequence: number; her
   heroGeneration: number; rustModelRevision: number }>;
 export type VerifiedHeroOwner = Readonly<{ requestId: string; actor: string; producerScope: string; serverRevision: string }>;
 export type HeroRawDelivery = HeroPhysical & Readonly<{ raw: string; sequence: number; receivedAtMs: number }>;
+export type HeroRawHighWater = HeroPhysical & Readonly<{sequence:number}>;
 export type HeroBootstrap = Readonly<{ source: HeroSource | null; acceptedFrameSequence: number; closed: boolean }>;
 export type HeroRuntime = {
   getMir2HeroUiAbiVersion?: () => number;
@@ -16,6 +17,11 @@ export type HeroRuntime = {
   getMir2HeroIngressCheckpoint?: (scope: string) => string | null | undefined;
   restoreMir2HeroIngressCheckpoint?: (scope: string, heldCheckpoint: string) => boolean;
   getMir2HeroUiStatus?: () => string;
+  getMir2HeroActionBasisVersion?: () => number;
+  setMir2HeroUiControl?: (scope:string,control:string) => boolean;
+  setMir2HeroUiInputEdge?: (scope:string,edge:string) => boolean;
+  setMir2HeroUiIntentSink?: (scope:string,sink:(raw:string)=>boolean) => number;
+  clearMir2HeroUiIntentSink?: (scope:string,sinkGeneration:number) => boolean;
 };
 const safe = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 const positive = (value: unknown): value is number => safe(value) && value > 0;
@@ -36,6 +42,13 @@ function validScene(value: HeroScene | null): value is HeroScene {
 }
 export function sameHeroScope(a: HeroScope | null, b: HeroScope | null): boolean {
   return !!a && !!b && scopeKeys.every(key => a[key] === b[key]);
+}
+export function sameHeroSource(a:HeroSource|null,b:HeroSource|null):boolean {
+  return !!a&&!!b&&sameHeroScope(a.scope,b.scope)&&a.frameSequence===b.frameSequence
+    &&a.heroObjectId===b.heroObjectId&&a.heroGeneration===b.heroGeneration&&a.rustModelRevision===b.rustModelRevision;
+}
+export function sameHeroHighWater(a:HeroRawHighWater|null,b:HeroRawHighWater|null):boolean {
+  return !!a&&!!b&&sameHeroPhysical(a,b)&&a.sequence===b.sequence;
 }
 function validScope(value: unknown): value is HeroScope {
   return row(value) && fields(value, scopeKeys) && positive(value.runGeneration) && positive(value.connectionGeneration)
@@ -235,6 +248,12 @@ export class HeroRawIngress {
     const value=this.runtime?readHeroBootstrap(this.runtime):null;
     return this.bound&&!this.closed&&!this.rendererFault&&this.scope&&sameScene(this.scope,this.scene)&&value&&!value.closed
       && (value.source===null||sameHeroScope(value.source.scope,this.scope))?value:null;
+  }
+  /** Exact captured cursor is independent of forwarding and the last Hero change. */
+  highWater():HeroRawHighWater|null {
+    const captured=this.latestCaptured;
+    return !this.closed&&!this.rendererFault&&captured&&sameHeroPhysical(captured,this.physical)
+      ?Object.freeze({socket:captured.socket,connectionGeneration:captured.connectionGeneration,sessionGeneration:captured.sessionGeneration,sequence:captured.sequence}):null;
   }
   caughtUp(): boolean {
     const value=this.bootstrap(),captured=this.latestCaptured;

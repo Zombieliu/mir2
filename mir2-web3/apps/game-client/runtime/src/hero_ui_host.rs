@@ -560,6 +560,8 @@ mod web {
         applied_source: &'a Option<HeroSource>,
         accepted_frame_sequence: u64,
         control_revision: u64,
+        sink_generation: u64,
+        modal: bool,
         web_lease_token: &'a str,
         frame: u64,
         ready: bool,
@@ -785,7 +787,9 @@ mod web {
         });
         let status = Status {
             version:1, source, applied_source:&applied.source, accepted_frame_sequence,
-            control_revision:control.control_revision,web_lease_token:&control.web_lease_token,
+            control_revision:control.control_revision,
+            sink_generation:SINK.with(|s|s.borrow().as_ref().map_or(0,|(_,generation,_)|*generation)),
+            modal:state.ui.modal(),web_lease_token:&control.web_lease_token,
             frame:frame.0,ready,input_enabled:ready&&context.input_enabled,
             input_regions:if ready {input_regions(&context,&state,&read).into_iter().map(HeroRegion::from).collect()} else {vec![]},
             closed,receipt_frames:&applied.receipt_frames,
@@ -814,6 +818,8 @@ mod web {
     pub fn abi_version()->u32 {
         if cfg!(all(feature="webgl2",not(feature="webgpu"),not(feature="webgl2-shared-ui"))) {0} else {1}
     }
+    #[wasm_bindgen(js_name=getMir2HeroActionBasisVersion)]
+    pub fn action_basis_version()->u32 {abi_version()}
     #[wasm_bindgen(js_name=activateMir2HeroIngress)]
     pub fn activate(raw:String)->bool {
         let Some(scope)=parse_scope(&raw) else{return false;};

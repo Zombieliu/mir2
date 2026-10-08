@@ -1,0 +1,54 @@
+{
+  "owner": "Root",
+  "kind": "Source42 independent review of actual finite evidence",
+  "reviewer": "/root/source30_native_bundle",
+  "actualFiniteAccepted": true,
+  "finiteResult": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-finite-result01.json",
+    "bytes": 77475,
+    "sha256": "ea8c852376a86f7a926df4eec4cd2749dcb25da1ee419a0e8270f9d404d8b625"
+  },
+  "rawArchive": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-raw-evidence01.json",
+    "bytes": 221008,
+    "sha256": "ca4a729c8f9df2bab4c2107b640af63ee36578300bdbdccc1848491c21d96bbd"
+  },
+  "historicalFailures": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-historical-failures01.json",
+    "bytes": 4939,
+    "sha256": "4dbeaa217effd6c306a3289f81b00842ed6f8b07e54f3252a72d52ee2f642158"
+  },
+  "actualChecks": {
+    "nestedPins": 81,
+    "rawFiles": 49,
+    "rawBytes": 145509,
+    "nonceFiles": 25,
+    "currentRustInputs": 908,
+    "currentWebInputs": 17126,
+    "currentUnionInputs": 17135,
+    "ownFiles": 8,
+    "currentDrift": 0,
+    "rustExecutions": 98,
+    "normalizedRustFunctions": 85,
+    "newRustFunctions": 6,
+    "wasmStaticChecks": 2,
+    "wasmApiExecutions": 0,
+    "nodeTestCases": 184,
+    "stage5LogicalGroups": 466,
+    "tscVersion": "5.9.3",
+    "tscDiagnostics": 0,
+    "allOriginalGuardPolicyBClosed": true,
+    "actualCMin": "221675769856",
+    "freshnessConservativeMaximumMs": 72,
+    "historicalWeb01Preserved": true,
+    "unrunTsc01Counted": false,
+    "originalTemplatesEdited": false
+  },
+  "scope": "Source42 actual named finite memory regressions and static checks; all exact original raw files independently matched. Current declared set matched. Documents and Git publication are separate later steps, not claimed reviewed here.",
+  "fullHeroReadyAccepted": false,
+  "fullPackagesAccepted": false,
+  "playerAccepted": false,
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false
+}
