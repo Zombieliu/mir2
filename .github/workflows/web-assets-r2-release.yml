@@ -22,7 +22,7 @@ on:
         required: false
         type: string
       native_updater_sequence:
-        description: Fixed signed native publication; 13/14 use R17, 15 uses R19, 16 uses R20
+        description: Fixed signed native publication; 13/14 R17, 15 R19, 16 R20, 17 R22
         required: false
         default: '13'
         type: choice
@@ -31,6 +31,7 @@ on:
           - '14'
           - '15'
           - '16'
+          - '17'
       native_stage_sha256:
         description: Exact SHA256 of the retained stage receipt; required only for promote
         required: false
@@ -182,13 +183,22 @@ jobs:
           python3 -B scripts/test_native_r19_s15_interrupt.py
 
       - name: Check signed16 R20 admission, unchanged s15 engine and bounded transport
-        if: ${{ inputs.native_updater_sequence == '16' }}
+        if: ${{ inputs.native_updater_sequence == '16' || inputs.native_updater_sequence == '17' }}
         working-directory: mir2-web3
         run: |
           python3 -B scripts/test_prepare_native_r20_s16_fixed.py
           node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r20-s16-publication.test.mjs
           python3 -B scripts/test_native_r20_s16_r2_delivery.py
           python3 -B scripts/test_native_r20_s16_interrupt.py
+
+      - name: Check signed17 R22 admission and original immutable predecessor
+        if: ${{ inputs.native_updater_sequence == '17' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r22_s17_offline.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r22-s17-publication.test.mjs
+          python3 -B scripts/test_native_r22_s17_r2_delivery.py
+          python3 -B scripts/test_native_r22_s17_interrupt.py
 
       - name: Retain raw offline checks
         if: ${{ always() }}
@@ -199,6 +209,7 @@ jobs:
             mir2-web3/evidence/
             mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/
             mir2-web3/scripts/fixtures/native-r20-s16/qa-runs/
+            mir2-web3/scripts/fixtures/native-r22-s17/qa-runs/
           if-no-files-found: error
           retention-days: 7
 
@@ -229,6 +240,7 @@ jobs:
             14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
             15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
             16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
+            17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
             *) exit 1 ;;
           esac
           timeout --signal=INT --kill-after=30s 330m python3 -B "$native_driver" --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
@@ -271,7 +283,7 @@ jobs:
           assert value['workflow_id'] == 284517107
           assert value['event'] == 'workflow_dispatch' and value['conclusion'] == 'success'
           assert value['head_branch'] == os.environ['GITHUB_REF_NAME']
-          if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16'):
+          if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16', '17'):
               assert value['head_sha'] == os.environ['GITHUB_SHA']
           PY
 
@@ -304,6 +316,7 @@ jobs:
             14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
             15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
             16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
+            17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
             *) exit 1 ;;
           esac
           timeout --signal=INT --kill-after=30s 8m python3 -B "$native_driver" --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"

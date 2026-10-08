@@ -1,0 +1,49 @@
+import hashlib, json, os, pathlib, stat
+
+
+def need(condition, label):
+    if not condition:
+        raise RuntimeError(label)
+
+
+def ident(info):
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+user = pathlib.Path('/tmp/mir2-origin-r22-s17-20261008-01')
+need(os.geteuid() == 1000, 'fixed-upload-owner-required')
+info = user.lstat()
+need(stat.S_ISDIR(info.st_mode) and info.st_uid == 1000 and stat.S_IMODE(info.st_mode) == 0o700, 'private-user-stage-required')
+fd = os.open(user, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+try:
+    need(ident(os.fstat(fd)) == ident(info), 'user-stage-open-race')
+    need(set(os.listdir(fd)) == {r['name'] for r in ROWS}, 'closed-user-input-set')
+    for row in ROWS:
+        name = row['name']
+        need(pathlib.Path(name).name == name and name not in ('.', '..'), 'unsafe-input-name')
+        before = os.stat(name, dir_fd=fd, follow_symlinks=False)
+        need(stat.S_ISREG(before.st_mode) and before.st_uid == 1000 and before.st_nlink == 1 and
+             stat.S_IMODE(before.st_mode) in (0o664, 0o644, 0o600) and before.st_size == row['size'], 'unsafe-upload-input')
+        f = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK, dir_fd=fd)
+        with os.fdopen(f, 'rb') as stream:
+            need(ident(os.fstat(stream.fileno())) == ident(before), 'upload-open-race')
+            count, h = 0, hashlib.sha256()
+            while chunk := stream.read(1024 * 1024):
+                count += len(chunk)
+                need(count <= row['size'], 'upload-overrun')
+                h.update(chunk)
+            need(count == row['size'] and h.hexdigest() == row['sha256'], 'upload-content-pin')
+            need(ident(os.fstat(stream.fileno())) == ident(before) and
+                 ident(os.stat(name, dir_fd=fd, follow_symlinks=False)) == ident(before), 'upload-read-race')
+            os.fchmod(stream.fileno(), 0o600)
+            after = os.fstat(stream.fileno())
+            need(stat.S_IMODE(after.st_mode) == 0o600 and after.st_uid == 1000 and after.st_size == before.st_size
+                 and after.st_ino == before.st_ino and after.st_dev == before.st_dev and after.st_nlink == 1
+                 and after.st_mtime_ns == before.st_mtime_ns, 'private-mode-result')
+            need(ident(os.stat(name, dir_fd=fd, follow_symlinks=False)) == ident(after), 'private-mode-path-race')
+    need(ident(os.fstat(fd)) == ident(info) and ident(user.lstat()) == ident(info), 'user-stage-changed')
+    need(set(os.listdir(fd)) == {r['name'] for r in ROWS}, 'user-stage-inputs-changed')
+finally:
+    os.close(fd)
+print(json.dumps({'schema': 'mir2.origin.r22.private-input-modes.v1', 'passed': True, 'files': len(ROWS),
+                  'mode': '0600', 'contentPinsVerified': True, 'publicMutations': False}))
