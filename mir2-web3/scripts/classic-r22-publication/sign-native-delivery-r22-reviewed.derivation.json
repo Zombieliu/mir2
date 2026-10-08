@@ -1,0 +1,394 @@
+{
+  "schema": "mir2.r22.delivery-signing-recipe-derivation.v1",
+  "original": {
+    "path": "C:\\mir2-playtest-releases\\20261007-npc-map-r20\\recipes-01\\sign-native-delivery-reviewed01.ps1",
+    "bytes": 7759,
+    "sha256": "f976933c93be36e5d9880ff7b5c381197a0a88a2c1c006eca50698a9167e43c6",
+    "lineEndings": "LF",
+    "perLineEndings": [
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF",
+      "LF"
+    ],
+    "utf8Bom": false
+  },
+  "derived": {
+    "path": "scripts/classic-r22-publication/sign-native-delivery-r22-reviewed.ps1",
+    "bytes": 9049,
+    "sha256": "49bb133aab18f94c4ba696213790892b90299d357caa1bee9a653819637fee87",
+    "lineEndings": "LF",
+    "utf8Bom": false
+  },
+  "gameSourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "gameCandidate": "WN-CANDIDATE-20261008-invited-22",
+  "verificationTool": {
+    "sourceRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+    "path": "apps/game-client/windows-updater/scripts/verify-native-delivery.py",
+    "bytes": 18013,
+    "sha256": "a2457e3897b07ea3929879d7c1460dad3a0032d43f14b609a3ddd649bdb3514f"
+  },
+  "reviewedChanges": [
+    {
+      "id": "mandatory-explicit-project-roots",
+      "originalCanonicalStartLine": 7,
+      "beforeApplyStartLine": 7,
+      "old": "    [Parameter(Mandatory)][string]$DeliveryRoot,\n",
+      "new": "    [Parameter(Mandatory)][string]$DeliveryRoot,\n    [Parameter(Mandatory)][string]$GameProjectRoot,\n    [Parameter(Mandatory)][string]$VerificationToolProjectRoot,\n"
+    },
+    {
+      "id": "independent-pinned-project-and-verifier-identities",
+      "originalCanonicalStartLine": 15,
+      "beforeApplyStartLine": 17,
+      "old": "$project='C:/Users/Administrator/.codex/worktrees/npc-map-go/mir2-player-journey/mir2-web3'\n",
+      "new": "$project=[IO.Path]::GetFullPath($GameProjectRoot)\n$toolProject=[IO.Path]::GetFullPath($VerificationToolProjectRoot)\n$gameRevision='7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc'\n$toolRevision='4c60c323aed11829abae6ee5ce6e13c675a3c1c3'\n$verificationTool=Join-Path $toolProject 'apps/game-client/windows-updater/scripts/verify-native-delivery.py'\n$verificationToolSha='A2457E3897B07EA3929879D7C1460DAD3A0032D43F14B609A3DDD649BDB3514F'\n$gameCandidate='WN-CANDIDATE-20261008-invited-22'\n"
+    },
+    {
+      "id": "separate-clean-source-checks-and-candidate-identity-helper",
+      "originalCanonicalStartLine": 65,
+      "beforeApplyStartLine": 73,
+      "old": "if((& git -C $project rev-parse HEAD).Trim()-cne$SourceRevision -or $LASTEXITCODE-ne0 -or\n   @(& git -C $project status --porcelain=v1 --untracked-files=all).Count-ne0){throw 'Exact clean committed tooling required'}\n",
+      "new": "function AssertSource {\n    NoLinks $project;NoLinks $toolProject\n    if($SourceRevision-cne$gameRevision){throw 'Exact frozen R22 game source required'}\n    if((& git -C $project rev-parse HEAD).Trim()-cne$gameRevision -or $LASTEXITCODE-ne0 -or\n       @(& git -C $project status --porcelain=v1 --untracked-files=all).Count-ne0 -or $LASTEXITCODE-ne0){throw 'Exact clean frozen R22 game source required'}\n    if((& git -C $toolProject rev-parse HEAD).Trim()-cne$toolRevision -or $LASTEXITCODE-ne0 -or\n       @(& git -C $toolProject status --porcelain=v1 --untracked-files=all).Count-ne0 -or $LASTEXITCODE-ne0 -or\n       (Sha (Bytes $verificationTool))-cne$verificationToolSha){throw 'Exact clean pinned delivery verification tooling required'}\n}\nfunction AssertCandidateIdentity($Version,$Statement) {\n    if($Version.gitRevision-cne$gameRevision -or $Statement.gitRevision-cne$gameRevision -or\n       $Version.candidate-cne$gameCandidate -or $Statement.candidate-cne$gameCandidate -or\n       $Statement.worktreeDirty-ne$false){throw 'Exact clean signed R22 Candidate identity required'}\n}\nAssertSource\n"
+    },
+    {
+      "id": "exact-signed-r22-candidate-check",
+      "originalCanonicalStartLine": 83,
+      "beforeApplyStartLine": 104,
+      "old": "   $statement.versionSha256-cne(Sha $versionBytes) -or $statement.candidate-cne$version.candidate){throw 'Candidate CMS does not bind metadata'}\n",
+      "new": "   $statement.versionSha256-cne(Sha $versionBytes) -or $statement.candidate-cne$version.candidate){throw 'Candidate CMS does not bind metadata'}\nAssertCandidateIdentity $version $statement\n"
+    },
+    {
+      "id": "same-original-verifier-with-explicit-pinned-root",
+      "originalCanonicalStartLine": 91,
+      "beforeApplyStartLine": 113,
+      "old": "$arguments=@((Join-Path 'C:/Users/Administrator/.codex/worktrees/r2-client-delivery/mir2-player-journey/mir2-web3/apps/game-client/windows-updater/scripts' 'verify-native-delivery.py'),'--candidate-root',$CandidateRoot,'--delivery-root',$DeliveryRoot,\n",
+      "new": "$arguments=@($verificationTool,'--candidate-root',$CandidateRoot,'--delivery-root',$DeliveryRoot,\n"
+    },
+    {
+      "id": "repeat-exact-source-check-after-byte-reconstruction",
+      "originalCanonicalStartLine": 98,
+      "beforeApplyStartLine": 120,
+      "old": "if((Sha (Bytes (Join-Path $DeliveryRoot 'DELIVERY.json')))-cne(Sha $descriptorBytes)){throw 'Descriptor changed during verification'}\n",
+      "new": "if((Sha (Bytes (Join-Path $DeliveryRoot 'DELIVERY.json')))-cne(Sha $descriptorBytes)){throw 'Descriptor changed during verification'}\nAssertSource\n"
+    }
+  ],
+  "inverseRecovery": {
+    "algorithm": "Apply exact new-to-old substitutions in reverse reviewedChanges order, split canonical LF lines, remove the final empty split component for a trailing LF, restore original perLineEndings; UTF-8 without BOM",
+    "recoveredBytes": 7759,
+    "recoveredSha256": "f976933c93be36e5d9880ff7b5c381197a0a88a2c1c006eca50698a9167e43c6",
+    "equalsOriginalBytes": true
+  },
+  "retainedOriginalFunctionCount": 6,
+  "astValidationPending": false,
+  "scriptExecuted": false,
+  "privateIdentityRead": false,
+  "signed": false,
+  "deployed": false,
+  "frozenSourcesModified": false,
+  "validation": {
+    "parserErrors": 0,
+    "unchangedOriginalFunctions": [
+      {
+        "name": "Sha",
+        "canonicalSha256": "8868492C65E615907012CC451FDF25AFF583BE429290B51931FF880BADFAA7F1",
+        "textEqual": true,
+        "astEqual": true
+      },
+      {
+        "name": "NoLinks",
+        "canonicalSha256": "C6890BD92CE29069239FF53F8823544118753EB72C141829B4C3F022914FEF62",
+        "textEqual": true,
+        "astEqual": true
+      },
+      {
+        "name": "Bytes",
+        "canonicalSha256": "8D764B7C88CA151D604851181F8BE650181BE40F2FA09CB677CD586316668BE5",
+        "textEqual": true,
+        "astEqual": true
+      },
+      {
+        "name": "Save",
+        "canonicalSha256": "4A85A3CC5FDD219C271FF23A0C2CA789660B2FF5D5D4BD35B8F2D633094ACC5C",
+        "textEqual": true,
+        "astEqual": true
+      },
+      {
+        "name": "CheckCertificate",
+        "canonicalSha256": "0DC6EEA1F8810502AEADD0D8F3834958074EF124BBEB186861F73CE9952D5A66",
+        "textEqual": true,
+        "astEqual": true
+      },
+      {
+        "name": "CheckCms",
+        "canonicalSha256": "7EE1CD2926E0A978744BA675F650174427F11F76FFF54647B65378BE5C2D34F7",
+        "textEqual": true,
+        "astEqual": true
+      }
+    ],
+    "unchangedOriginalSecurityFragments": [
+      {
+        "marker": "Refusing to overwrite delivery signature/proof",
+        "canonicalSha256": "93AE0F3771B5B93BEB75E6332A75366C332777B1BD5297F75032D469E466E613",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Fresh verification log required",
+        "canonicalSha256": "35970E895C80E18A165EACBD3C54EDC0499B6B4C733211E1827767F8C631C079",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Existing private signing identity required",
+        "canonicalSha256": "657CE9B29745E784C37D375553126E9B016D0C52D61C3456DFA6A6BB38B409FA",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Delivery Candidate binding mismatch",
+        "canonicalSha256": "90864C7B7168C48A51662ABE6B9A05360AF45EA5E266416B6E9A19DDBE45E1BC",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Candidate CMS does not bind metadata",
+        "canonicalSha256": "AE6068B4B3D67E7F71EA5BB0BBBBAE4E3D8D80385478761D5318C714C07A49FB",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Descriptor changed during verification",
+        "canonicalSha256": "1353FB43FA431FE4C16399A8A56E892B53E4FE0B8CEF5663E3A1C19C190B36F1",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Delivery byte reconstruction rejected",
+        "canonicalSha256": "508A75A3B88AE5C36FE18D0FDC575B98ABB8E01B34126D5C7290D4474C78BBBD",
+        "astType": "IfStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "foreach($base in $BaseExe)",
+        "canonicalSha256": "D86CB7D0DBD9C5DF8AE1BBD68FB94B0F2036703C1180BC5782D4C2CEAFAF24A9",
+        "astType": "ForEachStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "CheckCertificate $certificate $now",
+        "canonicalSha256": "B9CA9C8387A06E4168AA997781091622735D03FBE83C32FF5D289E472F86078F",
+        "astType": "PipelineAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "CheckCertificate $certificate $descriptor.builtUnix",
+        "canonicalSha256": "43F60AC4F473A3C4C62F286A5519557DBE771E1D6313411A8229111825D87D2F",
+        "astType": "PipelineAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "$signer.IncludeOption=",
+        "canonicalSha256": "800250F7A6C19931A7660030A5C8EE6EF8254235A31DBB2AA29F3EFC4BF00C72",
+        "astType": "AssignmentStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "$signer.DigestAlgorithm=",
+        "canonicalSha256": "6E5E1F5A51573678D51F36C6537D05623D176496C577A57DA03BD1E5246747A0",
+        "astType": "AssignmentStatementAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "$cms.ComputeSignature($signer,$false)",
+        "canonicalSha256": "D3EBC1BC9CA31039811969629433DA0707B00875DF0DC5F2D86E84FAC04037DF",
+        "astType": "PipelineAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Save $signaturePath $signature",
+        "canonicalSha256": "DC3DFC047AAFA92A7AEE41022EA520CCCD3B23AD9D5EB1ADF579F455AF3F0B67",
+        "astType": "PipelineAst",
+        "textAstEqual": true
+      },
+      {
+        "marker": "Save $receiptPath",
+        "canonicalSha256": "5ADE38C90DBA4AB046172E68EBFAE5393A7E85081C190E42674800BCA2487D92",
+        "astType": "PipelineAst",
+        "textAstEqual": true
+      }
+    ],
+    "preservedFunctionCount": 6,
+    "preservedSecurityFragmentCount": 15,
+    "mandatoryProjectRoots": true,
+    "hardcodedFilesystemDriveAbsent": true,
+    "originalCertProviderLiteralPreserved": true,
+    "retainedPreparationFailures": [
+      "Uniform CRLF assumption rejected before write; original byte inspection confirms all LF and exact per-line endings are recorded",
+      "Helper H collided with Get-History alias; renamed test helper without wrapper change",
+      "Drive test initially matched Cert:/ provider substring; regex now distinguishes filesystem drive literal without changing wrapper",
+      "Test receipt List-to-array serialization required explicit ToArray; actual isolated gate tests had passed, wrapper unchanged",
+      "Independent inverse recheck initially counted the terminal empty LF split component; corrected test drops that split component and recovers exact original bytes, wrapper unchanged"
+    ],
+    "offlineTests": [
+      {
+        "name": "actual clean7fea/4c60 exact verifier",
+        "passed": true
+      },
+      {
+        "name": "old SourceRevision",
+        "passed": true
+      },
+      {
+        "name": "wrong game checkout",
+        "passed": true
+      },
+      {
+        "name": "wrong tool checkout",
+        "passed": true
+      },
+      {
+        "name": "wrong verifier SHA",
+        "passed": true
+      },
+      {
+        "name": "exact R22 Candidate",
+        "passed": true
+      },
+      {
+        "name": "old Candidate",
+        "passed": true
+      },
+      {
+        "name": "wrong VERSION source",
+        "passed": true
+      },
+      {
+        "name": "wrong statement source",
+        "passed": true
+      },
+      {
+        "name": "dirty statement",
+        "passed": true
+      },
+      {
+        "name": "case-changed Candidate",
+        "passed": true
+      }
+    ],
+    "offlineTestsPassed": 11,
+    "actualCleanAnchorsVerified": true,
+    "wholeSigningScriptExecuted": false,
+    "signerCertificateStoreRead": false,
+    "privateKeyRead": false,
+    "signed": false,
+    "deployed": false
+  },
+  "validatedUtc": "2026-10-08T04:27:31.2670492+00:00"
+}

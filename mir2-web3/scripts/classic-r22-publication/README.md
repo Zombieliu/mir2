@@ -15,6 +15,16 @@ These are preparation tools. No new feed, root CMS receipt, publication plan, Wo
 
 Use actual input paths, fresh output directories under `C:/mir2-playtest-releases/20261008-classic-r22`, and preserve failed attempts. Do not reuse failed output directories.
 
+Before signing the feed, build delivery with the unchanged clean4c60 tooling,
+then run `sign-native-delivery-r22-reviewed.ps1` with explicit `GameProjectRoot`
+and `VerificationToolProjectRoot`, the actual `CandidateRoot`/`DeliveryRoot`,
+frozen `SourceRevision` and existing signer. This retains the original decoded
+byte reconstruction and six validation functions, adding independently clean
+game7fea/tool4c60/verifier-hash and signed R22 identity checks. Its dedicated
+derivation receipt records exact inverse byte recovery,15 retained safety
+fragments and11 offline gate cases. Signing still requires the actual completed
+Candidate, every original32MiB metadata bound and the original CMS/NoLinks gates.
+
 1. Run `sign-reused-engine-feed-r22-s17.ps1` with mandatory `CandidateRoot`, `GameProjectRoot`, `PreviousFeedRoot`, `EngineRoot`, `OutputRoot`, `SignerThumbprint`. It rechecks clean frozen source, all pinned CMS signers, candidate manifest/version/statement binding, exact predecessor bytes and unchanged engine payload before signing only the new sequence-17 feed.
 2. Run `prepare-signed-native-publication-r22-s17.ps1` with `CandidateRoot`, `DeliveryRoot`, `EngineRoot`, `FeedRoot`, `OutputRoot`, `EngineProjectRoot`, `PublicationToolProjectRoot`, `ExpectedCurrent`, `BootstrapExe`, `PythonPath` and the normal `IncludeRootFiles` flag. It performs actual Windows CMS checks, requires the decoded delivery receipt and delegates the complete closure to the pinned committed tool. Publication pointer source remains the reused engine revision; signed game source is checked independently.
 3. From mir2-web3 run `python -B scripts/prepare_native_r22_s17_fixed.py --publication-root <actual-proof-directory> --feed-root <actual-signed-feed-directory> --bootstrap-exe <actual-exe>`. It reads exact reviewed R20 template Git blobs at publication base aba54763 (shallow-clone fallback accepts only explicitly pinned unchanged LF/CRLF historical code variants; proof/feed/CMS bytes remain exact) and full-hashes every actual new object. Outputs are create-only R22/s17 files; no s16 reader or object is overwritten. It does not replace actual CMS verification with the generator's own claim.
