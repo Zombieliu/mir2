@@ -8,9 +8,33 @@ const url = process.env.MIR2_SPECTATOR_UI_URL
   || 'http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0';
 const expectLive = process.env.MIR2_SPECTATOR_EXPECT_LIVE === '1';
 const captureMode = new URL(url).searchParams.get('capture') === '1';
+const maxFrameAgeMs = process.env.MIR2_SPECTATOR_UI_MAX_AGE_MS
+  ? Number(process.env.MIR2_SPECTATOR_UI_MAX_AGE_MS) : null;
+const directoryUrl = (process.env.MIR2_SPECTATOR_HTTP_BASE_URL
+  || 'https://165.154.65.136.sslip.io/playtest') + '/spectator/matches';
 const output = path.resolve(process.env.MIR2_SPECTATOR_UI_OUTPUT || 'artifacts/spectator-readiness');
 const chrome = process.env.MIR2_CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const port = 9810 + (process.pid % 150);
+
+async function calibrateClock() {
+  const samples = [];
+  for (let index = 0; index < 5; index++) {
+    const startedAtMs = Date.now();
+    const response = await fetch(directoryUrl, { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    const finishedAtMs = Date.now();
+    assert.ok(Number.isSafeInteger(data.generatedAtMs));
+    samples.push({ serverAtMs: data.generatedAtMs, startedAtMs, finishedAtMs,
+      roundTripMs: finishedAtMs - startedAtMs, publicDelayMs: data.publicDelayMs });
+  }
+  // The server stamp must lie between local send and receive. Intersect these
+  // bounds rather than assuming either machine's clock is already correct.
+  const lowerOffsetMs = Math.max(...samples.map((sample) => sample.serverAtMs - sample.finishedAtMs));
+  const upperOffsetMs = Math.min(...samples.map((sample) => sample.serverAtMs - sample.startedAtMs));
+  assert.ok(lowerOffsetMs <= upperOffsetMs, 'Clock changed during calibration');
+  return { lowerOffsetMs, upperOffsetMs, samples };
+}
 
 async function until(check, timeout = 45_000) {
   const deadline = Date.now() + timeout;
@@ -33,14 +57,15 @@ async function main() {
   const sent = [];
   const errors = [];
   const resourceFailures = [];
+  const websocketEndpoints = [];
   let status = null;
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const id = next++;
     pending.set(id, { resolve, reject });
     socket.send(JSON.stringify({ id, method, params }));
   });
-  const evaluate = async (expression) => {
-    const result = await send('Runtime.evaluate', { expression, returnByValue: true });
+  const evaluate = async (expression, awaitPromise = false) => {
+    const result = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise });
     if (result.exceptionDetails) throw new Error('Browser evaluation failed');
     return result.result?.value;
   };
@@ -75,6 +100,12 @@ async function main() {
           if (frame.type === 'spectatorStatus') status = frame.payload;
         } catch { /* HMR/ping */ }
       }
+      if (message.method === 'Network.webSocketCreated') {
+        const endpoint = new URL(message.params.url);
+        endpoint.searchParams.delete('token');
+        endpoint.searchParams.delete('spectateToken');
+        websocketEndpoints.push(endpoint.toString());
+      }
       if (message.method === 'Network.responseReceived' && message.params.response.status >= 400) {
         const response = message.params.response;
         const resourceUrl = new URL(response.url);
@@ -91,10 +122,23 @@ async function main() {
     await send('Network.enable');
     await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
     await send('Page.navigate', { url });
-    await until(async () => {
-      const state = await evaluate('document.querySelector("[data-testid=spectator-live-state]")?.dataset.state');
-      return expectLive ? state === 'live' : state === 'waiting';
-    }, expectLive ? 90_000 : 45_000);
+    try {
+      await until(async () => {
+        const state = await evaluate('document.querySelector("[data-testid=spectator-live-state]")?.dataset.state');
+        return expectLive ? state === 'live' : state === 'waiting';
+      }, expectLive ? 90_000 : 45_000);
+    } catch (error) {
+      const diagnostic = await evaluate(`({ gate: window.__mir2SceneGate,
+        render: JSON.parse(window.render_game_to_text?.() || '{}'),
+        liveState: document.querySelector('[data-testid=spectator-live-state]')?.dataset.state,
+        badge: document.querySelector('[data-testid=spectator-live-state]')?.textContent })`);
+      const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+      await fs.writeFile(path.join(output, 'connection-not-ready.png'), Buffer.from(shot.data, 'base64'));
+      await fs.writeFile(path.join(output, 'connection-not-ready.json'), JSON.stringify({
+        diagnostic, status, websocketEndpoints, resourceFailures, errors, sent,
+      }, null, 2));
+      throw error;
+    }
     let liveFrames = null;
     if (expectLive) {
       const first = status;
@@ -128,6 +172,60 @@ async function main() {
         }, null, 2));
         throw error;
       }
+    }
+    let frameLatency = null;
+    if (maxFrameAgeMs !== null) {
+      assert.equal(expectLive, true, 'Frame age measurement needs a live source');
+      assert.ok(Number.isFinite(maxFrameAgeMs) && maxFrameAgeMs >= 1_000 && maxFrameAgeMs <= 60_000);
+      const beforeClock = await calibrateClock();
+      const observations = [];
+      const endAtMs = Date.now() + 30_000;
+      let previousSequence = null;
+      while (Date.now() < endAtMs) {
+        const observed = await evaluate(`new Promise((resolve) => requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            const event = window.__mir2GatewayEventHistory?.find((item) => item.type === 'spectatorStatus');
+            const current = event?.payload;
+            const gate = window.__mir2SceneGate;
+            resolve({ observedAtMs: Date.now(), receivedAtMs: event?.at,
+              sequence: current?.sequence, capturedAtMs: current?.capturedAtMs,
+              delayMs: current?.delayMs, map: current?.map, readOnly: current?.readOnly,
+              directorAuthorized: current?.directorAuthorized,
+              sceneReady: gate?.sceneInteractionReady && gate.hasRenderPlayer && gate.hasMapRegion,
+              liveState: document.querySelector('[data-testid=spectator-live-state]')?.dataset.state });
+          })))`, true);
+        if (Number.isFinite(observed.sequence) && observed.sequence !== previousSequence) {
+          assert.equal(observed.sceneReady, true);
+          assert.equal(observed.liveState, 'live');
+          assert.equal(observed.readOnly, true);
+          assert.equal(observed.directorAuthorized, false);
+          assert.ok(Number.isFinite(observed.capturedAtMs) && Number.isFinite(observed.receivedAtMs));
+          observations.push(observed);
+          previousSequence = observed.sequence;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+      const afterClock = await calibrateClock();
+      const lowerOffsetMs = Math.min(beforeClock.lowerOffsetMs, afterClock.lowerOffsetMs);
+      const upperOffsetMs = Math.max(beforeClock.upperOffsetMs, afterClock.upperOffsetMs);
+      const midpointOffsetMs = (lowerOffsetMs + upperOffsetMs) / 2;
+      for (const item of observations) {
+        item.ageEstimateMs = item.observedAtMs + midpointOffsetMs - item.capturedAtMs;
+        item.ageLowerBoundMs = item.observedAtMs + lowerOffsetMs - item.capturedAtMs;
+        item.ageUpperBoundMs = item.observedAtMs + upperOffsetMs - item.capturedAtMs;
+      }
+      const ages = observations.map((item) => item.ageEstimateMs).sort((a, b) => a - b);
+      frameLatency = { scope: 'server capture to browser-applied frame metadata after two animation frames with ready scene',
+        platformPublishing: 'not-run', thresholdMs: maxFrameAgeMs,
+        sampleCount: observations.length, clock: { before: beforeClock, after: afterClock },
+        minEstimateMs: ages[0], maxEstimateMs: ages.at(-1),
+        p95EstimateMs: ages[Math.max(0, Math.ceil(ages.length * 0.95) - 1)],
+        maxUpperBoundMs: Math.max(...observations.map((item) => item.ageUpperBoundMs)), observations };
+      frameLatency.passed = observations.length >= 20
+        && observations.every((item) => item.ageLowerBoundMs >= item.delayMs - 2
+          && item.ageUpperBoundMs <= maxFrameAgeMs);
+      await fs.writeFile(path.join(output, 'frame-latency.json'), JSON.stringify(frameLatency, null, 2));
+      assert.equal(frameLatency.passed, true, 'Measured browser frame age exceeded the target or enforced minimum');
     }
     const controls = { captureMode, defaultCollapsed: true, expandedAndClosed: false };
     assert.equal(await evaluate("!!document.querySelector('[data-testid=spectator-overlay]')"), false);
@@ -171,7 +269,7 @@ async function main() {
     const report = { schema: 'mir2.playtest-spectator-readiness.v1', generatedAt: new Date().toISOString(),
       url: safeUrl.toString(), expectLive, actualLiveFrameAcceptance: !!liveFrames,
       visualSceneAcceptance: expectLive && state.sceneGate?.sceneInteractionReady === true,
-      liveFrames, state, controls, resourceFailures,
+      liveFrames, state, controls, frameLatency, resourceFailures,
       playerCommandsSent: [], screenshot, platformPublishing: 'not-run' };
     await fs.writeFile(path.join(output, 'readiness.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify({ expectLive, state: state.state, screenshot, platformPublishing: 'not-run' }));

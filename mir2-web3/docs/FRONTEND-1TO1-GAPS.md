@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-09 authorized playtest spectator delay is now 3 seconds. Public HTTP
+> and read-only WS confirm it; ready map/avatar capture browser measured21 fresh
+> frames at3,155–4,067ms (P95 3,364ms, clock-bounded maximum4,097ms).
+> Capture remains free of controls, no HTTP resource failures or browser player
+> commands; owned QA logged out normally. Single QA/source scope only, not
+> Bilibili end-to-end delay or load acceptance. Automatic exciting-player
+> selection is not enabled. [Evidence](SPECTATOR-DIRECTOR-AUDIT-20261009.zh-CN.md).
+
 > 2026-10-09 local spectator panel no longer covers the live game by default.
 > Settings collapse to a small button; capture=1 removes both panel and button.
 > Actual public read-only browser frames/map/avatar, expand-close interaction,

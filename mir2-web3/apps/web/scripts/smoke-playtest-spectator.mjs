@@ -12,9 +12,11 @@ const accountId = process.env.MIR2_WATCH_QA_ACCOUNT;
 const password = process.env.MIR2_WATCH_QA_PASSWORD;
 const output = path.resolve(process.env.MIR2_WATCH_QA_OUTPUT || 'artifacts/spectator-readiness/live-transport.json');
 const holdMs = Number(process.env.MIR2_WATCH_QA_HOLD_MS || 180_000);
+const publicDelayMs = Number(process.env.MIR2_WATCH_QA_DELAY_MS || 30_000);
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 assert.ok(accountId && password, 'An explicitly owned QA account and password are required');
-assert.ok(Number.isFinite(holdMs) && holdMs >= 35_000 && holdMs <= 600_000);
+assert.ok(Number.isInteger(publicDelayMs) && publicDelayMs >= 1_000 && publicDelayMs <= 30_000);
+assert.ok(Number.isFinite(holdMs) && holdMs >= publicDelayMs + 5_000 && holdMs <= 600_000);
 
 async function connect(url, origin) {
   const socket = new Ws(url, { origin, handshakeTimeout: 10_000 });
@@ -65,7 +67,7 @@ async function main() {
       if (status === 200) {
         const directory = await response.json();
         assert.equal(directory.source, 'gateway-spectator');
-        assert.equal(directory.publicDelayMs, 30_000);
+        assert.equal(directory.publicDelayMs, publicDelayMs);
       }
     }
     const health = await (await fetch(base + '/health', { signal: AbortSignal.timeout(10_000) })).json();
@@ -114,7 +116,8 @@ async function main() {
     assert.equal(first.value.payload.readOnly, true);
     assert.equal(first.value.payload.directorAuthorized, false);
     assert.equal(first.value.payload.director, false);
-    assert.equal(first.value.payload.delayMs, 30_000);
+    assert.equal(first.value.payload.delayMs, publicDelayMs);
+    report.publicDelayMs = publicDelayMs;
     const invalidAfter = viewer.sequence;
     viewer.send({ type: 'walk', direction: 'Up' });
     await viewer.wait((value) => value.type === 'error' && String(value.message).includes('invalid spectator control'), invalidAfter);
@@ -136,7 +139,7 @@ async function main() {
     report.frames = { first: live.value.payload.sequence, next: next.value.payload.sequence,
       capturedAtMs: next.value.payload.capturedAtMs, entityCount: world.value.payload.entities?.length };
     console.log(JSON.stringify({ liveFrames: report.frames, holdMs }));
-    const holdUntil = Date.now() + Math.max(0, holdMs - 35_000);
+    const holdUntil = Date.now() + Math.max(0, holdMs - publicDelayMs - 5_000);
     while (Date.now() < holdUntil) {
       const releaseFile = process.env.MIR2_WATCH_QA_RELEASE_FILE;
       if (releaseFile && await fs.access(releaseFile).then(() => true, () => false)) break;
