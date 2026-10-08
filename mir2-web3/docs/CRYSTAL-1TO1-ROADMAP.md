@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Source47：构建配置副本入口通过严格类型检查；完整 Web 包待生成（2026-10-09）
+
+next.config.ts 新增可选 MIR2_NEXT_TSCONFIG_PATH，未设置时保留原行为，未放宽类型检查。原严格 TSC 实际 exit0、零诊断、12188ms，17136声明输入在调用前后匹配；用户主 tsconfig 原4932B保留。路径校验为代码与源码审阅结果，尚未实际执行 Next 配置。
+
+完整 Core/PUI/NPC 859项与 Bevy 607项声明输入已核对并绑定原 builder；旧36套renderer版本及12份公开flat文件字节保留。未来 Thin 的 report 参数只修正等价路径分隔符，未启动构建。原静态 WASM API边界问答未收到回答，完整runtime校验、不可变发布和新Next/Thin仍未执行；最新完整Web仍Source25。真实登录/任务/战斗/保存/重登及移动验收未运行，overallPercentage=null、Candidate100=false，goal active，无可信可玩日期。
+
+证据：[实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json)、[20份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json)、[严格TSC](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json)、[限定实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json)、[Source46实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json)。本轮提交推送随后另存实际记录，下方原正文及其他工作保留。
+
 ## Source46：更新 EXE 实际编译通过；完整 Web 打包边界待确认（2026-10-08）
 
 原守卫下最新 Native EXE 实际编译 exit0，835593ms，保留原 dev/debug（optimized＋debuginfo）配置。917项隔离声明输入在实际调用前后重核匹配，原50GiB/2000ms/15000ms和PolicyB保持；实际C197697568768B、freshness保守上界74ms，完整completed/exited/disposed后才接受。新EXE106106368B已保存独立副本，旧Source31 EXE106137600B同字节历史副本保留。正常Native编译闭包成立；5个仅cfg(test)未声明资产不计全测试。本轮未新跑Rust/Web/TSC、未启动EXE、未打包完整运行资源。
