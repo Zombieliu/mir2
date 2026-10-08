@@ -1,0 +1,1993 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "reviewedBy": "/root/source30_native_client",
+  "kind": "Source45 bounded data-only delivery input equivalence review; not fresh build acceptance or release manifest",
+  "generatedAtUtc": "2026-10-08T14:56:21.228Z",
+  "source33": {
+    "finite": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-finite-result01.json",
+      "bytes": 82717,
+      "sha256": "50f35c4093a7af0d4a63ada5895b4c6353dc3c23d09fcdb1a1458d6dd96361d1"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-source01-snapshot.json",
+      "bytes": 274421,
+      "sha256": "275bed7bbeaffce9ab15195564e30f066386f34f1b265ab3ba4228c18909ec87"
+    },
+    "declaredSnapshotScopeIsWiderThanSmallBundles": true
+  },
+  "smallBundleScope": {
+    "repositoryDependencyConclusion": "platform-web path dependencies are client-core and optional client-wire only; client-core has no dependencies and client-wire uses registry serde/json only. Hero client-bevy/runtime changes are outside these three small bundle production closures.",
+    "declaredFilesCompared": 56,
+    "allDeclaredFilesMatched": true,
+    "files": [
+      {
+        "relativePath": "apps/game-client/client-core/Cargo.lock",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\Cargo.lock",
+          "bytes": 167,
+          "sha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8",
+          "relativePath": "apps/game-client/client-core/Cargo.lock"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/Cargo.lock",
+          "bytes": 167,
+          "sha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/Cargo.toml",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\Cargo.toml",
+          "bytes": 390,
+          "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a",
+          "relativePath": "apps/game-client/client-core/Cargo.toml"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/Cargo.toml",
+          "bytes": 390,
+          "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/auth_ui.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\auth_ui.rs",
+          "bytes": 16041,
+          "sha256": "99eb021f190ddda8681e59cb155d41938cbe78c542943042efd29c258a818147",
+          "relativePath": "apps/game-client/client-core/src/auth_ui.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/auth_ui.rs",
+          "bytes": 16041,
+          "sha256": "99eb021f190ddda8681e59cb155d41938cbe78c542943042efd29c258a818147"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/cash_preview.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\cash_preview.rs",
+          "bytes": 6202,
+          "sha256": "8f75b889dd2b697673b106ff62cfe9083d60993d38e5048deb3fba52adb3a91f",
+          "relativePath": "apps/game-client/client-core/src/cash_preview.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/cash_preview.rs",
+          "bytes": 6202,
+          "sha256": "8f75b889dd2b697673b106ff62cfe9083d60993d38e5048deb3fba52adb3a91f"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/chat_ui.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\chat_ui.rs",
+          "bytes": 10371,
+          "sha256": "79cbe01bfe0d239111c7f3d86dae7d3f4d8f23d38264fe9fb579f655c5567c1e",
+          "relativePath": "apps/game-client/client-core/src/chat_ui.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/chat_ui.rs",
+          "bytes": 10371,
+          "sha256": "79cbe01bfe0d239111c7f3d86dae7d3f4d8f23d38264fe9fb579f655c5567c1e"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/clock.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\clock.rs",
+          "bytes": 1543,
+          "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5",
+          "relativePath": "apps/game-client/client-core/src/clock.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/clock.rs",
+          "bytes": 1543,
+          "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/entity_animation.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\entity_animation.rs",
+          "bytes": 63457,
+          "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e",
+          "relativePath": "apps/game-client/client-core/src/entity_animation.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/entity_animation.rs",
+          "bytes": 63457,
+          "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/equipment_pending.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\equipment_pending.rs",
+          "bytes": 13569,
+          "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a",
+          "relativePath": "apps/game-client/client-core/src/equipment_pending.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/equipment_pending.rs",
+          "bytes": 13569,
+          "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/fishing_click.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\fishing_click.rs",
+          "bytes": 14575,
+          "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa",
+          "relativePath": "apps/game-client/client-core/src/fishing_click.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/fishing_click.rs",
+          "bytes": 14575,
+          "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/intent.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\intent.rs",
+          "bytes": 7513,
+          "sha256": "adeec3ffbab3ddee1399e73280682dd120201bdb591a2505264bf5c5df8b8a1f",
+          "relativePath": "apps/game-client/client-core/src/intent.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/intent.rs",
+          "bytes": 7513,
+          "sha256": "adeec3ffbab3ddee1399e73280682dd120201bdb591a2505264bf5c5df8b8a1f"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/interpolation.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\interpolation.rs",
+          "bytes": 3723,
+          "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753",
+          "relativePath": "apps/game-client/client-core/src/interpolation.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/interpolation.rs",
+          "bytes": 3723,
+          "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/item_names.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\item_names.rs",
+          "bytes": 10185,
+          "sha256": "797c07b2d38ba868e4eda0f812aaad74f4ca54fbf70fd19a3d4110a1cadea160",
+          "relativePath": "apps/game-client/client-core/src/item_names.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/item_names.rs",
+          "bytes": 10185,
+          "sha256": "797c07b2d38ba868e4eda0f812aaad74f4ca54fbf70fd19a3d4110a1cadea160"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/item_tooltip.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\item_tooltip.rs",
+          "bytes": 72929,
+          "sha256": "b1eaee082e6b4f570302d9ed2e5a929faa4b51f60e67c4c20b42e0bd57746552",
+          "relativePath": "apps/game-client/client-core/src/item_tooltip.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/item_tooltip.rs",
+          "bytes": 72929,
+          "sha256": "b1eaee082e6b4f570302d9ed2e5a929faa4b51f60e67c4c20b42e0bd57746552"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/item_tooltip_types.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\item_tooltip_types.rs",
+          "bytes": 5441,
+          "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963",
+          "relativePath": "apps/game-client/client-core/src/item_tooltip_types.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/item_tooltip_types.rs",
+          "bytes": 5441,
+          "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/lib.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\lib.rs",
+          "bytes": 871,
+          "sha256": "abdd7a6c7ad988e4757645d0c957cf8fb7a8c9a9d94fbf07156815f9866d4fa0",
+          "relativePath": "apps/game-client/client-core/src/lib.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/lib.rs",
+          "bytes": 871,
+          "sha256": "abdd7a6c7ad988e4757645d0c957cf8fb7a8c9a9d94fbf07156815f9866d4fa0"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/mail_compose.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\mail_compose.rs",
+          "bytes": 10789,
+          "sha256": "388afe73f95401a00c9ff17e45c0f7989a83e0554e037da17457207d3a119fc2",
+          "relativePath": "apps/game-client/client-core/src/mail_compose.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/mail_compose.rs",
+          "bytes": 10789,
+          "sha256": "388afe73f95401a00c9ff17e45c0f7989a83e0554e037da17457207d3a119fc2"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/mail_parcel.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\mail_parcel.rs",
+          "bytes": 17544,
+          "sha256": "bfd8447860543832e1277e830187c72add6de5b718d4652a9b12ce15e0d65889",
+          "relativePath": "apps/game-client/client-core/src/mail_parcel.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/mail_parcel.rs",
+          "bytes": 17544,
+          "sha256": "bfd8447860543832e1277e830187c72add6de5b718d4652a9b12ce15e0d65889"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/map_route.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\map_route.rs",
+          "bytes": 6374,
+          "sha256": "02de643f0ffd8657190b9e9227c3885492193d18a577537f175d7913bd784fdd",
+          "relativePath": "apps/game-client/client-core/src/map_route.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/map_route.rs",
+          "bytes": 6374,
+          "sha256": "02de643f0ffd8657190b9e9227c3885492193d18a577537f175d7913bd784fdd"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/motion.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\motion.rs",
+          "bytes": 2181,
+          "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66",
+          "relativePath": "apps/game-client/client-core/src/motion.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/motion.rs",
+          "bytes": 2181,
+          "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_gold_buy_attempt.rs",
+          "bytes": 13918,
+          "sha256": "8c17caf73098d39644d0e6a1187590ade10dae9d632bfeb141ee6b9357fde5b9",
+          "relativePath": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+          "bytes": 13918,
+          "sha256": "8c17caf73098d39644d0e6a1187590ade10dae9d632bfeb141ee6b9357fde5b9"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_gold_buy_attempt_tests.rs",
+          "bytes": 17439,
+          "sha256": "8b483ae46733d7de4e50a9d22c2e04fe5502db41cf69777f300c4646d237ff29",
+          "relativePath": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+          "bytes": 17439,
+          "sha256": "8b483ae46733d7de4e50a9d22c2e04fe5502db41cf69777f300c4646d237ff29"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_pearl_buy.rs",
+          "bytes": 8367,
+          "sha256": "00d676ab0f6e6aa41330c9e920a7148ab5e306bd07570be2b53482345ebdba22",
+          "relativePath": "apps/game-client/client-core/src/npc_pearl_buy.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_pearl_buy.rs",
+          "bytes": 8367,
+          "sha256": "00d676ab0f6e6aa41330c9e920a7148ab5e306bd07570be2b53482345ebdba22"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/npc_purchase_host.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_purchase_host.rs",
+          "bytes": 27995,
+          "sha256": "2f7f4f7aef826fb660b65a66f816bc2db404bb4543e1b76d3f794e18cfc7e9eb",
+          "relativePath": "apps/game-client/client-core/src/npc_purchase_host.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_purchase_host.rs",
+          "bytes": 27995,
+          "sha256": "2f7f4f7aef826fb660b65a66f816bc2db404bb4543e1b76d3f794e18cfc7e9eb"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_purchase_receipt.rs",
+          "bytes": 38254,
+          "sha256": "0c95d0659685a2b3d260ae3c79af2c03c3e8707d5a531bb4a61e8998d2ad305b",
+          "relativePath": "apps/game-client/client-core/src/npc_purchase_receipt.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_purchase_receipt.rs",
+          "bytes": 38254,
+          "sha256": "0c95d0659685a2b3d260ae3c79af2c03c3e8707d5a531bb4a61e8998d2ad305b"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/npc_repair_quote.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_repair_quote.rs",
+          "bytes": 7948,
+          "sha256": "6c299f148e2bbafd55cec749f8ba65076b07d17fef65d469af8f779be06a9cee",
+          "relativePath": "apps/game-client/client-core/src/npc_repair_quote.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_repair_quote.rs",
+          "bytes": 7948,
+          "sha256": "6c299f148e2bbafd55cec749f8ba65076b07d17fef65d469af8f779be06a9cee"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/ordered_map.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\ordered_map.rs",
+          "bytes": 9323,
+          "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31",
+          "relativePath": "apps/game-client/client-core/src/ordered_map.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/ordered_map.rs",
+          "bytes": 9323,
+          "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/quest.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\quest.rs",
+          "bytes": 11249,
+          "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6",
+          "relativePath": "apps/game-client/client-core/src/quest.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/quest.rs",
+          "bytes": 11249,
+          "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/ranking_inspect.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\ranking_inspect.rs",
+          "bytes": 4346,
+          "sha256": "a382dd9fb89afb296295d1de5aa2cbd34f2ac8f565806c6325aae577b3c91106",
+          "relativePath": "apps/game-client/client-core/src/ranking_inspect.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/ranking_inspect.rs",
+          "bytes": 4346,
+          "sha256": "a382dd9fb89afb296295d1de5aa2cbd34f2ac8f565806c6325aae577b3c91106"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-core/src/reconciliation.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\reconciliation.rs",
+          "bytes": 3579,
+          "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867",
+          "relativePath": "apps/game-client/client-core/src/reconciliation.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/reconciliation.rs",
+          "bytes": 3579,
+          "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-wire/Cargo.lock",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-wire\\Cargo.lock",
+          "bytes": 2679,
+          "sha256": "b377e7d5f6fb809945a21c13ef34641e6ce69d53052952afca90dccd85bd631c",
+          "relativePath": "apps/game-client/client-wire/Cargo.lock"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-wire/Cargo.lock",
+          "bytes": 2679,
+          "sha256": "b377e7d5f6fb809945a21c13ef34641e6ce69d53052952afca90dccd85bd631c"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-wire/Cargo.toml",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-wire\\Cargo.toml",
+          "bytes": 364,
+          "sha256": "38a3ac4cc26de4d18c51c36026e84383c1c4ccc88dd31b725385cebd5651588e",
+          "relativePath": "apps/game-client/client-wire/Cargo.toml"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-wire/Cargo.toml",
+          "bytes": 364,
+          "sha256": "38a3ac4cc26de4d18c51c36026e84383c1c4ccc88dd31b725385cebd5651588e"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/client-wire/src/lib.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-wire\\src\\lib.rs",
+          "bytes": 108194,
+          "sha256": "19a0fb610fbf007a9da75849c0cee64826af47a2422f2b9f250f42ac426170c9",
+          "relativePath": "apps/game-client/client-wire/src/lib.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-wire/src/lib.rs",
+          "bytes": 108194,
+          "sha256": "19a0fb610fbf007a9da75849c0cee64826af47a2422f2b9f250f42ac426170c9"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/Cargo.lock",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\Cargo.lock",
+          "bytes": 5041,
+          "sha256": "c8e1fda2fa320f180a1d5252962034f61266b2375f052198e717e40ab6e85155",
+          "relativePath": "apps/game-client/platform-web/Cargo.lock"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/Cargo.lock",
+          "bytes": 5041,
+          "sha256": "c8e1fda2fa320f180a1d5252962034f61266b2375f052198e717e40ab6e85155"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/Cargo.toml",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\Cargo.toml",
+          "bytes": 710,
+          "sha256": "ef797825e86c499ece3528c8bcea25b3cb2ec564f4c4b2633bdf757b5ab49b7b",
+          "relativePath": "apps/game-client/platform-web/Cargo.toml"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/Cargo.toml",
+          "bytes": 710,
+          "sha256": "ef797825e86c499ece3528c8bcea25b3cb2ec564f4c4b2633bdf757b5ab49b7b"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/rust-toolchain.toml",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\rust-toolchain.toml",
+          "bytes": 113,
+          "sha256": "2502bc508cb09537bb43e98698911ccc2109aa947b3beba56f535119fd750cf6",
+          "relativePath": "apps/game-client/platform-web/rust-toolchain.toml"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/rust-toolchain.toml",
+          "bytes": 113,
+          "sha256": "2502bc508cb09537bb43e98698911ccc2109aa947b3beba56f535119fd750cf6"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/auth_ui.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\auth_ui.rs",
+          "bytes": 2773,
+          "sha256": "93f11a325c7c52eb74973269601f36bc31fc7c85140bba74efaa874bf61a6c52",
+          "relativePath": "apps/game-client/platform-web/src/auth_ui.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/auth_ui.rs",
+          "bytes": 2773,
+          "sha256": "93f11a325c7c52eb74973269601f36bc31fc7c85140bba74efaa874bf61a6c52"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\bag_to_belt.rs",
+          "bytes": 16516,
+          "sha256": "c209be803870326f8d0869dd7db4f065b56a111a1a11405552a7c0af99f4014d",
+          "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/bag_to_belt.rs",
+          "bytes": 16516,
+          "sha256": "c209be803870326f8d0869dd7db4f065b56a111a1a11405552a7c0af99f4014d"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/cash_preview.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\cash_preview.rs",
+          "bytes": 2661,
+          "sha256": "c92beffad40a5069dbb8a93e3be09dcc69630764fe6f2d03f177187ec1375c38",
+          "relativePath": "apps/game-client/platform-web/src/cash_preview.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/cash_preview.rs",
+          "bytes": 2661,
+          "sha256": "c92beffad40a5069dbb8a93e3be09dcc69630764fe6f2d03f177187ec1375c38"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/chat_ui.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\chat_ui.rs",
+          "bytes": 3487,
+          "sha256": "7f66ee40f459d580a5cfa4c62ec511cc1bea50271deda9a3d565ca810aec25ed",
+          "relativePath": "apps/game-client/platform-web/src/chat_ui.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/chat_ui.rs",
+          "bytes": 3487,
+          "sha256": "7f66ee40f459d580a5cfa4c62ec511cc1bea50271deda9a3d565ca810aec25ed"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/core_api.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\core_api.rs",
+          "bytes": 8244,
+          "sha256": "5743271b90f2f6a25d45b47b0a83be2d5154c69ae0a15908d04471fa14d2cd7a",
+          "relativePath": "apps/game-client/platform-web/src/core_api.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/core_api.rs",
+          "bytes": 8244,
+          "sha256": "5743271b90f2f6a25d45b47b0a83be2d5154c69ae0a15908d04471fa14d2cd7a"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/entity_animation.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation.rs",
+          "bytes": 4527,
+          "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f",
+          "relativePath": "apps/game-client/platform-web/src/entity_animation.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/entity_animation.rs",
+          "bytes": 4527,
+          "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation_state.rs",
+          "bytes": 36055,
+          "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552",
+          "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/entity_animation_state.rs",
+          "bytes": 36055,
+          "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/equipment_pending.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\equipment_pending.rs",
+          "bytes": 17345,
+          "sha256": "5d27eff8a70f165a0d96bddf8e99113d8bb3d66ab7c63b367f3969595bb91a99",
+          "relativePath": "apps/game-client/platform-web/src/equipment_pending.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/equipment_pending.rs",
+          "bytes": 17345,
+          "sha256": "5d27eff8a70f165a0d96bddf8e99113d8bb3d66ab7c63b367f3969595bb91a99"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+          "bytes": 34540,
+          "sha256": "441d92172f117641743477755ef35f2299ff9e192f64b2ad3785c00393a90356",
+          "relativePath": "apps/game-client/platform-web/src/fishing_click.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/fishing_click.rs",
+          "bytes": 34540,
+          "sha256": "441d92172f117641743477755ef35f2299ff9e192f64b2ad3785c00393a90356"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\item_tooltip.rs",
+          "bytes": 63748,
+          "sha256": "a33c21d6ccb557d064fd36121c0a5be07b75fff3a077f8ced91645fc0ee84654",
+          "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/item_tooltip.rs",
+          "bytes": 63748,
+          "sha256": "a33c21d6ccb557d064fd36121c0a5be07b75fff3a077f8ced91645fc0ee84654"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/lib.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+          "bytes": 3051,
+          "sha256": "c7ed74d8fe6fc2d243942ce488a16742868ab96b8c524138ed4eef0562fe6062",
+          "relativePath": "apps/game-client/platform-web/src/lib.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/lib.rs",
+          "bytes": 3051,
+          "sha256": "c7ed74d8fe6fc2d243942ce488a16742868ab96b8c524138ed4eef0562fe6062"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/mail_compose.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\mail_compose.rs",
+          "bytes": 33223,
+          "sha256": "2b8e71002931549269489e0ef8662ea65604aaeb08fa2d40c182df5fdfb921a9",
+          "relativePath": "apps/game-client/platform-web/src/mail_compose.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/mail_compose.rs",
+          "bytes": 33223,
+          "sha256": "2b8e71002931549269489e0ef8662ea65604aaeb08fa2d40c182df5fdfb921a9"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/mail_parcel.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\mail_parcel.rs",
+          "bytes": 11810,
+          "sha256": "8f645711c71c277c63a61224ddcfd50b4c4a45b301aeb6fbb3afa35b2c97fd3e",
+          "relativePath": "apps/game-client/platform-web/src/mail_parcel.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/mail_parcel.rs",
+          "bytes": 11810,
+          "sha256": "8f645711c71c277c63a61224ddcfd50b4c4a45b301aeb6fbb3afa35b2c97fd3e"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/map_route.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\map_route.rs",
+          "bytes": 4626,
+          "sha256": "661ce8827a1bc136d125aa5e16d473d71c7a8e135af8785e85db45abaee5df76",
+          "relativePath": "apps/game-client/platform-web/src/map_route.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/map_route.rs",
+          "bytes": 4626,
+          "sha256": "661ce8827a1bc136d125aa5e16d473d71c7a8e135af8785e85db45abaee5df76"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/npc_gold_buy_attempt.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_gold_buy_attempt.rs",
+          "bytes": 8128,
+          "sha256": "d8b8813cb7a81c9a2e51fed9cfa6ce55d327e6daaf902f634b46a2c9ccf12605",
+          "relativePath": "apps/game-client/platform-web/src/npc_gold_buy_attempt.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/npc_gold_buy_attempt.rs",
+          "bytes": 8128,
+          "sha256": "d8b8813cb7a81c9a2e51fed9cfa6ce55d327e6daaf902f634b46a2c9ccf12605"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/npc_gold_buy_attempt_tests.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_gold_buy_attempt_tests.rs",
+          "bytes": 25660,
+          "sha256": "7e6949114c9c0961274a69a2cd91abdaf700508cd83084317e7b3f40e427104f",
+          "relativePath": "apps/game-client/platform-web/src/npc_gold_buy_attempt_tests.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/npc_gold_buy_attempt_tests.rs",
+          "bytes": 25660,
+          "sha256": "7e6949114c9c0961274a69a2cd91abdaf700508cd83084317e7b3f40e427104f"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/npc_pearl_buy.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_pearl_buy.rs",
+          "bytes": 7858,
+          "sha256": "4ebcb856b6c5ca594ead3f497ae5cf11bb067ff91090371246bdf7bccd08520a",
+          "relativePath": "apps/game-client/platform-web/src/npc_pearl_buy.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/npc_pearl_buy.rs",
+          "bytes": 7858,
+          "sha256": "4ebcb856b6c5ca594ead3f497ae5cf11bb067ff91090371246bdf7bccd08520a"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_purchase_receipt.rs",
+          "bytes": 69876,
+          "sha256": "679fc449ea536d65fa0290a1834ea27691a74ebb10d97bc16a3065284b417b8d",
+          "relativePath": "apps/game-client/platform-web/src/npc_purchase_receipt.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+          "bytes": 69876,
+          "sha256": "679fc449ea536d65fa0290a1834ea27691a74ebb10d97bc16a3065284b417b8d"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/npc_repair_quote.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_repair_quote.rs",
+          "bytes": 4623,
+          "sha256": "70d27fa8a1cc1151401b3c0d184a65b431e423965fbaeaf51cfb5aae1e508259",
+          "relativePath": "apps/game-client/platform-web/src/npc_repair_quote.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/npc_repair_quote.rs",
+          "bytes": 4623,
+          "sha256": "70d27fa8a1cc1151401b3c0d184a65b431e423965fbaeaf51cfb5aae1e508259"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/ranking_inspect.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\ranking_inspect.rs",
+          "bytes": 8274,
+          "sha256": "cef1926b341a805f86d210865cf62b9f09aa4b1fefc6b8887febc71cafe43d7c",
+          "relativePath": "apps/game-client/platform-web/src/ranking_inspect.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/ranking_inspect.rs",
+          "bytes": 8274,
+          "sha256": "cef1926b341a805f86d210865cf62b9f09aa4b1fefc6b8887febc71cafe43d7c"
+        },
+        "matched": true
+      },
+      {
+        "relativePath": "apps/game-client/platform-web/src/strict_json.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\strict_json.rs",
+          "bytes": 2338,
+          "sha256": "7f8bfc46a2b38fc8c24ae43bb78fc557f4acfe27592643ff904e97a5d06baf98",
+          "relativePath": "apps/game-client/platform-web/src/strict_json.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/strict_json.rs",
+          "bytes": 2338,
+          "sha256": "7f8bfc46a2b38fc8c24ae43bb78fc557f4acfe27592643ff904e97a5d06baf98"
+        },
+        "matched": true
+      }
+    ],
+    "controlFilesCompared": 4,
+    "controlFiles": [
+      {
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\.cargo\\config.toml",
+          "bytes": 30,
+          "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+          "relativePath": ".cargo/config.toml"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/.cargo/config.toml",
+          "bytes": 30,
+          "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+        }
+      },
+      {
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\build-client-core.mjs",
+          "bytes": 9980,
+          "sha256": "638cb158792fa09329965ff1deadc9cd1f42f709bc2dbd1535865c27ba1622d1",
+          "relativePath": "apps/web/scripts/build-client-core.mjs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/build-client-core.mjs",
+          "bytes": 9980,
+          "sha256": "638cb158792fa09329965ff1deadc9cd1f42f709bc2dbd1535865c27ba1622d1"
+        }
+      },
+      {
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\client-core-release-files.mjs",
+          "bytes": 6996,
+          "sha256": "f5b5b9e1ea5c0de761606489616c419cfd36f8185982d7ddaffb526425f48202",
+          "relativePath": "apps/web/scripts/lib/client-core-release-files.mjs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/client-core-release-files.mjs",
+          "bytes": 6996,
+          "sha256": "f5b5b9e1ea5c0de761606489616c419cfd36f8185982d7ddaffb526425f48202"
+        }
+      },
+      {
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\renderer-wasm-opt.mjs",
+          "bytes": 14946,
+          "sha256": "b26db9e19ebccb8358afbd7f2048b5970689bc5c4c4f31744d65c1c052a3e7bb",
+          "relativePath": "apps/web/scripts/lib/renderer-wasm-opt.mjs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/renderer-wasm-opt.mjs",
+          "bytes": 14946,
+          "sha256": "b26db9e19ebccb8358afbd7f2048b5970689bc5c4c4f31744d65c1c052a3e7bb"
+        }
+      }
+    ],
+    "sourceInventory": {
+      "boundedDirectories": [
+        "apps/game-client/platform-web/src",
+        "apps/game-client/client-core/src",
+        "apps/game-client/client-wire/src"
+      ],
+      "beforeRsCount": 49,
+      "currentRsCount": 49,
+      "added": [],
+      "removed": [],
+      "crateBuildRsPresent": false,
+      "crateLocalCargoConfigPresent": false,
+      "includeResourcesOutsideScopeFound": false,
+      "localPathModulesAlreadyInDeclaredScope": true
+    },
+    "carryDecision": "May retain the existing three Source33 raw/bindgen/optimized static artifact sets under this explicit unchanged source/tool subset. Do not relabel the entire old snapshot as current or claim new execution, validation, publication or full package acceptance.",
+    "freshCompilationRequiredForUnchangedSmallBundleSubset": false,
+    "thirdPartyRegistryToolchainClosureRevalidated": false
+  },
+  "smallArtifacts": [
+    {
+      "label": "Core",
+      "artifacts": [
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\compiled-core.wasm",
+            "bytes": 466253,
+            "sha256": "f717b491e1a8ca5e29223d961de4cc77d39473ce51cc1e2ef68c818ad9486329"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\compiled-core.wasm",
+            "bytes": 466253,
+            "sha256": "f717b491e1a8ca5e29223d961de4cc77d39473ce51cc1e2ef68c818ad9486329"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web_bg.wasm",
+            "bytes": 282556,
+            "sha256": "e06c7a275d81b3c4f556e807cedc247d38eb0554e14f13ca4a0615cbcb523e73"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web_bg.wasm",
+            "bytes": 282556,
+            "sha256": "e06c7a275d81b3c4f556e807cedc247d38eb0554e14f13ca4a0615cbcb523e73"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web.d.ts",
+            "bytes": 6916,
+            "sha256": "a15d1ea1f8ebd7f4f4f0d96dae1150c51580dc56f00bf469f77def44b8c31edb"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web.d.ts",
+            "bytes": 6916,
+            "sha256": "a15d1ea1f8ebd7f4f4f0d96dae1150c51580dc56f00bf469f77def44b8c31edb"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web_bg.wasm.d.ts",
+            "bytes": 3382,
+            "sha256": "458aa92ec143c66fb813f198c460d6c040eb464ebdf7edb4e017c10854b6aa06"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\mir2_platform_web_bg.wasm.d.ts",
+            "bytes": 3382,
+            "sha256": "458aa92ec143c66fb813f198c460d6c040eb464ebdf7edb4e017c10854b6aa06"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\optimized_mir2_platform_web_bg.wasm",
+            "bytes": 252883,
+            "sha256": "6820ec58b6366a22d41715e8e93024c2f441ff87f85be2ed602c323ddf94edcf"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core\\optimized_mir2_platform_web_bg.wasm",
+            "bytes": 252883,
+            "sha256": "6820ec58b6366a22d41715e8e93024c2f441ff87f85be2ed602c323ddf94edcf"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "label": "Presentation",
+      "artifacts": [
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\compiled-pui.wasm",
+            "bytes": 454070,
+            "sha256": "a1801f569167eee978f82595f09ffa353bd4a4a00e7cc04509659316b9715313"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\compiled-pui.wasm",
+            "bytes": 454070,
+            "sha256": "a1801f569167eee978f82595f09ffa353bd4a4a00e7cc04509659316b9715313"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web.js",
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web.js",
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web_bg.wasm",
+            "bytes": 288513,
+            "sha256": "1dc3543116f057c32f12689ecc575e372b7f08b5484f0f15b2b9accf23a5b766"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web_bg.wasm",
+            "bytes": 288513,
+            "sha256": "1dc3543116f057c32f12689ecc575e372b7f08b5484f0f15b2b9accf23a5b766"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web.d.ts",
+            "bytes": 9971,
+            "sha256": "cb4398a1afecf5cb7cabde8835decdfed4ee90325f6cd632ee2112ae9dbcb519"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web.d.ts",
+            "bytes": 9971,
+            "sha256": "cb4398a1afecf5cb7cabde8835decdfed4ee90325f6cd632ee2112ae9dbcb519"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web_bg.wasm.d.ts",
+            "bytes": 3876,
+            "sha256": "4260004eeac906541cbb5fd6e8fee6620062dcb9845db4fee149ad7ff92da5ef"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\mir2_platform_web_bg.wasm.d.ts",
+            "bytes": 3876,
+            "sha256": "4260004eeac906541cbb5fd6e8fee6620062dcb9845db4fee149ad7ff92da5ef"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\optimized_mir2_platform_web_bg.wasm",
+            "bytes": 261542,
+            "sha256": "035226d980fa91d1dff93115f408842fbd8580fcf5f9f0cf07f63b0954e0d006"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui\\optimized_mir2_platform_web_bg.wasm",
+            "bytes": 261542,
+            "sha256": "035226d980fa91d1dff93115f408842fbd8580fcf5f9f0cf07f63b0954e0d006"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "label": "NPC Purchase",
+      "artifacts": [
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\compiled-npc.wasm",
+            "bytes": 321979,
+            "sha256": "62ceeb9c03362631976e59b208d2b82aa01438dd3386af4cbd43c4b7ce0bf292"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\compiled-npc.wasm",
+            "bytes": 321979,
+            "sha256": "62ceeb9c03362631976e59b208d2b82aa01438dd3386af4cbd43c4b7ce0bf292"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web.js",
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web.js",
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web_bg.wasm",
+            "bytes": 186636,
+            "sha256": "f8f69dc34bba302ac339893ae4a012483f40ebcc46cd7e0a7a316a1b7aaccbe5"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web_bg.wasm",
+            "bytes": 186636,
+            "sha256": "f8f69dc34bba302ac339893ae4a012483f40ebcc46cd7e0a7a316a1b7aaccbe5"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web.d.ts",
+            "bytes": 1982,
+            "sha256": "a582b06acf8945e788b580f0f023040dcbdeba52d22cbe4ea101a9b5faa9e740"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web.d.ts",
+            "bytes": 1982,
+            "sha256": "a582b06acf8945e788b580f0f023040dcbdeba52d22cbe4ea101a9b5faa9e740"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web_bg.wasm.d.ts",
+            "bytes": 791,
+            "sha256": "2f32cd071d22495918cab34f49686b33768dd5b2826c91f06192961c321cf57a"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\mir2_platform_web_bg.wasm.d.ts",
+            "bytes": 791,
+            "sha256": "2f32cd071d22495918cab34f49686b33768dd5b2826c91f06192961c321cf57a"
+          },
+          "matched": true
+        },
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\optimized_mir2_platform_web_bg.wasm",
+            "bytes": 167607,
+            "sha256": "70f2eca583a1559f81fd2861b6c69281dec3d72778e4bef61a2f74daee668f1f"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc\\optimized_mir2_platform_web_bg.wasm",
+            "bytes": 167607,
+            "sha256": "70f2eca583a1559f81fd2861b6c69281dec3d72778e4bef61a2f74daee668f1f"
+          },
+          "matched": true
+        }
+      ]
+    }
+  ],
+  "staticTools": [
+    {
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-core-bindgen01.config.json",
+        "bytes": 3798,
+        "sha256": "e2b9d6c91c9a19eef1537ca49c2fa803457856bb4f109bfb3c6b8108afbbc3fa"
+      },
+      "tools": [
+        {
+          "before": {
+            "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+            "bytes": 5551616,
+            "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+          },
+          "current": {
+            "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+            "bytes": 5551616,
+            "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-core-opt01.config.json",
+        "bytes": 3925,
+        "sha256": "4b1f7e5e04e9c5d002d13e36914371b7de07562b482f9a4e6acf59510c04f556"
+      },
+      "tools": [
+        {
+          "before": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+            "bytes": 10061312,
+            "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+          },
+          "current": {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+            "bytes": 10061312,
+            "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+          }
+        }
+      ]
+    }
+  ],
+  "originalSmallBundleConfigurations": [
+    {
+      "mode": "core",
+      "stage": "build02",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-core-build02.config.json",
+        "bytes": 4150,
+        "sha256": "97ef30efaa22127e85589ac3ad92a9884267f4ce4ace6e8ad4eeadfd8b93e428"
+      },
+      "originalArgs": [
+        "+1.95.0",
+        "build",
+        "--locked",
+        "--release",
+        "--target",
+        "wasm32-unknown-unknown",
+        "--target-dir",
+        "C:/mir2-cross-platform-storage-20261002/rust-target/windows"
+      ],
+      "originalCwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web",
+      "originalTarget": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864",
+        "QA_CARGO_GUARD_POLICY": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-core-build02.policy.json",
+        "QA_CARGO_GUARD_POLICY_SHA256": "38e35e05a793ab7b3cf46e56510b01c512c13d6a61fe7cfb5e4242f6db5a5626"
+      },
+      "originalExecutable": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+        "bytes": 37376,
+        "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+      },
+      "originalToolPins": [],
+      "executedAgain": false
+    },
+    {
+      "mode": "core",
+      "stage": "bindgen01",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-core-bindgen01.config.json",
+        "bytes": 3798,
+        "sha256": "e2b9d6c91c9a19eef1537ca49c2fa803457856bb4f109bfb3c6b8108afbbc3fa"
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/rust-target/windows/wasm32-unknown-unknown/release/mir2_platform_web.wasm",
+        "--target",
+        "web",
+        "--out-dir",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/core",
+        "--out-name",
+        "mir2_platform_web",
+        "--remove-name-section"
+      ],
+      "originalCwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core",
+      "originalTarget": null,
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864"
+      },
+      "originalExecutable": {
+        "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+        "bytes": 5551616,
+        "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+      },
+      "originalToolPins": [
+        {
+          "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+          "bytes": 5551616,
+          "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+        }
+      ],
+      "executedAgain": false
+    },
+    {
+      "mode": "core",
+      "stage": "opt01",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-core-opt01.config.json",
+        "bytes": 3925,
+        "sha256": "4b1f7e5e04e9c5d002d13e36914371b7de07562b482f9a4e6acf59510c04f556"
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/core/mir2_platform_web_bg.wasm",
+        "-Oz",
+        "--strip-debug",
+        "-o",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/core/optimized_mir2_platform_web_bg.wasm"
+      ],
+      "originalCwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\core",
+      "originalTarget": null,
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864",
+        "BINARYEN_CORES": "1"
+      },
+      "originalExecutable": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+      },
+      "originalToolPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+          "bytes": 10061312,
+          "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "executedAgain": false
+    },
+    {
+      "mode": "pui",
+      "stage": "build02",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-pui-build02.config.json",
+        "bytes": 4184,
+        "sha256": "33ee8a958f10898b9ac6b9f145e18bbe60201949275031bef8e8b8f3d6df415b"
+      },
+      "originalArgs": [
+        "+1.95.0",
+        "build",
+        "--locked",
+        "--release",
+        "--target",
+        "wasm32-unknown-unknown",
+        "--target-dir",
+        "C:/mir2-cross-platform-storage-20261002/rust-target/windows",
+        "--features",
+        "presentation-ui"
+      ],
+      "originalCwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web",
+      "originalTarget": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864",
+        "QA_CARGO_GUARD_POLICY": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-pui-build02.policy.json",
+        "QA_CARGO_GUARD_POLICY_SHA256": "589218f52112a8183ffe4e08423281d65dd8c8df2b4e4ed991f62851131263de"
+      },
+      "originalExecutable": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+        "bytes": 37376,
+        "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+      },
+      "originalToolPins": [],
+      "executedAgain": false
+    },
+    {
+      "mode": "pui",
+      "stage": "bindgen01",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-pui-bindgen01.config.json",
+        "bytes": 3791,
+        "sha256": "925acaf04579e4c329ec9eddb887ed512db9fa46f3e42ac15718a579618edd50"
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/rust-target/windows/wasm32-unknown-unknown/release/mir2_platform_web.wasm",
+        "--target",
+        "web",
+        "--out-dir",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/pui",
+        "--out-name",
+        "mir2_platform_web",
+        "--remove-name-section"
+      ],
+      "originalCwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui",
+      "originalTarget": null,
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864"
+      },
+      "originalExecutable": {
+        "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+        "bytes": 5551616,
+        "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+      },
+      "originalToolPins": [
+        {
+          "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+          "bytes": 5551616,
+          "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+        }
+      ],
+      "executedAgain": false
+    },
+    {
+      "mode": "pui",
+      "stage": "opt01",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-pui-opt01.config.json",
+        "bytes": 3917,
+        "sha256": "61f34335a7f56c705c5f46e513450f06bc04b27a3ca11d7f5940c2bd7849b4bf"
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/pui/mir2_platform_web_bg.wasm",
+        "-Oz",
+        "--strip-debug",
+        "-o",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/pui/optimized_mir2_platform_web_bg.wasm"
+      ],
+      "originalCwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\pui",
+      "originalTarget": null,
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864",
+        "BINARYEN_CORES": "1"
+      },
+      "originalExecutable": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+      },
+      "originalToolPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+          "bytes": 10061312,
+          "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "executedAgain": false
+    },
+    {
+      "mode": "npc",
+      "stage": "build02",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-npc-build02.config.json",
+        "bytes": 4188,
+        "sha256": "e6c74baf3ef2bc9b6b35bc8f9d180722845434f8e0e6133c8809ee4caf7c3a1b"
+      },
+      "originalArgs": [
+        "+1.95.0",
+        "build",
+        "--locked",
+        "--release",
+        "--target",
+        "wasm32-unknown-unknown",
+        "--target-dir",
+        "C:/mir2-cross-platform-storage-20261002/rust-target/windows",
+        "--features",
+        "npc-purchase-policy"
+      ],
+      "originalCwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web",
+      "originalTarget": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864",
+        "QA_CARGO_GUARD_POLICY": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-npc-build02.policy.json",
+        "QA_CARGO_GUARD_POLICY_SHA256": "06ecd544d6a3b157e4dbfd0e76ab1e4361fd263bc0dc8cd58b8ffc13762c1037"
+      },
+      "originalExecutable": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+        "bytes": 37376,
+        "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+      },
+      "originalToolPins": [],
+      "executedAgain": false
+    },
+    {
+      "mode": "npc",
+      "stage": "bindgen01",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-npc-bindgen01.config.json",
+        "bytes": 3791,
+        "sha256": "9e140ba6d53b2b4c4d4baad025bfc19b6a4c0deaf0ed527ab92f041da01cae70"
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/rust-target/windows/wasm32-unknown-unknown/release/mir2_platform_web.wasm",
+        "--target",
+        "web",
+        "--out-dir",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/npc",
+        "--out-name",
+        "mir2_platform_web",
+        "--remove-name-section"
+      ],
+      "originalCwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc",
+      "originalTarget": null,
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864"
+      },
+      "originalExecutable": {
+        "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+        "bytes": 5551616,
+        "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+      },
+      "originalToolPins": [
+        {
+          "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+          "bytes": 5551616,
+          "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28"
+        }
+      ],
+      "executedAgain": false
+    },
+    {
+      "mode": "npc",
+      "stage": "opt01",
+      "originalConfig": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-npc-opt01.config.json",
+        "bytes": 3917,
+        "sha256": "579ab25fa21b273595da46dd52d0ae356f29c08b0e6826cb3e81b05e7ba167cc"
+      },
+      "originalArgs": [
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/npc/mir2_platform_web_bg.wasm",
+        "-Oz",
+        "--strip-debug",
+        "-o",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-bundle-source33-staging01/npc/optimized_mir2_platform_web_bg.wasm"
+      ],
+      "originalCwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-staging01\\npc",
+      "originalTarget": null,
+      "originalEnvironment": {
+        "SystemRoot": "C:/Windows",
+        "windir": "C:/Windows",
+        "SystemDrive": "C:",
+        "ComSpec": "C:/Windows/System32/cmd.exe",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+        "USERPROFILE": "C:/Users/Administrator",
+        "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+        "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+        "NUMBER_OF_PROCESSORS": "1",
+        "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+        "CARGO_HOME": "C:/Users/Administrator/.cargo",
+        "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+        "RUSTUP_TOOLCHAIN": "1.95.0",
+        "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_NET_OFFLINE": "true",
+        "RUST_MIN_STACK": "67108864",
+        "BINARYEN_CORES": "1"
+      },
+      "originalExecutable": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+      },
+      "originalToolPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+          "bytes": 10061312,
+          "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "executedAgain": false
+    }
+  ],
+  "windows": {
+    "source31Result": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source31-native-build-result01.json",
+      "bytes": 5445,
+      "sha256": "3a14765a050cac516ffff133f913cf6dc0625024ef8efcf17eb07d3536f8c042"
+    },
+    "source31Snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-snapshot.json",
+      "bytes": 268700,
+      "sha256": "56f7e716785a6e0fa0c6caac8803022333eb2ce552652b72f85324b762a478f8"
+    },
+    "historicalExePin": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+      "bytes": 106137600,
+      "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+    },
+    "historicalBuildElapsedMs": 237498,
+    "historicalBuildSourceCount": 883,
+    "originalConfig": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.config.json",
+      "bytes": 4069,
+      "sha256": "aacaf2c99be414fd779d736ecce7b1afdfd2b565b2aaa07859eaf018da6100f0"
+    },
+    "originalArgs": [
+      "+1.95.0",
+      "build",
+      "--manifest-path",
+      "apps/game-client/platform-windows/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--jobs",
+      "1"
+    ],
+    "originalCwd": "E:\\mir2-player-journey\\mir2-web3",
+    "originalTarget": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+    "originalEnvironment": {
+      "SystemRoot": "C:/Windows",
+      "windir": "C:/Windows",
+      "SystemDrive": "C:",
+      "ComSpec": "C:/Windows/System32/cmd.exe",
+      "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+      "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+      "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+      "USERPROFILE": "C:/Users/Administrator",
+      "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+      "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+      "NUMBER_OF_PROCESSORS": "1",
+      "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+      "CARGO_HOME": "C:/Users/Administrator/.cargo",
+      "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+      "RUSTUP_TOOLCHAIN": "1.95.0",
+      "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_NET_OFFLINE": "true",
+      "RUST_MIN_STACK": "67108864",
+      "QA_CARGO_GUARD_POLICY": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.policy.json",
+      "QA_CARGO_GUARD_POLICY_SHA256": "7e38a4ff3aafdbfb369b1cfbf7eea76cd362b8c9b4b255cae49d883b4ecc3fc7"
+    },
+    "originalGuard": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+      "bytes": 37376,
+      "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+    },
+    "freshCompileRequired": true,
+    "selectedActualSourceDifferences": [
+      {
+        "relativePath": "apps/game-client/platform-windows/src/gateway.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+          "bytes": 679654,
+          "sha256": "7af3a4282186ecfa90fd514d92d3956e020c8d6859410e12a16c6f4dc464197e",
+          "relativePath": "apps/game-client/platform-windows/src/gateway.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+          "bytes": 705092,
+          "sha256": "b2be25d36a894634119c7186fea154001b61e3ff1a7efa93fca72a6440b9f5c3"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\npc_purchase_gateway.rs",
+          "bytes": 65696,
+          "sha256": "43362cab520fa98706b1ecd5d96e7eca7f03ed123668bd9bf788ddf3ffd16edc",
+          "relativePath": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+          "bytes": 76134,
+          "sha256": "85df7e8ed15bbd4597e717140e4831b8a1ee4c182978891528c2b9e3e6f3df16"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/client-bevy/src/hero_model.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hero_model.rs",
+          "bytes": 43127,
+          "sha256": "3fc668fb22cbc7aa4b979d9be72a646d50293f09605e0679e79dbeab0930d49e",
+          "relativePath": "apps/game-client/client-bevy/src/hero_model.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/hero_model.rs",
+          "bytes": 60197,
+          "sha256": "d3cf763b8b61f3e1ca10f55d7b76e1719f33767199182f993e8b7ed3f2fac493"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/client-bevy/src/lib.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\lib.rs",
+          "bytes": 4628,
+          "sha256": "e8d8b2ae9e8781bb440cf332ba4a68c0d579ed15fd20784d4bed521fc8d35952",
+          "relativePath": "apps/game-client/client-bevy/src/lib.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+          "bytes": 4945,
+          "sha256": "a9b655974e1cbeb1ff2098f5c5363fa6861bdf1ba697ba94e3e14d6207b7dd88"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/runtime/src/lib.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+          "bytes": 435788,
+          "sha256": "a965c77c1d7a8d2a44058e4c1b4976d93c321cbc1e8af038a56e259202dda10c",
+          "relativePath": "apps/game-client/runtime/src/lib.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/src/lib.rs",
+          "bytes": 436499,
+          "sha256": "34481061c6d55752bbe9030d89de74cb80acd359250f7d85b0c414d8f56815c1"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/runtime/src/native_ingest.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\native_ingest.rs",
+          "bytes": 129444,
+          "sha256": "5faf7e6a189acae1dba89119bacfac6f874209ee4b1d9d054577bc9ab3ae5aa2",
+          "relativePath": "apps/game-client/runtime/src/native_ingest.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+          "bytes": 133014,
+          "sha256": "e80975d48f6b3abc2f650319650c16cf106b7aadfd227bc5e867177a49a5fd14"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_purchase_economy.rs",
+          "bytes": 109944,
+          "sha256": "45e9edb037e2f5451f6497ede24507b8d15e09b19ba6ff46adeae623e4f9847f",
+          "relativePath": "apps/game-client/runtime/src/npc_purchase_economy.rs"
+        },
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs",
+          "bytes": 120950,
+          "sha256": "1a1fa063e6abadfb7b592b370624fe2dea9e21c810600055b36a5dbd65fd3794"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/client-bevy/src/hero_ingress.rs",
+        "before": null,
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/hero_ingress.rs",
+          "bytes": 77309,
+          "sha256": "fe0155d4cfdc433145193ebab6f3ed0662859b6e07921ec44073f896409184d0"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/runtime/src/hero_ui_host.rs",
+        "before": null,
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs",
+          "bytes": 101634,
+          "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+        },
+        "matched": false
+      },
+      {
+        "relativePath": "apps/game-client/client-bevy/src/portable_hero_ui.rs",
+        "before": null,
+        "current": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/portable_hero_ui.rs",
+          "bytes": 48418,
+          "sha256": "4a06df4ced85c5e63365c775eac2018f4b5a3c3e214acad7c7163a0bf39a4542"
+        },
+        "matched": false
+      }
+    ],
+    "conditionalScopeQualification": "Portable Hero UI/action-basis/witness and hero_ui_host are excluded from normal Native production by their cfg; their mere changes alone do not require Native linkage. Actual Native gateway/hero_model/native_ingest/npc_purchase_economy/lib changed, and unconditional hero_ingress is new, so Source31 EXE cannot cover current Native compile closure. Source43 native-ui 24 tests and WASM checks are not a fresh platform-windows EXE build.",
+    "oldExeUse": "Historical Source31 compile-only baseline, not current matching delivery."
+  },
+  "minimalDeliveryChecklist": [
+    {
+      "item": "Current renderer GPU/GL2/shared-GL2",
+      "state": "fresh build required/in Root progress",
+      "reason": "Source35 renderer precedes actual shared Hero ingress/painter/basis/witness/Host/Source44 visibility/input changes; use reviewed current freeze and original static CLI pipeline."
+    },
+    {
+      "item": "Core/PUI/NPC",
+      "state": "retain exact Source33 static candidates under 60-file limited source/control comparison",
+      "reason": "56 direct crate files plus four controls unchanged; all18 retained artifact pins and bindgen/Binaryen pins match. Any later relevant drift requires fresh compile/transform."
+    },
+    {
+      "item": "Windows EXE",
+      "state": "fresh compile required before current matching Windows delivery",
+      "reason": "Actual Native production dependency sources changed since Source31. Preserve Source31 compile-only result unmodified."
+    },
+    {
+      "item": "WASM full gates",
+      "state": "pending, neither skipped nor relaxed",
+      "reason": "Original WebAssembly.validate/Module name/normalized imports-exports ABI, renderer default gzip, init/resource and immutable publication gates not executed here."
+    },
+    {
+      "item": "Next/Thin/current Web production package and live acceptance",
+      "state": "pending separate authorized work",
+      "reason": "Static candidates and finite tests do not replace matching production package, actual init/login/save/relogin/mobile/user verification."
+    }
+  ],
+  "budgets": {
+    "smallWasmMaximumExclusive": 262144,
+    "allJsMaximumInclusive": 204800,
+    "rendererWasmMaximumInclusive": 32505856,
+    "rendererDefaultGzipMaximumInclusive": 7340032,
+    "oldSmallOptimizedBytes": {
+      "Core": 252883,
+      "PUI": 261542,
+      "NPC": 167607
+    },
+    "puiExclusiveBoundaryHeadroomBytes": 602,
+    "limitsChanged": false
+  },
+  "execution": {
+    "cliRun": false,
+    "cargoRun": false,
+    "productImportedOrEvaluated": false,
+    "wasmApiUsed": false,
+    "processStarted": false,
+    "uiUsed": false,
+    "networkUsed": false,
+    "sourceOrDocsWritten": false,
+    "ordinaryReviewJsonOnly": true,
+    "freshArtifactCreated": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "limitations": [
+    "This is bounded equality of declared repository files plus selected artifact/tool bytes, not whole workspace or full third-party registry/SDK/toolchain closure acceptance.",
+    "Original configs/flags/env/targets are historical data references only; Root must use fresh matching source declarations/policy/config for any future actual call and preserve original templates.",
+    "No new executable helper, runner, process config, release manifest or forged receipt was created.",
+    "Existing optimized small candidates remain unpublished; original metadata/name/ABI/init gates remain pending."
+  ]
+}

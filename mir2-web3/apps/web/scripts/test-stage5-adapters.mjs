@@ -8280,4 +8280,285 @@ check("Hero actual Page final claim rejects synchronous source or renderer chang
   }
 });
 
+
+// Source45 composes the actual shared Host with the existing Page extraction and
+// the one production Hero ledger. Renderer publication and socket.send remain
+// finite ports: these checks do not instantiate WASM, paint, or a live server.
+const heroSuccessPageNames45 = ["dispatchBevyHeroIntent", "submitHeroAction"];
+const heroSuccessPageDeclarations45 = new Map();
+(function visit(node) {
+  if (ts.isFunctionDeclaration(node) && heroSuccessPageNames45.includes(node.name?.text)) {
+    assert.equal(heroSuccessPageDeclarations45.has(node.name.text), false);
+    heroSuccessPageDeclarations45.set(node.name.text, node.getText(parityPageAst));
+  }
+  ts.forEachChild(node, visit);
+})(parityPageAst);
+assert.equal(heroSuccessPageDeclarations45.size, heroSuccessPageNames45.length);
+const heroSuccessPageJs45 = ts.transpileModule([...heroSuccessPageDeclarations45.values()].join("\n"), {
+  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
+}).outputText;
+function heroSuccessPageFixture45(setup) {
+  const shared = heroHostFixture44();
+  if (setup) { setup(shared.base); shared.authority(); shared.deliver(); }
+  const page = parityPageFixture(shared.base.owner, shared.base.world), scope = page.scope;
+  const ledger = scope.heroOperationsRef.current, sendProofs = [], intents = [];
+  scope.heroAuthorityRef.current = shared.base.authority;
+  scope.heroWindowActorRef.current = shared.model;
+  scope.heroWindowsRef.current = { ...shared.view.windows };
+  scope.heroWindowEpochsRef.current = { ...shared.view.windowEpochs };
+  scope.heroManagementOpenRef.current = scope.heroWindowsRef.current.inventoryOpen || scope.heroWindowsRef.current.characterOpen;
+  scope.heroPetOpenRef.current = false; scope.cashShopOpenRef.current = false;
+  scope.socialItemWindowsRef.current = { guild: false, trade: false };
+  scope.heroRawIngressRef = { current: shared.ingress };
+  scope.sameHeroHighWater = heroIngressDocument.sameHeroHighWater;
+  scope.captureHeroAction = heroUi.captureHeroAction;
+  scope.heroSharedUiIngressRef.current = shared.host;
+  Object.defineProperty(shared.view, "pending", { enumerable: true, get: () => Boolean(ledger.pending) });
+  shared.setOnOwner(token => { scope.heroRendererTokenRef.current = token ?? "hero-react:source45"; });
+  const keys = Object.keys(scope);
+  const api = new Function(...keys, parityPageJs + "\n" + heroSuccessPageJs45
+    + "\nreturn {dispatch:dispatchBevyHeroIntent,submit:submitHeroAction,currentHeroModel,heroProofCurrent,parityIngress,parityFinal,captureParityPacket,captureParitySnapshot};")
+    (...keys.map(key => scope[key]));
+  const captureSocketSend = page.socket.send;
+  page.socket.send = body => {
+    assert.equal(ledger.pending?.state, "entered", "the actual Page final slice must claim before socket entry");
+    sendProofs.push(ledger.pending.proof); captureSocketSend(body);
+  };
+  scope.sendRawHandler.current = (command, options) => api.parityIngress(command, options)
+    && api.parityFinal(command, options, page.socket);
+  shared.setOnIntent(intent => { intents.push(intent); return api.dispatch(intent); });
+  // ready() asserts separate unowned -> prepared/owned/inactive -> enabled/Ready
+  // publications. A successful setter alone cannot authorize this fake sink.
+  shared.ready();
+  assert.equal(shared.host.peek().active, true);
+  assert.equal(scope.heroRendererTokenRef.current, shared.state.control.webLeaseToken);
+  function snapshot(world = shared.base.world) {
+    api.captureParitySnapshot(world);
+    const model = api.currentHeroModel();
+    if (model) shared.setModel(model);
+    return model;
+  }
+  return { shared, page, scope, ledger, api, sendProofs, intents, snapshot };
+}
+function heroCustody45(model) {
+  assert(model.personalInventory, "these transfer/config fixtures retain complete personal custody");
+  return [["HeroInventory", model.inventory], ["HeroEquipment", model.equipment], ["Inventory", model.personalInventory]]
+    .flatMap(([grid, items]) => items.flatMap((item, slot) => item ? [{ grid, slot, uid: item.uniqueId, count: item.count,
+      carrierUid: item.userItem.unique_id, carrierCount: item.userItem.count }] : []));
+}
+function heroLocation45(model, uid) {
+  return heroCustody45(model).filter(item => item.uid === uid).map(({ grid, slot, uid, count }) => ({ grid, slot, uid, count }));
+}
+function assertHeroSuccessChain45(spec) {
+  const f = heroSuccessPageFixture45(spec.setup), before = f.api.currentHeroModel(); assert(before);
+  const oldOwner = { ...f.shared.base.owner, socket: {}, connectionGeneration: 0 };
+  const envelope = f.shared.envelope(spec.action, spec.origin ?? "inventory");
+  assert.equal(f.shared.dispatch(envelope), true, "actual semantic sink must reach actual Page send");
+  assert.deepEqual(f.page.sent, [spec.wire]);
+  const proof = f.ledger.pending?.proof; assert(proof);
+  assert.equal(f.ledger.pending.state, "entered");
+  assert.deepEqual(f.sendProofs, [proof]);
+  assert.strictEqual(f.scope.heroSharedProofsRef.current.get(proof), f.intents[0]);
+  assert.strictEqual(f.scope.heroOperationsRef.current, f.ledger);
+  assert.equal(f.shared.dispatch(envelope), false, "an admitted serialized intent is never sent twice");
+  assert.equal(f.ledger.observe(before), false, "a complete model without the matching receipt cannot settle");
+  const serialBeforeWrongOwner = f.shared.base.authority.authoritySerial;
+  f.api.captureParitySnapshot({ ...f.shared.base.world, playerObjectId: 41 });
+  f.api.captureParitySnapshot({ ...f.shared.base.world, mapFileName: "wrong-map" });
+  assert.equal(f.shared.base.authority.authoritySerial, serialBeforeWrongOwner, "actual Page rejects mismatched owner snapshots before authority mutation");
+  assert.equal(f.shared.base.authority.receiveSnapshot(f.shared.base.world, oldOwner), false);
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  const beforeAck = f.snapshot(); assert(beforeAck);
+  assert(beforeAck.snapshotSerial > before.snapshotSerial, "a newer full snapshot really arrived before the ACK");
+  assert.equal(f.ledger.pending.state, "entered");
+  f.api.captureParityPacket(spec.packet, spec.badAck);
+  assert.equal(f.ledger.pending.state, "entered", "a wrong tuple cannot acknowledge the operation");
+  assert.equal(f.ledger.receipt(spec.packet, spec.ack, oldOwner, beforeAck.authoritySerial), false);
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  f.api.captureParityPacket(spec.packet, spec.ack);
+  assert.equal(f.ledger.pending.state, "acknowledged");
+  assert.equal(f.ledger.pending.success, true);
+  const ackSerial = f.ledger.pending.ackSerial;
+  assert(ackSerial >= beforeAck.authoritySerial);
+  assert.equal(f.ledger.observe(beforeAck), false, "the pre-ACK full model cannot satisfy the post-ACK barrier");
+  assert.equal(f.ledger.cancelDefinitelyUnsent(proof), false, "entered custody cannot be released as unsent");
+  // A genuinely separate old physical owner can have a higher local serial;
+  // neither that model nor its otherwise exact receipt settles this owner.
+  const foreign = new heroUi.HeroPlayerAuthority();
+  assert(foreign.receiveInformation(f.shared.base.info, oldOwner));
+  for (let i = 0; i <= ackSerial; i++) assert(foreign.receiveSnapshot(f.shared.base.world, oldOwner));
+  const foreignModel = foreign.read(oldOwner); assert(foreignModel);
+  assert(foreignModel.authoritySerial > ackSerial);
+  assert.equal(f.ledger.observe(foreignModel), false);
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  if (proof.crossPlayer) {
+    f.api.captureParityPacket("HeroInformation", { info: f.shared.base.info });
+    const onlyHero = f.api.currentHeroModel(); assert(onlyHero);
+    assert(onlyHero.informationSerial > ackSerial);
+    assert(onlyHero.personalSerial <= ackSerial);
+    assert.equal(f.ledger.pending.state, "acknowledged", "a new Hero-only full packet cannot complete personal custody");
+  }
+  assert.equal(f.snapshot({ ...f.shared.base.world, heroStats: undefined }), null);
+  assert.equal(f.ledger.pending.state, "acknowledged", "a newer partial/invalid read model cannot settle");
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  spec.applyResult(f.shared.base);
+  const after = f.snapshot(); assert(after);
+  assert(after.snapshotSerial > ackSerial);
+  if (proof.crossPlayer) assert(after.personalSerial > ackSerial);
+  assert.equal(f.ledger.pending, null);
+  spec.assertResult(after, before);
+  const custody = heroCustody45(after);
+  assert.equal(new Set(custody.map(item => item.uid)).size, custody.length, "final authority has no duplicated instance custody");
+  for (const item of custody) {
+    assert.equal(item.carrierUid, item.uid); assert.equal(item.carrierCount, item.count);
+  }
+  assert.equal(f.shared.dispatch(envelope), false);
+  assert.equal(f.api.parityFinal({ ...proof.wire }, { heroProof: proof }, f.page.socket), false);
+  assert.equal(f.page.sent.length, 1);
+  assert.equal(f.sendProofs.length, 1);
+  // The completed proof and a duplicate old ACK cannot retire a new, unsent
+  // operation. This is deliberately a different tuple, not a claim to solve
+  // the legacy protocol's same-tuple late-ACK ambiguity.
+  const next = f.ledger.reserve(after, { kind: "autoPotValue", stat: 12, value: 7 }); assert(next);
+  assert.notEqual(next.id, proof.id);
+  assert.equal(f.ledger.cancelDefinitelyUnsent(proof), false);
+  f.api.captureParityPacket(spec.packet, spec.ack);
+  assert.strictEqual(f.ledger.pending.proof, next);
+  assert.equal(f.ledger.pending.state, "reserved");
+  assert.equal(f.page.sent.length, 1);
+  assert(f.ledger.cancelDefinitelyUnsent(next));
+  assert.equal(f.shared.calls.withdrawRaw, 0);
+  return { before, after, proof };
+}
+check("Hero shared Equip succeeds through actual Page single claim exact ACK and authoritative swap custody", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "equip", from: 4, to: 3 },
+    wire: { type: "equipItem", grid: "HeroInventory", uniqueId: 504, to: 3 }, packet: "EquipItem",
+    badAck: { grid: "HeroInventory", uniqueId: 505, to: 3, success: true },
+    ack: { grid: "HeroInventory", uniqueId: 504, to: 3, success: true },
+    applyResult(base) {
+      // hero_inventory::equip_item places the old equipment in the source cell.
+      const incoming = base.world.heroInventoryItems.find(item => item.uniqueId === 504);
+      const worn = base.world.heroEquipmentItems.find(item => item.uniqueId === 505);
+      base.world.heroInventoryItems = base.world.heroInventoryItems.filter(item => item.uniqueId !== 504);
+      base.world.heroInventoryItems.push({ ...worn, slot: 4 });
+      base.world.heroEquipmentItems = [{ ...incoming, slot: 3 }];
+    },
+    assertResult(after, before) {
+      assert.deepEqual(heroLocation45(before, 504), [{ grid: "HeroInventory", slot: 4, uid: 504, count: 1 }]);
+      assert.deepEqual(heroLocation45(after, 504), [{ grid: "HeroEquipment", slot: 3, uid: 504, count: 1 }]);
+      assert.deepEqual(heroLocation45(after, 505), [{ grid: "HeroInventory", slot: 4, uid: 505, count: 1 }]);
+      for (const uid of [501, 502, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared Remove null resolves the actual free bag cell then exact ACK and complete authority move the same UID", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "remove", from: 3, to: null }, origin: "character",
+    wire: { type: "removeItem", grid: "HeroInventory", uniqueId: 505, to: 3 }, packet: "RemoveItem",
+    badAck: { grid: "HeroInventory", uniqueId: 505, to: 1, success: true },
+    ack: { grid: "HeroInventory", uniqueId: 505, to: 3, success: true },
+    applyResult(base) {
+      const worn = base.world.heroEquipmentItems.find(item => item.uniqueId === 505);
+      base.world.heroEquipmentItems = []; base.world.heroInventoryItems.push({ ...worn, slot: 3 });
+    },
+    assertResult(after, before) {
+      assert.equal(after.equipment[3], null);
+      assert.deepEqual(heroLocation45(before, 505), [{ grid: "HeroEquipment", slot: 3, uid: 505, count: 1 }]);
+      assert.deepEqual(heroLocation45(after, 505), [{ grid: "HeroInventory", slot: 3, uid: 505, count: 1 }]);
+      for (const uid of [501, 502, 504, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared Merge exact source target ACK retires only after complete authority consumes the source and increases target count", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "merge", from: { grid: "HeroInventory", slot: 2 }, to: { grid: "HeroInventory", slot: 0 } },
+    wire: { type: "mergeItem", gridFrom: "HeroInventory", gridTo: "HeroInventory", idFrom: 502, idTo: 501 }, packet: "MergeItem",
+    badAck: { gridFrom: "HeroInventory", gridTo: "HeroInventory", idFrom: 501, idTo: 502, success: true },
+    ack: { gridFrom: "HeroInventory", gridTo: "HeroInventory", idFrom: 502, idTo: 501, success: true },
+    applyResult(base) {
+      const target = base.world.heroInventoryItems.find(item => item.uniqueId === 501);
+      target.quantity = 4; target.tooltipSource.userItem.count = 4;
+      base.world.heroInventoryItems = base.world.heroInventoryItems.filter(item => item.uniqueId !== 502);
+    },
+    assertResult(after, before) {
+      assert.equal(after.inventory[2], null); assert.deepEqual(heroLocation45(after, 502), []);
+      assert.deepEqual(heroLocation45(after, 501), [{ grid: "HeroInventory", slot: 0, uid: 501, count: 4 }]);
+      assert.equal(after.inventory[0].count, before.inventory[0].count + before.inventory[2].count);
+      for (const uid of [504, 505, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared Transfer successful exact ACK requires both full domains before personal UID becomes Hero custody", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "transfer", from: 3, to: 3 },
+    wire: { type: "transferHeroItem", from: 3, to: 3 }, packet: "TransferHeroItem",
+    badAck: { from: 3, to: 4, success: true }, ack: { from: 3, to: 3, success: true },
+    applyResult(base) {
+      const source = base.world.inventoryItems.find(item => item.uniqueId === 601);
+      base.world.inventoryItems = base.world.inventoryItems.filter(item => item.uniqueId !== 601);
+      base.world.heroInventoryItems.push({ ...source, slot: 3 });
+    },
+    assertResult(after, before) {
+      assert.deepEqual(heroLocation45(before, 601), [{ grid: "Inventory", slot: 3, uid: 601, count: 1 }]);
+      assert.equal(after.personalInventory[3], null);
+      assert.deepEqual(heroLocation45(after, 601), [{ grid: "HeroInventory", slot: 3, uid: 601, count: 1 }]);
+      for (const uid of [501, 502, 504, 505]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared TakeBack successful exact ACK requires both full domains before Hero stack becomes personal custody", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "takeBack", from: 2, to: 4 },
+    wire: { type: "takeBackHeroItem", from: 2, to: 4 }, packet: "TakeBackHeroItem",
+    badAck: { from: 2, to: 5, success: true }, ack: { from: 2, to: 4, success: true },
+    applyResult(base) {
+      const source = base.world.heroInventoryItems.find(item => item.uniqueId === 502);
+      base.world.heroInventoryItems = base.world.heroInventoryItems.filter(item => item.uniqueId !== 502);
+      base.world.inventoryItems.push({ ...source, slot: 4 });
+    },
+    assertResult(after, before) {
+      assert.equal(after.inventory[2], null);
+      assert.deepEqual(heroLocation45(before, 502), [{ grid: "HeroInventory", slot: 2, uid: 502, count: 3 }]);
+      assert.deepEqual(heroLocation45(after, 502), [{ grid: "Inventory", slot: 4, uid: 502, count: 3 }]);
+      for (const uid of [501, 504, 505, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared AutoPotValue HP and MP exact echoes wait for full authority with the requested changed threshold", () => {
+  for (const [stat, field, value] of [[12, "autoHpPercent", 55], [13, "autoMpPercent", 65]]) {
+    assertHeroSuccessChain45({
+      action: { kind: "autoPotValue", stat, value }, wire: { type: "setAutoPotValue", stat, value }, packet: "SetAutoPotValue",
+      badAck: { stat, value: value - 1 }, ack: { stat, value },
+      applyResult(base) { base.world.stage5Systems.hero[field] = value; },
+      assertResult(after, before) {
+        const own = stat === 12 ? "hpPercent" : "mpPercent", other = stat === 12 ? "mpPercent" : "hpPercent";
+        assert.notEqual(before[own], value); assert.equal(after[own], value); assert.equal(after[other], before[other]);
+        assert.equal(after.hpItemIndex, before.hpItemIndex); assert.equal(after.mpItemIndex, before.mpItemIndex);
+        assert.deepEqual(heroCustody45(after), heroCustody45(before));
+      },
+    });
+  }
+});
+check("Hero shared AutoPotItem HP MP selection and clear settle only with exact numeric echoes and final changed config", () => {
+  for (const [grid, statGrid, sourceField, worldField, resultField] of [
+    ["HeroHpItem", 23, "hp_item_index", "hpItemIndex", "hpItemIndex"],
+    ["HeroMpItem", 24, "mp_item_index", "mpItemIndex", "mpItemIndex"],
+  ]) for (const clear of [false, true]) {
+    const slot = clear ? null : 2, itemIndex = clear ? 0 : 10;
+    assertHeroSuccessChain45({
+      setup(base) { base.info[sourceField] = clear ? 10 : 0; base.world.stage5Systems.hero[worldField] = clear ? 10 : 0; },
+      action: { kind: "autoPotItem", grid, slot }, wire: { type: "setAutoPotItem", grid, itemIndex }, packet: "SetAutoPotItem",
+      badAck: { grid: statGrid === 23 ? 24 : 23, item_index: itemIndex }, ack: { grid: statGrid, item_index: itemIndex },
+      applyResult(base) { base.world.stage5Systems.hero[worldField] = itemIndex; },
+      assertResult(after, before) {
+        const other = resultField === "hpItemIndex" ? "mpItemIndex" : "hpItemIndex";
+        assert.notEqual(before[resultField], itemIndex); assert.equal(after[resultField], itemIndex);
+        assert.equal(after[other], before[other]); assert.equal(after.hpPercent, before.hpPercent); assert.equal(after.mpPercent, before.mpPercent);
+        assert.deepEqual(heroCustody45(after), heroCustody45(before));
+      },
+    });
+  }
+});
+
 console.log(`stage5 adapter tests passed (${passed} groups)`);

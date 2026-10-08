@@ -1,5 +1,15 @@
 # Windows 原生可玩闭环验收清单
 
+## Source45：最新 renderer 编译与动作回归通过；完整包及实玩仍待完成（2026-10-08）
+
+默认共享入口/任务四原脚本实际48/48 TAP通过；Hero原Stage5脚本实际1/1文件TAP、501逻辑组通过，其中原494组字节和断言保留，新增7组/11正向场景覆盖装备、卸装、合并、跨背包转移及补药配置。实际SharedHost→Page发送/claim→唯一台账→回执/完整快照接收路径执行，最终UID/数量/配置另有断言；Prepared/Ready、socket和权威结果仍为有限夹具，非真实服务器或玩家验收。两个输入区间分开记录，不声称整个当前checkout通过。
+
+三个renderer实际release Cargo及六次原bindgen/Binaryen静态转换全部exit0；优化WASM为31467818/17745325/32429102B，均在原32505856B内，共享WebGL2余76754B；JS均在原204800B内。917隔离Rust输入与当前17136项Web声明输入最终重核匹配，三Cargo严格串行、实际PolicyB关闭，原50GiB/2000ms门槛保留。本轮未新跑Rust测试、Native测试或TSC；源未变的Source44类型检查仅限定承接。
+
+Core/PUI/NPC只按56个相关源文件＋4个控制文件未变及18份产物pin限定保留Source33静态候选，旧完整workspace不承接。Windows EXE需要fresh编译；完整renderer metadata/name/ABI/defaultgzip/init、不可变发布与Next/Thin打包仍待完成。最新完整Web仍Source25，尚不含Source26–45。功能记录309/317≈97.5%含旧实现；共享分类103/317≈32.5%也不是总体进度。overallPercentage=null、Candidate100=false、goal active，可玩日期未知；继续代码且暂不操作界面，登录/任务/战斗/保存/重登与移动、人类验收未执行。
+
+证据：[本轮实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json)、[74份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json)、[最小交付输入审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json)、[Source44实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json)。Source44远端ad6f915a693e1322b69afeed926f36318caefdb4已核验；本轮随后单独记录实际提交推送。用户tsconfig及外来后端/文档正文保留并排除本轮提交，下方历史保留。
+
 ## Source44：Hero 共享页面及输入接线通过有限验证；新版完整包仍待交付（2026-10-08）
 
 Page 与 Shell 已接入共享 Hero Host：隐藏根先完成布局，Prepared 后同步卸载旧 DOM，再启用控制并等待实际 matching Ready；渲染期只读投影，事件和原发送前 claim 重核来源、租约、sink、布局及500ms帧健康。鼠标、键盘、悬停与移动菜单接原输入仲裁；旧 pointer/cleanup 不得跨场景或接管新手势。同内容完整快照保留合法拖拽，新来源或控制变化清除旧排队输入和反馈。继续复用原唯一操作台账、精确ACK与后续完整快照屏障及 Unknown custody。以上为代码接线与有限回归，不是 live World/Ready 或玩家验收。
