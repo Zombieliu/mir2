@@ -1,0 +1,76 @@
+{
+  "schema": "mir2.production-design.v0.2",
+  "status": "design-only",
+  "productionEnabled": false,
+  "numericParameters": "first-playtest-proposals",
+  "itemIds": "design-symbols-not-runtime-template-ids",
+  "sourceGates": {
+    "gathering": "Normal wood, stone, fiber, fruit and spice gathering must be implemented and accepted.",
+    "mining": "Bind allowed ordinary ore instances without consuming protected refining materials.",
+    "planting": "Normal seeds, crops, persistent harvest and purchase alternatives must be accepted.",
+    "fishing": "Normal rod, bait, catch, save and reconnect flow must be accepted.",
+    "saltMining": "Add a dedicated rock-salt source; existing metal ore cannot substitute for food salt.",
+    "construction": "Persistent buildings, collision and material consumption must be accepted.",
+    "medicine": "Bind the actual ordinary potion package and item-use flow.",
+    "food": "Food effects and consumption must be implemented and accepted."
+  },
+  "items": {
+    "wood": {"name":"木材","stage":"raw","family":"gathering","sourceGate":"gathering","source":"正常采集木材；交易或有限 NPC 供应可补缺","runtimeTemplateId":null},
+    "fiber": {"name":"植物纤维","stage":"raw","family":"gathering","sourceGate":"gathering","source":"正常采集藤草","runtimeTemplateId":null},
+    "rubble": {"name":"石料","stage":"raw","family":"gathering","sourceGate":"gathering","source":"正常采集石料","runtimeTemplateId":null},
+    "ore": {"name":"普通矿石","stage":"raw","family":"mining","sourceGate":"mining","source":"正常挖矿；具体实例和纯度使用白名单","runtimeTemplateId":null},
+    "grain": {"name":"谷物","stage":"raw","family":"planting","sourceGate":"planting","source":"正常播种与收获","runtimeTemplateId":null},
+    "herb": {"name":"药草","stage":"raw","family":"planting","sourceGate":"planting","source":"首期正常种植；野生药草以后用显式来源版本接入","runtimeTemplateId":null},
+    "fruit": {"name":"野果","stage":"raw","family":"gathering","sourceGate":"gathering","source":"正常采集野果","runtimeTemplateId":null},
+    "spice": {"name":"香草","stage":"raw","family":"gathering","sourceGate":"gathering","source":"正常采集食材香草","runtimeTemplateId":null},
+    "fish": {"name":"普通鱼","stage":"raw","family":"fishing","sourceGate":"fishing","source":"正常钓鱼","runtimeTemplateId":null},
+    "rockSalt": {"name":"岩盐","stage":"raw","family":"mining","sourceGate":"saltMining","source":"拟新增专用盐矿点","runtimeTemplateId":null},
+    "planks": {"name":"木板","stage":"processed","runtimeTemplateId":null},
+    "rope": {"name":"捆扎绳","stage":"processed","runtimeTemplateId":null},
+    "charcoal": {"name":"木炭","stage":"processed","runtimeTemplateId":null},
+    "stone": {"name":"建材石","stage":"processed","runtimeTemplateId":null},
+    "metal": {"name":"金属连接件","stage":"processed","runtimeTemplateId":null},
+    "flour": {"name":"面粉","stage":"processed","runtimeTemplateId":null},
+    "salt": {"name":"食用盐","stage":"processed","runtimeTemplateId":null},
+    "components": {"name":"木构件","stage":"component","runtimeTemplateId":null},
+    "buildingKit": {"name":"结构建材","stage":"component","runtimeTemplateId":null},
+    "packages": {"name":"基础补给包","stage":"final","runtimeTemplateId":null},
+    "ration": {"name":"谷物野果饼","stage":"final","runtimeTemplateId":null},
+    "meal": {"name":"盐焗鱼饭","stage":"final","runtimeTemplateId":null}
+  },
+  "facilities": {
+    "bench": {"name":"基础加工台","bootstrap":"共用作坊；无需先拥有个人建筑"},
+    "kiln": {"name":"共用窑炉","bootstrap":"共用作坊；无需先拥有个人建筑"},
+    "kitchen": {"name":"共用厨房","bootstrap":"共用作坊；无需先拥有个人建筑"}
+  },
+  "recipes": {
+    "planks": {"name":"木板","facility":"bench","inputs":{"wood":3},"gold":10,"minutes":1,"output":"planks","amount":3,"unlockGates":[]},
+    "rope": {"name":"捆扎绳","facility":"bench","inputs":{"fiber":3},"gold":10,"minutes":1,"output":"rope","amount":3,"unlockGates":[]},
+    "charcoal": {"name":"木炭","facility":"kiln","inputs":{"wood":2},"gold":10,"minutes":1,"output":"charcoal","amount":2,"unlockGates":[]},
+    "stone": {"name":"建材石","facility":"kiln","inputs":{"rubble":5,"charcoal":1},"gold":100,"minutes":1,"output":"stone","amount":10,"unlockGates":[]},
+    "metal": {"name":"金属连接件","facility":"kiln","inputs":{"ore":3,"charcoal":1},"gold":40,"minutes":1,"output":"metal","amount":3,"unlockGates":[]},
+    "flour": {"name":"面粉","facility":"bench","inputs":{"grain":3},"gold":10,"minutes":1,"output":"flour","amount":3,"unlockGates":[]},
+    "salt": {"name":"食用盐","facility":"kitchen","inputs":{"rockSalt":3,"charcoal":1},"gold":20,"minutes":1,"output":"salt","amount":3,"unlockGates":[]},
+    "timber": {"name":"木构件","facility":"bench","inputs":{"planks":2,"metal":1,"rope":1},"gold":20,"minutes":1,"output":"components","amount":2,"unlockGates":["construction"]},
+    "buildingKit": {"name":"结构建材","facility":"bench","inputs":{"planks":3,"stone":4,"metal":2,"rope":1},"gold":100,"minutes":2,"output":"buildingKit","amount":2,"unlockGates":["construction"]},
+    "supplies": {"name":"基础补给包","facility":"bench","inputs":{"herb":10,"grain":5},"gold":100,"minutes":2,"output":"packages","amount":1,"unlockGates":["medicine"]},
+    "ration": {"name":"谷物野果饼","facility":"kitchen","inputs":{"flour":2,"fruit":1},"gold":20,"minutes":1,"output":"ration","amount":2,"unlockGates":["food"]},
+    "meal": {"name":"盐焗鱼饭","facility":"kitchen","inputs":{"flour":2,"fish":3,"spice":1,"salt":1},"gold":40,"minutes":2,"output":"meal","amount":2,"unlockGates":["food"]}
+  },
+  "buildings": {
+    "plot": {"name":"农田","symbol":"田","w":1,"h":1,"inputs":{"wood":5},"minutes":0},
+    "warehouse": {"name":"小仓库","symbol":"仓","w":2,"h":2,"inputs":{"planks":8,"buildingKit":4,"components":2},"minutes":10},
+    "workbench": {"name":"加工台","symbol":"工","w":2,"h":1,"inputs":{"planks":6,"buildingKit":2},"minutes":5}
+  },
+  "rules": {
+    "maxBatch":10,
+    "refundMaterialNumerator":1,
+    "refundMaterialDenominator":2,
+    "refundGold":false,
+    "rawSubstitution":"explicit-whitelist-and-version-only",
+    "quality":"fixed-recipe-no-unlisted-ore-bonus",
+    "sourceGateResolution":"all-transitive-raw-source-gates-and-output-use-gates",
+    "automaticProductionChain":false,
+    "initialDemoStockIsGameplayGrant":false
+  }
+}
