@@ -1,12 +1,14 @@
 //! Crystal Hero dialogs use a separate actor and inventory custody.
 //! HeroInformation bootstraps actions; a complete owner checkpoint can show status.
 use mir2_protocol::{ClientMagic, HeroUserInformation, UserItem};
+use crate::crystal_ui::amount_input::CrystalAmountInput;
 #[path = "hero_assign_dialog.rs"]
 pub mod assign;
 #[path = "hero_cross_inventory.rs"]
 pub mod cross;
 #[path = "hero_dialog_geometry.rs"]
 pub mod geometry;
+#[cfg(feature = "native-ui")]
 #[path = "hero_dialog_host.rs"]
 pub mod host;
 #[path = "hero_item_use.rs"]
@@ -29,8 +31,8 @@ pub enum HeroPage {
 pub struct HeroDialogModel {
     pub assign: assign::HeroAssignUi,
     pub cross: cross::CrossInput,
-    pub amount: Option<(u8, super::CrystalAmountInput)>,
-    pub pending_amount: Option<(u8, super::CrystalAmountInput)>,
+    pub amount: Option<(u8, CrystalAmountInput)>,
+    pub pending_amount: Option<(u8, CrystalAmountInput)>,
     pub config_pending: Option<mir2_protocol::ClientPacket>,
     pub hero_generation: u64,
     pub armed: Option<render::HeroAction>,

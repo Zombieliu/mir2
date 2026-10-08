@@ -43,6 +43,7 @@ pub mod crystal_ui {
 pub mod entities;
 pub mod game_shop;
 pub mod hero_model;
+pub mod hero_ingress;
 #[cfg(feature = "native-ui")]
 pub mod hud;
 pub mod inventory;
@@ -62,6 +63,8 @@ pub mod player_text;
 pub mod portable_bag_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_character_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_hero_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_experience_bar_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]

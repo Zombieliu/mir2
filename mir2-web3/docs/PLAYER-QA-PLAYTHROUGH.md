@@ -1,5 +1,18 @@
 # Player-QA playthrough loop
 
+## Source39：Hero 共享原始数据与面板模块完成有限验证；完整 Web 接线仍待交付（2026-10-08）
+
+共享库新增严格 raw Hero ingress 和 portable Hero painter/reducer，Native 与 Web 共用同一 Crystal 绘制及物品规划。保留原始 u64/i64、首次到达的相对技能时钟、scope/scene/run 退休门槛和 bounded FIFO；未消费回执禁止 checkpoint 交接。UID0 只读并保留真实目标占位，动态实例 metadata 不一致等新 owner；Native 默认入口、控件及操作逻辑保留。多指针、过期反馈、背包重开/锁定页/前景、模态全 stage 拦截和缺失布局保护均有回归。
+
+最终 Source03 实际 portable 45/45＋Native 24/24，共69次执行、0失败/ignored；同原函数跨feature去重56项，新增21项，不能说69项新功能。原两次编译失败均执行0测试，完整失败凭据保留，分别修复错误常量import与Root清理误伤的font函数调用。WASM shared-runtime cargo check 实际exit0，仅静态编译，不计测试或完整生产包。899声明Rust输入11改/888保护；原5次Guard、25份nonce文件全部PolicyB completed/exited/disposed，C最低264547229696 B、freshness保守上界最大70ms；没有强制Cargo deadline声明。
+
+下一队列必须完成实际 Runtime Hero consumer/ABI/sink/匹配Ready、现有tooltip surface与真实auto-pot catalog preview，然后接Page原始帧缓存、renderer交接及现有唯一操作账本。当前只在共享库实现，不表示Web已接通Hero；不能只凭setter接受切掉React fallback，精确ACK仍须新完整snapshot后才结算。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，shared分类103/317≈32.5%也不是整体验收率。overallPercentage=null、Candidate100=false、goal active，未新增关闭Hero整链行。完整公开Web仍Source25 Next08/Thin08，不含Source26–39；本轮未构建新EXE/Core/PUI/renderer包/完整Web，manifest不变、TS未改/未新跑TSC。原metadata/name/normalized ABI/default-gzip/初始化及源码匹配打包门槛仍须保留，未绕过原helper的WASM API限制。登录→战斗→保存→重登、移动真机与玩家验收not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-finite-result01.json)、[五次真实Guard和完整原始输出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-raw-evidence01.json)、[Source38实际发布失败与远端6116记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-publication01.json)。本轮Git发布状态以随后真实发布记录为准。未改后端/共享Zone/协议parity；下面旧轮次均为历史。
+
+
 ## Source38：英雄共享数据基础及物品回执保留修复，50项回归通过；新版可玩包仍待交付（2026-10-08）
 
 完整Hero owner projector与item/tooltip校验移入client-bevy::hero_model；Native原签名用Incomplete/Decode/Projection三错误映射调用同一实现。完整inventory、Info/realInfo/UserItem/socket、UID0/u64MAX、i64 XP、容量/稀疏装备/keys/null配对保持原语义，gate/World/Applied/结算仍在Native。两个现有Hero consumer分支均保留item_result_receipt或skill ACK再应用最新模型，修复同批后续状态覆盖物品回执的问题。这不是完整WASM Hero adapter或共享面板完成。

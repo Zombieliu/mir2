@@ -1,5 +1,5 @@
 //! Source-sized current-frame hit regions; independent of recreated Bevy interaction nodes.
-use super::super::{CrystalRect, CRYSTAL_CHARACTER_EQUIPMENT_SLOTS};
+use crate::crystal_ui::{spec::CrystalRect, character_page::CRYSTAL_CHARACTER_EQUIPMENT_SLOTS};
 use super::{render::HeroAction, HeroDialogModel, HeroPage};
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum HeroWindow {
@@ -82,18 +82,18 @@ pub fn hit(
         }
         for i in 0..8u8 {
             if contains(CrystalRect::new(
-                349. + 32. * f32::from(i) + 5. * f32::from(i / 4),
-                369.,
-                28.,
-                30.,
+                339. + 32. * f32::from(i) + 5. * f32::from(i / 4),
+                370.,
+                32.,
+                32.,
             )) {
                 return (None, Some(HeroAction::AssignKey(i + 17)));
             }
         }
-        if contains(CrystalRect::new(616., 375., 64., 28.)) {
+        if contains(CrystalRect::new(606., 376., 76., 25.)) {
             return (None, Some(HeroAction::AssignKey(0)));
         }
-        if contains(CrystalRect::new(616., 412., 64., 28.)) {
+        if contains(CrystalRect::new(606., 413., 60., 25.)) {
             return (None, Some(HeroAction::AssignSave));
         }
         return (None, None);

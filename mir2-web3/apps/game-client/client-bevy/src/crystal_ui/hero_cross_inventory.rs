@@ -1,5 +1,10 @@
 //! Ordinary player/hero transfer gestures; never changes local item custody.
+#[cfg(feature = "native-ui")]
 use super::super::*;
+use bevy::prelude::*;
+use crate::inventory::{InventoryModel, ItemModel};
+#[cfg(feature = "native-ui")]
+use crate::crystal_ui::spec::CrystalRect;
 use super::*;
 use crate::hero_model::HeroModel;
 use mir2_protocol::{ClientPacket as C, MirGridType as G};
@@ -48,6 +53,7 @@ fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Opti
             && i.unique_id.is_some_and(|id| id != 0)
     })
 }
+#[cfg(feature = "native-ui")]
 fn hit(state: &NativePlayerUiState, player: &InventoryModel, p: Vec2) -> Option<Cell> {
     if player_covers(state, p) {
         return player_hit(state, player, p);
@@ -61,6 +67,7 @@ fn hit(state: &NativePlayerUiState, player: &InventoryModel, p: Vec2) -> Option<
     }
     player_hit(state, player, p)
 }
+#[cfg(feature = "native-ui")]
 pub fn player_covers(state: &NativePlayerUiState, p: Vec2) -> bool {
     state.hero.cross.player_front
         && state.inventory_open()
@@ -72,6 +79,7 @@ pub fn player_covers(state: &NativePlayerUiState, p: Vec2) -> bool {
         )
         .contains(p.x, p.y)
 }
+#[cfg(feature = "native-ui")]
 fn player_hit(state: &NativePlayerUiState, player: &InventoryModel, p: Vec2) -> Option<Cell> {
     if !state.hero.inventory_open || !state.inventory_open() || state.inventory_page > 1 {
         return None;
@@ -103,7 +111,7 @@ pub fn transfer_packet(
         _ => return None,
     };
     if let Some(target) = target {
-        return host::merge_packet(source, target, grid_from, grid_to);
+        return item_use::merge_packet(source, target, grid_from, grid_to);
     }
     match (from, to) {
         (Cell::Player(from), Cell::Hero(to)) => Some(C::TransferHeroItem {
@@ -117,6 +125,7 @@ pub fn transfer_packet(
         _ => None,
     }
 }
+#[cfg(feature = "native-ui")]
 fn edge(
     state: &mut NativePlayerUiState,
     player: &InventoryModel,
@@ -168,6 +177,7 @@ fn edge(
         state.hero.cross.pressed = None;
     }
 }
+#[cfg(feature = "native-ui")]
 pub fn process(
     mut state: ResMut<NativePlayerUiState>,
     player: Res<InventoryModel>,
@@ -263,6 +273,7 @@ pub fn process(
     }
 }
 
+#[cfg(feature = "native-ui")]
 pub fn draw_player_selection(
     parent: &mut ChildSpawnerCommands,
     state: &NativePlayerUiState,
@@ -287,6 +298,7 @@ pub fn draw_player_selection(
     ));
 }
 
+#[cfg(feature = "native-ui")]
 pub fn render_order(
     mut commands: Commands,
     state: Res<NativePlayerUiState>,
@@ -303,6 +315,6 @@ pub fn render_order(
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "native-ui"))]
 #[path = "hero_cross_inventory_tests.rs"]
 mod tests;

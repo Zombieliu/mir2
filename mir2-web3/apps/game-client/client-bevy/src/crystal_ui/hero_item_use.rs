@@ -1,6 +1,6 @@
 //! Crystal MirItemCell Hero UseItem planning. This never mutates custody.
 use crate::hero_model::HeroModel;
-use crate::inventory::CrystalItemInfoModel;
+use crate::inventory::{CrystalItemInfoModel, ItemModel};
 use mir2_protocol::{ClientPacket as C, MirGridType as G};
 #[derive(Debug, Clone, PartialEq)]
 pub enum HeroUsePlan {
@@ -183,6 +183,38 @@ pub fn remove_plan(model: &HeroModel, slot: u8) -> Option<C> {
         grid: G::HeroInventory,
         unique_id: item.unique_id,
         to: to as i32,
+    })
+}
+
+/// Exact Crystal stack planner shared with both Hero hosts.
+pub fn merge_packet(
+    source: &ItemModel,
+    target: &ItemModel,
+    grid_from: G,
+    grid_to: G,
+) -> Option<C> {
+    let (Some(source_info), Some(target_info)) = (
+        source.tooltip_source.as_ref(),
+        target.tooltip_source.as_ref(),
+    ) else {
+        return None;
+    };
+    if source_info.info.item_index != target_info.info.item_index
+        || target_info.info.stack_size <= 1
+        || target.quantity >= u32::from(target_info.info.stack_size)
+    {
+        return None;
+    }
+    let id_from = source.unique_id.filter(|id| *id != 0)?;
+    let id_to = target.unique_id.filter(|id| *id != 0)?;
+    if id_from == id_to {
+        return None;
+    }
+    Some(C::MergeItem {
+        grid_from,
+        grid_to,
+        id_from,
+        id_to,
     })
 }
 

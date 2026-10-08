@@ -429,8 +429,32 @@ pub fn paint_crystal_inventory_with_layout<A: Bundle>(
     player: &PlayerStats,
     options: &BagPaintOptions,
     layout: BagPaintLayout,
-    mut map_action: impl FnMut(BagPaintAction) -> A,
-    mut cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
+    map_action: impl FnMut(BagPaintAction) -> A,
+    cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
+    decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
+) {
+    paint_crystal_inventory_profile(parent, asset_server, inventory, player, options, layout,
+        BagPaintControls::Full, map_action, cell_policy, decorate);
+}
+
+/// The personal bag beside Hero exposes only ordinary bag pages and transfer cells.
+pub fn paint_crystal_hero_transfer_inventory<A: Bundle>(
+    parent: &mut ChildSpawnerCommands, asset_server: &AssetServer, inventory: &InventoryModel,
+    player: &PlayerStats, options: &BagPaintOptions, map_action: impl FnMut(BagPaintAction) -> A,
+    cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
+    decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
+) {
+    paint_crystal_inventory_profile(parent, asset_server, inventory, player, options,
+        BagPaintLayout::default(), BagPaintControls::HeroTransfer, map_action, cell_policy, decorate);
+}
+
+#[derive(Clone, Copy)]
+enum BagPaintControls { Full, HeroTransfer }
+
+fn paint_crystal_inventory_profile<A: Bundle>(
+    parent: &mut ChildSpawnerCommands, asset_server: &AssetServer, inventory: &InventoryModel,
+    player: &PlayerStats, options: &BagPaintOptions, layout: BagPaintLayout, controls: BagPaintControls,
+    mut map_action: impl FnMut(BagPaintAction) -> A, mut cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
     mut decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
 ) {
     parent.spawn((
@@ -457,6 +481,7 @@ pub fn paint_crystal_inventory_with_layout<A: Bundle>(
         ),
         (2, 146.0, 198, 739),
     ] {
+        if matches!(controls, BagPaintControls::HeroTransfer) && page == 2 { continue; }
         let action = BagPaintAction::SelectPage(page);
         let index = if options.page == page {
             active_index
@@ -521,7 +546,7 @@ pub fn paint_crystal_inventory_with_layout<A: Bundle>(
         );
     }
     let delete = BagPaintAction::ToggleDelete;
-    if !layout.touch { image_button(
+    if !layout.touch && matches!(controls, BagPaintControls::Full) { image_button(
         parent,
         asset_server,
         "Prguse2",

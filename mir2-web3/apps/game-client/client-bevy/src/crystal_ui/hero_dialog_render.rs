@@ -1,4 +1,17 @@
+#[cfg(feature = "native-ui")]
 use super::super::*;
+use bevy::prelude::*;
+use bevy::text::{Justify, LineBreak, TextLayout};
+use bevy::ui::FocusPolicy;
+use crate::crystal_ui::{
+    amount_input::CrystalAmountInput,
+    character_materials::CrystalCharacterWingMaterials,
+    character_page::{render_character_paper_doll, CRYSTAL_CHARACTER_EQUIPMENT_SLOTS},
+    panel_navigation::CHARACTER_PAGE_RECT as CRYSTAL_CHARACTER_PAGE_RECT,
+    character_stats, item_image::{original_item_image_bundle, spawn_original_item_image},
+    item_tooltip::crystal_item_tooltip_document, spec::CrystalRect, widget::CrystalItemHint,
+};
+use crate::read_model::UiReadModel;
 use super::*;
 use crate::hero_model::HeroModel;
 #[derive(Component)]
@@ -9,6 +22,20 @@ pub struct HeroButtonVisual {
     index: u16,
     action: HeroAction,
 }
+impl HeroButtonVisual {
+    pub fn image_path(&self, ui: &HeroDialogModel) -> String {
+        let hovered = ui.hovered == Some(self.action);
+        let pressed = hovered && ui.armed == Some(self.action);
+        let index = match self.action {
+            HeroAction::Page(_) => self.index,
+            HeroAction::Skill(_) | HeroAction::Previous | HeroAction::Next => self.index + u16::from(pressed),
+            HeroAction::AssignKey(_) if self.index == 1658 => 1658,
+            _ => self.index + if pressed { 2 } else { u16::from(hovered) },
+        };
+        format!("original-ui/{}/{index}.png", self.library)
+    }
+}
+#[cfg(feature = "native-ui")]
 pub fn button_visuals(
     state: Res<NativePlayerUiState>,
     assets: Option<Res<AssetServer>>,
@@ -16,16 +43,7 @@ pub fn button_visuals(
 ) {
     let Some(assets) = assets else { return };
     for (button, mut image) in &mut buttons {
-        let hovered = state.hero.hovered == Some(button.action);
-        let pressed = hovered && state.hero.armed == Some(button.action);
-        let index = match button.action {
-            HeroAction::Page(_) => button.index,
-            HeroAction::Skill(_) => button.index + u16::from(pressed),
-            HeroAction::Previous | HeroAction::Next => button.index + u16::from(pressed),
-            HeroAction::AssignKey(_) if button.index == 1658 => 1658,
-            _ => button.index + if pressed { 2 } else { u16::from(hovered) },
-        };
-        image.image = assets.load(format!("original-ui/{}/{index}.png", button.library));
+        image.image = assets.load(button.image_path(&state.hero));
     }
 }
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
@@ -105,7 +123,8 @@ fn button(
 fn item(
     parent: &mut ChildSpawnerCommands,
     assets: &AssetServer,
-    state: &NativePlayerUiState,
+    ui: &HeroDialogModel,
+    font: &TextFont,
     model: &HeroModel,
     container: u8,
     slot: u32,
@@ -130,23 +149,21 @@ fn item(
         .iter()
         .find(|item| item.container == container && item.slot == slot)
     {
-        if let Some(mut actor) = model.snapshot_read_model().or_else(||model.info.as_ref().map(actor_ui)) {
+        if let Some(mut actor) = actor_view(model) {
             actor.player.crystal_stats = model.stats.clone();
             cell.insert(CrystalItemHint(crystal_item_tooltip_document(
                 item,
                 &actor.player,
             )));
         }
-        let selected = state
-            .hero
-            .selected
+        let selected = ui.selected
             .is_some_and(|(gear, selected_slot, id)| {
                 container == if gear { 2 } else { 0 }
                     && slot == u32::from(selected_slot)
                     && item.unique_id == Some(id)
             })
             || (container == 0
-                && state.hero.cross.selected_cell() == Some(cross::Cell::Hero(slot as u8)));
+                && ui.cross.selected_cell() == Some(cross::Cell::Hero(slot as u8)));
         cell.with_children(|parent| {
             if let Some(index) = item.user_item_image_index() {
                 let (marker, node, image) = original_item_image_bundle(
@@ -177,13 +194,13 @@ fn item(
                     bevy::ui::FocusPolicy::Pass,
                 ));
             }
-            let count = inventory_cell_stack_label(item);
+            let count = item.crystal_stack_label();
             if !count.is_empty() {
-                overlay_text_at(
+                hero_text(font,
                     parent,
                     &count,
                     CrystalRect::new(0., 17., 36., 14.),
-                    (32. / 3.),
+                    32. / 3.,
                     Color::WHITE,
                 );
             }
@@ -207,6 +224,7 @@ pub fn actor_ui(info: &mir2_protocol::HeroUserInformation) -> UiReadModel {
         ..default()
     }
 }
+#[cfg(feature = "native-ui")]
 pub fn render(
     mut commands: Commands,
     roots: Query<Entity, With<OverlayRoot>>,
@@ -227,22 +245,31 @@ pub fn render(
         return;
     }
     let Ok(root)=roots.single() else {return;};
+    let font = crate::crystal_ui::typography::crystal_text_font(32. / 3.);
+    paint(&mut commands, root, &state.hero, &model, &assets, wings.as_deref(), &font, crate::hero_model::hero_clock_ms());
+}
+
+/// One Crystal painter for Native and portable hosts. Hosts provide font and a clock domain.
+pub fn paint(
+    commands: &mut Commands, root: Entity, ui: &HeroDialogModel, model: &HeroModel,
+    assets: &AssetServer, wings: Option<&CrystalCharacterWingMaterials>, font: &TextFont, now_ms: u64,
+) {
     let Some(info)=model.info.as_ref() else {
         // A checkpoint knows economic identity/XP without a packet-only
         // object ID or hair. Show its exact status without inventing either.
-        if state.hero.character_open {
+        if ui.character_open {
             if let Some(actor)=model.snapshot_read_model() {
-                let p=state.hero.character_position.unwrap_or([760,0]);
+                let p=ui.character_position.unwrap_or([760,0]);
                 commands.entity(root).with_children(|parent| {
                     parent.spawn((HeroRoot,Node{position_type:PositionType::Absolute,left:Val::Px(p[0] as f32),top:Val::Px(p[1] as f32),
                         width:Val::Px(264.),height:Val::Px(380.),..default()},ImageNode::new(assets.load("original-ui/Title/504.png")),
-                        GlobalZIndex(geometry::window_z(&state.hero,geometry::HeroWindow::Character)))).with_children(|parent| {
+                        GlobalZIndex(geometry::window_z(&ui,geometry::HeroWindow::Character)))).with_children(|parent| {
                         button(parent,&assets,"Prguse2",360,CrystalRect::new(241.,3.,24.,21.),HeroAction::CloseCharacter);
-                        overlay_centered_text_at(parent,actor.player.name.as_deref().unwrap_or(""),CrystalRect::new(0.,12.,264.,18.),32./3.,Color::WHITE);
+                        hero_centered_text(font, parent,actor.player.name.as_deref().unwrap_or(""),CrystalRect::new(0.,12.,264.,18.),32./3.,Color::WHITE);
                         image(parent,&assets,"Title",506,CRYSTAL_CHARACTER_PAGE_RECT,1.);
                         let weights=model.weights.map(|w|character_stats::Weights{bag:Some(i64::from(w.bag)),wear:Some(i64::from(w.wear)),hand:Some(i64::from(w.hand))}).unwrap_or_default();
                         for (text,top) in character_stats::lines(&actor.player,false,weights) {
-                            overlay_text_at(parent,&text,CrystalRect::new(134.,top,105.,16.),32./3.,Color::WHITE);
+                            hero_text(font, parent,&text,CrystalRect::new(134.,top,105.,16.),32./3.,Color::WHITE);
                         }
                     });
                 });
@@ -250,7 +277,6 @@ pub fn render(
         }
         return;
     };
-    let ui = &state.hero;
     let mut displayed = info.clone();
     ui.assign.overlay(&mut displayed);
     let info = &displayed;
@@ -279,7 +305,7 @@ pub fn render(
                         CrystalRect::new(0., 0., 456., 190.),
                         1.,
                     );
-                    friend_dialog::view::wrapped_text(
+                    hero_wrapped_text(font,
                         p,
                         "Are you use you want to use this Potion?",
                         CrystalRect::new(35., 35., 390., 110.),
@@ -302,10 +328,10 @@ pub fn render(
         });
     }
     if let Some((_, amount)) = ui.amount.as_ref() {
-        render_amount(&mut commands, root, &assets, amount);
+        render_amount(commands, root, assets, font, amount);
     }
     if ui.assign.open {
-        render_assign(&mut commands, root, &assets, ui, &state.keyboard, info);
+        render_assign(commands, root, assets, font, ui, info);
     }
     if ui.inventory_open {
         let p = ui.inventory_position;
@@ -339,7 +365,8 @@ pub fn render(
                             item(
                                 parent,
                                 &assets,
-                                &state,
+                                ui,
+                                font,
                                 &model,
                                 0,
                                 (cell + 2) as u32,
@@ -371,7 +398,8 @@ pub fn render(
                         item(
                             parent,
                             &assets,
-                            &state,
+                            ui,
+                                font,
                             &preview,
                             0,
                             0,
@@ -381,7 +409,8 @@ pub fn render(
                         item(
                             parent,
                             &assets,
-                            &state,
+                            ui,
+                                font,
                             &preview,
                             0,
                             1,
@@ -404,18 +433,18 @@ pub fn render(
                             CrystalRect::new(206., 206., 60., 25.),
                             HeroAction::AutoMp,
                         );
-                        overlay_centered_text_at(
+                        hero_centered_text(font,
                             parent,
                             &format!("{}%", info.auto_hp_percent),
                             CrystalRect::new(58., 233., 60., 25.),
-                            (32. / 3.),
+                            32. / 3.,
                             Color::WHITE,
                         );
-                        overlay_centered_text_at(
+                        hero_centered_text(font,
                             parent,
                             &format!("{}%", info.auto_mp_percent),
                             CrystalRect::new(206., 233., 60., 25.),
-                            (32. / 3.),
+                            32. / 3.,
                             Color::WHITE,
                         );
                     } else {
@@ -466,11 +495,11 @@ pub fn render(
                         CrystalRect::new(241., 3., 24., 21.),
                         HeroAction::CloseCharacter,
                     );
-                    overlay_centered_text_at(
+                    hero_centered_text(font,
                         parent,
                         &info.name,
                         CrystalRect::new(0., 12., 264., 18.),
-                        (32. / 3.),
+                        32. / 3.,
                         Color::WHITE,
                     );
                     image(
@@ -541,7 +570,8 @@ pub fn render(
                             item(
                                 parent,
                                 &assets,
-                                &state,
+                                ui,
+                                font,
                                 &model,
                                 2,
                                 slot,
@@ -554,11 +584,11 @@ pub fn render(
                             &assets,
                             wings.as_deref(),
                             &model.inventory_view,
-                            &model.snapshot_read_model().unwrap_or_else(||actor_ui(info)),
+                            &actor_view(model).unwrap_or_else(|| actor_ui(info)),
                         );
                     }
                     if matches!(ui.page, HeroPage::Status | HeroPage::State) {
-                        let mut actor = model.snapshot_read_model().unwrap_or_else(||actor_ui(info));
+                        let mut actor = actor_view(model).unwrap_or_else(|| actor_ui(info));
                         actor.player.crystal_stats = model.stats.clone();
                         let weights = model
                             .weights
@@ -573,7 +603,7 @@ pub fn render(
                             ui.page == HeroPage::State,
                             weights,
                         ) {
-                            overlay_text_at(
+                            hero_text(font,
                                 parent,
                                 &text,
                                 CrystalRect::new(134., top, 105., 16.),
@@ -600,7 +630,7 @@ pub fn render(
                                 .iter()
                                 .find(|clock| clock.spell == magic.spell)
                                 .and_then(|clock| {
-                                    clock.dialog_frame(crate::hero_model::hero_clock_ms())
+                                    clock.dialog_frame(now_ms)
                                 })
                             {
                                 // Original Prguse2 1290..1324 are all 36x34 with zero offset.
@@ -629,18 +659,18 @@ pub fn render(
                                 CrystalRect::new(89., y + 19., 24., 11.),
                                 1.,
                             );
-                            overlay_text_at(
+                            hero_text(font,
                                 parent,
                                 &magic.level.to_string(),
                                 CrystalRect::new(104., y + 2., 21., 14.),
-                                (32. / 3.),
+                                32. / 3.,
                                 Color::WHITE,
                             );
-                            overlay_text_at(
+                            hero_text(font,
                                 parent,
                                 &magic.name,
                                 CrystalRect::new(125., y + 2., 125., 14.),
-                                (32. / 3.),
+                                32. / 3.,
                                 Color::WHITE,
                             );
                             let exp = match magic.level {
@@ -649,11 +679,11 @@ pub fn render(
                                 2 => format!("{}/{}", magic.experience, magic.need3),
                                 _ => "-".into(),
                             };
-                            overlay_text_at(
+                            hero_text(font,
                                 parent,
                                 &exp,
                                 CrystalRect::new(125., y + 15., 125., 14.),
-                                (32. / 3.),
+                                32. / 3.,
                                 Color::WHITE,
                             );
                             let key = if (17..=24).contains(&magic.key) {
@@ -661,11 +691,11 @@ pub fn render(
                             } else {
                                 String::new()
                             };
-                            overlay_text_at(
+                            hero_text(font,
                                 parent,
                                 &key,
                                 CrystalRect::new(18., y + 2., 34., 30.),
-                                (32. / 3.),
+                                32. / 3.,
                                 Color::WHITE,
                             );
                         }
@@ -745,14 +775,15 @@ pub fn render(
                         item(
                             parent,
                             &assets,
-                            &state,
+                            ui,
+                                font,
                             &model,
                             0,
                             cell,
                             rect,
                             HeroAction::InventoryCell(cell as u8),
                         );
-                        overlay_text_at(
+                        hero_text(font,
                             parent,
                             &(cell + 7).to_string(),
                             CrystalRect::new(
@@ -769,7 +800,7 @@ pub fn render(
                                 26.,
                                 14.,
                             ),
-                            (32. / 3.),
+                            32. / 3.,
                             Color::WHITE,
                         );
                     }
@@ -806,8 +837,8 @@ fn render_assign(
     commands: &mut Commands,
     root: Entity,
     assets: &AssetServer,
+    font: &TextFont,
     ui: &HeroDialogModel,
-    _keyboard: &keyboard_dialog::KeyboardDialogUi,
     info: &mir2_protocol::HeroUserInformation,
 ) {
     let assign = &ui.assign;
@@ -830,7 +861,7 @@ fn render_assign(
                 FocusPolicy::Block,
             ))
             .with_children(|p| {
-                spawn_overlay_frame(p, assets, "original-ui/Prguse/710.png", 380., 144.);
+                hero_frame(p, assets, "original-ui/Prguse/710.png", 380., 144.);
                 image(
                     p,
                     assets,
@@ -839,7 +870,7 @@ fn render_assign(
                     CrystalRect::new(16., 16., 36., 34.),
                     1.,
                 );
-                overlay_centered_text_at(
+                hero_centered_text(font,
                     p,
                     &format!("Select the Key for: {}", magic.name),
                     CrystalRect::new(49., 17., 230., 32.),
@@ -862,7 +893,7 @@ fn render_assign(
                         HeroAction::AssignKey(17 + i),
                     );
                     let label = format!("Shift\nF{}", i + 1);
-                    overlay_text_at(
+                    hero_text(font,
                         p,
                         &label,
                         CrystalRect::new(rect.left + 1., rect.top, rect.width - 1., rect.height),
@@ -887,7 +918,7 @@ fn render_assign(
                     HeroAction::AssignSave,
                 );
                 if let Some(notice) = assign.notice.as_deref() {
-                    overlay_text_at(
+                    hero_text(font,
                         p,
                         notice,
                         CrystalRect::new(16., 130., 260., 14.),
@@ -903,6 +934,7 @@ fn render_amount(
     commands: &mut Commands,
     root: Entity,
     assets: &AssetServer,
+    font: &TextFont,
     input: &CrystalAmountInput,
 ) {
     commands.entity(root).with_children(|parent| {
@@ -921,8 +953,8 @@ fn render_amount(
                 FocusPolicy::Block,
             ))
             .with_children(|p| {
-                spawn_overlay_frame(p, assets, "original-ui/Prguse/238.png", 204., 109.);
-                overlay_text_at(
+                hero_frame(p, assets, "original-ui/Prguse/238.png", 204., 109.);
+                hero_text(font,
                     p,
                     "Enter Value",
                     CrystalRect::new(19., 8., 158., 14.),
@@ -984,7 +1016,7 @@ fn render_amount(
                     BorderColor::all(border),
                 ))
                 .with_children(|p| {
-                    overlay_text_at(
+                    hero_text(font,
                         p,
                         &input.draft,
                         CrystalRect::new(2., 1., 128., 17.),
@@ -994,4 +1026,47 @@ fn render_amount(
                 });
             });
     });
+}
+
+/// Preserve actual packet hair while the complete checkpoint owns XP, vitals and stats.
+pub fn actor_view(model: &HeroModel) -> Option<UiReadModel> {
+    let checkpoint = model.snapshot_read_model();
+    let packet_matches = model.info.as_ref().is_some_and(|info| model.snapshot_identity.as_ref().is_none_or(|s|
+        s.name == info.name && s.class == info.class && s.gender == info.gender));
+    let mut actor = if packet_matches { model.info.as_ref().map(actor_ui) } else { checkpoint.clone() }
+        .or_else(|| checkpoint.clone())?;
+    if let Some(checkpoint) = checkpoint {
+        actor.player.experience = checkpoint.player.experience;
+        actor.player.max_experience = checkpoint.player.max_experience;
+        actor.player.level = checkpoint.player.level;
+        if model.snapshot_identity.as_ref().is_some_and(|h| h.vitals.is_some()) {
+            actor.player.hp = checkpoint.player.hp; actor.player.max_hp = checkpoint.player.max_hp;
+            actor.player.mp = checkpoint.player.mp; actor.player.max_mp = checkpoint.player.max_mp;
+        }
+    }
+    actor.player.crystal_stats = model.stats.clone();
+    Some(actor)
+}
+fn hero_font(font: &TextFont, size: f32) -> TextFont {
+    TextFont { font_size: FontSize::Px(size), ..font.clone() }
+}
+fn hero_text(font: &TextFont, parent: &mut ChildSpawnerCommands, text: &str, rect: CrystalRect, size: f32, color: Color) {
+    parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(rect.left), top: Val::Px(rect.top),
+        width: Val::Px(rect.width), height: Val::Px(rect.height), overflow: Overflow::clip(), ..default() },
+        Text::new(text), hero_font(font, size), TextColor(color), TextLayout::new(Justify::Left, LineBreak::NoWrap)));
+}
+fn hero_centered_text(font: &TextFont, parent: &mut ChildSpawnerCommands, text: &str, rect: CrystalRect, size: f32, color: Color) {
+    parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(rect.left), top: Val::Px(rect.top),
+        width: Val::Px(rect.width), height: Val::Px(rect.height), align_items: AlignItems::Center,
+        justify_content: JustifyContent::Center, overflow: Overflow::clip(), ..default() }, BackgroundColor(Color::NONE)))
+        .with_children(|p| { p.spawn((Text::new(text), hero_font(font, size), TextColor(color), TextLayout::new(Justify::Center, LineBreak::NoWrap))); });
+}
+fn hero_wrapped_text(font: &TextFont, parent: &mut ChildSpawnerCommands, text: &str, rect: CrystalRect, color: Color) {
+    parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(rect.left), top: Val::Px(rect.top),
+        width: Val::Px(rect.width), height: Val::Px(rect.height), overflow: Overflow::clip(), ..default() },
+        Text::new(text), hero_font(font, 32. / 3.), TextColor(color), TextLayout::new(Justify::Left, LineBreak::WordBoundary)));
+}
+fn hero_frame(parent: &mut ChildSpawnerCommands, assets: &AssetServer, path: &'static str, width: f32, height: f32) {
+    parent.spawn((Node { position_type: PositionType::Absolute, width: Val::Px(width), height: Val::Px(height),
+        ..default() }, ImageNode::new(assets.load(path))));
 }

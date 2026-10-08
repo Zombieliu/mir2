@@ -42,6 +42,11 @@ pub mod notice;
 pub(crate) mod npc_item_quote;
 #[cfg(feature = "native-ui")]
 pub mod overlays;
+#[cfg(feature = "native-ui")]
+pub use overlays::hero_dialog;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+#[path = "hero_dialog.rs"]
+pub mod hero_dialog;
 #[cfg(not(feature = "native-ui"))]
 #[path = "overlays_portable.rs"]
 pub mod overlays;

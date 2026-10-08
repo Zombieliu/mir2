@@ -532,35 +532,8 @@ fn click_item(
         ui.selected = Some((gear, slot, id));
     }
 }
-pub(super) fn merge_packet(
-    source: &ItemModel,
-    target: &ItemModel,
-    grid_from: Grid,
-    grid_to: Grid,
-) -> Option<C> {
-    let (Some(source_info), Some(target_info)) = (
-        source.tooltip_source.as_ref(),
-        target.tooltip_source.as_ref(),
-    ) else {
-        return None;
-    };
-    if source_info.info.item_index != target_info.info.item_index
-        || target_info.info.stack_size <= 1
-        || target.quantity >= u32::from(target_info.info.stack_size)
-    {
-        return None;
-    }
-    let id_from = item_unique_id(source)?;
-    let id_to = item_unique_id(target)?;
-    if id_from == id_to {
-        return None;
-    }
-    Some(C::MergeItem {
-        grid_from,
-        grid_to,
-        id_from,
-        id_to,
-    })
+pub(super) fn merge_packet(source: &ItemModel, target: &ItemModel, grid_from: Grid, grid_to: Grid) -> Option<C> {
+    item_use::merge_packet(source, target, grid_from, grid_to)
 }
 pub fn use_item(
     ui: &mut HeroDialogModel,
