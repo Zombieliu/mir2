@@ -92,6 +92,8 @@ pub struct HeroUiState { pub ui:HeroDialogModel,pub personal_open:bool,pub perso
     sequence:u64,intent_sequence:u64,next_use_ms:u64,confirmation:Option<Selected>,personal_drag:Option<[f32;2]>,
 }
 impl HeroUiState {
+    /// Escape belongs to this exact reducer state, including personal selection.
+    pub fn captures_escape(&self) -> bool { self.ui.modal() || self.selected.is_some() || self.held.is_some() }
     pub fn cancel(&mut self) { self.held=None;self.selected=None;self.last_click=None;self.confirmation=None;
         self.ui.armed=None;self.ui.hovered=None;self.ui.dragging=None;self.personal_drag=None;self.ui.selected=None;self.ui.amount=None;
         self.ui.use_confirmation=None;self.ui.assign=Default::default(); }
@@ -231,7 +233,7 @@ impl HeroUiState {
         if edge.phase=="cancel" {if self.held.as_ref().is_some_and(|h|h.pointer!=edge.pointer_id){return false;}self.cancel();return true;}
         if !c.active || !c.ready || !c.input_enabled || !c.presentation.is_some_and(HeroPresentation::fits) {self.cancel();return false;}
         if edge.phase=="key" {
-            if edge.key=="Escape" {let consumed=self.ui.modal()||self.selected.is_some()||self.held.is_some();self.cancel();return consumed;}
+            if edge.key=="Escape" {let consumed=self.captures_escape();self.cancel();return consumed;}
             if self.ui.amount.is_some() {
                 if edge.key=="Enter" {self.activate(c,m,q,Hit::Hero(None,Some(HeroAction::AmountConfirm)));}
                 else if let Some((_,input))=self.ui.amount.as_mut(){if edge.key=="Backspace" {input.backspace();}else if edge.control && edge.key=="KeyA"{input.select_all=true;}else if !edge.control{input.push_text(&edge.text);}}
@@ -371,6 +373,25 @@ impl Plugin for Mir2PortableHeroUiPlugin{fn build(&self,app:&mut App){app.init_r
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn escape_capture_uses_actual_private_selection_held_and_modal_state() {
+        let c=context();let m=model();let mut state=HeroUiState::default();let mut intents=HeroIntentQueue::default();
+        state.reconcile(&c,&m);assert!(!state.captures_escape());
+        assert!(state.process(&c,&m,edge(&c,1,7,"down",2.,2.,0),&mut intents));
+        assert!(state.captures_escape());state.cancel();assert!(!state.captures_escape());
+        state.selected=Some(Selected {cell:HeroCell {grid:HeroGrid::Inventory,slot:0},
+            item:ItemModel::default(),origin:HeroOrigin::Inventory});
+        assert!(state.ui.selected.is_none());assert!(state.captures_escape());
+        let mut escape=edge(&c,2,7,"key",0.,0.,0);escape.key="Escape".into();
+        assert!(state.process(&c,&m,escape.clone(),&mut intents));assert!(!state.captures_escape());
+        escape.sequence=3;assert!(!state.process(&c,&m,escape.clone(),&mut intents));assert!(intents.0.is_empty());
+        state.ui.amount=Some((12,CrystalAmountInput::new(99)));
+        assert!(state.ui.modal());assert!(state.captures_escape());
+        escape.sequence=4;assert!(state.process(&c,&m,escape,&mut intents));
+        assert!(!state.captures_escape());assert!(state.ui.amount.is_none());assert!(intents.0.is_empty());
+    }
+
     fn context() -> HeroUiContext {
         HeroUiContext { stamp:HeroStamp {scope:HeroScope {run_generation:1,connection_generation:1,session_generation:1,
             scene_revision:1,player_object_id:42,map_file_name:"TestMap".into()},hero_object_id:12,hero_generation:1,

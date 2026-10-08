@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+## Source44：Hero 共享页面及输入接线通过有限验证；新版完整包仍待交付（2026-10-08）
+
+Page 与 Shell 已接入共享 Hero Host：隐藏根先完成布局，Prepared 后同步卸载旧 DOM，再启用控制并等待实际 matching Ready；渲染期只读投影，事件和原发送前 claim 重核来源、租约、sink、布局及500ms帧健康。鼠标、键盘、悬停与移动菜单接原输入仲裁；旧 pointer/cleanup 不得跨场景或接管新手势。同内容完整快照保留合法拖拽，新来源或控制变化清除旧排队输入和反馈。继续复用原唯一操作台账、精确ACK与后续完整快照屏障及 Unknown custody。以上为代码接线与有限回归，不是 live World/Ready 或玩家验收。
+
+实际隔离 Rust02 Runtime26/26＋portable66/66，共92次通过，新增5个测试函数；本轮未重新执行 Native。WebGL2 shared 与 WebGPU 两项静态 cargo check exit0。实际 Web03 原脚本185/185 TAP通过（155NPC购买＋29surface＋1Stage5脚本），Stage5另有494逻辑组＝原477＋新增17；TypeScript5.9.3 no-emit/nonincremental exit0、stdout/stderr均0B。旧测试业务断言继续执行；修复夹具依赖不表示整个旧runner逐字不变。
+
+917项隔离 Rust 输入、17130项 Web 输入及10个本轮源码在各自有限区间冻结，最终全量重核匹配；不合并声称当前整checkout或后端全部通过。四次最终 Cargo 均严格串行且原PolicyB completed/exited/disposed，实际C最低199272189952B、freshness保守上界最大79ms，原50GiB/2000ms门槛不变。原始64份最终/历史输出与配置归档；Rust01新夹具 spawned 状态不一致的一项失败、Web01/02遗漏新增Hero闭包依赖的失败完整保留，仅修夹具后通过。
+
+下一步复核默认共享入口与九类任务动作整链，再交付源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common；32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–44；真实登录/任务/战斗/保存/重登、移动真机及最终人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。用户tsconfig、外来制作加工/Cargo/simulation/文档变更保留且排除本轮提交。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-finite-result01.json)、[64份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-raw-evidence01.json)、[独立实际复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-actual-review01.json)、[Rust首次夹具失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-rust01-historical-failure01.json)、[Web首次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web01-historical-failure01.json)、[Web第二次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web02-historical-failure01.json)、[Source43实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-publication01.json)。Source43已推送f359d5b5d0cebd964eadd99b8a46d1ca52ecbd1f；本轮提交推送随后另存实际记录，下方保留历史。
+
 ## Source43：Hero 真实消费模型与独立显示一致性门通过代码验证；完整接管仍待完成（2026-10-08）
 
 Rust 与 TS 分别捕获 plannerInfo 和实际 actor_view 显示，按有界规范字符串比较，保留宽 UID、经验和有符号数的精确值。真实 HeroHealthChanged 已进入独立 TS 显示侧；Host 的 appliedWitness 只在 World 实际安装模型后产生，旧 bootstrap 或 setter 成功不能代替 Ready。既有精确 ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail 和唯一操作账本保持。

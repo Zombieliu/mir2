@@ -10,9 +10,13 @@ export type HeroRawDelivery = HeroPhysical & Readonly<{ raw: string; sequence: n
 export type HeroRawHighWater = HeroPhysical & Readonly<{sequence:number}>;
 export type HeroBootstrap = Readonly<{ source: HeroSource | null; acceptedFrameSequence: number; closed: boolean }>;
 export type HeroSourceWitness = Readonly<{ source: HeroSource; witness: string }>;
-export type HeroUiReady = HeroSourceWitness & Readonly<{acceptedFrameSequence:number;controlRevision:number;
-  sinkGeneration:number;webLeaseToken:string;frame:number;modal:boolean;inputEnabled:boolean;
-  inputRegions:readonly Readonly<{left:number;top:number;width:number;height:number}>[]}>;
+export type HeroInputRegion = Readonly<{left:number;top:number;width:number;height:number}>;
+export type HeroUiStatus = HeroSourceWitness & Readonly<{acceptedFrameSequence:number;acceptedInputSequence:number;
+  controlRevision:number;sinkGeneration:number;webLeaseToken:string;frame:number;prepared:boolean;ready:boolean;
+  modal:boolean;capturesEscape:boolean;inputEnabled:boolean;inputRegions:readonly HeroInputRegion[]}>;
+export type HeroUiReady = HeroUiStatus & Readonly<{ready:true;inputEnabled:true}>;
+/** A frame counter is liveness only, never a model, layout or Ready proof. */
+export type HeroUiFrame = Readonly<{frame:number;acceptedInputSequence:number;controlRevision:number}>;
 export type HeroRuntime = {
   getMir2HeroUiAbiVersion?: () => number;
   activateMir2HeroIngress?: (scope: string) => boolean;
@@ -138,10 +142,10 @@ export function bindHeroUiControl(runtime:HeroRuntime,control:Readonly<Record<st
     return after&&sameHeroSource(after.source,binding.source)&&after.witness===binding.witness?binding:null;
   } catch { return null; }
 }
-/** Requires the exact witness installed by the actual Rust World consumer and
- * the subsequent ready frame. A getter or setter echo alone has no authority. */
-export function readHeroUiReady(runtime:HeroRuntime,binding:HeroSourceWitness,model:HeroPlayerModel,
-  controlRevision:number,webLeaseToken:string,sinkGeneration:number):HeroUiReady|null {
+/** Reads the actual post-layout publication. Prepared keeps the Rust root hidden;
+ * only ready + inputEnabled can authorize a new physical gesture or intent. */
+export function readHeroUiStatus(runtime:HeroRuntime,binding:HeroSourceWitness,model:HeroPlayerModel,
+  controlRevision:number,webLeaseToken:string,sinkGeneration:number):HeroUiStatus|null {
   try {
     if(!supportsHeroSharedUi(runtime)||!positive(controlRevision)||!positive(sinkGeneration)
       ||typeof webLeaseToken!=="string"||!webLeaseToken||bytes(webLeaseToken)>512||webLeaseToken.includes("\0")
@@ -152,28 +156,51 @@ export function readHeroUiReady(runtime:HeroRuntime,binding:HeroSourceWitness,mo
     const raw=runtime.getMir2HeroUiStatus?.();
     if(typeof raw!=="string"||raw.length===0||raw.length>MAX_HERO_STATUS_BYTES||bytes(raw)>MAX_HERO_STATUS_BYTES)return null;
     const value:unknown=JSON.parse(raw);
-    if(!row(value)||value.version!==1||value.closed!==false||value.ready!==true
-      ||typeof value.inputEnabled!=="boolean"||typeof value.modal!=="boolean"
+    if(!row(value)||value.version!==1||value.closed!==false
+      ||typeof value.prepared!=="boolean"||typeof value.ready!=="boolean"
+      ||typeof value.inputEnabled!=="boolean"||typeof value.modal!=="boolean"||typeof value.capturesEscape!=="boolean"
+      ||value.ready&&(!value.prepared||!value.inputEnabled)
+      ||!value.ready&&(value.inputEnabled||value.capturesEscape)
       ||!validSource(value.source)||!validSource(value.appliedSource)
       ||!sameHeroSource(value.source,binding.source)||!sameHeroSource(value.appliedSource,binding.source)
       ||value.appliedWitness!==binding.witness||value.controlRevision!==controlRevision
       ||value.webLeaseToken!==webLeaseToken||value.sinkGeneration!==sinkGeneration||!positive(value.frame)
-      ||!safe(value.acceptedFrameSequence)||value.acceptedFrameSequence<binding.source.frameSequence
+      ||!safe(value.acceptedInputSequence)||!safe(value.acceptedFrameSequence)||value.acceptedFrameSequence<binding.source.frameSequence
       ||!Array.isArray(value.receiptFrames)||value.receiptFrames.length>4096||!value.receiptFrames.every(positive)
-      ||!Array.isArray(value.inputRegions)||value.inputRegions.length>256)return null;
-    const regions:Readonly<{left:number;top:number;width:number;height:number}>[]=[];
+      ||!Array.isArray(value.inputRegions)||value.inputRegions.length>256||!value.ready&&value.inputRegions.length!==0)return null;
+    const regions:HeroInputRegion[]=[];
     for(const region of value.inputRegions){
       if(!row(region)||!fields(region,["left","top","width","height"])
         ||![region.left,region.top,region.width,region.height].every(n=>typeof n==="number"&&Number.isFinite(n))
-        ||(region.width as number)<=0||(region.height as number)<=0)return null;
+        ||(region.width as number)<=0||(region.height as number)<=0
+        ||Math.abs(region.left as number)>16384||Math.abs(region.top as number)>16384
+        ||(region.width as number)>16384||(region.height as number)>16384)return null;
       regions.push(Object.freeze({left:region.left as number,top:region.top as number,
         width:region.width as number,height:region.height as number}));
     }
     const after=readHeroSourceWitness(runtime,model);
     if(!after||!sameHeroSource(after.source,binding.source)||after.witness!==binding.witness)return null;
     return Object.freeze({...binding,acceptedFrameSequence:value.acceptedFrameSequence,
-      controlRevision,sinkGeneration,webLeaseToken,frame:value.frame,modal:value.modal,
-      inputEnabled:value.inputEnabled,inputRegions:Object.freeze(regions)});
+      acceptedInputSequence:value.acceptedInputSequence,controlRevision,sinkGeneration,webLeaseToken,
+      frame:value.frame,prepared:value.prepared,ready:value.ready,modal:value.modal,
+      capturesEscape:value.capturesEscape,inputEnabled:value.inputEnabled,inputRegions:Object.freeze(regions)});
+  } catch { return null; }
+}
+/** A getter/setter echo cannot establish this actual consumed paint proof. */
+export function readHeroUiReady(runtime:HeroRuntime,binding:HeroSourceWitness,model:HeroPlayerModel,
+  controlRevision:number,webLeaseToken:string,sinkGeneration:number):HeroUiReady|null {
+  const status=readHeroUiStatus(runtime,binding,model,controlRevision,webLeaseToken,sinkGeneration);
+  return status?.ready&&status.inputEnabled?status as HeroUiReady:null;
+}
+export function readHeroUiFrame(runtime:HeroRuntime):HeroUiFrame|null {
+  try {
+    const raw=runtime.getMir2HeroUiStatus?.();
+    if(typeof raw!=="string"||raw.length===0||raw.length>MAX_HERO_STATUS_BYTES||bytes(raw)>MAX_HERO_STATUS_BYTES)return null;
+    const value:unknown=JSON.parse(raw);
+    if(!row(value)||value.version!==1||value.closed!==false||!positive(value.frame)
+      ||!safe(value.acceptedInputSequence)||!(value.controlRevision===undefined||safe(value.controlRevision)))return null;
+    return Object.freeze({frame:value.frame,acceptedInputSequence:value.acceptedInputSequence,
+      controlRevision:(value.controlRevision as number|undefined)??0});
   } catch { return null; }
 }
 const decimal = (value: unknown): value is string => typeof value === "string" && /^(?:0|[1-9][0-9]{0,19})$/.test(value)

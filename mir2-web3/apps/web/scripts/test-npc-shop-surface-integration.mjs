@@ -308,7 +308,7 @@ test("actual shared Page denies naked legacy mixed DTO and stale current status 
 
 pureFiles.npc="../lib/bevy-npc-shop-ui.ts";pureRequires.npc={"./bevy-bag-ui":"bag"};
 const {NpcShopPointerRouter}=loadPure("npc");
-const shellNames=["npcShopBlocksWorldInput","stopNpcShopWorldInput","guardNpcShopGameplay","dispatchKeyboardMoveInput",
+const shellNames=["heroBlocksWorldInput","npcShopBlocksWorldInput","stopNpcShopWorldInput","guardNpcShopGameplay","dispatchKeyboardMoveInput",
   "cancelWorldFishingHeldPointer","beginCombatUiHold","endCombatUiHold","cancelSharedNpcShopPointer","handleSharedNpcShopPointer","handleSharedQuestWorldPointer","handleSharedUiPointer","updateSceneCombatPointer"];
 function shellFixture() {
   let blocked=true,context=null,behavior=()=>true,stops=0,focus=0,downstream=0;const edges=[],holds=[],combatPointers=[];
@@ -322,6 +322,11 @@ function shellFixture() {
   const callbacks={getBevyNpcShopInputBlocked:()=>blocked,getBevyNpcShopPointerContext:()=>context,
     onBevyNpcShopPointer:edge=>{edges.push(edge);return behavior(edge);}};
   const scope={parityUiBlocksGameplay:undefined,onHeroShortcut:undefined,
+    // This NPC fixture has no Hero panel. Live Hero blocking still uses the
+    // actual extracted helper; unrelated Hero pointer ports explicitly decline.
+    heroPointerLeaseRef:{current:null},
+    heroPointerCallbacksRef:{current:{getBevyHeroInputBlocked:()=>false,getBevyHeroPointerContext:()=>null,
+      onBevyHeroPointer:()=>false,onBevyHeroKey:()=>false}},handleSharedHeroPointer:()=>false,
     handleNpcRepairPointer:()=>false,handleBagBeltPointer:()=>false,worldFishingPhysicalRef:{current:null},
     npcShopPointerRouterRef:{current:router},npcShopPointerCallbacksRef:{current:callbacks},
     sceneHoveredObjectIdRef:{current:null},setSceneHoveredObjectId:()=>{},
@@ -415,10 +420,11 @@ test("actual gamepad and touch props evaluate arming active and synchronous bloc
     }
     for(const key of ["enabled","gameplayReady"].filter(k=>props.has(k))){
       const expression=props.get(key).getText(shellTree);const code=ts.transpileModule("const result="+expression+";",{compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
-      const evaluate=(active,arming,blocked)=>new Function("clientProfile","screen","sceneInteractionReady","bevyQuestUiCapturesPointer",
+      const evaluate=(active,arming,blocked,parityUiWorldBlocked=false,bevyHeroUiWorldBlocked=false)=>new Function("clientProfile","screen","sceneInteractionReady","bevyQuestUiCapturesPointer",
         "bevyBagUiActive","bevyStorageUiActive","bevyStorageUiTransitioning","bevyNpcShopUiActive","bevyNpcShopUiTransitioning","npcShopBlocksWorldInput",
+        "parityUiWorldBlocked","bevyHeroUiWorldBlocked",
         code+"\nreturn result;")({input:element.tagName.getText(shellTree)==="OriginalClientGamepadControls"?"gamepad":"touch",layout:"touch"},
-          "game",true,false,false,false,false,active,arming,()=>blocked);
+          "game",true,false,false,false,false,active,arming,()=>blocked,parityUiWorldBlocked,bevyHeroUiWorldBlocked);
       assert.equal(evaluate(false,false,false),true,key+" preserves ordinary eligible input");
       assert.equal(evaluate(true,false,false),false,key+" active");assert.equal(evaluate(false,true,false),false,key+" arming");
       assert.equal(evaluate(false,false,true),false,key+" synchronous host gate before React state commits");
@@ -426,6 +432,33 @@ test("actual gamepad and touch props evaluate arming active and synchronous bloc
   }
 });
 
+
+test("actual gamepad and touch render props use pure Hero and parity blockers without invoking their live methods",()=>{
+  const controls=nodes(shellTree,n=>(ts.isJsxSelfClosingElement(n)||ts.isJsxOpeningElement(n))
+    &&["OriginalClientGamepadControls","OriginalClientMobileControls"].includes(n.tagName.getText(shellTree)));
+  assert.equal(controls.length,2);
+  for(const element of controls){
+    const props=new Map(element.attributes.properties.filter(ts.isJsxAttribute).map(p=>[p.name.text,p.initializer?.expression]));
+    for(const key of ["enabled","gameplayReady"].filter(k=>props.has(k))){
+      const expression=props.get(key).getText(shellTree);
+      const code=ts.transpileModule("const result="+expression+";",{compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+      let npcReads=0,heroLiveReads=0,parityLiveReads=0;
+      const evaluate=(parityBlocked,heroBlocked)=>new Function("clientProfile","screen","sceneInteractionReady","bevyQuestUiCapturesPointer",
+        "bevyBagUiActive","bevyStorageUiActive","bevyStorageUiTransitioning","bevyNpcShopUiActive","bevyNpcShopUiTransitioning",
+        "npcShopBlocksWorldInput","parityUiWorldBlocked","bevyHeroUiWorldBlocked","heroBlocksWorldInput","parityUiBlocksGameplay",
+        code+"\nreturn result;")({input:element.tagName.getText(shellTree)==="OriginalClientGamepadControls"?"gamepad":"touch",layout:"touch"},
+          "game",true,false,false,false,false,false,false,
+          includeParity=>{npcReads++;assert.equal(includeParity,false,"render retains only the original live NPC gate");return false;},
+          parityBlocked,heroBlocked,()=>{heroLiveReads++;return false;},()=>{parityLiveReads++;return false;});
+      assert.equal(evaluate(false,false),true,key+" ordinary eligible projection");
+      assert.equal(npcReads,1,key+" retains the synchronous NPC gate");
+      assert.equal(evaluate(false,true),false,key+" pure Hero blocker");
+      assert.equal(evaluate(true,false),false,key+" pure parity blocker");
+      assert.equal(heroLiveReads,0,key+" must not advance or withdraw Hero during render");
+      assert.equal(parityLiveReads,0,key+" must not invoke parity event validation during render");
+    }
+  }
+});
 
 test("actual mobile menu close feedback always cleans up while opening remains blocked by the current NPC host",()=>{
   const mobile=nodes(shellTree,n=>(ts.isJsxSelfClosingElement(n)||ts.isJsxOpeningElement(n))&&n.tagName.getText(shellTree)==="OriginalClientMobileControls");

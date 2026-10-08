@@ -142,7 +142,7 @@ impl HeroBridge {
         if self.input_closed { return false; }
         match self.ingress.receive_frame(scope, sequence, raw, at) {
             Ok(changed) => {
-                if changed { self.source_sequence = sequence; }
+                if changed { self.source_sequence = sequence; self.inputs.clear(); }
                 true
             }
             Err(_) => false,
@@ -155,7 +155,7 @@ impl HeroBridge {
         if self.input_closed { return false; }
         match self.ingress.receive_verified_owner_frame(scope, sequence, raw, at, expected) {
             Ok(changed) => {
-                if changed { self.source_sequence = sequence; }
+                if changed { self.source_sequence = sequence; self.inputs.clear(); }
                 true
             }
             Err(_) => false,
@@ -221,9 +221,9 @@ impl HeroBridge {
             }
         }
         let same_witness = witness.is_some() && self.control_witness.as_deref() == witness;
-        let same_lease = self.control.as_ref().is_some_and(|old|
-            old.stamp() == control.stamp() && old.web_lease_token == control.web_lease_token
-                && old.windows == control.windows);
+        let same_lease = self.control.as_ref().is_some_and(|old| same_interaction_lease(old, &control));
+        // Accepted edges retain their original revision; never re-label them.
+        self.inputs.clear();
         if !same_lease || !same_witness || !control.in_game || !control.host_visible || !control.input_enabled {
             self.inputs.clear(); self.input_reset = true;
         }
@@ -308,6 +308,31 @@ impl HeroBridge {
         self.sink_present && sink_generation == self.sink_generation && self.control_current(control)
     }
 }
+// Source frame/revision may advance without changing data or interaction state.
+fn same_interaction_lease(old: &HeroControl, next: &HeroControl) -> bool {
+    let presentation = match (old.presentation, next.presentation) {
+        (Some(a), Some(b)) => a.logical_width == b.logical_width && a.logical_height == b.logical_height
+            && a.stage_css_scale == b.stage_css_scale && a.touch == b.touch,
+        (None, None) => true,
+        _ => false,
+    };
+    old.stamp() == next.stamp() && old.web_lease_token == next.web_lease_token
+        && old.windows == next.windows && presentation
+        && old.in_game == next.in_game && old.host_visible == next.host_visible
+        && old.input_enabled == next.input_enabled && old.pending == next.pending
+}
+// The production observer and final publisher use these same visibility gates.
+fn hero_root_visibility(prepared: bool, input_enabled: bool) -> Visibility {
+    if prepared && input_enabled { Visibility::Inherited } else { Visibility::Hidden }
+}
+fn hero_root_current(root: &mir2_client_bevy::portable_hero_ui::SharedHeroRoot, context: &HeroUiContext) -> bool {
+    root.stamp == context.stamp && root.revision == context.revision && root.frame_sequence == context.frame_sequence
+}
+fn hero_matching_ready(prepared: bool, current: bool, input_enabled: bool,
+    root: &mir2_client_bevy::portable_hero_ui::SharedHeroRoot, context: &HeroUiContext,
+    visible: &InheritedVisibility) -> bool {
+    prepared && current && input_enabled && visible.get() && hero_root_current(root, context)
+}
 thread_local! {
     static BRIDGE: RefCell<HeroBridge> = RefCell::new(HeroBridge::default());
 }
@@ -317,6 +342,7 @@ struct AppliedHero {
     witness: Option<String>,
     control: Option<HeroControl>,
     receipt_frames: Vec<u64>,
+    sink_generation: u64,
     #[cfg(target_arch = "wasm32")]
     assets: Vec<Handle<Image>>,
     #[cfg(target_arch = "wasm32")]
@@ -363,10 +389,14 @@ fn apply_bridge_to_world(bridge: &mut HeroBridge, world: &mut World, now_ms: u64
         && applied_witness.as_deref().is_some_and(|witness| bridge.witness_current(witness))).cloned();
     let prior_ready = !bridge.input_reset && bridge.sink_present
         && world.get_resource::<HeroUiContext>().is_some_and(|c|
-            control.as_ref().is_some_and(|control| c.stamp == control.stamp()
-                && c.frame_sequence == control.source.frame_sequence && c.ready))
+            control.as_ref().zip(world.get_resource::<AppliedHero>().and_then(|a| a.control.as_ref()))
+                .is_some_and(|(next, old)| c.ready && c.stamp == old.stamp()
+                    && c.revision == old.control_revision && c.frame_sequence == old.source.frame_sequence
+                    && same_interaction_lease(old, next)
+                    && next.source.frame_sequence >= old.source.frame_sequence
+                    && next.source.rust_model_revision >= old.source.rust_model_revision))
         && world.get_resource::<AppliedHero>().is_some_and(|applied|
-            applied.witness.as_deref() == previous_witness.as_deref()
+            applied.sink_generation == bridge.sink_generation && applied.witness.as_deref() == previous_witness.as_deref()
                 && applied.witness.as_deref() == applied_witness.as_deref()
                 && applied.witness.as_deref().is_some_and(|witness| bridge.witness_current(witness))
                 && applied.control.as_ref().zip(control.as_ref())
@@ -405,6 +435,7 @@ fn apply_bridge_to_world(bridge: &mut HeroBridge, world: &mut World, now_ms: u64
     applied.witness = applied_witness;
     applied.control = control;
     applied.receipt_frames = receipt_frames;
+    applied.sink_generation = bridge.sink_generation;
 }
 
 
@@ -617,12 +648,15 @@ mod web {
         applied_source: &'a Option<HeroSource>,
         applied_witness: &'a Option<String>,
         accepted_frame_sequence: u64,
+        accepted_input_sequence: u64,
         control_revision: u64,
         sink_generation: u64,
         modal: bool,
         web_lease_token: &'a str,
         frame: u64,
+        prepared: bool,
         ready: bool,
+        captures_escape: bool,
         input_enabled: bool,
         input_regions: Vec<HeroRegion>,
         closed: bool,
@@ -632,12 +666,12 @@ mod web {
     struct HeroRegion { left:f32,top:f32,width:f32,height:f32 }
     impl From<CrystalRect> for HeroRegion { fn from(r:CrystalRect)->Self {Self{left:r.left,top:r.top,width:r.width,height:r.height}} }
     #[derive(Resource, Default)]
-    struct HeroCandidateReady(bool);
+    struct HeroCandidatePrepared(bool);
     #[derive(Resource, Default)]
     struct PublishedFrame(u64);
 
     pub fn install(app: &mut App) {
-        app.init_resource::<AppliedHero>().init_resource::<PublishedFrame>().init_resource::<HeroCandidateReady>()
+        app.init_resource::<AppliedHero>().init_resource::<PublishedFrame>().init_resource::<HeroCandidatePrepared>()
             .add_plugins(Mir2PortableHeroUiPlugin)
             .configure_sets(Update, HeroConsumeSet.after(PendingLifecycleSet::UiReset)
                 .before(HeroPaintSet))
@@ -702,7 +736,7 @@ mod web {
             Query<(Entity, &mir2_client_bevy::crystal_ui::bag_paint::BagPaintCell, &ComputedNode, &UiGlobalTransform)>,
             Query<(Entity, &BagPaintAction, &ComputedNode, &UiGlobalTransform)>),
         texts: Query<(Entity, &Text, &TextFont, Option<&bevy::text::TextLayoutInfo>)>,
-        parents: Query<&ChildOf>, mut candidate: ResMut<HeroCandidateReady>,
+        parents: Query<&ChildOf>, mut candidate: ResMut<HeroCandidatePrepared>,
     ) {
         let (surface,ui_ingress,server,wings)=assets_state;
         let Some(control) = applied.control.as_ref() else {
@@ -810,7 +844,7 @@ mod web {
             }
             true
         });
-        let ready = current && context.active && applied.source.as_ref()==Some(&control.source)
+        let prepared = current && context.active && applied.source.as_ref()==Some(&control.source)
             && surface.active && surface.generation==control.hud_generation
             && ui_ingress.has_complete_generation(control.hud_generation)
             && assets && window_ok && layout_ok && appearance_materials_ready(&read,wings.as_deref())
@@ -818,28 +852,29 @@ mod web {
                 .all(|item|item.state_image==0||item.state_image_width>0&&item.state_image_height>0)
             && (!context.windows.inventory_open || BRIDGE.with(|b|b.borrow().ingress.personal_source()
                 .is_some_and(|source|source.equipment_excluded&&source.instance_metadata_complete)));
-        candidate.0 = ready;
+        candidate.0 = prepared;
         for (_,_,_,_,mut visibility) in &mut roots {
-            *visibility = if ready {Visibility::Inherited} else {Visibility::Hidden};
+            *visibility = hero_root_visibility(prepared, control.input_enabled);
         }
     }
     fn publish(
-        mut frame:ResMut<PublishedFrame>,applied:Res<AppliedHero>,candidate:Res<HeroCandidateReady>,
+        mut frame:ResMut<PublishedFrame>,applied:Res<AppliedHero>,candidate:Res<HeroCandidatePrepared>,
         mut context:ResMut<HeroUiContext>,mut state:ResMut<HeroUiState>,read:Res<HeroUiReadModel>,
         roots:Query<(&SharedHeroRoot,&InheritedVisibility)>,mut intents:ResMut<HeroIntentQueue>,
     ) {
         frame.0=frame.0.saturating_add(1);
         let Some(control)=applied.control.as_ref() else {
             context.ready=false;intents.0.clear();
-            STATUS.with(|s|*s.borrow_mut()=serde_json::json!({"version":1,"frame":frame.0,"ready":false,"inputEnabled":false,"inputRegions":[],"appliedSource":applied.source,"appliedWitness":applied.witness}).to_string());
+            STATUS.with(|s|*s.borrow_mut()=serde_json::json!({"version":1,"frame":frame.0,"prepared":false,"ready":false,"capturesEscape":false,"inputEnabled":false,"inputRegions":[],"appliedSource":applied.source,"appliedWitness":applied.witness}).to_string());
             return;
         };
         let current=bound_sink_current(control)
             && applied.witness.as_deref().is_some_and(|witness| BRIDGE.with(|b| b.borrow().witness_current(witness)))
             && capture_hero_source_witness(&read).ok().as_deref()==applied.witness.as_deref();
-        let visible=roots.single().ok().is_some_and(|(root,visible)|root.stamp==context.stamp
-            &&root.revision==context.revision&&root.frame_sequence==context.frame_sequence&&visible.get());
-        let ready=candidate.0&&current&&visible&&applied.source.as_ref()==Some(&control.source);
+        let prepared=candidate.0&&current&&applied.source.as_ref()==Some(&control.source)
+            && roots.single().ok().is_some_and(|(root,_)|hero_root_current(root,&context));
+        let ready=roots.single().ok().is_some_and(|(root,visible)|
+            hero_matching_ready(prepared,current,control.input_enabled,root,&context,visible));
         context.ready=ready;
         context.input_enabled=ready&&control.input_enabled;
         let source = BRIDGE.with(|bridge| bridge.borrow().source());
@@ -849,10 +884,12 @@ mod web {
         });
         let status = Status {
             version:1, source, applied_source:&applied.source, applied_witness:&applied.witness, accepted_frame_sequence,
+            accepted_input_sequence:BRIDGE.with(|b|b.borrow().input_high),
             control_revision:control.control_revision,
             sink_generation:SINK.with(|s|s.borrow().as_ref().map_or(0,|(_,generation,_)|*generation)),
             modal:state.ui.modal(),web_lease_token:&control.web_lease_token,
-            frame:frame.0,ready,input_enabled:ready&&context.input_enabled,
+            frame:frame.0,prepared,ready,captures_escape:ready&&state.captures_escape(),
+            input_enabled:ready&&context.input_enabled,
             input_regions:if ready {input_regions(&context,&state,&read).into_iter().map(HeroRegion::from).collect()} else {vec![]},
             closed,receipt_frames:&applied.receipt_frames,
         };
@@ -970,14 +1007,16 @@ mod web {
             let b=b.borrow();
             value["source"]=serde_json::json!(b.source());
             value["acceptedFrameSequence"]=serde_json::json!(b.ingress.frame_sequence());
+            value["acceptedInputSequence"]=serde_json::json!(b.input_high);
             value["closed"]=serde_json::json!(b.input_closed||b.ingress.status().closed);
             let matching=!b.input_reset && b.control.as_ref().is_some_and(|c|sink_key.as_ref()
-                .is_some_and(|(scope,generation)| scope==&c.source.scope && b.feedback_current(c,*generation))
+                .is_some_and(|(scope,generation)| scope==&c.source.scope && b.feedback_current(c,*generation)
+                    &&value["sinkGeneration"].as_u64()==Some(*generation))
                 &&value["controlRevision"].as_u64()==Some(c.control_revision)
                 &&value["webLeaseToken"].as_str()==Some(c.web_lease_token.as_str())
                 &&serde_json::from_value::<HeroSource>(value["appliedSource"].clone()).ok().as_ref()==Some(&c.source)
                 &&value["appliedWitness"].as_str().is_some_and(|witness| b.witness_current(witness)));
-            if !matching {value["ready"]=serde_json::json!(false);value["inputEnabled"]=serde_json::json!(false);value["inputRegions"]=serde_json::json!([]);}
+            if !matching {value["prepared"]=serde_json::json!(false);value["capturesEscape"]=serde_json::json!(false);value["ready"]=serde_json::json!(false);value["inputEnabled"]=serde_json::json!(false);value["inputRegions"]=serde_json::json!([]);}
         });
         value.to_string()
     }
@@ -994,6 +1033,157 @@ mod tests {
 
     fn scope(run:u64)->HeroScope {HeroScope {run_generation:run,connection_generation:1,
         session_generation:1,scene_revision:1,player_object_id:42,map_file_name:"TestMap".into()}}
+
+    fn held_drag_world() -> (HeroBridge, HeroScope, World, HeroControl) {
+        let (mut bridge, scope) = start();
+        // The first HeroInformation deliberately clears spawned for a new instance.
+        // Stabilize the baseline with a real complete owner before holding a drag.
+        assert!(bridge.push_raw(&scope,3,&json!({"type":"worldSnapshot","payload":owner()}).to_string(),102));
+        assert!(bridge.ingress.model().spawned);
+        assert!(bridge.advance_sink(&scope).is_some());
+        let source = bridge.source().unwrap();
+        assert!(set_bound_control(&mut bridge, &scope, &control(&source, 1)));
+        let first = bridge.control.as_ref().unwrap().clone();
+        let mut world = world();
+        apply_bridge_to_world(&mut bridge, &mut world, 102);
+        let mut context = world.resource::<HeroUiContext>().clone();
+        context.ready = true;
+        let read = world.resource::<HeroUiReadModel>().clone();
+        let mut state = world.remove_resource::<HeroUiState>().unwrap();
+        state.reconcile(&context, &read);
+        let mut down: HostInput = serde_json::from_str(&edge(&first, 1)).unwrap();
+        down.edge.x = 2.; down.edge.y = 2.;
+        assert!(state.process(&context, &read, down.edge, &mut HeroIntentQueue::default()));
+        assert!(state.ui.dragging.is_some()); assert!(state.captures_escape());
+        world.insert_resource(state); world.insert_resource(context);
+        (bridge, scope, world, first)
+    }
+    fn reduce_host_edges(world: &mut World) {
+        let context = world.resource::<HeroUiContext>().clone();
+        let read = world.resource::<HeroUiReadModel>().clone();
+        let edges = std::mem::take(&mut world.resource_mut::<HeroInputQueue>().0);
+        let mut state = world.remove_resource::<HeroUiState>().unwrap();
+        let mut intents = world.remove_resource::<HeroIntentQueue>().unwrap();
+        state.reconcile(&context, &read);
+        for edge in edges { state.process(&context, &read, edge, &mut intents); }
+        world.insert_resource(state); world.insert_resource(intents);
+    }
+    #[test]
+    fn hero_host_prepared_hidden_root_needs_enabled_actual_inherited_visibility_for_ready() {
+        use mir2_client_bevy::portable_hero_ui::SharedHeroRoot;
+        let (_, _, mut world, _) = held_drag_world();
+        let context = world.resource::<HeroUiContext>().clone();
+        let entity = world.spawn((SharedHeroRoot { stamp:context.stamp.clone(),revision:context.revision,
+            frame_sequence:context.frame_sequence,regions:vec![] }, ComputedNode::default(),
+            hero_root_visibility(true, false), InheritedVisibility::HIDDEN)).id();
+        assert_eq!(*world.get::<Visibility>(entity).unwrap(), Visibility::Hidden);
+        assert!(!hero_matching_ready(true,true,false,world.get::<SharedHeroRoot>(entity).unwrap(),
+            &context,world.get::<InheritedVisibility>(entity).unwrap()));
+        world.entity_mut(entity).insert(hero_root_visibility(true,true));
+        assert_eq!(*world.get::<Visibility>(entity).unwrap(),Visibility::Inherited);
+        // Local Visibility changed, but the real inherited component is still hidden.
+        assert!(!hero_matching_ready(true,true,true,world.get::<SharedHeroRoot>(entity).unwrap(),
+            &context,world.get::<InheritedVisibility>(entity).unwrap()));
+        world.entity_mut(entity).insert(InheritedVisibility::VISIBLE);
+        assert!(hero_matching_ready(true,true,true,world.get::<SharedHeroRoot>(entity).unwrap(),
+            &context,world.get::<InheritedVisibility>(entity).unwrap()));
+        for (prepared,current,enabled) in [(false,true,true),(true,false,true),(true,true,false)] {
+            assert!(!hero_matching_ready(prepared,current,enabled,world.get::<SharedHeroRoot>(entity).unwrap(),
+                &context,world.get::<InheritedVisibility>(entity).unwrap()));
+        }
+        world.get_mut::<SharedHeroRoot>(entity).unwrap().frame_sequence += 1;
+        assert!(!hero_matching_ready(true,true,true,world.get::<SharedHeroRoot>(entity).unwrap(),
+            &context,world.get::<InheritedVisibility>(entity).unwrap()));
+    }
+    #[test]
+    fn hero_host_same_witness_owner_refresh_preserves_drag_but_revokes_old_edges_and_feedback() {
+        let (mut bridge, scope, mut world, first) = held_drag_world();
+        let witness = bridge.source_witness().unwrap();
+        assert!(bridge.push_edge(&scope,&edge(&first,2)));
+        world.resource_mut::<HeroIntentQueue>().0.push(HeroUiIntent { stamp:first.stamp(),intent_sequence:1,
+            body:mir2_client_bevy::portable_hero_ui::HeroIntentBody::Windows { windows:first.windows } });
+        assert!(bridge.push_raw(&scope,4,&json!({"type":"worldSnapshot","payload":owner()}).to_string(),103));
+        assert!(bridge.inputs.is_empty()); assert_eq!(bridge.input_high,2);
+        assert_eq!(bridge.source_witness().as_deref(),Some(witness.as_str()));
+        let next_source = bridge.source().unwrap();
+        assert!(next_source.frame_sequence > first.source.frame_sequence);
+        assert!(next_source.rust_model_revision > first.source.rust_model_revision);
+        assert!(set_bound_control(&mut bridge,&scope,&control(&next_source,2)));
+        let next = bridge.control.as_ref().unwrap().clone();
+        assert!(!bridge.input_reset); assert!(!bridge.feedback_current(&first,bridge.sink_generation));
+        assert!(!bridge.push_edge(&scope,&edge(&first,3)));
+        apply_bridge_to_world(&mut bridge,&mut world,104);
+        assert!(world.resource::<HeroUiContext>().ready);
+        assert_eq!(world.resource::<HeroUiContext>().frame_sequence,next.source.frame_sequence);
+        assert!(world.resource::<HeroUiState>().ui.dragging.is_some());
+        assert!(world.resource::<HeroInputQueue>().0.is_empty()); assert!(world.resource::<HeroIntentQueue>().0.is_empty());
+        let mut movement: Value = serde_json::from_str(&edge(&next,3)).unwrap();
+        movement["edge"]["phase"]=json!("move");movement["edge"]["x"]=json!(22);movement["edge"]["y"]=json!(32);
+        assert!(bridge.push_edge(&scope,&movement.to_string()));
+        apply_bridge_to_world(&mut bridge,&mut world,105);reduce_host_edges(&mut world);
+        assert_eq!(world.resource::<HeroUiState>().ui.inventory_position,[20,30]);
+        assert!(world.resource::<HeroUiState>().captures_escape());
+        let mut up: Value = serde_json::from_str(&edge(&next,4)).unwrap();
+        up["edge"]["phase"]=json!("up");up["edge"]["x"]=json!(22);up["edge"]["y"]=json!(32);
+        assert!(bridge.push_edge(&scope,&up.to_string()));
+        apply_bridge_to_world(&mut bridge,&mut world,106);reduce_host_edges(&mut world);
+        assert!(world.resource::<HeroUiState>().ui.dragging.is_none());
+        assert!(!world.resource::<HeroUiState>().captures_escape());
+        assert!(world.resource::<HeroIntentQueue>().0.is_empty());assert_eq!(bridge.input_high,4);
+    }
+    #[test]
+    fn hero_host_control_revision_clears_pending_edges_without_resetting_equal_data_drag() {
+        let (mut bridge,scope,mut world,first)=held_drag_world();
+        assert!(bridge.push_edge(&scope,&edge(&first,2)));
+        assert!(set_bound_control(&mut bridge,&scope,&control(&first.source,2)));
+        assert!(bridge.inputs.is_empty());assert_eq!(bridge.input_high,2);assert!(!bridge.input_reset);
+        assert!(!bridge.push_edge(&scope,&edge(&first,3)));
+        apply_bridge_to_world(&mut bridge,&mut world,103);
+        assert!(world.resource::<HeroUiContext>().ready);assert!(world.resource::<HeroUiState>().ui.dragging.is_some());
+        assert!(world.resource::<HeroInputQueue>().0.is_empty());assert!(world.resource::<HeroIntentQueue>().0.is_empty());
+        let current=bridge.control.as_ref().unwrap().clone();
+        assert!(!bridge.push_edge(&scope,&edge(&current,2)));
+        assert_eq!(bridge.input_high,2);
+    }
+    #[test]
+    fn hero_host_drag_continuity_rejects_changed_data_complete_lease_and_either_world_reset() {
+        for case in ["data","spawned","presentation","windows","pending","token","sink","hero-reset","read-reset","disable-cycle"] {
+            let (mut bridge,scope,mut world,first)=held_drag_world();
+            assert!(bridge.push_edge(&scope,&edge(&first,2)));
+            let witness=bridge.source_witness().unwrap();
+            let mut snapshot=owner();if case=="data" {snapshot["heroVitals"]["hp"]=json!(7);}
+            if case=="spawned" {snapshot["stage5Systems"]["hero"]["spawned"]=json!(false);}
+            assert!(bridge.push_raw(&scope,4,&json!({"type":"worldSnapshot","payload":snapshot}).to_string(),103));
+            if matches!(case,"data"|"spawned") {
+                assert_ne!(bridge.source_witness().as_deref(),Some(witness.as_str()),"{case}");
+            } else {
+                assert_eq!(bridge.source_witness().as_deref(),Some(witness.as_str()),"{case}");
+            }
+            let source=bridge.source().unwrap();let mut next:Value=serde_json::from_str(&control(&source,2)).unwrap();
+            match case {
+                "presentation"=>next["presentation"]["logicalWidth"]=json!(1025),
+                "windows"=>next["windows"]["inventoryOpen"]=json!(false),
+                "pending"=>next["pending"]=json!(true),
+                "token"=>next["webLeaseToken"]=json!("new-web-lease"),
+                "sink"=>{assert!(bridge.advance_sink(&scope).is_some());},
+                "hero-reset"=>{world.insert_resource(HeroModel::default());},
+                "read-reset"=>{world.resource_mut::<HeroUiReadModel>().hero=HeroModel::default();},
+                "disable-cycle"=>{let mut disabled=next.clone();disabled["inputEnabled"]=json!(false);
+                    assert!(set_bound_control(&mut bridge,&scope,&disabled.to_string()));next["controlRevision"]=json!(3);},
+                _=>{},
+            }
+            assert!(set_bound_control(&mut bridge,&scope,&next.to_string()));
+            assert!(bridge.inputs.is_empty());assert_eq!(bridge.input_high,2);
+            assert!(!bridge.push_edge(&scope,&edge(&first,3)));
+            apply_bridge_to_world(&mut bridge,&mut world,104);reduce_host_edges(&mut world);
+            assert!(!world.resource::<HeroUiContext>().ready,"{case}");
+            assert!(world.resource::<HeroUiState>().ui.dragging.is_none(),"{case}");
+            assert!(!world.resource::<HeroUiState>().captures_escape(),"{case}");
+            assert!(world.resource::<HeroIntentQueue>().0.is_empty(),"{case}");
+            assert_eq!(bridge.input_high,2,"{case}");
+        }
+    }
+
     fn owner()->Value {
         json!({"playerObjectId":42,"mapFileName":"TestMap","inventoryCapacity":46,"maxBagSlots":40,
             "gold":7,"inventoryItems":[],"beltItems":[],"equipmentItems":[],
