@@ -527,6 +527,26 @@ mod tests {
             cooldown_ms: 500,
             now_ms: 2000,
         });
+        assert!(!packets(&out).iter().any(|p| matches!(
+            p,
+            ServerPacket::ObjectPoisoned {
+                object_id: 101,
+                poison: 0
+            }
+        )));
+        let before = zone.resolve_pending_native_purifications(2499);
+        assert!(!packets(&before).iter().any(|p| matches!(
+            p,
+            ServerPacket::ObjectPoisoned {
+                object_id: 101,
+                poison: 0
+            }
+        )));
+        let state = zone.entity_combat.as_ref().unwrap();
+        assert_eq!(state.slows.len(), 1);
+        assert_eq!(state.controls.len(), 1);
+        assert_eq!(state.hits.len(), 1);
+        let out = zone.resolve_pending_native_purifications(2500);
         assert!(packets(&out).iter().any(|p| matches!(
             p,
             ServerPacket::ObjectPoisoned {
@@ -537,15 +557,16 @@ mod tests {
         let state = zone.entity_combat.as_ref().unwrap();
         assert!(state.slows.is_empty() && state.controls.is_empty());
         assert_eq!(state.hits.len(), 1);
-        zone.apply_native_entity_slow(&source, &target, 9, 1000, 2001);
-        zone.apply_native_entity_paralysis(&source, &target, 9, 1000, 2001);
+        assert_eq!(state.hits[0].due_ms, 9999);
+        zone.apply_native_entity_slow(&source, &target, 9, 1000, 2501);
+        zone.apply_native_entity_paralysis(&source, &target, 9, 1000, 2501);
         assert_eq!(zone.entity_combat.as_ref().unwrap().slows[0].duration, 9);
         assert_eq!(zone.entity_combat.as_ref().unwrap().controls[0].duration, 9);
-        zone.tick_entity_combat(2002);
-        assert!(zone_player_slowed(&zone.players[&session], 2002));
+        zone.tick_entity_combat(2502);
+        assert!(zone_player_slowed(&zone.players[&session], 2502));
         assert!(zone_player_status_blocks_movement(
             &zone.players[&session],
-            2002
+            2502
         ));
     }
 

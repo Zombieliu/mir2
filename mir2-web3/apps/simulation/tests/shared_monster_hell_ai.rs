@@ -521,6 +521,15 @@ fn purification_then_same_bit_reapplication_starts_a_fresh_counted_lease() {
         cooldown_ms: 500,
         now_ms: 10503,
     });
+    assert!(!packets(&clean)
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));
+    let before = z.tick(11002);
+    assert!(!packets(&before)
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));
+    assert_eq!(state(&z)["native_periodic_player_poisons"].as_array().unwrap().len(), 1);
+    let clean = z.tick(11003);
     assert!(packets(&clean)
         .iter()
         .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));

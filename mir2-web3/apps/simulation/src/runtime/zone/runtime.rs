@@ -53,6 +53,8 @@ mod crowded_fixture;
 mod experience_ownership;
 mod experience_profiles;
 #[cfg(test)]
+mod purification_tests;
+#[cfg(test)]
 mod stat_roll_tests;
 mod ground_ownership;
 use super::online_identity::{OnlineIdentityBook, OnlineOwner, OnlinePresence, OnlinePresenceSnapshot};
@@ -360,6 +362,8 @@ pub struct ZoneRuntime {
     pending_native_projectiles: Vec<PendingNativeProjectile>,
     pending_native_player_hits: Vec<PendingNativePlayerHit>,
     pending_native_player_heals: Vec<PendingNativePlayerHeal>,
+    // A live Source action must not be recovered as an online Node from bytes.
+    pending_native_purifications: Vec<PendingNativePurification>,
     pending_native_summons: Vec<PendingNativeSummon>,
     pending_native_ground_spells: Vec<PendingNativeGroundSpellAction>,
     ground_drops: BTreeMap<u32, ZoneGroundDrop>,
@@ -500,6 +504,17 @@ struct PendingNativePlayerHeal {
     amount: i32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     journey_event: Option<ZoneJourneyEventReceipt>,
+}
+
+/// HumanObject.Purification keeps the actual caster and target until +500ms.
+/// Both proofs bind the online Node and player life; bare IDs cannot rebind it.
+/// This live-only queue is cloned by transaction_fork, never deserialized.
+#[derive(Debug, Clone)]
+struct PendingNativePurification {
+    ready_at_ms: u64,
+    level: u8,
+    caster: owned_pet_combat::OwnedPetOwner,
+    target: owned_pet_combat::OwnedPetOwner,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -659,6 +674,7 @@ impl ZoneRuntime {
             pending_native_projectiles: Vec::new(),
             pending_native_player_hits: Vec::new(),
             pending_native_player_heals: Vec::new(),
+            pending_native_purifications: Vec::new(),
             pending_native_summons: Vec::new(),
             pending_native_ground_spells: Vec::new(),
             ground_drops: BTreeMap::new(),
@@ -722,6 +738,7 @@ impl ZoneRuntime {
         fork.pending_native_projectiles = self.pending_native_projectiles.clone();
         fork.pending_native_player_hits = self.pending_native_player_hits.clone();
         fork.pending_native_player_heals = self.pending_native_player_heals.clone();
+        fork.pending_native_purifications = self.pending_native_purifications.clone();
         fork.pending_native_summons = self.pending_native_summons.clone();
         fork.pending_native_ground_spells = self.pending_native_ground_spells.clone();
         fork.ground_drops = self.ground_drops.clone();
@@ -2154,6 +2171,7 @@ impl ZoneRuntime {
         outbounds.extend(self.resolve_pending_native_monster_hits(now_ms));
         outbounds.extend(self.tick_owned_human_pet_hits(now_ms));
         outbounds.extend(self.tick_owned_human_player_spells(now_ms));
+        outbounds.extend(self.resolve_pending_native_purifications(now_ms));
         outbounds.extend(self.tick_owned_human_monster_controls(now_ms));
         outbounds.extend(self.tick_owned_human_vampirism(now_ms));
         outbounds.extend(self.tick_entity_combat(now_ms));
@@ -6650,7 +6668,14 @@ impl ZoneRuntime {
         let Some(target_player) = self.players.get(target_session_id) else {
             return false;
         };
-        if !zone_players_are_friendly(caster, target_player)
+        let friendly = if spell == Spell::Purification {
+            self.native_purification_players_are_friendly(caster, target_player, now_ms)
+                && self.current_native_purification_owner(session_id).is_some()
+                && self.current_native_purification_owner(target_session_id).is_some()
+        } else {
+            zone_players_are_friendly(caster, target_player)
+        };
+        if !friendly
             || target_player.position != *target
             || !points_within_action_range(
                 &caster.position,
@@ -6732,6 +6757,7 @@ impl ZoneRuntime {
             Spell::MassHealing | Spell::HealingCircle => !self
                 .native_area_heal_target_session_ids(session_id, target)
                 .is_empty(),
+            Spell::Purification => self.current_native_purification_owner(session_id).is_some(),
             Spell::Repulsion | Spell::EnergyRepulsor => true,
             Spell::MagicShield => !player.buffs.contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE),
             Spell::Hiding
@@ -7435,6 +7461,161 @@ impl ZoneRuntime {
         true
     }
 
+    fn schedule_native_purification(
+        &mut self,
+        caster_session_id: &SessionId,
+        target_session_id: &SessionId,
+        level: u8,
+        now_ms: u64,
+    ) {
+        let Some(caster) = self.current_native_purification_owner(caster_session_id) else {
+            return;
+        };
+        let Some(target) = self.current_native_purification_owner(target_session_id) else {
+            return;
+        };
+        self.pending_native_purifications
+            .push(PendingNativePurification {
+                ready_at_ms: now_ms.saturating_add(500),
+                level,
+                caster,
+                target,
+            });
+    }
+
+    fn current_native_purification_owner(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<owned_pet_combat::OwnedPetOwner> {
+        let player = self.players.get(session_id)?;
+        let node = self.online_presence.get(session_id)?;
+        if node.life_generation != player.life_generation {
+            return None;
+        }
+        self.owned_pet_owner(session_id)
+    }
+
+    fn native_purification_players_are_friendly(
+        &self,
+        caster: &ZonePlayer,
+        target: &ZonePlayer,
+        now_ms: u64,
+    ) -> bool {
+        // PlayerObject.IsFriendlyTarget(HumanObject):4751. Read the target's
+        // current group/guild, and the real BrownTime, at completion as well.
+        if caster.session_id == target.session_id {
+            return true;
+        }
+        match caster.chat_profile.attack_mode {
+            1 => target
+                .chat_profile
+                .group_members
+                .iter()
+                .any(|name| name.eq_ignore_ascii_case(&caster.name)),
+            2 => target
+                .chat_profile
+                .guild_name
+                .as_deref()
+                .zip(caster.chat_profile.guild_name.as_deref())
+                .is_some_and(|(target_guild, caster_guild)| {
+                    target_guild.eq_ignore_ascii_case(caster_guild)
+                }),
+            3 => {
+                target.chat_profile.guild_name.is_some()
+                    && caster
+                        .chat_profile
+                        .guild_name
+                        .as_deref()
+                        .is_none_or(|caster_guild| {
+                            !target
+                                .chat_profile
+                                .active_guild_wars
+                                .iter()
+                                .any(|enemy| enemy.eq_ignore_ascii_case(caster_guild))
+                        })
+            }
+            4 => target.chat_profile.pk_points < 200
+                && now_ms > self.owned_pet_brown_until(target),
+            5 => false,
+            _ => true,
+        }
+    }
+
+    fn resolve_pending_native_purifications(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let pending = std::mem::take(&mut self.pending_native_purifications);
+        let mut outbounds = Vec::new();
+        for action in pending {
+            if now_ms < action.ready_at_ms {
+                self.pending_native_purifications.push(action);
+                continue;
+            }
+            // Each proof requires the same Node, life and current owner Zone.
+            // A leave/rejoin, revive or cold decode cannot bless the old action.
+            if self.current_native_purification_owner(&action.caster.online.session_id)
+                .as_ref()
+                != Some(&action.caster)
+                || self.current_native_purification_owner(&action.target.online.session_id)
+                    .as_ref()
+                    != Some(&action.target)
+            {
+                continue;
+            }
+            let caster = &self.players[&action.caster.online.session_id];
+            let target = &self.players[&action.target.online.session_id];
+            if !self.native_purification_players_are_friendly(caster, target, now_ms)
+                || zone_deterministic_roll(
+                    now_ms,
+                    usize::try_from(caster.object_id).unwrap_or_default(),
+                    usize::from(action.level).saturating_add(74),
+                    4,
+                ) > u64::from(action.level)
+            {
+                continue;
+            }
+            let target_ref = self
+                .native_entity_player_ref(&action.target.online.session_id)
+                .unwrap();
+            let target = self
+                .players
+                .get_mut(&action.target.online.session_id)
+                .unwrap();
+            let target_id = target.object_id;
+            let position = target.position.clone();
+            let removed_debuffs = target
+                .buffs
+                .keys()
+                .copied()
+                .filter(|kind| native_purification_is_debuff(*kind))
+                .collect::<Vec<_>>();
+            for kind in &removed_debuffs {
+                target.buffs.remove(kind);
+            }
+            target.poison = 0;
+            target.native_status_poison = 0;
+            target.native_status_poison_deadlines.clear();
+            target.native_status_poison_expires_at_ms = None;
+            self.clear_native_periodic_player_poisons(target_id);
+            self.clear_entity_player_poison_leases(target_id);
+            self.clear_owned_human_player_poison_leases(&target_ref);
+            let mut packets = vec![ServerPacket::ObjectPoisoned {
+                object_id: target_id,
+                poison: 0,
+            }];
+            packets.extend(removed_debuffs.into_iter().map(|buff_type| {
+                ServerPacket::RemoveBuff {
+                    object_id: target_id,
+                    buff_type,
+                }
+            }));
+            self.apply_zone_object_packets(&packets, now_ms);
+            outbounds.push(ZoneOutbound::ToMany {
+                session_ids: self.player_status_recipients(target_id, &position),
+                packets,
+            });
+        }
+        outbounds
+    }
+
     fn apply_native_friendly_player_magic(
         &mut self,
         caster_session_id: &SessionId,
@@ -7471,40 +7652,13 @@ impl ZoneRuntime {
                 }]
             }
             Spell::Purification => {
-                if zone_deterministic_roll(
+                self.schedule_native_purification(
+                    caster_session_id,
+                    target_session_id,
+                    level,
                     now_ms,
-                    usize::try_from(caster.object_id).unwrap_or_default(),
-                    usize::from(level).saturating_add(74),
-                    4,
-                ) > u64::from(level)
-                {
-                    return Vec::new();
-                }
-                let Some(target) = self.players.get_mut(target_session_id) else {
-                    return Vec::new();
-                };
-                target.poison &= !target.native_status_poison;
-                target.native_status_poison = 0;
-                target.native_status_poison_deadlines.clear();
-                target.native_status_poison_expires_at_ms = None;
-                let removed_debuffs = [CRYSTAL_CURSE_BUFF_TYPE]
-                    .into_iter()
-                    .filter(|buff_type| target.buffs.remove(buff_type).is_some())
-                    .collect::<Vec<_>>();
-                let mut packets = vec![ServerPacket::ObjectPoisoned {
-                    object_id: target.object_id,
-                    poison: target.poison,
-                }];
-                packets.extend(removed_debuffs.into_iter().map(|buff_type| {
-                    ServerPacket::RemoveBuff {
-                        object_id: target.object_id,
-                        buff_type,
-                    }
-                }));
-                let target_id = target.object_id;
-                self.clear_native_periodic_player_poisons(target_id);
-                self.clear_entity_player_poison_leases(target_id);
-                packets
+                );
+                Vec::new()
             }
             Spell::UltimateEnhancer => {
                 let spirit = zone_player_spirit_power(&caster, now_ms, 0x775C);
@@ -15212,6 +15366,27 @@ fn zone_player_can_attack_player_at(
         5 => true,
         _ => false,
     }
+}
+
+fn native_purification_is_debuff(buff_type: u8) -> bool {
+    // These wire IDs come from Shared/Enums.cs; properties come from the
+    // imported BuffInfo.Load manifest, never the client buff projection.
+    let name = match buff_type {
+        12 => "Curse",
+        53 => "RhinoPriestDebuff",
+        57 => "Blindness",
+        _ => return false,
+    };
+    mir2_game_data::crystal_buff_manifest_ref()
+        .buffs
+        .iter()
+        .any(|definition| {
+            definition.buff_type == name
+                && definition
+                    .properties
+                    .iter()
+                    .any(|property| property == "Debuff")
+        })
 }
 
 fn zone_players_are_friendly(caster: &ZonePlayer, target: &ZonePlayer) -> bool {

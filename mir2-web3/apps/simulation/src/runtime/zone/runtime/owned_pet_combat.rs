@@ -4286,6 +4286,22 @@ impl ZoneRuntime {
         }]
     }
 
+    pub(super) fn clear_owned_human_player_poison_leases(
+        &mut self,
+        target: &ZoneCombatEntityRef,
+    ) {
+        if !matches!(target, ZoneCombatEntityRef::Player { .. }) {
+            return;
+        }
+        if let Some(state) = self
+            .entity_combat
+            .as_mut()
+            .and_then(|state| state.owned_pet.as_mut())
+        {
+            state.poisons.retain(|poison| poison.target != *target);
+        }
+    }
+
     pub(super) fn tick_owned_human_poisons(&mut self, now: u64) -> Vec<ZoneOutbound> {
         let Some(state) = self
             .entity_combat

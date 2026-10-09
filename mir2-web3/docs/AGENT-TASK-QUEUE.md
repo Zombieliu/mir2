@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> 2026-10-09 Purification Candidate: Source cast+500ms now rechecks both typed
+> actor Nodes/lives, current friendship and original level chance; clears actual
+> poison and Source Debuffs12/53/57 without removing beneficial buffs or unrelated
+> in-flight damage. Focused17 and existing pet/Human38 pass; Root full Zone is
+> 201pass/8fail and all17 Hell-AI cases pass. The remaining8 failures stay RED.
+> Simultaneous same-destination live map transfer during the cast is open;
+> exact-source CI/publication/native/Human acceptance for this slice are pending.
+> [Source, limits and all original evidence](CLASSIC-PURIFICATION-LIFECYCLE-20261009.md).
+>
+> Snake source97a now passed actual Linux CI37889758213, including both jobs and
+> original appearance/security/classic/Source/PostgreSQL/siege/package gates.
+> Genuine artifact digest/ELF/Source metadata were verified; no server switch.
+> R23 sourcefaef origin40 immutable files are appended and independently read back;
+> R2 stage37899098919 is running on exact publication headbaf. Feed17/Gateway536
+> remain current. [Snake CI evidence](generated/player-qa/snake-master-20261009/linux-ci-01/EVIDENCE.json).
+
 > 2026-10-09 Snake Totem immediate-master Candidate: real AI62→AI63 children
 > now bind parent/child incarnations and causal online/life identity, use their
 > immediate Totem targeting/SlaveList/follow rules, preserve strict birth+2000

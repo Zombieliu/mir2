@@ -13944,7 +13944,7 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
     taoist_join.level = 50;
     purification_zone.handle(ZoneCommand::Join(taoist_join));
 
-    let poisoned = purification_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+    let poison_cast = purification_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
         session_id: poisoner.clone(),
         object_id: 102,
         spell: Spell::Poisoning,
@@ -13958,6 +13958,16 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
         item_param: 1,
         now_ms: 20,
     });
+    assert!(!has_packet(&poison_cast, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
+    )));
+    let before_poison = purification_zone.tick(519);
+    assert!(!has_packet(&before_poison, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
+    )));
+    let poisoned = purification_zone.tick(520);
     assert!(has_packet(&poisoned, &friend, |packet| matches!(
         packet,
         ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
@@ -13978,10 +13988,10 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
                 values: Vec::new(),
             },
         }],
-        now_ms: 25,
+        now_ms: 521,
     });
 
-    let purified = purification_zone.handle(ZoneCommand::PlayerCastMagic {
+    let purification_cast = purification_zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: taoist.clone(),
         object_id: 102,
         spell: Spell::Purification,
@@ -13992,8 +14002,20 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
         damage: 0,
         mp_cost: 0,
         cooldown_ms: 500,
-        now_ms: 40,
+        now_ms: 540,
     });
+    assert!(!has_packet(&purification_cast, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison: 0 }
+            | ServerPacket::RemoveBuff { object_id: 102, buff_type: 12 }
+    )));
+    let before_purification = purification_zone.tick(1_039);
+    assert!(!has_packet(&before_purification, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison: 0 }
+            | ServerPacket::RemoveBuff { object_id: 102, buff_type: 12 }
+    )));
+    let purified = purification_zone.tick(1_040);
     assert!(has_packet(&purified, &friend, |packet| matches!(
         packet,
         ServerPacket::ObjectPoisoned {

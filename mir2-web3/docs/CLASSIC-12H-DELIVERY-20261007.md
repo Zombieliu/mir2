@@ -7,21 +7,26 @@ not complete and no older blocked Goal is presented as complete.
 
 ## Actual delivery checkpoint — 2026-10-09
 
-Snake immediate-master local implementation now passes private64, normal
-in-process Zone API5 and original test-support pet-PK38. The full unchanged Zone
-fixture improves from198/11 to200/9; the nine remaining failures are retained.
-This original Archer/common-pet slice has not yet passed exact-source Linux CI,
-publication or natural native/Human PK acceptance.
+Snake immediate-master implementation passes private64, normal in-process
+Zone API5 and original test-support pet-PK38. Exact-source97a Linux CI37889758213
+passed both original jobs and all retained gates; genuine artifacts are verified.
+Publication and natural native/Human PK acceptance remain open. Its original
+Zone regression was200pass/9fail. Subsequent Purification now passes focused17,
+pet/Human38 and Root Hell-AI17; Root full Zone is201pass/8fail. The remaining8
+failures and simultaneous two-actor Purification map transfer stay open.
+[Purification Source evidence and limits](CLASSIC-PURIFICATION-LIFECYCLE-20261009.md).
 [Implementation, failures and complete evidence](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
 P1faef Linux/Windows release CI passed and R23/feed18 is genuinely signed and
-decoded, but is not yet public; R22/feed17/Gateway536 remains the release baseline.
+decoded. Origin40 immutable objects were appended and read back; exact-head
+R2 stage37899098919 is running. It is not yet public;
+R22/feed17/Gateway536 remains the release baseline.
 
 The user continued work after the missed deadline. The new P1 target/route/owner
 ACK Candidate passes native900/0/7ignored plus actual three-class native/Gateway
 socket movement and normal logout. It is implemented and locally tested, not yet
 published or human accepted. [Current P1 Candidate](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
-The full Zone regression remains198pass/11fail, identically reproduced on clean
-7fea; it is not a green baseline. [Source/fixture audit](CLASSIC-ZONE-BASELINE-AUDIT-20261009.md).
+The earlier clean7fea Zone baseline was198pass/11fail; after Snake and
+Purification it is201pass/8fail and is still not a green full suite. [Source/fixture audit](CLASSIC-ZONE-BASELINE-AUDIT-20261009.md).
 P7 source inspection identifies seven real shared-world gaps and ordered action/
 CAS/recovery requirements; none is counted complete by the new P1 tests.
 [P7 implementation plan](CLASSIC-P7-SOURCE-WORLD-AUDIT-20261009.md).
