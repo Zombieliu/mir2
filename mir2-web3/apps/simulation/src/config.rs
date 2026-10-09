@@ -196,7 +196,7 @@ mod guild_clock_driver;
 #[path = "config_guild_experience.rs"]
 pub(crate) mod guild_experience;
 pub use guild_experience::{GuildExperienceJournal, GuildExperienceEvent};
-const ACCOUNT_STORE_SCHEMA_VERSION: u16 = 7;
+const ACCOUNT_STORE_SCHEMA_VERSION: u16 = crate::billing::BILLING_SCHEMA_VERSION;
 
 #[path = "config_shared_conquests.rs"]
 mod shared_conquest_store;
@@ -350,7 +350,9 @@ impl AccountStore {
         let impossible_heroes=self.schema_version<5 && (!self.shared_heroes.is_empty() || self.hero_id_high_watermark != 0);
         let impossible_conquests=self.schema_version<6 && !self.shared_conquests.is_empty();
         let impossible_monthly_cards = self.schema_version < 7 && self.accounts.values().any(|account| account.monthly_card.is_some());
-        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes && !impossible_conquests && !impossible_monthly_cards {
+        let impossible_billing = self.schema_version < 8 && self.accounts.values().any(|account|
+            account.billing.is_some() || account.monthly_card.as_ref().is_some_and(|card| !card.item_receipts.is_empty()));
+        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes && !impossible_conquests && !impossible_monthly_cards && !impossible_billing {
             self.schema_version=ACCOUNT_STORE_SCHEMA_VERSION;
         }
         self.normalize_next_character_index();
@@ -630,6 +632,23 @@ struct AccountStoreMutationPlan {
     hero_allocator: Option<hero_registry::HeroAllocatorMutation>,
     accounts: BTreeMap<String, AccountStoreAccountMutation>,
     global_stock: Option<AccountStoreGlobalStockMutation>,
+}
+
+impl AccountStoreMutationPlan {
+    fn carries_billing_source(&self) -> bool {
+        self.accounts.values().any(|mutation| {
+            mutation.original_account.as_ref().and_then(|account| account.billing.as_ref())
+                != mutation.desired_account.as_ref().and_then(|account| account.billing.as_ref())
+                || mutation.original_account.as_ref().and_then(|account| account.monthly_card.as_ref())
+                    != mutation.desired_account.as_ref().and_then(|account| account.monthly_card.as_ref())
+                || mutation.saves.iter().any(|(index, save)| {
+                    let before = mutation.original_account.as_ref()
+                        .and_then(|account| account.saves.get(index)).map_or(0, |save| save.credit);
+                    let after = save.desired_save.as_ref().map_or(0, |save| save.credit);
+                    before != after
+                })
+        })
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -1036,6 +1055,7 @@ impl AccountStoreRepository for FileAccountStoreRepository {
             Err(error) => return Err(format!("failed to read file account store: {error}")),
         }
         .migrate_to_current_schema();
+        crate::billing::validate_complete_store(&store)?;
         hero_registry::validate_complete_state(&store)?;
         shared_conquest_store::validate_complete_state(&store)?;
         shared_guild_store::validate_complete_guild_state(&store)?;
@@ -1603,6 +1623,8 @@ fn replace_file_atomically(
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountRecord {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub billing: Option<crate::billing::BillingLedger>,
     #[serde(rename = "monthlyCard", default, skip_serializing_if = "Option::is_none")]
     pub monthly_card: Option<crate::monthly_card::MonthlyCardLedger>,
     #[serde(default = "default_account_password")]
@@ -1658,6 +1680,7 @@ impl AccountRecord {
         Self {
             password: default_account_password(),
             monthly_card: None,
+            billing: None,
             storage_size: default_storage_size(),
             has_expanded_storage: false,
             expanded_storage_expiry_time_binary_datetime: 0,
@@ -1678,6 +1701,7 @@ impl AccountRecord {
         Self {
             password: default_account_password(),
             monthly_card: None,
+            billing: None,
             storage_size: default_storage_size(),
             has_expanded_storage: false,
             expanded_storage_expiry_time_binary_datetime: 0,
@@ -3792,6 +3816,8 @@ pub struct SimulationConfig {
     pub crystal_world_experience_rate: f32,
     pub crystal_newbie_guild_name: String,
     pub monthly_card_policy: crate::monthly_card::MonthlyCardPolicy,
+    /// Disabled unless explicitly configured; paid Credits use the existing wallet.
+    pub billing_monthly_card_credit_price: Option<u32>,
     pub map: MapInformation,
     pub spawn: Point,
     pub scene_view: SceneView,
@@ -4036,6 +4062,7 @@ impl SimulationConfig {
             map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             monthly_card_policy: crate::monthly_card::MonthlyCardPolicy::default(),
+            billing_monthly_card_credit_price: None,
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
@@ -4362,7 +4389,7 @@ impl SimulationConfig {
     ) -> Result<Self, String> {
         let backend = account_store_runtime_backend_from_env()?;
         let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL").ok();
-        self.with_account_store_environment_with_loader(
+        self.with_billing_environment()?.with_account_store_environment_with_loader(
             account_store_path.into(),
             backend,
             database_url,
@@ -4505,7 +4532,8 @@ impl SimulationConfig {
     }
 
     fn map_clock_repository_error(&self,plan:&AccountStoreMutationPlan,error:String)->String{
-        if (plan.clock.is_some() && error.starts_with(guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN))
+        if (plan.carries_billing_source() && error.starts_with(crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN))
+            || (plan.clock.is_some() && error.starts_with(guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN))
             || ((!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.starts_with(guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN))
             || ((!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.starts_with(hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN))
             || (!plan.conquests.is_empty() && error.starts_with("CONQUEST_COMMIT_OUTCOME_UNKNOWN")) {
@@ -4774,6 +4802,7 @@ impl SimulationConfig {
             .lock()
             .map_err(|_| "account store mutex poisoned".to_string())?;
         let original_store = live_store.clone();
+        crate::billing::validate_complete_store(&original_store)?;
         let mut staged_store = original_store.clone();
         let result = transaction(&mut staged_store)?;
         if matches!(scope,AccountStoreMutationScope::FullRestore){
@@ -4831,6 +4860,7 @@ impl SimulationConfig {
             return Err("injected account-store failure before persist".to_string());
         }
 
+        crate::billing::validate_complete_store(&staged_store)?;
         // Fail serialization before touching either repository.  The file
         // backend repeats this encoding for its pretty snapshot, while this
         // preflight also protects PostgreSQL mirror-first ordering.
@@ -4903,7 +4933,7 @@ impl SimulationConfig {
                         shared_conquest_store::invalidate_restored_leases(&staged_store, &mut hero_restored)?;
                         compensation_plan.conquests = shared_conquest_store::build_mutations(&staged_store, &hero_restored, scope);
                     }
-                    if !mutation_plan.guilds.is_empty() || !mutation_plan.conquests.is_empty() || mutation_plan.carries_guild_experience_source() || mutation_plan.clock.is_some() {
+                    if !mutation_plan.guilds.is_empty() || !mutation_plan.conquests.is_empty() || mutation_plan.carries_guild_experience_source() || mutation_plan.clock.is_some() || mutation_plan.carries_billing_source() {
                         compensation_plan.fence_compensation(&receipt,&staged_store);
                     }
                     if let Some(clock)=receipt.clock.as_ref(){
@@ -5117,6 +5147,7 @@ impl SimulationConfig {
             store.source_save_versions.remove(account_id);
             return Ok(AccountSourceRefreshOutcome::Missing);
         };
+        crate::billing::validate_account_record(&account)?;
         store.source_account_versions.remove(account_id);
         store.source_save_versions.remove(account_id);
         store.accounts.insert(account_id.to_string(), account);
@@ -5223,6 +5254,7 @@ impl SimulationConfig {
         // Existing authority must be valid before optional development fixture insertion.
         // Otherwise a missing demo owner could be manufactured into a valid guild leader.
         let decoded = decoded.migrate_to_current_schema();
+        crate::billing::validate_complete_store(&decoded)?;
         hero_registry::validate_complete_state(&decoded)?;
         shared_conquest_store::validate_complete_state(&decoded)?;
         shared_guild_store::validate_complete_guild_state(&decoded)?;
@@ -5451,6 +5483,7 @@ fn load_account_store_from_postgres_with_pool(
         shared_guild_store::load_guilds(&mut transaction, &mut store)?;
         shared_conquest_store::load_conquests(&mut transaction, &mut store)?;
         hero_postgres::load_heroes(&mut transaction, &mut store)?;
+        crate::billing::validate_complete_store(&store)?;
         hero_registry::validate_complete_state(&store)?;
         shared_conquest_store::validate_complete_state(&store)?;
         let clock=guild_clock::load_postgres(&mut transaction)?;
@@ -5598,13 +5631,14 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     let carries_guilds=!plan.guilds.is_empty() || plan.carries_guild_experience_source();
     let carries_heroes=!plan.heroes.is_empty() || plan.hero_allocator.is_some();
     let carries_conquests=!plan.conquests.is_empty();
+    let carries_billing=plan.carries_billing_source();
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
         pool.ensure_migrated(&mut client)?;
         write_account_store_mutation_plan_to_postgres(&mut client, &plan, mode)
     })
     .join()
-    .map_err(|_|if carries_clock{format!("{}: postgres clock transaction worker panicked",guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN)}else if carries_guilds{format!("{}: postgres guild transaction worker panicked",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if carries_heroes{format!("{}: postgres Hero transaction worker panicked",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if carries_conquests {"CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege worker panicked".to_string()}else{"postgres account-store mutation thread panicked".to_string()})?
+    .map_err(|_|if carries_billing{format!("{}: postgres billing transaction worker panicked",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if carries_clock{format!("{}: postgres clock transaction worker panicked",guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN)}else if carries_guilds{format!("{}: postgres guild transaction worker panicked",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if carries_heroes{format!("{}: postgres Hero transaction worker panicked",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if carries_conquests {"CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege worker panicked".to_string()}else{"postgres account-store mutation thread panicked".to_string()})?
 }
 
 fn write_account_store_mutation_plan_to_postgres(
@@ -5619,7 +5653,7 @@ fn write_account_store_mutation_plan_to_postgres(
     let source_versions = write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
         .commit()
-        .map_err(|error|if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
+        .map_err(|error|if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
     Ok(source_versions)
 }
 

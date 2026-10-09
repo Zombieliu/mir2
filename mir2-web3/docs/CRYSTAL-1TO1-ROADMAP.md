@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-09 authorized commercial extension Candidate: Stripe Hosted Checkout
+> credits the existing character wallet; a custom30-day monthly item extends
+> account access exactly once. Original Crystal manifests remain unchanged.
+> Simulation44, Gateway36/shared4/adjacent4 and native checks pass locally;
+> PostgreSQL CI, operator prices/credentials, provider/native acceptance and
+> rollout remain pending. This does not advance full parity to100% or alter
+> public R22/Gatewaya41/feed17. [Details](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
+
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and
 > authenticated Source RPC registration validation are implemented. Simulation

@@ -43,6 +43,7 @@ mod owner_health_sync_tests;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2: &str = "nativeGameShopPurchaseV2";
 pub const ZONE_RPC_STORAGE_REQUEST_ID_V1: &str = "storageRequestIdV1";
+pub const ZONE_RPC_BILLING_V1: &str = "billingCreditsMonthlyCardV1";
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -2048,13 +2049,20 @@ enum CorrelatedMutationPolicy {
     NativePurchaseV2,
     OrdinaryPurchase,
     StorageRequestV2,
+    Billing,
 }
+
+#[cfg(test)]
+#[path = "zone_rpc_billing_tests.rs"]
+mod billing_tests;
 
 /// Keep the no-fallback rule narrow: correlated GameShop and Storage writes
 /// must never be replayed after an endpoint may have committed them. Read-only
 /// and unrelated gameplay commands retain endpoint fallback behavior.
 fn correlated_mutation_policy(command: &WorldCommand) -> Option<CorrelatedMutationPolicy> {
     match command {
+        WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
+            | WorldCommand::BillingActivateMonthlyCard { .. } => Some(CorrelatedMutationPolicy::Billing),
         WorldCommand::NativeGameShopPurchase(_) => Some(CorrelatedMutationPolicy::NativePurchaseV2),
         WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) => {
             Some(CorrelatedMutationPolicy::OrdinaryPurchase)
@@ -2070,6 +2078,8 @@ fn wire_correlated_mutation_policy(
     command: &WireWorldCommand,
 ) -> Result<Option<CorrelatedMutationPolicy>, String> {
     match command {
+        WireWorldCommand::BillingRefresh { .. } | WireWorldCommand::BillingBuyMonthlyCard { .. }
+            | WireWorldCommand::BillingActivateMonthlyCard { .. } => Ok(Some(CorrelatedMutationPolicy::Billing)),
         WireWorldCommand::NativeGameShopPurchaseV2 { .. } => {
             Ok(Some(CorrelatedMutationPolicy::NativePurchaseV2))
         }
@@ -2098,6 +2108,7 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
         match correlated_mutation_policy(request.command()) {
+            Some(CorrelatedMutationPolicy::Billing) => self.execute_owner_request(request, Some(ZONE_RPC_BILLING_V1), true),
             Some(CorrelatedMutationPolicy::NativePurchaseV2) => self.execute_owner_request(
                 request,
                 Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2),
@@ -3782,6 +3793,7 @@ impl ZoneHostServer {
                     ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
                     ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
                     ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
+                    ZONE_RPC_BILLING_V1.to_string(),
                 ],
             });
         }
@@ -5541,6 +5553,9 @@ enum WireWorldCommand {
     SetLanguage {
         language: String,
     },
+    BillingRefresh { character_index: i32 },
+    BillingBuyMonthlyCard { character_index: i32, request_id: String },
+    BillingActivateMonthlyCard { character_index: i32, unique_id: u64 },
     RestoreActiveCharacterCheckpoint {
         checkpoint: Box<CharacterSaveRecord>,
     },
@@ -5618,6 +5633,9 @@ impl WireWorldCommand {
                 renting,
             },
             WorldCommand::SetLanguage { language } => Self::SetLanguage { language },
+            WorldCommand::BillingRefresh { character_index } => Self::BillingRefresh { character_index },
+            WorldCommand::BillingBuyMonthlyCard { character_index, request_id } => Self::BillingBuyMonthlyCard { character_index, request_id },
+            WorldCommand::BillingActivateMonthlyCard { character_index, unique_id } => Self::BillingActivateMonthlyCard { character_index, unique_id },
             WorldCommand::Tick => Self::Tick,
         })
     }
@@ -5696,6 +5714,9 @@ impl WireWorldCommand {
                 renting,
             },
             Self::SetLanguage { language } => WorldCommand::SetLanguage { language },
+            Self::BillingRefresh { character_index } => WorldCommand::BillingRefresh { character_index },
+            Self::BillingBuyMonthlyCard { character_index, request_id } => WorldCommand::BillingBuyMonthlyCard { character_index, request_id },
+            Self::BillingActivateMonthlyCard { character_index, unique_id } => WorldCommand::BillingActivateMonthlyCard { character_index, unique_id },
             Self::RestoreActiveCharacterCheckpoint { .. } => {
                 return Err(ZoneRpcFault::new(
                     "checkpoint_command",

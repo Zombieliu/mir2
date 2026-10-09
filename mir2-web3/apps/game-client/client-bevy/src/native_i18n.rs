@@ -322,11 +322,69 @@ fn catalog() -> &'static Catalog {
                 result.values.push(values);
             }
         }
+        for (key, translations) in BILLING_TRANSLATIONS {
+            let index = result.values.len();
+            assert!(result.keys.insert((*key).into(), index).is_none());
+            // Stable billing keys never overwrite an ambiguous legacy alias.
+            result.exact.insert((*key).into(), index);
+            result.values.push(translations.map(str::to_owned));
+        }
+        for (source, key) in [
+            (MONTHLY_CARD_ITEM_NAME, "billing.monthlyCardItemName"),
+            (MONTHLY_CARD_ITEM_TOOLTIP, "billing.monthlyCardItemTooltip"),
+        ] {
+            let index = result.keys[key];
+            assert!(result.exact.insert(source.into(), index).is_none());
+        }
         result.templates.finish();
         result.npc_templates.finish();
         result
     })
 }
+
+// Authored payment vocabulary, in Locale::index order. Kept separate from
+// generated aliases such as Credits (the character scene's staff credits).
+const MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
+const MONTHLY_CARD_ITEM_TOOLTIP: &str = "Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.";
+const BILLING_TRANSLATIONS: &[(&str, [&str; Locale::COUNT])] = &[
+    ("billing.monthlyCardItemName", ["Monthly Card (30 Days)", "30 天月卡", "Cartão mensal (30 dias)", "Месячная карта (30 дней)", "मासिक कार्ड (30 दिन)", "Kartu Bulanan (30 Hari)", "Thẻ tháng (30 ngày)", "บัตรรายเดือน (30 วัน)", "بطاقة شهرية (30 يومًا)"]),
+    ("billing.monthlyCardItemTooltip", [MONTHLY_CARD_ITEM_TOOLTIP, "使用後增加 30 天全帳號遊戲使用期限。已有使用權限時，從目前到期時間起延長。離線時間也會計入。僅可使用一次。", "Ao usar, adiciona 30 dias de acesso ao jogo para toda a conta. Se o acesso estiver ativo, o prazo é prorrogado a partir do vencimento atual. O tempo offline conta. Uso único.", "При использовании добавляет 30 дней доступа к игре для всего аккаунта. Активный доступ продлевается от текущей даты окончания. Время вне игры учитывается. Одноразовое использование.", "इस्तेमाल करने पर पूरे खाते के लिए 30 दिन की गेम पहुँच जोड़ता है। सक्रिय पहुँच की अवधि मौजूदा समाप्ति समय से आगे बढ़ती है। ऑफ़लाइन समय भी गिना जाता है। केवल एक बार इस्तेमाल किया जा सकता है।", "Saat digunakan, menambah 30 hari akses game untuk seluruh akun. Akses yang masih aktif diperpanjang dari waktu kedaluwarsa saat ini. Waktu offline tetap dihitung. Sekali pakai.", "Khi sử dụng, thêm 30 ngày truy cập trò chơi cho toàn bộ tài khoản. Quyền truy cập đang còn hạn được gia hạn từ thời điểm hết hạn hiện tại. Thời gian ngoại tuyến vẫn được tính. Chỉ dùng một lần.", "เมื่อใช้จะเพิ่มสิทธิ์เข้าเกม 30 วันสำหรับทั้งบัญชี หากสิทธิ์ยังไม่หมดอายุ จะต่อเวลาจากวันหมดอายุปัจจุบัน เวลาที่ออฟไลน์จะถูกนับด้วย ใช้ได้ครั้งเดียว", "تضيف عند استخدامها 30 يومًا من الوصول إلى اللعبة للحساب بأكمله. يُمدَّد الوصول النشط بدءًا من موعد انتهائه الحالي. يُحتسب الوقت خارج الاتصال. تُستخدم مرة واحدة."]),
+    ("billing.updated", ["Account status refreshed.", "已更新帳號狀態。", "Status da conta atualizado.", "Статус аккаунта обновлён.", "खाते की स्थिति अपडेट हो गई।", "Status akun diperbarui.", "Đã cập nhật trạng thái tài khoản.", "อัปเดตสถานะบัญชีแล้ว", "تم تحديث حالة الحساب."]),
+    ("billing.title", ["Credits and Monthly Card", "點數與月卡", "Créditos e cartão mensal", "Кредиты и месячная карта", "क्रेडिट और मासिक कार्ड", "Kredit dan Kartu Bulanan", "Điểm và thẻ tháng", "เครดิตและบัตรรายเดือน", "الرصيد والبطاقة الشهرية"]),
+    ("billing.open", ["Recharge / buy monthly card", "充值／購買月卡", "Recarregar / comprar cartão", "Пополнить / купить карту", "रिचार्ज / मासिक कार्ड खरीदें", "Isi ulang / beli kartu", "Nạp điểm / mua thẻ tháng", "เติมเครดิต / ซื้อบัตรรายเดือน", "شحن الرصيد / شراء بطاقة"]),
+    ("billing.instructions", ["Payment opens in your browser. Return here and check status to confirm Credits. Each monthly card adds 30 days.", "付款會在瀏覽器開啟。返回此處檢查狀態以確認點數入帳。每張月卡增加 30 天。", "O pagamento abre no navegador. Volte e consulte o status para confirmar os créditos. Cada cartão adiciona 30 dias.", "Оплата откроется в браузере. Вернитесь и проверьте зачисление. Каждая карта добавляет 30 дней.", "भुगतान ब्राउज़र में खुलेगा। लौटकर स्थिति जाँचें और क्रेडिट की पुष्टि करें। हर मासिक कार्ड 30 दिन जोड़ता है।", "Pembayaran dibuka di browser. Kembali dan cek status untuk memastikan kredit masuk. Setiap kartu menambah 30 hari.", "Thanh toán mở trong trình duyệt. Quay lại kiểm tra trạng thái để xác nhận điểm. Mỗi thẻ thêm 30 ngày.", "ชำระเงินในเบราว์เซอร์ แล้วกลับมาตรวจสอบเครดิต บัตรแต่ละใบเพิ่มเวลา 30 วัน", "يُفتح الدفع في المتصفح. ارجع وتحقق من الحالة لتأكيد الرصيد. تضيف كل بطاقة 30 يومًا."]),
+    ("billing.balance", ["Credits: {0} · pending: {1}", "點數：{0} · 待入帳：{1}", "Créditos: {0} · pendentes: {1}", "Кредиты: {0} · ожидаются: {1}", "क्रेडिट: {0} · लंबित: {1}", "Kredit: {0} · tertunda: {1}", "Điểm: {0} · đang chờ: {1}", "เครดิต: {0} · รอดำเนินการ: {1}", "الرصيد: {0} · قيد الانتظار: {1}"]),
+    ("billing.points", ["{0} Credits", "{0} 點數", "{0} créditos", "{0} кредитов", "{0} क्रेडिट", "{0} kredit", "{0} điểm", "{0} เครดิต", "{0} رصيد"]),
+    ("billing.optional", ["Monthly access is optional on this server.", "此伺服器目前不要求月卡。", "O cartão mensal é opcional neste servidor.", "На этом сервере карта необязательна.", "इस सर्वर पर मासिक कार्ड वैकल्पिक है।", "Kartu bulanan opsional di server ini.", "Máy chủ này không bắt buộc thẻ tháng.", "เซิร์ฟเวอร์นี้ไม่บังคับใช้บัตรรายเดือน", "البطاقة الشهرية اختيارية في هذا الخادم."]),
+    ("billing.active", ["Monthly card active", "月卡使用中", "Cartão mensal ativo", "Месячная карта активна", "मासिक कार्ड सक्रिय है", "Kartu bulanan aktif", "Thẻ tháng đang hoạt động", "บัตรรายเดือนใช้งานอยู่", "البطاقة الشهرية نشطة"]),
+    ("billing.expired", ["Monthly card required or expired", "尚未啟用月卡或已到期", "Cartão mensal ausente ou vencido", "Нужна месячная карта, или срок истёк", "मासिक कार्ड आवश्यक है या समाप्त हो गया है", "Kartu bulanan diperlukan atau kedaluwarsa", "Cần thẻ tháng hoặc thẻ đã hết hạn", "ต้องใช้บัตรรายเดือนหรือบัตรหมดอายุแล้ว", "البطاقة الشهرية مطلوبة أو منتهية"]),
+    ("billing.expires", ["Expires:", "有效期限：", "Validade:", "Действует до:", "समाप्ति:", "Berlaku hingga:", "Hết hạn:", "หมดอายุ:", "تنتهي في:"]),
+    ("billing.unavailable", ["Billing is unavailable on this server.", "此伺服器目前未開放帳單服務。", "Pagamentos indisponíveis neste servidor.", "Платежи на этом сервере недоступны.", "इस सर्वर पर भुगतान सेवा उपलब्ध नहीं है।", "Layanan pembayaran tidak tersedia di server ini.", "Dịch vụ thanh toán chưa khả dụng trên máy chủ này.", "เซิร์ฟเวอร์นี้ยังไม่เปิดบริการชำระเงิน", "خدمة الدفع غير متاحة في هذا الخادم."]),
+    ("billing.insufficientCredits", ["Not enough Credits to buy this monthly card.", "點數不足，無法購買這張月卡。", "Créditos insuficientes para comprar este cartão mensal.", "Недостаточно кредитов для покупки этой месячной карты.", "इस मासिक कार्ड को खरीदने के लिए पर्याप्त क्रेडिट नहीं हैं।", "Kredit tidak cukup untuk membeli kartu bulanan ini.", "Không đủ điểm để mua thẻ tháng này.", "เครดิตไม่เพียงพอสำหรับซื้อบัตรรายเดือนนี้", "الرصيد غير كافٍ لشراء هذه البطاقة الشهرية."]),
+    ("billing.inventoryFull", ["Your bag is full. Free a slot before buying a monthly card.", "背包已滿。請先騰出一個空位，再購買月卡。", "Sua bolsa está cheia. Libere um espaço antes de comprar um cartão mensal.", "Сумка заполнена. Освободите ячейку перед покупкой месячной карты.", "आपका बैग भरा हुआ है। मासिक कार्ड खरीदने से पहले एक स्थान खाली करें।", "Tas Anda penuh. Kosongkan satu slot sebelum membeli kartu bulanan.", "Túi đã đầy. Hãy chừa một ô trống trước khi mua thẻ tháng.", "กระเป๋าเต็ม กรุณาเว้นช่องว่างหนึ่งช่องก่อนซื้อบัตรรายเดือน", "حقيبتك ممتلئة. أفرغ خانة قبل شراء بطاقة شهرية."]),
+    ("billing.monthlyDisabled", ["Monthly card purchases are unavailable on this server.", "此伺服器目前未開放月卡購買。", "A compra de cartões mensais está indisponível neste servidor.", "Покупка месячных карт на этом сервере недоступна.", "इस सर्वर पर मासिक कार्ड खरीदना उपलब्ध नहीं है।", "Pembelian kartu bulanan tidak tersedia di server ini.", "Máy chủ này chưa mở bán thẻ tháng.", "เซิร์ฟเวอร์นี้ยังไม่เปิดให้ซื้อบัตรรายเดือน", "شراء البطاقات الشهرية غير متاح في هذا الخادم."]),
+    ("billing.checkoutUnavailable", ["Online recharge is unavailable.", "目前未開放線上充值。", "Recarga online indisponível.", "Онлайн-пополнение недоступно.", "ऑनलाइन रिचार्ज उपलब्ध नहीं है।", "Isi ulang online tidak tersedia.", "Nạp điểm trực tuyến chưa khả dụng.", "ยังไม่เปิดเติมเครดิตออนไลน์", "شحن الرصيد عبر الإنترنت غير متاح."]),
+    ("billing.offers", ["Recharge offers", "充值方案", "Opções de recarga", "Варианты пополнения", "रिचार्ज विकल्प", "Pilihan isi ulang", "Gói nạp điểm", "แพ็กเกจเติมเครดิต", "خيارات شحن الرصيد"]),
+    ("billing.recharge", ["Recharge", "充值", "Recarregar", "Пополнить", "रिचार्ज", "Isi ulang", "Nạp điểm", "เติมเครดิต", "شحن الرصيد"]),
+    ("billing.monthlyPrice", ["30-day monthly card: {0} Credits", "30 天月卡：{0} 點數", "Cartão de 30 dias: {0} créditos", "Карта на 30 дней: {0} кредитов", "30-दिन का मासिक कार्ड: {0} क्रेडिट", "Kartu 30 hari: {0} kredit", "Thẻ 30 ngày: {0} điểm", "บัตร 30 วัน: {0} เครดิต", "بطاقة 30 يومًا: {0} رصيد"]),
+    ("billing.buyMonthly", ["Buy monthly card", "購買月卡", "Comprar cartão", "Купить карту", "मासिक कार्ड खरीदें", "Beli kartu bulanan", "Mua thẻ tháng", "ซื้อบัตรรายเดือน", "شراء بطاقة شهرية"]),
+    ("billing.owned", ["Your monthly cards", "持有的月卡", "Seus cartões mensais", "Ваши месячные карты", "आपके मासिक कार्ड", "Kartu bulanan Anda", "Thẻ tháng của bạn", "บัตรรายเดือนของคุณ", "بطاقاتك الشهرية"]),
+    ("billing.noCards", ["You have no monthly cards.", "目前沒有月卡。", "Você não tem cartões mensais.", "У вас нет месячных карт.", "आपके पास मासिक कार्ड नहीं हैं।", "Anda belum memiliki kartu bulanan.", "Bạn chưa có thẻ tháng.", "คุณยังไม่มีบัตรรายเดือน", "ليس لديك بطاقات شهرية."]),
+    ("billing.card", ["Monthly card", "月卡", "Cartão mensal", "Месячная карта", "मासिक कार्ड", "Kartu bulanan", "Thẻ tháng", "บัตรรายเดือน", "بطاقة شهرية"]),
+    ("billing.activate", ["Activate", "啟用", "Ativar", "Активировать", "सक्रिय करें", "Aktifkan", "Kích hoạt", "เปิดใช้งาน", "تفعيل"]),
+    ("billing.checking", ["Checking status...", "正在查詢狀態…", "Consultando status...", "Проверка статуса…", "स्थिति जाँची जा रही है…", "Memeriksa status…", "Đang kiểm tra trạng thái…", "กำลังตรวจสอบสถานะ…", "جارٍ التحقق من الحالة…"]),
+    ("billing.waiting", ["Checkout opened. Payment is not confirmed yet; return and check status.", "已開啟付款頁面，尚未確認付款。返回後請檢查狀態。", "Pagamento aberto. Ainda não confirmado; volte e consulte o status.", "Страница оплаты открыта. Оплата ещё не подтверждена; проверьте статус.", "भुगतान पृष्ठ खुल गया है। भुगतान की पुष्टि नहीं हुई है; लौटकर स्थिति जाँचें।", "Halaman pembayaran dibuka. Pembayaran belum dikonfirmasi; kembali dan cek status.", "Đã mở trang thanh toán. Chưa xác nhận thanh toán; hãy quay lại kiểm tra trạng thái.", "เปิดหน้าชำระเงินแล้ว ยังไม่ยืนยันการชำระเงิน กลับมาตรวจสอบสถานะ", "فُتحت صفحة الدفع. لم يُؤكَّد الدفع بعد؛ ارجع وتحقق من الحالة."]),
+    ("billing.unconfirmed", ["Result unconfirmed. Check status or retry the same request.", "結果尚未確認。請檢查狀態，或重試同一筆請求。", "Resultado não confirmado. Consulte o status ou repita a mesma solicitação.", "Результат неизвестен. Проверьте статус или повторите тот же запрос.", "परिणाम की पुष्टि नहीं हुई। स्थिति जाँचें या वही अनुरोध फिर भेजें।", "Hasil belum dikonfirmasi. Cek status atau ulangi permintaan yang sama.", "Chưa xác nhận kết quả. Kiểm tra trạng thái hoặc thử lại cùng yêu cầu.", "ยังไม่ยืนยันผล ตรวจสอบสถานะหรือลองคำขอเดิมอีกครั้ง", "النتيجة غير مؤكدة. تحقق من الحالة أو أعد الطلب نفسه."]),
+    ("billing.failed", ["Request could not be completed. Check status before retrying.", "請求未能完成。重試前請先檢查狀態。", "Não foi possível concluir. Consulte o status antes de tentar novamente.", "Не удалось выполнить запрос. Перед повтором проверьте статус.", "अनुरोध पूरा नहीं हुआ। दोबारा भेजने से पहले स्थिति जाँचें।", "Permintaan tidak selesai. Cek status sebelum mencoba lagi.", "Không thể hoàn tất yêu cầu. Kiểm tra trạng thái trước khi thử lại.", "ทำคำขอไม่สำเร็จ ตรวจสอบสถานะก่อนลองอีกครั้ง", "تعذر إتمام الطلب. تحقق من الحالة قبل إعادة المحاولة."]),
+    ("billing.browserFailed", ["Could not open the payment browser. Retry the same request.", "無法開啟付款瀏覽器。請重試同一筆請求。", "Não foi possível abrir o navegador. Repita a mesma solicitação.", "Не удалось открыть браузер оплаты. Повторите тот же запрос.", "भुगतान ब्राउज़र नहीं खुल सका। वही अनुरोध फिर भेजें।", "Browser pembayaran tidak dapat dibuka. Ulangi permintaan yang sama.", "Không thể mở trình duyệt thanh toán. Thử lại cùng yêu cầu.", "เปิดเบราว์เซอร์ชำระเงินไม่ได้ ลองคำขอเดิมอีกครั้ง", "تعذر فتح متصفح الدفع. أعد الطلب نفسه."]),
+    ("billing.done", ["Request confirmed. Refreshing account status...", "請求已確認，正在更新帳號狀態…", "Solicitação confirmada. Atualizando a conta...", "Запрос подтверждён. Обновление статуса…", "अनुरोध की पुष्टि हुई। खाते की स्थिति अपडेट हो रही है…", "Permintaan dikonfirmasi. Memperbarui status akun…", "Đã xác nhận yêu cầu. Đang cập nhật trạng thái tài khoản…", "ยืนยันคำขอแล้ว กำลังอัปเดตสถานะบัญชี…", "تم تأكيد الطلب. جارٍ تحديث حالة الحساب…"]),
+    ("billing.refresh", ["Check status", "檢查狀態", "Consultar status", "Проверить статус", "स्थिति जाँचें", "Cek status", "Kiểm tra trạng thái", "ตรวจสอบสถานะ", "التحقق من الحالة"]),
+    ("billing.retry", ["Retry same request", "重試同一筆請求", "Repetir solicitação", "Повторить запрос", "वही अनुरोध फिर भेजें", "Ulangi permintaan", "Thử lại cùng yêu cầu", "ลองคำขอเดิมอีกครั้ง", "إعادة الطلب نفسه"]),
+    ("billing.close", ["Close", "關閉", "Fechar", "Закрыть", "बंद करें", "Tutup", "Đóng", "ปิด", "إغلاق"]),
+    ("billing.previous", ["Previous", "上一頁", "Anterior", "Назад", "पिछला", "Sebelumnya", "Trước", "ก่อนหน้า", "السابق"]),
+    ("billing.next", ["Next", "下一頁", "Próximo", "Далее", "अगला", "Berikutnya", "Sau", "ถัดไป", "التالي"]),
+    ("billing.selectCharacter", ["Select a character to open billing.", "請先選擇角色，再開啟帳單。", "Selecione um personagem para abrir pagamentos.", "Выберите персонажа для оплаты.", "भुगतान खोलने के लिए पात्र चुनें।", "Pilih karakter untuk membuka pembayaran.", "Chọn nhân vật để mở thanh toán.", "เลือกตัวละครเพื่อเปิดบริการชำระเงิน", "اختر شخصية لفتح خدمة الدفع."]),
+];
 
 #[derive(Debug)]
 enum Part<'a> {
@@ -969,6 +1027,54 @@ fn show_language_menu(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn monthly_card_exact_system_name_and_tooltip_use_ordinary_item_translation() {
+        assert_eq!(MONTHLY_CARD_ITEM_NAME, "MonthlyCard30Days");
+        assert_eq!(MONTHLY_CARD_ITEM_TOOLTIP, "Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.");
+        for language in Locale::ALL {
+            with_locale(language, || {
+                let name = crate::player_text::name(MONTHLY_CARD_ITEM_NAME);
+                let tooltip = crate::player_text::text(MONTHLY_CARD_ITEM_TOOLTIP);
+                assert_eq!(name, translate(language, "billing.monthlyCardItemName"));
+                assert_eq!(tooltip, translate(language, "billing.monthlyCardItemTooltip"));
+                assert!(name.contains("30"));
+                assert!(tooltip.contains("30"));
+                assert_ne!(name, MONTHLY_CARD_ITEM_NAME);
+                if language != Locale::English {
+                    assert_ne!(tooltip, MONTHLY_CARD_ITEM_TOOLTIP);
+                }
+                for opaque in ["monthlyCard30Days", "MonthlyCard30DaysFromPlayer", "MonthlyCard60Days"] {
+                    assert_eq!(crate::player_text::name(opaque), opaque);
+                }
+            });
+        }
+        assert_eq!(translate(Locale::English, MONTHLY_CARD_ITEM_NAME), "Monthly Card (30 Days)");
+        assert_eq!(translate(Locale::English, MONTHLY_CARD_ITEM_TOOLTIP), MONTHLY_CARD_ITEM_TOOLTIP);
+    }
+
+    #[test]
+    fn billing_keys_cover_nine_locales_and_preserve_placeholders() {
+        let mut keys = HashSet::new();
+        for (key, values) in BILLING_TRANSLATIONS {
+            assert!(key.starts_with("billing."));
+            assert!(keys.insert(*key));
+            for language in Locale::ALL {
+                let value = &values[language.index()];
+                assert!(!value.is_empty());
+                assert_ne!(value, key);
+                assert_eq!(translate(language, key), *value);
+                for placeholder in ["{0}", "{1}"] {
+                    assert_eq!(
+                        values[0].matches(placeholder).count(),
+                        value.matches(placeholder).count(),
+                        "{key} {language:?}"
+                    );
+                }
+            }
+        }
+        assert_eq!(translate(Locale::TraditionalChinese, "Credits"), "製作名單");
+    }
 
     #[test]
     fn language_popup_survives_options_children_rebuilt_each_update() {

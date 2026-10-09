@@ -1743,6 +1743,7 @@ pub(super) fn delete_character_from_account(
             .find(|character| character.index == character_index)
             .cloned()
             .ok_or_else(|| "Character not found.".to_string())?;
+        crate::billing::ensure_character_billing_deletable(account, character_index)?;
         account
             .characters
             .retain(|character| character.index != character_index);

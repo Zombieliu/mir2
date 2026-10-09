@@ -880,6 +880,8 @@ pub struct NativePlayerUiState {
     /// server catalog row remains reachable.
     pub game_shop_page: usize,
     pub game_shop_dialog: game_shop_dialog::GameShopDialogUi,
+    pub billing_open: bool,
+    pub billing_input_consumed: bool,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
@@ -1338,6 +1340,8 @@ impl Default for NativePlayerUiState {
             shop_repair_slot: None,
             game_shop_page: 0,
             game_shop_dialog: Default::default(),
+            billing_open: false,
+            billing_input_consumed: false,
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
@@ -1637,7 +1641,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.refine.open
+        self.billing_open
+            || self.billing_input_consumed
+            || self.refine.open
             || self.refine.pending()
             || self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
@@ -1766,7 +1772,9 @@ impl NativePlayerUiState {
         panel_blocks: bool,
         hover_blocks: bool,
     ) -> bool {
-        self.refine.open
+        self.billing_open
+            || self.billing_input_consumed
+            || self.refine.open
             || self.refine.pending()
             || self.game_shop_dialog.confirmation.is_some()
             || self.storage_password_prompt.is_some()
@@ -1909,7 +1917,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.non_friend_amount_modal_open_except_hero()
     }
     fn non_friend_amount_modal_open_except_hero(&self) -> bool {
-        self.guild_panel.blocks()
+        self.billing_open
+            || self.billing_input_consumed
+            || self.guild_panel.blocks()
             || self.guild_panel.consumed
             || self.skill_assign.open
             || self.group_dialog.modal()
@@ -3434,6 +3444,7 @@ enum OverlayButton {
     GameShopPagePrev,
     GameShopPageNext,
     GameShopControl(game_shop_dialog::GameShopAction),
+    OpenBilling,
     // Storage
     SelectBagForStore(u32),
     SelectStorage(u32),
@@ -6943,6 +6954,10 @@ pub(crate) fn process_overlay_keyboard(
         typed.clear();
         return;
     }
+    if shell.billing.open || state.billing_input_consumed {
+        typed.clear();
+        return;
+    }
     let BigMapControls {
         model: mut big_map,
         intents: mut big_map_intents,
@@ -8064,6 +8079,9 @@ fn process_overlay_buttons(
     button_controls: OverlayButtonControls,
 ) {
     if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+    if shell.billing.open || state.billing_input_consumed {
         return;
     }
     let OverlayButtonControls {
@@ -10014,6 +10032,13 @@ fn process_overlay_buttons(
                 }
             }
             // Shop
+            OverlayButton::OpenBilling => {
+                if state.shop_open() {
+                    state.game_shop_dialog.blur_search();
+                    shell.open_billing();
+                    state.billing_open = shell.billing.open;
+                }
+            }
             OverlayButton::GameShopControl(action) => {
                 if let Some(model) = game_shop.as_deref_mut() {
                     game_shop_dialog::action(

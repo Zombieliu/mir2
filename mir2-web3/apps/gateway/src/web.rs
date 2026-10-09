@@ -85,6 +85,8 @@ type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
 type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
+#[path = "web_billing.rs"]
+mod billing;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
@@ -1572,6 +1574,10 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    BillingStatus(billing::StatusRequest),
+    BillingCheckout(billing::CheckoutRequest),
+    BillingBuyMonthlyCard(billing::BuyRequest),
+    BillingActivateMonthlyCard(billing::ActivateRequest),
     MonthlyCardStatus,
     RedeemMonthlyCard { code: monthly_card::RedeemCode, #[serde(rename = "requestId")] request_id: u64 },
     ClientVersion,
@@ -2241,6 +2247,7 @@ enum QaControlAction {
 
 #[derive(Debug, Clone)]
 enum SessionAction {
+    Billing(billing::Request),
     MonthlyCardStatus,
     RedeemMonthlyCard { code: monthly_card::RedeemCode, request_id: u64 },
     Packet(ClientPacket),
@@ -2711,6 +2718,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         )
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .merge(monthly_card::router())
+        .merge(billing::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -5405,6 +5413,8 @@ async fn handle_socket_work(
     let movement_ingress = Arc::new(RwLock::new(initial_movement_ingress));
     let serial_execution_gate = Arc::new(AsyncRwLock::new(()));
     let socket_authenticated = Arc::new(AtomicBool::new(authenticated));
+    let billing_generation = Arc::new(AtomicU64::new(0));
+    let _billing_socket_fence = billing::socket_fence(Arc::clone(&socket_authenticated),Arc::clone(&billing_generation));
     let (zone_outbound_tx, zone_outbound_rx) = mpsc::channel(LIVE_ZONE_OUTBOUND_CAPACITY);
     let (owner_location_outbound_tx, owner_location_outbound_rx) =
         mpsc::channel(OWNER_LOCATION_OUTBOUND_CAPACITY);
@@ -5662,6 +5672,19 @@ async fn handle_socket_work(
                 }
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
+                }
+                if matches!(&action, SessionAction::Packet(ClientPacket::Login { .. } | ClientPacket::LogOut | ClientPacket::Disconnect) | SessionAction::PasskeyLogin { .. }) {
+                    billing_generation.fetch_add(1, Ordering::AcqRel);
+                }
+                if let SessionAction::Billing(request) = &action {
+                    if let Err(error) = billing::socket_action(session, Arc::clone(&identity),
+                        active_identity_session.as_ref(), authenticated, authenticated_account_id.as_deref(),
+                        request.clone(), Arc::clone(&sender), Arc::clone(&session_cache),
+                        Arc::clone(&socket_authenticated), Arc::clone(&billing_generation)).await {
+                        let reply = billing::error_reply(request, error);
+                        if sender.lock().await.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                    }
+                    continue;
                 }
                 if matches!(&action, SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. }) {
                     let reply = tokio::task::block_in_place(|| monthly_card::socket_reply(
@@ -7407,7 +7430,7 @@ fn execute_session_action(
         SessionAction::QaControl { token, action } => {
             execute_qa_control_action(session, &token, action)
         }
-        SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => Err("monthly cards require the authenticated socket seam".into()),
+        SessionAction::Billing(_) | SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => Err("account purchases require the authenticated socket seam".into()),
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
@@ -7538,7 +7561,7 @@ fn execute_production_session_action(
         SessionAction::QaControl { .. } => {
             return Err("QA control is not allowed on the production player path".to_string());
         }
-        SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => return Err("monthly cards require the authenticated socket seam".into()),
+        SessionAction::Billing(_) | SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => return Err("account purchases require the authenticated socket seam".into()),
         SessionAction::SetLanguage { language } => session
             .execute_production_player_command_with_zone_owner_lease(
                 &zone_owner_lease,
@@ -8600,6 +8623,10 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::QaControl { token, action } => {
             Ok(SessionAction::QaControl { token, action })
         }
+        BrowserCommand::BillingStatus(request) => Ok(SessionAction::Billing(billing::Request::Status(request))),
+        BrowserCommand::BillingCheckout(request) => Ok(SessionAction::Billing(billing::Request::Checkout(request))),
+        BrowserCommand::BillingBuyMonthlyCard(request) => Ok(SessionAction::Billing(billing::Request::Buy(request))),
+        BrowserCommand::BillingActivateMonthlyCard(request) => Ok(SessionAction::Billing(billing::Request::Activate(request))),
         BrowserCommand::MonthlyCardStatus => Ok(SessionAction::MonthlyCardStatus),
         BrowserCommand::RedeemMonthlyCard { code, request_id } => Ok(SessionAction::RedeemMonthlyCard { code, request_id }),
         BrowserCommand::SetLanguage { language } => Ok(SessionAction::SetLanguage { language }),

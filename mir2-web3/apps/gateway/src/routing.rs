@@ -14652,7 +14652,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
-        if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect))
+        if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
+            | WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
+            | WorldCommand::BillingActivateMonthlyCard { .. })
             && self.inner.monthly_card_access_expired()? {
             // Keep the shared departure, trade rollback, authoritative transform
             // synchronization and durable save together on the existing path.
@@ -15240,9 +15242,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else if is_item_use {
             self.execute_shared_personal_vital_command(command, false)?
         } else if is_game_shop_buy {
+            let basis = self.prepare_shared_personal_vital_command()?;
             let execution = self.inner.execute_with_outcome(command)?;
             self.last_game_shop_purchase_outcome = execution.game_shop_purchase_outcome;
-            execution.packets
+            let mut packets = execution.packets;
+            if let Some(basis) = basis { self.commit_shared_personal_vital_command(basis, &mut packets)?; }
+            packets
         } else if let WorldCommand::ClientPacket(packet) = &command {
             if let Some(zone_packets) = self.execute_zone_player_packet(packet) {
                 zone_packets

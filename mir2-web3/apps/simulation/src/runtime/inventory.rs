@@ -1193,8 +1193,10 @@ fn normalize_user_item_tree_unique_ids(
         // A protocol UserItem always carries an exact identity. Preserve only
         // the first exact zero; every later zero is a collision.
     } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+        *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
         while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
+            *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                next_unique_id.checked_add(1).unwrap_or(1));
         }
         item.unique_id = *next_unique_id;
         seen.insert(item.unique_id);
@@ -1222,7 +1224,7 @@ fn equipment_root_unique_id(equipment: &super::equipment::EquipmentState) -> u64
         .unwrap_or_else(|| super::equipment::equipment_slot_unique_id(equipment.slot).unwrap_or(0))
 }
 
-fn equipment_tree_unique_id_is_used(
+pub(super) fn equipment_tree_unique_id_is_used(
     equipment: &super::equipment::EquipmentState,
     unique_id: u64,
 ) -> bool {
@@ -1302,9 +1304,10 @@ fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
 }
 
 fn next_available_unique_id(resources: &InventoryResource, minimum: u64) -> u64 {
-    let mut unique_id = minimum.max(1);
+    let mut unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(minimum.max(1));
     while inventory_unique_id_is_used(resources, unique_id) {
-        unique_id = unique_id.checked_add(1).unwrap_or(1);
+        unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+            unique_id.checked_add(1).unwrap_or(1));
     }
     unique_id
 }
@@ -1392,8 +1395,10 @@ fn normalize_incoming_item_tree_unique_ids_impl(
             // Preserve the first exact zero. A second zero is an impossible
             // protocol identity collision and is deterministically repaired.
         } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-                *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
+                *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                    next_unique_id.checked_add(1).unwrap_or(1));
             }
             item.unique_id = *next_unique_id;
             seen.insert(item.unique_id);
@@ -1480,6 +1485,7 @@ fn normalize_item_list_unique_ids(
         let normalized_unique_id = if preferred_available {
             preferred
         } else {
+            *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
             while local_seen.contains(&*next_unique_id)
                 || if exact_identity {
                     seen.contains(&*next_unique_id)
@@ -1487,7 +1493,8 @@ fn normalize_item_list_unique_ids(
                     exact_equipment_root_unique_ids.contains(&*next_unique_id)
                 }
             {
-                *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
+                *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                    next_unique_id.checked_add(1).unwrap_or(1));
             }
             let allocated = *next_unique_id;
             *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
@@ -1524,8 +1531,10 @@ fn normalize_embedded_item_unique_ids(
         if current_unique_id == 0 && item.user_item_metadata.is_some() && seen.insert(0) {
             // Preserve the first exact zero; repair subsequent collisions.
         } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-                *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
+                *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                    next_unique_id.checked_add(1).unwrap_or(1));
             }
             item.unique_id = *next_unique_id;
             seen.insert(item.unique_id);

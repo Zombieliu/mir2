@@ -1,5 +1,20 @@
 # Agent Run Log
 
+## 2026-10-09 — Stripe Credits / monthly consumable Candidate
+
+Implemented the user's one-time Stripe recharge and monthly GameShop item
+request in the existing isolated worktree, led by the coordinator with bounded
+writers/reviewers. No live credentials, payment, service, feed or save was changed.
+Local final simulation44, Gateway billing36/shared4/adjacent4 and native
+host5/model10/URL2 checks pass. The initial compilation/fixture failures remain
+in evidence; the actual socket test now supplies the mandatory fixture MAC key
+and permits the ordinary full bootstrap within its bounded ten-second deadline.
+All financial/identity/packet-order assertions remain. Actual isolated PostgreSQL
+CI is pending. Real prices/Stripe configuration, paired schema8 rollout and native
+human acceptance remain open; public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+[Feature](STRIPE-CREDITS-MONTHLY-CARD-20261009.md),
+[evidence](generated/player-qa/stripe-billing-20261009/README.md).
+
 > Latest fresh-native visual parity sync: 2026-07-18. Logged the local Crystal
 > QA character into Bichon `0 @ 332,275` through the rebuilt Release Gateway,
 > confirmed Day setting 2 plus Lime/White NPC labels, and captured live r05

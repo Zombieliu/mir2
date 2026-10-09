@@ -121,6 +121,10 @@ pub enum WorldCommand {
     SetLanguage {
         language: String,
     },
+    /// Authenticated billing seam only; never accepted as a raw player command.
+    BillingRefresh { character_index: i32 },
+    BillingBuyMonthlyCard { character_index: i32, request_id: String },
+    BillingActivateMonthlyCard { character_index: i32, unique_id: u64 },
     Tick,
 }
 
@@ -129,6 +133,9 @@ pub fn validate_production_player_command(
     command: &WorldCommand,
 ) -> Result<(), String> {
     match command {
+        WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
+            | WorldCommand::BillingActivateMonthlyCard { .. } =>
+            Err("billing commands require the authenticated billing seam".into()),
         WorldCommand::ReplayRetainedStartGameBootstrap { .. } => {
             Err("retained bootstrap replay is not allowed on the production player path".to_string())
         }
@@ -224,6 +231,7 @@ pub enum WorldCommandKind {
     CreditGoldFromOre,
     ItemRentalRequest,
     SetLanguage,
+    Billing,
     Tick,
 }
 
@@ -253,6 +261,8 @@ impl WorldCommand {
             Self::CreditGoldFromOre { .. } => WorldCommandKind::CreditGoldFromOre,
             Self::ItemRentalRequest { .. } => WorldCommandKind::ItemRentalRequest,
             Self::SetLanguage { .. } => WorldCommandKind::SetLanguage,
+            Self::BillingRefresh { .. } | Self::BillingBuyMonthlyCard { .. }
+                | Self::BillingActivateMonthlyCard { .. } => WorldCommandKind::Billing,
             Self::Tick => WorldCommandKind::Tick,
         }
     }
@@ -757,7 +767,9 @@ impl InProcessWorldRuntime {
     }
 
     pub fn try_tick_shared_zone_personal_state(&mut self) -> Result<Vec<ServerPacket>, String> {
-        self.session.try_tick_shared_zone_personal_state()
+        let mut packets = self.session.poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())?;
+        packets.extend(self.session.try_tick_shared_zone_personal_state()?);
+        Ok(packets)
     }
 
     pub fn zone_melee_attack_damage(&self) -> i32 {
@@ -1080,7 +1092,9 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
-        if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect))
+        if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
+            | WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
+            | WorldCommand::BillingActivateMonthlyCard { .. })
             && self.session.monthly_card_access_expired()? {
             return self.execute(WorldCommand::ClientPacket(ClientPacket::LogOut));
         }
@@ -1098,6 +1112,12 @@ impl WorldRuntime for InProcessWorldRuntime {
         let before = if force_periodic { self.session.begin_guild_experience_command(true)? }
             else if default_source { self.session.begin_default_npc_source_command()? }
             else if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
+        let mut billing_packets = match &command {
+            WorldCommand::Tick => self.session.poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())?,
+            WorldCommand::NativeGameShopPurchase(_) | WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) =>
+                self.session.refresh_recharge_credit_preflight()?,
+            _ => Vec::new(),
+        };
         let mut packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
             WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
@@ -1168,7 +1188,42 @@ impl WorldRuntime for InProcessWorldRuntime {
                 Vec::new()
             }
             WorldCommand::Tick => self.session.tick(),
+            WorldCommand::BillingRefresh { character_index } => {
+                if let Some(identity) = self.session.active_identity() {
+                    if identity.character_index != character_index { return Err("billingCharacterMismatch".into()); }
+                    self.session.consume_pending_recharge_credits()?
+                } else {
+                    let (config, account) = self.session.billing_authenticated_config()?;
+                    config.consume_inactive_pending_recharge_credits(&account, character_index,
+                        crate::monthly_card::monthly_card_now_ms())?;
+                    Vec::new()
+                }
+            },
+            WorldCommand::BillingBuyMonthlyCard { character_index, request_id } => {
+                let now = crate::monthly_card::monthly_card_now_ms();
+                if let Some(identity) = self.session.active_identity() {
+                    if identity.character_index != character_index { return Err("billingCharacterMismatch".into()); }
+                    self.session.buy_billing_monthly_card(&request_id, now)?
+                } else {
+                    let (config, account) = self.session.billing_authenticated_config()?;
+                    config.buy_monthly_card_for_character(&account, character_index, &request_id, now)?;
+                    Vec::new()
+                }
+            },
+            WorldCommand::BillingActivateMonthlyCard { character_index, unique_id } => {
+                let now = crate::monthly_card::monthly_card_now_ms();
+                if let Some(identity) = self.session.active_identity() {
+                    if identity.character_index != character_index { return Err("billingCharacterMismatch".into()); }
+                    self.session.activate_billing_monthly_card(unique_id, now)?
+                } else {
+                    let (config, account) = self.session.billing_authenticated_config()?;
+                    config.activate_monthly_card_for_character(&account, character_index, unique_id, now)?;
+                    Vec::new()
+                }
+            },
         };
+        billing_packets.append(&mut packets);
+        let mut packets = billing_packets;
         if default_source { self.session.dispatch_default_npc_source_packets(&mut packets); }
         self.session.finish_guild_experience_command(before,packets)
     }
@@ -1181,18 +1236,22 @@ impl WorldRuntime for InProcessWorldRuntime {
         let skip_snapshot = command.skips_outcome_snapshot();
         let (packets, game_shop_purchase_outcome) = match command {
             WorldCommand::NativeGameShopPurchase(request) => {
+                let mut packets = self.session.refresh_recharge_credit_preflight()?;
                 let execution = self.session.game_shop_buy_packet_idempotent(request)?;
-                (execution.packets, Some(execution.outcome))
+                packets.extend(execution.packets);
+                (packets, Some(execution.outcome))
             }
             WorldCommand::ClientPacket(ClientPacket::GameShopBuy {
                 g_index,
                 quantity,
                 price_type,
             }) => {
+                let mut packets = self.session.refresh_recharge_credit_preflight()?;
                 let execution = self
                     .session
                     .game_shop_buy_packet_with_outcome(g_index, quantity, price_type);
-                (execution.packets, Some(execution.outcome))
+                packets.extend(execution.packets);
+                (packets, Some(execution.outcome))
             }
             command => (self.execute(command)?, None),
         };

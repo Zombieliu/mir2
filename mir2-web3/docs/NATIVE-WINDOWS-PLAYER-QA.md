@@ -1,5 +1,16 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-09 新增充值/月卡 Candidate：商城充值入口和角色选择页续费已接
+>服务端；Stripe 确认后到账角色商城点数，30天月卡按真实UID消费一次。
+>本地服务端/HTTP/WS/私有RPC测试、Windows编译、5项host/10项模型/2项URL
+>检查通过；没有实际支付、浏览器跳转、截图或人工验收。价格、Stripe配置、
+>PostgreSQL CI和配套发布仍待完成。当前用户R22/网关a41/feed17保持原状。
+>[流程、配置及剩余验收](STRIPE-CREDITS-MONTHLY-CARD-20261009.md)。
+
+新增人工路线：正常登录→商城充值→浏览器付款→返回游戏刷新点数→购买月卡→
+领取/使用→重登核对时间；同时验收过期角色选择页续费、重复点击、取消付款、
+网络超时重试、背包满和九语言显示。当前不得勾选这些人工项目。
+
 > 2026-10-08 current public delivery: R22/game7fea, invited Gatewaya41 and
 > signed feed17 are actually live on origin and R2/CDN. Prior normal exit0,
 > strict six-counter/TCP drain, private backup, both normal service stops and

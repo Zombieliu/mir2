@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> 2026-10-09 Stripe recharge request: one-time Checkout to character Credits and
+> a30-day consumable monthly card are implemented as an unpublished Candidate.
+> Local simulation44, Gateway36/shared4/adjacent4 and native5/model10/URL2 checks
+> pass; the real PostgreSQL CI gate is pending. Pricing, Stripe configuration,
+> real-provider testing, native human acceptance and paired rollout remain open.
+> Public R22/Gatewaya41/feed17 are unchanged; original P1–P7 stays incomplete.
+> [Feature and evidence](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
+
+| Status | Current billing task | Evidence / remaining work |
+| --- | --- | --- |
+| [x] | Candidate durable recharge and authenticated HTTP/WS/Source settlement | Local raw webhook fixtures, replay/overflow/deletion/file restart checks |
+| [x] | Candidate Credit purchase and exact-UID monthly consumable | Native GameShop mail/claim/use, expired selection, renewal, pool-safe shared owner checks |
+| [x] | Candidate native billing presentation | Compile/model/correlation/URL/localization checks; no human visual acceptance |
+| [ ] | Real isolated PostgreSQL competing writers | Explicit ignored CI test, independent writers and stale owner/restart assertions |
+| [ ] | Real Stripe activation and release | Operator prices/credentials, test-mode purchase/refund, fleet schema8 upgrade and native acceptance |
+
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and
 > authenticated Source RPC registration validation are implemented. Simulation

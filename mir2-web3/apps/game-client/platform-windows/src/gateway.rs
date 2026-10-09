@@ -216,6 +216,12 @@ impl PlayerIntent {
 pub enum GatewayCommand {
     Connect,
     Wire(NativeOutboundCommand),
+    // Correlation metadata stays local; only `command` crosses the socket.
+    BillingWire {
+        request: mir2_client_bevy::native_billing::BillingRequest,
+        command: NativeOutboundCommand,
+    },
+    CancelBilling(u64),
     Player(PlayerIntent),
     Shutdown,
 }
@@ -603,6 +609,7 @@ impl NativeLightingPublisher {
 struct GatewaySessionContext {
     account_id: Option<String>,
     character_index: Option<i32>,
+    billing_request: Option<mir2_client_bevy::native_billing::BillingRequest>,
 }
 
 #[derive(Default)]
@@ -2335,7 +2342,10 @@ where
                 GatewayCommand::Shutdown => return Ok(false),
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                 | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => return Ok(false),
-                GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                GatewayCommand::Wire(_)
+                | GatewayCommand::Player(_)
+                | GatewayCommand::BillingWire { .. }
+                | GatewayCommand::CancelBilling(_) => {}
             }
         }
     }
@@ -2424,7 +2434,7 @@ where
                         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                             return Ok(RetryWait::Leave)
                         }
-                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::BillingWire { .. } | GatewayCommand::CancelBilling(_) => {}
                     }
                 }
             }
@@ -2893,9 +2903,11 @@ fn awaiting_resume_command_action(command: &GatewayCommand) -> AwaitingResumeCom
         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
             AwaitingResumeCommandAction::Cancel
         }
-        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {
-            AwaitingResumeCommandAction::Ignore
-        }
+        GatewayCommand::Connect
+        | GatewayCommand::Wire(_)
+        | GatewayCommand::Player(_)
+        | GatewayCommand::BillingWire { .. }
+        | GatewayCommand::CancelBilling(_) => AwaitingResumeCommandAction::Ignore,
     }
 }
 
@@ -3065,6 +3077,7 @@ where
                         _ => None,
                     };
                     let trace_player_command = matches!(&command, GatewayCommand::Player(_));
+                    let mut billing_request = None;
                     let payload = match command {
                         GatewayCommand::Connect => continue,
                         GatewayCommand::Shutdown => {
@@ -3072,6 +3085,17 @@ where
                             return Ok(ConnectedExit::Shutdown);
                         }
                         GatewayCommand::Player(intent) => intent.to_json(),
+                        GatewayCommand::CancelBilling(id) => {
+                            if context.billing_request.as_ref().is_some_and(|r| r.request_id == id) { context.billing_request = None; }
+                            continue;
+                        }
+                        GatewayCommand::BillingWire { request, command } => {
+                            if !billing_command_matches(&request, &command)
+                                || request.expired_at(mir2_client_bevy::native_billing::now_ms())
+                                || context.account_id.as_deref().is_some_and(|a| !request.belongs_to_account(a)) { continue; }
+                            billing_request = Some(request);
+                            command.to_wire_json()
+                        }
                         GatewayCommand::Wire(command) => {
                             update_session_context(&mut context, &command);
                             command.to_wire_json()
@@ -3083,6 +3107,7 @@ where
                         eprintln!("[gateway-client] sending player command {payload}");
                     }
                     if explicit_leave {
+                        connection_bootstrap_sent = false;
                         resume_state.clear();
                         // Do not leave stale darkness visible while the
                         // server processes logout/disconnect. The eventual
@@ -3107,6 +3132,7 @@ where
                         return Err(format!("gateway command send failed: {error}"));
                     }
                     crate::timing::sent(timed_request, send_started);
+                    if let Some(request) = billing_request { context.billing_request = Some(request); }
                     if let Some(request) = game_shop_request {
                         if !game_shop_receipt_gate.record_successful_send(request) {
                             game_shop_receipt_gate.clear_terminal();
@@ -3156,6 +3182,17 @@ where
                                 // Quarantined pre-resume frames are forbidden
                                 // from leaking into the new render generation.
                                 if disposition == InboundDisposition::Applied {
+                                    if let Ok(InboundEvent::Billing(reply)) = parse_inbound_event(text) {
+                                        let active_character = if connection_bootstrap_sent { context.character_index.or(resume_state.character_index) } else { None };
+                                        if synchronize_billing_credit(&mut context, &reply, active_character,
+                                            mir2_client_bevy::native_billing::now_ms(), &mut last_wallet, &mut last_world_payload, &mut ui_cursor) {
+                                            // Keep this absolute patch in the socket's packet order;
+                                            // a later Source delta must follow it in the ingest FIFO.
+                                            if let Some(wallet) = last_wallet {
+                                                let _ = mir2_bevy_runtime::native_ingest::push_native_wallet_patch(json!({"credit":wallet.credit}).to_string());
+                                            }
+                                        }
+                                    }
                                     if let Ok(envelope) = serde_json::from_str::<GatewayEnvelope>(text) {
                                         lighting_publisher.observe_envelope(&envelope);
                                     }
@@ -3205,17 +3242,115 @@ fn update_session_context(context: &mut GatewaySessionContext, command: &NativeO
     match command {
         NativeOutboundCommand::Login { account_id, .. }
         | NativeOutboundCommand::NewAccount { account_id, .. } => {
+            context.billing_request = None;
             context.account_id = Some(account_id.clone());
             context.character_index = None;
         }
         NativeOutboundCommand::StartGame { character_index } => {
+            context.billing_request = None;
             context.character_index = Some(*character_index);
         }
         NativeOutboundCommand::LogOut | NativeOutboundCommand::Disconnect => {
+            context.billing_request = None;
             context.character_index = None;
         }
         _ => {}
     }
+}
+
+fn billing_command_matches(
+    request: &mir2_client_bevy::native_billing::BillingRequest,
+    command: &NativeOutboundCommand,
+) -> bool {
+    use mir2_client_bevy::native_billing::BillingOperation;
+    let scope = match command {
+        NativeOutboundCommand::BillingStatus {
+            character_index,
+            request_id,
+        } => (BillingOperation::Status, *character_index, *request_id),
+        NativeOutboundCommand::BillingCheckout {
+            character_index,
+            request_id,
+            ..
+        } => (BillingOperation::Checkout, *character_index, *request_id),
+        NativeOutboundCommand::BillingBuyMonthlyCard {
+            character_index,
+            request_id,
+            ..
+        } => (
+            BillingOperation::BuyMonthlyCard,
+            *character_index,
+            *request_id,
+        ),
+        NativeOutboundCommand::BillingActivateMonthlyCard {
+            character_index,
+            request_id,
+            ..
+        } => (
+            BillingOperation::ActivateMonthlyCard,
+            *character_index,
+            *request_id,
+        ),
+        _ => return false,
+    };
+    scope
+        == (
+            request.operation,
+            request.character_index,
+            request.request_id,
+        )
+}
+
+fn synchronize_billing_credit(
+    context: &mut GatewaySessionContext,
+    reply: &mir2_client_bevy::native_billing::BillingReply,
+    active_character: Option<i32>,
+    now: u64,
+    last_wallet: &mut Option<WalletState>,
+    last_world_payload: &mut Option<Value>,
+    ui_cursor: &mut NativeUiPlayerCursor,
+) -> bool {
+    let Some(request) = context.billing_request.as_ref() else {
+        return false;
+    };
+    if request.expired_at(now)
+        || context
+            .account_id
+            .as_deref()
+            .is_some_and(|a| !request.belongs_to_account(a))
+        || reply.operation != request.operation
+        || reply.request_id != request.request_id
+        || reply.character_index != request.character_index
+        || reply.status.as_ref().is_some_and(|s| !s.is_valid())
+        || reply.checkout_url.as_ref().is_some_and(|url| {
+            url.len() > 4096
+                || reply.operation != mir2_client_bevy::native_billing::BillingOperation::Checkout
+                || reply.error.is_some()
+        })
+    {
+        return false;
+    }
+    // This lease lives only in this socket's context. Resumed sockets do not
+    // carry a login spelling, but still require the accepted world character.
+    context.billing_request = None;
+    let Some(status) = reply.status.as_ref().filter(|s| s.is_valid()) else {
+        return false;
+    };
+    if active_character != Some(reply.character_index) || last_world_payload.is_none() {
+        return false;
+    }
+    let mut wallet = last_wallet.unwrap_or_else(|| WalletState {
+        gold: last_world_payload
+            .as_ref()
+            .and_then(|p| value_u32(p.get("gold")))
+            .unwrap_or_default(),
+        credit: 0,
+    });
+    wallet.credit = status.credit;
+    *last_wallet = Some(wallet);
+    ui_cursor.credit = Some(status.credit);
+    merge_wallet_into_world(last_world_payload, *last_wallet);
+    true
 }
 
 fn mail_command_allowed(
@@ -4087,6 +4222,7 @@ where
                             wallet_value(payload, "credit"),
                             packet == "GainedCredit",
                         ) {
+                            ui_cursor.credit = Some(value);
                             let _ = mir2_bevy_runtime::native_ingest::push_native_wallet_patch(
                                 json!({"credit": value}).to_string(),
                             );
@@ -4888,6 +5024,7 @@ fn dispatch_shell_event(
         InboundEvent::MonthlyCard(reply) => {
             Some(ShellGatewayEvent::MonthlyCardReply(reply.clone()))
         }
+        InboundEvent::Billing(reply) => Some(ShellGatewayEvent::BillingReply(reply.clone())),
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
             message: account_feedback::gateway_error_message(error),
         }),
@@ -11196,6 +11333,105 @@ mod tests {
     }
 
     #[test]
+    fn billing_credit_cache_requires_the_current_request_account_and_active_character() {
+        use mir2_client_bevy::native_billing::{BillingOperation, BillingPanel, BillingReply};
+        let mut panel = BillingPanel::default();
+        panel.open_for("alice", 7, 10);
+        let request = panel.unsent_request().unwrap().clone();
+        let status = serde_json::from_value(json!({
+            "enabled":false,"checkoutEnabled":false,"credit":350,"pendingCredit":0,
+            "offers":[],"ownedMonthlyCards":[],"orders":[],
+            "monthlyCard":{"required":true,"active":false,"serverNowMs":10,"remainingMs":0,"canEnterGame":false}
+        })).unwrap();
+        let reply = BillingReply {
+            operation: BillingOperation::Status,
+            request_id: request.request_id,
+            character_index: 7,
+            status: Some(status),
+            checkout_url: None,
+            error: None,
+            replayed: None,
+        };
+        assert!(billing_command_matches(
+            &request,
+            &NativeOutboundCommand::BillingStatus {
+                character_index: 7,
+                request_id: request.request_id
+            }
+        ));
+        assert!(!billing_command_matches(
+            &request,
+            &NativeOutboundCommand::BillingStatus {
+                character_index: 8,
+                request_id: request.request_id
+            }
+        ));
+        for variant in 0..7 {
+            let mut context = GatewaySessionContext {
+                account_id: Some("alice".into()),
+                character_index: Some(7),
+                billing_request: Some(request.clone()),
+            };
+            let mut result = reply.clone();
+            let mut active = Some(7);
+            let mut now = 11;
+            match variant {
+                0 => context.billing_request = None,
+                1 => result.request_id += 1,
+                2 => result.operation = BillingOperation::Checkout,
+                3 => result.character_index = 8,
+                4 => context.account_id = Some("bob".into()),
+                5 => active = Some(8),
+                _ => now = 15_010,
+            }
+            let mut wallet = Some(WalletState {
+                gold: 100,
+                credit: 20,
+            });
+            let mut world = Some(json!({"gold":100,"credit":20}));
+            let mut cursor = NativeUiPlayerCursor::default();
+            assert!(!synchronize_billing_credit(
+                &mut context,
+                &result,
+                active,
+                now,
+                &mut wallet,
+                &mut world,
+                &mut cursor
+            ));
+            assert_eq!(wallet.unwrap().credit, 20);
+            assert_eq!(world.unwrap()["credit"], json!(20));
+        }
+        let mut context = GatewaySessionContext {
+            account_id: Some("alice".into()),
+            character_index: Some(7),
+            billing_request: Some(request),
+        };
+        let mut wallet = Some(WalletState {
+            gold: 100,
+            credit: 20,
+        });
+        let mut world = Some(json!({"gold":100,"credit":20}));
+        let mut cursor = NativeUiPlayerCursor::default();
+        assert!(synchronize_billing_credit(
+            &mut context,
+            &reply,
+            Some(7),
+            11,
+            &mut wallet,
+            &mut world,
+            &mut cursor
+        ));
+        assert!(context.billing_request.is_none());
+        assert_eq!(cursor.credit, Some(350));
+        assert_eq!(
+            apply_wallet_delta(&mut wallet, &mut world, "credit", Some(5), false),
+            Some(345)
+        );
+        assert_eq!(world.unwrap(), json!({"gold":100,"credit":345}));
+    }
+
+    #[test]
     fn wallet_cursor_overlays_stale_user_information_before_hud_transform() {
         let wallet = Some(WalletState {
             gold: 107,
@@ -11244,6 +11480,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (sender, receiver) = std::sync::mpsc::channel();
         let login = parse_inbound_event(
@@ -11285,6 +11522,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();

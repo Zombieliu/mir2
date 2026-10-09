@@ -148,6 +148,38 @@ pub enum NativeOutboundCommand {
         hero: bool,
     },
     ClientVersion,
+    BillingStatus {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingCheckout {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "offerId")]
+        offer_id: String,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingBuyMonthlyCard {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingActivateMonthlyCard {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "itemUniqueId")]
+        item_unique_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
     MonthlyCardStatus,
     RedeemMonthlyCard {
         code: String,
@@ -664,6 +696,10 @@ impl NativeOutboundCommand {
             Self::Observe { .. } => "observe",
             Self::Inspect { .. } => "inspect",
             Self::ClientVersion => "clientVersion",
+            Self::BillingStatus { .. } => "billingStatus",
+            Self::BillingCheckout { .. } => "billingCheckout",
+            Self::BillingBuyMonthlyCard { .. } => "billingBuyMonthlyCard",
+            Self::BillingActivateMonthlyCard { .. } => "billingActivateMonthlyCard",
             Self::MonthlyCardStatus => "monthlyCardStatus",
             Self::RedeemMonthlyCard { .. } => "redeemMonthlyCard",
             Self::ClientCapabilities { .. } => "clientCapabilities",
@@ -985,6 +1021,7 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    Billing(mir2_client_bevy::native_billing::BillingReply),
     MonthlyCard(mir2_client_bevy::native_monthly_card::MonthlyCardReply),
     Packet(PacketEvent),
     Error(ErrorEvent),
@@ -1044,6 +1081,9 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "billing" => serde_json::from_value(payload)
+            .map(InboundEvent::Billing)
+            .map_err(|_| ParseInboundError::InvalidJson("invalid billing response".into())),
         "monthlyCard" => serde_json::from_value(payload)
             .map(InboundEvent::MonthlyCard)
             .map_err(|error| {
@@ -1528,6 +1568,69 @@ mod tests {
             serde_json::to_value(command).expect("serialize command"),
             expected
         );
+    }
+
+    #[test]
+    fn billing_commands_use_only_server_owned_account_and_offer_identity() {
+        assert_serialized(
+            NativeOutboundCommand::BillingStatus {
+                character_index: 7,
+                request_id: 11,
+            },
+            serde_json::json!({"type":"billingStatus","characterIndex":7,"requestId":11}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingCheckout {
+                character_index: 7,
+                offer_id: "small".into(),
+                order_request_id: "native-stable-order".into(),
+                request_id: 12,
+            },
+            serde_json::json!({"type":"billingCheckout","characterIndex":7,"offerId":"small","orderRequestId":"native-stable-order","requestId":12}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingBuyMonthlyCard {
+                character_index: 7,
+                order_request_id: "native-stable-month".into(),
+                request_id: 13,
+            },
+            serde_json::json!({"type":"billingBuyMonthlyCard","characterIndex":7,"orderRequestId":"native-stable-month","requestId":13}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingActivateMonthlyCard {
+                character_index: 7,
+                item_unique_id: "18446744073709551615".into(),
+                request_id: 14,
+            },
+            serde_json::json!({"type":"billingActivateMonthlyCard","characterIndex":7,"itemUniqueId":"18446744073709551615","requestId":14}),
+        );
+    }
+
+    #[test]
+    fn billing_response_is_typed_and_never_logs_the_checkout_url() {
+        let parsed = parse_inbound_value(serde_json::json!({"type":"billing","payload":{
+            "operation":"checkout","requestId":12,"characterIndex":7,
+            "checkoutUrl":"https://checkout.stripe.com/c/pay/cs_test_opaque#private",
+            "replayed":true
+        }}))
+        .unwrap();
+        let debug = format!("{parsed:?}");
+        assert!(!debug.contains("cs_test_opaque"));
+        assert!(!debug.contains("private"));
+        let InboundEvent::Billing(reply) = parsed else {
+            panic!("missing typed billing response");
+        };
+        assert_eq!(reply.request_id, 12);
+        assert_eq!(reply.character_index, 7);
+        assert_eq!(
+            reply.operation,
+            mir2_client_bevy::native_billing::BillingOperation::Checkout
+        );
+        let error = parse_inbound_value(serde_json::json!({"type":"billing","payload":{
+            "operation":"https://checkout.stripe.com/c/pay/private","requestId":12,"characterIndex":7
+        }})).unwrap_err().to_string();
+        assert!(!error.contains("checkout.stripe.com"));
+        assert!(!error.contains("private"));
     }
 
     #[test]

@@ -1,0 +1,15 @@
+
+running 10 tests
+test all_nine_locales_use_billing_keys ... ok
+test canonical_u64_item_identity ... ok
+test checkout_is_bound_to_current_account_character_request_operation ... ok
+test closed_and_disabled_panels_cannot_open_checkout ... ok
+test definitive_errors_are_specific_correlated_and_allow_only_new_intent ... ok
+test expired_selection_can_open_billing ... ok
+test monthly_keyboard_focus_reaches_billing ... ok
+test ordinary_monthly_card_name_tooltip_and_errors_cover_nine_locales ... ok
+test purchase_reply_requests_status ... ok
+test timeout_and_uncertain_commit_reuse_the_same_order ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

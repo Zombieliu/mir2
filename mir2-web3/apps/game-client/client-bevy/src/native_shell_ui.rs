@@ -371,6 +371,7 @@ struct NativeShellContent;
 
 #[derive(Component)]
 pub(crate) enum NativeShellButton {
+    OpenBilling,
     OpenMonthlyCard,
     RedeemMonthlyCard,
     CloseMonthlyCard,
@@ -444,12 +445,19 @@ impl Plugin for Mir2NativeShellUiPlugin {
                 Update,
                 (
                     animate_login_door,
-                    update_root_visibility,
                     shell_keyboard_input,
                     shell_pointer_input,
-                    render_shell_ui,
+                    crate::native_billing::process_input,
                 )
-                    .chain(),
+                    .chain()
+                    .after(crate::pending_operations::PendingLifecycleSet::UiReset)
+                    .before(crate::crystal_ui::NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
+                (update_root_visibility, render_shell_ui)
+                    .chain()
+                    .after(crate::crystal_ui::NativePlayerUiSet::Mutate),
             )
             .add_systems(
                 Update,
@@ -520,9 +528,10 @@ fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn update_root_visibility(
     shell: Option<Res<NativeShellModel>>,
-    mut roots: Query<&mut Node, With<NativeShellRoot>>,
+    mut roots: Query<(&mut Node, &mut BackgroundColor), With<NativeShellRoot>>,
+    mut backgrounds: Query<&mut Node, (With<NativeLoginDoorBackground>, Without<NativeShellRoot>)>,
 ) {
-    let Ok(mut root) = roots.single_mut() else {
+    let Ok((mut root, mut color)) = roots.single_mut() else {
         return;
     };
 
@@ -531,7 +540,16 @@ fn update_root_visibility(
         return;
     };
 
-    root.display = if shell.screen == NativeShellScreen::InGame {
+    let in_game = shell.screen == NativeShellScreen::InGame;
+    color.0 = if in_game { Color::NONE } else { ROOT_BG };
+    for mut background in &mut backgrounds {
+        background.display = if in_game {
+            Display::None
+        } else {
+            Display::Flex
+        };
+    }
+    root.display = if in_game && !shell.billing.open {
         Display::None
     } else {
         Display::Flex
@@ -564,7 +582,7 @@ fn shell_pointer_input(
         return;
     };
 
-    if shell.screen == NativeShellScreen::InGame {
+    if shell.screen == NativeShellScreen::InGame || shell.billing.open {
         return;
     }
 
@@ -689,6 +707,7 @@ fn shell_pointer_input(
             && !matches!(
                 action,
                 NativeShellButton::OpenMonthlyCard
+                    | NativeShellButton::OpenBilling
                     | NativeShellButton::RedeemMonthlyCard
                     | NativeShellButton::CloseMonthlyCard
                     | NativeShellButton::FocusMonthlyCard
@@ -697,6 +716,9 @@ fn shell_pointer_input(
             continue;
         }
         match action {
+            NativeShellButton::OpenBilling => {
+                shell.open_billing();
+            }
             NativeShellButton::OpenMonthlyCard => {
                 apply_and_queue(&mut shell, &mut queue, NativeUiIntent::OpenMonthlyCard);
             }
@@ -830,7 +852,7 @@ fn shell_keyboard_input(
     modifiers.alt = keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight);
     modifiers.super_key = keys.pressed(KeyCode::SuperLeft) || keys.pressed(KeyCode::SuperRight);
 
-    if shell.screen == NativeShellScreen::InGame {
+    if shell.screen == NativeShellScreen::InGame || shell.billing.open {
         return;
     }
     let shifted = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
@@ -856,6 +878,9 @@ fn shell_keyboard_input(
                 }
                 MonthlyCardFocus::Refresh => {
                     apply_and_queue(&mut shell, &mut queue, NativeUiIntent::OpenMonthlyCard);
+                }
+                MonthlyCardFocus::Billing => {
+                    shell.open_billing();
                 }
                 _ => {
                     apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RedeemMonthlyCard);
@@ -1281,7 +1306,7 @@ fn render_shell_ui(
         return;
     };
 
-    if model.screen == NativeShellScreen::InGame {
+    if model.screen == NativeShellScreen::InGame && !model.billing.open {
         return;
     }
 
@@ -1304,9 +1329,8 @@ fn render_shell_ui(
 
     commands.entity(content).despawn_children();
 
-    commands
-        .entity(content)
-        .with_children(|screen| match model.screen {
+    commands.entity(content).with_children(|screen| {
+        match model.screen {
             NativeShellScreen::Connecting => {
                 with_generic_panel(screen, |panel| {
                     info_block(panel, "Connecting", "Connecting to gateway...");
@@ -1363,7 +1387,9 @@ fn render_shell_ui(
                 render_connection_lost(screen, &asset_server, &model, current_aux_focus);
             }
             NativeShellScreen::InGame => {}
-        });
+        }
+        crate::native_billing::render(screen, &model.billing);
+    });
 }
 
 fn with_generic_panel(
@@ -2460,10 +2486,13 @@ fn render_monthly_card(parent: &mut ChildSpawnerCommands, model: &NativeShellMod
     parent.spawn((absolute_node(spec::CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
         BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.75)), GlobalZIndex(2000)))
         .with_children(|layer| {
-            spawn_localized_frame(layer, spec::CrystalRect::new(202.0, 190.0, 620.0, 390.0));
+            spawn_localized_frame(layer, spec::CrystalRect::new(202.0, 170.0, 620.0, 456.0));
             spawn_aux_text(layer, "Monthly Card", spec::CrystalRect::new(222.0, 207.0, 580.0, 34.0), 22.0, GOLD, Justify::Center);
             spawn_aux_text(layer, "Each card adds 30 days. All characters share the account's expiry; offline time counts.",
                 spec::CrystalRect::new(224.0, 252.0, 576.0, 60.0), 14.0, CREAM, Justify::Left);
+            spawn_aux_text_button(layer, spec::CrystalRect::new(422.0, 574.0, 380.0, 36.0),
+                crate::native_i18n::tr("billing.open"), NativeShellButton::OpenBilling,
+                model.billing_character_index().is_some(), card.focus == MonthlyCardFocus::Billing);
             let status = match &card.status {
                 None => crate::native_i18n::tr("Checking monthly card..."),
                 Some(status) => {
@@ -2564,6 +2593,40 @@ mod tests {
             .iter(app.world())
             .map(|text| text.0.clone())
             .collect()
+    }
+
+    #[test]
+    fn expired_character_can_open_the_shared_billing_panel() {
+        use crate::native_shell::CharacterSummary;
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        model.last_account = Some("alice".into());
+        model.characters = vec![CharacterSummary::new(7, "Hero", 1, "Warrior", "Male")];
+        model.selected_character_index = Some(7);
+        model.monthly_card.open = true;
+        model.monthly_card.status = Some(crate::native_monthly_card::MonthlyCardStatus {
+            required: true,
+            active: false,
+            expires_at_ms: Some(1),
+            server_now_ms: 2,
+            remaining_ms: 0,
+            can_enter_game: false,
+        });
+        assert!(model.open_billing());
+        assert_eq!(model.billing.unsent_request().unwrap().character_index, 7);
+        let mut app = multilingual_shell_app(model);
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                app.update();
+                assert!(shell_texts(&mut app).contains(&crate::native_i18n::tr("billing.title")));
+                assert!(app
+                    .world_mut()
+                    .query::<&crate::native_billing::BillingButton>()
+                    .iter(app.world())
+                    .next()
+                    .is_some());
+            });
+        }
     }
 
     #[test]

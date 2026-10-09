@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-09 unpublished billing Candidate: account schema8 retains immutable
+> recharge/payment/application and monthly-item receipts. Webhooks only record
+> PaidPending; serialized Source consumes current owner state. Capacity fitting,
+> protected deletion, archived lookup, receipt replay and unknown-commit fencing
+> pass26 recharge/9 item/9 existing-code tests; Gateway36/shared4/adjacent4 pass.
+> Actual isolated PG concurrency is still pending CI. Live keys require PG
+> SourceOfTruth; all writers must upgrade before enablement. Public services,
+> pricing and real payments remain unchanged. [Details](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
+
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and
 > authenticated Source RPC registration validation are implemented. Simulation

@@ -1,0 +1,84 @@
+name: Mir2 Stripe Billing Acceptance
+
+on:
+  push:
+    branches: ["codex/**"]
+    paths:
+      - "mir2-web3/apps/simulation/**/billing*"
+      - "mir2-web3/apps/simulation/src/monthly_card.rs"
+      - "mir2-web3/apps/simulation/src/config.rs"
+      - "mir2-web3/apps/simulation/src/world_runtime.rs"
+      - "mir2-web3/apps/simulation/src/runtime/save.rs"
+      - "mir2-web3/apps/simulation/src/runtime/session.rs"
+      - "mir2-web3/apps/simulation/src/runtime/stage5.rs"
+      - "mir2-web3/apps/simulation/src/runtime/packets.rs"
+      - "mir2-web3/apps/simulation/src/runtime/items.rs"
+      - "mir2-web3/apps/simulation/src/runtime/inventory.rs"
+      - "mir2-web3/apps/gateway/**/billing*"
+      - "mir2-web3/apps/gateway/src/*billing*"
+      - "mir2-web3/apps/gateway/src/web.rs"
+      - "mir2-web3/apps/gateway/src/routing.rs"
+      - "mir2-web3/apps/gateway/src/zone_rpc.rs"
+      - "mir2-web3/apps/gateway/src/events.rs"
+      - "mir2-web3/apps/gateway/src/lib.rs"
+      - "mir2-web3/packages/game-data/src/lib.rs"
+      - ".github/workflows/stripe-billing-acceptance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  credits-and-monthly-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mir2_billing_qa_20261009_owned
+          POSTGRES_USER: billing_qa
+          POSTGRES_PASSWORD: ci-only-billing-isolated
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      RUSTUP_TOOLCHAIN: "1.95.0"
+      CARGO_BUILD_JOBS: "2"
+      MIR2_BILLING_TEST_ISOLATED: "1"
+      MIR2_BILLING_TEST_DATABASE_URL: postgres://billing_qa:ci-only-billing-isolated@127.0.0.1:5432/mir2_billing_qa_20261009_owned
+      MIR2_STRIPE_ENABLED: "0"
+    defaults:
+      run:
+        working-directory: mir2-web3
+        shell: bash
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install 1.95.0 --profile minimal
+      - name: Bind isolated evidence to source
+        run: |
+          mkdir -p billing-evidence
+          git rev-parse HEAD > billing-evidence/source-sha.txt
+      - name: Recharge, item custody and file restart
+        run: cargo test --locked -p mir2-simulation --features test-support --test billing_recharge --test billing_monthly_card 2>&1 | tee billing-evidence/simulation.log
+      - name: Real PostgreSQL competing writers and restart
+        run: cargo test --locked -p mir2-simulation --test billing_postgres -- --ignored --test-threads=1 2>&1 | tee billing-evidence/postgres.log
+      - name: Provider fixture HTTP, authenticated socket and private Source RPC
+        run: cargo test --locked -p mir2-gateway --lib billing -- --test-threads=1 2>&1 | tee billing-evidence/gateway.log
+      - name: Expired shared owner and authoritative pools
+        run: cargo test --locked -p mir2-gateway --test billing_monthly_card -- --test-threads=1 2>&1 | tee billing-evidence/shared-owner.log
+      - name: Retain logs including failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: stripe-billing-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: mir2-web3/billing-evidence/
+          if-no-files-found: error

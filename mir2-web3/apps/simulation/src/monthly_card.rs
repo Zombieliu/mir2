@@ -95,6 +95,91 @@ impl MonthlyCardPolicy {
 pub struct MonthlyCardLedger {
     pub expires_at_ms: u64,
     pub codes: BTreeMap<String, MonthlyCardCodeRecord>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub item_receipts: BTreeMap<String, MonthlyCardItemReceipt>,
+}
+
+const MAX_MONTHLY_CARD_ITEMS_PER_ACCOUNT: usize = 4096;
+const MONTHLY_CARD_UID_PREFIX: u64 = 0x001d_0000_0000_0000;
+const MONTHLY_CARD_UID_MASK: u64 = 0x0000_ffff_ffff_ffff;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum MonthlyCardItemDelivery {
+    Bag,
+    Mail,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MonthlyCardItemReceipt {
+    pub account_id: String,
+    pub character_index: i32,
+    pub request_id: String,
+    pub ordinal: u16,
+    pub purchase_quantity: u16,
+    pub unique_id: u64,
+    pub credit_price: u32,
+    pub delivery: MonthlyCardItemDelivery,
+    pub issued_at_ms: u64,
+    pub redeemed_at_ms: Option<u64>,
+    pub credited_until_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BillingMonthlyCardPurchaseReceipt {
+    pub request_id: String,
+    pub unique_id: u64,
+    pub replayed: bool,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BillingMonthlyCardActivationReceipt {
+    pub unique_id: u64,
+    pub replayed: bool,
+    pub status: MonthlyCardStatus,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BillingMonthlyCardItem {
+    pub unique_id: u64,
+    pub label: String,
+}
+
+pub(crate) fn monthly_card_item_identity(
+    account: &str,
+    character: i32,
+    request: &str,
+    ordinal: u16,
+) -> (String, u64) {
+    let mut hash = Sha256::new();
+    hash.update(b"mir2.monthly-card.item.v1");
+    for value in [account.as_bytes(), request.as_bytes()] {
+        hash.update((value.len() as u64).to_be_bytes());
+        hash.update(value);
+    }
+    hash.update(character.to_be_bytes());
+    hash.update(ordinal.to_be_bytes());
+    let digest = hash.finalize();
+    let low = digest[..6]
+        .iter()
+        .fold(0u64, |value, byte| (value << 8) | u64::from(*byte));
+    (
+        digest.iter().map(|byte| format!("{byte:02x}")).collect(),
+        MONTHLY_CARD_UID_PREFIX | low,
+    )
+}
+pub(crate) fn monthly_card_item_uid_is_reserved(uid: u64) -> bool {
+    uid & !MONTHLY_CARD_UID_MASK == MONTHLY_CARD_UID_PREFIX
+}
+/// Ordinary item allocators must never issue a consumable's permanent replay identity.
+pub(crate) fn skip_monthly_card_reserved_unique_id(uid: u64) -> u64 {
+    if monthly_card_item_uid_is_reserved(uid) {
+        MONTHLY_CARD_UID_PREFIX + MONTHLY_CARD_UID_MASK + 1
+    } else {
+        uid
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -138,13 +223,68 @@ impl MonthlyCardLedger {
                 _ => return Err("monthlyCardLedgerInvalid".into()),
             }
         }
+        if self.item_receipts.len() > MAX_MONTHLY_CARD_ITEMS_PER_ACCOUNT {
+            return Err("monthlyCardLedgerFull".into());
+        }
+        let mut units = std::collections::BTreeSet::new();
+        let mut purchases = BTreeMap::<(&str, i32, &str), Vec<&MonthlyCardItemReceipt>>::new();
+        for (key, item) in &self.item_receipts {
+            let (expected_key, expected_uid) = monthly_card_item_identity(
+                &item.account_id,
+                item.character_index,
+                &item.request_id,
+                item.ordinal,
+            );
+            if key != &expected_key
+                || item.unique_id != expected_uid
+                || !units.insert(item.unique_id)
+                || item.account_id.is_empty()
+                || item.account_id.len() > 256
+                || !valid_request_id(&item.request_id)
+                || item.credit_price == 0
+                || !(1..=99).contains(&item.purchase_quantity)
+                || item.ordinal >= item.purchase_quantity
+            {
+                return Err("monthlyCardItemReceiptInvalid".into());
+            }
+            purchases
+                .entry((&item.account_id, item.character_index, &item.request_id))
+                .or_default()
+                .push(item);
+            match (item.redeemed_at_ms, item.credited_until_ms) {
+                (None, None) => {}
+                (Some(at), Some(until))
+                    if at >= item.issued_at_ms
+                        && until
+                            >= at
+                                .checked_add(MONTHLY_CARD_DURATION_MS)
+                                .ok_or("monthlyCardTimeOverflow")? =>
+                {
+                    last_expiry = last_expiry.max(until);
+                }
+                _ => return Err("monthlyCardItemReceiptInvalid".into()),
+            }
+        }
+        for rows in purchases.values() {
+            let first = rows[0];
+            if rows.len() != usize::from(first.purchase_quantity)
+                || rows.iter().any(|row| {
+                    row.purchase_quantity != first.purchase_quantity
+                        || row.credit_price != first.credit_price
+                        || row.delivery != first.delivery
+                        || row.issued_at_ms != first.issued_at_ms
+                })
+            {
+                return Err("monthlyCardItemReceiptInvalid".into());
+            }
+        }
         if self.expires_at_ms != last_expiry {
             return Err("monthlyCardLedgerInvalid".into());
         }
         Ok(())
     }
 }
-fn valid_request_id(id: &str) -> bool {
+pub(crate) fn valid_request_id(id: &str) -> bool {
     (12..=96).contains(&id.len())
         && id
             .bytes()
@@ -179,7 +319,7 @@ pub struct MonthlyCardStatus {
     pub can_enter_game: bool,
 }
 impl MonthlyCardStatus {
-    fn new(required: bool, expires: u64, now: u64) -> Self {
+    pub(crate) fn new(required: bool, expires: u64, now: u64) -> Self {
         let active = expires > now;
         Self {
             required,

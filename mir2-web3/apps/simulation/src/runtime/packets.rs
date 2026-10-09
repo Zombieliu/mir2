@@ -882,6 +882,12 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
     let Some(mail_id) = u32::try_from(mail_id).ok() else {
         return Vec::new();
     };
+    // Capture immutable issuance authority before the save transaction takes
+    // the Store lock; the staged claim must not re-enter that lock.
+    let card_units = match super::billing_monthly_card::trusted_claim_units(world) {
+        Ok(units) => units,
+        Err(error) => { super::shared_guild_experience::reject_source(world, error); return Vec::new(); },
+    };
     let base_inventory = world.resource::<InventoryResource>().clone();
     let base_player = world.resource::<PlayerRuntimeResource>().clone();
     let base_mail = world
@@ -913,6 +919,7 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
         staged_systems.mail = visible_mail;
 
         let mut staged_world = World::new();
+        staged_world.insert_resource(card_units);
         staged_world.insert_resource(staged_inventory);
         staged_world.insert_resource(staged_player);
         staged_world.insert_resource(Stage5SystemsResource {
@@ -7348,7 +7355,14 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
-pub(super) fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+pub(super) fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut Vec<ServerPacket>) {
+    if let Some((item, stock_level)) = super::billing_monthly_card::game_shop_product(
+        &world.resource::<RuntimeConfigResource>().config) {
+        if !packets.iter().any(|packet| matches!(packet, ServerPacket::GameShopInfo { item: existing, .. }
+            if existing.g_index == item.g_index)) {
+            packets.push(ServerPacket::GameShopInfo { item, stock_level });
+        }
+    }
     let individual_purchases = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -9982,6 +9996,9 @@ impl SimulationSession {
                 count,
             } => split_item_impl(self.app.world_mut(), grid, unique_id, count),
             ClientPacket::UseItem { unique_id, grid } => {
+                if let Some(packets) = super::billing_monthly_card::use_card_packet(self.app.world_mut(), unique_id, grid) {
+                    return packets;
+                }
                 if grid == MirGridType::HeroInventory {
                     return use_hero_inventory_item_packet(self.app.world_mut(), unique_id);
                 }

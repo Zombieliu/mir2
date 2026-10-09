@@ -1,4 +1,6 @@
 mod big_map;
+mod billing;
+mod billing_monthly_card;
 mod buffs;
 mod combat;
 mod components;

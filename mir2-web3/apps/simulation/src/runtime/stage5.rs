@@ -665,6 +665,12 @@ pub(super) fn stage5_claim_mail_authoritative(
     } else {
         keyed_items
     };
+    if keyed_items.iter().any(|key| super::billing_monthly_card::is_card_key(key)) {
+        return Err(Stage5MailClaimError::InvalidExactItemState);
+    }
+
+    super::billing_monthly_card::validate_claim_items(world, &item_states)
+        .map_err(|_| Stage5MailClaimError::InvalidExactItemState)?;
 
     let exact_item_slots = {
         let resources = world.resource::<InventoryResource>();
@@ -710,7 +716,9 @@ pub(super) fn stage5_claim_mail_authoritative(
     for (mut item, (container, slot)) in item_states.into_iter().zip(exact_item_slots) {
         item.container = container;
         item.slot = slot;
-        normalize_fresh_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
+        if !super::billing_monthly_card::is_card(&item) {
+            normalize_fresh_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
+        }
         gained_items.push(item.clone());
         world
             .resource_mut::<InventoryResource>()
@@ -1330,6 +1338,13 @@ fn authoritative_game_shop_product(game_shop_index: i32) -> Option<(GameShopItem
             },
         )
         .find(|(item, _)| item.g_index == game_shop_index)
+}
+
+fn authoritative_game_shop_product_for_world(world: &World, game_shop_index: i32) -> Option<(GameShopItem, i32)> {
+    if game_shop_index == mir2_game_data::BILLING_MONTHLY_CARD_GAME_SHOP_INDEX {
+        return super::billing_monthly_card::game_shop_product(&world.resource::<RuntimeConfigResource>().config);
+    }
+    authoritative_game_shop_product(game_shop_index)
 }
 
 fn game_shop_payment_allowed(
@@ -4137,7 +4152,7 @@ impl SimulationSession {
                 return self.persist_native_game_shop_rejection(&request, failure, None)
             }
         };
-        let Some((product, _)) = authoritative_game_shop_product(request.g_index) else {
+        let Some((product, _)) = authoritative_game_shop_product_for_world(self.app.world(), request.g_index) else {
             return self.persist_native_game_shop_rejection(
                 &request,
                 GameShopPurchaseFailure::UnknownProduct,
@@ -4289,7 +4304,7 @@ impl SimulationSession {
         quantity: u8,
         price_type: GameShopPriceType,
     ) -> GameShopPurchaseExecution {
-        let Some((product, _)) = authoritative_game_shop_product(game_shop_index) else {
+        let Some((product, _)) = authoritative_game_shop_product_for_world(self.app.world(), game_shop_index) else {
             return self.game_shop_rejection_execution(
                 game_shop_index,
                 quantity,
@@ -4368,7 +4383,7 @@ impl SimulationSession {
         let uses_global_stock = stock > 0 && !individual_stock;
         let purchase_quantity = details.purchase_quantity;
         let attachment_count = details.attachment_states_json.len();
-        let pending_mail = Stage5MailMessage {
+        let mut pending_mail = Stage5MailMessage {
             id: 0,
             delivery_nonce: new_stage5_mail_delivery_nonce(),
             from: "Gameshop".to_string(),
@@ -4540,7 +4555,26 @@ impl SimulationSession {
                 Some(game_shop_stock_level(stock, next_purchases))
             };
 
-            match price_type {
+            if game_shop_index == mir2_game_data::BILLING_MONTHLY_CARD_GAME_SHOP_INDEX {
+                if !matches!(price_type, GameShopPriceType::Credit) {
+                    return Err("monthlyCardPaymentInvalid".into());
+                }
+                let request_id = idempotent_request_for_commit.as_ref()
+                    .map(|request| format!("gameshop-{}", request.server_idempotency_key))
+                    .unwrap_or_else(|| format!("gameshop-{}", pending_mail.delivery_nonce));
+                let (items, replayed) = super::billing_monthly_card::issue_credit_purchase(
+                    store.accounts.get_mut(&account_id).expect("validated game-shop account"),
+                    &mut staged_save, &account_id, active_character.index, &request_id,
+                    u16::from(purchase_quantity), total_price / u32::from(purchase_quantity),
+                    crate::monthly_card::monthly_card_now_ms(), crate::monthly_card::MonthlyCardItemDelivery::Mail,
+                )?;
+                // Native retries were resolved by their durable outcome above.
+                // A missing outcome must never duplicate an already issued unit.
+                if replayed { return Err("monthlyCardPurchaseReplayMissingOutcome".into()); }
+                pending_mail.item_states_json = items.iter().map(|item|
+                    serde_json::to_string(item).map_err(|_| "monthlyCardItemInvalid".to_string()))
+                    .collect::<Result<Vec<_>, _>>()?;
+            } else { match price_type {
                 GameShopPriceType::Credit => {
                     staged_save.credit = staged_save
                         .credit
@@ -4553,7 +4587,7 @@ impl SimulationSession {
                         .checked_sub(total_price)
                         .ok_or_else(|| "insufficient game-shop gold at commit".to_string())?;
                 }
-            }
+            } }
             staged_save.stage5_systems_json = Some(
                 serde_json::to_string(&systems)
                     .map_err(|error| format!("failed to encode game-shop systems: {error}"))?,

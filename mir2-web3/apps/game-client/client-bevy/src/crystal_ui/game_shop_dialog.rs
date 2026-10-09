@@ -445,6 +445,8 @@ pub(super) fn process_pointer(
 ) {
     let scroll: f32 = wheel.read().map(|event| event.y).sum();
     if !state.shop_open()
+        || state.billing_open
+        || state.billing_input_consumed
         || state.game_shop_dialog.confirmation.is_some()
         || state.leave_game.blocks()
         || state.friends.modal.is_some()
@@ -1010,6 +1012,30 @@ pub(super) fn render(
         true,
     );
     let class = shop.class_name(player);
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(145.0),
+                top: Val::Px(9.0),
+                width: Val::Px(210.0),
+                height: Val::Px(28.0),
+                ..default()
+            },
+            Button,
+            OverlayButton::OpenBilling,
+            BackgroundColor(Color::srgb(0.19, 0.15, 0.09)),
+        ))
+        .with_children(|b| {
+            text(
+                b,
+                &crate::native_i18n::tr("billing.recharge"),
+                CrystalRect::new(4.0, 2.0, 202.0, 24.0),
+                12.0,
+                TEXT,
+                Justify::Center,
+            );
+        });
     for (i, (x, index)) in [
         (539.0, 751),
         (568.0, 754),

@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-10-09 commercial extension is Candidate only: Stripe Credits and a
+>30-day paid consumable are separate from original Crystal parity. Local
+> simulation44, Gateway36/shared4/adjacent4 prove bounded financial/ownership
+> stories, including genuine loopback HTTP/WS and authenticated private TCP.
+> They do not prove actual Stripe or production multi-process acceptance.
+> Real isolated PostgreSQL CI, prices/keys, all-writer schema8 rollout and native
+> human gates remain. Public R22/Gatewaya41/feed17 and full P1–P7 are unchanged.
+> [Scope and remaining gates](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
+
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and
 > authenticated Source RPC registration validation are implemented. Simulation

@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+> 2026-10-09 unpublished Stripe Credits/monthly-item Candidate: native recharge
+> and expired-selection renewal, frozen Checkout orders, authenticated raw
+> webhooks, Source-owned settlement, permanent card units and single-attempt
+> capability-gated RPC are implemented. Local simulation44, Gateway36, shared
+> owner4 and adjacent monthly4 checks pass; native5/model10/URL2 plus test-check
+> evidence is retained. Real isolated PostgreSQL CI is pending. Prices, Stripe
+> credentials, real provider acceptance and paired rollout remain open; payments
+> default disabled. Public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+> [Scope, configuration and limits](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
+
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and
 > authenticated Source RPC registration validation are implemented. Simulation

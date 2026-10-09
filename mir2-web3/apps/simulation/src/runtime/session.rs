@@ -113,6 +113,7 @@ pub struct SimulationSession {
     pub(super) app: HeadlessRuntime,
     pub(super) visible_objects: BTreeSet<u32>,
     pub(super) dirty_economy_projection_event_ids: BTreeSet<String>,
+    pub(super) billing_last_recharge_poll: Option<(ActiveSessionIdentity, u64)>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -277,6 +278,7 @@ impl SimulationSession {
             app,
             visible_objects: BTreeSet::new(),
             dirty_economy_projection_event_ids: BTreeSet::new(),
+            billing_last_recharge_poll: None,
         }
     }
 

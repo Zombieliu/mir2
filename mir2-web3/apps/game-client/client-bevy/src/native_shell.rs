@@ -634,6 +634,7 @@ impl ShellNotice {
 
 #[derive(Clone, Default, PartialEq, Eq, Resource)]
 pub struct NativeShellModel {
+    pub billing: crate::native_billing::BillingPanel,
     pub monthly_card: crate::native_monthly_card::MonthlyCardPanel,
     pub screen: NativeShellScreen,
     pub login_opening_elapsed: Duration,
@@ -702,6 +703,34 @@ impl fmt::Debug for NativeShellModel {
 }
 
 impl NativeShellModel {
+    pub fn billing_character_index(&self) -> Option<i32> {
+        if self.screen == NativeShellScreen::InGame {
+            self.active_character.as_ref().map(|c| c.index)
+        } else {
+            self.selected_character_index
+                .filter(|index| self.has_character_index(*index))
+        }
+    }
+
+    pub fn open_billing(&mut self) -> bool {
+        if !matches!(
+            self.screen,
+            NativeShellScreen::CharacterSelect | NativeShellScreen::InGame
+        ) {
+            return false;
+        }
+        let Some(character) = self.billing_character_index() else {
+            self.set_error("billing.selectCharacter");
+            return false;
+        };
+        let Some(account) = self.last_account.as_deref() else {
+            return false;
+        };
+        self.billing
+            .open_for(account, character, crate::native_billing::now_ms());
+        true
+    }
+
     /// Crystal shows idle ChrSel/0, then frames 1..18 at 100 ms each.
     /// The nineteenth offset completes the animation instead of being drawn.
     pub fn login_opening_frame(&self) -> u32 {
@@ -724,6 +753,7 @@ impl NativeShellModel {
     }
 
     fn clear_session_payload(&mut self) {
+        self.billing = Default::default();
         self.monthly_card = Default::default();
         self.login_opening_elapsed = Duration::ZERO;
         self.characters.clear();
@@ -938,6 +968,7 @@ impl fmt::Debug for NativeUiIntent {
 /// Gateway callbacks for shell transitions.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NativeGatewayEvent {
+    BillingReply(crate::native_billing::BillingReply),
     MonthlyCardReply(crate::native_monthly_card::MonthlyCardReply),
     Connected,
     AccountCreated,
@@ -1159,7 +1190,7 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::StartGame) => {
-                if self.monthly_card.open {
+                if self.monthly_card.open || self.billing.open {
                     return false;
                 }
                 if self
@@ -1391,6 +1422,19 @@ impl NativeShellModel {
 
     pub fn apply_gateway_event(&mut self, event: NativeGatewayEvent) -> bool {
         match (self.screen, event) {
+            (_, NativeGatewayEvent::BillingReply(reply)) => {
+                let character = self.billing_character_index();
+                let account = self.last_account.as_deref().unwrap_or_default();
+                let accepted =
+                    self.billing
+                        .accept(reply, account, character, crate::native_billing::now_ms());
+                if accepted {
+                    if let Some(status) = &self.billing.status {
+                        self.monthly_card.status = Some(status.monthly_card.clone());
+                    }
+                }
+                accepted
+            }
             (_, NativeGatewayEvent::MonthlyCardReply(reply)) => {
                 self.monthly_card.accept(reply);
                 if self.screen == NativeShellScreen::CharacterSelect
