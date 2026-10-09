@@ -20,6 +20,8 @@ mod shared_player_kills;
 mod shared_pet_progress;
 #[path = "owner_wire_ids.rs"]
 mod owner_wire_ids;
+#[path = "routing/npc_population_binding.rs"]
+mod npc_population_binding;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -692,14 +694,24 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         } else {
             None
         };
+        let npc_binding = npc_population_binding::accepted_execution_binding(
+            request.owner_lease(),
+            mode,
+            economy_context.as_ref().map(|context| context.source_sequence),
+            true,
+        );
         let command = request.into_command();
-        if let Some(runtime) = runtime
+        let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
             .as_any_mut()
             .downcast_mut::<SharedInProcessZoneSessionRuntime>()
         {
+            let scope = runtime.begin_npc_owner_execution_scope(npc_binding)?;
             runtime.set_economy_execution_context(economy_context);
-        }
+            Some(scope)
+        } else {
+            None
+        };
         let result = match mode {
             ZoneOwnerCommandMode::Direct => runtime.execute_with_outcome(command),
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
@@ -974,6 +986,12 @@ impl HostedZoneOwnerCommandClient {
                 external_commit_authorized: may_commit_externally,
             }
         });
+        let npc_binding = npc_population_binding::accepted_execution_binding(
+            request.owner_lease(),
+            mode,
+            request.source_sequence(),
+            external_commit_authorized,
+        );
         let command = request.into_command();
         let runtime_lock_wait = GatewaySlowStage::start("zone_owner.hosted.runtime_lock_wait");
         let mut runtime = self
@@ -984,13 +1002,17 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
-        if let Some(runtime) = runtime
+        let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
             .as_any_mut()
             .downcast_mut::<SharedInProcessZoneSessionRuntime>()
         {
+            let scope = runtime.begin_npc_owner_execution_scope(npc_binding)?;
             runtime.set_economy_execution_context(economy_context);
-        }
+            Some(scope)
+        } else {
+            None
+        };
         let result = {
             let _slow_stage = GatewaySlowStage::start("zone_owner.hosted.execute_request");
             match mode {
@@ -8287,6 +8309,9 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             inventory_zone_id: zone_id.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
+            npc_owner_execution_slot: Arc::new(Mutex::new(
+                npc_population_binding::NpcOwnerExecutionSlot::default(),
+            )),
             last_ground_drop_projection_reconciliation_identity: None,
             trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: SharedZoneMovementIngress::new(
@@ -8970,6 +8995,8 @@ struct SharedInProcessZoneSessionRuntime {
     inventory_zone_id: ZoneId,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
+    // One process-local accepted execution; not part of world/account images.
+    npc_owner_execution_slot: Arc<Mutex<npc_population_binding::NpcOwnerExecutionSlot>>,
     last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
     trade_projection_reconciliation_state: TradeProjectionReconciliationState,
     movement_ingress: SharedZoneMovementIngress,
@@ -30222,7 +30249,7 @@ mod tests {
         (first, second)
     }
 
-    fn shared_session_runtime(
+    pub(super) fn shared_session_runtime(
         zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     ) -> SharedInProcessZoneSessionRuntime {
         shared_session_runtime_with_services(
@@ -30282,6 +30309,9 @@ mod tests {
             inventory_zone_id: ZoneId::new("test-shared-zone"),
             npc_world_service,
             economy_execution_context: None,
+            npc_owner_execution_slot: Arc::new(Mutex::new(
+                super::npc_population_binding::NpcOwnerExecutionSlot::default(),
+            )),
             last_ground_drop_projection_reconciliation_identity: None,
             trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),

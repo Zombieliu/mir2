@@ -42,6 +42,24 @@
 > expired heartbeat restart or blocked Goal completion.
 
 
+> Current continued round, 2026-10-10 local: Source population predecessor855863
+> is actually pushed with exact GitHub readbacks; previous Git REST/SSH/HTTPS
+> failures are retained. New Gateway owner entry scopes preserve full accepted
+> lease/real sequence/Active-Replay role, clear all return paths and bind exact
+> admitted SessionId/Node/life/presence epoch.43 distinct local checks pass,
+> including the original optimized Gateway4/strict500ms and security20.
+> [Scope, original evidence and next gates](CLASSIC-NPC-OWNER-EXECUTION-20261010.md).
+> The private population capture is not yet an ordinary CHECKHUM consumer.
+> Successful Source-load producer, actual NPC/page/body/DefaultFIFO binding,
+> deterministic read transcript and same-Source-CAS reservations/world outbox
+> remain open. Next: exact new Linux/package and those real producer boundaries.
+> Earlier ecd81 Linux/package qualifies, but a fresh1-WS preflight still holds
+> rollout before staging. Publicc704/R23/feed18 stays unchanged; no kicks/saves
+> or other games touched. Root is sole common writer; review is read-only.
+> Full P1-P7/Mentor/native/human remains unfinished. The expired heartbeat stays
+> paused; no blocked Goal completion or new deadline. Older statuses are history.
+
+
 > Latest continued round, 2026-10-10 local: exactecd81 is pushed and actual
 > Linux37970933774 passed both original jobs; genuine package/ELF/Source checks
 > are qualified. Rollout stopped before staging because1 WS connection remained;

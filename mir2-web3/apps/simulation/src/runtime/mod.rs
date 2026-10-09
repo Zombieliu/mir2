@@ -121,6 +121,7 @@ pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, GroundDropClaimTicket,
     PlayerId, SessionId, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
     ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
+    ZoneNpcPopulationReadSet,
     ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn,
     ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
     ZoneOutput, ZonePlayerAppearance, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,

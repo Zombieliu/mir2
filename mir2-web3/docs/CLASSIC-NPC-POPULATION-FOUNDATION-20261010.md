@@ -1,8 +1,15 @@
 # NPC population: Source selection and admitted Player census
 
+Update: exact foundation85586311e5 is now pushed and independently read back
+from GitHub. Original tree REST404, SSH disconnect and HTTPS timeout are retained,
+followed by the successful exact-tree/original-commit/non-forced expected-parent
+publication. [Gateway follow-up and genuine Git evidence](CLASSIC-NPC-OWNER-EXECUTION-20261010.md).
+The original archive's pre-commit `newSourcePushed:false` remains historical;
+it is not rewritten to manufacture a later Linux or gameplay release.
+
 This bounded foundation is based on pushed source
 `ecd81f6a1528e0a1a85bfd920356f607bc37a2a9`. It is implemented and locally tested.
-It is not yet called by the ordinary NPC interpreter. Its new Linux/publication
+It is not yet called by the ordinary NPC interpreter. Its new Linux/Gateway-publication
 and native/human gates remain open; public Gatewayc704/R23/feed18 is unchanged.
 The expired12-hour heartbeat stays paused and the broader Goal is unfinished.
 
