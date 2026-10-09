@@ -136,7 +136,7 @@
     }
   ],
   "execution_sha256": "5522ab1f667a363e34965f7552f7b482f93954ad53c2dc776c5eed8a03f9f8be",
-  "parser_contract_sha256": "8300c1afaff55b93ce50c8f802809bc5043873a4dbac956942fec787d68c5638",
+  "parser_contract_sha256": "44f92fb3f80c8fb939f442c62781685a45033bd0392d2aeb7cf5526857832e51",
   "parser_contract": {
     "parser_source": {
       "relative_path": "Server/MirObjects/NPC/NPCSegment.cs",
@@ -395,6 +395,12 @@
         "line_number": 498,
         "line": "//Use MOVE 0 328 264 if using the old BW map.",
         "reason": "unknown-original-opcode"
+      },
+      {
+        "section_label": "@_OnAcceptQuest(149)",
+        "line_number": 518,
+        "line": "CHECKHUM 1 D10071",
+        "reason": "missing-original-checkhum-arguments"
       },
       {
         "section_label": "@_LevelUp",

@@ -107,6 +107,13 @@ export async function compileParserOmissions(script, parserText, nameListExists)
   const recognized = Object.fromEntries([['check', 'ParseCheck'], ['act', 'ParseAct']].map(([kind, name]) => [
     kind, new Set([...parserMethod(parserText, name).matchAll(/case "([A-Z0-9]+)":/g)].map(match => match[1])),
   ]));
+  // This omission is bound to the supplied original ParseCheck source, not a
+  // newly invented shorthand. Keep complete checks even when their runtime
+  // values are invalid. ParseArguments replaces tokens without re-splitting.
+  if (recognized.check.has('CHECKHUM')
+    && !/case "CHECKHUM":\s*if \(parts\.Length < 4\) return;/.test(parserMethod(parserText, 'ParseCheck'))) {
+    throw new Error('CHECKHUM original parser minimum-argument proof differs');
+  }
   const ignored = [];
   const nameLists = new Map();
   for (const section of script.sections) {
@@ -124,6 +131,10 @@ export async function compileParserOmissions(script, parserText, nameListExists)
       const opcode = parts[0].toUpperCase();
       let reason;
       if (!recognized[kind].has(opcode)) reason = 'unknown-original-opcode';
+      else if (kind === 'check' && opcode === 'CHECKHUM'
+        && line.split(' ').filter(part => part.length > 0).length < 4) {
+        reason = 'missing-original-checkhum-arguments';
+      }
       else if (['CHECKNAMELIST', 'CLEARNAMELIST', 'DELNAMELIST'].includes(opcode)) {
         const filename = /"([^"]*)"/.exec(line)?.[1] ?? parts[1];
         if (!filename || filename.includes('\\') || filename.includes('/') || filename === '..') {

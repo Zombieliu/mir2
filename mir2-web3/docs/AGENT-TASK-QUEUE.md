@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> NPC parser Candidate fixes actual149/MissMi branch errors. Node6/Rust30 and
+> optimized normal Gateway4 pass; adjacent104/2 reproduces on frozen4baa.
+> Actual4baa Linux37941832277 failed the original strict500ms fixture setup;
+> no package/deploy. Owned-UID lookup is now prepared before cast, all Source
+> assertions preserved. Next: exact new Linux CI, genuine artifact verification
+> and drained publication. Shared population/reservations/world CAS-outbox and
+> full native/human gates stay open. [Evidence](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > NPC source3795cbd133 is now pushed with exact remote readback. A subsequent
 > test-only File follow-up passes8 NPC tests (six repeats/two new): real known
 > rename failure can retry, unknown result suppresses ACK and survives authority

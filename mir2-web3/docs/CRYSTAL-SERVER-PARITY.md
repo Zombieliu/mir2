@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> NPC parser Candidate omits incomplete CHECKHUM before expansion, matching
+> original empty-CheckList SAY. Genuine1482/MissMi packets and trusted149 hook,
+> Node6/Rust30 and optimized Gateway4 pass; adjacent104/2 matches frozen4baa.
+> Real Linux37941832277 failed the strict500ms setup; no new package/deploy.
+> Only actual UID preparation moved before cast; every original assertion
+> remains. Exact new CI/publication, shared population/instances/reservation/
+> world outbox and native/human gates stay open. [Scope](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
 > R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
 > protocol checks and14 acknowledged normal logouts pass, exact service/binary

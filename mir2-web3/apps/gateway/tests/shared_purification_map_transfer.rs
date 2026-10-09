@@ -574,15 +574,18 @@ fn wait_until(mut check: impl FnMut() -> bool) {
     }
 }
 
-fn town_scroll(session: &mut GatewaySession) -> Vec<ServerPacket> {
+fn town_scroll_unique_id(session: &GatewaySession) -> u64 {
     let template = mir2_game_data::crystal_item_by_name("TownTeleport").unwrap();
-    let unique_id = session
+    session
         .world_snapshot()
         .inventory_items
         .iter()
         .find(|item| item.key == format!("crystal-item-{}", template.item_index))
         .unwrap()
-        .unique_id;
+        .unique_id
+}
+
+fn town_scroll(session: &mut GatewaySession, unique_id: u64) -> Vec<ServerPacket> {
     let packets = session
         .try_handle_packet(ClientPacket::UseItem {
             unique_id,
@@ -655,6 +658,8 @@ fn normal_gateway_purification_survives_real_town_scroll_map_changes_in_both_act
         );
         let original = zone_player(&factory, "friend").1;
         let original_healer = zone_player(&factory, "healer").1;
+        let healer_scroll_id = town_scroll_unique_id(&healer);
+        let friend_scroll_id = town_scroll_unique_id(&friend);
         assert!(admitted(
             &magic(&mut healer, healer_id, Spell::Purification, target_id),
             Spell::Purification
@@ -666,13 +671,13 @@ fn normal_gateway_purification_survives_real_town_scroll_map_changes_in_both_act
         let before_scrolls = now_ms();
         let between_scrolls;
         if target_first {
-            town_scroll(&mut friend);
+            town_scroll(&mut friend, friend_scroll_id);
             between_scrolls = now_ms();
-            town_scroll(&mut healer);
+            town_scroll(&mut healer, healer_scroll_id);
         } else {
-            town_scroll(&mut healer);
+            town_scroll(&mut healer, healer_scroll_id);
             between_scrolls = now_ms();
-            town_scroll(&mut friend);
+            town_scroll(&mut friend, friend_scroll_id);
         }
         let after_scrolls = now_ms();
         assert!(after_scrolls < completion_deadline,
@@ -716,5 +721,8 @@ fn normal_gateway_purification_survives_real_town_scroll_map_changes_in_both_act
                 .iter()
                 .any(|p| matches!(p, ServerPacket::LogOutSuccess { .. })));
         }
+        eprintln!(
+            "normal purification scroll chain completed: targetFirst={target_first}, deadline={completion_deadline}, before={before_scrolls}, between={between_scrolls}, after={after_scrolls}"
+        );
     }
 }

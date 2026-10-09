@@ -1,5 +1,12 @@
 # NPC Source checkpoint and ordered pet interpretation — 2026-10-09
 
+> Actual follow-up:4baa is pushed with exact remote verification. Genuine Linux
+>37941832277 failed the strict500ms two-scroll setup before new NPC/package
+> gates; it was not deployed. New parser/fixture Candidate passes Node6/Rust30
+> and optimized Gateway4, with failed run and original assertions retained.
+> Exact new Linux qualification is still required.
+> [Current scope](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > Follow-up: source3795cbd13390379f9b9d13cd09651e0bd0c05ba2 is pushed and
 > its exact remote head verified. Two added File-only tests now pass with the
 > six original NPC cases: **8/8, zero failures/ignored**, not an additional94.

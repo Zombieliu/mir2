@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> NPC parser Candidate fixes actual149/MissMi wrong branches, preserving all26
+> source texts and45 earlier omissions. Node6/Rust30 and optimized Gateway4
+> pass; adjacent104/2 matches two frozen4baa failures. Actual Linux37941832277
+> failed its original strict500ms setup; no deploy. Real UID preparation now
+> precedes cast, every original clock/effect assertion preserved. New Linux
+> CI/publication and shared-world/native/human gates stay open; publicc704,
+> R23/feed18 unchanged. [Results](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
 > R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
 > protocol checks and14 acknowledged normal logouts pass, exact service/binary

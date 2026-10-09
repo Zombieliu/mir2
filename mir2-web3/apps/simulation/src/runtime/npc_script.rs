@@ -1094,6 +1094,14 @@ pub(super) fn execute_crystal_npc_section(
         }
 
         if matches!(mode, CrystalNpcParseMode::If) {
+            // NPCSegment.ParseCheck:255 splits the original line on ASCII
+            // spaces, substitutes each argument without re-splitting it, and
+            // omits CHECKHUM with fewer than three source arguments. Omission
+            // is not a failed check: an otherwise empty CheckList succeeds.
+            // Validate before runtime expansion can introduce extra spaces.
+            if original_checkhum_has_missing_arguments(line) {
+                continue;
+            }
             let resolved = resolve_crystal_npc_runtime_tokens(world, line, execution_state);
             record_unknown_crystal_npc_condition_command(world, &resolved, execution_state);
             if_conditions.push(resolved);
@@ -1166,6 +1174,12 @@ enum CrystalNpcParseMode {
     Act,
     ElseSay,
     ElseAct,
+}
+
+fn original_checkhum_has_missing_arguments(line: &str) -> bool {
+    let mut parts = line.split(' ').filter(|part| !part.is_empty());
+    parts.next().is_some_and(|command| command.eq_ignore_ascii_case("CHECKHUM"))
+        && parts.count() < 3
 }
 
 pub(super) fn resolve_crystal_npc_runtime_tokens(
@@ -2153,12 +2167,6 @@ pub(super) fn crystal_npc_check_hum(world: &World, parts: &[&str]) -> bool {
                 return false;
             }
             crystal_npc_compare_numeric(world, 1, &[*operator, *count])
-        }
-        [count, map_file_name] => {
-            if !crystal_npc_check_map(world, &[*map_file_name]) {
-                return false;
-            }
-            count.parse::<i32>().is_ok_and(|expected| expected <= 1)
         }
         _ => false,
     }

@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> NPC parser Candidate: original incomplete CHECKHUM is omitted before runtime
+> expansion. Genuine MissMi normal menu and trusted149 hook reach busy SAY.
+> Node6/Rust30, optimized Gateway4 pass; adjacent104/2 matches retained4baa
+> failures. Real Linux37941832277 failed the strict500ms setup and was not
+> deployed. UID preparation is now before cast; every Source gate remains.
+> Exact new Linux/publication and full shared-world/native/human acceptance
+> stay open. Publicc704/R23/feed18 unchanged. [Evidence](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
 > R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
 > protocol checks and14 acknowledged normal logouts pass, exact service/binary

@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> NPC parser Candidate fixes original149/MissMi short-CHECKHUM branch errors.
+> Node6/Rust30 pass; adjacent104/2 matches two retained pinned-parent failures.
+> Exact4baa Linux37941832277 failed its unchanged strict500ms scroll setup;
+> no deploy. Actual UID preparation is now before cast, all assertions retained,
+> optimized local Gateway4 passes. Root owns all files; the bounded fixture
+> worker returned ownership. New Linux/publication and shared-world/native/human
+> gates stay open. [Current evidence](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
 > R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
 > protocol checks and14 acknowledged normal logouts pass, exact service/binary

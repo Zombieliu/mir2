@@ -1,5 +1,13 @@
 # Classic gameplay delivery — 12-hour resumed work
 
+> Continued-work checkpoint: original short-CHECKHUM omissions fix actual149/
+> MissMi wrong branches. Node6/Rust30, optimized normal Gateway4 pass;
+> two adjacent failures reproduce on frozen4baa. Real Linux37941832277 failed
+> strict500ms fixture setup and was not deployed. Actual UID preparation now
+> precedes cast, all Source assertions preserved; new exact CI/publication
+> is next. World durability/population and full natural/native/human P1–P7/
+> Mentor gates remain open. [Actual Candidate](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
 > Current continued-work checkpoint, 2026-10-09: **Gatewayc704 is published**,
 > clientR23/feed18 stays current. Genuine Linux/siege CI and62 original public
 > protocol checks/14 confirmed normal logouts pass. Full native/human and
