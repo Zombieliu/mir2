@@ -7,6 +7,7 @@ import os from 'node:os';
 const url = process.env.MIR2_SPECTATOR_UI_URL
   || 'http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0';
 const expectLive = process.env.MIR2_SPECTATOR_EXPECT_LIVE === '1';
+const expectAutoFollow = process.env.MIR2_SPECTATOR_EXPECT_AUTO_FOLLOW === '1';
 const captureMode = new URL(url).searchParams.get('capture') === '1';
 const maxFrameAgeMs = process.env.MIR2_SPECTATOR_UI_MAX_AGE_MS
   ? Number(process.env.MIR2_SPECTATOR_UI_MAX_AGE_MS) : null;
@@ -228,6 +229,7 @@ async function main() {
       assert.equal(frameLatency.passed, true, 'Measured browser frame age exceeded the target or enforced minimum');
     }
     const controls = { captureMode, defaultCollapsed: true, expandedAndClosed: false };
+    let autoFollow = null;
     assert.equal(await evaluate("!!document.querySelector('[data-testid=spectator-overlay]')"), false);
     if (captureMode) {
       assert.equal(await evaluate("!!document.querySelector('[data-testid=spectator-controls-toggle]')"), false);
@@ -236,6 +238,30 @@ async function main() {
       await click('spectator-controls-toggle');
       await until(async () => await evaluate("!!document.querySelector('[data-testid=spectator-overlay]')"));
       assert.ok(await evaluate("document.querySelector('[data-testid=spectator-read-only]')?.textContent?.includes('只读安全')"));
+      if (expectAutoFollow) {
+        assert.equal(expectLive, true);
+        const selection = () => evaluate(`({
+          objectId: document.querySelector('[data-testid=spectator-auto-follow]')?.dataset.objectId,
+          mode: document.querySelector('[data-testid=spectator-auto-follow]')?.dataset.mode,
+          renderPlayerId: window.__mir2Stage5?.state.playerObjectId })`);
+        await until(async () => (await selection()).mode === 'automatic');
+        const automatic = await selection();
+        assert.equal(automatic.objectId, automatic.renderPlayerId);
+        const ordinaryTarget = status.targets.find((target) => String(target.objectId) === automatic.objectId);
+        assert.ok(ordinaryTarget, 'Selected camera must belong to a delivered player target');
+        await evaluate(`(() => { const select = document.querySelector('[data-testid=spectator-target]');
+          select.value = ${JSON.stringify(ordinaryTarget.name)};
+          select.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+        await until(async () => (await selection()).mode === 'manual');
+        const manual = await selection();
+        assert.equal(manual.objectId, String(ordinaryTarget.objectId));
+        assert.equal(manual.renderPlayerId, manual.objectId);
+        await evaluate(`(() => { const select = document.querySelector('[data-testid=spectator-target]');
+          select.value = ''; select.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+        await until(async () => (await selection()).mode === 'automatic');
+        autoFollow = { scope: 'real public delayed frame and ordinary manual control acknowledgements',
+          automatic, manual, returned: await selection(), bossPkAcceptance: false };
+      }
       const captureHref = await evaluate("document.querySelector('[data-testid=spectator-capture-link]')?.href");
       assert.equal(new URL(captureHref).searchParams.get('capture'), '1');
       await click('spectator-controls-toggle');
@@ -269,7 +295,7 @@ async function main() {
     const report = { schema: 'mir2.playtest-spectator-readiness.v1', generatedAt: new Date().toISOString(),
       url: safeUrl.toString(), expectLive, actualLiveFrameAcceptance: !!liveFrames,
       visualSceneAcceptance: expectLive && state.sceneGate?.sceneInteractionReady === true,
-      liveFrames, state, controls, frameLatency, resourceFailures,
+      liveFrames, state, controls, autoFollow, frameLatency, resourceFailures,
       playerCommandsSent: [], screenshot, platformPublishing: 'not-run' };
     await fs.writeFile(path.join(output, 'readiness.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify({ expectLive, state: state.state, screenshot, platformPublishing: 'not-run' }));

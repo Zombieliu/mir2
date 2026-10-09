@@ -1,12 +1,22 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-09 local watch-page automatic selection now uses recent delayed-frame
+> combat heat with an8s hold and manual priority. Node31/strictTS and9 synthetic
+> render-camera phases pass. Real shared-zone public frames/manual/auto restore
+> and visible map/avatar pass;23 fresh frames measure3,129.5–4,640.5ms, upper
+>4,672ms. Capture remains free of controls; normal QA logout/counter drain pass.
+> Current536b4a5 Gateway stays. Boss/PK scoring, real dual-player combat, load,
+> Bilibili delivery and paused-replay immediate follow remain unaccepted.
+> [Evidence and limitations](SPECTATOR-AUTO-FOLLOW-20261009.zh-CN.md).
+
 > 2026-10-09 authorized playtest spectator delay is now 3 seconds. Public HTTP
 > and read-only WS confirm it; ready map/avatar capture browser measured21 fresh
 > frames at3,155–4,067ms (P95 3,364ms, clock-bounded maximum4,097ms).
 > Capture remains free of controls, no HTTP resource failures or browser player
 > commands; owned QA logged out normally. Single QA/source scope only, not
 > Bilibili end-to-end delay or load acceptance. Automatic exciting-player
-> selection is not enabled. [Evidence](SPECTATOR-DIRECTOR-AUDIT-20261009.zh-CN.md).
+> selection was still absent at that earlier delay-only gate; the new bounded
+> webpage implementation is documented above. [Earlier evidence](SPECTATOR-DIRECTOR-AUDIT-20261009.zh-CN.md).
 
 > 2026-10-09 local spectator panel no longer covers the live game by default.
 > Settings collapse to a small button; capture=1 removes both panel and button.

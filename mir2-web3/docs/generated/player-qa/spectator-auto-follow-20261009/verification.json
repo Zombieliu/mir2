@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.spectator-auto-follow-verification.v1",
+  "parentCommit": "ab07ac8ea7ab6ec52d827d6f298535677739834b",
+  "boundedTests": {
+    "autoFollow": 24,
+    "adjacent": 7,
+    "passed": 31,
+    "failed": 0
+  },
+  "strictTypeScript": "passed",
+  "nodeSyntaxBothSmokes": "passed",
+  "readOnlyReview": "passed-after-two-fixes",
+  "syntheticBrowserPhases": 9,
+  "actualBrowserFrames": 23,
+  "actualGatewayRevision": "536b4a59f3a8af43f6d4484238e2847573dfb106",
+  "bossPkAcceptance": false,
+  "fullLoadAcceptance": false,
+  "platformPublishing": "not-run",
+  "sourceSha256": {
+    "apps/web/lib/spectator-auto-follow.ts": "ff49d2fb18dca2e8bf940f9c5ef3582f9534eb03bfb9d2dd8873a797017e77fe",
+    "apps/web/app/page.tsx": "734b5d374884170810892c40d7412cda61bd76be7f000ba33eb8986fba612d43",
+    "apps/web/app/components/spectator-overlay.tsx": "b24e67ecabb5bdfb70e99f596969f5f716e550729bd6bda256e0ddebd7cf754f",
+    "apps/web/scripts/test-spectator-auto-follow.mjs": "003269257ab5d9913a6244be078288c64808662721b82d3e1aed614f92e29eed",
+    "apps/web/scripts/smoke-spectator-auto-follow.mjs": "26427d21b400b13ca931ee2c32b2983a1a2c3f8e3e30cd8ab3196dd53949ae19",
+    "apps/web/scripts/smoke-spectator-readiness.mjs": "1391ba203274032331573bb6691c5b0c93dd8d49b7f5d1410ebc29721ce89700"
+  }
+}

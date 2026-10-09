@@ -1,0 +1,10 @@
+{
+  "error": "Synthetic spectator browser acceptance timed out",
+  "checks": [],
+  "state": {
+    "commands": []
+  },
+  "errors": [],
+  "resourceFailures": [],
+  "scope": "synthetic fixture, not live network acceptance"
+}

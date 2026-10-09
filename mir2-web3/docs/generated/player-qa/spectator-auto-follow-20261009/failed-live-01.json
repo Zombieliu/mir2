@@ -1,0 +1,10 @@
+{
+  "diagnostic": {
+    "render": {}
+  },
+  "status": null,
+  "websocketEndpoints": [],
+  "resourceFailures": [],
+  "errors": [],
+  "sent": []
+}

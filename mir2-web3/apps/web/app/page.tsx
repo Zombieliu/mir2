@@ -22,6 +22,7 @@ import {
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
 import { spectatorWebSocketUrl } from "../lib/spectator-endpoint";
+import { SpectatorFollowStream } from "../lib/spectator-auto-follow";
 import { SpectatorLiveStateBadge } from "./components/spectator-live-state";
 import {
   SpectatorOverlay,
@@ -2147,6 +2148,7 @@ export default function HomePage() {
   const [wsState, setWsState] = useState("closed");
   const [spectatorMode, setSpectatorMode] = useState(false);
   const [spectatorStatus, setSpectatorStatus] = useState<SpectatorStatus | null>(null);
+  const [spectatorFollowStream] = useState(() => new SpectatorFollowStream<GatewayWorldSnapshot>());
   const [aiLiveBrowserMode, setAiLiveBrowserMode] = useState(false);
   const [aiLiveAudioEnabled, setAiLiveAudioEnabled] = useState(false);
   const [aiLiveStatus, setAiLiveStatus] = useState<AiLiveStatus | null>(null);
@@ -5397,6 +5399,9 @@ export default function HomePage() {
 
   function sendSpectatorControl(command: Record<string, unknown>) {
     if (!isSpectatorBrowserMode() || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    if (["map", "replaySeek", "director", "camera", "cameraClear"].includes(String(command.type))) {
+      spectatorFollowStream.reset();
+    }
     socketRef.current.send(JSON.stringify(command));
   }
 
@@ -5982,6 +5987,10 @@ export default function HomePage() {
     }
 
     const gatewayUrl = resolveGatewayWebSocketUrl();
+    if (isSpectatorBrowserMode()) {
+      spectatorFollowStream.reset();
+      setSpectatorStatus(null);
+    }
     markMir2CacheMilestone("gatewayConnectStart", {
       url: safeGatewayUrlForDiagnostics(gatewayUrl),
       bootstrapAfterOpen,
@@ -6013,6 +6022,10 @@ export default function HomePage() {
       gatewayProtocolReadyRef.current = false;
       setLoginBusy(false);
       setWsState("closed");
+      if (isSpectatorBrowserMode()) {
+        spectatorFollowStream.reset();
+        setSpectatorStatus(null);
+      }
       markMir2CacheMilestone("gatewayClosed");
       updateWorld((current) => ({ ...current, connected: false }));
       appendLog(t("log.gatewayWsClosed"), "network");
@@ -8366,7 +8379,12 @@ export default function HomePage() {
     debugWindow.__mir2GatewayEventHistory = gatewayHistory;
     if (event.type === "spectatorStatus") {
       const status = event.payload as SpectatorStatus;
-      setSpectatorStatus(status);
+      const directed = spectatorFollowStream.receiveStatus(status);
+      if (directed) {
+        worldSnapshotVersionRef.current += 1;
+        applyGatewayWorldSnapshot(directed.world);
+      }
+      setSpectatorStatus({ ...status, autoFollow: directed?.decision ?? null });
       setSpectatorMode(true);
       screenRef.current = "game";
       setScreen("game");
@@ -8411,6 +8429,12 @@ export default function HomePage() {
       return;
     }
     if (event.type === "worldSnapshot") {
+      if (isSpectatorBrowserMode()) {
+        // Pair metadata with its preceding delayed world before choosing the
+        // render player. Avoid briefly displaying the server's default player.
+        spectatorFollowStream.receiveWorld(event.payload as GatewayWorldSnapshot);
+        return;
+      }
       worldSnapshotVersionRef.current += 1;
       const snapshot = event.payload as GatewayWorldSnapshot;
       const snapshotSelf = snapshot.entities.find(

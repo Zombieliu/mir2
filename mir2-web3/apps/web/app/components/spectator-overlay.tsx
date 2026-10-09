@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import type { SpectatorFollowDecision } from "../../lib/spectator-auto-follow";
 
 export type SpectatorTarget = {
   objectId: number;
@@ -41,6 +42,8 @@ export type SpectatorStatus = {
   recordingId: string | null;
   sequence: number | null;
   capturedAtMs: number | null;
+  /** Page-local selection from the authorized delayed frame, not director privilege. */
+  autoFollow?: SpectatorFollowDecision | null;
   replay: {
     active: boolean;
     playing: boolean;
@@ -210,7 +213,7 @@ export function SpectatorOverlay({ status, connectionState, onControl }: Spectat
           onChange={(event) => onControl({ type: "follow", target: event.target.value || null })}
           style={controlStyle}
         >
-          <option value="">自动选择</option>
+          <option value="">自动选择 · 近期交战</option>
           {status?.targets.map((target) => (
             <option key={target.objectId} value={target.name}>
               {target.name} · HP {target.hp ?? "?"}/{target.maxHp ?? "?"}
@@ -218,6 +221,20 @@ export function SpectatorOverlay({ status, connectionState, onControl }: Spectat
           ))}
         </select>
       </label>
+
+      {status?.autoFollow ? (
+        <p data-testid="spectator-auto-follow"
+          data-object-id={status.autoFollow.objectId ?? ""}
+          data-mode={status.autoFollow.mode}
+          style={{ margin: "7px 0 0", color: "#89a0b7", lineHeight: 1.6 }}>
+          {status.autoFollow.mode === "manualUnavailable" ? "手选玩家当前不可用，临时自动跟随。 " : ""}
+          {status.autoFollow.mode === "serverCamera" ? "服务端导演镜头。 "
+            : status.autoFollow.name ? `正在跟随 ${status.autoFollow.name}。 ` : "等待可跟随的玩家。 "}
+          {status.autoFollow.mode === "automatic" || status.autoFollow.mode === "manualUnavailable"
+            ? "依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+            : status.autoFollow.mode === "manual" ? "手选玩家优先。" : ""}
+        </p>
+      ) : null}
 
       {status?.directorAuthorized ? (
         <section style={{ marginTop: 14, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 12 }}>

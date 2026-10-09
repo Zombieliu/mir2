@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.playtest-spectator-transport.v1",
+  "generatedAt": "2026-10-09T00:36:27.668Z",
+  "endpoint": "https://165.154.65.136.sslip.io/playtest",
+  "source": "ordinary-owned-QA-shared-zone",
+  "publishing": "not-run",
+  "checks": {
+    "publicRoutes": true,
+    "readOnlyAndDelayEnforced": true,
+    "actualSharedFramesAndRedaction": true,
+    "normalOwnedQaLogout": true
+  },
+  "revision": "536b4a59f3a8af43f6d4484238e2847573dfb106",
+  "publicDelayMs": 3000,
+  "frames": {
+    "first": 528,
+    "next": 529,
+    "capturedAtMs": 1791506197996,
+    "entityCount": 32
+  }
+}

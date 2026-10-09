@@ -1,0 +1,82 @@
+{
+  "schema": "mir2.spectator-auto-follow-browser-fixture.v1",
+  "generatedAt": "2026-10-09T00:29:33.720Z",
+  "scope": "synthetic delayed-frame camera behavior using a redacted public map/sprite template",
+  "actualLiveNetworkAcceptance": false,
+  "bossPkAcceptance": false,
+  "platformPublishing": "not-run",
+  "checks": [
+    {
+      "phase": "initial stable idle",
+      "renderPlayerId": "710001",
+      "mode": "automatic",
+      "caption": "正在跟随 IdleFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    },
+    {
+      "phase": "hold despite challenger damage",
+      "renderPlayerId": "710001",
+      "mode": "automatic",
+      "caption": "正在跟随 IdleFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    },
+    {
+      "phase": "switch after eight seconds",
+      "renderPlayerId": "710002",
+      "mode": "automatic",
+      "caption": "正在跟随 CombatFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    },
+    {
+      "phase": "same-frame manual ACK",
+      "renderPlayerId": "710001",
+      "mode": "manual",
+      "caption": "正在跟随 IdleFixture。 手选玩家优先。"
+    },
+    {
+      "phase": "manual priority over continued damage",
+      "renderPlayerId": "710001",
+      "mode": "manual",
+      "caption": "正在跟随 IdleFixture。 手选玩家优先。"
+    },
+    {
+      "phase": "return to automatic starts hold",
+      "renderPlayerId": "710001",
+      "mode": "automatic",
+      "caption": "正在跟随 IdleFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    },
+    {
+      "phase": "stronger combat replaces held idle",
+      "renderPlayerId": "710002",
+      "mode": "automatic",
+      "caption": "正在跟随 CombatFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    },
+    {
+      "phase": "dead target replaced immediately",
+      "renderPlayerId": "710001",
+      "mode": "automatic",
+      "caption": "正在跟随 IdleFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    },
+    {
+      "phase": "reconnect clears history",
+      "renderPlayerId": "710001",
+      "mode": "automatic",
+      "caption": "正在跟随 IdleFixture。 依据近期掉血和附近交战选择，镜头至少停留 8 秒。"
+    }
+  ],
+  "captureModeClear": true,
+  "playerCommandsSent": [],
+  "defaultCollapsed": true,
+  "resourceFailures": [
+    {
+      "url": "http://127.0.0.1:3211/original-ui/NPC/94/meta.json",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:3211/original-ui/NPC/94/meta.json",
+      "status": 404
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "automatic-combat.png",
+    "capture-clear.png"
+  ]
+}

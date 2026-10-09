@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-09 bounded spectator auto-follow is available on the local watch page.
+> Delayed redacted frames drive recent-combat heat,8s hold,manual priority and
+> safe cache/lifecycle resets. Node31/strictTS/read-only review,9 synthetic
+> camera phases and real ordinary public follow acknowledgements pass;23
+> calibrated frames have an upper4,672ms age. Normal QA logout and both-realm
+> counters drain. Existing536b4a5 Gateway and proxy stay. Next is a complete
+> Zone-scoped trusted Boss/PK event projection, then platform reception/load
+> gates; AI remains off. This lane does not change the separate classic Goal.
+> [Current delivered behavior](SPECTATOR-AUTO-FOLLOW-20261009.zh-CN.md).
+
 > 2026-10-08 additive Bilibili / Windows playtest spectator task is activated
 > after both human exit confirmations and fresh drain/fingerprint checks.
 > Current a41dfe7 binary is reused. Ordinary owned QA receives fresh frames

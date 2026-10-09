@@ -1,0 +1,808 @@
+{
+  "schema": "mir2.playtest-spectator-readiness.v1",
+  "generatedAt": "2026-10-09T00:39:17.695Z",
+  "url": "http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0",
+  "expectLive": true,
+  "actualLiveFrameAcceptance": true,
+  "visualSceneAcceptance": true,
+  "liveFrames": {
+    "firstSequence": 617,
+    "nextSequence": 618,
+    "capturedAtMs": 1791506320984,
+    "mapFileName": "0"
+  },
+  "state": {
+    "badge": "即時觀戰 · 延遲 3 秒",
+    "state": "live",
+    "overlay": false,
+    "sceneGate": {
+      "screen": "game",
+      "sceneInteractionReady": true,
+      "sceneSpriteLibrariesReady": true,
+      "pendingSceneSpriteLibraryCount": 0,
+      "pendingSceneSpriteLibraryKeys": [],
+      "desiredSceneSpriteLibraryCount": 17,
+      "preloadStatus": "timeout",
+      "preloadInteractionReady": true,
+      "preloadReady": true,
+      "preloadFailed": 0,
+      "hasRenderPlayer": true,
+      "hasMapRegion": true,
+      "gpuEntityRendererRuntimePending": false,
+      "useGpuEntityRenderer": false
+    },
+    "render": {
+      "coordinateSystem": "tile coordinates; origin top-left; x right; y down",
+      "screen": "game",
+      "layout": "desktop",
+      "input": "keyboardMouse",
+      "wideMobile": false,
+      "viewport": {
+        "stageWidth": 1024,
+        "stageHeight": 768,
+        "rangeX": 16,
+        "rangeY": 17,
+        "origin": {
+          "tileLeft": 470,
+          "tileTop": 352,
+          "entityLeft": 480,
+          "entityTop": 352
+        }
+      },
+      "sceneInteractionReady": true,
+      "player": {
+        "objectId": "1000",
+        "x": 288,
+        "y": 616,
+        "direction": "Down",
+        "hp": 18,
+        "maxHp": 18
+      },
+      "selectedEntity": null,
+      "visibleEntities": [
+        {
+          "objectId": "1000",
+          "kind": "selfPlayer",
+          "name": "Watchc78c4e",
+          "x": 288,
+          "y": 616,
+          "dead": false
+        },
+        {
+          "objectId": "206641",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "dead": false
+        },
+        {
+          "objectId": "271801",
+          "kind": "monster",
+          "name": "Hen",
+          "x": 291,
+          "y": 616,
+          "dead": false
+        },
+        {
+          "objectId": "200716",
+          "kind": "monster",
+          "name": "Guard",
+          "x": 291,
+          "y": 620,
+          "dead": false
+        },
+        {
+          "objectId": "271806",
+          "kind": "monster",
+          "name": "Hen",
+          "x": 292,
+          "y": 613,
+          "dead": false
+        },
+        {
+          "objectId": "206302",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 287,
+          "y": 611,
+          "dead": false
+        },
+        {
+          "objectId": "206515",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 284,
+          "y": 611,
+          "dead": false
+        },
+        {
+          "objectId": "206644",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "dead": false
+        },
+        {
+          "objectId": "206632",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "dead": false
+        },
+        {
+          "objectId": "200325",
+          "kind": "monster",
+          "name": "ArcherGuard",
+          "x": 295,
+          "y": 624,
+          "dead": false
+        },
+        {
+          "objectId": "206339",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 280,
+          "y": 609,
+          "dead": false
+        },
+        {
+          "objectId": "206717",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 288,
+          "y": 624,
+          "dead": false
+        },
+        {
+          "objectId": "206524",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 294,
+          "y": 606,
+          "dead": false
+        },
+        {
+          "objectId": "206324",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 289,
+          "y": 604,
+          "dead": false
+        },
+        {
+          "objectId": "200339",
+          "kind": "monster",
+          "name": "Royal_Guard",
+          "x": 276,
+          "y": 604,
+          "dead": false
+        },
+        {
+          "objectId": "206626",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 628,
+          "dead": false
+        },
+        {
+          "objectId": "206530",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 288,
+          "y": 603,
+          "dead": false
+        },
+        {
+          "objectId": "206711",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 276,
+          "y": 603,
+          "dead": false
+        },
+        {
+          "objectId": "206714",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 275,
+          "y": 611,
+          "dead": false
+        },
+        {
+          "objectId": "206536",
+          "kind": "monster",
+          "name": "Deer",
+          "x": 291,
+          "y": 600,
+          "dead": false
+        },
+        {
+          "objectId": "200340",
+          "kind": "monster",
+          "name": "Royal_Guard",
+          "x": 280,
+          "y": 600,
+          "dead": false
+        },
+        {
+          "objectId": "206604",
+          "kind": "monster",
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "dead": false
+        },
+        {
+          "objectId": "1",
+          "kind": "npc",
+          "name": "Teleport_Gilbert",
+          "x": 287,
+          "y": 615,
+          "dead": false
+        },
+        {
+          "objectId": "2",
+          "kind": "npc",
+          "name": "BorderVillage_Board",
+          "x": 284,
+          "y": 615,
+          "dead": false
+        },
+        {
+          "objectId": "4",
+          "kind": "npc",
+          "name": "CraftsLady_Jude",
+          "x": 294,
+          "y": 619,
+          "dead": false
+        },
+        {
+          "objectId": "42",
+          "kind": "npc",
+          "name": "Merchant_Scott",
+          "x": 291,
+          "y": 610,
+          "dead": false
+        },
+        {
+          "objectId": "5",
+          "kind": "npc",
+          "name": "Blacksmith_Smith",
+          "x": 296,
+          "y": 613,
+          "dead": false
+        },
+        {
+          "objectId": "8",
+          "kind": "npc",
+          "name": "Merchant_Ruben",
+          "x": 288,
+          "y": 608,
+          "dead": false
+        },
+        {
+          "objectId": "3",
+          "kind": "npc",
+          "name": "Assistant_Jane",
+          "x": 284,
+          "y": 606,
+          "dead": false
+        },
+        {
+          "objectId": "40",
+          "kind": "npc",
+          "name": "TravellingMerchant_Damian",
+          "x": 287,
+          "y": 606,
+          "dead": false
+        },
+        {
+          "objectId": "43",
+          "kind": "npc",
+          "name": "MaterialDealer_Reece",
+          "x": 295,
+          "y": 605,
+          "dead": false
+        },
+        {
+          "objectId": "6",
+          "kind": "npc",
+          "name": "Merchant_John",
+          "x": 292,
+          "y": 603,
+          "dead": false
+        }
+      ],
+      "groundDrops": [],
+      "panels": {
+        "inventory": false,
+        "character": false
+      },
+      "tutorial": null,
+      "gamepad": {
+        "connected": false,
+        "id": null,
+        "family": "generic",
+        "mapping": "",
+        "mappingMode": "unverified",
+        "supported": false,
+        "uiMode": false,
+        "movement": null
+      }
+    }
+  },
+  "controls": {
+    "captureMode": false,
+    "defaultCollapsed": true,
+    "expandedAndClosed": true
+  },
+  "autoFollow": {
+    "scope": "real public delayed frame and ordinary manual control acknowledgements",
+    "automatic": {
+      "objectId": "1000",
+      "mode": "automatic",
+      "renderPlayerId": "1000"
+    },
+    "manual": {
+      "objectId": "1000",
+      "mode": "manual",
+      "renderPlayerId": "1000"
+    },
+    "returned": {
+      "objectId": "1000",
+      "mode": "automatic",
+      "renderPlayerId": "1000"
+    },
+    "bossPkAcceptance": false
+  },
+  "frameLatency": {
+    "scope": "server capture to browser-applied frame metadata after two animation frames with ready scene",
+    "platformPublishing": "not-run",
+    "thresholdMs": 5000,
+    "sampleCount": 23,
+    "clock": {
+      "before": {
+        "lowerOffsetMs": -324,
+        "upperOffsetMs": -262,
+        "samples": [
+          {
+            "serverAtMs": 1791506325212,
+            "startedAtMs": 1791506325301,
+            "finishedAtMs": 1791506325536,
+            "roundTripMs": 235,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506325397,
+            "startedAtMs": 1791506325536,
+            "finishedAtMs": 1791506325721,
+            "roundTripMs": 185,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506325461,
+            "startedAtMs": 1791506325721,
+            "finishedAtMs": 1791506325787,
+            "roundTripMs": 66,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506325526,
+            "startedAtMs": 1791506325787,
+            "finishedAtMs": 1791506325850,
+            "roundTripMs": 63,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506325588,
+            "startedAtMs": 1791506325850,
+            "finishedAtMs": 1791506325912,
+            "roundTripMs": 62,
+            "publicDelayMs": 3000
+          }
+        ]
+      },
+      "after": {
+        "lowerOffsetMs": -319,
+        "upperOffsetMs": -261,
+        "samples": [
+          {
+            "serverAtMs": 1791506355843,
+            "startedAtMs": 1791506355986,
+            "finishedAtMs": 1791506356163,
+            "roundTripMs": 177,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506356030,
+            "startedAtMs": 1791506356163,
+            "finishedAtMs": 1791506356372,
+            "roundTripMs": 209,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506356111,
+            "startedAtMs": 1791506356372,
+            "finishedAtMs": 1791506356444,
+            "roundTripMs": 72,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506356183,
+            "startedAtMs": 1791506356444,
+            "finishedAtMs": 1791506356511,
+            "roundTripMs": 67,
+            "publicDelayMs": 3000
+          },
+          {
+            "serverAtMs": 1791506356265,
+            "startedAtMs": 1791506356511,
+            "finishedAtMs": 1791506356584,
+            "roundTripMs": 73,
+            "publicDelayMs": 3000
+          }
+        ]
+      }
+    },
+    "minEstimateMs": 3129.5,
+    "maxEstimateMs": 4640.5,
+    "p95EstimateMs": 3336.5,
+    "maxUpperBoundMs": 4672,
+    "observations": [
+      {
+        "observedAtMs": 1791506325917,
+        "receivedAtMs": 1791506324418,
+        "sequence": 618,
+        "capturedAtMs": 1791506320984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 4640.5,
+        "ageLowerBoundMs": 4609,
+        "ageUpperBoundMs": 4672
+      },
+      {
+        "observedAtMs": 1791506326572,
+        "receivedAtMs": 1791506326399,
+        "sequence": 619,
+        "capturedAtMs": 1791506322982,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3297.5,
+        "ageLowerBoundMs": 3266,
+        "ageUpperBoundMs": 3329
+      },
+      {
+        "observedAtMs": 1791506327468,
+        "receivedAtMs": 1791506327399,
+        "sequence": 620,
+        "capturedAtMs": 1791506323983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3192.5,
+        "ageLowerBoundMs": 3161,
+        "ageUpperBoundMs": 3224
+      },
+      {
+        "observedAtMs": 1791506328555,
+        "receivedAtMs": 1791506328400,
+        "sequence": 621,
+        "capturedAtMs": 1791506324984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3278.5,
+        "ageLowerBoundMs": 3247,
+        "ageUpperBoundMs": 3310
+      },
+      {
+        "observedAtMs": 1791506330526,
+        "receivedAtMs": 1791506330400,
+        "sequence": 622,
+        "capturedAtMs": 1791506326984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3249.5,
+        "ageLowerBoundMs": 3218,
+        "ageUpperBoundMs": 3281
+      },
+      {
+        "observedAtMs": 1791506331439,
+        "receivedAtMs": 1791506331403,
+        "sequence": 623,
+        "capturedAtMs": 1791506327984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3162.5,
+        "ageLowerBoundMs": 3131,
+        "ageUpperBoundMs": 3194
+      },
+      {
+        "observedAtMs": 1791506333612,
+        "receivedAtMs": 1791506333399,
+        "sequence": 624,
+        "capturedAtMs": 1791506329983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3336.5,
+        "ageLowerBoundMs": 3305,
+        "ageUpperBoundMs": 3368
+      },
+      {
+        "observedAtMs": 1791506334489,
+        "receivedAtMs": 1791506334402,
+        "sequence": 625,
+        "capturedAtMs": 1791506330983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3213.5,
+        "ageLowerBoundMs": 3182,
+        "ageUpperBoundMs": 3245
+      },
+      {
+        "observedAtMs": 1791506335560,
+        "receivedAtMs": 1791506335400,
+        "sequence": 626,
+        "capturedAtMs": 1791506331986,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3281.5,
+        "ageLowerBoundMs": 3250,
+        "ageUpperBoundMs": 3313
+      },
+      {
+        "observedAtMs": 1791506337535,
+        "receivedAtMs": 1791506337400,
+        "sequence": 627,
+        "capturedAtMs": 1791506333983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3259.5,
+        "ageLowerBoundMs": 3228,
+        "ageUpperBoundMs": 3291
+      },
+      {
+        "observedAtMs": 1791506338433,
+        "receivedAtMs": 1791506338409,
+        "sequence": 628,
+        "capturedAtMs": 1791506334984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3156.5,
+        "ageLowerBoundMs": 3125,
+        "ageUpperBoundMs": 3188
+      },
+      {
+        "observedAtMs": 1791506340405,
+        "receivedAtMs": 1791506340399,
+        "sequence": 629,
+        "capturedAtMs": 1791506336983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3129.5,
+        "ageLowerBoundMs": 3098,
+        "ageUpperBoundMs": 3161
+      },
+      {
+        "observedAtMs": 1791506341476,
+        "receivedAtMs": 1791506341399,
+        "sequence": 630,
+        "capturedAtMs": 1791506337983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3200.5,
+        "ageLowerBoundMs": 3169,
+        "ageUpperBoundMs": 3232
+      },
+      {
+        "observedAtMs": 1791506342574,
+        "receivedAtMs": 1791506342409,
+        "sequence": 631,
+        "capturedAtMs": 1791506338984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3297.5,
+        "ageLowerBoundMs": 3266,
+        "ageUpperBoundMs": 3329
+      },
+      {
+        "observedAtMs": 1791506343448,
+        "receivedAtMs": 1791506343408,
+        "sequence": 632,
+        "capturedAtMs": 1791506339994,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3161.5,
+        "ageLowerBoundMs": 3130,
+        "ageUpperBoundMs": 3193
+      },
+      {
+        "observedAtMs": 1791506345454,
+        "receivedAtMs": 1791506345405,
+        "sequence": 633,
+        "capturedAtMs": 1791506341984,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3177.5,
+        "ageLowerBoundMs": 3146,
+        "ageUpperBoundMs": 3209
+      },
+      {
+        "observedAtMs": 1791506346553,
+        "receivedAtMs": 1791506346422,
+        "sequence": 634,
+        "capturedAtMs": 1791506342987,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3273.5,
+        "ageLowerBoundMs": 3242,
+        "ageUpperBoundMs": 3305
+      },
+      {
+        "observedAtMs": 1791506348524,
+        "receivedAtMs": 1791506348417,
+        "sequence": 635,
+        "capturedAtMs": 1791506344985,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3246.5,
+        "ageLowerBoundMs": 3215,
+        "ageUpperBoundMs": 3278
+      },
+      {
+        "observedAtMs": 1791506350528,
+        "receivedAtMs": 1791506350426,
+        "sequence": 636,
+        "capturedAtMs": 1791506346989,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3246.5,
+        "ageLowerBoundMs": 3215,
+        "ageUpperBoundMs": 3278
+      },
+      {
+        "observedAtMs": 1791506352508,
+        "receivedAtMs": 1791506352430,
+        "sequence": 637,
+        "capturedAtMs": 1791506348983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3232.5,
+        "ageLowerBoundMs": 3201,
+        "ageUpperBoundMs": 3264
+      },
+      {
+        "observedAtMs": 1791506353595,
+        "receivedAtMs": 1791506353428,
+        "sequence": 638,
+        "capturedAtMs": 1791506349983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3319.5,
+        "ageLowerBoundMs": 3288,
+        "ageUpperBoundMs": 3351
+      },
+      {
+        "observedAtMs": 1791506354485,
+        "receivedAtMs": 1791506354428,
+        "sequence": 639,
+        "capturedAtMs": 1791506350983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3209.5,
+        "ageLowerBoundMs": 3178,
+        "ageUpperBoundMs": 3241
+      },
+      {
+        "observedAtMs": 1791506355558,
+        "receivedAtMs": 1791506355428,
+        "sequence": 640,
+        "capturedAtMs": 1791506351983,
+        "delayMs": 3000,
+        "map": "0",
+        "readOnly": true,
+        "directorAuthorized": false,
+        "sceneReady": true,
+        "liveState": "live",
+        "ageEstimateMs": 3282.5,
+        "ageLowerBoundMs": 3251,
+        "ageUpperBoundMs": 3314
+      }
+    ],
+    "passed": true
+  },
+  "resourceFailures": [],
+  "playerCommandsSent": [],
+  "screenshot": "live-browser.png",
+  "platformPublishing": "not-run"
+}

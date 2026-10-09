@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-09 local public spectator auto-follow now ranks recent delayed-frame
+> HP loss/nearby combat, holds cameras8s, preserves manual priority and resets
+> on dead/missing targets, map/recording/time changes and reconnect. Node31,
+> strictTS, read-only review,9 synthetic browser phases and ordinary real
+> live/manual/auto frames pass.23 clock-calibrated browser frames remain within
+>5s (upper4,672ms). Current536b4a5 Gateway/config/PIDs stay; owned QA logs out
+> normally and counters drain. Boss/PK/complete Zone journal, load and Bilibili
+> reception remain open; this does not complete the classic Goal or full parity.
+> [Scope and evidence](SPECTATOR-AUTO-FOLLOW-20261009.zh-CN.md).
+
 > 2026-10-08 Windows playtest / Bilibili spectator integration is activated in an
 > isolated branch: independent realm URL, freshness states, read-only browser,
 > guarded operational activation and optional secret-file encoder. Node7,
