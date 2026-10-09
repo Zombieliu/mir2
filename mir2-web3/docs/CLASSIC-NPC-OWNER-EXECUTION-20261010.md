@@ -89,3 +89,17 @@ R23/sourcefaef/signedfeed18. No user is kicked and no real save is modified.
 
 Root is the sole common-file/Git/rollout writer. Full P1–P7/Mentor is unfinished;
 the expired12-hour heartbeat stays paused and no blocked Goal is marked complete.
+
+## Actual Git and Linux follow-up — 2026-10-10
+
+Source 01e3d08791c2639b3375c39d46fbf4f00ca53f75 is actually pushed after
+non-forced expected-parent update and fresh exact commit/tree/parent readbacks.
+Run 37993166469 completed build-linux-x64 and package upload successfully.
+Its first siege job failed pulling postgres:16 before tests (Docker Hub
+timeout/rate limit); the whole first attempt failed and is retained. One
+failed-job-only rerun was accepted. Snapshot 13 at 2026-10-09 22:34:16 UTC shows
+the siege job running the original live protocol checks with main build success
+retained. The original gates are unchanged. Overall Linux success, genuine
+artifact verification and rollout are still separate pending checks. The newer
+Source terrain changes require their own exact-source CI; this run cannot qualify
+them. Public c704/R23/feed18 and all real saves remain untouched.

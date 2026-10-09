@@ -82,6 +82,13 @@ jobs:
           # story; no synthetic deadline or ignored debug result substitutes it.
           cargo +1.89.0 test --locked --release -p mir2-gateway --test shared_purification_map_transfer -- --test-threads=1
 
+      - name: Verify bounded Source terrain and ordinary map collision
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib source_map_loading::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 map::map_collision_source_tests:: deadmine_entrance_collision_parses_from_pack crystal_map_v0_
+
       - name: Verify classic shared gameplay and durable source receipts
         working-directory: mir2-web3
         run: |

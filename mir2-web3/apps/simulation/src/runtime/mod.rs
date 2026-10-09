@@ -40,6 +40,7 @@ mod monsters;
 mod movement;
 mod npc;
 mod npc_population;
+pub(crate) mod source_map_loading;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_script;
