@@ -1,0 +1,233 @@
+{
+  "schema": "mir2.promo-studio-delivery.v1",
+  "date": "2026-10-10",
+  "engineTests": {
+    "passed": 42,
+    "failed": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "schema": "mir2.promo-studio-ui.v1",
+    "generatedAt": "2026-10-09T18:56:36.560Z",
+    "url": "http://127.0.0.1:3921",
+    "checks": {
+      "loadedRealData": true,
+      "desktopNoOverflow": true,
+      "missingMiningMaterialBlocksRender": true,
+      "realBrowserFileUpload": true,
+      "englishStoryboard": true,
+      "truthfulTemplateMode": true,
+      "realAsyncJobCreated": true,
+      "editorUsableDuringEncoding": true,
+      "actualMp4Playback": {
+        "width": 720,
+        "height": 1280,
+        "duration": 30.054687
+      },
+      "videoRange": true,
+      "postingAndSystemVoice": true,
+      "mobileNoOverflow": true
+    },
+    "errors": [],
+    "failedResources": [],
+    "publishing": "not-run",
+    "jobId": "a155121c56354748afaf39d1f4ae9c3e",
+    "completed": true,
+    "outputs": [
+      {
+        "format": "vertical",
+        "videoUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical.mp4",
+        "coverUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical-cover.jpg",
+        "subtitleUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical.srt",
+        "metadataUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical-metadata.json",
+        "durationSeconds": 30.055,
+        "width": 720,
+        "height": 1280
+      },
+      {
+        "format": "landscape",
+        "videoUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape.mp4",
+        "coverUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape-cover.jpg",
+        "subtitleUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape.srt",
+        "metadataUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape-metadata.json",
+        "durationSeconds": 30.055,
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "ownedBrowserClosed": true
+  },
+  "videos": [
+    {
+      "language": "zh-TW",
+      "format": "vertical",
+      "jobId": "7350fca92ed240a1bf2c54f825d15c0b",
+      "file": "Numeron-Bichon-zh-TW-9x16.mp4",
+      "sha256": "c7729912b0093c1a5e98850090621d2b5266cd07bf2d8e835bdb735ed55013d0",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 720,
+            "height": 1280,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "30/1"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "duration": "30.021354",
+          "size": "2196937"
+        }
+      },
+      "audioMeanDb": -29.6,
+      "audioPeakDb": -3.6,
+      "installedVoice": [
+        "Microsoft Huihui Desktop"
+      ],
+      "gameplayOffsetsSeconds": [
+        0,
+        6,
+        12
+      ]
+    },
+    {
+      "language": "zh-TW",
+      "format": "landscape",
+      "jobId": "7350fca92ed240a1bf2c54f825d15c0b",
+      "file": "Numeron-Bichon-zh-TW-16x9.mp4",
+      "sha256": "c6b79edf123ec3176b9c5d99d14b31fa9b5c7637501e0d5d57026d9f4a018328",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "30/1"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "duration": "30.021354",
+          "size": "928754"
+        }
+      },
+      "audioMeanDb": -29.6,
+      "audioPeakDb": -3.6,
+      "installedVoice": [
+        "Microsoft Huihui Desktop"
+      ],
+      "gameplayOffsetsSeconds": [
+        0,
+        6,
+        12
+      ]
+    },
+    {
+      "language": "en",
+      "format": "vertical",
+      "jobId": "a155121c56354748afaf39d1f4ae9c3e",
+      "file": "Numeron-Bichon-en-9x16.mp4",
+      "sha256": "b7984997994782ba292e651ba1fac831a9e0e6cbdd3dde40089df13adab3d161",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 720,
+            "height": 1280,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "30/1"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "duration": "30.054687",
+          "size": "2178320"
+        }
+      },
+      "audioMeanDb": -26.3,
+      "audioPeakDb": -6.1,
+      "installedVoice": [
+        "Microsoft Zira Desktop"
+      ],
+      "gameplayOffsetsSeconds": [
+        0,
+        6,
+        12
+      ]
+    },
+    {
+      "language": "en",
+      "format": "landscape",
+      "jobId": "a155121c56354748afaf39d1f4ae9c3e",
+      "file": "Numeron-Bichon-en-16x9.mp4",
+      "sha256": "4b1ad9557cd61ad2bc76e909b01299aa02e97eabe5109312a3bdb5f470df811d",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "30/1"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "duration": "30.054687",
+          "size": "914339"
+        }
+      },
+      "audioMeanDb": -26.3,
+      "audioPeakDb": -6.1,
+      "installedVoice": [
+        "Microsoft Zira Desktop"
+      ],
+      "gameplayOffsetsSeconds": [
+        0,
+        6,
+        12
+      ]
+    }
+  ],
+  "publishing": "not-run",
+  "voice": "Windows system TTS, not neural AI",
+  "ai": "Codex original still image; live paid text/video/TTS providers not configured"
+}

@@ -1,0 +1,51 @@
+{
+  "schema": "mir2.promo-studio-ui.v1",
+  "generatedAt": "2026-10-09T18:56:36.560Z",
+  "url": "http://127.0.0.1:3921",
+  "checks": {
+    "loadedRealData": true,
+    "desktopNoOverflow": true,
+    "missingMiningMaterialBlocksRender": true,
+    "realBrowserFileUpload": true,
+    "englishStoryboard": true,
+    "truthfulTemplateMode": true,
+    "realAsyncJobCreated": true,
+    "editorUsableDuringEncoding": true,
+    "actualMp4Playback": {
+      "width": 720,
+      "height": 1280,
+      "duration": 30.054687
+    },
+    "videoRange": true,
+    "postingAndSystemVoice": true,
+    "mobileNoOverflow": true
+  },
+  "errors": [],
+  "failedResources": [],
+  "publishing": "not-run",
+  "jobId": "a155121c56354748afaf39d1f4ae9c3e",
+  "completed": true,
+  "outputs": [
+    {
+      "format": "vertical",
+      "videoUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical.mp4",
+      "coverUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical-cover.jpg",
+      "subtitleUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical.srt",
+      "metadataUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/vertical-metadata.json",
+      "durationSeconds": 30.055,
+      "width": 720,
+      "height": 1280
+    },
+    {
+      "format": "landscape",
+      "videoUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape.mp4",
+      "coverUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape-cover.jpg",
+      "subtitleUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape.srt",
+      "metadataUrl": "/media/a155121c56354748afaf39d1f4ae9c3e/landscape-metadata.json",
+      "durationSeconds": 30.055,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "ownedBrowserClosed": true
+}

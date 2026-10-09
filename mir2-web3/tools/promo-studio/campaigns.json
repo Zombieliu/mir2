@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "campaigns": [
+    {
+      "id": "return-to-bichon",
+      "title": "今晚，回比奇。",
+      "theme": "老朋友 · 新的冒險",
+      "description": "下班之後，再赴一場老朋友的約。以原創 AI 情境視覺和比奇測試服實錄，介紹 Numeron - Legend of Rebirth。遊戲仍在測試，實際內容以目前版本為準。",
+      "requiredTags": ["bichon"],
+      "claims": ["從比奇開啟冒險。", "可選擇戰士、法師或道士。", "Windows 聯網測試版開放體驗。"],
+      "creativeTokens": ["今晚", "回比奇", "下班了", "老朋友", "新的冒險", "等你", "再出發", "你還記得嗎", "那條熟悉的路"],
+      "shots": [
+        {"seconds": 4, "assetRole": "creative", "headline": "下班了。回比奇？", "caption": "老朋友的一句話，讓我想起那條熟悉的路。", "narration": "下班了，今晚回比奇。"},
+        {"seconds": 4, "assetRole": "creative", "headline": "老朋友，還在等你。", "caption": "這次，從熟悉的城門再出發。", "narration": "老朋友，還在等你。"},
+        {"seconds": 6, "assetRole": "gameplay", "headline": "這裡，是比奇。", "caption": "從比奇開啟冒險。", "narration": "熟悉的街巷，新的冒險。", "factIndexes": [0]},
+        {"seconds": 6, "assetRole": "gameplay", "headline": "戰士 · 法師 · 道士", "caption": "可選擇戰士、法師或道士。", "narration": "這次，你會選哪個職業？", "factIndexes": [1]},
+        {"seconds": 6, "assetRole": "gameplay", "headline": "今晚，從這裡再出發。", "caption": "Windows 聯網測試版開放體驗。", "narration": "歡迎來到 Numeron 的測試世界。", "factIndexes": [2]},
+        {"seconds": 4, "assetRole": "creative", "headline": "回比奇。等你。", "caption": "Numeron - Legend of Rebirth", "narration": "下載連結，見簡介。"}
+      ],
+      "cta": "加入測試 · 下載連結見簡介",
+      "hashtags": ["Numeron", "LegendOfRebirth", "復古遊戲", "比奇", "遊戲測試"],
+      "locales": {
+        "en": {
+          "title": "One more adventure.", "theme": "OLD FRIENDS · A NEW CHAPTER",
+          "description": "An old friend's invitation, an original AI story visual, and real Bichon test-server footage. Meet Numeron - Legend of Rebirth. The game is in testing; available content may change.",
+          "claims": ["Start your adventure in Bichon.", "Choose Warrior, Wizard, or Taoist.", "A Windows online test build is available."],
+          "creativeTokens": ["Tonight", "Back to Bichon", "Old friends", "One more adventure", "After work", "A new chapter", "Waiting for you"],
+          "shots": [
+            {"seconds": 4, "assetRole": "creative", "headline": "After work. Back to Bichon?", "caption": "One message from an old friend.", "narration": "After work. Back to Bichon?"},
+            {"seconds": 4, "assetRole": "creative", "headline": "Old friends. A new chapter.", "caption": "The next adventure starts at a familiar gate.", "narration": "Old friends. One more adventure."},
+            {"seconds": 6, "assetRole": "gameplay", "headline": "This is Bichon.", "caption": "Start your adventure in Bichon.", "narration": "Familiar streets. A new adventure.", "factIndexes": [0]},
+            {"seconds": 6, "assetRole": "gameplay", "headline": "Warrior. Wizard. Taoist.", "caption": "Choose Warrior, Wizard, or Taoist.", "narration": "Which class will you choose?", "factIndexes": [1]},
+            {"seconds": 6, "assetRole": "gameplay", "headline": "Your next adventure starts here.", "caption": "A Windows online test build is available.", "narration": "Welcome to the Numeron test world.", "factIndexes": [2]},
+            {"seconds": 4, "assetRole": "creative", "headline": "Back to Bichon. Tonight.", "caption": "Numeron - Legend of Rebirth", "narration": "Download link in the description."}
+          ],
+          "cta": "JOIN THE TEST · LINK IN DESCRIPTION",
+          "hashtags": ["Numeron", "LegendOfRebirth", "RetroRPG", "Bichon", "Playtest"]
+        }
+      }
+    },
+    {
+      "id": "mine-after-work", "title": "這次，帶上礦鎬。", "theme": "玩法介紹 · 礦洞探險",
+      "description": "比奇礦洞玩法介紹。需要真正的購買、裝備礦鎬、進洞和揮鎬素材才能生成；不承諾礦石價值、收益或掉率。", "requiredTags": ["mining"],
+      "claims": ["礦鎬裝備需求為十二級。", "可購買並裝備礦鎬。", "可在已開放的比奇礦區採集礦石。", "礦鎬具有耐久度。"],
+      "creativeTokens": ["今晚", "帶上礦鎬", "礦洞探險", "再出發", "老朋友", "下一鎬"],
+      "shots": [
+        {"seconds": 4, "assetRole": "creative", "headline": "今晚，不只打怪。", "caption": "下一鎬，會挖到什麼？", "narration": "今晚，帶上礦鎬。"},
+        {"seconds": 6, "assetRole": "gameplay", "assetTags": ["mining"], "headline": "先準備，再進洞。", "caption": "礦鎬裝備需求為十二級。", "narration": "十二級，準備好你的礦鎬。", "factIndexes": [0]},
+        {"seconds": 6, "assetRole": "gameplay", "assetTags": ["mining"], "headline": "購買 · 裝備礦鎬", "caption": "可購買並裝備礦鎬。", "narration": "把礦鎬裝備好，前往礦洞。", "factIndexes": [1]},
+        {"seconds": 7, "assetRole": "gameplay", "assetTags": ["mining"], "headline": "揮鎬，採集礦石。", "caption": "可在已開放的比奇礦區採集礦石。", "narration": "在礦區揮鎬，採集礦石。", "factIndexes": [2]},
+        {"seconds": 5, "assetRole": "gameplay", "assetTags": ["mining"], "headline": "記得看看耐久。", "caption": "礦鎬具有耐久度。", "narration": "別忘了，礦鎬也有耐久度。", "factIndexes": [3]},
+        {"seconds": 4, "assetRole": "creative", "headline": "下一鎬，等你來。", "caption": "Numeron - Legend of Rebirth", "narration": "下載連結，見簡介。"}
+      ],
+      "cta": "加入測試 · 下載連結見簡介", "hashtags": ["Numeron", "遊戲挖礦", "比奇礦洞", "復古遊戲"]
+    },
+    {
+      "id": "choose-your-class", "title": "這次，你選誰？", "theme": "三職業 · 冒險的起點",
+      "description": "戰士、法師、道士三職業的選擇介紹。需三職業真實畫面素材；本模板不宣稱全部技能完成或職業強弱。", "requiredTags": ["warrior", "wizard", "taoist"],
+      "claims": ["可選擇戰士、法師或道士。", "三職業可進入 Windows 聯網測試版。", "從比奇開啟冒險。"],
+      "creativeTokens": ["老朋友", "這次", "你選誰", "再出發", "新的冒險", "比奇", "等你"],
+      "shots": [
+        {"seconds": 4, "assetRole": "creative", "headline": "老朋友，這次你選誰？", "caption": "熟悉的三個選擇，新的冒險。", "narration": "老朋友，這次你選誰？"},
+        {"seconds": 6, "assetRole": "gameplay", "assetTags": ["warrior"], "headline": "戰士", "caption": "可選擇戰士、法師或道士。", "narration": "戰士。", "factIndexes": [0]},
+        {"seconds": 6, "assetRole": "gameplay", "assetTags": ["wizard"], "headline": "法師", "caption": "可選擇戰士、法師或道士。", "narration": "法師。", "factIndexes": [0]},
+        {"seconds": 6, "assetRole": "gameplay", "assetTags": ["taoist"], "headline": "道士", "caption": "三職業可進入 Windows 聯網測試版。", "narration": "道士。", "factIndexes": [1]},
+        {"seconds": 6, "assetRole": "gameplay", "headline": "從比奇，再出發。", "caption": "從比奇開啟冒險。", "narration": "選好職業，從比奇出發。", "factIndexes": [2]},
+        {"seconds": 4, "assetRole": "creative", "headline": "你的選擇，你的冒險。", "caption": "Numeron - Legend of Rebirth", "narration": "下載連結，見簡介。"}
+      ],
+      "cta": "加入測試 · 下載連結見簡介", "hashtags": ["Numeron", "戰士", "法師", "道士", "復古遊戲"]
+    }
+  ]
+}

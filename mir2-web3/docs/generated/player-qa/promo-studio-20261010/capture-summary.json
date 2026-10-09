@@ -1,0 +1,54 @@
+{
+  "schema": "mir2.promo-spectator-capture.v1",
+  "generatedAt": "2026-10-09T17:07:20.324Z",
+  "source": {
+    "url": "http://127.0.0.1:3211/spectate?spectateMap=0&bevyRuntime=0&capture=1",
+    "directoryUrl": "https://165.154.65.136.sslip.io/playtest/spectator/matches",
+    "kind": "actual-public-spectator-browser",
+    "syntheticFixture": false,
+    "captureMode": true
+  },
+  "requestedSeconds": 22,
+  "samplingFps": 10,
+  "outputFps": 30,
+  "audio": "none",
+  "publishing": "not-run",
+  "actualWallSeconds": 21.964623800000002,
+  "freshness": {
+    "label": "live-delayed",
+    "liveAccepted": true,
+    "sequenceAdvanced": true,
+    "firstSequence": 213,
+    "lastSequence": 227,
+    "firstCapturedAtMs": 1791565639351,
+    "lastCapturedAtMs": 1791565661355,
+    "maxAllowedAgeMs": 15000,
+    "maxObservedAgeUpperMs": 5169,
+    "clockCalibratedBeforeAndAfter": true,
+    "readOnly": true,
+    "allLive": true,
+    "agesPass": true,
+    "badgeStates": [
+      "live"
+    ],
+    "labelingRequired": "Actual public spectator gameplay; delayed feed"
+  },
+  "captureTiming": {
+    "method": "actual midpoint screenshot timestamps; ffconcat holds; fps filter duplicates to 30fps",
+    "capturedFrames": 217,
+    "achievedSamplingFps": 9.879522725993603,
+    "maxHoldSeconds": 0.18303359999999974,
+    "minHoldSeconds": 0.06884040000000095,
+    "maxScreenshotLatencyMs": 95.51440000000002
+  },
+  "encodedDurationSeconds": 21.966667,
+  "durationPreserved": true,
+  "completed": true,
+  "originalSha256": "3c3f69340b85cd03ea446a4d5ecdc4fd3ab616825499046a6bc22a5731aab133",
+  "gameStageDerivative": {
+    "crop": "1024:768:208:66",
+    "completeGameHudPreserved": true,
+    "sha256": "6f22b5b055cf66eeab6c3de0c0f8c9a685ea213d282a297437297d27e414fe48"
+  },
+  "notNativeWindowsCapture": true
+}

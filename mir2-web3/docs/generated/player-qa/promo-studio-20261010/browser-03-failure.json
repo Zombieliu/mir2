@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.promo-studio-ui.v1",
+  "generatedAt": "2026-10-09T18:29:44.011Z",
+  "url": "http://127.0.0.1:3921",
+  "checks": {
+    "loadedRealData": true,
+    "desktopNoOverflow": true,
+    "missingMiningMaterialBlocksRender": true,
+    "realBrowserFileUpload": true,
+    "englishStoryboard": true,
+    "truthfulTemplateMode": true,
+    "realAsyncJobCreated": true
+  },
+  "errors": [],
+  "failedResources": [],
+  "publishing": "not-run",
+  "jobId": "c32baf63c030401f875f25b4ddc9b985",
+  "failure": "Expected values to be strictly equal:\n\ntrue !== false\n",
+  "lastNotice": "短片已加入背景製作佇列。你可以繼續編輯下一支。",
+  "ownedBrowserClosed": true
+}

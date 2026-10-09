@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.promo-studio-ui.v1",
+  "generatedAt": "2026-10-09T17:37:09.638Z",
+  "url": "http://127.0.0.1:3921",
+  "checks": {
+    "loadedRealData": true,
+    "desktopNoOverflow": true,
+    "missingMiningMaterialBlocksRender": true,
+    "realBrowserFileUpload": true,
+    "englishStoryboard": true,
+    "truthfulTemplateMode": true
+  },
+  "errors": [],
+  "failedResources": [],
+  "publishing": "not-run",
+  "ownedBrowserClosed": true
+}

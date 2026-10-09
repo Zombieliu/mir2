@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-10 local promotional tooling adds an original AI still, real public
+> Bichon capture and a loopback studio with durable background rendering.
+> Independent Python42, genuine browser upload/English creation/playback/
+> range-download/mobile checks and four actual 30s H.264/AAC exports pass.
+> Gameplay/HUD is preserved and source/voice limitations are explicit.
+> Missing mining/class clips, live paid providers, continuous AI short drama,
+> trusted combat slicing and platform posting remain open. This additive
+> marketing lane does not increase Crystal parity or finish the classic Goal.
+> [Design and bounded acceptance](AI-PROMO-STUDIO-20261010.zh-CN.md).
+
 > 2026-10-09 local public spectator auto-follow now ranks recent delayed-frame
 > HP loss/nearby combat, holds cameras8s, preserves manual priority and resets
 > on dead/missing targets, map/recording/time changes and reconnect. Node31,

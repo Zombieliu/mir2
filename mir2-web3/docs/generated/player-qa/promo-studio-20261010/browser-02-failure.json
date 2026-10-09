@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.promo-studio-ui.v1",
+  "generatedAt": "2026-10-09T18:19:39.975Z",
+  "url": "http://127.0.0.1:3921",
+  "checks": {
+    "loadedRealData": true,
+    "desktopNoOverflow": true,
+    "missingMiningMaterialBlocksRender": true,
+    "realBrowserFileUpload": true,
+    "englishStoryboard": true,
+    "truthfulTemplateMode": true
+  },
+  "errors": [],
+  "failedResources": [],
+  "publishing": "not-run",
+  "failure": "Local studio acceptance timed out",
+  "lastNotice": "已載入預設分鏡。即時模型介面尚未設定。",
+  "ownedBrowserClosed": true
+}

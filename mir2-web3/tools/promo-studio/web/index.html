@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Numeron · 宣傳短片工作室</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+  <aside class="rail" aria-label="導覽"><a class="monogram" href="/" aria-label="工作室首頁">N<span>R</span></a><span class="rail-line"></span><a href="#campaign-panel" class="rail-link active" title="創作">✦<span>創作</span></a><a href="#library-panel" class="rail-link" title="素材">▤<span>素材</span></a><a href="#jobs-panel" class="rail-link" title="成片">▶<span>成片</span></a><span class="rail-bottom">LOCAL<br>STUDIO</span></aside>
+  <main>
+    <header class="topbar"><div><span class="eyebrow">NUMERON · LEGEND OF REBIRTH</span><h1>宣傳短片工作室</h1></div><div class="connection"><span id="connection-dot" class="dot"></span><span id="connection-label">正在連線</span><span class="version">V1.0</span></div></header>
+    <section class="intro"><div><span class="eyebrow warm">YOUR NEXT STORY STARTS HERE</span><h2>把冒險，剪成下一個故事。</h2><p>選題、編寫分鏡、加入真實遊戲素材。從一個想法到可投稿的短片。</p></div><div class="intro-facts"><span><strong>9:16</strong>直式短影片</span><span><strong>16:9</strong>橫式宣傳片</span><span><strong>MP4</strong>字幕 · 封面 · 文案</span></div></section>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <div class="studio-grid">
+      <section id="campaign-panel" class="panel composer"><div class="section-heading"><span class="step">01</span><div><span class="eyebrow">CAMPAIGN</span><h3>故事從哪裡開始？</h3></div></div><div id="campaigns" class="campaign-list"><p class="muted">正在載入選題…</p></div>
+        <div class="settings-grid"><label>影片語言<select id="language"><option value="zh-TW">繁體中文</option></select></label><label>旁白<select id="voice"><option value="none">字幕版 · 無旁白</option><option value="system">系統語音 · 免費</option></select></label></div>
+        <div class="formats" role="group" aria-label="輸出格式"><label><input type="checkbox" id="vertical" checked><span><strong>9:16</strong>竪屏 · 720×1280</span></label><label><input type="checkbox" id="landscape" checked><span><strong>16:9</strong>橫屏 · 1280×720</span></label></div>
+        <div class="script-toolbar"><div><span class="eyebrow">STORYBOARD</span><h3>分鏡與字幕</h3></div><button class="button subtle" id="brief-button" type="button">生成分鏡</button></div><p class="small muted" id="provider-label">正在讀取腳本模式…</p><div id="shots" class="shots"></div>
+        <details class="facts"><summary>已驗證的宣傳內容 <span id="fact-count"></span></summary><ul id="claims"></ul></details>
+        <details class="advanced"><summary>進階：編輯完整分鏡 JSON</summary><p class="small muted">可調整秒數、順序及已核驗文案。新增玩法說法需先補充選題事實。</p><textarea id="script-json" rows="12" spellcheck="false" aria-label="完整分鏡 JSON"></textarea><button id="apply-script" class="button subtle" type="button">套用分鏡</button></details>
+        <div class="create-area"><p class="small muted" id="material-check">選取素材後即可製作。</p><button id="create-button" class="button primary" type="button" disabled>製作這支短片 <span>↗</span></button><span class="small muted">在背景編碼。成片後可預覽與下載。</span></div>
+      </section>
+      <div class="right-column">
+        <section class="panel preview-panel"><div class="section-heading spread"><div><span class="eyebrow">PREVIEW</span><h3>故事預覽</h3></div><span id="preview-label" class="pill">分鏡預覽</span></div><div class="preview-frame" id="preview-frame"><img id="poster" alt="原創 AI 故事情境" hidden><div id="preview-empty" class="preview-empty"><span>N</span><p>加入素材，開始你的故事。</p></div><div id="poster-copy" class="poster-copy"><span>NUMERON</span><h3 id="poster-title">今晚，回比奇。</h3><p id="poster-caption">老朋友 · 新的冒險</p><small>AI 情境視覺與遊戲實錄會分別標註</small></div><video id="video-preview" controls playsinline preload="metadata" hidden aria-label="成片預覽"></video></div><div id="preview-downloads" class="download-row" hidden></div><p class="small muted preview-note">直式保留完整遊戲畫面，避免裁掉人物和操作介面。此處可預覽已完成的影片。</p></section>
+        <section id="library-panel" class="panel"><div class="section-heading spread"><div><span class="eyebrow">02 · MATERIALS</span><h3>你的素材庫</h3></div><span id="asset-count" class="pill">0 個素材</span></div>
+          <div id="assets" class="asset-list"><p class="muted small">加入原創情境圖與真實遊戲錄影。</p></div>
+          <details class="upload-details" open><summary>加入圖片或影片</summary><div class="upload-fields"><label>素材來源<select id="provenance"><option value="gameplay">真實遊戲錄影</option><option value="ai_creative">AI 原創情境</option><option value="game_screenshot">遊戲截圖</option></select></label><label>玩法標籤<select id="asset-tag"><option value="bichon">比奇</option><option value="mining">挖礦</option><option value="classes,warrior">三職業 · 戰士</option><option value="classes,wizard">三職業 · 法師</option><option value="classes,taoist">三職業 · 道士</option></select></label><label class="wide">來源說明<input id="asset-source" type="text" maxlength="600" value="自有遊戲測試素材" aria-label="來源說明"></label></div><label class="drop-zone" id="drop-zone"><input type="file" id="file-input" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime" multiple><span>＋ 選取或拖入素材</span><small>PNG / JPG / WebP / MP4 / WebM · 原檔保留</small></label><progress id="upload-progress" max="100" value="0" hidden></progress></details>
+          <details class="advanced"><summary>從本機路徑匯入</summary><input id="import-path" type="text" placeholder="C:/素材/遊戲錄影.mp4" aria-label="素材完整路径"><button id="import-button" class="button subtle" type="button">匯入素材</button></details>
+        </section>
+      </div>
+    </div>
+    <section id="jobs-panel" class="panel jobs-panel"><div class="section-heading spread"><div><span class="eyebrow">03 · EXPORTS</span><h3>成片與製作佇列</h3></div><span class="muted small">生成 → 預覽 → 投稿素材包</span></div><div id="jobs" class="job-list"><p class="muted">還沒有成片。完成第一個故事吧。</p></div></section>
+    <footer><span>NUMERON / PROMO STUDIO</span><p>AI 原創視覺 · 真實遊戲素材 · 人工確認後投稿</p><span>本機製作，檔案保存在你的電腦。</span></footer>
+  </main><script src="/app.js"></script>
+</body></html>

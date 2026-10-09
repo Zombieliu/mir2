@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-10-10 the additive AI promotional-video studio is delivered locally.
+> Original imagegen art plus genuine delayed public Bichon footage produce
+> four real 30s MP4s (zh-TW/en, vertical/landscape), covers, SRT and posting
+> provenance. Independent Python42 and actual browser upload/async encoding/
+> playback/206/mobile gates pass; three failed browser runs stay recorded.
+> Mining/classes templates require corresponding real tagged material.
+> Paid models, continuous AI actor video, trusted combat slicing and platform
+> upload remain separate gates; Bilibili ARC_BASE is pending. No Gateway,
+> installer, player-save or classic Goal change is made by this lane.
+> [Delivered scope and evidence](AI-PROMO-STUDIO-20261010.zh-CN.md).
+
 > 2026-10-09 bounded spectator auto-follow is available on the local watch page.
 > Delayed redacted frames drive recent-combat heat,8s hold,manual priority and
 > safe cache/lifecycle resets. Node31/strictTS/read-only review,9 synthetic
