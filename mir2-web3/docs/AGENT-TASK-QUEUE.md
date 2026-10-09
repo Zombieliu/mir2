@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> Current bounded map I/O round, 2026-10-10 local: raw/gzip map byte reads now
+> stop at preparation limits, validate the complete first gzip footer and retain
+> typed ordinary fallback behavior. Final 59 library + 4 original optimized
+> Gateway tests pass (63 distinct; one original benchmark ignored). Actual463
+> raw files and1,620 gzip maps keep identical bytes/hashes; corpora overlap.
+> [Scope and original evidence](CLASSIC-SOURCE-MAP-IO-20261010.md).
+> Root owns all files; bounded worker returned ownership and review is read-only.
+> Source64b6 is pushed, but its Linux38001876065 remains incomplete. New I/O
+> Candidate needs its own Git/Linux qualification. Last observed publicc704/
+> R23/feed18 had1 undrained WS; no staging/switch/kick or real-save changes.
+> Source Map.Load/population, Source-CAS world outbox and fullP1–P7/Mentor/native/
+> human remain open. Expired heartbeat stays paused; no Goal completion claim.
+
 > Current Source terrain round, 2026-10-10 local: normal collision now shares
 > the Source decoder and corrects three format discrepancies. Final library32
 > pass/1 original benchmark ignored; all463 Server Maps preparations/collisions

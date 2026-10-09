@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -1349,9 +1348,16 @@ pub(super) fn runtime_map_collision_data_uncached(
         return Some(runtime_map_collision_from_template(starter_map_collision()));
     }
 
-    let bytes = crystal_map_path(normalized)
-        .and_then(|path| fs::read(path).ok())
-        .or_else(|| read_crystal_map_pack_bytes(normalized))?;
+    let bytes = match crystal_map_path(normalized) {
+        Some(path) => match super::source_map_io::read_raw_map_file_checked(&path) {
+            Ok(bytes) => bytes,
+            Err(error) if error.can_try_pack() => read_crystal_map_pack_bytes(normalized)?,
+            // A raw file outside the decoder's existing byte domain must not
+            // turn into a new gzip fallback merely because I/O stops early.
+            Err(_) => return None,
+        },
+        None => read_crystal_map_pack_bytes(normalized)?,
+    };
     let collision = parse_runtime_map_collision(normalized, &bytes)?;
     Some(runtime_map_collision_from_template(collision))
 }
@@ -1371,13 +1377,8 @@ fn crystal_map_pack_dir() -> Option<PathBuf> {
 
 /// Decompress a map's raw `.map` bytes from `{pack}/{name}.map.gz`.
 fn read_crystal_map_pack_bytes(normalized: &str) -> Option<Vec<u8>> {
-    use std::io::Read;
     let gz_path = crystal_map_pack_dir()?.join(format!("{normalized}.map.gz"));
-    let gz = fs::read(gz_path).ok()?;
-    let mut decoder = flate2::read::GzDecoder::new(gz.as_slice());
-    let mut bytes = Vec::new();
-    decoder.read_to_end(&mut bytes).ok()?;
-    Some(bytes)
+    super::source_map_io::read_gzip_map_file(&gz_path)
 }
 
 pub(super) fn runtime_map_collision_from_template(
@@ -1461,7 +1462,7 @@ pub(super) fn runtime_full_map_collision_data(
     }
 
     let parsed = crystal_map_path(&normalized)
-        .and_then(|map_path| fs::read(map_path).ok())
+        .and_then(|map_path| super::source_map_io::read_raw_map_file(&map_path))
         .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
         .map(runtime_map_collision_from_template)
         .map(Arc::new);

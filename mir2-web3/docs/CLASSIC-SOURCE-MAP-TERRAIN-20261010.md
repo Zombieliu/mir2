@@ -110,3 +110,37 @@ read transcripts and same-Source-CAS reservations/ordered world outbox.
 Cold snapshots cannot mint live receipts. These gates, natural/native/human
 P1–P7/Mentor acceptance and complete original gameplay remain open.
 The expired heartbeat remains paused; no old blocked Goal is marked complete.
+
+## Actual Git and Linux follow-up — 2026-10-10
+
+Terrain source 64b6b10c05732048da9c6bf5ccb0a491d2d053d3 is actually pushed
+with non-forced expected-parent update and fresh exact GitHub ref/commit/tree
+readbacks. The clean t64 worktree is frozen. Its exact-source Linux run
+[38001876065](https://github.com/Zombieliu/mir2/actions/runs/38001876065)
+was dispatched once with R2 publication disabled; snapshot 2 shows both jobs
+running. This is not yet a successful Linux package or deployment.
+
+Predecessor 01e3 run 37993166469 now actually passes both original jobs after
+the single failed-job-only retry. Its original artifact ZIP, archive, ELF
+Gateway/ZoneHost binaries, clean revision metadata, manifest and all original
+CI gates/logs were independently verified. The first Docker infrastructure
+failure remains retained. This predecessor cannot qualify the newer terrain
+source. The fresh public preflight still reports one WS connection; rollout
+remains held before staging, with c704/R23/feed18 current.
+
+The [follow-up receipt](generated/player-qa/source-map-terrain-20261010/git-linux-followup-01/EVIDENCE.json)
+and [original byte-verified archive](generated/player-qa/source-map-terrain-20261010/git-linux-followup-01/original-evidence.zip)
+retain those actual readbacks, complete CI log, first failure, rerun and public
+preflight. The initial long-name worktree creation failed on Windows path
+length; the shorter t64 creation succeeded without changing global Git settings.
+New bounded I/O work in the Root lane is a separate unqualified Candidate and
+does not alter the frozen source or these results.
+
+## Separate bounded I/O Candidate
+
+The following [I/O slice](CLASSIC-SOURCE-MAP-IO-20261010.md) bounds the actual
+raw/gzip providers while retaining Source ordinary-read semantics. It passes
+63 distinct final local checks and byte comparison across463 raw/1,620 gzip
+records. It does not change the frozen64b6 source or retroactively qualify its
+Linux run. Strict trailing-byte preparation gaps and Source-load/population,
+world-outbox and native/human gates above remain open.
