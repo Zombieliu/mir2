@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.production-review-copy.v1",
+  "source": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\independent-result-review.json",
+  "destination": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\slg-production-p02b2c-20261009\\independent-result-review.json",
+  "sha256": "61aae3d8d74d897ff6474a5bab931d91a029f2ce46c7122d57e5743f1e1c45e6",
+  "length": 199275,
+  "rawEvidenceManifestEntries": 122,
+  "includedInEarlierRawManifest": false
+}

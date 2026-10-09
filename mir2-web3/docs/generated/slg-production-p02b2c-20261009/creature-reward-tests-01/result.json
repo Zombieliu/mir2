@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "creature-reward-tests",
+  "startedUtc": "2026-10-08T23:37:07.3021470Z",
+  "finishedUtc": "2026-10-08T23:40:47.2013741Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::intelligent_creatures::uid_tests::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "a85bacd5bf5e2f6dad3734bd94863edf9828c1701c0148d35a6eeeb3bd7d1297",
+  "declaredInputs": 462,
+  "sourceDrift": [],
+  "cargoLogSha256": "bbba7d23a7d2cfeaf82990f9749c28e21b2f4f8675dcfbdd985ffb2041e206c1",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.production-relink-probe.v1",
+  "createdUtc": "2026-10-09T00:14:58.4781187Z",
+  "path": "work/slg-production-p02b2c-20261009/target/debug/deps/mir2_simulation-ce097f0588ae25bc.exe",
+  "readWriteExclusive": true,
+  "reason": null,
+  "cargoStarted": false,
+  "gameStopped": false
+}

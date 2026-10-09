@@ -1,0 +1,79 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-09T00:21:32.3775565+00:00",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-source-02.json",
+  "authoredSourceSha256": "40199f01559110ef850271eff8dff950dd0422761638d77f6031b94e88dca0d6",
+  "authoredFileCount": 4,
+  "shaAndLengthMismatches": 0,
+  "authoredFiles": [
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+      "length": 43402
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "sha256": "b271a9ebbd24419f8ce5938580aac484330c319725b0b6cefc05d3c3d36e6523",
+      "length": 24237
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/creature_reward_uid_tests.rs",
+      "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+      "length": 9230
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "sha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+      "length": 2432244
+    }
+  ],
+  "baselineCommit": "78d3abecb887d0e2c447d06e8224e7670486758e",
+  "priorReviewPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\independent-source-review-01.json",
+  "priorReviewSha256": "74d1be005bc11bec73b3948235859bf1cf544d7cb2945750b0181c5d87b34913",
+  "originalThreeAuthoredPathsUnchanged": true,
+  "fixtureArchivePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-bytes-01\\mir2-web3\\apps\\simulation\\src\\runtime\\tests.rs",
+  "fixtureArchiveSha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+  "fixtureInverseExactBytesMatch": true,
+  "fixtureOnlyInsertedBytes": 546,
+  "originalAssertionsUnchanged": true,
+  "productionTeleportBehaviorUnchanged": true,
+  "testFunctionCount": 8,
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Independent Source02 delta acceptance. All four declared source hashes/lengths match; the original three reward-box authored files are identical to accepted Source01. Independently inverse-removed the one546-byte test fixture insertion and compared every byte with the archived original protected tests.rs. It pins only the intended bind destination in the existing template-scroll routing test; the exact position/UserLocation/UseItem/no-Chat assertions and normal latest-safe-zone product behavior are unchanged. Types and borrow lifetimes are valid by source inspection. The original actual Source01 use-item46pass/1fail is preserved and no blanket result acceptance is asserted.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\run-check.ps1",
+    "sha256": "6c7802afc7c73cc742d409eb72b6b8898e81e7d9ad4f7e4ae909a2b50a10eb06",
+    "priorPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\run-check-01.ps1",
+    "priorSha256": "323594a70682a24d7ef76ee56594dd576505b9ddd0a986458e452c209421c99e",
+    "onlySourceReviewPathSemanticallyChanged": true,
+    "inversePathByteMatchesExactly": true,
+    "oneFishingLineCrRemoved": false,
+    "noArgumentFilterPolicyOrToolPinChanges": true,
+    "originalSevenToolPinsPreviouslyIndependentlyVerified": true,
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "probeTimeoutMs": 15000,
+    "postChildPolicy": "B"
+  },
+  "historicalFailedRun": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\use-item-regression-01",
+    "exitCode": 101,
+    "passed": 46,
+    "failed": 1,
+    "ignored": 0,
+    "preserveRaw": true,
+    "failedFixtureOriginalArchiveRetained": true
+  },
+  "failureExplorationPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\independent-teleport-failure-exploration-01.json",
+  "failureExplorationSha256": "e06b93074de5ac4e3697f3f66d463a76ac75a0030b09900f996947087b1e6d28",
+  "limits": [
+    "Static permit only; reviewer performed no compile or test execution.",
+    "Controlled File personal selected reward issuance and in-memory source/output publication; memory AccountStore relogin does not prove account-atomic durability.",
+    "Discarded-candidate mint timing, existing Belt-space difference, all issuers/mail/census/shared/PG/public gateway/UI/installers remain unaccepted."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}

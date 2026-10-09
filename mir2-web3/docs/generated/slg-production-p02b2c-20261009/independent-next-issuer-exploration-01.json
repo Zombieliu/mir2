@@ -1,0 +1,145 @@
+{
+  "schema": "mir2.production-independent-next-issuer-exploration.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-09T00:50:59.3298879+00:00",
+  "kind": "Read-only proposal; not implementation/source/result acceptance",
+  "currentPhaseSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-source-02.json",
+  "currentPhaseSourceSha256": "40199f01559110ef850271eff8dff950dd0422761638d77f6031b94e88dca0d6",
+  "currentPhaseFinalResultAccepted": false,
+  "selectedIssuer": {
+    "name": "Native Crystal recipe CraftItem fresh output",
+    "clientRoute": "runtime/packets.rs:9456-9460 ClientPacket::CraftItem directly dispatches craft_item_impl(world, unique_id, count, slots).",
+    "implementation": "runtime/items.rs:2530-2710 craft_item_impl",
+    "freshGrant": "Current success branch items.rs:2684 invokes add_or_increment_item_with_durability_and_stats after live materials/tool durability/gold were deducted.",
+    "value": "Normal recipe processing is directly relevant to composable production; coherent one-output recipe attempt can fail closed without changing persistent mail/claim/custody semantics."
+  },
+  "originalEvidence": {
+    "actorAndNpcGates": "Crystal PlayerObject.cs:8004-8017 rejects dead/zero count/no NPCPage/out-of-range NPC and dispatches NPCScript.Craft. Current Rust only checks in-world/dead and global recipe lookup; this NPC/context parity gap must stay explicit, not be claimed fixed by UID migration.",
+    "preflight": "Crystal NPCScript.cs:1242-1380 resolves recipe/output, gold, tools/current durability, distinct offered slots, ingredient count/current durability, output stack limit; creates a fresh candidate and calls CanGainItem BEFORE consuming inputs.",
+    "commit": "NPCScript.cs:1387-1449 consumes tool dura(count*1000), ingredient counts and gold, then rolls chance+CraftRatePercent. A legitimate missed roll still consumes and returns CraftItem.Success=true; a hit gains craftedItem.",
+    "capacity": "Original HumanObject.cs:7586-7624 CanGainItem is inventory-space/stack based, not a weight predicate. Do not introduce an invented original weight requirement in this UID slice.",
+    "uidTiming": "Original creates the candidate before CanGainItem and roll. Proposed File safety mints only published fresh output after planning; discarded-candidate UID timing parity remains excluded."
+  },
+  "minimalPaths": {
+    "product": "mir2-web3/apps/simulation/src/runtime/items.rs",
+    "independentTests": "mir2-web3/apps/simulation/src/runtime/native_craft_uid_tests.rs (new cfg child of items.rs)",
+    "existingService": "Use existing UserItemUidReason::Crafting; no new allocator, enum/schema or runtime.rs modifications required.",
+    "helpers": "Reuse item_grants::FreshItemGrant and plan_fresh_item_grants. Do not change carrier validators, generic infallible normalize or ordinary custody return."
+  },
+  "safeMigrationSteps": [
+    "Preserve original/current recipe lookup, offered-slot/durability/count checks and the capacity-before-input-consumption ordering. Keep Legacy behavior/default public binding unchanged or separately demonstrate protected old assertions.",
+    "Freeze deterministic roll and recipe plan once. Explicitly reject Unavailable/Fenced before a mutable attempt; after validating current input references, refresh_world_history_floor on ORIGINAL live world while every consumed root is still present. Verify configured authority matches; record high consumed material/tool roots before retirement.",
+    "Clone InventoryResource. Apply tool damage and ingredient debits to this clone only, preserving UID and metadata on retained/surplus tools or partially consumed stacks. Never pass existing materials/custody through FreshItemGrant.",
+    "For a successful chance roll, create a fresh zero-UID prototype using the same current native output defaults (name/description/grade/durability/stats/icon/weight). Keep original carrier validation. Call plan_fresh_item_grants against POST-DEBIT clone, not prepare_world_grants(world), which would read the original inventory.",
+    "Post-debit planning is important: if output also matches an ingredient, a fully consumed root must not be reused by prematurely merging output into that original root. Preserve a separate pre-consumption capacity check so freeing an ingredient slot does not make an otherwise forbidden full-bag attempt valid.",
+    "On grant/issuer/carrier failure, discard the entire clone and emit only failed CraftItem; do not charge gold, reduce tool durability, remove inputs, publish LoseGold/GainedItem or success. A burned allocated UID prefix may remain retired, but must not appear in any live carrier.",
+    "On a valid missed roll, publish staged debit and normal gold charge with successful attempt ack and no gained output. Preserve this original game failure semantics; it is not an issuance/capacity failure. Scan/raise retired input history before publication even on this branch; do not mint a new output UID.",
+    "On confirmed valid stage, replace inventory once, apply exact gold charge once, emit all changed output carriers projected from final inventory and final CraftItem result. This remains synchronous in-memory scope; do not add an unverified account-durable receipt claim."
+  ],
+  "recommendedTests": [
+    {
+      "name": "actual_craft_issues_above_retired_material_and_keeps_surplus_metadata",
+      "proof": "Use real GreenPoison recipe32 via actual ClientPacket::CraftItem, valid inventory slots/capacity, high consumed material UID, surviving surplus count/UID/metadata, exact output wire and cost; output UID above retired material floor."
+    },
+    {
+      "name": "two_craft_sessions_share_one_file_authority",
+      "proof": "Two actual sessions/config clones share one authority; final fresh outputs have distinct global IDs while identical slots/material templates are reused."
+    },
+    {
+      "name": "corrupt_craft_authority_publishes_no_debit_or_success",
+      "proof": "Corrupt existing File bytes; exact inventory/tool/currency image unchanged, no LoseGold/GainedItem/success packet; no repaired/recreated allocator."
+    },
+    {
+      "name": "exhausted_craft_authority_never_falls_back_to_material_or_slot_uid",
+      "proof": "u64::MAX seeded authority with a successful100% recipe; fail without consuming inputs/tools/gold or producing fallback IDs."
+    },
+    {
+      "name": "unavailable_fenced_and_wrong_config_craft_bindings_fail_closed",
+      "proof": "Actual typed policies and mismatched allocator config; no inventory/currency/output changes and no mutation of either mismatched authority."
+    },
+    {
+      "name": "full_live_capacity_rejects_before_ingredients_could_free_slots",
+      "proof": "Use valid cells, fill all applicable bag/Belt capacity and prevent compatible output merges; input debit would free cells but original pre-debit capacity still rejects with unchanged live state/high water. Do not reuse protected legacy fixtures slots60+ as valid File capacity fixtures."
+    },
+    {
+      "name": "valid_missed_recipe_consumes_tool_material_and_gold_without_fresh_mint",
+      "proof": "Select a deterministic genuine missed BraveryOrb recipe17 attempt; verify original successful-attempt ack and cost/tool/ingredient semantics, no output; high retired input floor may rise but no extra mint above it."
+    },
+    {
+      "name": "native_craft_merge_and_logout_preserve_final_output_identity",
+      "proof": "Real compatible pre-existing output stack plus actual crafting; unchanged target UID on merge, only actual overflow roots mint, complete final wire survives normal logout/memory-account relogin; never call this account-atomic durability."
+    }
+  ],
+  "protectedTests": [
+    "craft_item_packet_produces_output_and_consumes_ingredients",
+    "craft_item_packet_rejects_insufficient_gold",
+    "craft_item_packet_rejects_insufficient_ingredient_quantity",
+    "craft_item_packet_rejects_unknown_recipe",
+    "craft_item_packet_rejects_when_an_ingredient_slot_is_not_offered",
+    "craft_item_packet_enforces_tool_durability",
+    "craft_item_packet_with_tool_consumes_ingredients_even_on_a_missed_roll"
+  ],
+  "alternativesRejected": [
+    "NPC GIVEITEM has preceding TAKEITEM/TAKEGOLD live side effects and unconditional script Continue; replacing the final helper alone cannot establish whole-script atomicity.",
+    "Periodic BlackCreatureStone bag/mail delivery crosses mailbox publication/timer and Stage5 custody claim gaps; less coherent than the native synchronous recipe attempt.",
+    "Generic add_or_increment* signature migration reaches unrelated GM/drops/stage5/onchain/guild issuers and live partial merges; do not attempt a blanket migration without each caller failure boundary."
+  ],
+  "scopeAndLimits": [
+    "Proposal only, no product edits or focused-check permit for this future slice.",
+    "Original carrier validators/default production binding/high-conflict runtime.rs/persistent claim semantics unchanged.",
+    "Legacy/helper functional identity and packet semantics need explicit preservation under source review and seven existing craft regressions.",
+    "Existing NPC craft context/range/page authorization and CraftRatePercent support are not fixed by the proposed UID-only slice.",
+    "No full-account atomicity, all issuer migration, periodic mail/custody claims, external census, PostgreSQL/shared receipts, gateway/UI/installers or deployment acceptance.",
+    "P02b-2c current actual result acceptance is separate and still pending; do not count this exploration as a test or completed implementation."
+  ],
+  "readInputs": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "length": 166139
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_grants.rs",
+      "sha256": "c1d8522d7dc848cdc3b63eb6ef93b8a81050ee4974b5194bb2f431ba56394a1a",
+      "length": 7905
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "sha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4",
+      "length": 8418
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "8400a25e3767fcffdcd8dad5a2d1c9cd62ebed78c25b38f7ef8ba2781875d151",
+      "length": 194377
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/packets.rs",
+      "sha256": "069fbfbd47ad4cb99e2866cb543cae6c44657b54be2b3820ecd4238f09a3bedf",
+      "length": 400120
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "sha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+      "length": 2432244
+    },
+    {
+      "path": "Crystal/Server/MirObjects/NPC/NPCScript.cs",
+      "sha256": "922647762f8c84befb25280c3a85d6aafdcffcaafb011f78ebb6bf182b14db0e",
+      "length": 53055
+    },
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11",
+      "length": 586620
+    },
+    {
+      "path": "Crystal/Server/MirObjects/HumanObject.cs",
+      "sha256": "c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3",
+      "length": 353159
+    }
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductOrTestEdits": true
+}

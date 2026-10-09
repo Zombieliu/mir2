@@ -1,0 +1,8 @@
+{
+  "schema": "mir2.production-runner-byte-restoration.v1",
+  "beforeSha256": "a2cbe34e1f6ee0fa00e680f593af9f191ba556fcdde790a00d7a513583b37b81",
+  "afterSha256": "6c7802afc7c73cc742d409eb72b6b8898e81e7d9ad4f7e4ae909a2b50a10eb06",
+  "originalMixedLineEndingsRestored": true,
+  "onlySourceAcceptancePathChanged": true,
+  "cargoStarted": false
+}
