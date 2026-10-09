@@ -39,6 +39,16 @@ mir2-web3/scripts/fixtures/native-r19-s15/failed-generation-02/** -text
 # The admitted native object table is pinned by its raw byte SHA.
 mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json -text whitespace=blank-at-eol,space-before-tab,cr-at-eol
 
+# R23 admission, predecessor CMS and derivation preserve their signed/pinned bytes.
+mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication-plan.json -text
+mir2-web3/scripts/fixtures/native-r23-s18/** -text whitespace=blank-at-eol,space-before-tab,cr-at-eol
+mir2-web3/scripts/classic-r23-publication/* -text
+mir2-web3/scripts/prepare_native_r23_s18_fixed.py -text
+mir2-web3/scripts/native_r23_s18_r2_delivery.py -text
+mir2-web3/scripts/test_native_r23_s18_r2_delivery.py -text
+mir2-web3/scripts/test_native_r23_s18_interrupt.py -text
+mir2-web3/scripts/test_prepare_native_r23_s18_offline.py -text
+
 *.gif binary
 *.ico binary
 *.jpg binary

@@ -1,0 +1,174 @@
+{
+  "schema": "mir2.r23.root-wrapper-derivation.v1",
+  "sourceCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "gameSourceRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+  "channelSourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "sequence": 18,
+  "previousSequence": 17,
+  "wrappers": [
+    {
+      "sourceCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+      "sourcePath": "mir2-web3/scripts/classic-r22-publication/sign-native-delivery-r22-reviewed.ps1",
+      "sourceSha256": "49bb133aab18f94c4ba696213790892b90299d357caa1bee9a653819637fee87",
+      "outputPath": "mir2-web3/scripts/classic-r23-publication/sign-native-delivery-r23-reviewed.ps1",
+      "outputSha256": "76d65eeaf0034214f1c5edccb21020ce48005a778e813d00bc3eb042436c79b5",
+      "replacements": [
+        {
+          "before": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+          "after": "faefb69671272843958f68781b4f8ca2f4014522",
+          "count": 1
+        },
+        {
+          "before": "WN-CANDIDATE-20261008-invited-22",
+          "after": "WN-CANDIDATE-20261009-invited-23",
+          "count": 1
+        },
+        {
+          "before": "Exact frozen R22 game source required",
+          "after": "Exact frozen R23 game source required",
+          "count": 1
+        },
+        {
+          "before": "Exact clean frozen R22 game source required",
+          "after": "Exact clean frozen R23 game source required",
+          "count": 1
+        },
+        {
+          "before": "Exact clean signed R22 Candidate identity required",
+          "after": "Exact clean signed R23 Candidate identity required",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "sourceCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+      "sourcePath": "mir2-web3/scripts/classic-r22-publication/sign-reused-engine-feed-r22-s17.ps1",
+      "sourceSha256": "1a64e276549dfcb9548f79c9dbdf6ac8fe1a610d53a6c861239299c10fa9e2fa",
+      "outputPath": "mir2-web3/scripts/classic-r23-publication/sign-reused-engine-feed-r23-s18.ps1",
+      "outputSha256": "5a295ff94ea0517ab9e29393ee87223ea9ac4a30f8987cbbc70773b90b540355",
+      "replacements": [
+        {
+          "before": "R22/s17 signing",
+          "after": "R23/s18 signing",
+          "count": 1
+        },
+        {
+          "before": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+          "after": "faefb69671272843958f68781b4f8ca2f4014522",
+          "count": 1
+        },
+        {
+          "before": "Exact clean R22 source required",
+          "after": "Exact clean R23 source required",
+          "count": 1
+        },
+        {
+          "before": "FD8109231F6077405C410047FAB94EA1A5797E9963E81FD9A80A0CB86CF95DCA",
+          "after": "E7EFEBCB6B897E15F3B93B8A7A8EEB354D0EB01CCF799BB155C26C394F6EFC4F",
+          "count": 1
+        },
+        {
+          "before": "1F881C23724B892AB9814EB2EB9002A365DF159A7220BB5316538A0EA181A5C7",
+          "after": "84145FBABC752CD648D81415A5D45ABA464EE67DDD0A7D2A1A9F296C31844276",
+          "count": 1
+        },
+        {
+          "before": "$old.sequence-ne16",
+          "after": "$old.sequence-ne17",
+          "count": 1
+        },
+        {
+          "before": "WN-CANDIDATE-20261007-invited-20",
+          "after": "WN-CANDIDATE-20261008-invited-22",
+          "count": 1
+        },
+        {
+          "before": "Current s16/R20 predecessor required",
+          "after": "Current s17/R22 predecessor required",
+          "count": 1
+        },
+        {
+          "before": "$version.candidate-cne'WN-CANDIDATE-20261008-invited-22'",
+          "after": "$version.candidate-cne'WN-CANDIDATE-20261009-invited-23'",
+          "count": 1
+        },
+        {
+          "before": "$statement.candidate-cne'WN-CANDIDATE-20261008-invited-22'",
+          "after": "$statement.candidate-cne'WN-CANDIDATE-20261009-invited-23'",
+          "count": 1
+        },
+        {
+          "before": "R22 signed Candidate binding mismatch",
+          "after": "R23 signed Candidate binding mismatch",
+          "count": 1
+        },
+        {
+          "before": "sequence=17",
+          "after": "sequence=18",
+          "count": 3
+        },
+        {
+          "before": "mir2.r22.reused-engine-feed.v1",
+          "after": "mir2.r23.reused-engine-feed.v1",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "sourceCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+      "sourcePath": "mir2-web3/scripts/classic-r22-publication/prepare-signed-native-publication-r22-s17.ps1",
+      "sourceSha256": "d04761bad263565c5bd06d419b6bd37a794f67b5ee7e9cbf36ab7a3fa1d0248d",
+      "outputPath": "mir2-web3/scripts/classic-r23-publication/prepare-signed-native-publication-r23-s18.ps1",
+      "outputSha256": "a66af29e8a6f49e67656af4604c89bb99eb0fcc10d8262b8a74eba7e1337157a",
+      "replacements": [
+        {
+          "before": "$previous.sequence-ne16",
+          "after": "$previous.sequence-ne17",
+          "count": 1
+        },
+        {
+          "before": "fd8109231f6077405c410047fab94ea1a5797e9963e81fd9a80a0cb86cf95dca",
+          "after": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+          "count": 1
+        },
+        {
+          "before": "1f881c23724b892ab9814eb2eb9002a365df159a7220bb5316538a0ea181a5c7",
+          "after": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276",
+          "count": 1
+        },
+        {
+          "before": "Exact s16 predecessor pointer required",
+          "after": "Exact s17 predecessor pointer required",
+          "count": 1
+        },
+        {
+          "before": "$feed.sequence-ne17",
+          "after": "$feed.sequence-ne18",
+          "count": 1
+        },
+        {
+          "before": "WN-CANDIDATE-20261008-invited-22",
+          "after": "WN-CANDIDATE-20261009-invited-23",
+          "count": 2
+        },
+        {
+          "before": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+          "after": "faefb69671272843958f68781b4f8ca2f4014522",
+          "count": 1
+        },
+        {
+          "before": "Exact R22/s17 discovery required",
+          "after": "Exact R23/s18 discovery required",
+          "count": 1
+        },
+        {
+          "before": "Exact clean R22 statement required",
+          "after": "Exact clean R23 statement required",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "securityFunctionsChanged": false,
+  "cmsOrCertificateGatesRelaxed": false
+}

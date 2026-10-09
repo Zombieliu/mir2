@@ -1,0 +1,914 @@
+{
+  "schema": "mir2.native.origin-r23-s18.derivation.v1",
+  "templateCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "newGameSource": "faefb69671272843958f68781b4f8ca2f4014522",
+  "engineSourceUnchanged": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "sequence": 18,
+  "previousSequence": 17,
+  "guardsReadOnlySource": "scripts/classic-r22-publication/guards.py.in",
+  "guardsSha256Unchanged": "10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811",
+  "previousWriter": {
+    "path": "C:/mir2-playtest-releases/20261008-classic-r22/operators-01/origin_r22_s17.py",
+    "sha256": "76b9022d7978fd1f45c2030c3679964f7224c4da6ff7b2de14da50096a623aed"
+  },
+  "sourceFiles": [
+    {
+      "source": "scripts/classic-r22-publication/origin_r22_tail.py.in",
+      "destination": "scripts/classic-r23-publication/origin_r23_tail.py.in",
+      "originalSize": 8755,
+      "originalSha256": "cbd53eda0c6860c2912270d9d2e66f1d062901df43964afd66d9f403d6c66a23",
+      "derivedSize": 8755,
+      "derivedSha256": "a8edd16c43776cca96840b371642c2046885cb7389abd297c4f58a2a1e4a2252",
+      "exactOrderedReplacements": [
+        {
+          "before": "value['sequence'] == 16",
+          "after": "value['sequence'] == 17",
+          "occurrences": 1
+        },
+        {
+          "before": "'feed16-game-binding'",
+          "after": "'feed17-game-binding'",
+          "occurrences": 1
+        },
+        {
+          "before": "'feed16-expired'",
+          "after": "'feed17-expired'",
+          "occurrences": 1
+        },
+        {
+          "before": "(False, 'PUBLICATION-PLAN.json', 'ROOT-VERIFICATION.json', 17)",
+          "after": "(False, 'PUBLICATION-PLAN.json', 'ROOT-VERIFICATION.json', 18)",
+          "occurrences": 1
+        },
+        {
+          "before": "(True, 'PREVIOUS-PUBLICATION-PLAN.json', 'PREVIOUS-ROOT-VERIFICATION.json', 16)",
+          "after": "(True, 'PREVIOUS-PUBLICATION-PLAN.json', 'PREVIOUS-ROOT-VERIFICATION.json', 17)",
+          "occurrences": 1
+        },
+        {
+          "before": "prepared['sequence'] == 17",
+          "after": "prepared['sequence'] == 18",
+          "occurrences": 1
+        },
+        {
+          "before": "feed['sequence'] == 17",
+          "after": "feed['sequence'] == 18",
+          "occurrences": 1
+        },
+        {
+          "before": "'feed17-expired-or-mismatch'",
+          "after": "'feed18-expired-or-mismatch'",
+          "occurrences": 1
+        },
+        {
+          "before": "'mir2.origin-r22-s17.fixed-closure.v1'",
+          "after": "'mir2.origin-r23-s18.fixed-closure.v1'",
+          "occurrences": 1
+        },
+        {
+          "before": "'engineSource': ENGINE, 'sequence': 17",
+          "after": "'engineSource': ENGINE, 'sequence': 18",
+          "occurrences": 1
+        },
+        {
+          "before": "feed16FingerprintPreserved",
+          "after": "feed17FingerprintPreserved",
+          "occurrences": 1
+        }
+      ],
+      "inverseRecoveryExact": true,
+      "staticCompilePassed": true,
+      "unchangedFunctionOrClassAst": [
+        "copy_frozen",
+        "append"
+      ],
+      "onlyChangedFunctionOrClassAst": [
+        "stable_feed",
+        "fixed_envelope",
+        "main"
+      ]
+    },
+    {
+      "source": "scripts/classic-r22-publication/private_modes_r22.py.in",
+      "destination": "scripts/classic-r23-publication/private_modes_r23.py.in",
+      "originalSize": 2874,
+      "originalSha256": "df2ca70414b6b404d393ab19f3846dfde82a48194ef61a9dcfa081a594370f83",
+      "derivedSize": 2874,
+      "derivedSha256": "5e32ffc3a47ee1972f6e3b51a23e79e17da41400a1216344fc1a5c2d86bf4960",
+      "exactOrderedReplacements": [
+        {
+          "before": "/tmp/mir2-origin-r22-s17-20261008-01",
+          "after": "/tmp/mir2-origin-r23-s18-20261009-01",
+          "occurrences": 1
+        },
+        {
+          "before": "'mir2.origin.r22.private-input-modes.v1'",
+          "after": "'mir2.origin.r23.private-input-modes.v1'",
+          "occurrences": 1
+        }
+      ],
+      "inverseRecoveryExact": true,
+      "staticCompilePassed": true,
+      "unchangedFunctionOrClassAst": [
+        "need",
+        "ident"
+      ],
+      "onlyChangedFunctionOrClassAst": []
+    },
+    {
+      "source": "scripts/classic-r22-publication/seal_r22.py.in",
+      "destination": "scripts/classic-r23-publication/seal_r23.py.in",
+      "originalSize": 6919,
+      "originalSha256": "7def2164639122c63891b75de2178783f569b9574f64b6f370c39099001fe2ef",
+      "derivedSize": 6919,
+      "derivedSha256": "e6d4239dbeb72b24d1476654cf8373affd9f3e7eb9f07bc96f8b4615f6698f18",
+      "exactOrderedReplacements": [
+        {
+          "before": "/tmp/mir2-origin-r22-s17-20261008-01",
+          "after": "/tmp/mir2-origin-r23-s18-20261009-01",
+          "occurrences": 1
+        },
+        {
+          "before": "/srv/.mir2-origin-r22-s17-20261008-01",
+          "after": "/srv/.mir2-origin-r23-s18-20261009-01",
+          "occurrences": 1
+        },
+        {
+          "before": "'mir2.origin.r22.fixed-inputs-sealed.v1'",
+          "after": "'mir2.origin.r23.fixed-inputs-sealed.v1'",
+          "occurrences": 1
+        }
+      ],
+      "inverseRecoveryExact": true,
+      "staticCompilePassed": true,
+      "unchangedFunctionOrClassAst": [
+        "need",
+        "ident",
+        "root_parents",
+        "source_info",
+        "transfer"
+      ],
+      "onlyChangedFunctionOrClassAst": []
+    },
+    {
+      "source": "scripts/classic-r22-publication/feed_promote_r22.py.in",
+      "destination": "scripts/classic-r23-publication/feed_promote_r23.py.in",
+      "originalSize": 5341,
+      "originalSha256": "ea50adb42f12757b544b41c48a9c799239674fb3ea20710c27677ebe6e9fb4bd",
+      "derivedSize": 5341,
+      "derivedSha256": "9bcac0f0c61b8900be6039b79e12c9d569347d510f77af1c0533e13d14a82156",
+      "exactOrderedReplacements": [
+        {
+          "before": "/srv/.mir2-origin-r22-s17-20261008-01",
+          "after": "/srv/.mir2-origin-r23-s18-20261009-01",
+          "occurrences": 1
+        },
+        {
+          "before": "origin_r22_s17.py",
+          "after": "origin_r23_s18.py",
+          "occurrences": 1
+        },
+        {
+          "before": "verified_r22_s17_writer",
+          "after": "verified_r23_s18_writer",
+          "occurrences": 1
+        },
+        {
+          "before": "feed17-ready",
+          "after": "feed18-ready",
+          "occurrences": 2
+        },
+        {
+          "before": "'mir2.native.current-origin-feed17.v1'",
+          "after": "'mir2.native.current-origin-feed18.v1'",
+          "occurrences": 1
+        },
+        {
+          "before": "'sequence': 17",
+          "after": "'sequence': 18",
+          "occurrences": 1
+        },
+        {
+          "before": "oldFeed16BytesAndFingerprintsPreserved",
+          "after": "oldFeed17BytesAndFingerprintsPreserved",
+          "occurrences": 1
+        }
+      ],
+      "inverseRecoveryExact": true,
+      "staticCompilePassed": true,
+      "unchangedFunctionOrClassAst": [
+        "fingerprint",
+        "need",
+        "LocalTLS"
+      ],
+      "onlyChangedFunctionOrClassAst": []
+    },
+    {
+      "source": "scripts/classic-r22-publication/prepare_origin_r22_s17.py",
+      "destination": "scripts/classic-r23-publication/prepare_origin_r23_s18.py",
+      "originalSize": 20227,
+      "originalSha256": "baa91eddaf4e975af5d20b18b6a0f26ea20a811f54eb0e8fc6bee8739a3a277c",
+      "derivedSize": 20263,
+      "derivedSha256": "22066dc95e379ec5d29c588a03e26ff67c507f13c7243f9cb6b87f1843303af6",
+      "exactOrderedReplacements": [
+        {
+          "before": "Offline fixed R22/s17 origin preparation",
+          "after": "Offline fixed R23/s18 origin preparation",
+          "occurrences": 1,
+          "beforeOffsets": [
+            3
+          ],
+          "afterOffsets": [
+            3
+          ]
+        },
+        {
+          "before": "OUT = Path('C:/mir2-playtest-releases/20261008-classic-r22/operators-01')",
+          "after": "OUT = Path('C:/mir2-playtest-releases/20261009-target-r23/operators-01')",
+          "occurrences": 1,
+          "beforeOffsets": [
+            451
+          ],
+          "afterOffsets": [
+            451
+          ]
+        },
+        {
+          "before": "OLD = Path('C:/mir2-playtest-releases/20261007-npc-map-r20')",
+          "after": "OLD = Path('C:/mir2-playtest-releases/20261008-classic-r22')",
+          "occurrences": 1,
+          "beforeOffsets": [
+            524
+          ],
+          "afterOffsets": [
+            524
+          ]
+        },
+        {
+          "before": "GAME = '7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc'",
+          "after": "GAME = 'faefb69671272843958f68781b4f8ca2f4014522'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            624
+          ],
+          "afterOffsets": [
+            624
+          ]
+        },
+        {
+          "before": "CANDIDATE = 'WN-CANDIDATE-20261008-invited-22'",
+          "after": "CANDIDATE = 'WN-CANDIDATE-20261009-invited-23'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            726
+          ],
+          "afterOffsets": [
+            726
+          ]
+        },
+        {
+          "before": "/tmp/mir2-origin-r22-s17-20261008-01",
+          "after": "/tmp/mir2-origin-r23-s18-20261009-01",
+          "occurrences": 2,
+          "beforeOffsets": [
+            781,
+            17344
+          ],
+          "afterOffsets": [
+            781,
+            17344
+          ]
+        },
+        {
+          "before": "/srv/.mir2-origin-r22-s17-20261008-01",
+          "after": "/srv/.mir2-origin-r23-s18-20261009-01",
+          "occurrences": 1,
+          "beforeOffsets": [
+            827
+          ],
+          "afterOffsets": [
+            827
+          ]
+        },
+        {
+          "before": "OLD_WRITER_SHA = '11378641e6497feaa2c9687f1ce1da14e45408f9a5137d1af40f4d865c3b8fb3'",
+          "after": "OLD_WRITER_SHA = '76b9022d7978fd1f45c2030c3679964f7224c4da6ff7b2de14da50096a623aed'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            902
+          ],
+          "afterOffsets": [
+            902
+          ]
+        },
+        {
+          "before": "OLD_PROOF_SHA = '6a59813e8e3451820a064e1ff1c9f7525f77e0aab6ed85ffa791c8679c3192e8'",
+          "after": "OLD_PROOF_SHA = '8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            1066
+          ],
+          "afterOffsets": [
+            1066
+          ]
+        },
+        {
+          "before": "OLD_PLAN_SHA = '905bc48ea9a210d5cb8ef5d82f748b341d9654cf287f1c3803ce74a1a7ae556d'",
+          "after": "OLD_PLAN_SHA = 'ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            1149
+          ],
+          "afterOffsets": [
+            1149
+          ]
+        },
+        {
+          "before": "FEED16 = {\n    'latest.json': {'size': 1159, 'sha256': 'fd8109231f6077405c410047fab94ea1a5797e9963e81fd9a80a0cb86cf95dca'},\n    'latest.p7s': {'size': 1614, 'sha256': '1f881c23724b892ab9814eb2eb9002a365df159a7220bb5316538a0ea181a5c7'},\n}",
+          "after": "FEED17 = {\n    'latest.json': {'size': 1159, 'sha256': 'e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f'},\n    'latest.p7s': {'size': 1614, 'sha256': '84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276'},\n}",
+          "occurrences": 1,
+          "beforeOffsets": [
+            1310
+          ],
+          "afterOffsets": [
+            1310
+          ]
+        },
+        {
+          "before": "TEMPLATE_PINS = {'origin_r22_tail.py.in': 'cbd53eda0c6860c2912270d9d2e66f1d062901df43964afd66d9f403d6c66a23', 'private_modes_r22.py.in': 'df2ca70414b6b404d393ab19f3846dfde82a48194ef61a9dcfa081a594370f83', 'seal_r22.py.in': '7def2164639122c63891b75de2178783f569b9574f64b6f370c39099001fe2ef', 'feed_promote_r22.py.in': 'ea50adb42f12757b544b41c48a9c799239674fb3ea20710c27677ebe6e9fb4bd'}",
+          "after": "TEMPLATE_PINS = {'origin_r23_tail.py.in': 'a8edd16c43776cca96840b371642c2046885cb7389abd297c4f58a2a1e4a2252', 'private_modes_r23.py.in': '5e32ffc3a47ee1972f6e3b51a23e79e17da41400a1216344fc1a5c2d86bf4960', 'seal_r23.py.in': 'e6d4239dbeb72b24d1476654cf8373affd9f3e7eb9f07bc96f8b4615f6698f18', 'feed_promote_r23.py.in': '9bcac0f0c61b8900be6039b79e12c9d569347d510f77af1c0533e13d14a82156'}",
+          "occurrences": 1,
+          "beforeOffsets": [
+            1632
+          ],
+          "afterOffsets": [
+            1632
+          ]
+        },
+        {
+          "before": "origin_r22_s17.py",
+          "after": "origin_r23_s18.py",
+          "occurrences": 3,
+          "beforeOffsets": [
+            2294,
+            16180,
+            19017
+          ],
+          "afterOffsets": [
+            2294,
+            16180,
+            19017
+          ]
+        },
+        {
+          "before": "# Exact pinned R20 writer contains multiline PINS; take only code before it.",
+          "after": "# Exact pinned R22 writer contains multiline PINS; take only code before it.",
+          "occurrences": 1,
+          "beforeOffsets": [
+            9370
+          ],
+          "afterOffsets": [
+            9370
+          ]
+        },
+        {
+          "before": "base = base.replace('/srv/.mir2-origin-r20-s16-20261007-01', ROOT)",
+          "after": "base = base.replace('/srv/.mir2-origin-r22-s17-20261008-01', ROOT)",
+          "occurrences": 1,
+          "beforeOffsets": [
+            9525
+          ],
+          "afterOffsets": [
+            9525
+          ]
+        },
+        {
+          "before": "base = base.replace(\"GAME = '8faedd89fbcdda7d4f814c05f7d2f56979ab5bf5'\", 'GAME = ' + repr(GAME))",
+          "after": "base = base.replace(\"GAME = '7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc'\", 'GAME = ' + repr(GAME))",
+          "occurrences": 1,
+          "beforeOffsets": [
+            9596
+          ],
+          "afterOffsets": [
+            9596
+          ]
+        },
+        {
+          "before": "base = base.replace('R20/s16', 'R22/s17')",
+          "after": "base = base.replace('R22/s17', 'R23/s18')",
+          "occurrences": 1,
+          "beforeOffsets": [
+            9697
+          ],
+          "afterOffsets": [
+            9697
+          ]
+        },
+        {
+          "before": "objects = validate_admission(plan, proof, args.plan_sha256, args.root_proof_sha256, 17)",
+          "after": "objects = validate_admission(plan, proof, args.plan_sha256, args.root_proof_sha256, 18)",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11150
+          ],
+          "afterOffsets": [
+            11150
+          ]
+        },
+        {
+          "before": "publication-01/PUBLICATION-PLAN.json",
+          "after": "publication-17-02/PUBLICATION-PLAN.json",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11269
+          ],
+          "afterOffsets": [
+            11269
+          ]
+        },
+        {
+          "before": "publication-01/ROOT-VERIFICATION.json",
+          "after": "publication-17-02/ROOT-VERIFICATION.json",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11357
+          ],
+          "afterOffsets": [
+            11357
+          ]
+        },
+        {
+          "before": "old_objects = validate_admission(old_plan, old_proof, OLD_PLAN_SHA, OLD_PROOF_SHA, 16)",
+          "after": "old_objects = validate_admission(old_plan, old_proof, OLD_PLAN_SHA, OLD_PROOF_SHA, 17)",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11489
+          ],
+          "afterOffsets": [
+            11489
+          ]
+        },
+        {
+          "before": "need(len(old_objects) == 41 and old_objects[0]['sha256'] == FEED16['latest.json']['sha256']",
+          "after": "need(len(old_objects) == 40 and old_objects[0]['sha256'] == FEED17['latest.json']['sha256']",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11580
+          ],
+          "afterOffsets": [
+            11580
+          ]
+        },
+        {
+          "before": "old_objects[1]['sha256'] == FEED16['latest.p7s']['sha256'], 'known-r20-closure-required'",
+          "after": "old_objects[1]['sha256'] == FEED17['latest.p7s']['sha256'], 'known-r22-closure-required'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11685
+          ],
+          "afterOffsets": [
+            11685
+          ]
+        },
+        {
+          "before": "'exact-s16-predecessor-required'",
+          "after": "'exact-s17-predecessor-required'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            11834
+          ],
+          "afterOffsets": [
+            11834
+          ]
+        },
+        {
+          "before": "feed['sequence'] == 17 and feed['channel'] == 'invited'",
+          "after": "feed['sequence'] == 18 and feed['channel'] == 'invited'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            12103
+          ],
+          "afterOffsets": [
+            12103
+          ]
+        },
+        {
+          "before": "'actual-feed17-game-binding'",
+          "after": "'actual-feed18-game-binding'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            12306
+          ],
+          "afterOffsets": [
+            12306
+          ]
+        },
+        {
+          "before": "'fixed-r22-closed-scope'",
+          "after": "'fixed-r23-closed-scope'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            12795
+          ],
+          "afterOffsets": [
+            12795
+          ]
+        },
+        {
+          "before": "'actual-clean-r22-statement-required'",
+          "after": "'actual-clean-r23-statement-required'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            13157
+          ],
+          "afterOffsets": [
+            13157
+          ]
+        },
+        {
+          "before": "'schema': 'mir2.origin.r22.fixed-input-plan.v1', 'sequence': 17",
+          "after": "'schema': 'mir2.origin.r23.fixed-input-plan.v1', 'sequence': 18",
+          "occurrences": 1,
+          "beforeOffsets": [
+            14012
+          ],
+          "afterOffsets": [
+            14012
+          ]
+        },
+        {
+          "before": "guards_raw = read(HERE / 'guards.py.in', GUARDS_SHA)",
+          "after": "guards_raw = read(HERE.parent / 'classic-r22-publication/guards.py.in', GUARDS_SHA)",
+          "occurrences": 1,
+          "beforeOffsets": [
+            14873
+          ],
+          "afterOffsets": [
+            14873
+          ]
+        },
+        {
+          "before": "operators-01/origin_r20_s16.py",
+          "after": "operators-01/origin_r22_s17.py",
+          "occurrences": 1,
+          "beforeOffsets": [
+            14990
+          ],
+          "afterOffsets": [
+            14990
+          ]
+        },
+        {
+          "before": "'previousFeed': FEED16, 'previousGameDirectory': 'releases/game-WN-CANDIDATE-20261007-invited-20'",
+          "after": "'previousFeed': FEED17, 'previousGameDirectory': 'releases/game-WN-CANDIDATE-20261008-invited-22'",
+          "occurrences": 1,
+          "beforeOffsets": [
+            15332
+          ],
+          "afterOffsets": [
+            15332
+          ]
+        },
+        {
+          "before": "origin_r22_tail.py.in",
+          "after": "origin_r23_tail.py.in",
+          "occurrences": 2,
+          "beforeOffsets": [
+            15744,
+            15783
+          ],
+          "afterOffsets": [
+            15744,
+            15783
+          ]
+        },
+        {
+          "before": "private_modes_r22.py.in",
+          "after": "private_modes_r23.py.in",
+          "occurrences": 2,
+          "beforeOffsets": [
+            18099,
+            18140
+          ],
+          "afterOffsets": [
+            18099,
+            18140
+          ]
+        },
+        {
+          "before": "seal_r22.py.in",
+          "after": "seal_r23.py.in",
+          "occurrences": 2,
+          "beforeOffsets": [
+            18727,
+            18759
+          ],
+          "afterOffsets": [
+            18727,
+            18759
+          ]
+        },
+        {
+          "before": "feed_promote_r22.py.in",
+          "after": "feed_promote_r23.py.in",
+          "occurrences": 2,
+          "beforeOffsets": [
+            19172,
+            19212
+          ],
+          "afterOffsets": [
+            19172,
+            19212
+          ]
+        },
+        {
+          "before": "'schema': 'mir2.origin.r22.offline-preparation.v1', 'sequence': 17",
+          "after": "'schema': 'mir2.origin.r23.offline-preparation.v1', 'sequence': 18",
+          "occurrences": 1,
+          "beforeOffsets": [
+            19363
+          ],
+          "afterOffsets": [
+            19363
+          ]
+        }
+      ],
+      "inverseRecoveryExact": true,
+      "staticCompilePassed": true,
+      "unchangedFunctionOrClassAst": [
+        "need",
+        "sha",
+        "pairs",
+        "decode",
+        "encoded",
+        "source_identity",
+        "ordinary",
+        "read",
+        "match_local",
+        "object_rows",
+        "validate_admission",
+        "frozen_pin",
+        "write",
+        "command",
+        "require_fresh_outputs",
+        "prepare_output_directory"
+      ],
+      "onlyChangedFunctionOrClassAst": [
+        "render_writer",
+        "main"
+      ]
+    }
+  ],
+  "newTemplatePins": {
+    "origin_r23_tail.py.in": "a8edd16c43776cca96840b371642c2046885cb7389abd297c4f58a2a1e4a2252",
+    "private_modes_r23.py.in": "5e32ffc3a47ee1972f6e3b51a23e79e17da41400a1216344fc1a5c2d86bf4960",
+    "seal_r23.py.in": "e6d4239dbeb72b24d1476654cf8373affd9f3e7eb9f07bc96f8b4615f6698f18",
+    "feed_promote_r23.py.in": "9bcac0f0c61b8900be6039b79e12c9d569347d510f77af1c0533e13d14a82156"
+  },
+  "phase": "genuine-inputs-generated-and-offline-verified",
+  "retainedPreparationFailures": [
+    {
+      "stage": "all-in-memory-before-writes",
+      "kind": "exact-replacement-count-preflight",
+      "needle": "origin_r22_s17.py",
+      "expectedOccurrences": 4,
+      "actualOccurrences": 3,
+      "filesWritten": 0,
+      "correction": "Use exact observed three writer-name occurrences; preserve previous-writer path separately."
+    }
+  ],
+  "linuxCommandsExecuted": false,
+  "publicMutations": false,
+  "networkCalls": 0,
+  "credentialAccess": false,
+  "newProof": {
+    "planSha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0",
+    "rootProofSha256": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf",
+    "objects": 40
+  },
+  "previousProof": {
+    "planSha256": "ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee",
+    "rootProofSha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf",
+    "objects": 40,
+    "sequence": 17
+  },
+  "generatedWriter": {
+    "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\origin_r23_s18.py",
+    "size": 39911,
+    "sha256": "4e4221fe9c2a628616865952a3b4a25d86fae1d2db8fd0b5c7bf3c7a1940affc",
+    "unchangedFunctionAstAndBytes": [
+      "require",
+      "digest",
+      "fingerprint",
+      "boot",
+      "write_new",
+      "snapshot_services",
+      "same_pids",
+      "ensure_parent",
+      "check_target",
+      "copy_frozen",
+      "append"
+    ],
+    "changedFunctionAst": [
+      "stable_feed",
+      "fixed_envelope",
+      "main"
+    ],
+    "changedFunctionsExactlyMatchDerivedTail": true
+  },
+  "rawMetadataCopies": [
+    {
+      "name": "PUBLICATION-PLAN.json",
+      "source": "C:/mir2-playtest-releases/20261009-target-r23/publication-18-01/PUBLICATION-PLAN.json",
+      "sha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0",
+      "size": 15719,
+      "byteExact": true
+    },
+    {
+      "name": "ROOT-VERIFICATION.json",
+      "source": "C:/mir2-playtest-releases/20261009-target-r23/publication-18-01/ROOT-VERIFICATION.json",
+      "sha256": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf",
+      "size": 424,
+      "byteExact": true
+    },
+    {
+      "name": "PREVIOUS-PUBLICATION-PLAN.json",
+      "source": "C:/mir2-playtest-releases/20261008-classic-r22/publication-17-02/PUBLICATION-PLAN.json",
+      "sha256": "ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee",
+      "size": 15756,
+      "byteExact": true
+    },
+    {
+      "name": "PREVIOUS-ROOT-VERIFICATION.json",
+      "source": "C:/mir2-playtest-releases/20261008-classic-r22/publication-17-02/ROOT-VERIFICATION.json",
+      "sha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf",
+      "size": 424,
+      "byteExact": true
+    },
+    {
+      "name": "guards.py",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\classic-publication-20261008\\mir2-player-journey\\mir2-web3\\scripts\\classic-r22-publication\\guards.py.in",
+      "sha256": "10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811",
+      "size": 47951,
+      "byteExact": true
+    }
+  ],
+  "staticCompilation": {
+    "pythonFilesAndEmittedHeredocs": [
+      "origin_r23_s18.py",
+      "guards.py",
+      "CREATE-STAGE-01.command",
+      "PRIVATE-MODES-01.command",
+      "SEAL-STAGE-01.command",
+      "FEED-PROMOTE-01.command",
+      "PREFLIGHT-01.command",
+      "APPEND-01.command"
+    ],
+    "executed": false
+  },
+  "admissionNegativeChecks": [
+    {
+      "case": "duplicate-json-key",
+      "rejection": "duplicate-json-key"
+    },
+    {
+      "case": "rerun-output-already-exists",
+      "rejection": "fresh-output-required:APPEND-INPUTS.prepared.json"
+    },
+    {
+      "case": "wrong-root-proof-cms",
+      "rejection": "root-issued-admission-binding"
+    },
+    {
+      "case": "wrong-root-proof-sequence",
+      "rejection": "root-issued-admission-binding"
+    },
+    {
+      "case": "wrong-root-proof-engine",
+      "rejection": "root-issued-admission-binding"
+    },
+    {
+      "case": "wrong-root-proof-closure",
+      "rejection": "root-issued-closed-object-digest"
+    },
+    {
+      "case": "wrong-proof-hash-binding",
+      "rejection": "plan-root-proof-sha"
+    },
+    {
+      "case": "object-parent-traversal",
+      "rejection": "public-object-boundary"
+    },
+    {
+      "case": "duplicate-public-object",
+      "rejection": "duplicate-public-path"
+    },
+    {
+      "case": "noninteger-object-size",
+      "rejection": "object-size-bound"
+    },
+    {
+      "case": "object-size-overrun",
+      "rejection": "object-size-bound"
+    }
+  ],
+  "genuineOfflineGeneration": {
+    "receiptPath": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\OFFLINE-PREPARATION-01.json",
+    "receiptSha256": "0a1881623696b4a854a656c0636e977613b541b107dad1f7aae16ba5169c552d",
+    "objects": 40,
+    "sealedFiles": 47,
+    "uploadFiles": 24,
+    "newPublicObjects": 17,
+    "reusedPublicObjects": 23,
+    "uploadedObjectBytes": 450925421,
+    "reusedPublicBytes": 601218616,
+    "uploadedControlBytes": 136659,
+    "actualTotalUploadBytes": 451062080,
+    "generatedOutputs": [
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\APPEND-INPUTS.prepared.json",
+        "size": 16474,
+        "sha256": "87cbf43d863daafced80f56588c80ba01fe4dde14037126f5f6a3f43b1a0566f"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\ROOT-VERIFICATION.json",
+        "size": 424,
+        "sha256": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\PUBLICATION-PLAN.json",
+        "size": 15719,
+        "sha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\PREVIOUS-ROOT-VERIFICATION.json",
+        "size": 424,
+        "sha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\PREVIOUS-PUBLICATION-PLAN.json",
+        "size": 15756,
+        "sha256": "ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\guards.py",
+        "size": 47951,
+        "sha256": "10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\origin_r23_s18.py",
+        "size": 39911,
+        "sha256": "4e4221fe9c2a628616865952a3b4a25d86fae1d2db8fd0b5c7bf3c7a1940affc"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\UPLOAD-BATCH-01.json",
+        "size": 4845,
+        "sha256": "681cf169fdc1532fe3242cfb068c3d5ed788905c5b655609911b71af2734acee"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\SEAL-INPUTS-01.json",
+        "size": 13950,
+        "sha256": "8139b9e615c161bb07b0df493d8658e129e145d9f57deb155b9e5e77ce2870b7"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\CREATE-STAGE-01.command",
+        "size": 646,
+        "sha256": "b80939235cfcc92e7ccb1678eef3651c134109368fd14ea571f7fac75cf7892d"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\PRIVATE-MODES-01.command",
+        "size": 8951,
+        "sha256": "1a55aad4354a57bc61fafabd7cd7fe2ee73fb084ec849f68a864f74c3f08dc46"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\SEAL-STAGE-01.command",
+        "size": 20292,
+        "sha256": "23ffe48b323b3e4ac5e320149260a6c624399ee51595692a4d171111b78c4705"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\PREFLIGHT-01.command",
+        "size": 85,
+        "sha256": "afa4ff7391573193bd4bdf4978d25bf1a4fda0cea4095e35b2a5e8a24ca08b29"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\APPEND-01.command",
+        "size": 82,
+        "sha256": "b97bcb2607afdf383b1583999542c0ba29b42762d33f05c024e568b5b653360b"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\FEED-PROMOTE-01.command",
+        "size": 5456,
+        "sha256": "8a37858a2fe07f18029bc103f867a7d25f3053cfff6b63c209797922f6149b53"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-01\\OFFLINE-PREPARATION-01.json",
+        "size": 3982,
+        "sha256": "0a1881623696b4a854a656c0636e977613b541b107dad1f7aae16ba5169c552d"
+      }
+    ]
+  },
+  "cmsReverifiedByThisGenerator": false,
+  "linuxStageAccepted": false,
+  "linuxAppendAccepted": false,
+  "feedPromoteAccepted": false
+}
