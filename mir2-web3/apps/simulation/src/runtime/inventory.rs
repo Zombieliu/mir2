@@ -60,6 +60,7 @@ fn seed_item(
     heal_mp: i32,
 ) -> ItemState {
     ItemState {
+        stone_serial: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: item_icon_for_key(key),
@@ -127,6 +128,7 @@ pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<
                 .tooltip
                 .unwrap_or_else(|| "Crystal start item.".to_string());
             ItemState {
+                stone_serial: None,
                 key,
                 name: template.name,
                 icon: template.image,
@@ -2102,6 +2104,7 @@ pub(super) fn plan_npc_resale_or_pearl_gain(
         .next()?;
     let (added_attack, added_defence) = super::items::user_item_added_attack_defence(source);
     let item = ItemState {
+        stone_serial: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: item_icon_for_key(&key),
@@ -2783,6 +2786,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             },
         };
         let item = ItemState {
+            stone_serial: None,
             key: key.to_string(),
             name: name.to_string(),
             icon: item_icon_for_key(key),

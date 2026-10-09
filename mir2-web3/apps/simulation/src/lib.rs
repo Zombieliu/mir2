@@ -41,6 +41,7 @@ pub use config::{
 pub use runtime::{
     PersonalProductionState, PersonalProductionConfig, PersonalProductionFacility,
     ProductionDurableExecution, ProductionDurableError,
+    StoneWorkshopError,
     RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence, RankingInspectRequest,
     SharedMonsterKillCommitFailure,
     NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,

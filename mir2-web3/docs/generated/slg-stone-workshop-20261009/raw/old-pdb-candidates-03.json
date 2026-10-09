@@ -1,0 +1,64 @@
+{
+  "largestSix": [
+    {
+      "path": "C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\mir2_client_bevy-a9523797b30891a3.pdb",
+      "length": 1275842560,
+      "lastWriteTimeUtc": "2026-10-04T19:03:31.0571523Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-a9cf6cb393790c41.pdb",
+      "length": 1275154432,
+      "lastWriteTimeUtc": "2026-10-06T05:24:27.1116294Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-98a54a009f9f875c.pdb",
+      "length": 1268133888,
+      "lastWriteTimeUtc": "2026-10-05T14:16:11.4255031Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-20d629e283cf034d.pdb",
+      "length": 1243598848,
+      "lastWriteTimeUtc": "2026-10-03T06:03:19.9679257Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-2e1beb0e14051a9b.pdb",
+      "length": 1236365312,
+      "lastWriteTimeUtc": "2026-10-02T18:18:22.9254007Z"
+    },
+    {
+      "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_platform_windows-885f26529c360d17.pdb",
+      "length": 1196863488,
+      "lastWriteTimeUtc": "2026-10-06T14:52:34.2913907Z"
+    },
+    {
+      "path": "C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\mir2_platform_windows-862bc55556a078cd.pdb",
+      "length": 1193054208,
+      "lastWriteTimeUtc": "2026-10-04T17:59:16.7449903Z"
+    },
+    {
+      "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_platform_windows-29019765117be2ee.pdb",
+      "length": 1190400000,
+      "lastWriteTimeUtc": "2026-10-02T10:26:09.3411906Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_platform_windows-8f0f80378eca4457.pdb",
+      "length": 1190096896,
+      "lastWriteTimeUtc": "2026-10-03T01:04:17.9245851Z"
+    },
+    {
+      "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_platform_windows-e74665c6bcf6eeea.pdb",
+      "length": 1187663872,
+      "lastWriteTimeUtc": "2026-10-01T17:21:48.3324325Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-16bf56b7240b6760.pdb",
+      "length": 1131614208,
+      "lastWriteTimeUtc": "2026-10-06T09:32:00.5841038Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-ed8b0eac6621d57b.pdb",
+      "length": 1129328640,
+      "lastWriteTimeUtc": "2026-10-06T06:33:00.8676523Z"
+    }
+  ]
+}

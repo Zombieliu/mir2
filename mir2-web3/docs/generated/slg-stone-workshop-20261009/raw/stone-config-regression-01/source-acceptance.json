@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "c41721f118950a1f136fc1fd12eb5beb54978adc6ed2cb21de64b9e7adb0d500"
+  },
+  "independentSourceReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-review-05.json",
+    "sha256": "254bea0e450679dfd4dff6eaf4f15756da379a5cd6284d6bdfba0e73835924a5"
+  },
+  "scope": "Bounded stone/runtime implementation and adjacent regressions only. Controlled File and fake PG receipt evidence does not establish actual PostgreSQL, shared gateway, client rendering, sidebar, deployment or public playability."
+}

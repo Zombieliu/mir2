@@ -1,0 +1,10 @@
+{
+  "kind": "wrapper-preflight-refusal",
+  "checkId": "stone-rules-tests-02",
+  "exitCode": 1,
+  "guardLaunched": false,
+  "cargoLaunched": false,
+  "testExecutions": 0,
+  "origin": "actual exec_command tool output; no check directory was created by this refused attempt",
+  "logSha256": "ec9961ac9d36a994b6779648f7c0cc4a29a9a082c8ef6e4a5ce5843dd54d9c77"
+}

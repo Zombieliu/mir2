@@ -1,0 +1,122 @@
+{
+  "owner": "Root",
+  "observedAtUtc": "2026-10-08T08:22:20Z",
+  "sourceAcceptance": "Original Source02 Rust/Web05 actual call input snapshots and original logs/Guard gates retained. Current seven Source41 leased files match their tested pins. Late foreign changes prohibit whole-current-checkout qualification; no original tool/source gate weakened or tests relabeled.",
+  "drift": [
+    {
+      "relativePath": "apps/simulation/src/config.rs",
+      "tested": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+        "bytes": 299403,
+        "sha256": "358ab5cd968c129061a6ce11d229fff4f5c0813d530ef94119d6d205cfa6f71b",
+        "relativePath": "apps/simulation/src/config.rs"
+      },
+      "observed": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+        "bytes": 299667,
+        "sha256": "45b48a99f0d83f94a3b94994af8d0054d1276117c74b176d041219dc43367175"
+      }
+    },
+    {
+      "relativePath": "apps/simulation/src/lib.rs",
+      "tested": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\lib.rs",
+        "bytes": 5525,
+        "sha256": "e67e4d03d43538cc740079c87124a94f202fbb3410757966972cbfa7fe005c24",
+        "relativePath": "apps/simulation/src/lib.rs"
+      },
+      "observed": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\lib.rs",
+        "bytes": 5664,
+        "sha256": "63b4b7d06f36c8df6f61ed47185b9fbb9aef8518bdfe69e7c6a2cb8d31daef35"
+      }
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/mod.rs",
+      "tested": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mod.rs",
+        "bytes": 7014,
+        "sha256": "5b6f5e2b1afcb2d26a148a4837d2499ace251f410b01d3e33cb4c9f979be8cd6",
+        "relativePath": "apps/simulation/src/runtime/mod.rs"
+      },
+      "observed": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mod.rs",
+        "bytes": 7187,
+        "sha256": "4bab90c9690166f03be8c202e384f5ec0e13bffdaf5724e4717a630cea372d7f"
+      }
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "tested": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction.rs",
+        "bytes": 38728,
+        "sha256": "c31ac61eb2561ffc19aa384eeba8ddbc9b46f97094e4f4277a4e749ad68e05ef",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction.rs"
+      },
+      "observed": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction.rs",
+        "bytes": 38761,
+        "sha256": "bd8c0355e9a38862ce591c8a001b8fb50f2ac91c3d6afe84663bad9a11c8601f"
+      }
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/resources.rs",
+      "tested": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\resources.rs",
+        "bytes": 39044,
+        "sha256": "bee1f2c2bdd38ea8f835147ad6a398734108ffa49a1fcb4d8282c27e771fb97c",
+        "relativePath": "apps/simulation/src/runtime/resources.rs"
+      },
+      "observed": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\resources.rs",
+        "bytes": 39212,
+        "sha256": "3caee03e5cc2cff874453cec0bcac7c187cf42774ab6b4bf25b3dea2ffb50cc8"
+      }
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/save.rs",
+      "tested": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\save.rs",
+        "bytes": 165084,
+        "sha256": "eedc8dc96064617d19fff58b68b9a562ba0e85e481e1a2f08ca5ce581818dbc8",
+        "relativePath": "apps/simulation/src/runtime/save.rs"
+      },
+      "observed": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\save.rs",
+        "bytes": 165591,
+        "sha256": "b9b0be4b1fded6e1c7942ab3f05ce7b7f39e28e9d85feb203489c31bf097293f"
+      }
+    },
+    {
+      "relativePath": "packages/production/src/jobs.rs",
+      "tested": {
+        "path": "E:/mir2-player-journey/mir2-web3/packages/production/src/jobs.rs",
+        "bytes": 21146,
+        "sha256": "16d68343910b9139bc62b34329bac2937fa75300fda36a382fbec72d81b56317",
+        "relativePath": "packages/production/src/jobs.rs"
+      },
+      "observed": {
+        "path": "E:/mir2-player-journey/mir2-web3/packages/production/src/jobs.rs",
+        "bytes": 22815,
+        "sha256": "7cce1b039dbe55f67110082919688f42e6ccf96ff6f32cd5d8cb43f033e102bb"
+      }
+    }
+  ],
+  "currentDeclaredUnionAllMatch": false,
+  "currentLeasedSevenMatch": true,
+  "originalFiniteRecord": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result01.json",
+    "bytes": 114860,
+    "sha256": "2a9a7d531d63e245b84eac75783501eb03948818f48705da8967334c8edc78b9"
+  },
+  "rawEvidence": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json",
+    "bytes": 292527,
+    "sha256": "4cb601e2262d2d266eea0d6d1bc259f704b660660d5ae810302a6217dda54bcb"
+  },
+  "foreignChangesExcludedFromCommit": true,
+  "retestsRun": false,
+  "goalStatus": "active",
+  "candidateAccepted": false,
+  "goalComplete": false
+}

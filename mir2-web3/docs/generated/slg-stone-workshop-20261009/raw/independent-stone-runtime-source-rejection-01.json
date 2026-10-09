@@ -1,0 +1,10 @@
+{
+  "acceptedForFocusedTests": false,
+  "reviewer": "/root/production_review",
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-01.json",
+  "authoredSourceSha256": "85221ca01a462d856910cae61c7e966d27672f77b9f3ecbe4576a4876cc360a6",
+  "rawFinal": "Source01 was not admitted: the new full-bag fixture used raw capacity40 instead of valid46 (40bag+6belt), the real seal route already opens stone detail so its extra self-link was absent, and a standalone committed-output fixture had UID0. Root corrected only these fixture issues and tightened scope before Source03; no actual runtime Cargo/test failure is inferred.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductEdits": true
+}

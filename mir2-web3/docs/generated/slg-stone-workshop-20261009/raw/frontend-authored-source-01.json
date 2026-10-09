@@ -1,0 +1,36 @@
+{
+  "files": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "length": 5038,
+      "sha256": "0bb26ff4298628cc47507ade4004dd70bb43f05898ef7208fedd3c78b5c516e5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "length": 531988,
+      "sha256": "8c50c1e03c660159bd6032fee5ea58c7361c2b588ad4eb982934c8baa7cfc9fd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "length": 903736,
+      "sha256": "f7b692680fe0f16e412e9991c6eb4161b5c2b9286b455484219f9ddd883abdfc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "length": 11240,
+      "sha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "length": 167647,
+      "sha256": "56266851a23632b1844bea8cd9a9cd5781f2a9bed308988b39f22d74c485f614"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "length": 1411,
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    }
+  ],
+  "schema": "mir2.stone-sidebar-source.v1",
+  "createdUtc": "2026-10-09T14:56:24.1861305Z"
+}

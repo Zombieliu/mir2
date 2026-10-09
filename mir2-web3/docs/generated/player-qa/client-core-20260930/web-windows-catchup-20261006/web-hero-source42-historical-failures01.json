@@ -1,0 +1,98 @@
+{
+  "owner": "Root",
+  "kind": "Source42 preserved first finite Web failure",
+  "failedWeb01": {
+    "id": "web-test01",
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-web-test01.config01.json",
+      "bytes": 4428,
+      "sha256": "2835ef17ec84f50a9548e68d364e1143b56807ae21ebd864925151d4a1222f1d"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-web-test01.stdout.log",
+      "bytes": 21454,
+      "sha256": "8af856f17ff8c21cbdab3ae306947050adaa6ab50989e7d8ffebc0dc9c25a5a4"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-web-test01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-web-test01.outer.json",
+      "bytes": 519,
+      "sha256": "de9c5a2e67ee914267f23365585997ec8f488fdbd28d8bf8c98e1b3193016eb8"
+    },
+    "outerValue": {
+      "owner": "Root",
+      "exitCode": 1,
+      "builderPid": 186240,
+      "kind": "Source42 web-test original finite action-basis verification",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 17948,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source42-web-test01.config01.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "failure": "Actual old Page pure fixture omitted new heroProofHighWaterRef dependency; 183 TAP passed / 1 Stage5 script failed before new 9 groups. Add only empty WeakMap fixture dependency; no old business assertion changed."
+  },
+  "failedSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-web01-snapshot.json",
+    "bytes": 5963660,
+    "sha256": "32f4ceda60bc41ae93b3e26cab7696ee2947844b8a17814b99e49ff67f78b9b4"
+  },
+  "failedReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-web01-review01.json",
+    "bytes": 2982,
+    "sha256": "e835a93e0ddbe893c1b07c4b9c6aca380618be89b5c27910b2b5bd7e75fde755"
+  },
+  "repairSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source42-web02-snapshot01.json",
+    "bytes": 5964159,
+    "sha256": "0dd1f0fbb47f673ba12c1b8b679ef5386507eebb93dc0e13adbd5b64acb626ec"
+  },
+  "repairReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source42-web02-review01.json",
+    "bytes": 3370,
+    "sha256": "ef5797832a4955623a920d45b94746ebbaa38806fe0d5fcc9bb2d1a86de14bee"
+  },
+  "exactRepair": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+    "addedBytes": 42,
+    "addedText": " heroProofHighWaterRef:ref(new WeakMap()),",
+    "originalOldStage5Groups": 457,
+    "newStage5Groups": 9,
+    "businessAssertionsChanged": false,
+    "productSourceChanged": false,
+    "reason": "Original pure Page fixture did not provide new actual Page WeakMap closure dependency; ReferenceError before new groups. Genuine old fixture dependency supplied, no proof custody invented."
+  },
+  "originalWeb01OutputsPreserved": true,
+  "supersededUnrunTsc01": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source42-tsc01.config01.json",
+    "bytes": 4976,
+    "sha256": "b6db8c29715112ddc32ba5c7534f95a48c1479b7a3d547c0e2e115ee5829aa74"
+  },
+  "actualRepairRun": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source42-web-test02.config01.json",
+    "bytes": 4727,
+    "sha256": "15935f3503abd8d88adb6505f2a0131b6b1e5e7bf4d87beaa604ad6a3d227bab"
+  },
+  "actualTscRun": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source42-tsc02.config01.json",
+    "bytes": 5270,
+    "sha256": "cadaa0c1e303ee8d6bfac45ae137b041cf3c38c48ef918667ac9a514aca49df8"
+  },
+  "rawArchive": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source42-raw-evidence01.json",
+    "bytes": 221008,
+    "sha256": "ca4a729c8f9df2bab4c2107b640af63ee36578300bdbdccc1848491c21d96bbd"
+  },
+  "qualification": "183/184 first TAP is a failed script run and does not close Stage5. Accepted Web02 actual184/184 and466 logical groups are recorded independently. TSC01 unrun is never counted.",
+  "candidateAccepted": false,
+  "goalComplete": false
+}

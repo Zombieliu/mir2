@@ -1,0 +1,212 @@
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around type
+  --> src\crystal_ui\skill_page_shared.rs:67:20
+   |
+67 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+67 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+67 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: unnecessary parentheses around method argument
+   --> src\portable_character_ui.rs:514:25
+    |
+514 |                         (Node {
+    |                         ^
+...
+523 |                         }),
+    |                          ^
+    |
+help: remove these parentheses
+    |
+514 ~                         Node {
+515 |                             position_type: PositionType::Absolute,
+...
+522 |                             ..default()
+523 ~                         },
+    |
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:123:9
+    |
+123 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:168:9
+    |
+168 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:185:9
+    |
+185 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:2191:5
+     |
+2191 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `TEXT` is never used
+ --> src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:15:18
+   |
+15 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `set_selecting`, `selecting`, `render`, and `render_at` are never used
+   --> src\crystal_ui\mail_editor.rs:429:19
+    |
+ 75 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+429 |     pub(crate) fn set_selecting(&mut self, selecting: bool) {
+    |                   ^^^^^^^^^^^^^
+...
+433 |     pub(crate) fn selecting(&self) -> bool {
+    |                   ^^^^^^^^^
+...
+464 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+468 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+
+warning: function `item` is never used
+  --> src\crystal_ui\hero_cross_inventory.rs:44:4
+   |
+44 | fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Option<&'a ItemModel> {
+   |    ^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:78:7
+   |
+78 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> src\quest_ui.rs:1196:5
+     |
+1151 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1196 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1199 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `map` and `big_map` are never read
+    --> src\quest_ui.rs:1998:5
+     |
+1985 | pub(crate) struct QuestInputModels<'w> {
+     |                   ---------------- fields in this struct
+...
+1998 |     map: Option<Res<'w, MapModel>>,
+     |     ^^^
+...
+2006 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
+     |     ^^^^^^^
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> src\quest_ui.rs:4767:4
+     |
+4767 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:5586:4
+     |
+5586 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_list_message_lines` is never used
+    --> src\quest_ui.rs:5748:4
+     |
+5748 | fn quest_list_message_lines(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> src\quest_ui.rs:7701:4
+     |
+7701 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src\quest_ui.rs:7893:4
+     |
+7893 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+    --> src\quest_ui.rs:7903:4
+     |
+7903 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+    --> src\quest_ui.rs:7917:4
+     |
+7917 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+    --> src\quest_ui.rs:8065:4
+     |
+8065 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `avoiding_bag_origin` is never used
+   --> src\stone_workshop_ui.rs:113:15
+    |
+113 | pub(crate) fn avoiding_bag_origin(sidebar: QuestLogRect, p: QuestUiPresentation,
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib test) generated 23 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 6 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 51.84s
+     Running unittests src\lib.rs (C:/mir2-cross-platform-storage-20261002/rust-target/windows\debug\deps\mir2_client_bevy-497d2e91b2ddc127.exe)
+
+running 5 tests
+test quest_ui::mobile_layout_tests::workshop_portable_tree_uses_supplied_right_sidebar_and_keeps_touch_sheet ... ok
+test stone_workshop_ui::tests::actual_server_model_languages_and_full_range_quotes_are_supported ... ok
+test stone_workshop_ui::tests::invalid_identity_footer_target_or_disabled_quote_keeps_original_layout ... ok
+test stone_workshop_ui::tests::ordinary_entry_and_unknown_result_keep_original_layout ... ok
+test stone_workshop_ui::tests::touch_small_scaled_invalid_or_missing_viewport_uses_original_sheet ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 732 filtered out; finished in 0.14s
+

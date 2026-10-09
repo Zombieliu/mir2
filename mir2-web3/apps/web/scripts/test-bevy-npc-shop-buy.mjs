@@ -537,7 +537,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
     npcPurchaseUnavailableRef:{current:false},npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
-    npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},
+    npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},heroVerifiedDeliveryRef:{current:null},
     npcPurchaseCatalogSourceRef:{current:new WeakMap()},npcPurchaseClientRef:{current:null},
     NpcPurchaseClient:actualDurableNpc.NpcPurchaseClient,worldSnapshotVersionRef:{current:0},
     captureQuestMapGatewayEvent:()=>{},captureSpellsGatewayEvent:()=>{},mergeMailList:value=>value,

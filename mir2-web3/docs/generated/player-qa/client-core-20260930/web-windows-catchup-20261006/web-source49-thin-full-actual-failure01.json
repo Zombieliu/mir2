@@ -1,0 +1,71 @@
+{
+  "owner": "Root",
+  "kind": "Source49 original full Thin build actual closed failure",
+  "originalConfig": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-build-source49-thin-full-config01.json",
+    "bytes": 4830,
+    "sha256": "6cc137f68e4a1a5f68bc07ce36b798eee3c641b108da51318f0e4191a73cb5d4"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-build-source49-thin-full-snapshot02.json",
+    "bytes": 14810568,
+    "sha256": "af86d2f6844d89eb8acece7356f396215935ae2763cce0b4223468d06a8cefa2"
+  },
+  "independentReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source49-thin-full-source02-independent-review01.json",
+    "bytes": 16269,
+    "sha256": "e7ab206572ec8040bc72db7f64631fb464bd7b19f7723a4cf4de2e91f6da55ce"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 205044,
+    "kind": "Source49 original full portable thin client builder from actual fresh Source49 Next output",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 25289,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source49-thin-full-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "raw": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-thin-source49-full01-664f5411ab1d483aa7892ede7ed85ca6/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-thin-source49-full01-664f5411ab1d483aa7892ede7ed85ca6/stderr.log",
+      "bytes": 683,
+      "sha256": "73f76e4955f4ff87611e04675adb4d6f7876fef1561148ac8d3d6e01826db068"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-thin-source49-full01-664f5411ab1d483aa7892ede7ed85ca6/outer.json",
+      "bytes": 553,
+      "sha256": "dc05b305f12ced24a4cb5357f4c321b7c165102e0df1ea533abc4474c272b7b6"
+    }
+  ],
+  "partialOutput": {
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-source49-20261009-01",
+    "regularFiles": 1945,
+    "bytes": 97102733,
+    "links": []
+  },
+  "failure": {
+    "stage": "collectSharpNativePackages",
+    "exportPath": "./index.cjs",
+    "expectedByOldHelper": "Direct .node export",
+    "actualPackageVersion": "0.35.3"
+  },
+  "outputAccepted": false,
+  "partialOutputPreserved": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

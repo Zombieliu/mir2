@@ -47,6 +47,9 @@ mod npc_purchase_outcome;
 mod npc_purchase_transaction;
 mod npc_purchase_snapshot;
 mod production;
+mod stones;
+mod stone_npc;
+pub use stone_npc::StoneWorkshopError;
 pub use production::{PersonalProductionState, PersonalProductionConfig, PersonalProductionFacility,
     ProductionDurableExecution, ProductionDurableError};
 pub use npc_purchase_transaction::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseDurableExecution, NpcPurchaseDurableError};

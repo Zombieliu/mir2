@@ -41,7 +41,8 @@ const adapters = loadTypeScriptModule(
 const socialReplies = loadTypeScriptModule(new URL("../lib/social-incoming-replies.ts", import.meta.url));
 const socialOperations = loadTypeScriptModule(new URL("../lib/social-window-operations.ts", import.meta.url));
 const socialParityActions = loadTypeScriptModule(new URL("../lib/social-parity-actions.ts", import.meta.url));
-const extendedPackets = loadTypeScriptModule(new URL("../lib/extended-server-packets.ts", import.meta.url));
+const stageNpcRaw = loadTypeScriptModule(new URL("../lib/npc-purchase-client.ts", import.meta.url));
+const extendedPackets = loadTypeScriptModule(new URL("../lib/extended-server-packets.ts", import.meta.url), {"./npc-purchase-client":stageNpcRaw});
 const heroUi = loadTypeScriptModule(new URL("../lib/hero-player-ui.ts", import.meta.url));
 const guildBuffUi = loadTypeScriptModule(new URL("../lib/guild-buff-ui.ts", import.meta.url));
 const crystalItemSource = loadTypeScriptModule(new URL("../lib/crystal-item-source.ts", import.meta.url));
@@ -61,7 +62,7 @@ const cashShopUi = loadTypeScriptModule(new URL("../lib/cash-game-shop-ui.ts", i
   "./social-incoming-replies": socialReplies, "./creature-player-ui": creatureUi,
 });
 const storageRental = loadTypeScriptModule(new URL("../lib/storage-rental-confirmation.ts", import.meta.url), {
-  "./social-incoming-replies": socialReplies,
+  "./social-incoming-replies": socialReplies,"./npc-purchase-client":stageNpcRaw,
 });
 const itemIdentity = loadTypeScriptModule(new URL("../lib/world-model/item-identity.ts", import.meta.url));
 const bagModel = loadTypeScriptModule(new URL("../lib/bevy-bag-model.ts", import.meta.url), {
@@ -2786,7 +2787,7 @@ const parityPageUrl = new URL("../app/page.tsx", import.meta.url);
 const parityPageText = readFileSync(parityPageUrl, "utf8");
 const parityPageAst = ts.createSourceFile(fileURLToPath(parityPageUrl), parityPageText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const parityPageNames = ["currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
-  "currentHeroModel", "parityItemMutationAllowed", "heroProofCurrent", "heroInputAllowed", "otherPlayerUiBlocksInput",
+  "currentHeroModel", "parityItemMutationAllowed", "heroProofCurrent", "heroInputAllowed", "otherPlayerUiBlocksInput", "heroUiBlocksGameplay", "heroBasisWindows",
   "referenceWindowsBlockGameplay", "heroUiLeaseCurrent", "advanceHeroWindowEpochs", "changeHeroWindows", "syncHeroWindowActor", "scheduleHeroRestock", "syncObservePreference", "currentCreatureSource", "currentCashGameShopSource",
   "currentQuestWorldIdentity", "currentCombatModeOwner", "sameCombatModeOwner", "nextCombatModeRevision",
   "captureCombatModeSnapshot", "captureCombatModeReceipt", "readCombatModeSource", "retireWorldFishingGesture", "cancelWorldFishingGesture",
@@ -2894,7 +2895,9 @@ function parityPageFixture(owner, world = {}) {
     marketOpenRef:ref(false), conquestOpenRef:ref(false), buffsOpenRef:ref(false), mailUiOpenRef:ref(false), worldMapOpenRef:ref(false),
     chatSettingsOpenRef:ref(false), tutorialOpenRef:ref(false), npcShopServiceRef:ref(null), npcRepairServiceRef:ref(null),
     storageServiceActiveRef:ref(false), npcShopUiIngressRef:ref(null), npcRepairAuthorityRef:ref({invalidateInventory:()=>{}}), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
-    skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()),
+    skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()), heroProofHighWaterRef:ref(new WeakMap()),
+    heroSharedUiIngressRef:ref(null),heroSharedProofsRef:ref(new WeakMap()),heroProofRendererTokensRef:ref(new WeakMap()),
+    heroRendererTokenRef:ref("hero-react:0"),heroActionBasisMatches:heroUi.heroActionBasisMatches,
     heroWindowEpochsRef:ref({inventory:1,character:1,belt:1}), heroWindowsRef:ref({inventoryOpen:true,characterOpen:false,characterPage:"equipment",beltVisible:true,beltVertical:false}),
     heroWindowActorRef:ref(null), heroRestockScheduledRef:ref(false), setHeroWindows:()=>{}, sameHeroSession:heroUi.sameHeroSession,
     observeBootstrapRef:ref(null), observePreferenceRef:ref(null),
@@ -4902,10 +4905,13 @@ check("NPC repair actual Page Hold drop sends once through final proof and live 
 
 // Extract the actual Shell event routes and registered capture listeners. DOM
 // objects below supply geometry/capture only; repair authority is the real module.
+// Hero is absent in these repair fixtures. Retain its actual cleanup function
+// with null gesture/hover refs so the shared blur/resize listeners stay real.
 const repairShellSource=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8");
 const repairShellAst=ts.createSourceFile("original-client-shell.tsx",repairShellSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const repairShellNames=new Set(["repairGeometry","cancelNpcRepairPointer","beginNpcRepairPointer","handleNpcRepairPointer","fenceNpcRepairClick",
-  "npcRepairControlTarget","rememberNpcRepairControlClick","handleSharedUiPointer","changeNpcRepairTarget","confirmNpcRepairTarget","openNpcRepairBagPage"]);
+  "npcRepairControlTarget","rememberNpcRepairControlClick","handleSharedUiPointer","changeNpcRepairTarget","confirmNpcRepairTarget","openNpcRepairBagPage",
+  "cancelSharedHeroPointer"]);
 const repairShellDeclarations=new Map();let repairTargetRegistration=null,repairListenerEffect=null,repairLostCapture=null;
 function visitRepairShell(node){
   if(ts.isFunctionDeclaration(node)&&node.name&&repairShellNames.has(node.name.text))repairShellDeclarations.set(node.name.text,node.getText(repairShellAst));
@@ -4995,7 +5001,7 @@ check("NPC repair actual Shell captured drag terminal owns routing geometry and 
           api.beginNpcRepairPointer({pointerId:9,pointerType:"mouse",isPrimary:true,button:0,timeStamp:40,currentTarget:item,target:item,preventDefault(){},stopPropagation(){}},{});}
         return selection?{selection,submitted:false}:null;},
       handleSharedQuestWorldPointer:()=>{fallthrough++;},handleSharedNpcShopPointer:()=>{fallthrough++;return false;},handleSharedComposePointer:()=>false,
-      handleSharedMailPointer:()=>false,handleSharedStoragePointer:()=>false,handleSharedSpellsPointer:()=>false,handleSharedBagPointer:()=>{fallthrough++;}};
+      handleSharedMailPointer:()=>false,handleSharedStoragePointer:()=>false,handleSharedSpellsPointer:()=>false,heroPointerLeaseRef:{current:null},heroHoverContextRef:{current:null},handleSharedHeroPointer:()=>false,handleSharedBagPointer:()=>{fallthrough++;}};
     const keys=Object.keys(scope);api=new Function(...keys,repairShellJs+"\nreturn {beginNpcRepairPointer,handleSharedUiPointer,cancelNpcRepairPointer,registerNpcRepairTarget,changeNpcRepairTarget,lostRepairCapture,setView:value=>npcRepairView=value,setTab:value=>activeInventoryTab=value,setVisible:value=>showInventory=value,setScreen:value=>screen=value};")(...keys.map(key=>scope[key]));
     const cleanup=api.registerNpcRepairTarget(view,target),down={pointerId:7,pointerType:"mouse",isPrimary:true,button:0,timeStamp:10,currentTarget:item,target:item,clientX:111,clientY:121,
       prevented:0,preventDefault(){this.prevented++;},stopPropagation(){}};
@@ -5043,7 +5049,7 @@ check("NPC repair actual capture listeners quarantine second pointer through com
     onCancelNpcRepairDrag:drag=>service.cancelDrag(drag),onDropNpcRepairDrag:(drag,geometry,x,y)=>{const selection=service.drop(drag,geometry,x,y,view);return selection?{selection,submitted:false}:null;},
     onConfirmNpcRepair:selection=>{const proof=service.reserve(selection,view);if(!proof||!service.enter(proof,view,{...proof.command}))return false;sends++;return true;},
     handleSharedQuestWorldPointer:()=>{fallthrough++;},handleSharedNpcShopPointer:()=>{fallthrough++;return false;},handleSharedComposePointer:()=>false,handleSharedMailPointer:()=>false,
-    handleSharedStoragePointer:()=>false,handleSharedSpellsPointer:()=>false,handleSharedBagPointer:()=>{fallthrough++;},
+    handleSharedStoragePointer:()=>false,handleSharedSpellsPointer:()=>false,heroPointerLeaseRef:{current:null},heroHoverContextRef:{current:null},handleSharedHeroPointer:()=>false,handleSharedBagPointer:()=>{fallthrough++;},
     cancelSharedNpcShopPointer:()=>{stops++;},cancelSharedStoragePointer:()=>{},cancelSharedComposePointer:()=>{},cancelSharedMailPointer:()=>{},cancelSharedSpellsPointer:()=>{},cancelSharedCharacterPointer:()=>{},cancelSharedBagPointer:()=>{},cancelSharedHudPointer:()=>{}};
   // The dragged B row is the actual Bag2 slot43; the previously selected A row
   // belongs to the same authoritative repair view and remains visible.
@@ -6108,7 +6114,7 @@ const fishingPageSource=readFileSync(parityPageUrl,"utf8"),fishingPageAst=ts.cre
 const fishingPageNames=new Set(["worldFishingOwner","cancelWorldFishingGesture","retireWorldFishingGesture","publishWorldFishingSource",
   "captureWorldFishingGatewayEvent","captureWorldFishingSnapshot","commitWorldFishingAnimation","readWorldFishingRod","worldFishingInputAllowed","worldFishingPureUiBlocked",
   "worldFishingLeaseCurrent","beginWorldFishingGesture","worldFishingMapCell","worldFishingFinalCurrent","enterWorldFishingSend","tryWorldFishingBlockedClick",
-  "currentSpellsOwner","otherPlayerUiBlocksInput","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
+  "currentSpellsOwner","otherPlayerUiBlocksInput","heroUiBlocksGameplay","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
   "originalMapRegionContainsTile","originalMapCellBlocksMovement"]),fishingPageDeclarations=new Map();
 (function visit(node){if(ts.isFunctionDeclaration(node)&&fishingPageNames.has(node.name?.text))fishingPageDeclarations.set(node.name.text,node.getText(fishingPageAst));ts.forEachChild(node,visit);})(fishingPageAst);
 assert.equal(fishingPageDeclarations.size,fishingPageNames.size,"all actual fishing Page and input authority declarations");
@@ -6158,6 +6164,8 @@ function worldFishingPageFixture(){
   page.scope.questCoreRuntimeRef.current=core;
   const scope={...page.scope,Date:{now:()=>now},WorldFishingSource:worldFishingSource.WorldFishingSource,sameWorldFishingOwner:worldFishingSource.sameOwner,
     readCrystalEntityActionPose:fishingAnimation.readCrystalEntityActionPose,ownedItemTooltipRequest:page.api.ownedItemTooltipRequest,
+    // No Hero surface is mounted here; execute the real shared/fallback gate.
+    heroSharedUiIngressRef:ref(null),
     mapRoutePageBlockedRef:ref(false),questWindowOpenRef:ref(false),firstPlayableFrameMarkedRef:ref(true),
     worldFishingSourceRef:ref(new worldFishingSource.WorldFishingSource()),worldFishingRuntimeRef:ref({core,runtime}),worldFishingCommitRef:ref(null),
     worldFishingGestureRegistryRef:ref(new WeakMap()),worldFishingActiveGestureRef:ref(null),worldFishingSendProofsRef:ref(new WeakMap()),worldFishingQueuedRef:ref(null),
@@ -6245,7 +6253,7 @@ check("Fishing Page equivalent full snapshot preserves current gesture while Har
 const fishingShellSource=readFileSync(new URL("../app/original-client-shell.tsx",import.meta.url),"utf8"),fishingShellAst=ts.createSourceFile("original-client-shell.tsx",fishingShellSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const fishingShellNames=new Set(["retireWorldFishingPhysical","cancelWorldFishingHeldPointer","worldFishingStageGeometry","worldFishingPointCurrent",
   "updateWorldFishingPointerPosition","worldFishingPhysicalCurrent","attachWorldFishingPhysical","handleSceneWorldPointerDown","finishWorldFishingPhysical",
-  "scenePointFromMouseEvent","committedViewportPlayerPosition","tileFromScenePoint","dispatchSceneClickInput","dispatchSceneMoveInput","npcShopBlocksWorldInput","stopNpcShopWorldInput"]),fishingShellDeclarations=new Map(),fishingShellRefInitializers=new Map();
+  "scenePointFromMouseEvent","committedViewportPlayerPosition","tileFromScenePoint","dispatchSceneClickInput","dispatchSceneMoveInput","npcShopBlocksWorldInput","stopNpcShopWorldInput","heroBlocksWorldInput"]),fishingShellDeclarations=new Map(),fishingShellRefInitializers=new Map();
 let fishingListenerEffect=null,fishingContextEffect=null,fishingLayoutEffect=null,fishingIntervalCallback=null;
 (function visit(node){if(ts.isFunctionDeclaration(node)&&fishingShellNames.has(node.name?.text))fishingShellDeclarations.set(node.name.text,node.getText(fishingShellAst));
   if(ts.isVariableDeclaration(node)&&["worldFishingPhysicalRef","worldFishingTerminalRef","worldFishingPointersRef","worldFishingQuarantineRef","worldFishingShellRef","heldScenePointerRef"].includes(node.name.getText(fishingShellAst))){assert.ok(ts.isCallExpression(node.initializer)&&node.initializer.expression.getText(fishingShellAst)==="useRef");fishingShellRefInitializers.set(node.name.getText(fishingShellAst),node.initializer.arguments[0].getText(fishingShellAst));}
@@ -6275,7 +6283,7 @@ function worldFishingShellFixture(){
   const actualRefs=new Function(fishingShellInitializersJs)();assert.equal(actualRefs.worldFishingPhysicalRef.current,null);assert.equal(actualRefs.worldFishingTerminalRef.current,null);assert.equal(actualRefs.worldFishingPointersRef.current.size,0);
   page.runtime.resolveMir2EntityAnimationPoses=json=>{const input=JSON.parse(json);resolves.push(input);return JSON.stringify({worldKey:input.worldKey,nowMs:input.nowMs,poses:[]});};
   const scope={...actualRefs,HTMLElement:MemoryStageNode,document,window,Date:{now:()=>now},stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},
-    bagPointerCallbacksRef:ref({}),npcShopPointerCallbacksRef:ref({}),parityUiBlocksGameplay:undefined,
+    bagPointerCallbacksRef:ref({}),npcShopPointerCallbacksRef:ref({}),parityUiBlocksGameplay:undefined,heroPointerLeaseRef:ref(null),heroPointerCallbacksRef:ref({}),
     heldKeyboardMoveKeysRef:ref(new Set()),heldKeyboardRunModeRef:ref(false),onViewportDirectionStop:()=>{},updateSceneCombatPointer:()=>{},
     latestMoveInputRef:ref({screen:"game",player:{x:0,y:1}}),viewportLayout:{offsetX:0,offsetY:0},...fishingSceneLayout,
     screen:"game",sceneInteractionReady:true,bevyQuestUiCapturesPointer:false,questLocalModalOpen:false,mobileMoreOpen:false,bevyMailComposeReady:false,bevyMailComposePending:false,
@@ -7455,6 +7463,1102 @@ check("Ranking active Inspect blocks actual older Hero and Fishing Page paths th
   fishing.scope.rankingInspectOpenRef.current=true;
   assert.equal(fishing.api.worldFishingPureUiBlocked(),true);
   assert.equal(fishing.api.beginWorldFishingGesture(fishing.pointer),null);assert.equal(fishing.sent.length,0);assert.equal(fishing.requests.length,0);
+});
+
+
+// Source41 exercises the Page-owned custody with finite runtime ports, never WASM.
+const heroIngressDocument=loadTypeScriptModule(new URL("../lib/bevy-hero-ui.ts",import.meta.url),{"./hero-player-ui":heroUi});
+function heroRawFixture({bound=true,checkpoint=true}={}){
+  const physical={socket:{},connectionGeneration:1,sessionGeneration:2};
+  const scene={sceneRevision:1,playerObjectId:1,mapFileName:"D000"};
+  const ingress=new heroIngressDocument.HeroRawIngress(),checkpoints=new Map(),trace=[];
+  let serial=0,now=10;
+  function renderer({checkpointAvailable=checkpoint}={}){
+    const calls=[],options={checkpointAvailable,throwPush:false,rejectPush:false},state={scope:null,cursor:0,hero:false,firstClock:null};
+    const runtime={getMir2HeroUiAbiVersion:()=>1,
+      activateMir2HeroIngress(raw){state.scope=JSON.parse(raw);calls.push({kind:"activate",scope:state.scope});return true;},
+      pushMir2HeroRawFrame(scope,sequence,raw,receivedAtMs){return push("raw",scope,sequence,raw,receivedAtMs,null);},
+      pushMir2HeroVerifiedOwnerFrame(scope,sequence,raw,receivedAtMs,expected){return push("verified",scope,sequence,raw,receivedAtMs,expected);},
+      withdrawMir2HeroIngress(scope){calls.push({kind:"withdraw",scope});return true;},
+      getMir2HeroIngressCheckpoint(){if(!options.checkpointAvailable)return null;
+        const raw='{ "opaque" : 18446744073709551615, "cursor" : '+state.cursor+', "serial" : '+(++serial)+' }';
+        checkpoints.set(raw,{cursor:state.cursor,hero:state.hero,firstClock:state.firstClock});calls.push({kind:"checkpoint",raw});return raw;},
+      restoreMir2HeroIngressCheckpoint(scope,raw){calls.push({kind:"restore",scope:JSON.parse(scope),raw});
+        const held=checkpoints.get(raw);assert(held,"original held string must exist");Object.assign(state,held);return true;},
+      getMir2HeroUiStatus(){return JSON.stringify({version:1,source:state.hero?{scope:state.scope,frameSequence:state.cursor,
+        heroObjectId:2,heroGeneration:1,rustModelRevision:1}:null,acceptedFrameSequence:state.cursor,closed:false,
+        control:null,ready:false,frameSequence:0});}};
+    function push(kind,scope,sequence,raw,receivedAtMs,expected){
+      calls.push({kind,scope:JSON.parse(scope),sequence,raw,receivedAtMs,expected});trace.push({kind,sequence,raw,receivedAtMs});
+      if(options.throwPush)throw Error("controlled renderer failure");if(options.rejectPush)return false;
+      assert(sequence>state.cursor,"a restored receiver must not get its prefix twice");state.cursor=sequence;
+      if(raw.includes("HeroInformation")){state.hero=true;state.firstClock??=receivedAtMs;}return true;}
+    return {runtime,calls,options,state};
+  }
+  const first=renderer();ingress.sync(bound?first.runtime:null,physical,bound?scene:null);
+  function capture(raw,at=now++,identity=physical){const delivery=ingress.capture(raw,identity,at);assert(delivery);return delivery;}
+  function deliver(raw,expected=null){const delivery=capture(raw);assert(ingress.offer(delivery,expected));return delivery;}
+  return {physical,scene,ingress,renderer,first,trace,capture,deliver};
+}
+const heroOpaque={requestId:"18446744073709551615",actor:"a".repeat(64),producerScope:"b".repeat(64),serverRevision:"0"};
+const heroWideOriginal=' {"type":"packet","packet":"HeroInformation","payload":{"uniqueId":18446744073709551615,"xp":9007199254740993}} ';
+check("Hero ingress preserves original wide raw floating first clock and verified metadata",()=>{
+  const f=heroRawFixture({checkpoint:false}),d=f.capture(heroWideOriginal,10.375);assert(f.ingress.offer(d));
+  const owner=' {"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"18446744073709551615","reply":{},"snapshot":{"uniqueId":18446744073709551615},"authority":{"actor":"'+heroOpaque.actor+'","producerScope":"'+heroOpaque.producerScope+'","serverRevision":"0"}} ';
+  const expected=heroIngressDocument.verifiedHeroOwnerFromFrame(owner);assert.deepEqual(expected,heroOpaque);
+  const receipt=f.capture(owner,10.875);assert(f.ingress.offer(receipt,expected));
+  assert.equal(f.trace[0].raw,heroWideOriginal);assert.equal(f.trace[0].receivedAtMs,10.375);assert.equal(f.trace[1].raw,owner);
+  assert.equal(f.trace[1].receivedAtMs,10.875);assert.deepEqual(JSON.parse(f.first.calls.find(c=>c.kind==="verified").expected),heroOpaque);
+  assert(f.ingress.caughtUp());assert.equal(f.ingress.offer(receipt),false);
+});
+check("Hero bootstrap source can precede control but never manufactures UI Ready",()=>{
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);const bootstrap=f.ingress.bootstrap();
+  assert.equal(bootstrap.source.heroObjectId,2);assert.equal(bootstrap.acceptedFrameSequence,f.trace[0].sequence);
+  assert.equal(JSON.parse(f.first.runtime.getMir2HeroUiStatus()).ready,false);assert.equal(JSON.parse(f.first.runtime.getMir2HeroUiStatus()).control,null);
+  for(const bad of [{version:2,source:null,acceptedFrameSequence:1,closed:false},{version:1,source:null,acceptedFrameSequence:0.5,closed:false},
+    {version:1,source:{...bootstrap.source,scope:{...bootstrap.source.scope,unknown:1}},acceptedFrameSequence:bootstrap.acceptedFrameSequence,closed:false},
+    {version:1,source:{...bootstrap.source,frameSequence:bootstrap.acceptedFrameSequence+1},acceptedFrameSequence:bootstrap.acceptedFrameSequence,closed:false}]){
+    assert.equal(heroIngressDocument.readHeroBootstrap({getMir2HeroUiStatus:()=>JSON.stringify(bad)}),null);}
+});
+check("Hero ingress captures before bootstrap without dropping ignored original frames",()=>{
+  const f=heroRawFixture({bound:false,checkpoint:false});const ignored=f.capture('{"type":"notice","text":"first"}',10.25);
+  assert(f.ingress.offer(ignored));const info=f.capture(heroWideOriginal,10.75);assert(f.ingress.offer(info));assert.equal(f.trace.length,0);
+  f.ingress.sync(f.first.runtime,f.physical,f.scene);assert.deepEqual(f.trace.map(p=>p.sequence),[ignored.sequence,info.sequence]);
+  assert.deepEqual(f.trace.map(p=>p.receivedAtMs),[10.25,10.75]);assert.equal(f.first.state.firstClock,10.75);assert(f.ingress.caughtUp());
+});
+check("Hero captured high water blocks until classification and delivery finish",()=>{
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);assert(f.ingress.caughtUp());
+  const d=f.capture('{"type":"notice"}');assert.equal(f.ingress.caughtUp(),false);assert(f.ingress.offer(d));assert(f.ingress.caughtUp());
+});
+check("Hero reentrant offer cannot overtake earlier captured raw or report caught up",()=>{
+  const f=heroRawFixture({checkpoint:false}),a=f.capture(heroWideOriginal,10.125),b=f.capture('{"type":"notice"}',10.625);
+  assert(f.ingress.offer(b));assert.equal(f.trace.length,0);assert.equal(f.ingress.caughtUp(),false);assert(f.ingress.offer(a));
+  assert.deepEqual(f.trace.map(p=>p.sequence),[a.sequence,b.sequence]);assert.deepEqual(f.trace.map(p=>p.receivedAtMs),[10.125,10.625]);
+  assert(f.ingress.caughtUp());assert.equal(f.ingress.offer(a),false);
+});
+check("Hero tail retains every accepted frame when renderer cannot checkpoint",()=>{
+  const f=heroRawFixture({checkpoint:false}),a=f.deliver(heroWideOriginal),b=f.deliver('{"type":"notice"}');
+  assert.equal(f.ingress.status().tailFrames,2);const next=f.renderer({checkpointAvailable:false});f.ingress.detachRenderer(f.first.runtime);
+  f.ingress.sync(next.runtime,f.physical,f.scene);assert.equal(next.calls.filter(c=>c.kind==="restore").length,0);
+  assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[a.sequence,b.sequence]);assert(f.ingress.caughtUp());
+});
+check("Hero handoff restores exact held string then each retained tail once with new run",()=>{
+  const f=heroRawFixture(),a=f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  const held=f.first.calls.filter(c=>c.kind==="checkpoint").at(-1).raw,oldRun=f.ingress.status().scope.runGeneration;
+  f.first.options.checkpointAvailable=false;const b=f.deliver('{"type":"notice"}'),next=f.renderer({checkpointAvailable:false});
+  f.ingress.detachRenderer(f.first.runtime);f.ingress.sync(next.runtime,f.physical,f.scene);
+  assert.equal(next.calls.find(c=>c.kind==="restore").raw,held);assert(next.calls[0].scope.runGeneration>oldRun);
+  assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[b.sequence]);assert.equal(next.state.firstClock,a.receivedAtMs);
+  f.ingress.sync(next.runtime,f.physical,f.scene);assert.equal(next.calls.filter(c=>c.kind==="raw").length,1);assert(f.ingress.caughtUp());
+});
+check("Hero no renderer cross map restores old scene and tail before activating current scene",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  f.first.options.checkpointAvailable=false;f.ingress.sync(null,f.physical,f.scene);const oldTail=f.deliver('{"type":"notice","map":"old"}');
+  const changed={...f.scene,sceneRevision:2,mapFileName:"D001"};f.ingress.sync(null,f.physical,changed);
+  const mapTail=f.deliver('{"type":"packet","packet":"MapChanged","payload":{"mapFileName":"D001"}}'),next=f.renderer({checkpointAvailable:false});
+  f.ingress.sync(next.runtime,f.physical,changed);assert.equal(next.calls[0].scope.mapFileName,"D000");
+  assert.equal(next.calls.find(c=>c.kind==="restore").scope.mapFileName,"D000");
+  const raw=next.calls.filter(c=>c.kind==="raw");assert.deepEqual(raw.map(c=>c.sequence),[oldTail.sequence,mapTail.sequence]);
+  assert.deepEqual(raw.map(c=>c.scope.mapFileName),["D000","D001"]);assert.equal(f.ingress.status().scope.mapFileName,"D001");assert(f.ingress.caughtUp());
+});
+check("Hero failed checkpoint keeps last successful original plus full newer tail",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  const held=f.first.calls.filter(c=>c.kind==="checkpoint").at(-1).raw;
+  f.first.runtime.getMir2HeroIngressCheckpoint=()=>{throw Error("controlled checkpoint refusal");};
+  const b=f.deliver('{"type":"notice","n":1}'),c=f.deliver('{"type":"notice","n":2}');f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,f.scene);
+  assert.equal(next.calls.find(c=>c.kind==="restore").raw,held);assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[b.sequence,c.sequence]);
+});
+check("Hero renderer refusal permits a new runtime to recover the unchanged held and tail",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+  f.first.options.throwPush=true;const b=f.capture('{"type":"notice","n":1}');assert(f.ingress.offer(b));assert.equal(f.ingress.status().closed,true);
+  assert.equal(f.ingress.caughtUp(),false);const c=f.capture('{"type":"notice","n":2}');assert(f.ingress.offer(c));
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,f.scene);
+  assert.equal(f.ingress.status().closed,false);assert.deepEqual(next.calls.filter(c=>c.kind==="raw").map(c=>c.sequence),[b.sequence,c.sequence]);assert(f.ingress.caughtUp());
+});
+check("Hero physical session and socket replacement never restore previous private held",()=>{
+  for(const change of [p=>({...p,sessionGeneration:p.sessionGeneration+1}),p=>({...p,socket:{}})]){
+    const f=heroRawFixture();f.deliver(heroWideOriginal);f.ingress.sync(f.first.runtime,f.physical,f.scene);
+    const physical=change(f.physical),next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,physical,f.scene);
+    assert.equal(next.calls.filter(c=>c.kind==="restore").length,0);assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);
+    assert.equal(f.ingress.offer(f.capture('{"type":"notice"}',100,physical)),true);assert.equal(next.calls.filter(c=>c.kind==="raw").length,1);
+  }
+});
+check("Hero same runtime scene activation and stale cleanup preserve the live receiver",()=>{
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);const changed={...f.scene,sceneRevision:2,mapFileName:"D001"};
+  f.ingress.sync(f.first.runtime,f.physical,changed);assert.equal(f.first.calls.filter(c=>c.kind==="withdraw").length,0);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,changed);const before=next.calls.length;
+  f.ingress.detachRenderer(f.first.runtime);assert.equal(next.calls.length,before);assert.equal(f.ingress.status().scope.mapFileName,"D001");
+});
+check("Hero raw custody overflow and rejection remain closed across renderer replacement",()=>{
+  const f=heroRawFixture({bound:false,checkpoint:false});for(let i=0;i<4096;i++)f.capture('{"type":"notice"}',i+10);
+  assert.equal(f.ingress.capture('{}',f.physical,5000),null);assert.equal(f.ingress.status().closed,true);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,f.scene);assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);
+  assert.equal(f.ingress.caughtUp(),false);
+  const rejected=heroRawFixture({checkpoint:false}),d=rejected.capture(heroWideOriginal);rejected.ingress.reject(d);
+  assert.equal(rejected.ingress.offer(d),false);assert.equal(rejected.ingress.caughtUp(),false);
+});
+check("Hero unsupported ABI and unsafe owner metadata cannot grant raw authority",()=>{
+  const f=heroRawFixture({checkpoint:false});for(const runtime of [null,{...f.first.runtime,getMir2HeroUiAbiVersion:()=>0},
+    {...f.first.runtime,pushMir2HeroVerifiedOwnerFrame:undefined},{...f.first.runtime,getMir2HeroUiAbiVersion:()=>{throw Error("ABI");}}]){
+    assert.equal(heroIngressDocument.supportsHeroIngress(runtime),false);}
+  for(const bad of [{...heroOpaque,requestId:"0"},{...heroOpaque,requestId:"01"},{...heroOpaque,requestId:"18446744073709551616"},
+    {...heroOpaque,actor:"1"},{...heroOpaque,actor:"0".repeat(64)},{...heroOpaque,producerScope:"B".repeat(64)},
+    {...heroOpaque,serverRevision:"18446744073709551615"},{...heroOpaque,unknown:true}])assert.equal(heroIngressDocument.validVerifiedHeroOwner(bad),false);
+  assert.equal(heroIngressDocument.verifiedHeroOwnerFromFrame('{"type":"npcPurchaseOwner"}'),null);
+});
+check("Hero original Page message captures first clock before synchronous ingress work",()=>{
+  const handlers=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==='socket.addEventListener'
+    &&node.arguments[0]?.getText(parityPageAst)==='"message"'&&node.arguments[1]?.getText(parityPageAst).includes('heroRawIngressRef.current?.capture'))handlers.push(node.arguments[1]);
+    ts.forEachChild(node,visit);})(parityPageAst);assert.equal(handlers.length,1);
+  const compiled=ts.transpileModule('const originalHandler='+handlers[0].getText(parityPageAst)+';',
+    {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
+  const socket={},physical={socket,connectionGeneration:1,sessionGeneration:2},calls=[];let now=10.375;
+  const scope={socket,socketRef:{current:socket},connectionGeneration:1,equipmentConnectionGenerationRef:{current:1},
+    performance:{now(){calls.push("clock");return now;}},syncHeroRawIngress(){calls.push("sync");now=999;},
+    currentHeroRawPhysical:()=>physical,heroRawIngressRef:{current:{capture(raw,p,at){calls.push({raw,p,at});return {raw,at};},reject(){throw Error("unexpected reject");}}},
+    receiveNpcPurchaseGatewayFrame(event,generation,s,d){calls.push({received:d});},appendLog(){throw Error("unexpected Page log");},t:()=>"log"};
+  const handler=new Function('scope','with(scope){'+compiled+'return originalHandler;}')(scope);handler({data:heroWideOriginal});
+  assert.equal(calls[0],"clock");assert.equal(calls[1],"sync");assert.equal(calls[2].at,10.375);assert.equal(calls[3].received.at,10.375);
+  scope.socketRef.current={};const before=calls.length;handler({data:heroWideOriginal});assert.equal(calls.length,before);
+});
+
+
+check("Hero nontext invalid clock and oversized source close custody before stale readiness",()=>{
+  for(const [raw,clock] of [[{},100],[null,100],[new Uint8Array(1),100],["{}",NaN],["{}",Infinity],["{}",-1],["{}",Number.MAX_SAFE_INTEGER+1]]){
+    const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);assert(f.ingress.caughtUp());
+    assert.equal(f.ingress.capture(raw,f.physical,clock),null);assert.equal(f.ingress.status().closed,true);assert.equal(f.ingress.caughtUp(),false);
+  }
+  const f=heroRawFixture({checkpoint:false});f.deliver(heroWideOriginal);assert.equal(f.ingress.capture("a".repeat(16*1024*1024+1),f.physical,100),null);
+  assert.equal(f.ingress.status().closed,true);assert.equal(f.ingress.caughtUp(),false);
+});
+
+
+check("Hero cross scene reentry closes instead of relabelling earlier unfinished raw",()=>{
+  for(const bound of [true,false]){
+  const f=heroRawFixture({bound,checkpoint:false}),a=f.capture('{"type":"worldSnapshot","payload":{"mapFileName":"D000"}}',10.25),
+    b=f.capture('{"type":"packet","packet":"MapChanged","payload":{"mapFileName":"D001"}}',10.75);
+  f.ingress.sync(f.first.runtime,f.physical,{...f.scene,sceneRevision:2,mapFileName:"D001"});
+  assert.equal(f.ingress.offer(b),false);assert.equal(f.ingress.offer(a),false);assert.equal(f.trace.length,0);
+  assert.equal(f.ingress.status().closed,true);assert.equal(f.ingress.caughtUp(),false);
+  const next=f.renderer({checkpointAvailable:false});f.ingress.sync(next.runtime,f.physical,{...f.scene,sceneRevision:2,mapFileName:"D001"});
+  assert.equal(next.calls.filter(c=>c.kind==="raw").length,0);assert.equal(f.ingress.caughtUp(),false);
+  }
+});
+
+
+const heroBasisWindows42={inventoryOpen:true,characterOpen:true,characterPage:"equipment",beltVisible:true,beltVertical:false};
+check("Hero basis binds occupied destinations and exact canonical IDs independently",()=>{
+  const f=heroFixture(),action={kind:"move",from:2,to:0},basis=heroUi.captureHeroActionBasis(f.model,action,heroBasisWindows42);
+  assert(basis);assert.deepEqual(basis.cells.map(c=>[c.slot,c.item?.uid]),[[0,"501"],[2,"502"]]);
+  assert.equal(basis.resolvedWire.type,"moveItem");assert.equal(heroUi.heroActionBasisMatches(basis,f.model,action,heroBasisWindows42),true);
+  f.info.inventory[0].count=2;f.world.heroInventoryItems[0].quantity=2;f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);
+  assert.equal(heroUi.heroActionBasisMatches(basis,f.authority.read(f.owner),action,heroBasisWindows42),false);
+  assert.equal(heroUi.heroActionBasisMatches({...basis,untrusted:true},f.model,action,heroBasisWindows42),false);
+  assert.equal(Object.isFrozen(basis.facts.policies),true);assert.equal(Object.isFrozen(f.owner.socket),false);
+});
+check("Hero basis automatic remove preserves semantic omission and original bag-first target",()=>{
+  const f=heroFixture(),gear=heroItemFixture(503,12),info=heroInfoFixture(12,{item_type:12});
+  f.info.equipment[3]=gear;f.world.heroEquipmentItems=[heroWorldRowFixture(gear,3,"bag1",info)];
+  f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner),action={kind:"remove",from:3};
+  assert(model);const basis=heroUi.captureHeroActionBasis(model,action,heroBasisWindows42);assert(basis);
+  assert.equal("to" in action,false);assert.deepEqual(basis.facts.target,{mode:"automatic",slot:3});assert.equal(basis.resolvedWire.to,3);
+  assert.equal(basis.cells.length,11);assert.equal(basis.cells.filter(c=>c.grid==="HeroInventory").length,10);
+  const explicit=heroUi.captureHeroActionBasis(model,{...action,to:1},heroBasisWindows42);assert(explicit);
+  assert.equal(explicit.cells.length,2);assert.deepEqual(explicit.facts.target,{mode:"explicit",slot:1});
+});
+check("Hero basis retains both base and effective use policy and refuses differing Rust wire",()=>{
+  const f=heroFixture();f.world.heroInventoryItems[1].tooltipSource.realInfo=heroInfoFixture(777,{item_type:8,stack_size:30});
+  f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner),action={kind:"use",slot:2};
+  const basis=heroUi.captureHeroActionBasis(model,action,heroBasisWindows42);assert(basis);
+  const source=basis.facts.policies.find(p=>p.grid==="HeroInventory"&&p.slot===2);
+  assert.equal(source.base.itemIndex,10);assert.equal(source.effective.itemIndex,777);assert.equal(source.effective.stackSize,30);
+  assert.equal(basis.resolvedWire.type,"equipItem");assert.equal(basis.resolvedWire.uniqueId,"502");
+  const different={...basis,resolvedWire:{type:"mergeItem",gridFrom:"HeroInventory",gridTo:"HeroEquipment",idFrom:"502",idTo:"503"}};
+  assert.equal(heroUi.heroActionBasisMatches(different,model,action,heroBasisWindows42),false);
+  assert.equal(heroUi.planHeroAction(model,action).wire.type,"equipItem","witness rejection cannot rewrite the existing Web planner");
+});
+check("Hero basis carries belt restock authority and leaves request allocation in the sole ledger",()=>{
+  const f=heroFixture(),basis=heroUi.captureHeroActionBasis(f.model,{kind:"use",slot:0},heroBasisWindows42);assert(basis);
+  assert.equal(basis.cells.length,10);assert.deepEqual(basis.facts.restock,{belt:0,from:2,uid:"502",itemIndex:10});
+  const magic=heroUi.captureHeroActionBasis(f.model,{kind:"magicKey",spell:"FireBall",key:18},heroBasisWindows42);assert(magic);
+  assert.deepEqual(magic.facts.keys,[{spell:"FireBall",key:17}]);assert.equal(magic.resolvedWire.oldKey,17);assert.equal("requestId" in magic.resolvedWire,false);
+  const ledger=new heroUi.HeroPlayerOperations(),proof=ledger.reserve(f.model,{kind:"magicKey",spell:"FireBall",key:18});assert(proof);
+  assert(Number.isSafeInteger(proof.wire.requestId));assert.equal(proof.wire.oldKey,17);
+});
+check("Hero basis displays exact wide UID but does not widen legacy mutation wire",()=>{
+  const f=heroFixture(),id="9007199254740993";f.info.inventory[2].unique_id=id;f.world.heroInventoryItems[1].uniqueId=id;
+  f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner);assert(model);
+  const basis=heroUi.captureHeroActionBasis(model,{kind:"move",from:2,to:3},heroBasisWindows42);assert(basis);
+  assert.equal(basis.cells[0].item.uid,id);assert.equal(heroUi.captureHeroActionBasis(model,{kind:"use",slot:2},heroBasisWindows42),null);
+});
+check("Hero captured high-water changes even when identical raw has already been fully consumed",()=>{
+  const f=heroRawFixture();f.deliver(heroWideOriginal);const before=f.ingress.highWater();assert(before);assert.equal(f.ingress.caughtUp(),true);
+  const next=f.capture(heroWideOriginal);assert.equal(heroIngressDocument.sameHeroHighWater(before,f.ingress.highWater()),false);
+  assert.equal(f.ingress.caughtUp(),false);assert(f.ingress.offer(next));assert.equal(f.ingress.caughtUp(),true);
+  assert.equal(heroIngressDocument.sameHeroHighWater(before,f.ingress.highWater()),false);
+  assert.equal(heroIngressDocument.sameHeroHighWater(before,{...before,socket:{}}),false);
+});
+const heroSubmitFunctions42=[];(function visit(node){if(ts.isFunctionDeclaration(node)&&["submitHeroAction","heroProofCurrent"].includes(node.name?.text))heroSubmitFunctions42.push(node.getText(parityPageAst));ts.forEachChild(node,visit);})(parityPageAst);
+assert.equal(heroSubmitFunctions42.length,2);const heroSubmitJs42=ts.transpileModule(heroSubmitFunctions42.join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+function heroSubmitFixture42(mode="accepted"){
+  const f=heroFixture(),raw=heroRawFixture(),ledger=new heroUi.HeroPlayerOperations();raw.deliver(heroWideOriginal);
+  let sends=0,enabled=true;const scope={currentHeroModel:()=>f.model,heroInputAllowed:()=>enabled,heroUiLeaseCurrent:()=>true,
+    heroOperationsRef:{current:ledger},heroUiProofLeasesRef:{current:new WeakMap()},heroBeltProofRef:{current:null},heroProofHighWaterRef:{current:new WeakMap()},
+    heroSharedUiIngressRef:{current:null},heroSharedProofsRef:{current:new WeakMap()},heroProofRendererTokensRef:{current:new WeakMap()},
+    heroRendererTokenRef:{current:"hero-react:0"},heroWindowsRef:{current:heroBasisWindows42},heroBasisWindows:()=>heroBasisWindows42,heroActionBasisMatches:heroUi.heroActionBasisMatches,
+    heroRawIngressRef:{current:raw.ingress},sameHeroHighWater:heroIngressDocument.sameHeroHighWater,renderParityServices(){},console:{error(){}},
+    sendRaw(wire,{heroProof}){
+      if(mode==="prethrow")throw Error("controlled preclaim exception");
+      if(mode==="captured"||mode==="consumed"){const d=raw.capture(heroWideOriginal);if(mode==="consumed")raw.ingress.offer(d);}
+      if(!api.current(heroProof,wire))return false;
+      if(mode==="preclaim")return false;
+      assert(ledger.claim(heroProof,f.model,wire));if(mode==="postclaim")return false;if(mode==="throw")throw Error("controlled send exception");sends++;return true;
+    }};
+  const api=new Function(...Object.keys(scope),heroSubmitJs42+"\nreturn {submit:submitHeroAction,current:heroProofCurrent};")(...Object.values(scope));
+  return {f,raw,ledger,api,scope,get sends(){return sends;},disable(){enabled=false;}};
+}
+check("Hero actual Page submit returns true only after accepted send and cannot clear entered custody",()=>{
+  for(const mode of ["accepted","preclaim","prethrow","postclaim","throw"]){const f=heroSubmitFixture42(mode),dto=heroUi.captureHeroAction(f.f.model,{kind:"move",from:2,to:3});assert(dto);
+    assert.equal(f.api.submit(dto,false,{origin:"inventory",epoch:1}),mode==="accepted");assert.equal(f.sends,mode==="accepted"?1:0);
+    assert.equal(f.ledger.pending?.state??null,["preclaim","prethrow"].includes(mode)?null:mode==="accepted"?"entered":"unknown");
+    if(f.ledger.pending)assert.equal(f.ledger.cancelDefinitelyUnsent(f.ledger.pending.proof),false);
+  }
+  const blocked=heroSubmitFixture42();blocked.disable();assert.equal(blocked.api.submit(heroUi.captureHeroAction(blocked.f.model,{kind:"move",from:2,to:3}),false,{origin:"inventory",epoch:1}),false);assert.equal(blocked.ledger.pending,null);
+});
+check("Hero actual Page final gate rejects captured and already consumed same-content listener frames",()=>{
+  for(const mode of ["captured","consumed"]){const f=heroSubmitFixture42(mode),dto=heroUi.captureHeroAction(f.f.model,{kind:"move",from:2,to:3});
+    assert.equal(f.api.submit(dto,false,{origin:"inventory",epoch:1}),false);assert.equal(f.sends,0);assert.equal(f.ledger.pending,null);
+  }
+});
+
+
+check("Hero maximum 42-cell bag keeps valid use witness within the unchanged action bound",()=>{
+  const f=heroFixture(),info=heroInfoFixture(2147483647);f.info.inventory=Array.from({length:42},(_,slot)=>heroItemFixture(Number.MAX_SAFE_INTEGER-slot,2147483647,slot===0?1:3));
+  f.world.heroInventoryCapacity=42;f.world.heroInventoryItems=f.info.inventory.map((item,slot)=>heroWorldRowFixture(item,slot,"bag1",info));
+  f.authority.receiveInformation(f.info,f.owner);f.authority.receiveSnapshot(f.world,f.owner);const model=f.authority.read(f.owner);assert(model);
+  const basis=heroUi.captureHeroActionBasis(model,{kind:"use",slot:0},heroBasisWindows42);assert(basis);assert.equal(basis.cells.length,42);
+  assert.equal(basis.facts.policies.length,1,"scan-only occupancy must not duplicate unused item policy");assert(new TextEncoder().encode(JSON.stringify(basis)).byteLength<=16384);
+  assert.equal(basis.facts.restock.from,2);assert.equal(basis.facts.restock.itemIndex,2147483647);
+});
+
+// Source43 compares independent real projectors through finite ports, never WASM.
+const heroWitnessGolden43="{\"actor\":{\"class\":\"Warrior\",\"gender\":\"Male\",\"name\":\"Hero\",\"objectId\":12,\"spawned\":true},\"config\":{\"autoPot\":false,\"hpItemIndex\":0,\"hpPercent\":30,\"mpItemIndex\":0,\"mpPercent\":40},\"display\":{\"experience\":\"77\",\"hair\":3,\"hp\":20,\"level\":2,\"maxExperience\":\"200\",\"maxHp\":30,\"maxMp\":15,\"mp\":10},\"equipment\":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],\"inventory\":[null,null,null,null,null,null,null,null,null,null],\"inventoryCapacity\":10,\"keys\":[],\"personalCapacity\":40,\"personalInventory\":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],\"planner\":{\"experience\":\"77\",\"hp\":20,\"level\":2,\"maxExperience\":\"200\",\"mp\":10},\"riding\":null,\"skills\":[],\"stats\":[],\"version\":1,\"weights\":{\"bag\":1,\"hand\":3,\"wear\":2}}";
+function heroWitnessFixture43(){
+  const base=heroFixture(),owner={...base.owner,playerObjectId:42,mapFileName:"TestMap"};
+  const info={...base.info,object_id:12,level:2,hair:3,hp:20,mp:10,experience:77,max_experience:200,
+    inventory:Array(10).fill(null),equipment:Array(14).fill(null),magics:[],auto_pot:false,
+    auto_hp_percent:30,auto_mp_percent:40,hp_item_index:0,mp_item_index:0};
+  const world={...base.world,playerObjectId:42,mapFileName:"TestMap",inventoryItems:[],beltItems:[],heroInventoryItems:[],heroEquipmentItems:[],
+    heroMaxExperience:200,heroStats:[],heroWeights:{bag:1,wear:2,hand:3},heroVitals:{hp:20,maxHp:30,mp:10,maxMp:15},
+    stage5Systems:{hero:{name:"Hero",class:"Warrior",gender:"Male",level:2,experience:77,behaviour:0,spawned:true,
+      autoPot:false,autoHpPercent:30,autoMpPercent:40,hpItemIndex:0,mpItemIndex:0},heroLearnedMagics:[]}};
+  const authority=new heroUi.HeroPlayerAuthority();assert(authority.receiveInformation({info},owner));assert(authority.receiveSnapshot(world,owner));
+  return {owner,info,world,authority,get model(){const model=authority.read(owner);assert(model);return model;}};
+}
+function freezeHeroWitnessFixture43(value){
+  if(value&&typeof value==="object"){for(const v of Object.values(value))freezeHeroWitnessFixture43(v);Object.freeze(value);}return value;
+}
+function heroWitnessPort43(f=heroWitnessFixture43()){
+  const owner=f.owner,state={source:{scope:{runGeneration:1,connectionGeneration:owner.connectionGeneration,sessionGeneration:owner.sessionGeneration,
+    sceneRevision:owner.sceneRevision,playerObjectId:owner.playerObjectId,mapFileName:owner.mapFileName},frameSequence:2,heroObjectId:f.model.actor.objectId,
+    heroGeneration:1,rustModelRevision:1},witness:heroUi.createHeroSourceWitness(f.model),cursor:2,closed:false,control:null,ready:false,
+    appliedSource:null,appliedWitness:null,sinkGeneration:2,frame:0};assert(state.witness);
+  const controls=[],runtime={getMir2HeroUiAbiVersion:()=>1,getMir2HeroActionBasisVersion:()=>1,getMir2HeroSourceWitnessVersion:()=>1,
+    activateMir2HeroIngress:()=>true,pushMir2HeroRawFrame:()=>true,pushMir2HeroVerifiedOwnerFrame:()=>true,withdrawMir2HeroIngress:()=>true,
+    getMir2HeroIngressCheckpoint:()=>null,restoreMir2HeroIngressCheckpoint:()=>true,
+    getMir2HeroSourceWitness:()=>JSON.stringify({version:1,source:state.source,witness:state.witness}),
+    getMir2HeroUiStatus:()=>JSON.stringify({version:1,source:state.source,acceptedFrameSequence:state.cursor,closed:state.closed,
+      appliedSource:state.appliedSource,appliedWitness:state.appliedWitness,controlRevision:state.control?.controlRevision??0,
+      webLeaseToken:state.control?.webLeaseToken??"",sinkGeneration:state.sinkGeneration,frame:state.frame,modal:false,
+      ready:state.ready,prepared:state.prepared??false,capturesEscape:state.capturesEscape??false,acceptedInputSequence:state.acceptedInputSequence??0,
+      inputEnabled:state.ready,inputRegions:state.ready?[{left:0,top:0,width:316,height:236}]:[],receiptFrames:[]}),
+    setMir2HeroUiControlWithWitness(scope,raw,witness){controls.push({scope,raw,witness});state.control=JSON.parse(raw);return true;},
+    setMir2HeroUiInputEdge:()=>true,setMir2HeroUiIntentSink:()=>state.sinkGeneration,clearMir2HeroUiIntentSink:()=>true};
+  const control={source:state.source,controlRevision:1,webLeaseToken:"web-authority:43:hero:1",hudGeneration:8,webModelRevision:9,
+    presentationRevision:10,windowEpochs:[1,2,3],windows:{inventoryOpen:true,characterOpen:false,characterPage:"equipment",beltVisible:false,beltVertical:false},
+    presentation:{logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false},inGame:true,hostVisible:true,inputEnabled:true,pending:false};
+  return {f,state,controls,runtime,control,publish(){state.appliedSource=state.source;state.appliedWitness=state.witness;state.frame++;state.prepared=true;state.ready=true;}};
+}
+check("Hero independent Authority witness matches actual Rust golden bytes without adopting runtime data",()=>{
+  const f=heroWitnessFixture43(),witness=heroUi.createHeroSourceWitness(f.model);assert.equal(witness,heroWitnessGolden43);
+  assert(heroUi.heroSourceWitnessMatches(witness,f.model));assert.equal(Object.isFrozen(f.model.plannerSource),true);
+  assert.equal(Object.isFrozen(f.model.displaySource),true);assert.equal(heroUi.createHeroSourceWitness(heroFixture().model),null);
+  const changed=Object.freeze({...f.model,authoritySerial:900,informationSerial:900,snapshotSerial:900,personalSerial:900,skillSnapshotSerial:900,
+    actor:Object.freeze({...f.model.actor,generation:900})});assert.equal(heroUi.createHeroSourceWitness(changed),witness);
+});
+check("Hero live HP keeps actual owner inventory and all full-source ACK barriers",()=>{
+  const f=heroWitnessFixture43();f.world.heroInventoryItems=[heroWorldRowFixture(heroItemFixture(501),2)];
+  f.world.stage5Systems.hero.autoHpPercent=55;assert(f.authority.receiveSnapshot(f.world,f.owner));const before=f.model;
+  const ledger=new heroUi.HeroPlayerOperations(),proof=ledger.reserve(before,{kind:"move",from:2,to:3});assert(proof);assert(ledger.claim(proof,before,proof.wire));
+  const witness=heroUi.createHeroSourceWitness(before);assert(witness);
+  assert(f.authority.receiveHealthChanged({hp:7,mp:2},f.owner));const after=f.model;
+  for(const name of ["informationSerial","snapshotSerial","personalSerial","skillSnapshotSerial"])assert.equal(after[name],before[name]);
+  assert(after.authoritySerial>before.authoritySerial);assert.equal(after.inventory[2].uniqueId,501);assert.equal(after.hpPercent,55);
+  assert.equal(after.plannerSource.hp,7);assert.equal(after.displaySource.hp,7);assert.equal(after.displaySource.maxHp,30);
+  assert.notEqual(heroUi.createHeroSourceWitness(after),witness);assert.equal(after.experience,77);
+  assert.equal(ledger.receipt("HeroHealthChanged",{hp:7,mp:2},f.owner,after.authoritySerial),false);ledger.observe(after);
+  assert.equal(ledger.pending.state,"entered");assert.equal(ledger.cancelDefinitelyUnsent(proof),false);
+  assert(ledger.receipt("MoveItem",{grid:"HeroInventory",from:2,to:3,success:true},f.owner,after.authoritySerial));
+  assert(f.authority.receiveHealthChanged({hp:6,mp:1},f.owner));const afterAck=f.model;
+  assert.equal(afterAck.snapshotSerial,before.snapshotSerial);assert.equal(ledger.observe(afterAck),false);
+  assert.equal(ledger.pending.state,"acknowledged");assert.equal(ledger.cancelDefinitelyUnsent(proof),false);
+});
+check("Hero owner packet and new Information keep planner and painter level XP domains distinct",()=>{
+  const f=heroWitnessFixture43();assert(f.authority.receiveHealthChanged({hp:7,mp:2},f.owner));
+  const info={...f.info,level:9,hair:7,hp:5,mp:1,experience:88,max_experience:300};
+  assert(f.authority.receiveInformation({info},f.owner));const newer=f.model,witness=JSON.parse(heroUi.createHeroSourceWitness(newer));
+  assert.equal(witness.planner.level,9);assert.equal(witness.planner.experience,"88");assert.equal(witness.planner.maxExperience,"300");
+  assert.equal(witness.display.level,2);assert.equal(witness.display.experience,"77");assert.equal(witness.display.maxExperience,"200");
+  assert.equal(witness.display.hp,5);assert.equal(witness.display.maxHp,30);assert.equal(witness.display.hair,7);
+  assert(f.authority.receiveHealthChanged({hp:0,mp:-2},f.owner));const hp=f.model;
+  assert.equal(hp.plannerSource.level,9);assert.equal(hp.displaySource.level,2);assert.equal(hp.plannerSource.hp,0);
+  assert.equal(hp.informationSerial,newer.informationSerial);assert.equal(hp.snapshotSerial,newer.snapshotSerial);
+  f.world.stage5Systems.hero.level=3;f.world.stage5Systems.hero.experience=90;f.world.heroMaxExperience=250;f.world.heroVitals.hp=12;
+  assert(f.authority.receiveSnapshot(f.world,f.owner));const owner=f.model;
+  assert.equal(owner.plannerSource.hp,12);assert.equal(owner.plannerSource.level,3);assert.equal(owner.plannerSource.experience,90);
+  assert.equal(owner.displaySource.level,3);assert.equal(owner.displaySource.maxExperience,250);assert.equal(owner.displaySource.hair,7);
+});
+check("Hero invalid or foreign health cannot alter model clocks counters or physical source",()=>{
+  const f=heroWitnessFixture43(),before=f.model,witness=heroUi.createHeroSourceWitness(before);
+  for(const payload of [{hp:7},{hp:1.5,mp:2},{hp:2147483648,mp:2},{hp:NaN,mp:2},{hp:7,mp:Infinity}])assert.equal(f.authority.receiveHealthChanged(payload,f.owner),false);
+  for(const owner of [{...f.owner,socket:{}},{...f.owner,sessionGeneration:f.owner.sessionGeneration+1},
+    {...f.owner,sceneRevision:f.owner.sceneRevision+1},{...f.owner,mapFileName:"OtherMap"}])assert.equal(f.authority.receiveHealthChanged({hp:7,mp:2},owner),false);
+  assert.equal(f.model.authoritySerial,before.authoritySerial);assert.equal(heroUi.createHeroSourceWitness(f.model),witness);
+});
+check("Hero source witness preserves exact wide signed and zero UID data without mutation custody",()=>{
+  const f=heroWitnessFixture43(),wide="18446744073709551615";
+  f.info.inventory[2]=heroItemFixture(wide,2147483647,65535);f.info.inventory[3]=heroItemFixture(0);
+  f.world.heroInventoryItems=[heroWorldRowFixture(f.info.inventory[2],2),heroWorldRowFixture(f.info.inventory[3],3)];
+  f.info.experience="-9223372036854775808";f.info.max_experience="9223372036854775807";
+  f.world.stage5Systems.hero.experience=f.info.experience;f.world.heroMaxExperience=f.info.max_experience;
+  assert(f.authority.receiveInformation(f.info,f.owner));assert(f.authority.receiveSnapshot(f.world,f.owner));const model=f.model;
+  const witness=JSON.parse(heroUi.createHeroSourceWitness(model));assert.equal(witness.inventory[2].uid,wide);
+  assert.equal(witness.inventory[2].count,65535);assert.equal(witness.inventory[3].uid,"0");assert.equal(witness.planner.experience,f.info.experience);
+  assert.equal(heroUi.planHeroAction(model,{kind:"move",from:3,to:4}),null);assert.equal(heroUi.planHeroAction(model,{kind:"move",from:2,to:3}),null);
+  assert.equal(heroUi.planHeroAction(model,{kind:"use",slot:2}),null);assert.equal(heroUi.captureHeroActionBasis(model,{kind:"move",from:3,to:4},heroBasisWindows42),null);
+});
+check("Hero full 42 plus14 plus80 cells and all actual protocol skills fit the 64KiB source cap",()=>{
+  const f=heroWitnessFixture43(),uid=18446744073709551615n;
+  f.info.inventory=Array.from({length:42},(_,slot)=>heroItemFixture(String(uid-BigInt(slot)),2147483647,65535));
+  f.info.equipment=Array.from({length:14},(_,slot)=>heroItemFixture(String(uid-42n-BigInt(slot)),2147483647,65535));
+  f.world.heroInventoryCapacity=42;f.world.heroInventoryItems=f.info.inventory.map((item,slot)=>heroWorldRowFixture(item,slot));
+  f.world.heroEquipmentItems=f.info.equipment.map((item,slot)=>heroWorldRowFixture(item,slot));
+  f.world.inventoryCapacity=86;f.world.maxBagSlots=80;
+  f.world.inventoryItems=Array.from({length:80},(_,slot)=>heroWorldRowFixture(heroItemFixture(String(uid-56n-BigInt(slot)),2147483647,65535),slot%40,slot<40?"bag1":"bag2"));
+  const protocol=readFileSync(new URL("../../../packages/protocol/src/types.rs",import.meta.url),"utf8");
+  const spellBody=protocol.match(/pub enum Spell\s*\{([\s\S]*?)\n\}/)?.[1];assert(spellBody);
+  const spells=Array.from(spellBody.matchAll(/^\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*\d+\s*,/gm),match=>match[1]);assert(spells.length>1);
+  const seed=heroFixture().info.magics[0];f.info.magics=spells.map(spell=>({...seed,spell,name:spell,key:0}));
+  f.world.stage5Systems.heroLearnedMagics=f.info.magics.map(m=>({spell:m.spell,level:m.level,key:m.key,experience:m.experience}));
+  assert(f.authority.receiveInformation(f.info,f.owner));assert(f.authority.receiveSnapshot(f.world,f.owner));
+  const raw=heroUi.createHeroSourceWitness(f.model);assert(raw);assert(new TextEncoder().encode(raw).byteLength<=65536);const value=JSON.parse(raw);
+  assert.equal(value.inventory.length,42);assert.equal(value.equipment.length,14);assert.equal(value.personalInventory.length,80);assert.equal(value.skills.length,spells.length);
+});
+check("Hero canonical source cap counts UTF8 and rejects malformed canonical input",()=>{
+  const f=heroWitnessFixture43(),seed=heroFixture().info.magics[0];f.info.magics=[seed];f.world.stage5Systems.heroLearnedMagics=[{spell:seed.spell,level:1,key:17,experience:0}];
+  assert(f.authority.receiveInformation(f.info,f.owner));assert(f.authority.receiveSnapshot(f.world,f.owner));const model=f.model;
+  const base=heroUi.createHeroSourceWitness(model);assert(base);const make=name=>{
+    const raw=Object.freeze({...model.magics[0].raw,name}),magic=Object.freeze({...model.magics[0],name,raw});return Object.freeze({...model,magics:Object.freeze([magic])});};
+  const overhead=new TextEncoder().encode(base).byteLength-seed.name.length;
+  const exact=heroUi.createHeroSourceWitness(make("a".repeat(65536-overhead)));assert(exact);assert.equal(new TextEncoder().encode(exact).byteLength,65536);
+  assert.equal(heroUi.createHeroSourceWitness(make("a".repeat(65537-overhead))),null);
+  assert.equal(heroUi.createHeroSourceWitness(make("界".repeat(22000))),null);assert.equal(heroUi.createHeroSourceWitness(make("\ud800")),null);
+  assert.equal(heroUi.heroSourceWitnessMatches(base+" ",model),false);assert.equal(heroUi.heroSourceWitnessMatches(JSON.stringify({...JSON.parse(base),extra:true}),model),false);
+  assert.equal(heroUi.createHeroSourceWitness({...model}),null);assert.equal(heroUi.createHeroSourceWitness(Object.freeze({...model,plannerSource:undefined})),null);
+});
+check("Hero bridge requires independent model data and exact owner scope before requesting control",()=>{
+  const f=heroWitnessPort43(),binding=heroIngressDocument.readHeroSourceWitness(f.runtime,f.f.model);assert(binding);assert(heroIngressDocument.supportsHeroSharedUi(f.runtime));
+  assert.equal(heroIngressDocument.bindHeroUiControl(f.runtime,f.control,f.f.model)?.witness,binding.witness);assert.equal(f.controls.length,1);
+  assert.equal(f.state.ready,false);assert.equal(f.state.appliedWitness,null);
+  assert.equal(heroIngressDocument.readHeroUiReady(f.runtime,binding,f.f.model,1,f.control.webLeaseToken,2),null);
+  for(const name of ["connectionGeneration","sessionGeneration","playerObjectId","sceneRevision","mapFileName"]){
+    const port=heroWitnessPort43(),scope=port.state.source.scope;port.state.source={...port.state.source,scope:{...scope,[name]:typeof scope[name]==="string"?"OtherMap":scope[name]+1}};
+    assert.equal(heroIngressDocument.readHeroSourceWitness(port.runtime,port.f.model),null);assert.equal(port.controls.length,0);
+  }
+  const wrongActor=heroWitnessPort43();wrongActor.state.source={...wrongActor.state.source,heroObjectId:13};
+  assert.equal(heroIngressDocument.readHeroSourceWitness(wrongActor.runtime,wrongActor.f.model),null);
+  f.state.witness=heroWitnessGolden43.replace('"hp":20','"hp":19');assert.equal(heroIngressDocument.readHeroSourceWitness(f.runtime,f.f.model),null);
+});
+check("Hero source reads reject cursor reentry unsupported capabilities and unbounded bootstrap status",()=>{
+  const f=heroWitnessPort43(),getter=f.runtime.getMir2HeroSourceWitness;
+  f.runtime.getMir2HeroSourceWitness=()=>{const value=getter();f.state.cursor++;return value;};assert.equal(heroIngressDocument.readHeroSourceWitness(f.runtime,f.f.model),null);
+  const g=heroWitnessPort43();for(const runtime of [{...g.runtime,getMir2HeroSourceWitnessVersion:()=>0},
+    {...g.runtime,setMir2HeroUiControlWithWitness:undefined},{...g.runtime,getMir2HeroActionBasisVersion:()=>{throw Error("capability");}}])assert.equal(heroIngressDocument.supportsHeroSharedUi(runtime),false);
+  g.runtime.getMir2HeroUiStatus=()=>" ".repeat(196609);assert.equal(heroIngressDocument.readHeroBootstrap(g.runtime),null);
+  assert.equal(heroIngressDocument.readHeroSourceWitness(g.runtime,g.f.model),null);
+});
+check("Hero UI Ready requires actual applied source witness control lease sink and paint frame",()=>{
+  const f=heroWitnessPort43(),binding=heroIngressDocument.bindHeroUiControl(f.runtime,f.control,f.f.model);assert(binding);f.publish();
+  assert(heroIngressDocument.readHeroUiReady(f.runtime,binding,f.f.model,1,f.control.webLeaseToken,2));
+  const raw=f.runtime.getMir2HeroUiStatus(),status=JSON.parse(raw);
+  for(const delta of [{appliedWitness:null},{appliedWitness:binding.witness+" "},{appliedSource:{...binding.source,rustModelRevision:2}},
+    {controlRevision:2},{webLeaseToken:"other"},{sinkGeneration:3},{frame:0},{ready:false},{closed:true},
+    {prepared:false},{capturesEscape:"true"},{acceptedInputSequence:-1},
+    {inputRegions:[{left:0,top:0,width:-1,height:1}]},{receiptFrames:[1.5]}]){
+    f.runtime.getMir2HeroUiStatus=()=>JSON.stringify({...status,...delta});assert.equal(heroIngressDocument.readHeroUiReady(f.runtime,binding,f.f.model,1,f.control.webLeaseToken,2),null);
+  }
+});
+check("Hero actual Page routes health into independent Authority without settling entered operations",()=>{
+  const f=heroWitnessFixture43();f.world.heroInventoryItems=[heroWorldRowFixture(heroItemFixture(501),2)];assert(f.authority.receiveSnapshot(f.world,f.owner));
+  const before=f.model,page=parityPageFixture(f.owner,f.world);page.scope.heroAuthorityRef.current=f.authority;
+  const proof=page.scope.heroOperationsRef.current.reserve(before,{kind:"move",from:2,to:3});assert(proof);
+  assert(page.scope.heroOperationsRef.current.claim(proof,before,proof.wire));page.api.captureParityPacket("HeroHealthChanged",{hp:7,mp:2});
+  const after=f.model;assert.equal(after.plannerSource.hp,7);assert.equal(after.displaySource.hp,7);assert.equal(after.inventory[2].uniqueId,501);
+  for(const name of ["informationSerial","snapshotSerial","personalSerial","skillSnapshotSerial"])assert.equal(after[name],before[name]);
+  assert.equal(page.scope.heroOperationsRef.current.pending.state,"entered");assert.equal(page.sent.length,0);
+});
+
+
+// Source44 exercises the real ownership host through finite ports. Publication is
+// separate from control acceptance; this is not a renderer, browser or WASM test.
+const heroHostDocument44=loadTypeScriptModule(new URL("../lib/bevy-hero-host.ts",import.meta.url),{
+  "./bevy-hero-ui":heroIngressDocument,"./hero-player-ui":heroUi,
+});
+function heroHostFixture44(){
+  const base=heroFixture(),gearInfo=heroInfoFixture(12,{item_type:12}),bagGear=heroItemFixture(504,12),worn=heroItemFixture(505,12);
+  base.info.inventory[4]=bagGear;base.info.equipment[3]=worn;
+  base.world.heroInventoryItems.push(heroWorldRowFixture(bagGear,4,"bag1",gearInfo));
+  base.world.heroEquipmentItems=[heroWorldRowFixture(worn,3,"bag1",gearInfo)];
+  base.world.heroVitals={hp:100,maxHp:120,mp:50,maxMp:90};base.world.heroMaxExperience=100;base.world.stage5Systems.hero.experience=1;
+  assert(base.authority.receiveInformation(base.info,base.owner));assert(base.authority.receiveSnapshot(base.world,base.owner));
+  let model=base.authority.read(base.owner);assert(model);assert(heroUi.createHeroSourceWitness(model));
+  const physical={socket:base.owner.socket,connectionGeneration:base.owner.connectionGeneration,sessionGeneration:base.owner.sessionGeneration};
+  const scene={sceneRevision:base.owner.sceneRevision,playerObjectId:base.owner.playerObjectId,mapFileName:base.owner.mapFileName};
+  const ingress=new heroIngressDocument.HeroRawIngress(),trace=[],intents=[],ownerEvents=[],states=[];
+  const calls={read:0,now:0,status:0,witness:0,withdrawRaw:0},controls=[],edges=[],clears=[],sinks=[];
+  const state={scope:null,source:null,cursor:0,witness:heroUi.createHeroSourceWitness(model),frame:1,controlHigh:0,control:null,
+    publishedControl:null,appliedSource:null,appliedWitness:null,publishedSink:0,prepared:false,ready:false,
+    sinkGeneration:0,sink:null,acceptedInputSequence:0,closed:false,modal:false,capturesEscape:false,queued:[]};
+  const view={windows:{...heroBasisWindows42},windowEpochs:{inventory:1,character:2,belt:3},hudGeneration:8,
+    presentation:{logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false},pending:false,inputAllowed:true,eligible:true};
+  let time=0,receivedAt=10.375,intentSequence=0,onIntent=intent=>{intents.push(intent);return true;},onOwner=()=>{};
+  const sameSource=(a,b)=>heroIngressDocument.sameHeroSource(a,b),sameScope=raw=>heroIngressDocument.sameHeroScope(JSON.parse(raw),state.scope);
+  const runtime={getMir2HeroUiAbiVersion:()=>1,getMir2HeroActionBasisVersion:()=>1,getMir2HeroSourceWitnessVersion:()=>1,
+    activateMir2HeroIngress(raw){state.scope=JSON.parse(raw);return true;},
+    pushMir2HeroRawFrame(scope,sequence,raw,firstClock){assert(sameScope(scope));assert(sequence>state.cursor);
+      trace.push({scope,sequence,raw,firstClock});state.cursor=sequence;
+      state.source={scope:{...state.scope},frameSequence:sequence,heroObjectId:model.actor.objectId,heroGeneration:1,rustModelRevision:(state.source?.rustModelRevision??0)+1};
+      state.witness=heroUi.createHeroSourceWitness(model);assert(state.witness);return true;},
+    pushMir2HeroVerifiedOwnerFrame(scope,sequence,raw,firstClock){return runtime.pushMir2HeroRawFrame(scope,sequence,raw,firstClock);},
+    withdrawMir2HeroIngress(){calls.withdrawRaw++;return true;},getMir2HeroIngressCheckpoint:()=>null,restoreMir2HeroIngressCheckpoint:()=>false,
+    getMir2HeroSourceWitness(){calls.witness++;return JSON.stringify({version:1,source:state.source,witness:state.witness});},
+    getMir2HeroUiStatus(){calls.status++;const p=state.publishedControl,c=state.control;
+      const matching=!!p&&!!c&&!!state.sink&&p.controlRevision===c.controlRevision&&p.webLeaseToken===c.webLeaseToken
+        &&state.publishedSink===state.sinkGeneration&&sameSource(state.appliedSource,state.source)&&state.appliedWitness===state.witness;
+      const ready=matching&&state.ready;
+      return JSON.stringify({version:1,source:state.source,acceptedFrameSequence:state.cursor,acceptedInputSequence:state.acceptedInputSequence,closed:state.closed,
+        appliedSource:state.appliedSource,appliedWitness:state.appliedWitness,controlRevision:p?.controlRevision??0,webLeaseToken:p?.webLeaseToken??"",
+        sinkGeneration:state.publishedSink,frame:state.frame,modal:state.modal,prepared:matching&&state.prepared,ready,
+        capturesEscape:ready&&state.capturesEscape,inputEnabled:ready&&p.inputEnabled,
+        inputRegions:ready?[{left:10,top:20,width:316,height:236}]:[],receiptFrames:[]});},
+    setMir2HeroUiControlWithWitness(scope,raw,witness){const control=JSON.parse(raw);
+      if(!sameScope(scope)||!sameSource(control.source,state.source)||witness!==state.witness||control.controlRevision<=state.controlHigh)return false;
+      controls.push(control);state.controlHigh=control.controlRevision;state.control=control;state.queued=[];return true;},
+    setMir2HeroUiIntentSink(scope,sink){assert(sameScope(scope));state.sinkGeneration++;state.sink=sink;
+      sinks.push({generation:state.sinkGeneration,sink});return state.sinkGeneration;},
+    clearMir2HeroUiIntentSink(scope,expected){const current=sameScope(scope)&&expected===state.sinkGeneration&&!!state.sink;
+      clears.push({expected,current});if(current){state.sinkGeneration++;state.sink=null;state.queued=[];}return current;},
+    setMir2HeroUiInputEdge(scope,raw){const envelope=JSON.parse(raw),c=state.control;
+      if(!sameScope(scope)||!state.sink||!c?.inputEnabled||envelope.sinkGeneration!==state.sinkGeneration
+        ||envelope.webLeaseToken!==c.webLeaseToken||envelope.controlRevision!==c.controlRevision||envelope.edge.sequence<=state.acceptedInputSequence)return false;
+      assert.deepEqual(envelope.edge.stamp,stamp(c));state.acceptedInputSequence=envelope.edge.sequence;edges.push(envelope);state.queued.push(envelope);return true;},
+  };
+  function stamp(c){return {scope:c.source.scope,heroObjectId:c.source.heroObjectId,heroGeneration:c.source.heroGeneration,hudGeneration:c.hudGeneration,
+    modelRevision:c.webModelRevision,presentationRevision:c.presentationRevision,windowEpochs:c.windowEpochs};}
+  function capture(raw=heroWideOriginal){const delivery=ingress.capture(raw,physical,receivedAt++);assert(delivery);return delivery;}
+  function deliver(raw=heroWideOriginal){const delivery=capture(raw);assert(ingress.offer(delivery));return delivery;}
+  ingress.sync(runtime,physical,scene);deliver();
+  const options={runtime,now(){calls.now++;return time;},read(){calls.read++;return {...view,ingress,model};},
+    onOwner(token){ownerEvents.push({token,control:state.control,projection:currentHost?.peek()});onOwner(token);},
+    onState(next){states.push(next);},onIntent(intent){return onIntent(intent);}};
+  let currentHost=new heroHostDocument44.BevyHeroHost(options);
+  function publish({prepared=true}={}){time+=16;state.frame++;state.publishedControl=state.control;state.appliedSource=state.source;
+    state.appliedWitness=state.witness;state.publishedSink=state.sinkGeneration;state.prepared=prepared;
+    state.ready=prepared&&!!state.control?.inputEnabled&&!!state.sink;state.queued=[];}
+  function ready(host=currentHost){host.tick();assert.equal(host.peek().owned,false);publish();host.tick();
+    assert.equal(host.peek().owned,true);assert.equal(host.peek().active,false);publish();host.tick();assert.equal(host.peek().active,true);return host;}
+  function envelope(action={kind:"move",from:2,to:3},origin="inventory",basisOverride){
+    const c=state.control;assert(c);const normalized=heroHostDocument44.parseHeroSemanticAction(action);assert(normalized);
+    const basis=basisOverride??heroUi.captureHeroActionBasis(model,normalized,c.windows);assert(basis);
+    return {version:1,source:c.source,controlRevision:c.controlRevision,webLeaseToken:c.webLeaseToken,
+      intent:{...stamp(c),intentSequence:++intentSequence,type:"action",origin,action,oldKey:normalized.kind==="magicKey"?model.magics.find(m=>m.spell===normalized.spell)?.key:null,basis}};
+  }
+  function navigation(windows){const c=state.control;return {version:1,source:c.source,controlRevision:c.controlRevision,webLeaseToken:c.webLeaseToken,
+    intent:{...stamp(c),intentSequence:++intentSequence,type:"windows",windows}};}
+  function dispatch(value,sink=state.sink){assert.equal(typeof sink,"function");return sink(typeof value==="string"?value:JSON.stringify(value));}
+  function authority({information=true}={}){if(information)assert(base.authority.receiveInformation(base.info,base.owner));
+    assert(base.authority.receiveSnapshot(base.world,base.owner));model=base.authority.read(base.owner);assert(model);return model;}
+  return {base,state,view,options,calls,controls,edges,clears,sinks,trace,intents,ownerEvents,states,runtime,ingress,physical,scene,
+    get host(){return currentHost;},get model(){return model;},setModel(next){model=next;},setOnIntent(fn){onIntent=fn;},setOnOwner(fn){onOwner=fn;},
+    capture,deliver,publish,ready,envelope,navigation,dispatch,authority,
+    restart(){currentHost=new heroHostDocument44.BevyHeroHost(options);return currentHost;},
+    advanceTime(ms){time+=ms;},advanceFrame(){time+=16;state.frame++;},
+    sameContent(){authority({information:false});return deliver();},
+  };
+}
+check("Hero shared host publishes a pure owned projection between actual preparation and enabled Ready",()=>{
+  const f=heroHostFixture44(),h=f.host;
+  f.setOnOwner(token=>{assert(token);assert.equal(h.peek().owned,true);assert.equal(h.peek().active,false);
+    assert.equal(f.state.control.inputEnabled,false,"DOM retirement precedes enabling control");});
+  h.tick();assert.equal(h.peek().owned,false);assert.equal(f.controls.length,1);const prepareRevision=f.state.control.controlRevision;
+  for(let i=0;i<2;i++){f.advanceFrame();h.tick();assert.equal(f.controls.length,1);assert.equal(h.peek().owned,false);}
+  f.publish();h.tick();assert.equal(f.ownerEvents.length,1);assert.equal(f.state.control.inputEnabled,true);
+  assert(f.state.control.controlRevision>prepareRevision);assert.equal(h.peek().active,false);
+  const enabledRevision=f.state.control.controlRevision;
+  for(let i=0;i<2;i++){f.advanceFrame();h.tick();assert.equal(f.state.control.controlRevision,enabledRevision);assert.equal(h.peek().owned,true);}
+  f.publish();h.tick();assert.equal(h.peek().active,true);assert.equal(h.peek().worldBlocked,false);
+  const counts={...f.calls},projection=h.peek();for(let i=0;i<4;i++)assert.strictEqual(h.peek(),projection);
+  assert.deepEqual(f.calls,counts,"render projection samples no clock, source or runtime port");
+});
+check("Hero shared host never promotes a control or getter echo without exact applied World proof",()=>{
+  for(const damage of ["appliedSource","appliedWitness","sink","prepared"]){
+    const f=heroHostFixture44(),h=f.host;h.tick();f.publish();h.tick();assert.equal(h.peek().owned,true);f.publish();
+    if(damage==="appliedSource")f.state.appliedSource={...f.state.source,rustModelRevision:f.state.source.rustModelRevision+1};
+    if(damage==="appliedWitness")f.state.appliedWitness=null;
+    if(damage==="sink")f.state.publishedSink++;
+    if(damage==="prepared"){f.state.prepared=false;f.state.ready=false;}
+    h.tick();assert.equal(h.peek().active,false);assert.equal(h.pointerContext(),null);assert.equal(f.intents.length,0);
+  }
+});
+check("Hero shared sink admits all ten exact Rust semantic actions through the actual TS planner",()=>{
+  const actions=[
+    [{kind:"use",slot:0,confirmed:false},"belt"],[{kind:"move",from:2,to:3},"inventory"],
+    [{kind:"equip",from:4,to:3},"inventory"],[{kind:"remove",from:3,to:null},"character"],
+    [{kind:"merge",from:{grid:"HeroInventory",slot:2},to:{grid:"HeroInventory",slot:0}},"inventory"],
+    [{kind:"transfer",from:3,to:3},"inventory"],[{kind:"takeBack",from:2,to:4},"inventory"],
+    [{kind:"autoPotValue",stat:12,value:55},"inventory"],[{kind:"autoPotItem",grid:"HeroHpItem",slot:2},"inventory"],
+    [{kind:"magicKey",spell:"FireBall",key:18},"character"],
+  ];
+  for(const [action,origin] of actions){const f=heroHostFixture44();f.ready();const raw=f.envelope(action,origin);
+    assert.equal(f.dispatch(raw),true,action.kind);assert.equal(f.intents.length,1);const intent=f.intents[0];
+    assert.equal(intent.type,"action");assert.equal(intent.action.kind,action.kind);assert.equal(intent.origin,origin);
+    assert(heroUi.heroActionBasisMatches(intent.actionBasis,f.model,intent.action,heroBasisWindows42));
+    assert(Object.isFrozen(intent));assert(Object.isFrozen(intent.model));assert(Object.isFrozen(intent.model.inventory));
+    assert(Object.isFrozen(intent.actionBasis));assert.strictEqual(intent.model.owner.socket,f.base.owner.socket);
+    assert.equal(Object.isFrozen(f.base.owner.socket),false);assert.equal(f.host.claimCurrent(intent),true);assert.equal(f.host.claimCurrent(intent),true);
+    if(action.kind==="remove")assert.equal(Object.hasOwn(intent.action,"to"),false,"only Rust null maps to TS automatic placement");
+    if(action.kind==="magicKey")assert.equal(intent.oldKey,17);
+    assert.equal(f.dispatch(raw),false,"same serialized intent cannot replay");assert.equal(f.intents.length,1);
+  }
+});
+check("Hero shared sink rejects malformed semantic fields stale basis oldKey and repeated denied envelopes",()=>{
+  const f=heroHostFixture44();f.ready();
+  for(const mutate of [v=>v.extra=true,v=>v.source.extra=true,v=>v.intent.extra=true,
+    v=>v.intent.action.from="2",v=>v.intent.action.extra=true,v=>v.intent.basis.cells[0].item.uid="999",
+    v=>v.intent.basis.resolvedWire.to=9,v=>v.intent.oldKey=17,v=>v.intent.windowEpochs[0]++,
+    v=>v.intent.origin="belt",v=>v.intent.basis.extra=true]){
+    const valid=f.envelope(),bad=JSON.parse(JSON.stringify(valid));mutate(bad);assert.equal(f.dispatch(bad),false);
+  }
+  const magic=f.envelope({kind:"magicKey",spell:"FireBall",key:18},"character");magic.intent.oldKey=18;assert.equal(f.dispatch(magic),false);
+  const wrongBasis=f.envelope();wrongBasis.intent.basis={};assert.equal(f.dispatch(wrongBasis),false);
+  wrongBasis.intent.basis=heroUi.captureHeroActionBasis(f.model,{kind:"move",from:2,to:3},heroBasisWindows42);
+  assert.equal(f.dispatch(wrongBasis),false,"denied admitted sequence is still burned");assert.equal(f.intents.length,0);
+  for(const action of [{kind:"remove",from:3},{kind:"use",slot:0},{kind:"use",slot:"0",confirmed:false},
+    {kind:"autoPotValue",stat:14,value:10},{kind:"autoPotValue",stat:12,value:100},
+    {kind:"autoPotItem",grid:"Inventory",slot:null},{kind:"magicKey",spell:"FireBall",key:1},
+    {kind:"merge",from:{grid:"HeroInventory",slot:2,extra:true},to:{grid:"HeroInventory",slot:0}}])
+    assert.equal(heroHostDocument44.parseHeroSemanticAction(action),null);
+});
+check("Hero shared UID0 remains display-only while wide UID cell moves do not widen legacy use",()=>{
+  for(const uid of [0,"9007199254740993"]){
+    const f=heroHostFixture44(),priorBasis=heroUi.captureHeroActionBasis(f.model,{kind:"use",slot:2,confirmed:false},heroBasisWindows42);
+    f.base.info.inventory[2].unique_id=uid;const source=f.base.world.heroInventoryItems.find(item=>item.slot===2);
+    source.uniqueId=uid;source.tooltipSource.userItem.unique_id=uid;f.authority();f.deliver();f.ready();
+    assert.equal(JSON.parse(heroUi.createHeroSourceWitness(f.model)).inventory[2].uid,String(uid));
+    const use=f.envelope({kind:"use",slot:2,confirmed:false},"inventory",priorBasis);assert.equal(f.dispatch(use),false);
+    const move={kind:"move",from:2,to:3};
+    if(uid===0){assert.equal(heroUi.captureHeroActionBasis(f.model,move,heroBasisWindows42),null);
+      const oldMove=heroUi.captureHeroActionBasis(heroHostFixture44().model,move,heroBasisWindows42);
+      assert.equal(f.dispatch(f.envelope(move,"inventory",oldMove)),false);
+    }else{assert.equal(f.dispatch(f.envelope(move)),true);assert.equal(f.intents[0].actionBasis.cells[0].item.uid,uid);}
+  }
+});
+check("Hero shared live pointer sink and claim reject a frozen frame at 501ms without waiting for tick",()=>{
+  for(const boundary of ["pointer","sink","claim"]){
+    const f=heroHostFixture44();f.ready();const context=f.host.pointerContext(),raw=f.envelope();assert(context);
+    let accepted;if(boundary==="claim"){assert(f.dispatch(raw));accepted=f.intents[0];assert(f.host.claimCurrent(accepted));}
+    f.advanceTime(500);if(boundary==="claim")assert.equal(f.host.claimCurrent(accepted),true);
+    f.advanceTime(1);
+    if(boundary==="pointer")assert.equal(f.host.pointer({context,pointerId:9,phase:"down",x:30,y:40,button:0}),false);
+    if(boundary==="sink")assert.equal(f.dispatch(raw),false);
+    if(boundary==="claim")assert.equal(f.host.claimCurrent(accepted),false);
+    assert.equal(f.edges.length,0);assert.equal(f.intents.length,boundary==="claim"?1:0);
+    assert.equal(f.host.isSharedOwner(),false);assert.equal(f.host.peek().owned,false);
+  }
+});
+check("Hero shared late cleanup is generation checked and same-runtime restarts keep control and input monotonic",()=>{
+  const f=heroHostFixture44(),old=f.ready(),context=old.pointerContext();assert(context);
+  assert(old.pointer({context,pointerId:9,phase:"down",x:30,y:40,button:0}));
+  assert(old.pointer({context,pointerId:9,phase:"up",x:30,y:40,button:0}));const sequence=f.edges.at(-1).edge.sequence,revision=f.state.control.controlRevision;
+  const oldGeneration=f.state.sinkGeneration,replacement=f.restart();replacement.tick();const replacementSink=f.state.sink,replacementGeneration=f.state.sinkGeneration;
+  assert(replacementGeneration>oldGeneration);assert(f.state.control.controlRevision>revision);const replacementControl=f.state.control;
+  old.stop();assert.strictEqual(f.state.sink,replacementSink);assert.strictEqual(f.state.control,replacementControl);
+  assert.deepEqual(f.clears.at(-1),{expected:oldGeneration,current:false});
+  f.publish();replacement.tick();f.publish();replacement.tick();assert.equal(replacement.peek().active,true);
+  const next=replacement.pointerContext();assert(next);assert(replacement.pointer({context:next,pointerId:9,phase:"down",x:30,y:40,button:0}));
+  assert(f.edges.at(-1).edge.sequence>sequence);assert.equal(old.pointer({context,pointerId:9,phase:"up",x:30,y:40,button:0}),false);
+  assert.equal(f.state.sinkGeneration,replacementGeneration);assert.equal(f.calls.withdrawRaw,0);
+});
+check("Hero shared identical full frame preserves fresh physical drag edges but never rebases an old queued intent",()=>{
+  const f=heroHostFixture44(),h=f.ready(),context=h.pointerContext(),old=f.envelope();assert(context);
+  assert(h.pointer({context,pointerId:9,phase:"down",x:30,y:40,button:0}));f.publish();h.tick();
+  const before=f.state.control,oldModel=f.model;f.sameContent();assert(f.model.authoritySerial>oldModel.authoritySerial);assert.equal(f.model.sourceKey,oldModel.sourceKey);
+  h.tick();const during=h.pointerContext();assert(during);assert.equal(during.ready,false);assert.equal(h.peek().owned,true);assert.equal(h.peek().active,false);
+  assert.equal(f.state.control.webModelRevision,before.webModelRevision);assert.equal(f.state.control.presentationRevision,before.presentationRevision);
+  assert.equal(f.state.control.inputEnabled,true);assert(f.state.control.controlRevision>before.controlRevision);
+  assert.equal(h.pointer({context:during,pointerId:10,phase:"down",x:40,y:50,button:0}),false);
+  assert(h.pointer({context,pointerId:9,phase:"move",x:80,y:90,button:0}));
+  assert(h.pointer({context,pointerId:9,phase:"up",x:80,y:90,button:0}));
+  assert.deepEqual(f.edges.slice(-2).map(edge=>edge.edge.phase),["move","up"]);
+  assert.equal(f.edges.at(-1).controlRevision,f.state.control.controlRevision);assert.deepEqual(f.edges.at(-1).edge.stamp,context.stamp);
+  assert.equal(f.dispatch(old),false);f.publish();h.tick();assert.equal(h.peek().active,true);assert.equal(f.dispatch(old),false);
+  assert.equal(f.dispatch(f.envelope()),true);
+});
+check("Hero shared material pending layout and window changes revoke old pointer lineage before accepting a new click",()=>{
+  for(const change of ["model","pending","presentation","window"]){
+    const f=heroHostFixture44(),h=f.ready(),context=h.pointerContext();assert(context);
+    assert(h.pointer({context,pointerId:9,phase:"down",x:30,y:40,button:0}));f.publish();h.tick();
+    if(change==="model"){assert(f.base.authority.receiveHealthChanged({hp:90,mp:40},f.base.owner));f.setModel(f.base.authority.read(f.base.owner));f.deliver();}
+    if(change==="pending")f.view.pending=true;
+    if(change==="presentation")f.view.presentation={...f.view.presentation,logicalWidth:1280};
+    if(change==="window"){f.view.windows={...f.view.windows,characterPage:"skills"};f.view.windowEpochs={...f.view.windowEpochs,character:f.view.windowEpochs.character+1};}
+    h.tick();assert.equal(h.pointer({context,pointerId:9,phase:"up",x:30,y:40,button:0}),false);
+    assert.equal(h.pointer({context,pointerId:9,phase:"cancel",x:30,y:40,button:0}),false);
+    f.publish();h.tick();const fresh=h.pointerContext();assert(fresh?.ready);
+    assert(h.pointer({context:fresh,pointerId:9,phase:"down",x:30,y:40,button:0}));
+    assert(h.pointer({context:fresh,pointerId:9,phase:"up",x:30,y:40,button:0}));
+  }
+});
+check("Hero shared own reservation stays claimable and only the original exact ACK plus new full snapshot settles it",()=>{
+  const f=heroHostFixture44(),h=f.ready(),ledger=new heroUi.HeroPlayerOperations();let proof,accepted;
+  f.setOnIntent(intent=>{accepted=intent;proof=ledger.reserve(f.model,heroUi.captureHeroAction(intent.model,intent.action));assert(proof);f.view.pending=true;
+    assert(h.allows(intent));assert(h.claimCurrent(intent));assert(h.claimCurrent(intent));assert(ledger.claim(proof,f.model,proof.wire));return true;});
+  assert.equal(f.dispatch(f.envelope()),true);assert.equal(ledger.pending.state,"entered");
+  assert.equal(ledger.receipt("MoveItem",{grid:"HeroInventory",from:2,to:4,success:true},f.base.owner,f.model.authoritySerial),false);
+  assert(ledger.receipt("MoveItem",{grid:"HeroInventory",from:2,to:3,success:true},f.base.owner,f.model.authoritySerial));assert.equal(ledger.pending.state,"acknowledged");
+  h.withdraw();assert.equal(h.claimCurrent(accepted),false);assert.equal(ledger.pending.state,"acknowledged");assert.equal(ledger.observe(f.model),false);
+  f.base.world.heroInventoryItems.find(item=>item.slot===2).slot=3;f.authority({information:false});
+  assert.equal(f.model.inventory[2],null);assert.equal(f.model.inventory[3].uniqueId,502);assert.equal(ledger.observe(f.model),true);assert.equal(ledger.pending,null);
+  assert.equal(f.calls.withdrawRaw,0);assert(f.ingress.highWater());
+});
+check("Hero shared final claim refuses synchronous captured source window and owner changes without releasing entered custody",()=>{
+  for(const mode of ["captured","consumed","window","owner","entered"]){
+    const f=heroHostFixture44(),h=f.ready(),ledger=new heroUi.HeroPlayerOperations();let proof;
+    f.setOnIntent(intent=>{proof=ledger.reserve(f.model,heroUi.captureHeroAction(intent.model,intent.action));assert(proof);f.view.pending=true;
+      if(mode==="entered")assert(ledger.claim(proof,f.model,proof.wire));
+      if(mode==="captured")f.capture();
+      if(mode==="consumed"||mode==="entered")f.sameContent();
+      if(mode==="window"){f.view.windows={...f.view.windows,inventoryOpen:false};f.view.windowEpochs={...f.view.windowEpochs,inventory:f.view.windowEpochs.inventory+1};}
+      if(mode==="owner")f.setModel(Object.freeze({...f.model,owner:Object.freeze({...f.model.owner,socket:{}})}));
+      assert.equal(h.claimCurrent(intent),false);assert.equal(h.allows(intent),false);
+      assert.equal(ledger.pending.state,mode==="entered"?"entered":"reserved");return false;});
+    assert.equal(f.dispatch(f.envelope()),false);assert(proof);
+    assert.equal(ledger.cancelDefinitelyUnsent(proof),mode!=="entered");
+    if(mode==="entered"){assert.equal(ledger.pending.state,"entered");assert(ledger.outcomeUnknown(proof));assert.equal(ledger.pending.state,"unknown");}
+    assert.equal(f.calls.withdrawRaw,0);
+  }
+});
+check("Hero shared lifecycle gates fall back without retiring original raw custody and do not fake touch geometry",()=>{
+  for(const mode of ["focus","hidden","resize","touch"]){
+    const f=heroHostFixture44(),h=f.ready(),before=f.ingress.highWater(),first=f.trace[0];
+    if(mode==="focus")f.view.inputAllowed=false;if(mode==="hidden")f.view.eligible=false;
+    if(mode==="resize")f.view.presentation=null;if(mode==="touch")f.view.presentation={logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:true};
+    h.tick();assert.equal(h.peek().owned,false);assert.equal(h.peek().active,false);assert.equal(f.calls.withdrawRaw,0);
+    assert(heroIngressDocument.sameHeroHighWater(before,f.ingress.highWater()));assert(f.ingress.caughtUp());
+    assert.strictEqual(f.trace[0],first);assert.equal(first.raw,heroWideOriginal);assert.equal(first.firstClock,10.375);
+    assert.equal(h.pointerContext(),null);
+  }
+  assert.equal(heroHostDocument44.heroPresentationFits({logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:true}),false);
+  assert.equal(heroHostDocument44.heroPresentationFits({logicalWidth:1024,logicalHeight:768,stageCssScale:4,touch:true}),true);
+});
+check("Hero shared keys leave world movement alone and preserve modal text Ctrl+A and Escape order",()=>{
+  const f=heroHostFixture44(),h=f.ready();
+  assert.equal(h.key({key:"ArrowUp",code:"ArrowUp"}),false);assert.equal(h.key({key:"a",code:"KeyA"}),false);assert.equal(f.edges.length,0);
+  f.state.modal=true;f.state.capturesEscape=true;f.publish();h.tick();
+  assert(h.key({key:"a",code:"KeyA",control:true}));assert.equal(f.edges.at(-1).edge.key,"KeyA");assert.equal(f.edges.at(-1).edge.text,"");
+  assert(h.key({key:"5",code:"Digit5"}));assert.equal(f.edges.at(-1).edge.text,"5");
+  assert(h.key({key:"Escape",code:"Escape"}));assert.equal(f.edges.at(-1).edge.key,"Escape");
+  f.state.modal=false;f.state.capturesEscape=false;f.publish();h.tick();assert.equal(h.key({key:"ArrowUp"}),false);
+  const context=h.pointerContext();assert(context);assert(h.pointer({context,pointerId:9,phase:"down",x:30,y:40,button:0}));
+  assert(h.pointer({context,pointerId:9,phase:"up",x:30,y:40,button:0}));
+  assert(h.key({key:"Escape"}),"same-frame Escape follows an admitted UI click instead of leaking to world");
+});
+
+
+// Source44: execute actual Page and Shell declarations in the original finite harness.
+const heroShellNames44=new Set(["heroBlocksWorldInput","cancelSharedHeroPointer","handleSharedHeroPointer"]),heroShellDeclarations44=new Map();
+(function visit(node){if(ts.isFunctionDeclaration(node)&&heroShellNames44.has(node.name?.text))heroShellDeclarations44.set(node.name.text,node.getText(fishingShellAst));ts.forEachChild(node,visit);})(fishingShellAst);
+assert.equal(heroShellDeclarations44.size,3,"actual Hero Shell authority functions");
+const heroShellJs44=ts.transpileModule([...heroShellDeclarations44.values()].join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+function heroShellFixture44(){
+  const ref=current=>({current}),edges=[];
+  class HeroNode44 {id="";captured=new Set();focus(){}setPointerCapture(id){this.captured.add(id);}hasPointerCapture(id){return this.captured.has(id);}}
+  const frame=new HeroNode44(),canvas=new HeroNode44();canvas.id="shared-hero-test-canvas";
+  let context={webLeaseToken:"hero:44",sinkGeneration:2,stamp:{scope:{runGeneration:1,connectionGeneration:1,sessionGeneration:1,sceneRevision:1,playerObjectId:42,mapFileName:"TestMap"},
+    heroObjectId:12,heroGeneration:1,hudGeneration:8,modelRevision:9,presentationRevision:10,windowEpochs:[1,2,3]},
+    presentation:{logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false},ready:true,inputRegions:[{left:0,top:0,width:40,height:40}]};
+  let stops=0,accepted=true;
+  const scope={HTMLElement:HeroNode44,heroPointerLeaseRef:ref(null),heroHoverContextRef:ref(null),
+    heroPointerCallbacksRef:ref({getBevyHeroInputBlocked:()=>false,getBevyHeroPointerContext:()=>context,
+      onBevyHeroPointer:edge=>{edges.push(edge);return accepted;}}),
+    stageFrameRef:ref(frame),sceneInteractionReady:true,questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
+    webGl2SharedCanvasPrototype:false,sharedUiCanvasId:()=>canvas.id,scenePointFromMouseEvent:({clientX,clientY})=>({sceneX:clientX,sceneY:clientY}),
+    stopNpcShopWorldInput:()=>stops++,heldScenePointerRef:ref(null),worldFishingPhysicalRef:ref(null),combatUiHoldRef:ref(new Map()),
+    bagBeltPointerRef:ref(null),bagBeltArmedSharedRef:ref(null),npcRepairPointerRef:ref(null),bagBeltQuarantineRef:ref(new Map()),npcRepairQuarantineRef:ref(new Map()),
+    heldQuestControlPointersRef:ref(new Set()),hudPointerRouterRef:ref({held:null}),bagPointerRouterRef:ref({held:null}),
+    characterPointerRouterRef:ref({held:null}),storagePointerRouterRef:ref({held:null}),npcShopPointerRouterRef:ref({held:null}),
+    spellsPointerRouterRef:ref({held:null}),mailPointerRouterRef:ref({held:null}),bevyMailComposeReady:false,bevyMailComposePending:false};
+  const api=new Function(...Object.keys(scope),heroShellJs44+"\nreturn {handle:handleSharedHeroPointer,cancel:cancelSharedHeroPointer,blocked:heroBlocksWorldInput};")(...Object.values(scope));
+  const event=(time=10,extra={})=>({pointerId:1,pointerType:"mouse",timeStamp:time,type:"pointermove",button:0,buttons:0,clientX:10,clientY:10,target:canvas,
+    preventDefault(){this.prevented=true;},...extra});
+  return {api,scope,edges,frame,canvas,event,get context(){return context;},setContext:value=>{context=value;},setAccepted:value=>{accepted=value;},get stops(){return stops;}};
+}
+check("Hero actual Shell hover clears once through its original context and never captures world origin",()=>{
+  const f=heroShellFixture44(),original=f.context;
+  assert.equal(f.api.handle(f.event(),"move"),true);assert.equal(f.edges.length,1);assert.equal(f.scope.heroPointerLeaseRef.current,null);assert.equal(f.stops,0);assert.equal(f.canvas.captured.size,0);
+  f.setContext(structuredClone(original));
+  const outside=f.event(11,{clientX:100});assert.equal(f.api.handle(outside,"move"),false);assert.equal(outside.prevented,undefined);
+  assert.equal(f.edges.length,2);assert.equal(f.edges[1].context,original);assert.equal(f.edges[1].x,100);assert.equal(f.scope.heroHoverContextRef.current,null);
+  assert.equal(f.api.handle(f.event(12,{clientX:101}),"move"),false);assert.equal(f.edges.length,2);
+  for(const name of ["heldScenePointerRef","worldFishingPhysicalRef","bagBeltPointerRef","bagBeltArmedSharedRef","npcRepairPointerRef"]){
+    const guarded=heroShellFixture44();guarded.scope[name].current={};assert.equal(guarded.api.handle(guarded.event(),"move"),false);assert.equal(guarded.edges.length,0);
+  }
+  for(const name of ["hudPointerRouterRef","bagPointerRouterRef","characterPointerRouterRef","storagePointerRouterRef","npcShopPointerRouterRef","spellsPointerRouterRef","mailPointerRouterRef"]){
+    const guarded=heroShellFixture44();guarded.scope[name].current.held={};assert.equal(guarded.api.handle(guarded.event(),"move"),false);assert.equal(guarded.edges.length,0);
+  }
+  const pressed=heroShellFixture44();assert.equal(pressed.api.handle(pressed.event(10,{buttons:1}),"move"),false);assert.equal(pressed.edges.length,0);
+});
+check("Hero actual Shell rejects old terminals and wrong capture without clearing the current physical lease",()=>{
+  const f=heroShellFixture44();assert.equal(f.api.handle(f.event(10,{type:"pointerdown",buttons:1}),"down"),true);
+  const old=f.scope.heroPointerLeaseRef.current;assert(old);assert.equal(f.edges[0].context,old.context);
+  for(const extra of [{timeStamp:9,type:"pointerup"},{pointerType:"touch",type:"pointerup"},
+    {type:"lostpointercapture",target:f.frame},{type:"lostpointercapture",target:f.canvas}]){
+    assert.equal(f.api.handle(f.event(11,extra),extra.type==="lostpointercapture"?"cancel":"up"),true);assert.equal(f.scope.heroPointerLeaseRef.current,old);assert.equal(f.edges.length,1);
+  }
+  assert.equal(f.api.handle(f.event(12,{type:"pointercancel"}),"cancel"),true);assert.equal(f.scope.heroPointerLeaseRef.current,null);
+  assert.equal(f.api.handle(f.event(20,{type:"pointerdown",buttons:1}),"down"),true);const next=f.scope.heroPointerLeaseRef.current;
+  f.api.cancel(old);assert.equal(f.scope.heroPointerLeaseRef.current,next);
+  assert.equal(f.api.handle(f.event(15,{type:"pointerup"}),"up"),true);assert.equal(f.scope.heroPointerLeaseRef.current,next);
+  assert.equal(f.api.handle(f.event(21,{type:"pointerup"}),"up"),true);assert.equal(f.scope.heroPointerLeaseRef.current,null);
+  assert.equal(f.edges.at(-1).context,next.context);assert.equal(f.edges.at(-1).phase,"up");
+  const wrong=heroShellFixture44();wrong.api.handle(wrong.event(10,{type:"pointerdown",buttons:1}),"down");
+  assert.equal(wrong.api.handle(wrong.event(11,{type:"pointerup",button:2}),"up"),true);assert.deepEqual(wrong.edges.map(e=>e.phase),["down","cancel"]);
+  const replaced=heroShellFixture44();replaced.api.handle(replaced.event(10,{type:"pointerdown",buttons:1}),"down");const newEdges=[];
+  replaced.scope.heroPointerCallbacksRef.current={...replaced.scope.heroPointerCallbacksRef.current,onBevyHeroPointer:e=>{newEdges.push(e);return true;}};
+  assert.equal(replaced.api.handle(replaced.event(11,{type:"pointerup"}),"up"),true);assert.deepEqual(replaced.edges.map(e=>e.phase),["down","cancel"]);assert.equal(newEdges.length,0);
+});
+function heroPageSharedFixture44(mode="accepted"){
+  const f=heroSubmitFixture42(mode),action={kind:"move",from:2,to:3},dto=heroUi.captureHeroAction(f.f.model,action),basis=heroUi.captureHeroActionBasis(f.f.model,action,heroBasisWindows42);assert(dto&&basis);
+  let current=true,claims=0;
+  const intent={type:"action",origin:"inventory",action,actionBasis:basis,oldKey:null,model:f.f.model,sourceWindows:heroBasisWindows42,
+    webLeaseToken:"hero-shared:44",windowEpochs:{inventory:1,character:2,belt:3},intentSequence:1};
+  f.scope.heroRendererTokenRef.current=intent.webLeaseToken;
+  f.scope.heroSharedUiIngressRef.current={isSharedOwner:()=>true,allows:()=>current,claimCurrent:value=>{assert.equal(value,intent);claims++;return current;}};
+  return {...f,intent,dto,get claims(){return claims;},invalidate:()=>{current=false;}};
+}
+check("Hero actual Page shared action uses its sole ledger and preserves definitely unsent versus entered unknown",()=>{
+  for(const mode of ["accepted","preclaim","prethrow","postclaim","throw"]){
+    const f=heroPageSharedFixture44(mode);assert.equal(f.api.submit(f.dto,false,{origin:"inventory",epoch:1},f.intent.webLeaseToken,f.intent),mode==="accepted");
+    assert.equal(f.ledger.pending?.state??null,["preclaim","prethrow"].includes(mode)?null:mode==="accepted"?"entered":"unknown");
+    if(f.ledger.pending){assert.equal(f.scope.heroSharedProofsRef.current.get(f.ledger.pending.proof),f.intent);assert.equal(f.ledger.cancelDefinitelyUnsent(f.ledger.pending.proof),false);}
+  }
+  const legacy=heroPageSharedFixture44();assert.equal(legacy.api.submit(legacy.dto,false,{origin:"inventory",epoch:1},"hero-react:0"),false);assert.equal(legacy.ledger.pending,null);
+});
+check("Hero actual Page final claim rejects synchronous source or renderer changes and never retags the shared proof",()=>{
+  for(const mutation of ["captured","consumed","renderer","host","basis"]){
+    const f=heroPageSharedFixture44(),wireProof=f.ledger.reserve(f.f.model,f.dto);assert(wireProof);
+    f.scope.heroUiProofLeasesRef.current.set(wireProof,{kind:"window",lease:{origin:"inventory",epoch:1}});
+    f.scope.heroProofRendererTokensRef.current.set(wireProof,f.intent.webLeaseToken);f.scope.heroSharedProofsRef.current.set(wireProof,f.intent);
+    f.scope.heroProofHighWaterRef.current.set(wireProof,f.raw.ingress.highWater());
+    if(mutation==="captured"||mutation==="consumed"){const delivery=f.raw.capture(heroWideOriginal);if(mutation==="consumed")assert(f.raw.ingress.offer(delivery));}
+    if(mutation==="renderer")f.scope.heroRendererTokenRef.current="hero-react:1";
+    if(mutation==="host")f.invalidate();
+    if(mutation==="basis")f.intent.actionBasis={...f.intent.actionBasis,version:99};
+    assert.equal(f.api.current(wireProof,wireProof.wire),false);assert.equal(f.ledger.pending.state,"reserved");
+    assert.equal(f.ledger.cancelDefinitelyUnsent(wireProof),true);assert.equal(f.ledger.pending,null);
+  }
+});
+
+
+// Source45 composes the actual shared Host with the existing Page extraction and
+// the one production Hero ledger. Renderer publication and socket.send remain
+// finite ports: these checks do not instantiate WASM, paint, or a live server.
+const heroSuccessPageNames45 = ["dispatchBevyHeroIntent", "submitHeroAction"];
+const heroSuccessPageDeclarations45 = new Map();
+(function visit(node) {
+  if (ts.isFunctionDeclaration(node) && heroSuccessPageNames45.includes(node.name?.text)) {
+    assert.equal(heroSuccessPageDeclarations45.has(node.name.text), false);
+    heroSuccessPageDeclarations45.set(node.name.text, node.getText(parityPageAst));
+  }
+  ts.forEachChild(node, visit);
+})(parityPageAst);
+assert.equal(heroSuccessPageDeclarations45.size, heroSuccessPageNames45.length);
+const heroSuccessPageJs45 = ts.transpileModule([...heroSuccessPageDeclarations45.values()].join("\n"), {
+  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
+}).outputText;
+function heroSuccessPageFixture45(setup) {
+  const shared = heroHostFixture44();
+  if (setup) { setup(shared.base); shared.authority(); shared.deliver(); }
+  const page = parityPageFixture(shared.base.owner, shared.base.world), scope = page.scope;
+  const ledger = scope.heroOperationsRef.current, sendProofs = [], intents = [];
+  scope.heroAuthorityRef.current = shared.base.authority;
+  scope.heroWindowActorRef.current = shared.model;
+  scope.heroWindowsRef.current = { ...shared.view.windows };
+  scope.heroWindowEpochsRef.current = { ...shared.view.windowEpochs };
+  scope.heroManagementOpenRef.current = scope.heroWindowsRef.current.inventoryOpen || scope.heroWindowsRef.current.characterOpen;
+  scope.heroPetOpenRef.current = false; scope.cashShopOpenRef.current = false;
+  scope.socialItemWindowsRef.current = { guild: false, trade: false };
+  scope.heroRawIngressRef = { current: shared.ingress };
+  scope.sameHeroHighWater = heroIngressDocument.sameHeroHighWater;
+  scope.captureHeroAction = heroUi.captureHeroAction;
+  scope.heroSharedUiIngressRef.current = shared.host;
+  Object.defineProperty(shared.view, "pending", { enumerable: true, get: () => Boolean(ledger.pending) });
+  shared.setOnOwner(token => { scope.heroRendererTokenRef.current = token ?? "hero-react:source45"; });
+  const keys = Object.keys(scope);
+  const api = new Function(...keys, parityPageJs + "\n" + heroSuccessPageJs45
+    + "\nreturn {dispatch:dispatchBevyHeroIntent,submit:submitHeroAction,currentHeroModel,heroProofCurrent,parityIngress,parityFinal,captureParityPacket,captureParitySnapshot};")
+    (...keys.map(key => scope[key]));
+  const captureSocketSend = page.socket.send;
+  page.socket.send = body => {
+    assert.equal(ledger.pending?.state, "entered", "the actual Page final slice must claim before socket entry");
+    sendProofs.push(ledger.pending.proof); captureSocketSend(body);
+  };
+  scope.sendRawHandler.current = (command, options) => api.parityIngress(command, options)
+    && api.parityFinal(command, options, page.socket);
+  shared.setOnIntent(intent => { intents.push(intent); return api.dispatch(intent); });
+  // ready() asserts separate unowned -> prepared/owned/inactive -> enabled/Ready
+  // publications. A successful setter alone cannot authorize this fake sink.
+  shared.ready();
+  assert.equal(shared.host.peek().active, true);
+  assert.equal(scope.heroRendererTokenRef.current, shared.state.control.webLeaseToken);
+  function snapshot(world = shared.base.world) {
+    api.captureParitySnapshot(world);
+    const model = api.currentHeroModel();
+    if (model) shared.setModel(model);
+    return model;
+  }
+  return { shared, page, scope, ledger, api, sendProofs, intents, snapshot };
+}
+function heroCustody45(model) {
+  assert(model.personalInventory, "these transfer/config fixtures retain complete personal custody");
+  return [["HeroInventory", model.inventory], ["HeroEquipment", model.equipment], ["Inventory", model.personalInventory]]
+    .flatMap(([grid, items]) => items.flatMap((item, slot) => item ? [{ grid, slot, uid: item.uniqueId, count: item.count,
+      carrierUid: item.userItem.unique_id, carrierCount: item.userItem.count }] : []));
+}
+function heroLocation45(model, uid) {
+  return heroCustody45(model).filter(item => item.uid === uid).map(({ grid, slot, uid, count }) => ({ grid, slot, uid, count }));
+}
+function assertHeroSuccessChain45(spec) {
+  const f = heroSuccessPageFixture45(spec.setup), before = f.api.currentHeroModel(); assert(before);
+  const oldOwner = { ...f.shared.base.owner, socket: {}, connectionGeneration: 0 };
+  const envelope = f.shared.envelope(spec.action, spec.origin ?? "inventory");
+  assert.equal(f.shared.dispatch(envelope), true, "actual semantic sink must reach actual Page send");
+  assert.deepEqual(f.page.sent, [spec.wire]);
+  const proof = f.ledger.pending?.proof; assert(proof);
+  assert.equal(f.ledger.pending.state, "entered");
+  assert.deepEqual(f.sendProofs, [proof]);
+  assert.strictEqual(f.scope.heroSharedProofsRef.current.get(proof), f.intents[0]);
+  assert.strictEqual(f.scope.heroOperationsRef.current, f.ledger);
+  assert.equal(f.shared.dispatch(envelope), false, "an admitted serialized intent is never sent twice");
+  assert.equal(f.ledger.observe(before), false, "a complete model without the matching receipt cannot settle");
+  const serialBeforeWrongOwner = f.shared.base.authority.authoritySerial;
+  f.api.captureParitySnapshot({ ...f.shared.base.world, playerObjectId: 41 });
+  f.api.captureParitySnapshot({ ...f.shared.base.world, mapFileName: "wrong-map" });
+  assert.equal(f.shared.base.authority.authoritySerial, serialBeforeWrongOwner, "actual Page rejects mismatched owner snapshots before authority mutation");
+  assert.equal(f.shared.base.authority.receiveSnapshot(f.shared.base.world, oldOwner), false);
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  const beforeAck = f.snapshot(); assert(beforeAck);
+  assert(beforeAck.snapshotSerial > before.snapshotSerial, "a newer full snapshot really arrived before the ACK");
+  assert.equal(f.ledger.pending.state, "entered");
+  f.api.captureParityPacket(spec.packet, spec.badAck);
+  assert.equal(f.ledger.pending.state, "entered", "a wrong tuple cannot acknowledge the operation");
+  assert.equal(f.ledger.receipt(spec.packet, spec.ack, oldOwner, beforeAck.authoritySerial), false);
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  f.api.captureParityPacket(spec.packet, spec.ack);
+  assert.equal(f.ledger.pending.state, "acknowledged");
+  assert.equal(f.ledger.pending.success, true);
+  const ackSerial = f.ledger.pending.ackSerial;
+  assert(ackSerial >= beforeAck.authoritySerial);
+  assert.equal(f.ledger.observe(beforeAck), false, "the pre-ACK full model cannot satisfy the post-ACK barrier");
+  assert.equal(f.ledger.cancelDefinitelyUnsent(proof), false, "entered custody cannot be released as unsent");
+  // A genuinely separate old physical owner can have a higher local serial;
+  // neither that model nor its otherwise exact receipt settles this owner.
+  const foreign = new heroUi.HeroPlayerAuthority();
+  assert(foreign.receiveInformation(f.shared.base.info, oldOwner));
+  for (let i = 0; i <= ackSerial; i++) assert(foreign.receiveSnapshot(f.shared.base.world, oldOwner));
+  const foreignModel = foreign.read(oldOwner); assert(foreignModel);
+  assert(foreignModel.authoritySerial > ackSerial);
+  assert.equal(f.ledger.observe(foreignModel), false);
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  if (proof.crossPlayer) {
+    f.api.captureParityPacket("HeroInformation", { info: f.shared.base.info });
+    const onlyHero = f.api.currentHeroModel(); assert(onlyHero);
+    assert(onlyHero.informationSerial > ackSerial);
+    assert(onlyHero.personalSerial <= ackSerial);
+    assert.equal(f.ledger.pending.state, "acknowledged", "a new Hero-only full packet cannot complete personal custody");
+  }
+  assert.equal(f.snapshot({ ...f.shared.base.world, heroStats: undefined }), null);
+  assert.equal(f.ledger.pending.state, "acknowledged", "a newer partial/invalid read model cannot settle");
+  assert.strictEqual(f.ledger.pending.proof, proof);
+  spec.applyResult(f.shared.base);
+  const after = f.snapshot(); assert(after);
+  assert(after.snapshotSerial > ackSerial);
+  if (proof.crossPlayer) assert(after.personalSerial > ackSerial);
+  assert.equal(f.ledger.pending, null);
+  spec.assertResult(after, before);
+  const custody = heroCustody45(after);
+  assert.equal(new Set(custody.map(item => item.uid)).size, custody.length, "final authority has no duplicated instance custody");
+  for (const item of custody) {
+    assert.equal(item.carrierUid, item.uid); assert.equal(item.carrierCount, item.count);
+  }
+  assert.equal(f.shared.dispatch(envelope), false);
+  assert.equal(f.api.parityFinal({ ...proof.wire }, { heroProof: proof }, f.page.socket), false);
+  assert.equal(f.page.sent.length, 1);
+  assert.equal(f.sendProofs.length, 1);
+  // The completed proof and a duplicate old ACK cannot retire a new, unsent
+  // operation. This is deliberately a different tuple, not a claim to solve
+  // the legacy protocol's same-tuple late-ACK ambiguity.
+  const next = f.ledger.reserve(after, { kind: "autoPotValue", stat: 12, value: 7 }); assert(next);
+  assert.notEqual(next.id, proof.id);
+  assert.equal(f.ledger.cancelDefinitelyUnsent(proof), false);
+  f.api.captureParityPacket(spec.packet, spec.ack);
+  assert.strictEqual(f.ledger.pending.proof, next);
+  assert.equal(f.ledger.pending.state, "reserved");
+  assert.equal(f.page.sent.length, 1);
+  assert(f.ledger.cancelDefinitelyUnsent(next));
+  assert.equal(f.shared.calls.withdrawRaw, 0);
+  return { before, after, proof };
+}
+check("Hero shared Equip succeeds through actual Page single claim exact ACK and authoritative swap custody", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "equip", from: 4, to: 3 },
+    wire: { type: "equipItem", grid: "HeroInventory", uniqueId: 504, to: 3 }, packet: "EquipItem",
+    badAck: { grid: "HeroInventory", uniqueId: 505, to: 3, success: true },
+    ack: { grid: "HeroInventory", uniqueId: 504, to: 3, success: true },
+    applyResult(base) {
+      // hero_inventory::equip_item places the old equipment in the source cell.
+      const incoming = base.world.heroInventoryItems.find(item => item.uniqueId === 504);
+      const worn = base.world.heroEquipmentItems.find(item => item.uniqueId === 505);
+      base.world.heroInventoryItems = base.world.heroInventoryItems.filter(item => item.uniqueId !== 504);
+      base.world.heroInventoryItems.push({ ...worn, slot: 4 });
+      base.world.heroEquipmentItems = [{ ...incoming, slot: 3 }];
+    },
+    assertResult(after, before) {
+      assert.deepEqual(heroLocation45(before, 504), [{ grid: "HeroInventory", slot: 4, uid: 504, count: 1 }]);
+      assert.deepEqual(heroLocation45(after, 504), [{ grid: "HeroEquipment", slot: 3, uid: 504, count: 1 }]);
+      assert.deepEqual(heroLocation45(after, 505), [{ grid: "HeroInventory", slot: 4, uid: 505, count: 1 }]);
+      for (const uid of [501, 502, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared Remove null resolves the actual free bag cell then exact ACK and complete authority move the same UID", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "remove", from: 3, to: null }, origin: "character",
+    wire: { type: "removeItem", grid: "HeroInventory", uniqueId: 505, to: 3 }, packet: "RemoveItem",
+    badAck: { grid: "HeroInventory", uniqueId: 505, to: 1, success: true },
+    ack: { grid: "HeroInventory", uniqueId: 505, to: 3, success: true },
+    applyResult(base) {
+      const worn = base.world.heroEquipmentItems.find(item => item.uniqueId === 505);
+      base.world.heroEquipmentItems = []; base.world.heroInventoryItems.push({ ...worn, slot: 3 });
+    },
+    assertResult(after, before) {
+      assert.equal(after.equipment[3], null);
+      assert.deepEqual(heroLocation45(before, 505), [{ grid: "HeroEquipment", slot: 3, uid: 505, count: 1 }]);
+      assert.deepEqual(heroLocation45(after, 505), [{ grid: "HeroInventory", slot: 3, uid: 505, count: 1 }]);
+      for (const uid of [501, 502, 504, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared Merge exact source target ACK retires only after complete authority consumes the source and increases target count", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "merge", from: { grid: "HeroInventory", slot: 2 }, to: { grid: "HeroInventory", slot: 0 } },
+    wire: { type: "mergeItem", gridFrom: "HeroInventory", gridTo: "HeroInventory", idFrom: 502, idTo: 501 }, packet: "MergeItem",
+    badAck: { gridFrom: "HeroInventory", gridTo: "HeroInventory", idFrom: 501, idTo: 502, success: true },
+    ack: { gridFrom: "HeroInventory", gridTo: "HeroInventory", idFrom: 502, idTo: 501, success: true },
+    applyResult(base) {
+      const target = base.world.heroInventoryItems.find(item => item.uniqueId === 501);
+      target.quantity = 4; target.tooltipSource.userItem.count = 4;
+      base.world.heroInventoryItems = base.world.heroInventoryItems.filter(item => item.uniqueId !== 502);
+    },
+    assertResult(after, before) {
+      assert.equal(after.inventory[2], null); assert.deepEqual(heroLocation45(after, 502), []);
+      assert.deepEqual(heroLocation45(after, 501), [{ grid: "HeroInventory", slot: 0, uid: 501, count: 4 }]);
+      assert.equal(after.inventory[0].count, before.inventory[0].count + before.inventory[2].count);
+      for (const uid of [504, 505, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared Transfer successful exact ACK requires both full domains before personal UID becomes Hero custody", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "transfer", from: 3, to: 3 },
+    wire: { type: "transferHeroItem", from: 3, to: 3 }, packet: "TransferHeroItem",
+    badAck: { from: 3, to: 4, success: true }, ack: { from: 3, to: 3, success: true },
+    applyResult(base) {
+      const source = base.world.inventoryItems.find(item => item.uniqueId === 601);
+      base.world.inventoryItems = base.world.inventoryItems.filter(item => item.uniqueId !== 601);
+      base.world.heroInventoryItems.push({ ...source, slot: 3 });
+    },
+    assertResult(after, before) {
+      assert.deepEqual(heroLocation45(before, 601), [{ grid: "Inventory", slot: 3, uid: 601, count: 1 }]);
+      assert.equal(after.personalInventory[3], null);
+      assert.deepEqual(heroLocation45(after, 601), [{ grid: "HeroInventory", slot: 3, uid: 601, count: 1 }]);
+      for (const uid of [501, 502, 504, 505]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared TakeBack successful exact ACK requires both full domains before Hero stack becomes personal custody", () => {
+  assertHeroSuccessChain45({
+    action: { kind: "takeBack", from: 2, to: 4 },
+    wire: { type: "takeBackHeroItem", from: 2, to: 4 }, packet: "TakeBackHeroItem",
+    badAck: { from: 2, to: 5, success: true }, ack: { from: 2, to: 4, success: true },
+    applyResult(base) {
+      const source = base.world.heroInventoryItems.find(item => item.uniqueId === 502);
+      base.world.heroInventoryItems = base.world.heroInventoryItems.filter(item => item.uniqueId !== 502);
+      base.world.inventoryItems.push({ ...source, slot: 4 });
+    },
+    assertResult(after, before) {
+      assert.equal(after.inventory[2], null);
+      assert.deepEqual(heroLocation45(before, 502), [{ grid: "HeroInventory", slot: 2, uid: 502, count: 3 }]);
+      assert.deepEqual(heroLocation45(after, 502), [{ grid: "Inventory", slot: 4, uid: 502, count: 3 }]);
+      for (const uid of [501, 504, 505, 601]) assert.deepEqual(heroLocation45(after, uid), heroLocation45(before, uid));
+    },
+  });
+});
+check("Hero shared AutoPotValue HP and MP exact echoes wait for full authority with the requested changed threshold", () => {
+  for (const [stat, field, value] of [[12, "autoHpPercent", 55], [13, "autoMpPercent", 65]]) {
+    assertHeroSuccessChain45({
+      action: { kind: "autoPotValue", stat, value }, wire: { type: "setAutoPotValue", stat, value }, packet: "SetAutoPotValue",
+      badAck: { stat, value: value - 1 }, ack: { stat, value },
+      applyResult(base) { base.world.stage5Systems.hero[field] = value; },
+      assertResult(after, before) {
+        const own = stat === 12 ? "hpPercent" : "mpPercent", other = stat === 12 ? "mpPercent" : "hpPercent";
+        assert.notEqual(before[own], value); assert.equal(after[own], value); assert.equal(after[other], before[other]);
+        assert.equal(after.hpItemIndex, before.hpItemIndex); assert.equal(after.mpItemIndex, before.mpItemIndex);
+        assert.deepEqual(heroCustody45(after), heroCustody45(before));
+      },
+    });
+  }
+});
+check("Hero shared AutoPotItem HP MP selection and clear settle only with exact numeric echoes and final changed config", () => {
+  for (const [grid, statGrid, sourceField, worldField, resultField] of [
+    ["HeroHpItem", 23, "hp_item_index", "hpItemIndex", "hpItemIndex"],
+    ["HeroMpItem", 24, "mp_item_index", "mpItemIndex", "mpItemIndex"],
+  ]) for (const clear of [false, true]) {
+    const slot = clear ? null : 2, itemIndex = clear ? 0 : 10;
+    assertHeroSuccessChain45({
+      setup(base) { base.info[sourceField] = clear ? 10 : 0; base.world.stage5Systems.hero[worldField] = clear ? 10 : 0; },
+      action: { kind: "autoPotItem", grid, slot }, wire: { type: "setAutoPotItem", grid, itemIndex }, packet: "SetAutoPotItem",
+      badAck: { grid: statGrid === 23 ? 24 : 23, item_index: itemIndex }, ack: { grid: statGrid, item_index: itemIndex },
+      applyResult(base) { base.world.stage5Systems.hero[worldField] = itemIndex; },
+      assertResult(after, before) {
+        const other = resultField === "hpItemIndex" ? "mpItemIndex" : "hpItemIndex";
+        assert.notEqual(before[resultField], itemIndex); assert.equal(after[resultField], itemIndex);
+        assert.equal(after[other], before[other]); assert.equal(after.hpPercent, before.hpPercent); assert.equal(after.mpPercent, before.mpPercent);
+        assert.deepEqual(heroCustody45(after), heroCustody45(before));
+      },
+    });
+  }
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

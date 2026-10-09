@@ -69,6 +69,9 @@ use super::skills::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ItemState {
+    /// Server registry reference only; no hidden outcome or random seed.
+    #[serde(default, skip_serializing_if="Option::is_none")]
+    pub(super) stone_serial: Option<u64>,
     pub(super) key: String,
     pub(super) name: String,
     pub(super) icon: u16,
@@ -914,6 +917,7 @@ pub(super) fn embedded_item_state_from_template(
     slot: u8,
 ) -> ItemState {
     ItemState {
+        stone_serial: None,
         key: crystal_item_key_for_template(template),
         name: template.name.clone(),
         icon: template.image,

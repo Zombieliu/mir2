@@ -63,7 +63,7 @@ pub enum HeroPotGrid { HeroHpItem,HeroMpItem }
 pub enum HeroOrigin { Inventory,Character,Belt }
 #[derive(Debug,Clone,Serialize)]
 #[serde(tag="type",rename_all="camelCase")]
-pub enum HeroIntentBody { Action{origin:HeroOrigin,action:HeroSemanticAction,#[serde(rename="oldKey")] old_key:Option<u8>},Windows{windows:HeroWindows} }
+pub enum HeroIntentBody { Action{origin:HeroOrigin,action:HeroSemanticAction,#[serde(rename="oldKey")] old_key:Option<u8>,basis:crate::hero_action_basis::HeroActionBasis},Windows{windows:HeroWindows} }
 #[derive(Debug,Clone,Serialize)]
 #[serde(rename_all="camelCase")]
 pub struct HeroUiIntent { #[serde(flatten)] pub stamp:HeroStamp,pub intent_sequence:u64,#[serde(flatten)]pub body:HeroIntentBody }
@@ -92,6 +92,8 @@ pub struct HeroUiState { pub ui:HeroDialogModel,pub personal_open:bool,pub perso
     sequence:u64,intent_sequence:u64,next_use_ms:u64,confirmation:Option<Selected>,personal_drag:Option<[f32;2]>,
 }
 impl HeroUiState {
+    /// Escape belongs to this exact reducer state, including personal selection.
+    pub fn captures_escape(&self) -> bool { self.ui.modal() || self.selected.is_some() || self.held.is_some() }
     pub fn cancel(&mut self) { self.held=None;self.selected=None;self.last_click=None;self.confirmation=None;
         self.ui.armed=None;self.ui.hovered=None;self.ui.dragging=None;self.personal_drag=None;self.ui.selected=None;self.ui.amount=None;
         self.ui.use_confirmation=None;self.ui.assign=Default::default(); }
@@ -145,15 +147,16 @@ impl HeroUiState {
         if q.0.len()>=16 || self.intent_sequence>=MAX_SAFE {self.cancel();return;}
         self.intent_sequence+=1;q.0.push(HeroUiIntent{stamp:c.stamp.clone(),intent_sequence:self.intent_sequence,body});
     }
-    fn action(&mut self,c:&HeroUiContext,q:&mut HeroIntentQueue,origin:HeroOrigin,action:HeroSemanticAction,old_key:Option<u8>) {
+    fn action(&mut self,c:&HeroUiContext,m:&HeroUiReadModel,q:&mut HeroIntentQueue,origin:HeroOrigin,action:HeroSemanticAction,old_key:Option<u8>) {
         if c.pending || q.0.iter().any(|i|matches!(i.body,HeroIntentBody::Action{..})) {return;}
-        self.emit(c,q,HeroIntentBody::Action{origin,action,old_key});
+        let Some(basis)=crate::hero_action_basis::capture_action_basis(m,c.windows,&action,old_key) else{return;};
+        self.emit(c,q,HeroIntentBody::Action{origin,action,old_key,basis});
     }
     fn window_action(&mut self,c:&HeroUiContext,q:&mut HeroIntentQueue) {let windows=HeroWindows{inventory_open:self.ui.inventory_open,character_open:self.ui.character_open,
         character_page:self.ui.page.into(),belt_visible:self.ui.belt_visible,belt_vertical:self.ui.belt_vertical}; self.emit(c,q,HeroIntentBody::Windows{windows});}
     fn use_cell(&mut self,c:&HeroUiContext,m:&HeroUiReadModel,q:&mut HeroIntentQueue,cell:HeroCell,origin:HeroOrigin,confirmed:bool) {
         if c.pending || c.now_ms<self.next_use_ms || Self::item(m,cell).is_none() {return;}
-        if cell.grid==HeroGrid::HeroEquipment {if hero_dialog::item_use::remove_plan(&m.hero,cell.slot as u8).is_some() {self.action(c,q,origin,HeroSemanticAction::Remove{from:cell.slot,to:None},None);}return;}
+        if cell.grid==HeroGrid::HeroEquipment {if hero_dialog::item_use::remove_plan(&m.hero,cell.slot as u8).is_some() {self.action(c,m,q,origin,HeroSemanticAction::Remove{from:cell.slot,to:None},None);}return;}
         if cell.grid!=HeroGrid::HeroInventory {return;}
         let plan=hero_dialog::item_use::plan(&m.hero,cell.slot as u8);
         match plan {
@@ -161,7 +164,7 @@ impl HeroUiState {
                 if let Some(item)=Self::item(m,cell) {self.confirmation=Some(Selected{cell,item:item.clone(),origin});self.ui.use_confirmation=Some(packet);}
             }
             hero_dialog::item_use::HeroUsePlan::ConfirmPotion(_) | hero_dialog::item_use::HeroUsePlan::Packet(_)=> {
-                self.action(c,q,origin,HeroSemanticAction::Use{slot:cell.slot,confirmed},None);
+                self.action(c,m,q,origin,HeroSemanticAction::Use{slot:cell.slot,confirmed},None);
             } _=>{}
         }
     }
@@ -176,7 +179,7 @@ impl HeroUiState {
             self.ui.selected=None;
             if old.cell==cell {return;}
             if Self::item(m,old.cell)!=Some(&old.item) {return;}
-            if let Some(action)=cell_action(m,old.cell,cell,&old.item) {self.action(c,q,old.origin,action,None);return;}
+            if let Some(action)=cell_action(m,old.cell,cell,&old.item) {self.action(c,m,q,old.origin,action,None);return;}
         }
         self.selected=item.cloned().map(|item|Selected{cell,item,origin});
         self.ui.selected=self.selected.as_ref().filter(|s|s.cell.grid!=HeroGrid::Inventory).and_then(|s|s.item.unique_id.map(|id|(s.cell.grid==HeroGrid::HeroEquipment,s.cell.slot as u8,id)));
@@ -200,15 +203,15 @@ impl HeroUiState {
                     let a=&self.ui.assign;let valid=m.hero.info.as_ref().is_some_and(|i|i.object_id==a.actor && i.hp>0 && m.hero.session_epoch==a.epoch
                         && m.hero.hero_generation==a.generation && i.magics.iter().any(|m|Some(m.spell)==a.spell && m.key==a.old_key));
                     if valid && a.open {if a.key==0 && a.old_key==0 {self.ui.assign=Default::default();}else if let Some(spell)=a.spell {
-                        self.action(c,q,HeroOrigin::Character,HeroSemanticAction::MagicKey{spell:format!("{spell:?}"),key:a.key},Some(a.old_key));}}
+                        self.action(c,m,q,HeroOrigin::Character,HeroSemanticAction::MagicKey{spell:format!("{spell:?}"),key:a.key},Some(a.old_key));}}
                 }
                 HeroAction::AutoHp|HeroAction::AutoMp if !c.pending=>{if m.hero.info.as_ref().is_some_and(|i|i.auto_pot) {self.ui.amount=Some((if action==HeroAction::AutoHp{12}else{13},CrystalAmountInput::new(99)));}}
                 HeroAction::AmountCancel=>self.ui.amount=None,
-                HeroAction::AmountConfirm if !c.pending=> {if let Some((stat,input))=self.ui.amount.as_ref(){if let Some(value)=input.amount(){self.action(c,q,HeroOrigin::Inventory,HeroSemanticAction::AutoPotValue{stat:*stat,value},None);}}}
+                HeroAction::AmountConfirm if !c.pending=> {if let Some((stat,input))=self.ui.amount.as_ref(){if let Some(value)=input.amount(){self.action(c,m,q,HeroOrigin::Inventory,HeroSemanticAction::AutoPotValue{stat:*stat,value},None);}}}
                 HeroAction::AutoPotItem(hp) if !c.pending=> {
                     let selected=self.selected.as_ref();let slot=selected.filter(|s|s.cell.grid==HeroGrid::HeroInventory && Self::item(m,s.cell)==Some(&s.item)
                         && s.item.tooltip_source.as_ref().is_some_and(|t|t.info.item_type==13 && t.info.shape<=1)).map(|s|s.cell.slot);
-                    if selected.is_none() || slot.is_some() {self.action(c,q,HeroOrigin::Inventory,HeroSemanticAction::AutoPotItem{grid:if hp{HeroPotGrid::HeroHpItem}else{HeroPotGrid::HeroMpItem},slot},None);}
+                    if selected.is_none() || slot.is_some() {self.action(c,m,q,HeroOrigin::Inventory,HeroSemanticAction::AutoPotItem{grid:if hp{HeroPotGrid::HeroHpItem}else{HeroPotGrid::HeroMpItem},slot},None);}
                 }
                 HeroAction::UseCancel=>{self.confirmation=None;self.ui.use_confirmation=None;}
                 HeroAction::UseConfirm if !c.pending=> {if let Some(draft)=self.confirmation.clone(){if Self::item(m,draft.cell)==Some(&draft.item)
@@ -230,7 +233,7 @@ impl HeroUiState {
         if edge.phase=="cancel" {if self.held.as_ref().is_some_and(|h|h.pointer!=edge.pointer_id){return false;}self.cancel();return true;}
         if !c.active || !c.ready || !c.input_enabled || !c.presentation.is_some_and(HeroPresentation::fits) {self.cancel();return false;}
         if edge.phase=="key" {
-            if edge.key=="Escape" {let consumed=self.ui.modal()||self.selected.is_some()||self.held.is_some();self.cancel();return consumed;}
+            if edge.key=="Escape" {let consumed=self.captures_escape();self.cancel();return consumed;}
             if self.ui.amount.is_some() {
                 if edge.key=="Enter" {self.activate(c,m,q,Hit::Hero(None,Some(HeroAction::AmountConfirm)));}
                 else if let Some((_,input))=self.ui.amount.as_mut(){if edge.key=="Backspace" {input.backspace();}else if edge.control && edge.key=="KeyA"{input.select_all=true;}else if !edge.control{input.push_text(&edge.text);}}
@@ -272,7 +275,7 @@ impl HeroUiState {
             if let Some(to)=hit {
                 if held.hit==to {self.activate(c,m,q,to);}else if let (Some((from,origin)),Some((dest,_)))=(Self::cell(held.hit),Self::cell(to)){
                     if origin!=HeroOrigin::Belt {self.ui.selected=None;self.last_click=None;self.selected=Self::item(m,from).cloned().map(|item|Selected{cell:from,item,origin});
-                        if let Some(source)=self.selected.take(){if let Some(action)=cell_action(m,source.cell,dest,&source.item){self.action(c,q,origin,action,None);}}}
+                        if let Some(source)=self.selected.take(){if let Some(action)=cell_action(m,source.cell,dest,&source.item){self.action(c,m,q,origin,action,None);}}}
                 }
             }return true;
         } false
@@ -370,6 +373,25 @@ impl Plugin for Mir2PortableHeroUiPlugin{fn build(&self,app:&mut App){app.init_r
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn escape_capture_uses_actual_private_selection_held_and_modal_state() {
+        let c=context();let m=model();let mut state=HeroUiState::default();let mut intents=HeroIntentQueue::default();
+        state.reconcile(&c,&m);assert!(!state.captures_escape());
+        assert!(state.process(&c,&m,edge(&c,1,7,"down",2.,2.,0),&mut intents));
+        assert!(state.captures_escape());state.cancel();assert!(!state.captures_escape());
+        state.selected=Some(Selected {cell:HeroCell {grid:HeroGrid::Inventory,slot:0},
+            item:ItemModel::default(),origin:HeroOrigin::Inventory});
+        assert!(state.ui.selected.is_none());assert!(state.captures_escape());
+        let mut escape=edge(&c,2,7,"key",0.,0.,0);escape.key="Escape".into();
+        assert!(state.process(&c,&m,escape.clone(),&mut intents));assert!(!state.captures_escape());
+        escape.sequence=3;assert!(!state.process(&c,&m,escape.clone(),&mut intents));assert!(intents.0.is_empty());
+        state.ui.amount=Some((12,CrystalAmountInput::new(99)));
+        assert!(state.ui.modal());assert!(state.captures_escape());
+        escape.sequence=4;assert!(state.process(&c,&m,escape,&mut intents));
+        assert!(!state.captures_escape());assert!(state.ui.amount.is_none());assert!(intents.0.is_empty());
+    }
+
     fn context() -> HeroUiContext {
         HeroUiContext { stamp:HeroStamp {scope:HeroScope {run_generation:1,connection_generation:1,session_generation:1,
             scene_revision:1,player_object_id:42,map_file_name:"TestMap".into()},hero_object_id:12,hero_generation:1,
@@ -382,8 +404,22 @@ mod tests {
     fn edge(c:&HeroUiContext,sequence:u64,pointer_id:u64,phase:&str,x:f32,y:f32,button:u8)->HeroInputEdge {
         HeroInputEdge {stamp:c.stamp.clone(),sequence,pointer_id,phase:phase.into(),x,y,button,key:String::new(),text:String::new(),control:false,shift:false}
     }
+    fn test_basis(c:&HeroUiContext,action:&HeroSemanticAction,old_key:Option<u8>)->crate::hero_action_basis::HeroActionBasis {
+        let mut read=crate::hero_action_basis::tests::read_model();
+        read.hero.info.as_mut().unwrap().object_id=c.stamp.hero_object_id;
+        if let HeroSemanticAction::Use{slot,..}=action {
+            crate::hero_action_basis::tests::add(&mut read,HeroGrid::HeroInventory,*slot,7,1,1,13);
+        } else {
+            read.hero.info.as_mut().unwrap().magics.push(serde_json::from_value(serde_json::json!({
+                "name":"Fire Ball","spell":"FireBall","base_cost":1,"level_cost":0,"icon":1,"level1":1,
+                "level2":2,"level3":3,"need1":1,"need2":2,"need3":3,"level":1,"key":17,
+                "experience":0,"delay":100,"range":8,"cast_time":0})).unwrap());
+        }
+        crate::hero_action_basis::capture_action_basis(&read,c.windows,action,old_key).unwrap()
+    }
     fn intent(c:&HeroUiContext,confirmed:bool)->HeroUiIntent {HeroUiIntent {stamp:c.stamp.clone(),intent_sequence:1,
-        body:HeroIntentBody::Action {origin:HeroOrigin::Inventory,action:HeroSemanticAction::Use {slot:2,confirmed},old_key:None}}}
+        body:HeroIntentBody::Action {origin:HeroOrigin::Inventory,action:HeroSemanticAction::Use {slot:2,confirmed},old_key:None,
+            basis:test_basis(c,&HeroSemanticAction::Use {slot:2,confirmed},None)}}}
 
     #[test]
     fn close_hero_inventory_removes_personal_hit_region_in_the_same_reducer_frame() {
@@ -464,7 +500,8 @@ mod tests {
     fn hero_intent_encodes_host_old_key_without_native_pending() {
         let c=context();let m=model();let mut state=HeroUiState::default();state.reconcile(&c,&m);
         let intent=HeroUiIntent {stamp:c.stamp.clone(),intent_sequence:1,body:HeroIntentBody::Action {origin:HeroOrigin::Character,
-            action:HeroSemanticAction::MagicKey {spell:"FireBall".into(),key:18},old_key:Some(17)}};
+            action:HeroSemanticAction::MagicKey {spell:"FireBall".into(),key:18},old_key:Some(17),
+            basis:test_basis(&c,&HeroSemanticAction::MagicKey {spell:"FireBall".into(),key:18},Some(17))}};
         let encoded=serde_json::to_value(&intent).unwrap();assert_eq!(encoded["oldKey"],17);assert!(encoded.get("old_key").is_none());
         state.accepted(&intent,true,100);assert!(state.ui.assign.pending.is_none());assert!(state.ui.pending.is_none());
     }
@@ -514,6 +551,24 @@ mod tests {
         assert!(state.process(&c,&m,edge(&c,2,7,"down",2.,2.,0),&mut q));assert!(state.ui.dragging.is_some());
         c.presentation=None;assert!(!state.process(&c,&m,edge(&c,3,7,"move",400.,400.,0),&mut q));
         assert!(state.held.is_none());assert!(state.ui.dragging.is_none());assert!(q.0.is_empty());
+    }
+
+    #[test]
+    fn hero_reducer_real_actions_include_basis_and_window_intents_have_no_basis() {
+        let c=context();let mut read=crate::hero_action_basis::tests::read_model();
+        crate::hero_action_basis::tests::add(&mut read,HeroGrid::HeroInventory,2,u64::MAX,1,1,13);
+        let mut state=HeroUiState::default();state.reconcile(&c,&read);let mut q=HeroIntentQueue::default();
+        state.use_cell(&c,&read,&mut q,HeroCell{grid:HeroGrid::HeroInventory,slot:2},HeroOrigin::Inventory,false);
+        assert_eq!(q.0.len(),1);
+        let HeroIntentBody::Action{basis,action,..}=&q.0[0].body else{panic!("actual action");};
+        assert_eq!(*action,HeroSemanticAction::Use{slot:2,confirmed:false});
+        assert_eq!(basis.version,1);assert_eq!(basis.resolved_wire["uniqueId"],u64::MAX.to_string());
+        assert!(serde_json::to_vec(basis).unwrap().len()<=crate::hero_action_basis::MAX_ACTION_BASIS_BYTES);
+        q.0.clear();read.hero.inventory_view.items[0].tooltip_source=None;
+        state.use_cell(&c,&read,&mut q,HeroCell{grid:HeroGrid::HeroInventory,slot:2},HeroOrigin::Inventory,false);
+        assert!(q.0.is_empty());
+        state.window_action(&c,&mut q);
+        let json=serde_json::to_value(&q.0[0]).unwrap();assert_eq!(json["type"],"windows");assert!(json.get("basis").is_none());
     }
 
 }

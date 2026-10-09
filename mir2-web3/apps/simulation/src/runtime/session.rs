@@ -1869,6 +1869,11 @@ fn apply_shared_trade_offer(
             &mut item,
             &staged_inventory,
         );
+        // A sealed stone's registry refers to the original physical UID.
+        // Legacy collision repair must not turn it into a different carrier.
+        if item.stone_serial.is_some() && item.unique_id != offered_item.unique_id {
+            return trade_offer_delivery_failed_packets(world, rollback);
+        }
         let Ok(user_item) = try_user_item_from_item_state(&item) else {
             return trade_offer_delivery_failed_packets(world, rollback);
         };

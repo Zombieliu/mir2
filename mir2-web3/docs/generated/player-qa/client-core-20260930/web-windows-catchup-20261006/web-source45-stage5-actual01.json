@@ -1,0 +1,63 @@
+{
+  "owner": "Root",
+  "kind": "Actual Source45 original Stage5 runner output",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01.config.json",
+    "bytes": 4372,
+    "sha256": "0d7502afeb746421e1584784b9b0e406b171c18f148bf86b7be67583ee4f91b9"
+  },
+  "source": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01-source.json",
+    "bytes": 5965630,
+    "sha256": "61c9d932aab9943e91c35e986a7ac47e4d693b504d84dfc895a1d8eb2d1eafbb"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01-review.json",
+    "bytes": 1054,
+    "sha256": "51926f5cc5da1fd6b8fc8d27053d86a30bea46737834e81c98e043c2bb3cc20b"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01.stdout.log",
+    "bytes": 206,
+    "sha256": "3f9e803b99259e33907c84b797b41023bf52bc414099abdb065f9711ccbfff1f"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01.outer.json",
+    "bytes": 517,
+    "sha256": "6899391140ed138a4eed629e8f406f9d1fbb13008e287767ed8811737f3993f2"
+  },
+  "outerValue": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 187428,
+    "kind": "Source45 original Stage5 Hero successful result finite regression",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 3494,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-stage5-01.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdoutText": "stage5 adapter tests passed (501 groups)\n✔ scripts\\test-stage5-adapters.mjs (3414.7254ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3423.3016\n",
+  "stderrText": "",
+  "independentSourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-hero-success-tests-independent-review01.json",
+    "bytes": 6771,
+    "sha256": "82872aac93b4c4c5fa748cc0de6fceb9456ebdb391c5fce366a857c341c3dd22"
+  },
+  "logicalGroups": 501,
+  "priorLogicalGroups": 494,
+  "newLogicalGroups": 7,
+  "positiveScenarios": 11,
+  "tapFileTests": 1,
+  "qualification": "Actual finite TS/Page module execution with supplied authoritative result fixtures; no real server/renderer/Ready or player verification."
+}

@@ -226,6 +226,14 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   bevyHudBarReadLivePlans?: () => import("../../lib/bevy-hud-bar-draw-plan").CurrentHudBarPlans | null;
   onHpOrbLocalOverlayChange?: (blocked: boolean) => void;
   bevyBagUiActive?: boolean;
+  bevyHeroUiActive?: boolean;
+  bevyHeroUiTransitioning?: boolean;
+  bevyHeroUiToken?: string | null;
+  bevyHeroUiWorldBlocked?: boolean;
+  getBevyHeroInputBlocked?: () => boolean;
+  getBevyHeroPointerContext?: () => import("../../lib/bevy-hero-host").HeroPointerContext | null;
+  onBevyHeroPointer?: (edge: import("../../lib/bevy-hero-host").HeroPointerEdge) => boolean;
+  onBevyHeroKey?: (edge: import("../../lib/bevy-hero-host").HeroKeyEdge) => boolean;
   bevyNpcShopUiActive?: boolean;
   bevyNpcShopUiTransitioning?: boolean;
   getBevyNpcShopInputBlocked?: () => boolean;
@@ -348,6 +356,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onTurnCashPreview?: (direction: number, right: boolean) => number | null;
   onGameShopVisibilityChange?: (open: boolean) => void;
   onHeroShortcut?: (key: string, ctrl: boolean, alt: boolean, shift: boolean, repeat: boolean) => boolean;
+  parityUiWorldBlocked?: boolean;
   parityUiBlocksGameplay?: () => boolean;
   crystalKeyBindings?: readonly CrystalKeyBinding[];
   playerUiPreferences?: Readonly<PlayerUiPreferences>;

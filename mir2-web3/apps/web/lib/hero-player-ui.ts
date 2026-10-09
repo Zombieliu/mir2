@@ -11,6 +11,8 @@ export type HeroItem = Readonly<{
 }>;
 export type HeroMagic = Readonly<{ spell: string; name: string; icon: number; key: number; level: number; raw: Readonly<Row> }>;
 export type HeroSkillKeyAck = Readonly<{ requestId: number; spell: string; key: number; oldKey: number; accepted: boolean }>;
+export type HeroPlannerSource = Readonly<{ hp: number; mp: number; level: number; experience: number | string; maxExperience: number | string }>;
+export type HeroDisplaySource = HeroPlannerSource & Readonly<{ maxHp: number; maxMp: number; hair: number | null }>;
 export type HeroPlayerModel = Readonly<{
   owner: HeroUiOwner; actor: HeroActor; sourceKey: string; authoritySerial: number;
   informationSerial: number; snapshotSerial: number; personalSerial: number; skillSnapshotSerial: number;
@@ -21,6 +23,8 @@ export type HeroPlayerModel = Readonly<{
   stats: readonly Readonly<{ stat: number; value: number }>[];
   weights: Readonly<{ bag: number; wear: number; hand: number }>;
   skillKeyAck: HeroSkillKeyAck | null;
+  /** Independent packet planner and current owner painter domains, captured before publication. */
+  plannerSource?: HeroPlannerSource; displaySource?: HeroDisplaySource;
 }>;
 export type HeroGrid = "HeroInventory" | "HeroEquipment" | "Inventory";
 export type HeroCell = Readonly<{ grid: HeroGrid; slot: number }>;
@@ -38,6 +42,68 @@ export type HeroUiAction =
 export type HeroWire = Readonly<Record<string, string | number>>;
 export type HeroActionPlan = Readonly<{ wire: HeroWire; confirmationRequired: boolean; crossPlayer: boolean }>;
 export type HeroActionDto = Readonly<{ actor: HeroActor; owner: HeroUiOwner; sourceKey: string; action: HeroUiAction }>;
+
+export type HeroBasisWindows = Readonly<{inventoryOpen:boolean;characterOpen:boolean;characterPage:"equipment"|"status"|"state"|"skills";beltVisible:boolean;beltVertical:boolean}>;
+export type HeroActionBasis = Readonly<{version:1;actor:Readonly<{objectId:number;name:string;class:string;gender:string;spawned:boolean}>;
+  windows:HeroBasisWindows;cells:readonly Readonly<{grid:HeroGrid;slot:number;capacity:number;item:null|Readonly<{uid:string;itemIndex:number;count:number}>}>[];
+  facts:Readonly<Record<string,unknown>>;resolvedWire:Readonly<Record<string,string|number>>;confirmationRequired:boolean;crossPlayer:boolean}>;
+/** An action witness, independently derived from the frozen Web owner model.
+ * It never supplies a model to the Rust planner or broadens the legacy wire ABI. */
+export function captureHeroActionBasis(model:HeroPlayerModel,action:HeroUiAction,windows:HeroBasisWindows):HeroActionBasis|null {
+  try {
+    const plan=planHeroAction(model,action);if(!plan)return null;
+    const selected:HeroCell[]=[],policySelected:HeroCell[]=[];let target:{mode:"none"|"explicit"|"automatic";slot:number|null}={mode:"none",slot:null};
+    let requirement:Readonly<{passed:boolean;statValue:number|null}>|null=null;
+    let restock:Readonly<{belt:number;from:number;uid:string;itemIndex:number}>|null=null;
+    const add=(grid:HeroGrid,slot:number,usesPolicy=true)=>{const cell={grid,slot};if(!available(model,cell))throw Error("Hero basis cell unavailable");
+      if(!selected.some(c=>c.grid===grid&&c.slot===slot))selected.push(cell);
+      if(usesPolicy&&!policySelected.some(c=>c.grid===grid&&c.slot===slot))policySelected.push(cell);};
+    const policy=(item:HeroItem)=>{const base=item.tooltipSource.info as Row,effective=item.info;
+      return {base:{itemIndex:base.item_index,itemType:base.item_type,shape:base.shape,stackSize:base.stack_size},
+        effective:{itemIndex:effective.item_index,itemType:effective.item_type,shape:effective.shape,stackSize:effective.stack_size,
+          requiredClass:effective.required_class,requiredGender:effective.required_gender,requiredType:effective.required_type,requiredAmount:effective.required_amount}};};
+    const requireItem=(slot:number)=>{const item=at(model,{grid:"HeroInventory",slot});if(!item)throw Error("Hero basis source absent");
+      const stat=({1:1,2:3,3:5,4:7,5:9,7:0,8:2,9:4,10:6,11:8} as Record<number,number>)[item.info.required_type as number];
+      requirement={passed:heroRequirements(model,item),statValue:stat===undefined?null:model.stats.find(s=>s.stat===stat)?.value??0};return item;};
+    switch(action.kind){
+      case "move":case "equip":add("HeroInventory",action.from);add(action.kind==="move"?"HeroInventory":"HeroEquipment",action.to);
+        target={mode:"explicit",slot:action.to};if(action.kind==="equip")requireItem(action.from);break;
+      case "merge":add(action.from.grid,action.from.slot);add(action.to.grid,action.to.slot);target={mode:"explicit",slot:action.to.slot};break;
+      case "transfer":case "takeBack":add(action.kind==="transfer"?"Inventory":"HeroInventory",action.from);
+        add(action.kind==="transfer"?"HeroInventory":"Inventory",action.to);target={mode:"explicit",slot:action.to};break;
+      case "remove":add("HeroEquipment",action.from);target={mode:action.to===undefined?"automatic":"explicit",slot:plan.wire.to as number};
+        if(action.to===undefined){for(let slot=0;slot<model.inventory.length;slot++)add("HeroInventory",slot,false);}else add("HeroInventory",action.to);break;
+      case "use":{
+        add("HeroInventory",action.slot);const item=requireItem(action.slot),type=item.info.item_type;
+        if(type===6)add("HeroEquipment",6);if(type===7)add("HeroEquipment",8);
+        if(plan.wire.type==="equipItem"){target={mode:"automatic",slot:plan.wire.to as number};add("HeroEquipment",target.slot!);}
+        if(plan.wire.type==="mergeItem"){const slot=model.equipment.findIndex(i=>i&&String(i.uniqueId)===String(plan.wire.idTo));
+          if(slot<0)throw Error("Hero basis target absent");target={mode:"automatic",slot};add("HeroEquipment",slot);}
+        if(plan.wire.type==="useItem"&&action.slot<=1&&item.count===1){for(let slot=0;slot<model.inventory.length;slot++)add("HeroInventory",slot,false);
+          const candidate=heroRestockCandidate(model,action.slot);if(candidate)restock={belt:candidate.belt,from:candidate.from,uid:String(candidate.uniqueId),itemIndex:candidate.itemIndex};}
+        break;}
+      case "autoPotItem":if(action.slot!==null){add("HeroInventory",action.slot);target={mode:"explicit",slot:action.slot};}break;
+      case "autoPotValue":case "magicKey":break;
+    }
+    const rank={HeroInventory:0,HeroEquipment:1,Inventory:2};selected.sort((a,b)=>rank[a.grid]-rank[b.grid]||a.slot-b.slot);
+    const cells=selected.map(cell=>{const item=at(model,cell),list=cell.grid==="HeroInventory"?model.inventory:cell.grid==="HeroEquipment"?model.equipment:model.personalInventory!;
+      if(item&&!exactId(item.uniqueId))throw Error("Hero basis invalid UID");
+      return {...cell,capacity:list.length,item:item?{uid:String(item.uniqueId),itemIndex:item.itemIndex,count:item.count}:null};});
+    policySelected.sort((a,b)=>rank[a.grid]-rank[b.grid]||a.slot-b.slot);
+    const policies=policySelected.flatMap(cell=>{const item=at(model,cell);return item?[{...cell,...policy(item)}]:[];});
+    const keys=action.kind==="magicKey"?model.magics.map(m=>({spell:m.spell,key:m.key})).sort((a,b)=>a.spell<b.spell?-1:a.spell>b.spell?1:0):[];
+    const resolvedWire=Object.fromEntries(Object.entries(plan.wire).map(([k,v])=>[k,["uniqueId","idFrom","idTo"].includes(k)?String(v):v]));
+    const basis:HeroActionBasis={version:1,actor:{objectId:model.actor.objectId,name:model.actor.name,class:model.actor.class,gender:model.actor.gender,spawned:model.spawned},
+      windows:{...windows},cells,facts:{hp:plannerHp(model),level:plannerLevel(model),riding:model.riding,autoPot:model.autoPot,policies,requirement,target,keys,restock,confirmed:action.kind==="use"&&action.confirmed===true},
+      resolvedWire,confirmationRequired:plan.confirmationRequired,crossPlayer:plan.crossPlayer};
+    return new TextEncoder().encode(canonical(basis)).byteLength<=16384?freeze(basis):null;
+  }catch{return null;}
+}
+export function heroActionBasisMatches(basis:unknown,model:HeroPlayerModel,action:HeroUiAction,windows:HeroBasisWindows):boolean {
+  const expected=captureHeroActionBasis(model,action,windows);
+  try{return expected!==null&&canonical(basis)===canonical(expected);}catch{return false;}
+}
+
 export type HeroRestockCandidate = Readonly<{ actor: HeroActor; owner: HeroUiOwner; belt: number; from: number; uniqueId: number; itemIndex: number }>;
 
 const row = (v: unknown): v is Row => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -51,9 +117,13 @@ const capacities = [10, 18, 26, 34, 42];
 const i32 = (v: unknown): v is number => int(v, -2147483648, 2147483647);
 const exactId = (v: unknown): v is number | string => int(v, 1) || typeof v === "string"
   && /^[1-9][0-9]{0,19}$/.test(v) && BigInt(v) <= 18446744073709551615n;
-const exactExperience = (v: unknown): v is number | string => int(v, 0) || typeof v === "string"
-  && /^(?:0|[1-9][0-9]{0,18})$/.test(v) && BigInt(v) <= 9223372036854775807n;
-const sameId = (a: unknown, b: unknown) => exactId(a) && exactId(b) && String(a) === String(b);
+const sourceId = (v: unknown): v is number | string => int(v, 0) && !Object.is(v, -0) || typeof v === "string"
+  && /^(?:0|[1-9][0-9]{0,19})$/.test(v) && BigInt(v) <= 18446744073709551615n;
+const exactExperience = (v: unknown): v is number | string => int(v, -Number.MAX_SAFE_INTEGER) && !Object.is(v, -0) || typeof v === "string"
+  && /^(?:0|-?[1-9][0-9]{0,18})$/.test(v) && BigInt(v) >= -9223372036854775808n && BigInt(v) <= 9223372036854775807n;
+const sameId = (a: unknown, b: unknown) => sourceId(a) && sourceId(b) && String(a) === String(b);
+const plannerHp = (model: HeroPlayerModel): number => model.plannerSource?.hp ?? model.hp;
+const plannerLevel = (model: HeroPlayerModel): number => model.plannerSource?.level ?? model.level;
 /** Stable serialization is a proof of the entire source, never an instance ID. */
 function canonical(value: unknown): string {
   if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);
@@ -83,7 +153,7 @@ function sameActor(a: HeroActor, b: HeroActor): boolean {
   return a.objectId === b.objectId && a.name === b.name && a.class === b.class && a.gender === b.gender && a.generation === b.generation;
 }
 function userItem(v: unknown, depth = 0): v is Row {
-  if (!row(v) || depth > 8 || !exactId(v.unique_id) || !i32(v.item_index) || !int(v.count, 1, 65535)) return false;
+  if (!row(v) || depth > 8 || !sourceId(v.unique_id) || !i32(v.item_index) || !int(v.count, 1, 65535)) return false;
   for (const k of ["current_dura", "max_dura", "gem_count"]) if (!int(v[k], 0, 65535)) return false;
   for (const k of ["soul_bound_id", "refine_success_chance", "wedding_ring"]) if (!i32(v[k])) return false;
   for (const k of ["awake_type", "refined_value", "refine_added"]) if (!int(v[k], 0, 255)) return false;
@@ -99,7 +169,7 @@ function nullableItems(v: unknown, count: number): v is (Row | null)[] {
 function custodyIds(items: readonly (HeroItem | Row | null)[]): string[] {
   const result: string[] = [];
   const visit = (raw: Row) => {
-    result.push(String(raw.unique_id));
+    if (String(raw.unique_id) !== "0") result.push(String(raw.unique_id));
     for (const child of raw.slots as (Row | null)[]) if (child) visit(child);
   };
   for (const item of items) if (item) visit("userItem" in item ? item.userItem as Row : item as Row);
@@ -109,7 +179,7 @@ function magic(v: unknown): v is Row {
   if (!row(v) || !text(v.name) || !text(v.spell) || !key(v.key)) return false;
   for (const k of ["base_cost", "level_cost", "icon", "level1", "level2", "level3", "level", "range"]) if (!int(v[k], 0, 255)) return false;
   for (const k of ["need1", "need2", "need3", "experience"]) if (!int(v[k], 0, 65535)) return false;
-  return int(v.delay, -Number.MAX_SAFE_INTEGER) && int(v.cast_time, -Number.MAX_SAFE_INTEGER);
+  return exactExperience(v.delay) && exactExperience(v.cast_time);
 }
 function information(v: unknown): v is Row {
   if (!row(v) || !int(v.object_id, 1, 4294967295) || !text(v.name) || !classes.includes(String(v.class))
@@ -140,25 +210,27 @@ function sparseItems(v: unknown, capacity: number, personal = false): (HeroItem 
     if (!row(raw) || !["bag1", "bag2", "belt"].includes(String(raw.container)) || !int(raw.slot, 0, personal ? 39 : capacity - 1)) return null;
     const slot = personal && raw.container === "bag2" ? raw.slot + 40 : raw.slot;
     if ((personal && raw.container === "belt") || slot >= capacity || result[slot] !== null
-      || !exactId(raw.uniqueId) || ids.has(String(raw.uniqueId)) || !int(raw.quantity, 1, 65535)
+      || !sourceId(raw.uniqueId) || (String(raw.uniqueId) !== "0" && ids.has(String(raw.uniqueId))) || !int(raw.quantity, 1, 65535)
       || !text(raw.name) || !int(raw.icon, 0, 65535) || !row(raw.tooltipSource)
       || !userItem(raw.tooltipSource.userItem) || !sameId(raw.tooltipSource.userItem.unique_id, raw.uniqueId)
       || raw.tooltipSource.userItem.count !== raw.quantity || !itemInfo(raw.tooltipSource.info, raw.tooltipSource.userItem.item_index)
       || (raw.tooltipSource.realInfo != null && (!row(raw.tooltipSource.realInfo)
         || !itemInfo(raw.tooltipSource.realInfo, raw.tooltipSource.realInfo.item_index)))) return null;
     const info = raw.tooltipSource.realInfo ?? raw.tooltipSource.info;
-    ids.add(String(raw.uniqueId));
+    if (String(raw.uniqueId) !== "0") ids.add(String(raw.uniqueId));
     result[slot] = { slot, uniqueId: raw.uniqueId, itemIndex: raw.tooltipSource.userItem.item_index as number,
       count: raw.quantity, name: raw.name, icon: raw.icon, userItem: raw.tooltipSource.userItem,
       info: info as Row, tooltipSource: raw.tooltipSource };
   }
   return result;
 }
-function enrich(items: (Row | null)[], catalog: readonly (HeroItem | null)[]): (HeroItem | null)[] | null {
+function enrich(items: (Row | null)[], catalog: readonly (HeroItem | null)[], ownGrid: readonly (HeroItem | null)[]): (HeroItem | null)[] | null {
   const result: (HeroItem | null)[] = [];
   for (const [slot, raw] of items.entries()) {
     if (!raw) { result.push(null); continue; }
-    const view = catalog.find(v => v !== null && sameId(v.uniqueId, raw.unique_id) && v.itemIndex === raw.item_index);
+    // Anonymous legacy items have no identity for cross-grid matching.
+    const choices = String(raw.unique_id) === "0" ? [ownGrid[slot]] : catalog;
+    const view = choices.find(v => v != null && sameId(v.uniqueId, raw.unique_id) && v.itemIndex === raw.item_index);
     if (!view) return null;
     result.push({ ...view, slot, count: raw.count as number, userItem: raw,
       tooltipSource: { ...view.tooltipSource, userItem: raw } });
@@ -174,6 +246,103 @@ function skillAck(v: unknown): HeroSkillKeyAck | null {
     ? v as HeroSkillKeyAck : null;
 }
 
+export const MAX_HERO_SOURCE_WITNESS_BYTES = 65536;
+/** V1 contains actual model data only. It cannot supply action or item custody. */
+export function createHeroSourceWitness(model: HeroPlayerModel): string | null {
+  try {
+    const planner = model.plannerSource, display = model.displaySource;
+    if (!Object.isFrozen(model) || !planner || !display || !Object.isFrozen(planner) || !Object.isFrozen(display)
+      || !int(model.actor.objectId, 1, 4294967295) || !witnessText(model.actor.name)
+      || !classes.includes(model.actor.class) || !genders.includes(model.actor.gender) || typeof model.spawned !== "boolean"
+      || !sourceTuple(planner) || !sourceTuple(display) || !i32(display.maxHp) || !i32(display.maxMp)
+      || !(display.hair === null || int(display.hair, 0, 255))
+      || !(model.riding === null || typeof model.riding === "boolean") || typeof model.autoPot !== "boolean"
+      || !int(model.hpPercent, 0, 99) || !int(model.mpPercent, 0, 99) || !i32(model.hpItemIndex) || !i32(model.mpItemIndex)
+      || !capacities.includes(model.inventoryCapacity) || model.inventory.length !== model.inventoryCapacity
+      || model.equipment.length !== 14) return null;
+    const ids = new Set<string>();
+    const slots = (items: readonly (HeroItem | null)[], max: number) => {
+      if (!Array.isArray(items) || items.length > max) throw Error("Hero witness slot bound");
+      return Array.from(items, (item, slot) => {
+        if (item === null) return null;
+        if (!row(item) || item.slot !== slot || !sourceId(item.uniqueId) || !i32(item.itemIndex) || !int(item.count, 1, 65535)
+          || !userItem(item.userItem) || !row(item.tooltipSource) || !userItem(item.tooltipSource.userItem)
+          || !sameId(item.uniqueId, item.userItem.unique_id) || !sameId(item.uniqueId, item.tooltipSource.userItem.unique_id)
+          || item.itemIndex !== item.userItem.item_index || item.itemIndex !== item.tooltipSource.userItem.item_index
+          || item.count !== item.userItem.count || item.count !== item.tooltipSource.userItem.count
+          || !row(item.tooltipSource.info) || item.tooltipSource.info.item_index !== item.itemIndex) throw Error("Hero witness slot mismatch");
+        const uid = String(item.uniqueId);
+        if (uid !== "0" && ids.has(uid)) throw Error("Hero witness duplicate UID");
+        if (uid !== "0") ids.add(uid);
+        return { uid, itemIndex: item.itemIndex, count: item.count };
+      });
+    };
+    const inventory = slots(model.inventory, 42), equipment = slots(model.equipment, 14);
+    const personalInventory = model.personalInventory === null ? null : slots(model.personalInventory, 80);
+    const stats = statBlock(model.stats);
+    if (!stats || !Array.isArray(model.magics) || model.magics.length > 256) return null;
+    const weights = model.weights;
+    if (!(weights === null || row(weights) && [weights.bag, weights.wear, weights.hand].every(i32))) return null;
+    const spells = new Set<string>(), assigned = new Set<number>();
+    const skills = model.magics.map(m => {
+      const raw = m.raw;
+      if (!sourceMagic(raw) || !witnessText(m.spell) || !witnessText(m.name) || m.spell !== raw.spell || m.name !== raw.name
+        || m.icon !== raw.icon || !key(m.key) || spells.has(m.spell) || m.key !== 0 && assigned.has(m.key)) throw Error("Hero witness skill mismatch");
+      spells.add(m.spell); if (m.key !== 0) assigned.add(m.key);
+      return { spell: m.spell, name: m.name, baseCost: raw.base_cost, levelCost: raw.level_cost, icon: raw.icon,
+        level1: raw.level1, level2: raw.level2, level3: raw.level3, need1: raw.need1, need2: raw.need2, need3: raw.need3,
+        level: raw.level, key: m.key, experience: raw.experience, delay: String(raw.delay), range: raw.range, castTime: String(raw.cast_time) };
+    });
+    const keys = skills.map(m => ({ spell: m.spell, key: m.key })).sort((a, b) => a.spell < b.spell ? -1 : a.spell > b.spell ? 1 : 0);
+    return boundedWitness({ version: 1,
+      actor: { objectId: model.actor.objectId, name: model.actor.name, class: model.actor.class, gender: model.actor.gender, spawned: model.spawned },
+      planner: { hp: planner.hp, mp: planner.mp, level: planner.level, experience: String(planner.experience), maxExperience: String(planner.maxExperience) },
+      display: { hp: display.hp, maxHp: display.maxHp, mp: display.mp, maxMp: display.maxMp, level: display.level,
+        experience: String(display.experience), maxExperience: String(display.maxExperience), hair: display.hair },
+      riding: model.riding, config: { autoPot: model.autoPot, hpPercent: model.hpPercent, mpPercent: model.mpPercent,
+        hpItemIndex: model.hpItemIndex, mpItemIndex: model.mpItemIndex },
+      stats: [...stats].sort((a, b) => a.stat - b.stat).map(s => ({ stat: s.stat, value: s.value })),
+      weights: weights === null ? null : { bag: weights.bag, wear: weights.wear, hand: weights.hand },
+      inventoryCapacity: model.inventoryCapacity, inventory, equipment,
+      personalCapacity: personalInventory === null ? null : personalInventory.length, personalInventory, skills, keys });
+  } catch { return null; }
+}
+export function heroSourceWitnessMatches(witness: unknown, model: HeroPlayerModel): boolean {
+  if (typeof witness !== "string" || new TextEncoder().encode(witness).byteLength > MAX_HERO_SOURCE_WITNESS_BYTES) return false;
+  const expected = createHeroSourceWitness(model);
+  return expected !== null && witness === expected;
+}
+function sourceTuple(v: HeroPlannerSource): boolean {
+  return row(v) && i32(v.hp) && i32(v.mp) && int(v.level, 0, 65535) && exactExperience(v.experience) && exactExperience(v.maxExperience);
+}
+function sourceMagic(v: unknown): v is Row {
+  if (!row(v) || !witnessText(v.name) || !witnessText(v.spell) || !key(v.key)) return false;
+  for (const k of ["base_cost", "level_cost", "icon", "level1", "level2", "level3", "level", "range"]) if (!int(v[k], 0, 255)) return false;
+  for (const k of ["need1", "need2", "need3", "experience"]) if (!int(v[k], 0, 65535)) return false;
+  return exactExperience(v.delay) && exactExperience(v.cast_time);
+}
+function witnessText(v: unknown): v is string {
+  if (typeof v !== "string" || v.length === 0 || v.length > MAX_HERO_SOURCE_WITNESS_BYTES || v.includes("\0")) return false;
+  for (let i = 0; i < v.length; i++) {
+    const c = v.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff) { const low = v.charCodeAt(++i); if (!(low >= 0xdc00 && low <= 0xdfff)) return false; }
+    else if (c >= 0xdc00 && c <= 0xdfff) return false;
+  }
+  return true;
+}
+function boundedWitness(value: unknown): string {
+  const chunks: string[] = []; let bytes = 0; const encoder = new TextEncoder();
+  const append = (chunk: string) => { bytes += encoder.encode(chunk).byteLength;
+    if (bytes > MAX_HERO_SOURCE_WITNESS_BYTES) throw Error("Hero witness byte bound"); chunks.push(chunk); };
+  const write = (v: unknown) => {
+    if (v === null || typeof v === "boolean" || typeof v === "string" || typeof v === "number" && Number.isFinite(v)) append(JSON.stringify(v));
+    else if (Array.isArray(v)) { append("["); v.forEach((x, i) => { if (i) append(","); write(x); }); append("]"); }
+    else if (row(v)) { append("{"); Object.keys(v).sort().forEach((k, i) => { if (i) append(","); append(JSON.stringify(k)); append(":"); write(v[k]); }); append("}"); }
+    else throw Error("Incomplete Hero witness");
+  };
+  write(value); return chunks.join("");
+}
+
 /** Receivers must supply the physical authenticated owner; read uses the stricter current scene owner. */
 export class HeroPlayerAuthority {
   private owner: HeroUiOwner | null = null;
@@ -184,6 +353,7 @@ export class HeroPlayerAuthority {
   private infoSerial = 0;
   private worldSerial = 0;
   private actorIdentity = "";
+  private health: { hp: number; mp: number; serial: number; actorIdentity: string; owner: HeroUiOwner } | null = null;
   private actorState: { objectId: number; spawned?: boolean; riding?: boolean } | null = null;
   get authoritySerial(): number { return this.serial; }
   receiveInformation(payload: unknown, owner: HeroUiOwner): boolean {
@@ -198,12 +368,18 @@ export class HeroPlayerAuthority {
       if (this.actorIdentity) this.world = null;
       ++this.generation; this.actorIdentity = identity; this.actorState = null;
     }
-    this.info = cloned;
+    this.info = cloned; this.health = null;
+    return true;
+  }
+  /** HP/MP packet order is separate from full model and acknowledgement barriers. */
+  receiveHealthChanged(payload: unknown, owner: HeroUiOwner): boolean {
+    if (!this.owner || !this.info || !sameHeroOwner(this.owner, owner) || !row(payload) || !i32(payload.hp) || !i32(payload.mp)) return false;
+    this.health = { hp: payload.hp, mp: payload.mp, serial: ++this.serial, actorIdentity: this.actorIdentity, owner: { ...owner } };
     return true;
   }
   receiveSnapshot(payload: unknown, owner: HeroUiOwner): boolean {
     if (!this.acceptSession(owner)) return false;
-    ++this.serial; this.worldSerial = this.serial;
+    ++this.serial; this.worldSerial = this.serial; this.health = null;
     this.owner = { ...owner };
     if (!row(payload) || payload.playerObjectId !== owner.playerObjectId || payload.mapFileName !== owner.mapFileName) {
       this.world = null; return false;
@@ -226,7 +402,7 @@ export class HeroPlayerAuthority {
   /** Only a different real authenticated session releases cached authority. */
   retireSession(nextOwner: HeroUiOwner): boolean {
     if (!validOwner(nextOwner) || !this.owner || sameHeroSession(this.owner, nextOwner)) return false;
-    this.owner = { ...nextOwner }; this.info = this.world = null; this.actorIdentity = ""; this.actorState = null;
+    this.owner = { ...nextOwner }; this.info = this.world = null; this.actorIdentity = ""; this.actorState = null; this.health = null;
     this.infoSerial = this.worldSerial = 0; ++this.generation; ++this.serial;
     return true;
   }
@@ -255,9 +431,8 @@ export class HeroPlayerAuthority {
       const maxExperience = infoNewer || !snapshotExperience ? h.max_experience : w.heroMaxExperience;
       if (!exactExperience(experience) || !exactExperience(maxExperience)) return null;
       if (infoNewer) {
-        if (h.level !== stage.level) return null;
-        const nextInv = enrich(h.inventory as (Row | null)[], [...inv, ...gear]);
-        const nextGear = enrich(h.equipment as (Row | null)[], [...inv, ...gear]);
+        const nextInv = enrich(h.inventory as (Row | null)[], [...inv, ...gear], inv);
+        const nextGear = enrich(h.equipment as (Row | null)[], [...inv, ...gear], gear);
         if (!nextInv || !nextGear) return null;
         inventory = nextInv; equipment = nextGear;
       }
@@ -292,10 +467,23 @@ export class HeroPlayerAuthority {
       if (typeof autoPot !== "boolean" || !int(hpPercent, 0, 99) || !int(mpPercent, 0, 99) || !i32(hpItemIndex) || !i32(mpItemIndex)) return null;
       const actor: HeroActor = { objectId: h.object_id as number, name: h.name as string,
         class: h.class as string, gender: h.gender as string, generation: this.generation };
+      // Owner application overwrites the actual Rust Info tuple without being a new information packet.
+      // A later health packet only overlays HP/MP, never that packet's cached inventory or XP.
+      const health = this.health && this.health.serial > Math.max(this.infoSerial, this.worldSerial)
+        && this.health.actorIdentity === this.actorIdentity && sameHeroOwner(this.health.owner, owner) ? this.health : null;
+      const hp = health?.hp ?? (infoNewer ? h.hp as number : vitals.hp);
+      const mp = health?.mp ?? (infoNewer ? h.mp as number : vitals.mp);
+      const plannerSource: HeroPlannerSource | undefined = snapshotExperience ? { hp, mp,
+        level: infoNewer ? h.level as number : stage.level, experience, maxExperience } : undefined;
+      const displaySource: HeroDisplaySource | undefined = snapshotExperience && int(stage.level, 1, 65535) && exactExperience(stage.experience)
+        && exactExperience(w.heroMaxExperience) && BigInt(w.heroMaxExperience) >= 0n && i32(vitals.maxHp) && i32(vitals.maxMp) ? { hp, mp,
+          maxHp: vitals.maxHp, maxMp: vitals.maxMp, level: stage.level, experience: stage.experience,
+          maxExperience: w.heroMaxExperience, hair: h.hair as number } : undefined;
       const data = { actor, inventory, equipment, personalInventory: personal, magics,
-        hp: infoNewer ? h.hp as number : vitals.hp, mp: infoNewer ? h.mp as number : vitals.mp,
+        hp, mp,
         level: infoNewer ? h.level as number : stage.level, experience,
         maxExperience, spawned: true, riding: this.actorState?.riding ?? null,
+        ...(plannerSource && displaySource ? { plannerSource, displaySource } : {}),
         autoPot, hpPercent, mpPercent, hpItemIndex, mpItemIndex, stats, weights: weights as { bag: number; wear: number; hand: number } };
       const sourceKey = canonical(data);
       // Preserve socket identity; never freeze an external transport object.
@@ -322,8 +510,8 @@ export function heroRequirements(model: HeroPlayerModel, item: HeroItem): boolea
   if (!((i.required_class as number) & (1 << classes.indexOf(model.actor.class)))
     || !((i.required_gender as number) & (1 << genders.indexOf(model.actor.gender)))) return false;
   const amount = i.required_amount as number, type = i.required_type as number;
-  if (type === 0) return model.level >= amount;
-  if (type === 6) return model.level <= amount;
+  if (type === 0) return plannerLevel(model) >= amount;
+  if (type === 6) return plannerLevel(model) <= amount;
   const stat = ({ 1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 7: 0, 8: 2, 9: 4, 10: 6, 11: 8 } as Record<number, number>)[type];
   return stat !== undefined && (model.stats.find(s => s.stat === stat)?.value ?? 0) >= amount;
 }
@@ -334,9 +522,10 @@ function equipTarget(model: HeroPlayerModel, item: HeroItem): number | null {
   return ({ 1: 0, 2: 1, 4: 2, 5: 4, 8: 9, 9: 10, 10: 11, 11: 12, 12: 3, 19: 13 } as Record<number, number>)[type] ?? null;
 }
 function canEquip(model: HeroPlayerModel, item: HeroItem, to: number): boolean {
+  if (!exactId(item.uniqueId) || model.equipment[to] && !exactId(model.equipment[to]?.uniqueId)) return false;
   const type = item.info.item_type as number;
   const targets = type === 6 ? [5, 6] : type === 7 ? [7, 8] : [equipTarget(model, item)];
-  return model.hp > 0 && !(model.riding === true && type !== 12) && targets.includes(to) && heroRequirements(model, item);
+  return plannerHp(model) > 0 && !(model.riding === true && type !== 12) && targets.includes(to) && heroRequirements(model, item);
 }
 function mergePlan(model: HeroPlayerModel, from: HeroCell, to: HeroCell): HeroActionPlan | null {
   if (from.grid === "Inventory" && to.grid === "Inventory") return null;
@@ -356,7 +545,9 @@ export function planHeroAction(model: HeroPlayerModel, action: HeroUiAction): He
       ? null : ({ wire, confirmationRequired, crossPlayer });
   switch (action.kind) {
     case "move": {
-      if (action.from === action.to || !at(model, { grid: "HeroInventory", slot: action.from }) || !available(model, { grid: "HeroInventory", slot: action.to })) return null;
+      const source = at(model, { grid: "HeroInventory", slot: action.from }), target = at(model, { grid: "HeroInventory", slot: action.to });
+      if (action.from === action.to || !source || !exactId(source.uniqueId) || target && !exactId(target.uniqueId)
+        || !available(model, { grid: "HeroInventory", slot: action.to })) return null;
       return result({ type: "moveItem", grid: "HeroInventory", from: action.from, to: action.to });
     }
     case "merge": return mergePlan(model, action.from, action.to);
@@ -367,7 +558,7 @@ export function planHeroAction(model: HeroPlayerModel, action: HeroUiAction): He
     }
     case "remove": {
       const item = at(model, { grid: "HeroEquipment", slot: action.from });
-      if (!item || model.hp <= 0 || (model.riding === true && action.from !== 3)) return null;
+      if (!item || plannerHp(model) <= 0 || (model.riding === true && action.from !== 3)) return null;
       const to = action.to ?? [...Array.from({ length: Math.max(0, model.inventory.length - 2) }, (_, n) => n + 2), 0, 1].find(n => !model.inventory[n]);
       return to !== undefined && available(model, { grid: "HeroInventory", slot: to }) && !model.inventory[to]
         ? result({ type: "removeItem", grid: "HeroInventory", uniqueId: item.uniqueId, to }) : null;
@@ -375,13 +566,14 @@ export function planHeroAction(model: HeroPlayerModel, action: HeroUiAction): He
     case "transfer": case "takeBack": {
       const from: HeroCell = { grid: action.kind === "transfer" ? "Inventory" : "HeroInventory", slot: action.from };
       const to: HeroCell = { grid: action.kind === "transfer" ? "HeroInventory" : "Inventory", slot: action.to };
-      if (!at(model, from) || !available(model, to)) return null;
+      const source = at(model, from), target = at(model, to);
+      if (!source || !exactId(source.uniqueId) || target && !exactId(target.uniqueId) || !available(model, to)) return null;
       if (at(model, to)) return mergePlan(model, from, to);
       return result({ type: action.kind === "transfer" ? "transferHeroItem" : "takeBackHeroItem", from: action.from, to: action.to }, false, true);
     }
     case "use": {
       const item = at(model, { grid: "HeroInventory", slot: action.slot });
-      if (!item || !heroRequirements(model, item)) return null;
+      if (!item || !exactId(item.uniqueId) || !heroRequirements(model, item)) return null;
       const target = equipTarget(model, item);
       if (target !== null) {
         if (!canEquip(model, item, target)) return null;
@@ -400,12 +592,12 @@ export function planHeroAction(model: HeroPlayerModel, action: HeroUiAction): He
     case "autoPotItem": {
       if (!model.autoPot || !["HeroHpItem", "HeroMpItem"].includes(action.grid)) return null;
       const item = action.slot === null ? null : at(model, { grid: "HeroInventory", slot: action.slot });
-      if (action.slot !== null && (!item || model.hp <= 0 || (item.tooltipSource.info as Row).item_type !== 13 || ((item.tooltipSource.info as Row).shape as number) > 1)) return null;
+      if (action.slot !== null && (!item || !exactId(item.uniqueId) || plannerHp(model) <= 0 || (item.tooltipSource.info as Row).item_type !== 13 || ((item.tooltipSource.info as Row).shape as number) > 1)) return null;
       return result({ type: "setAutoPotItem", grid: action.grid, itemIndex: item?.itemIndex ?? 0 });
     }
     case "magicKey": {
       const spell = model.magics.find(m => m.spell === action.spell);
-      if (model.hp <= 0 || !spell || !key(action.key) || (action.key === 0 && spell.key === 0)) return null;
+      if (plannerHp(model) <= 0 || !spell || !key(action.key) || (action.key === 0 && spell.key === 0)) return null;
       return result({ type: "magicKey", spell: spell.spell, key: action.key, oldKey: spell.key });
     }
   }

@@ -1,0 +1,51 @@
+{
+  "reviewer": "/root/production_review",
+  "readOnly": true,
+  "noCompressionPerformed": true,
+  "noDeletesOrMoves": true,
+  "noCargoRun": true,
+  "noGuardOrProbeRun": true,
+  "excludedSource49Source50": true,
+  "excludedTodayLocalAsiaShanghai": true,
+  "cutoffUtc": "2026-10-08T16:00:00.0000000Z",
+  "candidateCount": 4829,
+  "largestSix": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime.pdb",
+      "length": 1591373824,
+      "lastWriteTimeUtc": "2026-10-08T15:27:12.5775175Z",
+      "attributes": "Archive, NotContentIndexed"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-e75e6abcefaa0a52.pdb",
+      "length": 1444098048,
+      "lastWriteTimeUtc": "2026-10-08T10:55:48.9509603Z",
+      "attributes": "Archive, NotContentIndexed"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-8bdeff6706524811.pdb",
+      "length": 1442844672,
+      "lastWriteTimeUtc": "2026-10-06T02:39:05.3820571Z",
+      "attributes": "Archive, NotContentIndexed"
+    },
+    {
+      "path": "C:\\mir2-build\\p1-native-20261007\\debug\\deps\\mir2_client_bevy-b391d075045f3b6c.pdb",
+      "length": 1428459520,
+      "lastWriteTimeUtc": "2026-10-07T23:57:39.4292636Z",
+      "attributes": "Archive, NotContentIndexed"
+    },
+    {
+      "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_client_bevy-91bd920759008e45.pdb",
+      "length": 1427681280,
+      "lastWriteTimeUtc": "2026-10-07T06:13:29.8840272Z",
+      "attributes": "Archive, NotContentIndexed"
+    },
+    {
+      "path": "C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\mir2_client_bevy-da12aa03c55a69b6.pdb",
+      "length": 1424887808,
+      "lastWriteTimeUtc": "2026-10-04T17:54:22.6683701Z",
+      "attributes": "Archive, NotContentIndexed"
+    }
+  ],
+  "limitation": "Metadata candidates only: not proven task ownership, non-active status, per-file source dependencies, or compression/hash safety; Root must verify before any operation."
+}

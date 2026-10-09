@@ -46,6 +46,34 @@ impl HeroScope {
             && self.player_object_id == other.player_object_id
     }
 }
+
+/// Correlation copied by the browser only after the existing Core/producer and
+/// complete Page owner application checks. This is a display-source witness,
+/// never a replacement for authentication, Core Applied or operation settlement.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct VerifiedHeroOwner {
+    pub request_id: String,
+    pub actor: String,
+    pub producer_scope: String,
+    pub server_revision: String,
+}
+impl VerifiedHeroOwner {
+    pub fn valid(&self) -> bool {
+        fn decimal(value: &str) -> Option<u64> {
+            if value.is_empty() || value.len() > 20 || !value.bytes().all(|c|c.is_ascii_digit())
+                || (value.len() > 1 && value.starts_with('0')) { return None; }
+            value.parse::<u64>().ok()
+        }
+        let opaque = |value: &str| value.len() == 64
+            && value.bytes().all(|c|c.is_ascii_digit() || (b'a'..=b'f').contains(&c))
+            && value.bytes().any(|c|c != b'0');
+        decimal(&self.request_id).is_some_and(|n|n != 0)
+            && decimal(&self.server_revision).is_some_and(|n|n != u64::MAX)
+            && opaque(&self.actor) && opaque(&self.producer_scope)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HeroIngressLease {
@@ -205,6 +233,16 @@ impl HeroIngress {
     }
     pub fn receive_frame(&mut self, scope: &HeroScope, frame_sequence: u64,
         raw: &str, received_ms: u64) -> Result<bool, HeroIngressError> {
+        self.receive(scope, frame_sequence, raw, received_ms, None)
+    }
+    /// The caller must already have verified this original envelope and applied
+    /// its complete owner successfully. Ordinary raw ingress never grants this.
+    pub fn receive_verified_owner_frame(&mut self, scope: &HeroScope, frame_sequence: u64,
+        raw: &str, received_ms: u64, expected: &VerifiedHeroOwner) -> Result<bool, HeroIngressError> {
+        self.receive(scope, frame_sequence, raw, received_ms, Some(expected))
+    }
+    fn receive(&mut self, scope: &HeroScope, frame_sequence: u64,
+        raw: &str, received_ms: u64, expected: Option<&VerifiedHeroOwner>) -> Result<bool, HeroIngressError> {
         if !self.is_current(scope) { return Err(HeroIngressError::Retired); }
         if self.closed { return Err(HeroIngressError::Closed); }
         if frame_sequence == 0 || frame_sequence > MAX_SAFE_JS || frame_sequence <= self.frame_sequence {
@@ -214,7 +252,7 @@ impl HeroIngress {
             return Err(HeroIngressError::Clock);
         }
         let lease=self.lease.as_ref().ok_or(HeroIngressError::Retired)?;
-        let result = self.prepare(lease, frame_sequence, received_ms, raw);
+        let result = self.prepare(lease, frame_sequence, received_ms, raw, expected);
         match result {
             Ok(None) => {
                 self.frame_sequence = frame_sequence;
@@ -283,15 +321,36 @@ impl HeroIngress {
         if let Some(receipt) = receipt { n = add(n, measure(receipt)?)?; }
         Ok(n)
     }
-    fn prepare(&self, lease:&HeroIngressLease, frame_sequence:u64, received_ms:u64, raw:&str)
-        -> Result<Option<(Candidate,HeroIngressDelivery,bool)>,HeroIngressError> {
+    fn prepare(&self, lease:&HeroIngressLease, frame_sequence:u64, received_ms:u64, raw:&str,
+        expected:Option<&VerifiedHeroOwner>) -> Result<Option<(Candidate,HeroIngressDelivery,bool)>,HeroIngressError> {
+        if expected.is_some_and(|expected| !expected.valid()) { return Err(HeroIngressError::Correlation); }
         let value = strict_json(raw)?;
         let root = value.as_object().ok_or(HeroIngressError::Shape)?;
         let kind = text(root, "type")?;
-        if kind != "worldSnapshot" && kind != "packet" { return Ok(None); }
-        let payload = root.get("payload").and_then(Value::as_object).ok_or(HeroIngressError::Shape)?;
+        let payload = if let Some(expected) = expected {
+            if root.len() != 6 || !["type","protocolVersion","requestId","reply","snapshot","authority"]
+                .iter().all(|key|root.contains_key(*key)) || !root["reply"].is_object() {
+                return Err(HeroIngressError::Shape);
+            }
+            if kind != "npcPurchaseOwner" || unsigned(root,"protocolVersion")? != 1 {
+                return Err(HeroIngressError::Correlation);
+            }
+            let authority = root["authority"].as_object().ok_or(HeroIngressError::Shape)?;
+            if authority.len() != 3 || !["actor","producerScope","serverRevision"]
+                .iter().all(|key|authority.contains_key(*key)) { return Err(HeroIngressError::Shape); }
+            if text(root,"requestId")? != expected.request_id
+                || text(authority,"actor")? != expected.actor
+                || text(authority,"producerScope")? != expected.producer_scope
+                || text(authority,"serverRevision")? != expected.server_revision {
+                return Err(HeroIngressError::Correlation);
+            }
+            root["snapshot"].as_object().ok_or(HeroIngressError::Shape)?
+        } else {
+            if kind != "worldSnapshot" && kind != "packet" { return Ok(None); }
+            root.get("payload").and_then(Value::as_object).ok_or(HeroIngressError::Shape)?
+        };
         let mut candidate = Candidate { model:self.model.clone(), owner:self.owner.clone(), personal:self.personal.clone() };
-        let publish = if kind == "worldSnapshot" {
+        let publish = if expected.is_some() || kind == "worldSnapshot" {
             if unsigned(payload,"playerObjectId")? != u64::from(lease.scope.player_object_id)
                 || text(payload,"mapFileName")? != lease.scope.map_file_name {
                 return Err(HeroIngressError::Correlation);
@@ -851,6 +910,122 @@ mod tests {
         assert!(ingress.available());
         (ingress,scope)
     }
+
+    fn verified_owner() -> VerifiedHeroOwner {
+        VerifiedHeroOwner {request_id:u64::MAX.to_string(),actor:"1".repeat(64),
+            producer_scope:"2".repeat(64),server_revision:(u64::MAX-1).to_string()}
+    }
+    fn paired_owner(owner:Value, witness:&VerifiedHeroOwner) -> String {
+        json!({"type":"npcPurchaseOwner","protocolVersion":1,"requestId":witness.request_id,
+            "reply":{"kind":"producer","producer":{"actor":witness.actor,
+                "producerScope":witness.producer_scope,"serverRevision":witness.server_revision}},
+            "snapshot":owner,"authority":{"actor":witness.actor,
+                "producerScope":witness.producer_scope,"serverRevision":witness.server_revision}}).to_string()
+    }
+    #[test]
+    fn hero_ingress_verified_owner_preserves_wide_values_and_first_packet_clock() {
+        let (mut ingress,scope)=start();let mut info=information();info.magics.push(magic());
+        send_packet(&mut ingress,&scope,3,"HeroInformation",json!({"info":info}),100).unwrap();
+        let mut owner=world();owner["stage5Systems"]["heroLearnedMagics"]=json!([{"spell":"FireBall","key":17}]);
+        owner["stage5Systems"]["hero"]["experience"]=json!(i64::MIN);owner["heroMaxExperience"]=json!(i64::MAX);
+        owner["heroInventoryItems"]=json!([item(u64::MAX,3,"bag1")]);
+        owner["inventoryItems"]=json!([item(0,5,"bag1")]);
+        let witness=verified_owner();let raw=paired_owner(owner,&witness);
+        assert!(ingress.receive_verified_owner_frame(&scope,4,&raw,200,&witness).unwrap());
+        let model=ingress.model();let identity=model.snapshot_identity.unwrap();
+        assert_eq!((identity.experience,identity.max_experience),(i64::MIN,i64::MAX));
+        assert_eq!(model.inventory_view.items[0].unique_id,Some(u64::MAX));
+        assert_eq!(model.info.as_ref().unwrap().inventory.as_ref().unwrap()[3].as_ref().unwrap().unique_id,u64::MAX);
+        assert_eq!(model.magic_clocks[0].received_ms,100);
+        assert_eq!(model.magic_clocks[0].remaining_ms(1100),1400);
+        assert_eq!(ingress.personal().unwrap().items[0].unique_id,Some(0));
+        assert!(ingress.available());
+    }
+    #[test]
+    fn hero_ingress_verified_owner_requires_separate_entry_before_raw_cursor_advances() {
+        let (mut ingress,scope)=start();let witness=verified_owner();let mut owner=world();
+        owner["heroVitals"]["hp"]=json!(1);let raw=paired_owner(owner,&witness);
+        assert!(!ingress.receive_frame(&scope,3,&raw,101).unwrap());
+        assert_eq!(ingress.frame_sequence(),3);assert_eq!(ingress.model().info.unwrap().hp,20);
+        assert_eq!(ingress.receive_verified_owner_frame(&scope,3,&raw,101,&witness),Err(HeroIngressError::Sequence));
+        assert!(!ingress.status().closed);
+        assert!(ingress.receive_verified_owner_frame(&scope,4,&raw,102,&witness).unwrap());
+        assert_eq!(ingress.model().info.unwrap().hp,1);
+    }
+    #[test]
+    fn hero_ingress_verified_owner_correlation_rejects_old_identity_without_poisoning_current() {
+        let witness=verified_owner();let raw=paired_owner(world(),&witness);
+        let (mut ingress,scope)=start();
+        for field in 0..4 {
+            let mut wrong=witness.clone();match field {0=>wrong.request_id="1".into(),
+                1=>wrong.actor="3".repeat(64),2=>wrong.producer_scope="4".repeat(64),
+                _=>wrong.server_revision="1".into()};
+            assert_eq!(ingress.receive_verified_owner_frame(&scope,3,&raw,101,&wrong),Err(HeroIngressError::Correlation));
+            assert_eq!(ingress.frame_sequence(),2);assert!(ingress.available());
+        }
+        for field in ["playerObjectId","mapFileName"] {
+            let mut owner=world();owner[field]=if field=="playerObjectId"{json!(43)}else{json!("OldMap")};
+            assert_eq!(ingress.receive_verified_owner_frame(&scope,3,&paired_owner(owner,&witness),101,&witness),
+                Err(HeroIngressError::Correlation));assert!(ingress.available());
+        }
+        let mut old=scope.clone();old.connection_generation=2;
+        assert_eq!(ingress.receive_verified_owner_frame(&old,3,&raw,101,&witness),Err(HeroIngressError::Retired));
+        let mut invalid=witness.clone();invalid.request_id="01".into();
+        assert_eq!(ingress.receive_verified_owner_frame(&scope,3,&raw,101,&invalid),Err(HeroIngressError::Correlation));
+        assert!(ingress.available());assert!(!ingress.status().closed);
+    }
+    #[test]
+    fn hero_ingress_verified_owner_strict_raw_shape_cannot_manufacture_a_snapshot() {
+        let witness=verified_owner();let original=paired_owner(world(),&witness);
+        let mut bad=Vec::new();
+        let mut value:Value=serde_json::from_str(&original).unwrap();value["snapshot"]=Value::Null;bad.push(value.to_string());
+        let mut value:Value=serde_json::from_str(&original).unwrap();value.as_object_mut().unwrap().remove("snapshot");bad.push(value.to_string());
+        let mut value:Value=serde_json::from_str(&original).unwrap();value["reply"]=Value::Null;bad.push(value.to_string());
+        let mut value:Value=serde_json::from_str(&original).unwrap();value["authority"]["extra"]=json!(true);bad.push(value.to_string());
+        let mut value:Value=serde_json::from_str(&original).unwrap();value["requestId"]=json!(u64::MAX);bad.push(value.to_string());
+        bad.push(original.replacen("{",r#"{"ty\u0070e":"npcPurchaseOwner","#,1));
+        bad.push(original.clone()+" {}");
+        bad.push("[".repeat(MAX_DEPTH+1)+"0"+&"]".repeat(MAX_DEPTH+1));
+        bad.push(" ".repeat(MAX_RAW_BYTES+1));
+        for raw in bad {
+            let (mut ingress,scope)=start();let before=ingress.frame_sequence();
+            assert!(ingress.receive_verified_owner_frame(&scope,3,&raw,101,&witness).is_err());
+            assert_eq!(ingress.frame_sequence(),before);assert!(ingress.status().closed);
+            assert!(ingress.take_batch().unwrap().is_some());
+        }
+    }
+    #[test]
+    fn hero_ingress_verified_owner_keeps_two_exact_receipts_before_latest() {
+        let (mut ingress,scope)=start();ingress.take_batch().unwrap();
+        send_packet(&mut ingress,&scope,3,"UseItem",json!({"uniqueId":u64::MAX,"grid":"HeroInventory","success":false}),101).unwrap();
+        send_packet(&mut ingress,&scope,4,"SetAutoPotValue",json!({"stat":12,"value":35,"typed":true}),102).unwrap();
+        let witness=verified_owner();let mut owner=world();owner["heroVitals"]["hp"]=json!(8);
+        assert!(ingress.receive_verified_owner_frame(&scope,5,&paired_owner(owner,&witness),103,&witness).unwrap());
+        let batch=ingress.take_batch().unwrap().unwrap();assert!(ingress.batch_is_current(&batch));
+        assert_eq!(batch.receipts.len(),2);assert_eq!(batch.receipts[0].frame_sequence,3);
+        assert_eq!(batch.receipts[0].model.last_item_result.as_ref().unwrap().1["uniqueId"].as_u64(),Some(u64::MAX));
+        assert_eq!(batch.receipts[1].frame_sequence,4);
+        let latest=batch.latest.unwrap();assert_eq!(latest.frame_sequence,5);assert_eq!(latest.model.info.unwrap().hp,8);
+        assert!(!latest.model.item_result_receipt&&latest.model.skill_key_ack.is_none());
+        assert!(ingress.take_batch().unwrap().is_none());
+    }
+    #[test]
+    fn hero_ingress_verified_owner_no_hero_clears_private_info_and_clocks() {
+        let (mut ingress,scope)=start();let mut info=information();info.magics.push(magic());
+        send_packet(&mut ingress,&scope,3,"HeroInformation",json!({"info":info}),100).unwrap();
+        let witness=verified_owner();let mut owner=world();
+        owner["stage5Systems"]["hero"]=Value::Null;owner["heroMaxExperience"]=Value::Null;
+        owner["inventoryItems"]=json!([item(0,5,"bag1")]);
+        assert!(ingress.receive_verified_owner_frame(&scope,4,&paired_owner(owner,&witness),101,&witness).unwrap());
+        assert!(ingress.model().info.is_none()&&ingress.model().magic_clocks.is_empty());
+        assert_eq!(ingress.personal().unwrap().items[0].unique_id,Some(0));
+        // Available means a complete current owner, including authoritative absence.
+        assert!(ingress.available());assert!(ingress.status().owner_current);assert!(!ingress.status().closed);
+        assert!(ingress.model().snapshot_identity.is_none());
+        let latest=ingress.take_batch().unwrap().unwrap().latest.unwrap();
+        assert!(latest.model.info.is_none()&&latest.model.snapshot_identity.is_none());
+    }
+
     #[test]
     fn hero_ingress_raw_world_and_information_preserve_exact_wide_values() {
         let mut ingress=HeroIngress::default();let scope=scope();ingress.activate(scope.clone()).unwrap();

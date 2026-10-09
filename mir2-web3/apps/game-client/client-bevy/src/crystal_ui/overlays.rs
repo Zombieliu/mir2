@@ -6824,11 +6824,25 @@ fn sync_npc_dialog_inventory_location(
     mut shop: Option<ResMut<ShopModel>>,
     intents: Option<Res<NativePlayerUiIntentQueue>>,
     mut was_open: Local<bool>,
+    presentation: Option<Res<crate::quest_ui::QuestUiPresentation>>,
+    geometry: crate::stone_workshop_ui::StoneWorkshopGeometry,
+    mut previous_sidebar: Local<Option<(crate::quest_ui::QuestLogRect, crate::quest_ui::QuestUiPresentation)>>,
 ) {
     if let Some(intents) = intents { state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate()); }
-    let is_open = npc_dialog.is_some_and(|dialog| dialog.is_open);
+    let is_open = npc_dialog.as_deref().is_some_and(|dialog| dialog.is_open);
+    let p = geometry.presentation(presentation.as_deref().copied());
+    let sidebar = npc_dialog.as_deref().and_then(|dialog| crate::stone_workshop_ui::sidebar_rect(dialog, p));
+    let sidebar_state = sidebar.zip(p);
+    let sidebar_changed = sidebar_state != *previous_sidebar;
+    let returned_to_ordinary = sidebar.is_none() && previous_sidebar.is_some();
+    *previous_sidebar = sidebar_state;
+    let initial_origin = if is_open != *was_open || returned_to_ordinary {
+        Vec2::new(445.0, 0.0)
+    } else { Vec2::new(state.inventory_window.left, state.inventory_window.top) };
+    let avoiding_origin = sidebar.zip(p).and_then(|(sidebar, p)| crate::stone_workshop_ui::avoiding_bag_origin(
+        sidebar, p, initial_origin, Vec2::new(INVENTORY_PANEL_SIZE.width as f32, INVENTORY_PANEL_SIZE.height as f32)));
     if !is_open { state.withdraw_bound_npc_gold_buy(); }
-    if is_open == *was_open {
+    if is_open == *was_open && !sidebar_changed && avoiding_origin.is_none() {
         return;
     }
     let was_npc_shop_open = state.npc_shop_open();
@@ -6838,8 +6852,9 @@ fn sync_npc_dialog_inventory_location(
     state.inventory_item_drag = None;
     state.inventory_item_pointer_consumed = false;
     if is_open {
-        state.inventory_window.left = 445.0;
-        state.inventory_window.top = 0.0;
+        let origin = avoiding_origin.unwrap_or(initial_origin);
+        state.inventory_window.left = origin.x;
+        state.inventory_window.top = origin.y;
         return;
     }
 
@@ -17670,6 +17685,108 @@ mod tests {
             app.world().resource::<ShopModel>().service_mode,
             NpcShopServiceMode::Closed
         );
+    }
+
+    fn workshop_bag_dialog() -> NpcDialogModel {
+        let mut dialog = NpcDialogModel::default();
+        dialog.apply(crate::quest_model::NpcDialogUpdate {
+            npc_object_id: 2000, npc_name: Some("Bill".into()),
+            lines: vec!["Stone workshop".into(), "Gold: 9000".into(),
+                "Materials and raw stones stay in your physical Bag.".into()],
+            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"].into_iter()
+                .map(|target| crate::quest_model::NpcDialogOption {
+                    option_id: target.into(), label: "server link".into(), enabled: true,
+                }).collect(),
+            open: true, replace: true,
+        });
+        dialog
+    }
+
+    fn workshop_bag_render_app(width: f32, height: f32) -> (App, Entity) {
+        let mut app = overlay_render_test_app();
+        app.init_resource::<NpcDialogModel>()
+            .insert_resource(bevy::prelude::UiScale(2.0))
+            .add_systems(Update, sync_npc_dialog_inventory_location.before(render_overlays));
+        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
+            mir2_ui_core::state::UiPanel::Inventory;
+        let mut window = Window::default();
+        window.resolution.set(width, height);
+        let primary = app.world_mut().spawn((window, PrimaryWindow)).id();
+        (app, primary)
+    }
+
+    fn rendered_workshop_bag_origin(app: &mut App) -> Vec2 {
+        let world = app.world_mut();
+        let node = world.query_filtered::<&Node, With<OverlayInventory>>()
+            .single(world).expect("the actual Bag renderer");
+        assert_eq!(node.display, Display::Flex);
+        assert_eq!((node.width, node.height), (Val::Px(316.0), Val::Px(236.0)));
+        let (Val::Px(left), Val::Px(top)) = (node.left, node.top) else { panic!("Bag pixel origin") };
+        Vec2::new(left, top)
+    }
+
+    #[test]
+    fn workshop_bag_render_avoids_sidebar_and_preserves_separate_user_drag() {
+        let (mut app, primary) = workshop_bag_render_app(2048.0, 1536.0);
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(445.0, 0.0));
+        app.insert_resource(workshop_bag_dialog());
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(568.0, 248.0));
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.inventory_window.left = 0.0;
+            state.inventory_window.top = 10.0;
+        }
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(0.0, 10.0));
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.inventory_window.left = 588.0;
+            state.inventory_window.top = 24.0;
+            state.inventory_item_drag = Some(InventoryItemDrag {
+                source_slot: 2, unique_id: 7, start: Vec2::new(588.0, 24.0),
+            });
+        }
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(568.0, 248.0));
+        assert!(app.world().resource::<NativePlayerUiState>().inventory_item_drag.is_none());
+        app.world_mut().get_mut::<Window>(primary).unwrap().resolution.set(2048.0, 960.0);
+        app.update();
+        let bag = rendered_workshop_bag_origin(&mut app);
+        assert!(bag.x >= 0.0 && bag.x + 316.0 <= 1024.0);
+        assert!(bag.y >= 240.0 && bag.y + 236.0 <= 480.0,
+            "a height-only change clamps the real Bag without covering the sidebar: {bag:?}");
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.inventory_window.left = 445.0;
+            state.inventory_window.top = 0.0;
+        }
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(244.0, 16.0),
+            "a short stage uses the free space left of the sidebar");
+        app.world_mut().resource_mut::<NpcDialogModel>().options.remove(0);
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(445.0, 0.0));
+        app.world_mut().resource_mut::<NpcDialogModel>().close();
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::ZERO);
+    }
+
+    #[test]
+    fn workshop_bag_render_keeps_normal_origin_when_sidebar_is_already_separate() {
+        let (mut app, _) = workshop_bag_render_app(2560.0, 1536.0);
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+        app.update();
+        app.insert_resource(workshop_bag_dialog());
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(445.0, 0.0));
+        app.insert_resource(crate::quest_ui::QuestUiPresentation {
+            logical_width: 1280.0, logical_height: 768.0, stage_css_scale: 1.0, touch: true,
+        });
+        app.update();
+        assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(445.0, 0.0));
     }
 
     #[test]

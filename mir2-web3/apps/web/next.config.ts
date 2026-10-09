@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { readFileSync } from "node:fs";
+import { lstatSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { rewriteStandaloneFullPackTrace } from "./lib/standalone-full-pack-tracing";
@@ -9,6 +9,30 @@ const isStandaloneProduction = process.env.MIR2_NEXT_STANDALONE === "1" && !isDe
 const isVercelProduction =
   process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
 const configDir = path.dirname(fileURLToPath(import.meta.url));
+// Next may update the selected tsconfig with fresh distDir type globs.
+// An explicit build copy must stay in this Web root; normal builds keep Next defaults.
+const buildTsconfigPath = process.env.MIR2_NEXT_TSCONFIG_PATH;
+if (buildTsconfigPath !== undefined) {
+  const parts = buildTsconfigPath.split("/");
+  const invalidPath = () => new Error(
+    "MIR2_NEXT_TSCONFIG_PATH must name an existing regular .json file within the Web root using a relative path without links or parent traversal.",
+  );
+  if (
+    !buildTsconfigPath.endsWith(".json") ||
+    parts.some((part) => !/^[A-Za-z0-9_.-]+$/.test(part) || part === "." || part === "..")
+  ) {
+    throw invalidPath();
+  }
+  let entryPath = configDir;
+  for (const [index, part] of parts.entries()) {
+    entryPath = path.join(entryPath, part);
+    const entry = lstatSync(entryPath);
+    const isFile = index === parts.length - 1;
+    if (entry.isSymbolicLink() || (isFile ? !entry.isFile() || entry.nlink !== 1 : !entry.isDirectory())) {
+      throw invalidPath();
+    }
+  }
+}
 const monorepoRoot = path.resolve(configDir, "../../..");
 const compiledRuntimeManifest = readFileSync(
   path.resolve(configDir, "lib/generated/bevy_runtime_version.json"), "utf8",
@@ -97,6 +121,7 @@ const localDiagnosticsTracingExcludes = ["../../docs/generated/**/*"];
 
 const nextConfig: NextConfig = {
   distDir: process.env.MIR2_NEXT_DIST_DIR || ".next",
+  ...(buildTsconfigPath === undefined ? {} : { typescript: { tsconfigPath: buildTsconfigPath } }),
   reactStrictMode: true,
   devIndicators: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],

@@ -4,6 +4,7 @@ import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
 import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
 import {composeStagePoint,sameComposeAuthority,sameComposeScope,type ClipboardGesture,type ComposeProof,type ComposeTextOperation,type MailComposeHost} from "../lib/bevy-mail-text-input";
 import { HudPointerRouter } from "../lib/bevy-hud-ui";
+import type { HeroPointerContext } from "../lib/bevy-hero-host";
 import { crystalKeyNameFromBrowserEvent, matchingCrystalKeyFunctions, crystalDropViewDeadline } from "../lib/player-ui-preferences";
 import { crystalWindowShortcut, crystalSkillShortcutSlot } from "../lib/crystal-shortcut-actions";
 import { crystalCombatModeStopsDispatch } from "../lib/shared-combat-mode-keys";
@@ -567,6 +568,8 @@ export function OriginalClientShell({
   bevyHudBarReadLivePlans,
   onHpOrbLocalOverlayChange,
   bevyBagUiActive = false,
+  bevyHeroUiActive = false, bevyHeroUiTransitioning = false, bevyHeroUiToken = null, bevyHeroUiWorldBlocked = false,
+  getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey,
   bevyNpcShopUiActive = false,
   bevyNpcShopUiTransitioning = false,
   getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer,
@@ -665,7 +668,7 @@ export function OriginalClientShell({
   cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip,
   cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview,
   chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
-  onGameShopVisibilityChange, onHeroShortcut, parityUiBlocksGameplay,
+  onGameShopVisibilityChange, onHeroShortcut, parityUiBlocksGameplay, parityUiWorldBlocked = false,
   crystalKeyBindings, playerUiPreferences, questNameTargetObjectIds, dropViewHeld = false, getKeybindCaptureActive,
   onCrystalWindowShortcut, onCrystalGameplayShortcut, onCrystalDropViewHeldChange, skillBars,
   onSendClientCommand,
@@ -1134,6 +1137,14 @@ export function OriginalClientShell({
   const characterPointerCallbacksRef = useRef({ getBevyCharacterPointerContext, onBevyCharacterPointer });
   characterPointerCallbacksRef.current = { getBevyCharacterPointerContext, onBevyCharacterPointer };
   const hudPointerRouterRef = useRef(new HudPointerRouter());
+  type HeroPhysicalLease = { context: HeroPointerContext; pointerId: number; button: 0 | 2; x: number; y: number;
+    startedAt: number; pointerType: string; target: EventTarget | null;
+    callback: typeof onBevyHeroPointer; contextCallback: typeof getBevyHeroPointerContext };
+  const heroPointerLeaseRef = useRef<HeroPhysicalLease | null>(null);
+  const heroHoverContextRef = useRef<{ context: HeroPointerContext; pointerId: number; startedAt: number; target: EventTarget | null;
+    callback: typeof onBevyHeroPointer; contextCallback: typeof getBevyHeroPointerContext } | null>(null);
+  const heroPointerCallbacksRef = useRef({ getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey });
+  useLayoutEffect(() => { heroPointerCallbacksRef.current = { getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey }; });
   const bagPointerCallbacksRef = useRef({ getBevyBagPointerContext, onBevyBagPointer });
   useLayoutEffect(() => { bagPointerCallbacksRef.current = { getBevyBagPointerContext, onBevyBagPointer }; });
   const npcShopPointerCallbacksRef = useRef({ getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer });
@@ -1472,6 +1483,11 @@ export function OriginalClientShell({
       if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
       if (bevyQuestUiCapturesPointer) return;
       if (keyboardInputTargetIsEditable(event.target)) return;
+      if (heroPointerCallbacksRef.current.onBevyHeroKey?.({ key: event.key, code: event.code,
+        control: event.ctrlKey, shift: event.shiftKey, alt: event.altKey, meta: event.metaKey, repeat: event.repeat })) {
+        stopNpcShopWorldInput(); event.preventDefault(); return;
+      }
+      if (heroBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
       if (crystalKeyBindings) {
         const key = crystalKeyNameFromBrowserEvent(event);
         if (event.metaKey || !key) return;
@@ -1585,7 +1601,8 @@ export function OriginalClientShell({
   ]);
 
   function npcShopBlocksWorldInput(includeParity = true): boolean {
-    return (includeParity && parityUiBlocksGameplay?.() === true) || npcShopPointerCallbacksRef.current.getBevyNpcShopInputBlocked?.() === true;
+    return (includeParity && (parityUiBlocksGameplay?.() === true || heroBlocksWorldInput()))
+      || npcShopPointerCallbacksRef.current.getBevyNpcShopInputBlocked?.() === true;
   }
 
   function stopNpcShopWorldInput() {
@@ -4162,7 +4179,121 @@ export function OriginalClientShell({
     }
   }
 
+  function heroBlocksWorldInput(): boolean {
+    return heroPointerLeaseRef.current !== null || heroPointerCallbacksRef.current.getBevyHeroInputBlocked?.() === true;
+  }
+  function cancelSharedHeroPointer(expected = heroPointerLeaseRef.current) {
+    if (expected && heroPointerLeaseRef.current !== expected) return;
+    heroHoverContextRef.current = null;
+    if (!expected) return;
+    heroPointerLeaseRef.current = null;
+    expected.callback?.({ context: expected.context, pointerId: expected.pointerId, phase: "cancel",
+      x: expected.x, y: expected.y, button: expected.button });
+  }
+  function handleSharedHeroPointer(event: Parameters<typeof handleSharedBagPointer>[0] & { ctrlKey?: boolean; shiftKey?: boolean; timeStamp?: number; type?: string; buttons?: number }, phase: "down" | "move" | "up" | "cancel"): boolean {
+    const prior = heroPointerLeaseRef.current;
+    if (prior && prior.pointerId !== event.pointerId) {
+      if (phase === "down") { event.preventDefault(); return true; }
+      return false;
+    }
+    if (phase !== "down" && !prior) {
+      if (phase !== "move") return false;
+      const callbacks = heroPointerCallbacksRef.current, frame = stageFrameRef.current;
+      const context = callbacks.getBevyHeroPointerContext?.() ?? null;
+      if (!frame || !context?.ready || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer
+        || event.pointerType !== "mouse" || event.buttons !== 0 || typeof event.timeStamp !== "number"
+        || !Number.isFinite(event.timeStamp) || event.timeStamp < 0 || !(event.target instanceof HTMLElement)
+        || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)
+        || heldScenePointerRef.current || worldFishingPhysicalRef.current || combatUiHoldRef.current.size > 0
+        || bagBeltPointerRef.current || bagBeltArmedSharedRef.current || npcRepairPointerRef.current
+        || bagBeltQuarantineRef.current.has(event.pointerId) || npcRepairQuarantineRef.current.has(event.pointerId)
+        || heldQuestControlPointersRef.current.size > 0 || hudPointerRouterRef.current.held || bagPointerRouterRef.current.held
+        || characterPointerRouterRef.current.held || storagePointerRouterRef.current.held || npcShopPointerRouterRef.current.held
+        || spellsPointerRouterRef.current.held || mailPointerRouterRef.current.held || bevyMailComposeReady || bevyMailComposePending) {
+        heroHoverContextRef.current = null;
+        return false;
+      }
+      const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+      const inside = context.inputRegions.some(rect => point.sceneX >= rect.left && point.sceneY >= rect.top
+        && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height);
+      const hover = heroHoverContextRef.current;
+      if (!inside) {
+        heroHoverContextRef.current = null;
+        if (hover && hover.pointerId === event.pointerId && hover.target === event.target && event.timeStamp >= hover.startedAt
+          && hover.callback === callbacks.onBevyHeroPointer && hover.contextCallback === callbacks.getBevyHeroPointerContext
+          && hover.context.webLeaseToken === context.webLeaseToken && hover.context.sinkGeneration === context.sinkGeneration
+          && JSON.stringify(hover.context.stamp) === JSON.stringify(context.stamp)
+          && JSON.stringify(hover.context.presentation) === JSON.stringify(context.presentation)) {
+          hover.callback?.({ context: hover.context, pointerId: event.pointerId, phase: "move", x: point.sceneX, y: point.sceneY,
+            button: 0, control: event.ctrlKey === true, shift: event.shiftKey === true });
+        }
+        return false;
+      }
+      const accepted = callbacks.onBevyHeroPointer?.({ context, pointerId: event.pointerId, phase: "move", x: point.sceneX,
+        y: point.sceneY, button: 0, control: event.ctrlKey === true, shift: event.shiftKey === true }) === true;
+      heroHoverContextRef.current = accepted ? { context, pointerId: event.pointerId, startedAt: event.timeStamp,
+        target: event.target, callback: callbacks.onBevyHeroPointer, contextCallback: callbacks.getBevyHeroPointerContext } : null;
+      if (accepted) event.preventDefault();
+      return accepted;
+    }
+    if (typeof event.timeStamp !== "number" || !Number.isFinite(event.timeStamp) || event.timeStamp < 0
+      || prior && (event.timeStamp < prior.startedAt || event.pointerType !== prior.pointerType
+        || phase === "cancel" && event.type === "lostpointercapture" && (event.target !== prior.target
+          || prior.target instanceof HTMLElement && prior.target.hasPointerCapture?.(event.pointerId)))) {
+      if (prior) { event.preventDefault(); return true; }
+      return false;
+    }
+    if (prior && phase === "up" && event.button !== prior.button) {
+      event.preventDefault(); cancelSharedHeroPointer(prior); return true;
+    }
+    const callbacks = heroPointerCallbacksRef.current, frame = stageFrameRef.current;
+    if (prior && (phase === "down" || prior.callback !== callbacks.onBevyHeroPointer
+      || prior.contextCallback !== callbacks.getBevyHeroPointerContext)) {
+      event.preventDefault(); cancelSharedHeroPointer(prior); return true;
+    }
+    const context = prior?.context ?? callbacks.getBevyHeroPointerContext?.() ?? null;
+    if (!frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer) {
+      if (prior) { event.preventDefault(); cancelSharedHeroPointer(prior); return true; }
+      return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    if (phase === "down") {
+      if (!(event.target instanceof HTMLElement) || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)
+        || (event.button !== 0 && event.button !== 2)
+        || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context.presentation.touch)) return false;
+      const inside = context.inputRegions.some(rect => point.sceneX >= rect.left && point.sceneY >= rect.top
+        && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height);
+      if (!inside) {
+        if (!heroBlocksWorldInput()) return false;
+        stopNpcShopWorldInput(); event.preventDefault(); return true;
+      }
+      if (!context.ready) { stopNpcShopWorldInput(); event.preventDefault(); return true; }
+    }
+    const lease = prior ?? { context, pointerId: event.pointerId, button: event.button as 0 | 2,
+      startedAt: event.timeStamp, pointerType: event.pointerType, target: event.target,
+      x: point.sceneX, y: point.sceneY, callback: callbacks.onBevyHeroPointer, contextCallback: callbacks.getBevyHeroPointerContext };
+    if (phase === "down") { heroHoverContextRef.current = null; heroPointerLeaseRef.current = lease; }
+    lease.x = point.sceneX; lease.y = point.sceneY;
+    // Only a newly observed physical edge reaches the host. The original context
+    // remains bound; any same-data source advance is revalidated there.
+    event.preventDefault();
+    let accepted = false;
+    try { accepted = lease.callback?.({ context: lease.context, pointerId: lease.pointerId, phase,
+      x: lease.x, y: lease.y, button: lease.button, control: event.ctrlKey === true, shift: event.shiftKey === true }) === true; }
+    finally {
+      if (heroPointerLeaseRef.current === lease && (phase === "up" || phase === "cancel")) heroPointerLeaseRef.current = null;
+      else if (!accepted && heroPointerLeaseRef.current === lease) cancelSharedHeroPointer(lease);
+    }
+    if (phase === "down" && accepted && heroPointerLeaseRef.current === lease) {
+      frame.focus({ preventScroll: true });
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Global terminal listener also clears the original lease. */ }
+      stopNpcShopWorldInput();
+    }
+    return true;
+  }
+
   function handleSharedUiPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"){
+    if (heroPointerLeaseRef.current && handleSharedHeroPointer(event, phase)) return;
     if (handleNpcRepairPointer(event, phase)) return;
     if (handleBagBeltPointer(event, phase)) return;
     if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
@@ -4173,6 +4304,7 @@ export function OriginalClientShell({
     if(handleSharedMailPointer(event,phase))return;
     if(handleSharedStoragePointer(event,phase))return;
     if(handleSharedSpellsPointer(event,phase))return;
+    if(handleSharedHeroPointer(event,phase))return;
     handleSharedBagPointer(event,phase);
   }
 
@@ -4471,6 +4603,7 @@ export function OriginalClientShell({
     const repairLease = npcRepairPointerRef.current;
     if (repairLease) cancelNpcRepairPointer(repairLease);
     cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    cancelSharedHeroPointer();
     cancelSharedNpcShopPointer();
     cancelSharedStoragePointer();
     cancelSharedComposePointer();
@@ -4485,7 +4618,7 @@ export function OriginalClientShell({
     // before the shared canvas became interactive.
     cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
     onViewportDirectionStop();
-  }, [npcRepairView?.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
+  }, [bevyHeroUiToken, npcRepairView?.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
   useEffect(() => {
     const down = (event: globalThis.PointerEvent) => {
       if (!bagBeltPointerRef.current && !bagBeltQuarantineRef.current.has(event.pointerId)) {
@@ -4508,10 +4641,10 @@ export function OriginalClientShell({
     const mousedown = (event: globalThis.MouseEvent) => { if (fenceBagBeltMouse(event)) event.stopImmediatePropagation(); };
     const up = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "up");
     const cancel = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "cancel");
-    const blur = () => { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
-    const resize = () => { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
-    const hidden = () => { if (document.visibilityState === "hidden") { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); } };
-    const pagehide = () => { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); };
+    const blur = () => { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
+    const resize = () => { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    const hidden = () => { if (document.visibilityState === "hidden") { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); } };
+    const pagehide = () => { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); };
     window.addEventListener("pointerdown", down, true);
     window.addEventListener("click", click, true);
     window.addEventListener("mousedown", mousedown, true);
@@ -4536,6 +4669,7 @@ export function OriginalClientShell({
       if (bagBeltGeometryRef.current) { bagBeltGeometryRef.current = null; bagBeltCallbacksRef.current.onBagBeltDropGeometry?.(null); }
       cancelNpcRepairPointer();
       heldQuestControlPointersRef.current.clear();
+      cancelSharedHeroPointer();
       cancelSharedNpcShopPointer();
       cancelSharedStoragePointer();
       cancelSharedComposePointer();
@@ -4549,7 +4683,7 @@ export function OriginalClientShell({
 
   function isSharedBagCompatibilityMouse(event: MouseEvent<HTMLElement>) {
     if (npcShopBlocksWorldInput() || npcShopPointerRouterRef.current.held) return true;
-    return Boolean(storagePointerRouterRef.current.held)||bevyMailComposeReady||bevyMailComposePending||Boolean(mailPointerRouterRef.current.held)||Boolean(characterPointerRouterRef.current.held) || Boolean(hudPointerRouterRef.current.held) || Boolean(bagPointerRouterRef.current.held)
+    return Boolean(heroPointerLeaseRef.current)||Boolean(storagePointerRouterRef.current.held)||bevyMailComposeReady||bevyMailComposePending||Boolean(mailPointerRouterRef.current.held)||Boolean(characterPointerRouterRef.current.held) || Boolean(hudPointerRouterRef.current.held) || Boolean(bagPointerRouterRef.current.held)
       || (event.target instanceof HTMLElement
         && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype));
   }
@@ -4945,9 +5079,9 @@ export function OriginalClientShell({
             width={76} height={12} aria-hidden="true" tabIndex={-1} />
           <canvas
             id="mir2-quest-ui-canvas"
-            className={(bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
-            data-ui-interactive={bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady ? "true" : undefined}
-            style={{ pointerEvents: (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
+            className={(bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
+            data-ui-interactive={bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady ? "true" : undefined}
+            style={{ pointerEvents: (bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
             aria-label="Shared game windows"
             tabIndex={-1}
           />
@@ -5253,7 +5387,7 @@ export function OriginalClientShell({
         </div>
       ) : null}
       <OriginalClientMobileControls
-        enabled={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !npcShopBlocksWorldInput()}
+        enabled={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !parityUiWorldBlocked && !bevyHeroUiWorldBlocked && !npcShopBlocksWorldInput(false)}
         forceVisible={clientProfile.layout === "touch" && clientProfile.input === "touch"}
         t={t}
         world={world}
@@ -5272,11 +5406,11 @@ export function OriginalClientShell({
         onUseItem={guardNpcShopGameplay(onUseItem)}
       />
       <OriginalClientGamepadControls
-        enabled={clientProfile.input === "gamepad" && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !npcShopBlocksWorldInput()}
+        enabled={clientProfile.input === "gamepad" && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !parityUiWorldBlocked && !bevyHeroUiWorldBlocked && !npcShopBlocksWorldInput(false)}
         t={t}
         expectedProfile={clientProfile.gamepad}
         screen={screen}
-        gameplayReady={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !npcShopBlocksWorldInput()}
+        gameplayReady={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !parityUiWorldBlocked && !bevyHeroUiWorldBlocked && !npcShopBlocksWorldInput(false)}
         stageRootRef={stageFrameRef}
         world={world}
         player={player}

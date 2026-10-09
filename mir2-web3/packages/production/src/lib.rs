@@ -4,6 +4,8 @@
 mod catalog;
 mod jobs;
 mod planning;
+mod stones;
+pub use stones::*;
 pub use catalog::*;
 pub use jobs::*;
 pub use planning::*;

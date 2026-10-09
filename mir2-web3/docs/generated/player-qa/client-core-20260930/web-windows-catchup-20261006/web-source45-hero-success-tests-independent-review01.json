@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "reviewedBy": "/root/source30_native_client",
+  "kind": "Source45 source-only independent review of seven Hero positive-chain groups; no parse/evaluation/test execution",
+  "generatedAtUtc": "2026-10-08T14:50:45.884Z",
+  "sourceHandoff": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-hero-success-tests-source01.json",
+    "bytes": 6350,
+    "sha256": "efd07dc39264bae700ba2b501e4252da9932436e36aeb77aa518c44a897b9ad3"
+  },
+  "script": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+    "bytes": 738080,
+    "sha256": "8353102c15461c62f540ca630a5783e58e6113672dc3e33e937fcabf4e1b2629"
+  },
+  "baselineRecovery": {
+    "method": "Remove exact handoff insertion byte range from read file Buffer; hash remaining ordinary bytes",
+    "removedByteOffset": 719775,
+    "removedBytes": 18242,
+    "recoveredBytes": 719838,
+    "recoveredSha256": "02ca191dab829467667ab64646cc3897a9146b0de78b4cf786c701ce4ec70c9c",
+    "matchesDeclaredHeadBaseline": true,
+    "old494LogicAndAssertionsByteIdentical": true
+  },
+  "newGroups": [
+    {
+      "line": 8433,
+      "name": "Hero shared Equip succeeds through actual Page single claim exact ACK and authoritative swap custody"
+    },
+    {
+      "line": 8455,
+      "name": "Hero shared Remove null resolves the actual free bag cell then exact ACK and complete authority move the same UID"
+    },
+    {
+      "line": 8473,
+      "name": "Hero shared Merge exact source target ACK retires only after complete authority consumes the source and increases target count"
+    },
+    {
+      "line": 8492,
+      "name": "Hero shared Transfer successful exact ACK requires both full domains before personal UID becomes Hero custody"
+    },
+    {
+      "line": 8510,
+      "name": "Hero shared TakeBack successful exact ACK requires both full domains before Hero stack becomes personal custody"
+    },
+    {
+      "line": 8528,
+      "name": "Hero shared AutoPotValue HP and MP exact echoes wait for full authority with the requested changed threshold"
+    },
+    {
+      "line": 8543,
+      "name": "Hero shared AutoPotItem HP MP selection and clear settle only with exact numeric echoes and final changed config"
+    }
+  ],
+  "sourceExpectedLogicalGroups": 501,
+  "intendedPositiveScenarios": 11,
+  "actualProductInputsRead": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+      "bytes": 1057610,
+      "sha256": "aee83fbdd2e463bfb78b32a97e354a96b39d532769317e576bb442fa13512ef6"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hero-host.ts",
+      "bytes": 37310,
+      "sha256": "62fe12c38fbe739f6f2b1ac29ad71ffaa9d1dbb47261518dbbf8fa0d85fb5122"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/hero-player-ui.ts",
+      "bytes": 55255,
+      "sha256": "f348516026b6aad3cca7e4df2d01afe61aa03a37ec9e804222d643c2b7f3ae1d"
+    }
+  ],
+  "actualSourceCallChain": [
+    {
+      "lines": "7915-7998",
+      "fact": "Existing fixture loads actual BevyHeroHost; runtime publication and socket are explicit finite ports. ready stages distinguish Prepared from enabled Ready."
+    },
+    {
+      "lines": "8287-8341",
+      "fact": "Unique actual Page dispatchBevyHeroIntent/submitHeroAction declarations extracted from current Page AST; shares original parityPageJs ingress/final send/receivers, actual HeroPlayerAuthority and the original Page HeroPlayerOperations instance."
+    },
+    {
+      "lines": "8355-8363",
+      "fact": "Actual Host sink -> Page dispatch/submit -> original unique reserve/proof -> actual final claim -> finite socket, exact independent literal wire compared; same serialized intent rejected on repeat."
+    },
+    {
+      "lines": "8364-8403",
+      "fact": "No ACK, mismatched tuple, old physical owner receipt/model with higher serial, mismatched player/map snapshots, pre-ACK snapshot and invalid newer read model preserve pending. Cross transfer requires both new Hero and personal full sources."
+    },
+    {
+      "lines": "8404-8429",
+      "fact": "Concrete authoritative result fixture goes through actual Page snapshot receiver and strict authority read; asserts post-ACK snapshot/personal serial, no pending, independently specified final UID/slot/count/config. Old proof and duplicate ACK cannot retire different reserved successor."
+    }
+  ],
+  "finalIndependentAssertions": {
+    "equip": "UID504 bag4 -> equipment3; displaced UID505 -> bag4; untouched identities unchanged",
+    "remove": "Semantic to:null; independently expected resolved wire bag3; UID505 equipment3 -> bag3",
+    "merge": "UID502 count3 removed, UID501 count1 -> count4; source cell null and total counts exact",
+    "transfer": "Personal UID601 slot3 -> Hero slot3; personal slot clears; newer both-domain serial required",
+    "takeBack": "Hero UID502 slot2 count3 -> personal slot4 count3; Hero slot clears",
+    "autoPotValue": "HP55 and MP65 each change only selected threshold; item config and custody unchanged",
+    "autoPotItem": "HP/MP select itemIndex10 and clear0 each change only selected config; thresholds/other config/custody unchanged",
+    "all": "No duplicate final UID custody; userItem carrier UID/count equal projected values"
+  },
+  "findings": [],
+  "limitedSourceAccepted": true,
+  "execution": {
+    "testsRun": false,
+    "cliRun": false,
+    "productImportedOrEvaluated": false,
+    "wasmApiUsed": false,
+    "uiUsed": false,
+    "networkUsed": false,
+    "processStarted": false
+  },
+  "limitations": [
+    "Source review does not prove parsing or runtime success; Root must run original finite CLI.",
+    "Prepared/Ready, renderer API and socket are fixture ports; no actual Rust World paint, WASM, server, network or user acceptance.",
+    "Page test exercises the original selected preflight/final claim/socket slices and actual selected receiver declarations, not every unrelated statement of full sendRaw/handleGatewayEvent.",
+    "Except MagicKey, the original ledger independently checks exact ACK plus newer complete model; it does not compare final item/config values. Concrete final result values are independently asserted by these tests and are not ledger guarantees.",
+    "Final snapshot/result is a supplied authority fixture consumed by real Authority/receivers, not an executed server result.",
+    "Same-tuple legacy late-ACK ambiguity remains unchanged; successor negative uses a deliberately different tuple.",
+    "New semantic envelope basis is captured by existing TS fixture; these additions do not independently prove Rust generated semantic output or visibility.",
+    "No Matrix/actionChainClosed/Candidate/full package promotion."
+  ]
+}

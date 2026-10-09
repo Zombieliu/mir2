@@ -1,5 +1,95 @@
 # Player-QA playthrough loop
 
+## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
+
+最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。
+
+原 Next build --webpack 实际 exit0，162013ms，19556项完整输入在原调用前后匹配，严格 TypeScript 和13页静态生成通过。Thin 首次因当前 Sharp0.35.3将 sharp.node 导出指向 index.cjs 失败（实际 exit1/25289ms）；本轮仅修真实打包 helper，支持包根有界单句入口并检查其实际版本化 .node，保留版本、许可、DLL、regular file/path/COPY_EXCL和原预算。55个现有Sharp输入仍等于此前恢复记录，没有安装或混入旧版本。该 helper 只供 Thin 消费，Next 原编译区间及不变产物明确限定承接；不声称当前整个旧广义快照仍匹配。
+
+Source50 原 Thin --skipBuild true 实际 exit0，38463ms，55303项完整当前输入在原调用前后匹配。新包7331 regular files、778目录（含根）、0链接、373987154B，原377487360B上限余3500206B；三套renderer和Core/PUI/NPC均与已编译版本一致。包位于 apps/web/.mir2-thin-client-web-windows-catchup-source50-20261009-01。231项JSON压缩及59条原NFT追踪警告保留，产物与依赖另有只读复核；原失败输出、历史旧08及不可变旧版本均保留。
+
+继续遵守“继续代码，暂不操作界面”：真实资源初始化、登录→任务/战斗→保存退出重登、移动真机及人类前端验收仍未执行；省略媒体的不可变资源origin和覆盖仍待真实验证，构建成功不证明在线可玩。Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅有界代码记录，overallPercentage=null、Candidate100=false、goal未完成，无可信可玩日期。用户主4932B tsconfig保留；外来Cargo/simulation/后端及制作加工文档正文保留且排除本轮提交。
+
+证据：[本轮交付](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-delivery01.json)、[64份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-raw-evidence02.json)、[完整Thin实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual01.json)、[实际产物复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual-independent-review01.json)、[依赖及警告复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-dependency-actual-review01.json)、[Source47实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-publication01.json)。本轮提交推送随后另存真实记录，下方原正文及其他工作保持。
+
+## Source47：构建配置副本入口通过严格类型检查；完整 Web 包待生成（2026-10-09）
+
+next.config.ts 新增可选 MIR2_NEXT_TSCONFIG_PATH，未设置时保留原行为，未放宽类型检查。原严格 TSC 实际 exit0、零诊断、12188ms，17136声明输入在调用前后匹配；用户主 tsconfig 原4932B保留。路径校验为代码与源码审阅结果，尚未实际执行 Next 配置。
+
+完整 Core/PUI/NPC 859项与 Bevy 607项声明输入已核对并绑定原 builder；旧36套renderer版本及12份公开flat文件字节保留。未来 Thin 的 report 参数只修正等价路径分隔符，未启动构建。原静态 WASM API边界问答未收到回答，完整runtime校验、不可变发布和新Next/Thin仍未执行；最新完整Web仍Source25。真实登录/任务/战斗/保存/重登及移动验收未运行，overallPercentage=null、Candidate100=false，goal active，无可信可玩日期。
+
+证据：[实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json)、[20份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json)、[严格TSC](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json)、[限定实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json)、[Source46实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json)。本轮提交推送随后另存实际记录，下方原正文及其他工作保留。
+
+## Source46：更新 EXE 实际编译通过；完整 Web 打包边界待确认（2026-10-08）
+
+原守卫下最新 Native EXE 实际编译 exit0，835593ms，保留原 dev/debug（optimized＋debuginfo）配置。917项隔离声明输入在实际调用前后重核匹配，原50GiB/2000ms/15000ms和PolicyB保持；实际C197697568768B、freshness保守上界74ms，完整completed/exited/disposed后才接受。新EXE106106368B已保存独立副本，旧Source31 EXE106137600B同字节历史副本保留。正常Native编译闭包成立；5个仅cfg(test)未声明资产不计全测试。本轮未新跑Rust/Web/TSC、未启动EXE、未打包完整运行资源。
+
+三套renderer编译与静态转换继续以Source45限定结果为依据，完整metadata/name/normalizedABI/defaultgzip/init未通过。原完整builder可条件性用现有CargoGuard直接逐次守卫（Bevy通常4nonce、Core3nonce），没有fresh预构建候选直接接纳入口；原Bevy锁若存在即拒绝启动，不读取锁内容或查询PID。当前任务保留禁WASM API约束，已问一次是否允许原静态构建校验，未收到回答前不执行依赖步骤；旧immutable版本与Next08/Thin08保护。最新完整Web仍Source25；登录/任务/战斗/保存/重登、移动及人类验收未执行，overallPercentage=null、Candidate100=false、goal active，无可信可玩日期。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-finite-result01.json)、[实际Native编译](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-actual01.json)、[14份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-raw-evidence01.json)、[原完整流程守卫路线](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-original-builder-guard-route-review01.json)、[Source45实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-publication01.json)。Source45远端429fe0eb2a860da30f6327702b29395df62c3afc已核验，本轮随后单独保存实际提交推送；用户tsconfig及外来后端/文档正文保留并排除提交。下方历史保留。
+
+## Source45：最新 renderer 编译与动作回归通过；完整包及实玩仍待完成（2026-10-08）
+
+默认共享入口/任务四原脚本实际48/48 TAP通过；Hero原Stage5脚本实际1/1文件TAP、501逻辑组通过，其中原494组字节和断言保留，新增7组/11正向场景覆盖装备、卸装、合并、跨背包转移及补药配置。实际SharedHost→Page发送/claim→唯一台账→回执/完整快照接收路径执行，最终UID/数量/配置另有断言；Prepared/Ready、socket和权威结果仍为有限夹具，非真实服务器或玩家验收。两个输入区间分开记录，不声称整个当前checkout通过。
+
+三个renderer实际release Cargo及六次原bindgen/Binaryen静态转换全部exit0；优化WASM为31467818/17745325/32429102B，均在原32505856B内，共享WebGL2余76754B；JS均在原204800B内。917隔离Rust输入与当前17136项Web声明输入最终重核匹配，三Cargo严格串行、实际PolicyB关闭，原50GiB/2000ms门槛保留。本轮未新跑Rust测试、Native测试或TSC；源未变的Source44类型检查仅限定承接。
+
+Core/PUI/NPC只按56个相关源文件＋4个控制文件未变及18份产物pin限定保留Source33静态候选，旧完整workspace不承接。Windows EXE需要fresh编译；完整renderer metadata/name/ABI/defaultgzip/init、不可变发布与Next/Thin打包仍待完成。最新完整Web仍Source25，尚不含Source26–45。功能记录309/317≈97.5%含旧实现；共享分类103/317≈32.5%也不是总体进度。overallPercentage=null、Candidate100=false、goal active，可玩日期未知；继续代码且暂不操作界面，登录/任务/战斗/保存/重登与移动、人类验收未执行。
+
+证据：[本轮实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json)、[74份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json)、[最小交付输入审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json)、[Source44实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json)。Source44远端ad6f915a693e1322b69afeed926f36318caefdb4已核验；本轮随后单独记录实际提交推送。用户tsconfig及外来后端/文档正文保留并排除本轮提交，下方历史保留。
+
+## Source44：Hero 共享页面及输入接线通过有限验证；新版完整包仍待交付（2026-10-08）
+
+Page 与 Shell 已接入共享 Hero Host：隐藏根先完成布局，Prepared 后同步卸载旧 DOM，再启用控制并等待实际 matching Ready；渲染期只读投影，事件和原发送前 claim 重核来源、租约、sink、布局及500ms帧健康。鼠标、键盘、悬停与移动菜单接原输入仲裁；旧 pointer/cleanup 不得跨场景或接管新手势。同内容完整快照保留合法拖拽，新来源或控制变化清除旧排队输入和反馈。继续复用原唯一操作台账、精确ACK与后续完整快照屏障及 Unknown custody。以上为代码接线与有限回归，不是 live World/Ready 或玩家验收。
+
+实际隔离 Rust02 Runtime26/26＋portable66/66，共92次通过，新增5个测试函数；本轮未重新执行 Native。WebGL2 shared 与 WebGPU 两项静态 cargo check exit0。实际 Web03 原脚本185/185 TAP通过（155NPC购买＋29surface＋1Stage5脚本），Stage5另有494逻辑组＝原477＋新增17；TypeScript5.9.3 no-emit/nonincremental exit0、stdout/stderr均0B。旧测试业务断言继续执行；修复夹具依赖不表示整个旧runner逐字不变。
+
+917项隔离 Rust 输入、17130项 Web 输入及10个本轮源码在各自有限区间冻结，最终全量重核匹配；不合并声称当前整checkout或后端全部通过。四次最终 Cargo 均严格串行且原PolicyB completed/exited/disposed，实际C最低199272189952B、freshness保守上界最大79ms，原50GiB/2000ms门槛不变。原始64份最终/历史输出与配置归档；Rust01新夹具 spawned 状态不一致的一项失败、Web01/02遗漏新增Hero闭包依赖的失败完整保留，仅修夹具后通过。
+
+下一步复核默认共享入口与九类任务动作整链，再交付源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common；32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–44；真实登录/任务/战斗/保存/重登、移动真机及最终人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。用户tsconfig、外来制作加工/Cargo/simulation/文档变更保留且排除本轮提交。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-finite-result01.json)、[64份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-raw-evidence01.json)、[独立实际复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-actual-review01.json)、[Rust首次夹具失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-rust01-historical-failure01.json)、[Web首次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web01-historical-failure01.json)、[Web第二次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web02-historical-failure01.json)、[Source43实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-publication01.json)。Source43已推送f359d5b5d0cebd964eadd99b8a46d1ca52ecbd1f；本轮提交推送随后另存实际记录，下方保留历史。
+
+## Source43：Hero 真实消费模型与独立显示一致性门通过代码验证；完整接管仍待完成（2026-10-08）
+
+Rust 与 TS 分别捕获 plannerInfo 和实际 actor_view 显示，按有界规范字符串比较，保留宽 UID、经验和有符号数的精确值。真实 HeroHealthChanged 已进入独立 TS 显示侧；Host 的 appliedWitness 只在 World 实际安装模型后产生，旧 bootstrap 或 setter 成功不能代替 Ready。既有精确 ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail 和唯一操作账本保持。
+
+最终隔离 Rust 生成05实际 Runtime22/22、portable65/65、Native24/24，共111次执行、0失败/ignored，原函数归一化98项，新增13项；WebGL2 shared 与 WebGPU 静态 cargo check exit0。Web生成02有效调用区间实际184/184 TAP（155NPC＋28surface＋1Stage5脚本），Stage5逻辑477组另列，新增11组；TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。未执行 WASM API、实例或 UI，不代表完整生产包。
+
+Rust隔离声明917项含909份同字节真实产品/数据和8个原脚本引用，最终全量重核匹配；Web17128项仅接受生成02各自有效调用区间，两类证据不可合并称当前整checkout或完整server通过。9个本轮源码始终匹配。5次最终Cargo均先实际PolicyB completed/exited/disposed再启动下一项；C最低204420620288 B、freshness保守上界最大83ms，原50GiB/2000ms门槛不变。原始148文件及85nonce保留全部历史：两个外来源码漂移区间不接受，GPU02在原preflight拒绝且未启Cargo；隔离portable03/native04缺少原include资产的编译失败保留，补齐同字节原PNG/JSON后全部通过，未削弱断言。
+
+下一Source44须接Page control/sink、Prepared后才绘制、实际visibility和capturesEscape、Shell输入仲裁及500ms帧健康；来源/control变化清旧输入队列、同内容完整快照保持合法拖拽也待修复。随后完成默认共享入口、九项任务动作整链及源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common：32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–43；登录/战斗/保存/重登、移动真机及人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-finite-result01.json)、[完整原始输出及历史](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-raw-evidence01.json)、[实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-actual-review01.json)、[隔离资产失败03](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-historical-scope-drift03.json)、[隔离资产失败04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-historical-scope-drift04.json)、[Source42实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-publication01.json)。Source42已推送0a2bb7cee34fb3e330d087eaa3ad363598ab49db，本轮提交推送随后单独记录；下方保留历史。
+
+## Source42：Hero 动作依据与发送前校验通过回归；完整接管和可玩包仍待完成（2026-10-08）
+
+真实 Rust Hero reducer 的动作现必带原 planner 依据，独立 TS 模型捕获相同字段后精确比较：原物品 UID/数量/槽位、基础与生效政策、要求、原自动目标、补药和快捷键配置均保留。16KiB 有界依据支持实际42格背包，宽 UID 仅用于精确比较，旧数值 mutation 限制不扩大。Page 原 submitHeroAction 改为严格 transport-accepted boolean；发送前失败仅撤销 definitely-unsent，进入原最终 claim 后的未知结果仍保留 custody。原唯一 ledger 的 proof 另捕获最初 raw high-water，同步 listener 后在原 claim 前重核，不把后来帧或新模型贴回旧动作。
+
+实际 Runtime16/16＋portable58/58＋Native24/24，共98次通过、0失败/ignored，归一化原函数85项，新Rust函数6项。Web02 原有限脚本184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑466组另列，原457组加9组。TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。WebGL2 shared 与 WebGPU cargo check exit0，仅静态编译，0次WASM API/初始化，不代表新完整生产包。
+
+908声明Rust输入、17126声明Web输入、去重17135输入在实际调用前后匹配，最终声明集重核亦匹配；原905/17123集合保留，另加真实Hero模块和两个当前制作加工simulation依赖，外来工作保留且排除本轮提交。5次Cargo原Guard均先PolicyB completed/exited/disposed后才开始下一Cargo，25份nonce，C最低221675769856 B、freshness保守上界最大72ms，原50GiB/2000ms门槛不变。首次Web01的旧纯Page夹具缺少新增WeakMap引用而失败；保留完整输出，仅补42B真实闭包依赖后重跑，原457组与新增9组断言不削弱。未执行的TSC01不计通过，原工具、探针、模板与发布门槛保持，不声称强制deadline。
+
+本轮完成动作依据及发送前保护基础，尚未启用共享Hero的Page control/sink/matching Ready/Shell输入全链。下一步须补独立冻结TS模型与真实Rust已消费模型的数据一致性门，尤其实时HeroHealthChanged与checkpoint显示可能不同；来源戳、bootstrap或setter成功均不能据此隐藏React。继续接完整布局、帧推进、源/租约/sink/输入清理及回退，再完成默认共享入口、九项任务动作整链和源码匹配的renderer/Core/EXE/Web完整包。精确ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail与原账本不变。
+
+Matrix11仍103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–42；公开manifest及用户tsconfig保持，未改后端/共享Zone/协议parity。登录→任务/战斗→保存→重登、移动真机及最终玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信可玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json)、[49份完整原始文件与25nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json)、[首次失败与修复](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json)、[Source41实际提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json)。Source41已核验推送1ff247c37bb9c420cfff6b5e7c280691fe949c02；本轮Git发布以随后实际记录为准。下方保留历史。
+
+## Source41：Page Hero 原始数据接线通过代码回归；完整可玩包仍未交付（2026-10-08）
+
+Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首次物理消息 performance 时钟在应用前捕获；不把 Hero snapshot 经过 JS 重编码。实际验证通过的 NPC purchase owner 回调以独立关联 tuple 加原文进入严格 Rust 接口，保留精确 u64/i64、noHero 清除和 receipt FIFO。Socket/connection/session、renderer run 与 scene 分开；恢复 held checkpoint 后按顺序补齐完整尾队列，未完成旧帧不可被后帧越过。Renderer 缺失/故障保留 Page custody，换图直接 activate；同步跨 scene 重入明确拒绝。
+
+当前 Source02 实际 Runtime16/16＋portable52/52＋Native24/24，共92次通过、0失败/ignored；跨 feature 原函数去重79项，新Rust函数7项。Web05 原有限脚本实际184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑457组另列，新17组；surface新增1组真实 ordinary 快照委托/旧物理owner拒绝。严格 TypeScript5.9.3 no-emit/nonincremental 实际exit0、零诊断。WebGL2 shared与WebGPU两个 WASM cargo check exit0，仅静态编译，未生成或初始化新的完整生产包。
+
+905声明Rust输入、17123声明Web输入、去重17132输入在各实际调用前后冻结检查匹配，Root初次去重复核也匹配；最终审阅时其他任务继续编辑7个simulation/production输入，当前整checkout不再完全匹配。七个本轮源码仍匹配，后续其他任务变更另列保留并排除本轮提交，原测试冻结与工具/源码门槛不变；当前5次Cargo原Guard均PolicyB completed/exited/disposed，25份nonce，C最低236199809024 B、freshness保守上界最大122ms（门槛50GiB/2000ms）。原Source01 portable51通过/1失败、新测试误解available的noHero语义，修正新测试后当前全部通过；旧2Cargo和3CLI失败输出完整保留。原测试业务断言保留，NPCsurface26块原文不变、1块静态调用断言移至真实委托链；不替换原Guard、探针、模板、政策、预算或发布门槛，不声称强制Cargo/CLI deadline。
+
+本轮只接数据来源，不关闭Hero整条操作链：实际Rust planner动作依据须与独立捕获TS模型比较；控制、sink、布局、matching Ready及Shell输入仲裁尚待接线，bootstrap source不能当Ready，也不能据setter成功隐藏React。沿用唯一原Hero操作账本，原Core Applied、精确ACK后完整快照屏障及Unknown custody保持。下一轮继续这些功能、源码匹配的完整renderer/Core/EXE/Web包，以及默认共享入口和任务整链；宽UID操作、旧引擎宽日期与NewMagic完整producer限制仍开放。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–41；公开manifest和用户tsconfig未替换。未改后端/共享Zone/协议parity，其他制作加工/Cargo/simulation/production工作保持且排除本轮提交。登录→任务/战斗→保存→重登、移动真机及玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信试玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留，未绕过原helper WASM API限制。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json)、[完整原始71文件与35nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json)、[晚期其他任务源码资格](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json)、[历史失败与修正记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json)、[Source40真实提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-publication01.json)。Source40已核验推送8e64c987849137b56a67fda4b64f18b0645917eb；本轮Git发布以随后实际结果为准。下方旧记录保留为历史。
+
 ## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
 
 本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。

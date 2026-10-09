@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "stone-npc-tests",
+  "startedUtc": "2026-10-09T14:42:42.9703004Z",
+  "finishedUtc": "2026-10-09T14:42:44.2038722Z",
+  "exitCode": 90,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::stone_npc::tests::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "ee02e76295af2894b14d3289d49038a210a280820fd25012eab752e105f7400a",
+  "declaredInputs": 470,
+  "sourceDrift": [],
+  "cargoLogSha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

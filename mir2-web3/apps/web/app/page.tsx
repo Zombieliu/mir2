@@ -47,6 +47,10 @@ import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, proj
   type BevyQuestUiIntent, type BevyQuestUiIntentResult, type BevyQuestUiRuntime } from "../lib/bevy-quest-ui";
 import { useBevyHudUi } from "../lib/use-bevy-hud-ui";
 import { useBevyCharacterUi } from "../lib/use-bevy-character-ui";
+import { HeroRawIngress, sameHeroPhysical, sameHeroHighWater, verifiedHeroOwnerFromFrame, type HeroRawDelivery, type HeroPhysical, type HeroRawHighWater, type HeroRuntime } from "../lib/bevy-hero-ui";
+import { useBevyHeroUi } from "../lib/use-bevy-hero-ui";
+import type { HeroSharedIntent } from "../lib/bevy-hero-host";
+import { flushSync } from "react-dom";
 import { useBevySpellsUi } from "../lib/use-bevy-spells-ui";
 import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
 import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
@@ -95,7 +99,7 @@ import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationCon
   WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { readCrystalEntityActionPose, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
 import { SharedCombatModeKeys, isCrystalCombatModeFunction, nextCombatModePhysicalGeneration, type CombatModeRuntime, type CombatModeOwner, type CombatModeProof } from "../lib/shared-combat-mode-keys";
-import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
+import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, heroActionBasisMatches, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
 import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, HeroUiOrigin, HeroUiLease } from "./components/original-client-hero-management-window";
 import {
   DEFAULT_PLAYER_UI_PREFERENCES, PLAYER_UI_PREFERENCES_STORAGE_KEY, CRYSTAL_KEY_BINDINGS_STORAGE_KEY,
@@ -472,7 +476,7 @@ function useImmediateUiState<T>(initial: T) {
   return [state, set, current] as const;
 }
 
-type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
+type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & HeroRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
   default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
@@ -2140,10 +2144,20 @@ export default function HomePage() {
   const socialRepliesRef = useRef(new SocialIncomingReplies());
   const guildBuffAuthorityRef = useRef(new GuildBuffAuthority());
   const guildBuffOperationsRef = useRef(new GuildBuffOperations());
+  const heroRawIngressRef = useRef<HeroRawIngress | null>(null);
+  if (heroRawIngressRef.current === null) heroRawIngressRef.current = new HeroRawIngress();
+  const heroRawOwnerRef = useRef<(HeroPhysical & Readonly<{ playerObjectId: number }>) | null>(null);
+  const heroVerifiedDeliveryRef = useRef<HeroRawDelivery | null>(null);
   const heroAuthorityRef = useRef(new HeroPlayerAuthority());
   const heroOperationsRef = useRef(new HeroPlayerOperations());
   const heroManagementOpenRef = useRef(false);
   const heroBeltProofRef = useRef<HeroOperationProof | null>(null);
+  const heroProofHighWaterRef = useRef(new WeakMap<HeroOperationProof, HeroRawHighWater>());
+  const heroSharedUiIngressRef = useRef<ReturnType<typeof useBevyHeroUi> | null>(null);
+  const heroRendererTokenRef = useRef("hero-react:0");
+  const heroReactRendererSerialRef = useRef(0);
+  const heroProofRendererTokensRef = useRef(new WeakMap<HeroOperationProof, string>());
+  const heroSharedProofsRef = useRef(new WeakMap<HeroOperationProof, Extract<HeroSharedIntent, { type: "action" }>>());
   const heroWindowEpochsRef = useRef<Readonly<Record<HeroUiOrigin, number>>>({ inventory: 1, character: 1, belt: 1 });
   const heroUiProofLeasesRef = useRef(new WeakMap<HeroOperationProof, Readonly<{ kind: "window"; lease: HeroUiLease } | { kind: "keyboardBelt" | "acceptedRestock" }>>());
   const heroRestockInputWasAllowedRef = useRef(false);
@@ -5703,6 +5717,13 @@ export default function HomePage() {
   }, [bevyRuntimeGeneration, bevyRuntimeStarted]);
 
   useEffect(() => {
+    const runtime = runtimeRef.current;
+    syncHeroRawIngress();
+    const timer = window.setInterval(syncHeroRawIngress,50);
+    return () => {window.clearInterval(timer);heroRawIngressRef.current?.detachRenderer(runtime);};
+  }, [bevyRuntimeGeneration]);
+
+  useEffect(() => {
     if (!world.originalMapRegion) return;
     const sceneKey = `${normalizeMapFileName(world.originalMapRegion.mapFileName)}:${world.originalMapRegion.regionBounds.minX}:${world.originalMapRegion.regionBounds.minY}:${world.originalMapRegion.regionBounds.maxX}:${world.originalMapRegion.regionBounds.maxY}`;
     if (sceneSpritesReadyKeyRef.current === sceneKey) return;
@@ -7230,10 +7251,15 @@ export default function HomePage() {
     });
 
     socket.addEventListener("message", (event) => {
-      if (socketRef.current !== socket) return;
+      if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+      const receivedAtMs=performance.now();
+      syncHeroRawIngress();
+      const physical = currentHeroRawPhysical();
+      const delivery = heroRawIngressRef.current?.capture(event.data, physical, receivedAtMs) ?? null;
       try {
-        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket);
+        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket, delivery);
       } catch (error) {
+        heroRawIngressRef.current?.reject(delivery);
         appendLog(t("log.invalidGatewayPayload", [String(error)]), "system");
       }
     });
@@ -7863,7 +7889,7 @@ export default function HomePage() {
     const windows = playerReferenceWindowsRef.current;
     return windows.help || windows.hotkeys || windows.options || windows.capture || rankingInspectOpenRef.current
       || mapRouteLocalModalRef.current || mapRoutePageBlockedRef.current || skillBarPointerHeldRef.current
-      || heroManagementOpenRef.current || questWindowOpenRef.current || bevyHpLocalOverlayOpenRef.current || questReactModalOpenRef.current
+      || heroUiBlocksGameplay() || questWindowOpenRef.current || bevyHpLocalOverlayOpenRef.current || questReactModalOpenRef.current
       || bagOpenRef.current || characterOpenRef.current || questLogOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
       || socialItemWindowsRef.current.guild || socialItemWindowsRef.current.trade || socialReplyWindowsRef.current.group
       || socialReplyWindowsRef.current.bonds || socialRosterWindowsRef.current.friends || rankingWindowRef.current
@@ -9496,6 +9522,15 @@ export default function HomePage() {
           npcPurchaseDisplaySourceRef.current = Object.freeze({ socket, session, rawFrame, snapshot: rawSnapshot,
             fingerprint: npcPurchaseDisplayFingerprint(worldRef.current) });
           npcPurchaseUnavailableRef.current = false;
+          const delivery = heroVerifiedDeliveryRef.current;
+          const expected = delivery && delivery.raw === rawFrame && sameHeroPhysical(delivery,currentHeroRawPhysical())
+            ? verifiedHeroOwnerFromFrame(rawFrame) : null;
+          if (delivery && expected) {
+            observeHeroRawOwner(delivery,rawSnapshot);syncHeroRawIngress();
+            // Display only; the caller still performs Core Applied and all
+            // operation/receipt settlement through the established paths.
+            heroRawIngressRef.current?.offer(delivery,expected);heroSharedUiIngressRef.current?.tick();
+          }
           return true;
         },
       });
@@ -10256,7 +10291,7 @@ export default function HomePage() {
     const editing = typeof HTMLElement !== "undefined" && active instanceof HTMLElement && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
     return { ...raw, enabled: typeof document !== "undefined" && screenRef.current === "game" && !isSpectatorBrowserMode()
       && initialSceneAssetsReadyRef.current && document.hasFocus() && document.visibilityState === "visible" && !editing
-      && !heroManagementOpenRef.current && !skillBarPointerHeldRef.current && !otherPlayerUiBlocksInput() };
+      && !heroUiBlocksGameplay() && !skillBarPointerHeldRef.current && !otherPlayerUiBlocksInput() };
   }
   function nextCombatModeRevision(): number | null {
     return Number.isSafeInteger(combatModeRevisionRef.current) && combatModeRevisionRef.current < Number.MAX_SAFE_INTEGER
@@ -10316,7 +10351,7 @@ export default function HomePage() {
       || !initialSceneAssetsReadyRef.current || equipmentHostSuspendReasonRef.current !== null
       || document.visibilityState !== "visible" || !document.hasFocus()
       || active instanceof HTMLElement && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))
-      || heroManagementOpenRef.current || otherPlayerUiBlocksInput();
+      || heroUiBlocksGameplay() || otherPlayerUiBlocksInput();
   }
   function castSkillBarLease(lease: SkillBarLease, worldCursor: readonly [number, number] | null) {
     if (skillBarPointerHeldRef.current || skillBarInputBlocked() || !playerUiPreferencesRef.current.skillBar
@@ -10440,7 +10475,7 @@ export default function HomePage() {
     }
     if (repeat) return true;
     if (screenRef.current !== "game" || isSpectatorBrowserMode() || !currentSocialReplyOwner()
-      || referenceWindowsBlockGameplay() || heroManagementOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
+      || referenceWindowsBlockGameplay() || heroUiBlocksGameplay() || heroPetOpenRef.current || cashShopOpenRef.current
       || equipmentHostSuspendReasonRef.current !== null || !document.hasFocus() || document.visibilityState !== "visible") return false;
     const beltSlot = crystalBeltShortcutSlot(functionId);
     if (beltSlot !== null) {
@@ -10586,26 +10621,67 @@ export default function HomePage() {
     for (const origin of origins) next[origin] = Number.isSafeInteger(next[origin]) && next[origin] >= 0 && next[origin] < Number.MAX_SAFE_INTEGER ? next[origin] + 1 : -1;
     heroWindowEpochsRef.current = next;
   }
+  function heroBasisWindows() {
+    const windows = heroWindowsRef.current;
+    return { inventoryOpen: windows.inventoryOpen, characterOpen: windows.characterOpen,
+      characterPage: windows.characterPage, beltVisible: windows.beltVisible, beltVertical: windows.beltVertical };
+  }
+  function heroUiBlocksGameplay(): boolean {
+    const shared = heroSharedUiIngressRef.current;
+    return shared?.isSharedOwner() ? shared.blocksWorld() : heroManagementOpenRef.current;
+  }
+  function dispatchBevyHeroIntent(intent: HeroSharedIntent): boolean {
+    const host = heroSharedUiIngressRef.current;
+    if (!host || !host.allows(intent) || !heroInputAllowed()) return false;
+    if (intent.type === "windows") {
+      if (!host.claimCurrent(intent)) return false;
+      changeHeroWindows(intent.windows);
+      return true;
+    }
+    const model = currentHeroModel();
+    if (!model || !heroActionBasisMatches(intent.actionBasis, model, intent.action, heroBasisWindows())) return false;
+    const dto = captureHeroAction(intent.model, intent.action);
+    if (!dto) return false;
+    return submitHeroAction(dto, false, { origin: intent.origin, epoch: intent.windowEpochs[intent.origin] },
+      intent.webLeaseToken, intent);
+  }
   function heroProofCurrent(proof: HeroOperationProof, command: Record<string, unknown>): boolean {
     const model = currentHeroModel(), source = heroUiProofLeasesRef.current.get(proof);
+    const shared = heroSharedProofsRef.current.get(proof), rendererToken = heroProofRendererTokensRef.current.get(proof);
+    if (rendererToken !== undefined && rendererToken !== heroRendererTokenRef.current) return false;
+    if (shared && (heroSharedUiIngressRef.current?.claimCurrent(shared) !== true
+      || !model || !heroActionBasisMatches(shared.actionBasis, model, proof.dto.action, heroBasisWindows()))) return false;
+    if (!shared && source?.kind === "window" && heroSharedUiIngressRef.current?.isSharedOwner()) return false;
     if (!model || !source || !heroInputAllowed()
       || (source.kind === "window" ? !heroUiLeaseCurrent(source.lease) : heroBeltProofRef.current !== proof)) return false;
     if (source.kind === "window" && source.lease.origin === "belt" && (proof.dto.action.kind !== "use" || proof.dto.action.slot > 1)) return false;
+    const captured = heroProofHighWaterRef.current.get(proof);
+    if (captured && !sameHeroHighWater(captured, heroRawIngressRef.current?.highWater() ?? null)) return false;
     return heroOperationsRef.current.allows(proof, model, command);
   }
-  function submitHeroAction(dto: HeroActionDto, beltIntent = false, lease?: HeroUiLease) {
+  function submitHeroAction(dto: HeroActionDto, beltIntent = false, lease?: HeroUiLease,
+    rendererToken = heroRendererTokenRef.current, sharedIntent?: Extract<HeroSharedIntent, { type: "action" }>): boolean {
     const model = currentHeroModel();
+    if (rendererToken !== heroRendererTokenRef.current || sharedIntent && heroSharedUiIngressRef.current?.allows(sharedIntent) !== true
+      || !sharedIntent && lease && heroSharedUiIngressRef.current?.isSharedOwner()) return false;
     if (!model || !heroInputAllowed() || (lease ? !heroUiLeaseCurrent(lease) : !beltIntent)
-      || (beltIntent || lease?.origin === "belt") && (dto.action.kind !== "use" || dto.action.slot > 1)) return;
+      || (beltIntent || lease?.origin === "belt") && (dto.action.kind !== "use" || dto.action.slot > 1)) return false;
     const proof = heroOperationsRef.current.reserve(model, dto);
-    if (!proof) return;
+    if (!proof) return false;
+    const captured = heroRawIngressRef.current?.highWater();
+    if (captured) heroProofHighWaterRef.current.set(proof, captured);
     heroUiProofLeasesRef.current.set(proof, lease ? { kind: "window", lease: Object.freeze({ ...lease }) } : { kind: "keyboardBelt" });
+    heroProofRendererTokensRef.current.set(proof, rendererToken);
+    if (sharedIntent) heroSharedProofsRef.current.set(proof, sharedIntent);
     if (beltIntent) heroBeltProofRef.current = proof;
+    let sent = false;
     try {
-      if (!sendRaw({ ...proof.wire }, { heroProof: proof })) heroOperationsRef.current.cancelDefinitelyUnsent(proof);
-    } catch (error) { heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero operation outcome is unknown", error); }
+      sent = sendRaw({ ...proof.wire }, { heroProof: proof });
+      if (!sent) {heroOperationsRef.current.cancelDefinitelyUnsent(proof);heroOperationsRef.current.outcomeUnknown(proof);}
+    } catch (error) { heroOperationsRef.current.cancelDefinitelyUnsent(proof); heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero operation outcome is unknown", error); }
     finally { if (heroBeltProofRef.current === proof) heroBeltProofRef.current = null; }
     renderParityServices(n => n + 1);
+    return sent;
   }
   function changeHeroWindows(next: HeroManagementWindows) {
     if (!["equipment", "status", "state", "skills"].includes(next.characterPage)
@@ -10648,10 +10724,12 @@ export default function HomePage() {
       if (!heroInputAllowed()) return;
       const model = currentHeroModel(); if (!model) return;
       const proof = heroOperationsRef.current.reserveRestock(model); if (!proof) return;
+      const captured = heroRawIngressRef.current?.highWater();
+      if (captured) heroProofHighWaterRef.current.set(proof, captured);
       heroUiProofLeasesRef.current.set(proof, { kind: "acceptedRestock" });
       heroBeltProofRef.current = proof;
       try { if (!sendRaw({ ...proof.wire }, { heroProof: proof })) heroOperationsRef.current.cancelDefinitelyUnsent(proof); }
-      catch (error) { heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero restock outcome is unknown", error); }
+      catch (error) { heroOperationsRef.current.cancelDefinitelyUnsent(proof); heroOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Hero restock outcome is unknown", error); }
       finally { if (heroBeltProofRef.current === proof) heroBeltProofRef.current = null; }
       renderParityServices(n => n + 1);
     });
@@ -10753,6 +10831,7 @@ export default function HomePage() {
     }
     if (["GuildStatus","GuildBuffList","GuildStorageGoldChange"].includes(packet)) renderParityServices(n => n + 1);
     if (packet === "HeroInformation") heroAuthorityRef.current.receiveInformation(payload, owner);
+    else if (packet === "HeroHealthChanged") heroAuthorityRef.current.receiveHealthChanged(payload, owner);
     else heroAuthorityRef.current.receiveActor(packet, payload, owner);
     if (heroOperationsRef.current.receipt(packet, payload, owner, heroAuthorityRef.current.authoritySerial)) renderParityServices(n => n + 1);
     syncObservePreference(owner);
@@ -11408,7 +11487,7 @@ export default function HomePage() {
   }
   function mapRouteInputBlocked(): boolean {
     return mapRouteLocalModalRef.current || mapRoutePageBlockedRef.current || skillBarPointerHeldRef.current
-      || heroManagementOpenRef.current || cashShopOpenRef.current || referenceWindowsBlockGameplay()
+      || heroUiBlocksGameplay() || cashShopOpenRef.current || referenceWindowsBlockGameplay()
       || worldMapOpenRef.current || questWindowOpenRef.current || sceneInputDeferredForInitialAssets()
       || document.visibilityState !== "visible" || !document.hasFocus();
   }
@@ -13015,6 +13094,29 @@ export default function HomePage() {
     return {connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration,
       ownerRevision:equipmentBagOwnerRef.current.ownerRevision,playerObjectId};
   }
+  function currentHeroRawPhysical(): HeroPhysical | null {
+    const socket = socketRef.current, session = equipmentStartGameRef.current;
+    return socket && socket.readyState === WebSocket.OPEN && session
+      && session.connectionGeneration === equipmentConnectionGenerationRef.current
+      && session.sessionGeneration === equipmentSessionGenerationRef.current && session.sessionGeneration > 0
+      ? {socket,connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration} : null;
+  }
+  function observeHeroRawOwner(delivery: HeroRawDelivery, snapshot: GatewayWorldSnapshot | Readonly<Record<string, unknown>>) {
+    const physical = currentHeroRawPhysical(), id = snapshot.playerObjectId;
+    if (sameHeroPhysical(delivery,physical) && physical && typeof id === "number" && Number.isSafeInteger(id)
+      && id > 0 && id <= 0xffffffff && typeof snapshot.mapFileName === "string"
+      && worldRef.current.playerObjectId === String(id) && worldRef.current.mapFileName === snapshot.mapFileName) {
+      heroRawOwnerRef.current = Object.freeze({...physical,playerObjectId:id});
+    }
+  }
+  function syncHeroRawIngress() {
+    const physical = currentHeroRawPhysical(), owner = heroRawOwnerRef.current, current = worldRef.current;
+    const scene = physical && owner && sameHeroPhysical(physical,owner) && current.playerObjectId === String(owner.playerObjectId)
+      && typeof current.mapFileName === "string" && current.mapFileName.length > 0
+      && Number.isSafeInteger(questSceneRevisionRef.current) && questSceneRevisionRef.current > 0
+      ? {sceneRevision:questSceneRevisionRef.current,playerObjectId:owner.playerObjectId,mapFileName:current.mapFileName} : null;
+    heroRawIngressRef.current?.sync(runtimeRef.current,physical,scene);
+  }
   function currentQuestWorldIdentity(): QuestWorldIdentity | null {
     const current = worldRef.current;
     const owner = currentSpellsOwner(Number(current.playerObjectId));
@@ -13212,21 +13314,36 @@ export default function HomePage() {
     }
   }
 
-  function receiveNpcPurchaseGatewayFrame(event: { data: unknown }, connectionGeneration: number, socket: WebSocket) {
+  function receiveNpcPurchaseGatewayFrame(event: { data: unknown }, connectionGeneration: number, socket: WebSocket, delivery: HeroRawDelivery | null = null) {
     if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
     let strictWorld = false;
+    const apply = (decoded: GatewayEvent, rawWorld?: string) => {
+      handleGatewayEvent(decoded,connectionGeneration,socket,rawWorld);
+      if (delivery) {
+        if (decoded.type === "worldSnapshot") observeHeroRawOwner(delivery,decoded.payload as GatewayWorldSnapshot);
+        syncHeroRawIngress();heroRawIngressRef.current?.offer(delivery);heroSharedUiIngressRef.current?.tick();
+      }
+    };
     try {
       // New bounded raw-source policy. The previous generic decoder was
       // uncapped; reject before either marker or decoder to prevent fallback.
       if (typeof event.data !== "string" || event.data.length > 16 * 1024 * 1024) { strictWorld = true; throw Error("Invalid gateway raw frame size"); }
       if (isNpcPurchaseOwnerFrame(event.data)) {
         const adapter = npcPurchaseClientRef.current;
-        if (adapter?.socket === socket && adapter.core === questCoreRuntimeRef.current) adapter.client.receive(event.data);
+        if (adapter?.socket === socket && adapter.core === questCoreRuntimeRef.current) {
+          if (delivery) {
+            const prior = heroVerifiedDeliveryRef.current;heroVerifiedDeliveryRef.current=delivery;
+            try {adapter.client.receive(event.data);} finally {heroVerifiedDeliveryRef.current=prior;}
+          } else adapter.client.receive(event.data);
+        }
+        // Failed/unpaired owner envelopes remain ordinary ignored raw input. A
+        // successful callback already queued this same delivery with its witness.
+        if (delivery) {syncHeroRawIngress();heroRawIngressRef.current?.offer(delivery);heroSharedUiIngressRef.current?.tick();}
         return;
       }
       strictWorld = isNpcPurchaseWorldFrame(event.data);
       if (strictWorld) {
-        handleGatewayEvent(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, connectionGeneration, socket, event.data);
+        apply(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, event.data);
         return;
       }
       // The final world check also prevents a failed structural marker from
@@ -13234,8 +13351,8 @@ export default function HomePage() {
       const decoded = parseGatewayMailDates(event.data as string) as GatewayEvent;
       if (decoded.type === "worldSnapshot") {
         strictWorld = true;
-        handleGatewayEvent(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, connectionGeneration, socket, event.data);
-      } else handleGatewayEvent(decoded, connectionGeneration, socket);
+        apply(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, event.data);
+      } else apply(decoded);
     } catch (error) {
       if (strictWorld) {
         npcPurchaseUnavailableRef.current = true;
@@ -19281,6 +19398,36 @@ export default function HomePage() {
     [],
   );
 
+  const bevyHeroUi = useBevyHeroUi({
+    requested: bevyQuestUiRequested, runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
+    read: () => {
+      const projection = readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+        document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch");
+      return { ingress: heroRawIngressRef.current!, model: currentHeroModel(), windows: heroBasisWindows(),
+        windowEpochs: heroWindowEpochsRef.current, hudGeneration: bevyQuestGenerationRef.current,
+        presentation: projection ? { logicalWidth: projection.logicalWidth, logicalHeight: projection.logicalHeight,
+          stageCssScale: projection.stageCssScale, touch: projection.touch } : null,
+        pending: Boolean(heroOperationsRef.current.pending), inputAllowed: heroInputAllowed(),
+        eligible: bevyQuestUiRequested && (bevyRuntimeBackend === "webgpu" || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend))
+          && screenRef.current === "game" && worldRef.current.connected && initialSceneAssetsReadyRef.current
+          && equipmentHostSuspendReasonRef.current === null && document.visibilityState === "visible" && document.hasFocus() };
+    },
+    onOwner: token => {
+      heroRendererTokenRef.current = token ?? `hero-react:${++heroReactRendererSerialRef.current}`;
+      if (token !== null) { cancelPlayerUiWorldIntent(); flushSync(() => renderParityServices(n => n + 1)); }
+      else renderParityServices(n => n + 1);
+    },
+    onIntent: dispatchBevyHeroIntent,
+  });
+  heroSharedUiIngressRef.current = bevyHeroUi;
+  const renderedHeroGameplayBlocked = bevyHeroUi.owned ? bevyHeroUi.worldBlocked : heroManagementOpenRef.current;
+  const renderedHeroRendererToken = heroRendererTokenRef.current;
+  const renderedHeroWindowEpochs = heroWindowEpochsRef.current;
+  const heroReactCallbacksCurrent = () => !heroSharedUiIngressRef.current?.isSharedOwner()
+    && heroRendererTokenRef.current === renderedHeroRendererToken
+    && (["inventory", "character", "belt"] as const).every(origin =>
+      heroWindowEpochsRef.current[origin] === renderedHeroWindowEpochs[origin]);
+
   const bevyNpcShopUi = useBevyNpcShopUi({
     requested: bevyQuestUiRequested && Boolean(npcShopService?.supportsBuy) && currentNpcShopTab(npcShopService) === "buy",
     runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
@@ -19487,7 +19634,7 @@ export default function HomePage() {
       const actor=(e:WorldEntity):CombatActor=>{const source=sources.get(e.objectId),master=combatMastersRef.current.get(e.objectId);return {objectId:e.objectId,kind:e.kind,x:e.x,y:e.y,direction:e.direction??null,dead:e.dead===true,ai:e.ai??0,masterObjectId:master&&master.owner.connectionGeneration===owner.connectionGeneration&&master.owner.sessionGeneration===owner.sessionGeneration&&master.owner.ownerRevision===owner.ownerRevision&&master.owner.playerObjectId===owner.playerObjectId?master.master:Number.isInteger(source?.masterObjectId)?Number(source!.masterObjectId):0};};
       const source=sources.get(self.objectId),flag=(key:string)=>typeof source?.[key]==="boolean"?source[key] as boolean:null;
       const active=document.activeElement,editing=active instanceof HTMLElement&&(active.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
-      const modal=heroManagementOpenRef.current||skillBarPointerHeldRef.current||otherPlayerUiBlocksInput()||combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||heroManagementPage!==null||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
+      const modal=heroUiBlocksGameplay()||skillBarPointerHeldRef.current||otherPlayerUiBlocksInput()||combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
       // The GPU/lean backend draws its scene on the existing map canvas, independently of shared UI.
       const visible=Array.from(document.querySelectorAll<HTMLElement>(webGl2SharedCanvasPrototype?".game-world-composite":"#mir2-web3-canvas, .webgl2-map-atlas-canvas")).some(surface=>{const rect=surface.getBoundingClientRect(),style=getComputedStyle(surface);return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden"&&Number(style.opacity)>0;});
       const target=current.entities.find(e=>e.objectId===current.selectedObjectId);
@@ -19517,15 +19664,15 @@ export default function HomePage() {
   bagYieldRef.current = bevyBagUi.yieldToReact;
 
   const hpOrbPageBlocked = Boolean(bevyHpLocalOverlayOpen || bevyQuestReactModalOpen || showInventory || showQuestLog
-    || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
+    || showCharacter || renderedHeroGameplayBlocked || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
     || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap || referenceWindowsBlockGameplay() || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
   questWindowOpenRef.current = showQuestLog;
   questWorldBlockedRef.current = Boolean(screenRef.current !== "game" || bevyHpLocalOverlayOpen || bevyQuestReactModalOpen
-    || showInventory || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds
+    || showInventory || showCharacter || renderedHeroGameplayBlocked || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds
     || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
     || referenceWindowsBlockGameplay() || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
   mapRoutePageBlockedRef.current = Boolean(screenRef.current !== "game" || showInventory || showCharacter || showQuestLog
-    || heroManagementPage !== null || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
+    || renderedHeroGameplayBlocked || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
     || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap || showChatSettings || showTutorial
     || world.activeNpcDialog || npcShopService || npcRepairService);
   useEffect(() => {
@@ -19730,6 +19877,14 @@ export default function HomePage() {
       }}
       onHpOrbLocalOverlayChange={handleHpOrbLocalOverlayChange}
       bevyBagUiActive={bevyBagUi.active && showInventory}
+      bevyHeroUiActive={bevyHeroUi.active}
+      bevyHeroUiTransitioning={bevyHeroUi.transitioning}
+      bevyHeroUiToken={bevyHeroUi.webLeaseToken}
+      bevyHeroUiWorldBlocked={bevyHeroUi.worldBlocked}
+      getBevyHeroInputBlocked={bevyHeroUi.blocksWorld}
+      getBevyHeroPointerContext={bevyHeroUi.pointerContext}
+      onBevyHeroPointer={bevyHeroUi.pointer}
+      onBevyHeroKey={bevyHeroUi.key}
       bevyNpcShopUiActive={bevyNpcShopUi.active}
       bevyNpcShopUiTransitioning={bevyNpcShopUi.transitioning}
       getBevyNpcShopInputBlocked={bevyNpcShopUi.blocksInput}
@@ -19906,7 +20061,8 @@ export default function HomePage() {
       onCrystalGameplayShortcut={handleCrystalGameplayShortcut}
       onCrystalDropViewHeldChange={changeDropViewHeld}
       skillBars={{ skills: currentSkillBarDocument?.rows ?? [], bindings: crystalKeyBindings, visible: screen === "game" && playerUiPreferences.skillBar, positions: skillBarPositions, onPositionsChange: changeSkillBarPositions, inputBlocked: skillBarInputBlocked(), sourceKey: currentSkillBarDocument?.sourceKey ?? null, onCastSlot: castSkillBarLease, onPointerHeldChange: changeSkillBarPointerHeld }}
-      parityUiBlocksGameplay={() => skillBarPointerHeldRef.current || heroManagementOpenRef.current || cashShopOpenRef.current || referenceWindowsBlockGameplay()}
+      parityUiWorldBlocked={Boolean(skillBarPointerHeldRef.current || renderedHeroGameplayBlocked || cashShopOpenRef.current || referenceWindowsBlockGameplay())}
+      parityUiBlocksGameplay={() => skillBarPointerHeldRef.current || heroUiBlocksGameplay() || cashShopOpenRef.current || referenceWindowsBlockGameplay()}
       worldFishingAnimation={worldFishingAnimation}
       {...worldFishingStableCallbacks}
       onSendClientCommand={sendClientCommand}
@@ -19963,7 +20119,7 @@ export default function HomePage() {
         canFinishQuest: (questId, selectedItemIndex) =>
           questActionDecision(questId, "finish", selectedItemIndex)?.eligible === true,
       }}
-      heroManagement={{open:screen === "game" && !!currentHeroModel() && (heroManagementPage !== null || heroWindows.beltVisible), onClose:closeHeroManagement, model:currentHeroModel(), pending:heroOperationsRef.current.pending, windows:heroWindows, windowEpochs:heroWindowEpochsRef.current, onWindowChange:changeHeroWindows, onReadStats:readHeroStats, initialPage:heroManagementPage ?? "inventory", onAction:(dto, lease) => submitHeroAction(dto, false, lease), onReadItemTooltip:readHeroItemTooltip}}
+      heroManagement={{open:screen === "game" && !bevyHeroUi.owned && !!currentHeroModel() && (heroManagementPage !== null || heroWindows.beltVisible), onClose:() => { if (heroReactCallbacksCurrent()) closeHeroManagement(); }, model:currentHeroModel(), pending:heroOperationsRef.current.pending, windows:heroWindows, windowEpochs:heroWindowEpochsRef.current, onWindowChange:next => { if (heroReactCallbacksCurrent()) changeHeroWindows(next); }, onReadStats:readHeroStats, initialPage:heroManagementPage ?? "inventory", onAction:(dto, lease) => submitHeroAction(dto, false, lease, renderedHeroRendererToken), onReadItemTooltip:readHeroItemTooltip}}
       heroPet={{ open: showHeroPet, onClose: () => {heroPetOpenRef.current = false; setShowHeroPet(false);}, creatureSource:currentCreatureSource(), petActionPending:Boolean(creatureOperationsRef.current.pending()), onPetAction:submitCreatureAction, onOpenHeroManagement:showHeroPet && currentHeroModel() ? openHeroManagement : undefined, hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "guild") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("guild", epoch, accept),
         buffSource:currentGuildBuffSource(), buffPending:guildBuffOperationsRef.current.pending, onBuffAction:submitGuildBuffAction,

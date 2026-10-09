@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "portable-tests",
+  "startedUtc": "2026-10-09T15:28:15.3157090Z",
+  "finishedUtc": "2026-10-09T15:29:08.8185056Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "apps/game-client/client-bevy/Cargo.toml",
+    "--no-default-features",
+    "--features",
+    "portable-quest-ui",
+    "--lib",
+    "workshop_",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "8f384e2a44bf870977217143a71312b1a96b047269533cfad4678af2ff9ae669",
+  "declaredInputs": 728,
+  "sourceDrift": [],
+  "cargoLogSha256": "688a656268c4f508b91d2162dd91a0b28e4a88d103a8eedf1801d9eb3363a020",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "headlessSidebarTests": true
+}

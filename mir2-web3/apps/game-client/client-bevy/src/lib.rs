@@ -66,6 +66,10 @@ pub mod portable_character_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_hero_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod hero_action_basis;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod hero_source_witness;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_experience_bar_ui;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
 pub mod portable_hp_orb_ui;
@@ -105,6 +109,8 @@ pub mod quest_route_search;
 pub mod quest_supplies;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod quest_ui;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod stone_workshop_ui;
 pub mod read_model;
 pub mod shop;
 pub mod npc_shop_buy;

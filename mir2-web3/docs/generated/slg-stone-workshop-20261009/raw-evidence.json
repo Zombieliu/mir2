@@ -1,0 +1,1496 @@
+{
+  "schema": "mir2.stone-raw-evidence.v1",
+  "rawCopies": 248,
+  "allCopiesByteVerified": true,
+  "originalGuardNonceDirectories": 18,
+  "files": [
+    {
+      "path": "raw/actual-result-audit-01.json",
+      "length": 54715,
+      "sha256": "09f1fef5e745668c563ddd897fb578272bbf39146f623a0b7203ab54508946c5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\actual-result-audit-01.json"
+    },
+    {
+      "path": "raw/audit-and-copy.py",
+      "length": 4001,
+      "sha256": "adac2a40687f28547aa3450238d38c7327a138cd0007c8b19c6343f45f9f4ff7",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\audit-and-copy.py"
+    },
+    {
+      "path": "raw/authority-edit-receipt.json",
+      "length": 789,
+      "sha256": "c1ab02ccaf400ac8c98fea7abfa4f98daa87c1e3ea4d08cdf080c9dc5a282abe",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\authority-edit-receipt.json"
+    },
+    {
+      "path": "raw/backend-protected-parent-qualification-01.json",
+      "length": 327,
+      "sha256": "4eaa8834d8c4bb77f31bf839af1a0ec454515f8d597b7311e2220d04bbedf729",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\backend-protected-parent-qualification-01.json"
+    },
+    {
+      "path": "raw/carrier-edit-receipt.json",
+      "length": 1462,
+      "sha256": "537395050620c08a9695c1c95574f995a7c1c19950ce6ca66add48170c6b570c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\carrier-edit-receipt.json"
+    },
+    {
+      "path": "raw/compress-old-pdbs-02.py",
+      "length": 1982,
+      "sha256": "242cc0ed907c1aa8ab6bcb8a2d0a00bab46cdb994d0348f0b50dc2fc419b7397",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\compress-old-pdbs-02.py"
+    },
+    {
+      "path": "raw/compress-old-pdbs-03.py",
+      "length": 1982,
+      "sha256": "38efcb22cc951d81209758b2ce2c85d4833ba09394b8006a12a84ca9eda9fff3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\compress-old-pdbs-03.py"
+    },
+    {
+      "path": "raw/compress-old-pdbs.py",
+      "length": 1996,
+      "sha256": "5655364aaea4a84e94b5fd7e4ebef6e2c9bc28c8fb2c76bea274bda39f7eb6e9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\compress-old-pdbs.py"
+    },
+    {
+      "path": "raw/frontend-authored-source-01.json",
+      "length": 1286,
+      "sha256": "2aea2fb7ebb03dcbbf1f5829ad96111df2843ffcf65d571133c80d6ee0efa99e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\frontend-authored-source-01.json"
+    },
+    {
+      "path": "raw/frontend-protected-parent-qualification-01.json",
+      "length": 1575,
+      "sha256": "fafed729fd11702bd7d0e5cd72f10408b30d6f9feb3efd21d4e3189a4a79f66a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\frontend-protected-parent-qualification-01.json"
+    },
+    {
+      "path": "raw/frontend-sidebar-handoff-01.json",
+      "length": 17269,
+      "sha256": "79ffb5f46f6132ebec05e13fa4013b0fc88fd1873ce350e384d73c5210b7ce08",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\frontend-sidebar-handoff-01.json"
+    },
+    {
+      "path": "raw/independent-authority-runtime-exploration-01.json",
+      "length": 6157,
+      "sha256": "52aa2ea2c1bb3382819b79b668b369990f6d36848ba505b2a31122179a4c18d4",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-authority-runtime-exploration-01.json"
+    },
+    {
+      "path": "raw/independent-c-pdb-candidates-01.json",
+      "length": 2174,
+      "sha256": "ef93a59ea87d5033eec24f80e28aa52787147752889bd5bc411c718669957384",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-c-pdb-candidates-01.json"
+    },
+    {
+      "path": "raw/independent-guard-refusal-diagnosis-01.json",
+      "length": 10322,
+      "sha256": "2687417e3ff8142a9b2391fd8ce64a63c5e2f195812058cc9f4b81b5dcfed361",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-guard-refusal-diagnosis-01.json"
+    },
+    {
+      "path": "raw/independent-stone-frontend-source-review-01.json",
+      "length": 10327,
+      "sha256": "d0b2376232660b68f4a7d4022056fdc0dc5a1d859e56d47a2141cdc9aa17d8d5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-frontend-source-review-01.json"
+    },
+    {
+      "path": "raw/independent-stone-npc-bridge-01.json",
+      "length": 11420,
+      "sha256": "abba77f32aa423a6e9399aa2f09d2fc1f5a17f323957be8e16e85336dc4c7594",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-npc-bridge-01.json"
+    },
+    {
+      "path": "raw/independent-stone-rules-implementation-01.json",
+      "length": 11085,
+      "sha256": "3c76456f9351ca52e9a3beb63e6e4f388a6b24cf64d45e6446b6847d3a60ab6e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-rules-implementation-01.json"
+    },
+    {
+      "path": "raw/independent-stone-rules-source-review-01.json",
+      "length": 5608,
+      "sha256": "4dcc034f97be67e6f563cca44c371c62c394e2f7ea269988e2f6bacdf979d10c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-rules-source-review-01.json"
+    },
+    {
+      "path": "raw/independent-stone-runtime-source-rejection-01.json",
+      "length": 757,
+      "sha256": "afc278bacb148729d45bf99dd11fad40f97fa256fb79039eb4d2e76c65a594b2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-rejection-01.json"
+    },
+    {
+      "path": "raw/independent-stone-runtime-source-review-01.json",
+      "length": 12004,
+      "sha256": "3d31bae3b44f4eb8d727b6d446191b4d4384ad730768a8a63c769531c908a297",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-review-01.json"
+    },
+    {
+      "path": "raw/independent-stone-runtime-source-review-02.json",
+      "length": 14648,
+      "sha256": "3f60ba5d323aff3575e0d7ff977e8648c1000a983e9f301ab460abe846f2ecb8",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-review-02.json"
+    },
+    {
+      "path": "raw/independent-stone-runtime-source-review-03.json",
+      "length": 15112,
+      "sha256": "d4bb93b42dacc553c6366f6839c9aece953690905c14210f6c425b4fcac885b2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-review-03.json"
+    },
+    {
+      "path": "raw/independent-stone-runtime-source-review-04.json",
+      "length": 15860,
+      "sha256": "f0792a136042dadbdf8e4e76d78b1245428bb3f4f580c8f9e0e0feb6fd1d9c21",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-review-04.json"
+    },
+    {
+      "path": "raw/independent-stone-runtime-source-review-05.json",
+      "length": 16615,
+      "sha256": "254bea0e450679dfd4dff6eaf4f15756da379a5cd6284d6bdfba0e73835924a5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-runtime-source-review-05.json"
+    },
+    {
+      "path": "raw/independent-system-exploration-01.json",
+      "length": 26575,
+      "sha256": "c1cfd0c5be339fe09b131e69e397ba2a8e6cae4b04a02a170eb0df6aede3eec6",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-system-exploration-01.json"
+    },
+    {
+      "path": "raw/independent-ui-exploration-01.json",
+      "length": 26252,
+      "sha256": "c1774440f8f0f52423e48a313daa89864f85964995795293a822317889bbb8fc",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-ui-exploration-01.json"
+    },
+    {
+      "path": "raw/integrate-authority.py",
+      "length": 11418,
+      "sha256": "8d5a0a59c294ab03579a1779e6c1bc5b53dc4b7c21255dabd92f8e658d1b8b56",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\integrate-authority.py"
+    },
+    {
+      "path": "raw/integrate-carriers.py",
+      "length": 1398,
+      "sha256": "0a215dd0dccbac3ecdc993cd64d6198f7da49e0336c6f68ed234459518508369",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\integrate-carriers.py"
+    },
+    {
+      "path": "raw/make-frontend-runner.py",
+      "length": 3186,
+      "sha256": "dcb07e41dbea23c0daf65a6651a16cc0483829f6085f13a6177946e89e127121",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\make-frontend-runner.py"
+    },
+    {
+      "path": "raw/ntfs-compression-result-01.json",
+      "length": 2893,
+      "sha256": "a75ddb5c0798c51f3d5cfb4d5212e934740332d1607e307f59fe31afe224262a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\ntfs-compression-result-01.json"
+    },
+    {
+      "path": "raw/ntfs-compression-result-02.json",
+      "length": 2287,
+      "sha256": "2292f15fac1ef4e0afc2a0fa0cb9d84ffe8d2d9fb335400d06a8d40ccd34fdf1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\ntfs-compression-result-02.json"
+    },
+    {
+      "path": "raw/ntfs-compression-result-03.json",
+      "length": 8930,
+      "sha256": "adf5abb8f3bb1a9ed71dde039af8a6f76877ea8209657d7c34c04a8ea6ea09e3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\ntfs-compression-result-03.json"
+    },
+    {
+      "path": "raw/old-pdb-candidates-02.json",
+      "length": 733,
+      "sha256": "017c846d82a027fceb8d24502ce7422490ce3224f8a577c3d4d2bca483dab4b3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\old-pdb-candidates-02.json"
+    },
+    {
+      "path": "raw/old-pdb-candidates-03.json",
+      "length": 2760,
+      "sha256": "ae036a59137d85d5d04fe14258b5048c836325e4c83783d702939acdb618052e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\old-pdb-candidates-03.json"
+    },
+    {
+      "path": "raw/qualify-backend-parent.ps1",
+      "length": 2006,
+      "sha256": "dd416aa1a6f88935de0dadd72452fdaad0b1d6db531e7b31fe6c5509363940bb",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\qualify-backend-parent.ps1"
+    },
+    {
+      "path": "raw/qualify-frontend-parent.ps1",
+      "length": 2549,
+      "sha256": "7700d84bca6b49595718fc9d045a971e20d2cb2bcd598d8b065cf14a74658bc7",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\qualify-frontend-parent.ps1"
+    },
+    {
+      "path": "raw/reconstruct-source06-test.py",
+      "length": 1739,
+      "sha256": "84a6665562f95b6edc878b552b18ee4fd0cf82de1371cb9f3fdbf4df5b73ed8e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\reconstruct-source06-test.py"
+    },
+    {
+      "path": "raw/run-check.ps1",
+      "length": 10081,
+      "sha256": "a593f0f450ec1d3122817ab8595793c7b6b12cb7e1c31bc62894d70cccd01e02",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\run-check.ps1"
+    },
+    {
+      "path": "raw/run-frontend-check.ps1",
+      "length": 7390,
+      "sha256": "9dcd6aca6fe0c17a8708445a8b2a99ee223d77771db09c58db7007ef28d0cf5c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\run-frontend-check.ps1"
+    },
+    {
+      "path": "raw/run-runtime-check.ps1",
+      "length": 11124,
+      "sha256": "cd0d4a31c3650fcffbe22e17e3272b3cec62960e5931e515daeb17b3737a3ad5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\run-runtime-check.ps1"
+    },
+    {
+      "path": "raw/source06-stones-tests-reconstructed.rs",
+      "length": 14773,
+      "sha256": "269253dbd08d65ffab71dbc85c1ffbc710baa796a3e0b8425cb1301bab7f2062",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\source06-stones-tests-reconstructed.rs"
+    },
+    {
+      "path": "raw/stone-config-regression-01/cargo-receipts/293d89f3f7ed460197f57a9f6b8ed172/after.json",
+      "length": 329,
+      "sha256": "9fd1e1c9041f856f43ef1250f4dc8344f38027a8ab62867e3ad8b096ec2f98e8",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\cargo-receipts\\293d89f3f7ed460197f57a9f6b8ed172\\after.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/cargo-receipts/293d89f3f7ed460197f57a9f6b8ed172/before.json",
+      "length": 953,
+      "sha256": "78764848a574bab0e4f85a71ef30679da2e48c32a49b6c7c6c1b7c0d32e21f75",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\cargo-receipts\\293d89f3f7ed460197f57a9f6b8ed172\\before.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/cargo-receipts/293d89f3f7ed460197f57a9f6b8ed172/probe-process.json",
+      "length": 442,
+      "sha256": "3bf69d9b535840ad2f64562f6221fded06ff05d0dc4d2d081d31fa4ca02c5118",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\cargo-receipts\\293d89f3f7ed460197f57a9f6b8ed172\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/cargo-receipts/293d89f3f7ed460197f57a9f6b8ed172/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\cargo-receipts\\293d89f3f7ed460197f57a9f6b8ed172\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-config-regression-01/cargo-receipts/293d89f3f7ed460197f57a9f6b8ed172/probe.stdout.bin",
+      "length": 196,
+      "sha256": "f34f1648841a87d548165fcbe101615a9ff95d82acd1a7bfc46acd561c45cb58",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\cargo-receipts\\293d89f3f7ed460197f57a9f6b8ed172\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-config-regression-01/cargo.log",
+      "length": 56550,
+      "sha256": "8064e9c815be930b970471e40615445bf15a04a8108802a2df8a4d1a2b3fd93a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-config-regression-01/guard-policy.json",
+      "length": 2271,
+      "sha256": "4862e079dd8e22b6e220be1457d0af5bf1a21fcfd914540e826b6834fa239aa3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/result.json",
+      "length": 733,
+      "sha256": "c152e8e459e407fc9323d554e5239c50a65b63b94b7c2994d7e6bab5475781b2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\result.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/root-authority.json",
+      "length": 530,
+      "sha256": "bdf3645fa7742cfd1ae01eb7613ddf9a10ce4d6bc10c5fbd757eec6bfd279bee",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "a81ad37bdba3fbda470ffc4e074ae907ea016e61f5294363fbc817e724b08920",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-config-regression-01/source-snapshot.json",
+      "length": 94270,
+      "sha256": "c41721f118950a1f136fc1fd12eb5beb54978adc6ed2cb21de64b9e7adb0d500",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-config-regression-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/cargo-receipts/9e422da099b345a180d3e7485761d4be/after.json",
+      "length": 319,
+      "sha256": "afd9567306e94b51d5a630eae68a222ee65ae399399ae2e5165eb07d0e283953",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\cargo-receipts\\9e422da099b345a180d3e7485761d4be\\after.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/cargo-receipts/9e422da099b345a180d3e7485761d4be/before.json",
+      "length": 947,
+      "sha256": "7a9f8d3847200bda6ac3fa8234f9511c89e2711799bf73a4cd44459af8de76ff",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\cargo-receipts\\9e422da099b345a180d3e7485761d4be\\before.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/cargo-receipts/9e422da099b345a180d3e7485761d4be/probe-process.json",
+      "length": 430,
+      "sha256": "be9b7e2ed034748cf6946fdc33c8995b183e509ecf2d044fffb40b06899a3227",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\cargo-receipts\\9e422da099b345a180d3e7485761d4be\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/cargo-receipts/9e422da099b345a180d3e7485761d4be/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\cargo-receipts\\9e422da099b345a180d3e7485761d4be\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/cargo-receipts/9e422da099b345a180d3e7485761d4be/probe.stdout.bin",
+      "length": 196,
+      "sha256": "4fde6ff16ba9601b70e23c3992ac2ff59853a858ddb2ed54c8b45ec2d01a207d",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\cargo-receipts\\9e422da099b345a180d3e7485761d4be\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/cargo.log",
+      "length": 40891,
+      "sha256": "3baeede148622beb3f48344379ae291a3cf3962624252cb39f303c1422024a5b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/guard-policy.json",
+      "length": 2263,
+      "sha256": "c1004c0e87bb66a1378cc01c70dccb678c6cc89a54b3b6af04ec161bb0847ef4",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/result.json",
+      "length": 739,
+      "sha256": "762364553b9ea2f6e762dbb5595653f148ab4686f1b37c01559cdc9edffc4d2a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\result.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/root-authority.json",
+      "length": 530,
+      "sha256": "e1d5f563bf072436a1c671c52e41bc99900f14b850fff61c53a16e5777d723da",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "270e9197873fa75e5e8137ea871be780b015d15eacbc1b06cb916c9a9fa1898e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-drop-regression-01/source-snapshot.json",
+      "length": 94268,
+      "sha256": "62e100e0eaa454bb5498f783a5f11bc0ccb43d98d0bd3b03e13c1d1b8af5e7a2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-drop-regression-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/cargo-receipts/864a21abe26d4b43b6b111108071e46e/after.json",
+      "length": 319,
+      "sha256": "96fe4551c82cba33e3145734df780985e4d7b62780d95754fb970d7c3872d3cf",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\cargo-receipts\\864a21abe26d4b43b6b111108071e46e\\after.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/cargo-receipts/864a21abe26d4b43b6b111108071e46e/before.json",
+      "length": 925,
+      "sha256": "b2f4a6c55a0ca36a0420e196cd6c7c09b123bbf37bebf3c680d155fb1518548c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\cargo-receipts\\864a21abe26d4b43b6b111108071e46e\\before.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/cargo-receipts/864a21abe26d4b43b6b111108071e46e/probe-process.json",
+      "length": 431,
+      "sha256": "a7554e3a4dca1e63e4d35d6d1ec5b0726b1d051eb50812e7e7ef3f2730b28a8e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\cargo-receipts\\864a21abe26d4b43b6b111108071e46e\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/cargo-receipts/864a21abe26d4b43b6b111108071e46e/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\cargo-receipts\\864a21abe26d4b43b6b111108071e46e\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/cargo-receipts/864a21abe26d4b43b6b111108071e46e/probe.stdout.bin",
+      "length": 196,
+      "sha256": "9b771d7c4bb30c9699f1f2f8605a004f86ae8e3b82394d2fb27a65fdcb0269fd",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\cargo-receipts\\864a21abe26d4b43b6b111108071e46e\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/cargo.log",
+      "length": 5484,
+      "sha256": "e63bb9e6da6fe05c0e22729102aa58cf39c1a86c57f5de5f56ed14f0c479d3ee",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/guard-policy.json",
+      "length": 2283,
+      "sha256": "17f35f023408cb186fdee67067c1cfca5a4c240d4e714fd193eecc593794fcae",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/result.json",
+      "length": 704,
+      "sha256": "c85e07c12aab5102679a1e50b2ff6506394db40ea677c5bef45a958a59538117",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\result.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/root-authority.json",
+      "length": 530,
+      "sha256": "d0e1032fd194ae3aa60b5da150b1429fd9bd329661cb008315a891a8756d006b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "48807f0cbb84b75bd02d95c65c818c320c81830456a9f666b019bf284e80ed67",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-game-data-regression-01/source-snapshot.json",
+      "length": 94273,
+      "sha256": "b7bfb7ae2fb646189c22b9ba67e0e7567a9e26dba723a90277ad6288e8d1023d",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-game-data-regression-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/cargo-receipts/7394d3c9d5b5442f8a67a4cb561a04ec/after.json",
+      "length": 319,
+      "sha256": "ce624cf0244ef57bbe522b947a152728abad4bbd6c853e6a4bcbf63ba3ad51a4",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\cargo-receipts\\7394d3c9d5b5442f8a67a4cb561a04ec\\after.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/cargo-receipts/7394d3c9d5b5442f8a67a4cb561a04ec/before.json",
+      "length": 967,
+      "sha256": "e1630b7a9eeee010fa3eea303fa4fbeb4166a26eab82a07cafcad828885507ac",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\cargo-receipts\\7394d3c9d5b5442f8a67a4cb561a04ec\\before.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/cargo-receipts/7394d3c9d5b5442f8a67a4cb561a04ec/probe-process.json",
+      "length": 441,
+      "sha256": "f76dc4d1ebc150861225db5863afcdc5e0886de01b98cd0d2f5b38fddad6f08d",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\cargo-receipts\\7394d3c9d5b5442f8a67a4cb561a04ec\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/cargo-receipts/7394d3c9d5b5442f8a67a4cb561a04ec/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\cargo-receipts\\7394d3c9d5b5442f8a67a4cb561a04ec\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/cargo-receipts/7394d3c9d5b5442f8a67a4cb561a04ec/probe.stdout.bin",
+      "length": 196,
+      "sha256": "348bc7e5363f10338fcbe31d321ea668cad04ea422a83e93dd9bfa6269fd8f7b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\cargo-receipts\\7394d3c9d5b5442f8a67a4cb561a04ec\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/cargo.log",
+      "length": 44086,
+      "sha256": "a1d137d4b16ed4779b195e5c5043bad724ded41b929921aee55a5283196e8ade",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/guard-policy.json",
+      "length": 2283,
+      "sha256": "20944b549e3735515223b73613a2e2cac085ff1f1f652533d8a91a036b8573c2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/result.json",
+      "length": 748,
+      "sha256": "6a0b80d47106c8d2948c3f13665b752ac746c11907271a0534cc7744e22fe086",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\result.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/root-authority.json",
+      "length": 530,
+      "sha256": "c360d2435258006cc1d41d3a7b79758dc1785f4ffd6a56d25ffc84e641d499d2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "d53a80ec7d9614c52af34112c8a28cbd93f9613d07d2a70b767f8a210df35e6b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-inventory-regression-01/source-snapshot.json",
+      "length": 94273,
+      "sha256": "dc455e5608d591264ecc33a0a47c49203b19cfe08c612caea2c749c53fffe425",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-inventory-regression-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/cargo-receipts/f587af83be8547e396e5fac2df4c4cfa/after.json",
+      "length": 327,
+      "sha256": "701457df1100b602949cdd58c543cb261aafd26f021d8d5d0882f7fe4acd2341",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\cargo-receipts\\f587af83be8547e396e5fac2df4c4cfa\\after.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/cargo-receipts/f587af83be8547e396e5fac2df4c4cfa/before.json",
+      "length": 937,
+      "sha256": "a9c24d71bc452675b3a9f90da72c58a0520c2f039e805ab3f9494d8fceace3c3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\cargo-receipts\\f587af83be8547e396e5fac2df4c4cfa\\before.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/cargo-receipts/f587af83be8547e396e5fac2df4c4cfa/probe-process.json",
+      "length": 431,
+      "sha256": "a4331965ea3a9b2b61c3e5ff472faacf0c9d9c293309640c69aa82850c3dd09c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\cargo-receipts\\f587af83be8547e396e5fac2df4c4cfa\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/cargo-receipts/f587af83be8547e396e5fac2df4c4cfa/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\cargo-receipts\\f587af83be8547e396e5fac2df4c4cfa\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-native-check-01/cargo-receipts/f587af83be8547e396e5fac2df4c4cfa/probe.stdout.bin",
+      "length": 196,
+      "sha256": "d55a16e52167b0198f80f903e12fdfff7e0f1cdb1e2cf04ab65e726f2807cd81",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\cargo-receipts\\f587af83be8547e396e5fac2df4c4cfa\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-native-check-01/cargo.log",
+      "length": 52553,
+      "sha256": "f5412003b8e373535bcb1e735f2eb3a21cf69443f102179b9bc5b106a973a84e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-native-check-01/guard-policy.json",
+      "length": 2251,
+      "sha256": "32c3902c55fd8144e8e0b83e9270e9ac929e217841a9e220c3789d344c0c7e30",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/result.json",
+      "length": 694,
+      "sha256": "d26bccf014aff10d8fcbe5f716e308f13891127e42a025d63ad14adf5db48a42",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\result.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/root-authority.json",
+      "length": 530,
+      "sha256": "550b35648995985c3af4abf7ee2ea217fd9c068db34e93e5b86a31cbddbc3d9f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/source-acceptance.json",
+      "length": 660,
+      "sha256": "17e7e56c423fef1d76dec7922d94c8ce2805e10980f29c19e1ef95cbc748dd74",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-native-check-01/source-snapshot.json",
+      "length": 149051,
+      "sha256": "521c30f2071c60fae5da0a8d36a0af524a9ed5564c2f46b06918cedbc21d009e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-check-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/cargo-receipts/697fdfc8268746f8b91ea4063fbde44e/after.json",
+      "length": 329,
+      "sha256": "1e3d5efc49332b34160943ee373bbecfb62546748fdc1c737eab6da132cbb6f2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\cargo-receipts\\697fdfc8268746f8b91ea4063fbde44e\\after.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/cargo-receipts/697fdfc8268746f8b91ea4063fbde44e/before.json",
+      "length": 1000,
+      "sha256": "5e0ebd083a3571632758af5e4e92e7853d2ad168eb7b205b262be3be629b113f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\cargo-receipts\\697fdfc8268746f8b91ea4063fbde44e\\before.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/cargo-receipts/697fdfc8268746f8b91ea4063fbde44e/probe-process.json",
+      "length": 431,
+      "sha256": "2aca4edeba0fe4c9b29cb3d71be5f34724f6a8025fefa4d3519ff0e1ea62e079",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\cargo-receipts\\697fdfc8268746f8b91ea4063fbde44e\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/cargo-receipts/697fdfc8268746f8b91ea4063fbde44e/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\cargo-receipts\\697fdfc8268746f8b91ea4063fbde44e\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-native-tests-01/cargo-receipts/697fdfc8268746f8b91ea4063fbde44e/probe.stdout.bin",
+      "length": 196,
+      "sha256": "94c18fdb33f4ef6acac026f88c2a2732d07d31ace7c8d49677033b84bf68cd58",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\cargo-receipts\\697fdfc8268746f8b91ea4063fbde44e\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-native-tests-01/cargo.log",
+      "length": 27619,
+      "sha256": "88acf72cb21ee9264da71357761370a98fe9544ba35c5e14384872c57fd241e8",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-native-tests-01/guard-policy.json",
+      "length": 2251,
+      "sha256": "279b4562efed556786d2cc649e8476a92637763f53bfd3e93ae9d435f1f291c9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/result.json",
+      "length": 792,
+      "sha256": "7f57b98f23e86e4815558656c937823dc2958654b27f094642e67204a8efb62a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\result.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/root-authority.json",
+      "length": 530,
+      "sha256": "19cb2b187bb33145f2439a4c99d17cfb81eecac0b7dab6e8bc06a64083805e86",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/source-acceptance.json",
+      "length": 660,
+      "sha256": "6ea5dab288cce41fdfcbe30d0a7310cf7a473901f30dccb6bc28b7fe82f546a9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-native-tests-01/source-snapshot.json",
+      "length": 149051,
+      "sha256": "d8ba60d6d626792c865f39a186c7c8086c43ea8264586a82efb8a4e82b261efd",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-native-tests-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/cargo-receipts/82ce89b8a3734130846dddbb3df11b26/probe-process.json",
+      "length": 431,
+      "sha256": "5bbb8cb69ecd3c9ae1a7f5db9bc963f9db3c8a2de534cb7f8ec227f15b575263",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\cargo-receipts\\82ce89b8a3734130846dddbb3df11b26\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/cargo-receipts/82ce89b8a3734130846dddbb3df11b26/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\cargo-receipts\\82ce89b8a3734130846dddbb3df11b26\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/cargo-receipts/82ce89b8a3734130846dddbb3df11b26/probe.stdout.bin",
+      "length": 196,
+      "sha256": "e27c01201acceaa3eb8e76c2eb10e64b0b3a534ed8c14cc163f81eec1f1db4a5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\cargo-receipts\\82ce89b8a3734130846dddbb3df11b26\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/cargo-receipts/82ce89b8a3734130846dddbb3df11b26/refusal.json",
+      "length": 82,
+      "sha256": "1f5d205bae6b36c0b690a216c20650efc27dfddd1df72a527b2a88c7ac7a580c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\cargo-receipts\\82ce89b8a3734130846dddbb3df11b26\\refusal.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/cargo.log",
+      "length": 31,
+      "sha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/guard-policy.json",
+      "length": 2239,
+      "sha256": "208f16f99f5265a6f6ee2870cbe8367e872506ace7235300b7c1ef74b1edd5e4",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/result.json",
+      "length": 751,
+      "sha256": "5fcedca957fff99b83d2ab40721a3124d9d06e585ca7b4169fc890af36f5cf95",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\result.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/root-authority.json",
+      "length": 530,
+      "sha256": "032e98d23f52fb63b0fdce0717344d9678760b043453e74c7b282bea7f943c37",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "7979435d788fc9c066ec12979e3eaab64d7f36d379bed6ca6fc49a74b6c2c616",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-01/source-snapshot.json",
+      "length": 94268,
+      "sha256": "ee02e76295af2894b14d3289d49038a210a280820fd25012eab752e105f7400a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/cargo-receipts/7f488b9a5c3f4d698c2051652837632e/after.json",
+      "length": 337,
+      "sha256": "1e889fa7ebae473ad305ebacb7fb8992523375bb4b1a13397d14b384a45340de",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\cargo-receipts\\7f488b9a5c3f4d698c2051652837632e\\after.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/cargo-receipts/7f488b9a5c3f4d698c2051652837632e/before.json",
+      "length": 953,
+      "sha256": "474079743eb382d405cc60591d78284b58ac3348c12c220a8dbf21bf6c29ff9d",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\cargo-receipts\\7f488b9a5c3f4d698c2051652837632e\\before.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/cargo-receipts/7f488b9a5c3f4d698c2051652837632e/probe-process.json",
+      "length": 431,
+      "sha256": "52d46b32a7de843afe832913e8ca5da531feff61c5e6375c587e1e5996daa30f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\cargo-receipts\\7f488b9a5c3f4d698c2051652837632e\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/cargo-receipts/7f488b9a5c3f4d698c2051652837632e/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\cargo-receipts\\7f488b9a5c3f4d698c2051652837632e\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/cargo-receipts/7f488b9a5c3f4d698c2051652837632e/probe.stdout.bin",
+      "length": 196,
+      "sha256": "718f76d546aa828bd9a97a0bc8088ecee89718b9e445059d6529b2fbd39095ec",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\cargo-receipts\\7f488b9a5c3f4d698c2051652837632e\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/cargo.log",
+      "length": 39483,
+      "sha256": "0fe13cb665d84406d53399a56efdf37a0ceb2c6b6b2367d3b9bd28610823522f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\cargo.log"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/guard-policy.json",
+      "length": 2239,
+      "sha256": "af29e60862542d67eb168ee4e744d46bb81a2f4955057ed699646ca4e3fadde1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/result.json",
+      "length": 750,
+      "sha256": "306dd75de2a259aa2cd890169927fd36963f91327a6bbf9c273c8d3d80745a71",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\result.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/root-authority.json",
+      "length": 530,
+      "sha256": "8eff77b7bf11807ca4ec6d3b392012cd0585d13fb62b3d0420491d5fddc29c10",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/source-acceptance.json",
+      "length": 664,
+      "sha256": "aedf320af961edcece1ca01a37d0cd37a39180a7342f87fbb19b93a173c78c88",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-npc-tests-02/source-snapshot.json",
+      "length": 94268,
+      "sha256": "43633ec781435af34dd96bd5d2d65c62e34a9cbf851df99620593c49760fb564",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-npc-tests-02\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/cargo-receipts/c3ab0b5c46404f3f8e210ca37d0ef58d/after.json",
+      "length": 329,
+      "sha256": "7f0d55e88239bea1bfc4009d0ddaf5d76219d568cfdc5834cd094611a9fc635b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\cargo-receipts\\c3ab0b5c46404f3f8e210ca37d0ef58d\\after.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/cargo-receipts/c3ab0b5c46404f3f8e210ca37d0ef58d/before.json",
+      "length": 1043,
+      "sha256": "01056fbecdafd8790e2a786aa9f93e94b13d87d96a3a6b013c25658b34263edd",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\cargo-receipts\\c3ab0b5c46404f3f8e210ca37d0ef58d\\before.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/cargo-receipts/c3ab0b5c46404f3f8e210ca37d0ef58d/probe-process.json",
+      "length": 440,
+      "sha256": "121a0d41a2bdb4c71590952e4a178562c4429075101655516d07fa6213750c6e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\cargo-receipts\\c3ab0b5c46404f3f8e210ca37d0ef58d\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/cargo-receipts/c3ab0b5c46404f3f8e210ca37d0ef58d/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\cargo-receipts\\c3ab0b5c46404f3f8e210ca37d0ef58d\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/cargo-receipts/c3ab0b5c46404f3f8e210ca37d0ef58d/probe.stdout.bin",
+      "length": 196,
+      "sha256": "03f9521143ee461d4c47a0ba5f6fcdfd723d652fab1c4921b78b736c9a51b70f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\cargo-receipts\\c3ab0b5c46404f3f8e210ca37d0ef58d\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/cargo.log",
+      "length": 7842,
+      "sha256": "688a656268c4f508b91d2162dd91a0b28e4a88d103a8eedf1801d9eb3363a020",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/guard-policy.json",
+      "length": 2259,
+      "sha256": "0c0e40a28b4a2ee95fcc2b770887d2e683351d4cf920feb3985f88c054fb1c1e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/result.json",
+      "length": 832,
+      "sha256": "94cba0fbe1902fe3906501701e9cb04aeaf9bdb07a19efd936f1ec2a952d93d8",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\result.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/root-authority.json",
+      "length": 530,
+      "sha256": "0fb001eecd884f5e21e1816663cee67bbd47be20f753caf15cd08da1d85fffa0",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/source-acceptance.json",
+      "length": 660,
+      "sha256": "cf55ada7577036524148210d633cbc4d8c96132189943ab1424a3f224d3b8e96",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-portable-tests-01/source-snapshot.json",
+      "length": 149053,
+      "sha256": "8f384e2a44bf870977217143a71312b1a96b047269533cfad4678af2ff9ae669",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-portable-tests-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-receipt-edit.json",
+      "length": 169,
+      "sha256": "3cd57105c9ba4c0f765d6cdc31a149321cb077f442545783826ac7633460faf1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-receipt-edit.json"
+    },
+    {
+      "path": "raw/stone-rules-authored-source-01.json",
+      "length": 739,
+      "sha256": "af616c5dc6d99982f753100f8f94319dee50172afeff4f37475cf7b4768a96fe",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-authored-source-01.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/probe-process.json",
+      "length": 442,
+      "sha256": "6fd00a2255c7dc194edf0033878a5f4dcb4c409b4ba8e8b61162f6dbd09d8554",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\cargo-receipts\\ce8bbc152ef14c1998c86c4808a30df0\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\cargo-receipts\\ce8bbc152ef14c1998c86c4808a30df0\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/probe.stdout.bin",
+      "length": 196,
+      "sha256": "50cb277e2993603921d9f6ca5160aaa8b252fc1beb56a26a437f05242b4d9e8e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\cargo-receipts\\ce8bbc152ef14c1998c86c4808a30df0\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/cargo-receipts/ce8bbc152ef14c1998c86c4808a30df0/refusal.json",
+      "length": 82,
+      "sha256": "c062b1ca59986e85d32a2d17aff4141d244ffd6384bc08cae9305b1505c2bff9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\cargo-receipts\\ce8bbc152ef14c1998c86c4808a30df0\\refusal.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/cargo.log",
+      "length": 31,
+      "sha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/guard-policy.json",
+      "length": 2247,
+      "sha256": "f3900587229eaacad4b2a41a36eca2f5ae36077e9eaa186ea348468df5861418",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/result.json",
+      "length": 701,
+      "sha256": "a98f0aaabd9a85150d7e035c38136b20d5b02618d51bb1d31d6ac8b73a90f6c5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\result.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/root-authority.json",
+      "length": 530,
+      "sha256": "481306c38e940c8733718619c993b0b0807aa14ad19adaf83029cd1611ffbf01",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/source-acceptance.json",
+      "length": 561,
+      "sha256": "900569e7a7035c59fac4f91394d86efa13b3dd672f450b5fd190190cf540d507",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-01/source-snapshot.json",
+      "length": 3007,
+      "sha256": "78626e70f16e882e2e94144bf8dd5abd14e7f47f57e653e1be1739b075c7c2f2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/cargo-receipts/07d6d62b44c34c389e658a0422467257/after.json",
+      "length": 319,
+      "sha256": "0a6ac3a91053c087a2c9129edab587194bb08cc96d8c9334aa3d26458b709b65",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\cargo-receipts\\07d6d62b44c34c389e658a0422467257\\after.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/cargo-receipts/07d6d62b44c34c389e658a0422467257/before.json",
+      "length": 918,
+      "sha256": "199ebeb8058a5b779796eede3c75765fd8fbc8f4d576c9a7080f1ff8ae820f6d",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\cargo-receipts\\07d6d62b44c34c389e658a0422467257\\before.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/cargo-receipts/07d6d62b44c34c389e658a0422467257/probe-process.json",
+      "length": 432,
+      "sha256": "b37c149874963564374c2d50f8e2d94a13942027d7688611354be5db314b51e1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\cargo-receipts\\07d6d62b44c34c389e658a0422467257\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/cargo-receipts/07d6d62b44c34c389e658a0422467257/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\cargo-receipts\\07d6d62b44c34c389e658a0422467257\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/cargo-receipts/07d6d62b44c34c389e658a0422467257/probe.stdout.bin",
+      "length": 196,
+      "sha256": "b69e0f6771355fbf9c9be77fd3afcf1cc4a30cef7b3d84d060bbb0c6ad24baea",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\cargo-receipts\\07d6d62b44c34c389e658a0422467257\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/cargo.log",
+      "length": 4619,
+      "sha256": "74e88263f4f80284881ed064fe8561daf603cf80ad9775073a3696cd2b246560",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\cargo.log"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/guard-policy.json",
+      "length": 2247,
+      "sha256": "5a6d390e65bacfbc0d8d23ba45a086196998c2b94c4a9e60d34c4f05644971e9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/result.json",
+      "length": 700,
+      "sha256": "aa3bf1bd08f1ca2a62035e2ecb044575c1ee07b05cc1fe721c730dce5d173310",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\result.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/root-authority.json",
+      "length": 530,
+      "sha256": "b2a46a1bfde401b323c7de873acff2ce9c6711c9873b9448668fcaf85b2f8d12",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/source-acceptance.json",
+      "length": 561,
+      "sha256": "b6dde1ed8f4a2071951f4cf395922d5c408758f3dbb7c185400b6c9ff2b127ce",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-02/source-snapshot.json",
+      "length": 3007,
+      "sha256": "0d9cc4325c35b4996aa8517232a4e24bbb15ec8e11fbc38fe92ed114adf6fda3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-02\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/cargo-receipts/f50c4e3532b24a75963e3e6adcfde0f7/after.json",
+      "length": 328,
+      "sha256": "d13c8277f48d3757dd652502b6c6d0b07bd633168a83f84fa924123cee957625",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\cargo-receipts\\f50c4e3532b24a75963e3e6adcfde0f7\\after.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/cargo-receipts/f50c4e3532b24a75963e3e6adcfde0f7/before.json",
+      "length": 928,
+      "sha256": "21018bf62b5eb8d4c099f01fc1df2150d96486443090778513979e6f891eb3a4",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\cargo-receipts\\f50c4e3532b24a75963e3e6adcfde0f7\\before.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/cargo-receipts/f50c4e3532b24a75963e3e6adcfde0f7/probe-process.json",
+      "length": 442,
+      "sha256": "cebee161b8305c0a27c8e503dfb8bc82e22d6dd83087b82e1d5d435368a58cb5",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\cargo-receipts\\f50c4e3532b24a75963e3e6adcfde0f7\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/cargo-receipts/f50c4e3532b24a75963e3e6adcfde0f7/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\cargo-receipts\\f50c4e3532b24a75963e3e6adcfde0f7\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/cargo-receipts/f50c4e3532b24a75963e3e6adcfde0f7/probe.stdout.bin",
+      "length": 196,
+      "sha256": "9c08e839f077889f6d5c6ff6391c178bc597364982a8fd7093123a35ec058ab8",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\cargo-receipts\\f50c4e3532b24a75963e3e6adcfde0f7\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/cargo.log",
+      "length": 4084,
+      "sha256": "e82c78cbdc4caac8e26dee8ca168fea7703fdf208d4166d8e97350cca5988db1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\cargo.log"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/guard-policy.json",
+      "length": 2247,
+      "sha256": "ead6de9c001edad90ea171a74f41724c31a954d8a1b4412deb7546e9b329b607",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/result.json",
+      "length": 700,
+      "sha256": "ee1c2794d2fa0f3a813617495972fffa54e7a8388e5fcc3181befa65006bb2ce",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\result.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/root-authority.json",
+      "length": 530,
+      "sha256": "a40d0ab53686364a1d9d90574bdf26e24d481120b4ecd3a7666b9ea77d0929c9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/source-acceptance.json",
+      "length": 664,
+      "sha256": "d6c674dd20c58297d9c14939f68f2dab09b6cb2a62a4b892c37aa725e6b28688",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-rules-tests-03/source-snapshot.json",
+      "length": 3007,
+      "sha256": "112affa1cbe65a8dc572aaedc0d7c1c38fe03cd1800e8bac25f210876a0c19a1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-rules-tests-03\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-01.json",
+      "length": 4672,
+      "sha256": "85221ca01a462d856910cae61c7e966d27672f77b9f3ecbe4576a4876cc360a6",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-01.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-02.json",
+      "length": 4672,
+      "sha256": "b2ecb4400e69f64cca867932ce2e9377179834b4143fe5cb85c8971664005a61",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-02.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-03.json",
+      "length": 4672,
+      "sha256": "263313eb7f0753a1a22ba9fc265dd5568c17a160ff771b7f35463981dccdc74a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-03.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-04.json",
+      "length": 4672,
+      "sha256": "72cf71666434942bf6978e9a6aede3f41247806b90163367eb8ae02ebbbb4115",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-04.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-05.json",
+      "length": 4672,
+      "sha256": "89858e935b1411eb711565d3170dc12e63b444dffb6171efff467fbcf981d2c0",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-05.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-06.json",
+      "length": 4668,
+      "sha256": "d4d8fdeb307fb26824f386890bbf18d94bba7536c874b249ea2ad5147ef2801a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-06.json"
+    },
+    {
+      "path": "raw/stone-runtime-authored-source-07.json",
+      "length": 4668,
+      "sha256": "af2f82ce7da3a209ca08e3958ccbb1712333b7027f52b54f90884c3c9bd6ac2e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-runtime-authored-source-07.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/cargo-receipts/7d20bafac74b4c81b16b21d664d559d3/after.json",
+      "length": 320,
+      "sha256": "1de0ea07d104f0bab2892b8aa0ece072b2f19e2b5569bd2a89c5a2f7fbe0ced0",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\cargo-receipts\\7d20bafac74b4c81b16b21d664d559d3\\after.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/cargo-receipts/7d20bafac74b4c81b16b21d664d559d3/before.json",
+      "length": 947,
+      "sha256": "20c11db8cc29ed68169af82d0d2b00c538954eb91d0f4cccbced7f6ed7da8da6",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\cargo-receipts\\7d20bafac74b4c81b16b21d664d559d3\\before.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/cargo-receipts/7d20bafac74b4c81b16b21d664d559d3/probe-process.json",
+      "length": 431,
+      "sha256": "74495c3abfdba60cc5ae28c1947f63046e15062ee9248ac68bf492b2008660e6",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\cargo-receipts\\7d20bafac74b4c81b16b21d664d559d3\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/cargo-receipts/7d20bafac74b4c81b16b21d664d559d3/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\cargo-receipts\\7d20bafac74b4c81b16b21d664d559d3\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-save-regression-01/cargo-receipts/7d20bafac74b4c81b16b21d664d559d3/probe.stdout.bin",
+      "length": 196,
+      "sha256": "422a6d2bcf44dcf3e7c225d0d7149e6ba5c0f5012e8025f8ef02f2ed7e17d2c9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\cargo-receipts\\7d20bafac74b4c81b16b21d664d559d3\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-save-regression-01/cargo.log",
+      "length": 45787,
+      "sha256": "643f68e09ad34c5114ac87b553e47c7e0fa7d08c8a63ca09fd9597093b209abe",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-save-regression-01/guard-policy.json",
+      "length": 2263,
+      "sha256": "b4dcb5f6f6a4dd222624c40f25f091cdbb39f66f7c8ad696784bac4890f6ddf1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/result.json",
+      "length": 738,
+      "sha256": "c73408f06f6277d6b47cc33fc6cf89bd957e10ca790b71dfe18441e56d7aa53c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\result.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/root-authority.json",
+      "length": 530,
+      "sha256": "559708fe5be23d50328eef3df856f3db5cfe718c5fcfd8522a5ddbfe206df007",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "e7e895e94e05fa9dd88d26e7a74b39f9b459800c1b378d96be8ecad3b9b88ea0",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-save-regression-01/source-snapshot.json",
+      "length": 94268,
+      "sha256": "7c05c2157a89792d53694051ce20e2f9da11ca7c8108e4aec6cf5f11d96b6f70",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-save-regression-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/cargo-receipts/a292c73b882a43e6b1f3b2ec49ec4315/after.json",
+      "length": 322,
+      "sha256": "652a78e852f11890464131902dc985fc4c5b1c98111f5d0c1051de96e91e735b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\cargo-receipts\\a292c73b882a43e6b1f3b2ec49ec4315\\after.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/cargo-receipts/a292c73b882a43e6b1f3b2ec49ec4315/before.json",
+      "length": 955,
+      "sha256": "e2674dee74f1e7bbe3dc7e33bc944d1b0a80b3e52dcf5c608ff91d39d4c8480b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\cargo-receipts\\a292c73b882a43e6b1f3b2ec49ec4315\\before.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/cargo-receipts/a292c73b882a43e6b1f3b2ec49ec4315/probe-process.json",
+      "length": 432,
+      "sha256": "a7f485d46c254cc7d78b32ac7580b366962115811c5f3678c038f649f4d65714",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\cargo-receipts\\a292c73b882a43e6b1f3b2ec49ec4315\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/cargo-receipts/a292c73b882a43e6b1f3b2ec49ec4315/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\cargo-receipts\\a292c73b882a43e6b1f3b2ec49ec4315\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-session-tests-01/cargo-receipts/a292c73b882a43e6b1f3b2ec49ec4315/probe.stdout.bin",
+      "length": 196,
+      "sha256": "8f2d0fd62fa89620b8dc55c3cb4a488abc52602fe1f49e88c87d9a1a138e258b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\cargo-receipts\\a292c73b882a43e6b1f3b2ec49ec4315\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-session-tests-01/cargo.log",
+      "length": 7524,
+      "sha256": "0a98e1d294a70c5d3c162bb9fb388800d062ae0cff789cfdd8159178e619df54",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-session-tests-01/guard-policy.json",
+      "length": 2255,
+      "sha256": "f7adf8ee5aac6088eeb6673707f5c3fa77b4a9237aadf7db067ca964dec5dd8b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/result.json",
+      "length": 745,
+      "sha256": "ff3792e6cdeeaf8d01314cbe2f2e7731d66377804914692e2f9d64b096e64ce7",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\result.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/root-authority.json",
+      "length": 530,
+      "sha256": "60fcf28e7accdd03df98b70515e0ee7c35334b8c05019459a7ff825d7f65df31",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "afc16b10734832adbdf9e70cfb29f9a77ce730b65f50ed60cd98eac26570fffa",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-session-tests-01/source-snapshot.json",
+      "length": 94264,
+      "sha256": "1c7588d96d79704a7666d3f08695a4d19d0b080cc751b191f8c2d5d1705910c3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/cargo-receipts/310c855aea164648a1f5d33d86cbf30b/after.json",
+      "length": 330,
+      "sha256": "10dfa15b3e00cdc91fadf7197fc563c48bf89684ae894a27829acf6a30cb44ff",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\cargo-receipts\\310c855aea164648a1f5d33d86cbf30b\\after.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/cargo-receipts/310c855aea164648a1f5d33d86cbf30b/before.json",
+      "length": 952,
+      "sha256": "e339c0d58009ae43fb0cdd331464ccc8a3cfb1d36945b8edbc3e33c0c7b5dd5c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\cargo-receipts\\310c855aea164648a1f5d33d86cbf30b\\before.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/cargo-receipts/310c855aea164648a1f5d33d86cbf30b/probe-process.json",
+      "length": 429,
+      "sha256": "bb24ff739368355cee4bd4a2e3c02a478783d9f908e80347e8ca71c374d8f4ba",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\cargo-receipts\\310c855aea164648a1f5d33d86cbf30b\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/cargo-receipts/310c855aea164648a1f5d33d86cbf30b/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\cargo-receipts\\310c855aea164648a1f5d33d86cbf30b\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-session-tests-02/cargo-receipts/310c855aea164648a1f5d33d86cbf30b/probe.stdout.bin",
+      "length": 196,
+      "sha256": "4f93193060f13f1b94a8f34cfbb951854a3d984e64c55939ad456077895f5557",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\cargo-receipts\\310c855aea164648a1f5d33d86cbf30b\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-session-tests-02/cargo.log",
+      "length": 39863,
+      "sha256": "3d3b02f824a80416cb9b3d8ddce46233c5b925ba4c1916473499414ba0e8a218",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\cargo.log"
+    },
+    {
+      "path": "raw/stone-session-tests-02/guard-policy.json",
+      "length": 2255,
+      "sha256": "aeab8d2ec1cff4ea66cd906b8124668a745f4a4d8b2a809c687ed5396daf4f8a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/result.json",
+      "length": 743,
+      "sha256": "7611d08ac7fdd54f957b7123649ed24b1b39fc3782b6abed68454f7885d47e20",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\result.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/root-authority.json",
+      "length": 530,
+      "sha256": "3d64c6a1fa104d9d80a5e1ec1a2eb672e3b2dffbf77c59af415989cc3c9c27fd",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/source-acceptance.json",
+      "length": 664,
+      "sha256": "ee88b5f9b981e318fb325c8e749de8b46f6a6a59e433692f53edbbc809c1f6f7",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-session-tests-02/source-snapshot.json",
+      "length": 94264,
+      "sha256": "03fef02dac72d12d7c97382c297e41476d8fa0f0cbd9ea18bcc725c99683b6f6",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-02\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/cargo-receipts/933a7346c5d84351bddea73b463fb62f/after.json",
+      "length": 330,
+      "sha256": "ea93e1b9236610dbd819a8ff8e09b851ea0c09f6aa5448cad89db9ca6555216b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\cargo-receipts\\933a7346c5d84351bddea73b463fb62f\\after.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/cargo-receipts/933a7346c5d84351bddea73b463fb62f/before.json",
+      "length": 954,
+      "sha256": "441b337fe1e0a48529839a2cab4c565526d8fb47fd59f1a99f3b9bda2b38e5a2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\cargo-receipts\\933a7346c5d84351bddea73b463fb62f\\before.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/cargo-receipts/933a7346c5d84351bddea73b463fb62f/probe-process.json",
+      "length": 431,
+      "sha256": "7c4d7d98f78c70d72214464b5fb0ed8f37276ca3a41b8769213c38b1834b6a6c",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\cargo-receipts\\933a7346c5d84351bddea73b463fb62f\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/cargo-receipts/933a7346c5d84351bddea73b463fb62f/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\cargo-receipts\\933a7346c5d84351bddea73b463fb62f\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-session-tests-03/cargo-receipts/933a7346c5d84351bddea73b463fb62f/probe.stdout.bin",
+      "length": 196,
+      "sha256": "3f4a73a54804c67bf2c2076a66ed2e08ffd32c0c64d832e3a6559628f0675b36",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\cargo-receipts\\933a7346c5d84351bddea73b463fb62f\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-session-tests-03/cargo.log",
+      "length": 39863,
+      "sha256": "d8880f1ebebc7a5af4429e92a6507aa1da6d6b4d410d369f0cc9ec57a35b4599",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\cargo.log"
+    },
+    {
+      "path": "raw/stone-session-tests-03/guard-policy.json",
+      "length": 2255,
+      "sha256": "1fa2e387e88008a9d947b2c5d31f3c432136afbe15841d17ea84c2a26cb0422d",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/result.json",
+      "length": 743,
+      "sha256": "357b0c52f3ceb097f032d833a79b2802fb3cdc6d70258ff674fb20b79e69d33a",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\result.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/root-authority.json",
+      "length": 530,
+      "sha256": "ff6ad9048a0ac11b1d68bace0065c83a61a324476603f679af5b5f4b6935e383",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/source-acceptance.json",
+      "length": 664,
+      "sha256": "223b0fa5df3039d0b82081ee13e3c89c166f633d743f28eb16584b65a7fe0516",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-session-tests-03/source-snapshot.json",
+      "length": 94264,
+      "sha256": "64d1fe9f007b32382c701b4e449564ccfd167879b766930477cbae258946804b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-session-tests-03\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/cargo-receipts/fe7cdeb68d22466b8e1d6ff2558ace2a/after.json",
+      "length": 324,
+      "sha256": "c72e3a17b67546026290e80dc1bbf66112399bcae7addccf98b4b0d2e0e7d1d9",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\cargo-receipts\\fe7cdeb68d22466b8e1d6ff2558ace2a\\after.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/cargo-receipts/fe7cdeb68d22466b8e1d6ff2558ace2a/before.json",
+      "length": 901,
+      "sha256": "14816c009ce72bbee7349c4d55c49e0f7d932e354f682ac4596cf7516a7900ec",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\cargo-receipts\\fe7cdeb68d22466b8e1d6ff2558ace2a\\before.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/cargo-receipts/fe7cdeb68d22466b8e1d6ff2558ace2a/probe-process.json",
+      "length": 433,
+      "sha256": "2dcd9243caf5cee4bda327d4d122ed224300e319c4b924b51c96c90eec4364c2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\cargo-receipts\\fe7cdeb68d22466b8e1d6ff2558ace2a\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/cargo-receipts/fe7cdeb68d22466b8e1d6ff2558ace2a/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\cargo-receipts\\fe7cdeb68d22466b8e1d6ff2558ace2a\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/cargo-receipts/fe7cdeb68d22466b8e1d6ff2558ace2a/probe.stdout.bin",
+      "length": 196,
+      "sha256": "a8e22a49d54b89bc30f0869c64e01935095de2d172d6542de19d35a3322a475f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\cargo-receipts\\fe7cdeb68d22466b8e1d6ff2558ace2a\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/cargo.log",
+      "length": 10588,
+      "sha256": "1b6f9fd60c9dfe6eec4232b650e336035bbc9406417c48a46c0e87f6231a6501",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/guard-policy.json",
+      "length": 2267,
+      "sha256": "70cad55dcb4297acec19b74a7618ceb8b38eb3af0c1f5a52d98b4b3576c5f965",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/result.json",
+      "length": 668,
+      "sha256": "531a96dc76ec13abd0c6930d0b819561286dcc2cc5b8e51caead53678a0f300e",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\result.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/root-authority.json",
+      "length": 530,
+      "sha256": "2f53bb434b8fdf70606d5d3f4bab8fcc58d7b094b94d52cc29e081655f131698",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "8138d731b2f91434040d8eeb84d444b0fa0e0d67e5a82c7922df59f30bd8efe0",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-simulation-check-01/source-snapshot.json",
+      "length": 94269,
+      "sha256": "50cc56c549f87bbdfde8a697b836c635de63da5ab1c044d0f135abac420ab47b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-simulation-check-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/cargo-receipts/42f8a942f3894538b82aa1279c26a485/after.json",
+      "length": 328,
+      "sha256": "3e6a25e94fd2a0f11b0c0527ef8610919ce9427843513d8cf1dc7a8256463137",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\cargo-receipts\\42f8a942f3894538b82aa1279c26a485\\after.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/cargo-receipts/42f8a942f3894538b82aa1279c26a485/before.json",
+      "length": 938,
+      "sha256": "73af04cc19e7ffc5b783ec8ec5e2c3e2ceedeaafc56b6d977dd5314aad8197c1",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\cargo-receipts\\42f8a942f3894538b82aa1279c26a485\\before.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/cargo-receipts/42f8a942f3894538b82aa1279c26a485/probe-process.json",
+      "length": 431,
+      "sha256": "77dc68fc101da2bd23cafbb46d3707308a67cc59b85c5ba88cf466001317b5a2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\cargo-receipts\\42f8a942f3894538b82aa1279c26a485\\probe-process.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/cargo-receipts/42f8a942f3894538b82aa1279c26a485/probe.stderr.bin",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\cargo-receipts\\42f8a942f3894538b82aa1279c26a485\\probe.stderr.bin"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/cargo-receipts/42f8a942f3894538b82aa1279c26a485/probe.stdout.bin",
+      "length": 196,
+      "sha256": "8fbfd126f0e4b684084230dfbc1bf6ecaabfd96e689b365dde052ef88b0290f2",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\cargo-receipts\\42f8a942f3894538b82aa1279c26a485\\probe.stdout.bin"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/cargo.log",
+      "length": 45475,
+      "sha256": "4bf6ba3060ade3115374f9baafbcf90e230c1740f3b6eae61d555fb7d8a6f77b",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\cargo.log"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/guard-policy.json",
+      "length": 2267,
+      "sha256": "0106669d9a8809e3c8650d5c0fc42bae67228dfb3a79ae4468c82bc4382bfb86",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\guard-policy.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/result.json",
+      "length": 729,
+      "sha256": "1adfa8ba5d45ee2c3b8d3cc23bd0730e7f38da618f678c3fdc8fb180a9cc28d3",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\result.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/root-authority.json",
+      "length": 530,
+      "sha256": "046c8c75fa8a0dd45f96bcd10a56f9676231a147c60d7a93be64b60700664d68",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\root-authority.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/source-acceptance.json",
+      "length": 664,
+      "sha256": "249e603f37020a7e6bf2a3ba5305ab83332213041048a24b527e02b1fe87b05f",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\source-acceptance.json"
+    },
+    {
+      "path": "raw/stone-trade-regression-01/source-snapshot.json",
+      "length": 94269,
+      "sha256": "8cddc0b759bc9fd154437cd0b4a60d219018a8019c4be67467a7a645afb9e276",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\stone-trade-regression-01\\source-snapshot.json"
+    },
+    {
+      "path": "raw/wrapper-serial-preflight-refusal-01.json",
+      "length": 365,
+      "sha256": "bcd7497c51da0ca92ec7ceaccdbcbf23732072706ae9d914f2195a88c4b7e535",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\wrapper-serial-preflight-refusal-01.json"
+    },
+    {
+      "path": "raw/wrapper-serial-preflight-refusal-01.log",
+      "length": 62,
+      "sha256": "ec9961ac9d36a994b6779648f7c0cc4a29a9a082c8ef6e4a5ce5843dd54d9c77",
+      "source": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\wrapper-serial-preflight-refusal-01.log"
+    }
+  ]
+}

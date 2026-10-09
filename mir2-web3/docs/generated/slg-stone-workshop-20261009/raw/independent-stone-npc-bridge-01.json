@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "task": "first playable sealed-stone bridge through existing NPC dialog links",
+  "worker": "/root/stone_ui_explore",
+  "completedAtUtc": "2026-10-09 12:21:21 UTC",
+  "status": "handoff-ready; tests not run",
+  "productWriteScope": [
+    "mir2-web3/apps/simulation/src/runtime/stone_npc.rs"
+  ],
+  "fileHashesSha256": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs",
+      "hash": "d4289e45148d1273fcde1af7c04c89635183dee9c3d7e93269d0a1e9b00eb5d2"
+    }
+  ],
+  "bridge": {
+    "approvedActualNpcs": [
+      {
+        "scriptKey": "BichonProvince/BichonWall/Blacksmith",
+        "mapFileName": "0",
+        "x": 302,
+        "y": 221,
+        "name": "Blacksmith_Bill",
+        "manifestRef": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json:602"
+      },
+      {
+        "scriptKey": "MongchonProvince/MudWall/Blacksmith",
+        "mapFileName": "0159",
+        "x": 5,
+        "y": 9,
+        "name": "Merchant_Bruce",
+        "manifestRef": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json:6144"
+      }
+    ],
+    "presentation": [
+      "Decorate enabled approved NPC dialogs with one workshop entry while preserving original content/menu/exit links.",
+      "Home explains actual Bag source conversion and fixed generation-time result, and offers eligible ores/raw stones.",
+      "Item lists have at most three physical item choices per server page, stable exact decimal selectors and previous/next/back links.",
+      "Ore detail explains single physical source conversion, fixed matching grade and zero sealing gold fee.",
+      "Raw-stone detail shows six real material possibilities, exact basis-point percentages, frozen appraisal/cut fees and only an earned coarse clue.",
+      "Cut completion carries a bounded sanitized committed public result and refreshed public inventory view; Seal/Appraise ignore incidental result strings."
+    ],
+    "supportedLanguages": [
+      "English",
+      "ChineseSimplified",
+      "Portuguese",
+      "Spanish"
+    ],
+    "languageSourceRef": "mir2-web3/packages/game-data/src/lib.rs:2105",
+    "nextExplicitPhase": "Dedicated materials/sidebar UI integration remains next; this bridge uses existing NPC flow only."
+  },
+  "api": [
+    {
+      "symbol": "StoneWorkshopView / StoneOreView",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:27",
+      "fields": "owner:StoneOwner, inventory_revision:u64, ores:Vec<{uid:String,template_id:i32,grade:StoneGrade}>, stones:Vec<PublicStone>, gold:u32"
+    },
+    {
+      "symbol": "StoneWorkshopCommand / StoneWorkshopOperation",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:41",
+      "fields": "request_id:String,expected_inventory_revision:u64,operation: Seal{uid:u64}|Appraise{serial:u64,expected_stone_revision:u64}|Cut{serial:u64,expected_stone_revision:u64}"
+    },
+    {
+      "symbol": "StoneWorkshopExecution",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:53",
+      "fields": "packets:Vec<ServerPacket>,replayed:bool,public_result:String. public_result should be localized or blank and describe only committed Cut result."
+    },
+    {
+      "symbol": "StoneWorkshopError",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:61",
+      "fields": "Unavailable|InvalidRequest|StaleInventory|Rejected(StoneError)|AuthorityRejected|OutcomeUnknown. Implements From<StoneError>,Display,Error."
+    },
+    {
+      "symbol": "approved_npc",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:225",
+      "fields": "(world:&World,object_id:u32)->bool; actual Npc+NpcAgent exact script/map/position proof. Root workshop_allowed can reuse this."
+    },
+    {
+      "symbol": "decorate_dialog",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:234",
+      "fields": "(world:&World,dialog:&mut ActiveNpcDialogState). Uses workshop_enabled(world), approved_npc; no view getter needed."
+    },
+    {
+      "symbol": "handle_target",
+      "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:473",
+      "fields": "(session:&mut SimulationSession,target:&str)->Option<Vec<ServerPacket>>. Must hook after original live-link/DataRange checks and pass original target unchanged, not normalized_target."
+    }
+  ],
+  "targetProtocol": {
+    "maxBytes": 256,
+    "maxPhysicalItems": 80,
+    "pageSize": 3,
+    "maxZeroBasedPage": 26,
+    "shapes": [
+      "@stone:v1:home",
+      "@stone:v1:list:ore|stone:<page>",
+      "@stone:v1:ore:<uid>:<inventoryRevision>",
+      "@stone:v1:stone:<serial>:<stoneRevision>:<inventoryRevision>",
+      "@stone:v1:seal:<uid>:<inventoryRevision>:<requestId>",
+      "@stone:v1:appraise|cut:<serial>:<stoneRevision>:<inventoryRevision>:<requestId>"
+    ],
+    "selectors": "Canonical decimal u64 strings; exact overflow/leading-zero/empty/sign rejection. Physical UID and private-registry serial remain distinct opaque selectors.",
+    "requestId": "stone- followed by 64 lowercase SHA256 hex characters. Hash domain includes owner account/incarnation with length prefixes, operation, UID-or-serial, item revision and inventory revision.",
+    "authority": "Hash is deterministic request identity, not a secret or possession permission. Handler also requires exact target in current displayed link set, approved live actual NPC, Root workshop_allowed and current view revisions. Core authority still checks actual holder and atomic persistence.",
+    "navigation": "Old navigation links can refresh the current public preview. Old action links can fail closed; original core receipt replay remains supported by Root.",
+    "strictness": "Exact version/token count, bounds and decimal parser reject extra fields, parenthesized arguments, whitespace, uppercase variants, unknown versions/operations and arbitrary QA/debug commands."
+  },
+  "failureBehavior": {
+    "localRefusal": "Localized notice with source/item preserved by core; refresh public view and remain on source detail when it exists.",
+    "unknownCommit": "OutcomeUnknown produces localized reconnect/check-Bag notice, removes every stone navigation/action link, keeps original merchant menu/exit and does not call execution or view refresh again.",
+    "hiddenData": "UI reads only PublicStone; hidden outcomes/source/roll/seed/registry records are not accepted by this helper or rendered. Seal/Appraise never forward public_result."
+  },
+  "existingClientEvidence": [
+    {
+      "ref": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs:3957",
+      "finding": "Existing activeNpcDialog body/footer are converted to NPC lines and link target copied directly to option_id; no new packet or client target parsing required."
+    },
+    {
+      "ref": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:455",
+      "finding": "Existing NPC_DIALOG_VISIBLE_ROWS=9."
+    },
+    {
+      "ref": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4649",
+      "finding": "Existing NPC native dialog paging reads all rows and has scroll up/down when more than nine rows; six-material detail can use current rendering."
+    }
+  ],
+  "verification": {
+    "cargoExecutedByWorker": false,
+    "testsExecutedByWorker": false,
+    "uiExecutedByWorker": false,
+    "screenshotsCapturedByWorker": false,
+    "testsStatus": "10 inline tests authored; not run. Root owns Rust build and integrated NPC/core/authority verification.",
+    "tests": [
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:574",
+        "case": "Max-u64 action target roundtrip, strict syntax/token/decimal/page/length rejection"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:595",
+        "case": "Request quote changes with owner/incarnation, selector, operation and both revisions"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:612",
+        "case": "80 actual item selectors over <=3-item pages; no omission/duplicate; original Buy/Main/Exit preserved"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:626",
+        "case": "Six exact probabilities, fees and hidden-clue appraisal lifecycle in detail"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:644",
+        "case": "Unknown outcome notice has no stone action/navigation links"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:655",
+        "case": "Only exact two script/map/position whitelisted locations"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:665",
+        "case": "Displayed quote fails after inventory/stone revision or incarnation changes"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:677",
+        "case": "Duplicate carriers, bad decimal, invalid output template, oversized public view rejected"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:686",
+        "case": "All four supported server languages render workshop and refusal notices"
+      },
+      {
+        "ref": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs:698",
+        "case": "Seal/Appraise completion cannot forward incidental hidden private result string"
+      }
+    ],
+    "staticReview": "Manual source/API review, current repository NPC security/normal snapshot transport, native scrolling and server language enum. Final source SHA256 recorded.",
+    "limitations": [
+      "No Cargo, format, Rust parse/compile success or passing tests claimed.",
+      "No live Windows/web UI execution or human frontend acceptance claimed.",
+      "Only new helper file edited; Root must declare module/exports and integration hooks.",
+      "Hook must receive original raw target after existing live-link/range checks; normalized target strips argument suffix and would undermine strict parsing.",
+      "Runtime must correctly distinguish uncertain commit from known local/CAS refusal and return OutcomeUnknown for uncertainty.",
+      "Current NPC input/movement behavior is inherited; helper itself performs no movement/attack/input mutation.",
+      "Sidebar management and dedicated materials tab remain explicitly outstanding follow-on UI work."
+    ]
+  },
+  "rootIntegrationContract": [
+    "Provide super::stones::{workshop_enabled(&World)->bool,workshop_allowed(&World)->bool}.",
+    "Provide SimulationSession::stone_workshop_view()->Result<StoneWorkshopView,String> and execute_stone_workshop(StoneWorkshopCommand)->Result<StoneWorkshopExecution,StoneWorkshopError>.",
+    "Enable controlled workshop configuration via begin_stone_workshops(); ordinary clients do not supply trusted context, source, roll or fees.",
+    "Declare runtime::stone_npc module, expose public command/view/execution/error types as needed, decorate original NPC pages and call handler after existing original checks.",
+    "Keep raw result in private registry; physical ItemState has only registry reference. Assert real source possession, sealed grade mapping, current owner incarnation and atomic global File/PG CAS.",
+    "Committed execute packets and public_result must exclude private result on Seal/Appraise; localized material receipt only after committed Cut.",
+    "Root owns all broad product/docs changes and build validation; this worker releases the new helper at handoff."
+  ]
+}

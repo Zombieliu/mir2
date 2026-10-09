@@ -1382,6 +1382,7 @@ fn game_shop_attachment_states_json(
         };
         let (heal_hp, heal_mp) = item_heal_values_for_key(item_key);
         let state = ItemState {
+            stone_serial: None,
             key: item_key.to_string(),
             name: template.name.clone(),
             icon: template.image,
@@ -5633,6 +5634,7 @@ impl SimulationSession {
         let unique_id = allocate_item_unique_id(&resources, container, slot);
         let (heal_hp, heal_mp) = item_heal_values_for_key(&item_key);
         resources.inventory_items.push(ItemState {
+            stone_serial: None,
             key: item_key.clone(),
             name: stage5_item_name(&item_key),
             icon: item_icon_for_key(&item_key),
