@@ -1,5 +1,12 @@
 # Classic gameplay delivery — 12-hour resumed work
 
+> Latest resumed round (2026-10-10 local): exact20cee is pushed, but actual
+> Linux37955396469 again failed unchanged500ms setup (+14ms); no deployment.
+> Borrowed NPC lookup removes97,500 catalog copies per rebuild; focused93 Rust/
+> Node6 and final original optimized Gateway4 pass. New exact Linux/publication
+> remain pending. Publicc704/R23/feed18 and full Goal's open gates are unchanged.
+> [Current results and limitations](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
 > Continued-work checkpoint: original short-CHECKHUM omissions fix actual149/
 > MissMi wrong branches. Node6/Rust30, optimized normal Gateway4 pass;
 > two adjacent failures reproduce on frozen4baa. Real Linux37941832277 failed

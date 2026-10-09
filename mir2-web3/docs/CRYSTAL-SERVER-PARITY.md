@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> Current bounded Candidate: Source Buff ACT/Infinite metadata and borrowed NPC
+> identities pass focused93 Rust/Node6 and final original optimized Gateway4.
+> Original500ms gate remains; actual20cee Linux37955396469 failed by14ms, not
+> deployed. New exact Linux/publication and full Buff/world CAS-outbox/native/
+> human gates remain open. Publicc704/R23/feed18 unchanged.
+> [Evidence](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
 > NPC parser Candidate omits incomplete CHECKHUM before expansion, matching
 > original empty-CheckList SAY. Genuine1482/MissMi packets and trusted149 hook,
 > Node6/Rust30 and optimized Gateway4 pass; adjacent104/2 matches frozen4baa.

@@ -1431,7 +1431,9 @@ impl SimulationSession {
         super::buffs::apply_or_refresh_buff(
             world,
             super::buffs::BuffState {
-                real_time_duration: None,
+                real_time_duration: buff.infinite.then(|| super::buffs::RealTimeBuffDuration::new_infinite(
+                    u64::try_from(buff.expire_time.max(0)).unwrap_or_default(),
+                )),
                 key: key.to_string(),
                 name,
                 description,

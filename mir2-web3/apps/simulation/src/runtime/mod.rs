@@ -47,6 +47,10 @@ mod npc_world_plan;
 mod npc_source_guard_tests;
 #[cfg(test)]
 mod npc_parser_omission_tests;
+#[cfg(test)]
+mod npc_buff_action_tests;
+#[cfg(test)]
+mod npc_catalog_lookup_tests;
 mod onchain;
 mod packets;
 mod pathfind;

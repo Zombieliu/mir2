@@ -1,5 +1,12 @@
 # Agent Orchestration
 
+> 2026-10-10 resumed NPC round: all Source/integration explorers and the bounded
+> test writer returned ownership. Root solely owns npc.rs/npc_script.rs/buffs.rs/
+> buff_duration.rs/session.rs/test registration, workflow and common docs.
+>20cee CI37955396469 failed; no deploy. New catalog/Buff Candidate passes local
+> gates, awaiting exact Linux; continue population/world outbox afterward.
+> No native/human/Goal100% claim.
+
 > NPC parser Candidate fixes original149/MissMi short-CHECKHUM branch errors.
 > Node6/Rust30 pass; adjacent104/2 matches two retained pinned-parent failures.
 > Exact4baa Linux37941832277 failed its unchanged strict500ms scroll setup;

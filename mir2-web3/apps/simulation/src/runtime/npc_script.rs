@@ -1040,6 +1040,7 @@ pub(super) fn execute_crystal_npc_section(
     let mut mode = CrystalNpcParseMode::None;
     let mut if_conditions = Vec::new();
     let mut if_result = None;
+    let mut selected_act_returned = false;
 
     for (line_index, raw_line) in section.lines.iter().enumerate() {
         execution_state.line_number = section.line_number + line_index;
@@ -1074,6 +1075,7 @@ pub(super) fn execute_crystal_npc_section(
             if mode == CrystalNpcParseMode::If {
                 if_conditions.clear();
                 if_result = None;
+                selected_act_returned = false;
             } else if matches!(
                 mode,
                 CrystalNpcParseMode::Say
@@ -1125,14 +1127,19 @@ pub(super) fn execute_crystal_npc_section(
             mode,
             CrystalNpcParseMode::Act | CrystalNpcParseMode::ElseAct
         ) {
-            let control = execute_crystal_npc_action_line(
-                world,
-                &resolve_crystal_npc_runtime_tokens(world, line, execution_state),
-                &mut outcome.packets,
-                execution_state,
-            );
+            if selected_act_returned { continue; }
+            // Buff actions are parsed before expansion. Source substitutes
+            // each parameter independently, without splitting inserted spaces.
+            let control = execute_original_npc_buff_action(world, line, &mut outcome.packets, execution_state)
+                .unwrap_or_else(|| execute_crystal_npc_action_line(
+                    world,
+                    &resolve_crystal_npc_runtime_tokens(world, line, execution_state),
+                    &mut outcome.packets,
+                    execution_state,
+                ));
             match control {
                 CrystalNpcActionControl::Continue => {}
+                CrystalNpcActionControl::ReturnFromActList => selected_act_returned = true,
                 CrystalNpcActionControl::Goto(label) => {
                     outcome.goto_label = Some(label);
                     break;
@@ -1819,7 +1826,11 @@ pub(super) fn crystal_npc_check_buff(world: &World, parts: &[&str]) -> bool {
     let [buff_key] = parts else {
         return false;
     };
-    let key = normalize_stage5_key(buff_key);
+    // CheckBuff uses Enum.TryParse(ignoreCase:true), unlike ACT IsDefined.
+    // Numeric byte enum values are also accepted by the original parser.
+    let key = buff_key.parse::<u8>().ok().and_then(crystal_buff_key_for_type).map(str::to_owned)
+        .or_else(|| original_npc_buff_name(buff_key, true).and_then(original_npc_buff_key));
+    let Some(key) = key else { return false; };
     world
         .resource::<BuffResource>()
         .buffs
@@ -2247,6 +2258,9 @@ pub(super) fn player_level(world: &World) -> i32 {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) enum CrystalNpcActionControl {
     Continue,
+    // NPCSegment.Act returns; Success/Failed still append SAY and the page
+    // continues with its next segment. BREAK has different page semantics.
+    ReturnFromActList,
     Goto(String),
     Break,
     Close,
@@ -2258,6 +2272,9 @@ pub(super) fn execute_crystal_npc_action_line(
     packets: &mut Vec<ServerPacket>,
     execution_state: &mut CrystalNpcExecutionState,
 ) -> CrystalNpcActionControl {
+    if let Some(control) = execute_original_npc_buff_action(world, line, packets, execution_state) {
+        return control;
+    }
     if let Some(label) = parse_crystal_goto_target(line) {
         return CrystalNpcActionControl::Goto(label);
     }
@@ -2550,28 +2567,8 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_change_hair(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }
-        "GIVEBUFF" => {
-            if let Some(buff) = crystal_npc_give_buff(world, &parts[1..]) {
-                packets.push(buff);
-            }
-            CrystalNpcActionControl::Continue
-        }
-        "REMOVEBUFF" => {
-            if let Some(source_name) = parts.get(1) {
-                let key = normalize_stage5_key(source_name);
-                if let Some(buff_type) = crystal_buff_type_for_key(&key) {
-                    let mut buffs = world.resource_mut::<BuffResource>();
-                    let count = buffs.buffs.len();
-                    buffs.buffs.retain(|buff| crystal_buff_type_for_key(&buff.key) != Some(buff_type));
-                    if buffs.buffs.len() != count {
-                        packets.push(ServerPacket::RemoveBuff {
-                            buff_type, object_id:current_player_object_id(world).unwrap_or_default(),
-                        });
-                    }
-                }
-            }
-            CrystalNpcActionControl::Continue
-        }
+        // A non-ASCII-space delimiter cannot create a Source Buff action.
+        "GIVEBUFF" | "REMOVEBUFF" => CrystalNpcActionControl::Continue,
         "REVIVEHERO" => {
             crystal_npc_revive_hero(world);
             CrystalNpcActionControl::Continue
@@ -3477,11 +3474,56 @@ pub(super) fn crystal_npc_change_hair(world: &mut World, parts: &[&str]) {
         .hair = hair;
 }
 
+/// BuffInfo's 59 source names are the original enum except None. Validation
+/// retains enum spelling, including currently unsupported monster/GM buffs.
+/// Mapping a supported type to a local key is a separate operation.
+fn original_npc_buff_name(name: &str, ignore_case: bool) -> Option<&str> {
+    if name == "None" || (ignore_case && name.eq_ignore_ascii_case("None")) { return Some("None"); }
+    mir2_game_data::crystal_buff_manifest_ref().buffs.iter()
+        .find(|buff| if ignore_case { buff.buff_type.eq_ignore_ascii_case(name) } else { buff.buff_type == name })
+        .map(|buff| buff.buff_type.as_str())
+}
+
+fn original_npc_buff_key(name: &str) -> Option<String> {
+    let mut key = String::new();
+    for (index, ch) in name.chars().enumerate() {
+        if index != 0 && ch.is_ascii_uppercase() { key.push('-'); }
+        key.push(ch.to_ascii_lowercase());
+    }
+    crystal_buff_type_for_key(&key).and_then(crystal_buff_key_for_type).map(str::to_owned)
+}
+
+fn execute_original_npc_buff_action(
+    world: &mut World, line: &str, packets: &mut Vec<ServerPacket>, state: &CrystalNpcExecutionState,
+) -> Option<CrystalNpcActionControl> {
+    let raw: Vec<_> = line.split(' ').filter(|part| !part.is_empty()).collect();
+    let command = *raw.first()?;
+    let give = command.eq_ignore_ascii_case("GIVEBUFF");
+    if !give && !command.eq_ignore_ascii_case("REMOVEBUFF") { return None; }
+    // ParseAct omission precedes Enum.IsDefined and argument substitution.
+    if raw.len() < if give { 4 } else { 2 } { return Some(CrystalNpcActionControl::Continue); }
+    let expanded: Vec<_> = raw[1..].iter().map(|arg| resolve_crystal_npc_runtime_tokens(world, arg, state)).collect();
+    let parts: Vec<_> = expanded.iter().map(String::as_str).collect();
+    let Some(name) = original_npc_buff_name(parts[0], false) else {
+        return Some(CrystalNpcActionControl::ReturnFromActList);
+    };
+    if give {
+        if let Some(buff) = crystal_npc_give_buff(world, &parts) { packets.push(buff); }
+    } else if let Some(buff_type) = original_npc_buff_key(name).and_then(|key| crystal_buff_type_for_key(&key)) {
+        let mut buffs = world.resource_mut::<BuffResource>();
+        let count = buffs.buffs.len();
+        buffs.buffs.retain(|buff| crystal_buff_type_for_key(&buff.key) != Some(buff_type));
+        if buffs.buffs.len() != count {
+            packets.push(ServerPacket::RemoveBuff { buff_type, object_id: current_player_object_id(world).unwrap_or_default() });
+        }
+    }
+    Some(CrystalNpcActionControl::Continue)
+}
+
 pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) -> Option<ServerPacket> {
     let [source_key, duration, _visible, _rest @ ..] = parts else { return None; };
-    let key = normalize_stage5_key(source_key);
-    crystal_buff_type_for_key(&key)?;
-    let seconds = duration.parse::<i32>().unwrap_or(0);
+    let key = original_npc_buff_name(source_key, false).and_then(original_npc_buff_key)?;
+    let seconds = duration.trim().parse::<i32>().unwrap_or(0);
     let tick = runtime_tick(world);
     // The pinned NPCSegment source deliberately passes empty Stats and does
     // not forward parsed infinite/stackable values to AddBuff. Keep that
@@ -3492,7 +3534,13 @@ pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) -> Option
     let duration_ms=u64::try_from(seconds).unwrap_or(0).saturating_mul(1000)
         .saturating_add(if stacked { previous.as_ref().map_or(0,|buff| buff.remaining_ms(tick)) } else {0});
     let buff = BuffState {
-        real_time_duration:(!infinite).then(|| RealTimeBuffDuration::new(duration_ms)),
+        real_time_duration: Some(if infinite {
+            // Infinite stack types retain the first supplied ExpireTime; it
+            // is packet/save metadata, never an online expiry countdown.
+            previous.as_ref().and_then(|buff| buff.real_time_duration.clone())
+                .filter(RealTimeBuffDuration::is_infinite)
+                .unwrap_or_else(|| RealTimeBuffDuration::new_infinite(if previous.is_some() { 0 } else { duration_ms }))
+        } else { RealTimeBuffDuration::new(duration_ms) }),
         key:key.clone(),name:stage5_item_name(&key),description:"Crystal NPC buff.".into(),
         expires_at_tick:if infinite {u64::MAX} else {tick.saturating_add(duration_ms.div_ceil(1000))},
         attack_bonus:previous.as_ref().map_or(0,|buff| buff.attack_bonus),

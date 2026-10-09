@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest bounded round:20cee Linux37955396469 failed unchanged500ms setup by14ms,
+> not deployed. New product NPC lookup borrows instead of cloning375 records
+> per endpoint; every identity remains equal. Buff ACT/supported-key/Infinite
+> save/cold projection, focused93 Rust/Node6 and optimized Gateway4 pass.
+> New exact Linux/publication, full Buff/world/native/human gates remain open.
+> Publicc704/R23/feed18 unchanged. [Candidate](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
 > NPC parser Candidate: original incomplete CHECKHUM is omitted before runtime
 > expansion. Genuine MissMi normal menu and trusted149 hook reach busy SAY.
 > Node6/Rust30, optimized Gateway4 pass; adjacent104/2 matches retained4baa

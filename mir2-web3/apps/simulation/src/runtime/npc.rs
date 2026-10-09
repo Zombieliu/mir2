@@ -11,7 +11,8 @@ use crate::config::{
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_item_by_index, crystal_item_by_name, crystal_npc_info_by_script_key,
-    crystal_npc_info_manifest, crystal_npc_script_by_key, crystal_quest_packet_manifest,
+    crystal_npc_info_manifest, crystal_npc_info_manifest_ref, crystal_npc_script_by_key,
+    crystal_quest_packet_manifest,
     localized_text_or_fallback, starter_server_data, CrystalItemTemplate, CrystalNpcInfoTemplate,
     CrystalNpcScript, LanguageCode, NpcScriptTemplate,
 };
@@ -208,14 +209,19 @@ pub(super) fn localized_npc_dialog_base_key(npc_object_id: u32) -> String {
 }
 
 pub(super) fn canonical_crystal_quest_npc_info(npc_index: u32) -> Option<CrystalNpcInfoTemplate> {
-    let npcs = crystal_npc_info_manifest().npcs.into_iter()
-        .chain(mir2_game_data::periodic_quests::npc_templates()).collect::<Vec<_>>();
-    npcs.iter()
+    // A map rebuild resolves every quest endpoint. Borrow the immutable
+    // catalog instead of cloning all imported NPCs for each reference.
+    // Loaded-object identity still wins across both catalogs before any
+    // database-index fallback; only the matched template is copied.
+    let imported = &crystal_npc_info_manifest_ref().npcs;
+    let periodic = mir2_game_data::periodic_quests::npc_templates();
+    imported.iter().chain(periodic.iter())
         .find(|npc| npc.loaded_object_id == Some(npc_index))
         .cloned()
         .or_else(|| {
             let database_index = i32::try_from(npc_index).ok()?;
-            npcs.into_iter().find(|npc| npc.npc_index == database_index)
+            imported.iter().chain(periodic.iter())
+                .find(|npc| npc.npc_index == database_index).cloned()
         })
 }
 

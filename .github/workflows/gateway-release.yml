@@ -105,6 +105,9 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_source_guard_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_world_plan::tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_parser_omission_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_buff_action_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_catalog_lookup_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib buff_duration::tests -- --test-threads=1
 
       - name: Package Gateway
         working-directory: mir2-web3

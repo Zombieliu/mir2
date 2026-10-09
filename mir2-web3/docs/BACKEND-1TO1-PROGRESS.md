@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> Latest resumed round: borrowed NPC lookup retains all template/quest identities.
+> Source Buff ACT/Infinite metadata/cold projection and focused93 Rust/Node6/
+> original optimized Gateway4 pass. Narrow adjacent54/2 retains known failures.
+>20cee CI37955396469 failed unchanged500ms setup by14ms; no deployment. New exact
+> Linux and full Buff/world/native/human gates remain open. Publicc704/R23/feed18
+> unchanged. [Scope](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
 > NPC parser Candidate fixes actual149/MissMi wrong branches, preserving all26
 > source texts and45 earlier omissions. Node6/Rust30 and optimized Gateway4
 > pass; adjacent104/2 matches two frozen4baa failures. Actual Linux37941832277

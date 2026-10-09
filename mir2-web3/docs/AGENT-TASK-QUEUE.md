@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> Current priority: new borrowed NPC catalog/Buff ACT Candidate passes local
+> focused93 Rust/Node6 and original optimized Gateway4; require new exact Linux
+> and genuine artifact before drained publication.20cee is exactly pushed;
+> actual37955396469 failed unchanged500ms setup (+14ms). Narrow adjacent54/2
+> retains known failures. Root owns product/common docs; workers returned
+> ownership. Continue trusted population/Source-CAS world outbox afterward.
+> Publicc704/R23/feed18 stays current. [Round](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
 > NPC parser Candidate fixes actual149/MissMi branch errors. Node6/Rust30 and
 > optimized normal Gateway4 pass; adjacent104/2 reproduces on frozen4baa.
 > Actual4baa Linux37941832277 failed the original strict500ms fixture setup;
