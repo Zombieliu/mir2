@@ -7,6 +7,15 @@ not complete and no older blocked Goal is presented as complete.
 
 ## Actual delivery checkpoint — 2026-10-09
 
+Snake immediate-master local implementation now passes private64, normal
+in-process Zone API5 and original test-support pet-PK38. The full unchanged Zone
+fixture improves from198/11 to200/9; the nine remaining failures are retained.
+This original Archer/common-pet slice has not yet passed exact-source Linux CI,
+publication or natural native/Human PK acceptance.
+[Implementation, failures and complete evidence](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
+P1faef Linux/Windows release CI passed and R23/feed18 is genuinely signed and
+decoded, but is not yet public; R22/feed17/Gateway536 remains the release baseline.
+
 The user continued work after the missed deadline. The new P1 target/route/owner
 ACK Candidate passes native900/0/7ignored plus actual three-class native/Gateway
 socket movement and normal logout. It is implemented and locally tested, not yet

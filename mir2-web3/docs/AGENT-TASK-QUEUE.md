@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> 2026-10-09 Snake Totem immediate-master Candidate: real AI62→AI63 children
+> now bind parent/child incarnations and causal online/life identity, use their
+> immediate Totem targeting/SlaveList/follow rules, preserve strict birth+2000
+> and 300ms impact, and revoke stale pending hits. Master-null corpse bursts
+> cannot inherit former Human authority; child damage cannot mint Human XP/gold
+> or steal a living first hitter's custody. Final private64, ordinary in-process
+> Zone API5 and original test-support pet-PK38 pass on the same source. Full Zone
+> is200pass/9fail: two Snake failures fixed, remaining nine retained; no fixture
+> or checkpoint implementation rewrite. Exact-source CI/publication/native/Human
+> acceptance remain pending. SummonSnakes is the original Archer skill; this is
+> not full Taoist-PK parity. [Scope and raw evidence](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
+>
+> P1 sourcefaef is pushed; original Linux CI37880146450 and Windows CI37880146228
+> pass. Genuine clean attested EXE, strict full resource package, decoded R22
+> delta and signedfeed18 are ready, not published. Public remainsR22/feed17 and
+> Gateway536 until a separate drained paired release. No100% Candidate claim.
+
 > 2026-10-09 target/movement lifecycle Candidate: temporary blocked pursuit now
 > keeps a live target and caches only failed routes against the exact shared
 > collision footprint. A blocker death/position/blocked-hint change replans;
@@ -14,17 +31,20 @@
 > Full seven-monster/native-human and P1-P7/Mentor gates remain open.
 > [Scope, original evidence and remaining work](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
 
-Current sole source writer: root in the isolated gateway-lifecycle lane. The two
-read-only audit agents completed their assigned docs and hold no source writes.
-Next bounded rounds, preserving this Candidate and real source saves:
+Current sole source writer: root in the isolated gateway-lifecycle lane. The
+bounded Snake worker and publication worker have returned ownership; all actual
+service/Git/publication decisions remain with root. The separate publication
+worktree holds only its assigned R23 delivery files and root-reviewed integration.
+Next bounded rounds, preserving these Candidates and real source saves:
 
-1. Commit/push this exact P1 source, run Linux original release/security/clock
-   gates and clean Windows attested build; then publish the paired client/Gateway
-   only with verified saved/drained sessions. Qualify real seven-monster pressure
-   for all three classes without lowering the gate or changing source clocks.
-2. Repair the actual Snake Totem immediate-master typed owner chain and strict
-   source birth/action clock; keep the nine other baseline story corrections
-   separate. [11-failure clean-source audit](CLASSIC-ZONE-BASELINE-AUDIT-20261009.md).
+1. Finish P1 sourcefaef R23/feed18 staging, exact source/security delivery gates
+   and paired publication only after saved/drained sessions. Both original
+   release CIs and clean attested Windows package already pass. Qualify genuine
+   seven-monster pressure for all three classes without lowering source clocks.
+2. Commit/push the tested Snake immediate-master Candidate, run its new Linux
+   gate and original security/Source/PostgreSQL/siege gates, then perform separate
+   Gateway-only publication and actual normal acceptance. Keep the nine remaining
+   baseline stories separate. [Current scope](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
 3. Implement source NPC ordered logical world actions and same Source-CAS durable
    Zone outbox, then actual group admission/save and CHECKHUM capacity semantics.
    [P7 rules and staged acceptance](CLASSIC-P7-SOURCE-WORLD-AUDIT-20261009.md).

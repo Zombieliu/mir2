@@ -1,7 +1,9 @@
 # Target and movement lifecycle Candidate — 2026-10-09
 
-Implemented and locally tested; exact-source Linux/Windows release CI, paired
-publication and human frontend acceptance are separate pending gates. The last
+Implemented and locally tested; pushed sourcefaef passed original Linux
+release CI37880146450 and clean attested Windows CI37880146228. The strict R23
+full resource package and decoded R22 delta are signed; feed18 is signed with
+the unchanged engine. Paired publication and human acceptance remain pending. The last
 verified public pair remains R22/source7fea/feed17 and Gateway536b4a59f3.
 This work continues the user's instruction after the original12-hour deadline;
 the expired heartbeat remains stopped and the broader Goal is not marked complete.

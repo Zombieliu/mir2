@@ -11476,6 +11476,10 @@ impl ZoneRuntime {
             return outbounds;
         };
         let damage = zone_summoned_pet_explosion_damage(snake.summon_skill_level);
+        let source = entity_combat::ZoneCombatEntityRef::Monster {
+            object_id,
+            incarnation: snake.incarnation,
+        };
         let target_object_ids = self
             .native_monsters
             .iter()
@@ -11485,7 +11489,15 @@ impl ZoneRuntime {
                     && !monster.dead
                     && monster.hp > 0
                     && (monster.position.x - position.x).abs() <= 1
-                    && (monster.position.y - position.y).abs() <= 1)
+                    && (monster.position.y - position.y).abs() <= 1
+                    && self.charmed_snake_death_explosion_can_attack(
+                        &source,
+                        &entity_combat::ZoneCombatEntityRef::Monster {
+                            object_id: *target_object_id,
+                            incarnation: monster.incarnation,
+                        },
+                        now_ms,
+                    ))
                     .then_some(*target_object_id)
             })
             .collect::<Vec<_>>();

@@ -253,6 +253,10 @@ pub(super) struct OwnedPetOwner {
 struct OwnedPetLife {
     owner: OwnedPetOwner,
     pet: ZoneCombatEntityRef,
+    /// The causal Human authenticates this chain; it does not replace the
+    /// CharmedSnake's actual immediate SnakeTotem Master.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    monster_master: Option<ZoneCombatEntityRef>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -873,6 +877,7 @@ impl ZoneRuntime {
         {
             state.targets.retain(|id, r| {
                 &r.life.owner.online.session_id != session
+                    || r.life.monster_master.is_some()
                     || monsters.get(id).is_some_and(|m| matches!(m.ai, 60 | 61))
             });
         }
@@ -1022,6 +1027,11 @@ impl ZoneRuntime {
             else {
                 continue;
             };
+            // CharmedSnake's custom AI follows its Totem, so never recall a
+            // SlaveList child to the causal Human's new map.
+            if binding.monster_master.is_some() {
+                continue;
+            }
             let Some(presence) = self
                 .online_presence
                 .get(&binding.owner.online.session_id)
@@ -1337,9 +1347,60 @@ impl ZoneRuntime {
         let Some(pet) = self.native_entity_monster_ref(id) else {
             return;
         };
-        self.owned_pet_state_mut()
-            .bindings
-            .insert(id, OwnedPetLife { owner, pet });
+        self.owned_pet_state_mut().bindings.insert(
+            id,
+            OwnedPetLife {
+                owner,
+                pet,
+                monster_master: None,
+            },
+        );
+    }
+
+    /// Only the real SnakeTotem production path may attach a newly born child.
+    /// Neither a legacy checkpoint nor an unowned same-id monster mints a life.
+    pub(super) fn register_owned_snake_child_life(&mut self, id: u32, master_id: u32) {
+        let Some(parent) = self.owned_pet_life(master_id) else {
+            return;
+        };
+        let Some(master) = self.native_monsters.get(&master_id) else {
+            return;
+        };
+        let Some(child) = self.native_monsters.get(&id) else {
+            return;
+        };
+        if parent.monster_master.is_some()
+            || master.ai != 62
+            || master.name != "SnakeTotem"
+            || child.ai != 63
+            || child.name != "CharmedSnake"
+            || self.dead_object_ids.contains_key(&id)
+            || self.dead_object_ids.contains_key(&master_id)
+            || child
+                .special_ai
+                .as_ref()
+                .and_then(|s| s.snake_totem.as_ref())
+                .is_some_and(|s| s.retired_child)
+            || child.master_object_id != master_id
+            || child.owner_session_id.as_ref() != Some(&parent.owner.online.session_id)
+            || zone_native_summon_owner_player_object_id(child) != parent.owner.online.object_id
+        {
+            return;
+        }
+        let Some(pet) = self.native_entity_monster_ref(id) else {
+            return;
+        };
+        if !self.entity_ref_exists(&pet, false) {
+            return;
+        }
+        self.owned_pet_state_mut().bindings.insert(
+            id,
+            OwnedPetLife {
+                owner: parent.owner,
+                pet,
+                monster_master: Some(parent.pet),
+            },
+        );
     }
 
     fn owned_pet_life(&self, id: u32) -> Option<OwnedPetLife> {
@@ -1348,12 +1409,55 @@ impl ZoneRuntime {
         if !self.entity_ref_exists(&binding.pet, false)
             || self.owned_pet_master(&binding.owner).is_none()
             || monster.owner_session_id.as_ref() != Some(&binding.owner.online.session_id)
-            || monster.master_object_id != binding.owner.online.object_id
             || zone_native_summon_owner_player_object_id(monster) != binding.owner.online.object_id
         {
             return None;
         }
+        if let Some(master) = &binding.monster_master {
+            let parent = self.owned_pet_state()?.bindings.get(&master.object_id())?;
+            let parent_monster = self.native_monsters.get(&master.object_id())?;
+            if monster.ai != 63
+                || monster.name != "CharmedSnake"
+                || self.dead_object_ids.contains_key(&id)
+                || self.dead_object_ids.contains_key(&master.object_id())
+                || self.removed_object_ids.contains(&master.object_id())
+                || monster
+                    .special_ai
+                    .as_ref()
+                    .and_then(|s| s.snake_totem.as_ref())
+                    .is_some_and(|s| s.retired_child)
+                || monster.master_object_id != master.object_id()
+                || parent.monster_master.is_some()
+                || parent.pet != *master
+                || parent.owner != binding.owner
+                || parent_monster.ai != 62
+                || parent_monster.name != "SnakeTotem"
+                || self.owned_pet_life(master.object_id()).as_ref() != Some(parent)
+                || zone_tile_distance(&monster.position, &parent_monster.position) > 15
+            {
+                return None;
+            }
+        } else if monster.master_object_id != binding.owner.online.object_id {
+            return None;
+        }
         Some(binding.clone())
+    }
+
+    pub(super) fn owned_pet_immediate_monster_master(
+        &self,
+        id: u32,
+    ) -> Option<ZoneCombatEntityRef> {
+        self.owned_pet_life(id)?.monster_master
+    }
+
+    fn owned_pet_immediate_master_mode(&self, life: &OwnedPetLife) -> Option<u8> {
+        if life.monster_master.is_some() {
+            // MonsterObject constructor: AMode=All, PMode=Both. A Human's
+            // modes do not overwrite its Monster's own Master properties.
+            Some(0)
+        } else {
+            Some(self.owned_pet_master(&life.owner)?.chat_profile.pet_mode)
+        }
     }
 
     fn pet_position_is_safe(&self, position: &Point) -> bool {
@@ -1439,6 +1543,7 @@ impl ZoneRuntime {
         self.owned_pet_state().is_some_and(|state| {
             state.targets.values().any(|r| {
                 r.life.owner == *owner
+                    && r.life.monster_master.is_none()
                     && r.target == *target
                     && self.owned_pet_life(r.life.pet.object_id()).as_ref() == Some(&r.life)
             })
@@ -1471,6 +1576,9 @@ impl ZoneRuntime {
             return false;
         }
         let source = &self.native_monsters[&life.pet.object_id()];
+        if let Some(master) = &life.monster_master {
+            return self.owned_snake_child_can_attack(life, master, target, purpose, now);
+        }
         let Some(owner) = self.owned_pet_master(&life.owner) else {
             return false;
         };
@@ -1568,6 +1676,7 @@ impl ZoneRuntime {
                     }
                     let victim_pets_claimed_by_owner = self.native_monsters.values().any(|pet| {
                         pet.owner_session_id.as_ref() == Some(&victim_life.owner.online.session_id)
+                            && pet.master_object_id == victim_life.owner.online.object_id
                             && pet.experience_owner.as_ref().is_some_and(|claim| {
                                 now <= claim.expires_at_ms
                                     && claim.online_owner.as_ref() == Some(&life.owner.online)
@@ -1578,6 +1687,7 @@ impl ZoneRuntime {
                         || self.owned_pet_state().is_some_and(|s| {
                             s.targets.values().any(|r| {
                                 r.life.owner == victim_life.owner
+                                    && r.life.monster_master.is_none()
                                     && r.target == life.pet
                                     && self.owned_pet_life(r.life.pet.object_id()).as_ref()
                                         == Some(&r.life)
@@ -1600,6 +1710,63 @@ impl ZoneRuntime {
         }
     }
 
+    fn owned_snake_child_can_attack(
+        &self,
+        life: &OwnedPetLife,
+        master: &ZoneCombatEntityRef,
+        target: &ZoneCombatEntityRef,
+        purpose: EntityTargetPurpose,
+        now: u64,
+    ) -> bool {
+        let source = &self.native_monsters[&life.pet.object_id()];
+        let parent = &self.native_monsters[&master.object_id()];
+        match target {
+            ZoneCombatEntityRef::Monster { object_id, .. } => {
+                let victim = &self.native_monsters[object_id];
+                if victim.owner_session_id.is_some()
+                    || victim.master_object_id != 0
+                    || !victim.hostile_to_player
+                    || matches!(victim.ai, 57 | 68)
+                    || self.owned_monster_shocked(*object_id, now)
+                    || !monster_visibility_is_attackable(victim)
+                    || !trap_rock_visible(victim)
+                {
+                    return false;
+                }
+                if purpose != EntityTargetPurpose::Impact {
+                    let hidden = self.objects.get(object_id).is_some_and(|o| {
+                        matches!(&o.packet,
+                        ServerPacket::ObjectMonster { info } if info.hidden)
+                    });
+                    if hidden && !self.entity_cool_eye_sees(source, victim.level) {
+                        return false;
+                    }
+                }
+                // SnakeTotem.SlaveList is not MapObject.Pets. In the ordinary
+                // source path only victim.Target==attacker.Master grants this
+                // threat; the causal Human's Target/Pets cannot grant it.
+                self.owned_pet_monster_targets(*object_id, master)
+                    || now < source.hallucination_until_ms
+                    || self.owned_monster_rage_active(life.pet.object_id(), now)
+            }
+            ZoneCombatEntityRef::Player { session_id, .. } => {
+                let victim = &self.players[session_id];
+                !victim.chat_profile.is_gm
+                    && !victim.combat_stats.gm_never_die
+                    && !victim.chat_profile.in_safe_zone
+                    && !self.pet_position_is_safe(&victim.position)
+                    && !self.pet_position_is_safe(&source.position)
+                    && !self.pet_position_is_safe(&parent.position)
+                    && (purpose == EntityTargetPurpose::Impact
+                        || (!victim.hidden || self.entity_cool_eye_sees(source, victim.level))
+                            && now >= source.hallucination_until_ms)
+                    // The Totem has no ordinary attack, Pets or Human
+                    // LastHitter. Do not substitute the Human threat clock.
+                    && self.owned_pet_last_hitter_is(victim, master, now)
+            }
+        }
+    }
+
     fn owned_pet_target_position(&self, target: &ZoneCombatEntityRef) -> Option<Point> {
         match target {
             ZoneCombatEntityRef::Player { session_id, .. } => {
@@ -1618,7 +1785,7 @@ impl ZoneRuntime {
     ) -> Option<NativeEntityTarget> {
         let life = self.owned_pet_life(id)?;
         let source = self.native_monsters.get(&id)?.clone();
-        let mode = self.owned_pet_master(&life.owner)?.chat_profile.pet_mode;
+        let mode = self.owned_pet_immediate_master_mode(&life)?;
         if matches!(mode, 1 | 3) && source.ai != 61 {
             // Custom Vampire/Toad ProcessAI does not execute the base AI's
             // PMode target-clearing block. Pausing must retain assigned Target.
@@ -1739,8 +1906,8 @@ impl ZoneRuntime {
             return false;
         }
         self.owned_pet_life(id).is_some_and(|life| {
-            self.owned_pet_master(&life.owner)
-                .is_some_and(|m| pet_mode_can_move(m.chat_profile.pet_mode))
+            self.owned_pet_immediate_master_mode(&life)
+                .is_some_and(pet_mode_can_move)
         })
     }
 
@@ -1752,8 +1919,8 @@ impl ZoneRuntime {
             return false;
         }
         self.owned_pet_life(id).is_some_and(|life| {
-            self.owned_pet_master(&life.owner)
-                .is_some_and(|m| pet_mode_can_attack(m.chat_profile.pet_mode))
+            self.owned_pet_immediate_master_mode(&life)
+                .is_some_and(pet_mode_can_attack)
         })
     }
 
@@ -2145,7 +2312,7 @@ impl ZoneRuntime {
             id,
             &target.reference,
             damage,
-            if magic {
+            if magic || life.monster_master.is_some() && source.ai == 63 {
                 EntityDefence::MAC
             } else {
                 EntityDefence::ACAgility
@@ -2246,21 +2413,40 @@ impl ZoneRuntime {
         let Some(owner) = self.owned_pet_master(&life.owner) else {
             return Vec::new();
         };
-        if self
-            .online_presence
-            .get(&owner.session_id)
-            .is_none_or(|p| p.key != self.key)
+        if life.monster_master.is_none()
+            && self
+                .online_presence
+                .get(&owner.session_id)
+                .is_none_or(|p| p.key != self.key)
         {
             return Vec::new();
         }
+        // CharmedSnake.ProcessRoam uses MasterTotem.Back. The causal Human's
+        // current position must not turn into the child's follow destination.
+        let follow = life.monster_master.as_ref().map_or_else(
+            || owner.position.clone(),
+            |master| {
+                let parent = &self.native_monsters[&master.object_id()];
+                offset_point(
+                    &parent.position,
+                    zone_rotated_direction(parent.direction, 4),
+                    1,
+                )
+            },
+        );
+        let already_home = if life.monster_master.is_some() {
+            source.position == follow
+        } else {
+            zone_tile_distance(&source.position, &follow) <= 2
+        };
         if !self.owned_pet_can_move_now(id)
             || !zone_native_summon_can_move(&source)
             || source.ai == 18 && !shinsu_can_act(&source, now)
-            || zone_tile_distance(&source.position, &owner.position) <= 2
+            || already_home
         {
             return Vec::new();
         }
-        let Some(direction) = zone_direction_toward(&source.position, &owner.position) else {
+        let Some(direction) = zone_direction_toward(&source.position, &follow) else {
             return Vec::new();
         };
         let destination = offset_point(&source.position, direction, 1);
@@ -2344,7 +2530,9 @@ impl ZoneRuntime {
             .into_iter()
             .flat_map(|s| s.bindings.values())
             .filter(|b| {
-                b.owner == owner && self.owned_pet_life(b.pet.object_id()).as_ref() == Some(*b)
+                b.owner == owner
+                    && b.monster_master.is_none()
+                    && self.owned_pet_life(b.pet.object_id()).as_ref() == Some(*b)
             })
             .cloned()
             .collect();
@@ -4395,7 +4583,9 @@ impl ZoneRuntime {
             .into_iter()
             .flat_map(|s| s.bindings.values())
             .filter(|b| {
-                b.owner == owner && self.owned_pet_life(b.pet.object_id()).as_ref() == Some(*b)
+                b.owner == owner
+                    && b.monster_master.is_none()
+                    && self.owned_pet_life(b.pet.object_id()).as_ref() == Some(*b)
             })
             .cloned()
             .collect();
@@ -4653,6 +4843,16 @@ impl ZoneRuntime {
                 );
                 if actual > 0 {
                     out.extend(self.release_owned_monster_shock(*object_id, now));
+                    if let Some(packet) =
+                        self.apply_native_charmed_snake_hit_paralysis(pet_id, *object_id, now)
+                    {
+                        self.apply_zone_object_packets(std::slice::from_ref(&packet), now);
+                        out.push(ZoneOutbound::ToMany {
+                            session_ids: self
+                                .native_monster_visible_recipients(*object_id, &monster.position),
+                            packets: vec![packet],
+                        });
+                    }
                 }
                 if actual > 0 {
                     if let Some(victim_life) = self.owned_pet_life(*object_id) {
@@ -4761,17 +4961,33 @@ impl ZoneRuntime {
             let affected = |object: u32| object == id || pets.contains(&object);
             state.targets.retain(|_, r| {
                 !affected(r.life.pet.object_id())
+                    && !r
+                        .life
+                        .monster_master
+                        .as_ref()
+                        .is_some_and(|m| affected(m.object_id()))
                     && (!affected(r.life.owner.online.object_id) || preserve_transferred_pets)
                     && !affected(r.target.object_id())
             });
             state.hits.retain(|h| {
                 !affected(h.life.pet.object_id())
+                    && !h
+                        .life
+                        .monster_master
+                        .as_ref()
+                        .is_some_and(|m| affected(m.object_id()))
                     && (!affected(h.life.owner.online.object_id) || preserve_transferred_pets)
                     && !affected(h.target.object_id())
             });
             state.human_hits.retain(|h| {
                 !affected(h.authority.attacker.online.object_id)
                     && !affected(h.authority.victim.pet.object_id())
+                    && !h
+                        .authority
+                        .victim
+                        .monster_master
+                        .as_ref()
+                        .is_some_and(|m| affected(m.object_id()))
                     && !affected(h.authority.victim.owner.online.object_id)
             });
             state.player_spells.retain(|h| {
@@ -4787,6 +5003,10 @@ impl ZoneRuntime {
                 .retain(|p| !affected(p.caster.online.object_id));
             state.bindings.retain(|_, b| {
                 !affected(b.pet.object_id())
+                    && !b
+                        .monster_master
+                        .as_ref()
+                        .is_some_and(|m| affected(m.object_id()))
                     && (!affected(b.owner.online.object_id) || preserve_transferred_pets)
             });
             state
@@ -4938,3 +5158,7 @@ fn owned_pet_owner_struck_projection(
 #[cfg(test)]
 #[path = "owned_pet_combat_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "owned_pet_immediate_master_tests.rs"]
+mod owned_pet_immediate_master_tests;

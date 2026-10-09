@@ -1,5 +1,22 @@
 # Crystal Server Parity
 
+> 2026-10-09 Snake Totem immediate-master Candidate: real AI62→AI63 children
+> now bind parent/child incarnations and causal online/life identity, use their
+> immediate Totem targeting/SlaveList/follow rules, preserve strict birth+2000
+> and 300ms impact, and revoke stale pending hits. Master-null corpse bursts
+> cannot inherit former Human authority; child damage cannot mint Human XP/gold
+> or steal a living first hitter's custody. Final private64, ordinary in-process
+> Zone API5 and original test-support pet-PK38 pass on the same source. Full Zone
+> is200pass/9fail: two Snake failures fixed, remaining nine retained; no fixture
+> or checkpoint implementation rewrite. Exact-source CI/publication/native/Human
+> acceptance remain pending. SummonSnakes is the original Archer skill; this is
+> not full Taoist-PK parity. [Scope and raw evidence](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
+>
+> P1 sourcefaef is pushed; original Linux CI37880146450 and Windows CI37880146228
+> pass. Genuine clean attested EXE, strict full resource package, decoded R22
+> delta and signedfeed18 are ready, not published. Public remainsR22/feed17 and
+> Gateway536 until a separate drained paired release. No100% Candidate claim.
+
 > 2026-10-09 target/movement lifecycle Candidate: temporary blocked pursuit now
 > keeps a live target and caches only failed routes against the exact shared
 > collision footprint. A blocker death/position/blocked-hint change replans;
