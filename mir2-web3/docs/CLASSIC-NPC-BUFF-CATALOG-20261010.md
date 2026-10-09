@@ -1,6 +1,7 @@
 # NPC Buff ACT boundaries and canonical catalog lookup
 
-This bounded Candidate is based on exact pushed20cee44303012dc83260181b53fd0d2dcd21900a.
+This bounded Candidate is committed/pushed as exact
+`ecd81f6a1528e0a1a85bfd920356f607bc37a2a9`, based on20cee.
 Public Gateway remainsc704; clientR23/feed18 remains current. It is not full
 P7, native gameplay or human acceptance. The expired12-hour follow-up stays paused.
 
@@ -8,6 +9,12 @@ Actual20cee Linux workflow37955396469 failed its unchanged Purification500ms
 setup by14ms (target-first=false; scrolls241/231ms). Siege passed, but no new
 Gateway artifact was qualified or deployed. Full original log/API results are
 retained. The earlier4baa workflow37941832277 failed by48ms.
+
+The new exactecd81 Linux workflow37970933774 actually completed SUCCESS in both
+build and siege jobs, retaining every original clock, auth, save/recovery,
+PostgreSQL, classic gameplay and package gate. The genuine artifact, inner
+tar/ELF binaries, manifest and Source metadata are qualified. This is Linux
+acceptance of this bounded slice; it does not complete the full gameplay Goal.
 
 ## Product changes and original Source
 
@@ -48,7 +55,8 @@ is rejected. Legacy unknown expiry retains its previous zero-packet convention.
 | Default generator |6 passed| Source proof, omissions and failed-source handling. |
 | Adjacent `crystal_npc` |54 passed,2 failed| Same retained dead-Buy and short-Prison/Hero failures on frozen4baa. This filter is narrower than earlier104/2. |
 | Original optimized Gateway |4 passed on final source| All original assertions,500ms budget, both actor orders, Source CAS, owned scroll UID use and logout unchanged. Remaining budget136/173ms in this Windows run. |
-| New exact Linux/publication/native/human |Pending| Not qualified or deployed. |
+| Exactecd81 Linux/package |Passed| Actual37970933774, both jobs SUCCESS and genuine artifact byte/ELF/metadata verification. No widened500ms assertion. |
+| Public rollout/native/human |Open| Deployment driver stopped before remote staging/service changes because1 WebSocket connection had not drained. No new public protocol or native/human acceptance. |
 
 Initial6/8 and corrected-fixture8/6 Buff failures, catalog fixture compilation
 failure and Luke visibility diagnostics are retained. Fixture corrections do
@@ -68,3 +76,18 @@ and [byte-verified receipt](generated/player-qa/npc-buff-catalog-20261010/candid
 retain all local failures, final logs, source inputs and the actual20cee failed
 CI. Archive1188217 bytes, SHA256
 `d8e3db41522318cbb20e8e8434da52200e388302cd614c92598edbb9474bc8db`.
+
+The separate [62-entry actual Linux archive](generated/player-qa/npc-buff-catalog-20261010/linux-ci-01/original-evidence.zip)
+and [qualified receipt](generated/player-qa/npc-buff-catalog-20261010/linux-ci-01/EVIDENCE.json)
+preserve original successful CI/logs/metadata, exact Git readback and held rollout.
+Archive564564 bytes, SHA256
+`15ed48b46c311821aebd47e7e8e62048299d926efca2675e3c834c2a18daeb90`.
+The first300s artifact download timed out after29,655,040 bytes; its original
+partial remains retained. A verified206 range supplied the remaining4,199,391
+bytes; complete33,854,431-byte ZIP SHA256 matches GitHub's published digest.
+All final archive/gate assertions are retained. Initial recovered-verifier
+preparation byte claims were corrected for Windows newline translation; its
+old receipt is retained and explicitly superseded by actual byte/AST accounting.
+Private redirect/response headers and large binary archives are excluded from
+Git evidence. The apply attempt stopped before staging with child exit75
+(PowerShell tool exit1); it did not restart or disconnect any client.

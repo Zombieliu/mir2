@@ -108,6 +108,11 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_buff_action_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_catalog_lookup_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib buff_duration::tests -- --test-threads=1
+          # Pure CHECKHUM selection and real Manager census are foundations;
+          # this gate does not attest the pending Gateway/Source invocation.
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_population:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib zone::manager:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib online_epoch_exhaustion -- --test-threads=1
 
       - name: Package Gateway
         working-directory: mir2-web3

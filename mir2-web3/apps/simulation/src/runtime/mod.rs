@@ -39,6 +39,7 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
+mod npc_population;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_script;

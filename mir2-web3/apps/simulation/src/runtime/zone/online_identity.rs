@@ -113,6 +113,9 @@ impl OnlineIdentityBook {
     pub fn owner(&self, session_id: &SessionId) -> Option<&OnlineOwner> {
         self.owners.get(session_id)
     }
+    pub(super) fn owners(&self) -> impl Iterator<Item = (&SessionId, &OnlineOwner)> {
+        self.owners.iter()
+    }
     pub fn validates_encoded(&self, encoded: &str) -> bool {
         serde_json::from_str::<OnlineOwner>(encoded)
             .ok()

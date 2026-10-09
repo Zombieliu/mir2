@@ -41,6 +41,19 @@
 > Earlier faef/P7 ownership/publication status below is historical. No100% claim,
 > expired heartbeat restart or blocked Goal completion.
 
+
+> Latest continued round, 2026-10-10 local: exactecd81 is pushed and actual
+> Linux37970933774 passed both original jobs; genuine package/ELF/Source checks
+> are qualified. Rollout stopped before staging because1 WS connection remained;
+> publicc704/R23/feed18 is unchanged. [Linux evidence](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+> New P7 Source population selection and real Manager census foundation passes
+>32 distinct local checks (40 executions include duplicates). Ordinary CHECKHUM,
+> successful-load producer, full Gateway invocation/replay and Source-CAS world
+> outbox are still unwired. [Exact scope and next integration](CLASSIC-NPC-POPULATION-FOUNDATION-20261010.md).
+> Root owns all common files/Git/rollout; worker/reviewer ownership is returned.
+> Full P1–P7/Mentor/native/human gates remain open; no100% claim, expired heartbeat
+> restart or blocked Goal completion. Older statuses below are historical.
+
 > 2026-10-09 live Purification map/Player powder Candidate: the original
 > opaque action, complete actor proofs, actual buffs/deadlines and Hidden state
 > survive only a true retained live map change. Shared Player magic preflight

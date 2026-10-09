@@ -18,7 +18,7 @@ mod intelligent_creatures;
 pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickupIntent};
 
 pub use collision::{ZoneBounds, ZoneCollision};
-pub use manager::ZoneManager;
+pub use manager::{ZoneManager, ZoneNpcPopulationReadSet};
 pub use replay::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, ZoneInput, ZoneOutput,
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,

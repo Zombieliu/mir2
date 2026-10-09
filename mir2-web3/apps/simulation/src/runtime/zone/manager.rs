@@ -20,6 +20,10 @@ use super::types::{
     ZoneMonsterKillAward, ZoneOutbound,
 };
 
+#[path = "npc_population.rs"]
+mod npc_population;
+pub use npc_population::ZoneNpcPopulationReadSet;
+
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
 #[derive(Debug)]

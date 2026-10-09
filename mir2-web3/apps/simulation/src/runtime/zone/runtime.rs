@@ -798,6 +798,17 @@ impl ZoneRuntime {
         self.players.len()
     }
 
+    pub(super) fn npc_population_count(&self, book: &OnlineIdentityBook,
+        routes: &BTreeMap<SessionId, ZoneKey>) -> Option<usize> {
+        // Prove both directions: a route with no actual Player must not make
+        // an empty or partially restored Players collection a known zero.
+        let routed_count = routes.values().filter(|key| *key == &self.key).count();
+        (routed_count == self.players.len() && self.players.iter().all(|(session, player)|
+            &player.session_id == session && routes.get(session) == Some(&self.key)
+                && book.owner(session).is_some_and(|owner| owner.matches_player(player))))
+            .then_some(self.players.len())
+    }
+
     pub fn ground_drop_count(&self) -> usize {
         self.ground_drops.len()
     }
