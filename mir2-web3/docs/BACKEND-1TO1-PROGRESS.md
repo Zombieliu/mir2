@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> 2026-10-09 R23/sourcefaef and signed18 are actually published, with the paired
+> playtest Gateway on the same source. Exact Linux37880146450/Windows37880146228,
+> full40-object CDN stage37899098919 and separate same-head promote37904194682
+> pass. Actual Windows engine HTTPS/CMS/206 and public ordinary44/resume18/target9
+> total71 checks/20 normal logouts pass. The first target cohort's genuine death,
+> Caddy/timeout and archive-shape failures remain retained and excluded. Original
+> realm/config/resources, real saves and protected installations are preserved.
+> Existing Launcher can update without reinstalling; total update size/duration
+> and native dense-monster/laptop/human acceptance are not claimed. The broader
+> P1-P7/Mentor Goal is incomplete and the expired heartbeat remains paused.
+> [Published scope and complete receipts](CLASSIC-TARGET-MOVEMENT-PUBLISHED-R23-20261009.md).
+
 > 2026-10-07 source2b04 mining Gateway is now paired with published R19/updater15.
 > Strict six-count/TCP drain, private DB/state/config backup, old/candidate exit0
 > and cold start pass with no journal panic. Original realm, authentication,

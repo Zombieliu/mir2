@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.r23.private-caddy-no-archive-leak.v1",
+  "passed": true,
+  "privateInputSha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d",
+  "privateInputCopiedOrPrinted": false,
+  "boundedCandidateStringsChecked": 2,
+  "matchingArchiveEntries": 0,
+  "archiveSha256": "595e75c166fb53c38db60c8d67ab4a1a46d9a9392caa76a1e913625cb380cad7",
+  "scope": "Exact private bytes plus long alphanumeric candidate strings; not a universal secret scanner."
+}
