@@ -12,6 +12,12 @@ const NPC: u32 = 1140;
 const FLAG: u32 = 524;
 
 fn fixture() -> (SimulationConfig, SimulationSession, WorldEntitySnapshot) {
+    fixture_with_store(None)
+}
+
+fn fixture_with_store(
+    file: Option<&std::path::Path>,
+) -> (SimulationConfig, SimulationSession, WorldEntitySnapshot) {
     let info = mir2_game_data::crystal_npc_info_manifest_ref()
         .npcs
         .iter()
@@ -56,6 +62,12 @@ fn fixture() -> (SimulationConfig, SimulationSession, WorldEntitySnapshot) {
         save.position = config.spawn.clone();
         save.quest_states_json.clear();
         save.npc_flag_states_json.clear();
+    }
+    if let Some(file) = file {
+        let initial = config.account_store.lock().unwrap().clone();
+        config = config.with_account_store_path(file);
+        *config.account_store.lock().unwrap() = initial;
+        config.save_account_store().unwrap();
     }
     let mut session = SimulationSession::new(config.clone());
     assert!(session
@@ -334,4 +346,101 @@ fn actual_main_oven_failure_restores_exact_source_clock_and_retry_commits_once()
             .refine,
         raw_before
     );
+}
+
+fn isolated_file_path(case: &str, path: u8) -> std::path::PathBuf {
+    std::env::temp_dir()
+        .join(format!(
+            "mir2-npc-source-{case}-{path}-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ))
+        .join("accounts.json")
+}
+
+fn writer_marker(file: &std::path::Path) -> std::path::PathBuf {
+    let mut name = file.as_os_str().to_os_string();
+    name.push(".writer.lock");
+    name.into()
+}
+
+#[test]
+fn original_main_known_file_rename_failure_retains_image_and_retry_saves_once() {
+    for path in 0..5 {
+        let file = isolated_file_path("known", path);
+        let (config, mut session, npc) = fixture_with_store(Some(&file));
+        let before = std::fs::read(&file).unwrap();
+        let revision = config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision;
+        config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
+        assert!(!succeeded(&open(&mut session, &npc, path)));
+        assert!(!crystal_npc_flag_value(session.app.world(), FLAG));
+        assert_eq!(std::fs::read(&file).unwrap(), before);
+        assert_eq!(std::fs::metadata(writer_marker(&file)).unwrap().len(), 0);
+        config.ensure_account_store_writable().unwrap();
+        assert!(succeeded(&open(&mut session, &npc, path)));
+        let stored: crate::AccountStore = serde_json::from_slice(&std::fs::read(&file).unwrap()).unwrap();
+        assert_eq!(stored.accounts["demo"].saves[&0].revision, revision + 1);
+        assert_eq!(config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision, revision + 1);
+        assert!(crystal_npc_flag_value(session.app.world(), FLAG));
+        assert_eq!(std::fs::metadata(writer_marker(&file)).unwrap().len(), 0);
+        drop(session);
+        drop(config);
+        assert!(std::fs::read(writer_marker(&file)).unwrap().is_empty());
+        // Isolated images are intentionally retained; no human save is removed.
+    }
+}
+
+#[test]
+fn original_main_unknown_file_publication_suppresses_ack_and_survives_restart_frozen() {
+    for path in 0..5 {
+        let file = isolated_file_path("unknown", path);
+        let (config, mut session, npc) = fixture_with_store(Some(&file));
+        let before = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
+        config.inject_account_store_transaction_fault(
+            AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
+        );
+        assert!(!succeeded(&open(&mut session, &npc, path)));
+        assert!(crystal_npc_flag_value(session.app.world(), FLAG), "unknown cannot guess an old live image");
+        assert_eq!(
+            serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0]).unwrap(),
+            serde_json::to_value(&before).unwrap()
+        );
+        assert!(config.ensure_account_store_writable().is_err());
+        let visible_bytes = std::fs::read(&file).unwrap();
+        let visible: crate::AccountStore = serde_json::from_slice(&visible_bytes).unwrap();
+        let visible_save = &visible.accounts["demo"].saves[&0];
+        assert_eq!(visible_save.revision, before.revision + 1);
+        assert!(visible_save.npc_flag_states_json.iter().any(|entry|
+            serde_json::from_str::<serde_json::Value>(entry).unwrap()
+                == serde_json::json!({"index":FLAG,"value":true})));
+        // Windows enforces the authority's OS lock even for another read-only
+        // handle. Observe length now, and exact persistent bytes only after
+        // every live holder is dropped; never bypass the authority lock.
+        let marker_length = std::fs::metadata(writer_marker(&file)).unwrap().len();
+        assert!(marker_length > b"PENDING PUBLICATION\n".len() as u64);
+        assert!(!succeeded(&open(&mut session, &npc, path)));
+        assert!(session.save_active_character().is_err());
+        let clone = config.clone();
+        assert!(clone.save_account_store().is_err());
+        assert_eq!(std::fs::read(&file).unwrap(), visible_bytes);
+        assert_eq!(std::fs::metadata(writer_marker(&file)).unwrap().len(), marker_length);
+        drop(clone);
+        drop(session);
+        drop(config);
+        let marker_before = std::fs::read(writer_marker(&file)).unwrap();
+        assert!(marker_before.starts_with(b"PENDING PUBLICATION\n"));
+        assert!(String::from_utf8_lossy(&marker_before).contains("FROZEN:"));
+        assert_eq!(marker_before.len() as u64, marker_length);
+        let restarted = SimulationConfig::default().with_account_store_path(&file);
+        assert!(restarted.ensure_account_store_writable().is_err());
+        assert!(restarted.save_account_store().is_err());
+        assert_eq!(std::fs::read(&file).unwrap(), visible_bytes);
+        drop(restarted);
+        assert_eq!(std::fs::read(writer_marker(&file)).unwrap(), marker_before);
+        // Visible bytes are not confirmed durability. Do not clear the fence,
+        // acknowledge success or claim operator reconciliation has happened.
+    }
 }

@@ -1,5 +1,39 @@
 # NPC Source checkpoint and ordered pet interpretation — 2026-10-09
 
+> Follow-up: source3795cbd13390379f9b9d13cd09651e0bd0c05ba2 is pushed and
+> its exact remote head verified. Two added File-only tests now pass with the
+> six original NPC cases: **8/8, zero failures/ignored**, not an additional94.
+> Product code is unchanged. The original release workflow is preserved and
+> adds the complete NPC Source and ordered-pet test gates; actual CI is pending.
+> These test/workflow changes are not a Gateway publication.
+
+## File publication follow-up
+
+The actual imported Ashes @MAIN runs through all five normal/direct entry
+wrappers on a File-only store bound before session creation. Known rename-before
+failure retains the old file and live flag, clears the ordinary publication
+marker, permits retry and saves revision exactly once. Unknown rename-after
+failure suppresses success, keeps the executed live flag and old in-memory save,
+freezes subsequent NPC/save/clone writes, and preserves PENDING+FROZEN on disk.
+After all File authority holders release, a fresh binding is still frozen.
+
+The first run22 passed6/failed2 because Windows correctly denies a second
+handle's read of the authority-locked marker. The corrected fixture observes
+live metadata length and reads exact marker bytes only after releasing all
+holders. Run23 passes8; no OS lock or business assertion is weakened. This
+tests authority release/rebinding, not an independent process crash or power
+loss. A visible new file image does not confirm directory durability.
+
+No fence is cleared. The existing offline reconcile tool accepts exact PENDING
+and still rejects this appended PENDING+FROZEN marker; automated thaw/recovery
+is not implemented or claimed by this follow-up.
+[Actual File results and limitations](generated/player-qa/npc-world-20261009/file-followup-02/EVIDENCE.json)
+and [11 original source/workflow/positive-negative receipts](generated/player-qa/npc-world-20261009/file-followup-02/original-evidence.zip)
+are retained. Archive23735B/SHA256
+cd9945c63ab8308f3415fb60ffb06b126e5dfa831b0a9ebe98b057f3cafd233a.
+The prior94-test checkpoint below remains its own historical source/fixture
+scope and is not presented as one new96-test full-suite execution.
+
 Status: **implemented and locally tested; not published or human accepted**.
 Parent source is c70436f34eabb432d769e0082c0afa23303294b0. Root owns the
 common files, integration, tests, Git and rollout; the bounded pet-module writer

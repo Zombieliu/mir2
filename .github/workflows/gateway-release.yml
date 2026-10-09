@@ -98,6 +98,13 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --test shared_pet_source_transport --test shared_mentor_source_transport -- --test-threads=1
           node --test tools/generate-crystal-default-npc-scripts.test.mjs
 
+      - name: Verify complete NPC Source acknowledgement and ordered pet interpretation
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_source_guard_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_world_plan::tests -- --test-threads=1
+
       - name: Package Gateway
         working-directory: mir2-web3
         env:

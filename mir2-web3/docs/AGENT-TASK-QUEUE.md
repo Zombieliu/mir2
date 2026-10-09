@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> NPC source3795cbd133 is now pushed with exact remote readback. A subsequent
+> test-only File follow-up passes8 NPC tests (six repeats/two new): real known
+> rename failure can retry, unknown result suppresses ACK and survives authority
+> release/rebind frozen. Original workflow preserved plus two additional gates;
+> exact-source CI is not yet run. Product code and Gatewayc704 stay unchanged.
+> Pending+FROZEN offline reconciliation, shared world CAS/outbox and native
+> stories stay open. [File follow-up evidence](CLASSIC-NPC-SOURCE-GUARD-20261009.md).
+
 > 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
 > R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
 > protocol checks and14 acknowledged normal logouts pass, exact service/binary
