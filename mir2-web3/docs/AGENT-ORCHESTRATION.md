@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-10-10 local Stripe trial: root is the sole guard writer; a read-only
+> review passes. Gateway38 and binary build pass; compatible native is prepared.
+> Explicit test-only loopback returns permit official CLI outbound forwarding
+> after an automatic approval block stopped the proposed public Quick Tunnel.
+> The private test-key entry is now empty; refill is requested. No listener,
+> Gateway, native login or payment has started. Public R22/Gatewaya41/feed17 and
+> unfinished P1–P7 are unchanged. [Evidence and remaining gate](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 > 2026-10-10 Stripe credential follow-up: the operator's sandbox server key
 > passes four real provider reads, Checkout creation/expiration and temporary
 > webhook creation/deletion. The real Endive API rejected the obsolete

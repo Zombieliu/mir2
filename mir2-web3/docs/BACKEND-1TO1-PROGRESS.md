@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> 2026-10-10 local Stripe guard: explicit opt-in/test-key/literal-loopback HTTP
+> returns pass Gateway38 and binary build; live/default HTTPS and all financial
+> checks remain. Official outbound CLI is prepared after the public tunnel's
+> auto-review rejection. The private server-key entry is empty, blocking actual
+> listener/Gateway/payment startup. No schema, public service, save or parity
+> completion is claimed. [Proof and limits](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 > 2026-10-10 Stripe provider follow-up: four authenticated sandbox reads and
 > Checkout/temporary webhook creation and cleanup pass on real Stripe. Endive
 > rejected the obsolete payment-method field; its supported card eligibility

@@ -74,6 +74,59 @@ fn env(name: &str) -> Result<String, String> {
     std::env::var(name).map_err(|_| format!("billingConfigurationMissing:{name}"))
 }
 
+fn loopback_test_return_flag(value: Option<&str>) -> Result<bool, String> {
+    match value {
+        None | Some("0" | "false") => Ok(false),
+        Some("1" | "true") => Ok(true),
+        _ => Err("billingConfigurationInvalid:MIR2_STRIPE_ALLOW_LOOPBACK_TEST_RETURN".into()),
+    }
+}
+
+fn valid_return_base(raw: &str, livemode: bool, allow_loopback_test: bool) -> bool {
+    if raw
+        .chars()
+        .any(|c| c.is_control() || c.is_whitespace() || c == '\\')
+    {
+        return false;
+    }
+    let Ok(base) = reqwest::Url::parse(raw) else {
+        return false;
+    };
+    if base.host_str().is_none()
+        || !base.username().is_empty()
+        || base.password().is_some()
+        || base.query().is_some()
+        || base.fragment().is_some()
+    {
+        return false;
+    }
+    if base.scheme() == "https" {
+        return true;
+    }
+    // The Stripe CLI forwards signed sandbox events without exposing a server.
+    // Only an explicit test-mode opt-in permits an HTTP cosmetic return page.
+    // Check the original authority too: URL parsing normalizes numeric aliases.
+    if livemode || !allow_loopback_test || base.scheme() != "http" {
+        return false;
+    }
+    let Some(authority) = raw
+        .strip_prefix("http://")
+        .and_then(|s| s.split('/').next())
+    else {
+        return false;
+    };
+    ["127.0.0.1", "[::1]"].into_iter().any(|host| {
+        authority == host
+            || authority.strip_prefix(host).is_some_and(|suffix| {
+                suffix.strip_prefix(':').is_some_and(|port| {
+                    !port.is_empty()
+                        && port.bytes().all(|b| b.is_ascii_digit())
+                        && port.parse::<u16>().is_ok_and(|port| port != 0)
+                })
+            })
+    })
+}
+
 impl StripeBilling {
     pub(crate) fn validate_store(&self, config: &SimulationConfig) -> Result<(), String> {
         if config.account_store_path.is_none() && config.account_store_database_url.is_none() {
@@ -116,14 +169,17 @@ impl StripeBilling {
             return Err("billingWebhookSecretInvalid".into());
         }
         let public_base = env("MIR2_BILLING_PUBLIC_BASE_URL")?;
-        let base = reqwest::Url::parse(&public_base).map_err(|_| "billingPublicUrlInvalid")?;
-        if base.scheme() != "https"
-            || base.host_str().is_none()
-            || !base.username().is_empty()
-            || base.password().is_some()
-            || base.query().is_some()
-            || base.fragment().is_some()
-        {
+        let loopback_setting = match std::env::var("MIR2_STRIPE_ALLOW_LOOPBACK_TEST_RETURN") {
+            Ok(value) => Some(value),
+            Err(std::env::VarError::NotPresent) => None,
+            Err(_) => {
+                return Err(
+                    "billingConfigurationInvalid:MIR2_STRIPE_ALLOW_LOOPBACK_TEST_RETURN".into(),
+                )
+            }
+        };
+        let allow_loopback_test = loopback_test_return_flag(loopback_setting.as_deref())?;
+        if !valid_return_base(&public_base, livemode, allow_loopback_test) {
             return Err("billingPublicUrlInvalid".into());
         }
         let offers: Vec<RechargeOffer> = serde_json::from_str(&env("MIR2_STRIPE_RECHARGE_OFFERS")?)
@@ -532,6 +588,65 @@ mod provider_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn stripe_return_base_requires_https_unless_explicit_test_loopback() {
+        for livemode in [false, true] {
+            for opt_in in [false, true] {
+                assert!(valid_return_base(
+                    "https://billing.example.test",
+                    livemode,
+                    opt_in
+                ));
+                assert!(!valid_return_base(
+                    "http://billing.example.test",
+                    livemode,
+                    opt_in
+                ));
+                for local in ["http://127.0.0.1:7121", "http://[::1]:7121/"] {
+                    assert_eq!(
+                        valid_return_base(local, livemode, opt_in),
+                        !livemode && opt_in
+                    );
+                }
+            }
+        }
+        for invalid in [
+            "http://localhost:7121",
+            "http://192.168.1.1:7121",
+            "http://0.0.0.0:7121",
+            "http://127.0.0.1.evil.test",
+            "http://user@127.0.0.1:7121",
+            "http://127.0.0.1:7121?redirect=1",
+            "http://127.0.0.1:7121#fragment",
+            "http://2130706433:7121",
+            "http://0x7f000001:7121",
+            "http://127.1:7121",
+            "http://127.0.0.1:0",
+            "http://127.0.0.1:65536",
+            "http://[::1]:7121\\path",
+            "http://127.0.0.1:7121\n",
+            " https://billing.example.test",
+            "https://user:password@billing.example.test",
+            "file:///C:/return",
+            "not-a-url",
+        ] {
+            assert!(!valid_return_base(invalid, false, true), "{invalid}");
+        }
+    }
+
+    #[test]
+    fn stripe_loopback_opt_in_is_disabled_by_default_and_rejects_invalid_flags() {
+        for value in [None, Some("0"), Some("false")] {
+            assert_eq!(loopback_test_return_flag(value), Ok(false));
+        }
+        for value in ["1", "true"] {
+            assert_eq!(loopback_test_return_flag(Some(value)), Ok(true));
+        }
+        for value in ["", "yes", "TRUE", "2", " true "] {
+            assert!(loopback_test_return_flag(Some(value)).is_err());
+        }
+    }
+
     fn signature(secret: &str, stamp: u64, raw: &[u8]) -> String {
         let mut mac = <Hmac<Sha256> as KeyInit>::new_from_slice(secret.as_bytes()).unwrap();
         mac.update(stamp.to_string().as_bytes());

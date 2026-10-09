@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-10 requested local Stripe trial is prepared, not runnable yet:
+> test-only loopback guard/Gateway38/build pass; compatible native and ordinary
+> player helper are ready. Official CLI forwarding avoids the rejected public
+> Quick Tunnel. The current private key entry is empty; operator refill and
+> actual Checkout/callback/1000-Credit/monthly/native acceptance remain open.
+> Public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+> [Prepared files, original block and limits](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 > 2026-10-10 Stripe credentials and pricing are now confirmed: sandbox provider
 > reads and unpaid Checkout/temporary webhook provisioning pass. The obsolete
 > Endive payment-method request field is corrected; Gateway billing36 passes.

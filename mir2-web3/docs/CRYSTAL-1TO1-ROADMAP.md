@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-10 commercial trial preparation: Gateway38 and the isolated binary
+> build pass for an explicit test-only loopback return option. Native is built;
+> official CLI outbound forwarding is prepared, but the private key entry is
+> currently empty. No running trial, paid callback, wallet/monthly item or human
+> UI acceptance is claimed. Public R22/Gatewaya41/feed17 and P1–P7 remain.
+> [Evidence and actual blocker](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 > 2026-10-10 commercial extension follow-up: real sandbox credentials and
 > Checkout/webhook provisioning are verified, with temporary objects cleaned.
 > Endive's removed payment-method parameter is replaced by its supported

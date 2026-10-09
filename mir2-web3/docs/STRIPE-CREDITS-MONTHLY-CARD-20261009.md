@@ -1,5 +1,18 @@
 # Stripe Credits and monthly-card Candidate — 2026-10-09
 
+## 2026-10-10 local trial preparation — waiting for the test key
+
+The local Gateway and compatible native binary are built, with an explicit
+test-only loopback return option and Gateway billing38/38 passing. Automatic
+approval blocked the proposed public Quick Tunnel; the safer official Stripe
+CLI outbound forwarding is prepared without exposing local services. The
+current private server-key entry is empty, despite the earlier successful
+credential verification, and the operator was asked to refill that file.
+No listener, Gateway, native client or test payment has started. The ordinary
+signup/Checkout/1000 Credits/30-day item story and human UI acceptance remain
+open. Public R22/Gatewaya41/feed17 and original P1–P7 are unchanged.
+[Preparation, retained block and exact evidence](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 The authorized change connects one-time Stripe Hosted Checkout payments to
 the existing character **Credits** wallet and sells a **30-day monthly-card
 consumable** for Credits. This is an unpublished Candidate. Public R22,
@@ -69,6 +82,7 @@ writers before enabling. Production provider acceptance is still pending.
 | `MIR2_STRIPE_SECRET_KEY` | Server-only test or live Stripe secret/restricted key |
 | `MIR2_STRIPE_WEBHOOK_SECRET` | Server-only webhook endpoint signing secret |
 | `MIR2_BILLING_PUBLIC_BASE_URL` | HTTPS origin/base for the cosmetic return page |
+| `MIR2_STRIPE_ALLOW_LOOPBACK_TEST_RETURN=1` | Explicit local sandbox opt-in: test key only; permits HTTP return at literal `127.0.0.1` or `[::1]`; defaults off, never permits live HTTP |
 | `MIR2_STRIPE_RECHARGE_OFFERS` | JSON array of frozen server offers |
 | `MIR2_MONTHLY_CARD_CREDIT_PRICE` | Positive Credits price, identical on Gateway and every Source |
 | `MIR2_MONTHLY_CARD_REQUIRED` | Existing independent entry policy; selling cards alone does not enable the gate |
@@ -87,6 +101,15 @@ Checkout or process payment webhooks. **Live keys additionally require
 PostgreSQL SourceOfTruth**; JSON-file storage is for local/test evidence only.
 Provider configuration errors fail billing closed without preventing ordinary
 login/gameplay. The existing monthly entry policy remains independent.
+
+For local test development, official Stripe CLI can forward signed events to
+the Gateway's loopback webhook. Configure the matching CLI signing secret,
+verify event API version Endive, and opt in to a return base such as
+`http://127.0.0.1:7121`. This exception changes only the cosmetic return page;
+Hosted Checkout remains Stripe HTTPS and raw-signature/provider/order checks
+remain required. DNS `localhost`, numeric address aliases, LAN/public HTTP,
+userinfo, query/fragment and invalid flag values are rejected. Never enable
+this local flow with live credentials or mistake fixture events for settlement.
 
 Register the HTTPS endpoint `POST /v1/billing/stripe/webhook` with pinned
 Stripe API version **2026-09-30.endive** for `checkout.session.completed`,

@@ -1,5 +1,20 @@
 # Agent Run Log
 
+## 2026-10-10 — Prepare a local Stripe trial; key refill pending
+
+Built compatible native and Gateway binaries for the user's trial request.
+Automatic approval rejected the proposed Quick Tunnel startup with "blocked by
+policy" and no detailed reason; no tunnel ran or was retried through another
+tool. Prepared official Stripe CLI1.53.1 outbound loopback forwarding instead,
+with an explicit test-only HTTP cosmetic return guard. Read-only security review
+and Gateway38/38 pass; root owns all guard edits. The current private key entry
+is empty (earlier provider verification remains retained), so the listener
+helper refuses startup before any request/process. Key refill was requested.
+No Gateway/client/account/Checkout/wallet/monthly activation ran. Test helpers
+and instructions remain outside Git, with independent files and clean child
+environments. Public R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+[Exact hashes, retained logs and remaining acceptance](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 ## 2026-10-10 — Real Stripe sandbox credential verification
 
 Read the operator's private test-mode server key without printing or copying

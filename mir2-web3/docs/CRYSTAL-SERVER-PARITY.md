@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-10-10 local trial preparation adds a commercial test-only loopback
+> return guard, with Gateway38/build and read-only review passing. The native
+> binary and official CLI outbound listener helper are prepared; neither runs
+> because the current private key entry is empty. No paid/provider/native
+> acceptance or original-parity progress follows from this preparation.
+> Public R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+> [Actual evidence and blocked step](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
 > 2026-10-10 Stripe sandbox key and provisioning acceptance: real provider
 > reads, unpaid Checkout create/expire and temporary webhook create/delete
 > pass. The supported Endive card filter replaces the rejected old parameter;
