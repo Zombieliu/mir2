@@ -1,0 +1,111 @@
+{
+  "schema": "mir2.r23-missing-assets.append.v1",
+  "utc": "2026-10-09T17:57:37.517536+00:00",
+  "apply": true,
+  "assets": [
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/coverage-audit.json",
+      "size": 723520,
+      "sha256": "014c18e1e49666877ebcda9e21935c22b46d8950aa2bd1b35a67824946cae42b",
+      "action": "appended_verified"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/resource-input-provenance.json",
+      "size": 32275,
+      "sha256": "e8ca68605b5c27e925476cae6e055cceb9552157075d6e45b8aa9d4cb76f05a8",
+      "action": "appended_verified"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Prguse/1002.png",
+      "size": 15671,
+      "sha256": "72f73b42bc7b95a91144fe0f135ede2ad343fbfed488c75095f98ed427caf497",
+      "action": "appended_verified"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Title/18.png",
+      "size": 697,
+      "sha256": "3b8a6097b20b32fc1bb8d371efdefffe564af7bf1c75bc098bfd10be097c02ad",
+      "action": "appended_verified"
+    }
+  ],
+  "protectedPinsBefore": [
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "2012c0163c8ec418ed09ed9d3953337db1a246bb1b2d3191abe6b0ba485eb03e"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "size": 1221,
+      "sha256": "d8c2e7d380c4b37e90695c825e89e1c75ecf6738ce04e67780b4439a002957ee"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/BUILD-ATTESTATION.json",
+      "size": 2416,
+      "sha256": "62254955d4376366dfdbe2976c93bcaf4a688cca8e6b283ac1ed61b5ab85ff90"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/README-START.txt",
+      "size": 49328,
+      "sha256": "5bc26223994015306280ee17952cafe2d30d61b1649f8a0ff7f1de3cc40b8bbd"
+    },
+    {
+      "path": "/srv/mir2-client-updates/feed-current/latest.json",
+      "size": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2"
+    },
+    {
+      "path": "/srv/mir2-client-updates/feed-current/latest.p7s",
+      "size": 1614,
+      "sha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4"
+    },
+    {
+      "path": "/etc/caddy/Caddyfile",
+      "size": 4717,
+      "sha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d"
+    }
+  ],
+  "servicesBefore": "MainPID=3173775\nExecMainStartTimestampMonotonic=12436941773167\nId=mir2-playtest.service\nActiveState=active\nSubState=running\n\nMainPID=2107428\nExecMainStartTimestampMonotonic=6238264578119\nId=caddy.service\nActiveState=active\nSubState=running\n",
+  "noFeedPromotion": true,
+  "noServiceRestartCalled": true,
+  "protectedPinsAfter": [
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "2012c0163c8ec418ed09ed9d3953337db1a246bb1b2d3191abe6b0ba485eb03e"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "size": 1221,
+      "sha256": "d8c2e7d380c4b37e90695c825e89e1c75ecf6738ce04e67780b4439a002957ee"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/BUILD-ATTESTATION.json",
+      "size": 2416,
+      "sha256": "62254955d4376366dfdbe2976c93bcaf4a688cca8e6b283ac1ed61b5ab85ff90"
+    },
+    {
+      "path": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/README-START.txt",
+      "size": 49328,
+      "sha256": "5bc26223994015306280ee17952cafe2d30d61b1649f8a0ff7f1de3cc40b8bbd"
+    },
+    {
+      "path": "/srv/mir2-client-updates/feed-current/latest.json",
+      "size": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2"
+    },
+    {
+      "path": "/srv/mir2-client-updates/feed-current/latest.p7s",
+      "size": 1614,
+      "sha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4"
+    },
+    {
+      "path": "/etc/caddy/Caddyfile",
+      "size": 4717,
+      "sha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d"
+    }
+  ],
+  "servicesAfter": "MainPID=3173775\nExecMainStartTimestampMonotonic=12436941773167\nId=mir2-playtest.service\nActiveState=active\nSubState=running\n\nMainPID=2107428\nExecMainStartTimestampMonotonic=6238264578119\nId=caddy.service\nActiveState=active\nSubState=running\n",
+  "serviceProcessesUnchanged": true,
+  "protectedBytesUnchanged": true
+}

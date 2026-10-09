@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/003-r23-login.jpg",
+  "purpose": "Actual R23 installation verified independently; visible ordinary login screen, no user authentication actions performed.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 317075,
+  "sha256": "dd70d2c1c7aa262174cea69bc5f4ef5f63ab0219ce010d9e25272fac14174f61",
+  "recordedUtc": "2026-10-09T18:17:33.975Z"
+}

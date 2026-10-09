@@ -1,0 +1,316 @@
+{
+  "schema": "mir2.native-play-evidence-index.v1",
+  "byteExactCopies": [
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/acceptance-result.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\acceptance-result.json",
+      "size": 19794,
+      "sha256": "ce262e59581bf44c263f228faff906ff42de6b7c51c3fb4d0554be35308dfb73"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/environment-exploration.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\environment-exploration.json",
+      "size": 19036,
+      "sha256": "a920e5f94cd5ed0c372b33cdd73184d70944549efe45b517503888bd042febad"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/ui-acceptance-plan.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\ui-acceptance-plan.json",
+      "size": 53370,
+      "sha256": "1f853a32f3083975fa01d3376a711908a044e8604b206f63648b2afdf38ca031"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution_preflight.py",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution_preflight.py",
+      "size": 3797,
+      "sha256": "ddf724d4713d7b6c4af189d84692646b16341f7f2c9de4e944d3513e0534bd3e"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution_append.py",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution_append.py",
+      "size": 8113,
+      "sha256": "14d961f35b2d6673e7f77b3442230d59bf3dc7a08ff35b2fe722c9edebb9d3d7"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/verify_distribution.py",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\verify_distribution.py",
+      "size": 3172,
+      "sha256": "ed06ac622b1e3e913e2ebb5544302e88253154bdaf248c625b7cdbdcee0dd6e4"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-reviewed-source.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-reviewed-source.json",
+      "size": 247,
+      "sha256": "7b94d6dccbcc62064e8708b09ccf52bf5477c8ff7cfa7a454c10a158bed7821f"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-source-pins.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-source-pins.json",
+      "size": 1765,
+      "sha256": "72b226a02f1d0f73a4b7332b21752dd4d2fccc7442997dcb30d2e6e720265339"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-preflight.stdout.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-preflight.stdout.json",
+      "size": 7008,
+      "sha256": "1ddb0f1953595cca2e2a4b52327f636743b2a874b64a88c2e0bc0967b77afd0d"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/origin-services-readonly.stdout.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\origin-services-readonly.stdout.json",
+      "size": 5555,
+      "sha256": "08552ad00ea231a2bc7047f0b31bd9b6ba218c5b60cd221fb056e0f36a6956d5"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-stage-permissions.stdout.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-stage-permissions.stdout.json",
+      "size": 998,
+      "sha256": "8f7ee168787074ed838de9937f97204f7660ab765c8d9941e2818625673f8188"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-dry-run.stderr.txt",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-dry-run.stderr.txt",
+      "size": 317,
+      "sha256": "62c9918494de4295d87343cb1f1f776f1143ee787382857b51f26635fe18be94"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-dry-run-02.stdout.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-dry-run-02.stdout.json",
+      "size": 4990,
+      "sha256": "a48b29b97b42654c223d88c6270e22b885a6c5aec15d4a7974480bfb9b1ae69d"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-apply.stdout.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-apply.stdout.json",
+      "size": 5001,
+      "sha256": "622dc5e5fccfc9a50f1dda60e578fcfe43602820114d7fb1d1943f217b38c8b5"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/distribution-public-verification.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\distribution-public-verification.json",
+      "size": 5660,
+      "sha256": "8de65bbd07ce4afecd521588182fb4f23da55b78e571a87b2e32d2c5cedb027f"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/installed-r23-verified.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\installed-r23-verified.json",
+      "size": 3092,
+      "sha256": "8806ba0e54d10e9457cfbd8e27901cc39e693de27cf7408a33f4715b7d3f5fb9"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/001-r19-login.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\001-r19-login.jpg",
+      "size": 317178,
+      "sha256": "b7d239a1e493ceb06c65bc488d0e6a7847abaeb8067e184942b3475bb16717c4"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/001-r19-login.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\001-r19-login.json",
+      "size": 532,
+      "sha256": "949518c2f59589324de065366de52ed247fb5b807e12e62966c1a6700efeac4d"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/002-r23-checking.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\002-r23-checking.jpg",
+      "size": 19377,
+      "sha256": "db1b97032017abc528de5ded8ed51bd96df8f720f7adf346c277b07fcccd3fef"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/002-r23-checking.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\002-r23-checking.json",
+      "size": 691,
+      "sha256": "bb09911102c7a5d84e0589a92b27b68e4d58f522c3d8387086663aabbd4a1185"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/003-r23-login.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\003-r23-login.jpg",
+      "size": 317075,
+      "sha256": "dd70d2c1c7aa262174cea69bc5f4ef5f63ab0219ce010d9e25272fac14174f61"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/003-r23-login.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\003-r23-login.json",
+      "size": 636,
+      "sha256": "5ee921f4df7374e4a99c06e7205c446baa5c58d4fc36d77de26d17e572f4975d"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/004-r23-resolution-options.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\004-r23-resolution-options.jpg",
+      "size": 294749,
+      "sha256": "aeccf76d804895d83d1004e4e66b3493971b20b1bd4eb7d52286918a5c322175"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/004-r23-resolution-options.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\004-r23-resolution-options.json",
+      "size": 647,
+      "sha256": "539cba8da78429a842951c5f2b7999d0937a034027b70b880496e83344d67258"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/005-r23-resolution-1280.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\005-r23-resolution-1280.jpg",
+      "size": 475768,
+      "sha256": "7355cdef3a24cb2cef837faded6ec3d64569e0d02686ecb464aa5ae006470d34"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/005-r23-resolution-1280.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\005-r23-resolution-1280.json",
+      "size": 667,
+      "sha256": "43630d71066e4ac4415790be843a5394d5c03907f0ea2cccadd6865d1ca95615"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/006-r23-resolution-restored.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\006-r23-resolution-restored.jpg",
+      "size": 316920,
+      "sha256": "c39f82b255d73eb0a7fe412f9e478b65fc6589b48a671b09c3b8592585804e1c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/006-r23-resolution-restored.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\006-r23-resolution-restored.json",
+      "size": 587,
+      "sha256": "e6a54880324151092938d0e11e894ad7f334836c7a8f5464718c50a64e47db8b"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/007-r23-language-options.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\007-r23-language-options.jpg",
+      "size": 303857,
+      "sha256": "e37db2e8e68615536632af68e49dfe1d11d7529ec9451b4a465a4b576ae1699c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/007-r23-language-options.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\007-r23-language-options.json",
+      "size": 594,
+      "sha256": "8e9140cbd194df7401ed595c64a758c2f25db114c0b12c06814a959fb6fccbb1"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/008-r23-locale-en.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\008-r23-locale-en.jpg",
+      "size": 318658,
+      "sha256": "e03a7825fa95b832998bc11e27faf99f16856e1d474da02d5b5fc2929c4b581b"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/008-r23-locale-en.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\008-r23-locale-en.json",
+      "size": 637,
+      "sha256": "958122ccbbd31c0e155dbc29100ddef9eff4ab19c70b7faf58699e21cc04cf26"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/009-r23-locale-pt-br.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\009-r23-locale-pt-br.jpg",
+      "size": 319282,
+      "sha256": "bd56c3d7e2e6bebfe074ca8458e96442f2f92f65856cb426022b02270086aba0"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/009-r23-locale-pt-br.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\009-r23-locale-pt-br.json",
+      "size": 637,
+      "sha256": "51b1c99621b43bdf330232f8d8752987858006f9bc506e70ed80fe0b9730312b"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/010-r23-locale-ar.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\010-r23-locale-ar.jpg",
+      "size": 317511,
+      "sha256": "d44fb0ef464acb364b987daf6fffb0e73a03a1f68d742355b2c79e36a2e84c7f"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/010-r23-locale-ar.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\010-r23-locale-ar.json",
+      "size": 628,
+      "sha256": "733d23f1975c5ce23bd2896f3b96ee2e22a4642c1114b70555e257933f81ab2b"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/011-r23-locale-hi.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\011-r23-locale-hi.jpg",
+      "size": 317889,
+      "sha256": "55fde48c2dfaba3b6fe2ec4cc497984ec60e5cf045929b6b1a711477651aa833"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/011-r23-locale-hi.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\011-r23-locale-hi.json",
+      "size": 639,
+      "sha256": "a541e79b708f6f68036b639d8730d28a81740138d6a9f24d9a47cbf17f539a2c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/012-r23-locale-ru.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\012-r23-locale-ru.jpg",
+      "size": 318827,
+      "sha256": "754ab7e248fdc6c6a11c15ab1a2f90233d9c6d1bb8ed202f490bfc1ef5595b21"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/012-r23-locale-ru.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\012-r23-locale-ru.json",
+      "size": 644,
+      "sha256": "1011af2c62f955f6e66fd1b0069cbf2f67397062a19374d28f286eaeddb80042"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/013-r23-locale-id.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\013-r23-locale-id.jpg",
+      "size": 318850,
+      "sha256": "51ddb9e86c976e99c2aabbacd49e35b29acea5f7e7ca162ba1484d43bb3dc959"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/013-r23-locale-id.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\013-r23-locale-id.json",
+      "size": 598,
+      "sha256": "de6c021c3babacfb2b776246ca4a543ed81d2e6c839091275e19f884a65d1e0c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/014-r23-locale-vi.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\014-r23-locale-vi.jpg",
+      "size": 319657,
+      "sha256": "c01386c06b43553f65ad6afbe59ce075969d8953318b2947d14a0f9b954d2a21"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/014-r23-locale-vi.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\014-r23-locale-vi.json",
+      "size": 638,
+      "sha256": "b9aec35dfb86cfb290991f784994cb42d0fe379d39c19758961f3206900b3982"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/015-r23-locale-th.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\015-r23-locale-th.jpg",
+      "size": 317536,
+      "sha256": "61f6e1f4c2491873969a7c2a736bf39d73f83c6a0dc4fb4f34527cead34d6fb3"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/015-r23-locale-th.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\015-r23-locale-th.json",
+      "size": 606,
+      "sha256": "cbbb2f7b1c0f280e03708987e53f7ca14147f0b8597c91415ab2343d39115949"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/016-r23-final-waiting-login.jpg",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\016-r23-final-waiting-login.jpg",
+      "size": 316777,
+      "sha256": "fd207612be40ea0384bca33e80dcc7a634ce6415d9aa0d4a4f7afd4ab610bb31"
+    },
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/screenshots/016-r23-final-waiting-login.json",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\screenshots\\016-r23-final-waiting-login.json",
+      "size": 677,
+      "sha256": "7e53b350af43effa0490e2af8998d63fb8d095ac1182d8402166d29e063903e1"
+    }
+  ],
+  "derivedFiles": [
+    {
+      "path": "mir2-web3/docs/generated/native-play-acceptance-20261010/updater-events-projection.json",
+      "kind": "declared-event-projection",
+      "size": 3763,
+      "sha256": "43bd69ee8abbedf8c1bda4b4c717e8e4dcbc003bcf95c49b445c6ec72d1a9d79",
+      "source": "E:\\mir2-player-journey\\work\\native-play-acceptance-20261010\\updater-retry-observed.jsonl",
+      "sourceSize": 9765,
+      "sourceSha256": "b6794f69013410ef2b8a50fafba2f5fd7afce844d65b542d0610f7fe5cd00af5",
+      "rule": {
+        "eventWhitelist": [
+          "local-phase-end",
+          "update-error",
+          "update",
+          "delivery-bundle",
+          "delivery-delta-base-unavailable",
+          "game-exit"
+        ],
+        "minimumTime": 1791564621
+      },
+      "notByteExactCopyOfRawSource": true
+    }
+  ]
+}

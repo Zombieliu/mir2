@@ -1,0 +1,151 @@
+{
+  "derivedProjection": true,
+  "events": [
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 154579,
+        "copyFlushMs": 0,
+        "elapsedMs": 457535,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "checking-installed",
+        "total": 154579,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1791564621
+    },
+    {
+      "detail": {
+        "path": "mir2-platform-windows.exe",
+        "sha256": "3ABC0C7B74AF234D797705AC9CE32A68ABEFAC70BF43095093A353C81145F297",
+        "size": 111107072
+      },
+      "event": "delivery-delta-base-unavailable",
+      "time": 1791564625
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 1,
+        "copyFlushMs": 0,
+        "elapsedMs": 974,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "extracting",
+        "total": 1,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1791564634
+    },
+    {
+      "detail": {
+        "elapsedMs": 8829,
+        "fileCount": 1,
+        "path": "delivery/90d296b063520ecd9999ac3e1749e333938d38120952aa33a49e5e693e21ca94.m2b.gz",
+        "wireBytes": 36362191
+      },
+      "event": "delivery-bundle",
+      "time": 1791564634
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 2,
+        "copyFlushMs": 7,
+        "elapsedMs": 1039,
+        "outcome": "unfinished",
+        "payloadResolveMs": 478,
+        "phase": "staging",
+        "total": 7,
+        "writtenBytes": 51744
+      },
+      "event": "local-phase-end",
+      "time": 1791564635
+    },
+    {
+      "detail": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/coverage-audit.json: status code 404",
+      "event": "update-error",
+      "time": 1791564635
+    },
+    {
+      "detail": {
+        "code": 0
+      },
+      "event": "game-exit",
+      "time": 1791568904
+    },
+    {
+      "detail": {
+        "cacheHits": 0,
+        "completed": 154579,
+        "copyFlushMs": 0,
+        "elapsedMs": 414474,
+        "outcome": "complete",
+        "payloadResolveMs": 0,
+        "phase": "checking-installed",
+        "total": 154579,
+        "writtenBytes": 0
+      },
+      "event": "local-phase-end",
+      "time": 1791569548
+    },
+    {
+      "detail": {
+        "cacheHits": 3,
+        "completed": 7,
+        "copyFlushMs": 103,
+        "elapsedMs": 8524,
+        "outcome": "complete",
+        "payloadResolveMs": 8414,
+        "phase": "staging",
+        "total": 7,
+        "writtenBytes": 112167011
+      },
+      "event": "local-phase-end",
+      "time": 1791569559
+    },
+    {
+      "detail": {
+        "completed": 14,
+        "elapsedMs": 1139,
+        "outcome": "complete",
+        "phase": "preparing",
+        "total": 14
+      },
+      "event": "local-phase-end",
+      "time": 1791569561
+    },
+    {
+      "detail": {
+        "completed": 14,
+        "elapsedMs": 284,
+        "outcome": "complete",
+        "phase": "installing",
+        "total": 14
+      },
+      "event": "local-phase-end",
+      "time": 1791569561
+    },
+    {
+      "detail": {
+        "activated": true,
+        "candidate": "WN-CANDIDATE-20261009-invited-23",
+        "changedGameFiles": 7,
+        "delivery": {
+          "bundles": 0,
+          "fallbacks": 0,
+          "patches": 0
+        },
+        "downloadedBytes": 772163,
+        "downloadedFiles": 4,
+        "sequence": 18,
+        "wireBytes": 42880824
+      },
+      "event": "update",
+      "time": 1791569562
+    }
+  ]
+}

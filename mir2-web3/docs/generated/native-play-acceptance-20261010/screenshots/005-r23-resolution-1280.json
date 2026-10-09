@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/005-r23-resolution-1280.jpg",
+  "purpose": "Display menu selection resized actual client screenshot to 1282x992 including borders; UI remained visible, no gameplay or persistence claim.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1282,
+  "height": 992,
+  "mime": "image/jpeg",
+  "bytes": 475768,
+  "sha256": "7355cdef3a24cb2cef837faded6ec3d64569e0d02686ecb464aa5ae006470d34",
+  "recordedUtc": "2026-10-09T18:21:03.081Z"
+}
