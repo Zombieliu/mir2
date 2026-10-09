@@ -1,5 +1,22 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
+> R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
+> protocol checks and14 acknowledged normal logouts pass, exact service/binary
+> and unchanged original realm confirmed. Two local orchestration/metadata
+> errors after successful switch/checks are retained; apply was not repeated.
+> [Published scope](CLASSIC-PURIFICATION-MAP-PUBLISHED-20261009.md).
+>
+> NPC full personal Source guard and raw refining-clock rollback, plus private
+> ordered pet interpretation, pass94 distinct selected tests. They are local
+> Candidate only, not published world integration. Root is sole common writer;
+> the pet worker has returned ownership. Next P7 work is trusted capture,
+> same-Source-CAS outbox and authoritative durable application/recovery; all
+> seven-world-action, natural/native/human and full P1–P7/Mentor gates stay open.
+> [Current Candidate and limits](CLASSIC-NPC-SOURCE-GUARD-20261009.md).
+> Earlier faef/P7 ownership/publication status below is historical. No100% claim,
+> expired heartbeat restart or blocked Goal completion.
+
 > 2026-10-09 live Purification map/Player powder Candidate: the original
 > opaque action, complete actor proofs, actual buffs/deadlines and Hidden state
 > survive only a true retained live map change. Shared Player magic preflight

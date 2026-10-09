@@ -1,5 +1,15 @@
 # Classic gameplay delivery — 12-hour resumed work
 
+> Current continued-work checkpoint, 2026-10-09: **Gatewayc704 is published**,
+> clientR23/feed18 stays current. Genuine Linux/siege CI and62 original public
+> protocol checks/14 confirmed normal logouts pass. Full native/human and
+> P1–P7/Mentor acceptance remain open. [Actual publication](CLASSIC-PURIFICATION-MAP-PUBLISHED-20261009.md).
+> NPC Source rollback/raw refining clocks and private ordered pet interpretation
+> pass94 selected tests, but shared-world outbox/application/recovery is not
+> integrated or published. [Current P7 foundation](CLASSIC-NPC-SOURCE-GUARD-20261009.md).
+> Older publication states below are historical; the original deadline remains
+> missed and its automatic follow-up remains stopped. No full Goal completion.
+
 Started 2026-10-07 15:13:35 UTC. Delivery checkpoint is 2026-10-08
 03:13:35 UTC / 11:13 Asia/Shanghai. That12-hour checkpoint was missed.
 Its expired automatic follow-up is stopped as instructed; the broader Goal is

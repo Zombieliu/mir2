@@ -1103,7 +1103,9 @@ impl WorldRuntime for InProcessWorldRuntime {
             |WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}
             |WorldCommand::CastSkill{..}|WorldCommand::UseItem{..}|WorldCommand::TransferMap{..}
             |WorldCommand::ApplyHandoffTransform{..}|WorldCommand::Stage5Command{..});
-        let before = if force_periodic { self.session.begin_guild_experience_command(true)? }
+        let before = if matches!(&command, WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}) {
+                self.session.begin_npc_dialog_source_command(force_periodic)?
+            } else if force_periodic { self.session.begin_guild_experience_command(true)? }
             else if default_source { self.session.begin_default_npc_source_command()? }
             else if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
         let mut packets = match command {

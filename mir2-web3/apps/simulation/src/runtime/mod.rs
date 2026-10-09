@@ -42,6 +42,9 @@ mod npc;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_script;
+mod npc_world_plan;
+#[cfg(test)]
+mod npc_source_guard_tests;
 mod onchain;
 mod packets;
 mod pathfind;

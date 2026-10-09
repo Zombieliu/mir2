@@ -189,6 +189,7 @@ impl SimulationSession {
             npc_guild_actions: crate::runtime::npc_shared_guild_actions::capture(self.app.world()),
             pet_progress: crate::runtime::shared_pet_progress::capture(self.app.world()),
             default_transient: crate::runtime::default_npc_events::capture_transient(self.app.world()),
+            refine_source: self.app.world().resource::<crate::runtime::resources::Stage5SystemsResource>().stage5_systems.refine.clone(),
         };
         match config.publish_prepared_kill_source(&source, publish) {
             Ok(PreparedKillPublication::Written(value)) => {

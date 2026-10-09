@@ -3654,13 +3654,21 @@ impl SimulationSession {
     }
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(object_id).is_some()) {
+            Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.interact_impl(object_id);
-        self.finalize_journey_npc_packets(object_id, packets)
+        let packets = self.finalize_journey_npc_packets(object_id, packets);
+        self.finish_guild_experience_command(before, packets).unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(npc.object_id).is_some()) {
+            Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.interact_shared_npc_snapshot_impl(npc);
-        self.finalize_journey_npc_packets(npc.object_id, packets)
+        let packets = self.finalize_journey_npc_packets(npc.object_id, packets);
+        self.finish_guild_experience_command(before, packets).unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn call_shared_npc_snapshot(
@@ -3668,7 +3676,7 @@ impl SimulationSession {
         npc: &WorldEntitySnapshot,
         key: &str,
     ) -> Vec<ServerPacket> {
-        let before=match self.begin_guild_experience_command(mir2_game_data::periodic_quests::npc(npc.object_id).is_some()) {
+        let before=match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(npc.object_id).is_some()) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
@@ -3677,7 +3685,7 @@ impl SimulationSession {
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
-        let before=match self.begin_guild_experience_command(mir2_game_data::periodic_quests::npc(object_id).is_some()) {
+        let before=match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(object_id).is_some()) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.call_npc_impl(object_id, key);
@@ -3690,7 +3698,7 @@ impl SimulationSession {
             .map(|dialog| dialog.npc_object_id);
         let force=object_id.is_some_and(|id|mir2_game_data::periodic_quests::npc(id).is_some())
             || super::quests::periodic_quests::target_is_periodic(target);
-        let before=match self.begin_guild_experience_command(force) {
+        let before=match self.begin_npc_dialog_source_command(force) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.select_npc_dialog_target_impl(target);
@@ -3712,8 +3720,12 @@ impl SimulationSession {
     }
 
     pub fn submit_npc_input(&mut self, value: &str) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.submit_npc_input_impl(value);
-        self.finalize_packets(packets)
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets).unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn confirm_npc_input(
@@ -3722,8 +3734,12 @@ impl SimulationSession {
         page_name: &str,
         value: &str,
     ) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(npc_id).is_some()) {
+            Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.confirm_npc_input_impl(npc_id, page_name, value);
-        self.finalize_packets(packets)
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets).unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub(super) fn interact_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
