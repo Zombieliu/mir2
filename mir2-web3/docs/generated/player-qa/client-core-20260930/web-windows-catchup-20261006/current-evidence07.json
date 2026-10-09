@@ -1,0 +1,840 @@
+{
+  "schemaVersion": 1,
+  "kind": "source21-owned-tooltip-source-candidate-finite-combined-static-build-checkpoint",
+  "generatedAtUtc": "2026-10-06T20:58:03.824Z",
+  "parentCommit": "463d6f1ce42fefdd4244cbd801f92715e29674a1",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "artifacts": {
+    "feature-matrix07.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix07.json",
+      "bytes": 2953626,
+      "sha256": "08d5092c02336e92e577cad535b273758b6e754c9adbf68d1b762dd63ccc52df"
+    },
+    "feature-matrix07.md": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix07.md",
+      "bytes": 34532,
+      "sha256": "d6ab82199ca3a37152c710505a6736aee38c70a97177df0fc6e93e273efd1f55"
+    },
+    "README.md": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "bytes": 25007,
+      "sha256": "073ca8ca88f2268295fe9e75d6a14c40b3005629bb0072c6d2c21c6612d73bde"
+    },
+    "tooltip-source21-finite-result01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/tooltip-source21-finite-result01.json",
+      "bytes": 46941,
+      "sha256": "a8a65221b3510ef9f6586e5301a6327848407caeccf7d29fe947755c902b367d"
+    },
+    "tooltip-source21-action-chain-review01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/tooltip-source21-action-chain-review01.json",
+      "bytes": 15511,
+      "sha256": "41355d82d9e260d1062e3f3c2888a4aeace3d240220a7bc4e1e50b8ffd6d9efa"
+    },
+    "tooltip-source21-combined-build-result01.json": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/tooltip-source21-combined-build-result01.json",
+      "bytes": 91350,
+      "sha256": "27a41cbd5d83a0298cb1adbfb0770c62a8a2ca610148b0c3e256288c147b338e"
+    }
+  },
+  "currentDocs": [
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "bytes": 224844,
+      "sha256": "49e3ccffb8accb6b711ee3a9c6180ca7055e44ca531942417cb287e103b5af2f"
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "bytes": 835881,
+      "sha256": "54c0ee11e0cf5a9cf08cadbd3348c09305a8288612c11056be85b134cf98d86c"
+    },
+    {
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 162171,
+      "sha256": "d6f3a2b3682a530331874317c400aa3704b502f0bf06ba74ab000a78595f51c0"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 953568,
+      "sha256": "fe282de1b057f0f9cd508694c015ed6d4f2eeeb3fe9bd62e26205d404d1d3c1b"
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "bytes": 577405,
+      "sha256": "90c82ea818ddd8800ba523a74fc54e71f18b8505fe2e13ed1b5852f0c072399c"
+    },
+    {
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 35661,
+      "sha256": "9a4db3e2261b471a5a2decb6a29d5afda0c92fcaea921992abfa23b723771d4b"
+    }
+  ],
+  "summary": {
+    "sourceCategories": {
+      "shared": 103,
+      "legacy": 202,
+      "open": 4,
+      "commonLimitation": 8
+    },
+    "stablePlayerRows": 317,
+    "allPlayerRows": "not-run",
+    "completeDenominatorFrozen": false,
+    "overallPercentage": null,
+    "goalStatus": "active",
+    "candidate100": false,
+    "fixtureAssociations": {
+      "priorSource20": {
+        "rowAssociations": 230,
+        "uniqueDeclarations": 118,
+        "qualification": "Historical Matrix06 summary only; actual row field totals are236/112, per-row dedup235."
+      },
+      "source21Added": {
+        "rowAssociations": 18,
+        "uniqueDeclarations": 9
+      },
+      "current": {
+        "rowAssociations": 254,
+        "uniqueDeclarations": 121,
+        "rowDeduplicatedAssociations": 253,
+        "duplicates": [
+          {
+            "row": "F01.safe-key.open",
+            "identity": "apps/web/scripts/test-storage-page-gate.mjs|actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields"
+          }
+        ]
+      },
+      "mapping": [
+        {
+          "declaration": "PUI optional item formatter preserves capability independence exact clock cache and ABI getter custody",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5099,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Shared item clock uses exact canonical i64 ticks and bounded caches while signed catalog indexes remain real",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5126,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Core actual item reader facade proxies only presentation and leaves missing optional capabilities usable",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5141,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Page owned instance request preserves UID zero signed index unit sale value count and independent raw carrier",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5149,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Page actual owned readers bind displayed Bag Belt Equipment objects and commit source before any format read",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5165,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Page actual owned readers reject physical owner source visibility and reentrant changes before and after Core",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5184,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Actual Bag Belt Equipment tooltip events are read only and active timer cleans stale source and successor safely",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5244,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Three actual tooltip mounts carry exact reader props document and original fallback without raw bulk actions",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5289,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        },
+        {
+          "declaration": "Actual movement snapshot item projection keeps sale value changes out of confirmed movement fast path",
+          "path": "apps/web/scripts/test-stage5-adapters.mjs",
+          "line": 5323,
+          "rows": [
+            "F05.bag.tooltip-compat",
+            "F05.belt.tooltip"
+          ],
+          "coveredAspect": "Shared optional formatter and actual owned Bag/Belt/Equipment DOM host source/fixture; equipment covered by Bag compatibility stable row. No player behavior proof."
+        }
+      ],
+      "qualification": "Fresh actual current totals are obtained by flattening each rows.finiteChecks.declarations or compatible declaration array/object, identity path + name|declaration;254 associations/121 unique declarations,253 associations after per-row deduplication. F01.safe-key.open contains one retained duplicate Overlay declaration. Frozen Matrix06 summary230/118 plus Source21 increment18/9 yields historical summary arithmetic248/127 only, not fresh current totals. Matrix06 actual fields flatten236/112 (per-row dedup235). No associations are Node executions, internal Stage5 groups or player acceptance.",
+      "historicalSummaryArithmetic": {
+        "priorSource20Summary": {
+          "rowAssociations": 230,
+          "uniqueDeclarations": 118
+        },
+        "source21Added": {
+          "rowAssociations": 18,
+          "uniqueDeclarations": 9
+        },
+        "arithmeticOnly": {
+          "rowAssociations": 248,
+          "uniqueDeclarations": 127
+        },
+        "qualification": "Frozen Matrix06 summary arithmetic only, not freshly flattened current row totals."
+      },
+      "priorSource20ActualFields": {
+        "rowAssociations": 236,
+        "uniqueDeclarations": 112,
+        "rowDeduplicatedAssociations": 235,
+        "duplicates": [
+          {
+            "row": "F01.safe-key.open",
+            "identity": "apps/web/scripts/test-storage-page-gate.mjs|actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields"
+          }
+        ]
+      }
+    },
+    "node": {
+      "scripts": 11,
+      "passed": 218,
+      "failed": 0,
+      "skipped": 0,
+      "stage5HistoricalInternalGroups": 290,
+      "stage5NewInternalGroups": 9,
+      "stage5InternalGroups": 299,
+      "stage5GroupsAreOneFileTest": true,
+      "notAddedTo218": true
+    },
+    "strictCodeOnlyNonincrementalTsc03Passed": true,
+    "rust": {
+      "selectedCrossConfigurationPasses": 169,
+      "originalIgnored": 3,
+      "onlyFreshAfterFinalPuiHintFix": 21,
+      "unaffectedSource21PriorActualQualified": 148,
+      "core": 101,
+      "default": 44,
+      "native": 3,
+      "finalPui": 21,
+      "distinctAdded": 18,
+      "tooltipAndNameExecuted": 30,
+      "originalNativeNamedTestsPreserved": 12,
+      "qualification": "Core01 101, default01 44+3 original ignored and Native01 3 were actually executed on Source21 rust01. rust01 to rust02 is exactly one PUI-only module change; these three effective configurations are unaffected and qualified to current source. PUI02 21 was freshly executed after final host-hint fix. Do not claim 169 executions occurred after that fix; only21 did."
+    },
+    "corePui": {
+      "currentManifest": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+        "bytes": 1039,
+        "sha256": "5b1a3fc481b83a2a7d1293d6cf48a02c77f5b82c7d92cb0387aeb7c58bd87f5a"
+      },
+      "coreVersion": "cdbc1b7cf151b7755cadbc83e7dc1c57185cdb00139f755dc67d00d9e1cdf1ee",
+      "puiVersion": "230592474f7a2420fa0f80ba15b0bb942a78335b88f6678a87128825bbff1dff",
+      "sourceSha256": "49a8ea7b660a779f564c7d9388681988b79e224f26a1a5a7345d69db671fc566",
+      "coreWasmBytes": 252417,
+      "coreJsBytes": 24393,
+      "puiWasmBytes": 211995,
+      "puiJsBytes": 16829,
+      "currentLeaves": [
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/client-core/cdbc1b7cf151b7755cadbc83e7dc1c57185cdb00139f755dc67d00d9e1cdf1ee/mir2_platform_web.js",
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+          "bundleVersion": "cdbc1b7cf151b7755cadbc83e7dc1c57185cdb00139f755dc67d00d9e1cdf1ee"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/client-core/cdbc1b7cf151b7755cadbc83e7dc1c57185cdb00139f755dc67d00d9e1cdf1ee/mir2_platform_web_bg.wasm",
+          "bytes": 252417,
+          "sha256": "d13573984f6ec6eb406a81ac69831d8f001fc08dbc57f1cd38ff292f4a854835",
+          "bundleVersion": "cdbc1b7cf151b7755cadbc83e7dc1c57185cdb00139f755dc67d00d9e1cdf1ee"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/client-core/230592474f7a2420fa0f80ba15b0bb942a78335b88f6678a87128825bbff1dff/mir2_platform_web.js",
+          "bytes": 16829,
+          "sha256": "6a1ebdde7f30974c7cd8d790a6615b50f0e9c59669fa49917162863de9394836",
+          "bundleVersion": "230592474f7a2420fa0f80ba15b0bb942a78335b88f6678a87128825bbff1dff"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/client-core/230592474f7a2420fa0f80ba15b0bb942a78335b88f6678a87128825bbff1dff/mir2_platform_web_bg.wasm",
+          "bytes": 211995,
+          "sha256": "184f669412162cec7ec47b8fe078a73048f1acd7041a8d930201e33772f00d6d",
+          "bundleVersion": "230592474f7a2420fa0f80ba15b0bb942a78335b88f6678a87128825bbff1dff"
+        }
+      ],
+      "budget": "EachWASM<262144B, JS<=204800B; actualbuild02, no WASMAPI/instance"
+    },
+    "renderer": {
+      "version": "bevy-e9f57ef01a6282c7",
+      "threeActualBuilds": true,
+      "leaves": [
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgpu/mir2_bevy_runtime.js",
+          "bytes": 133785,
+          "sha256": "b34b10b68bf123352fdd4e56766b0c95adaa4fbfed0c8f5a5615a4e0402999cd",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgpu/mir2_bevy_runtime.js"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "bytes": 30876417,
+          "sha256": "84a63d47672d7f4ab0ac5870b2fa019754ffa3579ccaa73a2c1c587828209697",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2/mir2_bevy_runtime.js",
+          "bytes": 116615,
+          "sha256": "2ae71361e50984d23e8d17eeddce43bc42a5e4b43251a446c9d12e2a95dc0387",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2/mir2_bevy_runtime.js"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+          "bytes": 17760041,
+          "sha256": "61b03fd4599490ef9f0eadd6f00a0907c08af6ef5c57c1d78c21cce7938dee1b",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "bytes": 131759,
+          "sha256": "9441749e85f5bd9cd4a146f02d9da85110381d37323a4a6ce4137c9f5eea2a11",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2-shared/mir2_bevy_runtime.js"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "bytes": 31838554,
+          "sha256": "22206157da1164eecd92b5949a4a460702e9177cb4fb5da866504c58dc38abee",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm"
+        },
+        {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/runtime-manifest.json",
+          "bytes": 1711,
+          "sha256": "830d355b5b37c2e6c4dc35f8bd3b10eede97b9edb37c71fb13979b83ddccef90",
+          "relativePath": "apps/web/public/bevy-runtime-releases/bevy-e9f57ef01a6282c7/runtime-manifest.json"
+        }
+      ],
+      "qualification": "Actualexistingbuilder02 and original package budgets passed; immutable generated release excluded by existing.gitignore, not forced into Git."
+    },
+    "native": {
+      "archive": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-native-build01-mir2-platform-windows.exe",
+        "bytes": 104760320,
+        "sha256": "0b54aee401aa2504939dd3dbae80615f597ec83ae19da1321e7170ff43baaf30"
+      },
+      "originalAtBuild": {
+        "path": "C:/mir2-cross-platform-storage-20261002/rust-target/windows/debug/mir2-platform-windows.exe",
+        "bytes": 104760320,
+        "sha256": "0b54aee401aa2504939dd3dbae80615f597ec83ae19da1321e7170ff43baaf30"
+      },
+      "profile": "Original Windows development profile with opt-level1 and dependency opt-level3",
+      "launched": false,
+      "qualification": "Actual Source21 native-build01 consumed rust01 and built current Native/Core tooltip adapters; final rust02 only changed PUI module, outside Native effective dependency features. Archive hash and source qualification carried to rust02, no duplicate Native build claimed."
+    },
+    "next": {
+      "root": "E:/mir2-player-journey/mir2-web3/apps/web/.next-web-windows-catchup-20261007-04",
+      "declaredInputCount": 27404,
+      "outputs": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-next01-output-snapshot.json",
+        "bytes": 7833732,
+        "sha256": "ec5d8889ee399880ad211dcf4ccedf50998a0a7db9dcf4532777013c104e8e8e"
+      },
+      "regularFiles": 19007,
+      "directoriesIncludingRoot": 308,
+      "bytes": 603079321,
+      "sourceLinks": [
+        {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-04\\standalone\\mir2-web3\\apps\\web\\node_modules",
+          "relativePath": "standalone/mir2-web3/apps/web/node_modules",
+          "target": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules",
+          "resolved": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules"
+        }
+      ],
+      "linksTraversed": false,
+      "nftClosure": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-next01-nft-closure.json",
+        "bytes": 13461521,
+        "sha256": "82b9b27bf0437cbd07c8c39036d164e15a33cae6e4dec40676ffae7d2831080f"
+      },
+      "nftTraceCount": 61,
+      "nftUniqueReferences": 37094,
+      "nftRegularFiles": 37092,
+      "nftDirectories": 2,
+      "nftMissing": 0,
+      "nftPrivateReferences": 0,
+      "strictTypeScript": true,
+      "strictTypeScriptSeconds": 21.9,
+      "staticPages": 13,
+      "metadataAllowanceChecks": {
+        "before": [
+          {
+            "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+            "bytes": 4322,
+            "sha256": "f30039b0599020d19db2b20e3e22f41474a2880554bf0fc4ba58e796bd4c9512",
+            "relativePath": "apps/web/tsconfig.json",
+            "contents": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"lib\": [\n      \"dom\",\n      \"dom.iterable\",\n      \"es2022\"\n    ],\n    \"allowJs\": false,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"react-jsx\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ]\n  },\n  \"include\": [\n    \"next-env.d.ts\",\n    \"**/*.ts\",\n    \"**/*.tsx\",\n    \".next/types/**/*.ts\",\n    \".next/dev/types/**/*.ts\",\n    \".next-client-goal/types/**/*.ts\",\n    \".next-client-goal/dev/types/**/*.ts\",\n    \".next-package-selection-49d3/types/**/*.ts\",\n    \".next-package-selection-49d3/dev/types/**/*.ts\",\n    \".next-web-input-routing/types/**/*.ts\",\n    \".next-web-input-routing/dev/types/**/*.ts\",\n    \".next-portable-thin-02/types/**/*.ts\",\n    \".next-portable-thin-02/dev/types/**/*.ts\",\n    \".next-shared-hp-orb/types/**/*.ts\",\n    \".next-shared-hp-orb/dev/types/**/*.ts\",\n    \".next-shared-hp-orb-retry/types/**/*.ts\",\n    \".next-shared-hp-orb-retry/dev/types/**/*.ts\",\n    \".next-shared-mp-orb/types/**/*.ts\",\n    \".next-shared-mp-orb/dev/types/**/*.ts\",\n    \".next-shared-mp-orb-dpr2/types/**/*.ts\",\n    \".next-shared-mp-orb-dpr2/dev/types/**/*.ts\",\n    \".next-shared-experience-bar/types/**/*.ts\",\n    \".next-shared-experience-bar/dev/types/**/*.ts\",\n    \".next-shared-weight-bar/types/**/*.ts\",\n    \".next-shared-weight-bar/dev/types/**/*.ts\",\n    \".next-shared-hud-draw-plan/types/**/*.ts\",\n    \".next-shared-hud-draw-plan/dev/types/**/*.ts\",\n    \".next-mobile-joystick-lifecycle/types/**/*.ts\",\n    \".next-mobile-joystick-lifecycle/dev/types/**/*.ts\",\n    \".next-mobile-chat-ime/types/**/*.ts\",\n    \".next-mobile-chat-ime/dev/types/**/*.ts\",\n    \".next-portable-asset-trace/types/**/*.ts\",\n    \".next-portable-asset-trace/dev/types/**/*.ts\",\n    \".next-web-document-language/types/**/*.ts\",\n    \".next-web-document-language/dev/types/**/*.ts\",\n    \".next-shared-quest-locale/types/**/*.ts\",\n    \".next-shared-quest-locale/dev/types/**/*.ts\",\n    \".next-pwa-selected-locale/types/**/*.ts\",\n    \".next-pwa-selected-locale/dev/types/**/*.ts\",\n    \".next-shared-quest-heading/types/**/*.ts\",\n    \".next-shared-quest-heading/dev/types/**/*.ts\",\n    \".next-shared-hud-stats/types/**/*.ts\",\n    \".next-shared-hud-stats/dev/types/**/*.ts\",\n    \".next-shared-character-equipment/types/**/*.ts\",\n    \".next-shared-character-equipment/dev/types/**/*.ts\",\n    \".next-shared-spells-keys/types/**/*.ts\",\n    \".next-shared-spells-keys/dev/types/**/*.ts\",\n    \".next-shared-mail-inbox/types/**/*.ts\",\n    \".next-shared-mail-inbox/dev/types/**/*.ts\",\n    \".next-shared-mail-combined-01/types/**/*.ts\",\n    \".next-shared-mail-combined-01/dev/types/**/*.ts\",\n    \".next-shared-mail-combined-02/types/**/*.ts\",\n    \".next-shared-mail-combined-02/dev/types/**/*.ts\",\n    \".next-shared-mail-combined-03/types/**/*.ts\",\n    \".next-shared-mail-combined-03/dev/types/**/*.ts\",\n    \".next-shared-storage-combined-01/types/**/*.ts\",\n    \".next-shared-storage-combined-01/dev/types/**/*.ts\",\n    \".next-shared-npc-shop-combined-01/types/**/*.ts\",\n    \".next-shared-npc-shop-combined-01/dev/types/**/*.ts\",\n    \".next-shared-npc-gold-capacity-combined-01/types/**/*.ts\",\n    \".next-shared-npc-gold-capacity-combined-01/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-01/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-01/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-02/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-02/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-03/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-03/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-04/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-04/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-01/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-01/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-02/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-02/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-03/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-03/dev/types/**/*.ts\"\n  ],\n  \"exclude\": [\n    \"node_modules\",\n    \"standalone-*/**/*\"\n  ]\n}\r\n"
+          },
+          {
+            "path": "E:/mir2-player-journey/mir2-web3/apps/web/next-env.d.ts",
+            "bytes": 285,
+            "sha256": "27cecedeade9f4f4f0c9bc47e3ba29075343e80699c68751138bfc9f1a92ac73",
+            "relativePath": "apps/web/next-env.d.ts",
+            "contents": "/// <reference types=\"next\" />\r\n/// <reference types=\"next/image-types/global\" />\r\nimport \"./.next-web-windows-catchup-20261007-03/types/routes.d.ts\";\r\n\r\n// NOTE: This file should not be edited\r\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.\r\n"
+          }
+        ],
+        "after": [
+          {
+            "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+            "bytes": 4444,
+            "sha256": "60746f2d6d3bb73802b202058a8195eb8aa57a70e01009926752c60f42e5fda9",
+            "relativePath": "apps/web/tsconfig.json",
+            "contents": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"lib\": [\n      \"dom\",\n      \"dom.iterable\",\n      \"es2022\"\n    ],\n    \"allowJs\": false,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"react-jsx\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ]\n  },\n  \"include\": [\n    \"next-env.d.ts\",\n    \"**/*.ts\",\n    \"**/*.tsx\",\n    \".next/types/**/*.ts\",\n    \".next/dev/types/**/*.ts\",\n    \".next-client-goal/types/**/*.ts\",\n    \".next-client-goal/dev/types/**/*.ts\",\n    \".next-package-selection-49d3/types/**/*.ts\",\n    \".next-package-selection-49d3/dev/types/**/*.ts\",\n    \".next-web-input-routing/types/**/*.ts\",\n    \".next-web-input-routing/dev/types/**/*.ts\",\n    \".next-portable-thin-02/types/**/*.ts\",\n    \".next-portable-thin-02/dev/types/**/*.ts\",\n    \".next-shared-hp-orb/types/**/*.ts\",\n    \".next-shared-hp-orb/dev/types/**/*.ts\",\n    \".next-shared-hp-orb-retry/types/**/*.ts\",\n    \".next-shared-hp-orb-retry/dev/types/**/*.ts\",\n    \".next-shared-mp-orb/types/**/*.ts\",\n    \".next-shared-mp-orb/dev/types/**/*.ts\",\n    \".next-shared-mp-orb-dpr2/types/**/*.ts\",\n    \".next-shared-mp-orb-dpr2/dev/types/**/*.ts\",\n    \".next-shared-experience-bar/types/**/*.ts\",\n    \".next-shared-experience-bar/dev/types/**/*.ts\",\n    \".next-shared-weight-bar/types/**/*.ts\",\n    \".next-shared-weight-bar/dev/types/**/*.ts\",\n    \".next-shared-hud-draw-plan/types/**/*.ts\",\n    \".next-shared-hud-draw-plan/dev/types/**/*.ts\",\n    \".next-mobile-joystick-lifecycle/types/**/*.ts\",\n    \".next-mobile-joystick-lifecycle/dev/types/**/*.ts\",\n    \".next-mobile-chat-ime/types/**/*.ts\",\n    \".next-mobile-chat-ime/dev/types/**/*.ts\",\n    \".next-portable-asset-trace/types/**/*.ts\",\n    \".next-portable-asset-trace/dev/types/**/*.ts\",\n    \".next-web-document-language/types/**/*.ts\",\n    \".next-web-document-language/dev/types/**/*.ts\",\n    \".next-shared-quest-locale/types/**/*.ts\",\n    \".next-shared-quest-locale/dev/types/**/*.ts\",\n    \".next-pwa-selected-locale/types/**/*.ts\",\n    \".next-pwa-selected-locale/dev/types/**/*.ts\",\n    \".next-shared-quest-heading/types/**/*.ts\",\n    \".next-shared-quest-heading/dev/types/**/*.ts\",\n    \".next-shared-hud-stats/types/**/*.ts\",\n    \".next-shared-hud-stats/dev/types/**/*.ts\",\n    \".next-shared-character-equipment/types/**/*.ts\",\n    \".next-shared-character-equipment/dev/types/**/*.ts\",\n    \".next-shared-spells-keys/types/**/*.ts\",\n    \".next-shared-spells-keys/dev/types/**/*.ts\",\n    \".next-shared-mail-inbox/types/**/*.ts\",\n    \".next-shared-mail-inbox/dev/types/**/*.ts\",\n    \".next-shared-mail-combined-01/types/**/*.ts\",\n    \".next-shared-mail-combined-01/dev/types/**/*.ts\",\n    \".next-shared-mail-combined-02/types/**/*.ts\",\n    \".next-shared-mail-combined-02/dev/types/**/*.ts\",\n    \".next-shared-mail-combined-03/types/**/*.ts\",\n    \".next-shared-mail-combined-03/dev/types/**/*.ts\",\n    \".next-shared-storage-combined-01/types/**/*.ts\",\n    \".next-shared-storage-combined-01/dev/types/**/*.ts\",\n    \".next-shared-npc-shop-combined-01/types/**/*.ts\",\n    \".next-shared-npc-shop-combined-01/dev/types/**/*.ts\",\n    \".next-shared-npc-gold-capacity-combined-01/types/**/*.ts\",\n    \".next-shared-npc-gold-capacity-combined-01/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-01/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-01/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-02/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-02/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-03/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-03/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-04/types/**/*.ts\",\n    \".next-web-windows-catchup-20261006-04/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-01/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-01/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-02/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-02/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-03/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-03/dev/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-04/types/**/*.ts\",\n    \".next-web-windows-catchup-20261007-04/dev/types/**/*.ts\"\n  ],\n  \"exclude\": [\n    \"node_modules\",\n    \"standalone-*/**/*\"\n  ]\n}\r\n"
+          },
+          {
+            "path": "E:/mir2-player-journey/mir2-web3/apps/web/next-env.d.ts",
+            "bytes": 285,
+            "sha256": "03a0d621fd804bf43376b6ab728d21a68a1587c093bfbee3efca792bd0dc0467",
+            "relativePath": "apps/web/next-env.d.ts",
+            "contents": "/// <reference types=\"next\" />\r\n/// <reference types=\"next/image-types/global\" />\r\nimport \"./.next-web-windows-catchup-20261007-04/types/routes.d.ts\";\r\n\r\n// NOTE: This file should not be edited\r\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.\r\n"
+          }
+        ],
+        "compilerOptionsAndExclusionsIdentical": true,
+        "priorIncludesRetained": true,
+        "onlyNewIncludes": [
+          ".next-web-windows-catchup-20261007-04/types/**/*.ts",
+          ".next-web-windows-catchup-20261007-04/dev/types/**/*.ts"
+        ],
+        "onlyEnvRouteImportUpdated": true,
+        "declaredSourceMembersRehashed": 27404,
+        "frozenSourceDriftCount": 0
+      },
+      "actualExit0": true,
+      "process": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 101008,
+        "kind": "Source21 existing production Next webpack shared item tooltip standalone build01",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 142707,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-next01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "qualification": "Source21 existing next01 builder produced output04. Static type/package closure only; junction not traversed."
+    },
+    "thin": {
+      "root": "E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261007-04",
+      "declaredInputCount": 63153,
+      "stats": {
+        "exists": true,
+        "bytes": 372903563,
+        "files": 7301,
+        "directories": 776,
+        "links": 0
+      },
+      "capBytes": 377487360,
+      "headroomBytes": 4583797,
+      "actualExit0": true,
+      "process": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 82236,
+        "kind": "Source21 existing production Thin client shared item tooltip build01",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 25804,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-thin01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "qualification": "Source21 existing thin01 builder produced package04. Elevenruntimecopies match;231JSONpairs only carry historicaltokenresult;44warnings fullmultiset matched, no newparser/lexer."
+    },
+    "currentNamedFixtureRowAssociations": 254,
+    "currentUniqueNamedFixtureDeclarations": 121,
+    "currentRowDeduplicatedAssociations": 253,
+    "fixtureAssociationCountingQualification": "Fresh actual current totals are obtained by flattening each rows.finiteChecks.declarations or compatible declaration array/object, identity path + name|declaration;254 associations/121 unique declarations,253 associations after per-row deduplication. F01.safe-key.open contains one retained duplicate Overlay declaration. Frozen Matrix06 summary230/118 plus Source21 increment18/9 yields historical summary arithmetic248/127 only, not fresh current totals. Matrix06 actual fields flatten236/112 (per-row dedup235). No associations are Node executions, internal Stage5 groups or player acceptance."
+  },
+  "independentReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "accepted": true,
+    "confirmedBlockers": 0,
+    "pureFs": true,
+    "readOnly": true,
+    "executionsByReviewer": 0,
+    "writesByReviewer": 0,
+    "inputsActuallyRehashed": 63153,
+    "nextFilesActuallyRehashed": 19007,
+    "thinFilesActuallyRehashed": 7301,
+    "nftUnionReconstructedFromActualTraces": 37094,
+    "runtimeLeavesActuallyRehashed": 11,
+    "evidenceReferencesActuallyRehashed": 108,
+    "sourceFingerprintsAndVersionsRecomputed": true,
+    "metadataAllowanceAccepted": true,
+    "warningMultisetAnd231ActualJsonPairsAccepted": true,
+    "qualification": "Accepted actual frozen source, finite CPU and existing script results plus current static production closure. No compiled WASM/browser/native runtime or player execution by reviewer."
+  },
+  "preservation": {
+    "changedRows": [
+      "F05.bag.tooltip-compat",
+      "F05.belt.tooltip"
+    ],
+    "allOther315WholeRowsIdentical": true,
+    "all317OrderedIdsPreserved": true,
+    "allOriginalAuditAndNativeUnchanged": true,
+    "historicalRawCountsUnchanged": true,
+    "historyPins": [
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix06.json",
+        "bytes": 2830285,
+        "sha256": "e01eea6d54125f02a663c1ef67021d7f065d613c81e98c1de9e1ea2de3c7443f"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix06.md",
+        "bytes": 33376,
+        "sha256": "8ebec58ed082e96b681200d211757edc7169d5ad94bfec151efa25c194d8eb07"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/current-evidence06.json",
+        "bytes": 15578,
+        "sha256": "09d565388bfdf5aac484ddef388e9a15bf3bcfb0371df141b88c2d8bd0bcda77"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-finite-result01.json",
+        "bytes": 20389,
+        "sha256": "b576c1d9da49afe10bfb07907663e4262f5a40805427aca6e6d2c9b5725aee91"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-action-chain-review01.json",
+        "bytes": 9671,
+        "sha256": "f85d542b45b91a8d0dcbf00a8e6e4c80fc999bd9f4a7f9ebd8db19998d0cfcb5"
+      },
+      {
+        "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-combined-build-result01.json",
+        "bytes": 47048,
+        "sha256": "c20c93dbe39dd9e0f47bbef08c7e19dac8bc1d2d6d452a913eefdbdabf541d19"
+      }
+    ],
+    "oldArtifactsWritten": false,
+    "fixtureIntegrity": {
+      "stage5": {
+        "finalPin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+          "bytes": 411838,
+          "sha256": "e75bb2e8bb3b87fbfd1283e72aaaab121cf3aa0bf02847253f54f22b75cd9ccc"
+        },
+        "oldNamedGroups": 290,
+        "addedGroups": [
+          {
+            "line": 5099,
+            "name": "PUI optional item formatter preserves capability independence exact clock cache and ABI getter custody"
+          },
+          {
+            "line": 5126,
+            "name": "Shared item clock uses exact canonical i64 ticks and bounded caches while signed catalog indexes remain real"
+          },
+          {
+            "line": 5141,
+            "name": "Core actual item reader facade proxies only presentation and leaves missing optional capabilities usable"
+          },
+          {
+            "line": 5149,
+            "name": "Page owned instance request preserves UID zero signed index unit sale value count and independent raw carrier"
+          },
+          {
+            "line": 5165,
+            "name": "Page actual owned readers bind displayed Bag Belt Equipment objects and commit source before any format read"
+          },
+          {
+            "line": 5184,
+            "name": "Page actual owned readers reject physical owner source visibility and reentrant changes before and after Core"
+          },
+          {
+            "line": 5244,
+            "name": "Actual Bag Belt Equipment tooltip events are read only and active timer cleans stale source and successor safely"
+          },
+          {
+            "line": 5289,
+            "name": "Three actual tooltip mounts carry exact reader props document and original fallback without raw bulk actions"
+          },
+          {
+            "line": 5323,
+            "name": "Actual movement snapshot item projection keeps sale value changes out of confirmed movement fast path"
+          }
+        ],
+        "totalInternalGroups": 299,
+        "priorPin": {
+          "bytes": 376366,
+          "sha256": "09f5e1815059200861a3ca05592bec7ad5e0f32a27fdd6eab43f240bcfd62235"
+        },
+        "exactInverseAccepted": true,
+        "qualification": "Original290 declarations retained in order, with one clock group name and its assertions strengthened to exact formatter clock, and obsolete negative-index rejection replaced with below-i32 rejection plus valid negative-index coverage. Nine new groups include real declarations/actual component AST and explicit memory mocks. New selector fix narrows actual sole component/button class token while preserving card count1 and six event checks. No claim every old assertion byte stayed identical."
+      },
+      "combat": {
+        "finalPin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-combat-input.mjs",
+          "bytes": 65656,
+          "sha256": "6dbde12357d12efa2fb663c74d0fd8ba32bb25ec404087c28acfe30b47ed24af"
+        },
+        "changedInSource21": false,
+        "originalTests": 23,
+        "allOriginalTestsAndAssertionsRetained": true
+      },
+      "rust": {
+        "originalNativeNamedTests": 12,
+        "preservedInCore": 11,
+        "preservedInNative": 1,
+        "newDistinct": 18,
+        "noNewDependencies": true
+      }
+    },
+    "failureAndPreparedHistory": {
+      "node01Failed": {
+        "outer": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-node01.outer.json",
+          "bytes": 511,
+          "sha256": "916310bc15968bce4dafc9539c19f2b00fe537c8d4099b10754d257d3b6cf4bd"
+        },
+        "stdout": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-node01.stdout.log",
+          "bytes": 23979,
+          "sha256": "85001fc9fd8f4eb594cb7215796273185c9d8b5cddca0300b9328e354ce3dfac"
+        },
+        "stderr": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-node01.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "tests": 218,
+        "passed": 217,
+        "failed": 1
+      },
+      "tsc01Passed": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-tsc01.outer.json",
+        "bytes": 509,
+        "sha256": "e1e02f9ad2361565422cfc3487c3ae8e75923689d6187914b7dc2b0cb8d6c561"
+      },
+      "pui01PassedHistorical20": {
+        "tag": "pui01",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/game-client/platform-web/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--features",
+          "presentation-ui",
+          "--lib",
+          "--",
+          "--test-threads=1"
+        ],
+        "config": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01.config.json",
+          "bytes": 3859,
+          "sha256": "a30e176bcf872d36435355082f720f51a4eaa15ede51357c8ffe06d636524d2b"
+        },
+        "policy": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01.policy.json",
+          "bytes": 2305,
+          "sha256": "ca07d68ddfc780df18f1d6d4cdbf7f1378a60ac46c0f3d563578161bc6324024"
+        },
+        "outer": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01.outer.json",
+          "bytes": 438,
+          "sha256": "79b2c0e076b1fa57d021fe2c3af3e5638f1de9a40cb1172fef79e64805caf567"
+        },
+        "stdout": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01.stdout.log",
+          "bytes": 1999,
+          "sha256": "14344441db3253fa15a5467f38535615f8db4d91db0a99245747b22215b240aa"
+        },
+        "stderr": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01.stderr.log",
+          "bytes": 322,
+          "sha256": "1c1d77ed8d0a1bb96379805e2d025efd6608bbba53e66e74c5f415bf4b1e844d"
+        },
+        "process": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 104116,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 3413,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01.config.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0,
+        "receipts": [
+          {
+            "run": "56126774b75a402592315a528862aac3",
+            "pins": [
+              {
+                "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01-cargo-receipts/56126774b75a402592315a528862aac3/after.json",
+                "bytes": 327,
+                "sha256": "be3d4fa328665565394113c0517573937e7bd6a35703bfa48ebbb00b92964e25"
+              },
+              {
+                "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01-cargo-receipts/56126774b75a402592315a528862aac3/before.json",
+                "bytes": 1015,
+                "sha256": "6936951de8792384affd901a7936fc3355082e56b274e4ba68c648b6a0ee3ecd"
+              },
+              {
+                "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01-cargo-receipts/56126774b75a402592315a528862aac3/probe-process.json",
+                "bytes": 431,
+                "sha256": "98bf8f48d1e03c91e98d21484508576a26fce9a959e040a0684a47971fee60bc"
+              },
+              {
+                "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01-cargo-receipts/56126774b75a402592315a528862aac3/probe.stderr.bin",
+                "bytes": 0,
+                "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              },
+              {
+                "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-pui01-cargo-receipts/56126774b75a402592315a528862aac3/probe.stdout.bin",
+                "bytes": 197,
+                "sha256": "87f33c2fd0f508fa13521cf9934a901e84af87c04bca0d3bfa38c0d53bee606d"
+              }
+            ],
+            "remainingBytes": "497741824000",
+            "thresholdBytes": "53687091200",
+            "ageMs": 20.78309999999999,
+            "childPid": 99636,
+            "exitCode": 0,
+            "exited": true,
+            "disposed": true,
+            "postChildPolicy": "B"
+          }
+        ]
+      },
+      "renderer01PreparedNeverExecuted": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-renderer-build01.config.json",
+        "bytes": 5276,
+        "sha256": "85d2fb2fd0c70556225683f9ba00035c1f94f70065c7456c8e99a96c71cd2f39"
+      },
+      "node02AndTsc02PassedPreRenderer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-finite-pre-renderer02.json",
+        "bytes": 17844,
+        "sha256": "ae1ab6089688c16fb7ef47999113f0b8e82ad82ebafd5e256d856f6431647d38"
+      },
+      "priorSource20": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-finite-result01.json",
+        "bytes": 20389,
+        "sha256": "b576c1d9da49afe10bfb07907663e4262f5a40805427aca6e6d2c9b5725aee91"
+      },
+      "coreBuild01HistoricalWrongHostHintNotSelected": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-core-build01.outer.json",
+        "bytes": 505,
+        "sha256": "46a08e3258a47122b1384c66ce93d4e79b13028293ec7b1339abcda276d6816f"
+      },
+      "fixedThreeSourceIssues": [
+        "Shared JS name limit 256 to 512 UTF16 preliminary characters while PUI remains authoritative at 512 UTF8 bytes",
+        "Movement-only itemIdentity now includes sellValue with the actual projection zero default",
+        "PUI host MoreActions hint now matches the actual DOM split action; new CPU golden21 passed"
+      ],
+      "newSelectorCorrection": "New actual-component button class token AST selector fixes Node01 broad selector failure without weakening unique-card or six event assertions"
+    },
+    "sourceReviewPendingTextPreservedAsCreationState": true,
+    "fixtureFieldCountingCorrection": {
+      "priorActualFields": {
+        "rowAssociations": 236,
+        "uniqueDeclarations": 112,
+        "rowDeduplicatedAssociations": 235,
+        "duplicates": [
+          {
+            "row": "F01.safe-key.open",
+            "identity": "apps/web/scripts/test-storage-page-gate.mjs|actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields"
+          }
+        ]
+      },
+      "currentActualFields": {
+        "rowAssociations": 254,
+        "uniqueDeclarations": 121,
+        "rowDeduplicatedAssociations": 253,
+        "duplicates": [
+          {
+            "row": "F01.safe-key.open",
+            "identity": "apps/web/scripts/test-storage-page-gate.mjs|actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields"
+          }
+        ]
+      },
+      "historicalSummaryArithmetic": {
+        "priorSource20Summary": {
+          "rowAssociations": 230,
+          "uniqueDeclarations": 118
+        },
+        "source21Added": {
+          "rowAssociations": 18,
+          "uniqueDeclarations": 9
+        },
+        "arithmeticOnly": {
+          "rowAssociations": 248,
+          "uniqueDeclarations": 127
+        },
+        "qualification": "Frozen Matrix06 summary arithmetic only, not freshly flattened current row totals."
+      },
+      "originalRowsUnchanged": true,
+      "oldMatrix06NotWritten": true
+    }
+  },
+  "remainingSourceGapIds": [
+    "F02.world.fishing-click",
+    "F05.belt.move-from-bag",
+    "F09.NPC.PEARL",
+    "F11.RANKING.INSPECT"
+  ],
+  "nextPriority": "Source22 actual Bag-to-Belt; then fishing-click/Pearl/RankingInspect; W6 player/UI/mobile acceptance still pending",
+  "sourcePublication": {
+    "source20PublishedHead": "463d6f1ce42fefdd4244cbd801f92715e29674a1",
+    "source20PushAndRemoteVerified": true,
+    "currentSource21CommitAndPush": "pending at evidence creation; exact actual head will be reported after scoped commit and remote verification",
+    "artifacts": "Current Core/PUI immutable leaves are source-controlled selected resources. Renderer immutable release is generated and excluded by existing repository .gitignore; actual current archive/source and Thin copies are hash recorded. Next/Thin/Native output artifacts remain local generated candidates."
+  },
+  "limits": "No overall completion percentage or complete acceptance denominator. Source candidate closure does not prove actual visible tooltip timing, gameplay, save/relogin or mobile/foreground frontend acceptance. SourceReview pending text is historical creation state superseded by actual results here. All317 player rows remain not-run; Candidate100=false and goal remains active. No new executable QA/runner/receipt factory, no product imports/eval in pure Node REPL, no WASM API or network/service probes.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false,
+  "writerProductOrTestExecutions": 0
+}

@@ -102,6 +102,18 @@ const phase = (library, base, count, interval, kind, extra = {}) => ({
 
 const withPhases = (effect, phases) => ({ ...effect, ...phases });
 
+// PlayerObject's six point-exploding talismans are launched after the Spell
+// actor action, with 16 directions (three frames plus seven skipped frames).
+const groundTalisman = (name, impact) => withPhases({
+  ...spell(name, "Magic", 1160, 3, 30, "projectile"),
+  ...direction16(1160, 3, 10),
+}, {
+  projectile: phase("Magic", 1160, 3, 30, "projectile", {
+    ...direction16(1160, 3, 10),
+  }),
+  ...(impact ? { impact } : {}),
+});
+
 const attackOverlay = (name, library, base, count, interval, directionStride, rate) => ({
   spell: name,
   spellId: SPELL_IDS[name],
@@ -264,15 +276,9 @@ export const SPELL_EFFECTS = [
     }),
     impact: phase("Magic", 1360, 10, 60, "target"),
   }),
-  withPhases(spell("MassHiding", "Magic", 1160, 3, 30, "projectile"), {
-    impact: phase("Magic", 1540, 10, 80, "target"),
-  }),
-  withPhases(spell("SoulShield", "Magic", 1160, 3, 30, "projectile"), {
-    impact: phase("Magic", 1320, 15, 80, "target"),
-  }),
-  withPhases(spell("BlessedArmour", "Magic", 1160, 3, 30, "projectile"), {
-    impact: phase("Magic", 1340, 15, 80, "target"),
-  }),
+  groundTalisman("MassHiding", phase("Magic", 1540, 10, 80, "ground")),
+  groundTalisman("SoulShield", phase("Magic", 1320, 15, 80, "ground")),
+  groundTalisman("BlessedArmour", phase("Magic", 1340, 15, 80, "ground")),
   withPhases({
     ...spell("Hallucination", "Magic", 1160, 3, 48, "projectile"),
     ...direction16(1160, 3, 10),
@@ -282,13 +288,9 @@ export const SPELL_EFFECTS = [
     }),
     impact: phase("Magic2", 1110, 10, 100, "target"),
   }),
-  withPhases(spell("Curse", "Magic", 1160, 3, 30, "projectile"), {
-    impact: phase("Magic2", 950, 24, 83, "target"),
-  }),
-  withPhases(spell("Plague", "Magic", 1160, 3, 30, "projectile"), {
-    impact: phase("Magic3", 110, 10, 120, "target"),
-  }),
-  spell("PoisonCloud", "Magic", 1160, 3, 30, "projectile"),
+  groundTalisman("Curse", phase("Magic2", 950, 24, 83, "ground")),
+  groundTalisman("Plague", phase("Magic3", 110, 10, 120, "ground")),
+  groundTalisman("PoisonCloud"),
 ];
 
 const worldSpell = (name, library, base, count, interval, extra = {}) => ({
@@ -362,6 +364,22 @@ const clientEffect = (effect, library, base, count, interval, source, extra = {}
 // Client-owned effects that are not SpellEffect enum packets. Crystal creates
 // these exact actor-bound effects from packet-driven client object actions.
 export const CLIENT_EFFECTS = [
+  ...[
+    ["Slaying", "Magic", 1820, 10, true],
+    ["Thrusting", "Magic", 2190, 10, true],
+    ["HalfMoon", "Magic", 2560, 10, true],
+    ["TwinDrakeBlade", "Magic2", 220, 20, false],
+    ["CrossHalfMoon", "Magic2", 40, 10, false],
+  ].map(([name, library, base, stride, levelled]) => clientEffect(
+    `Warrior${name}Attack`, library, base, 6, 100, PLAYER_ATTACK_OVERLAY_SOURCE, {
+      kind: "attackOverlay", rate: 0.7, light: 0,
+      directionCount: 8, directionStride: stride,
+      directionRanges: Array.from({ length: 8 }, (_, direction) => ({ direction, base: base + direction * stride, end: base + direction * stride + 5 })),
+      ...(levelled ? { valueCount: 4, valueStride: 90,
+        valueRanges: Array.from({ length: 4 }, (_, value) => ({ value, base: base + value * 90, end: base + value * 90 + 5 })) } : {}),
+    },
+  )),
+  clientEffect("ImmortalSkinSecondary", "Magic3", 570, 5, 120, PLAYER_SPELL_SOURCE),
   clientEffect("LeftGuardRangeProjectile", "Magic", 10, 6, 30, LEFT_GUARD_RANGE_PROJECTILE_SOURCE, {
     kind: "projectile",
     ...direction16(10, 6, 10),

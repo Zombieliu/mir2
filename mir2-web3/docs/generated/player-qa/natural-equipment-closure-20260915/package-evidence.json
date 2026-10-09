@@ -1,0 +1,417 @@
+{
+  "kind": "mir2-natural-equipment-closure-evidence",
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-15T05:56:29.356Z",
+  "assetRoot": "C:/mir2-natural-journey-20260911/hookingcat-resource-package-r2/mir2-assets",
+  "sourceCatalogue": "docs/generated/assets/crystal-source-snapshot.generated.json",
+  "requiredProfiles": [
+    {
+      "class": "Warrior",
+      "level": 30,
+      "saveRevision": 7430,
+      "armourItem": 1221,
+      "weaponItem": 1216
+    },
+    {
+      "class": "Wizard",
+      "level": 25,
+      "saveRevision": 7085,
+      "armourItem": 1223,
+      "weaponItem": 1217
+    },
+    {
+      "class": "Taoist",
+      "level": 23,
+      "saveRevision": 8202,
+      "armourItem": 1190,
+      "weaponItem": 268
+    }
+  ],
+  "exported": [
+    {
+      "library": "CArmour/02",
+      "sourcePath": "E:/mir2/Crystal/Build/Client/Debug/Data/CArmour/02.Lib",
+      "sourceSha256": "b274a07d0bf8cf0019171b64982e93c25322f6574576aed225b0ccf09f3d89aa",
+      "sourceBytes": 4366813,
+      "frameCount": 1616,
+      "pngCount": 1616,
+      "metadataSha256": "459d90e3981f4d71be3178bb80b139287eda2b06ccc98998599632fb4b730443",
+      "samples": [
+        {
+          "index": 0,
+          "width": 64,
+          "height": 76,
+          "x": 8,
+          "y": -48,
+          "pngSha256": "71495f8cab104cc4c0bd913b767032230c48204ffc5e0cd726f3383a3b81fad7",
+          "rgbaSha256": "b6deffa8acccd281c5a6cdba19d0ac7b4e82584844a4421c6863788870a5875a"
+        },
+        {
+          "index": 64,
+          "width": 60,
+          "height": 76,
+          "x": 10,
+          "y": -47,
+          "pngSha256": "6e301ae98d6599d80f0d57232e97205de54acb0d6ac5f16a0e24aa42b9fccfcc",
+          "rgbaSha256": "2a7f5bccb825be42a8529e5b6a3bea784bf47cd4276b1d4452e6c44d63785d50"
+        },
+        {
+          "index": 104,
+          "width": 68,
+          "height": 80,
+          "x": 5,
+          "y": -44,
+          "pngSha256": "89bb07d4e15fec1f8f3c6f164f3d2ad60960ae36cf678fb3d6953010ef0d688a",
+          "rgbaSha256": "935232b2dc2d8dd40acdb617d8caed9d7da96e2cfa4d5ee20cbce4c94464189f"
+        },
+        {
+          "index": 384,
+          "width": 88,
+          "height": 72,
+          "x": -2,
+          "y": -50,
+          "pngSha256": "0b78b049e6354f5f44eefa10e3f0652659e0bd1106fff2b5c9fa3357f2ae7676",
+          "rgbaSha256": "24bc944e85ba15b363e40ed0198a7649f58cbaf7a89f8422eea0492777f90eb8"
+        },
+        {
+          "index": 387,
+          "width": 56,
+          "height": 76,
+          "x": 5,
+          "y": -17,
+          "pngSha256": "a0c1bc827a4e33afa03ea689422de9294a29ba3a60545c299b5220e8528dd253",
+          "rgbaSha256": "60c13ff2c80f60375dfda121f3d1d5d8f3ef2a6d5530fd7fe0337ecfdb0859bf"
+        }
+      ]
+    },
+    {
+      "library": "CArmour/03",
+      "sourcePath": "E:/mir2/Crystal/Build/Client/Debug/Data/CArmour/03.Lib",
+      "sourceSha256": "df3dd27f8f33f12bb4a13a26f8b72c2b2175b449b1ef85f0eb4fed1dea3e8fbe",
+      "sourceBytes": 3540581,
+      "frameCount": 1616,
+      "pngCount": 1616,
+      "metadataSha256": "0085ebed2a8de0e0c2db6969272fa33a229386b55dcc9e5c8f1a4e98a605d0c9",
+      "samples": [
+        {
+          "index": 0,
+          "width": 72,
+          "height": 76,
+          "x": 2,
+          "y": -48,
+          "pngSha256": "037dde7a6e98ccd16cde407cb9e1aaae428c3c1b2dd18a541b5712aebd1afad2",
+          "rgbaSha256": "3882ca260a44e60714653ebb60413391b1c00b50cab3244d4ac556ac050a4bab"
+        },
+        {
+          "index": 64,
+          "width": 64,
+          "height": 76,
+          "x": 9,
+          "y": -47,
+          "pngSha256": "01e4e2cdf459a037197355dab257569675d5461ec9707c1aa0ef1f30e244d845",
+          "rgbaSha256": "c489500cccaf3c15ecb0130be308aac4c1b5b2bb1e630d91e2d13b18ea55d43c"
+        },
+        {
+          "index": 104,
+          "width": 84,
+          "height": 88,
+          "x": 4,
+          "y": -53,
+          "pngSha256": "7e6acb7ce33f80395251ea89d948a299b8022dcdfff462b122619482a5484fc2",
+          "rgbaSha256": "bfabb8ece728d66ab56a657a37c02561837356e2caf79636fd1130a715687d45"
+        },
+        {
+          "index": 384,
+          "width": 84,
+          "height": 80,
+          "x": -2,
+          "y": -50,
+          "pngSha256": "e4b61bb97922b6ff55e8bd48591946329253035fbd68dcb67f21d5a8acbb84de",
+          "rgbaSha256": "46d4851e7f84fd6f5bbb5a7248e7fdee43e2a4680aa3773cabd40c6cc9dbd7da"
+        },
+        {
+          "index": 387,
+          "width": 56,
+          "height": 76,
+          "x": 4,
+          "y": -17,
+          "pngSha256": "06ed919cf549f18d0299837a4a0baee99af76728092182245112fac23161e9cd",
+          "rgbaSha256": "9c7504fc67a5dee6732de4233691e20e4d6b55b3ab6e1926b420763e4e8c7bbd"
+        }
+      ]
+    },
+    {
+      "library": "CArmour/04",
+      "sourcePath": "E:/mir2/Crystal/Build/Client/Debug/Data/CArmour/04.Lib",
+      "sourceSha256": "98797e3a3f4722a57fe0836f9ba165b2de4c98e157e2d88db1bfaceba0b06594",
+      "sourceBytes": 3660285,
+      "frameCount": 1616,
+      "pngCount": 1616,
+      "metadataSha256": "198414ebff006f2e2ed652d038507b35659efb047497d8c0c7876d8a713cc1f9",
+      "samples": [
+        {
+          "index": 0,
+          "width": 64,
+          "height": 72,
+          "x": 7,
+          "y": -48,
+          "pngSha256": "e3fd35432bed8186c3619eb13289859295e0b1c2303adfa325b466dd8b693222",
+          "rgbaSha256": "8d7b312356dd3a2e133a252ea58923ae3b85cf5a43fef260066115d285387a7c"
+        },
+        {
+          "index": 64,
+          "width": 60,
+          "height": 72,
+          "x": 10,
+          "y": -47,
+          "pngSha256": "97732aa808f8ada8a607a65b27d7ae47141a7f61980a2b3f50161587d1fcaa5c",
+          "rgbaSha256": "21dc84eeb96e677d549abe0810ac55981b83338094c87d81b4d6f1d1aab89f14"
+        },
+        {
+          "index": 104,
+          "width": 68,
+          "height": 76,
+          "x": 5,
+          "y": -44,
+          "pngSha256": "5067c1f82d0f0881a4bcb26f245935312a422b6c71bf31205fdd4ee2dbbf0599",
+          "rgbaSha256": "cf4111316605a4a3bbfbeca30de0e3019d0f39f148caee584d56990dfb32e5a6"
+        },
+        {
+          "index": 384,
+          "width": 100,
+          "height": 72,
+          "x": -15,
+          "y": -49,
+          "pngSha256": "d3a84153ac817fb8fc843fe67c5f485f2c02a94366f61182e9e6a168d81db88f",
+          "rgbaSha256": "924aa361da7c4da425f6925cc51c50b1078520510a13110dec882945c3c5ad9c"
+        },
+        {
+          "index": 387,
+          "width": 84,
+          "height": 76,
+          "x": -8,
+          "y": -17,
+          "pngSha256": "02cd46ede6fdc9f02e0aa792f7d1156c03bd64212e92798bd37936d9368ab515",
+          "rgbaSha256": "c0bc2ac13a37dada23f2a6a736de16d902ac027268411b11112c21603927180a"
+        }
+      ]
+    },
+    {
+      "library": "CWeapon/07",
+      "sourcePath": "E:/mir2/Crystal/Build/Client/Debug/Data/CWeapon/07.Lib",
+      "sourceSha256": "5299d552707c24c6e12df28f94f8e5e8a295bc4e57d7d8dffda3449fc37cae78",
+      "sourceBytes": 355802,
+      "frameCount": 832,
+      "pngCount": 832,
+      "metadataSha256": "3c5588e1640e3051a093d1857cd52e23d2d54161ba3166507a20c2adf924947e",
+      "samples": [
+        {
+          "index": 0,
+          "width": 8,
+          "height": 28,
+          "x": 36,
+          "y": -37,
+          "pngSha256": "e0bd4b208f411273bb9a1f7086703eb224a27471ce9878cade9f11f4c1a9803b",
+          "rgbaSha256": "686dd57e0e2daf8a76895ba8d6527d937d40f9fa73d4d79635b155df87a86048"
+        },
+        {
+          "index": 64,
+          "width": 40,
+          "height": 24,
+          "x": -21,
+          "y": -28,
+          "pngSha256": "413a1108e45b025bfe620c48257edd83dd93adb9ad6567fe91edcf04d9dadf2c",
+          "rgbaSha256": "34f0f3b28a2bce30949b908b253c93e95e6456941341e87bf0e326093d712bd5"
+        },
+        {
+          "index": 104,
+          "width": 16,
+          "height": 36,
+          "x": -4,
+          "y": -30,
+          "pngSha256": "fcec7d60edfff77f74f867a021c84f1fa5f7140b3558d74ee588ce8d6776ebad",
+          "rgbaSha256": "c957f3b21928e66b60296ecdcd12df3919f59e5c8e61a81a86e7c3217ffe6176"
+        },
+        {
+          "index": 384,
+          "width": 48,
+          "height": 36,
+          "x": 13,
+          "y": -62,
+          "pngSha256": "2b2e32f0cfaae9180741dd44e3e3520b9f6948c3950a3851483584003cef5f0c",
+          "rgbaSha256": "b88b2794a7ff23572ff1348fa12bfc3692ea76ce45c7a86db777c6ea33c3043e"
+        },
+        {
+          "index": 387,
+          "width": 52,
+          "height": 32,
+          "x": 14,
+          "y": 40,
+          "pngSha256": "a1b1746064039f718d5889346bee773e2f56d0e3f7b2a5d84f56afceb459f3e0",
+          "rgbaSha256": "7bbe743df31aa6ab7894b49ef955c7296a95e8147124a340dc0dd17e82a048da"
+        }
+      ]
+    },
+    {
+      "library": "CWeapon/09",
+      "sourcePath": "E:/mir2/Crystal/Build/Client/Debug/Data/CWeapon/09.Lib",
+      "sourceSha256": "53578d4295468075c7d5b7bc1c096b7efa4f162a1db77edc4d99b45b7dd83161",
+      "sourceBytes": 283116,
+      "frameCount": 832,
+      "pngCount": 832,
+      "metadataSha256": "747bb1b509d471aef23300dbb1c739ff4f3da3d9a7612a4b3bcc76bbbd10c095",
+      "samples": [
+        {
+          "index": 0,
+          "width": 8,
+          "height": 16,
+          "x": 36,
+          "y": -27,
+          "pngSha256": "1c87c0e95518b425a42333167f380f487ac853fda08d9de3ba2acaef9669a398",
+          "rgbaSha256": "b79096b6f7eeb3a7dcdd2d1de6ad492589b25116d4af651a972f1556311a19b3"
+        },
+        {
+          "index": 64,
+          "width": 44,
+          "height": 28,
+          "x": -24,
+          "y": -26,
+          "pngSha256": "11b8974e4c990899184e60e78a63c9544c8fcb38624982a9f511c8e4f22fcad4",
+          "rgbaSha256": "fbdabf70742e312ce17054ae84156e5bb3837131d95dca11726e3adb5c0f71d2"
+        },
+        {
+          "index": 104,
+          "width": 20,
+          "height": 40,
+          "x": -8,
+          "y": -28,
+          "pngSha256": "e942083ef74b5b7be423dedc165dbe9da5f069b30ce6044e795ef719f09894e8",
+          "rgbaSha256": "77b47548b07375e3f91e89869363201248068188e19c6ee5f1772ae0b66b3ab6"
+        },
+        {
+          "index": 384,
+          "width": 40,
+          "height": 40,
+          "x": 20,
+          "y": -67,
+          "pngSha256": "cf69839ccf18fab59681e094a0d2d99003304d3b04b9bc33261199ff0b439c55",
+          "rgbaSha256": "3a1380260e8f56d71916b8034051449a5b47e8a56371fdb5e670b0870ab6299f"
+        },
+        {
+          "index": 387,
+          "width": 44,
+          "height": 40,
+          "x": 21,
+          "y": 42,
+          "pngSha256": "6edc226a1477c3b161ca0ee27db5677de7150114eec198020ae65e52dbca02e1",
+          "rgbaSha256": "726e6722f76e159ae316a318d872948e972ab437d9ace90fd4d6f95ed9fc868c"
+        }
+      ]
+    },
+    {
+      "library": "CWeapon/10",
+      "sourcePath": "E:/mir2/Crystal/Build/Client/Debug/Data/CWeapon/10.Lib",
+      "sourceSha256": "fa22fe5a76a7605ce9e5380150e47047009d7031ddeb16e12d9471595a4e3964",
+      "sourceBytes": 439818,
+      "frameCount": 832,
+      "pngCount": 832,
+      "metadataSha256": "ec36c6c173364880469259da004057cd8e2a96f5bb82bb83cfe46f2004be9186",
+      "samples": [
+        {
+          "index": 0,
+          "width": 16,
+          "height": 24,
+          "x": 32,
+          "y": -30,
+          "pngSha256": "965ab412d9c9ddb8aeef665a142290811da7572a01045a5cb6d09952802b345e",
+          "rgbaSha256": "9c864ab2593eaf55aadb29448516d5fc5b5d53cf3976136562b524fd5ad8367f"
+        },
+        {
+          "index": 64,
+          "width": 68,
+          "height": 44,
+          "x": -27,
+          "y": -41,
+          "pngSha256": "5c77c70e24ffdd64a4bdca10ed5e4f1d2b614dbca39fdba61a9961b04d7d7a3d",
+          "rgbaSha256": "9c8189f9c37591f34951267fa72b4e8c84c1d9ba6b5dbf38047778a2bfe365eb"
+        },
+        {
+          "index": 104,
+          "width": 28,
+          "height": 56,
+          "x": -8,
+          "y": -48,
+          "pngSha256": "79a51e79234d9df3bdaa72b201438e73e992752fc3a8945224425088150c11aa",
+          "rgbaSha256": "6889471b41d7647debc4bb1e051f647a8b028137655d05339d5f125e5718ba4a"
+        },
+        {
+          "index": 384,
+          "width": 60,
+          "height": 60,
+          "x": 17,
+          "y": -68,
+          "pngSha256": "1ae853656656750c5e50e5e23942b9ad0d53ffa94b953976d45e18a73dab707d",
+          "rgbaSha256": "60eed238f35f83237c5c82341a743049e84981743dfe889384a02d979e0b2217"
+        },
+        {
+          "index": 387,
+          "width": 68,
+          "height": 56,
+          "x": 17,
+          "y": 23,
+          "pngSha256": "7e829f2a9864a195e7b34bcb7056bdb194bae89c073694e263259370ac6742af",
+          "rgbaSha256": "63d23efa21096b9a54eefcea95d3a334c9cbb4c16df33886a7076902abf46e98"
+        }
+      ]
+    }
+  ],
+  "totalExportedFrames": 7344,
+  "existingAtlas": {
+    "manifestSha256": "a6f57f316c350221e30b95a006f20807a06ca4341ef4a61a65f23714922b2a40",
+    "verifiedPageCount": 8,
+    "pages": [
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base.png",
+        "sha256": "63e5a51ed0b50db0756246a24ef2bca2ee736d7ccdf5faee5fd4f2bd0233eb41",
+        "imageBytes": 1867769
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base-p1.png",
+        "sha256": "b07a3122e89340e3b43ea1fd73cc491f5d7ec064e9cb4794447c381e06821988",
+        "imageBytes": 1984969
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base-p2.png",
+        "sha256": "04faa52bf32d1e801a22a597126d854b00069b956ffd77e06f753cb482de107e",
+        "imageBytes": 1609063
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base-p3.png",
+        "sha256": "3c8f88b8a072670cd9f8601fb9291a4b755a1dde432f863a4e89dcaebf37a5d9",
+        "imageBytes": 1783358
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base-p4.png",
+        "sha256": "5ec62f9231d1d012582063717372a302a082e3c28649878f48a84e14acc1e516",
+        "imageBytes": 1763685
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base-p5.png",
+        "sha256": "510359ec37d1abb291bf5e469e5cd967b3b8f91ae539777130f93fd452210786",
+        "imageBytes": 2021619
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/starter-bichon-base-p6.png",
+        "sha256": "eb069face1d811f655907619ed69a42201accc35171ea29bf3a5cb1854b5bd07",
+        "imageBytes": 2219427
+      },
+      {
+        "imageUrl": "/bevy-entity-atlases/hookingcat-monster-006.png",
+        "sha256": "320eb828375c8dcea0edea61f9003e8338506d9a1c561524021caaa9da920317",
+        "imageBytes": 618316
+      }
+    ]
+  },
+  "exportSummarySha256": "912b18f7719595a6d196b268e252a422d051827a73d480beea59b4488c64cc48",
+  "visualAcceptance": false
+}

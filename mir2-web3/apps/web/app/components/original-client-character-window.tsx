@@ -4,6 +4,10 @@ import { type CSSProperties } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
 import { originalItemIconPath } from "./original-client-inventory-utils";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import type { DisplayEquipmentItem } from "./original-client-types";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+import { useActiveItemTooltip } from "./original-client-panels";
 import { OriginalItemTooltip, type ItemTooltipGrade } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -43,17 +47,6 @@ type DisplayEntity = {
   level?: number;
 };
 
-type DisplayEquipmentItem = {
-  slot: EquipmentSlot;
-  name: string;
-  icon: number;
-  description: string;
-  durabilityCurrent: number;
-  durabilityMax: number;
-  attack: number;
-  defence: number;
-};
-
 type DisplayKnownSkill = {
   key: string;
   name: string;
@@ -82,7 +75,7 @@ type DisplayWorld = {
   knownSkills: DisplayKnownSkill[];
 };
 
-type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
+type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot" | "authoritativeUniqueId">;
 
 type StatRangeValue = { min?: number; max?: number };
 
@@ -119,6 +112,7 @@ type CharacterWindowProps = {
   player: DisplayEntity | null;
   world: DisplayWorld;
   onRemoveItem: (item: EquipmentActionRef) => void;
+  onReadEquipmentItemTooltip?: (item: Readonly<DisplayEquipmentItem>) => CrystalTooltipDocument | null;
   /**
    * Retained for host compatibility but no longer surfaced here: Crystal's
    * CharacterDialog has no in-window repair buttons (repair is NPC-driven via
@@ -152,7 +146,7 @@ export function CharacterWindow({
   onTabChange,
   player,
   world,
-  onRemoveItem,
+  onRemoveItem, onReadEquipmentItemTooltip,
   onCastSkill,
   stats,
   guildName,
@@ -160,6 +154,7 @@ export function CharacterWindow({
   title,
 }: CharacterWindowProps) {
   const activePage = ORIGINAL_UI.character.pages[activeTab];
+  const tooltip = useActiveItemTooltip(world.equipmentItems, onReadEquipmentItemTooltip, activeTab === "char");
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
   const totalDefence = world.equipmentItems.reduce((sum, item) => sum + item.defence, 0);
@@ -254,6 +249,7 @@ export function CharacterWindow({
           {ORIGINAL_UI.character.equipmentSlots.map((slot) => {
             const equipSlot = equipmentSlotFromLabel(slot.label);
             const item = equipmentBySlot.get(equipSlot);
+            const tooltipDocument = item ? tooltip.document(item) : null;
 
             return (
               <div
@@ -268,7 +264,13 @@ export function CharacterWindow({
                     type="button"
                     className="character-slot-card"
                     aria-label={item.name}
-                    onClick={() => onRemoveItem({ slot: item.slot })}
+                    onPointerEnter={event => { if (event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
+                    onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
+                    onFocus={event => tooltip.activate(item, event.currentTarget)}
+                    onBlur={event => { if (!event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
+                    onPointerCancel={event => tooltip.release(item, event.currentTarget)}
+                    onPointerDown={event => { if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); } }}
+                    onClick={() => onRemoveItem({ slot: item.slot, authoritativeUniqueId: item.authoritativeUniqueId })}
                   >
                     <img
                       className="original-item-icon character-item-icon"
@@ -276,6 +278,7 @@ export function CharacterWindow({
                       alt=""
                       draggable={false}
                     />
+                    {tooltipDocument ? <OriginalCrystalItemTooltip document={tooltipDocument} align={slot.x > 110 ? "left" : "right"} /> : (
                     <OriginalItemTooltip
                       t={t}
                       name={item.name}
@@ -290,6 +293,7 @@ export function CharacterWindow({
                       defence={item.defence}
                       align={slot.x > 110 ? "left" : "right"}
                     />
+                    )}
                   </button>
                 ) : null}
               </div>

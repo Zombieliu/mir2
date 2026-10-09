@@ -25,6 +25,7 @@
 //! transport, which is tracked separately.
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -35,6 +36,49 @@ use crate::routing::{
 };
 
 const DEFAULT_LEASE_TTL_MS: u64 = 30_000;
+
+/// Owns a synchronous PostgreSQL resource all the way through its destruction.
+/// `postgres::Client::drop` drives its private Tokio runtime. The last owner may
+/// disappear on an async worker when a server future is cancelled or fails, so
+/// putting only construction/queries on blocking workers is not sufficient.
+pub(crate) struct SyncPostgresResource<T: Send> {
+    value: Option<T>,
+}
+
+impl<T: Send> SyncPostgresResource<T> {
+    pub(crate) fn new(value: T) -> Self {
+        Self { value: Some(value) }
+    }
+}
+
+impl<T: Send> Deref for SyncPostgresResource<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.value
+            .as_ref()
+            .expect("PostgreSQL resource is owned until drop")
+    }
+}
+
+impl<T: Send> Drop for SyncPostgresResource<T> {
+    fn drop(&mut self) {
+        if tokio::runtime::Handle::try_current().is_err() {
+            // Ordinary synchronous callers already have a safe context.
+            drop(self.value.take());
+            return;
+        }
+        // This worker does not depend on a live Tokio scheduler, including on a
+        // current-thread runtime or during shutdown. Join before returning: do
+        // not leak connections or defer cleanup to a runtime being destroyed.
+        std::thread::scope(|scope| {
+            let worker = scope.spawn(|| drop(self.value.take()));
+            if let Err(panic) = worker.join() {
+                std::panic::resume_unwind(panic);
+            }
+        });
+    }
+}
 
 fn now_ms() -> u64 {
     SystemTime::now()
@@ -62,7 +106,7 @@ pub struct PostgresZoneOwnerLeaseAuthority {
     database_url: String,
     owner_id: String,
     lease_ttl_ms: u64,
-    client: Arc<Mutex<Option<Client>>>,
+    client: Arc<SyncPostgresResource<Mutex<Option<Client>>>>,
     last_known: Mutex<BTreeMap<String, CachedZoneLease>>,
 }
 
@@ -97,7 +141,7 @@ impl PostgresZoneOwnerLeaseAuthority {
             database_url: database_url.into(),
             owner_id,
             lease_ttl_ms: lease_ttl_ms.max(1),
-            client: Arc::new(Mutex::new(None)),
+            client: Arc::new(SyncPostgresResource::new(Mutex::new(None))),
             last_known: Mutex::new(BTreeMap::new()),
         }
     }
@@ -403,6 +447,48 @@ fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<Strin
 }
 
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
+
+    fn supports_durable_npc_purchase_lease(&self) -> bool { true }
+
+    fn with_durable_npc_purchase_lease(&self, lease: &ZoneOwnerLease,
+        operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        // A scoped worker keeps the real row lock through the account commit;
+        // no cached/bootstrap lease is accepted and no new schema is created.
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                let mut slot = self.client.lock().map_err(|_| "zone lease client mutex poisoned")?;
+                if slot.is_none() {
+                    *slot = Some(Client::connect(&self.database_url, NoTls)
+                        .map_err(|error| format!("durable NPC lease connect failed: {error}"))?);
+                }
+                let guarded_result = (|| {
+                let client = slot.as_mut().expect("connected lease client");
+                let mut transaction = client.transaction()
+                    .map_err(|error| format!("durable NPC lease transaction failed: {error}"))?;
+                let row = transaction.query_opt(
+                    "SELECT owner_id, fencing_token, expires_at_ms FROM zone_owner_leases WHERE zone_id=$1 FOR UPDATE",
+                    &[&lease.zone_id().as_str()],
+                ).map_err(|error| format!("durable NPC owner lease lock failed: {error}"))?
+                    .ok_or("durable NPC owner lease is not registered")?;
+                let owner: String = row.get("owner_id");
+                let token: i64 = row.get("fencing_token");
+                let expires: i64 = row.get("expires_at_ms");
+                if owner != lease.owner_id() || token <= 0 || token as u64 != lease.fencing_token()
+                    || expires <= 0 || expires as u64 <= now_ms() {
+                    return Err("stale durable NPC purchase owner lease".into());
+                }
+                crate::session::catch_gateway_panic("durable NPC lease callback", || operation())?;
+                // The row was only locked. Rollback releases the fencing guard;
+                // any release error follows the already captured commit receipt.
+                transaction.rollback().map_err(|error| format!("durable NPC lease guard release failed: {error}"))
+                })();
+                if guarded_result.is_err() { *slot = None; }
+                guarded_result
+            }).join().map_err(|_| "durable NPC lease guard worker panicked".to_string())?
+        })
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         let now = now_ms();
         if let Some(cached) = self.cached_entry(zone_id) {
@@ -619,8 +705,250 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
 }
 
 #[cfg(test)]
+pub(crate) struct LifecyclePostgresTest {
+    url: String,
+    monitor: Client,
+}
+
+#[cfg(test)]
+impl LifecyclePostgresTest {
+    pub(crate) fn new() -> Self {
+        let url = std::env::var("MIR2_GATEWAY_LIFECYCLE_TEST_DATABASE_URL")
+            .expect("explicit isolated lifecycle test database URL is required");
+        let config = url
+            .parse::<postgres::Config>()
+            .unwrap_or_else(|_| panic!("invalid lifecycle test database configuration"));
+        let database = config
+            .get_dbname()
+            .expect("explicit lifecycle database required");
+        let suffix = database
+            .strip_prefix("mir2_playtest_lifecycle_")
+            .expect("lifecycle tests refuse ordinary game databases");
+        assert!(
+            !suffix.is_empty()
+                && suffix
+                    .bytes()
+                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_')
+        );
+        assert!(config.get_user() == Some("mir2_playtest"));
+        assert!(
+            config.get_hosts().len() == 1
+                && matches!(&config.get_hosts()[0],
+            postgres::config::Host::Tcp(host) if host == "127.0.0.1" || host == "::1")
+        );
+        assert!(
+            config.get_ports().len() == 1
+                && config.get_ports()[0] != 0
+                && config.get_ports()[0] != 5432
+        );
+        assert!(config.get_hostaddrs().is_empty() && config.get_options().is_none());
+        let parsed = reqwest::Url::parse(&url)
+            .unwrap_or_else(|_| panic!("lifecycle tests require a PostgreSQL URL"));
+        assert!(parsed.query().is_none() && parsed.fragment().is_none());
+        let mut monitor = config
+            .connect(NoTls)
+            .unwrap_or_else(|_| panic!("isolated lifecycle database connection failed"));
+        let identity = monitor
+            .query_one("SELECT current_database()::text, current_user::text", &[])
+            .unwrap_or_else(|_| panic!("lifecycle database identity check failed"));
+        assert!(identity.get::<_, &str>(0) == database);
+        assert!(identity.get::<_, &str>(1) == "mir2_playtest");
+        Self { url, monitor }
+    }
+
+    pub(crate) fn tagged_url(&self, label: &str) -> (String, String) {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let tag = format!("lifecycle-{label}-{}-{nonce}", std::process::id());
+        assert!(tag.len() < 64);
+        let mut url = reqwest::Url::parse(&self.url)
+            .unwrap_or_else(|_| panic!("validated lifecycle URL became invalid"));
+        url.query_pairs_mut().append_pair("application_name", &tag);
+        (url.to_string(), tag)
+    }
+
+    pub(crate) fn connections(&mut self, tag: &str) -> i64 {
+        self.monitor.query_one(
+            "SELECT count(*)::bigint FROM pg_stat_activity WHERE datname = current_database() AND usename = current_user AND application_name = $1",
+            &[&tag],
+        ).unwrap_or_else(|_| panic!("lifecycle connection observation failed"))
+            .get(0)
+    }
+
+    pub(crate) fn assert_connections_closed(&mut self, tag: &str) {
+        for _ in 0..200 {
+            if self.connections(tag) == 0 {
+                return;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(25));
+        }
+        panic!("owned PostgreSQL connections remained after lifecycle completion");
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn lifecycle_test_runtime(multi_thread: bool) -> tokio::runtime::Runtime {
+    let mut builder = if multi_thread {
+        let mut builder = tokio::runtime::Builder::new_multi_thread();
+        builder.worker_threads(2);
+        builder
+    } else {
+        tokio::runtime::Builder::new_current_thread()
+    };
+    builder
+        .enable_all()
+        .build()
+        .expect("lifecycle test Tokio runtime")
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
+
+    fn runtime_resource() -> (
+        Arc<SyncPostgresResource<tokio::runtime::Runtime>>,
+        tokio::sync::oneshot::Receiver<()>,
+    ) {
+        let runtime = lifecycle_test_runtime(false);
+        let (sender, receiver) = tokio::sync::oneshot::channel();
+        runtime.spawn(async move {
+            std::future::pending::<()>().await;
+            drop(sender);
+        });
+        (Arc::new(SyncPostgresResource::new(runtime)), receiver)
+    }
+
+    #[test]
+    fn sync_postgres_resource_drops_a_real_runtime_before_returning() {
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (resource, mut receiver) = runtime_resource();
+            let weak = Arc::downgrade(&resource);
+            outer.block_on(async move {
+                drop(resource);
+            });
+            assert!(weak.upgrade().is_none());
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+        }
+    }
+
+    #[test]
+    fn sync_postgres_resource_handles_concurrent_last_arc_and_cancelled_task() {
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (resource, mut receiver) = runtime_resource();
+            let copies = (0..4).map(|_| Arc::clone(&resource)).collect::<Vec<_>>();
+            drop(resource);
+            outer.block_on(async move {
+                let barrier = Arc::new(tokio::sync::Barrier::new(copies.len()));
+                let workers = copies
+                    .into_iter()
+                    .map(|copy| {
+                        let barrier = Arc::clone(&barrier);
+                        tokio::spawn(async move {
+                            barrier.wait().await;
+                            drop(copy);
+                        })
+                    })
+                    .collect::<Vec<_>>();
+                for worker in workers {
+                    worker.await.expect("last owner must drop safely");
+                }
+            });
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+
+            let (resource, mut receiver) = runtime_resource();
+            outer.block_on(async move {
+                let (ready, started) = tokio::sync::oneshot::channel();
+                let worker = tokio::spawn(async move {
+                    ready.send(()).unwrap();
+                    std::future::pending::<()>().await;
+                    drop(resource);
+                });
+                started.await.unwrap();
+                worker.abort();
+                assert!(worker.await.unwrap_err().is_cancelled());
+            });
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+        }
+    }
+
+    #[test]
+    fn sync_postgres_resource_handles_async_initialization_error() {
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (resource, mut receiver) = runtime_resource();
+            let result = outer.block_on(async move {
+                let _resource = resource;
+                tokio::task::yield_now().await;
+                Err::<(), _>("later initializer failed")
+            });
+            assert!(result.is_err());
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+        }
+    }
+
+    #[test]
+    #[ignore = "requires isolated MIR2_GATEWAY_LIFECYCLE_TEST_DATABASE_URL"]
+    fn lifecycle_postgres_closes_actual_zone_authority_cache() {
+        let mut database = LifecyclePostgresTest::new();
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (url, tag) = database.tagged_url("zone-cache");
+            let authority = Arc::new(PostgresZoneOwnerLeaseAuthority::new(
+                &url,
+                "lifecycle-only",
+                1_000,
+            ));
+            // Populate the actual cached-client field. Do not run unrelated game
+            // schema migrations or acquire/modify leases in this drop-only test.
+            *authority.client.lock().unwrap() = Some(
+                Client::connect(&url, NoTls)
+                    .unwrap_or_else(|_| panic!("lifecycle cached client connection failed")),
+            );
+            assert_eq!(
+                authority
+                    .run(|client| {
+                        client
+                            .query_one("SELECT 1::int", &[])
+                            .map(|row| row.get::<_, i32>(0))
+                            .map_err(|_| "lifecycle cached client query failed".to_string())
+                    })
+                    .unwrap_or_else(|_| panic!("real authority cached operation failed")),
+                1
+            );
+            assert_eq!(database.connections(&tag), 1);
+            outer.block_on(async move {
+                let (ready, started) = tokio::sync::oneshot::channel();
+                let worker = tokio::spawn(async move {
+                    ready.send(()).unwrap();
+                    std::future::pending::<()>().await;
+                    drop(authority);
+                });
+                started.await.unwrap();
+                worker.abort();
+                assert!(worker.await.unwrap_err().is_cancelled());
+            });
+            database.assert_connections_closed(&tag);
+        }
+        eprintln!(
+            "actual zone authority cached-client closure verified in both Tokio runtime flavours"
+        );
+    }
 
     #[test]
     fn trusted_rpc_authority_adopts_and_fences_allowed_owner() {

@@ -155,6 +155,17 @@ pub trait GatewaySessionCache: Send + Sync {
         self.remove(key);
         Some(record)
     }
+    /// Atomically release a completed explicit leave by its captured owner.
+    /// Backends must fence both the record and lease, including a new lease
+    /// whose owner has not yet published a replacement record.
+    fn release_owned_session_route(
+        &self,
+        _key: &GatewaySessionCacheKey,
+        _owner: &str,
+        _character_name: &str,
+    ) -> Result<bool, String> {
+        Err("atomic owned session route release is unsupported by this cache".to_string())
+    }
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord>;
     fn trace_events(
         &self,
@@ -398,6 +409,62 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
         record
     }
 
+    fn release_owned_session_route(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        _character_name: &str,
+    ) -> Result<bool, String> {
+        // Match refresh_owned_route_lease_record's lock order. A refresh
+        // already in flight either completes before this removal or observes
+        // the absent lease afterwards and cannot resurrect the old record.
+        let mut records = self
+            .records
+            .lock()
+            .map_err(|_| "session cache lock poisoned")?;
+        let mut leases = self
+            .route_leases
+            .lock()
+            .map_err(|_| "route lease lock poisoned")?;
+        let lease = leases.get(key);
+        if lease.is_some_and(|lease| lease.owner != owner) {
+            return Ok(false);
+        }
+        if records.get(key).is_some_and(|record| {
+            record
+                .route_lease_owner
+                .as_deref()
+                .is_some_and(|value| value != owner)
+                || record
+                    .gateway_session_id
+                    .as_deref()
+                    .is_some_and(|value| value != owner)
+                || (lease.is_none()
+                    && record.route_lease_owner.is_none()
+                    && record.gateway_session_id.is_none())
+        }) {
+            return Ok(false);
+        }
+        let record = records.remove(key);
+        let lease = leases.remove(key);
+        drop(leases);
+        drop(records);
+        if let Some(record) = record.as_ref() {
+            let mut history = self
+                .trace_history
+                .lock()
+                .expect("session trace lock should not be poisoned");
+            let entries = history.entry(key.clone()).or_default();
+            entries.push(trace_event(
+                record,
+                "disconnected",
+                "completed explicit leave released owned route",
+            ));
+            trim_trace_history(entries);
+        }
+        Ok(record.is_some() || lease.is_some())
+    }
+
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord> {
         let mut records = self
             .records
@@ -580,6 +647,27 @@ pub struct RedisGatewaySessionCache {
     ttl_seconds: u64,
     timeout: Duration,
 }
+
+// Kept as a single executable script so compare/delete cannot race a new
+// StartGame or an in-flight background refresh on another gateway.
+const RELEASE_OWNED_SESSION_ROUTE_LUA: &str = r#"
+local lease = redis.call('GET', KEYS[2])
+if lease and lease ~= ARGV[1] then return 0 end
+local raw = redis.call('GET', KEYS[1])
+if raw then
+  local record = cjson.decode(raw)
+  local record_owner = record.routeLeaseOwner
+  local session_owner = record.gatewaySessionId
+  if record_owner and record_owner ~= cjson.null and record_owner ~= ARGV[1] then return 0 end
+  if session_owner and session_owner ~= cjson.null and session_owner ~= ARGV[1] then return 0 end
+  if not lease and (not record_owner or record_owner == cjson.null) and (not session_owner or session_owner == cjson.null) then return 0 end
+end
+if not raw and not lease then return 0 end
+local index = redis.call('GET', KEYS[3])
+redis.call('DEL', KEYS[1], KEYS[2])
+if index == KEYS[1] then redis.call('DEL', KEYS[3]) end
+return 1
+"#;
 
 impl RedisGatewaySessionCache {
     pub fn new(redis_url: &str, namespace: impl Into<String>, ttl_seconds: u64) -> Self {
@@ -1061,6 +1149,29 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
         }
         self.remove(key);
         Some(record)
+    }
+
+    fn release_owned_session_route(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        character_name: &str,
+    ) -> Result<bool, String> {
+        match self.execute(&[
+            "EVAL".to_string(),
+            RELEASE_OWNED_SESSION_ROUTE_LUA.to_string(),
+            "3".to_string(),
+            self.redis_key(key),
+            self.route_lease_key(key),
+            self.character_index_key(character_name),
+            owner.to_string(),
+        ])? {
+            RedisValue::Integer(1) => Ok(true),
+            RedisValue::Integer(0) => Ok(false),
+            other => Err(format!(
+                "unexpected redis explicit leave release response: {other:?}"
+            )),
+        }
     }
 
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord> {

@@ -15,22 +15,28 @@ use crate::{
 /// Thread-safe receiver wrapper accepted as a Bevy resource.
 #[derive(Resource)]
 pub struct GatewayEventInbox {
-    receiver: Mutex<mpsc::Receiver<NativeGatewayEvent>>,
+    receiver: GatewayEventReceiver,
+}
+
+enum GatewayEventReceiver {
+    Owned(Mutex<mpsc::Receiver<crate::gateway::NativeShellEnvelope>>),
+    #[cfg(test)] Legacy(Mutex<mpsc::Receiver<NativeGatewayEvent>>),
 }
 
 impl GatewayEventInbox {
+    pub(crate) fn new_owned(receiver:mpsc::Receiver<crate::gateway::NativeShellEnvelope>)->Self{Self {receiver:GatewayEventReceiver::Owned(Mutex::new(receiver))}}
+    #[cfg(test)]
     pub fn new(receiver: mpsc::Receiver<NativeGatewayEvent>) -> Self {
         Self {
-            receiver: Mutex::new(receiver),
+            receiver: GatewayEventReceiver::Legacy(Mutex::new(receiver)),
         }
     }
 
-    fn drain(&self) -> Vec<NativeGatewayEvent> {
-        let receiver = self
-            .receiver
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        receiver.try_iter().collect()
+    fn drain(&self) -> Vec<crate::gateway::NativeShellEnvelope> {
+        match &self.receiver {
+            GatewayEventReceiver::Owned(receiver)=>receiver.lock().map(|r|r.try_iter().collect()).unwrap_or_default(),
+            #[cfg(test)] GatewayEventReceiver::Legacy(receiver)=>receiver.lock().map(|r|r.try_iter().map(|event|crate::gateway::NativeShellEnvelope {stamp:None,event}).collect()).unwrap_or_default(),
+        }
     }
 }
 
@@ -73,7 +79,11 @@ pub fn drain_gateway_events(
     commands: Res<GatewayCommands>,
     mut auto_login: ResMut<NativeAutoLoginFlow>,
 ) {
-    for event in inbox.drain() {
+    for envelope in inbox.drain() {
+        if let Some(stamp)=envelope.stamp {if !commands.apply_shell_stamp(stamp){continue;}}
+        else if commands.ownership_fence().is_some(){continue;}
+        let event=envelope.event;
+        let previous_screen = shell.screen;
         // A password response is correlated to the one in-flight request in
         // NativeShellModel.  Never let a delayed response mutate a later
         // Login/Character/InGame state after the request was already closed.
@@ -87,7 +97,6 @@ pub fn drain_gateway_events(
             continue;
         }
         let connected = matches!(&event, NativeGatewayEvent::Connected);
-        let login_succeeded = matches!(&event, NativeGatewayEvent::LoginSuccess { .. });
         let reconnect_bootstrap = match &event {
             NativeGatewayEvent::PlayerBootstrapped { ref character }
                 if matches!(
@@ -119,6 +128,9 @@ pub fn drain_gateway_events(
         } else {
             shell.apply_gateway_event(event);
         }
+        if shell.screen != previous_screen && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+            eprintln!("[native-shell] transition {previous_screen:?} -> {:?}", shell.screen);
+        }
 
         if connected
             && auto_login.enabled
@@ -130,26 +142,44 @@ pub fn drain_gateway_events(
             let password = shell.login.password.clone();
             if shell.apply_ui_intent(NativeUiIntent::Login) {
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
-                commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::Login {
-                    account_id,
-                    password,
-                }));
+                send_shell_command(&commands,&mut shell,NativeOutboundCommand::Login {account_id,password});
                 auto_login.submitted = true;
             }
         }
-
-        if login_succeeded {
-            if let Some(character_index) = auto_login.desired_character_index.take() {
-                if shell.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index })
-                    && shell.apply_ui_intent(NativeUiIntent::StartGame)
-                {
-                    commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::StartGame {
-                        character_index,
-                    }));
-                }
+    }
+    // Explicit development auto-login must wait for the original door animation,
+    // including frames with no new Gateway event, before starting a character.
+    if shell.screen == NativeShellScreen::CharacterSelect {
+        if let Some(character_index) = auto_login.desired_character_index.take() {
+            if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+                eprintln!("[native-shell] auto_start_attempt character_index={character_index}");
+            }
+            if shell.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index })
+                && shell.apply_ui_intent(NativeUiIntent::StartGame)
+            {
+                send_shell_command(&commands,&mut shell,NativeOutboundCommand::StartGame {character_index});
             }
         }
     }
+}
+/// A local before-commit failure completes only the original request class.
+/// Callers qualify its immutable ticket before entering this existing reducer.
+pub(crate) fn apply_local_control_not_sent(shell:&mut NativeShellModel,command:&NativeOutboundCommand){
+    use NativeOutboundCommand as C;
+    let relevant=match command {
+        C::Login {..}=>shell.login_request_in_flight,
+        C::StartGame {..}=>shell.start_game_request_in_flight,
+        C::NewAccount {..}=>shell.register_request_in_flight,
+        C::NewCharacter {..}=>shell.create_character_request_in_flight,
+        C::DeleteCharacter {..}=>shell.delete_request_in_flight,
+        C::ChangePassword {..}=>shell.change_password_request_in_flight,
+        C::LogOut|C::Disconnect=>shell.logout_request_in_flight,
+        _=>false,
+    };
+    if relevant{shell.apply_gateway_event(NativeGatewayEvent::OperationFailure {message:"local command definitely not sent".into()});}
+}
+fn send_shell_command(commands:&GatewayCommands,shell:&mut NativeShellModel,command:NativeOutboundCommand)->bool{
+    if commands.send_command(GatewayCommand::Wire(command.clone())){true}else{apply_local_control_not_sent(shell,&command);false}
 }
 
 /// Forward already-validated widget intents to the Gateway owner. Local-only
@@ -178,20 +208,28 @@ pub fn forward_native_ui_intents(
                     password: shell.login.password.clone(),
                 })
             }
-            NativeUiIntent::RegisterAccount
+            NativeUiIntent::SubmitRegistration {
+                account_id,
+                password,
+                birth_date_binary,
+                user_name,
+                secret_question,
+                secret_answer,
+                email_address,
+                ..
+            }
                 if shell.register_request_in_flight && !register_command_sent =>
             {
                 register_command_sent = true;
-                let account_id = shell.login.account.trim().to_owned();
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
                 Some(NativeOutboundCommand::NewAccount {
-                    account_id: account_id.clone(),
-                    password: shell.login.password.clone(),
-                    birth_date_binary: 0,
-                    user_name: account_id,
-                    secret_question: String::new(),
-                    secret_answer: String::new(),
-                    email_address: String::new(),
+                    account_id,
+                    password,
+                    birth_date_binary,
+                    user_name,
+                    secret_question,
+                    secret_answer,
+                    email_address,
                 })
             }
             NativeUiIntent::CreateCharacter {
@@ -238,7 +276,7 @@ pub fn forward_native_ui_intents(
             }
             NativeUiIntent::Retry if shell.retry_request_in_flight && !retry_command_sent => {
                 retry_command_sent = true;
-                commands.send_command(GatewayCommand::Connect);
+                if !commands.send_command(GatewayCommand::Connect){shell.apply_gateway_event(NativeGatewayEvent::OperationFailure {message:"local reconnect request definitely not sent".into()});}
                 None
             }
             NativeUiIntent::Logout if shell.logout_request_in_flight && !logout_command_sent => {
@@ -249,7 +287,9 @@ pub fn forward_native_ui_intents(
             | NativeUiIntent::CancelCharacterCreate
             | NativeUiIntent::SelectCharacter { .. }
             | NativeUiIntent::Login
-            | NativeUiIntent::RegisterAccount
+            | NativeUiIntent::OpenRegistration
+            | NativeUiIntent::CancelRegistration
+            | NativeUiIntent::SubmitRegistration { .. }
             | NativeUiIntent::CreateCharacter { .. }
             | NativeUiIntent::DeleteCharacter { .. }
             | NativeUiIntent::StartGame
@@ -271,7 +311,7 @@ pub fn forward_native_ui_intents(
         };
 
         if let Some(command) = command {
-            commands.send_command(GatewayCommand::Wire(command));
+            send_shell_command(&commands,&mut shell,command);
         }
     }
 }
@@ -303,6 +343,50 @@ mod tests {
     }
 
     #[test]
+    fn development_auto_start_waits_for_door_even_without_another_gateway_event() {
+        let config = NativeAutoLogin {
+            account_id: "door-test".into(),
+            password: "test".into(),
+            character_index: Some(7),
+        };
+        let mut shell = initial_shell_model(Some(&config));
+        shell.screen = NativeShellScreen::Authenticating;
+        shell.login_request_in_flight = true;
+        let (events, inbox) = mpsc::channel();
+        let (commands, sent) = mpsc::channel();
+        let mut app = bevy::prelude::App::new();
+        app.insert_resource(shell);
+        app.insert_resource(GatewayEventInbox::new(inbox));
+        app.insert_resource(GatewayCommands::new(commands));
+        app.insert_resource(NativeAutoLoginFlow::from_config(Some(&config)));
+        app.add_systems(bevy::prelude::Update, drain_gateway_events);
+        events
+            .send(NativeGatewayEvent::LoginSuccess {
+                account: "door-test".into(),
+                characters: vec![CharacterSummary::new(7, "Hero", 1, "Warrior", "Male")],
+            })
+            .unwrap();
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            NativeShellScreen::OpeningLogin
+        );
+        assert!(sent.try_recv().is_err());
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .advance_login_opening(std::time::Duration::from_millis(1800));
+        app.update();
+        assert!(matches!(
+            sent.try_recv(),
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::StartGame {
+                character_index: 7
+            }))
+        ));
+        app.update();
+        assert!(sent.try_recv().is_err());
+    }
+
+    #[test]
     fn normal_launch_has_no_credentials_or_auto_submit() {
         let model = initial_shell_model(None);
         let flow = NativeAutoLoginFlow::from_config(None);
@@ -328,38 +412,38 @@ mod tests {
     }
 
     #[test]
-    fn distinct_register_and_login_commands_are_not_dropped_by_final_screen_state() {
+    fn registration_forwards_the_submitted_crystal_packet_fields() {
         let mut shell = NativeShellModel::default();
-        shell.screen = NativeShellScreen::Authenticating;
-        shell.login.account = "player".to_owned();
-        shell.login.password = "secret".to_owned();
+        shell.screen = NativeShellScreen::Registration;
         shell.register_request_in_flight = true;
-        shell.login_request_in_flight = true;
-
-        let (commands, _) = forward(
-            shell,
-            [NativeUiIntent::RegisterAccount, NativeUiIntent::Login],
-        );
-        assert_eq!(
-            commands
-                .iter()
-                .filter(|command| matches!(
-                    command,
-                    GatewayCommand::Wire(NativeOutboundCommand::NewAccount { .. })
-                ))
-                .count(),
-            1
-        );
-        assert_eq!(
-            commands
-                .iter()
-                .filter(|command| matches!(
-                    command,
-                    GatewayCommand::Wire(NativeOutboundCommand::Login { .. })
-                ))
-                .count(),
-            1
-        );
+        let (commands, _) = forward(shell, [NativeUiIntent::SubmitRegistration {
+            account_id: "player".to_owned(),
+            password: "secret".to_owned(),
+            confirm_password: "secret".to_owned(),
+            birth_date: "2000-01-01".to_owned(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Player Name".to_owned(),
+            secret_question: "pet?".to_owned(),
+            secret_answer: "cat".to_owned(),
+            email_address: "player@example.test".to_owned(),
+        }]);
+        assert!(commands.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::NewAccount {
+                account_id,
+                password,
+                birth_date_binary: 630_822_816_000_000_000,
+                user_name,
+                secret_question,
+                secret_answer,
+                email_address,
+            }) if account_id == "player"
+                && password == "secret"
+                && user_name == "Player Name"
+                && secret_question == "pet?"
+                && secret_answer == "cat"
+                && email_address == "player@example.test"
+        )));
         assert_eq!(
             commands
                 .iter()
@@ -368,7 +452,7 @@ mod tests {
                     GatewayCommand::Wire(NativeOutboundCommand::ClientVersion)
                 ))
                 .count(),
-            2
+            1
         );
     }
 
@@ -596,5 +680,27 @@ mod tests {
                     | GatewayCommand::Wire(NativeOutboundCommand::StartGame { .. })
             )
         }));
+    }
+}
+
+#[cfg(test)]
+mod ownership_control_tests {
+    use super::*;
+    #[test]
+    fn not_connected_bounded_login_completes_local_busy_without_server_rejection(){
+        let (sender,_receiver)=crate::gateway::command_channel(8);let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::Authenticating;shell.login_request_in_flight=true;
+        let mut intents=NativeUiIntentQueue::default();intents.push(NativeUiIntent::Login);
+        let mut app=bevy::prelude::App::new();app.insert_resource(shell);app.insert_resource(intents);app.insert_resource(GatewayCommands::new(sender));app.add_systems(bevy::app::Update,forward_native_ui_intents);app.update();
+        let shell=app.world().resource::<NativeShellModel>();assert_eq!(shell.screen,NativeShellScreen::Login);assert!(!shell.login_request_in_flight);
+    }
+    #[test]
+    fn full_bounded_queue_start_game_completes_local_busy(){
+        let (sender,_receiver)=crate::gateway::command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);
+        for _ in 0..8{sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::MagicKey {request_id:1,spell:"FireBall".into(),key:1,old_key:0}),Some(stamp)).unwrap();}
+        let commands=GatewayCommands::new(sender);assert!(commands.apply_shell_stamp(stamp));
+        let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::StartingGame;shell.start_game_request_in_flight=true;shell.selected_character_index=Some(3);
+        let mut intents=NativeUiIntentQueue::default();intents.push(NativeUiIntent::StartGame);
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.insert_resource(shell);app.insert_resource(intents);app.add_systems(bevy::app::Update,forward_native_ui_intents);app.update();
+        let shell=app.world().resource::<NativeShellModel>();assert_eq!(shell.screen,NativeShellScreen::CharacterSelect);assert!(!shell.start_game_request_in_flight);assert!(!shell.start_game_acknowledged);
     }
 }

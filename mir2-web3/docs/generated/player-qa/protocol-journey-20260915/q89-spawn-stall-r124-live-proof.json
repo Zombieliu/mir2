@@ -1,0 +1,199 @@
+{
+  "trace": "C:/mir2-protocol-journey-20260911/Wizard.2026-09-15T19-37-28-605Z.trace.jsonl",
+  "events": 5452,
+  "latest": {
+    "sequence": 5452,
+    "at": "2026-09-15T19:48:35.572Z",
+    "direction": "received",
+    "type": "packet",
+    "packet": "UserLocation"
+  },
+  "owner": {
+    "objectId": 1000,
+    "level": 25,
+    "x": 287,
+    "y": 607,
+    "hp": 100,
+    "maxHp": 100,
+    "dead": false
+  },
+  "map": "0",
+  "q89": {
+    "stage": "inProgress",
+    "objectives": [
+      {
+        "current": 2,
+        "done": false,
+        "label": "Kill CursedPriest",
+        "required": 3
+      },
+      {
+        "current": 3,
+        "done": true,
+        "label": "Kill ShiZombie",
+        "required": 3
+      },
+      {
+        "current": 3,
+        "done": true,
+        "label": "Kill CursedZombie",
+        "required": 3
+      }
+    ]
+  },
+  "diagnosticCounts": {
+    "spawnStallProtectedBlockerAttempt": 2,
+    "spawnStallProtectedBlockerCleared": 2,
+    "spawnSearchProgress": 15
+  },
+  "recentDiagnostics": [
+    {
+      "sequence": 1193,
+      "at": "2026-09-15T19:38:26.543Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1219,
+      "at": "2026-09-15T19:38:26.581Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1245,
+      "at": "2026-09-15T19:38:26.601Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1271,
+      "at": "2026-09-15T19:38:26.679Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1297,
+      "at": "2026-09-15T19:38:26.740Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1356,
+      "at": "2026-09-15T19:38:30.532Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1382,
+      "at": "2026-09-15T19:38:30.554Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1408,
+      "at": "2026-09-15T19:38:30.601Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1434,
+      "at": "2026-09-15T19:38:30.632Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 1460,
+      "at": "2026-09-15T19:38:30.657Z",
+      "direction": "diagnostic",
+      "type": "spawnSearchProgress",
+      "mapFileName": "D2031"
+    }
+  ],
+  "protectedBlockers": [
+    {
+      "sequence": 554,
+      "at": "2026-09-15T19:37:32.459Z",
+      "direction": "diagnostic",
+      "type": "spawnStallProtectedBlockerAttempt",
+      "objectId": 341105,
+      "name": "CursedShaman",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 758,
+      "at": "2026-09-15T19:37:54.275Z",
+      "direction": "diagnostic",
+      "type": "spawnStallProtectedBlockerCleared",
+      "objectId": 341105,
+      "name": "CursedShaman",
+      "mapFileName": "D2031",
+      "dead": true,
+      "receiptConfirmed": false
+    },
+    {
+      "sequence": 759,
+      "at": "2026-09-15T19:37:54.277Z",
+      "direction": "diagnostic",
+      "type": "spawnStallProtectedBlockerAttempt",
+      "objectId": 341100,
+      "name": "CursedShaman",
+      "mapFileName": "D2031"
+    },
+    {
+      "sequence": 984,
+      "at": "2026-09-15T19:38:17.870Z",
+      "direction": "diagnostic",
+      "type": "spawnStallProtectedBlockerCleared",
+      "objectId": 341100,
+      "name": "CursedShaman",
+      "mapFileName": "D2031",
+      "dead": true,
+      "receiptConfirmed": false
+    }
+  ],
+  "blockerDeathReceipts": [
+    {
+      "sequence": 766,
+      "at": "2026-09-15T19:37:55.236Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectDied",
+      "objectId": 341105
+    },
+    {
+      "sequence": 991,
+      "at": "2026-09-15T19:38:18.724Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectDied",
+      "objectId": 341100
+    }
+  ],
+  "blockerStatesAtClearance": [
+    {
+      "clearSequence": 758,
+      "snapshotSequence": 757,
+      "map": "D2031",
+      "objectId": 341105,
+      "hp": 0,
+      "dead": true
+    },
+    {
+      "clearSequence": 984,
+      "snapshotSequence": 983,
+      "map": "D2031",
+      "objectId": 341100,
+      "hp": 0,
+      "dead": true
+    }
+  ]
+}

@@ -11,16 +11,22 @@
 
 use std::{
     collections::{HashMap, VecDeque},
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use futures_util::{SinkExt, StreamExt};
 use mir2_client_bevy::game_shop::{GameShopReceipt, GameShopRequest};
+use mir2_client_bevy::inventory::{
+    CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel,
+};
 use mir2_client_bevy::native_shell::{CharacterSummary, NativeGatewayEvent as ShellGatewayEvent};
 use mir2_client_bevy::pending_operations::{InventoryOperationAck, QuestOperationAck};
 use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
 use mir2_client_bevy::social::SocialModel;
+use mir2_game_data::{crystal_item_manifest, crystal_real_item_for_player, CrystalItemTemplate};
+use mir2_protocol::catalog_transport::CATALOG_GZIP_CAPABILITY;
+use mir2_protocol::MirClass;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio_tungstenite::tungstenite::Message;
@@ -33,6 +39,15 @@ use crate::native_protocol::{
     parse_inbound_event, InboundEvent, NativeOutboundCommand, PacketEvent,
 };
 use crate::session_config::NativeReconnectConfig;
+
+#[path = "trade_projection.rs"]
+mod trade_projection;
+
+#[path = "gateway_catalog_transport.rs"]
+mod catalog_transport;
+
+#[path = "npc_purchase_gateway.rs"]
+mod npc_purchase_gateway;
 
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
@@ -150,6 +165,42 @@ where
     }
 }
 
+fn process_connected_server_frame<T, A, F>(
+    frame: &Message,
+    gate: &mut GameShopReceiptGate,
+    mut apply: A,
+    mut push_data_reset: F,
+) -> Result<Vec<T>, String>
+where
+    A: FnMut(&str, &mut GameShopReceiptGate) -> Result<T, String>,
+    F: FnMut() -> bool,
+{
+    let texts: Vec<std::borrow::Cow<'_, str>> = match frame {
+        Message::Text(text) => vec![std::borrow::Cow::Borrowed(text.as_ref())],
+        Message::Binary(bytes) => match catalog_transport::decode_validated_catalog_batch(bytes) {
+            Ok(texts) => texts.into_iter().map(std::borrow::Cow::Owned).collect(),
+            Err(error) => {
+                let _ = terminate_written_game_shop_unknown(gate, &mut push_data_reset);
+                return Err(error);
+            }
+        },
+        _ => return Err("unsupported catalog transport frame".to_owned()),
+    };
+    // The decoder validates every envelope before this first callback. Each
+    // callback is the exact legacy text path, including resume quarantine and
+    // transaction boundaries; batching never grants an early world entry.
+    let mut results = Vec::with_capacity(texts.len());
+    for text in texts {
+        results.push(process_connected_text_frame(
+            &text,
+            gate,
+            |text, gate| apply(text, gate),
+            &mut push_data_reset,
+        )?);
+    }
+    Ok(results)
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum ConnectedSocketEnd {
     Disconnected,
@@ -203,6 +254,847 @@ pub enum GatewayCommand {
     Wire(NativeOutboundCommand),
     Player(PlayerIntent),
     Shutdown,
+    Owned(Box<OwnedGatewayCommand>),
+}
+
+
+/// Immutable producer provenance. Unknown map is None; map zero is a real map.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct NativeCommandStamp {
+    run: u64,
+    connection: u64,
+    procedure: u64,
+    owner_epoch: u64,
+    scene_epoch: u64,
+    cancellation: u64,
+    actor: Option<u32>,
+    map: Option<i32>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum NativeCommandScope { Procedure, Personal, World, Leave, Shutdown }
+
+/// Exhaustive local classification. This does not change any wire field.
+pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandScope {
+    use NativeCommandScope as S;
+    use NativeOutboundCommand as C;
+    match command {
+        GatewayCommand::Owned(owned) => native_command_scope(&owned.command),
+        GatewayCommand::Connect => S::Procedure,
+        GatewayCommand::Shutdown => S::Shutdown,
+        GatewayCommand::Player(_) => S::World,
+        GatewayCommand::Wire(wire) => match wire {
+            C::ClientVersion | C::ClientCapabilities { .. } | C::ResumeSession { .. }
+            | C::Login { .. } | C::ChangePassword { .. } | C::NewAccount { .. }
+            | C::NewCharacter { .. } | C::DeleteCharacter { .. } | C::StartGame { .. } => S::Procedure,
+            C::LogOut | C::Disconnect => S::Leave,
+            C::Walk { .. } | C::Run { .. } | C::Turn { .. } | C::Attack { .. }
+            | C::AttackDirection { .. } | C::RangeAttack { .. } | C::Magic { .. }
+            | C::SpellToggle { .. } | C::Harvest { .. } | C::PickUp { .. } | C::PickUpTile
+            | C::Interact { .. } | C::SelectNpcDialog { .. } | C::AcceptQuest { .. }
+            | C::FinishQuest { .. } | C::FishingCast { .. } | C::FishingChangeAutocast { .. }
+            | C::IntelligentCreaturePickup { .. } | C::Observe { .. } | C::RequestMapInfo { .. }
+            | C::SearchMap { .. } | C::TeleportToNpc { .. } | C::TownRevive
+            | C::DropItem { .. } | C::BuyItem { .. } | C::SellItem { .. } | C::RepairItem { .. }
+            | C::SpecialRepairItem { .. } | C::StoreItem { .. } | C::TakeBackItem { .. }
+            | C::UnlockStorage { .. } | C::SetStoragePassword { .. } | C::RemoveStoragePassword { .. }
+            | C::Chat { .. } | C::GuildStorageGoldChange { .. } | C::GuildStorageItemChange { .. }
+            | C::TradeRequest | C::TradeReply { .. } | C::TradeGold { .. } | C::DepositTradeItem { .. }
+            | C::RetrieveTradeItem { .. } | C::TradeConfirm { .. } | C::TradeCancel => S::World,
+            C::Inspect { ranking: false, .. } => S::World,
+            C::Inspect { ranking: true, .. }
+            | C::AllowMentor | C::AddMentor { .. } | C::CancelMentor | C::MentorReply { .. }
+            | C::ChangeMarriage | C::MarriageRequest | C::MarriageReply { .. }
+            | C::DivorceRequest | C::DivorceReply { .. } | C::EquipSlotItem { .. } | C::RemoveSlotItem { .. }
+            | C::RequestIntelligentCreatureUpdates { .. } | C::UpdateIntelligentCreature { .. }
+            | C::RefreshFriends | C::RemoveFriend { .. } | C::AddMemo { .. } | C::AddFriend { .. }
+            | C::GetRanking { .. } | C::AbandonQuest { .. } | C::ShareQuest { .. }
+            | C::ChangeHero { .. } | C::SetHeroBehaviour { .. } | C::SetAutoPotValue { .. }
+            | C::SetAutoPotItem { .. } | C::TransferHeroItem { .. } | C::TakeBackHeroItem { .. }
+            | C::UseItem { .. } | C::EquipItem { .. } | C::RemoveItem { .. } | C::DeleteItem { .. }
+            | C::MoveItem { .. } | C::MergeItem { .. } | C::SplitItem { .. }
+            | C::ChangeAMode { .. } | C::ChangePMode { .. } | C::MagicKey { .. } | C::GameShopBuy { .. }
+            | C::ReadMail { .. } | C::LockMail { .. } | C::CollectParcel { .. } | C::DeleteMail { .. }
+            | C::MailCost { .. } | C::MailLockedItem { .. } | C::SendMail { .. } | C::SwitchGroup { .. }
+            | C::AddMember { .. } | C::DelMember { .. } | C::GroupInvite { .. } | C::GuildBuffUpdate { .. }
+            | C::RequestGuildInfo { .. } | C::EditGuildMember { .. } | C::EditGuildNotice { .. }
+            | C::GuildInvite { .. } => S::Personal,
+        },
+    }
+}
+
+impl NativeCommandStamp {
+    #[cfg(test)]
+    pub(crate) fn test_mail_epoch(self)->mir2_client_bevy::mail_service::MailServiceStreamEpoch{mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:self.run,connection:self.connection}}
+    pub(crate) fn same_owner(self,other:Self)->bool {self.run==other.run&&self.connection==other.connection&&self.owner_epoch==other.owner_epoch&&self.actor==other.actor}
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct OwnedGatewayCommand {
+    command: GatewayCommand,
+    stamp: NativeCommandStamp,
+    sequence: u64,
+    commit_revision:u64,
+    fence: NativeCommandFence,
+    mail_quote:Option<Arc<NativeMailQuoteProof>>,
+    mail_send:Option<Arc<NativeMailSendProof>>,
+    npc_gold_buy:Option<Arc<NativeNpcGoldBuyProof>>,
+    npc_gold_buy_required:bool,
+    // Missing publication authority is retained as unavailable. Dequeue never
+    // replaces it with a newer catalogue or inventory.
+    npc_purchase_source:Option<npc_purchase_gateway::UiSource>,
+}
+
+#[derive(Clone)]
+struct NativeMailSendPublisher(Arc<dyn Fn(mir2_client_bevy::mail_service::MailServiceInboxMessage)->bool+Send+Sync>);
+impl std::fmt::Debug for NativeMailSendPublisher {fn fmt(&self,f:&mut std::fmt::Formatter<'_>)->std::fmt::Result{f.write_str("NativeMailSendPublisher")}}
+impl NativeMailSendPublisher {fn native()->Self{Self(Arc::new(|message|match message{
+    mir2_client_bevy::mail_service::MailServiceInboxMessage::SendReceipt(receipt)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_receipt(receipt),
+    mir2_client_bevy::mail_service::MailServiceInboxMessage::SendAcknowledgement(ack)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_acknowledgement(ack),_=>false}))}}
+#[derive(Debug)]
+struct NativeMailSendProof {
+    ticket:mir2_client_bevy::mail_service::MailSendTicket,publisher:NativeMailSendPublisher,
+    fence:std::sync::Weak<Mutex<NativeCommandFenceState>>,stamp:NativeCommandStamp,
+    state:std::sync::atomic::AtomicU8,write_reported:std::sync::atomic::AtomicBool,
+}
+impl NativeMailSendProof {
+    fn mark_entered(&self)->bool{self.state.compare_exchange(1,5,std::sync::atomic::Ordering::SeqCst,std::sync::atomic::Ordering::SeqCst).is_ok()}
+    fn deliver(&self,message:mir2_client_bevy::mail_service::MailServiceInboxMessage)->bool {
+        let accepted=(self.publisher.0)(message);
+        if !accepted{if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){state.mail_quote_delivery_failed=Some(self.ticket.epoch());}}}accepted
+    }
+    fn publish(&self,outcome:mir2_client_bevy::mail_service::MailSendOutcome)->bool {
+        use mir2_client_bevy::mail_service::{MailSendOutcome,MailSendReceipt,MailServiceInboxMessage};use std::sync::atomic::Ordering;
+        match outcome {
+            MailSendOutcome::DefinitelyUnsent=>{if self.state.compare_exchange(1,3,Ordering::SeqCst,Ordering::SeqCst).is_err(){return true;}}
+            MailSendOutcome::Entered=>{if self.state.compare_exchange(5,2,Ordering::SeqCst,Ordering::SeqCst).is_err(){return true;}}
+            MailSendOutcome::Flushed|MailSendOutcome::Unknown=>{if self.state.load(Ordering::SeqCst)!=2||self.write_reported.swap(true,Ordering::SeqCst){return true;}}
+        }
+        self.deliver(MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket:self.ticket,outcome}))
+    }
+}
+impl Drop for NativeMailSendProof {
+    fn drop(&mut self){
+        if self.state.load(std::sync::atomic::Ordering::SeqCst)!=1{return;}
+        if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){if state.outstanding.get(&self.ticket.sequence)==Some(&self.stamp){state.outstanding.remove(&self.ticket.sequence);state.waiters.remove(&self.ticket.sequence);}}}
+        self.publish(mir2_client_bevy::mail_service::MailSendOutcome::DefinitelyUnsent);
+    }
+}
+
+#[derive(Clone)]
+struct NativeMailQuotePublisher(Arc<dyn Fn(mir2_client_bevy::mail_service::MailQuoteReceipt)->bool+Send+Sync>);
+impl std::fmt::Debug for NativeMailQuotePublisher {fn fmt(&self,f:&mut std::fmt::Formatter<'_>)->std::fmt::Result{f.write_str("NativeMailQuotePublisher")}}
+impl NativeMailQuotePublisher {
+    fn native()->Self{Self(Arc::new(mir2_bevy_runtime::native_ingest::push_native_mail_quote_receipt))}
+}
+#[derive(Debug)]
+struct NativeMailQuoteProof {
+    ticket:mir2_client_bevy::mail_service::MailQuoteTicket,publisher:NativeMailQuotePublisher,
+    fence:std::sync::Weak<Mutex<NativeCommandFenceState>>,stamp:NativeCommandStamp,
+    // 1=published, 2=entered receipt dispatched, 3=unsent,
+    // 4=failed admission, 5=start_send entered (receipt not yet dispatched).
+    state:std::sync::atomic::AtomicU8,
+}
+impl NativeMailQuoteProof {
+    fn mark_entered(&self)->bool{
+        // Only local atomic state changes under the fence lock. A retire or
+        // final-envelope drop cannot downgrade entry before its callback runs.
+        self.state.compare_exchange(1,5,std::sync::atomic::Ordering::SeqCst,std::sync::atomic::Ordering::SeqCst).is_ok()
+    }
+    fn publish(&self,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome)->bool{
+        use std::sync::atomic::Ordering;
+        let (previous,next)=match outcome{mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent=>(1,3),mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{..}=>(5,2)};
+        if self.state.compare_exchange(previous,next,Ordering::SeqCst,Ordering::SeqCst).is_err(){return true;}
+        let accepted=(self.publisher.0)(mir2_client_bevy::mail_service::MailQuoteReceipt{ticket:self.ticket,outcome});
+        if !accepted{if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){state.mail_quote_delivery_failed=Some(self.ticket.epoch());}}}
+        accepted
+    }
+}
+impl Drop for NativeMailQuoteProof {
+    fn drop(&mut self){
+        // Last published-envelope disappearance (including receiver/channel
+        // closure) is exact unsent. Entered proofs never become unsent.
+        if self.state.load(std::sync::atomic::Ordering::SeqCst)!=1{return;}
+        if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){
+            if state.outstanding.get(&self.ticket.sequence)==Some(&self.stamp){state.outstanding.remove(&self.ticket.sequence);state.waiters.remove(&self.ticket.sequence);}
+        }}
+        self.publish(mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent);
+    }
+}
+impl OwnedGatewayCommand {
+    fn publish_mail_quote(&self,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome)->bool {
+        let Some(quote)=self.mail_quote.as_ref()else{return true;};
+        // Never called under the ownership mutex; the publisher can lock the
+        // independent inbound queue or synchronously inspect this fence.
+        quote.publish(outcome)
+    }
+}
+#[cfg(test)]
+pub(crate) fn is_test_mail_quote(owned:&OwnedGatewayCommand)->bool{owned.mail_quote.is_some()}
+#[cfg(test)]
+pub(crate) fn is_test_mail_send(owned:&OwnedGatewayCommand)->bool{owned.mail_send.is_some()}
+#[cfg(test)]
+pub(crate) fn test_owned_wire(owned:&OwnedGatewayCommand)->Option<NativeOutboundCommand>{match &owned.command{GatewayCommand::Wire(command)=>Some(command.clone()),_=>None}}
+
+impl GatewayCommand {
+    fn payload(&self) -> &GatewayCommand {
+        match self { Self::Owned(owned) => &owned.command, raw => raw }
+    }
+    fn into_parts(self) -> (GatewayCommand, Option<OwnedGatewayCommand>) {
+        match self {
+            Self::Owned(owned) => (owned.command.clone(), Some(*owned)),
+            raw => (raw, None),
+        }
+    }
+}
+
+/// Local-only terminal identity; no credential, packet or server ACK field.
+pub(crate) fn native_transport_key(command:&NativeOutboundCommand)->Option<String> {
+    use NativeOutboundCommand as C;
+    match command {
+        C::Login {..}=>Some("control:login".into()),C::StartGame {..}=>Some("control:start_game".into()),
+        C::NewAccount {..}=>Some("control:new_account".into()),C::ChangePassword {..}=>Some("control:change_password".into()),
+        C::NewCharacter {..}=>Some("control:new_character".into()),C::DeleteCharacter {..}=>Some("control:delete_character".into()),
+        C::GameShopBuy {request_id,..}=>Some(format!("shop:{request_id}")),
+        C::StoreItem {request_id,..}|C::TakeBackItem {request_id,..}=>Some(format!("storage:{request_id}")),
+        C::LogOut=>Some("control:logout".into()),C::Disconnect=>Some("control:disconnect".into()),
+        _=>None,
+    }
+}
+
+#[derive(Debug)]
+struct NativeCommandFenceState {
+    current: NativeCommandStamp,
+    connected: bool,
+    connection_entry_revision:Option<u64>,
+    retired: bool,
+    next_sequence: Option<u64>,
+    outstanding: HashMap<u64, NativeCommandStamp>,
+    entry_requested: bool,
+    entry_authorized: bool,
+    terminals: VecDeque<(NativeCommandStamp,u64,NativeOutboundCommand)>,
+    waiters: HashMap<u64,std::task::Waker>,
+    mail_quote_delivery_failed:Option<mir2_client_bevy::mail_service::MailServiceStreamEpoch>,
+    mail_send_flight:Option<Arc<NativeMailSendProof>>,
+    npc_gold_buy:NativeNpcGoldBuySourceState,
+    npc_economy_gate:Option<mir2_bevy_runtime::npc_purchase_economy::NativeNpcEconomyGate>,
+    hero_owner_gate:Option<(NativeCommandStamp,mir2_bevy_runtime::npc_purchase_economy::NativeHeroOwnerGate)>,
+    npc_entry_pending:bool,
+}
+impl NativeCommandFenceState {
+    fn retire_npc_economy(&mut self) {
+        if let Some(gate) = self.npc_economy_gate.take() { gate.retire(); }
+        if let Some((_,gate)) = self.hero_owner_gate.take() { gate.retire(); }
+    }
+}
+
+
+#[derive(Debug)]
+struct NativeNpcGoldBuySourceState {
+    revision: u64, stamp: Option<NativeCommandStamp>,
+    inventory: Option<mir2_client_bevy::inventory::InventoryModel>, inventory_ready: bool,
+    shop: mir2_client_bevy::shop::ShopModel, shop_ready: bool,
+    snapshot_dialog: Option<Value>, dialog_retired_since_snapshot: bool,
+}
+fn npc_snapshot_service_parent(payload: Option<&Value>) -> Option<Value> {
+    let payload = payload?;
+    if let Some(source) = payload.get("nativeNpcShop") {
+        if source.is_null() { return Some(Value::Null); }
+        return Some(json!({"npcObjectId":source.get("npcObjectId"),"scriptKey":source.get("scriptKey"),
+            "service":source.get("service"),"packetType":source.get("packetType")}));
+    }
+    payload.get("activeNpcDialog").cloned()
+}
+impl Default for NativeNpcGoldBuySourceState {
+    fn default() -> Self { Self { revision: 1, stamp: None, inventory: None,
+        inventory_ready: false, shop: Default::default(), shop_ready: false,
+        snapshot_dialog: None, dialog_retired_since_snapshot: false } }
+}
+impl NativeNpcGoldBuySourceState {
+    fn advance(&mut self) {
+        if self.revision == 0 { return; }
+        self.revision = self.revision.checked_add(1).unwrap_or(0);
+        if self.revision == 0 { self.inventory_ready = false; self.shop_ready = false; }
+    }
+    fn sync_owner(&mut self, stamp: NativeCommandStamp) {
+        if self.stamp != Some(stamp) {
+            self.advance(); self.stamp = Some(stamp); self.inventory = None;
+            self.inventory_ready = false; self.shop = Default::default(); self.shop_ready = false;
+            self.snapshot_dialog = None; self.dialog_retired_since_snapshot = false;
+        }
+    }
+    fn ready(&self, stamp: NativeCommandStamp) -> bool {
+        self.revision > 0 && self.stamp == Some(stamp) && self.inventory_ready && self.shop_ready
+            && self.shop.allows_buy() && self.inventory.is_some()
+    }
+}
+#[derive(Debug, Clone)]
+pub(crate) struct NativeNpcGoldBuySource {
+    pub(crate) stamp: NativeCommandStamp, pub(crate) revision: u64, pub(crate) model: String,
+    pub(crate) connection: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch,
+}
+
+#[derive(Debug)]
+struct NativeNpcGoldBuyProof {
+    ticket: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyTicket,
+    gate: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyGate,
+    fence: std::sync::Weak<Mutex<NativeCommandFenceState>>, stamp: NativeCommandStamp,
+    inventory: Value,
+}
+impl NativeNpcGoldBuyProof {
+    fn publish(&self, outcome: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome) {
+        self.gate.receipt(self.ticket, outcome);
+    }
+}
+impl Drop for NativeNpcGoldBuyProof {
+    fn drop(&mut self) {
+        // Last envelope loss is unsent only while the exact Core flight is Bound.
+        if let Some(fence) = self.fence.upgrade() {
+            if let Ok(mut state) = fence.lock() {
+                if state.outstanding.get(&self.ticket.sequence) == Some(&self.stamp) {
+                    state.outstanding.remove(&self.ticket.sequence); state.waiters.remove(&self.ticket.sequence);
+                }
+            }
+        }
+        self.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::DefinitelyUnsent);
+    }
+}
+
+/// Revocation and final start_send share this one short critical section.
+#[derive(Debug, Clone)]
+pub(crate) struct NativeCommandFence(Arc<Mutex<NativeCommandFenceState>>);
+
+impl NativeCommandFence {
+    pub(crate) fn npc_gold_buy_source(&self) -> Option<NativeNpcGoldBuySource> {
+        let mut state = self.0.lock().ok()?;
+        let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        if !Self::matches(&state, stamp, NativeCommandScope::World) || !state.npc_gold_buy.ready(stamp) { return None; }
+        let model = mir2_client_bevy::npc_gold_buy_attempt::npc_gold_buy_model_authority(
+            &state.npc_gold_buy.shop, state.npc_gold_buy.inventory.as_ref()?)?;
+        Some(NativeNpcGoldBuySource { stamp, revision: state.npc_gold_buy.revision, model,
+            connection: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch { run: stamp.run, connection: stamp.connection } })
+    }
+    pub(crate) fn withdraw_npc_gold_buy_service(&self) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            state.npc_gold_buy.advance(); state.npc_gold_buy.shop = Default::default();
+            state.npc_gold_buy.shop_ready = false;
+            state.npc_gold_buy.dialog_retired_since_snapshot = true;
+            for waker in state.waiters.values(){waker.wake_by_ref();}
+        }
+    }
+    /// Compare the complete raw parent dialog before any cursor/default merge.
+    /// A known dialog/request retirement already cleared the old catalog; retain
+    /// only a subsequently delivered catalog when that same transition reaches
+    /// its snapshot. A closed/missing parent never authorizes a service.
+    fn begin_npc_gold_buy_snapshot(&self, payload: Option<&Value>) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            // A store replaces the main text dialog. Its same-turn service
+            // parent, not visibility of NPCDialog text, owns the catalogue.
+            let dialog = npc_snapshot_service_parent(payload);
+            let valid = dialog.as_ref().is_some_and(|value| value.is_object()
+                && value.get("npcObjectId").and_then(Value::as_u64)
+                    .is_some_and(|id| id > 0 && id <= u32::MAX as u64));
+            let changed = state.npc_gold_buy.snapshot_dialog != dialog;
+            state.npc_gold_buy.inventory_ready = false;
+            if !valid || changed {
+                state.npc_gold_buy.advance();
+                if !valid || !state.npc_gold_buy.dialog_retired_since_snapshot {
+                    state.npc_gold_buy.shop = Default::default();
+                    state.npc_gold_buy.shop_ready = false;
+                }
+            }
+            state.npc_gold_buy.snapshot_dialog = dialog;
+            state.npc_gold_buy.dialog_retired_since_snapshot = false;
+            for waker in state.waiters.values() { waker.wake_by_ref(); }
+        }
+    }
+    fn invalidate_npc_gold_buy_packet(&self, packet: &str) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            if matches!(packet, "NPCDialog" | "NPCResponse") {
+                state.npc_gold_buy.dialog_retired_since_snapshot = true;
+            }
+            match packet {
+                "NPCGoods" | "NPCPearlGoods" | "NPCDialog" | "NPCResponse" | "NPCRepair" | "NPCSRepair"
+                | "NPCStorage" | "NPCRefine" | "NPCCheckRefine" | "NPCCollectRefine" | "NPCReplaceWedRing"
+                | "NPCConsign" | "NPCMarket" | "NPCMarketPage" | "NPCRequestInput" | "NPCAwakening"
+                | "NPCDisassemble" | "NPCDowngrade" | "NPCReset" => {
+                    state.npc_gold_buy.advance(); state.npc_gold_buy.shop = Default::default();
+                    state.npc_gold_buy.shop_ready = false;
+                }
+                "NPCSell" => { state.npc_gold_buy.advance(); }
+                "GainedGold" | "LoseGold" | "UserInformation" | "GainedItem" | "DeleteItem" | "DeleteItems"
+                | "ItemChanged" | "ItemDurability" | "MoveItem" | "MergeItem" | "SplitItem" | "SplitItem1"
+                | "DropItem" | "SellItem" | "EquipItem" | "RemoveItem" | "StoreItem" | "StoreItemV2"
+                | "TakeBackItem" | "TakeBackItemV2" | "ResizeInventory" | "NewItem"
+                | "UserSlotsRefresh" | "UseItem" | "RemoveSlotItem" | "EquipSlotItem" | "DepositRefineItem"
+                | "RetrieveRefineItem" | "DepositTradeItem" | "RetrieveTradeItem" | "TakeBackHeroItem"
+                | "TransferHeroItem" | "CombineItem" | "ItemUpgraded" | "RefreshItem" | "DuraChanged"
+                | "ItemRepaired" | "ItemSlotSizeChanged" | "ItemSealChanged" | "DepositRentalItem"
+                | "RetrieveRentalItem" | "UpdateRentalItem" | "ConfirmItemRental" | "MailLockedItem"
+                | "AwakeningLockedItem" | "Awakening" => {
+                    // A local packet withdraws readiness, not the last complete authority.
+                    state.npc_gold_buy.inventory_ready = false;
+                }
+                _ => {}
+            }
+            for waker in state.waiters.values(){waker.wake_by_ref();}
+        }
+    }
+    fn stage_npc_gold_buy_inventory(&self, value: &Value) -> Option<(NativeCommandStamp, u64)> {
+        let mut state = self.0.lock().ok()?;
+        let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        state.npc_gold_buy.inventory_ready = false;
+        for waker in state.waiters.values(){waker.wake_by_ref();}
+        let model = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(value.clone()).ok()?;
+        let authority = |inventory: &mir2_client_bevy::inventory::InventoryModel| {
+            let mut inventory = inventory.clone(); inventory.npc_gold_trade_capacity = None;
+            serde_json::to_value(inventory).ok()
+        };
+        if state.npc_gold_buy.inventory.as_ref().and_then(authority) != authority(&model) {
+            state.npc_gold_buy.advance();
+        }
+        state.npc_gold_buy.inventory = Some(model);
+        (state.npc_gold_buy.revision > 0).then_some((stamp, state.npc_gold_buy.revision))
+    }
+    fn finish_npc_gold_buy_inventory(&self, staged: Option<(NativeCommandStamp, u64)>, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.inventory_ready = delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
+        }
+    }
+    fn stage_npc_gold_buy_catalog(&self, value: &Value, catalog_packet:bool) -> Option<(NativeCommandStamp, u64)> {
+        let mut state = self.0.lock().ok()?;
+        let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        state.npc_gold_buy.shop_ready = false;
+        for waker in state.waiters.values(){waker.wake_by_ref();}
+        let model = serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(value.clone()).ok()?;
+        if state.npc_gold_buy.shop.goods != model.goods || state.npc_gold_buy.shop.hide_added_stats != model.hide_added_stats {
+            state.npc_gold_buy.advance();
+            if !catalog_packet {
+                state.npc_gold_buy.shop=Default::default();return None;
+            }
+        }
+        state.npc_gold_buy.shop.goods = model.goods; state.npc_gold_buy.shop.hide_added_stats = model.hide_added_stats;
+        (state.npc_gold_buy.revision > 0).then_some((stamp, state.npc_gold_buy.revision))
+    }
+    fn finish_npc_gold_buy_catalog(&self, staged: Option<(NativeCommandStamp, u64)>, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.shop_ready = delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
+        }
+    }
+    fn stage_npc_gold_buy_complete_catalog(&self, value: &Value) -> Option<(NativeCommandStamp,u64)> {
+        let model: mir2_client_bevy::shop::ShopModel = serde_json::from_value(value.clone()).ok()?;
+        let mut state = self.0.lock().ok()?; let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        state.npc_gold_buy.shop_ready = false;
+        if state.npc_gold_buy.shop != model { state.npc_gold_buy.advance(); }
+        state.npc_gold_buy.shop = model;
+        for waker in state.waiters.values() { waker.wake_by_ref(); }
+        (state.npc_gold_buy.revision > 0).then_some((stamp,state.npc_gold_buy.revision))
+    }
+    fn observe_npc_gold_buy_service(&self, signal: mir2_client_bevy::shop::NpcShopServiceSignal, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            let old = state.npc_gold_buy.shop.clone();
+            if !delivered || !state.npc_gold_buy.shop.apply_service_signal(signal) {
+                state.npc_gold_buy.shop_ready = false;for waker in state.waiters.values(){waker.wake_by_ref();} return;
+            }
+            if old != state.npc_gold_buy.shop { state.npc_gold_buy.advance(); }
+            // Catalog receipt is independent; a service signal cannot repair its failed delivery.
+        }
+    }
+
+    fn new() -> Self {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT_RUN: AtomicU64 = AtomicU64::new(1);
+        let run = NEXT_RUN.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |n| n.checked_add(1)).ok();
+        Self(Arc::new(Mutex::new(NativeCommandFenceState {
+            current: NativeCommandStamp { run:run.unwrap_or(0),connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:None,map:None },
+            connected:false,connection_entry_revision:None,retired:run.is_none(),next_sequence:Some(1),outstanding:HashMap::new(),
+            entry_requested:false,entry_authorized:false,terminals:VecDeque::new(),waiters:HashMap::new(),mail_quote_delivery_failed:None,mail_send_flight:None,npc_gold_buy:Default::default(),npc_economy_gate:None,hero_owner_gate:None,npc_entry_pending:false,
+        })))
+    }
+    pub(crate) fn stamp(&self) -> Option<NativeCommandStamp> {
+        let state=self.0.lock().ok()?; (!state.retired).then_some(state.current)
+    }
+    fn matches(state: &NativeCommandFenceState, stamp: NativeCommandStamp, scope: NativeCommandScope) -> bool {
+        if state.retired || stamp.run!=state.current.run { return false; }
+        if scope==NativeCommandScope::Shutdown { return true; }
+        if stamp.connection!=state.current.connection || stamp.procedure!=state.current.procedure
+            || stamp.owner_epoch!=state.current.owner_epoch { return false; }
+        if scope==NativeCommandScope::Leave { return state.connected; }
+        if stamp.cancellation!=state.current.cancellation{return false;}
+        if !state.connected { return false; }
+        if scope==NativeCommandScope::Procedure { return true; }
+        if stamp.actor.is_none() || stamp.actor!=state.current.actor { return false; }
+        scope==NativeCommandScope::Personal || (stamp.scene_epoch==state.current.scene_epoch
+            && stamp.map.is_some() && stamp.map==state.current.map)
+    }
+    pub(crate) fn is_current(&self,stamp:NativeCommandStamp)->bool {self.stamp()==Some(stamp)}
+    pub(crate) fn accepts_control_event(&self,stamp:NativeCommandStamp)->bool{self.stamp().is_some_and(|current|current.run==stamp.run&&current.connection==stamp.connection&&current.procedure==stamp.procedure&&current.cancellation==stamp.cancellation)}
+    pub(crate) fn is_retired(&self)->bool {self.0.lock().map(|s|s.retired).unwrap_or(true)}
+    fn mail_quote_delivery_failed(&self)->bool {self.0.lock().map(|s|s.mail_quote_delivery_failed==Some(mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:s.current.run,connection:s.current.connection})).unwrap_or(true)}
+    pub(crate) fn accepts(&self, stamp: NativeCommandStamp, world: bool) -> bool {
+        self.0.lock().ok().is_some_and(|s| Self::matches(&s,stamp,if world {NativeCommandScope::World} else {NativeCommandScope::Procedure}))
+    }
+    pub(crate) fn revoke_local_leave(&self,stamp:NativeCommandStamp)->bool{
+        let Ok(mut state)=self.0.lock() else{return false;};
+        if !Self::matches(&state,stamp,NativeCommandScope::Leave){return false;}
+        state.retire_npc_economy();
+        let Some(revision)=state.current.cancellation.checked_add(1) else{state.retired=true;for waker in state.waiters.values(){waker.wake_by_ref();}return false;};
+        state.current.cancellation=revision;
+        state.current.actor=None;state.current.map=None;state.entry_requested=false;state.entry_authorized=false;
+        for waker in state.waiters.values(){waker.wake_by_ref();}true
+    }
+    fn prepare(&self, stamp: NativeCommandStamp, command: GatewayCommand) -> Result<GatewayCommand,()> {
+        let mut state=self.0.lock().map_err(|_|())?;
+        let scope=native_command_scope(&command);
+        // Connect is a local attempt request. No stale connection/procedure is promoted.
+        let valid=if matches!(command,GatewayCommand::Connect) {
+            !state.retired && stamp==state.current
+        } else { Self::matches(&state,stamp,scope) };
+        if !valid { return Err(()); }
+
+        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::Login {..}
+            | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..})) {
+            state.retire_npc_economy();
+            state.npc_entry_pending=true;
+        }
+
+        if scope==NativeCommandScope::Leave {
+            state.retire_npc_economy();
+            let Some(revision)=state.current.cancellation.checked_add(1) else{state.retired=true;for waker in state.waiters.values(){waker.wake_by_ref();}return Err(());};
+            state.current.cancellation=revision;
+            state.current.actor=None;state.current.map=None;
+            state.entry_requested=false;state.entry_authorized=false;
+        }
+        if scope==NativeCommandScope::Shutdown { state.retire_npc_economy();state.retired=true;state.connected=false; }
+        if matches!(scope,NativeCommandScope::Leave|NativeCommandScope::Shutdown){for waker in state.waiters.values(){waker.wake_by_ref();}}
+        let sequence=state.next_sequence.ok_or(())?;
+        state.next_sequence=sequence.checked_add(1);
+        if state.outstanding.len()>=MAX_COMMANDS_PER_POLL+8 { return Err(()); }
+        state.outstanding.insert(sequence,stamp);
+        let npc_gold_buy_required=matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,..})
+            if state.npc_gold_buy.shop.goods.iter().any(|good|good.unique_id==*item_index&&good.uses_gold_buy_plan()));
+        let npc_purchase_source=if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{..})) {
+            npc_purchase_gateway::UiSource::at_publication(&state,stamp)
+        }else{None};
+        Ok(GatewayCommand::Owned(Box::new(OwnedGatewayCommand {command,stamp,sequence,commit_revision:state.current.cancellation,fence:self.clone(),mail_quote:None,mail_send:None,npc_gold_buy:None,npc_gold_buy_required,npc_purchase_source})))
+    }
+    fn allows(&self, owned:&OwnedGatewayCommand) -> bool {
+        self.0.lock().ok().is_some_and(|s| s.outstanding.get(&owned.sequence)==Some(&owned.stamp)
+            && (native_command_scope(&owned.command)==NativeCommandScope::Shutdown
+                || (matches!(owned.command,GatewayCommand::Connect)&&!s.retired&&s.current==owned.stamp)
+                || Self::matches(&s,owned.stamp,native_command_scope(&owned.command))))
+    }
+    fn retire(&self, owned:&OwnedGatewayCommand) {
+        let notify=if let Ok(mut state)=self.0.lock() {
+            state.waiters.remove(&owned.sequence);
+            if state.outstanding.remove(&owned.sequence)==Some(owned.stamp) {
+                if let GatewayCommand::Wire(command)=&owned.command {
+                    if native_transport_key(command).is_some() { state.terminals.push_back((owned.stamp,owned.sequence,command.clone())); }
+                }
+                owned.mail_quote.is_some()||owned.mail_send.is_some()||owned.npc_gold_buy.is_some()
+            }else{false}
+        }else{false};
+        if notify{owned.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent);if let Some(send)=&owned.mail_send{send.publish(mir2_client_bevy::mail_service::MailSendOutcome::DefinitelyUnsent);}if let Some(buy)=&owned.npc_gold_buy{buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::DefinitelyUnsent);}}
+    }
+    pub(crate) fn take_terminals(&self) -> Vec<(NativeCommandStamp,u64,NativeOutboundCommand)> {
+        self.0.lock().map(|mut s|s.terminals.drain(..).collect()).unwrap_or_default()
+    }
+    fn begin_connection(&self) -> Result<(),String> {
+        let mut s=self.0.lock().map_err(|_|"ownership fence poisoned")?;
+        if s.retired { return Err("command channel retired".into()); }
+        s.connected=true;s.connection_entry_revision=Some(s.current.cancellation);Ok(())
+    }
+    fn socket_lost(&self) {
+        if let Ok(mut s)=self.0.lock() {
+            s.retire_npc_economy();
+            for waker in s.waiters.values(){waker.wake_by_ref();}
+            s.connected=false;s.connection_entry_revision=None;s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
+            if let (Some(c),Some(o),Some(e),Some(p))=(s.current.connection.checked_add(1),s.current.owner_epoch.checked_add(1),s.current.scene_epoch.checked_add(1),s.current.procedure.checked_add(1)) {
+                s.current.connection=c;s.current.owner_epoch=o;s.current.scene_epoch=e;s.current.procedure=p;
+                s.mail_send_flight=None;
+            } else {s.retired=true;}
+        }
+    }
+    fn authorize_entry(&self, resumed:bool) {
+        if let Ok(mut s)=self.0.lock() {
+            if (resumed&&s.connection_entry_revision==Some(s.current.cancellation)) || (!resumed&&s.entry_requested) {s.entry_authorized=true;s.entry_requested=false;s.npc_entry_pending=false;}
+        }
+    }
+    fn observe_scene(&self, map:i32, boundary:bool) {
+        if let Ok(mut s)=self.0.lock() {
+            if boundary || s.current.map.is_some_and(|old|old!=map) {
+                s.retire_npc_economy();
+                for waker in s.waiters.values(){waker.wake_by_ref();}
+                if let Some(epoch)=s.current.scene_epoch.checked_add(1) {s.current.scene_epoch=epoch;} else {s.retired=true;}
+            }
+            s.current.map=Some(map);
+        }
+    }
+    fn revoke_owner(&self) {
+        if let Ok(mut s)=self.0.lock() {
+            s.retire_npc_economy();
+            for waker in s.waiters.values(){waker.wake_by_ref();}
+            s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
+            if let (Some(o),Some(p),Some(e))=(s.current.owner_epoch.checked_add(1),s.current.procedure.checked_add(1),s.current.scene_epoch.checked_add(1)) {
+                s.current.owner_epoch=o;s.current.procedure=p;s.current.scene_epoch=e;
+            } else {s.retired=true;}
+        }
+    }
+    #[cfg(test)]
+    pub(crate) fn test_owner_change(&self,actor:u32,map:i32)->NativeCommandStamp{self.revoke_owner();self.test_world_ready(actor,map)}
+    #[cfg(test)]
+    pub(crate) fn test_reconnect(&self,actor:u32,map:i32)->NativeCommandStamp{self.socket_lost();self.test_world_ready(actor,map)}
+    #[cfg(test)]
+    pub(crate) fn test_world_ready(&self,actor:u32,map:i32)->NativeCommandStamp{self.begin_connection().unwrap();self.authorize_entry(true);self.observe_scene(map,false);self.confirm_owner(actor).unwrap()}
+    #[cfg(test)]
+    pub(crate) fn test_scene_boundary(&self,map:i32){self.observe_scene(map,true);}
+    fn confirm_owner(&self,actor:u32) -> Option<NativeCommandStamp> {
+        let mut s=self.0.lock().ok()?;
+        if s.retired || !s.connected || actor==0 {return None;}
+        if s.current.actor!=Some(actor) {
+            if !s.entry_authorized {return None;}
+            s.retire_npc_economy();
+            let Some(epoch)=s.current.owner_epoch.checked_add(1) else {s.retired=true;for waker in s.waiters.values(){waker.wake_by_ref();}return None;};
+            s.current.owner_epoch=epoch;
+            s.current.actor=Some(actor);s.entry_authorized=false;
+        }
+        Some(s.current)
+    }
+    /// Ordinary owner display uses the same authenticated lifetime as commands.
+    /// This source channel cannot acknowledge an economic bundle or settlement.
+    fn prepare_hero_owner(&self,stamp:NativeCommandStamp,owner:&Value)
+        -> Result<Option<mir2_bevy_runtime::npc_purchase_economy::NativeHeroOwnerUpdate>,String> {
+        use mir2_bevy_runtime::npc_purchase_economy::{NativeHeroOwnerEpoch,NativeHeroOwnerGate};
+        let mut state=self.0.lock().map_err(|_|"Hero owner fence poisoned")?;
+        if state.npc_entry_pending || !Self::matches(&state,stamp,NativeCommandScope::World) {return Ok(None);}
+        if state.hero_owner_gate.as_ref().is_some_and(|(saved,_)|*saved!=stamp) {
+            if let Some((_,gate))=state.hero_owner_gate.take(){gate.retire();}
+        }
+        if state.hero_owner_gate.is_none() {
+            let epoch=NativeHeroOwnerEpoch {run:stamp.run,connection:stamp.connection,procedure:stamp.procedure,
+                owner_epoch:stamp.owner_epoch,scene_epoch:stamp.scene_epoch,cancellation:stamp.cancellation,
+                actor:stamp.actor.ok_or("Hero owner actor missing")?,map:stamp.map.ok_or("Hero owner map missing")?};
+            state.hero_owner_gate=Some((stamp,NativeHeroOwnerGate::new(epoch).map_err(|error|format!("Hero owner gate: {error:?}"))?));
+        }
+        state.hero_owner_gate.as_ref().expect("current Hero owner gate").1.prepare(owner)
+            .map(Some).map_err(|error|format!("Hero owner source: {error:?}"))
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum NativeSinkCommit { DefinitelyUnsent, Flushed, Unknown(String), Unavailable(String), MailQuoteReceiptUnavailable }
+
+/// Flush is irreversible transport progress, not permission to resurrect an
+/// entry whose local cancellation revision changed after start_send.
+fn apply_flushed_control_context(proof:Option<&OwnedGatewayCommand>,wire:&NativeOutboundCommand,context:&mut GatewaySessionContext,resume:&mut NativeResumeClientState)->bool{
+    if let Some(proof)=proof {
+        let Ok(mut state)=proof.fence.0.lock() else{return false;};
+        if state.current.cancellation!=proof.commit_revision
+            || !NativeCommandFence::matches(&state,proof.stamp,native_command_scope(&proof.command)){return false;}
+        update_session_context(context,wire);
+        if matches!(wire,NativeOutboundCommand::StartGame {..}){state.entry_requested=true;}
+        if matches!(wire,NativeOutboundCommand::LogOut|NativeOutboundCommand::Disconnect){resume.clear();}
+        true
+    }else{
+        #[cfg(test)] {update_session_context(context,wire);if matches!(wire,NativeOutboundCommand::LogOut|NativeOutboundCommand::Disconnect){resume.clear();}return true;}
+        #[cfg(not(test))] {let _=(wire,context,resume);false}
+    }
+}
+
+// One absolute transport budget covers readiness, local entry and flush.
+// A timeout never constitutes an acknowledgement or permission to replay.
+const NATIVE_TRANSPORT_TIMEOUT: Duration = Duration::from_secs(10);
+const NATIVE_TRANSPORT_TIMEOUT_ERROR: &str = "native gateway transport deadline expired";
+
+trait NativeWriteBudget {
+    fn expired(&self) -> bool;
+    fn poll_expired(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<()>;
+}
+struct TokioNativeWriteBudget {
+    deadline: tokio::time::Instant,
+    sleep: std::pin::Pin<Box<tokio::time::Sleep>>,
+}
+impl TokioNativeWriteBudget {
+    fn new() -> Self {
+        let deadline = tokio::time::Instant::now() + NATIVE_TRANSPORT_TIMEOUT;
+        Self { deadline, sleep: Box::pin(tokio::time::sleep_until(deadline)) }
+    }
+}
+impl NativeWriteBudget for TokioNativeWriteBudget {
+    fn expired(&self) -> bool { tokio::time::Instant::now() >= self.deadline }
+    fn poll_expired(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<()> {
+        use std::future::Future;
+        self.sleep.as_mut().poll(cx)
+    }
+}
+#[derive(Debug)]
+struct NativeWriteExpired;
+async fn await_native_write_phase<T>(budget: &mut impl NativeWriteBudget,
+    mut poll_phase: impl FnMut(&mut std::task::Context<'_>) -> std::task::Poll<T>) -> Result<T,NativeWriteExpired> {
+    std::future::poll_fn(|cx| {
+        // Expiry wins equality even if the sink becomes ready on the same poll.
+        if budget.expired() || budget.poll_expired(cx).is_ready() {
+            return std::task::Poll::Ready(Err(NativeWriteExpired));
+        }
+        poll_phase(cx).map(Ok)
+    }).await
+}
+
+#[cfg(test)]
+#[derive(Clone)]
+struct ManualNativeWriteBudget {
+    now: Arc<std::sync::atomic::AtomicU64>,
+    deadline: u64,
+    waker: Arc<Mutex<Option<std::task::Waker>>>,
+}
+#[cfg(test)]
+impl ManualNativeWriteBudget {
+    fn new(deadline: u64) -> Self {
+        Self { now: Arc::new(std::sync::atomic::AtomicU64::new(0)), deadline,
+            waker: Arc::new(Mutex::new(None)) }
+    }
+    fn advance_to(&self, now: u64) {
+        self.now.store(now,std::sync::atomic::Ordering::SeqCst);
+        let waker = self.waker.lock().unwrap().take();
+        if let Some(waker) = waker { waker.wake(); }
+    }
+}
+#[cfg(test)]
+impl NativeWriteBudget for ManualNativeWriteBudget {
+    fn expired(&self) -> bool {
+        self.now.load(std::sync::atomic::Ordering::SeqCst) >= self.deadline
+    }
+    fn poll_expired(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<()> {
+        *self.waker.lock().unwrap() = Some(cx.waker().clone());
+        if self.expired() { std::task::Poll::Ready(()) } else { std::task::Poll::Pending }
+    }
+}
+
+/// Real production writer helper: readiness may await, the ownership/claim/
+/// start_send interval cannot. A sequence is consumed even if start_send fails.
+async fn commit_owned_frame<S>(sink:&mut S,proof:Option<&OwnedGatewayCommand>,frame:Message) -> NativeSinkCommit
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    let mut budget=TokioNativeWriteBudget::new();
+    commit_owned_frame_with_budget(sink,proof,frame,&mut budget).await
+}
+
+async fn commit_owned_frame_with_budget<S>(sink:&mut S, proof:Option<&OwnedGatewayCommand>,frame:Message,budget:&mut impl NativeWriteBudget) -> NativeSinkCommit
+where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
+    use std::pin::Pin;
+    if let Some(owned)=proof{if matches!(&owned.command,GatewayCommand::Wire(NativeOutboundCommand::SendMail{..}))&&owned.mail_send.is_none(){owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;}}
+    let ready=await_native_write_phase(budget,|cx| {
+        if let Some(owned)=proof {
+            let Ok(mut state)=owned.fence.0.lock() else{return std::task::Poll::Ready(None);};
+            if state.outstanding.get(&owned.sequence)!=Some(&owned.stamp)
+                || !NativeCommandFence::matches(&state,owned.stamp,native_command_scope(&owned.command)) {
+                return std::task::Poll::Ready(None);
+            }
+            if let Some(buy)=&owned.npc_gold_buy{
+                if !state.npc_gold_buy.ready(owned.stamp)||state.npc_gold_buy.revision!=buy.ticket.source_revision
+                    || state.npc_gold_buy.inventory.as_ref().and_then(|inventory|serde_json::to_value(inventory).ok()).as_ref()!=Some(&buy.inventory)
+                    || !buy.gate.watch(buy.ticket,cx.waker()){return std::task::Poll::Ready(None);}
+            }
+            state.waiters.insert(owned.sequence,cx.waker().clone());
+        }
+        Pin::new(&mut *sink).poll_ready(cx).map(Some)
+    }).await;
+    if let Some(owned)=proof {if let Ok(mut state)=owned.fence.0.lock(){state.waiters.remove(&owned.sequence);}if let Some(buy)=&owned.npc_gold_buy{buy.gate.forget_waiter(buy.ticket);}}
+    match ready {
+        Err(_)=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());},
+        Ok(None)=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::DefinitelyUnsent;},
+        Ok(Some(Err(error)))=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::Unavailable(error.to_string());},
+        Ok(Some(Ok(())))=>{},
+    }
+    let (start_result,entered_at_ms)=if let Some(owned)=proof {
+        let Ok(mut state)=owned.fence.0.lock() else {return NativeSinkCommit::DefinitelyUnsent;};
+        if state.outstanding.get(&owned.sequence)!=Some(&owned.stamp)
+            || !NativeCommandFence::matches(&state,owned.stamp,native_command_scope(&owned.command)) {
+            drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+        }
+        if owned.mail_send.is_some()&&(state.mail_send_flight.is_some()||state.mail_quote_delivery_failed==Some(mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:owned.stamp.run,connection:owned.stamp.connection})){
+            drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+        }
+        if let Some(buy)=&owned.npc_gold_buy {
+            if !state.npc_gold_buy.ready(owned.stamp)||state.npc_gold_buy.revision!=buy.ticket.source_revision
+                || state.npc_gold_buy.inventory.as_ref().and_then(|inventory|serde_json::to_value(inventory).ok()).as_ref()!=Some(&buy.inventory) {
+                drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+            }
+        } else if let GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,..})=&owned.command {
+            if owned.npc_gold_buy_required||!state.npc_gold_buy.shop_ready||!state.npc_gold_buy.shop.allows_buy()
+                || !state.npc_gold_buy.shop.goods.iter().any(|good|good.unique_id==*item_index&&!good.uses_gold_buy_plan()) {
+                drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+            }
+        }
+        if budget.expired(){drop(state);owned.fence.retire(owned);return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
+        state.outstanding.remove(&owned.sequence);
+        // Final authorization and the local irreversible phase precede the
+        // call with no await/callback between them. Calling start_send itself
+        // enters, even when it returns Err; an observer cannot win mid-call.
+        if owned.mail_quote.as_ref().is_some_and(|quote|!quote.mark_entered()){return NativeSinkCommit::DefinitelyUnsent;}
+        if let Some(send)=owned.mail_send.as_ref(){if !send.mark_entered(){return NativeSinkCommit::DefinitelyUnsent;}state.mail_send_flight=Some(send.clone());}
+        let entered_at_ms=owned.mail_quote.as_ref().map(|_|mir2_client_bevy::hero_model::hero_clock_ms());
+        let result=if let Some(buy)=&owned.npc_gold_buy {
+            let Some(result)=buy.gate.commit(buy.ticket,||Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string())) else {
+                drop(state);buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::DefinitelyUnsent);return NativeSinkCommit::DefinitelyUnsent;
+            };result
+        } else {Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string())};
+        (result,entered_at_ms)
+    } else {if budget.expired(){return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}(Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string()),None)};
+    if let (Some(owned),Some(at_ms))=(proof,entered_at_ms) {
+        if !owned.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms}){return NativeSinkCommit::MailQuoteReceiptUnavailable;}
+    }
+    let buy=proof.and_then(|owned|owned.npc_gold_buy.as_ref());
+    let send=proof.and_then(|owned|owned.mail_send.as_ref());
+    if send.is_some_and(|send|!send.publish(mir2_client_bevy::mail_service::MailSendOutcome::Entered)){return NativeSinkCommit::MailQuoteReceiptUnavailable;}
+    if let Err(error)=start_result{if let Some(buy)=buy{buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Unknown);}if send.is_some_and(|send|!send.publish(mir2_client_bevy::mail_service::MailSendOutcome::Unknown)){return NativeSinkCommit::MailQuoteReceiptUnavailable;}return NativeSinkCommit::Unknown(error);}
+    let outcome=match await_native_write_phase(budget,|cx|Pin::new(&mut *sink).poll_flush(cx)).await {
+        Ok(Ok(()))=>NativeSinkCommit::Flushed,Ok(Err(error))=>NativeSinkCommit::Unknown(error.to_string()),
+        Err(_)=>NativeSinkCommit::Unknown(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),
+    };
+    if let Some(send)=send{let written=if matches!(&outcome,NativeSinkCommit::Flushed){mir2_client_bevy::mail_service::MailSendOutcome::Flushed}else{mir2_client_bevy::mail_service::MailSendOutcome::Unknown};if !send.publish(written){return NativeSinkCommit::MailQuoteReceiptUnavailable;}}
+    if let Some(buy)=buy{buy.publish(if matches!(&outcome,NativeSinkCommit::Flushed){mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Flushed}else{mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Unknown});}
+    outcome
+}
+
+/// Local event wrapper, not a shared protocol/NativeGatewayEvent change.
+#[derive(Debug, Clone)]
+pub(crate) struct NativeShellEnvelope {
+    pub(crate) stamp:Option<NativeCommandStamp>,
+    pub(crate) event:ShellGatewayEvent,
+}
+#[derive(Clone)]
+pub(crate) enum NativeShellEventSender {
+    Owned {sender:std::sync::mpsc::Sender<NativeShellEnvelope>,fence:NativeCommandFence},
+    #[cfg(test)]
+    Legacy(std::sync::mpsc::Sender<ShellGatewayEvent>),
+}
+pub(crate) trait NativeShellEventSink {
+    fn send_event(&self,event:ShellGatewayEvent)->Result<(),()>;
+}
+impl NativeShellEventSink for NativeShellEventSender {
+    fn send_event(&self,event:ShellGatewayEvent)->Result<(),()> {
+        match self {
+            Self::Owned {sender,fence}=>{
+                let Ok(state)=fence.0.lock() else{return Err(());};
+                if state.retired{return Err(());}
+                if matches!(&event,ShellGatewayEvent::StartGameAck {..})&&!(state.entry_requested||state.entry_authorized){return Ok(());}
+                sender.send(NativeShellEnvelope {stamp:Some(state.current),event}).map_err(|_|())
+            },
+            #[cfg(test)] Self::Legacy(sender)=>sender.send(event).map_err(|_|()),
+        }
+    }
+}
+#[cfg(test)]
+impl From<std::sync::mpsc::Sender<ShellGatewayEvent>> for NativeShellEventSender {
+    fn from(sender:std::sync::mpsc::Sender<ShellGatewayEvent>)->Self {Self::Legacy(sender)}
+}
+#[cfg(test)]
+impl NativeShellEventSink for std::sync::mpsc::Sender<ShellGatewayEvent> {
+    fn send_event(&self,event:ShellGatewayEvent)->Result<(),()> {self.send(event).map_err(|_|())}
 }
 
 /// Non-blocking producer handle for the sole WebSocket writer. Production uses
@@ -211,6 +1103,7 @@ pub enum GatewayCommand {
 #[derive(Clone)]
 pub struct GatewayCommandSender {
     inner: Arc<GatewayCommandSenderInner>,
+    fence: Option<NativeCommandFence>,
 }
 
 enum GatewayCommandSenderInner {
@@ -219,10 +1112,12 @@ enum GatewayCommandSenderInner {
         priority: Arc<Mutex<VecDeque<GatewayCommand>>>,
         transaction: Arc<Mutex<Option<GatewayCommand>>>,
     },
+    #[cfg(test)]
     Test(std::sync::mpsc::Sender<GatewayCommand>),
 }
 
 pub struct GatewayCommandReceiver {
+    fence: Option<NativeCommandFence>,
     receiver: std::sync::mpsc::Receiver<GatewayCommand>,
     priority: Option<Arc<Mutex<VecDeque<GatewayCommand>>>>,
     transaction: Option<Arc<Mutex<Option<GatewayCommand>>>>,
@@ -230,11 +1125,13 @@ pub struct GatewayCommandReceiver {
 
 /// Create the production command pair. No producer call blocks the UI thread.
 pub fn command_channel(capacity: usize) -> (GatewayCommandSender, GatewayCommandReceiver) {
+    let fence=NativeCommandFence::new();
     let (sender, receiver) = std::sync::mpsc::sync_channel(capacity.max(8));
     let priority = Arc::new(Mutex::new(VecDeque::with_capacity(3)));
     let transaction = Arc::new(Mutex::new(None));
     (
         GatewayCommandSender {
+            fence:Some(fence.clone()),
             inner: Arc::new(GatewayCommandSenderInner::Bounded {
                 sender,
                 priority: priority.clone(),
@@ -242,6 +1139,7 @@ pub fn command_channel(capacity: usize) -> (GatewayCommandSender, GatewayCommand
             }),
         },
         GatewayCommandReceiver {
+            fence:Some(fence),
             receiver,
             priority: Some(priority),
             transaction: Some(transaction),
@@ -249,17 +1147,118 @@ pub fn command_channel(capacity: usize) -> (GatewayCommandSender, GatewayCommand
     )
 }
 
+#[cfg(test)]
+pub(crate) fn test_command_channel(capacity:usize)->(GatewayCommandSender,GatewayCommandReceiver){
+    let (mut sender,mut receiver)=command_channel(capacity);
+    sender.fence=None;receiver.fence=None;(sender,receiver)
+}
+
+#[cfg(test)]
 impl From<std::sync::mpsc::Sender<GatewayCommand>> for GatewayCommandSender {
     fn from(sender: std::sync::mpsc::Sender<GatewayCommand>) -> Self {
         Self {
+            fence:None,
             inner: Arc::new(GatewayCommandSenderInner::Test(sender)),
         }
     }
 }
 
 impl GatewayCommandSender {
+    pub(crate) fn send_npc_gold_buy_with_bind<F>(
+        &self, command:GatewayCommand, stamp:Option<NativeCommandStamp>,
+        token:mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptToken, source_revision:u64,
+        gate:mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyGate, mut bind:F,
+    )->Result<mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyTicket,()>
+    where F:FnMut(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyTicket)->bool {
+        use mir2_client_bevy::npc_gold_buy_attempt::{NpcGoldBuyTicket,NpcGoldBuyAttemptOutcome};
+        let expected=gate.command(token).ok_or(())?;
+        if !matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,count,panel_type})
+            if *item_index==expected.item_index&&*count==expected.count&&*panel_type==expected.panel_type) {return Err(());}
+        let fence=self.fence.as_ref().ok_or(())?;
+        let GatewayCommand::Owned(mut owned)=fence.prepare(stamp.ok_or(())?,command)?else{return Err(());};
+        let s=owned.stamp;
+        let ticket=NpcGoldBuyTicket {run:s.run,connection:s.connection,procedure:s.procedure,
+            owner_epoch:s.owner_epoch,scene_epoch:s.scene_epoch,cancellation:s.cancellation,
+            actor:s.actor,map:s.map,sequence:owned.sequence,local_attempt_token:token.value(),source_revision};
+        let inventory=fence.0.lock().ok().and_then(|state| {
+            if !state.npc_gold_buy.ready(s)||state.npc_gold_buy.revision!=source_revision{return None;}
+            let current=state.npc_gold_buy.inventory.as_ref()?;
+            if !gate.matches_inventory(token,current){return None;}
+            serde_json::to_value(current).ok()
+        });
+        let Some(inventory)=inventory else{fence.retire(&owned);return Err(());};
+        if !ticket.is_valid()||!bind(ticket){fence.retire(&owned);return Err(());}
+        owned.npc_gold_buy=Some(Arc::new(NativeNpcGoldBuyProof{ticket,gate,
+            fence:Arc::downgrade(&fence.0),stamp:s,inventory}));
+        let rejected=owned.clone();
+        if self.send_enveloped(GatewayCommand::Owned(owned)).is_err() {
+            fence.retire(&rejected);
+            if let Some(proof)=&rejected.npc_gold_buy{proof.publish(NpcGoldBuyAttemptOutcome::DefinitelyUnsent);}
+            return Err(());
+        }
+        Ok(ticket)
+    }
+
+    pub(crate) fn send_mail_send_with_bind<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,bind:F)->Result<mir2_client_bevy::mail_service::MailSendTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailSendTicket)->bool {
+        self.send_mail_send_with_publisher(command,stamp,token,bind,NativeMailSendPublisher::native())
+    }
+    fn send_mail_send_with_publisher<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,mut bind:F,publisher:NativeMailSendPublisher)->Result<mir2_client_bevy::mail_service::MailSendTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailSendTicket)->bool {
+        use mir2_client_bevy::mail_service::MailSendTicket;
+        if token==0||!matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::SendMail{..})){return Err(());}
+        let fence=self.fence.as_ref().ok_or(())?;
+        let GatewayCommand::Owned(mut owned)=fence.prepare(stamp.ok_or(())?,command)?else{return Err(());};let s=owned.stamp;
+        let ticket=MailSendTicket{run:s.run,connection:s.connection,procedure:s.procedure,owner_epoch:s.owner_epoch,scene_epoch:s.scene_epoch,cancellation:s.cancellation,actor:s.actor,map:s.map,sequence:owned.sequence,local_send_token:token};
+        if !ticket.is_valid()||!bind(ticket){fence.retire(&owned);return Err(());}
+        owned.mail_send=Some(Arc::new(NativeMailSendProof{ticket,publisher,fence:Arc::downgrade(&fence.0),stamp:s,state:std::sync::atomic::AtomicU8::new(1),write_reported:std::sync::atomic::AtomicBool::new(false)}));
+        let mut rejected=owned.clone();
+        if self.send_enveloped(GatewayCommand::Owned(owned)).is_err(){if let Some(send)=&rejected.mail_send{send.state.store(4,std::sync::atomic::Ordering::SeqCst);}rejected.mail_send=None;fence.retire(&rejected);return Err(());}Ok(ticket)
+    }
+    pub(crate) fn send_mail_quote_with_bind<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,bind:F)->Result<mir2_client_bevy::mail_service::MailQuoteTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailQuoteTicket)->bool {
+        self.send_mail_quote_with_publisher(command,stamp,token,bind,NativeMailQuotePublisher::native())
+    }
+    fn send_mail_quote_with_publisher<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,mut bind:F,publisher:NativeMailQuotePublisher)->Result<mir2_client_bevy::mail_service::MailQuoteTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailQuoteTicket)->bool {
+        use mir2_client_bevy::mail_service::MailQuoteTicket;
+        if token==0||!matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::MailCost{..})){return Err(());}
+        let fence=self.fence.as_ref().ok_or(())?;
+        let prepared=fence.prepare(stamp.ok_or(())?,command)?;
+        let GatewayCommand::Owned(mut owned)=prepared else{return Err(());};
+        let s=owned.stamp;
+        let ticket=MailQuoteTicket{run:s.run,connection:s.connection,procedure:s.procedure,owner_epoch:s.owner_epoch,scene_epoch:s.scene_epoch,cancellation:s.cancellation,actor:s.actor,map:s.map,sequence:owned.sequence,local_quote_token:token};
+        if !ticket.is_valid()||!bind(ticket){fence.retire(&owned);return Err(());}
+        owned.mail_quote=Some(Arc::new(NativeMailQuoteProof{ticket,publisher,fence:Arc::downgrade(&fence.0),stamp:owned.stamp,state:std::sync::atomic::AtomicU8::new(1)}));
+        let mut rejected=owned.clone();
+        if self.send_enveloped(GatewayCommand::Owned(owned)).is_err(){
+            // Never admitted: caller rolls back this exact prebound ticket.
+            if let Some(quote)=rejected.mail_quote.as_ref(){quote.state.store(4,std::sync::atomic::Ordering::SeqCst);}
+            rejected.mail_quote=None;fence.retire(&rejected);return Err(());
+        }
+        Ok(ticket)
+    }
+    pub(crate) fn ownership_fence(&self)->Option<NativeCommandFence>{self.fence.clone()}
+    pub(crate) fn initial_stamp(&self)->Option<NativeCommandStamp>{self.fence.as_ref().and_then(NativeCommandFence::stamp)}
+    pub(crate) fn send_with_stamp(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>)->Result<(),()>{self.send_with_ticket(command,stamp).map(|_|())}
+    pub(crate) fn send_with_ticket(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>)->Result<Option<(NativeCommandStamp,u64)>,()>{
+        let command=if let Some(fence)=&self.fence {
+            if matches!(command,GatewayCommand::Owned(_)){return Err(());}
+            fence.prepare(stamp.ok_or(())?,command)?
+        }else{command};
+        let ticket=match &command {GatewayCommand::Owned(owned)=>Some((owned.stamp,owned.sequence)),_=>None};
+        let rejected=command.clone();
+        let result=self.send_enveloped(command);
+        if result.is_err(){if let GatewayCommand::Owned(owned)=rejected {owned.fence.retire(&owned);}}
+        result.map(|_|ticket)
+    }
     pub fn send(&self, command: GatewayCommand) -> Result<(), ()> {
+        if self.fence.is_some() && !matches!(command,GatewayCommand::Shutdown) {return Err(());}
+        self.send_with_stamp(command,self.initial_stamp())
+    }
+    fn send_enveloped(&self, command: GatewayCommand) -> Result<(), ()> {
         match self.inner.as_ref() {
+            #[cfg(test)]
             GatewayCommandSenderInner::Test(sender) => sender.send(command).map_err(|_| ()),
             GatewayCommandSenderInner::Bounded {
                 sender,
@@ -269,18 +1268,19 @@ impl GatewayCommandSender {
                 if is_priority_command(&command) {
                     let mut queue = priority
                         .lock()
-                        .unwrap_or_else(|poisoned| poisoned.into_inner());
-                    if !queue
+                        .map_err(|_|())?;
+                    if matches!(command,GatewayCommand::Owned(_)) || !queue
                         .iter()
                         .any(|queued| same_priority_kind(queued, &command))
                     {
+                        if queue.len()>=3{return Err(());}
                         queue.push_back(command);
                     }
                     Ok(())
                 } else if is_correlated_transaction(&command) {
                     let mut slot = transaction
                         .lock()
-                        .unwrap_or_else(|poisoned| poisoned.into_inner());
+                        .map_err(|_|())?;
                     if slot.is_some() {
                         return Err(());
                     }
@@ -301,7 +1301,20 @@ impl GatewayCommandSender {
 }
 
 impl GatewayCommandReceiver {
-    fn try_recv(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
+    #[cfg(test)]
+    pub(crate) fn try_recv_for_test(&mut self)->Result<GatewayCommand,std::sync::mpsc::TryRecvError>{self.try_recv()}
+    fn try_recv(&mut self)->Result<GatewayCommand,std::sync::mpsc::TryRecvError>{
+        for _ in 0..MAX_COMMANDS_PER_POLL+8 {
+            let command=self.take_next()?;
+            #[cfg(test)] if self.fence.is_none(){return Ok(command);}
+            if let GatewayCommand::Owned(owned)=&command {
+                if owned.fence.allows(owned){return Ok(command);}
+                owned.fence.retire(owned);
+            }
+        }
+        Err(std::sync::mpsc::TryRecvError::Empty)
+    }
+    fn take_next(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
         if let Some(priority) = &self.priority {
             if let Some(command) = priority
                 .lock()
@@ -326,7 +1339,7 @@ impl GatewayCommandReceiver {
 
 fn is_priority_command(command: &GatewayCommand) -> bool {
     matches!(
-        command,
+        command.payload(),
         GatewayCommand::Shutdown
             | GatewayCommand::Wire(NativeOutboundCommand::LogOut)
             | GatewayCommand::Wire(NativeOutboundCommand::Disconnect)
@@ -335,14 +1348,14 @@ fn is_priority_command(command: &GatewayCommand) -> bool {
 
 fn is_game_shop_transaction(command: &GatewayCommand) -> bool {
     matches!(
-        command,
+        command.payload(),
         GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy { .. })
     )
 }
 
 fn is_storage_transaction(command: &GatewayCommand) -> bool {
     matches!(
-        command,
+        command.payload(),
         GatewayCommand::Wire(
             NativeOutboundCommand::StoreItem { .. } | NativeOutboundCommand::TakeBackItem { .. }
         )
@@ -353,13 +1366,17 @@ fn is_correlated_transaction(command: &GatewayCommand) -> bool {
     is_game_shop_transaction(command) || is_storage_transaction(command)
 }
 
+pub(crate) fn game_shop_request_from_wire(wire:&NativeOutboundCommand)->Option<GameShopRequest>{
+    game_shop_request_from_command(&GatewayCommand::Wire(wire.clone()))
+}
+
 fn game_shop_request_from_command(command: &GatewayCommand) -> Option<GameShopRequest> {
     let GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
         request_id,
         g_index,
         quantity,
         price_type,
-    }) = command
+    }) = command.payload()
     else {
         return None;
     };
@@ -379,6 +1396,11 @@ where
 {
     if !is_correlated_transaction(command) {
         return false;
+    }
+    if let GatewayCommand::Owned(owned)=command {
+        // Exact local terminal; an old queued request cannot reset current runtime models.
+        owned.fence.retire(owned);
+        return true;
     }
     if is_game_shop_transaction(command) {
         gate.clear_terminal();
@@ -404,8 +1426,9 @@ where
 }
 
 fn same_priority_kind(left: &GatewayCommand, right: &GatewayCommand) -> bool {
-    matches!(
-        (left, right),
+    let same_owner=match (left,right){(GatewayCommand::Owned(a),GatewayCommand::Owned(b))=>a.stamp==b.stamp,(GatewayCommand::Owned(_),_)|(_,GatewayCommand::Owned(_))=>false,_=>true};
+    same_owner && matches!(
+        (left.payload(), right.payload()),
         (GatewayCommand::Shutdown, GatewayCommand::Shutdown)
             | (
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut),
@@ -419,15 +1442,18 @@ fn same_priority_kind(left: &GatewayCommand, right: &GatewayCommand) -> bool {
 }
 
 pub trait CommandSource {
+    fn ownership_fence(&self)->Option<NativeCommandFence>{None}
     fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError>;
 }
 
 impl CommandSource for GatewayCommandReceiver {
+    fn ownership_fence(&self)->Option<NativeCommandFence>{self.fence.clone()}
     fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
         self.try_recv()
     }
 }
 
+#[cfg(test)]
 impl CommandSource for std::sync::mpsc::Receiver<GatewayCommand> {
     fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
         self.try_recv()
@@ -461,9 +1487,10 @@ struct NativeLightingPublisher {
 impl NativeLightingPublisher {
     fn for_connection(generation: u64) -> Self {
         let assets = crate::assets::asset_root()
-            .map(|root| NativeLightAssets::from_asset_root(&root))
+            .map(|root: std::path::PathBuf| NativeLightAssets::from_asset_root(root.as_path()))
             .unwrap_or_default();
         let mut bridge = NativeLightingBridge::default();
+        bridge.set_force_daylight(crate::map_parser::lighting::force_daylight_enabled());
         bridge.set_generation(generation);
         Self {
             bridge,
@@ -521,7 +1548,7 @@ impl NativeLightingPublisher {
                     .unwrap_or_default();
                 let state = self.bridge.build_render_state(
                     payload,
-                    map.as_deref(),
+                    map.as_ref(),
                     &self.map_frame_offsets,
                     &native_lighting_default_motion(),
                     &self.assets,
@@ -587,6 +1614,95 @@ impl NativeLightingPublisher {
 struct GatewaySessionContext {
     account_id: Option<String>,
     character_index: Option<i32>,
+    mail_stream: Option<NativeMailServiceStream>,
+}
+
+/// The publisher is selected at entry, never inferred from a missing runtime.
+/// Only the explicit cfg(test) loopback seam can substitute controlled delivery.
+#[derive(Clone)]
+enum NativeMailServicePublisher {
+    Native,
+    #[cfg(test)]
+    Controlled {
+        run: u64,
+        publish: Arc<dyn Fn(mir2_client_bevy::mail_service::MailServiceInboxMessage) -> bool + Send + Sync>,
+    },
+}
+
+#[derive(Clone)]
+struct NativeMailServiceStream {
+    epoch: mir2_client_bevy::mail_service::MailServiceStreamEpoch,
+    publisher: NativeMailServicePublisher,
+    fence:Option<NativeCommandFence>,
+}
+
+impl NativeMailServicePublisher {
+    fn publish(&self, message: mir2_client_bevy::mail_service::MailServiceInboxMessage) -> bool {
+        use mir2_client_bevy::mail_service::MailServiceInboxMessage;
+        match self {
+            Self::Native => match message {
+                MailServiceInboxMessage::StreamStarted(marker) => mir2_bevy_runtime::native_ingest::push_native_mail_service_stream_started(marker),
+                MailServiceInboxMessage::Delivery(delivery) => mir2_bevy_runtime::native_ingest::push_native_mail_service(delivery),
+                MailServiceInboxMessage::QuoteReceipt(receipt)=>mir2_bevy_runtime::native_ingest::push_native_mail_quote_receipt(receipt),
+                MailServiceInboxMessage::SendReceipt(receipt)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_receipt(receipt),
+                MailServiceInboxMessage::SendAcknowledgement(ack)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_acknowledgement(ack),
+            },
+            #[cfg(test)]
+            Self::Controlled { publish, .. } => publish(message),
+        }
+    }
+
+    fn start_socket(&self, fence: Option<&NativeCommandFence>, _generation: u64) -> Result<NativeMailServiceStream, String> {
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage, MailServiceStreamEpoch, MailServiceStreamStarted};
+        // Called once, after begin_connection and the successful handshake,
+        // before any socket.next(). Owner/procedure changes do not relabel it.
+        let epoch = if let Some(fence) = fence {
+            let state=fence.0.lock().map_err(|_| "native mail stream fence poisoned".to_owned())?;
+            if !state.connected || state.retired { return Err("native mail stream fence is not connected".to_owned()); }
+            let stamp=state.current;
+            MailServiceStreamEpoch { run: stamp.run, connection: stamp.connection }
+        } else {
+            match self {
+                Self::Native => return Err("native mail stream requires a trusted command fence".to_owned()),
+                #[cfg(test)]
+                Self::Controlled { run, .. } => MailServiceStreamEpoch { run: *run, connection: _generation },
+            }
+        };
+        if !epoch.is_valid() { return Err("native mail stream epoch is invalid".to_owned()); }
+        if !self.publish(MailServiceInboxMessage::StreamStarted(MailServiceStreamStarted { epoch })) {
+            return Err("native mail stream marker was not accepted".to_owned());
+        }
+        Ok(NativeMailServiceStream { epoch, publisher: self.clone(),fence:fence.cloned() })
+    }
+}
+
+impl NativeMailServiceStream {
+    fn has_send_flight(&self)->bool{self.fence.as_ref().is_some_and(|fence|fence.0.lock().ok().is_some_and(|state|state.mail_send_flight.as_ref().is_some_and(|send|send.ticket.epoch()==self.epoch)))}
+    fn acknowledge_send(&self,result:i32)->bool{
+        use mir2_client_bevy::mail_service::{MailSendAcknowledgement,MailServiceInboxMessage};
+        if !matches!(result,1|-1){return true;}
+        let Some(fence)=self.fence.as_ref()else{return true;};
+        let send=match fence.0.lock(){Ok(mut state)=>{
+            if !state.mail_send_flight.as_ref().is_some_and(|send|send.ticket.epoch()==self.epoch){return true;}state.mail_send_flight.take()
+        },Err(_)=>return false};
+        let Some(send)=send else{return true;};
+        // Captured exact old ticket; no owner reset or latest stamp relabels it.
+        send.deliver(MailServiceInboxMessage::SendAcknowledgement(MailSendAcknowledgement{ticket:send.ticket,result}))
+    }
+    fn deliver(&self, event: mir2_client_bevy::mail_service::MailServiceEvent) -> bool {
+        use mir2_client_bevy::mail_service::{MailServiceDelivery, MailServiceInboxMessage};
+        self.publisher.publish(MailServiceInboxMessage::Delivery(MailServiceDelivery { epoch: self.epoch, event }))
+    }
+}
+
+#[cfg(test)]
+fn controlled_mail_service_publisher(
+    publish: impl Fn(mir2_client_bevy::mail_service::MailServiceInboxMessage) -> bool + Send + Sync + 'static,
+) -> NativeMailServicePublisher {
+    // Isolated logic fixtures have no NativeInbound resource or ownership
+    // channel. Allocate a positive test run explicitly; production cannot use it.
+    let run = NativeCommandFence::new().stamp().expect("controlled test run").run;
+    NativeMailServicePublisher::Controlled { run, publish: Arc::new(publish) }
 }
 
 #[derive(Default)]
@@ -753,20 +1869,32 @@ struct WalletState {
 /// transitions. A missing JSON field means "no update"; it must not erase the
 /// complete `UserInformation` values that were already delivered.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-struct NativeUiPlayerCursor {
+pub(crate) struct NativeUiPlayerCursor {
+    npc_shop_uses_pearls: bool,
+    // Raw f32 bits retain Eq on the cursor and survive partial snapshots.
+    npc_shop_purchase_rate_bits: Option<u32>,
+    npc_shop_panel_type: u8,
+    npc_shop_hide_added_stats: bool,
     hp: Option<i32>,
     max_hp: Option<i32>,
     mp: Option<i32>,
     max_mp: Option<i32>,
     gold: Option<u32>,
     credit: Option<u32>,
+    crystal_stats: Option<Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>>,
     level: Option<u32>,
     experience: Option<i64>,
     max_experience: Option<i64>,
     current_weight: Option<u16>,
+    player_weights: Option<mir2_client_bevy::read_model::PlayerWeights>,
     max_weight: Option<u16>,
     name: Option<String>,
     class_name: Option<String>,
+    gender: Option<String>,
+    hair: Option<u8>,
+    wing_effect: Option<u8>,
+    guild_name: Option<String>,
+    guild_rank_name: Option<String>,
     map_name: Option<String>,
     in_safe_zone: Option<bool>,
 }
@@ -776,7 +1904,19 @@ impl NativeUiPlayerCursor {
         *self = Self::default();
     }
 
-    fn observe_world_snapshot(&mut self, payload: &Value) {
+    pub(crate) fn observe_world_snapshot(&mut self, payload: &Value) {
+        if let Some(source) = payload.get("nativeNpcShop") {
+            self.npc_shop_uses_pearls = source.get("packetType").and_then(Value::as_str) == Some("NPCPearlGoods");
+            self.npc_shop_purchase_rate_bits = source.get("rate").and_then(Value::as_f64)
+                .map(|rate| rate as f32).filter(|rate| rate.is_finite() && *rate >= 0.0).map(f32::to_bits);
+            self.npc_shop_panel_type = source.get("panelType").and_then(Value::as_u64)
+                .and_then(|panel| u8::try_from(panel).ok()).unwrap_or(0);
+            self.npc_shop_hide_added_stats = source.get("hideAddedStats").and_then(Value::as_bool).unwrap_or(false);
+        }
+        // Full world snapshots own this optional block; absent/null must clear old weights.
+        self.player_weights = payload
+            .get("playerWeights")
+            .and_then(|value| serde_json::from_value(value.clone()).ok());
         if let Some(value) = value_i32(payload.get("playerHp")) {
             self.hp = Some(value);
         }
@@ -794,6 +1934,14 @@ impl NativeUiPlayerCursor {
         }
         if let Some(value) = value_u32(payload.get("credit")) {
             self.credit = Some(value);
+        }
+        if let Some(value) = payload.get("playerCrystalStats") {
+            if let Ok(stats) = serde_json::from_value::<
+                Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>,
+            >(value.clone())
+            {
+                self.crystal_stats = Some(stats);
+            }
         }
         if let Some(value) = value_i64(payload.get("playerExperience")) {
             self.experience = Some(value);
@@ -840,6 +1988,37 @@ impl NativeUiPlayerCursor {
             self_player.and_then(|entity| entity.get("class").or_else(|| entity.get("className"))),
         ) {
             self.class_name = Some(value);
+        }
+        if let Some(value) = value_string(
+            self_player.and_then(|entity| entity.get("gender").or_else(|| entity.get("genderKey"))),
+        ) {
+            self.gender = Some(value);
+        }
+        if let Some(value) = value_u32(self_player.and_then(|entity| entity.get("hair")))
+            .and_then(|value| u8::try_from(value).ok())
+        {
+            self.hair = Some(value);
+        }
+        if let Some(value) = value_u32(self_player.and_then(|entity| {
+            entity
+                .get("wingEffect")
+                .or_else(|| entity.get("wing_effect"))
+        }))
+        .and_then(|value| u8::try_from(value).ok())
+        {
+            // Zero is an explicit authoritative clear; a missing field is a
+            // partial snapshot and must preserve the previous value.
+            self.wing_effect = Some(value);
+        }
+        if let Some(value) = value_string(self_player.and_then(|entity| entity.get("guildName"))) {
+            self.guild_name = Some(value);
+        }
+        if let Some(value) = value_string(self_player.and_then(|entity| {
+            entity
+                .get("guildRankName")
+                .or_else(|| entity.get("guildRank"))
+        })) {
+            self.guild_rank_name = Some(value);
         }
     }
 
@@ -898,6 +2077,26 @@ impl NativeUiPlayerCursor {
         {
             self.class_name = Some(value);
         }
+        if let Some(value) =
+            value_string(payload.get("gender").or_else(|| payload.get("genderKey")))
+        {
+            self.gender = Some(value);
+        }
+        if let Some(value) =
+            value_u32(payload.get("hair")).and_then(|value| u8::try_from(value).ok())
+        {
+            self.hair = Some(value);
+        }
+        if let Some(value) = value_string(payload.get("guildName")) {
+            self.guild_name = Some(value);
+        }
+        if let Some(value) = value_string(
+            payload
+                .get("guildRankName")
+                .or_else(|| payload.get("guildRank")),
+        ) {
+            self.guild_rank_name = Some(value);
+        }
         if let Some(value) = payload
             .get("inSafeZone")
             .or_else(|| payload.get("in_safe_zone"))
@@ -919,7 +2118,7 @@ impl NativeUiPlayerCursor {
         }
     }
 
-    fn to_read_model_json(&self) -> Value {
+    pub(crate) fn to_read_model_json(&self) -> Value {
         json!({
             "player": {
                 "hp": self.hp.unwrap_or_default(),
@@ -928,17 +2127,283 @@ impl NativeUiPlayerCursor {
                 "maxMp": self.max_mp.unwrap_or_default(),
                 "gold": self.gold.unwrap_or_default(),
                 "credit": self.credit.unwrap_or_default(),
+                "crystalStats": self.crystal_stats.clone(),
                 "level": self.level.unwrap_or_default(),
                 "experience": self.experience.unwrap_or_default(),
                 "maxExperience": self.max_experience.unwrap_or_default(),
                 "currentWeight": self.current_weight.unwrap_or_default(),
+                "currentWeightKnown":self.current_weight.is_some(),
+                "weights":self.player_weights,
                 "maxWeight": self.max_weight.unwrap_or_default(),
                 "name": self.name,
                 "className": self.class_name,
+                "gender": self.gender,
+                "hair": self.hair,
+                "wingEffect": self.wing_effect,
+                "guildName": self.guild_name,
+                "guildRankName": self.guild_rank_name,
                 "mapName": self.map_name,
                 "inSafeZone": self.in_safe_zone.unwrap_or(false),
             }
         })
+    }
+}
+
+fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)> {
+    let level = u16::try_from(cursor.level?).ok()?;
+    let class = match cursor
+        .class_name
+        .as_deref()?
+        .trim()
+        .to_ascii_lowercase()
+        .as_str()
+    {
+        "warrior" => MirClass::Warrior,
+        "wizard" => MirClass::Wizard,
+        "taoist" => MirClass::Taoist,
+        "assassin" => MirClass::Assassin,
+        "archer" => MirClass::Archer,
+        _ => return None,
+    };
+    Some((level, class))
+}
+
+/// Crystal's `UserItem` wire carrier has only an item index. Resolve it only
+/// when that index names exactly one row in the extracted Crystal database;
+/// an ambiguous or absent index must stay partial rather than choosing a row.
+fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplate> {
+    let mut matches = crystal_item_manifest()
+        .items
+        .into_iter()
+        .filter(|item| item.item_index == item_index);
+    let item = matches.next()?;
+    if matches.next().is_some() {
+        return None;
+    }
+    Some(item)
+}
+
+fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> {
+    serde_json::from_value(serde_json::to_value(unique_crystal_tooltip_template(item_index)?).ok()?)
+        .ok()
+}
+
+fn crystal_wire_item_info(value: &Value) -> Option<CrystalItemInfoModel> {
+    let mut object = value.as_object()?.clone();
+    if !object.contains_key("item_index") {
+        object.insert(
+            "item_index".to_owned(),
+            object.get("index").cloned().unwrap_or(Value::Null),
+        );
+    }
+    serde_json::from_value(Value::Object(object)).ok()
+}
+
+fn crystal_real_tooltip_info(
+    info: &CrystalItemInfoModel,
+    viewer: Option<(u16, MirClass)>,
+) -> Option<CrystalItemInfoModel> {
+    let (level, class) = viewer?;
+    if !info.class_based && !info.level_based {
+        return Some(info.clone());
+    }
+    let origin = unique_crystal_tooltip_template(info.item_index)?;
+    let origin_model =
+        serde_json::from_value::<CrystalItemInfoModel>(serde_json::to_value(&origin).ok()?).ok()?;
+    if origin_model != *info {
+        return None;
+    }
+    serde_json::from_value(
+        serde_json::to_value(crystal_real_item_for_player(&origin, level, class)).ok()?,
+    )
+    .ok()
+}
+
+fn crystal_tooltip_source_for_user_item(
+    value: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<CrystalItemTooltipSourceModel> {
+    let user_item = serde_json::from_value::<CrystalUserItemModel>(value.clone()).ok()?;
+    let info = unique_crystal_tooltip_info(user_item.item_index)?;
+    let viewer = crystal_tooltip_viewer(cursor);
+    let socket_infos = user_item
+        .slots
+        .iter()
+        .map(|slot| {
+            slot.as_ref()
+                .and_then(|socket| unique_crystal_tooltip_info(socket.item_index))
+        })
+        .collect::<Vec<_>>();
+    let real_socket_infos = if viewer.is_some() {
+        socket_infos
+            .iter()
+            .map(|socket| {
+                socket
+                    .as_ref()
+                    .and_then(|socket| crystal_real_tooltip_info(socket, viewer))
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+    Some(CrystalItemTooltipSourceModel {
+        real_info: crystal_real_tooltip_info(&info, viewer),
+        info,
+        user_item: Some(user_item),
+        socket_infos,
+        real_socket_infos,
+    })
+}
+
+/// Mirrors `new UserItem(info)` at the two Crystal catalogue-only surfaces.
+/// GameShop supplies a count; QuestCell leaves the constructor's zero count
+/// alone and paints the reward quantity as a separate cell label.
+fn crystal_tooltip_source_for_preview(
+    info: CrystalItemInfoModel,
+    count: u16,
+    cursor: &NativeUiPlayerCursor,
+) -> CrystalItemTooltipSourceModel {
+    let user_item = CrystalUserItemModel {
+        item_index: info.item_index,
+        current_dura: info.durability,
+        max_dura: info.durability,
+        count,
+        identified: false,
+        slots: vec![None; usize::from(info.slots)],
+        ..Default::default()
+    };
+    let viewer = crystal_tooltip_viewer(cursor);
+    CrystalItemTooltipSourceModel {
+        real_info: crystal_real_tooltip_info(&info, viewer),
+        info,
+        user_item: Some(user_item),
+        socket_infos: Vec::new(),
+        real_socket_infos: Vec::new(),
+    }
+}
+
+fn add_quest_reward_tooltip_sources(payload: &mut Value, cursor: &NativeUiPlayerCursor) {
+    let Some(payload_object) = payload.as_object_mut() else {
+        return;
+    };
+    let raw_info = payload_object.get("info").cloned();
+    let Some(rewards) = payload_object
+        .get_mut("rewards")
+        .and_then(Value::as_object_mut)
+    else {
+        return;
+    };
+    for (rendered_key, raw_key) in [
+        ("items", "rewards_fixed_item"),
+        ("selectItems", "rewards_select_item"),
+    ] {
+        let raw_items = raw_info
+            .as_ref()
+            .and_then(|info| info.get(raw_key))
+            .and_then(Value::as_array);
+        let Some(rendered_items) = rewards.get_mut(rendered_key).and_then(Value::as_array_mut)
+        else {
+            continue;
+        };
+        for (index, rendered) in rendered_items.iter_mut().enumerate() {
+            let info = raw_items
+                .and_then(|items| items.get(index))
+                .and_then(|reward| reward.get("item"))
+                .and_then(crystal_wire_item_info)
+                .or_else(|| {
+                    value_i32(rendered.get("itemIndex")).and_then(unique_crystal_tooltip_info)
+                });
+            let (Some(info), Some(object)) = (info, rendered.as_object_mut()) else {
+                continue;
+            };
+            object.insert(
+                "tooltipSource".to_owned(),
+                json!(crystal_tooltip_source_for_preview(info, 0, cursor)),
+            );
+        }
+    }
+}
+
+fn enrich_guild_storage_item(value: &mut Value, cursor: &NativeUiPlayerCursor) {
+    let Some(item) = value.get("item").cloned() else {
+        return;
+    };
+    let Some(source) = crystal_tooltip_source_for_user_item(&item, cursor) else {
+        return;
+    };
+    if let Some(object) = value.as_object_mut() {
+        object.insert("tooltipSource".to_owned(), json!(source));
+    }
+}
+
+fn add_social_item_tooltip_sources(
+    packet: &str,
+    payload: &mut Value,
+    cursor: &NativeUiPlayerCursor,
+) {
+    match packet {
+        "GuildStorageList" => {
+            if let Some(items) = payload.get_mut("items").and_then(Value::as_array_mut) {
+                for item in items.iter_mut().filter(|item| !item.is_null()) {
+                    enrich_guild_storage_item(item, cursor);
+                }
+            }
+        }
+        "GuildStorageItemChange" => {
+            if let Some(item) = payload.get_mut("item").filter(|item| !item.is_null()) {
+                enrich_guild_storage_item(item, cursor);
+            }
+        }
+        "TradeItem" => {
+            let source_items = payload.get("tradeItems").and_then(Value::as_array).cloned();
+            let Some(source_items) = source_items else {
+                return;
+            };
+            let partner_items = source_items
+                .into_iter()
+                .map(|item| {
+                    if item.is_null() {
+                        return Value::Null;
+                    }
+                    let Some(mut entry) = item.as_object().cloned() else {
+                        // Preserve malformed values for the bounded model to
+                        // reject; do not turn them into invented empty items.
+                        return item;
+                    };
+                    let item_index = value_i32(item.get("item_index"));
+                    if let Some(item_index) = item_index {
+                        entry.insert("itemIndex".to_owned(), json!(item_index));
+                        let name = unique_crystal_tooltip_info(item_index)
+                            .map(|info| info.name)
+                            .unwrap_or_else(|| format!("Item #{item_index}"));
+                        entry.insert("name".to_owned(), json!(name));
+                    }
+                    if let Some(unique_id) = value_u64(item.get("unique_id")) {
+                        entry.insert("uniqueId".to_owned(), json!(unique_id));
+                    }
+                    if let Some(source) = crystal_tooltip_source_for_user_item(&item, cursor) {
+                        entry.insert("tooltipSource".to_owned(), json!(source));
+                    }
+                    Value::Object(entry)
+                })
+                .collect();
+            if let Some(object) = payload.as_object_mut() {
+                object.insert("partnerItems".to_owned(), Value::Array(partner_items));
+            }
+        }
+        _ => {}
+    }
+}
+
+fn add_packet_item_tooltip_sources(packet: &mut PacketEvent, cursor: &NativeUiPlayerCursor) {
+    match packet {
+        PacketEvent::NewQuestInfo(info) => {
+            add_quest_reward_tooltip_sources(&mut info.payload, cursor)
+        }
+        PacketEvent::Other { packet, payload } => {
+            add_social_item_tooltip_sources(packet, payload, cursor)
+        }
+        _ => {}
     }
 }
 
@@ -963,7 +2428,7 @@ struct SkillPacketPatch {
     /// Tick-less deltas may affect only one bounded snapshot serial. This
     /// prevents an event without an ordering tick from living forever.
     zero_tick_expires_at_snapshot_serial: Option<u64>,
-    cooldown_remaining_ticks: Option<u32>,
+    delay_ms: Option<u32>,
     level: Option<u8>,
     experience: Option<u16>,
     can_use: Option<bool>,
@@ -990,8 +2455,19 @@ struct SkillRemovalPatch {
 /// tick at packet arrival is used as a bounded stale-snapshot fence: snapshots
 /// at or before that tick cannot overwrite the packet delta; a later snapshot
 /// is accepted as the new authority and retires the patch.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct SkillPacketCursor {
+    hero: mir2_client_bevy::hero_model::HeroModel,
+    pending_hero_model: Option<String>,
+    pending_hero_receipts: std::collections::VecDeque<String>,
+    pending_receipt_model: Option<String>,
+    pending_latest_model: Option<String>,
+    session_epoch: u64,
+    magic_icons: std::collections::HashMap<String, u8>,
+    magic_needs: std::collections::HashMap<String, [Option<u16>; 3]>,
+    magic_names: std::collections::HashMap<String, String>,
+    magic_casts: std::collections::HashMap<String, u64>,
+    next_magic_cast: u64,
     snapshot_serial: u64,
     patches: Vec<SkillPacketPatch>,
     removals: Vec<SkillRemovalPatch>,
@@ -999,7 +2475,114 @@ struct SkillPacketCursor {
     player_object_id: Option<u32>,
 }
 
+impl Default for SkillPacketCursor {
+    fn default() -> Self {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        Self {
+            hero: Default::default(),
+            pending_hero_model: None,
+            pending_hero_receipts: Default::default(),
+            pending_receipt_model: None,
+            pending_latest_model: None,
+            session_epoch: NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+            snapshot_serial: 0,
+            magic_icons: Default::default(),
+            magic_needs: Default::default(),
+            magic_names: Default::default(),
+            magic_casts: Default::default(),
+            next_magic_cast: 0,
+            patches: vec![],
+            removals: vec![],
+            vitals: None,
+            player_object_id: None,
+        }
+    }
+}
 impl SkillPacketCursor {
+    fn observe_hero_packet(
+        &mut self,
+        packet: &str,
+        payload: &Value,
+        player: &NativeUiPlayerCursor,
+    ) -> Result<(), String> {
+        if self.hero.apply_packet(packet, payload) {
+            self.hero.session_epoch = self.session_epoch;
+            if let Some(info) = self.hero.info.as_ref() {
+                self.hero.inventory_view = hero_inventory_view(info, player);
+                self.hero.auto_pot_view = hero_auto_pot_view(info, player);
+            }
+            let json = serde_json::to_string(&self.hero).map_err(|e| e.to_string())?;
+            if self.hero.item_result_receipt {
+                self.pending_hero_receipts.push_back(json);
+                self.pending_hero_model = None;
+            } else {
+                self.pending_hero_model = Some(json);
+            }
+        }
+        self.flush_hero_model();
+        Ok(())
+    }
+    fn flush_hero_model(&mut self) {
+        self.flush_hero_models_with(mir2_bevy_runtime::native_ingest::push_native_hero_model);
+    }
+    fn flush_hero_models_with(&mut self, mut push: impl FnMut(String) -> bool) -> bool {
+        while let Some(json) = self.pending_hero_receipts.front() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_hero_receipts.pop_front();
+        }
+        if let Some(json) = self.pending_hero_model.as_ref() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_hero_model = None;
+        }
+        true
+    }
+
+    fn queue_skill_model(&mut self, payload: &Value) -> Result<bool, String> {
+        let mut model = transform_skill_model(payload);
+        // C.MagicKey routes to Hero if either key is in its 17..24 bank.
+        // 0/0 really routes to player; Hero observes its unchanged authority separately.
+        if model.get("skillKeyAck").is_some_and(|ack| {
+            ack["key"].as_u64().unwrap_or(0) > 16 || ack["oldKey"].as_u64().unwrap_or(0) > 16
+        }) {
+            model["skillKeyAck"] = Value::Null;
+        }
+        let is_receipt = model.get("skillKeyAck").is_some_and(|v| !v.is_null());
+        if is_receipt {
+            let ack: mir2_client_bevy::skill_model::SkillKeyAck =
+                serde_json::from_value(model["skillKeyAck"].clone()).map_err(|e| e.to_string())?;
+            if ack.request_id == 0 || ack.spell.is_empty() || ack.key > 16 || ack.old_key > 16 {
+                return Err("invalid player skill receipt".into());
+            }
+        }
+        let json = serde_json::to_string(&model).map_err(|e| e.to_string())?;
+        if is_receipt {
+            self.pending_receipt_model = Some(json);
+            self.pending_latest_model = None;
+        } else {
+            self.pending_latest_model = Some(json);
+        }
+        Ok(self.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model))
+    }
+    fn flush_skill_models_with(&mut self, mut push: impl FnMut(String) -> bool) -> bool {
+        if let Some(json) = self.pending_receipt_model.as_ref() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_receipt_model = None;
+        }
+        if let Some(json) = self.pending_latest_model.as_ref() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_latest_model = None;
+        }
+        true
+    }
+
     fn reset(&mut self) {
         *self = Self::default();
     }
@@ -1034,10 +2617,46 @@ impl SkillPacketCursor {
     }
 
     fn apply_active_patches(&self, payload: &mut Value, snapshot_tick: u64) {
+        payload["_nativeSkillAuthority"] = json!({"sessionEpoch":self.session_epoch,"snapshotSerial":self.snapshot_serial,"playerObjectId":self.player_object_id.unwrap_or(0)});
         if let Some(skills) = skill_array_mut(payload) {
             skills.truncate(MAX_LEARNED_SKILLS);
 
             for skill in skills.iter_mut() {
+                if let Some(name) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase()))
+                {
+                    skill["magicName"] = json!(name);
+                }
+
+                if let Some(sequence) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_casts.get(&spell.to_ascii_lowercase()))
+                {
+                    skill["castSequence"] = json!(sequence);
+                }
+
+                if let Some(icon) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_icons.get(&spell.to_ascii_lowercase()))
+                    .copied()
+                {
+                    skill["icon"] = json!(icon);
+                }
+                if let Some(needs) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_needs.get(&spell.to_ascii_lowercase()))
+                {
+                    for (field, value) in ["need1", "need2", "need3"].into_iter().zip(needs) {
+                        if let Some(value) = value {
+                            skill[field] = json!(value);
+                        }
+                    }
+                }
                 if self.removals.iter().any(|removal| {
                     skill_hotkey(skill) == Some(removal.hotkey)
                         && Self::removal_is_active(removal, snapshot_tick, self.snapshot_serial)
@@ -1104,6 +2723,58 @@ impl SkillPacketCursor {
 
     fn apply_packet(&mut self, packet: &str, payload: &Value, base_snapshot_tick: u64) -> bool {
         match packet {
+            "NewMagic" => {
+                if payload.get("hero").and_then(Value::as_bool) != Some(false) {
+                    return false;
+                }
+                let Some(magic) = payload.get("magic") else {
+                    return false;
+                };
+                let Some(spell) = magic
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .filter(|v| !v.is_empty())
+                else {
+                    return false;
+                };
+                let known = self
+                    .magic_icons
+                    .keys()
+                    .chain(self.magic_names.keys())
+                    .chain(self.magic_needs.keys())
+                    .any(|key| key.eq_ignore_ascii_case(spell));
+                let distinct = self
+                    .magic_icons
+                    .keys()
+                    .chain(self.magic_names.keys())
+                    .chain(self.magic_needs.keys())
+                    .map(|key| key.to_ascii_lowercase())
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
+                if !known && distinct >= MAX_LEARNED_SKILLS {
+                    return false;
+                }
+                if let Some(name) = magic
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .filter(|v| !v.is_empty())
+                {
+                    self.magic_names
+                        .insert(spell.to_ascii_lowercase(), name.to_owned());
+                }
+                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok())
+                {
+                    self.magic_icons.insert(spell.to_ascii_lowercase(), icon);
+                }
+                self.magic_needs.insert(
+                    spell.to_ascii_lowercase(),
+                    ["need1", "need2", "need3"].map(|field| {
+                        value_u32(magic.get(field)).and_then(|v| u16::try_from(v).ok())
+                    }),
+                );
+                true
+            }
+
             "UserInformation" => {
                 let Some(object_id) = value_u32(payload.get("objectId")) else {
                     return false;
@@ -1127,6 +2798,19 @@ impl SkillPacketCursor {
                 }
                 true
             }
+            "MagicCast" => {
+                let Some(identity) = packet_spell_identity(payload) else {
+                    return false;
+                };
+                if !self.magic_casts.contains_key(&identity)
+                    && self.magic_casts.len() >= MAX_LEARNED_SKILLS
+                {
+                    return false;
+                }
+                self.next_magic_cast = self.next_magic_cast.saturating_add(1);
+                self.magic_casts.insert(identity, self.next_magic_cast);
+                true
+            }
             "MagicDelay" => {
                 if !self.packet_targets_player(payload) {
                     return false;
@@ -1138,7 +2822,7 @@ impl SkillPacketCursor {
                     return false;
                 };
                 self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.cooldown_remaining_ticks = Some(delay);
+                    patch.delay_ms = Some(delay);
                     if let Some(mp_cost) =
                         value_u32(payload.get("mpCost").or_else(|| payload.get("mp_cost")))
                     {
@@ -1297,8 +2981,8 @@ fn skill_matches_identity(skill: &Value, identity: &str) -> bool {
 }
 
 fn apply_skill_patch(skill: &mut Value, patch: &SkillPacketPatch) {
-    if let Some(cooldown) = patch.cooldown_remaining_ticks {
-        skill["cooldownRemainingTicks"] = json!(cooldown);
+    if let Some(delay) = patch.delay_ms {
+        skill["delayMs"] = json!(delay);
     }
     if let Some(level) = patch.level {
         skill["level"] = json!(level);
@@ -1319,41 +3003,62 @@ fn apply_skill_patch(skill: &mut Value, patch: &SkillPacketPatch) {
 /// connection that already received a resume credential retries inside the
 /// bounded reconnect window; a normal Web-compatible connection still waits
 /// for the visible Retry action after it fails.
-pub async fn run_gateway_client<R: CommandSource + Send>(
+pub async fn run_gateway_client<R: CommandSource + Send, E:Into<NativeShellEventSender>>(
     base_url: &str,
     commands: R,
-    shell_events: std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: E,
     gameplay_events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     reconnect_config: NativeReconnectConfig,
 ) -> Result<(), String> {
-    run_gateway_client_with_world_ingest(
+    run_gateway_client_with_ingest_and_mail_publisher(
         base_url,
         commands,
         shell_events,
         gameplay_events,
         reconnect_config,
         mir2_bevy_runtime::native_ingest::push_native_world_state,
+        NativeMailServicePublisher::Native,
     )
     .await
 }
 
-async fn run_gateway_client_with_world_ingest<R, F>(
+#[cfg(test)]
+async fn run_gateway_client_with_world_ingest<R, F, E:Into<NativeShellEventSender>>(
+    base_url: &str,
+    commands: R,
+    shell_events: E,
+    gameplay_events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
+    reconnect_config: NativeReconnectConfig,
+    push_world_state: F,
+) -> Result<(), String>
+where R: CommandSource + Send, F: FnMut(String) -> bool {
+    run_gateway_client_with_ingest_and_mail_publisher(base_url, commands, shell_events,
+        gameplay_events, reconnect_config, push_world_state,
+        controlled_mail_service_publisher(|_| true)).await
+}
+
+async fn run_gateway_client_with_ingest_and_mail_publisher<R, F, E:Into<NativeShellEventSender>>(
     base_url: &str,
     mut commands: R,
-    shell_events: std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: E,
     gameplay_events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     reconnect_config: NativeReconnectConfig,
     mut push_world_state: F,
+    mail_publisher: NativeMailServicePublisher,
 ) -> Result<(), String>
 where
     R: CommandSource + Send,
     F: FnMut(String) -> bool,
 {
+    let shell_events:NativeShellEventSender=shell_events.into();
+    let ownership=commands.ownership_fence();
     let mut should_connect = true;
     let mut generation = 0_u64;
     let mut resume_state = NativeResumeClientState::default();
     let mut game_shop_receipt_gate = GameShopReceiptGate::default();
     let mut retry_delay = None;
+    // Permanent Actor ledgers outlive physical reconnect and UI entry.
+    let mut npc_purchases = npc_purchase_gateway::NativeNpcPurchaseGateway::new()?;
     loop {
         if let Some(delay) = retry_delay.take() {
             match wait_for_retry_or_leave_until(
@@ -1375,7 +3080,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("native reconnect cancelled".to_owned()),
                     });
                     should_connect = false;
@@ -1388,7 +3093,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("gateway reconnect deadline expired".to_owned()),
                     });
                     should_connect = false;
@@ -1419,7 +3124,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("gateway reconnect deadline expired".to_owned()),
                 });
                 should_connect = false;
@@ -1428,6 +3133,8 @@ where
             resume_state.retry_attempt = resume_state.retry_attempt.saturating_add(1);
         }
 
+        crate::timing::reset_requests();
+        let connect_started = Instant::now();
         let mut socket = match connect_gateway_with_resume_controls(
             base_url,
             &mut commands,
@@ -1447,7 +3154,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("native reconnect cancelled".to_owned()),
                 });
                 should_connect = false;
@@ -1460,7 +3167,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("gateway reconnect deadline expired".to_owned()),
                 });
                 should_connect = false;
@@ -1485,7 +3192,7 @@ where
                             &mut resume_state,
                             &mut game_shop_receipt_gate,
                         );
-                        let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                        let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                             reason: Some("gateway reconnect unavailable".to_owned()),
                         });
                         should_connect = false;
@@ -1496,7 +3203,7 @@ where
                             &mut resume_state,
                             &mut game_shop_receipt_gate,
                         );
-                        let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                        let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                             reason: Some(format!("gateway connect failed: {error}")),
                         });
                         should_connect = false;
@@ -1506,7 +3213,13 @@ where
             }
         };
 
-        generation = generation.wrapping_add(1);
+        generation = generation.checked_add(1).ok_or_else(||"connection generation exhausted".to_owned())?;
+        npc_purchases.open_connection()?;
+        if let Some(fence)=&ownership {fence.begin_connection()?;}
+        crate::timing::report(
+            &format!("websocket_connected:generation{generation}"),
+            connect_started,
+        );
         eprintln!("[gateway-client] connected generation={generation} resume={attempting_resume}");
         let mut phase = if attempting_resume {
             ConnectionPhase::AwaitingResume
@@ -1529,6 +3242,8 @@ where
         )
         .await;
         if !matches!(handshake_result, ResumeLifecycle::Complete(())) {
+            npc_purchases.disconnect();
+            if let Some(fence)=&ownership {fence.socket_lost();}
             let error = match handshake_result {
                 ResumeLifecycle::Cancel => {
                     let _ = apply_outer_terminal_transition(
@@ -1536,7 +3251,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("native reconnect cancelled".to_owned()),
                     });
                     should_connect = false;
@@ -1549,7 +3264,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("gateway reconnect deadline expired".to_owned()),
                     });
                     should_connect = false;
@@ -1576,7 +3291,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("gateway reconnect handshake unavailable".to_owned()),
                     });
                     should_connect = false;
@@ -1587,7 +3302,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some(format!("gateway handshake failed: {error}")),
                     });
                     should_connect = false;
@@ -1595,8 +3310,15 @@ where
             }
             continue;
         }
+        let mail_stream = match mail_publisher.start_socket(ownership.as_ref(), generation) {
+            Ok(stream) => stream,
+            Err(error) => {
+                if let Some(fence) = &ownership { fence.socket_lost(); }
+                return Err(error);
+            }
+        };
         if !attempting_resume {
-            let _ = shell_events.send(ShellGatewayEvent::Connected);
+            let _ = shell_events.send_event(ShellGatewayEvent::Connected);
         }
         let exit = run_connected_gateway(
             socket,
@@ -1610,8 +3332,12 @@ where
             &mut resume_scene_reset_sent,
             &mut game_shop_receipt_gate,
             &mut push_world_state,
+            mail_stream,
+            &mut npc_purchases,
         )
         .await;
+        npc_purchases.disconnect();
+        if let Some(fence)=&ownership {fence.socket_lost();}
         match exit {
             Ok(ConnectedExit::Shutdown) => return Ok(()),
             Ok(ConnectedExit::ResumeRejected) => {
@@ -1620,7 +3346,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("session resume unavailable".to_owned()),
                 });
                 should_connect = false;
@@ -1631,7 +3357,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("gateway reconnect deadline expired".to_owned()),
                 });
                 should_connect = false;
@@ -1647,7 +3373,7 @@ where
                             &mut resume_state,
                             &mut game_shop_receipt_gate,
                         );
-                        let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                        let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                             reason: Some("gateway reconnect unavailable".to_owned()),
                         });
                         should_connect = false;
@@ -1660,7 +3386,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: reason.or_else(|| Some("connection closed".to_owned())),
                     });
                     should_connect = false;
@@ -1676,7 +3402,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some(reason),
                     });
                     should_connect = false;
@@ -1713,11 +3439,12 @@ where
     let mut poll = tokio::time::interval(Duration::from_millis(25));
     loop {
         poll.tick().await;
-        let batch = drain_command_batch(commands, batch_limit);
+        let batch = unsent_command_batch(drain_command_batch(commands, batch_limit));
+        if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed before socket entry".into());}
         // Scan transactions before honoring Connect/Leave from the same
         // batch; drain_command_batch deliberately appends reserved lanes and
         // a control command may otherwise return first.
-        for command in &batch {
+        for command in &batch.0 {
             let _ = discard_correlated_before_socket_write(
                 command,
                 game_shop_receipt_gate,
@@ -1728,14 +3455,16 @@ where
             if is_game_shop_transaction(&command) {
                 continue;
             }
-            match command {
+            retire_unsent_command(&command);
+            match command.payload() {
                 GatewayCommand::Connect => return Ok(true),
                 GatewayCommand::Shutdown => return Ok(false),
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                 | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => return Ok(false),
-                GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {}
             }
         }
+        if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed before socket entry".into());}
     }
 }
 
@@ -1803,8 +3532,9 @@ where
             _ = &mut resume_timeout => return Ok(RetryWait::Deadline),
             _ = &mut deadline => return Ok(RetryWait::Elapsed),
             _ = poll.tick() => {
-                let batch = drain_command_batch(commands, batch_limit);
-                for command in &batch {
+                let batch = unsent_command_batch(drain_command_batch(commands, batch_limit));
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed during recovery".into());}
+                for command in &batch.0 {
                     let _ = discard_correlated_before_socket_write(
                         command,
                         game_shop_receipt_gate,
@@ -1815,19 +3545,34 @@ where
                     if is_game_shop_transaction(&command) {
                         continue;
                     }
-                    match command {
+                    retire_unsent_command(&command);
+                    match command.payload() {
                         GatewayCommand::Shutdown => return Ok(RetryWait::Shutdown),
                         GatewayCommand::Connect => return Ok(RetryWait::Connect),
                         GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                             return Ok(RetryWait::Leave)
                         }
-                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {}
                     }
                 }
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed during recovery".into());}
             }
         }
     }
+}
+
+fn retire_unsent_command(command:&GatewayCommand){if let GatewayCommand::Owned(owned)=command{owned.fence.retire(owned);}}
+
+/// Every not-yet-visited tail remains definitely unsent on an early return.
+struct NativeUnsentCommandBatch(VecDeque<GatewayCommand>);
+impl Iterator for NativeUnsentCommandBatch {type Item=GatewayCommand;fn next(&mut self)->Option<Self::Item>{self.0.pop_front()}}
+impl Drop for NativeUnsentCommandBatch {fn drop(&mut self){for command in &self.0{retire_unsent_command(command);}}}
+fn unsent_command_batch(batch:Vec<GatewayCommand>)->NativeUnsentCommandBatch{NativeUnsentCommandBatch(batch.into())}
+fn mail_quote_delivery_failed<R:CommandSource>(commands:&R)->bool {
+    commands.ownership_fence().is_some_and(|fence|{
+        fence.mail_quote_delivery_failed()||fence.stamp().is_some_and(|stamp|mir2_bevy_runtime::native_ingest::native_mail_stream_failed_epoch()==Some(mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:stamp.run,connection:stamp.connection}))
+    })
 }
 
 fn drain_command_batch<R: CommandSource>(
@@ -1849,20 +3594,20 @@ fn drain_command_batch<R: CommandSource>(
         let Ok(command) = commands.try_command() else {
             break;
         };
-        match command {
-            GatewayCommand::Shutdown => return vec![GatewayCommand::Shutdown],
+        match command.payload() {
+            GatewayCommand::Shutdown => {for old in &batch{retire_unsent_command(old);}if let Some(old)=latest_player.as_ref(){retire_unsent_command(old);}if let Some(old)=leave.as_ref(){retire_unsent_command(old);}return vec![command];},
             GatewayCommand::Connect => {
                 if batch.len() < limit {
-                    batch.push(GatewayCommand::Connect);
-                }
+                    batch.push(command);
+                } else {retire_unsent_command(&command);}
             }
-            GatewayCommand::Player(intent) => latest_player = Some(GatewayCommand::Player(intent)),
+            GatewayCommand::Player(_) => {if let Some(old)=latest_player.replace(command){retire_unsent_command(&old);}},
             GatewayCommand::Wire(NativeOutboundCommand::LogOut)
             | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
-                leave = Some(command);
+                if let Some(old)=leave.replace(command){retire_unsent_command(&old);}
             }
-            other if is_correlated_transaction(&other) => {
-                transaction = Some(other);
+            _ if is_correlated_transaction(&command) => {
+                transaction = Some(command);
                 // A bounded receiver takes the reserved transaction slot
                 // atomically. Stop this drain immediately so a second
                 // transaction concurrently inserted after that take remains
@@ -1870,28 +3615,28 @@ fn drain_command_batch<R: CommandSource>(
                 // silently discarded in this batch.
                 break;
             }
-            other if batch.len() < limit => batch.push(other),
-            _ => {}
+            _ if batch.len() < limit => batch.push(command),
+            _ => {retire_unsent_command(&command);}
         }
     }
     let reserved = usize::from(transaction.is_some())
         .saturating_add(usize::from(leave.is_some()))
         .saturating_add(usize::from(latest_player.is_some()));
     while batch.len().saturating_add(reserved) > limit && !batch.is_empty() {
-        batch.pop();
+        if let Some(old)=batch.pop(){retire_unsent_command(&old);}
     }
     if let Some(transaction) = transaction {
         batch.push(transaction);
     }
     if let Some(leave) = leave {
         if batch.len() == limit && reserved <= limit {
-            batch.pop();
+            if let Some(old)=batch.pop(){retire_unsent_command(&old);}
         }
         batch.push(leave);
     }
     if let Some(player) = latest_player {
         if batch.len() == limit && reserved <= limit {
-            batch.pop();
+            if let Some(old)=batch.pop(){retire_unsent_command(&old);}
         }
         batch.push(player);
     }
@@ -1927,9 +3672,9 @@ type GatewaySocket =
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 
 /// Every operation inside a native resume attempt is governed by the same
-/// absolute deadline and command fence.  A regular first connection retains
-/// its existing behavior; only a reconnect with a live credential enters this
-/// lifecycle.
+/// absolute deadline and command fence. Regular startup has a separate bounded
+/// transport budget; only a reconnect with a live credential consumes the
+/// recovery command queue and recovery deadline.
 #[derive(Debug)]
 enum ResumeLifecycle<T> {
     Complete(T),
@@ -1962,7 +3707,9 @@ where
     R: CommandSource,
     F: FnMut() -> bool,
 {
-    for command in drain_command_batch(commands, batch_limit) {
+    let batch=unsent_command_batch(drain_command_batch(commands,batch_limit));
+    if mail_quote_delivery_failed(commands){return ResumeLifecycle::Failed("native MailCost receipt delivery failed during recovery".into());}
+    for command in batch {
         if discard_correlated_before_socket_write(
             &command,
             game_shop_receipt_gate,
@@ -1970,6 +3717,7 @@ where
         ) {
             continue;
         }
+        retire_unsent_command(&command);
         match awaiting_resume_command_action(&command) {
             AwaitingResumeCommandAction::Shutdown => return ResumeLifecycle::Shutdown,
             AwaitingResumeCommandAction::Cancel => return ResumeLifecycle::Cancel,
@@ -1978,7 +3726,70 @@ where
             AwaitingResumeCommandAction::Ignore => {}
         }
     }
+    if mail_quote_delivery_failed(commands){return ResumeLifecycle::Failed("native MailCost receipt delivery failed during recovery".into());}
     ResumeLifecycle::Complete(())
+}
+
+/// Normal startup watches Shutdown without consuming queued Login/StartGame.
+/// Resume keeps its existing, earlier absolute recovery deadline and queue policy.
+struct NativeStartupWaiter(Option<NativeCommandFence>);
+impl Drop for NativeStartupWaiter {
+    fn drop(&mut self) {
+        if let Some(fence)=&self.0 {if let Ok(mut state)=fence.0.lock(){state.waiters.remove(&0);}}
+    }
+}
+async fn await_native_startup_phase<T>(budget:&mut impl NativeWriteBudget,
+    fence:Option<&NativeCommandFence>,
+    mut poll_phase:impl FnMut(&mut std::task::Context<'_>)->std::task::Poll<T>) -> ResumeLifecycle<T> {
+    let _waiter=NativeStartupWaiter(fence.cloned());
+    match await_native_write_phase(budget,|cx| {
+        if let Some(fence)=fence {
+            let Ok(mut state)=fence.0.lock() else {return std::task::Poll::Ready(ResumeLifecycle::Failed("native ownership fence unavailable".into()));};
+            if state.retired {return std::task::Poll::Ready(ResumeLifecycle::Shutdown);}
+            state.waiters.insert(0,cx.waker().clone());
+        }
+        poll_phase(cx).map(ResumeLifecycle::Complete)
+    }).await {
+        Ok(result)=>result,
+        Err(_) if fence.is_some_and(NativeCommandFence::is_retired)=>ResumeLifecycle::Shutdown,
+        Err(_)=>ResumeLifecycle::Failed(NATIVE_TRANSPORT_TIMEOUT_ERROR.into()),
+    }
+}
+async fn send_native_unowned_frame_with_budget<S>(sink:&mut S,frame:Message,
+    fence:Option<&NativeCommandFence>,budget:&mut impl NativeWriteBudget)->ResumeLifecycle<()>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    use std::pin::Pin;
+    match await_native_startup_phase(budget,fence,|cx|Pin::new(&mut *sink).poll_ready(cx)).await {
+        ResumeLifecycle::Complete(Ok(()))=>{},
+        ResumeLifecycle::Complete(Err(error))=>return ResumeLifecycle::Failed(error.to_string()),
+        ResumeLifecycle::Shutdown=>return ResumeLifecycle::Shutdown,
+        ResumeLifecycle::Failed(error)=>return ResumeLifecycle::Failed(error),
+        _=>unreachable!("normal startup only completes, fails or shuts down"),
+    }
+    // Final Shutdown and deadline check precede the local entry without awaits.
+    let start={
+        let guard=match fence {
+            Some(fence)=>match fence.0.lock(){Ok(state)=>Some(state),Err(_)=>return ResumeLifecycle::Failed("native ownership fence unavailable".into())},
+            None=>None,
+        };
+        if guard.as_ref().is_some_and(|state|state.retired){return ResumeLifecycle::Shutdown;}
+        if budget.expired(){return ResumeLifecycle::Failed(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
+        Pin::new(&mut *sink).start_send(frame)
+    };
+    if let Err(error)=start{return ResumeLifecycle::Failed(error.to_string());}
+    match await_native_startup_phase(budget,fence,|cx|Pin::new(&mut *sink).poll_flush(cx)).await {
+        ResumeLifecycle::Complete(Ok(()))=>ResumeLifecycle::Complete(()),
+        ResumeLifecycle::Complete(Err(error))=>ResumeLifecycle::Failed(error.to_string()),
+        ResumeLifecycle::Shutdown=>ResumeLifecycle::Shutdown,
+        ResumeLifecycle::Failed(error)=>ResumeLifecycle::Failed(error),
+        _=>unreachable!("normal startup only completes, fails or shuts down"),
+    }
+}
+async fn send_native_unowned_frame<S>(sink:&mut S,frame:Message,
+    fence:Option<&NativeCommandFence>)->ResumeLifecycle<()>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    let mut budget=TokioNativeWriteBudget::new();
+    send_native_unowned_frame_with_budget(sink,frame,fence,&mut budget).await
 }
 
 async fn connect_gateway_with_resume_controls<R: CommandSource>(
@@ -1989,14 +3800,26 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
     batch_limit: usize,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
 ) -> ResumeLifecycle<GatewaySocket> {
+    let request = match gateway_handshake_request(base_url) {
+        Ok(request) => request,
+        Err(error) => return ResumeLifecycle::Failed(error),
+    };
     if !attempting_resume {
-        return tokio_tungstenite::connect_async(base_url)
-            .await
-            .map(|(socket, _)| ResumeLifecycle::Complete(socket))
-            .unwrap_or_else(|error| ResumeLifecycle::Failed(error.to_string()));
+        use std::future::Future;
+        let mut budget=TokioNativeWriteBudget::new();
+        let fence=commands.ownership_fence();
+        let connect=tokio_tungstenite::connect_async(request);
+        tokio::pin!(connect);
+        return match await_native_startup_phase(&mut budget,fence.as_ref(),|cx|connect.as_mut().poll(cx)).await {
+            ResumeLifecycle::Complete(Ok((socket,_)))=>ResumeLifecycle::Complete(socket),
+            ResumeLifecycle::Complete(Err(error))=>ResumeLifecycle::Failed(error.to_string()),
+            ResumeLifecycle::Shutdown=>ResumeLifecycle::Shutdown,
+            ResumeLifecycle::Failed(error)=>ResumeLifecycle::Failed(error),
+            _=>unreachable!("normal connect only completes, fails or shuts down"),
+        };
     }
 
-    let connect = tokio_tungstenite::connect_async(base_url);
+    let connect = tokio_tungstenite::connect_async(request);
     tokio::pin!(connect);
     let resume_timeout = async {
         if let Some(deadline) = resume_deadline {
@@ -2027,6 +3850,62 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
             },
         }
     }
+}
+
+/// The staging Gateway applies its exact Origin allowlist to native clients as
+/// well as browsers. Derive the HTTP origin from the configured endpoint on
+/// every connection, including resume. Paths and query values stay in the
+/// WebSocket request and never enter this header. The normal TLS connector checks
+/// the server certificate and hostname against the operating system roots.
+fn gateway_handshake_request(
+    base_url: &str,
+) -> Result<tokio_tungstenite::tungstenite::http::Request<()>, String> {
+    use tokio_tungstenite::tungstenite::{
+        client::IntoClientRequest,
+        http::{header::ORIGIN, HeaderValue, Uri},
+    };
+
+    let uri = base_url
+        .parse::<Uri>()
+        .map_err(|_| "gateway URL must be a valid WebSocket URL".to_owned())?;
+    let authority = uri
+        .authority()
+        .ok_or_else(|| "gateway URL must include a host".to_owned())?;
+    if authority.as_str().contains('@') {
+        return Err("gateway URL must not contain credentials".to_owned());
+    }
+    let host = uri
+        .host()
+        .ok_or_else(|| "gateway URL must include a host".to_owned())?
+        .trim_matches(['[', ']']);
+    let is_loopback = host.eq_ignore_ascii_case("localhost")
+        || host
+            .parse::<std::net::IpAddr>()
+            .is_ok_and(|address| address.is_loopback());
+    let (scheme, default_port) = match uri.scheme_str() {
+        Some("wss") => ("https", 443),
+        Some("ws") if is_loopback => ("http", 80),
+        Some("ws") => return Err("gateway URL must use wss:// outside loopback".to_owned()),
+        _ => return Err("gateway URL must use ws:// or wss://".to_owned()),
+    };
+    let host = if host.contains(':') {
+        format!("[{}]", host.to_ascii_lowercase())
+    } else {
+        host.to_ascii_lowercase()
+    };
+    let origin = match uri.port_u16() {
+        Some(port) if port != default_port => format!("{scheme}://{host}:{port}"),
+        _ => format!("{scheme}://{host}"),
+    };
+    let mut request = base_url
+        .into_client_request()
+        .map_err(|_| "gateway WebSocket handshake URL is invalid".to_owned())?;
+    request.headers_mut().insert(
+        ORIGIN,
+        HeaderValue::from_str(&origin)
+            .map_err(|_| "gateway WebSocket origin is invalid".to_owned())?,
+    );
+    Ok(request)
 }
 
 async fn send_resume_frame_with_controls<R: CommandSource>(
@@ -2071,35 +3950,37 @@ async fn send_resume_frame_with_controls<R: CommandSource>(
     }
 }
 
-async fn send_resume_handshake(
-    socket: &mut GatewaySocket,
-    credential: Option<&str>,
-) -> Result<(), String> {
+async fn send_native_handshake_with_budget<S>(
+    socket: &mut S,credential: Option<&str>,fence:Option<&NativeCommandFence>,
+    budget:&mut impl NativeWriteBudget,
+) -> ResumeLifecycle<()>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
     let capability = NativeOutboundCommand::ClientCapabilities {
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.to_owned(),
+            CATALOG_GZIP_CAPABILITY.to_owned(),
         ],
     }
     .to_wire_json();
-    socket
-        .send(Message::Text(capability.to_string().into()))
-        .await
-        .map_err(|error| format!("gateway capability send failed: {error}"))?;
+    match send_native_unowned_frame_with_budget(socket,Message::Text(capability.to_string().into()),fence,budget).await {
+        ResumeLifecycle::Complete(())=>{},
+        ResumeLifecycle::Shutdown=>return ResumeLifecycle::Shutdown,
+        ResumeLifecycle::Failed(error)=>return ResumeLifecycle::Failed(format!("gateway capability send failed: {error}")),
+        _=>unreachable!("normal capability only completes, fails or shuts down"),
+    }
     if let Some(credential) = credential {
         if credential.len() > MAX_CREDENTIAL_LENGTH {
-            return Err("native resume credential rejected".to_owned());
+            return ResumeLifecycle::Failed("native resume credential rejected".to_owned());
         }
         let payload = NativeOutboundCommand::ResumeSession {
             credential: credential.to_owned(),
         }
         .to_wire_json();
-        socket
-            .send(Message::Text(payload.to_string().into()))
-            .await
-            .map_err(|error| format!("gateway resume send failed: {error}"))?;
+        return send_native_unowned_frame_with_budget(socket,Message::Text(payload.to_string().into()),fence,budget).await;
     }
-    Ok(())
+    ResumeLifecycle::Complete(())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2140,15 +4021,16 @@ async fn send_resume_handshake_with_resume_controls<R: CommandSource>(
     game_shop_receipt_gate: &mut GameShopReceiptGate,
 ) -> ResumeLifecycle<()> {
     if !attempting_resume {
-        return send_resume_handshake(socket, credential)
-            .await
-            .map(|()| ResumeLifecycle::Complete(()))
-            .unwrap_or_else(ResumeLifecycle::Failed);
+        let mut budget=TokioNativeWriteBudget::new();
+        let fence=commands.ownership_fence();
+        return send_native_handshake_with_budget(socket,credential,fence.as_ref(),&mut budget).await;
     }
     let capability = NativeOutboundCommand::ClientCapabilities {
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.to_owned(),
+            CATALOG_GZIP_CAPABILITY.to_owned(),
         ],
     }
     .to_wire_json();
@@ -2196,13 +4078,13 @@ enum AwaitingResumeCommandAction {
 }
 
 fn awaiting_resume_command_action(command: &GatewayCommand) -> AwaitingResumeCommandAction {
-    match command {
+    match command.payload() {
         GatewayCommand::Shutdown => AwaitingResumeCommandAction::Shutdown,
         GatewayCommand::Wire(NativeOutboundCommand::LogOut)
         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
             AwaitingResumeCommandAction::Cancel
         }
-        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {
+        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {
             AwaitingResumeCommandAction::Ignore
         }
     }
@@ -2228,7 +4110,7 @@ async fn run_connected_gateway<R, F>(
         tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
     >,
     commands: &mut R,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     generation: u64,
     reconnect_config: NativeReconnectConfig,
@@ -2237,6 +4119,8 @@ async fn run_connected_gateway<R, F>(
     resume_scene_reset_sent: &mut bool,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
     push_world_state: &mut F,
+    mail_stream: NativeMailServiceStream,
+    npc_purchases: &mut npc_purchase_gateway::NativeNpcPurchaseGateway,
 ) -> Result<ConnectedExit, String>
 where
     R: CommandSource,
@@ -2253,15 +4137,17 @@ where
         }
     };
     tokio::pin!(resume_timeout);
-    let mut context = GatewaySessionContext::default();
+    let mut context = GatewaySessionContext { mail_stream: Some(mail_stream), ..Default::default() };
     let mut gameplay_adapter = NativeGameplayAdapter::default();
     gameplay_adapter.set_generation(generation);
+    gameplay_adapter.command_fence=commands.ownership_fence();
     // Every WebSocket generation owns an isolated lighting lifecycle. A
     // reconnect must never retain the previous map's darkness or emitters.
     let mut lighting_publisher = NativeLightingPublisher::for_connection(generation);
     lighting_publisher.push_clear_state();
     let mut last_world_payload: Option<Value> = None;
     let mut last_wallet: Option<WalletState> = None;
+    let mut map_packet_cursor = NativeMapPacketCursor::default();
     let mut ui_cursor = NativeUiPlayerCursor::default();
     let mut skill_cursor = SkillPacketCursor::default();
     let mut social_cursor = SocialModel::default();
@@ -2295,22 +4181,52 @@ where
                     .map(|duration| duration.as_millis() as i64)
                     .unwrap_or(0);
                 let keepalive = json!({ "type": "keepAlive", "time": now_ms });
-                if let Err(error) = socket
-                    .send(Message::Text(keepalive.to_string().into()))
-                    .await
-                {
-                    let _ = terminate_written_game_shop_unknown(
-                        game_shop_receipt_gate,
-                        mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                    );
-                    return Err(format!("gateway keepalive failed: {error}"));
+                let fence=commands.ownership_fence();
+                match send_native_unowned_frame(&mut socket,Message::Text(keepalive.to_string().into()),fence.as_ref()).await {
+                    ResumeLifecycle::Complete(())=>{},
+                    ResumeLifecycle::Shutdown=>return Ok(ConnectedExit::Shutdown),
+                    ResumeLifecycle::Failed(error)=>{
+                        let _=terminate_written_game_shop_unknown(game_shop_receipt_gate,mir2_bevy_runtime::native_ingest::push_native_data_reset);
+                        return Err(format!("gateway keepalive failed: {error}"));
+                    },
+                    _=>unreachable!("normal keepalive only completes, fails or shuts down"),
                 }
             }
             _ = input_poll.tick() => {
-                for command in drain_command_batch(commands, reconnect_config.command_batch_limit) {
+                if commands.ownership_fence().is_some_and(|fence|fence.is_retired()){return Ok(ConnectedExit::Shutdown);}
+                if let Some(fence) = commands.ownership_fence() {
+                    if let Some((dispatch,stamp)) = npc_purchases.begin_if_ready(Some(&fence),gameplay_adapter.last_full_producer_stamp,*phase,connection_bootstrap_sent,last_world_payload.as_ref().and_then(map_file_name))? {
+                        match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                            other => return Err(format!("Native purchase Begin control unavailable: {other:?}")),
+                        }
+                    }
+                    // This consumes only the Runtime's sealed completion after
+                    // every model and the entire owner source changed in World.
+                    npc_purchases.drain_applied(&fence)?;
+                    if let Some((dispatch,stamp)) = npc_purchases.recovery_if_ready()? {
+                        match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                            other => return Err(format!("Native purchase Query control unavailable: {other:?}")),
+                        }
+                    }
+                    if let Some(outcome) = npc_purchases.purchase_if_ready(&mut socket).await {
+                        match outcome {
+                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                            other => return Err(format!("Native purchase entered sender unavailable: {other:?}")),
+                        }
+                    }
+                }
+                if *phase==ConnectionPhase::Normal {skill_cursor.flush_hero_model();skill_cursor.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model);}
+                let batch=unsent_command_batch(drain_command_batch(commands,reconnect_config.command_batch_limit));
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed".into());}
+                for enveloped_command in batch {
+                    let (command,ownership_proof)=enveloped_command.clone().into_parts();
+                    if commands.ownership_fence().is_some() && ownership_proof.is_none(){continue;}
+                    if let Some(proof)=ownership_proof.as_ref(){if !proof.fence.allows(proof){proof.fence.retire(proof);continue;}}
                     if *phase != ConnectionPhase::Normal {
                         if discard_correlated_before_socket_write(
-                            &command,
+                            &enveloped_command,
                             game_shop_receipt_gate,
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
                         ) {
@@ -2327,8 +4243,28 @@ where
                                     "native reconnect cancelled".to_owned(),
                                 )));
                             }
-                            AwaitingResumeCommandAction::Ignore => continue,
+                            AwaitingResumeCommandAction::Ignore => {retire_unsent_command(&enveloped_command);continue;},
                         }
+                    }
+                    if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::BuyItem {..})) {
+                        // Every actual native NPC Buy gesture uses the durable
+                        // lane. An unavailable/refused quote never falls back.
+                        let Some(owned) = ownership_proof else { continue; };
+                        let fence = owned.fence.clone();
+                        match npc_purchases.quote(owned) {
+                            Ok((dispatch,stamp)) => match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                                NativeSinkCommit::Flushed => {},
+                                NativeSinkCommit::DefinitelyUnsent => npc_purchases.cancel_quote(),
+                                other => { npc_purchases.cancel_quote(); return Err(format!("Native purchase Quote control unavailable: {other:?}")); }
+                            },
+                            Err(_) => {}, // Exact original UI proof is retired as unsent.
+                        }
+                        continue;
+                    }
+                    if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::Login {..}
+                        | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..}
+                        | NativeOutboundCommand::LogOut | NativeOutboundCommand::Disconnect)) {
+                        npc_purchases.leave_or_select();
                     }
                     let explicit_leave = matches!(
                         &command,
@@ -2345,19 +4281,21 @@ where
                         &command,
                         GatewayCommand::Wire(NativeOutboundCommand::SendMail { .. })
                     );
+                    if is_send_mail&&ownership_proof.as_ref().is_none_or(|proof|proof.mail_send.is_none()){retire_unsent_command(&enveloped_command);continue;}
                     // Crystal's mail commands have no request id. Keep one
                     // in-flight command per operation class even if callers
                     // enqueue different mail ids/drafts in the same frame.
                     if !mail_command_allowed(
                         &command,
                         in_flight_claim_mail_id,
-                        send_mail_in_flight,
+                        send_mail_in_flight||context.mail_stream.as_ref().is_some_and(NativeMailServiceStream::has_send_flight),
                         !pending_mail_feedback.is_empty(),
                     ) {
-                        continue;
+                        retire_unsent_command(&enveloped_command);continue;
                     }
                     let game_shop_request = game_shop_request_from_command(&command);
                     if game_shop_request.is_some() && game_shop_receipt_gate.pending.is_some() {
+                        if let Some(proof)=ownership_proof.as_ref(){proof.fence.retire(proof);continue;}
                         // The UI and command transaction lanes both enforce a
                         // single purchase. Treat any violation at the sole
                         // writer as an ambiguous terminal operation instead of
@@ -2366,47 +4304,57 @@ where
                         let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         continue;
                     }
+                    let timed_request = match &command {
+                        GatewayCommand::Wire(NativeOutboundCommand::Login { .. }) => Some("login"),
+                        GatewayCommand::Wire(NativeOutboundCommand::StartGame { .. }) => Some("start_game"),
+                        _ => None,
+                    };
                     let trace_player_command = matches!(&command, GatewayCommand::Player(_));
+                    let context_command=match &command {GatewayCommand::Wire(wire)=>Some(wire.clone()),_=>None};
                     let payload = match command {
-                        GatewayCommand::Connect => continue,
+                        GatewayCommand::Connect => {if let Some(owned)=ownership_proof.as_ref(){owned.fence.retire(owned);}continue;},
                         GatewayCommand::Shutdown => {
                             reset_native_data_models();
                             return Ok(ConnectedExit::Shutdown);
                         }
                         GatewayCommand::Player(intent) => intent.to_json(),
                         GatewayCommand::Wire(command) => {
-                            update_session_context(&mut context, &command);
                             command.to_wire_json()
                         }
+                        GatewayCommand::Owned(_)=>unreachable!("only normalized queue payload reaches serialization"),
                     };
                     if trace_player_command
                         && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
                     {
                         eprintln!("[gateway-client] sending player command {payload}");
                     }
-                    if explicit_leave {
-                        resume_state.clear();
-                        // Do not leave stale darkness visible while the
-                        // server processes logout/disconnect. The eventual
-                        // packet reset is idempotent and will retry if this
-                        // enqueue was backpressured.
-                        lighting_publisher.reset_session();
-                        lighting_publisher.push_clear_state();
-                    }
-                    if let Err(error) = socket
-                        .send(Message::Text(payload.to_string().into()))
-                        .await
-                    {
-                        let terminated_written = terminate_written_game_shop_unknown(
-                            game_shop_receipt_gate,
-                            mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                        );
-                        if game_shop_request.is_some() && !terminated_written {
-                            game_shop_receipt_gate.clear_terminal();
-                            let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                    let send_started = Instant::now();
+                    let outcome=commit_owned_frame(&mut socket,ownership_proof.as_ref(),Message::Text(payload.to_string().into())).await;
+                    match outcome {
+                        NativeSinkCommit::MailQuoteReceiptUnavailable=>{
+                            return Err("native MailCost entry receipt delivery failed".into());
                         }
-                        return Err(format!("gateway command send failed: {error}"));
+                        NativeSinkCommit::DefinitelyUnsent=>continue,
+                        NativeSinkCommit::Unavailable(error)=>{
+                            if let Some(proof)=ownership_proof.as_ref(){proof.fence.retire(proof);}
+                            return Err(format!("gateway command readiness failed before commit: {error}"));
+                        }
+                        NativeSinkCommit::Unknown(error)=>{
+                            // start_send was called; the frame is irreversible and never replayed.
+                            let terminated=terminate_written_game_shop_unknown(game_shop_receipt_gate,mir2_bevy_runtime::native_ingest::push_native_data_reset);
+                            if game_shop_request.is_some()&&!terminated {
+                                game_shop_receipt_gate.clear_terminal();let _=mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                            }
+                            return Err(format!("gateway command commit/flush unknown: {error}"));
+                        }
+                        NativeSinkCommit::Flushed=>{}
                     }
+                    // These local procedure transitions belong only to the frame actually committed.
+                    let control_still_current=context_command.as_ref().is_none_or(|wire|apply_flushed_control_context(ownership_proof.as_ref(),wire,&mut context,resume_state));
+                    if explicit_leave&&control_still_current {
+                        lighting_publisher.reset_session();lighting_publisher.push_clear_state();
+                    }
+                    crate::timing::sent(timed_request, send_started);
                     if let Some(request) = game_shop_request {
                         if !game_shop_receipt_gate.record_successful_send(request) {
                             game_shop_receipt_gate.clear_terminal();
@@ -2420,14 +4368,31 @@ where
                         send_mail_in_flight = true;
                     }
                 }
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed".into());}
             }
             message = socket.next() => {
                 match message {
-                    Some(Ok(Message::Text(text))) => {
-                        let disposition = process_connected_text_frame(
-                            &text,
+                    Some(Ok(frame @ (Message::Text(_) | Message::Binary(_)))) => {
+                        let dispositions = process_connected_server_frame(
+                            &frame,
                             game_shop_receipt_gate,
                             |text, gate| {
+                                // Owner frames bypass all ordinary number/date
+                                // decoders, packet cursors and movement overlays.
+                                if npc_purchase_gateway::claims_owner_frame(text) {
+                                    if *phase != ConnectionPhase::Normal { return Ok(InboundDisposition::Quarantined); }
+                                    let Some(fence) = gameplay_adapter.command_fence.as_ref() else { return Ok(InboundDisposition::Quarantined); };
+                                    if let Some(owner) = npc_purchases.receive(text,fence)? {
+                                        last_world_payload = Some(owner.clone());
+                                        update_wallet_from_snapshot(&mut last_wallet,&owner);
+                                        // Replace the read cursor from this same source;
+                                        // never merge an older packet's wallet/XP.
+                                        ui_cursor = NativeUiPlayerCursor::default();
+                                        ui_cursor.observe_world_snapshot(&owner);
+                                    }
+                                    return Ok(InboundDisposition::Applied);
+                                }
+                                npc_purchases.before_ordinary_frame(text);
                                 let disposition = handle_gateway_text_for_connection(
                                     text,
                                     &mut snapshot_log_counter,
@@ -2437,6 +4402,7 @@ where
                                     gameplay_events,
                                     &mut last_world_payload,
                                     &mut last_wallet,
+                                    &mut map_packet_cursor,
                                     &mut ui_cursor,
                                     &mut in_flight_claim_mail_id,
                                     &mut send_mail_in_flight,
@@ -2450,6 +4416,7 @@ where
                                     gate,
                                     push_world_state,
                                 )?;
+                                npc_purchases.after_ordinary_frame(text,*phase,connection_bootstrap_sent);
                                 // Consume exactly the same authoritative
                                 // envelope that drove the gameplay bridge.
                                 // Quarantined pre-resume frames are forbidden
@@ -2463,11 +4430,13 @@ where
                             },
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
                         )?;
-                        match disposition {
-                            InboundDisposition::ResumeRejected => {
-                                return Ok(ConnectedExit::ResumeRejected);
+                        for disposition in dispositions {
+                            match disposition {
+                                InboundDisposition::ResumeRejected => {
+                                    return Ok(ConnectedExit::ResumeRejected);
+                                }
+                                InboundDisposition::Applied | InboundDisposition::Quarantined => {}
                             }
-                            InboundDisposition::Applied | InboundDisposition::Quarantined => {}
                         }
                     }
                     Some(Ok(Message::Close(_))) | None => {
@@ -2475,15 +4444,6 @@ where
                             ConnectedSocketEnd::Disconnected,
                             game_shop_receipt_gate,
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                        ));
-                    }
-                    Some(Ok(Message::Binary(bytes))) if bytes.len() > MAX_GATEWAY_FRAME_BYTES => {
-                        let _ = terminate_written_game_shop_unknown(
-                            game_shop_receipt_gate,
-                            mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                        );
-                        return Err(format!(
-                            "gateway binary frame exceeds {MAX_GATEWAY_FRAME_BYTES} bytes"
                         ));
                     }
                     Some(Ok(_)) => continue,
@@ -2650,11 +4610,12 @@ fn handle_gateway_text_for_connection<F>(
     text: &str,
     snapshot_log_counter: &mut u32,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_adapter: &mut NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -2671,7 +4632,10 @@ fn handle_gateway_text_for_connection<F>(
 where
     F: FnMut(String) -> bool,
 {
-    let parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    let mut parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let InboundEvent::Packet(packet) = &mut parsed {
+        add_packet_item_tooltip_sources(packet, ui_cursor);
+    }
     match parsed {
         InboundEvent::ResumeCredential(event) => {
             record_resume_credential_if_allowed(
@@ -2692,6 +4656,7 @@ where
                 apply_reconnect_reset_policy(session_resumed_reset_policy());
                 *resume_scene_reset_sent = true;
             }
+            if let Some(fence)=&gameplay_adapter.command_fence {fence.authorize_entry(true);}
             *phase = ConnectionPhase::Resumed;
             return Ok(InboundDisposition::Applied);
         }
@@ -2739,6 +4704,25 @@ where
         });
     }
 
+    // Bootstrap belongs to each successful world entry, not the socket's
+    // lifetime. Logout/character selection may reuse this connection.
+    if matches!(&parsed, InboundEvent::Packet(PacketEvent::StartGameAck(ack)) if ack.result == Some(4))
+    {
+        if let Some(fence)=&gameplay_adapter.command_fence {fence.authorize_entry(false);}
+        *connection_bootstrap_sent = false;
+    }
+
+    // Revoke at authoritative ingress, before any map-only or full publication.
+    if let Some(fence)=&gameplay_adapter.command_fence {
+        match &parsed {
+            InboundEvent::Packet(PacketEvent::MapInformation(identity))=>fence.observe_scene(identity.map_index,false),
+            InboundEvent::Packet(PacketEvent::MapChanged(identity))=>fence.observe_scene(identity.map_index,true),
+            _=>{}
+        }
+        if let Ok(envelope)=serde_json::from_str::<GatewayEnvelope>(text) {
+            if envelope.packet.as_deref().and_then(packet_native_reset_scope)==Some(NativeResetScope::Session){fence.revoke_owner();}
+        }
+    }
     let is_world_snapshot = text_kind(text).as_deref() == Some("worldSnapshot");
     let snapshot_ingest = handle_gateway_text_with_world_ingest(
         text,
@@ -2749,6 +4733,7 @@ where
         gameplay_events,
         last_world_payload,
         last_wallet,
+        map_packet_cursor,
         ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
@@ -2758,16 +4743,19 @@ where
         push_world_state,
     )?;
 
-    if is_world_snapshot && snapshot_ingest == WorldSnapshotIngestOutcome::Applied {
+    let producer_entry_ready=gameplay_adapter.command_fence.as_ref().is_none_or(|fence|gameplay_adapter.last_full_producer_stamp.is_some_and(|stamp|fence.accepts(stamp,true)));
+    if is_world_snapshot && snapshot_ingest == WorldSnapshotIngestOutcome::Applied && producer_entry_ready {
         let value: Value = serde_json::from_str(text)
             .map_err(|error| format!("invalid gateway payload: {error}"))?;
         let payload = value.get("payload").unwrap_or(&Value::Null);
         if !*connection_bootstrap_sent {
-            if let Some(character) = resumed_character_from_snapshot(
-                payload,
-                resume_state.character_index.or(context.character_index),
-            ) {
-                let _ = shell_events.send(ShellGatewayEvent::PlayerBootstrapped { character });
+            let character_index = if *phase == ConnectionPhase::Resumed {
+                resume_state.character_index.or(context.character_index)
+            } else {
+                context.character_index
+            };
+            if let Some(character) = resumed_character_from_snapshot(payload, character_index) {
+                let _ = shell_events.send_event(ShellGatewayEvent::PlayerBootstrapped { character });
                 *connection_bootstrap_sent = true;
             }
         }
@@ -2840,11 +4828,12 @@ fn handle_gateway_text(
     text: &str,
     snapshot_log_counter: &mut u32,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_adapter: &mut NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -2861,6 +4850,7 @@ fn handle_gateway_text(
         gameplay_events,
         last_world_payload,
         last_wallet,
+        map_packet_cursor,
         ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
@@ -2875,11 +4865,12 @@ fn handle_gateway_text_with_world_ingest<F>(
     text: &str,
     snapshot_log_counter: &mut u32,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_adapter: &mut NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -2893,7 +4884,14 @@ where
 {
     let event: GatewayEnvelope =
         serde_json::from_str(text).map_err(|error| format!("invalid gateway payload: {error}"))?;
-    let parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let Some(fence)=&gameplay_adapter.command_fence{
+        if let Some(packet)=event.packet.as_deref(){fence.invalidate_npc_gold_buy_packet(packet);}
+        else if event.kind=="worldSnapshot"{fence.begin_npc_gold_buy_snapshot(event.payload.as_ref());}
+    }
+    let mut parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let InboundEvent::Packet(packet) = &mut parsed {
+        add_packet_item_tooltip_sources(packet, ui_cursor);
+    }
     dispatch_shell_event(&parsed, context, shell_events);
     let packet_updates_world = if let InboundEvent::Packet(packet) = &parsed {
         gameplay_adapter.observe_packet(packet)
@@ -2919,6 +4917,7 @@ where
         // world/map/entity/effect registry in the same frame. Never re-emit
         // the previous map's personal snapshot.
         *last_world_payload = None;
+        map_packet_cursor.reset();
         if scope == NativeResetScope::Session {
             ui_cursor.reset();
             *last_wallet = None;
@@ -2949,7 +4948,121 @@ where
     };
 
     if let InboundEvent::Packet(PacketEvent::Other { packet, payload }) = &parsed {
-        if social_cursor.apply_packet(packet, payload) {
+        if packet == "PlayerInspect" {
+            if let Some(data) = native_player_inspect_readback(payload, ui_cursor) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.player_inspect = Some(data);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        if let Some(menu_packet) = crate::equipment_creature_wire::packet(packet, payload) {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            snapshot.equipment_owner_id = last_world_payload
+                .as_ref()
+                .and_then(|w| w.get("playerObjectId"))
+                .and_then(Value::as_u64)
+                .and_then(|id| u32::try_from(id).ok());
+            snapshot.equipment_creature_packet = Some(menu_packet);
+            let _ = gameplay_events.send(snapshot);
+        }
+        if let Some(buff) = mir2_client_bevy::crystal_ui::overlays::status_hud::BuffEvent::parse(
+            packet,
+            payload,
+            std::time::Instant::now(),
+        ) {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            if let Some(info) = skill_cursor.hero.info.as_ref() {
+                snapshot.hero_buff_event = Some(
+                    mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Buff {
+                        identity: mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
+                            session_epoch: skill_cursor.session_epoch,
+                            hero_generation: skill_cursor.hero.hero_generation,
+                            object_id: info.object_id,
+                        },
+                        event: buff.clone(),
+                    },
+                );
+            }
+            snapshot.status_buff_event = Some((skill_cursor.player_object_id, buff));
+            let _ = gameplay_events.send(snapshot);
+        }
+        if packet == "GuildBuffList" {
+            if let Some(packet) = guild_buff_readback(payload) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.guild_buff_packet = Some(packet);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        if let Some(bond_packet) = crate::social_bond_wire::packet(packet, payload) {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            snapshot.social_bond_packet = Some(bond_packet);
+            let _ = gameplay_events.send(snapshot);
+        }
+        if packet == "FriendUpdate" {
+            if let Some(friend_packet) = native_friend_packet(payload) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.friend_packet = Some(friend_packet);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        if matches!(packet.as_str(), "ChangeAMode" | "ChangePMode") {
+            if let Some(mode) = value_u32(payload.get("mode")).and_then(|v| u8::try_from(v).ok()) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.combat_mode_packet = match packet.as_str() {
+                    "ChangeAMode" if mode < 6 => {
+                        Some(mir2_protocol::ServerPacket::ChangeAMode { mode })
+                    }
+                    "ChangePMode" if mode < 5 => {
+                        Some(mir2_protocol::ServerPacket::ChangePMode { mode })
+                    }
+                    _ => None,
+                };
+                if snapshot.combat_mode_packet.is_some() {
+                    let _ = gameplay_events.send(snapshot);
+                }
+            }
+        }
+        if packet == "Rankings" {
+            if let Some(ranking_packet) = native_ranking_packet(payload) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.ranking_packet = Some(ranking_packet);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        let previous_hero_revision = skill_cursor.hero.revision;
+        skill_cursor.observe_hero_packet(packet, payload, ui_cursor)?;
+        let hero_buff_event = if packet == "HeroInformation"
+            && skill_cursor.hero.revision != previous_hero_revision
+        {
+            skill_cursor.hero.info.as_ref().map(|info| {
+                mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Information(
+                    mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
+                        session_epoch: skill_cursor.session_epoch,
+                        hero_generation: skill_cursor.hero.hero_generation,
+                        object_id: info.object_id,
+                    },
+                )
+            })
+        } else if packet == "UpdateHeroSpawnState" {
+            payload
+                .get("state")
+                .and_then(Value::as_u64)
+                .filter(|v| *v <= 3)
+                .map(|v| {
+                    mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::SpawnState(
+                        v as u8,
+                    )
+                })
+        } else {
+            None
+        };
+        if let Some(event) = hero_buff_event {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            snapshot.hero_buff_event = Some(event);
+            let _ = gameplay_events.send(snapshot);
+        }
+
+        if social_cursor.apply_network_packet(packet, payload) {
             let json = serde_json::to_string(social_cursor).map_err(|error| error.to_string())?;
             let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(json);
         }
@@ -2961,12 +5074,68 @@ where
                 .payload
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
+            // Capture the actual public owner before map, wallet and packet
+            // cursors can replace fields. Old protocol specimens have no gate.
+            let hero_raw_owner = if payload.get("heroMaxExperience").is_some() {
+                crate::npc_purchase_projection::project_hero(&payload)?;
+                Some(payload.clone())
+            } else {None};
+            let npc_buy_raw_inventory=full_npc_gold_buy_inventory_snapshot(&payload);
+            let npc_buy_raw_catalog = if payload.get("nativeNpcShop").is_some() {
+                Some(serde_json::to_value(crate::npc_purchase_projection::project_shop(&payload)?).map_err(|error|error.to_string())?)
+            } else { None };
             validate_quest_operation_ack(&payload)?;
+            map_packet_cursor.trace_snapshot_identity(&payload);
+            // Source identity is checked before cursor metadata can overwrite
+            // it. Same file names do not prove the packet's current map index.
+            let source_index_mismatch=gameplay_adapter.command_fence.is_some()
+                && value_i32(map_packet_cursor.identity_metadata.get("mapIndex"))
+                    .is_some_and(|index|{
+                        if let Some(raw_index)=payload.get("mapIndex"){
+                            value_i32(Some(raw_index))!=Some(index)
+                        }else{
+                            // Current server WorldSnapshot has no mapIndex.
+                            // Its original file identity must match before overlay.
+                            !map_packet_cursor.map_file_name.as_deref().zip(map_file_name(&payload))
+                                .is_some_and(|(current,incoming)|normalize_map_file_name(current)==normalize_map_file_name(incoming))
+                        }
+                    });
+            if map_packet_cursor.snapshot_is_from_previous_map(&payload)||source_index_mismatch {
+                // An explicitly named source-map snapshot cannot supersede a
+                // newer transfer packet or repopulate destination UI/actors.
+                forward_stale_map_receipts(
+                    &mut payload,
+                    gameplay_adapter,
+                    gameplay_events,
+                    skill_cursor,
+                )?;
+                return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
+            }
+            map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
             gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);
-            let _ = gameplay_events.send(gameplay_adapter.snapshot(&payload));
+            if skill_cursor.hero.observe_snapshot(&payload) {
+                skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+                let json = serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?;
+                if skill_cursor.hero.skill_key_ack.is_some() {
+                    skill_cursor.pending_hero_receipts.push_back(json);
+                    skill_cursor.pending_hero_model = None;
+                } else {
+                    skill_cursor.pending_hero_model = Some(json);
+                }
+            }
+            skill_cursor.flush_hero_model();
+            // Skill receipts use their own critical channel, before ECS/world
+            // ingestion. Keep the complete snapshot on retry, never just ACK.
+            let mut skill_source_model=transform_skill_model(&payload);
+            if skill_source_model.get("skillKeyAck").is_some_and(|ack|ack["key"].as_u64().unwrap_or(0)>16||ack["oldKey"].as_u64().unwrap_or(0)>16){skill_source_model["skillKeyAck"]=Value::Null;}
+            let skill_ingest=skill_cursor.queue_skill_model(&payload)?;
+            if let Some(object) = payload.as_object_mut() {
+                object.remove("skillKeyAck");
+            }
+            let mut owned_gameplay_snapshot=gameplay_adapter.snapshot(&payload);
             strip_one_shot_quest_operation_ack(&mut payload);
             let runtime_snapshot = transform_world_snapshot(&payload);
             let json = serde_json::to_string(&runtime_snapshot).map_err(|e| e.to_string())?;
@@ -2975,6 +5144,10 @@ where
                 // so the native console stays readable while the map renders.
                 *snapshot_log_counter += 1;
                 if *snapshot_log_counter <= 3 {
+                    crate::timing::milestone(&format!(
+                        "world_snapshot_forwarded:{}",
+                        *snapshot_log_counter
+                    ));
                     eprintln!(
                         "[gateway-client] forwarded world snapshot #{}",
                         *snapshot_log_counter
@@ -2997,12 +5170,12 @@ where
             ui_cursor.observe_world_snapshot(&payload);
             let ui_model = ui_cursor.to_read_model_json();
             let ui_json = serde_json::to_string(&ui_model).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
+            let ui_ingest=mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
 
             // Feed the shared map model so client-bevy renders terrain tiles.
             let map_model = transform_map_model(&payload);
             let map_json = serde_json::to_string(&map_model).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
+            let map_ingest=mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
 
             // When a local map pack + atlas are available, render the real map
             // textures via MapRenderState instead of the colored terrain. The
@@ -3012,7 +5185,7 @@ where
             // Feed the shared entity model set so client-bevy renders entities.
             let entity_model = transform_entity_model_set(&payload);
             let entity_json = serde_json::to_string(&entity_model).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
+            let entity_ingest=mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
 
             // The main-thread Windows entity presentation resource owns real
             // sprite render-state production so its Crystal frame clock keeps
@@ -3020,14 +5193,18 @@ where
 
             // Feed the shared inventory model so client-bevy renders the bag.
             let inventory = transform_inventory_model(&payload);
+            if trade_projection::observe_own_offer(&payload, &inventory, social_cursor) {
+                let social_json =
+                    serde_json::to_string(social_cursor).map_err(|error| error.to_string())?;
+                let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(social_json);
+            }
             let inventory_json = serde_json::to_string(&inventory).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_inventory_model(inventory_json);
+            let inventory_ingest = mir2_bevy_runtime::native_ingest::push_native_inventory_model(inventory_json);
 
             // Skills are a separate Bevy resource, not part of UiReadModel.
             // Keep it synchronized with every accepted authoritative snapshot;
             // otherwise NewMagic can be acknowledged in chat while the native
             // SPELLS page and F1-F8 resolver remain permanently empty.
-            let _ = push_native_skill_model_from_world(&payload)?;
 
             // These models are deliberately independent. NPCGoods populates
             // ShopModel, while the cash catalogue uses GameShopInfo/Stock.
@@ -3039,16 +5216,41 @@ where
                     serde_json::to_string(&storage).map_err(|error| error.to_string())?;
                 let _ = mir2_bevy_runtime::native_ingest::push_native_storage_model(storage_json);
             }
-            if payload_has_valid_shop_array(&payload) {
-                let shop = transform_shop_model_from_snapshot(&payload);
+            let mut npc_buy_shop_delivery=None;
+            if let Some(shop) = npc_buy_raw_catalog {
                 let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
-                let _ = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                let delivered = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                npc_buy_shop_delivery=Some((shop,delivered,true));
+            } else if payload_has_valid_shop_array(&payload) {
+                let shop = transform_shop_model_from_snapshot(&payload, ui_cursor);
+                let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
+                let delivered = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                npc_buy_shop_delivery=Some((shop,delivered,false));
             }
 
+            if world_ingest==WorldSnapshotIngestOutcome::Applied && ui_ingest&&map_ingest&&entity_ingest&&skill_ingest {
+                attach_native_producer_provenance(&mut owned_gameplay_snapshot,gameplay_adapter,&payload,&ui_model,&map_model,&entity_model,Some(&skill_source_model),true)?;
+                gameplay_adapter.last_full_producer_stamp=owned_gameplay_snapshot.command_stamp;
+                gameplay_adapter.last_full_producer_models=owned_gameplay_snapshot.producer_models.clone();
+            }
+            if let (Some(owner),Some(fence),Some(stamp))=(hero_raw_owner.as_ref(),gameplay_adapter.command_fence.as_ref(),owned_gameplay_snapshot.command_stamp) {
+                if let Some(update)=fence.prepare_hero_owner(stamp,owner)? {
+                    let _=mir2_bevy_runtime::native_ingest::push_native_hero_owner_snapshot(update);
+                }
+            }
+            if let Some(fence)=&gameplay_adapter.command_fence{
+                let staged=if npc_buy_raw_inventory{fence.stage_npc_gold_buy_inventory(&inventory)}else{None};
+                fence.finish_npc_gold_buy_inventory(staged,npc_buy_raw_inventory&&inventory_ingest&&world_ingest==WorldSnapshotIngestOutcome::Applied&&owned_gameplay_snapshot.producer_models.is_some());
+                if let Some((shop,delivered,complete))=npc_buy_shop_delivery{let staged=if complete {fence.stage_npc_gold_buy_complete_catalog(&shop)}else{fence.stage_npc_gold_buy_catalog(&shop,false)};fence.finish_npc_gold_buy_catalog(staged,delivered);}
+            }
+            // Legacy adapters preserve established fixture delivery; production never
+            // presents a backpressured snapshot as an applied producer grant.
+            if gameplay_adapter.command_fence.is_none() || owned_gameplay_snapshot.command_stamp.is_some(){let _=gameplay_events.send(owned_gameplay_snapshot);}
             Ok(world_ingest)
         }
         "packet" => {
             let packet = event.packet.as_deref().unwrap_or("?");
+            crate::timing::reply(packet);
             match packet {
                 "LoginSuccess" => {
                     eprintln!("[gateway-client] LoginSuccess");
@@ -3058,7 +5260,11 @@ where
                 }
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                    }
                     if let Some(payload) = event.payload.as_ref() {
+                        map_packet_cursor.observe_map_information(payload);
                         if let Some(world) = last_world_payload.as_mut() {
                             apply_map_information_to_world_payload(world, payload);
                         }
@@ -3070,7 +5276,11 @@ where
                 }
                 "MapChanged" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                    }
                     if let Some(payload) = event.payload.as_ref() {
+                        map_packet_cursor.observe_map_information_kind(payload, "MapChanged");
                         ui_cursor.observe_map_identity(payload);
                         let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
                             ui_cursor.to_read_model_json().to_string(),
@@ -3107,23 +5317,27 @@ where
                         }
                     }
                 }
-                "NPCGoods" => {
+                "NPCGoods" | "NPCPearlGoods" => {
                     if let Some(payload) = event.payload.as_ref() {
-                        if let Some(shop) = try_transform_shop_model_from_packet(payload) {
+                        if let Some(shop) = transform_npc_catalog_packet(packet, payload, ui_cursor)
+                        {
                             let shop_json =
                                 serde_json::to_string(&shop).map_err(|error| error.to_string())?;
-                            let _ =
-                                mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                            let staged=gameplay_adapter.command_fence.as_ref().and_then(|fence|fence.stage_npc_gold_buy_catalog(&shop,true));
+                            let delivered=mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                            if let Some(fence)=&gameplay_adapter.command_fence{fence.finish_npc_gold_buy_catalog(staged,delivered);}
                             let signal = npc_shop_service_from_packet(packet, payload)
                                 .ok_or_else(|| "invalid NPCGoods service signal".to_owned())?;
-                            push_native_npc_shop_service(signal)?;
+                            let delivered=push_native_npc_shop_service(signal)?;
+                            if let Some(fence)=&gameplay_adapter.command_fence{fence.observe_npc_gold_buy_service(signal,delivered);}
                         }
                     }
                 }
                 "NPCSell" => {
                     let signal = npc_shop_service_from_packet(packet, &Value::Null)
                         .ok_or_else(|| "invalid NPCSell service signal".to_owned())?;
-                    push_native_npc_shop_service(signal)?;
+                    let delivered=push_native_npc_shop_service(signal)?;
+                    if let Some(fence)=&gameplay_adapter.command_fence{fence.observe_npc_gold_buy_service(signal,delivered);}
                 }
                 "NPCRepair" | "NPCSRepair" => {
                     let Some(signal) = event
@@ -3134,9 +5348,11 @@ where
                         eprintln!("[gateway-client] ignored malformed {packet} service rate");
                         return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
                     };
-                    push_native_npc_shop_service(signal)?;
+                    let delivered=push_native_npc_shop_service(signal)?;
+                    if let Some(fence)=&gameplay_adapter.command_fence{fence.observe_npc_gold_buy_service(signal,delivered);}
                 }
-                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" => {
+                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem"
+                | "EquipItem" | "RemoveItem" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(ack) = transform_inventory_operation_ack(packet, payload) {
                             if let Ok(json) = serde_json::to_string(&ack) {
@@ -3151,10 +5367,15 @@ where
                 }
                 "GameShopInfo" => {
                     if let Some(payload) = event.payload.as_ref() {
-                        if let Some(item) = transform_game_shop_info_from_packet(payload) {
+                        if let Some(item) = transform_game_shop_info_from_packet(payload, ui_cursor)
+                        {
                             let json = serde_json::to_string(&item).map_err(|e| e.to_string())?;
-                            let _ =
-                                mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            let enqueued = mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            if item.get("gameShopIndex").and_then(Value::as_i64) == Some(31)
+                                && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
+                            {
+                                eprintln!("[native-game-shop] catalog_sample g_index=31 enqueued={enqueued}");
+                            }
                         }
                     }
                 }
@@ -3197,19 +5418,39 @@ where
                         }
                     }
                 }
+                "MailSendRequest" | "MailCost" | "MailLockedItem" => {
+                    let payload = event.payload.as_ref().unwrap_or(&Value::Null);
+                    if !push_native_mail_service_event(context.mail_stream.as_ref(), packet, payload)? {
+                        eprintln!("[gateway-client] ignored malformed {packet} parcel service packet");
+                    }
+                }
                 "ReceiveMail" => {
                     if let Some(payload) = event.payload.as_ref() {
+                        let row_count = payload
+                            .get("mail")
+                            .and_then(Value::as_array)
+                            .map_or(0, Vec::len);
+                        let mut converted = false;
+                        let mut enqueued = false;
                         if let Some(mut model) = try_transform_mail_model_from_packet(payload) {
-                            let _ =
-                                push_mail_model_with_feedback(&mut model, pending_mail_feedback)?;
+                            converted = true;
+                            enqueued = push_mail_model_with_feedback(
+                                &mut model,
+                                pending_mail_feedback,
+                            )?;
+                        }
+                        if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+                            eprintln!(
+                                "[native-mail] receive_rows={row_count} converted={converted} enqueued={enqueued}"
+                            );
                         }
                     }
                 }
                 "MailSent" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(feedback) = mail_operation_feedback(packet, payload, None) {
+                            if let Some(stream)=context.mail_stream.as_ref(){if !stream.acknowledge_send(if feedback.success{1}else{-1}){return Err("native MailSent ACK delivery failed".into());}}
                             *send_mail_in_flight = false;
-                            let _ = enqueue_mail_feedback(pending_mail_feedback, feedback);
                         }
                     }
                 }
@@ -3267,10 +5508,22 @@ where
                 if let Some(base_payload) = last_world_payload.as_ref() {
                     let mut payload = base_payload.clone();
                     gameplay_adapter.apply_authoritative_overlay(&mut payload);
+                    skill_cursor.apply_active_patches(
+                        &mut payload,
+                        world_payload_tick_from(Some(base_payload)),
+                    );
+                    let source = match &parsed {
+                        InboundEvent::Packet(packet) => Some(packet),
+                        _ => None,
+                    };
+                    if packet_first_world_needs_aux_models(source) {
+                        let _ = skill_cursor.queue_skill_model(&payload)?;
+                    }
                     forward_packet_first_world(
                         &payload,
                         gameplay_adapter,
                         gameplay_events,
+                        ui_cursor,
                         pending_mail_feedback,
                         match &parsed {
                             InboundEvent::Packet(packet) => Some(packet),
@@ -3290,13 +5543,42 @@ where
     }
 }
 
-/// Fold the authoritative MapInformation identity into the retained personal
-/// snapshot before the destination UserLocation arrives.
-///
-/// The Web client applies this packet immediately. The native packet-first
-/// path used to overlay only the new coordinates onto the retained snapshot,
-/// leaving `mapFileName`, title and source-map population untouched. Entering
-/// `0141` therefore rendered map `0` at `(2, 11)` and kept the Bichon title.
+/// Preserve session-scoped operation receipts without restoring the old scene.
+fn forward_stale_map_receipts(
+    payload: &mut Value,
+    gameplay_adapter: &NativeGameplayAdapter,
+    gameplay_events: &std::sync::mpsc::Sender<crate::gameplay_bridge::NativeGameplaySnapshot>,
+    skill_cursor: &mut SkillPacketCursor,
+) -> Result<(), String> {
+    validate_quest_operation_ack(payload)?;
+    if let Some(ack) = payload.get("questOperationAck").filter(|value| !value.is_null()) {
+        // ACKs are applied before full gameplay projections; this envelope
+        // carries the current big map and no old actors or scene metadata.
+        let mut receipt = gameplay_adapter.big_map_snapshot();
+        receipt.quest_operation_ack = Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
+        let _ = gameplay_events.send(receipt);
+    }
+    if payload.get("skillKeyAck").is_some_and(|value| !value.is_null()) {
+        // Skill authority is session-scoped. Retain its full model with the
+        // receipt, independently of the rejected world/map projection.
+        skill_cursor.observe_snapshot(payload);
+        if skill_cursor.hero.observe_snapshot(payload) {
+            skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+            if skill_cursor.hero.skill_key_ack.is_some() {
+                skill_cursor.pending_hero_receipts.push_back(
+                    serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?,
+                );
+                skill_cursor.pending_hero_model = None;
+            }
+        }
+        skill_cursor.flush_hero_model();
+        let _ = skill_cursor.queue_skill_model(payload)?;
+    }
+    Ok(())
+}
+
+/// Fold MapInformation into the retained snapshot before UserLocation. A
+/// transfer must not put destination coordinates onto source-map metadata.
 fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> bool {
     let next_file_name = packet
         .get("fileName")
@@ -3318,11 +5600,16 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
     let Some(object) = world.as_object_mut() else {
         return false;
     };
+    if map_changed {
+        for key in ["mapTitle", "miniMapIndex", "bigMapIndex", "mapLightSetting",
+            "mapDarkLight", "weatherParticles", "mapMusic"] {
+            object.remove(key);
+        }
+    }
     for (source, destination) in [
         ("mapIndex", "mapIndex"),
         ("fileName", "mapFileName"),
         ("title", "mapTitle"),
-        ("miniMapIndex", "miniMapIndex"),
         ("bigMapIndex", "bigMapIndex"),
         ("lights", "mapLightSetting"),
         ("mapDarkLight", "mapDarkLight"),
@@ -3332,6 +5619,9 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
             object.insert(destination.to_owned(), value.clone());
         }
+    }
+    if let Some(value) = packet_minimap_value(packet) {
+        object.insert("miniMapIndex".to_owned(), value.clone());
     }
     if !map_changed {
         return false;
@@ -3362,6 +5652,141 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         });
     }
     true
+}
+
+/// Retains authoritative packet map identity across schema/partial snapshots.
+/// An absent snapshot identity inherits the latest map packet; an explicitly
+/// different identity is stale and must not replace destination projections.
+/// Scene/session reset clears this cursor before adopting the new packet.
+#[derive(Debug, Default)]
+struct NativeMapPacketCursor {
+    map_file_name: Option<String>,
+    mini_map_index: Option<u16>,
+    identity_metadata: serde_json::Map<String, Value>,
+    trace_pending_snapshot: bool,
+    trace_rejected_file: Option<String>,
+}
+
+impl NativeMapPacketCursor {
+    fn reset(&mut self) {
+        *self = Self::default();
+    }
+
+    fn observe_map_information(&mut self, packet: &Value) {
+        self.observe_map_information_kind(packet, "MapInformation");
+    }
+
+    fn observe_map_information_kind(&mut self, packet: &Value, packet_kind: &str) {
+        let Some(map_file_name) = map_file_name(packet) else {
+            return;
+        };
+        let changed = self.map_file_name.as_deref().is_some_and(|current| {
+            normalize_map_file_name(current) != normalize_map_file_name(map_file_name)
+        });
+        if changed || self.map_file_name.is_none() {
+            if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
+                    "event":"packet", "packet":packet_kind,
+                    "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
+                    "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
+                    "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
+                }));
+            }
+            self.trace_pending_snapshot = true;
+            self.trace_rejected_file = None;
+        }
+        if changed {
+            self.mini_map_index = None;
+            self.identity_metadata.clear();
+        }
+        self.map_file_name = Some(map_file_name.to_owned());
+        for (source, destination) in [
+            ("mapIndex", "mapIndex"), ("title", "mapTitle"),
+            ("bigMapIndex", "bigMapIndex"), ("lights", "mapLightSetting"),
+            ("mapDarkLight", "mapDarkLight"), ("weatherParticles", "weatherParticles"),
+            ("music", "mapMusic"),
+        ] {
+            if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
+                self.identity_metadata.insert(destination.to_owned(), value.clone());
+            }
+        }
+
+        // A present zero is authoritative: it means the destination has no
+        // minimap and must clear a prior map's positive index.
+        if packet_minimap_value(packet).is_some() {
+            self.mini_map_index = map_minimap_index(packet);
+        }
+    }
+
+    fn snapshot_is_from_previous_map(&self, snapshot: &Value) -> bool {
+        self.map_file_name.as_deref().zip(map_file_name(snapshot))
+            .is_some_and(|(current, incoming)| {
+                normalize_map_file_name(current) != normalize_map_file_name(incoming)
+            })
+    }
+
+    fn trace_snapshot_identity(&mut self, snapshot: &Value) {
+        if !mir2_bevy_runtime::native_render_diagnostics_enabled() { return; }
+        let rejected = self.snapshot_is_from_previous_map(snapshot);
+        let incoming = map_file_name(snapshot).unwrap_or("<partial>");
+        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) { return; }
+        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() { return; }
+        mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
+            "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
+            "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
+            "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
+            "authoritativeMiniMap":self.mini_map_index,
+        }));
+        if rejected { self.trace_rejected_file = Some(incoming.to_owned()); }
+        else { self.trace_pending_snapshot = false; self.trace_rejected_file = None; }
+    }
+
+    fn merge_into_same_map_snapshot(&mut self, snapshot: &mut Value) {
+        let Some(current_file_name) = self.map_file_name.as_ref() else {
+            return;
+        };
+        if self.snapshot_is_from_previous_map(snapshot) {
+            // Snapshots can be delayed across a transition. They may not use
+            // a packet cursor for another map, but must not erase the newer
+            // MapInformation/MapChanged identity that will receive its own
+            // periodic snapshot next.
+            return;
+        }
+        let Some(object) = snapshot.as_object_mut() else {
+            return;
+        };
+        object.insert("mapFileName".to_owned(), json!(current_file_name));
+        for (key, value) in &self.identity_metadata {
+            object.insert(key.clone(), value.clone());
+        }
+        if let Some(index) = self.mini_map_index {
+            object.insert("miniMapIndex".to_owned(), json!(index));
+        } else {
+            object.remove("miniMapIndex");
+        }
+    }
+}
+
+fn packet_minimap_value(packet: &Value) -> Option<&Value> {
+    packet
+        .get("miniMapIndex")
+        .filter(|value| !value.is_null())
+        .or_else(|| packet.get("miniMap").filter(|value| !value.is_null()))
+}
+
+fn map_minimap_index(packet: &Value) -> Option<u16> {
+    value_u64(packet_minimap_value(packet))
+        .and_then(|index| u16::try_from(index).ok())
+        .filter(|index| *index > 0)
+}
+
+fn map_file_name(value: &Value) -> Option<&str> {
+    value
+        .get("fileName")
+        .or_else(|| value.get("mapFileName"))
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
 }
 
 fn normalize_map_file_name(value: &str) -> String {
@@ -3454,37 +5879,80 @@ fn packet_updates_big_map(packet: &PacketEvent) -> bool {
 /// snapshot leaves a successfully moved native player looking frozen in place.
 /// Inventory remains on the periodic snapshot path because Zone deltas do not
 /// mutate it.
+fn normalized_producer_model<T:serde::de::DeserializeOwned+serde::Serialize>(value:&Value)->Result<Value,String>{
+    let model:T=serde_json::from_value(value.clone()).map_err(|e|e.to_string())?;
+    serde_json::to_value(model).map_err(|e|e.to_string())
+}
+fn attach_native_producer_provenance(
+    snapshot:&mut NativeGameplaySnapshot,adapter:&NativeGameplayAdapter,payload:&Value,
+    ui:&Value,map:&Value,entities:&Value,skills:Option<&Value>,confirm_entry:bool,
+)->Result<(),String>{
+    let Some(fence)=&adapter.command_fence else{return Ok(());};
+    let self_actor=payload.get("entities").and_then(Value::as_array).and_then(|rows|rows.iter().find(|row|row.get("kind").and_then(Value::as_str)==Some("selfPlayer")))
+        .and_then(|row|row.get("objectId")).and_then(|value|value_u32(Some(value))).filter(|id|*id!=0);
+    let Some(actor)=self_actor else{return Ok(());};
+    if value_u32(payload.get("playerObjectId")).is_some_and(|id|id!=actor){return Ok(());}
+    if let Some(map_index)=value_i32(payload.get("mapIndex")){fence.observe_scene(map_index,false);}
+    let inherited_skills=if !confirm_entry {
+        let current=fence.stamp();
+        let inherited=adapter.last_full_producer_models.as_ref().and_then(|models|models.skills.as_ref());
+        if adapter.last_full_producer_stamp!=current||inherited.is_none(){
+            // Keep map/ACK presentation, but an old retained payload cannot be
+            // promoted into the new scene's complete producer source.
+            snapshot.command_stamp=current;snapshot.big_map_only=true;snapshot.producer_models=None;return Ok(());
+        }
+        inherited
+    }else{skills};
+    let stamp=if confirm_entry {fence.confirm_owner(actor)} else {fence.stamp()};
+    let Some(stamp)=stamp.filter(|stamp|stamp.actor==Some(actor)&&fence.accepts(*stamp,true)) else{return Ok(());};
+    snapshot.command_stamp=Some(stamp);
+    snapshot.producer_models=Some(crate::gameplay_bridge::NativeProducerModels {
+        ui:normalized_producer_model::<mir2_client_bevy::read_model::UiReadModel>(ui)?,
+        entities:normalized_producer_model::<mir2_client_bevy::entities::EntityModelSet>(entities)?,
+        map:normalized_producer_model::<mir2_client_bevy::map::MapModel>(map)?,
+        skills:inherited_skills.map(normalized_producer_model::<mir2_client_bevy::skill_model::SkillModel>).transpose()?,
+    });
+    Ok(())
+}
+
 fn forward_packet_first_world(
     payload: &Value,
     gameplay_adapter: &NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
+    ui_cursor: &mut NativeUiPlayerCursor,
     pending_mail_feedback: &mut VecDeque<PendingMailOperationFeedback>,
     source_packet: Option<&PacketEvent>,
 ) -> Result<(), String> {
     let mut gameplay_snapshot = gameplay_adapter.snapshot(payload);
     gameplay_snapshot.authoritative_self_movement =
         native_self_movement_ack(source_packet, payload);
-    let _ = gameplay_events.send(gameplay_snapshot);
-
     let runtime_snapshot = transform_world_snapshot(payload);
     let runtime_json =
         serde_json::to_string(&runtime_snapshot).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_world_state(runtime_json);
+    let world_ingest=mir2_bevy_runtime::native_ingest::push_native_world_state(runtime_json);
 
-    let ui_model = transform_ui_read_model(payload);
+    // Movement/map packet refreshes clone a partial retained world snapshot.
+    // Merge it into the packet-first cursor so UserInformation-only appearance
+    // (hair, guild and gender) cannot disappear on the next walk/turn packet.
+    ui_cursor.observe_world_snapshot(payload);
+    let ui_model = ui_cursor.to_read_model_json();
     let ui_json = serde_json::to_string(&ui_model).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
+    let ui_ingest=mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
 
     let map_model = transform_map_model(payload);
     let map_json = serde_json::to_string(&map_model).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
+    let map_ingest=mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
 
     push_local_map_render_state(payload)?;
 
     let entity_model = transform_entity_model_set(payload);
     let entity_json = serde_json::to_string(&entity_model).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
+    let entity_ingest=mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
 
+    if world_ingest&&ui_ingest&&map_ingest&&entity_ingest {
+        attach_native_producer_provenance(&mut gameplay_snapshot,gameplay_adapter,payload,&ui_model,&map_model,&entity_model,None,false)?;
+    }
+    if gameplay_adapter.command_fence.is_none()||gameplay_snapshot.command_stamp.is_some(){let _=gameplay_events.send(gameplay_snapshot);}
     // A successful Crystal movement acknowledgement only advances the local
     // scene/camera and releases the pending action. Inventory, learned skills,
     // mail, storage and shop are unrelated immutable models on this packet and
@@ -3492,8 +5960,6 @@ fn forward_packet_first_world(
     if !packet_first_world_needs_aux_models(source_packet) {
         return Ok(());
     }
-
-    let _ = push_native_skill_model_from_world(payload)?;
 
     if let Some(mut mail) = try_transform_mail_model_from_snapshot(payload) {
         let _ = push_mail_model_with_feedback(&mut mail, pending_mail_feedback)?;
@@ -3503,9 +5969,11 @@ fn forward_packet_first_world(
         let _ = mir2_bevy_runtime::native_ingest::push_native_storage_model(storage_json);
     }
     if payload_has_valid_shop_array(payload) {
-        let shop = transform_shop_model_from_snapshot(payload);
+        let shop = transform_shop_model_from_snapshot(payload, ui_cursor);
         let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
-        let _ = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+        let staged=gameplay_adapter.command_fence.as_ref().and_then(|fence|fence.stage_npc_gold_buy_catalog(&shop,false));
+        let delivered=mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+        if let Some(fence)=&gameplay_adapter.command_fence{fence.finish_npc_gold_buy_catalog(staged,delivered);}
     }
 
     Ok(())
@@ -3593,7 +6061,7 @@ fn native_self_movement_ack(
 fn dispatch_shell_event(
     event: &InboundEvent,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
 ) {
     let shell_event = match event {
         InboundEvent::Packet(PacketEvent::NewAccountResult(result)) => match result.result {
@@ -3615,12 +6083,13 @@ fn dispatch_shell_event(
                 .filter_map(|character| {
                     let index = i32::try_from(character.index?).ok()?;
                     let level = u16::try_from(character.level.unwrap_or(1)).unwrap_or(1);
-                    Some(CharacterSummary::new(
+                    Some(CharacterSummary::new_with_last_access(
                         index,
                         character.name.as_deref().unwrap_or("Unnamed"),
                         level,
                         character.class.as_deref().unwrap_or("Unknown"),
                         character.gender.as_deref().unwrap_or("Unknown"),
+                        character.last_access_binary_datetime.unwrap_or_default(),
                     ))
                 })
                 .collect();
@@ -3630,11 +6099,27 @@ fn dispatch_shell_event(
             })
         }
         InboundEvent::Packet(PacketEvent::LoginFailure(failure)) => {
+            // Crystal's LoginBanned packet carries an authoritative reason;
+            // preserve any protocol-provided reason before interpreting the
+            // numeric Login result below.
             let message = failure.reason.clone().unwrap_or_else(|| {
-                failure.result.map_or_else(
-                    || "login failed".to_owned(),
-                    |result| format!("login failed (result {result})"),
-                )
+                // These are Crystal's S.Login result codes. Keep the
+                // account-not-found distinction (Crystal exposes it too), but
+                // intentionally collapse credential failures into one message
+                // so the native UI does not reveal which secret was wrong.
+                match failure.result {
+                    Some(0) => "login is currently disabled".to_owned(),
+                    Some(1) => "account ID is invalid".to_owned(),
+                    Some(2) => "password is invalid".to_owned(),
+                    Some(3) => "account does not exist".to_owned(),
+                    Some(4) => "invalid credentials".to_owned(),
+                    Some(5) => "password change required before login".to_owned(),
+                    Some(result) => format!("login failed (result {result})"),
+                    None => failure
+                        .reason
+                        .clone()
+                        .unwrap_or_else(|| "login failed".to_owned()),
+                }
             });
             Some(ShellGatewayEvent::LoginFailure { message })
         }
@@ -3730,7 +6215,7 @@ fn dispatch_shell_event(
     };
 
     if let Some(event) = shell_event {
-        let _ = shell_events.send(event);
+        let _ = shell_events.send_event(event);
     }
 }
 
@@ -3757,7 +6242,7 @@ fn character_summary_from_value(value: &Value) -> Option<CharacterSummary> {
         .and_then(Value::as_u64)
         .and_then(|level| u16::try_from(level).ok())
         .unwrap_or(1);
-    Some(CharacterSummary::new(
+    Some(CharacterSummary::new_with_last_access(
         index,
         value
             .get("name")
@@ -3772,6 +6257,12 @@ fn character_summary_from_value(value: &Value) -> Option<CharacterSummary> {
             .get("gender")
             .and_then(Value::as_str)
             .unwrap_or("Unknown"),
+        value_i64(
+            value
+                .get("lastAccessBinaryDatetime")
+                .or_else(|| value.get("last_access_binary_datetime")),
+        )
+        .unwrap_or_default(),
     ))
 }
 
@@ -3781,7 +6272,7 @@ fn character_summary_from_value(value: &Value) -> Option<CharacterSummary> {
 /// The gateway serializes `WorldSnapshot` with u32 `objectId`s and a wide field
 /// set; the Bevy runtime deserializes a smaller camelCase shape with string
 /// object ids and the movement timing the motion table consumes.
-fn transform_world_snapshot(payload: &Value) -> Value {
+pub(crate) fn transform_world_snapshot(payload: &Value) -> Value {
     let entities = payload
         .get("entities")
         .and_then(Value::as_array)
@@ -3833,6 +6324,7 @@ fn transform_world_snapshot(payload: &Value) -> Value {
 
     json!({
         "mapTitle": payload.get("mapTitle"),
+        "mapFileName": payload.get("mapFileName"),
         "playerObjectId": payload.get("playerObjectId").and_then(object_id_string),
         "selectedObjectId": payload.get("selectedObjectId").and_then(object_id_string),
         "sceneView": payload.get("sceneView"),
@@ -3847,16 +6339,31 @@ fn transform_world_snapshot(payload: &Value) -> Value {
             "maxMp": value_i32_or(payload.get("playerMaxMp"), 0),
             "gold": value_u32_or(payload.get("gold"), 0),
             "credit": value_u32_or(payload.get("credit"), 0),
+            "crystalStats": payload.get("playerCrystalStats").cloned().unwrap_or(Value::Null),
             "level": value_u32_or(self_player.and_then(|entity| entity.get("level")), 0),
             "experience": value_i64_or(payload.get("playerExperience"), 0),
             "maxExperience": value_i64_or(payload.get("playerMaxExperience"), 0),
             "currentWeight": value_u16_or(payload.get("currentWeight"), 0),
+            "currentWeightKnown":value_u32(payload.get("currentWeight")).is_some(),
             "maxWeight": value_u16_or(payload.get("maxWeight"), 0),
             "name": value_string(self_player.and_then(|entity| entity.get("name"))),
             "className": value_string(
                 self_player
                     .and_then(|entity| entity.get("class"))
                     .or_else(|| self_player.and_then(|entity| entity.get("className"))),
+            ),
+            "gender": value_string(
+                self_player
+                    .and_then(|entity| entity.get("gender"))
+                    .or_else(|| self_player.and_then(|entity| entity.get("genderKey"))),
+            ),
+            "hair": value_u32(self_player.and_then(|entity| entity.get("hair")))
+                .and_then(|value| u8::try_from(value).ok()),
+            "guildName": value_string(self_player.and_then(|entity| entity.get("guildName"))),
+            "guildRankName": value_string(
+                self_player
+                    .and_then(|entity| entity.get("guildRankName"))
+                    .or_else(|| self_player.and_then(|entity| entity.get("guildRank"))),
             ),
             "mapName": value_string(payload.get("mapTitle")),
         },
@@ -3879,11 +6386,31 @@ fn transform_map_model(payload: &Value) -> Value {
     let time_of_day_light_setting = value_u64(payload.get("lightSetting"))
         .and_then(|value| u8::try_from(value).ok())
         .filter(|value| *value <= 4);
+    // MapModel is the HUD projection. Preserve the received source payload and
+    // light bridge state while making its icon agree with the displayed scene.
+    let time_of_day_light_setting = crate::map_parser::lighting::presentation_light_setting(
+        time_of_day_light_setting,
+        crate::map_parser::lighting::force_daylight_enabled(),
+    );
+    let mini_map_index = value_u64(payload.get("miniMapIndex"))
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| *value > 0);
+    // The map parser is cache-backed and already used for native scene
+    // rendering. Its dimensions are required to scale the authoritative MMap
+    // image without title-specific geometry guesses.
+    let map_dimensions = payload
+        .get("mapFileName")
+        .and_then(Value::as_str)
+        .and_then(crate::map_parser::load_map)
+        .map(|map| (map.width, map.height));
 
     json!({
         "centerX": center_x,
         "centerY": center_y,
         "timeOfDayLightSetting": time_of_day_light_setting,
+        "miniMapIndex": mini_map_index,
+        "mapWidth": map_dimensions.map(|(width, _)| width),
+        "mapHeight": map_dimensions.map(|(_, height)| height),
         "patches": payload.get("terrainPatches").cloned().unwrap_or(Value::Array(vec![])),
     })
 }
@@ -3977,8 +6504,30 @@ fn transform_inventory_operation_ack(
     packet: &str,
     payload: &Value,
 ) -> Option<InventoryOperationAck> {
+    if packet == "DeleteItem" {
+        // Crystal's S.DeleteItem receipt carries the exact instance/count but
+        // no Success field. Receiving the packet itself is the authoritative
+        // success acknowledgement.
+        return Some(InventoryOperationAck::Delete {
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
+            success: true,
+        });
+    }
     let success = payload.get("success")?.as_bool()?;
     match packet {
+        "EquipItem" => Some(InventoryOperationAck::Equip {
+            grid: payload.get("grid")?.as_str()?.to_owned(),
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            to: value_i32(payload.get("to"))?,
+            success,
+        }),
+        "RemoveItem" => Some(InventoryOperationAck::Remove {
+            grid: payload.get("grid")?.as_str()?.to_owned(),
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            to: value_i32(payload.get("to"))?,
+            success,
+        }),
         "DropItem" => Some(InventoryOperationAck::Drop {
             unique_id: value_u64(payload.get("uniqueId"))?,
             count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
@@ -4013,7 +6562,10 @@ fn transform_inventory_operation_ack(
     }
 }
 
-fn transform_game_shop_info_from_packet(payload: &Value) -> Option<Value> {
+fn transform_game_shop_info_from_packet(
+    payload: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<Value> {
     let item = payload
         .get("item")
         .filter(|value| value.is_object())
@@ -4028,6 +6580,12 @@ fn transform_game_shop_info_from_packet(payload: &Value) -> Option<Value> {
             .or_else(|| item.get("stock_level")),
     )
     .unwrap_or_else(|| value_i32(item.get("stock")).unwrap_or(0));
+    let tooltip_source = info.and_then(crystal_wire_item_info).map(|info| {
+        let count = value_u32(item.get("count"))
+            .and_then(|value| u16::try_from(value).ok())
+            .unwrap_or(1);
+        crystal_tooltip_source_for_preview(info, count, cursor)
+    });
     Some(json!({
         "itemIndex": value_i32(item.get("itemIndex").or_else(|| item.get("item_index")))
             .or_else(|| value_i32(info.and_then(|value| value.get("index"))))
@@ -4054,6 +6612,7 @@ fn transform_game_shop_info_from_packet(payload: &Value) -> Option<Value> {
         "dateBinaryDatetime": value_i64(item.get("dateBinaryDatetime").or_else(|| item.get("date_binary_datetime"))).unwrap_or_default(),
         "canBuyCredit": item.get("canBuyCredit").or_else(|| item.get("can_buy_credit")).and_then(Value::as_bool).unwrap_or(false),
         "canBuyGold": item.get("canBuyGold").or_else(|| item.get("can_buy_gold")).and_then(Value::as_bool).unwrap_or(false),
+        "tooltipSource": tooltip_source,
     }))
 }
 
@@ -4080,13 +6639,13 @@ fn transform_game_shop_stock_from_packet(payload: &Value) -> Option<Value> {
 /// `NPCSell` remain separate packet signals; the shared ShopModel folds that
 /// ordered pair into one BUYSELL capability set, while a lone NPCSell stays
 /// sell-only.
-fn npc_shop_service_from_packet(
+pub(crate) fn npc_shop_service_from_packet(
     packet: &str,
     payload: &Value,
 ) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
     use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
     let signal = match packet {
-        "NPCGoods" => NpcShopServiceSignal {
+        "NPCGoods" | "NPCPearlGoods" => NpcShopServiceSignal {
             mode: NpcShopServiceMode::Buy,
             repair_rate: None,
         },
@@ -4113,35 +6672,47 @@ fn npc_shop_service_from_packet(
 
 fn push_native_npc_shop_service(
     signal: mir2_client_bevy::shop::NpcShopServiceSignal,
-) -> Result<(), String> {
+) -> Result<bool, String> {
     if !signal.is_valid() {
         return Err("invalid NPC shop service signal".to_owned());
     }
     let json = serde_json::to_string(&signal).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_npc_shop_service(json);
-    Ok(())
+    Ok(mir2_bevy_runtime::native_ingest::push_native_npc_shop_service(json))
 }
 
-fn transform_shop_model_from_packet(payload: &Value) -> Value {
+fn npc_catalog_projection_cursor(payload: &Value, cursor: &NativeUiPlayerCursor) -> NativeUiPlayerCursor {
+    let mut projected = cursor.clone();
+    projected.npc_shop_purchase_rate_bits = payload.get("rate").and_then(Value::as_f64)
+        .map(|rate| rate as f32).filter(|rate| rate.is_finite() && *rate >= 0.0)
+        .map(f32::to_bits);
+    projected.npc_shop_panel_type = value_u32(payload.get("panelType").or_else(|| payload.get("panel_type")))
+        .and_then(|value| u8::try_from(value).ok()).unwrap_or(u8::MAX);
+    projected
+}
+
+fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
+    let projected = npc_catalog_projection_cursor(payload, cursor);
+    let cursor = &projected;
     let goods: Vec<Value> = payload
         .get("list")
         .and_then(Value::as_array)
         .map(|list| {
             list.iter()
                 .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot))
+                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
                 .collect()
         })
         .unwrap_or_default();
     json!({
         "goods": goods,
         "selected_id": Value::Null,
+        "hide_added_stats": if ["hideAddedStats", "hide_added_stats", "shopHideAddedStats", "shop_hide_added_stats"].iter().any(|key| payload.get(*key).is_some()) { shop_hide_added_stats(payload) } else { cursor.npc_shop_hide_added_stats },
         "selected_bag_slot_for_sell": Value::Null,
         "selected_bag_slot_for_repair": Value::Null,
     })
 }
 
-fn transform_shop_model_from_snapshot(payload: &Value) -> Value {
+pub(crate) fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
     let list = ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
         .iter()
         .find_map(|key| payload.get(*key))
@@ -4150,50 +6721,122 @@ fn transform_shop_model_from_snapshot(payload: &Value) -> Value {
         .map(|list| {
             list.iter()
                 .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot))
+                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
                 .collect()
         })
         .unwrap_or_default();
     json!({
         "goods": goods,
         "selected_id": Value::Null,
+        "hide_added_stats": shop_hide_added_stats(payload),
         "selected_bag_slot_for_sell": Value::Null,
         "selected_bag_slot_for_repair": Value::Null,
     })
 }
 
-fn shop_good_json(item: &Value, fallback: usize) -> Option<Value> {
+fn shop_good_json(item: &Value, _fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value> {
+    let supplied = item.get("tooltipSource");
+    let ordinary_raw = item.get("is_shop_item").and_then(Value::as_bool) == Some(true)
+        || supplied.and_then(|source| source.get("userItem"))
+            .and_then(|raw| raw.get("is_shop_item")).and_then(Value::as_bool) == Some(true);
     let id = value_u64(
         item.get("uniqueId")
             .or_else(|| item.get("unique_id"))
             .or_else(|| item.get("id"))
-            .or_else(|| item.get("itemIndex"))
-            .or_else(|| item.get("item_index")),
+            .or_else(|| (!ordinary_raw).then(|| item.get("itemIndex").or_else(|| item.get("item_index"))).flatten()),
     )?;
+
+    // Check original presence before legacy serde defaults can fill a carrier.
+    let tooltip_source = if ordinary_raw {
+        if let Some(source) = supplied {
+            mir2_client_bevy::npc_shop_buy::full_npc_gold_tooltip_source(source).then(|| source.clone())
+        } else if mir2_client_bevy::npc_shop_buy::full_npc_gold_user_item(item) {
+            crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source))
+        } else { None }
+    } else {
+        supplied.cloned().or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)))
+    };
+    let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);
+    let icon = crystal_user_item_icon(item, count).or_else(|| {
+        value_u32(item.get("icon"))
+            .and_then(|value| u16::try_from(value).ok())
+            .filter(|value| *value != 0)
+    });
+    let icon_geometry = icon.and_then(item_frame_geometry);
+
     Some(json!({
         "unique_id": id,
+        "use_pearls": cursor.npc_shop_uses_pearls,
+        "requires_gold_buy_plan": ordinary_raw && !cursor.npc_shop_uses_pearls,
+        "purchase_rate": if ordinary_raw && tooltip_source.is_some() { cursor.npc_shop_purchase_rate_bits.map(f32::from_bits) } else { None },
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
         "price": value_u32(item.get("price")).unwrap_or_default(),
-        "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
+        "count": u16::try_from(count).unwrap_or(1),
         "stock": value_i32(item.get("stock")).unwrap_or(-1),
-        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
-            .and_then(|value| u8::try_from(value).ok())
-            .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
-        "icon": value_u32(item.get("icon")).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "panel_type": cursor.npc_shop_panel_type,
+        "icon": icon.unwrap_or_default(),
+        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),
+        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),
         "description": value_string(item.get("description")).unwrap_or_default(),
+        "tooltip_source": tooltip_source,
     }))
 }
 
-fn try_transform_shop_model_from_packet(payload: &Value) -> Option<Value> {
+fn shop_hide_added_stats(payload: &Value) -> bool {
+    [
+        "hideAddedStats",
+        "hide_added_stats",
+        "shopHideAddedStats",
+        "shop_hide_added_stats",
+    ]
+    .iter()
+    .find_map(|key| payload.get(*key))
+    .and_then(Value::as_bool)
+    .unwrap_or(false)
+}
+
+/// The ordinary catalogue packet changes both goods and their currency atomically.
+/// Malformed catalogues must not change the currency of the previous visible shop.
+pub(crate) fn transform_npc_catalog_packet(
+    packet: &str,
+    payload: &Value,
+    cursor: &mut NativeUiPlayerCursor,
+) -> Option<Value> {
+    if !matches!(packet, "NPCGoods" | "NPCPearlGoods") {
+        return None;
+    }
+    let previous = (cursor.npc_shop_uses_pearls, cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type);
+    let projected = npc_catalog_projection_cursor(payload, cursor);
+    cursor.npc_shop_purchase_rate_bits = projected.npc_shop_purchase_rate_bits;
+    cursor.npc_shop_panel_type = projected.npc_shop_panel_type;
+    cursor.npc_shop_uses_pearls = packet == "NPCPearlGoods";
+    let mut model = try_transform_shop_model_from_packet(payload, cursor);
+    if let Some(model) = model.as_mut() {
+        if packet == "NPCPearlGoods" {
+            // Original Pearl packet has no HideAddedStats and does not assign it.
+            model["hide_added_stats"] = json!(cursor.npc_shop_hide_added_stats);
+        } else {
+            cursor.npc_shop_hide_added_stats = shop_hide_added_stats(payload);
+        }
+    } else {
+        (cursor.npc_shop_uses_pearls, cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type) = previous;
+    }
+    model
+}
+
+fn try_transform_shop_model_from_packet(
+    payload: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<Value> {
     let list = payload.get("list")?.as_array()?;
     if list
         .iter()
         .enumerate()
-        .any(|(slot, item)| shop_good_json(item, slot).is_none())
+        .any(|(slot, item)| shop_good_json(item, slot, cursor).is_none())
     {
         return None;
     }
-    Some(transform_shop_model_from_packet(payload))
+    Some(transform_shop_model_from_packet(payload, cursor))
 }
 
 fn payload_has_valid_shop_array(payload: &Value) -> bool {
@@ -4217,8 +6860,14 @@ fn mail_source(payload: &Value) -> Option<&Value> {
         .or_else(|| payload.get("stage5").and_then(|value| value.get("mail")))
 }
 
-fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
-    mail_model_from_entries(mail_source(payload)?.as_array()?)
+pub(crate) fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
+    let entries = mail_source(payload)?.as_array()?;
+    let visible = entries
+        .iter()
+        .filter(|mail| !mail.get("deleted").and_then(Value::as_bool).unwrap_or(false))
+        .cloned()
+        .collect::<Vec<_>>();
+    mail_model_from_entries(&visible)
 }
 
 fn try_transform_mail_model_from_packet(payload: &Value) -> Option<Value> {
@@ -4234,11 +6883,22 @@ fn mail_model_from_entries(entries: &[Value]) -> Option<Value> {
 }
 
 fn mail_message_json(mail: &Value) -> Option<Value> {
-    let id = value_u64(mail.get("mailId").or_else(|| mail.get("mail_id")))?;
-    let message = mail
-        .get("message")
-        .and_then(Value::as_str)
-        .unwrap_or_default();
+    let id = value_u64(
+        mail.get("mailId")
+            .or_else(|| mail.get("mail_id"))
+            .or_else(|| mail.get("id")),
+    )?;
+    let subject = value_string(mail.get("subject")).unwrap_or_default();
+    let body = value_string(mail.get("body")).unwrap_or_default();
+    let message = value_string(mail.get("message")).unwrap_or_else(|| {
+        if subject.is_empty() {
+            body.clone()
+        } else if body.is_empty() {
+            subject.clone()
+        } else {
+            format!("{subject}\n{body}")
+        }
+    });
     let items = mail
         .get("items")?
         .as_array()?
@@ -4247,8 +6907,12 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
         .collect::<Option<Vec<_>>>()?;
     Some(json!({
         "id": id,
-        "sender": mail.get("senderName").or_else(|| mail.get("sender")).and_then(Value::as_str).unwrap_or("System"),
-        "subject": message.lines().next().unwrap_or("Mail"),
+        "sender": mail.get("senderName").or_else(|| mail.get("sender")).or_else(|| mail.get("from")).and_then(Value::as_str).unwrap_or("System"),
+        "can_reply": mail.get("canReply").or_else(|| mail.get("can_reply")).and_then(Value::as_bool).unwrap_or(false),
+        "date_sent_binary_datetime": value_i64(mail.get("dateSentBinaryDatetime").or_else(|| mail.get("date_sent_binary_datetime"))).unwrap_or_default(),
+        "metadata_known": mail.get("canReply").or_else(|| mail.get("can_reply")).and_then(Value::as_bool).is_some()
+            && value_i64(mail.get("dateSentBinaryDatetime").or_else(|| mail.get("date_sent_binary_datetime"))).is_some(),
+        "subject": if subject.is_empty() { message.lines().next().unwrap_or("Mail") } else { &subject },
         "body": message,
         "gold": value_u32(mail.get("gold")).unwrap_or_default(),
         "items": items,
@@ -4260,7 +6924,8 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
 
 fn mail_attachment_json(item: &Value) -> Option<Value> {
     if let Some(name) = item.as_str().filter(|name| !name.is_empty()) {
-        return Some(json!({ "name": name, "count": 1 }));
+        return Some(json!({ "name": name, "count": 1,
+            "image": mir2_game_data::crystal_item_by_name(name).map(|template| template.image) }));
     }
     let item_index = value_i32(item.get("itemIndex").or_else(|| item.get("item_index")));
     let name = value_string(item.get("name"));
@@ -4271,6 +6936,9 @@ fn mail_attachment_json(item: &Value) -> Option<Value> {
     Some(json!({
         "uniqueId": value_u64(item.get("uniqueId").or_else(|| item.get("unique_id"))),
         "itemIndex": item_index,
+        "image": item_index.and_then(mir2_game_data::crystal_item_by_index)
+            .or_else(|| name.as_deref().and_then(mir2_game_data::crystal_item_by_name))
+            .map(|template| template.image),
         "key": key,
         "name": name,
         "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
@@ -4288,6 +6956,48 @@ fn mail_packet_body(payload: &Value) -> &Value {
         .get("data")
         .filter(|value| value.is_object())
         .unwrap_or(payload)
+}
+
+/// Convert the three Crystal parcel-service packets without inventing local
+/// request correlation. `MailCost` responses enter the native FIFO in packet
+/// order; the compose UI keeps its postage request single-flight.
+fn mail_service_event_from_packet(
+    packet: &str,
+    payload: &Value,
+) -> Option<mir2_client_bevy::mail_service::MailServiceEvent> {
+    use mir2_client_bevy::mail_service::MailServiceEvent;
+
+    let body = mail_packet_body(payload);
+    match packet {
+        "MailSendRequest" => Some(MailServiceEvent::OpenParcel),
+        "MailCost" => Some(MailServiceEvent::Cost {
+            cost: value_u32(body.get("cost"))?,
+        }),
+        "MailLockedItem" => Some(MailServiceEvent::LockedItem {
+            unique_id: value_u64(body.get("uniqueId").or_else(|| body.get("unique_id")))?,
+            locked: body.get("locked")?.as_bool()?,
+        }),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+fn push_native_mail_service_event_with(
+    packet: &str,
+    payload: &Value,
+    deliver: impl FnOnce(String) -> bool,
+) -> Result<bool, String> {
+    let Some(event) = mail_service_event_from_packet(packet, payload) else {
+        return Ok(false);
+    };
+    let json = serde_json::to_string(&event).map_err(|error| error.to_string())?;
+    Ok(deliver(json))
+}
+
+fn push_native_mail_service_event(stream: Option<&NativeMailServiceStream>, packet: &str, payload: &Value) -> Result<bool, String> {
+    let Some(event) = mail_service_event_from_packet(packet, payload) else { return Ok(false); };
+    let stream = stream.ok_or_else(|| "native mail packet arrived without a trusted stream marker".to_owned())?;
+    Ok(stream.deliver(event))
 }
 
 fn mail_operation_feedback(
@@ -4370,19 +7080,28 @@ fn deliver_mail_model_with_feedback(
     Ok(delivered)
 }
 
-fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
+pub(crate) fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
     let source = payload
         .get("storageItems")
         .or_else(|| payload.get("storage_items"))?
         .as_array()?;
     let items = storage_items_json(source)?;
+    let unlocked = payload.get("storageUnlocked")
+        .or_else(|| payload.get("storage_unlocked"))
+        .and_then(Value::as_bool)
+        .unwrap_or_else(|| !payload.get("requireStoragePassword")
+            .or_else(|| payload.get("require_storage_password"))
+            .and_then(Value::as_bool).unwrap_or(false));
     Some(json!({
         "items": items,
-        "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(30),
+        "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(80),
         "has_password": payload.get("hasStoragePassword").or_else(|| payload.get("has_storage_password")).and_then(Value::as_bool).unwrap_or(false),
-        "unlocked": payload.get("storageUnlocked").or_else(|| payload.get("storage_unlocked")).and_then(Value::as_bool).unwrap_or(true),
+        "unlocked": unlocked,
         "has_expanded": payload.get("hasExpandedStorage").or_else(|| payload.get("has_expanded_storage")).and_then(Value::as_bool).unwrap_or(false),
-        "expiry": value_i64(payload.get("expiryTimeBinaryDatetime").or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
+        "expiry": value_i64(payload.get("expandedStorageExpiryTimeBinaryDatetime")
+            .or_else(|| payload.get("expanded_storage_expiry_time_binary_datetime"))
+            .or_else(|| payload.get("expiryTimeBinaryDatetime"))
+            .or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
         "selected_bag_slot": Value::Null,
         "selected_storage_slot": Value::Null,
         "password_draft": "",
@@ -4465,9 +7184,10 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
-                "ack": { "operation": "unlock", "success": result == 0 }
+                "password_result": { "operation": "unlock", "result": result },
+                "ack": { "operation": "unlock", "success": result == 0 || result == 4 }
             });
-            if result == 0 || !has_password {
+            if result == 0 || result == 4 || !has_password {
                 patch["unlocked"] = json!(true);
             }
             Some(patch)
@@ -4478,7 +7198,7 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
-                "expiry": value_i64(payload.get("lastSetBinaryDatetime"))?,
+                "password_result": { "operation": "password", "result": result, "removing": removing },
                 "ack": {
                     "operation": if removing { "removePassword" } else { "setPassword" },
                     "success": result == 4,
@@ -4504,100 +7224,8 @@ fn wallet_value(payload: &Value, field: &str) -> Option<u32> {
         .or_else(|| value_u32(payload.get("amount")))
 }
 
-fn transform_skill_model(payload: &Value) -> Value {
-    let skills = payload
-        .get("knownSkills")
-        .or_else(|| payload.get("known_skills"))
-        .or_else(|| payload.get("skills"))
-        .and_then(Value::as_array)
-        .map(|skills| {
-            skills
-                .iter()
-                .take(MAX_LEARNED_SKILLS)
-                .enumerate()
-                .map(|(idx, skill)| {
-                    let id = value_u32(skill.get("id")).unwrap_or(idx as u32);
-                    let key = skill.get("key").and_then(Value::as_str).map(str::to_owned);
-                    let name = skill
-                        .get("name")
-                        .and_then(Value::as_str)
-                        .unwrap_or_default()
-                        .to_owned();
-                    let level = value_u32(skill.get("level"))
-                        .and_then(|value| u8::try_from(value).ok())
-                        .unwrap_or(0);
-                    let delay_ms = value_i64(
-                        skill
-                            .get("delayMs")
-                            .or_else(|| skill.get("delay_ms"))
-                            .or_else(|| skill.get("cooldownMs")),
-                    )
-                    .unwrap_or(0);
-                    let mut transformed = serde_json::Map::new();
-                    transformed.insert("id".to_owned(), json!(id));
-                    transformed.insert("name".to_owned(), json!(name));
-                    transformed.insert("level".to_owned(), json!(level));
-                    transformed.insert("key".to_owned(), json!(key));
-                    transformed.insert("cooldown_ms".to_owned(), json!(delay_ms.max(0)));
-                    transformed.insert(
-                        "spell".to_owned(),
-                        optional_non_empty_string_value(skill.get("spell")),
-                    );
-                    transformed.insert(
-                        "castKind".to_owned(),
-                        optional_non_empty_string_value(skill.get("castKind")),
-                    );
-                    transformed.insert(
-                        "canUse".to_owned(),
-                        skill.get("canUse").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "offensive".to_owned(),
-                        skill.get("offensive").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "hotkey".to_owned(),
-                        skill.get("hotkey").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "cooldownRemainingTicks".to_owned(),
-                        value_u32(
-                            skill
-                                .get("cooldownRemainingTicks")
-                                .or_else(|| skill.get("cooldown_remaining_ticks")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or_else(|| json!(0)),
-                    );
-                    transformed.insert(
-                        "mpCost".to_owned(),
-                        value_u32(skill.get("mpCost").or_else(|| skill.get("mp_cost")))
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "castTimeMs".to_owned(),
-                        value_i64(
-                            skill
-                                .get("castTimeMs")
-                                .or_else(|| skill.get("cast_time_ms")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "experience".to_owned(),
-                        value_u32(skill.get("experience"))
-                            .and_then(|value| u16::try_from(value).ok())
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    Value::Object(transformed)
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    json!({ "skills": skills })
+pub(crate) fn transform_skill_model(payload: &Value) -> Value {
+    mir2_bevy_runtime::npc_purchase_economy::project_owner_skill_model(payload)
 }
 
 fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
@@ -4641,10 +7269,10 @@ fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
         "helmet" => 2,
         "torch" => 3,
         "necklace" => 4,
-        "bracelet-left" | "braceletl" => 5,
-        "bracelet-right" | "braceletr" => 6,
-        "ring-left" | "ringl" => 7,
-        "ring-right" | "ringr" => 8,
+        "bracelet-left" | "braceletleft" | "braceletl" => 5,
+        "bracelet-right" | "braceletright" | "braceletr" => 6,
+        "ring-left" | "ringleft" | "ringl" => 7,
+        "ring-right" | "ringright" | "ringr" => 8,
         "amulet" => 9,
         "belt" => 10,
         "boots" => 11,
@@ -4676,11 +7304,292 @@ fn transform_chat_line(packet: &str, payload: &Value) -> Option<mir2_client_bevy
     Some(mir2_client_bevy::chat::ChatLine { text, channel })
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct StateItemFrameGeometry {
+    index: u16,
+    width: u16,
+    height: u16,
+    x: i32,
+    y: i32,
+}
+
+#[derive(Debug, Deserialize)]
+struct StateItemLibraryMetadata {
+    frames: Vec<StateItemFrameGeometry>,
+}
+
+static STATE_ITEM_FRAME_GEOMETRY: OnceLock<HashMap<u16, StateItemFrameGeometry>> = OnceLock::new();
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ItemFrameGeometry {
+    index: u16,
+    width: u16,
+    height: u16,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemLibraryMetadata {
+    frames: Vec<ItemFrameGeometry>,
+}
+
+static ITEM_FRAME_GEOMETRY: OnceLock<HashMap<u16, ItemFrameGeometry>> = OnceLock::new();
+
+/// Resolve Crystal's `useOffset=true` StateItem draw rectangle from the exact
+/// exported library metadata. The snapshot carries the authoritative image
+/// index; this lookup supplies only source geometry and never guesses an item.
+fn state_item_frame_geometry(index: u16) -> Option<StateItemFrameGeometry> {
+    STATE_ITEM_FRAME_GEOMETRY
+        .get_or_init(|| {
+            let Some(path) = crate::assets::asset_path("/original-ui/StateItem/meta.json") else {
+                eprintln!("[gateway-client] StateItem metadata is unavailable");
+                return HashMap::new();
+            };
+            let metadata = std::fs::read_to_string(&path)
+                .ok()
+                .and_then(|text| serde_json::from_str::<StateItemLibraryMetadata>(&text).ok());
+            let Some(metadata) = metadata else {
+                eprintln!(
+                    "[gateway-client] invalid StateItem metadata at {}",
+                    path.display()
+                );
+                return HashMap::new();
+            };
+            metadata
+                .frames
+                .into_iter()
+                .filter(|frame| frame.width > 0 && frame.height > 0)
+                .map(|frame| (frame.index, frame))
+                .collect()
+        })
+        .get(&index)
+        .copied()
+}
+
+/// Exported full-bitmap dimensions retained in the legacy read model. These
+/// are NOT GetTrueSize: native cell layout measures alpha from the loaded PNG.
+/// MirItemCell ignores library x/y offsets and still draws the full bitmap.
+fn item_frame_geometry(index: u16) -> Option<ItemFrameGeometry> {
+    ITEM_FRAME_GEOMETRY
+        .get_or_init(|| {
+            let Some(path) = crate::assets::asset_path("/original-ui/Items/meta.json") else {
+                eprintln!("[gateway-client] Items metadata is unavailable");
+                return HashMap::new();
+            };
+            let metadata = std::fs::read_to_string(&path)
+                .ok()
+                .and_then(|text| serde_json::from_str::<ItemLibraryMetadata>(&text).ok());
+            let Some(metadata) = metadata else {
+                eprintln!(
+                    "[gateway-client] invalid Items metadata at {}",
+                    path.display()
+                );
+                return HashMap::new();
+            };
+            metadata
+                .frames
+                .into_iter()
+                .filter(|frame| frame.width > 0 && frame.height > 0)
+                .map(|frame| (frame.index, frame))
+                .collect()
+        })
+        .get(&index)
+        .copied()
+}
+
 /// Transform a gateway `worldSnapshot` payload into the shared
 /// `mir2-client-bevy::inventory::InventoryModel` JSON shape.
 ///
-/// Container mapping: inventory items → 0 (bag), belt items → 1, equipment → 2.
-fn transform_inventory_model(payload: &Value) -> Value {
+/// Container mapping: Bag1/Bag2 → 0 (one logical 0..79 bag grid), belt → 1,
+/// equipment → 2, quest inventory → 3 (read-only Crystal third tab).
+fn native_friend_packet(payload: &Value) -> Option<mir2_protocol::ServerPacket> {
+    let friends = serde_json::from_value::<Vec<mir2_protocol::ClientFriend>>(
+        payload.get("friendRecords")?.clone(),
+    )
+    .ok()?;
+    Some(mir2_protocol::ServerPacket::FriendUpdate { friends })
+}
+fn native_ranking_packet(payload: &Value) -> Option<mir2_protocol::ServerPacket> {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Rankings {
+        rank_type: u8,
+        my_rank: i32,
+        listing_details: Vec<mir2_protocol::RankCharacterInfo>,
+        listings: Vec<i64>,
+        count: i32,
+    }
+    let p = serde_json::from_value::<Rankings>(payload.clone()).ok()?;
+    if p.rank_type >= 6 {
+        return None;
+    }
+    Some(mir2_protocol::ServerPacket::Rankings {
+        rank_type: p.rank_type,
+        my_rank: p.my_rank,
+        listing_details: p.listing_details,
+        listings: p.listings,
+        count: p.count,
+    })
+}
+
+/// Crystal Hero.HPItem/MPItem are catalogue preview UserItems, not carried custody.
+fn hero_auto_pot_view(
+    info: &mir2_protocol::HeroUserInformation,
+    player: &NativeUiPlayerCursor,
+) -> mir2_client_bevy::inventory::InventoryModel {
+    let mut preview = info.clone();
+    preview.equipment = None;
+    preview.inventory = Some(
+        [info.hp_item_index, info.mp_item_index]
+            .into_iter()
+            .map(|index| {
+                if index <= 0 {
+                    return None;
+                }
+                let item = CrystalUserItemModel {
+                    item_index: index,
+                    count: 1,
+                    ..Default::default()
+                };
+                serde_json::to_value(item)
+                    .ok()
+                    .and_then(|v| serde_json::from_value(v).ok())
+            })
+            .collect(),
+    );
+    hero_inventory_view(&preview, player)
+}
+
+fn hero_inventory_view(
+    info: &mir2_protocol::HeroUserInformation,
+    cursor: &NativeUiPlayerCursor,
+) -> mir2_client_bevy::inventory::InventoryModel {
+    let mut target = cursor.clone();
+    target.level = Some(u32::from(info.level));
+    target.class_name = Some(format!("{:?}", info.class));
+    target.gender = Some(format!("{:?}", info.gender));
+    let map_items = |items: Option<&Vec<Option<mir2_protocol::UserItem>>>| {
+        items
+            .into_iter()
+            .flatten()
+            .enumerate()
+            .filter_map(|(slot, item)| {
+                let item = item.as_ref()?;
+                let mut value = serde_json::to_value(item).ok()?;
+                value["slot"] = json!(slot);
+                if let Some(source) = crystal_tooltip_source_for_user_item(&value, &target) {
+                    value["name"] = json!(source.info.name);
+                    value["stateImage"] =
+                        json!(source.real_info.as_ref().unwrap_or(&source.info).image);
+                    value["tooltipSource"] = json!(source);
+                }
+                Some(value)
+            })
+            .collect::<Vec<_>>()
+    };
+    serde_json::from_value(transform_inventory_model(&json!({"inventoryItems":map_items(info.inventory.as_ref()),"equipmentItems":map_items(info.equipment.as_ref())}))).unwrap_or_default()
+}
+
+fn native_player_inspect_readback(
+    payload: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<
+    mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback,
+> {
+    let info =
+        serde_json::from_value::<mir2_protocol::PlayerInspectInfo>(payload.get("info")?.clone())
+            .ok()?;
+    let mut target = cursor.clone();
+    target.level = Some(u32::from(info.level));
+    target.class_name = Some(format!("{:?}", info.class));
+    target.gender = Some(format!("{:?}", info.gender));
+    let equipment = info
+        .equipment
+        .iter()
+        .enumerate()
+        .filter_map(|(slot, item)| {
+            let item = item.as_ref()?;
+            let mut value = serde_json::to_value(item).ok()?;
+            value["slot"] = json!(slot);
+            if let Some(source) = crystal_tooltip_source_for_user_item(&value, &target) {
+                value["name"] = json!(source.info.name);
+                value["stateImage"] =
+                    json!(source.real_info.as_ref().unwrap_or(&source.info).image);
+                value["tooltipSource"] = json!(source);
+            }
+            Some(value)
+        })
+        .collect::<Vec<_>>();
+    let inventory = serde_json::from_value(transform_inventory_model(
+        &json!({"equipmentItems":equipment}),
+    ))
+    .ok()?;
+    Some(mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback{info,inventory})
+}
+
+#[cfg(test)]
+mod ranking_projection_tests {
+    use super::*;
+    #[test]
+    fn friend_projection_preserves_blocked_identity_and_empty_memos() {
+        let payload = json!({"friends":[{"name":"Blade","online":true}],"blocked":[{"name":"Griefer"}],"friendRecords":[{"index":42,"name":"Blade","memo":"","blocked":false,"online":true},{"index":43,"name":"Griefer","memo":"ignored","blocked":true,"online":false}]});
+        let Some(mir2_protocol::ServerPacket::FriendUpdate { friends }) =
+            native_friend_packet(&payload)
+        else {
+            panic!("full server friend records must project");
+        };
+        assert_eq!(friends.len(), 2);
+        assert_eq!(friends[0].index, 42);
+        assert_eq!(friends[0].memo, "");
+        assert_eq!(friends[1].index, 43);
+        assert!(friends[1].blocked);
+        assert!(
+            native_friend_packet(&json!({"friends":[{"name":"Blade","online":true}]})).is_none()
+        );
+    }
+    #[test]
+    fn player_inspect_readback_keeps_named_subject_and_empty_slots_without_grants() {
+        let payload = json!({"info":{"name":"RankPeer","guildName":"Guild","guildRank":"Member","equipment":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],"class":"Warrior","gender":"Male","hair":2,"level":30,"loverName":"","allowObserve":false,"isHero":false}});
+        let data = native_player_inspect_readback(&payload, &NativeUiPlayerCursor::default())
+            .expect("typed inspect payload");
+        assert_eq!(data.info.name, "RankPeer");
+        assert_eq!(data.info.equipment.len(), 14);
+        assert!(data.inventory.items.is_empty());
+        assert_eq!(data.inventory.gold, 0);
+        let mut bad = payload;
+        bad["info"]["equipment"] = json!("invalid");
+        assert!(native_player_inspect_readback(&bad, &NativeUiPlayerCursor::default()).is_none());
+    }
+}
+
+
+fn full_npc_gold_buy_inventory_snapshot(payload:&Value)->bool {
+    use mir2_client_bevy::inventory::InventoryModel;
+    let Some(capacity)=payload.get("inventoryCapacity").and_then(Value::as_u64)
+        .and_then(|value|u16::try_from(value).ok()) else{return false;};
+    if InventoryModel::canonical_capacity(capacity)!=capacity
+        || payload.get("gold").and_then(Value::as_u64).and_then(|value|u32::try_from(value).ok()).is_none(){return false;}
+    for (name,limit) in [("inventoryItems",usize::from(capacity-6)),("beltItems",6),("equipmentItems",32)] {
+        let Some(items)=payload.get(name).and_then(Value::as_array)else{return false;};
+        if items.len()>256{return false;}
+        for item in items {
+            if !item.is_object(){return false;}
+            let Some(slot)=item.get("slot").and_then(Value::as_u64)else{return false;};
+            let container=item.get("container").and_then(Value::as_str).unwrap_or("");
+            let valid_slot=if name=="inventoryItems" {
+                match container {"bag2"=>slot<40&&slot+40<(limit as u64),"quest"=>slot<80,
+                    ""|"bag"|"bag1"=>slot<(limit as u64),_=>false}
+            } else {slot<(limit as u64)};
+            if !valid_slot||item.get("uniqueId").or_else(||item.get("unique_id")).and_then(Value::as_u64).is_none()
+                || item.get("quantity").or_else(||item.get("count")).and_then(Value::as_u64)
+                    .and_then(|value|u32::try_from(value).ok()).filter(|count|*count>0).is_none(){return false;}
+        }
+    }
+    mir2_client_bevy::npc_shop_buy::full_npc_gold_buy_inventory(&transform_inventory_model(payload))
+}
+
+pub(crate) fn transform_inventory_model(payload: &Value) -> Value {
     let gold = value_u32_or(payload.get("gold"), 0);
     // Only an explicit Crystal-array length can unlock page two. Occupied
     // item count and the runtime's broader maxBagSlots value are not evidence
@@ -4690,7 +7599,7 @@ fn transform_inventory_model(payload: &Value) -> Value {
         .map(mir2_client_bevy::inventory::InventoryModel::canonical_capacity)
         .unwrap_or(mir2_client_bevy::inventory::CRYSTAL_BASE_INVENTORY_CAPACITY);
 
-    let map_items = |items: Option<&Value>, container: u8| -> Vec<Value> {
+    let map_items = |items: Option<&Value>, default_container: u8| -> Vec<Value> {
         items
             .and_then(Value::as_array)
             .map(|list| {
@@ -4707,12 +7616,25 @@ fn transform_inventory_model(payload: &Value) -> Value {
                             .or_else(|| value_string(item.get("item_index")))
                             .or_else(|| unique_id.map(|id| id.to_string()))
                             .unwrap_or_else(|| index.to_string());
+                        let local_slot = normalized_slot(item.get("slot"), fallback_slot);
+                        let source_container = value_string(item.get("container"))
+                            .unwrap_or_default()
+                            .to_ascii_lowercase();
+                        let (container, slot) = if default_container == 0 {
+                            match source_container.as_str() {
+                                "bag2" => (0, 40u32.saturating_add(local_slot)),
+                                "quest" => (3, local_slot),
+                                _ => (0, local_slot),
+                            }
+                        } else {
+                            (default_container, local_slot)
+                        };
                         let mut mapped = json!({
                             "uniqueId": unique_id,
                             "key": key,
                             "name": value_string(item.get("name")).unwrap_or_default(),
                             "quantity": value_u32(item.get("quantity").or_else(|| item.get("count"))).unwrap_or(1),
-                            "slot": normalized_slot(item.get("slot"), fallback_slot),
+                            "slot": slot,
                             "container": container,
                         });
                         extend_item_metadata(&mut mapped, item);
@@ -4728,7 +7650,11 @@ fn transform_inventory_model(payload: &Value) -> Value {
     items.extend(map_items(payload.get("beltItems"), 1));
     items.extend(map_items(payload.get("equipmentItems"), 2));
 
-    json!({ "capacity": capacity, "gold": gold, "items": items })
+    let mut model = json!({ "capacity": capacity, "gold": gold, "items": items });
+    if let Some(evidence) = payload.get("npcGoldTradeCapacity") {
+        model["npcGoldTradeCapacity"] = evidence.clone();
+    }
+    model
 }
 
 /// Copy the item fields that the simulation already exposes into the shared
@@ -4738,6 +7664,7 @@ fn transform_inventory_model(payload: &Value) -> Value {
 fn extend_item_metadata(mapped: &mut Value, item: &Value) {
     let metadata = [
         ("icon", &["icon"][..]),
+        ("stateImage", &["stateImage", "state_image"][..]),
         ("description", &["description"][..]),
         (
             "durabilityCurrent",
@@ -4770,6 +7697,7 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
         ("addedLuck", &["addedLuck", "added_luck"][..]),
         ("shape", &["shape"][..]),
         ("socketSlots", &["socketSlots", "socket_slots"][..]),
+        ("tooltipSource", &["tooltipSource", "tooltip_source"][..]),
     ];
     let Some(target) = mapped.as_object_mut() else {
         return;
@@ -4779,6 +7707,57 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
             target.insert(target_name.to_owned(), value);
         }
     }
+    let source_icon = value_u32(target.get("quantity"))
+        .and_then(|quantity| crystal_user_item_icon(item, quantity));
+    if let Some(icon) = source_icon {
+        target.insert("icon".to_owned(), json!(icon));
+    }
+    let icon = source_icon.or_else(|| {
+        value_u32(target.get("icon"))
+            .and_then(|value| u16::try_from(value).ok())
+            .filter(|value| *value != 0)
+    });
+    if let Some(frame) = icon.and_then(item_frame_geometry) {
+        target.insert("iconWidth".to_owned(), json!(frame.width));
+        target.insert("iconHeight".to_owned(), json!(frame.height));
+    }
+    let state_image = value_u32(target.get("stateImage"))
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| *value != 0);
+    if let Some(frame) = state_image.and_then(state_item_frame_geometry) {
+        target.insert("stateImageX".to_owned(), json!(frame.x));
+        target.insert("stateImageY".to_owned(), json!(frame.y));
+        target.insert("stateImageWidth".to_owned(), json!(frame.width));
+        target.insert("stateImageHeight".to_owned(), json!(frame.height));
+    }
+}
+
+/// Resolve only concrete UserItem surfaces (bag/belt/equipment/storage/NPC
+/// goods). Catalogue previews never call this. The current quantity is the
+/// authority, not a stale tooltip UserItem count, icon, or viewer realInfo.
+fn crystal_user_item_icon(item: &Value, count: u32) -> Option<u16> {
+    if let Some(info) = item
+        .get("tooltipSource")
+        .or_else(|| item.get("tooltip_source"))
+        .and_then(|source| source.get("info"))
+    {
+        return Some(mir2_game_data::crystal_user_item_image(
+            u8::try_from(value_u32(info.get("item_type"))?).ok()?,
+            i16::try_from(value_i32(info.get("shape"))?).ok()?,
+            u16::try_from(value_u32(info.get("stack_size"))?).ok()?,
+            u16::try_from(value_u32(info.get("image"))?).ok()?,
+            count,
+        ));
+    }
+    let index = value_i32(item.get("item_index").or_else(|| item.get("itemIndex")))?;
+    let info = unique_crystal_tooltip_template(index)?;
+    Some(mir2_game_data::crystal_user_item_image(
+        info.item_type,
+        info.shape,
+        info.stack_size,
+        info.image,
+        count,
+    ))
 }
 
 /// Transform a gateway `worldSnapshot` payload into the shared
@@ -4853,10 +7832,12 @@ fn transform_ui_read_model(payload: &Value) -> Value {
             "maxMp": value_i32_or(payload.get("playerMaxMp"), 0),
             "gold": value_u32_or(payload.get("gold"), 0),
             "credit": value_u32_or(payload.get("credit"), 0),
+            "crystalStats": payload.get("playerCrystalStats").cloned().unwrap_or(Value::Null),
             "level": value_u32_or(self_player.and_then(|entity| entity.get("level")), 0),
             "experience": value_i64_or(payload.get("playerExperience"), 0),
             "maxExperience": value_i64_or(payload.get("playerMaxExperience"), 0),
             "currentWeight": value_u16_or(payload.get("currentWeight"), 0),
+            "currentWeightKnown":value_u32(payload.get("currentWeight")).is_some(),
             "maxWeight": value_u16_or(payload.get("maxWeight"), 0),
             "name": value_string(self_player.and_then(|entity| entity.get("name"))),
             "className": value_string(
@@ -4960,6 +7941,7 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
             "maxMp": value_i32(payload.get("maxMp").or_else(|| payload.get("playerMaxMp"))).unwrap_or_default(),
             "gold": value_u32(payload.get("gold")).unwrap_or_default(),
             "credit": value_u32(payload.get("credit")).unwrap_or_default(),
+            "crystalStats": Value::Null,
             "level": value_u32(payload.get("level")).unwrap_or_default(),
             "experience": value_i64(payload.get("experience").or_else(|| payload.get("playerExperience"))).unwrap_or_default(),
             "maxExperience": value_i64(payload.get("maxExperience").or_else(|| payload.get("playerMaxExperience"))).unwrap_or_default(),
@@ -4978,8 +7960,60 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
 }
 
 #[cfg(test)]
+#[path = "gateway_map_identity_tests.rs"]
+mod map_identity_tests;
+
+#[cfg(test)]
+#[path = "gateway_handshake_tests.rs"]
+mod handshake_tests;
+
+#[cfg(test)]
+#[path = "gateway_quest_tooltip_tests.rs"]
+mod quest_tooltip_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn skill_experience_projection_uses_real_snapshot_and_catalog_needs() {
+        let def = mir2_game_data::crystal_magic_by_spell("FireBall").unwrap();
+        let payload = json!({"knownSkills":[
+            {"spell":"FireBall","experience":0,"need2":999},
+            {"spell":"Uncatalogued"},
+            {"spell":"FireBall"}
+        ]});
+        let model: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transform_skill_model(&payload)).unwrap();
+        assert_eq!(model.bindings[0].experience, Some(0));
+        assert_eq!(model.bindings[0].need1, Some(def.need1));
+        assert_eq!(model.bindings[0].need2, Some(999));
+        assert_eq!(model.bindings[0].need3, Some(def.need3));
+        assert_eq!(model.bindings[1].experience, None);
+        assert_eq!(model.bindings[1].need1, None);
+        assert_eq!(model.bindings[2].experience, None);
+    }
+
+    #[test]
+    fn skill_experience_new_magic_keeps_server_threshold_override_until_session_reset() {
+        let mut cursor = SkillPacketCursor::default();
+        assert!(cursor.apply_packet("NewMagic",&json!({"hero":false,"magic":{"spell":"FireBall","icon":0,"need1":17,"need2":0,"need3":29}}),0));
+        let mut payload = json!({"knownSkills":[{"spell":"FireBall","experience":9}]});
+        cursor.apply_active_patches(&mut payload, 1);
+        let model: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transform_skill_model(&payload)).unwrap();
+        assert_eq!(model.bindings[0].experience, Some(9));
+        assert_eq!(
+            (
+                model.bindings[0].need1,
+                model.bindings[0].need2,
+                model.bindings[0].need3
+            ),
+            (Some(17), Some(0), Some(29))
+        );
+        cursor.reset();
+        assert!(cursor.magic_needs.is_empty());
+    }
     use tokio::net::TcpListener;
     use tokio::sync::oneshot;
     use tokio::time::{sleep, timeout};
@@ -5105,21 +8139,174 @@ mod tests {
     }
 
     #[test]
+    fn player_weight_projection_preserves_u32_and_clears_null_missing_or_partial() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        cursor.observe_world_snapshot(&json!({"playerWeights":{"bag":70000,"wear":25,"hand":9}}));
+        let model: mir2_client_bevy::read_model::UiReadModel =
+            serde_json::from_value(cursor.to_read_model_json()).unwrap();
+        assert_eq!(model.player.weights.unwrap().bag, 70000);
+        assert_eq!(model.player.weights.unwrap().wear, 25);
+        assert_eq!(model.player.weights.unwrap().hand, 9);
+        for value in [
+            json!({"playerWeights":null}),
+            json!({}),
+            json!({"playerWeights":{"bag":1}}),
+        ] {
+            cursor.player_weights = model.player.weights;
+            cursor.observe_world_snapshot(&value);
+            assert!(cursor.player_weights.is_none());
+            assert!(cursor.to_read_model_json()["player"]["weights"].is_null());
+        }
+    }
+
+    #[test]
+    fn pearl_goods_currency_survives_snapshot_and_normal_catalogue_resets_it() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let payload =
+            json!({"list":[{"uniqueId":9,"name":"Potion","price":50,"count":1,"icon":7}]});
+        transform_npc_catalog_packet(
+            "NPCGoods",
+            &json!({"list":[],"hideAddedStats":true}),
+            &mut cursor,
+        )
+        .unwrap();
+        let pearl = transform_npc_catalog_packet("NPCPearlGoods", &payload, &mut cursor).unwrap();
+        assert_eq!(pearl["hide_added_stats"], true);
+        assert_eq!(pearl["goods"][0]["use_pearls"], true);
+        assert_eq!(pearl["goods"][0]["price"], 50);
+        assert_eq!(
+            npc_shop_service_from_packet("NPCPearlGoods", &payload)
+                .unwrap()
+                .mode,
+            mir2_client_bevy::shop::NpcShopServiceMode::Buy
+        );
+        let snapshot =
+            transform_shop_model_from_snapshot(&json!({"npc_goods":payload["list"]}), &cursor);
+        assert_eq!(snapshot["goods"][0]["use_pearls"], true);
+        assert!(
+            transform_npc_catalog_packet("NPCGoods", &json!({"list":[{}]}), &mut cursor).is_none()
+        );
+        assert!(cursor.npc_shop_uses_pearls);
+        let gold = transform_npc_catalog_packet("NPCGoods", &payload, &mut cursor).unwrap();
+        assert_eq!(gold["goods"][0]["use_pearls"], false);
+        cursor.npc_shop_uses_pearls = true;
+        cursor.reset();
+        assert!(!cursor.npc_shop_uses_pearls);
+    }
+
+    #[test]
+    fn npc_gold_catalog_keeps_raw_rate_uid_and_packet_panel_for_every_row() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let mut raw = CrystalUserItemModel {
+            unique_id: 43122689, item_index: 658, count: 1, is_shop_item: true,
+            ..Default::default()
+        };
+        let mut first = json!(raw); first["price"] = json!(53);
+        raw.unique_id += 1;
+        let mut second = json!(raw); second["price"] = json!(53);
+        let payload = json!({"list":[first, second], "rate":1.337_f32, "panelType":0});
+        let model = transform_npc_catalog_packet("NPCGoods", &payload, &mut cursor).unwrap();
+        let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model).unwrap();
+        shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal {
+            mode: mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate: None,
+        });
+        shop.selected_id = Some(raw.unique_id);
+        assert_eq!(shop.goods[1].panel_type, 0, "row index is not a packet panel");
+        assert_eq!(shop.goods[1].purchase_rate, Some(1.337_f32));
+        let inv = mir2_client_bevy::inventory::InventoryModel { gold:1000, ..Default::default() };
+        let plan = mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy(&shop, &inv, 3);
+        assert!(plan.can_buy); assert_eq!(plan.total_gold, Some(160));
+        assert_eq!(plan.command.unwrap().item_index, raw.unique_id);
+        let recovered = transform_shop_model_from_snapshot(&json!({"npc_goods":payload["list"]}), &cursor);
+        assert_eq!(recovered["goods"][1]["purchase_rate"], json!(1.337_f32));
+        let before = (cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type);
+        assert!(transform_npc_catalog_packet("NPCGoods", &json!({"list":[{}],"rate":2,"panelType":3}), &mut cursor).is_none());
+        assert_eq!((cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type), before);
+        cursor.reset(); assert!(cursor.npc_shop_purchase_rate_bits.is_none());
+    }
+
+    #[test]
+    fn npc_gold_catalog_missing_rate_cannot_reuse_previous_quote_rate() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let raw = CrystalUserItemModel { unique_id:19, item_index:658, count:1, is_shop_item:true, ..Default::default() };
+        let mut item = json!(raw); item["price"] = json!(40);
+        transform_npc_catalog_packet("NPCGoods", &json!({"list":[item.clone()],"rate":1.0,"panelType":0}), &mut cursor).unwrap();
+        let model = transform_npc_catalog_packet("NPCGoods", &json!({"list":[item],"panelType":0}), &mut cursor).unwrap();
+        let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model).unwrap();
+        shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal { mode:mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate:None });
+        shop.selected_id = Some(19);
+        assert!(shop.goods[0].purchase_rate.is_none());
+        assert!(!mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy(&shop, &mir2_client_bevy::inventory::InventoryModel {gold:1000, ..Default::default()}, 1).can_buy);
+    }
+
+    #[test]
+    fn npc_gold_catalog_original_missing_fields_and_panel_overrides_fail_closed() {
+        let raw = CrystalUserItemModel { unique_id:29, item_index:658, count:1, is_shop_item:true, ..Default::default() };
+        let full = json!(raw);
+        for field in ["unique_id", "current_dura", "max_dura", "slots", "added_stats", "soul_bound_id"] {
+            let mut item = full.clone(); item.as_object_mut().unwrap().remove(field);
+            item["price"] = json!(40);
+            let mut cursor = NativeUiPlayerCursor::default();
+            let model = transform_npc_catalog_packet("NPCGoods", &json!({"list":[item],"rate":1.0,"panelType":0}), &mut cursor);
+            if field == "unique_id" { assert!(model.is_none()); continue; }
+            let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model.unwrap()).unwrap();
+            shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal { mode:mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate:None });
+            shop.selected_id = Some(29);
+            assert!(shop.goods[0].requires_gold_buy_plan);
+            assert!(shop.goods[0].tooltip_source.is_none(), "raw missing {field} must not be filled");
+            assert!(mir2_client_bevy::shop::shop_buy_item_command(&shop, &mir2_client_bevy::inventory::InventoryModel { gold:1000,..Default::default() }, 1, 0).is_none());
+        }
+        for panel in [None, Some(json!(-1)), Some(json!(256)), Some(json!(1))] {
+            let mut item = full.clone(); item["price"] = json!(40); item["panelType"] = json!(0);
+            let mut payload = json!({"list":[item],"rate":1.0});
+            if let Some(panel) = panel { payload["panelType"] = panel; }
+            let mut cursor = NativeUiPlayerCursor::default();
+            let model = transform_npc_catalog_packet("NPCGoods", &payload, &mut cursor).unwrap();
+            let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model).unwrap();
+            shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal { mode:mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate:None });
+            shop.selected_id = Some(29);
+            assert_ne!(shop.goods[0].panel_type, 0, "row panel must not overwrite catalogue authority");
+            assert!(!mir2_client_bevy::shop::shop_buy_enabled(&shop, &mir2_client_bevy::inventory::InventoryModel {gold:1000,..Default::default()}, 1));
+        }
+    }
+
+    #[test]
     fn recovered_npc_goods_populates_only_the_independent_npc_shop_model() {
-        let model = try_transform_shop_model_from_packet(&json!({
-            "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20 }],
-            "rate": 1.0,
-            "panelType": 0,
-        }))
+        let model = try_transform_shop_model_from_packet(
+            &json!({
+                "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20, "icon": 7 }],
+                "rate": 1.0,
+                "panelType": 0,
+                "hideAddedStats": true,
+            }),
+            &NativeUiPlayerCursor::default(),
+        )
         .expect("complete NPCGoods payload");
         let shop = serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(model)
             .expect("ShopModel-compatible NPC catalog");
         assert_eq!(shop.goods.len(), 1);
         assert_eq!(shop.goods[0].unique_id, 9);
         assert_eq!(shop.goods[0].price, 50);
-        assert!(try_transform_shop_model_from_packet(&json!({
-            "list": [{ "name": "missing identity" }]
-        }))
+        assert_eq!(shop.goods[0].icon_width, 36);
+        assert_eq!(shop.goods[0].icon_height, 26);
+        assert!(shop.hide_added_stats);
+
+        let snapshot = transform_shop_model_from_snapshot(
+            &json!({
+                "npc_goods": [{ "unique_id": 10, "name": "Blade", "icon": 7 }],
+                "shop_hide_added_stats": true,
+            }),
+            &NativeUiPlayerCursor::default(),
+        );
+        let snapshot = serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(snapshot)
+            .expect("snapshot ShopModel");
+        assert!(snapshot.hide_added_stats);
+        assert!(try_transform_shop_model_from_packet(
+            &json!({
+                "list": [{ "name": "missing identity" }]
+            }),
+            &NativeUiPlayerCursor::default()
+        )
         .is_none());
     }
 
@@ -5160,6 +8347,80 @@ mod tests {
     }
 
     #[test]
+    fn parcel_service_packets_preserve_source_order_without_local_correlation() {
+        let mut delivered = Vec::new();
+        for (packet, payload) in [
+            ("MailSendRequest", json!({})),
+            ("MailCost", json!({"cost":125})),
+            ("MailLockedItem", json!({"uniqueId":77,"locked":true})),
+        ] {
+            assert!(push_native_mail_service_event_with(packet, &payload, |json| {
+                delivered.push(json);
+                true
+            })
+            .unwrap());
+        }
+        let events = delivered
+            .iter()
+            .map(|json| serde_json::from_str(json).unwrap())
+            .collect::<Vec<mir2_client_bevy::mail_service::MailServiceEvent>>();
+        assert_eq!(
+            events,
+            vec![
+                mir2_client_bevy::mail_service::MailServiceEvent::OpenParcel,
+                mir2_client_bevy::mail_service::MailServiceEvent::Cost { cost: 125 },
+                mir2_client_bevy::mail_service::MailServiceEvent::LockedItem {
+                    unique_id: 77,
+                    locked: true,
+                },
+            ]
+        );
+        assert!(!push_native_mail_service_event_with("MailCost", &json!({}), |_| true).unwrap());
+    }
+
+    #[test]
+    fn snapshot_mail_accepts_stage5_shape_and_hides_deleted_rows() {
+        let model = try_transform_mail_model_from_snapshot(&json!({
+            "stage5Systems": { "mail": [
+                { "id": 41, "from": "Gameshop", "subject": "Purchase", "body": "Parcel",
+                  "items": [{ "item_index": 1268, "count": 1 }], "deleted": false },
+                { "id": 42, "from": "ledger", "subject": "hidden", "body": "hidden",
+                  "items": [], "deleted": true }
+            ] }
+        }))
+        .expect("stage5 snapshot mail");
+        let mail = serde_json::from_value::<mir2_client_bevy::mail::MailModel>(model)
+            .expect("native mail model");
+        assert_eq!(mail.mails.len(), 1);
+        assert_eq!(mail.mails[0].id, 41);
+        assert_eq!(mail.mails[0].sender, "Gameshop");
+        assert_eq!(mail.mails[0].subject, "Purchase");
+        assert_eq!(mail.mails[0].body, "Purchase\nParcel");
+        assert_eq!(mail.mails[0].items.len(), 1);
+        assert_eq!(mail.mails[0].items[0].item_index, Some(1268));
+    }
+
+    #[test]
+    fn receive_mail_packet_accepts_concrete_client_mail_shape() {
+        let model = try_transform_mail_model_from_packet(&json!({
+            "mail": [{
+                "mailId": 77,
+                "senderName": "Gameshop",
+                "message": "Purchase\nParcel",
+                "opened": false,
+                "collected": false,
+                "items": [{ "item_index": 1268, "count": 1 }]
+            }]
+        }))
+        .expect("ReceiveMail payload");
+        let mail = serde_json::from_value::<mir2_client_bevy::mail::MailModel>(model)
+            .expect("native mail model");
+        assert_eq!(mail.mails.len(), 1);
+        assert_eq!(mail.mails[0].id, 77);
+        assert_eq!(mail.mails[0].items[0].item_index, Some(1268));
+    }
+
+    #[test]
     fn recovered_storage_packets_decode_only_correlatable_items_and_metadata() {
         let items = transform_storage_items_from_packet(&json!({
             "storage": [null, { "unique_id": 55, "item_index": 321, "count": 3, "slot": 1,
@@ -5172,7 +8433,9 @@ mod tests {
         assert_eq!(storage.items.len(), 1);
         assert_eq!(storage.items[0].key, "55");
         assert_eq!(storage.items[0].quantity, 3);
-        assert_eq!(storage.items[0].icon, 24);
+        // Exact source index 321 resolves image 61; an enriched but stale icon
+        // must not override the original UserItem.Info.Image property.
+        assert_eq!(storage.items[0].icon, 61);
         assert_eq!(storage.items[0].durability_current, Some(8));
         assert_eq!(storage.items[0].durability_max, Some(10));
         assert_eq!(storage.items[0].sell_value, 99);
@@ -5252,6 +8515,27 @@ mod tests {
         )
         .is_none());
 
+        let locked_snapshot = try_transform_storage_model_from_snapshot(&json!({
+            "storage_items": [], "has_storage_password": true,
+            "require_storage_password": true,
+            "expanded_storage_expiry_time_binary_datetime": 987
+        })).expect("locked authoritative snapshot");
+        assert_eq!(locked_snapshot["unlocked"], false);
+        assert_eq!(locked_snapshot["size"], 80);
+        assert_eq!(locked_snapshot["expiry"], 987);
+        let unlocked_snapshot = try_transform_storage_model_from_snapshot(&json!({
+            "storageItems": [], "hasStoragePassword": true,
+            "requireStoragePassword": false,
+            "expandedStorageExpiryTimeBinaryDatetime": 654
+        })).expect("unlocked authoritative snapshot");
+        assert_eq!(unlocked_snapshot["unlocked"], true);
+        assert_eq!(unlocked_snapshot["expiry"], 654);
+        let explicit_unlock = try_transform_storage_model_from_snapshot(&json!({
+            "storageItems": [], "requireStoragePassword": true,
+            "storageUnlocked": true
+        })).expect("explicit unlock compatibility");
+        assert_eq!(explicit_unlock["unlocked"], true);
+
         let password_failure = transform_storage_patch_from_packet(
             "StoragePasswordResult",
             &json!({
@@ -5264,6 +8548,13 @@ mod tests {
         .expect("password failure acknowledgement");
         assert_eq!(password_failure["ack"]["operation"], "removePassword");
         assert_eq!(password_failure["ack"]["success"], false);
+        assert!(password_failure.get("expiry").is_none(),
+            "password last-set timestamp must not replace warehouse rental expiry");
+        let no_password = transform_storage_patch_from_packet(
+            "StorageUnlockResult", &json!({"result": 4, "hasPassword": false})
+        ).expect("no-password unlock result");
+        assert_eq!(no_password["ack"]["success"], true);
+        assert_eq!(no_password["unlocked"], true);
 
         let resize = transform_storage_patch_from_packet(
             "ResizeStorage",
@@ -5603,7 +8894,7 @@ mod tests {
 
     #[test]
     fn production_command_queue_is_bounded_and_priority_leave_survives_full_normal_lane() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         let mut accepted = 0;
         let mut rejected = 0;
         for _ in 0..256 {
@@ -5693,6 +8984,141 @@ mod tests {
     }
 
     #[test]
+    fn gateway_map_information_survives_schema_snapshots_until_the_map_changes() {
+        let context = GatewaySessionContext::default();
+        let (shell_sender, _shell_receiver) = std::sync::mpsc::channel();
+        let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
+        let mut snapshot_log_counter = 0;
+        let mut gameplay_adapter = NativeGameplayAdapter::default();
+        let mut last_world_payload = None;
+        let mut last_wallet = None;
+        let mut map_packet_cursor = NativeMapPacketCursor::default();
+        let mut ui_cursor = NativeUiPlayerCursor::default();
+        let mut in_flight_claim_mail_id = None;
+        let mut send_mail_in_flight = false;
+        let mut pending_mail_feedback = VecDeque::new();
+        let mut skill_cursor = SkillPacketCursor::default();
+        let mut social_cursor = SocialModel::default();
+        let mut push_world_state = |_: String| true;
+        macro_rules! ingest {
+            ($envelope:expr) => {{
+                handle_gateway_text_with_world_ingest(
+                    &$envelope.to_string(),
+                    &mut snapshot_log_counter,
+                    &context,
+                    &shell_sender,
+                    &mut gameplay_adapter,
+                    &gameplay_sender,
+                    &mut last_world_payload,
+                    &mut last_wallet,
+                    &mut map_packet_cursor,
+                    &mut ui_cursor,
+                    &mut in_flight_claim_mail_id,
+                    &mut send_mail_in_flight,
+                    &mut pending_mail_feedback,
+                    &mut skill_cursor,
+                    &mut social_cursor,
+                    &mut push_world_state,
+                )
+                .expect("gateway event")
+            }};
+        }
+
+        let d401_changed = json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {"mapIndex": 401, "fileName": "D401", "title": "DeadMineEntrance", "miniMap": 8},
+        });
+        assert_eq!(ingest!(d401_changed), WorldSnapshotIngestOutcome::NotSnapshot);
+        let partial_destination = json!({
+            "type": "worldSnapshot",
+            "payload": {"mapTitle": "BichonProvince", "miniMapIndex": 1,
+                "sceneView": {"center": {"x": 30, "y": 179}}},
+        });
+        assert_eq!(ingest!(partial_destination), WorldSnapshotIngestOutcome::Applied);
+        let destination = last_world_payload.as_ref().unwrap();
+        assert_eq!(destination["mapFileName"], json!("D401"));
+        assert_eq!(destination["mapTitle"], json!("DeadMineEntrance"));
+        assert_eq!(destination["miniMapIndex"], json!(8));
+        assert_eq!(transform_world_snapshot(destination)["playerStats"]["mapName"], json!("DeadMineEntrance"));
+        let d401_snapshot = json!({
+            "type": "worldSnapshot",
+            // The ordinary server snapshot deliberately lacks miniMapIndex.
+            "payload": {"mapFileName": "D401", "sceneView": {"center": {"x": 19, "y": 156}}},
+        });
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8))
+        );
+        let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(
+            transform_map_model(last_world_payload.as_ref().expect("cached snapshot")),
+        )
+        .expect("MapModel");
+        assert_eq!(
+            map_model.mini_map_index,
+            Some(8),
+            "the map model receives packet-only minimap metadata"
+        );
+
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8)),
+            "later same-map snapshots retain the cursor"
+        );
+
+        let d402_no_minimap = json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {"mapIndex": 402, "fileName": "D402", "miniMap": 0},
+        });
+        assert_eq!(
+            ingest!(d402_no_minimap),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        let d402_snapshot = json!({
+            "type": "worldSnapshot",
+            "payload": {"mapFileName": "D402", "sceneView": {"center": {"x": 1, "y": 2}}},
+        });
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()));
+
+        let d401_information = json!({
+            "type": "packet",
+            "packet": "MapInformation",
+            "payload": {"mapIndex": 401, "fileName": "D401", "miniMapIndex": 8},
+        });
+        assert_eq!(
+            ingest!(d401_information),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        // This is a stale pre-transition payload. It cannot clear the newer
+        // D401 packet identity before the first fresh D401 snapshot arrives.
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::NotSnapshot);
+        assert_eq!(last_world_payload.as_ref().unwrap()["miniMapIndex"], json!(8));
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8)),
+            "the new D401 packet restores index 8 after the zero-index map"
+        );
+
+        assert_eq!(
+            ingest!(json!({"type": "packet", "packet": "LogOutSuccess", "payload": {}})),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()),
+            "a session boundary must not reuse the prior map's packet cursor"
+        );
+    }
+
+    #[test]
     fn equivalent_map_file_spellings_do_not_clear_the_live_scene() {
         let mut world = json!({
             "mapFileName": "0141.map",
@@ -5743,7 +9169,7 @@ mod tests {
 
     #[test]
     fn command_drain_leaves_reliable_wire_overflow_for_the_next_batch() {
-        let (sender, mut receiver) = command_channel(16);
+        let (sender, mut receiver) = test_command_channel(16);
         for index in 0..8 {
             sender
                 .send(GatewayCommand::Wire(NativeOutboundCommand::Chat {
@@ -5775,7 +9201,7 @@ mod tests {
 
     #[test]
     fn game_shop_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         for _ in 0..256 {
             let _ = sender.send(GatewayCommand::Player(PlayerIntent::Walk {
                 direction: "up".to_owned(),
@@ -5816,7 +9242,7 @@ mod tests {
 
     #[test]
     fn storage_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         for _ in 0..256 {
             let _ = sender.send(GatewayCommand::Player(PlayerIntent::Walk {
                 direction: "up".to_owned(),
@@ -5849,7 +9275,7 @@ mod tests {
 
     #[test]
     fn second_correlated_transaction_fails_closed_while_lane_is_occupied() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         let store = |request_id: &str| {
             GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
                 request_id: request_id.to_owned(),
@@ -5898,7 +9324,7 @@ mod tests {
             }
         }
 
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender
             .send(GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
                 request_id: "st-0000000000000001".to_owned(),
@@ -5931,7 +9357,7 @@ mod tests {
 
     #[test]
     fn second_game_shop_transaction_fails_closed_while_lane_is_occupied() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         let purchase = |request_id: &str| {
             GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
                 request_id: request_id.to_owned(),
@@ -5971,7 +9397,7 @@ mod tests {
     #[tokio::test]
     async fn prewrite_transaction_in_retry_wait_resets_once_and_is_not_replayed() {
         let request = GameShopRequest::new("gs-retry".to_owned(), 31, 1, 1).unwrap();
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(purchase_command(&request)).unwrap();
         sender.send(GatewayCommand::Connect).unwrap();
         let mut gate = GameShopReceiptGate::default();
@@ -6001,7 +9427,7 @@ mod tests {
     #[tokio::test]
     async fn prewrite_transaction_in_connect_wait_resets_once_and_is_not_replayed() {
         let request = GameShopRequest::new("gs-connect".to_owned(), 31, 1, 1).unwrap();
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(purchase_command(&request)).unwrap();
         sender.send(GatewayCommand::Connect).unwrap();
         let mut gate = GameShopReceiptGate::default();
@@ -6032,7 +9458,7 @@ mod tests {
             })
         };
 
-        let (retry_sender, mut retry_receiver) = command_channel(8);
+        let (retry_sender, mut retry_receiver) = test_command_channel(8);
         retry_sender.send(storage()).unwrap();
         retry_sender.send(GatewayCommand::Connect).unwrap();
         let mut retry_gate = GameShopReceiptGate::default();
@@ -6054,7 +9480,7 @@ mod tests {
         assert_eq!(retry_resets, 1);
         assert!(drain_command_batch(&mut retry_receiver, 8).is_empty());
 
-        let (connect_sender, mut connect_receiver) = command_channel(8);
+        let (connect_sender, mut connect_receiver) = test_command_channel(8);
         connect_sender.send(storage()).unwrap();
         connect_sender.send(GatewayCommand::Connect).unwrap();
         let mut connect_gate = GameShopReceiptGate::default();
@@ -6084,7 +9510,7 @@ mod tests {
             })
         };
 
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(storage()).unwrap();
         let mut gate = GameShopReceiptGate::default();
         let mut resume_resets = 0;
@@ -6156,7 +9582,7 @@ mod tests {
         let mut pending = PendingOperations::default();
         assert!(pending.try_begin(key));
 
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(purchase_command(&request)).unwrap();
         let batch = drain_command_batch(&mut receiver, 8);
         assert_eq!(batch.len(), 1);
@@ -6534,6 +9960,10 @@ mod tests {
             "playerMaxHp": 100,
             "playerMp": 25,
             "playerMaxMp": 50,
+            "playerCrystalStats": [
+                { "stat": 4, "value": 2 },
+                { "stat": 5, "value": 7 }
+            ],
             "playerExperience": 435,
             "playerMaxExperience": 900,
             "currentWeight": 1,
@@ -6618,6 +10048,13 @@ mod tests {
         assert_eq!(stats["maxMp"], json!(50));
         assert_eq!(stats["gold"], json!(1234));
         assert_eq!(stats["credit"], json!(45));
+        assert_eq!(
+            stats["crystalStats"],
+            json!([
+                { "stat": 4, "value": 2 },
+                { "stat": 5, "value": 7 }
+            ])
+        );
         assert_eq!(stats["level"], json!(3));
         assert_eq!(stats["name"], json!("Demo"));
         assert_eq!(stats["mapName"], json!("BichonProvince"));
@@ -6630,6 +10067,13 @@ mod tests {
         assert_eq!(ui["player"]["maxHp"], json!(100));
         assert_eq!(ui["player"]["gold"], json!(1234));
         assert_eq!(ui["player"]["credit"], json!(45));
+        assert_eq!(
+            ui["player"]["crystalStats"],
+            json!([
+                { "stat": 4, "value": 2 },
+                { "stat": 5, "value": 7 }
+            ])
+        );
         assert_eq!(ui["player"]["experience"], json!(435));
         assert_eq!(ui["player"]["maxExperience"], json!(900));
         assert_eq!(ui["player"]["currentWeight"], json!(1));
@@ -6645,6 +10089,7 @@ mod tests {
         assert_eq!(model.player.max_hp, 100);
         assert_eq!(model.player.gold, 1234);
         assert_eq!(model.player.credit, 45);
+        assert_eq!(model.player.crystal_stats.as_ref().unwrap().len(), 2);
         assert_eq!(model.player.experience, 435);
         assert_eq!(model.player.max_experience, 900);
         assert_eq!(model.player.current_weight, 1);
@@ -6697,6 +10142,10 @@ mod tests {
         cursor.observe_user_information(&json!({
             "name": "Alice",
             "class": "Wizard",
+            "gender": "Female",
+            "hair": 7,
+            "guildName": "Test Guild",
+            "guildRank": "Officer",
             "level": 7,
             "hp": 80,
             "maxHp": 100,
@@ -6710,6 +10159,16 @@ mod tests {
             "maxWeight": 50,
             "mapTitle": "BichonProvince",
             "inSafeZone": true
+        }));
+
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
+            "playerCrystalStats": [{ "stat": 5, "value": 11 }],
+            "entities": [{
+                "objectId": 99,
+                "kind": "player",
+                "wingEffect": 2
+            }]
         }));
 
         cursor.observe_world_snapshot(&json!({
@@ -6727,9 +10186,15 @@ mod tests {
         .expect("cursor read model");
         assert_eq!(model.player.name.as_deref(), Some("Alice"));
         assert_eq!(model.player.class_name.as_deref(), Some("Wizard"));
+        assert_eq!(model.player.gender.as_deref(), Some("Female"));
+        assert_eq!(model.player.hair, Some(7));
+        assert_eq!(model.player.wing_effect, Some(2));
+        assert_eq!(model.player.guild_name.as_deref(), Some("Test Guild"));
+        assert_eq!(model.player.guild_rank_name.as_deref(), Some("Officer"));
         assert_eq!(model.player.level, 7);
         assert_eq!((model.player.hp, model.player.max_hp), (80, 100));
         assert_eq!((model.player.mp, model.player.max_mp), (20, 40));
+        assert_eq!(model.player.crystal_stats.as_ref().unwrap()[0].value, 11);
         assert_eq!(model.player.map_name.as_deref(), Some("BichonProvince"));
         assert!(model.player.in_safe_zone);
     }
@@ -6753,7 +10218,12 @@ mod tests {
                 "kind": "player",
                 "name": "Alice Renamed",
                 "level": 8,
-                "className": "Wizard"
+                "className": "Wizard",
+                "gender": "Male",
+                "hair": 2,
+                "wingEffect": 1,
+                "guildName": "New Guild",
+                "guildRankName": "Leader"
             }]
         }));
         cursor.observe_map_identity(&json!({
@@ -6771,6 +10241,11 @@ mod tests {
         );
         assert_eq!(model.player.name.as_deref(), Some("Alice Renamed"));
         assert_eq!(model.player.level, 8);
+        assert_eq!(model.player.gender.as_deref(), Some("Male"));
+        assert_eq!(model.player.hair, Some(2));
+        assert_eq!(model.player.wing_effect, Some(1));
+        assert_eq!(model.player.guild_name.as_deref(), Some("New Guild"));
+        assert_eq!(model.player.guild_rank_name.as_deref(), Some("Leader"));
         assert_eq!(model.player.map_name.as_deref(), Some("BorderVillage"));
         assert!(!model.player.in_safe_zone);
 
@@ -6780,9 +10255,91 @@ mod tests {
         )
         .expect("reset cursor read model");
         assert_eq!(reset.player.name, None);
+        assert_eq!(reset.player.wing_effect, None);
         assert_eq!(reset.player.hp, 0);
         assert_eq!(reset.player.map_name, None);
         assert!(!reset.player.in_safe_zone);
+    }
+
+    #[test]
+    fn native_ui_wing_effect_uses_only_self_authority_and_zero_clears_it() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
+            "entities": [
+                { "objectId": 7, "kind": "player", "wingEffect": 2 },
+                { "objectId": 99, "kind": "player", "wingEffect": 1 }
+            ]
+        }));
+        assert_eq!(cursor.wing_effect, Some(1));
+
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
+            "entities": [{ "objectId": 7, "kind": "player", "wingEffect": 2 }]
+        }));
+        assert_eq!(
+            cursor.wing_effect,
+            Some(1),
+            "remote appearance cannot overwrite self"
+        );
+
+        cursor.observe_world_snapshot(&json!({
+            "entities": [{ "kind": "selfPlayer", "wing_effect": 0 }]
+        }));
+        assert_eq!(
+            cursor.wing_effect,
+            Some(0),
+            "zero is an authoritative clear"
+        );
+
+        for invalid in [Value::Null, json!(-1), json!(256)] {
+            cursor.observe_world_snapshot(&json!({
+                "entities": [{ "kind": "selfPlayer", "wingEffect": invalid }]
+            }));
+            assert_eq!(cursor.wing_effect, Some(0));
+        }
+        let model = serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(
+            cursor.to_read_model_json(),
+        )
+        .expect("wing read model");
+        assert_eq!(model.player.wing_effect, Some(0));
+    }
+
+    #[test]
+    fn source_zero_image_keeps_full_frame_metadata_but_legacy_zero_stays_absent() {
+        let known = json!({
+            "uniqueId": 987654321,
+            "name": "Source zero",
+            "icon": 71,
+            "count": 1,
+            "tooltipSource": { "info": {
+                "item_type": 0, "shape": 0, "stack_size": 1, "image": 0
+            }}
+        });
+        let mut mapped = json!({ "quantity": 1 });
+        extend_item_metadata(&mut mapped, &known);
+        assert_eq!(mapped["icon"], 0);
+        assert_eq!(
+            (mapped["iconWidth"].as_u64(), mapped["iconHeight"].as_u64()),
+            (Some(32), Some(23))
+        );
+        assert_eq!(mapped["tooltipSource"], known["tooltipSource"]);
+
+        let legacy = json!({ "uniqueId": 987654321, "name": "PigEar", "icon": 0, "count": 1 });
+        let mut missing = json!({ "quantity": 1 });
+        extend_item_metadata(&mut missing, &legacy);
+        assert_eq!(missing["icon"], 0);
+        assert!(missing.get("iconWidth").is_none());
+        assert!(missing.get("iconHeight").is_none());
+
+        let cursor = NativeUiPlayerCursor::default();
+        let good = shop_good_json(&known, 0, &cursor).unwrap();
+        assert_eq!(good["icon"], 0);
+        assert_eq!(good["icon_width"], 32);
+        assert_eq!(good["icon_height"], 23);
+        let missing = shop_good_json(&legacy, 0, &cursor).unwrap();
+        assert_eq!(missing["icon_width"], 0);
+        assert_eq!(missing["icon_height"], 0);
     }
 
     #[test]
@@ -6805,7 +10362,23 @@ mod tests {
         assert_eq!(model.center_x, 9);
         assert_eq!(model.center_y, 7);
         assert_eq!(model.time_of_day_light_setting, Some(4));
+        assert_eq!(model.mini_map_index, None);
+        assert_eq!(model.map_width, None);
+        assert_eq!(model.map_height, None);
         assert_eq!(model.patches.len(), 1);
+    }
+
+    #[test]
+    fn d401_minimap_transform_uses_authoritative_index_and_parsed_dimensions() {
+        let payload = json!({
+            "mapFileName": "D401",
+            "miniMapIndex": 8,
+            "sceneView": { "center": { "x": 19, "y": 156 } },
+        });
+        let model: mir2_client_bevy::map::MapModel =
+            serde_json::from_value(transform_map_model(&payload)).expect("MapModel");
+        assert_eq!(model.mini_map_index, Some(8));
+        assert_eq!((model.map_width, model.map_height), (Some(200), Some(200)));
     }
 
     #[test]
@@ -6835,50 +10408,175 @@ mod tests {
     }
 
     #[test]
+    fn user_item_count_images_and_true_size_refresh_across_native_surfaces() {
+        let cursor = NativeUiPlayerCursor::default();
+        // Includes both poison width changes and the Amulet's three bands.
+        for (index, count, image, width, height) in [
+            (710, 49, 3673, 16, 28),
+            (710, 50, 3674, 24, 27),
+            (710, 100, 2960, 28, 29),
+            (710, 150, 3675, 28, 29),
+            (711, 49, 3670, 20, 29),
+            (711, 50, 3671, 24, 27),
+            (711, 100, 2961, 28, 29),
+            (711, 150, 3672, 28, 29),
+            (712, 199, 3660, 32, 30),
+            (712, 200, 3661, 32, 30),
+            (712, 300, 3662, 32, 30),
+        ] {
+            let info = unique_crystal_tooltip_template(index).unwrap();
+            let instance = json!({
+                "key": format!("crystal-item-{index}"), "uniqueId": 71001,
+                "quantity": count, "slot": 0, "icon": info.image,
+                "stateImage": info.image, "tooltipSource": {
+                    "info": info, "realInfo": {"image": 1},
+                    "userItem": {"item_index": index, "count": 1}
+                }
+            });
+            for field in ["inventoryItems", "beltItems", "equipmentItems"] {
+                let payload = json!({field: [instance.clone()]});
+                let model = transform_inventory_model(&payload);
+                let mapped = &model["items"][0];
+                assert_eq!(mapped["icon"], image, "{field} count {count}");
+                assert_eq!(mapped["iconWidth"], width);
+                assert_eq!(mapped["iconHeight"], height);
+                assert_eq!(mapped["stateImage"], info.image);
+                assert_eq!(mapped["tooltipSource"], instance["tooltipSource"]);
+            }
+            // Raw storage/shop carriers have an exact index but no enriched
+            // icon or tooltip source. They use the same source rule.
+            let wire = json!({"item_index": index, "unique_id": 71001, "count": count});
+            let storage = storage_items_json(&[wire.clone()]).unwrap();
+            assert_eq!(storage[0]["icon"], image);
+            assert_eq!(storage[0]["iconWidth"], width);
+            assert_eq!(storage[0]["iconHeight"], height);
+            let good = shop_good_json(&wire, 0, &cursor).unwrap();
+            assert_eq!(good["icon"], image);
+            assert_eq!(good["icon_width"], width);
+            assert_eq!(good["icon_height"], height);
+            assert_eq!(good["count"], count);
+        }
+    }
+
+    #[test]
+    fn user_item_selector_never_guesses_identity_from_names_or_partial_info() {
+        for item in [
+            json!({"name": "Amulet", "icon": 270, "shape": 0}),
+            json!({"item_index": -1, "name": "GreenPoison", "icon": 259}),
+            json!({"tooltipSource": {"info": {"item_type": 8, "shape": 1}}}),
+            json!({"tooltipSource": {"realInfo": {"item_type": 8, "shape": 1, "stack_size": 500, "image": 259}}}),
+        ] {
+            assert_eq!(crystal_user_item_icon(&item, 300), None);
+        }
+        for index in [658, 713, 714] {
+            let info = unique_crystal_tooltip_template(index).unwrap();
+            assert_eq!(
+                crystal_user_item_icon(&json!({"itemIndex": index, "icon": 24}), 300),
+                Some(info.image)
+            );
+        }
+    }
+
+    #[test]
+    fn catalogue_shop_preview_keeps_base_image_even_with_large_count() {
+        let info = unique_crystal_tooltip_template(712).unwrap();
+        let preview = transform_game_shop_info_from_packet(
+            &json!({
+                "g_index": 1, "item_index": 712, "info": info, "count": 300,
+            }),
+            &NativeUiPlayerCursor::default(),
+        )
+        .unwrap();
+        assert_eq!(preview["image"], 270, "GameShopCell draws Item.Info.Image");
+        assert_eq!(preview["count"], 300);
+    }
+
+    #[test]
     fn inventory_transform_groups_items_by_container() {
         let mut payload = gateway_payload();
         payload["inventoryItems"] = json!([
             { "key": "small-hp-drug", "uniqueId": 42, "name": "Red Potion", "quantity": 5, "slot": 0,
+              "container": "bag1",
               "icon": 7, "description": "Restores HP", "durabilityCurrent": 4, "durabilityMax": 5,
               "sellValue": 12, "equipSlot": "Weapon", "grade": "Rare", "attack": 3, "defence": 2,
-              "addedAttack": 1, "addedDefence": 4, "addedLuck": 2, "shape": 9, "socketSlots": 3 }
+              "addedAttack": 1, "addedDefence": 4, "addedLuck": 2, "shape": 9, "socketSlots": 3,
+              "tooltipSource": {
+                "info": { "item_index": 658, "name": "Red Potion", "item_type": 13,
+                  "grade": 0, "stack_size": 20, "stats": [{ "stat": 12, "value": 15 }] },
+                "realInfo": { "item_index": 659, "name": "Red Potion[Warrior]", "item_type": 13,
+                  "grade": 0, "stack_size": 20, "stats": [{ "stat": 12, "value": 19 }] },
+                "userItem": { "unique_id": 42, "item_index": 658, "current_dura": 4,
+                  "max_dura": 5, "count": 5, "slots": [],
+                  "added_stats": [{ "stat": 12, "value": 2 }] },
+                "socketInfos": [],
+                "realSocketInfos": []
+              } },
+            { "key": "bag2-item", "uniqueId": 45, "name": "Bag2 Item", "quantity": 1, "slot": 7,
+              "container": "bag2" },
+            { "key": "quest-leaf", "uniqueId": 46, "name": "Cannibal Leaves", "quantity": 5, "slot": 0,
+              "container": "quest" }
         ]);
+        payload["inventoryCapacity"] = json!(54);
         payload["beltItems"] = json!([
             { "key": "blue-potion", "uniqueId": 43, "name": "Blue Potion", "quantity": 2, "slot": 0 }
         ]);
         payload["equipmentItems"] = json!([
-            { "key": "wooden-sword", "uniqueId": 44, "name": "Wooden Sword", "quantity": 1, "slot": 3 }
+            { "key": "wooden-sword", "uniqueId": 44, "name": "Wooden Sword", "quantity": 1, "slot": 3,
+              "stateImage": 30 }
         ]);
 
         let inventory = transform_inventory_model(&payload);
-        assert_eq!(inventory["capacity"], json!(46));
+        assert_eq!(inventory["capacity"], json!(54));
         assert_eq!(inventory["gold"], json!(1234));
         let items = inventory["items"].as_array().expect("items");
-        assert_eq!(items.len(), 3);
+        assert_eq!(items.len(), 5);
         assert_eq!(items[0]["container"], json!(0));
         assert_eq!(items[0]["key"], json!("small-hp-drug"));
         assert_eq!(items[0]["uniqueId"], json!(42));
-        assert_eq!(items[1]["container"], json!(1));
-        assert_eq!(items[2]["container"], json!(2));
-        assert_eq!(items[2]["name"], json!("Wooden Sword"));
+        assert_eq!(items[1]["container"], json!(0));
+        assert_eq!(items[1]["slot"], json!(47));
+        assert_eq!(items[2]["container"], json!(3));
+        assert_eq!(items[2]["slot"], json!(0));
+        assert_eq!(items[3]["container"], json!(1));
+        assert_eq!(items[4]["container"], json!(2));
+        assert_eq!(items[4]["name"], json!("Wooden Sword"));
 
         let model = serde_json::from_str::<mir2_client_bevy::inventory::InventoryModel>(
             &serde_json::to_string(&inventory).expect("serialize"),
         )
         .expect("InventoryModel");
         assert_eq!(model.gold, 1234);
-        assert_eq!(model.items.len(), 3);
+        assert_eq!(model.items.len(), 5);
         assert_eq!(model.items[0].key, "small-hp-drug");
         assert_eq!(model.items[0].unique_id, Some(42));
         assert_eq!(model.items[0].icon, 7);
+        assert_eq!(model.items[0].icon_width, 36);
+        assert_eq!(model.items[0].icon_height, 26);
         assert_eq!(model.items[0].description, "Restores HP");
         assert_eq!(model.items[0].durability_current, Some(4));
         assert_eq!(model.items[0].durability_max, Some(5));
         assert_eq!(model.items[0].sell_value, 12);
+        let equipped = &model.items[4];
+        assert_eq!(equipped.state_image, 30);
+        assert_eq!(equipped.state_image_x, 75);
+        assert_eq!(equipped.state_image_y, 186);
+        assert_eq!(equipped.state_image_width, 28);
+        assert_eq!(equipped.state_image_height, 57);
         assert_eq!(model.items[0].equip_slot.as_deref(), Some("Weapon"));
         assert_eq!(model.items[0].added_defence, 4);
         assert_eq!(model.items[0].shape, Some(9));
         assert_eq!(model.items[0].socket_slots, 3);
+        let tooltip = model.items[0]
+            .tooltip_source
+            .as_ref()
+            .expect("gateway preserves the exact tooltip source");
+        assert_eq!(tooltip.info.item_index, 658);
+        assert_eq!(tooltip.info.stats[0].value, 15);
+        assert_eq!(tooltip.real_info.as_ref().unwrap().item_index, 659);
+        assert_eq!(tooltip.real_info.as_ref().unwrap().stats[0].value, 19);
+        assert_eq!(tooltip.user_item.as_ref().unwrap().unique_id, 42);
+        assert_eq!(tooltip.user_item.as_ref().unwrap().added_stats[0].value, 2);
+        assert!(tooltip.real_socket_infos.is_empty());
     }
 
     #[test]
@@ -7024,7 +10722,11 @@ mod tests {
             "equipmentItems": [
                 { "key": "sword", "name": "WoodenSword", "quantity": 1, "slot": "weapon" },
                 { "key": "dress", "name": "BaseDress(M)", "quantity": 1, "slot": "armour" },
-                { "key": "mystery", "name": "Mystery", "quantity": 1, "slot": "future-slot" }
+                { "key": "mystery", "name": "Mystery", "quantity": 1, "slot": "future-slot" },
+                { "key": "ring-r", "name": "Ring R", "quantity": 1, "slot": "ringRight" },
+                { "key": "bracelet-l", "name": "Bracelet L", "quantity": 1, "slot": "braceletLeft" },
+                { "key": "ring-l", "name": "Ring L", "quantity": 1, "slot": "ringLeft" },
+                { "key": "bracelet-r", "name": "Bracelet R", "quantity": 1, "slot": "braceletRight" }
             ]
         });
 
@@ -7041,6 +10743,22 @@ mod tests {
         assert_eq!(model.items[1].slot, 0);
         assert_eq!(model.items[2].slot, 1);
         assert_eq!(model.items[3].slot, 2);
+        for (key, slot) in [
+            ("bracelet-l", 5),
+            ("bracelet-r", 6),
+            ("ring-l", 7),
+            ("ring-r", 8),
+        ] {
+            assert_eq!(
+                model
+                    .items
+                    .iter()
+                    .find(|item| item.key == key)
+                    .map(|item| item.slot),
+                Some(slot),
+                "camelCase equipment slot must not fall back to array order"
+            );
+        }
     }
 
     #[test]
@@ -7159,11 +10877,97 @@ mod tests {
 
         // The display-only entry remains learned, but never acquires a
         // protocol spell or an invented MP cost.
-        let display_only = model
-            .selection_for_shortcut(3)
-            .expect("F3 selected display-only skill");
-        assert_eq!(display_only.spell, None);
-        assert_eq!(display_only.mp_cost, None);
+        assert!(model.selection_for_shortcut(3).is_none());
+        assert_eq!(model.binding_for(0).spell, None);
+        assert_eq!(model.binding_for(0).mp_cost, None);
+    }
+
+    #[test]
+    fn hero_receipt_backpressure_preserves_all_processed_models_before_latest() {
+        let mut cursor = SkillPacketCursor::default();
+        cursor
+            .pending_hero_receipts
+            .extend(["first".into(), "second".into()]);
+        cursor.pending_hero_model = Some("latest".into());
+        assert!(!cursor.flush_hero_models_with(|_| false));
+        assert_eq!(cursor.pending_hero_receipts.len(), 2);
+        let mut sent = vec![];
+        assert!(cursor.flush_hero_models_with(|value| {
+            sent.push(value);
+            true
+        }));
+        assert_eq!(sent, vec!["first", "second", "latest"]);
+        cursor.pending_hero_receipts.push_back("old-session".into());
+        cursor.reset();
+        assert!(cursor.pending_hero_receipts.is_empty());
+    }
+
+    #[test]
+    fn skill_receipt_retry_keeps_its_own_keys_before_latest_snapshot() {
+        let mut cursor = SkillPacketCursor::default();
+        let receipt = serde_json::json!({"skillKeyAck":{"requestId":73,"spell":"FireBall","key":16,"oldKey":0,"accepted":true},"skills":[{"id":1,"hotkey":16}] }).to_string();
+        let newer = serde_json::json!({"skills":[{"id":1,"hotkey":3}]}).to_string();
+        cursor.pending_receipt_model = Some(receipt.clone());
+        cursor.pending_latest_model = Some(newer.clone());
+        assert!(!cursor.flush_skill_models_with(|_| false));
+        assert_eq!(cursor.pending_receipt_model.as_ref(), Some(&receipt));
+        let mut sent = vec![];
+        assert!(!cursor.flush_skill_models_with(|model| {
+            if sent.is_empty() {
+                sent.push(model);
+                true
+            } else {
+                false
+            }
+        }));
+        assert_eq!(sent, vec![receipt]);
+        assert!(cursor.pending_receipt_model.is_none());
+        assert_eq!(cursor.pending_latest_model.as_ref(), Some(&newer));
+        assert!(cursor.flush_skill_models_with(|model| {
+            sent.push(model);
+            true
+        }));
+        assert_eq!(sent[1], newer);
+        cursor.pending_latest_model = Some("stale".into());
+        cursor.reset();
+        assert!(cursor.pending_latest_model.is_none());
+        assert!(cursor.pending_receipt_model.is_none());
+    }
+
+    #[test]
+    fn real_magic_icons_override_catalog_snapshots_and_reset_at_session_boundary() {
+        let mut cursor = SkillPacketCursor::default();
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"FireBall","icon":0}}),
+            1
+        ));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":true,"magic":{"spell":"FireBall","icon":99}}),
+            1
+        ));
+        let mut payload = json!({"tick":2,"knownSkills":[{"id":1,"spell":"FireBall","icon":44,"hotkey":16,"castKind":"target"}]});
+        cursor.observe_snapshot(&mut payload);
+        let model: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transform_skill_model(&payload)).unwrap();
+        assert_eq!(model.binding_for(1).icon, Some(0));
+        assert_eq!(model.skill_for_shortcut(16).unwrap().id, 1);
+        cursor.reset();
+        payload["knownSkills"][0]["icon"] = json!(44);
+        cursor.observe_snapshot(&mut payload);
+        assert_eq!(payload["knownSkills"][0]["icon"], 44);
+        let wire = NativeOutboundCommand::MagicKey {
+            request_id: 73,
+            spell: "FireBall".into(),
+            key: 16,
+            old_key: 1,
+        };
+        let value = serde_json::to_value(&wire).unwrap();
+        assert_eq!(
+            value,
+            json!({"type":"magicKey","requestId":73,"spell":"FireBall","key":16,"oldKey":1})
+        );
     }
 
     #[test]
@@ -7216,6 +11020,99 @@ mod tests {
     }
 
     #[test]
+    fn skill_cast_sequence_is_an_event_and_delay_is_milliseconds() {
+        let mut cursor = SkillPacketCursor::default();
+        let original = json!({"tick":100,"playerObjectId":1001,"knownSkills":[{"spell":"FireBall","hotkey":1,"cooldownRemainingTicks":3,"delayMs":200}]});
+        let mut snapshot = original.clone();
+        cursor.observe_snapshot(&mut snapshot);
+        assert!(cursor.apply_packet(
+            "MagicDelay",
+            &json!({"objectId":1001,"spell":"FireBall","delay":2200}),
+            100
+        ));
+        assert!(cursor.apply_packet("MagicCast", &json!({"spell":"FireBall"}), 100));
+        cursor.apply_active_patches(&mut snapshot, 100);
+        assert_eq!(snapshot["knownSkills"][0]["delayMs"], json!(2200));
+        assert_eq!(
+            snapshot["knownSkills"][0]["cooldownRemainingTicks"],
+            json!(3)
+        );
+        assert_eq!(snapshot["knownSkills"][0]["castSequence"], json!(1));
+        let mut repeated = original.clone();
+        cursor.observe_snapshot(&mut repeated);
+        assert_eq!(repeated["knownSkills"][0]["castSequence"], json!(1));
+        assert!(cursor.apply_packet("MagicCast", &json!({"spell":"FireBall"}), 100));
+        cursor.apply_active_patches(&mut repeated, 100);
+        assert_eq!(repeated["knownSkills"][0]["castSequence"], json!(2));
+        let transformed = transform_skill_model(&repeated);
+        let native: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transformed).unwrap();
+        assert_eq!(native.bindings[0].cast_sequence, 2);
+    }
+
+    #[test]
+    fn skill_name_metadata_cap_preserves_known_iconless_updates() {
+        let mut cursor = SkillPacketCursor::default();
+        for index in 0..MAX_LEARNED_SKILLS {
+            assert!(cursor.apply_packet(
+                "NewMagic",
+                &json!({"hero":false,"magic":{"spell":format!("Spell{index}")}}),
+                0
+            ));
+        }
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"overflow"}}),
+            0
+        ));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),
+            0
+        ));
+        assert_eq!(
+            cursor.magic_names.get("spell0").map(String::as_str),
+            Some("Updated")
+        );
+    }
+
+    #[test]
+    fn authoritative_skill_names_survive_alias_snapshots_and_reset() {
+        let mut cursor = SkillPacketCursor::default();
+        let base = json!({"knownSkills":[{"spell":"Fury","name":"Battle Focus","magicName":"Fury"},
+            {"spell":"Healing","name":"Minor Heal","magicName":"Healing"}]});
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"Fury","name":"定制怒气"}}),
+            0
+        ));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":true,"magic":{"spell":"Fury","name":"Hero name"}}),
+            0
+        ));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"Fury","name":""}}),
+            0
+        ));
+        for _ in 0..3 {
+            let mut snapshot = base.clone();
+            cursor.observe_snapshot(&mut snapshot);
+            let model = transform_skill_model(&snapshot);
+            assert_eq!(model["skills"][0]["name"], "定制怒气");
+            assert_eq!(model["skills"][1]["name"], "Healing");
+        }
+        cursor.reset();
+        let mut snapshot = base;
+        cursor.observe_snapshot(&mut snapshot);
+        assert_eq!(
+            transform_skill_model(&snapshot)["skills"][0]["name"],
+            "Fury"
+        );
+    }
+
+    #[test]
     fn skill_packets_win_over_stale_snapshot_and_fresh_tick_retires_patch() {
         let mut cursor = SkillPacketCursor::default();
         let mut initial = json!({
@@ -7260,7 +11157,8 @@ mod tests {
         });
         cursor.observe_snapshot(&mut stale);
         assert_eq!(stale["playerMp"], json!(40));
-        assert_eq!(stale["knownSkills"][0]["cooldownRemainingTicks"], json!(12));
+        assert_eq!(stale["knownSkills"][0]["delayMs"], json!(12));
+        assert_eq!(stale["knownSkills"][0]["cooldownRemainingTicks"], json!(0));
 
         let mut fresh = json!({
             "tick": 101,
@@ -7318,7 +11216,8 @@ mod tests {
             }]
         });
         cursor.observe_snapshot(&mut next);
-        assert_eq!(next["knownSkills"][0]["cooldownRemainingTicks"], json!(12));
+        assert_eq!(next["knownSkills"][0]["delayMs"], json!(12));
+        assert_eq!(next["knownSkills"][0]["cooldownRemainingTicks"], json!(3));
         assert!(cursor.patches.is_empty());
         let mut later = json!({
             "tick": 0,
@@ -7525,7 +11424,8 @@ mod tests {
         ));
         let mut patched = initial;
         cursor.observe_snapshot(&mut patched);
-        assert_eq!(patched["knownSkills"][0]["cooldownRemainingTicks"], 12);
+        assert_eq!(patched["knownSkills"][0]["cooldownRemainingTicks"], 0);
+        assert_eq!(patched["knownSkills"][0]["delayMs"], 12);
         assert_eq!(patched["knownSkills"][0]["level"], 2);
         assert_eq!(patched["knownSkills"][0]["experience"], 7);
     }
@@ -7632,6 +11532,9 @@ mod tests {
             assert!(capabilities["capabilities"]
                 .as_array()
                 .is_some_and(|values| values.iter().any(|value| value == NATIVE_RESUME_PROTOCOL)));
+            assert!(capabilities["capabilities"]
+                .as_array()
+                .is_some_and(|values| values.iter().any(|value| value == CATALOG_GZIP_CAPABILITY)));
             socket
                 .send(Message::Text(
                     json!({
@@ -7657,6 +11560,15 @@ mod tests {
             };
             assert_eq!(start_game["type"], json!("startGame"));
             assert_eq!(start_game["characterIndex"], json!(3));
+            let catalog = catalog_transport::tests::catalog_fixture_texts();
+            let catalog_refs: Vec<&str> = catalog.iter().map(String::as_str).collect();
+            let compressed_catalog = mir2_protocol::catalog_transport::encode_catalog_batch(
+                &catalog_refs,
+            ).expect("encode all four catalog envelopes");
+            socket
+                .send(Message::Binary(compressed_catalog.clone().into()))
+                .await
+                .expect("send negotiated catalog before the ordinary snapshot");
             socket
                 .send(Message::Text(
                     loopback_world_snapshot("initial-authority", 10, 20, 3)
@@ -7686,6 +11598,9 @@ mod tests {
                 .expect("upgrade resume socket");
             let capabilities = loopback_receive_json(&mut socket).await;
             assert_eq!(capabilities["type"], json!("clientCapabilities"));
+            assert!(capabilities["capabilities"]
+                .as_array()
+                .is_some_and(|values| values.iter().any(|value| value == CATALOG_GZIP_CAPABILITY)));
             let resume = loopback_receive_json(&mut socket).await;
             assert_eq!(resume["type"], json!("resumeSession"));
             assert_eq!(resume["credential"], json!(credential));
@@ -7709,6 +11624,10 @@ mod tests {
                 ))
                 .await
                 .expect("send quarantined pre-resume snapshot");
+            socket
+                .send(Message::Binary(compressed_catalog.into()))
+                .await
+                .expect("catalog batch must obey the same pre-resume quarantine");
             socket
                 .send(Message::Text(
                     json!({
@@ -7987,6 +11906,71 @@ mod tests {
     }
 
     #[test]
+    fn mail_reader_metadata_and_exact_source_icons_survive_wire_transform() {
+        let template = mir2_game_data::crystal_item_by_index(658).expect("potion template");
+        let mail = mail_message_json(&json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
+            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]})).unwrap();
+        assert_eq!(mail["can_reply"], true);
+        assert_eq!(mail["metadata_known"], true);
+        assert_eq!(mail["date_sent_binary_datetime"], 621_355_968_000_000_000i64);
+        assert_eq!(mail["items"][0]["image"], template.image);
+        assert_eq!(mail["items"][0]["uniqueId"], 777);
+        assert_eq!(mail["items"][0]["count"], 3);
+        assert_eq!(mail_attachment_json(&json!(template.name)).unwrap()["image"], template.image);
+        assert!(mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null());
+        let snapshot = mail_message_json(&json!({"id":42,"items":[]})).unwrap();
+        assert_eq!(snapshot["metadata_known"], false);
+        let command = NativeOutboundCommand::LockMail { mail_id: 42, lock: true };
+        assert_eq!(command.command_type(), "lockMail");
+        let wire = serde_json::to_value(command).unwrap();
+        assert_eq!(wire["mailId"], 42);
+        assert_eq!(wire["lock"], true);
+    }
+
+    #[test]
+    fn storage_password_receipts_preserve_results_without_echoing_credentials() {
+        for result in 0..=6 {
+            let unlock = transform_storage_patch_from_packet("StorageUnlockResult",
+                &json!({"result":result,"hasPassword":true,"password":"private-input"})).unwrap();
+            assert_eq!(unlock["password_result"]["operation"], "unlock");
+            assert_eq!(unlock["password_result"]["result"], result);
+            assert_eq!(unlock["ack"]["success"], result == 0 || result == 4);
+            if result == 0 || result == 4 {
+                assert_eq!(unlock["unlocked"], true);
+            } else {
+                assert!(unlock.get("unlocked").is_none());
+            }
+            for removing in [false, true] {
+                let password = transform_storage_patch_from_packet("StoragePasswordResult",
+                    &json!({"result":result,"removing":removing,"hasPassword":true,"password":"private-input"})).unwrap();
+                assert_eq!(password["password_result"], json!({"operation":"password","result":result,"removing":removing}));
+                assert!(!password.to_string().contains("private-input"));
+            }
+            assert!(!unlock.to_string().contains("private-input"));
+        }
+        assert!(transform_storage_patch_from_packet("StorageUnlockResult", &json!({"hasPassword":true})).is_none());
+        assert!(transform_storage_patch_from_packet("StoragePasswordResult", &json!({"result":4,"hasPassword":true})).is_none());
+    }
+
+    #[test]
+    fn equipment_storage_ack_transform_preserves_identity_and_failure() {
+        for success in [false, true] {
+            let payload = json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
+            assert_eq!(transform_inventory_operation_ack("EquipItem", &payload),
+                Some(InventoryOperationAck::Equip { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            assert_eq!(transform_inventory_operation_ack("RemoveItem", &payload),
+                Some(InventoryOperationAck::Remove { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            for field in ["grid", "uniqueId", "to", "success"] {
+                let mut malformed = payload.clone();
+                malformed.as_object_mut().unwrap().remove(field);
+                for packet in ["EquipItem", "RemoveItem"] {
+                    assert!(transform_inventory_operation_ack(packet, &malformed).is_none());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn inventory_ack_transform_requires_complete_correlatable_fields() {
         assert_eq!(
             transform_inventory_operation_ack(
@@ -8003,6 +11987,14 @@ mod tests {
                 count: 3,
                 hero_inventory: false,
                 success: false,
+            })
+        );
+        assert_eq!(
+            transform_inventory_operation_ack("DeleteItem", &json!({"uniqueId":7002,"count":2})),
+            Some(InventoryOperationAck::Delete {
+                unique_id: 7002,
+                count: 2,
+                success: true,
             })
         );
         assert_eq!(
@@ -8069,29 +12061,35 @@ mod tests {
             &json!({"grid":"Inventory","from":4,"to":9})
         )
         .is_none());
+        assert!(
+            transform_inventory_operation_ack("DeleteItem", &json!({"uniqueId":7002})).is_none()
+        );
     }
 
     #[test]
     fn game_shop_packet_transforms_keep_cash_catalog_and_stock_patch_separate() {
-        let info = transform_game_shop_info_from_packet(&json!({
-            "item": {
-                "item_index": 1200,
-                "g_index": 42,
-                "info": {"index": 1200, "name": "Cash Potion", "item_type": 3, "image": 77},
-                "gold_price": 100,
-                "credit_price": 5,
-                "count": 2,
-                "class": "All",
-                "category": "Potion",
-                "stock": 10,
-                "deal": true,
-                "top_item": false,
-                "date_binary_datetime": 0,
-                "can_buy_credit": true,
-                "can_buy_gold": true
-            },
-            "stockLevel": 8
-        }))
+        let info = transform_game_shop_info_from_packet(
+            &json!({
+                "item": {
+                    "item_index": 1200,
+                    "g_index": 42,
+                    "info": {"index": 1200, "name": "Cash Potion", "item_type": 3, "image": 77},
+                    "gold_price": 100,
+                    "credit_price": 5,
+                    "count": 2,
+                    "class": "All",
+                    "category": "Potion",
+                    "stock": 10,
+                    "deal": true,
+                    "top_item": false,
+                    "date_binary_datetime": 0,
+                    "can_buy_credit": true,
+                    "can_buy_gold": true
+                },
+                "stockLevel": 8
+            }),
+            &NativeUiPlayerCursor::default(),
+        )
         .expect("GameShopInfo");
         let entry = serde_json::from_value::<mir2_client_bevy::game_shop::GameShopEntry>(info)
             .expect("cash entry shape");
@@ -8099,6 +12097,14 @@ mod tests {
         assert_eq!(entry.item_name, "Cash Potion");
         assert_eq!(entry.stock_level, 8);
         assert_eq!(entry.image, 77);
+        assert_eq!(
+            entry
+                .tooltip_source
+                .as_ref()
+                .and_then(|source| source.user_item.as_ref())
+                .map(|item| (item.item_index, item.count, item.identified)),
+            Some((1200, 2, false))
+        );
 
         let stock = transform_game_shop_stock_from_packet(&json!({
             "g_index": 42,
@@ -8110,6 +12116,167 @@ mod tests {
                 .expect("cash stock patch shape");
         assert_eq!(patch.game_shop_index, 42);
         assert_eq!(patch.stock_level, 3);
+    }
+
+    #[test]
+    fn crystal_packet_tooltip_projection_preserves_instance_preview_and_viewer_semantics() {
+        let cursor = NativeUiPlayerCursor {
+            level: Some(20),
+            class_name: Some("Wizard".to_owned()),
+            ..Default::default()
+        };
+        let offered = CrystalUserItemModel {
+            unique_id: 77,
+            item_index: 1,
+            current_dura: 3_000,
+            max_dura: 4_000,
+            count: 1,
+            identified: true,
+            ..Default::default()
+        };
+        let source = crystal_tooltip_source_for_user_item(&json!(offered), &cursor)
+            .expect("unique Crystal UserItem tooltip source");
+        assert_eq!(source.info.item_index, 1);
+        assert_eq!(
+            source.real_info.as_ref().map(|info| info.item_index),
+            Some(3)
+        );
+        assert_eq!(
+            source.user_item.as_ref().map(|item| (
+                item.unique_id,
+                item.current_dura,
+                item.max_dura,
+                item.identified
+            )),
+            Some((77, 3_000, 4_000, true))
+        );
+
+        let info = unique_crystal_tooltip_info(658).expect("quest potion template");
+        let preview = crystal_tooltip_source_for_preview(info.clone(), 5, &cursor);
+        let preview_item = preview.user_item.expect("Crystal preview UserItem");
+        assert_eq!(preview_item.item_index, info.item_index);
+        assert_eq!(
+            (preview_item.current_dura, preview_item.max_dura),
+            (info.durability, info.durability)
+        );
+        assert_eq!(preview_item.count, 5);
+        assert!(!preview_item.identified);
+    }
+
+    #[test]
+    fn quest_trade_and_guild_packet_adapters_retain_complete_tooltip_sources() {
+        let cursor = NativeUiPlayerCursor {
+            level: Some(20),
+            class_name: Some("Wizard".to_owned()),
+            ..Default::default()
+        };
+        let info = mir2_game_data::crystal_item_by_index(658).expect("potion template");
+        let mut quest = json!({
+            "info": {
+                "rewards_fixed_item": [{"item": info, "count": 3}],
+                "rewards_select_item": []
+            },
+            "rewards": {
+                "items": [{"itemIndex": 658, "name": "(HP)DrugSmall", "count": 3}],
+                "selectItems": []
+            }
+        });
+        add_quest_reward_tooltip_sources(&mut quest, &cursor);
+        let quest_source = serde_json::from_value::<CrystalItemTooltipSourceModel>(
+            quest["rewards"]["items"][0]["tooltipSource"].clone(),
+        )
+        .expect("quest tooltip source");
+        let quest_item = quest_source.user_item.expect("quest preview UserItem");
+        assert_eq!(quest_item.item_index, 658);
+        assert_eq!(
+            quest_item.count, 0,
+            "QuestCell paints count outside ShowItem"
+        );
+        assert!(!quest_item.identified);
+
+        let carried = CrystalUserItemModel {
+            unique_id: 88,
+            item_index: 658,
+            count: 4,
+            identified: true,
+            ..Default::default()
+        };
+        let mut trade_payload = json!({"tradeItems": [carried, null]});
+        add_social_item_tooltip_sources("TradeItem", &mut trade_payload, &cursor);
+        let mut trade = SocialModel::default();
+        assert!(trade.apply_packet("TradeItem", &trade_payload));
+        let trade_item = trade.trade.partner_items[0].as_ref().unwrap();
+        assert_eq!(
+            (trade_item.unique_id, trade_item.item_index),
+            (Some(88), Some(658))
+        );
+        assert_eq!(
+            trade_item
+                .tooltip_source
+                .as_ref()
+                .and_then(|source| source.user_item.as_ref())
+                .map(|item| item.count),
+            Some(4)
+        );
+
+        let carried = CrystalUserItemModel {
+            unique_id: 99,
+            item_index: 658,
+            count: 2,
+            identified: true,
+            ..Default::default()
+        };
+        let mut guild_payload = json!({
+            "items": [{"item": carried, "user_id": 12}]
+        });
+        add_social_item_tooltip_sources("GuildStorageList", &mut guild_payload, &cursor);
+        let mut guild = SocialModel::default();
+        assert!(guild.apply_packet("GuildStorageList", &guild_payload));
+        let guild_item = guild.guild.storage_items[0].as_ref().expect("guild item");
+        assert_eq!(
+            (
+                guild_item.unique_id,
+                guild_item.item_index,
+                guild_item.count
+            ),
+            (99, 658, 2)
+        );
+        assert!(guild_item.tooltip_source.is_some());
+    }
+
+    #[test]
+    fn trade_item_tooltip_adapter_preserves_holes_and_rejects_malformed_wire_rows() {
+        let cursor = NativeUiPlayerCursor::default();
+        let carried = CrystalUserItemModel {
+            unique_id: 88,
+            item_index: 658,
+            count: 4,
+            identified: true,
+            ..Default::default()
+        };
+        let mut payload = json!({"tradeItems":[null,carried,null,null,null]});
+        add_social_item_tooltip_sources("TradeItem", &mut payload, &cursor);
+        assert_eq!(payload["partnerItems"].as_array().unwrap().len(), 5);
+        let mut model = SocialModel::default();
+        assert!(model.apply_packet("TradeItem", &payload));
+        assert!(model.trade.partner_items[0].is_none());
+        assert!(model.trade.partner_items[4].is_none());
+        assert_eq!(
+            model.trade.partner_items[1].as_ref().unwrap().unique_id,
+            Some(88)
+        );
+        let before = model.clone();
+        for bad in [
+            json!(42),
+            json!(false),
+            json!({}),
+            json!({"unique_id":88,"count":65536}),
+        ] {
+            let mut malformed = json!({"tradeItems":[null,bad]});
+            add_social_item_tooltip_sources("TradeItem", &mut malformed, &cursor);
+            assert!(!model.apply_packet("TradeItem", &malformed));
+            assert_eq!(model, before);
+        }
     }
 
     #[test]
@@ -8180,10 +12347,11 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (sender, receiver) = std::sync::mpsc::channel();
         let login = parse_inbound_event(
-            r#"{"type":"packet","packet":"LoginSuccess","payload":{"characters":[{"index":3,"name":"Alice","level":7,"class":"Warrior","gender":"Female"}]}}"#,
+            r#"{"type":"packet","packet":"LoginSuccess","payload":{"characters":[{"index":3,"name":"Alice","level":7,"class":"Warrior","gender":"Female","lastAccessBinaryDatetime":"-8584918932854775808"}]}}"#,
         )
         .expect("login event");
 
@@ -8197,6 +12365,10 @@ mod tests {
                 assert_eq!(characters.len(), 1);
                 assert_eq!(characters[0].index, 3);
                 assert_eq!(characters[0].class_name, "Warrior");
+                assert_eq!(
+                    characters[0].last_access_binary_datetime,
+                    -8584918932854775808
+                );
             }
             other => panic!("unexpected event: {other:?}"),
         }
@@ -8217,6 +12389,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
@@ -8224,6 +12397,7 @@ mod tests {
         let mut gameplay_adapter = NativeGameplayAdapter::default();
         let mut last_world_payload = None;
         let mut last_wallet = None;
+        let mut map_packet_cursor = NativeMapPacketCursor::default();
         let mut ui_cursor = NativeUiPlayerCursor::default();
         let mut in_flight_claim_mail_id = None;
         let mut send_mail_in_flight = false;
@@ -8249,6 +12423,7 @@ mod tests {
                 &gameplay_sender,
                 &mut last_world_payload,
                 &mut last_wallet,
+                &mut map_packet_cursor,
                 &mut ui_cursor,
                 &mut in_flight_claim_mail_id,
                 &mut send_mail_in_flight,
@@ -8278,6 +12453,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -8301,6 +12477,95 @@ mod tests {
             }
             other => panic!("unexpected event: {other:?}"),
         }
+
+        // A second successful StartGame on the same socket must re-arm
+        // bootstrap, while subsequent ordinary snapshots stay deduplicated.
+        let start_ack = r#"{"type":"packet","packet":"StartGame","payload":{"result":4}}"#;
+        handle_gateway_text_for_connection(
+            start_ack,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut map_packet_cursor,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("second StartGame ACK");
+        assert!(matches!(
+            shell_receiver.try_recv(),
+            Ok(ShellGatewayEvent::StartGameAck { accepted: true, .. })
+        ));
+        assert!(!connection_bootstrap_sent);
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut map_packet_cursor,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+        assert!(matches!(
+            shell_receiver.try_recv(),
+            Ok(ShellGatewayEvent::PlayerBootstrapped { .. })
+        ));
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut map_packet_cursor,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+        assert!(
+            shell_receiver.try_recv().is_err(),
+            "ordinary snapshots must not repeat bootstrap"
+        );
     }
 
     #[test]
@@ -8648,6 +12913,55 @@ mod tests {
         }
     }
 
+    #[test]
+    fn shell_dispatch_maps_crystal_login_result_codes_to_actionable_messages() {
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let expected = [
+            (0, "login is currently disabled"),
+            (1, "account ID is invalid"),
+            (2, "password is invalid"),
+            (3, "account does not exist"),
+            (4, "invalid credentials"),
+            (5, "password change required before login"),
+            (99, "login failed (result 99)"),
+        ];
+
+        for (result, message) in expected {
+            let event = parse_inbound_event(&format!(
+                r#"{{"type":"packet","packet":"Login","payload":{{"result":{result}}}}}"#
+            ))
+            .expect("login event");
+            dispatch_shell_event(&event, &context, &sender);
+            match receiver.try_recv().expect("shell login failure event") {
+                ShellGatewayEvent::LoginFailure { message: actual } => {
+                    assert_eq!(actual, message)
+                }
+                other => panic!("unexpected event: {other:?}"),
+            }
+        }
+
+        let missing_result =
+            parse_inbound_event(r#"{"type":"packet","packet":"Login","payload":{}}"#)
+                .expect("missing-result login event");
+        dispatch_shell_event(&missing_result, &context, &sender);
+        assert!(matches!(
+            receiver.try_recv().expect("missing-result shell event"),
+            ShellGatewayEvent::LoginFailure { message } if message == "login failed"
+        ));
+
+        let banned = parse_inbound_event(
+            r#"{"type":"packet","packet":"LoginBanned","payload":{"reason":"account is temporarily banned"}}"#,
+        )
+        .expect("login-banned event");
+        dispatch_shell_event(&banned, &context, &sender);
+        assert!(matches!(
+            receiver.try_recv().expect("login-banned shell event"),
+            ShellGatewayEvent::LoginFailure { message }
+                if message == "account is temporarily banned"
+        ));
+    }
+
     #[tokio::test]
     async fn native_resume_minimal_socket_contract_reconnects_and_accepts_post_resume_snapshot() {
         let listener = TcpListener::bind("127.0.0.1:0")
@@ -8793,7 +13107,7 @@ mod tests {
             let _ = second.close(None).await;
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -9015,7 +13329,7 @@ mod tests {
             );
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -9205,7 +13519,7 @@ mod tests {
                 .expect("send resume rejection");
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -9339,7 +13653,7 @@ mod tests {
             );
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -9416,3 +13730,1020 @@ mod tests {
             .expect("loopback server task must not panic");
     }
 }
+
+fn guild_buff_readback(payload: &serde_json::Value) -> Option<mir2_protocol::ServerPacket> {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct BuffReadback {
+        remove: u8,
+        active_buffs: Vec<mir2_protocol::GuildBuff>,
+        guild_buffs: Vec<mir2_protocol::GuildBuffInfo>,
+    }
+    let data = serde_json::from_value::<BuffReadback>(payload.clone()).ok()?;
+    Some(mir2_protocol::ServerPacket::GuildBuffList {
+        remove: data.remove,
+        active_buffs: data.active_buffs,
+        guild_buffs: data.guild_buffs,
+    })
+}
+#[cfg(test)]
+mod guild_wire_tests {
+    use super::*;
+    #[test]
+    fn guild_buff_delta_keeps_source_ids_stats_and_duration() {
+        let value = serde_json::json!({"remove":1,"activeBuffs":[{"id":42,"active":false,"active_time_remaining":17}],"guildBuffs":[{"id":42,"icon":3,"name":"Might","level_requirement":2,"points_requirement":1,"time_limit":60,"activation_cost":100,"stats":[{"stat":5,"value":3}]}]});
+        let Some(mir2_protocol::ServerPacket::GuildBuffList {
+            remove,
+            active_buffs,
+            guild_buffs,
+        }) = guild_buff_readback(&value)
+        else {
+            panic!("ordinary source readback");
+        };
+        assert_eq!(remove, 1);
+        assert_eq!(active_buffs[0].active_time_remaining, 17);
+        assert!(!active_buffs[0].active);
+        assert_eq!(guild_buffs[0].stats[0].stat, 5);
+        assert_eq!(guild_buffs[0].stats[0].value, 3);
+        assert!(guild_buff_readback(&serde_json::json!({"remove":0,"activeBuffs":[]})).is_none());
+    }
+    #[test]
+    fn guild_buff_requests_serialize_as_ordinary_browser_commands() {
+        for action in 0..=2 {
+            let command =
+                crate::native_protocol::NativeOutboundCommand::GuildBuffUpdate { action, id: 42 };
+            assert_eq!(
+                serde_json::to_value(command).unwrap(),
+                serde_json::json!({"type":"guildBuffUpdate","action":action,"id":42})
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn native_queue_test_guard() -> std::sync::MutexGuard<'static, ()> {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+#[cfg(test)]
+mod ownership_tests {
+    use super::*;
+    use futures_util::Sink;
+    use bevy::prelude::IntoScheduleConfigs;
+    use std::{pin::Pin,task::{Context,Poll},sync::{Arc,Mutex}};
+    #[derive(Default)]
+    struct SinkState {pending:bool,ready_error:bool,flush_pending:bool,flush_waker:Option<std::task::Waker>,start_error:bool,flush_error:bool,starts:usize,flushes:usize,frames:Vec<Message>,after_start:Option<Box<dyn FnOnce()+Send>>,after_ready:Option<Box<dyn FnOnce()+Send>>,after_flush:Option<Box<dyn FnOnce()+Send>>}
+    #[derive(Clone,Default)]
+    struct ControlledSink(Arc<Mutex<SinkState>>);
+    impl Sink<Message> for ControlledSink {
+        type Error=&'static str;
+        fn poll_ready(self:Pin<&mut Self>,_:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let mut state=self.0.lock().unwrap();if state.pending{return Poll::Pending;}let result=if state.ready_error{Err("ready failure")}else{Ok(())};let hook=state.after_ready.take();drop(state);if let Some(hook)=hook{hook();}Poll::Ready(result)}
+        fn start_send(self:Pin<&mut Self>,frame:Message)->Result<(),Self::Error>{let mut s=self.0.lock().unwrap();s.starts+=1;s.frames.push(frame);let result=if s.start_error{Err("start failure")}else{Ok(())};let hook=s.after_start.take();drop(s);if let Some(hook)=hook{hook();}result}
+        fn poll_flush(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let mut s=self.0.lock().unwrap();s.flushes+=1;if s.flush_pending{s.flush_waker=Some(cx.waker().clone());return Poll::Pending;}let result=if s.flush_error{Err("flush failure")}else{Ok(())};let hook=s.after_flush.take();drop(s);if let Some(hook)=hook{hook();}Poll::Ready(result)}
+        fn poll_close(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{self.poll_flush(cx)}
+    }
+    fn prepared_world()->(GatewayCommandSender,GatewayCommandReceiver,NativeCommandFence,NativeCommandStamp){
+        let (sender,receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);(sender,receiver,fence,stamp)
+    }
+    fn frame()->Message{Message::Text("{}".into())}
+    fn attack()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::Attack {object_id:19})}
+    fn owned(command:GatewayCommand)->OwnedGatewayCommand{match command{GatewayCommand::Owned(p)=>*p,_=>panic!("actual bounded envelope required")}}
+    fn mail_cost()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::MailCost{gold:700,items_idx:[0;5],stamped:false})}
+    fn mail_quote_publisher(fence:NativeCommandFence,receipts:Arc<Mutex<Vec<mir2_client_bevy::mail_service::MailQuoteReceipt>>>)->NativeMailQuotePublisher {
+        NativeMailQuotePublisher(Arc::new(move|receipt|{assert!(fence.0.try_lock().is_ok(),"receipt callback must run outside the fence lock");receipts.lock().unwrap().push(receipt);true}))
+    }
+    fn mail_send_command()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::SendMail{name:"R".into(),message:"body".into(),gold:0,items_idx:[0;5],stamped:false})}
+    fn mail_send_publisher(fence:NativeCommandFence,messages:Arc<Mutex<Vec<mir2_client_bevy::mail_service::MailServiceInboxMessage>>>)->NativeMailSendPublisher{
+        NativeMailSendPublisher(Arc::new(move|message|{assert!(fence.0.try_lock().is_ok(),"Send receipt/ACK callback is outside the short fence lock");messages.lock().unwrap().push(message);true}))
+    }
+    struct BudgetWake(std::sync::atomic::AtomicUsize);
+    impl futures_util::task::ArcWake for BudgetWake {
+        fn wake_by_ref(this:&Arc<Self>){this.0.fetch_add(1,std::sync::atomic::Ordering::SeqCst);}
+    }
+    fn budget_context_waker()->(Arc<BudgetWake>,std::task::Waker){
+        let wake=Arc::new(BudgetWake(std::sync::atomic::AtomicUsize::new(0)));
+        let waker=futures_util::task::waker(wake.clone());(wake,waker)
+    }
+    #[test]
+    fn transport_budget_mail_ready_expiry_is_exact_unsent_and_wakes_without_sink_progress(){
+        use std::future::Future;
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+        let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().pending=true;
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let (wake,waker)=budget_context_waker();let mut cx=Context::from_waker(&waker);
+        let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));
+        assert!(future.as_mut().poll(&mut cx).is_pending());assert!(fence.0.lock().unwrap().waiters.contains_key(&proof.sequence));
+        clock.advance_to(10);assert!(wake.0.load(std::sync::atomic::Ordering::SeqCst)>0);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unavailable(_))));drop(future);
+        let expected=vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::DefinitelyUnsent})];
+        assert_eq!(*messages.lock().unwrap(),expected);assert_eq!(state.lock().unwrap().starts,0);
+        assert!(fence.0.lock().unwrap().waiters.is_empty());assert!(fence.0.lock().unwrap().mail_send_flight.is_none());
+        fence.retire(&proof);assert_eq!(*messages.lock().unwrap(),expected);
+    }
+    #[test]
+    fn transport_budget_mail_flush_expiry_retains_original_barrier_and_cannot_clear_successor(){
+        use std::future::Future;
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        let stream=controlled_mail_service_publisher(|_|true).start_socket(Some(&fence),1).unwrap();
+        let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+        let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+        let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());
+        assert_eq!(state.lock().unwrap().starts,1);assert!(stream.has_send_flight());clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unknown(_))));drop(future);
+        assert_eq!(*messages.lock().unwrap(),vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::Entered}),
+            MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::Unknown})]);
+        assert!(stream.has_send_flight());assert!(fence.0.lock().unwrap().waiters.is_empty());
+        let mut fresh_budget=ManualNativeWriteBudget::new(10);
+        assert_eq!(futures_util::FutureExt::now_or_never(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut fresh_budget)).unwrap(),NativeSinkCommit::DefinitelyUnsent);
+        assert_eq!(state.lock().unwrap().starts,1);assert!(stream.acknowledge_send(1));assert!(!stream.has_send_flight());
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),30,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let next=owned(receiver.try_recv().unwrap());state.lock().unwrap().flush_pending=false;
+        assert_eq!(futures_util::FutureExt::now_or_never(commit_owned_frame_with_budget(&mut sink,Some(&next),frame(),&mut fresh_budget)).unwrap(),NativeSinkCommit::Flushed);
+        let count=messages.lock().unwrap().len();assert!(proof.mail_send.as_ref().unwrap().publish(MailSendOutcome::Unknown));fence.retire(&proof);
+        assert_eq!(messages.lock().unwrap().len(),count);assert!(stream.has_send_flight());
+        assert_eq!(fence.0.lock().unwrap().mail_send_flight.as_ref().unwrap().ticket,next.mail_send.as_ref().unwrap().ticket);
+    }
+    #[test]
+    fn transport_budget_mail_quote_expiry_and_unvisited_batch_tails_are_exact(){
+        use std::future::Future;
+        use mir2_client_bevy::mail_service::{MailQuoteReceipt,MailQuoteOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        let first=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let tail=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().flush_pending=true;
+        for command in unsent_command_batch(drain_command_batch(&mut receiver,8)) {
+            let proof=owned(command);let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);
+            assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unknown(_))));break;
+        }
+        assert_eq!(sink.0.lock().unwrap().starts,1);let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),2);
+        assert_eq!(receipts[0].ticket,first);assert!(matches!(receipts[0].outcome,MailQuoteOutcome::Entered{..}));
+        assert_eq!(receipts[1],MailQuoteReceipt{ticket:tail,outcome:MailQuoteOutcome::DefinitelyUnsent});assert!(fence.0.lock().unwrap().waiters.is_empty());
+    }
+    #[test]
+    fn transport_budget_one_deadline_spans_readiness_flush_and_final_entry(){
+        use std::future::Future;
+        for expire_before_entry in [false,true] {
+            let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+            let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().pending=true;state.lock().unwrap().flush_pending=true;
+            let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());
+            let mut future=Box::pin(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget));assert!(future.as_mut().poll(&mut cx).is_pending());
+            clock.advance_to(if expire_before_entry{10}else{9});state.lock().unwrap().pending=false;
+            if expire_before_entry {assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unavailable(_))));}
+            else {assert!(future.as_mut().poll(&mut cx).is_pending());assert_eq!(state.lock().unwrap().starts,1);clock.advance_to(10);assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(NativeSinkCommit::Unknown(_))));}
+            drop(future);assert_eq!(state.lock().unwrap().starts,usize::from(!expire_before_entry));assert!(fence.0.lock().unwrap().waiters.is_empty());
+        }
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();
+        sink.0.lock().unwrap().after_ready=Some(Box::new(move||clock.advance_to(10)));
+        assert!(matches!(futures_util::FutureExt::now_or_never(commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget)).unwrap(),NativeSinkCommit::Unavailable(_)));
+        assert_eq!(sink.0.lock().unwrap().starts,0);
+    }
+    #[test]
+    fn transport_budget_normal_startup_shutdown_preserves_ordinary_queue_and_expiry_is_failure(){
+        use std::future::Future;
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::StartGame{character_index:3}),Some(stamp)).unwrap();
+        let mut budget=ManualNativeWriteBudget::new(10);let mut pending=Box::pin(std::future::pending::<()>());let (wake,waker)=budget_context_waker();let mut cx=Context::from_waker(&waker);
+        let mut future=Box::pin(await_native_startup_phase(&mut budget,Some(&fence),|cx|pending.as_mut().poll(cx)));assert!(future.as_mut().poll(&mut cx).is_pending());
+        let queued=receiver.try_recv().unwrap();assert!(matches!(queued.payload(),GatewayCommand::Wire(NativeOutboundCommand::StartGame{character_index:3})));
+        sender.send_with_stamp(GatewayCommand::Shutdown,Some(stamp)).unwrap();assert!(wake.0.load(std::sync::atomic::Ordering::SeqCst)>0);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Shutdown)));drop(future);assert!(fence.0.lock().unwrap().waiters.is_empty());
+        let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut pending=Box::pin(std::future::pending::<()>());
+        let mut future=Box::pin(await_native_startup_phase(&mut budget,None,|cx|pending.as_mut().poll(cx)));assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Failed(error)) if error==NATIVE_TRANSPORT_TIMEOUT_ERROR));drop(future);
+        let (sender,_receiver,fence,stamp)=prepared_world();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let mut pending=Box::pin(std::future::pending::<()>());
+        let mut future=Box::pin(await_native_startup_phase(&mut budget,Some(&fence),|cx|pending.as_mut().poll(cx)));assert!(future.as_mut().poll(&mut cx).is_pending());
+        clock.advance_to(10);sender.send_with_stamp(GatewayCommand::Shutdown,Some(stamp)).unwrap();
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Shutdown)));drop(future);assert!(fence.0.lock().unwrap().waiters.is_empty());
+    }
+    #[test]
+    fn transport_budget_handshake_shares_capability_credential_deadline_and_keepalive_is_bounded(){
+        use std::future::Future;
+        let mut sink=ControlledSink::default();let state=sink.0.clone();let hook_state=state.clone();let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();let hook_clock=clock.clone();
+        state.lock().unwrap().after_flush=Some(Box::new(move||{hook_clock.advance_to(9);hook_state.lock().unwrap().pending=true;}));
+        let mut cx=Context::from_waker(futures_util::task::noop_waker_ref());let mut future=Box::pin(send_native_handshake_with_budget(&mut sink,Some("controlled-credential"),None,&mut budget));
+        assert!(future.as_mut().poll(&mut cx).is_pending());assert_eq!(state.lock().unwrap().starts,1);clock.advance_to(10);
+        assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Failed(_))));drop(future);
+        assert_eq!(state.lock().unwrap().starts,1);let capability:Value=serde_json::from_str(state.lock().unwrap().frames[0].to_text().unwrap()).unwrap();
+        assert_eq!(capability,NativeOutboundCommand::ClientCapabilities{capabilities:vec![NATIVE_RESUME_PROTOCOL.into(),NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.into(),mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.into(),CATALOG_GZIP_CAPABILITY.into()]}.to_wire_json());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;let mut budget=ManualNativeWriteBudget::new(10);let clock=budget.clone();
+        let mut future=Box::pin(send_native_unowned_frame_with_budget(&mut sink,Message::Text(json!({"type":"keepAlive","time":1}).to_string().into()),None,&mut budget));
+        assert!(future.as_mut().poll(&mut cx).is_pending());clock.advance_to(10);assert!(matches!(future.as_mut().poll(&mut cx),Poll::Ready(ResumeLifecycle::Failed(_))));drop(future);assert_eq!(state.lock().unwrap().starts,1);
+        let mut sink=ControlledSink::default();let mut budget=ManualNativeWriteBudget::new(10);
+        assert!(matches!(futures_util::FutureExt::now_or_never(send_native_handshake_with_budget(&mut sink,Some("controlled-credential"),None,&mut budget)).unwrap(),ResumeLifecycle::Complete(())));
+        assert_eq!(sink.0.lock().unwrap().starts,2);
+    }
+    #[tokio::test]
+    async fn transport_budget_real_timer_wakes_a_sink_that_never_reports_ready(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();sink.0.lock().unwrap().pending=true;
+        let deadline=tokio::time::Instant::now()+Duration::from_millis(1);let mut budget=TokioNativeWriteBudget{deadline,sleep:Box::pin(tokio::time::sleep_until(deadline))};
+        let outcome=tokio::time::timeout(Duration::from_millis(100),commit_owned_frame_with_budget(&mut sink,Some(&proof),frame(),&mut budget)).await.unwrap();
+        assert!(matches!(outcome,NativeSinkCommit::Unavailable(_)));assert_eq!(sink.0.lock().unwrap().starts,0);assert!(fence.0.lock().unwrap().waiters.is_empty());
+    }
+    #[tokio::test]
+    async fn mail_send_actual_sink_prebind_entry_and_write_outcomes_are_exact(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        for case in 0..4{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));let mut bound=None;
+            let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|ticket|{assert!(receiver.try_recv().is_err());assert!(fence.0.try_lock().is_ok());bound=Some(ticket);true},mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+            assert_eq!(bound,Some(ticket));let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();
+            let GatewayCommand::Wire(wire)=&proof.command else{panic!("wire SendMail required");};
+            assert_eq!(serde_json::to_value(wire).unwrap(),json!({"type":"sendMail","name":"R","message":"body","gold":0,"itemsIdx":[0,0,0,0,0],"stamped":false}),"local ticket/token never enters the stable command JSON");
+            {let mut state=sink.0.lock().unwrap();state.ready_error=case==0;state.start_error=case==1;state.flush_error=case==2;}
+            let outcome=commit_owned_frame(&mut sink,Some(&proof),frame()).await;
+            let expected=if case==0{vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::DefinitelyUnsent})]}else{vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::Entered}),MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:if case==3{MailSendOutcome::Flushed}else{MailSendOutcome::Unknown}})]};
+            assert_eq!(*messages.lock().unwrap(),expected);assert_eq!(sink.0.lock().unwrap().starts,usize::from(case!=0));
+            if case==0{assert!(matches!(outcome,NativeSinkCommit::Unavailable(_)));assert!(fence.0.lock().unwrap().mail_send_flight.is_none());}
+            else{assert_eq!(matches!(outcome,NativeSinkCommit::Flushed),case==3);assert!(fence.0.lock().unwrap().mail_send_flight.is_some());}
+            fence.retire(&proof);assert_eq!(*messages.lock().unwrap(),expected);
+        }
+    }
+    #[tokio::test]
+    async fn mail_send_entry_phase_precedes_sink_call_and_concurrent_retire_cannot_report_unsent(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());let rival=proof.clone();
+        let retire=Arc::new(Mutex::new(None));let handle=retire.clone();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().after_start=Some(Box::new(move||{
+            assert!(rival.fence.0.try_lock().is_err());
+            assert!(rival.mail_send.as_ref().unwrap().publish(MailSendOutcome::DefinitelyUnsent));
+            *handle.lock().unwrap()=Some(std::thread::spawn(move||{rival.fence.retire(&rival);}));
+        }));
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        retire.lock().unwrap().take().unwrap().join().unwrap();
+        let messages=messages.lock().unwrap();assert_eq!(messages.len(),2);assert!(matches!(messages[0],MailServiceInboxMessage::SendReceipt(receipt) if receipt.outcome==MailSendOutcome::Entered));assert!(matches!(messages[1],MailServiceInboxMessage::SendReceipt(receipt) if receipt.outcome==MailSendOutcome::Flushed));
+    }
+    #[tokio::test]
+    async fn mail_send_same_stream_owner_reset_keeps_ack_barrier_and_valid_old_ack_only_retires_it(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendAcknowledgement};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        let stream=controlled_mail_service_publisher(|_|true).start_socket(Some(&fence),1).unwrap();
+        let old=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        let fresh=fence.test_owner_change(8,0);assert_eq!(old.epoch(),fresh.test_mail_epoch());assert!(stream.has_send_flight());
+        assert!(stream.acknowledge_send(0));assert!(stream.acknowledge_send(-2));assert!(stream.has_send_flight());
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(fresh),30,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let blocked=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&blocked),frame()).await,NativeSinkCommit::DefinitelyUnsent);assert_eq!(sink.0.lock().unwrap().starts,0);
+        assert!(stream.acknowledge_send(1));assert!(!stream.has_send_flight());assert!(matches!(messages.lock().unwrap().last(),Some(MailServiceInboxMessage::SendAcknowledgement(MailSendAcknowledgement{ticket,result:1})) if *ticket==old));
+        let count=messages.lock().unwrap().len();assert!(stream.acknowledge_send(1));assert_eq!(messages.lock().unwrap().len(),count);
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(fresh),31,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let next=owned(receiver.try_recv().unwrap());assert_eq!(commit_owned_frame(&mut sink,Some(&next),frame()).await,NativeSinkCommit::Flushed);
+    }
+    #[tokio::test]
+    async fn mail_send_receiver_recovery_and_unvisited_batch_tails_emit_exact_unsent(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        for case in 0..4{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+            if case<3{sender.send_with_stamp(GatewayCommand::Connect,Some(stamp)).unwrap();}
+            let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+            match case{0=>{assert!(wait_for_connect_request_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true).await.unwrap());},1=>{assert_eq!(wait_for_retry_or_leave_with_reset(&mut receiver,Duration::from_secs(5),8,&mut GameShopReceiptGate::default(),None,||true).await.unwrap(),RetryWait::Connect);},2=>{assert!(matches!(drain_resume_lifecycle_commands_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true),ResumeLifecycle::Complete(())));},_=>{drop(receiver);}}
+            assert_eq!(*messages.lock().unwrap(),vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::DefinitelyUnsent})]);assert!(fence.0.lock().unwrap().outstanding.is_empty());
+        }
+    }
+    #[tokio::test]
+    async fn mail_send_untracked_owned_command_fails_closed_and_poison_only_recovers_on_new_stream(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(mail_send_command(),Some(stamp)).unwrap();let untracked=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&untracked),frame()).await,NativeSinkCommit::DefinitelyUnsent);assert_eq!(sink.0.lock().unwrap().starts,0);
+        let probe=fence.clone();sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,NativeMailSendPublisher(Arc::new(move |_|{assert!(probe.0.try_lock().is_ok());false}))).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::MailQuoteReceiptUnavailable);assert!(mail_quote_delivery_failed(&receiver));assert!(fence.accepts(stamp,true));
+        fence.test_owner_change(8,0);assert!(mail_quote_delivery_failed(&receiver),"same-stream ownership reset cannot rehabilitate a missing critical terminal");
+        fence.socket_lost();fence.test_world_ready(8,0);assert!(!mail_quote_delivery_failed(&receiver),"a real newer transport pair supersedes the failed epoch");
+    }
+    #[tokio::test]
+    async fn mail_send_entered_receipt_is_outside_lock_before_waiting_for_flush(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let sink_state=sink.0.clone();sink_state.lock().unwrap().flush_pending=true;
+        let future=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(future);
+        tokio::select!{result=&mut future=>panic!("controlled flush must remain pending: {result:?}"),_=tokio::time::sleep(Duration::from_millis(1))=>{}}
+        assert!(fence.0.try_lock().is_ok());assert_eq!(messages.lock().unwrap().len(),1);assert!(matches!(messages.lock().unwrap()[0],MailServiceInboxMessage::SendReceipt(receipt) if receipt.outcome==MailSendOutcome::Entered));
+        fence.revoke_owner();assert!(proof.mail_send.as_ref().unwrap().publish(MailSendOutcome::DefinitelyUnsent));assert_eq!(messages.lock().unwrap().len(),1);
+        {let mut state=sink_state.lock().unwrap();state.flush_pending=false;state.flush_waker.take().unwrap().wake();}
+        assert_eq!(future.await,NativeSinkCommit::Flushed);assert_eq!(messages.lock().unwrap().len(),2);
+    }
+    #[tokio::test]
+    async fn native_mail_send_actual_bridge_sink_buffer_runtime_ui_keeps_reset_tombstone_and_settles_exact_ack(){
+        use bevy::prelude::*;
+        use bevy::ecs::system::RunSystemOnce;
+        use mir2_client_bevy::crystal_ui::overlays::{Mir2NativeMailParcelServicePlugin,NativePlayerUiState,NativePlayerUiIntentQueue,NativePlayerUiIntent,MailComposeUi,UiEffectQueue};
+        use mir2_client_bevy::native_shell::{NativeShellModel,NativeShellScreen,NativeUiIntentQueue};
+        use mir2_client_bevy::pending_operations::{PendingOperations,PendingLifecycleSet,SessionResetRevision,OverlayResetTracker,apply_overlay_session_reset};
+        use mir2_client_bevy::crystal_ui::overlays::{MailSendDraft,prepare_native_mail_send as prepare_send};
+        use mir2_bevy_runtime::{Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,native_ingest};
+        use mir2_client_bevy::mail_service::MailServiceStreamStarted;
+        let _guard=super::native_queue_test_guard();
+        // Pure App, local channels and ControlledSink exercise the production
+        // bridge/publisher/buffer/ingest/UI systems, without a socket or Window.
+        for reset_before_entry in [false,true]{for preserve_shop in [false,true]{
+            let (sender,mut receiver,fence,stamp)=prepared_world();
+            let commands=crate::input::GatewayCommands::new(sender);assert!(commands.activate_world_stamp(stamp));
+            let mut app=App::new();app.add_plugins((Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,Mir2NativeMailParcelServicePlugin));
+            app.insert_resource(commands).init_resource::<mir2_client_bevy::quest_ui::QuestUiIntentQueue>()
+                .init_resource::<OverlayResetTracker>().init_resource::<NativeUiIntentQueue>().init_resource::<UiEffectQueue>()
+                .add_systems(Update,apply_overlay_session_reset.in_set(PendingLifecycleSet::UiReset));
+            app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;
+            let stream=NativeMailServicePublisher::Native.start_socket(Some(&fence),1).unwrap();app.update();
+            let admit=|app:&mut App,message:&str|{
+                let generation={let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(mir2_ui_core::state::MailComposeDraft{recipient:" R ".into(),message:message.into(),..Default::default()});state.mail_draft_clock.advance();state.mail_draft_clock.generation().unwrap()};
+                let draft=MailSendDraft{recipient:" R ".into(),message:message.into(),gold:0,attachment_unique_ids:vec![],stamped:false,parcel:false,generation};
+                let payload=prepare_send(&draft.recipient,&draft.message,0,&[]).unwrap();
+                let owner=app.world().resource::<SessionResetRevision>().0;
+                let mut queue=app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();
+                let accepted=queue.push_mail_send(&mut app.world_mut().resource_mut::<PendingOperations>(),stream.epoch,owner,draft,payload.clone(),NativePlayerUiIntent::SendMail{recipient:payload.recipient,message:payload.message,gold:0,attachment_unique_ids:vec![],stamped:false});
+                let token=queue.mail_send_token();app.insert_resource(queue);(accepted,token)
+            };
+            let (accepted,old_token)=admit(&mut app," old\r\n draft ");assert!(accepted);let old_token=old_token.unwrap();
+            app.world_mut().run_system_once(crate::gameplay_bridge::forward_quest_ui_intents).unwrap();
+            let old_ticket=app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket().unwrap();
+            assert_eq!(old_ticket.local_send_token,old_token.value());let old_proof=owned(receiver.try_recv().unwrap());
+            let reset=|app:&mut App|{
+                if preserve_shop{assert!(native_ingest::push_native_data_reset_preserving_exact_game_shop_receipt(serde_json::from_value(json!({"protocol":"nativeGameShopReceiptV1","requestId":"gs-send-reset","success":false,"gIndex":31,"quantity":2,"priceType":1,"code":"insufficientCurrency"})).unwrap()));}
+                else{assert!(native_ingest::push_native_data_reset());}app.update();
+                assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_none());
+                assert!(app.world().resource::<PendingOperations>().has_pending_mail_send());
+                assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),Some(old_ticket));
+            };
+            if reset_before_entry{reset(&mut app);}
+            assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&old_proof),frame()).await,NativeSinkCommit::Flushed);
+            if reset_before_entry{app.update();}else{reset(&mut app);}
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:stream.epoch}));app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),Some(old_ticket),"same marker/reset retains the prebound or entered old flight");
+            let fresh=fence.test_owner_change(8,0);assert!(app.world().resource::<crate::input::GatewayCommands>().activate_world_stamp(fresh));
+            let (accepted,still_old)=admit(&mut app,"new draft");assert!(!accepted);assert_eq!(still_old,Some(old_token));
+            app.world_mut().resource_mut::<MailComposeUi>().last_notice=Some("new draft notice".into());
+            assert!(stream.acknowledge_send(0));assert!(stream.has_send_flight());
+            assert!(stream.acknowledge_send(1));app.update();
+            assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_token(),None);
+            assert_eq!(app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().unwrap().message,"new draft");
+            assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(),Some("new draft notice"));
+            let (accepted,next_token)=admit(&mut app,"new draft");assert!(accepted);let next_token=next_token.unwrap();assert_ne!(next_token,old_token);
+            app.world_mut().run_system_once(crate::gameplay_bridge::forward_quest_ui_intents).unwrap();let next_ticket=app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket().unwrap();
+            let next_proof=owned(receiver.try_recv().unwrap());assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&next_proof),frame()).await,NativeSinkCommit::Flushed);app.update();
+            assert!(native_ingest::push_native_mail_send_acknowledgement(mir2_client_bevy::mail_service::MailSendAcknowledgement{ticket:old_ticket,result:1}));app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),Some(next_ticket));assert!(app.world().resource::<PendingOperations>().has_pending_mail_send());
+            assert!(stream.acknowledge_send(1));app.update();assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_none());
+            // A newly published provisional flight also survives ordinary clear;
+            // only a genuine new pair discards it and releases its exact binding.
+            let (accepted,last_token)=admit(&mut app,"stream replacement");assert!(accepted);app.world_mut().run_system_once(crate::gameplay_bridge::forward_quest_ui_intents).unwrap();let last=receiver.try_recv().unwrap();
+            fence.socket_lost();let new_stamp=fence.test_world_ready(8,0);assert!(app.world().resource::<crate::input::GatewayCommands>().activate_world_stamp(new_stamp));
+            let newer=NativeMailServicePublisher::Native.start_socket(Some(&fence),1).unwrap();assert!(newer.epoch>stream.epoch);app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_token(),None);assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());drop(last);app.update();
+            let (accepted,token)=admit(&mut app,"stream replacement");assert!(!accepted,"the controlled old-stream admission cannot relabel a new stream");assert_eq!(token,None);assert!(last_token.unwrap().value()>next_token.value());
+        }}
+    }
+    #[test]
+    fn mail_quote_ticket_is_bound_before_publish_and_rejection_never_publishes(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));let publisher=mail_quote_publisher(fence.clone(),receipts.clone());
+        let mut bound=None;let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|ticket|{assert!(receiver.try_recv().is_err());assert!(fence.0.try_lock().is_ok());bound=Some(ticket);true},publisher.clone()).unwrap();
+        assert_eq!(bound,Some(ticket));let proof=owned(receiver.try_recv().unwrap());assert_eq!(proof.mail_quote.as_ref().unwrap().ticket,ticket);fence.retire(&proof);
+        assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent}]);
+        assert!(fence.take_terminals().is_empty(),"MailCost must not join static inventory/shop/storage terminal keys");
+        assert!(sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|false,publisher).is_err());assert!(receiver.try_recv().is_err());assert!(fence.0.lock().unwrap().outstanding.is_empty());assert_eq!(receipts.lock().unwrap().len(),1);
+    }
+    #[test]
+    fn mail_quote_local_metadata_keeps_wire_json_and_entry_phase_cannot_downgrade(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let GatewayCommand::Wire(wire)=&proof.command else{panic!("wire MailCost required");};
+        assert_eq!(serde_json::to_value(wire).unwrap(),serde_json::json!({"type":"mailCost","gold":700,"itemsIdx":[0,0,0,0,0],"stamped":false}));
+        // Focused phase-state fixture: actual commit marks this same atomic
+        // state under its short lock, before publishing outside that lock.
+        assert!(proof.mail_quote.as_ref().unwrap().mark_entered());fence.retire(&proof);
+        assert!(proof.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent));assert!(receipts.lock().unwrap().is_empty());
+        assert!(proof.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms:500}));
+        assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms:500}}]);
+    }
+    #[tokio::test]
+    async fn mail_quote_actual_start_send_retire_barrier_never_reports_unsent(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));let observed=receipts.clone();let probe=fence.clone();
+        let (done,wait)=std::sync::mpsc::channel();let wait=Mutex::new(wait);
+        let publisher=NativeMailQuotePublisher(Arc::new(move|receipt|{
+            assert!(probe.0.try_lock().is_ok());assert!(matches!(receipt.outcome,MailQuoteOutcome::Entered{..}));
+            wait.lock().unwrap().recv_timeout(Duration::from_secs(1)).unwrap();observed.lock().unwrap().push(receipt);true
+        }));
+        let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,publisher).unwrap();let proof=owned(receiver.try_recv().unwrap());let rival=proof.clone();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().after_start=Some(Box::new(move||{
+            // Exercise an atomic observer during the actual sink call too.
+            // It must lose without invoking the publisher under commit's lock.
+            assert!(rival.publish_mail_quote(MailQuoteOutcome::DefinitelyUnsent));
+            std::thread::spawn(move||{
+                // Blocks on commit's actual fence lock until start_send and
+                // its irreversible local entry phase are both complete.
+                rival.fence.retire(&rival);assert!(rival.publish_mail_quote(MailQuoteOutcome::DefinitelyUnsent));done.send(()).unwrap();
+            });
+        }));
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),1);assert_eq!(receipts[0].ticket,ticket);assert!(matches!(receipts[0].outcome,MailQuoteOutcome::Entered{..}));
+    }
+    #[test]
+    fn mail_quote_receiver_close_or_last_envelope_drop_has_one_unsent_terminal(){
+        for close_receiver in [false,true]{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+            let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+            if close_receiver{drop(receiver);}else{let command=receiver.try_recv().unwrap();let clone=command.clone();drop(command);assert!(receipts.lock().unwrap().is_empty());drop(clone);}
+            assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent}]);assert!(fence.0.lock().unwrap().outstanding.is_empty());
+        }
+    }
+    #[test]
+    fn mail_quote_sequence_exhaustion_and_stale_receiver_drop_have_exact_terminals(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));let publisher=mail_quote_publisher(fence.clone(),receipts.clone());
+        fence.0.lock().unwrap().next_sequence=Some(u64::MAX);
+        let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,publisher.clone()).unwrap();assert_eq!(ticket.sequence,u64::MAX);
+        assert!(sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|panic!("exhausted sequence cannot bind"),publisher).is_err());
+        fence.revoke_owner();assert!(receiver.try_recv().is_err());assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent}]);
+        assert!(fence.0.lock().unwrap().outstanding.is_empty());
+    }
+    #[tokio::test]
+    async fn mail_quote_readiness_revoke_start_error_flush_error_and_success_are_exact(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        for case in 0..5{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+            let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+            let mut sink=ControlledSink::default();{let mut state=sink.0.lock().unwrap();state.ready_error=case==0;state.start_error=case==2;state.flush_error=case==3;}
+            if case==1{fence.revoke_owner();}
+            let outcome=commit_owned_frame(&mut sink,Some(&proof),frame()).await;
+            assert_eq!(sink.0.lock().unwrap().starts,usize::from(case>=2));
+            match case{0=>assert!(matches!(outcome,NativeSinkCommit::Unavailable(_))),1=>assert_eq!(outcome,NativeSinkCommit::DefinitelyUnsent),2|3=>assert!(matches!(outcome,NativeSinkCommit::Unknown(_))),_=>assert_eq!(outcome,NativeSinkCommit::Flushed)}
+            let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),1);assert_eq!(receipts[0].ticket,ticket);
+            if case<2{assert_eq!(receipts[0].outcome,MailQuoteOutcome::DefinitelyUnsent);}else{assert!(matches!(receipts[0].outcome,MailQuoteOutcome::Entered{..}));}
+            drop(receipts);fence.retire(&proof);assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::DefinitelyUnsent);
+        }
+    }
+    #[tokio::test]
+    async fn mail_quote_entry_precedes_delayed_flush_and_failure_is_terminal(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;
+        {let future=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(future);
+        tokio::select!{result=&mut future=>panic!("unexpected {result:?}"),_=tokio::task::yield_now()=>{}}
+        assert_eq!(receipts.lock().unwrap().len(),1,"entry is published before an arbitrarily delayed flush");fence.revoke_owner();
+        {let mut state=state.lock().unwrap();state.flush_pending=false;state.flush_waker.take().unwrap().wake();}assert_eq!(future.await,NativeSinkCommit::Flushed);}
+        assert_eq!(receipts.lock().unwrap().len(),1);fence.retire(&proof);assert_eq!(receipts.lock().unwrap().len(),1);
+        let (sender,mut receiver,fence,stamp)=prepared_world();let probe=fence.clone();
+        sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|true,NativeMailQuotePublisher(Arc::new(move |_|{assert!(probe.0.try_lock().is_ok());false}))).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&proof),frame()).await,NativeSinkCommit::MailQuoteReceiptUnavailable);assert!(mail_quote_delivery_failed(&receiver));
+        assert!(fence.accepts(stamp,true),"delivery failure must not rewrite ownership decisions");
+    }
+    #[tokio::test]
+    async fn mail_quote_recovery_connect_tail_and_connected_error_tail_retire_exactly(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        sender.send_with_stamp(GatewayCommand::Connect,Some(stamp)).unwrap();let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        assert!(wait_for_connect_request_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true).await.unwrap());
+        assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:MailQuoteOutcome::DefinitelyUnsent}]);
+        let first=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let tail=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),21,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().start_error=true;
+        for command in unsent_command_batch(drain_command_batch(&mut receiver,8)){let proof=owned(command);if matches!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Unknown(_)){break;}}
+        let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),3);assert_eq!(receipts[1].ticket,first);assert!(matches!(receipts[1].outcome,MailQuoteOutcome::Entered{..}));assert_eq!(receipts[2],mir2_client_bevy::mail_service::MailQuoteReceipt{ticket:tail,outcome:MailQuoteOutcome::DefinitelyUnsent});
+    }
+    #[tokio::test]
+    async fn mail_quote_retry_connect_tail_and_resume_ignored_commands_retire_exactly(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        for retry in [false,true]{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+            sender.send_with_stamp(GatewayCommand::Connect,Some(stamp)).unwrap();let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+            if retry{assert_eq!(wait_for_retry_or_leave_with_reset(&mut receiver,Duration::from_secs(5),8,&mut GameShopReceiptGate::default(),None,||true).await.unwrap(),RetryWait::Connect);}
+            else{assert!(matches!(drain_resume_lifecycle_commands_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true),ResumeLifecycle::Complete(())));}
+            assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:MailQuoteOutcome::DefinitelyUnsent}]);assert!(fence.0.lock().unwrap().outstanding.is_empty());
+        }
+    }
+    pub(super) async fn drain_entered_native_mail_fixture(app:&mut bevy::prelude::App,receiver:&mut GatewayCommandReceiver)->Vec<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntent>{
+        use mir2_client_bevy::crystal_ui::overlays::{NativePlayerUiIntentQueue,NativePlayerUiIntent};
+        let mut queue=app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();let drained=queue.drain_for_gateway();
+        for (intent,token) in &drained{if let (NativePlayerUiIntent::MailCost{gold,stamped,..},Some(token))=(intent,token){assert!(app.world().resource::<crate::input::GatewayCommands>().send_mail_quote(NativeOutboundCommand::MailCost{gold:*gold,items_idx:[0;5],stamped:*stamped},*token,&mut queue));}}
+        app.insert_resource(queue);
+        while let Ok(command)=receiver.try_recv(){let proof=owned(command);assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&proof),frame()).await,NativeSinkCommit::Flushed);}
+        drained.into_iter().map(|(intent,_)|intent).collect()
+    }
+    #[tokio::test]
+    async fn pending_sink_is_woken_and_canceled_without_becoming_ready(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().pending=true;
+        let pending=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(pending);
+        tokio::select!{outcome=&mut pending=>panic!("premature {outcome:?}"),_=tokio::task::yield_now()=>{}}
+        fence.observe_scene(0,true);
+        assert_eq!(tokio::time::timeout(Duration::from_millis(100),pending).await.unwrap(),NativeSinkCommit::DefinitelyUnsent);
+        assert_eq!(state.lock().unwrap().starts,0);
+    }
+    #[tokio::test]
+    async fn production_sink_claim_is_one_use_and_unknown_is_never_replayed(){
+        for (start_error,flush_error) in [(false,false),(true,false),(false,true)]{
+            let (sender,mut receiver,_,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+            let mut sink=ControlledSink::default();{let mut state=sink.0.lock().unwrap();state.start_error=start_error;state.flush_error=flush_error;}
+            let first=commit_owned_frame(&mut sink,Some(&proof),frame()).await;
+            assert_eq!(matches!(first,NativeSinkCommit::Unknown(_)),start_error||flush_error);
+            assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::DefinitelyUnsent);
+            assert_eq!(sink.0.lock().unwrap().starts,1);
+        }
+    }
+    #[tokio::test]
+    async fn full_bounded_queue_logout_revokes_old_batch_before_socket_commit(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();
+        for _ in 0..8{sender.send_with_stamp(attack(),Some(stamp)).unwrap();}
+        assert!(sender.send_with_stamp(attack(),Some(stamp)).is_err());
+        sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::LogOut),Some(stamp)).unwrap();
+        assert!(!fence.accepts(stamp,true));
+        let proof=owned(receiver.try_recv().unwrap());assert!(matches!(proof.command,GatewayCommand::Wire(NativeOutboundCommand::LogOut)));
+        let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        assert!(receiver.try_recv().is_err());assert_eq!(sink.0.lock().unwrap().starts,1);
+    }
+    #[test]
+    fn exhaustion_leave_revokes_and_old_cleanup_cannot_revoke_successor(){
+        let (sender,_,fence,old)=prepared_world();fence.0.lock().unwrap().next_sequence=None;
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::LogOut),Some(old)).is_err());assert!(!fence.accepts(old,true));
+        let (sender,_,fence,old)=prepared_world();fence.socket_lost();let fresh=fence.test_world_ready(7,0);
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::Disconnect),Some(old)).is_err());assert!(fence.accepts(fresh,true));
+        fence.0.lock().unwrap().current.scene_epoch=u64::MAX;fence.observe_scene(0,true);assert!(fence.is_retired());
+    }
+    #[test]
+    fn scene_and_personal_classification_and_refresh_preserve_exact_identity(){
+        let (sender,_receiver,fence,old)=prepared_world();assert_eq!(old.map,Some(0));
+        fence.observe_scene(0,false);assert_eq!(fence.confirm_owner(7),Some(old));
+        fence.observe_scene(0,true);assert!(!fence.accepts(old,true));
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::MagicKey {request_id:1,spell:"FireBall".into(),key:1,old_key:0}),Some(old)).is_ok());
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::Chat {message:"old map".into()}),Some(old)).is_err());
+        assert!(fence.confirm_owner(8).is_none());
+    }
+    #[test]
+    fn exact_local_terminal_survives_resume_but_not_same_id_successor(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let commands=crate::input::GatewayCommands::new(sender);
+        assert!(commands.activate_world_stamp(stamp));
+        let original=NativeOutboundCommand::GameShopBuy {request_id:"m12-pending".into(),g_index:1,quantity:1,price_type:1};
+        assert!(commands.send_command(GatewayCommand::Wire(original.clone())));let old=owned(receiver.try_recv().unwrap());
+        fence.socket_lost();let fresh=fence.test_world_ready(7,0);assert!(commands.activate_world_stamp(fresh));fence.retire(&old);
+        let terminal=fence.take_terminals().pop().unwrap();assert!(commands.claim_local_terminal(terminal.0,terminal.1,&terminal.2).is_some());
+        assert!(commands.send_command(GatewayCommand::Wire(original.clone())));let old=owned(receiver.try_recv().unwrap());
+        fence.socket_lost();let fresh=fence.test_world_ready(7,0);assert!(commands.activate_world_stamp(fresh));
+        let mut successor=original.clone();if let NativeOutboundCommand::GameShopBuy {g_index,..}=&mut successor{*g_index=2;}
+        assert!(commands.send_command(GatewayCommand::Wire(successor)));fence.retire(&old);
+        let terminal=fence.take_terminals().pop().unwrap();assert!(commands.claim_local_terminal(terminal.0,terminal.1,&terminal.2).is_none());
+    }
+    #[tokio::test]
+    async fn owned_shell_batch_ack_then_confirmed_owner_bootstrap_enters_game(){
+        use mir2_client_bevy::native_shell::{NativeShellModel,NativeShellScreen};
+        let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        let request=NativeOutboundCommand::StartGame {character_index:3};sender.send_with_stamp(GatewayCommand::Wire(request.clone()),fence.stamp()).unwrap();
+        let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        assert!(apply_flushed_control_context(Some(&proof),&request,&mut GatewaySessionContext::default(),&mut NativeResumeClientState::default()));
+        let (events,inbox)=std::sync::mpsc::channel();let events=NativeShellEventSender::Owned {sender:events,fence:fence.clone()};
+        let old=fence.stamp().unwrap();events.send_event(ShellGatewayEvent::StartGameAck {accepted:true,reason:None}).unwrap();
+        fence.authorize_entry(false);fence.observe_scene(0,false);let new=fence.confirm_owner(7).unwrap();assert_ne!(old.owner_epoch,new.owner_epoch);
+        events.send_event(ShellGatewayEvent::PlayerBootstrapped {character:CharacterSummary::new(3,"authority",8,"Wizard","Male")}).unwrap();
+        let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::StartingGame;shell.start_game_request_in_flight=true;
+        let mut app=bevy::prelude::App::new();app.insert_resource(shell);app.insert_resource(crate::input::GatewayCommands::new(sender));app.insert_resource(crate::shell_bridge::GatewayEventInbox::new_owned(inbox));app.init_resource::<crate::shell_bridge::NativeAutoLoginFlow>();app.add_systems(bevy::app::Update,crate::shell_bridge::drain_gateway_events);app.update();
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,NativeShellScreen::InGame);
+        fence.socket_lost();events.send_event(ShellGatewayEvent::Disconnect {reason:Some("closed".into())}).unwrap();app.update();assert_eq!(app.world().resource::<NativeShellModel>().screen,NativeShellScreen::ConnectionLost);
+    }
+    #[test]
+    fn full_source_models_apply_before_world_stamp_and_map_only_never_readies(){
+        use mir2_client_bevy::{read_model::UiReadModel,entities::EntityModelSet,map::MapModel,skill_model::SkillModel};
+        let (sender,_receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        fence.0.lock().unwrap().entry_requested=true;fence.authorize_entry(false);fence.observe_scene(0,false);
+        let mut adapter=NativeGameplayAdapter::default();adapter.command_fence=Some(fence.clone());
+        let payload=json!({"mapIndex":0,"mapFileName":"scene-zero","playerObjectId":7,"entities":[{"kind":"selfPlayer","objectId":7,"name":"authority","x":10,"y":20,"direction":"right"}],"_nativeSkillAuthority":{"sessionEpoch":1,"snapshotSerial":1,"playerObjectId":7}});
+        let mut snapshot=adapter.snapshot(&payload);
+        attach_native_producer_provenance(&mut snapshot,&adapter,&payload,&transform_ui_read_model(&payload),&transform_map_model(&payload),&transform_entity_model_set(&payload),Some(&transform_skill_model(&payload)),true).unwrap();
+        let stamp=snapshot.command_stamp.unwrap();let models=snapshot.producer_models.unwrap();
+        let commands=crate::input::GatewayCommands::new(sender);assert!(commands.applied_world_stamp().is_none());
+        *commands.pending_provenance.lock().unwrap()=Some((stamp,models.clone()));
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.init_resource::<UiReadModel>();app.init_resource::<EntityModelSet>();app.init_resource::<MapModel>();app.init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>();
+        app.insert_resource(serde_json::from_value::<SkillModel>(models.skills.clone().unwrap()).unwrap());app.add_systems(bevy::app::Update,crate::gameplay_bridge::activate_native_command_provenance);app.update();
+        assert_eq!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp(),Some(stamp));
+        assert_eq!(serde_json::to_value(app.world().resource::<EntityModelSet>()).unwrap(),models.entities);
+        fence.observe_scene(0,true);app.world().resource::<crate::input::GatewayCommands>().clear_world_stamp();
+        let map_only=adapter.big_map_snapshot();assert!(map_only.producer_models.is_none());app.update();assert!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp().is_none());
+    }
+
+    #[tokio::test]
+    async fn submitted_start_game_flush_after_failed_local_leave_cannot_reopen_entry(){
+        let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        let commands=crate::input::GatewayCommands::new(sender);let request=NativeOutboundCommand::StartGame {character_index:3};
+        assert!(commands.send_command(GatewayCommand::Wire(request.clone())));let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;
+        {let future=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(future);
+        tokio::select!{result=&mut future=>panic!("unexpected {result:?}"),_=tokio::task::yield_now()=>{}}
+        assert_eq!(state.lock().unwrap().starts,1);assert!(state.lock().unwrap().flush_waker.is_some());
+        // Even a definitely-unsent leave revokes local entry before allocation.
+        fence.0.lock().unwrap().next_sequence=None;assert!(!commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::LogOut)));
+        {let mut state=state.lock().unwrap();state.flush_pending=false;state.flush_waker.take().unwrap().wake();}
+        assert_eq!(future.await,NativeSinkCommit::Flushed);}
+        let mut context=GatewaySessionContext::default();let mut resume=NativeResumeClientState::default();
+        assert!(!apply_flushed_control_context(Some(&proof),&request,&mut context,&mut resume));assert!(context.character_index.is_none());
+        fence.authorize_entry(false);assert!(fence.confirm_owner(7).is_none());
+        let (events,inbox)=std::sync::mpsc::channel();let events=NativeShellEventSender::Owned {sender:events,fence:fence.clone()};
+        events.send_event(ShellGatewayEvent::StartGameAck {accepted:true,reason:None}).unwrap();assert!(inbox.try_recv().is_err());
+        // Resume completion from this canceled connection is also not a grant.
+        fence.authorize_entry(true);assert!(fence.confirm_owner(7).is_none());
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::DefinitelyUnsent);
+        assert_eq!(state.lock().unwrap().starts,1);assert!(receiver.try_recv().is_err());
+    }
+
+
+
+    // Controlled memory fixtures only: no renderer, window, socket or gateway.
+    fn source36_skill_readiness_fixture() -> (
+        bevy::prelude::App, GatewayCommandReceiver, Value, SkillPacketCursor,
+    ) {
+        use mir2_client_bevy::{read_model::UiReadModel, entities::EntityModelSet,
+            map::MapModel, skill_model::SkillModel};
+        let (sender, receiver) = command_channel(8);
+        let fence = sender.ownership_fence().unwrap();
+        fence.begin_connection().unwrap();
+        fence.0.lock().unwrap().entry_requested = true;
+        fence.authorize_entry(false);
+        fence.observe_scene(0, false);
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.command_fence = Some(fence);
+        let mut payload = json!({"tick":7,"mapIndex":0,"mapFileName":"scene-zero",
+            "playerObjectId":7,"entities":[{"kind":"selfPlayer","objectId":7,
+                "name":"authority","x":10,"y":20,"direction":"right"}],
+            "knownSkills":[
+                {"id":1,"name":"Fire Ball","key":"fire","spell":"FireBall",
+                    "hotkey":1,"icon":3,"level":1,"experience":2,"need1":11,
+                    "need2":22,"need3":33,"castKind":"Active","offensive":true,
+                    "canUse":true,"mpCost":5,"delayMs":50,"castTimeMs":200},
+                {"id":2,"name":"Healing","key":"heal","spell":"Healing",
+                    "hotkey":2,"icon":4,"level":1,"experience":3,"need1":12,
+                    "need2":23,"need3":34,"castKind":"Active","offensive":false,
+                    "canUse":true,"mpCost":6,"delayMs":60,"castTimeMs":250}
+            ]});
+        let mut cursor = SkillPacketCursor::default();
+        cursor.observe_snapshot(&mut payload);
+        let mut snapshot = adapter.snapshot(&payload);
+        attach_native_producer_provenance(&mut snapshot, &adapter, &payload,
+            &transform_ui_read_model(&payload), &transform_map_model(&payload),
+            &transform_entity_model_set(&payload), Some(&transform_skill_model(&payload)),
+            true).unwrap();
+        let stamp = snapshot.command_stamp.unwrap();
+        let models = snapshot.producer_models.unwrap();
+        let commands = crate::input::GatewayCommands::new(sender);
+        *commands.pending_provenance.lock().unwrap() = Some((stamp, models.clone()));
+        let mut app = bevy::prelude::App::new();
+        app.insert_resource(commands);
+        app.init_resource::<UiReadModel>();
+        app.init_resource::<EntityModelSet>();
+        app.init_resource::<MapModel>();
+        app.init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>();
+        app.insert_resource(serde_json::from_value::<SkillModel>(models.skills.unwrap()).unwrap());
+        app.add_systems(bevy::app::Update,
+            crate::gameplay_bridge::activate_native_command_provenance);
+        (app, receiver, payload, cursor)
+    }
+
+    #[test]
+    fn source36_skill_correct_authority_wrong_descriptors_keep_source_pending() {
+        use mir2_client_bevy::skill_model::SkillModel;
+        let (mut app, mut receiver, _, _) = source36_skill_readiness_fixture();
+        let original = app.world().resource::<SkillModel>().clone();
+        let (stamp, models) = app.world().resource::<crate::input::GatewayCommands>()
+            .pending_provenance.lock().unwrap().as_ref().unwrap().clone();
+        for field in ["id", "name", "key", "spell", "icon", "need1", "need2", "need3",
+            "cast_kind", "offensive", "skill_id", "row_order", "binding_order"] {
+            let mut wrong = original.clone();
+            match field {
+                "id" => wrong.skills[0].id = 99,
+                "name" => wrong.skills[0].name = "other learned skill".into(),
+                "key" => wrong.skills[0].key = Some("other".into()),
+                "spell" => wrong.bindings[0].spell = Some("Healing".into()),
+                "icon" => wrong.bindings[0].icon = Some(99),
+                "need1" => wrong.bindings[0].need1 = Some(99),
+                "need2" => wrong.bindings[0].need2 = Some(99),
+                "need3" => wrong.bindings[0].need3 = Some(99),
+                "cast_kind" => wrong.bindings[0].cast_kind = Some("Passive".into()),
+                "offensive" => wrong.bindings[0].offensive = Some(false),
+                "skill_id" => wrong.bindings[0].skill_id = 2,
+                "row_order" => wrong.skills.reverse(),
+                "binding_order" => wrong.bindings.reverse(),
+                _ => unreachable!(),
+            }
+            assert_eq!(wrong.authority, original.authority);
+            assert_eq!(wrong.skills.len(), original.skills.len());
+            app.insert_resource(wrong);
+            for _ in 0..3 {
+                app.update();
+                let commands = app.world().resource::<crate::input::GatewayCommands>();
+                assert!(commands.applied_world_stamp().is_none(), "{field}");
+                let pending = commands.pending_provenance.lock().unwrap();
+                let (current_stamp, current_models) = pending.as_ref().expect("retain complete source");
+                assert_eq!(*current_stamp, stamp);
+                assert_eq!(current_models.ui, models.ui);
+                assert_eq!(current_models.entities, models.entities);
+                assert_eq!(current_models.map, models.map);
+                assert_eq!(current_models.skills, models.skills);
+                assert!(!commands.send_command(attack()));
+                assert!(receiver.try_recv().is_err());
+            }
+        }
+        app.insert_resource(original);
+        app.update();
+        let commands = app.world().resource::<crate::input::GatewayCommands>();
+        assert_eq!(commands.applied_world_stamp(), Some(stamp));
+        assert!(commands.pending_provenance.lock().unwrap().is_none());
+        assert!(commands.send_command(attack()));
+        assert!(receiver.try_recv().is_ok());
+    }
+
+    #[test]
+    fn source36_skill_later_packets_and_exact_ack_activate_without_rewind() {
+        use mir2_client_bevy::skill_model::SkillModel;
+        let (mut app, mut receiver, mut payload, mut cursor) = source36_skill_readiness_fixture();
+        let original = app.world().resource::<SkillModel>().clone();
+        let stamp = app.world().resource::<crate::input::GatewayCommands>()
+            .pending_provenance.lock().unwrap().as_ref().unwrap().0;
+        for (packet, patch) in [
+            ("MagicCast", json!({"spell":"FireBall"})),
+            ("MagicDelay", json!({"objectId":7,"spell":"FireBall","delay":900,"mpCost":7})),
+            ("MagicLeveled", json!({"objectId":7,"spell":"FireBall","level":3,"experience":17})),
+            ("SpellToggle", json!({"objectId":7,"spell":"FireBall","canUse":false})),
+        ] {
+            assert!(cursor.apply_packet(packet, &patch, 7), "{packet}");
+        }
+        // Exact controlled server snapshot: the ACK and its hotkey travel together.
+        payload["knownSkills"][0]["hotkey"] = json!(16);
+        payload["skillKeyAck"] = json!({"requestId":73,"spell":"FireBall","key":16,
+            "oldKey":1,"accepted":true});
+        cursor.observe_snapshot(&mut payload);
+        let live = serde_json::from_value::<SkillModel>(transform_skill_model(&payload)).unwrap();
+        assert!(live.has_same_learned_descriptors(&original));
+        assert!(live.authority.snapshot_serial > original.authority.snapshot_serial);
+        assert_eq!(live.skills[0].level, 3);
+        assert_eq!(live.skills[0].mp_cost, 7);
+        assert_eq!(live.skills[0].cooldown_ms, 900);
+        assert_eq!(live.bindings[0].experience, Some(17));
+        assert_eq!(live.bindings[0].hotkey, Some(16));
+        assert_eq!(live.bindings[0].cast_sequence, 1);
+        assert_eq!(live.bindings[0].can_use, Some(false));
+        let live_value = serde_json::to_value(&live).unwrap();
+        app.insert_resource(live);
+        app.update();
+        let commands = app.world().resource::<crate::input::GatewayCommands>();
+        assert_eq!(commands.applied_world_stamp(), Some(stamp));
+        assert!(commands.pending_provenance.lock().unwrap().is_none());
+        assert_eq!(serde_json::to_value(app.world().resource::<SkillModel>()).unwrap(), live_value);
+        let ack = app.world().resource::<SkillModel>().skill_key_ack.as_ref().unwrap();
+        assert_eq!((ack.request_id, ack.spell.as_str(), ack.key, ack.old_key, ack.accepted),
+            (73, "FireBall", 16, 1, true));
+        assert!(commands.send_command(attack()));
+        assert!(receiver.try_recv().is_ok());
+    }
+
+    #[tokio::test]
+    async fn handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities(){
+        for invalidation in ["positive","scene","owner","connection","leave","retired"] {
+        use mir2_client_bevy::{native_shell::{NativeShellModel,NativeShellScreen},read_model::UiReadModel,entities::EntityModelSet,map::MapModel,skill_model::SkillModel,pending_operations::{PendingOperations,AuthoritativeModelRevisions},quest_model::{QuestTracker,CompletedQuestTracker,NpcDialogModel,NearbyNpcModel,CombatTargetModel,GroundPickupModel},crystal_ui::notice::NoticeDialogState};
+        // Registers the real bounded ingress queue without renderer, window or
+        // GPU. This plugin does not run private Ui/Skill typed consumers here.
+        let mut runtime=bevy::prelude::App::new();runtime.add_plugins(mir2_bevy_runtime::Mir2NativeSessionBoundaryPlugin);
+        let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        let request=NativeOutboundCommand::StartGame {character_index:3};sender.send_with_stamp(GatewayCommand::Wire(request.clone()),fence.stamp()).unwrap();let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        let mut context=GatewaySessionContext {account_id:Some("bounded-test".into()),character_index:None,..Default::default()};let mut resume=NativeResumeClientState::default();assert!(apply_flushed_control_context(Some(&proof),&request,&mut context,&mut resume));
+        let (shell_sender,_shell_receiver)=std::sync::mpsc::channel();let shell_sender=NativeShellEventSender::Owned {sender:shell_sender,fence:fence.clone()};let (gameplay_sender,gameplay_receiver)=std::sync::mpsc::channel();
+        let mut counter=0;let mut adapter=NativeGameplayAdapter::default();adapter.command_fence=Some(fence.clone());let mut last_world=None;let mut wallet=None;let mut map_cursor=NativeMapPacketCursor::default();let mut ui_cursor=NativeUiPlayerCursor::default();let mut claim=None;let mut send_mail=false;let mut mail_feedback=VecDeque::new();let mut skill_cursor=SkillPacketCursor::default();let mut social=SocialModel::default();let mut phase=ConnectionPhase::Normal;let mut scene_reset=false;let mut bootstrapped=false;let mut shop_gate=GameShopReceiptGate::default();
+        let mut push_world=mir2_bevy_runtime::native_ingest::push_native_world_state;
+        macro_rules! ingest {($value:expr)=>{handle_gateway_text_for_connection(&$value.to_string(),&mut counter,&context,&shell_sender,&mut adapter,&gameplay_sender,&mut last_world,&mut wallet,&mut map_cursor,&mut ui_cursor,&mut claim,&mut send_mail,&mut mail_feedback,&mut skill_cursor,&mut social,&mut phase,&mut resume,&mut scene_reset,&mut bootstrapped,&mut shop_gate,&mut push_world).unwrap()};}
+        ingest!(json!({"type":"packet","packet":"StartGame","payload":{"result":4}}));
+        let world=json!({"type":"worldSnapshot","payload":{"mapIndex":401,"mapFileName":"scene-zero","mapTitle":"Scene Zero","playerObjectId":7,"playerHp":10,"playerMaxHp":10,"sceneView":{"center":{"x":10,"y":20}},"entities":[{"kind":"selfPlayer","objectId":7,"name":"authority","class":"Wizard","level":8,"x":10,"y":20,"direction":"Down"},{"kind":"monster","objectId":19,"name":"old-target","x":11,"y":20}],"knownSkills":[],"inventoryItems":[],"beltItems":[],"equipmentItems":[]}});
+        // Real server schema omits mapIndex. Packet-first MapInformation
+        // supplies the destination; raw matching mapFileName keeps bootstrap compatible.
+        ingest!(json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":401,"fileName":"scene-zero","miniMapIndex":0}}));
+        let mut server_schema=world.clone();server_schema["payload"].as_object_mut().unwrap().remove("mapIndex");assert!(server_schema["payload"].get("mapIndex").is_none());
+        assert_eq!(ingest!(server_schema),InboundDisposition::Applied);assert!(bootstrapped);
+        let original_stamp=adapter.last_full_producer_stamp.unwrap();let expected=adapter.last_full_producer_models.as_ref().unwrap().skills.clone().unwrap();
+        ingest!(json!({"type":"packet","packet":"UserLocation","payload":{"x":10,"y":20,"direction":"Down"}}));
+        let snapshots=gameplay_receiver.try_iter().collect::<Vec<_>>();let latest=snapshots.iter().rev().find(|snapshot|!snapshot.big_map_only).unwrap();assert_eq!(latest.command_stamp,Some(original_stamp));assert_eq!(latest.producer_models.as_ref().unwrap().skills.as_ref(),Some(&expected));
+        // Re-deliver the actual full+packet batch to the production drain. Its
+        // reverse-last coalescing must retain the full skill authority gate.
+        let (batch,inbox)=std::sync::mpsc::channel();for snapshot in snapshots{batch.send(snapshot).unwrap();}
+        let commands=crate::input::GatewayCommands::new(sender);let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::InGame;
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.insert_resource(shell);app.insert_resource(crate::gameplay_bridge::GameplayEventInbox::new(inbox));app.init_resource::<bevy::prelude::Time>();app.init_resource::<UiReadModel>();app.init_resource::<EntityModelSet>();app.init_resource::<MapModel>();app.init_resource::<SkillModel>();app.init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>();app.init_resource::<QuestTracker>();app.init_resource::<CompletedQuestTracker>();app.init_resource::<NpcDialogModel>();app.init_resource::<NearbyNpcModel>();app.init_resource::<CombatTargetModel>();app.init_resource::<GroundPickupModel>();app.init_resource::<NoticeDialogState>();app.init_resource::<crate::entity_presentation::NativeEntityPresentation>();app.init_resource::<crate::entity_overlays::NativeEntityOverlays>();app.init_resource::<crate::effects::NativeEffects>();app.init_resource::<AuthoritativeModelRevisions>();app.init_resource::<PendingOperations>();
+        app.add_systems(bevy::app::PreUpdate,(crate::gameplay_bridge::withdraw_invalid_native_world_producers,crate::gameplay_bridge::drain_gameplay_events).chain());app.add_systems(bevy::app::Update,crate::gameplay_bridge::activate_native_command_provenance);app.update();
+        assert!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp().is_none());assert!(app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().as_ref().unwrap().1.skills.is_some());
+        let exact_skills=serde_json::from_value::<SkillModel>(expected.clone()).unwrap();
+        let expected_models=app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().as_ref().unwrap().1.clone();
+        let assert_waiting=|app:&bevy::prelude::App|{
+            let commands=app.world().resource::<crate::input::GatewayCommands>();
+            assert!(commands.applied_world_stamp().is_none());
+            let pending=commands.pending_provenance.lock().unwrap();let (stamp,models)=pending.as_ref().expect("current complete source survives empty inbox");
+            assert_eq!(*stamp,original_stamp);assert_eq!(models.ui,expected_models.ui);assert_eq!(models.entities,expected_models.entities);assert_eq!(models.map,expected_models.map);assert_eq!(models.skills,Some(expected.clone()));
+            assert!(!commands.send_command(attack()));
+        };
+        for _ in 0..3{app.update();assert_waiting(&app);}
+        for wrong_authority in ["session","player","serial"]{
+            let mut wrong=exact_skills.clone();
+            match wrong_authority {
+                "session"=>wrong.authority.session_epoch=wrong.authority.session_epoch.checked_add(1).unwrap(),
+                "player"=>wrong.authority.player_object_id=8,
+                "serial"=>wrong.authority.snapshot_serial=wrong.authority.snapshot_serial.checked_sub(1).expect("actual full snapshot has positive serial"),
+                _=>unreachable!(),
+            }
+            app.insert_resource(wrong);for _ in 0..2{app.update();assert_waiting(&app);}
+        }
+        if invalidation!="positive"{
+            match invalidation {
+                "scene"=>fence.observe_scene(401,true),
+                "owner"=>fence.revoke_owner(),
+                "connection"=>fence.socket_lost(),
+                "leave"=>assert!(fence.revoke_local_leave(original_stamp)),
+                "retired"=>{fence.0.lock().unwrap().current.scene_epoch=u64::MAX;fence.observe_scene(401,true);assert!(fence.is_retired());},
+                _=>unreachable!(),
+            }
+            // A now-matching Skill cannot revive the stale complete source.
+            app.insert_resource(exact_skills);for _ in 0..2{
+                app.update();let commands=app.world().resource::<crate::input::GatewayCommands>();
+                assert!(commands.applied_world_stamp().is_none());assert!(commands.pending_provenance.lock().unwrap().is_none());assert!(!commands.send_command(attack()));
+            }
+            assert!(receiver.try_recv().is_err());continue;
+        }
+        // Apply the exact typed source value explicitly. This exercises the
+        // real readiness gate, not the private runtime ingestion schedule.
+        app.insert_resource(exact_skills);app.update();assert_eq!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp(),Some(original_stamp));
+        assert!(app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().is_none());
+        assert_eq!(serde_json::to_value(app.world().resource::<UiReadModel>()).unwrap(),expected_models.ui);
+        assert_eq!(serde_json::to_value(app.world().resource::<EntityModelSet>()).unwrap(),expected_models.entities);
+        assert_eq!(serde_json::to_value(app.world().resource::<MapModel>()).unwrap(),expected_models.map);
+        ingest!(json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":402,"fileName":"scene-one","miniMapIndex":8}}));
+        ingest!(json!({"type":"packet","packet":"UserLocation","payload":{"x":10,"y":20,"direction":"Down"}}));
+        assert_ne!(fence.stamp(),Some(original_stamp));assert_eq!(adapter.last_full_producer_stamp,Some(original_stamp));
+        // Delayed explicit old full source must not become scene-one through
+        // metadata overlay, including two scene identities with the same file.
+        assert_eq!(ingest!(world),InboundDisposition::Applied); // Wrapper preserves ordinary non-snapshot disposition.
+        assert_eq!(adapter.last_full_producer_stamp,Some(original_stamp));
+        ingest!(json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":402,"fileName":"scene-zero","miniMapIndex":8}}));
+        assert_eq!(ingest!(world),InboundDisposition::Applied);assert_eq!(adapter.last_full_producer_stamp,Some(original_stamp));
+        let changed=gameplay_receiver.try_iter().collect::<Vec<_>>();assert!(!changed.is_empty());for snapshot in changed {assert!(snapshot.big_map_only);assert!(snapshot.producer_models.is_none());batch.send(snapshot).unwrap();}
+        app.update();assert!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp().is_none());assert!(app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().is_none());
+        assert!(!app.world().resource::<crate::input::GatewayCommands>().send_command(attack()));assert!(receiver.try_recv().is_err());
+        }
+    }
+
+    #[test]
+    fn owned_terminal_settlement_cancels_original_pending_after_resume(){
+        use mir2_client_bevy::{native_shell::NativeShellModel,pending_operations::{PendingOperations,PendingOperationKey},game_shop::GameShopModel,crystal_ui::overlays::NativePlayerUiState};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let commands=crate::input::GatewayCommands::new(sender);commands.activate_world_stamp(stamp);
+        let wire=NativeOutboundCommand::GameShopBuy {request_id:"owned-terminal".into(),g_index:1,quantity:1,price_type:1};
+        let request=game_shop_request_from_wire(&wire).unwrap();assert!(commands.send_command(GatewayCommand::Wire(wire)));let old=owned(receiver.try_recv().unwrap());
+        fence.socket_lost();commands.activate_world_stamp(fence.test_world_ready(7,0));fence.retire(&old);
+        let mut pending=PendingOperations::default();let key=PendingOperationKey::GameShop(request.request_id.clone());assert!(pending.try_begin(key.clone()));
+        let mut shop=GameShopModel::default();shop.pending_purchase=Some(request.clone());let mut ui=NativePlayerUiState::default();ui.core.game_shop_pending=Some(request);
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.insert_resource(pending);app.insert_resource(shop);app.insert_resource(ui);app.init_resource::<NativeShellModel>();app.add_systems(bevy::app::Update,crate::gameplay_bridge::settle_native_command_terminals);app.update();
+        assert!(!app.world().resource::<PendingOperations>().contains(&key));assert!(app.world().resource::<GameShopModel>().pending_purchase.is_none());assert!(app.world().resource::<GameShopModel>().last_receipt.is_none());assert!(app.world().resource::<NativePlayerUiState>().core.game_shop_pending.is_none());
+    }
+
+}
+
+#[cfg(test)]
+mod native_mail_stream_tests {
+    use super::*;
+    use mir2_client_bevy::mail_service::{MailServiceDelivery, MailServiceEvent, MailServiceInbox, MailServiceInboxMessage, MailServiceStreamEpoch, MailServiceStreamStarted};
+
+    #[test]
+    fn native_mail_producer_captures_socket_epoch_and_never_relabels_using_latest_fence() {
+        let fence=NativeCommandFence::new();
+        let delivered=Arc::new(Mutex::new(Vec::new())); let captured=delivered.clone();
+        let publisher=controlled_mail_service_publisher(move |message| {captured.lock().unwrap().push(message);true});
+        assert!(publisher.start_socket(Some(&fence),1).is_err(),"begin_connection is required");
+        fence.begin_connection().unwrap();
+        let stream=publisher.start_socket(Some(&fence),1).unwrap(); let epoch=stream.epoch;
+        fence.socket_lost(); fence.begin_connection().unwrap();
+        assert_ne!(fence.stamp().unwrap().connection,epoch.connection);
+        assert!(push_native_mail_service_event(Some(&stream),"MailCost",&json!({"cost":125})).unwrap());
+        assert_eq!(*delivered.lock().unwrap(),vec![
+            MailServiceInboxMessage::StreamStarted(MailServiceStreamStarted{epoch}),
+            MailServiceInboxMessage::Delivery(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:125}}),
+        ]);
+    }
+
+    #[test]
+    fn native_mail_production_has_no_missing_marker_or_invalid_epoch_fallback() {
+        assert!(NativeMailServicePublisher::Native.start_socket(None,1).is_err());
+        assert!(push_native_mail_service_event(None,"MailCost",&json!({"cost":125})).is_err());
+        let fence=NativeCommandFence::new(); fence.begin_connection().unwrap();
+        assert!(controlled_mail_service_publisher(|_|false).start_socket(Some(&fence),1).is_err());
+        let publisher=controlled_mail_service_publisher(|_|true);
+        for (run,connection) in [(0,1),(1,0)] {
+            {let mut state=fence.0.lock().unwrap();state.current.run=run;state.current.connection=connection;}
+            assert!(publisher.start_socket(Some(&fence),1).is_err());
+        }
+        {let mut state=fence.0.lock().unwrap();state.current.run=u64::MAX;state.current.connection=u64::MAX;}
+        assert_eq!(publisher.start_socket(Some(&fence),1).unwrap().epoch,MailServiceStreamEpoch{run:u64::MAX,connection:u64::MAX});
+    }
+
+    #[tokio::test]
+    async fn native_mail_actual_socket_handshake_publishes_marker_before_first_packet() {
+        use tokio::time::timeout;
+        let listener=tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap(); let address=listener.local_addr().unwrap();
+        let (finish_tx,finish_rx)=tokio::sync::oneshot::channel();
+        let server=tokio::spawn(async move {
+            let (tcp,_)=listener.accept().await.unwrap(); let mut socket=tokio_tungstenite::accept_async(tcp).await.unwrap();
+            // The packet may already be waiting while the client finishes its
+            // capability write. It still cannot overtake the local marker.
+            socket.send(Message::Text(json!({"type":"packet","packet":"MailCost","payload":{"cost":125}}).to_string().into())).await.unwrap();
+            let _=finish_rx.await; let _=socket.close(None).await;
+        });
+        let (sender,receiver)=command_channel(8); let fence=sender.ownership_fence().unwrap(); let observer_fence=fence.clone();
+        let delivered=Arc::new(Mutex::new(Vec::new())); let captured=delivered.clone();
+        let (seen_tx,seen_rx)=tokio::sync::oneshot::channel(); let seen_tx=Arc::new(Mutex::new(Some(seen_tx)));
+        let publisher=controlled_mail_service_publisher(move |message| {
+            if let MailServiceInboxMessage::StreamStarted(marker)=&message {
+                let state=observer_fence.0.lock().unwrap(); assert!(state.connected);
+                assert_eq!(marker.epoch,MailServiceStreamEpoch{run:state.current.run,connection:state.current.connection});
+            }
+            let is_delivery=matches!(&message,MailServiceInboxMessage::Delivery(_));
+            captured.lock().unwrap().push(message);
+            if is_delivery {if let Some(tx)=seen_tx.lock().unwrap().take(){let _=tx.send(());}}
+            true
+        });
+        let (shell_tx,_shell_rx)=std::sync::mpsc::channel(); let (game_tx,_game_rx)=std::sync::mpsc::channel();
+        let client=tokio::spawn(async move {run_gateway_client_with_ingest_and_mail_publisher(&format!("ws://{address}"),receiver,shell_tx,game_tx,NativeReconnectConfig::default(),|_|true,publisher).await});
+        timeout(Duration::from_secs(2),seen_rx).await.unwrap().unwrap();
+        let epoch=MailServiceStreamEpoch{run:fence.stamp().unwrap().run,connection:fence.stamp().unwrap().connection};
+        assert_eq!(*delivered.lock().unwrap(),vec![MailServiceInboxMessage::StreamStarted(MailServiceStreamStarted{epoch}),MailServiceInboxMessage::Delivery(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:125}})]);
+        sender.send_with_stamp(GatewayCommand::Shutdown,fence.stamp()).unwrap();
+        timeout(Duration::from_secs(2),client).await.unwrap().unwrap().unwrap();
+        let _=finish_tx.send(()); timeout(Duration::from_secs(2),server).await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn native_mail_marker_rejection_terminates_actual_socket_before_packet_delivery() {
+        use tokio::time::timeout;
+        let listener=tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap(); let address=listener.local_addr().unwrap();
+        let server=tokio::spawn(async move {
+            let (tcp,_)=listener.accept().await.unwrap(); let mut socket=tokio_tungstenite::accept_async(tcp).await.unwrap();
+            let _=socket.send(Message::Text(json!({"type":"packet","packet":"MailCost","payload":{"cost":125}}).to_string().into())).await;
+            while let Some(Ok(_))=socket.next().await {}
+        });
+        let (_sender,receiver)=command_channel(8);
+        let (shell_tx,_shell_rx)=std::sync::mpsc::channel(); let (game_tx,_game_rx)=std::sync::mpsc::channel();
+        let delivered=Arc::new(Mutex::new(Vec::new())); let captured=delivered.clone();
+        let publisher=controlled_mail_service_publisher(move |message|{captured.lock().unwrap().push(message);false});
+        let result=timeout(Duration::from_secs(2),run_gateway_client_with_ingest_and_mail_publisher(&format!("ws://{address}"),receiver,shell_tx,game_tx,NativeReconnectConfig::default(),|_|true,publisher)).await.unwrap();
+        assert!(result.unwrap_err().contains("marker was not accepted"));
+        let delivered=delivered.lock().unwrap(); assert_eq!(delivered.len(),1); assert!(matches!(&delivered[0],MailServiceInboxMessage::StreamStarted(_))); drop(delivered);
+        timeout(Duration::from_secs(2),server).await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn native_mail_real_buffer_runtime_and_parcel_consumer_retire_old_owner_quote_after_every_reset() {
+        use bevy::prelude::*;
+        use mir2_client_bevy::crystal_ui::overlays::{Mir2NativeMailParcelServicePlugin,NativePlayerUiState,MailComposeUi,MailComposeKind,NativePlayerUiIntentQueue,NativePlayerUiIntent,native_mail_parcel_quote_state};
+        use mir2_client_bevy::native_shell::{NativeShellModel,NativeShellScreen};
+        use mir2_bevy_runtime::{Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,native_ingest};
+        let _guard=super::native_queue_test_guard();
+        for already_in_inbox in [false,true] { for reserve_cost in [false,true] { for preserve_shop in [false,true] {
+            let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);
+            let epoch=MailServiceStreamEpoch{run:stamp.run,connection:stamp.connection};
+            let mut app=App::new();
+            app.add_plugins((Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,Mir2NativeMailParcelServicePlugin));
+            let commands=crate::input::GatewayCommands::new(sender);assert!(commands.activate_world_stamp(stamp));app.insert_resource(commands);
+            app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;
+            {let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(mir2_ui_core::state::MailComposeDraft{gold:700,..Default::default()});}
+            app.world_mut().resource_mut::<MailComposeUi>().kind=MailComposeKind::Parcel;
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch})); app.update();
+            assert_eq!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await,vec![NativePlayerUiIntent::MailCost{gold:700,attachment_unique_ids:vec![],stamped:false}]);
+            app.update();
+            assert!(native_mail_parcel_quote_state(app.world()).unwrap().pending);
+            if already_in_inbox {
+                // Runtime tests separately prove real buffer -> already-drained
+                // inbox retention. Here exercise that same inbox before the
+                // actual runtime reset + production parcel consumers run.
+                let mut inbox=app.world_mut().resource_mut::<MailServiceInbox>();
+                assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::OpenParcel}));
+                assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::LockedItem{unique_id:77,locked:true}}));
+                if reserve_cost {for _ in 2..mir2_client_bevy::mail_service::MAIL_SERVICE_INBOX_CAPACITY {assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::OpenParcel}));}}
+                assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:70}}));
+            } else {
+                assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::OpenParcel}));
+                assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::LockedItem{unique_id:77,locked:true}}));
+                if reserve_cost {for index in 2..256 {assert!(native_ingest::push_native_social_model(index.to_string()));}}
+                assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:70}}));
+            }
+            if preserve_shop {assert!(native_ingest::push_native_data_reset_preserving_exact_game_shop_receipt(serde_json::from_value(json!({"protocol":"nativeGameShopReceiptV1","requestId":"gs-parcel-reset","success":false,"gIndex":31,"quantity":2,"priceType":1,"code":"insufficientCurrency"})).unwrap()));}
+            else {assert!(native_ingest::push_native_data_reset());}
+            app.update();
+            let quote=native_mail_parcel_quote_state(app.world()).unwrap();
+            assert_eq!(quote.stream_epoch,Some(epoch)); assert_eq!(quote.postage,None); assert!(!quote.current);
+            assert!(quote.pending,"old Cost retires its tombstone; exactly one new quote becomes pending");
+            assert_eq!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.len(),1);
+            assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:140}})); app.update();
+            let quote=native_mail_parcel_quote_state(app.world()).unwrap(); assert!(quote.current); assert_eq!(quote.postage,Some(140));
+            assert!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.is_empty());
+            // A true new stream clears old postage/slot once. Late old socket
+            // replies cannot authorize the freshly reserved new-stream quote.
+            fence.socket_lost();let fresh=fence.test_world_ready(7,0);assert!(app.world().resource::<crate::input::GatewayCommands>().activate_world_stamp(fresh));
+            let newer=MailServiceStreamEpoch{run:fresh.run,connection:fresh.connection};
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:newer}));
+            assert!(!native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:999}})); app.update();
+            assert_eq!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.len(),1);
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:newer})); app.update();
+            assert!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.is_empty());
+            assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch:newer,event:MailServiceEvent::Cost{cost:210}})); app.update();
+            let quote=native_mail_parcel_quote_state(app.world()).unwrap(); assert!(quote.current); assert_eq!(quote.postage,Some(210));
+        }}}
+    }
+}
+
+#[cfg(test)]
+#[path = "npc_gold_buy_transport_tests.rs"]
+mod npc_gold_buy_transport_tests;

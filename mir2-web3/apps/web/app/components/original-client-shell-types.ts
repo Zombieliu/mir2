@@ -1,12 +1,28 @@
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-core-runtime";
+import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
+import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { BagBeltCallbacks } from "../../lib/bag-belt-gesture";
+import type { WorldFishingCallbacks, WorldFishingGesture } from "../../lib/world-fishing-input";
+import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry, NpcRepairDrop } from "../../lib/npc-repair-service";
+import type { BagPointerContext, BagPointerEdge } from "../../lib/bevy-bag-ui";
+import type { BevyHpOrbStatus, BevyMpOrbStatus } from "../../lib/bevy-hp-orb";
 import type { WorldStore } from "../../lib/world-model";
-import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import type { CombatAction } from "../../lib/bevy-combat-input";
+import type { CrystalKeyBinding, PlayerUiPreferences } from "../../lib/player-ui-preferences";
+import type { CrystalWindowShortcut } from "../../lib/crystal-shortcut-actions";
+import type { SkillBarsProps, SkillBarLease } from "./original-client-skill-bars";
+import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
+import type { SuiWalletSummary, LoginAuthControls } from "../../lib/client-login-runtime";
 import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
 import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
 import type {
   DisplayEntity,
+  DisplayItem,
+  DisplayEquipmentItem,
   DisplayLogLine,
   DisplayNpcShopService,
   DisplayWorld,
@@ -15,6 +31,7 @@ import type {
   EquipmentActionRef,
   EquipmentSlot,
   ItemActionRef,
+  ItemContainer,
   MergeItemRef,
   MoveItemRef,
   PredictedPlayerMotion,
@@ -156,7 +173,7 @@ export type BevyMapRenderState = {
   cameraOffset?: { x: number; y: number };
 };
 
-export type OriginalClientShellProps = {
+export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks & {
   language: Mir2Language;
   screen: ClientScreen;
   runtimePhase: string;
@@ -183,6 +200,59 @@ export type OriginalClientShellProps = {
   sceneInteractionReady: boolean;
   bevyEntityRendererReady: boolean;
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
+  webGl2SharedCanvasPrototype?: boolean;
+  bevyHudUiReady?: boolean;
+  bevyHudSourceGeometry?: import("../../lib/bevy-hud-ui").MainHudPlan | null;
+  bevyCharacterStatsReady?: boolean;
+  bevyCharacterPageReady?: boolean;
+  bevySpellsPageReady?: boolean;
+  getBevySpellsPointerContext?:()=>import("../../lib/bevy-spells-ui").SpellsPointerContext|null;
+  onBevySpellsPointer?:(edge:import("../../lib/bevy-spells-ui").SpellsPointerEdge)=>boolean;
+  getBevyCharacterPointerContext?: () => import("../../lib/bevy-character-ui").CharacterPointerContext | null;
+  onBevyCharacterPointer?: (edge: import("../../lib/bevy-character-ui").CharacterPointerEdge) => boolean;
+  readBevyHudStatus?: () => import("../../lib/bevy-hud-ui").HudStatus | null;
+  dispatchBevyHudNavigation?: (action: import("../../lib/bevy-hud-ui").HudAction) => boolean;
+  bevyQuestUiReady?: boolean;
+  bevyQuestUiCapturesPointer?: boolean;
+  bevyQuestWorldUiReady?: boolean;
+  readBevyQuestWorldControls?: () => import("../../lib/bevy-quest-world-controls").QuestWorldControls | null;
+  readBevyQuestWorldControlBlockers?: () => import("../../lib/bevy-quest-world-controls").QuestWorldControls | null;
+  bevyHpOrb?: BevyHpOrbStatus | null;
+  bevyMpOrb?: BevyMpOrbStatus | null;
+  bevyExperienceBar?: import("../../lib/bevy-experience-bar").BevyExperienceBarStatus | null;
+  bevyWeightBar?: import("../../lib/bevy-weight-bar").BevyWeightBarStatus | null;
+  bevyHudBarIdentity?: string | null;
+  bevyHudBarPlans?: import("../../lib/bevy-hud-bar-draw-plan").CurrentHudBarPlans | null;
+  bevyHudBarReadLivePlans?: () => import("../../lib/bevy-hud-bar-draw-plan").CurrentHudBarPlans | null;
+  onHpOrbLocalOverlayChange?: (blocked: boolean) => void;
+  bevyBagUiActive?: boolean;
+  bevyHeroUiActive?: boolean;
+  bevyHeroUiTransitioning?: boolean;
+  bevyHeroUiToken?: string | null;
+  bevyHeroUiWorldBlocked?: boolean;
+  getBevyHeroInputBlocked?: () => boolean;
+  getBevyHeroPointerContext?: () => import("../../lib/bevy-hero-host").HeroPointerContext | null;
+  onBevyHeroPointer?: (edge: import("../../lib/bevy-hero-host").HeroPointerEdge) => boolean;
+  onBevyHeroKey?: (edge: import("../../lib/bevy-hero-host").HeroKeyEdge) => boolean;
+  bevyNpcShopUiActive?: boolean;
+  bevyNpcShopUiTransitioning?: boolean;
+  getBevyNpcShopInputBlocked?: () => boolean;
+  getBevyNpcShopPointerContext?: () => import("../../lib/bevy-npc-shop-ui").NpcShopPointerContext | null;
+  onBevyNpcShopPointer?: (edge: import("../../lib/bevy-npc-shop-ui").NpcShopPointerEdge) => boolean;
+  npcShopTab?: "buy" | "sell";
+  onNpcShopTabChange?: (tab: "buy" | "sell") => void;
+  bevyStorageUiActive?: boolean;
+  bevyStorageUiTransitioning?: boolean;
+  bevyStorageOwnerRevision?: number;
+  getBevyStoragePointerContext?: () => import("../../lib/bevy-storage-ui").StoragePointerContext | null;
+  onBevyStoragePointer?: (edge: import("../../lib/bevy-storage-ui").StoragePointerEdge) => boolean;
+  bevyBagOwnerRevision?: number;
+  getBevyBagPointerContext?: () => BagPointerContext | null;
+  onBevyBagPointer?: (edge: BagPointerEdge) => boolean;
+  onBevyBagTouchFallback?: () => void;
+  inventoryInitialDeleteMode?: boolean;
+  onInventoryCompatibilityInteraction?: () => void;
+  onQuestUiModalChange?: (blocked: boolean) => void;
   bevyMapRuntimeGeneration: number;
   bevyMapRuntimeReady: boolean;
   bevyMapPresentedImageKeys: ReadonlySet<string>;
@@ -195,8 +265,14 @@ export type OriginalClientShellProps = {
   accountId: string;
   password: string;
   chatMessage: string;
+  chatUi?: ChatUiControls;
+  mapImageRouteSource?: MapImageRouteSource | null;
+  onMapImageRoute?: (intent: MapImageRouteIntent) => void;
+  onMapImageRoutePress?: (source: MapImageRouteSource | null) => void;
+  onMapRouteModalChange?: (blocked: boolean) => void;
   loginBusy: boolean;
   loginError: string | null;
+  loginAuth: LoginAuthControls;
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheWalletUrl: string;
@@ -211,8 +287,16 @@ export type OriginalClientShellProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  storagePasswordOpenVersion?: number;
   npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
+  npcRepairView?: NpcRepairView | null;
+  onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
+  onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
+  onToggleNpcRepairHold?: (view: NpcRepairView) => void;
+  onBeginNpcRepairDrag?: (view: NpcRepairView, item: ItemActionRef, geometry: NpcRepairDragGeometry) => NpcRepairDrag | null;
+  onCancelNpcRepairDrag?: (drag: NpcRepairDrag) => void;
+  onDropNpcRepairDrag?: (drag: NpcRepairDrag, geometry: NpcRepairDragGeometry, x: number, y: number) => NpcRepairDrop | null;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -230,46 +314,77 @@ export type OriginalClientShellProps = {
   onSendChat: (message: string) => void;
   onRequestTrade: () => void;
   onRentExpandedStorage: () => void;
+  storageRentalPrompt?: { id: number; renewing: boolean } | null;
+  onConfirmStorageRental?: (id: number) => void;
+  onCancelStorageRental?: (id: number) => void;
   onLogout: () => void;
   onCreateCharacter: (draft: CreateCharacterDraft) => void;
   onDeleteCharacter: () => void;
   onUseItem: (item: ItemActionRef) => void;
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
+  onReadEquipmentItemTooltip?: (item: Readonly<DisplayEquipmentItem>) => CrystalTooltipDocument | null;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
   onRemoveItem: (item: EquipmentActionRef) => void;
-  onMoveItem: (item: MoveItemRef, toSlot: number) => void;
+  onMoveItem: (item: MoveItemRef, toSlot: number, toContainer?: ItemContainer) => boolean;
   onMergeItem: (from: MergeItemRef, to: MergeItemRef) => void;
   onSplitItem: (item: ItemActionRef, count: number) => void;
-  onStoreItem: (item: MoveItemRef, toSlot: number) => void;
-  onTakeBackItem: (item: MoveItemRef, toSlot: number) => void;
+  onStoreItem: (item: MoveItemRef, toSlot: number) => boolean;
+  onTakeBackItem: (item: MoveItemRef, toSlot: number, toContainer: ItemContainer) => boolean;
   onUnlockStorage: (password: string) => void;
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
   onRemoveStoragePassword: (currentPassword: string) => void;
   onSellItem: (item: ItemActionRef, count: number) => void;
   onBuyNpcShopItem: (id: number, quantity: number, panelType: number) => void;
+  onQuoteNpcShopItem: (id: number, quantity: number) => NpcGoldBuyQuote | null;
   onDropGold: (amount: number) => void;
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
+  onCombatKey?: (action:Extract<CombatAction,{type:"key"}>,repeat:boolean)=>{supported:boolean;handled:boolean};
+  onCombatPointer?: (cursor:[number,number]|null,hovered:string|null)=>void;
+  onCombatCancel?: ()=>void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
+  cashGameShopSource?: CashGameShopSource | null;
+  cashGameShopPending?: boolean;
+  onConfirmCashGameShopPurchase?: (confirmation: CashGameShopConfirmation) => void;
+  onReadCashGameShopItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  cashPreviewSourceKey?: string | null;
+  onReadCashPreviewLayers?: (item: CashGameShopEntry, direction: number, elapsedMs: number) => CashPreviewLayerDocument | null;
+  onTurnCashPreview?: (direction: number, right: boolean) => number | null;
+  onGameShopVisibilityChange?: (open: boolean) => void;
+  onHeroShortcut?: (key: string, ctrl: boolean, alt: boolean, shift: boolean, repeat: boolean) => boolean;
+  parityUiWorldBlocked?: boolean;
+  parityUiBlocksGameplay?: () => boolean;
+  crystalKeyBindings?: readonly CrystalKeyBinding[];
+  playerUiPreferences?: Readonly<PlayerUiPreferences>;
+  questNameTargetObjectIds?: ReadonlySet<string>;
+  dropViewHeld?: boolean;
+  getKeybindCaptureActive?: () => boolean;
+  onCrystalWindowShortcut?: (action: CrystalWindowShortcut) => boolean;
+  onCrystalGameplayShortcut?: (functionId: string, repeat: boolean) => boolean;
+  onCrystalDropViewHeldChange?: (held: boolean) => void;
+  skillBars?: Omit<SkillBarsProps, "onCastSlot"> & { onCastSlot?: (lease: SkillBarLease, worldCursor: readonly [number, number] | null) => void };
   onSendClientCommand: (command: Record<string, unknown>) => void;
   onStartTutorial: (input: Mir2InputProfile, gamepadFamily: Mir2GamepadFamily) => void;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
   onToggleQuestLog: () => void;
+  onToggleOptions?: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseStorage?: () => void;
   onCloseNpcShopService: () => void;
   onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
-  onViewportTileClick: (x: number, y: number) => void;
+  onViewportTileClick: (x: number, y: number, gesture?: WorldFishingGesture) => void;
   onViewportTileSecondaryAction: (x: number, y: number) => void;
   onViewportTileStepClick: (x: number, y: number) => void;
   onViewportTileStepSecondaryAction: (x: number, y: number) => void;
-  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run") => void;
+  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture) => void;
   onViewportDirectionIntent: (
     direction: string,
     mode: "walk" | "run",

@@ -6,6 +6,11 @@
   font-family: Georgia, "Times New Roman", serif;
 }
 
+/* The touch game deck and world keep input ownership at every viewport size. */
+body:has(.mir-client-page[data-layout-profile="touch"][data-input-profile="touch"][data-client-screen="game"]) .mir-pwa-shell {
+  display: none;
+}
+
 .mir-pwa-actions {
   position: absolute;
   top: max(10px, env(safe-area-inset-top));
@@ -131,6 +136,37 @@
 }
 
 @media (orientation: landscape) and (max-height: 430px) {
+  body:has(.mir-client-page[data-layout-profile="touch"][data-input-profile="touch"]:is([data-client-screen="login"], [data-client-screen="select"])) .mir-pwa-actions {
+    /* Leave the original left identity and right language/audio controls reachable. */
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 400px);
+    justify-content: center;
+  }
+
+  body:has(.mir-client-page[data-layout-profile="touch"][data-input-profile="touch"]:is([data-client-screen="login"], [data-client-screen="select"])) .mir-pwa-action {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  body:has(.mir-client-page[data-layout-profile="touch"][data-input-profile="touch"][data-client-screen="game"]) .mir-pwa-actions {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    /* Reserve the expanded Quest/Char/Bag/More row at the right edge. */
+    max-width: calc(100vw - 408px);
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+
+  body:has(.mir-client-page[data-layout-profile="touch"][data-input-profile="touch"][data-client-screen="game"]) .mir-pwa-action {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
   .mir-pwa-guide {
     width: min(230px, calc(100vw - 28px));
     padding: 8px 10px;
@@ -152,5 +188,12 @@
     min-height: 32px;
     padding: 6px 9px;
     font-size: 11px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 360px) {
+  body:has(.mir-client-page[data-layout-profile="touch"][data-input-profile="touch"][data-client-screen="game"]) .mir-pwa-actions {
+    /* The compact four-target row begins 180px from the right edge. */
+    max-width: calc(100vw - 376px);
   }
 }

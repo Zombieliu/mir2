@@ -1,0 +1,82 @@
+{
+  "schema": "w0-spouse-communication-source-review02",
+  "generatedAt": "2026-10-06T11:12:03.2066467Z",
+  "reviewType": "bounded read-only source delta review",
+  "baseCommit": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+  "reviewInputs": {
+    "previousReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-spouse-communication-source-review01.json",
+      "sha256": "76d4ddb559bda1cc8bccee0379366e2805a204997c863087cb20f3d48931cb4f",
+      "bytes": 6289
+    },
+    "adapterEvidence": {
+      "path": "mir2-web3/apps/web/lib/stage5-window-adapters.ts",
+      "bytes": 37709,
+      "sha256": "d6a3c5e135cf8c94f39f3087f394af63123ce122203e6f7d048fccdc39e336e3",
+      "lines": "458-470",
+      "finding": "adapter maps mapName/partnerMap into partnerMap but does not supply partnerOnline, so component derives status from current map field"
+    },
+    "currentFrozenFiles": [
+      {
+        "path": "mir2-web3/apps/web/app/page.tsx",
+        "bytes": 888773,
+        "sha256": "e6c5d598f2f5f2cf436691586281fb442caff65f939aed5df6fcbd52ae613b7a",
+        "parentBlob": "33c4999b6d64cf91c7f219cd94fd98d5eef573a5",
+        "deltaFromSource01": "unchanged since Source01"
+      },
+      {
+        "path": "mir2-web3/apps/web/app/components/original-client-bonds-window.tsx",
+        "bytes": 26201,
+        "sha256": "eecaed6b29d534e233ab5c245159ff432dd4f026baa13b77320106d011a54aed",
+        "parentBlob": "35db40788ddcf4b9e3576364b41e6301f27aee4f",
+        "deltaFromSource01": "updated derived partnerOnline and reused it for Whisper availability"
+      },
+      {
+        "path": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+        "bytes": 19659,
+        "sha256": "f5aaa5419748b84c94c7f011286062d2d81d5c1635a1a6b7f9f2d46774d57c1b",
+        "parentBlob": "73a0487f3da50e675f9248dd1df1b6c33f7cb8de",
+        "deltaFromSource01": "unchanged since Source01"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/test-storage-page-gate.mjs",
+        "bytes": 99126,
+        "sha256": "91c8f6fd74c2aa1cc95ce36e27ef57bf3b3ce5910b851a4f88aa924db1f7acb9",
+        "parentBlob": "020e4c9221e55919beab72dacc2fd78e3ced6e1f",
+        "deltaFromSource01": "added partnerOnline local extraction and map/status coherence assertion"
+      }
+    ]
+  },
+  "deltaFindings": [
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-bonds-window.tsx",
+      "lines": "124-126,230-244,272-276",
+      "assessment": "partnerOnline derives as married && Boolean(relationship.partnerMap.length), and Whisper uses that same flag. Adapter supplies no independent online field, so Online/Offline label, location display and Whisper availability share the map-presence predicate."
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-storage-page-gate.mjs",
+      "lines": "1260-1329",
+      "assessment": "Finite source harness extracts partnerOnline with the existing component locals and checks map/status/Whisper coherence for named, unnamed, mapless and callbacks-absent cases. No execution performed; source harness evidence only."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "lines": "9317-9340,10197-10201,17902",
+      "assessment": "Page callback owner/epoch/scene/map/relationship checks and local-only mail/chat composition are unchanged. Page does not bind Recall or Teleport callbacks; those controls remain disabled."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+      "lines": "260-267,500-509",
+      "assessment": "ExtraWindows prop forwarding remains unchanged."
+    }
+  ],
+  "findings": [],
+  "findingCount": 0,
+  "confirmedP0": 0,
+  "confirmedP1": 0,
+  "conclusion": "No confirmed P0/P1 in this bounded status correction. partnerOnline is a render-derived view of the adapter map field rather than an absent adapter boolean; Whisper and online labeling now share that predicate. Page still omits Recall/Teleport callbacks. No tests, build, product code, UI or runtime were executed.",
+  "scope": [
+    "Compared only spouse component/test delta against Source01 and f1cf963 baseline.",
+    "Page and ExtraWindows pins are unchanged from Source01.",
+    "This does not establish server semantics beyond source contracts, UI presentation, screen-reader behavior, or player acceptance."
+  ]
+}

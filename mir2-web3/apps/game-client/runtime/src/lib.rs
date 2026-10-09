@@ -1,21 +1,65 @@
 mod additive_material;
+#[cfg(feature = "web-quest-ui")]
+mod bag_ui_host;
+pub mod capture_context;
+#[cfg(feature = "web-quest-ui")]
+pub mod character_ui_host;
+pub mod combat_input_host;
 pub mod entity_animation;
 mod entity_animation_bridge;
+#[cfg(test)]
+#[path = "fallback_hierarchy_tests.rs"]
+mod fallback_hierarchy_tests;
+#[cfg(feature = "web-quest-ui")]
+pub mod hud_ui_host;
+#[cfg(all(feature = "web-quest-ui", any(target_arch = "wasm32", test)))]
+pub mod hero_ui_host;
 mod interpolation;
 mod lighting;
 mod local_motion;
+#[cfg(test)]
+#[path = "mail_service_runtime_tests.rs"]
+mod mail_service_runtime_tests;
 mod motion;
 mod movement_shadow;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native_ingest;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod npc_purchase_economy;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
 mod presentation_pose;
+#[cfg(feature = "web-quest-ui")]
+mod quest_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod quest_route_plan;
+#[cfg(feature = "web-item-tooltip")]
+mod item_tooltip_query;
+#[cfg(feature = "web-item-tooltip")]
+mod skill_bar_query;
+#[cfg(feature = "web-item-tooltip")]
+mod combat_modes_host;
 mod remote_motion;
+#[cfg(not(target_arch = "wasm32"))]
+mod render_diagnostics;
+mod runtime_ui_capabilities;
+#[cfg(feature = "web-quest-ui")]
+pub mod spells_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod npc_shop_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod storage_ui_host;
+#[cfg(feature = "web-quest-ui")]
+pub mod mail_ui_host;
+mod webgl2_shared_ui;
+#[cfg(not(target_arch = "wasm32"))]
+pub use render_diagnostics::{native_render_diagnostics_enabled, record_native_render_marker};
+
+pub use presentation_pose::PresentationPoseBuffer;
 
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use bevy::asset::{AssetMetaCheck, AssetPlugin, LoadState, RenderAssetUsages};
 use bevy::camera::{visibility::RenderLayers, ClearColorConfig, RenderTarget};
@@ -23,6 +67,8 @@ use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
 use bevy::math::{Rect, URect, UVec2};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+#[cfg(all(not(target_arch = "wasm32"), feature = "native-font-atlas-telemetry"))]
+use bevy::text::FontAtlasSet;
 use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
 use mir2_client_bevy::pending_operations::{
@@ -36,6 +82,8 @@ use mir2_client_bevy::pending_operations::{
 };
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsCast;
 
 const TILE_SIZE: f32 = 32.0;
 const FLOOR_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
@@ -48,6 +96,17 @@ const COMPILED_RENDER_BACKEND: &str = "webgl2";
     all(target_arch = "wasm32", feature = "webgl2", not(feature = "webgpu"))
 )))]
 const COMPILED_RENDER_BACKEND: &str = "native";
+
+/// The ordered runtime stage that commits map/entity centers and publishes the
+/// exact camera/entity presentation pose used by the renderer. Native UI
+/// overlays schedule after this set so they never observe a mixed-center frame.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct RuntimePresentationSet;
+
+/// Native packets and input publish movement before its presentation consumer
+/// runs in the same PreUpdate. Registration order alone provides no ordering.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct NativeMotionProducerSet;
 
 // Both wasm backends composite transparently over the DOM map/floor/UI layers, so
 // Bevy can be the entity renderer on non-WebGPU too (the webgl2 build was opaque,
@@ -73,11 +132,55 @@ thread_local! {
     static PENDING_EFFECT_RENDER_STATE: RefCell<Option<EffectRenderState>> = const { RefCell::new(None) };
     static PENDING_LIGHTING_RENDER_STATE: RefCell<Option<lighting::LightingRenderState>> = const { RefCell::new(None) };
     static PENDING_SCENE_RESET: Cell<bool> = const { Cell::new(false) };
-    // Optional self-player motion window (from_x, from_y, to_x, to_y, started_ms,
-    // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
-    // (the default) ⇒ `follow_player` keeps the camera pinned at origin = the
-    // current fold-in behaviour.
-    static PENDING_SELF_CAMERA_MOTION: Cell<Option<(f32, f32, f32, f32, f64, f64)>> = const { Cell::new(None) };
+}
+
+type SelfCameraMotionWindow = (f32, f32, f32, f32, f64, f64);
+
+// Browser calls and the WASM Bevy schedule share one thread. Native input and
+// render systems can run on different Bevy workers, so the same bridge must be
+// process-wide there instead of thread-local.
+#[cfg(target_arch = "wasm32")]
+thread_local! {
+    static PENDING_SELF_CAMERA_MOTION: Cell<Option<SelfCameraMotionWindow>> = const { Cell::new(None) };
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_SELF_CAMERA_MOTION: std::sync::Mutex<Option<SelfCameraMotionWindow>> =
+    std::sync::Mutex::new(None);
+
+fn set_pending_self_camera_motion(window: Option<SelfCameraMotionWindow>) {
+    #[cfg(target_arch = "wasm32")]
+    PENDING_SELF_CAMERA_MOTION.with(|cell| cell.set(window));
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *PENDING_SELF_CAMERA_MOTION
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = window;
+    }
+}
+
+fn pending_self_camera_motion() -> Option<SelfCameraMotionWindow> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_SELF_CAMERA_MOTION.with(Cell::get)
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *PENDING_SELF_CAMERA_MOTION
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+}
+
+/// Scene reset arrives in `Update`, after native input can have produced a
+/// command in that frame's `PreUpdate`. The local shadow identifies that exact
+/// new command using the runtime clock; only it may retain its camera window.
+fn clear_stale_self_camera_motion_for_scene_reset(keep_current_command: bool) {
+    if !keep_current_command {
+        set_pending_self_camera_motion(None);
+    }
 }
 
 #[derive(Resource, Default, Clone)]
@@ -133,6 +236,20 @@ struct RuntimeEffectShadowCleanupTracker(u64);
 /// without creating a renderer/window.
 pub struct Mir2NativeSessionBoundaryPlugin;
 
+/// Production typed parcel ingress, usable with the session-boundary plugin
+/// on a plain App. Its parent runtime retains the original model ordering.
+pub struct Mir2NativeMailServiceIngestPlugin;
+#[derive(Debug,Clone,Copy,PartialEq,Eq,Hash,SystemSet)]
+struct NativeMailServiceIngestSet;
+impl Plugin for Mir2NativeMailServiceIngestPlugin {
+    fn build(&self, app:&mut App) {
+        app.init_resource::<mir2_client_bevy::mail_service::MailServiceInbox>()
+            .init_resource::<native_ingest::NativeInbound>()
+            .add_systems(Update,ingest_pending_mail_service.in_set(PendingLifecycleSet::Ingest)
+                .in_set(NativeMailServiceIngestSet).after(apply_session_reset_to_runtime_models));
+    }
+}
+
 impl Plugin for Mir2NativeSessionBoundaryPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<mir2_client_bevy::read_model::UiReadModel>()
@@ -142,10 +259,14 @@ impl Plugin for Mir2NativeSessionBoundaryPlugin {
             .init_resource::<mir2_client_bevy::inventory::InventoryModel>()
             .init_resource::<mir2_client_bevy::chat::ChatModel>()
             .init_resource::<mir2_client_bevy::mail::MailModel>()
+            .init_resource::<mir2_client_bevy::mail_service::MailServiceInbox>()
             .init_resource::<mir2_client_bevy::shop::ShopModel>()
             .init_resource::<mir2_client_bevy::game_shop::GameShopModel>()
             .init_resource::<mir2_client_bevy::storage::StorageModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
             .init_resource::<mir2_client_bevy::skill_model::SkillModel>()
+            .init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>()
             .init_resource::<mir2_client_bevy::social::SocialModel>()
             .init_resource::<PendingOperations>()
             .init_resource::<InventoryOperationFeedback>()
@@ -254,6 +375,150 @@ struct NativeSoakCounts {
     additive_cache_entries: usize,
     additive_cache_live_entries: usize,
     additive_asset_count: usize,
+    image_asset_count: usize,
+    image_data_bytes: usize,
+    native_queue_messages: usize,
+    native_queue_bytes: usize,
+    map_render_images: usize,
+    map_render_url_image_keys: usize,
+    map_render_layouts: usize,
+    map_render_layout_rect_pages: usize,
+    font_atlas_keys: usize,
+    font_atlas_pages: usize,
+    font_atlas_bytes: u64,
+    font_atlas_font_ids: Vec<u32>,
+    font_atlas_font_size_bits: Vec<u32>,
+}
+
+/// One resolved `AssetServer` image-path group.  Keep this native-only and
+/// sample it only with the opt-in soak line: its purpose is to identify which
+/// producer is retaining decoded `Image` payloads, not to participate in
+/// rendering or asset lifetime.
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeImagePathBucket {
+    count: usize,
+    bytes: usize,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeImagePathTelemetry {
+    buckets: Vec<(String, NativeImagePathBucket)>,
+    largest: Vec<(String, usize)>,
+    duplicate_paths: Vec<(String, NativeImagePathBucket)>,
+    untracked_assets: NativeImagePathBucket,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_image_path_bucket(path: &str) -> String {
+    let mut components = path.split('/').filter(|component| !component.is_empty());
+    match (components.next(), components.next()) {
+        (Some("original-ui"), Some(library)) => format!("original-ui/{library}"),
+        (Some("generated"), Some(pack)) => format!("generated/{pack}"),
+        (Some(first), _) => first.to_owned(),
+        _ => "<untracked>".to_owned(),
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_image_path_telemetry(
+    images: &Assets<Image>,
+    asset_server: &AssetServer,
+) -> NativeImagePathTelemetry {
+    let mut buckets = BTreeMap::<String, NativeImagePathBucket>::new();
+    let mut paths = BTreeMap::<String, NativeImagePathBucket>::new();
+    let mut untracked_assets = NativeImagePathBucket::default();
+
+    for (id, image) in images.iter() {
+        let bytes = image.data.as_ref().map_or(0, Vec::len);
+        let Some(path) = asset_server.get_path(id) else {
+            untracked_assets.count = untracked_assets.count.saturating_add(1);
+            untracked_assets.bytes = untracked_assets.bytes.saturating_add(bytes);
+            continue;
+        };
+        let path = path.path().to_string_lossy().replace('\\', "/");
+        let bucket = buckets.entry(native_image_path_bucket(&path)).or_default();
+        bucket.count = bucket.count.saturating_add(1);
+        bucket.bytes = bucket.bytes.saturating_add(bytes);
+        let entry = paths.entry(path).or_default();
+        entry.count = entry.count.saturating_add(1);
+        entry.bytes = entry.bytes.saturating_add(bytes);
+    }
+
+    let mut buckets = buckets.into_iter().collect::<Vec<_>>();
+    buckets.sort_by(|left, right| {
+        right
+            .1
+            .bytes
+            .cmp(&left.1.bytes)
+            .then_with(|| right.1.count.cmp(&left.1.count))
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    buckets.truncate(12);
+
+    let mut largest = paths
+        .iter()
+        .map(|(path, value)| (path.clone(), value.bytes))
+        .collect::<Vec<_>>();
+    largest.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
+    largest.truncate(12);
+
+    let mut duplicate_paths = paths
+        .into_iter()
+        .filter(|(_, value)| value.count > 1)
+        .collect::<Vec<_>>();
+    duplicate_paths.sort_by(|left, right| {
+        right
+            .1
+            .bytes
+            .cmp(&left.1.bytes)
+            .then_with(|| right.1.count.cmp(&left.1.count))
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    duplicate_paths.truncate(12);
+
+    NativeImagePathTelemetry {
+        buckets,
+        largest,
+        duplicate_paths,
+        untracked_assets,
+    }
+}
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "native-font-atlas-telemetry"))]
+fn native_font_atlas_counts(
+    font_atlases: Option<&FontAtlasSet>,
+    images: &Assets<Image>,
+) -> (usize, usize, u64, Vec<u32>, Vec<u32>) {
+    let Some(font_atlases) = font_atlases else {
+        return (0, 0, 0, Vec::new(), Vec::new());
+    };
+    let mut font_ids = font_atlases.keys().map(|key| key.id).collect::<Vec<_>>();
+    font_ids.sort_unstable();
+    font_ids.dedup();
+    let mut font_size_bits = font_atlases
+        .keys()
+        .map(|key| key.font_size_bits)
+        .collect::<Vec<_>>();
+    font_size_bits.sort_unstable();
+    font_size_bits.dedup();
+    (
+        font_atlases.len(),
+        font_atlases.values().map(Vec::len).sum(),
+        font_atlases.total_bytes(images),
+        font_ids,
+        font_size_bits,
+    )
+}
+
+#[cfg(all(
+    not(target_arch = "wasm32"),
+    not(feature = "native-font-atlas-telemetry")
+))]
+fn native_font_atlas_counts(images: &Assets<Image>) -> (usize, usize, u64, Vec<u32>, Vec<u32>) {
+    let _ = images;
+    (0, 0, 0, Vec::new(), Vec::new())
 }
 
 /// Take a renderer-only snapshot without touching ECS entities or the native
@@ -287,7 +552,54 @@ fn native_soak_counts(
         additive_cache_entries: additive_cache.len(),
         additive_cache_live_entries: additive_cache.live_len(additive_materials),
         additive_asset_count: additive_materials.len(),
+        image_asset_count: 0,
+        image_data_bytes: 0,
+        native_queue_messages: 0,
+        native_queue_bytes: 0,
+        map_render_images: 0,
+        map_render_url_image_keys: 0,
+        map_render_layouts: 0,
+        map_render_layout_rect_pages: 0,
+        font_atlas_keys: 0,
+        font_atlas_pages: 0,
+        font_atlas_bytes: 0,
+        font_atlas_font_ids: Vec::new(),
+        font_atlas_font_size_bits: Vec::new(),
     }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_image_asset_counts(images: &Assets<Image>) -> (usize, usize) {
+    images.iter().fold((0, 0), |(count, bytes), (_, image)| {
+        (
+            count.saturating_add(1),
+            bytes.saturating_add(image.data.as_ref().map_or(0, Vec::len)),
+        )
+    })
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_soak_counts_with_runtime(
+    registry: &SceneRegistry,
+    effect_state: &RuntimeEffectRenderState,
+    additive_cache: &additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &Assets<additive_material::CrystalAdditiveMaterial>,
+    images: &Assets<Image>,
+    native: &native_ingest::NativeInbound,
+    map_atlases: &RuntimeMapRenderAtlases,
+) -> NativeSoakCounts {
+    let mut counts = native_soak_counts(registry, effect_state, additive_cache, additive_materials);
+    let (image_asset_count, image_data_bytes) = native_image_asset_counts(images);
+    let queue = native.diagnostics();
+    counts.image_asset_count = image_asset_count;
+    counts.image_data_bytes = image_data_bytes;
+    counts.native_queue_messages = queue.message_count;
+    counts.native_queue_bytes = queue.retained_bytes;
+    counts.map_render_images = map_atlases.images.len();
+    counts.map_render_url_image_keys = map_atlases.url_image_keys.len();
+    counts.map_render_layouts = map_atlases.layouts.len();
+    counts.map_render_layout_rect_pages = map_atlases.layout_rects.len();
+    counts
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -306,6 +618,7 @@ fn native_soak_metrics_json(
     process_id: u32,
     timestamp_ms: u64,
     counts: &NativeSoakCounts,
+    image_paths: &NativeImagePathTelemetry,
 ) -> String {
     serde_json::json!({
         "processId": process_id,
@@ -326,6 +639,23 @@ fn native_soak_metrics_json(
         "additiveCacheEntries": counts.additive_cache_entries,
         "additiveCacheLiveEntries": counts.additive_cache_live_entries,
         "additiveAssetCount": counts.additive_asset_count,
+        "imageAssetCount": counts.image_asset_count,
+        "imageDataBytes": counts.image_data_bytes,
+        "nativeQueueMessages": counts.native_queue_messages,
+        "nativeQueueBytes": counts.native_queue_bytes,
+        "mapRenderImages": counts.map_render_images,
+        "mapRenderUrlImageKeys": counts.map_render_url_image_keys,
+        "mapRenderLayouts": counts.map_render_layouts,
+        "mapRenderLayoutRectPages": counts.map_render_layout_rect_pages,
+        "fontAtlasKeys": counts.font_atlas_keys,
+        "fontAtlasPages": counts.font_atlas_pages,
+        "fontAtlasBytes": counts.font_atlas_bytes,
+        "fontAtlasFontIds": counts.font_atlas_font_ids,
+        "fontAtlasFontSizeBits": counts.font_atlas_font_size_bits,
+        "imagePathBuckets": image_paths.buckets.iter().map(|(path, value)| serde_json::json!({"path": path, "count": value.count, "bytes": value.bytes})).collect::<Vec<_>>(),
+        "largestImagePaths": image_paths.largest.iter().map(|(path, bytes)| serde_json::json!({"path": path, "bytes": bytes})).collect::<Vec<_>>(),
+        "duplicateImagePaths": image_paths.duplicate_paths.iter().map(|(path, value)| serde_json::json!({"path": path, "count": value.count, "bytes": value.bytes})).collect::<Vec<_>>(),
+        "untrackedImages": {"count": image_paths.untracked_assets.count, "bytes": image_paths.untracked_assets.bytes},
     })
     .to_string()
 }
@@ -341,6 +671,11 @@ fn emit_native_soak_metrics(
     effect_state: Res<RuntimeEffectRenderState>,
     additive_cache: Res<additive_material::CrystalAdditiveMaterialCache>,
     additive_materials: Res<Assets<additive_material::CrystalAdditiveMaterial>>,
+    images: Res<Assets<Image>>,
+    asset_server: Res<AssetServer>,
+    native: Res<native_ingest::NativeInbound>,
+    map_atlases: Res<RuntimeMapRenderAtlases>,
+    #[cfg(feature = "native-font-atlas-telemetry")] font_atlases: Option<Res<FontAtlasSet>>,
     mut clock: Local<NativeSoakMetricsClock>,
 ) {
     if !clock.initialized {
@@ -362,13 +697,26 @@ fn emit_native_soak_metrics(
     }
     clock.last_sample_ms = Some(elapsed_ms);
 
-    let counts = native_soak_counts(
+    let mut counts = native_soak_counts_with_runtime(
         &registry,
         &effect_state,
         &additive_cache,
         &additive_materials,
+        &images,
+        &native,
+        &map_atlases,
     );
-    let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts);
+    #[cfg(feature = "native-font-atlas-telemetry")]
+    let font_atlas_counts = native_font_atlas_counts(font_atlases.as_deref(), &images);
+    #[cfg(not(feature = "native-font-atlas-telemetry"))]
+    let font_atlas_counts = native_font_atlas_counts(&images);
+    counts.font_atlas_keys = font_atlas_counts.0;
+    counts.font_atlas_pages = font_atlas_counts.1;
+    counts.font_atlas_bytes = font_atlas_counts.2;
+    counts.font_atlas_font_ids = font_atlas_counts.3;
+    counts.font_atlas_font_size_bits = font_atlas_counts.4;
+    let image_paths = native_image_path_telemetry(&images, &asset_server);
+    let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts, &image_paths);
     eprintln!("[native-soak] {line}");
 }
 
@@ -398,6 +746,10 @@ struct MapRenderSceneCache {
 struct MapRenderTileHandle {
     entity: Entity,
     last_seen_generation: u64,
+    /// Additive map sprites own a cache entry keyed by their stable tile key.
+    /// Keep this ownership bit with the ECS handle so a viewport eviction can
+    /// release the material (and its strong image handle) at the same time.
+    additive: bool,
 }
 
 /// One preloaded phase of a Crystal map animation family. Every family frame
@@ -517,6 +869,8 @@ struct MirLightingComposite;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct WorldSnapshot {
+    #[serde(default)]
+    pub(crate) map_file_name: Option<String>,
     #[serde(default)]
     pub(crate) map_title: Option<String>,
     #[serde(default)]
@@ -677,6 +1031,12 @@ struct EntityRenderEntry {
     grid_x: Option<i32>,
     #[serde(default)]
     grid_y: Option<i32>,
+    /// Optional Crystal `MapLocation` equivalent used only for y-sort during
+    /// an active movement action. X/Y placement still uses `grid_x/grid_y`.
+    #[serde(default)]
+    motion_sort_x: Option<i32>,
+    #[serde(default)]
+    motion_sort_y: Option<i32>,
     #[serde(default)]
     layers: Vec<EntityRenderLayer>,
     // Opt-in (`?bevyEntityInterp=1`) per-entity sub-cell motion window, in CSS-px
@@ -990,9 +1350,175 @@ pub fn get_mir2_renderer_backend() -> String {
     COMPILED_RENDER_BACKEND.to_owned()
 }
 
+fn web_startup_ui_mode() -> webgl2_shared_ui::StartupUiMode {
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    {
+        quest_ui_host::startup_mode()
+    }
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    {
+        webgl2_shared_ui::StartupUiMode {
+            requested: false,
+            shared_webgl2: false,
+        }
+    }
+}
+
+#[wasm_bindgen(js_name = getMir2RuntimeCanvasSelector)]
+pub fn get_mir2_runtime_canvas_selector() -> String {
+    webgl2_shared_ui::runtime_canvas_selector(web_startup_ui_mode()).to_owned()
+}
+
+#[wasm_bindgen(js_name = getMir2RuntimeUiCapabilities)]
+pub fn get_mir2_runtime_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_json()
+}
+
+#[wasm_bindgen(js_name = getMir2HudUiCapabilities)]
+pub fn get_mir2_hud_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_hud_json()
+}
+
+#[wasm_bindgen(js_name = getMir2CharacterUiCapabilities)]
+pub fn get_mir2_character_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_character_json()
+}
+
+#[wasm_bindgen(js_name = getMir2SpellsUiCapabilities)]
+pub fn get_mir2_spells_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_spells_json()
+}
+
+#[wasm_bindgen(js_name = getMir2StorageUiCapabilities)]
+pub fn get_mir2_storage_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_storage_json()
+}
+
+#[wasm_bindgen(js_name = getMir2NpcShopUiCapabilities)]
+pub fn get_mir2_npc_shop_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_npc_shop_json()
+}
+
+/// Pure shared NPC Gold Buy decision; it does not send or mutate player state.
+#[wasm_bindgen(js_name = getMir2NpcGoldBuyPlan)]
+pub fn get_mir2_npc_gold_buy_plan(input_json: &str) -> String {
+    mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy_json(input_json)
+}
+
+/// Pure ordinary Quest route selection; the host retains movement authority.
+#[cfg(feature = "web-quest-ui")]
+#[wasm_bindgen(js_name = getMir2QuestRoutePlan)]
+pub fn get_mir2_quest_route_plan(query_json: &str, blocked_bits: &[u8]) -> String {
+    quest_route_plan::plan(query_json, blocked_bits)
+}
+
+/// Additive local HUD preference support; the existing strict capabilities JSON is unchanged.
+#[wasm_bindgen(js_name = getMir2HudPreferencesVersion)]
+pub fn get_mir2_hud_preferences_version() -> u32 { if cfg!(feature = "web-quest-ui") { 1 } else { 0 } }
+
+#[wasm_bindgen(js_name = getMir2QuestNameTargetsVersion)]
+pub fn get_mir2_quest_name_targets_version() -> u32 { if cfg!(feature = "web-quest-ui") { 1 } else { 0 } }
+
+/// Read-only identities from the current shared Quest tracker. Thin ABI0 remains explicitly unknown.
+#[wasm_bindgen(js_name = getMir2QuestNameTargets)]
+pub fn get_mir2_quest_name_targets() -> String {
+    #[cfg(all(feature = "web-quest-ui", target_arch = "wasm32"))]
+    { return quest_ui_host::quest_name_targets_json(); }
+    #[cfg(not(all(feature = "web-quest-ui", target_arch = "wasm32")))]
+    { "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into() }
+}
+
+#[wasm_bindgen(js_name = getMir2CombatModeKeysVersion)]
+pub fn get_mir2_combat_mode_keys_version() -> u32 { if cfg!(feature = "web-item-tooltip") { 1 } else { 0 } }
+
+/// Local Native reducer only; the browser's final socket gate retains all authority.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = processMir2CombatModeKeys)]
+pub fn process_mir2_combat_mode_keys(input: &str) -> String { combat_modes_host::process_json(input) }
+
+/// Read-only Crystal item document, shared with the Native tooltip painter.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2ItemTooltipDocument)]
+pub fn get_mir2_item_tooltip_document(query_json: &str) -> String {
+    item_tooltip_query::query_item_tooltip_json(query_json)
+}
+
+/// Exact unique Crystal template lookup for readonly browser item labels.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2ItemCatalogInfo)]
+pub fn get_mir2_item_catalog_info(query_json: &str) -> String {
+    item_tooltip_query::query_item_catalog_json(query_json)
+}
+
+/// Read-only character rows from the same Native Status/State rule.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2CharacterStatsDocument)]
+pub fn get_mir2_character_stats_document(query_json: &str) -> String {
+    item_tooltip_query::query_character_stats_json(query_json)
+}
+
+/// Read-only bar metadata from the same Native learned-skill normalization.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2SkillBarDocument)]
+pub fn get_mir2_skill_bar_document(query_json: &str) -> String {
+    skill_bar_query::query_skill_bar_json(query_json)
+}
+
+#[cfg(test)]
+#[test]
+fn npc_gold_buy_query_is_data_only_and_rejects_incomplete_models() {
+    let result: serde_json::Value = serde_json::from_str(&get_mir2_npc_gold_buy_plan("{}")).unwrap();
+    assert_eq!(result["canBuy"], false);
+    assert_eq!(result["blockReason"], "invalidInput");
+    assert!(result["command"].is_null());
+}
+
+#[wasm_bindgen(js_name = getMir2MailUiCapabilities)]
+pub fn get_mir2_mail_ui_capabilities() -> String {
+    let compiled = cfg!(all(target_arch = "wasm32", feature = "web-quest-ui"))
+        && (COMPILED_RENDER_BACKEND == "webgpu"
+            || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    let startup = { let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2) };
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    let startup = false;
+    serde_json::json!({"schemaVersion":1,"mailPageAbiVersion":u8::from(compiled),
+        "mailIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup}).to_string()
+}
+
+#[wasm_bindgen(js_name = getMir2MailComposeUiCapabilities)]
+pub fn get_mir2_mail_compose_ui_capabilities() -> String {
+    let compiled = cfg!(all(target_arch = "wasm32", feature = "web-quest-ui"))
+        && (COMPILED_RENDER_BACKEND == "webgpu"
+            || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    let startup = { let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2) };
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    let startup = false;
+    serde_json::json!({"schemaVersion":1,"mailComposeUiAbiVersion":u8::from(compiled),
+        "textAdapterAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup}).to_string()
+}
+#[wasm_bindgen(js_name = getMir2HudSourceGeometry)]
+pub fn get_mir2_hud_source_geometry() -> String {
+    #[cfg(feature = "web-quest-ui")]
+    return serde_json::to_string(&mir2_client_bevy::crystal_ui::shared_hud::main_hud_plan(
+        &mir2_client_bevy::read_model::UiReadModel::default(),
+    ))
+    .unwrap_or_default();
+    #[cfg(not(feature = "web-quest-ui"))]
+    return "null".to_owned();
+}
+
 #[wasm_bindgen(js_name = resolveMir2EntityAnimationPoses)]
 pub fn resolve_mir2_entity_animation_poses(snapshot_json: String) -> String {
     entity_animation_bridge::resolve_json(&snapshot_json)
+}
+
+#[wasm_bindgen(js_name = getMir2EntityActionPose)]
+pub fn get_mir2_entity_action_pose(query_json: String) -> String {
+    entity_animation_bridge::action_pose_json(&query_json)
 }
 
 #[wasm_bindgen(js_name = resetMir2EntityAnimations)]
@@ -1213,7 +1739,8 @@ pub fn set_mir2_map_camera_offset(x: f32, y: f32) {
 /// camera scroll at display refresh rate (instead of the ~33Hz React `motionNow`
 /// clock). Opt-in: only the `?bevySelfCamera=1` producer calls this. Mirrors
 /// `EntityMotionSnapshot` (`fromX,fromY,toX,toY,startedAt,expiresAt`). When the step
-/// has elapsed (`now >= expires_ms`) the camera falls back to origin.
+/// has elapsed the pose stays at its endpoint until the retained map centre
+/// catches up or the producer clears/replaces the window.
 #[wasm_bindgen(js_name = setMir2SelfCameraMotion)]
 pub fn set_mir2_self_camera_motion(
     from_x: f32,
@@ -1223,8 +1750,7 @@ pub fn set_mir2_self_camera_motion(
     started_ms: f64,
     expires_ms: f64,
 ) {
-    PENDING_SELF_CAMERA_MOTION
-        .with(|cell| cell.set(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms))));
+    set_pending_self_camera_motion(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)));
 }
 
 /// Clear the retained self-camera interpolation window immediately.
@@ -1235,7 +1761,7 @@ pub fn set_mir2_self_camera_motion(
 /// source tile.
 #[wasm_bindgen(js_name = clearMir2SelfCameraMotion)]
 pub fn clear_mir2_self_camera_motion() {
-    PENDING_SELF_CAMERA_MOTION.with(|cell| cell.set(None));
+    set_pending_self_camera_motion(None);
 }
 
 /// Window/surface configuration for a Mir2 runtime host.
@@ -1253,6 +1779,8 @@ pub struct RuntimeWindowSpec {
     pub transparent: bool,
     pub fit_canvas_to_parent: bool,
     pub prevent_default_event_handling: bool,
+    /// Hosts with an in-game quit confirmation handle OS close requests themselves.
+    pub close_when_requested: bool,
     pub composite_alpha_mode: CompositeAlphaMode,
     /// Native hosts: filesystem root the AssetServer resolves relative paths
     /// against (e.g. the repo `apps/web` so `public/` atlas images load). WASM
@@ -1262,16 +1790,24 @@ pub struct RuntimeWindowSpec {
 }
 
 impl RuntimeWindowSpec {
-    /// Web WASM host: transparent overlay over the DOM map/floor/UI layers.
+    /// Web WASM host: world canvas ordinarily, fixed stage UI canvas for shared GL2.
     pub fn web() -> Self {
+        // The ordinary world canvas shares React's mouse routing. Cancelling
+        // pointerdown in winit suppresses the compatibility mousedown/up events
+        // that route requires. Only the fixed stage shared-UI surface owns
+        // those gestures; secondary UI windows keep their own prevention.
+        let startup = web_startup_ui_mode();
+        let prevent_default_event_handling = startup.shared_webgl2;
+
         Self {
-            canvas_selector: Some("#mir2-web3-canvas".to_owned()),
+            canvas_selector: Some(webgl2_shared_ui::runtime_canvas_selector(startup).to_owned()),
             title: "mir2-web3".to_owned(),
             width: 1280,
             height: 720,
             transparent: true,
             fit_canvas_to_parent: true,
-            prevent_default_event_handling: true,
+            prevent_default_event_handling,
+            close_when_requested: true,
             composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
             asset_root: ".".to_owned(),
         }
@@ -1287,6 +1823,7 @@ impl RuntimeWindowSpec {
             transparent: false,
             fit_canvas_to_parent: false,
             prevent_default_event_handling: false,
+            close_when_requested: true,
             composite_alpha_mode: CompositeAlphaMode::Auto,
             asset_root: ".".to_owned(),
         }
@@ -1308,6 +1845,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeMapRenderAtlases::default())
         .insert_resource(RuntimeEffectRenderState::default())
         .insert_resource(RuntimeLightingRenderState::default())
+        .init_resource::<capture_context::RenderedCaptureContext>()
         .insert_resource(RuntimeLightingSceneResetTracker::default())
         .insert_resource(RuntimeMapCameraOffset::default())
         .insert_resource(SceneRegistry::default())
@@ -1324,7 +1862,10 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(mir2_client_bevy::shop::ShopModel::default())
         .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
         .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+        .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+        .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
         .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
+        .init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>()
         .insert_resource(mir2_client_bevy::social::SocialModel::default())
         .insert_resource(PendingOperations::default())
         .insert_resource(InventoryOperationFeedback::default())
@@ -1346,11 +1887,15 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 })
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
+                    close_when_requested: spec.close_when_requested,
                     primary_window: Some(Window {
                         canvas: spec.canvas_selector.clone(),
                         composite_alpha_mode: spec.composite_alpha_mode,
                         fit_canvas_to_parent: spec.fit_canvas_to_parent,
                         prevent_default_event_handling: spec.prevent_default_event_handling,
+                        // The web canvas is a fixed virtual stage. Browser DPR changes
+                        // must not halve its logical size while keeping its backing
+                        // dimensions unchanged. Desktop windows retain the OS scale.
                         resolution: WindowResolution::new(spec.width, spec.height),
                         title: spec.title,
                         transparent: spec.transparent,
@@ -1361,6 +1906,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         )
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
+            Mir2NativeMailServiceIngestPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
             lighting::CrystalMultiplyMaterialPlugin,
             motion::CrystalMoveClockPlugin,
@@ -1373,6 +1919,8 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             Update,
             PendingLifecycleSet::Ingest.before(PendingLifecycleSet::UiReset),
         )
+        .configure_sets(Update,NativeMailServiceIngestSet.after(ingest_pending_mail_model)
+            .before(ingest_pending_shop_model))
         .add_systems(
             Update,
             (
@@ -1434,7 +1982,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_storage_patch,
                 ingest_pending_storage_items,
                 ingest_pending_storage_model,
-                ingest_pending_skill_model,
+                (ingest_pending_hero_model, ingest_pending_skill_model).chain(),
                 ingest_pending_social_model,
                 ingest_pending_chat_line,
             )
@@ -1455,15 +2003,44 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 begin_presentation_pose_frame,
                 sync_entity_render_layers,
                 follow_player,
+                follow_lighting_camera,
                 publish_presentation_pose_frame,
             )
-                .chain(),
+                .chain()
+                .in_set(RuntimePresentationSet),
         );
+    app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(Update, npc_purchase_economy::apply_pending_native_npc_economy
+        .after(ingest_pending_chat_line)
+        .after(ingest_pending_lighting_render_state)
+        .after(NativeMailServiceIngestSet)
+        .before(PendingLifecycleSet::UiReset)
+        .before(RuntimePresentationSet)
+        .in_set(PendingLifecycleSet::Ingest));
+    combat_input_host::install(&mut app);
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(Last, render_diagnostics::capture_committed_frame);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
         emit_native_soak_metrics.after(publish_presentation_pose_frame),
     );
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    {
+        let ui_mode = quest_ui_host::startup_mode();
+        if ui_mode.requested {
+            if ui_mode.shared_webgl2 {
+                #[cfg(feature = "webgl2-shared-ui")]
+                app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
+            }
+            quest_ui_host::install(&mut app, ui_mode.shared_webgl2);
+            #[cfg(not(all(feature = "webgl2", not(feature = "webgpu"), not(feature = "webgl2-shared-ui"))))]
+            storage_ui_host::install(&mut app);
+            #[cfg(not(all(feature = "webgl2", not(feature = "webgpu"), not(feature = "webgl2-shared-ui"))))]
+            npc_shop_ui_host::install(&mut app);
+        }
+    }
     app
 }
 
@@ -1479,9 +2056,65 @@ pub fn boot_mir2_runtime() {
     app.run();
 }
 
-fn setup_scene(mut commands: Commands) {
-    commands.spawn((Camera2d, MainCamera));
+fn setup_scene(
+    mut commands: Commands,
+    #[cfg(feature = "webgl2-shared-ui")] prototype: Option<
+        Res<webgl2_shared_ui::WebGl2SharedUiPrototype>,
+    >,
+) {
+    commands.spawn((
+        Camera2d,
+        Camera {
+            is_active: {
+                #[cfg(feature = "webgl2-shared-ui")]
+                {
+                    prototype.is_none()
+                }
+                #[cfg(not(feature = "webgl2-shared-ui"))]
+                {
+                    true
+                }
+            },
+            ..Default::default()
+        },
+        MainCamera,
+    ));
     publish_status("scene-ready", "Camera ready");
+}
+
+#[cfg(all(test, feature = "web-quest-ui"))]
+mod shared_ui_camera_tests {
+    use super::*;
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn non_wasm_web_spec_uses_the_world_canvas_selector() {
+        let selector = get_mir2_runtime_canvas_selector();
+        assert_eq!(selector, "#mir2-web3-canvas");
+        assert_eq!(RuntimeWindowSpec::web().canvas_selector.as_deref(), Some(selector.as_str()));
+    }
+
+    #[test]
+    fn ordinary_world_camera_remains_active() {
+        let mut app = App::new();
+        app.add_systems(Startup, setup_scene);
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<&Camera, With<MainCamera>>();
+        assert!(query.single(world).unwrap().is_active);
+    }
+
+    #[cfg(feature = "webgl2-shared-ui")]
+    #[test]
+    fn world_camera_is_inactive_for_shared_webgl2() {
+        let mut app = App::new();
+        app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
+        app.add_systems(Startup, setup_scene);
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<&Camera, With<MainCamera>>();
+        assert!(!query.single(world).unwrap().is_active);
+    }
 }
 
 fn ingest_pending_world_state(
@@ -1636,6 +2269,7 @@ fn ingest_pending_entity_render_atlases(
 fn ingest_pending_ui_read_model(
     mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
     native: Res<native_ingest::NativeInbound>,
+    ingress: Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
 ) {
     native.drain_matching(
         |message| matches!(message, native_ingest::NativeInboundMessage::UiReadModel(_)),
@@ -1643,6 +2277,9 @@ fn ingest_pending_ui_read_model(
             if let native_ingest::NativeInboundMessage::UiReadModel(json) = message {
                 match serde_json::from_str::<mir2_client_bevy::read_model::UiReadModel>(&json) {
                     Ok(model) => {
+                        if cfg!(target_arch = "wasm32") && ingress.is_some() {
+                            return;
+                        }
                         *ui = model;
                     }
                     Err(error) => {
@@ -1671,6 +2308,7 @@ fn ingest_pending_wallet_patch(
     mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
     mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
     native: Res<native_ingest::NativeInbound>,
+    ingress: Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
 ) {
     native.drain_matching(
         |message| matches!(message, native_ingest::NativeInboundMessage::WalletPatch(_)),
@@ -1678,6 +2316,9 @@ fn ingest_pending_wallet_patch(
             if let native_ingest::NativeInboundMessage::WalletPatch(json) = message {
                 match serde_json::from_str::<WalletPatch>(&json) {
                     Ok(patch) if patch.gold.is_some() || patch.credit.is_some() => {
+                        if cfg!(target_arch = "wasm32") && ingress.is_some() {
+                            return;
+                        }
                         if let Some(gold) = patch.gold {
                             ui.player.gold = gold;
                             inventory.gold = gold;
@@ -1875,7 +2516,9 @@ fn ingest_pending_scene_and_data_reset(
 fn discard_pending_scene_thread_locals() {
     PENDING_WORLD_STATE.with(|pending| *pending.borrow_mut() = None);
     PENDING_ENTITY_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
-    PENDING_ENTITY_RENDER_ATLASES.with(|pending| pending.borrow_mut().clear());
+    // Entity atlases are immutable process-lifetime assets.  Scene/session
+    // resets replace the models that reference them, but must not discard the
+    // only uploaded copy: the native host loads these pages once at startup.
     PENDING_MAP_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
     PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| pending.borrow_mut().clear());
     PENDING_MAP_CAMERA_OFFSET.with(|offset| offset.set((0.0, 0.0)));
@@ -1888,13 +2531,13 @@ fn apply_scene_reset_to_runtime(
     mut tracker: ResMut<RuntimeSceneResetTracker>,
     mut state: ResMut<RuntimeWorldState>,
     mut entity_render_state: ResMut<RuntimeEntityRenderState>,
-    mut entity_atlases: ResMut<RuntimeEntityRenderAtlases>,
     mut map_render_state: ResMut<RuntimeMapRenderState>,
     mut map_atlases: ResMut<RuntimeMapRenderAtlases>,
     mut effect_render_state: ResMut<RuntimeEffectRenderState>,
     mut map_camera_offset: ResMut<RuntimeMapCameraOffset>,
     mut snapshots: ResMut<interpolation::SnapshotBuffer>,
     mut motion_table: ResMut<motion::EntityMotionTable>,
+    mut local_motion: Option<ResMut<local_motion::LocalMotionPresentationShadow>>,
     mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
     mut registry: ResMut<SceneRegistry>,
     mut commands: Commands,
@@ -1908,14 +2551,22 @@ fn apply_scene_reset_to_runtime(
 
     state.snapshot = None;
     entity_render_state.snapshot = None;
-    entity_atlases.images.clear();
+    // RuntimeEntityRenderAtlases intentionally survives this boundary. The
+    // Windows host uploads entity atlas pages once per process, while players
+    // may cross maps or return to character selection many times.
     map_render_state.snapshot = None;
     *map_atlases = RuntimeMapRenderAtlases::default();
     effect_render_state.snapshot = None;
     *map_camera_offset = RuntimeMapCameraOffset::default();
     *snapshots = interpolation::SnapshotBuffer::default();
     *motion_table = motion::EntityMotionTable::default();
-    *presentation_poses = presentation_pose::PresentationPoseBuffer::default();
+    if let Some(local_motion) = local_motion.as_deref_mut() {
+        let keep_current_command = local_motion.clear_stale_for_scene_reset();
+        clear_stale_self_camera_motion_for_scene_reset(keep_current_command);
+    } else {
+        clear_mir2_self_camera_motion();
+    }
+    presentation_poses.reset_scene();
 
     clear_scene_registry(
         &mut commands,
@@ -1986,26 +2637,49 @@ fn apply_session_reset_to_runtime_models(
     mut entities: ResMut<mir2_client_bevy::entities::EntityModelSet>,
     mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
     mut chat: ResMut<mir2_client_bevy::chat::ChatModel>,
-    mut mail: ResMut<mir2_client_bevy::mail::MailModel>,
+    (mut mail, mut mail_service): (
+        ResMut<mir2_client_bevy::mail::MailModel>,
+        ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
+    ),
     mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
     mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
     mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
-    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    skill_state: (
+        ResMut<mir2_client_bevy::skill_model::SkillModel>,
+        Option<ResMut<mir2_client_bevy::skill_model::SkillModelReceipts>>,
+        Option<ResMut<mir2_client_bevy::hero_model::HeroModel>>,
+        Option<ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>>,
+    ),
     mut social: ResMut<mir2_client_bevy::social::SocialModel>,
-    mut inventory_feedback: ResMut<InventoryOperationFeedback>,
-    mut preservation: ResMut<SessionResetGameShopPreservation>,
+    runtime_reset_state: (
+        ResMut<InventoryOperationFeedback>,
+        ResMut<SessionResetGameShopPreservation>,
+        Option<ResMut<local_motion::LocalMotionPresentationShadow>>,
+        Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
+    ),
 ) {
+    let (mut skills, mut receipts, mut hero, mut hero_receipts) = skill_state;
+    let (mut inventory_feedback, mut preservation, mut local_motion, ui_ingress) =
+        runtime_reset_state;
     if tracker.0 == reset.0 {
         return;
     }
     tracker.0 = reset.0;
-    *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    if let Some(receipts) = receipts.as_deref_mut() {
+        receipts.0.clear();
+    }
+    // Portable complete/legacy snapshots use one generation-controlled ingress.
+    // A native protocol reset cannot mutate its player outside that owner.
+    if !cfg!(target_arch = "wasm32") || ui_ingress.is_none() {
+        *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    }
     surface_signals.npc_shop_open_requested = false;
     *map = mir2_client_bevy::map::MapModel::default();
     *entities = mir2_client_bevy::entities::EntityModelSet::default();
     *inventory = mir2_client_bevy::inventory::InventoryModel::default();
     *chat = mir2_client_bevy::chat::ChatModel::default();
     *mail = mir2_client_bevy::mail::MailModel::default();
+    mail_service.clear_session();
     *shop = mir2_client_bevy::shop::ShopModel::default();
     let preserved_receipt = preservation.receipt_for(reset.0).cloned();
     if let Some(receipt) = preserved_receipt.as_ref() {
@@ -2016,6 +2690,16 @@ fn apply_session_reset_to_runtime_models(
     }
     *storage = mir2_client_bevy::storage::StorageModel::default();
     *skills = mir2_client_bevy::skill_model::SkillModel::default();
+    if let Some(hero) = hero.as_deref_mut() {
+        *hero = Default::default();
+    }
+    if let Some(receipts) = hero_receipts.as_deref_mut() {
+        receipts.0.clear();
+    }
+    if let Some(local_motion) = local_motion.as_deref_mut() {
+        local_motion.clear_for_session_reset();
+    }
+    clear_mir2_self_camera_motion();
     social.clear_session();
     inventory_feedback.last = None;
 }
@@ -2049,8 +2733,27 @@ fn ingest_pending_mail_model(
                     serde_json::from_value::<mir2_client_bevy::mail::MailModel>(value)
                         .map_err(|error| error.to_string())
                 }) {
-                    Ok(model) => {
+                    Ok(mut model) => {
                         let old = mail.clone();
+                        for incoming in &mut model.mails {
+                            if incoming.metadata_known {
+                                continue;
+                            }
+                            let Some(previous) = old.mails.iter().find(|previous| {
+                                previous.metadata_known
+                                    && previous.id == incoming.id
+                                    && previous.sender == incoming.sender
+                            }) else {
+                                continue;
+                            };
+                            // Stage5 snapshots omit Crystal's per-message reply/date
+                            // metadata. Retain only known packet metadata for the
+                            // same sender and mail identity; every mailbox state field
+                            // still comes from the authoritative snapshot.
+                            incoming.can_reply = previous.can_reply;
+                            incoming.date_sent_binary_datetime = previous.date_sent_binary_datetime;
+                            incoming.metadata_known = true;
+                        }
                         let selected_valid = model
                             .selected_id
                             .and_then(|id| model.mails.iter().find(|m| m.id == id).map(|_| id))
@@ -2072,6 +2775,45 @@ fn ingest_pending_mail_model(
             }
         },
     );
+}
+
+fn ingest_pending_mail_service(
+    mut inbox: ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::MailService(_)
+            | native_ingest::NativeInboundMessage::MailServiceStreamStarted(_)
+            | native_ingest::NativeInboundMessage::MailQuoteReceipt(_)
+            | native_ingest::NativeInboundMessage::MailSendReceipt(_)
+            | native_ingest::NativeInboundMessage::MailSendAcknowledgement(_)),
+        |message| {
+            let critical_epoch=match &message{
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt)=>Some(receipt.ticket.epoch()),
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt)=>Some(receipt.ticket.epoch()),
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack)=>Some(ack.ticket.epoch()),
+                native_ingest::NativeInboundMessage::MailService(delivery) if matches!(delivery.event,mir2_client_bevy::mail_service::MailServiceEvent::Cost{..})=>Some(delivery.epoch),
+                _=>None,
+            };
+            let accepted = match message {
+                native_ingest::NativeInboundMessage::MailServiceStreamStarted(marker) => inbox.start_stream(marker),
+                native_ingest::NativeInboundMessage::MailService(delivery) => inbox.push_delivery(delivery),
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt)=>inbox.push_quote_receipt(receipt),
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt)=>inbox.push_send_receipt(receipt),
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack)=>inbox.push_send_acknowledgement(ack),
+                _ => return,
+            };
+            if !accepted {
+                if let Some(epoch)=critical_epoch{native.fail_mail_stream(epoch);inbox.fail_stream(epoch);}
+                publish_status("native-mail-service-overflow", "mail service delivery rejected");
+                eprintln!("[runtime] mail service delivery rejected");
+            }
+        },
+    );
+    // A marker drained in this same pass must not erase an already-poisoned
+    // producing stream merely because the inbox had not seen its epoch yet.
+    if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
 }
 
 fn ingest_pending_shop_model(
@@ -2102,6 +2844,7 @@ fn ingest_pending_shop_model(
                             });
                         shop.goods = model.goods;
                         shop.selected_id = selected_valid;
+                        shop.hide_added_stats = model.hide_added_stats;
                         reconcile_shop_refresh(&mut pending, &old, &shop);
                         mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Shop);
                     }
@@ -2282,6 +3025,14 @@ fn ingest_pending_npc_shop_service(
     );
 }
 
+#[derive(Debug, Deserialize)]
+struct StoragePasswordResult {
+    operation: String,
+    result: i32,
+    #[serde(default)]
+    removing: bool,
+}
+
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 struct StorageModelPatch {
@@ -2291,6 +3042,7 @@ struct StorageModelPatch {
     has_expanded: Option<bool>,
     expiry: Option<i64>,
     ack: Option<StorageOperationAck>,
+    password_result: Option<StoragePasswordResult>,
 }
 
 impl StorageModelPatch {
@@ -2301,6 +3053,7 @@ impl StorageModelPatch {
             && self.has_expanded.is_none()
             && self.expiry.is_none()
             && self.ack.is_none()
+            && self.password_result.is_none()
     }
 
     fn apply_to(&self, storage: &mut mir2_client_bevy::storage::StorageModel) {
@@ -2322,11 +3075,47 @@ impl StorageModelPatch {
     }
 }
 
+/// Crystal's storage-result handlers emit system chat only for explicit result
+/// packets. Ordinary storage snapshots must remain silent, even when their
+/// password fields change.
+fn storage_password_result_message(
+    result: &StoragePasswordResult,
+    had_password: bool,
+) -> Option<&'static str> {
+    match result.operation.as_str() {
+        "unlock" => match result.result {
+            1 => Some("Password not acceptable."),
+            2 => Some("Incorrect storage password."),
+            3 => Some("Storage is not available."),
+            _ => None,
+        },
+        "password" => match result.result {
+            0 => Some("Storage is not available."),
+            1 | 3 => Some("Password not acceptable."),
+            2 => Some("Incorrect storage password."),
+            5 => Some("No storage password is set."),
+            4 if result.removing => Some("Storage password removed."),
+            4 if had_password => Some("Storage password changed."),
+            4 => Some("Storage password set."),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn successful_storage_password_removal(result: Option<&StoragePasswordResult>) -> bool {
+    result.is_some_and(|result| {
+        result.operation == "password" && result.result == 4 && result.removing
+    })
+}
+
 fn ingest_pending_storage_patch(
     mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
     inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
     mut revisions: ResMut<AuthoritativeModelRevisions>,
     mut pending: ResMut<PendingOperations>,
+    mut chat: ResMut<mir2_client_bevy::chat::ChatModel>,
+    mut storage_feedback: Option<ResMut<mir2_client_bevy::storage::StorageUiFeedback>>,
     native: Res<native_ingest::NativeInbound>,
 ) {
     native.drain_matching(
@@ -2345,6 +3134,24 @@ fn ingest_pending_storage_patch(
                             apply_storage_operation_ack(&mut pending, ack);
                         }
                         patch.apply_to(&mut storage);
+                        if let Some(text) = patch.password_result.as_ref().and_then(|result| {
+                            storage_password_result_message(result, old.has_password)
+                        }) {
+                            chat.push(mir2_client_bevy::chat::ChatLine {
+                                text: text.to_owned(),
+                                channel: "system".to_owned(),
+                            });
+                        }
+                        if successful_storage_password_removal(patch.password_result.as_ref()) {
+                            // Crystal immediately relocks and hides StorageDialog after a
+                            // successful removal, even though the result metadata says it
+                            // was unlocked while processing the request. The native host
+                            // owns the optional one-shot close latch.
+                            storage.unlocked = false;
+                            if let Some(storage_feedback) = storage_feedback.as_deref_mut() {
+                                storage_feedback.close_requested = true;
+                            }
+                        }
                         reconcile_storage_refresh(&mut pending, &inventory, &old, &storage);
                         mark_authoritative_refresh(
                             &mut revisions,
@@ -2488,16 +3295,71 @@ fn ingest_pending_storage_model(
     );
 }
 
+fn ingest_pending_hero_model(world: &mut World) {
+    let mut messages = Vec::new();
+    world.resource::<native_ingest::NativeInbound>().drain_matching(
+        |message| match message {
+            native_ingest::NativeInboundMessage::HeroModel(_)
+            | native_ingest::NativeInboundMessage::HeroModelReceipt(_) => true,
+            #[cfg(not(target_arch = "wasm32"))]
+            native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_) => true,
+            _ => false,
+        },
+        |message| messages.push(message),
+    );
+    for message in messages {
+        #[cfg(not(target_arch = "wasm32"))]
+        if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update) = message {
+            npc_purchase_economy::apply_native_hero_owner_update(world, update);
+            continue;
+        }
+        if let native_ingest::NativeInboundMessage::HeroModel(json)
+        | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
+        {
+            match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
+                Ok(model) => {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    npc_purchase_economy::apply_native_hero_packet_model(world, model);
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        if model.skill_key_ack.is_some() || model.item_result_receipt {
+                            if let Some(mut receipts) = world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
+                                receipts.0.push_back(model.clone());
+                            }
+                        }
+                        world.insert_resource(model);
+                    }
+                }
+                Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
+            }
+        }
+    }
+}
+
 fn ingest_pending_skill_model(
     mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
     native: Res<native_ingest::NativeInbound>,
+    mut receipts: Option<ResMut<mir2_client_bevy::skill_model::SkillModelReceipts>>,
 ) {
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::SkillModel(_)),
         |message| {
-            if let native_ingest::NativeInboundMessage::SkillModel(json) = message {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::SkillModel(_)
+                    | native_ingest::NativeInboundMessage::SkillModelReceipt(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::SkillModel(json)
+            | native_ingest::NativeInboundMessage::SkillModelReceipt(json) = message
+            {
                 match serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(&json) {
                     Ok(model) => {
+                        if model.skill_key_ack.is_some() {
+                            if let Some(receipts) = receipts.as_deref_mut() {
+                                receipts.0.push_back(model.clone());
+                            }
+                        }
                         *skills = model;
                     }
                     Err(error) => {
@@ -2650,8 +3512,10 @@ fn ingest_pending_lighting_render_state(
 
 /// Retained Crystal light buffer. A dedicated camera clears an offscreen image
 /// to Crystal's darkness colour and adds every `Lighting/N.png` source on an
-/// isolated render layer. A full-stage main-pass mesh then multiplies the
-/// completed light-buffer RGB with the world. This preserves Crystal's
+/// isolated render layer. A guarded main-pass mesh then multiplies the
+/// completed light-buffer RGB with the world; its shader fills the out-of-stage
+/// guard with the same darkness colour without enlarging the offscreen target.
+/// This preserves Crystal's
 /// `scene * (darkness + lights)` equation instead of the visibly-wrong
 /// `scene * darkness + lights` approximation. Day has no light pass.
 fn sync_lighting_render(
@@ -2702,6 +3566,9 @@ fn sync_lighting_render(
         clear_lighting!();
         return;
     };
+    let composite_size = lighting::guarded_light_composite_size(stage_size);
+    let uv_scale_offset = lighting::guarded_light_uv_scale_offset(stage_size);
+    let border_darkness = darkness.to_linear();
 
     if registry
         .lighting_darkness
@@ -2726,7 +3593,11 @@ fn sync_lighting_render(
         }
         if let Ok(mut transform) = transform_query.get_mut(handle.composite_entity) {
             transform.translation = dark_position;
-            transform.scale = Vec3::new(snapshot.stage_width, snapshot.stage_height, 1.0);
+            transform.scale = Vec3::new(composite_size.x as f32, composite_size.y as f32, 1.0);
+        }
+        if let Some(mut material) = multiply_materials.get_mut(&handle.material) {
+            material.uv_scale_offset = uv_scale_offset;
+            material.border_darkness = border_darkness;
         }
     } else {
         let buffer_image = images.add(Image::new_target_texture(
@@ -2752,14 +3623,16 @@ fn sync_lighting_render(
         let mesh = additive_cache.unit_quad(&mut meshes);
         let material = multiply_materials.add(lighting::CrystalMultiplyMaterial {
             light_buffer: buffer_image.clone(),
+            uv_scale_offset,
+            border_darkness,
         });
         let composite_entity = commands
             .spawn((
                 Mesh2d(mesh),
                 MeshMaterial2d(material.clone()),
                 Transform::from_translation(dark_position).with_scale(Vec3::new(
-                    snapshot.stage_width,
-                    snapshot.stage_height,
+                    composite_size.x as f32,
+                    composite_size.y as f32,
                     1.0,
                 )),
                 MirLightingComposite,
@@ -2784,10 +3657,11 @@ fn sync_lighting_render(
             let cache_key = lighting_material_cache_key(&light.key);
             let material =
                 additive_cache.material(&cache_key, image, light.opacity, &mut additive_materials);
+            // Shared immutable materials may change on opacity alone.
+            if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                binding.set_if_neq(MeshMaterial2d(material));
+            }
             if handle.image_key != image_key {
-                if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
-                    *binding = MeshMaterial2d(material);
-                }
                 handle.image_key = image_key;
             }
             if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
@@ -3154,9 +4028,12 @@ fn sync_effect_render(
                         transform.scale = Vec3::new(shadow_size.x, shadow_size.y, 1.0);
                     }
                 } else {
+                    // Bichon safe-zone pillars flicker with a dense ground lattice;
+                    // the 0.28 alpha disc pulsed as a black circle. Keep the shadow
+                    // but make it faint so the lattice stays full at 285,620.
                     let mesh = meshes.add(Ellipse::new(0.5, 0.5));
                     let material = shadow_materials.add(ColorMaterial::from_color(Color::srgba(
-                        0.02, 0.01, 0.01, 0.28,
+                        0.02, 0.01, 0.01, 0.08,
                     )));
                     let entity = commands
                         .spawn((
@@ -3312,8 +4189,11 @@ fn clear_scene_registry(
     for entity in registry.map.spawned.drain(..) {
         commands.entity(entity).despawn();
     }
-    for (_, handle) in registry.map_render.tiles.drain() {
+    for (key, handle) in registry.map_render.tiles.drain() {
         commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&key, additive_materials);
+        }
     }
     for (_, handles) in registry.mine_nodes.drain() {
         commands.entity(handles.root).despawn();
@@ -3378,12 +4258,12 @@ fn ingest_pending_map_render_images(
 }
 
 /// Stage 2 (unified y-sort) z scale. Map tiles and entities derive z from the
-/// SAME `viewportDepthForCell`; the entity producer pre-multiplies by
+/// SAME `viewportDepthForCell` for y-sorted objects; the entity producer pre-multiplies by
 /// MAP_TILE_ENTITY_DEPTH_GAIN (the `depth*10+order` in buildBevyEntityRenderState)
 /// before the runtime's `/ MAP_TILE_Z_DENOM` (entity_render_layer_position). The
-/// map producer feeds RAW depth, so apply the same ×10 here → map world-z lands on
-/// the IDENTICAL band as entities (floor behind ≈0.2, tall fronts above actors ≈3.9,
-/// objects interleave with actors by cell row) — Crystal's single y-sorted band.
+/// map producer feeds RAW depth, so apply the same ×10 here. Static floor-pass
+/// frames use a dedicated negative raw band; tall fronts and actors continue to
+/// interleave by cell row like Crystal's DrawObjects pass.
 const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
 const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 const CRYSTAL_MAP_ANIMATION_INTERVAL_MS: u128 = 100;
@@ -3407,16 +4287,47 @@ fn map_animation_frame_visible(count: u64, frame: &MapAnimationFrame) -> bool {
     crystal_map_animation_phase(count, frame.frame_count, frame.animation_tick) == frame.phase
 }
 
-fn animate_map_tiles(time: Res<Time>, mut frames: Query<(&MapAnimationFrame, &mut Visibility)>) {
+fn animate_map_tiles(
+    time: Res<Time>,
+    mut frames: Query<(&MapAnimationFrame, &mut Visibility)>,
+    mut trace_interval: Local<u64>,
+) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let diagnostic_started =
+        render_diagnostics::native_render_diagnostics_enabled().then(std::time::Instant::now);
     let count = crystal_map_animation_count(time.elapsed());
+    let mut phase_count = 0;
+    let mut changed_count = 0;
     for (frame, mut visibility) in &mut frames {
         let active = map_animation_frame_visible(count, frame);
-        *visibility = if active {
+        let next = if active {
             Visibility::Visible
         } else {
             Visibility::Hidden
         };
+        // A Crystal phase lasts at least 100 ms. Rewriting all retained phases
+        // at display Hz also dirties visibility/render extraction at display Hz.
+        changed_count += usize::from(visibility.set_if_neq(next));
+        phase_count += 1;
     }
+    let interval = (time.elapsed().as_millis() / 10_000) as u64;
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(started) = diagnostic_started {
+        let duration_ms = started.elapsed().as_secs_f64() * 1000.0;
+        if interval != *trace_interval || duration_ms >= 2.0 {
+            render_diagnostics::record_native_render_marker(
+                "cpuStage",
+                serde_json::json!({
+                    "stage":"mapAnimationVisibility", "durationMs":duration_ms,
+                    "preloadedPhases":phase_count, "changedPhases":changed_count,
+                    "measurement":"cpuElapsedNotGpuPresent",
+                }),
+            );
+        }
+    }
+    #[cfg(target_arch = "wasm32")]
+    let _ = (phase_count, changed_count);
+    *trace_interval = interval;
 }
 
 fn sync_map_animation_component(
@@ -3509,6 +4420,70 @@ mod map_animation_tests {
             assert_eq!(visible[0] as u32, crystal_map_animation_phase(count, 3, 1));
         }
     }
+
+    #[test]
+    fn unchanged_sixteen_ms_map_frames_do_not_dirty_visibility() {
+        #[derive(Resource, Default)]
+        struct Changes(Vec<usize>);
+        fn record_changes(
+            changed: Query<Entity, (With<MapAnimationFrame>, Changed<Visibility>)>,
+            mut changes: ResMut<Changes>,
+        ) {
+            changes.0.push(changed.iter().count());
+        }
+        let mut app = App::new();
+        app.init_resource::<Time>()
+            .init_resource::<Changes>()
+            .add_systems(Update, (animate_map_tiles, record_changes).chain());
+        // Dense Wooma entrance: 25 eight-phase additive map animations.
+        for _ in 0..25 {
+            for phase in 0..8 {
+                app.world_mut().spawn((
+                    MapAnimationFrame {
+                        phase,
+                        frame_count: 8,
+                        animation_tick: 0,
+                    },
+                    if phase == 0 {
+                        Visibility::Visible
+                    } else {
+                        Visibility::Hidden
+                    },
+                ));
+            }
+        }
+        app.update();
+        for _ in 0..6 {
+            app.world_mut()
+                .resource_mut::<Time>()
+                .advance_by(std::time::Duration::from_millis(16));
+            app.update();
+        }
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(4));
+        app.update();
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(16));
+        app.update();
+        assert_eq!(
+            app.world().resource::<Changes>().0,
+            [200, 0, 0, 0, 0, 0, 0, 50, 0]
+        );
+        let visible = app
+            .world_mut()
+            .query::<(&MapAnimationFrame, &Visibility)>()
+            .iter(app.world())
+            .filter(|(_, visibility)| **visibility == Visibility::Visible)
+            .map(|(frame, _)| frame.phase)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            visible,
+            vec![1; 25],
+            "only the two changed phases per family affect rendering"
+        );
+    }
 }
 
 /// Bevy-native map-tile renderer. Builds/refreshes atlas-page layouts, then skips
@@ -3546,13 +4521,18 @@ fn sync_map_render(
     mut transform_query: Query<&mut Transform>,
     mut native_trace_state: Local<Option<String>>,
 ) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let _render_timing = render_diagnostics::SyncTimer::map();
     let active = map_state
         .snapshot
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     if !active {
-        for (_, handle) in registry.map_render.tiles.drain() {
+        for (key, handle) in registry.map_render.tiles.drain() {
             commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&key, &mut additive_materials);
+            }
         }
         registry.map_render.applied = None;
         if !atlas_assets.images.is_empty() || !atlas_assets.layouts.is_empty() {
@@ -3618,101 +4598,48 @@ fn sync_map_render(
     // WITHOUT marking it applied. (This race — not the tile z value — was the real
     // cause of the "band-z map vanishes" bug; z=-50 only ever "worked" when the
     // images happened to be ingested before the first sync.)
-    let mut failed_url_asset = None;
-    let atlases_ready = snapshot.atlases.iter().all(|atlas| {
-        let Some(image) = atlas_assets.images.get(&atlas.key) else {
-            return false;
+    // Standalone animation frames and residency-only images must pass the same
+    // pixel-readiness gate as atlas pages. A URL handle only means that loading
+    // was queued; it must never release the previous complete map frame.
+    let mut image_keys: Vec<_> = map_render_active_image_keys(snapshot).into_iter().collect();
+    image_keys.sort();
+    let mut pending_images = Vec::new();
+    for key in image_keys {
+        let Some(image) = atlas_assets.images.get(&key) else {
+            pending_images.push(format!("{key}=missing-handle"));
+            continue;
         };
-        if !atlas_assets.url_image_keys.contains(&atlas.key) {
-            return true;
+        if !atlas_assets.url_image_keys.contains(&key) {
+            continue;
         }
         match asset_server.load_state(image.id()) {
-            LoadState::Loaded => asset_server.is_loaded_with_dependencies(image.id()),
+            LoadState::Loaded if asset_server.is_loaded_with_dependencies(image.id()) => {}
             LoadState::Failed(error) => {
-                failed_url_asset = Some((atlas.key.clone(), error.to_string()));
-                false
-            }
-            _ => false,
-        }
-    });
-    if let Some((key, error)) = failed_url_asset {
-        trace_native_map_state(
-            &mut native_trace_state,
-            format!("asset-failed key={key} error={error}"),
-        );
-        publish_map_status(
-            "map-render-asset-error",
-            &format!("Failed to load map atlas {key}: {error}"),
-            &snapshot.ack_key,
-            &[key],
-        );
-        return;
-    }
-    if !atlases_ready {
-        let states = snapshot
-            .atlases
-            .iter()
-            .map(|atlas| {
-                let state = atlas_assets.images.get(&atlas.key).map_or_else(
-                    || "missing-handle".to_owned(),
-                    |image| format!("{:?}", asset_server.load_state(image.id())),
+                trace_native_map_state(
+                    &mut native_trace_state,
+                    format!("asset-failed key={key} error={error}"),
                 );
-                format!("{}={state}", atlas.key)
-            })
-            .collect::<Vec<_>>()
-            .join(",");
+                publish_map_status(
+                    "map-render-asset-error",
+                    &format!("Failed to load map image {key}: {error}"),
+                    &snapshot.ack_key,
+                    &[key],
+                );
+                return;
+            }
+            state => pending_images.push(format!("{key}={state:?}")),
+        }
+    }
+    if !pending_images.is_empty() {
         trace_native_map_state(
             &mut native_trace_state,
             format!(
-                "waiting-atlases center={map_center:?} count={} states=[{states}]",
-                snapshot.atlases.len()
+                "waiting-images center={map_center:?} states=[{}]",
+                pending_images.join(",")
             ),
         );
         return;
     }
-
-    // Keep the previous complete frame visible while standalone textures decode.
-    // Mutating only the ready subset would despawn retained tiles and expose holes.
-    let standalone_images_ready = snapshot
-        .standalone_tiles
-        .iter()
-        .all(|tile| atlas_assets.images.contains_key(&tile.image_key));
-    if !standalone_images_ready {
-        let missing = snapshot
-            .standalone_tiles
-            .iter()
-            .filter(|tile| !atlas_assets.images.contains_key(&tile.image_key))
-            .map(|tile| tile.image_key.as_str())
-            .collect::<Vec<_>>()
-            .join(",");
-        trace_native_map_state(
-            &mut native_trace_state,
-            format!("waiting-standalone missing=[{missing}]"),
-        );
-        return;
-    }
-
-    // Animation-family textures are residency-only: they participate in the
-    // atomic frame handoff but never produce map render entities themselves.
-    let retained_images_ready = snapshot
-        .retained_image_keys
-        .iter()
-        .all(|key| atlas_assets.images.contains_key(key));
-    if !retained_images_ready {
-        let missing = snapshot
-            .retained_image_keys
-            .iter()
-            .filter(|key| !atlas_assets.images.contains_key(*key))
-            .map(String::as_str)
-            .collect::<Vec<_>>()
-            .join(",");
-        trace_native_map_state(
-            &mut native_trace_state,
-            format!("waiting-retained missing=[{missing}]"),
-        );
-        return;
-    }
-
     // A loaded atlas page does not guarantee that every draw can bind: stale
     // manifests or an incorrect library-index mapping can still omit a layout
     // or rect. Keep rendering the valid subset, but surface exact coverage in
@@ -3794,6 +4721,7 @@ fn sync_map_render(
                 MapRenderTileHandle {
                     entity,
                     last_seen_generation: generation,
+                    additive: false,
                 },
             );
         }
@@ -3891,6 +4819,7 @@ fn sync_map_render(
                 MapRenderTileHandle {
                     entity,
                     last_seen_generation: generation,
+                    additive: tile.additive,
                 },
             );
         }
@@ -3908,6 +4837,9 @@ fn sync_map_render(
     for key in stale {
         if let Some(handle) = registry.map_render.tiles.remove(&key) {
             commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&key, &mut additive_materials);
+            }
         }
     }
 
@@ -4059,12 +4991,12 @@ fn sync_map_render_atlas_layouts(
             rects.insert(key, index);
         }
         let layout = texture_atlas_layouts.add(layout);
-        if let Some((stale_layout, _)) = atlas_assets
+        // Sprites from the applied frame still own the old layout while the
+        // replacement waits at the image-readiness barrier. Let strong handles
+        // retain it until all sprites rebind; Bevy reclaims it after that.
+        atlas_assets
             .layouts
-            .insert(atlas.key.clone(), (layout, rects))
-        {
-            texture_atlas_layouts.remove(stale_layout.id());
-        }
+            .insert(atlas.key.clone(), (layout, rects));
         atlas_assets.layout_sizes.insert(atlas.key.clone(), size);
         atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
     }
@@ -4294,7 +5226,11 @@ fn sync_entities(
         let mut facing = None;
         let mut selection = None;
         let entity = commands
-            .spawn((MirObject, Transform::from_translation(position)))
+            .spawn((
+                MirObject,
+                Transform::from_translation(position),
+                Visibility::Inherited,
+            ))
             .with_children(|parent| {
                 selection = Some(
                     parent
@@ -4404,6 +5340,8 @@ fn sync_entity_render_layers(
         &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
     >,
 ) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let _render_timing = render_diagnostics::SyncTimer::entity();
     let Some(snapshot) = &entity_render_state.snapshot else {
         clear_entity_render_layers(
             &mut commands,
@@ -4412,6 +5350,8 @@ fn sync_entity_render_layers(
             &mut additive_materials,
         );
         presentation_poses.set_applied_entity_center(None);
+        #[cfg(not(target_arch = "wasm32"))]
+        render_diagnostics::record_applied_entity_center(None);
         return;
     };
 
@@ -4423,6 +5363,8 @@ fn sync_entity_render_layers(
             &mut additive_materials,
         );
         presentation_poses.set_applied_entity_center(None);
+        #[cfg(not(target_arch = "wasm32"))]
+        render_diagnostics::record_applied_entity_center(None);
         return;
     }
 
@@ -4434,9 +5376,40 @@ fn sync_entity_render_layers(
         (presentation_poses.applied_map_center(), entity_center),
         (Some(map), Some(entity)) if map != entity
     ) {
-        // The matching map snapshot has not committed yet. Keep the previous
-        // entity transforms/provenance so the renderer never publishes a
-        // mixed-center frame; this state is retried on the next Bevy tick.
+        // Keep the old center/images, but advance the retained self composite
+        // with the camera. Waiting for producer synchronization must not pause
+        // every movement command, or expose a camera-only frame.
+        if let Some(self_entity) = snapshot.entities.iter().find(|entity| entity.is_self) {
+            if let Some(previous) = registry
+                .entity_render_actor_roots
+                .get(&self_entity.object_id)
+                .copied()
+            {
+                let offset = presentation_poses.self_entity_offset();
+                let current = retained_self_root(
+                    snapshot.stage_width,
+                    snapshot.stage_height,
+                    offset,
+                    previous.z,
+                );
+                let delta = current - previous;
+                for (key, handle) in &registry.entity_render_layers {
+                    if entity_render_key_is_actor(&self_entity.object_id, key) {
+                        if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                            transform.translation += delta;
+                        }
+                    }
+                }
+                registry
+                    .entity_render_actor_roots
+                    .insert(self_entity.object_id.clone(), current);
+                presentation_poses.record_entity(
+                    &self_entity.object_id,
+                    offset,
+                    presentation_pose::EntityPoseSource::LocalCommand,
+                );
+            }
+        }
         return;
     }
 
@@ -4475,7 +5448,17 @@ fn sync_entity_render_layers(
                     direction: phase.direction,
                 }
             });
-            presentation_poses.reconcile_local_command_for_applied_center(candidate, motion);
+            if local_motion.smooth_display_enabled() {
+                // Path and committed-center validation above still applies;
+                // smooth display deliberately differs from the stepped fallback.
+                presentation_poses.set_local_self_motion(motion);
+                presentation_poses.set_camera(
+                    -candidate,
+                    presentation_pose::CameraPoseSource::LocalCommand,
+                );
+            } else {
+                presentation_poses.reconcile_local_command_for_applied_center(candidate, motion);
+            }
         }
     }
 
@@ -4797,6 +5780,8 @@ fn sync_entity_render_layers(
         .retain(|object_id, _| alive_actor_objects.contains(object_id));
 
     presentation_poses.set_applied_entity_center(entity_center);
+    #[cfg(not(target_arch = "wasm32"))]
+    render_diagnostics::record_applied_entity_center(entity_center.map(|c| [c.x, c.y]));
 }
 
 struct EntityRenderImageBinding {
@@ -5032,6 +6017,16 @@ fn clear_entity_render_layers(
 /// offsets while a replacement frame is only partially ready tears the retained
 /// body/hair/weapon composite apart. Grid/center coordinates recover the common
 /// root so a deferred old composite can move as one rigid group.
+fn retained_self_root(stage_width: f32, stage_height: f32, offset: Vec2, depth: f32) -> Vec3 {
+    let origin_x = (stage_width * 0.5 / 48.0).floor() * 48.0;
+    let origin_y = ((stage_height * 0.5 / 32.0).floor() - 1.0) * 32.0;
+    Vec3::new(
+        origin_x - stage_width * 0.5 + offset.x,
+        stage_height * 0.5 - origin_y - offset.y,
+        depth,
+    )
+}
+
 fn entity_render_actor_root(
     snapshot: &EntityRenderState,
     entity: &EntityRenderEntry,
@@ -5048,9 +6043,11 @@ fn entity_render_actor_root(
     let origin_y = ((snapshot.stage_height * 0.5 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
     let root_left = origin_x + (i64::from(grid_x) - i64::from(center_x)) as f32 * CELL_WIDTH;
     let root_top = origin_y + (i64::from(grid_y) - i64::from(center_y)) as f32 * CELL_HEIGHT;
-    let depth = i64::from(grid_y)
+    let sort_x = entity.motion_sort_x.unwrap_or(grid_x);
+    let sort_y = entity.motion_sort_y.unwrap_or(grid_y);
+    let depth = i64::from(sort_y)
         .saturating_mul(1_000)
-        .saturating_add(i64::from(grid_x).saturating_mul(10))
+        .saturating_add(i64::from(sort_x).saturating_mul(10))
         .saturating_mul(ENTITY_DEPTH_GAIN) as f32
         / WORLD_DEPTH_DIVISOR;
 
@@ -5140,7 +6137,8 @@ fn browser_asset_path(path: &str) -> String {
 /// self motion window pushed via `setMir2SelfCameraMotion` and interpolates the
 /// sub-cell offset every frame (so the scroll no longer steps at the ~33Hz React
 /// `motionNow` clock). Returns `Vec2::ZERO` when no window is set (default
-/// fold-in) or the step has elapsed → camera stays pinned at origin.
+/// fold-in). A completed step stays at its endpoint relative to the applied
+/// map centre until that centre catches up or the producer clears the window.
 ///
 /// Units: CSS-px screen space (the entity render layers' coordinate system, 48×32
 /// per cell), Y flipped because `entity_render_layer_position` maps screen-top via
@@ -5150,9 +6148,9 @@ fn browser_asset_path(path: &str) -> String {
 fn self_camera_screen_offset(
     motion_table: &motion::EntityMotionTable,
     applied_map_center: Option<presentation_pose::PresentationGridCenter>,
+    smooth_display: bool,
 ) -> (Vec2, presentation_pose::CameraPoseSource) {
-    let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) =
-        PENDING_SELF_CAMERA_MOTION.with(|cell| cell.get())
+    let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) = pending_self_camera_motion()
     else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
@@ -5164,9 +6162,12 @@ fn self_camera_screen_offset(
         started_ms,
         expires_ms,
     };
-    let Some(camera_offset) =
-        self_camera_offset_for_applied_center(window, motion_table.now_ms, applied_map_center)
-    else {
+    let Some(camera_offset) = self_camera_offset_for_applied_center_mode(
+        window,
+        motion_table.now_ms,
+        applied_map_center,
+        smooth_display,
+    ) else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
     (
@@ -5180,8 +6181,16 @@ fn self_camera_offset_for_applied_center(
     now_ms: f64,
     applied_map_center: Option<presentation_pose::PresentationGridCenter>,
 ) -> Option<Vec2> {
+    self_camera_offset_for_applied_center_mode(window, now_ms, applied_map_center, false)
+}
+
+fn self_camera_offset_for_applied_center_mode(
+    window: local_motion::LocalTsMotionWindow,
+    now_ms: f64,
+    applied_map_center: Option<presentation_pose::PresentationGridCenter>,
+    smooth_display: bool,
+) -> Option<Vec2> {
     if window.expires_ms <= window.started_ms
-        || now_ms >= window.expires_ms
         || (window.from_x == window.to_x && window.from_y == window.to_y)
     {
         return None;
@@ -5189,17 +6198,29 @@ fn self_camera_offset_for_applied_center(
     // Successive movement windows can start from the fractional pose of the
     // previous step. Preserve that value across the JS/WASM boundary; coercing
     // it to i32 makes the fallback camera disagree with the local-command pose.
-    let mut entity_offset = motion::compute_motion_offset_fractional(
-        window.from_x,
-        window.from_y,
-        window.to_x,
-        window.to_y,
-        window.started_ms,
-        window.expires_ms,
-        now_ms,
-        48.0,
-        32.0,
-    );
+    // A late ACK must not move the camera back to a source-centred frame at
+    // the animation deadline. The motion function clamps at the endpoint;
+    // centre compensation below then reaches zero when the map commits.
+    let mut entity_offset = if smooth_display {
+        let progress = ((now_ms - window.started_ms) / (window.expires_ms - window.started_ms))
+            .clamp(0.0, 1.0) as f32;
+        Vec2::new(
+            (window.from_x - window.to_x) * 48.0,
+            (window.from_y - window.to_y) * 32.0,
+        ) * (1.0 - progress)
+    } else {
+        motion::compute_motion_offset_fractional(
+            window.from_x,
+            window.from_y,
+            window.to_x,
+            window.to_y,
+            window.started_ms,
+            window.expires_ms,
+            now_ms,
+            48.0,
+            32.0,
+        )
+    };
     if let Some(center) = applied_map_center {
         let center_matches_window = (center.x == window.from_x.round() as i32
             && center.y == window.from_y.round() as i32)
@@ -5222,29 +6243,54 @@ fn self_camera_offset_for_applied_center(
 }
 
 fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTsMotionWindow> {
-    PENDING_SELF_CAMERA_MOTION.with(|cell| {
-        cell.get()
-            .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
-                local_motion::LocalTsMotionWindow {
-                    from_x,
-                    from_y,
-                    to_x,
-                    to_y,
-                    started_ms,
-                    expires_ms,
-                }
-            })
-            .filter(|window| {
-                window.expires_ms > window.started_ms
-                    && now_ms < window.expires_ms
-                    && (window.from_x != window.to_x || window.from_y != window.to_y)
-            })
-    })
+    pending_self_camera_motion()
+        .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
+            local_motion::LocalTsMotionWindow {
+                from_x,
+                from_y,
+                to_x,
+                to_y,
+                started_ms,
+                expires_ms,
+            }
+        })
+        .filter(|window| {
+            window.expires_ms > window.started_ms
+                && now_ms < window.expires_ms
+                && (window.from_x != window.to_x || window.from_y != window.to_y)
+        })
 }
 
 #[cfg(test)]
 mod self_camera_motion_tests {
     use super::*;
+
+    #[test]
+    fn smooth_fallback_does_not_jump_one_sprite_phase_before_command_takeover() {
+        let window = run_window();
+        let source = Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 });
+        let target = Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 });
+        let mut previous = 0.0;
+        for now in [0.0, 10.0, 20.0, 30.0, 40.0, 100.0, 600.0, 900.0] {
+            let offset =
+                self_camera_offset_for_applied_center_mode(window, now, source, true).unwrap();
+            let expected = 96.0 * (now / 600.0).min(1.0) as f32;
+            assert!((-offset.x - expected).abs() < 0.001);
+            assert!(-offset.x >= previous);
+            previous = -offset.x;
+            let recentered =
+                self_camera_offset_for_applied_center_mode(window, now, target, true).unwrap();
+            assert!(((-recentered.x + 96.0) - expected).abs() < 0.001);
+        }
+        // Old fallback exposed phase zero immediately: a 16 px jump followed
+        // by a rollback when the smooth command arrived a few ticks later.
+        assert_eq!(
+            self_camera_offset_for_applied_center_mode(window, 0.0, source, false)
+                .unwrap()
+                .x,
+            -16.0
+        );
+    }
 
     fn run_window() -> local_motion::LocalTsMotionWindow {
         local_motion::LocalTsMotionWindow {
@@ -5297,7 +6343,7 @@ mod self_camera_motion_tests {
     }
 
     #[test]
-    fn stale_scene_center_and_expired_window_fail_closed() {
+    fn stale_scene_center_fails_closed_and_finished_step_stays_at_endpoint() {
         assert_eq!(
             self_camera_offset_for_applied_center(
                 run_window(),
@@ -5312,8 +6358,64 @@ mod self_camera_motion_tests {
                 600.0,
                 Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
             ),
-            None
+            Some(Vec2::ZERO)
         );
+    }
+
+    #[test]
+    fn completed_prediction_keeps_camera_at_endpoint_until_map_commit() {
+        for now_ms in [600.0, 750.0, 1_500.0] {
+            let old_center = self_camera_offset_for_applied_center(
+                run_window(),
+                now_ms,
+                Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
+            )
+            .unwrap();
+            let committed = self_camera_offset_for_applied_center(
+                run_window(),
+                now_ms,
+                Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+            )
+            .unwrap();
+            assert_eq!(old_center, Vec2::new(-96.0, 0.0));
+            assert_eq!(committed, Vec2::ZERO);
+            assert_eq!(committed.x - old_center.x, 96.0);
+            // Exercise the renderer's shared actor/camera pose contract:
+            // the player stays screen-locked and a fixed world object does
+            // not jump when the ACK finally commits the target-centred map.
+            let mut poses = presentation_pose::PresentationPoseBuffer::default();
+            poses.begin_frame(now_ms, true);
+            poses.set_camera(old_center, presentation_pose::CameraPoseSource::SelfWindow);
+            assert_eq!(
+                poses.self_entity_offset() + poses.camera_screen_offset(),
+                Vec2::ZERO
+            );
+            let world_before = (30.0 - 10.0) * 48.0 + poses.camera_screen_offset().x;
+            poses.set_camera(committed, presentation_pose::CameraPoseSource::SelfWindow);
+            assert_eq!(
+                poses.self_entity_offset() + poses.camera_screen_offset(),
+                Vec2::ZERO
+            );
+            let world_after = (30.0 - 12.0) * 48.0 + poses.camera_screen_offset().x;
+            assert_eq!(world_before, world_after);
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn native_self_camera_window_crosses_the_input_render_thread_boundary() {
+        clear_mir2_self_camera_motion();
+        std::thread::spawn(|| {
+            set_mir2_self_camera_motion(10.0, 5.0, 12.0, 5.0, 100.0, 700.0);
+        })
+        .join()
+        .expect("input producer thread completes");
+
+        assert_eq!(
+            pending_self_camera_motion(),
+            Some((10.0, 5.0, 12.0, 5.0, 100.0, 700.0))
+        );
+        clear_mir2_self_camera_motion();
     }
 }
 
@@ -5330,12 +6432,32 @@ fn begin_presentation_pose_frame(
         .snapshot
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
+    let previous_camera = presentation_poses.camera_screen_offset();
+    let previous_source = presentation_poses.camera_source();
     presentation_poses.begin_frame(motion_table.now_ms, renderer_enabled);
+    let incoming_center = entity_render_state
+        .snapshot
+        .as_ref()
+        .and_then(|snapshot| snapshot.center_x.zip(snapshot.center_y))
+        .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
+    if !local_motion.smooth_display_enabled()
+        && matches!((presentation_poses.applied_map_center(), incoming_center),
+        (Some(map), Some(entity)) if map != entity)
+    {
+        // sync_entity_render_layers retains the entire previous actor frame
+        // while waiting for its matching map center. Retain its camera too:
+        // advancing just the camera exposes a one-phase screen-space jerk.
+        presentation_poses.set_camera(previous_camera, previous_source);
+        return;
+    }
     // `sync_map_render` runs immediately before this system. Use the centre it
     // actually committed, not the newer requested snapshot centre, so a local
     // movement window has the same screen pose before and after its fast ACK.
-    let (ts_camera_offset, ts_source) =
-        self_camera_screen_offset(&motion_table, presentation_poses.applied_map_center());
+    let (ts_camera_offset, ts_source) = self_camera_screen_offset(
+        &motion_table,
+        presentation_poses.applied_map_center(),
+        local_motion.smooth_display_enabled(),
+    );
     let mut selected_camera_offset = ts_camera_offset;
     let mut selected_source = ts_source;
     let mut selected_motion = None;
@@ -5508,6 +6630,42 @@ fn follow_player(
     camera_transform.translation.z = 1000.0;
 }
 
+/// Keep the offscreen light pass and its main-pass multiply quad in the exact
+/// same presented coordinate frame as the world camera.
+///
+/// The light target is screen-sized. If it remains at the map-frame origin
+/// while `follow_player` scrolls the main camera, the viewport crosses from the
+/// sampled target into the multiply material's dark virtual guard. That is the
+/// straight one-cell black strip visible during Run. Moving both lighting
+/// followers after the main camera commits its display-Hz pose keeps the real
+/// light buffer over the whole visible stage; the guard stays offscreen as a
+/// defensive margin only.
+fn follow_lighting_camera(
+    main_camera_query: Query<
+        &Transform,
+        (
+            With<MainCamera>,
+            Without<MirLightingBufferCamera>,
+            Without<MirLightingComposite>,
+        ),
+    >,
+    mut lighting_query: Query<
+        &mut Transform,
+        (
+            Or<(With<MirLightingBufferCamera>, With<MirLightingComposite>)>,
+            Without<MainCamera>,
+        ),
+    >,
+) {
+    let Ok(main_camera) = main_camera_query.single() else {
+        return;
+    };
+    for mut transform in &mut lighting_query {
+        transform.translation.x = main_camera.translation.x;
+        transform.translation.y = main_camera.translation.y;
+    }
+}
+
 /// Per-cell entities for a rendered mine vein: a constant dark rock base plus an
 /// ore overlay whose colour and size shrink as the vein is mined out.
 struct MineNodeHandles {
@@ -5564,7 +6722,11 @@ fn sync_mine_nodes(
         translation.z = 0.2;
         let mut ore: Option<Entity> = None;
         let root = commands
-            .spawn((MirObject, Transform::from_translation(translation)))
+            .spawn((
+                MirObject,
+                Transform::from_translation(translation),
+                Visibility::Inherited,
+            ))
             .with_children(|parent| {
                 parent.spawn((
                     Sprite::from_color(Color::srgb(0.18, 0.16, 0.15), Vec2::splat(TILE_SIZE - 8.0)),
@@ -5623,7 +6785,10 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
             translation.z = -0.75;
 
             let root = commands
-                .spawn(Transform::from_translation(translation))
+                .spawn((
+                    Transform::from_translation(translation),
+                    Visibility::Inherited,
+                ))
                 .with_children(|parent| {
                     parent.spawn((
                         Sprite::from_color(
@@ -5661,7 +6826,10 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
         translation.z = 0.3;
 
         let entity = commands
-            .spawn(Transform::from_translation(translation))
+            .spawn((
+                Transform::from_translation(translation),
+                Visibility::Inherited,
+            ))
             .with_children(|parent| {
                 parent.spawn((
                     Sprite::from_color(Color::srgba(0.02, 0.02, 0.02, 0.10), Vec2::new(18.0, 8.0)),
@@ -6104,6 +7272,33 @@ mod entity_atlas_tests {
     use super::*;
 
     #[test]
+    fn retained_actor_root_uses_target_xy_and_crystal_motion_sort_depth() {
+        let snapshot: EntityRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024.0,
+                "stageHeight": 768.0,
+                "centerX": 9,
+                "centerY": 7,
+                "entities": [{
+                    "objectId": "moving",
+                    "gridX": 9,
+                    "gridY": 7,
+                    "motionSortX": 8,
+                    "motionSortY": 6
+                }]
+            }"#,
+        )
+        .expect("entity render state");
+
+        let root = entity_render_actor_root(&snapshot, &snapshot.entities[0], Vec2::ZERO)
+            .expect("actor root");
+        assert_eq!(root.x, -32.0, "X placement follows the destination grid");
+        assert_eq!(root.y, 32.0, "Y placement follows the destination grid");
+        assert_eq!(root.z, 0.608, "depth follows the source sort grid");
+    }
+
+    #[test]
     fn stable_map_render_revision_skips_only_the_applied_image_generation() {
         let applied = AppliedMapRenderState {
             producer_revision: Some(41),
@@ -6114,6 +7309,51 @@ mod entity_atlas_tests {
         assert!(!map_render_revision_is_current(Some(42), Some(&applied), 7));
         assert!(!map_render_revision_is_current(Some(41), Some(&applied), 8));
         assert!(!map_render_revision_is_current(Some(41), None, 7));
+    }
+
+    #[test]
+    fn pending_entity_center_retains_camera_with_the_previous_actor_frame() {
+        let mut app = App::new();
+        let snapshot: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth":1024, "stageHeight":768,
+            "centerX":304, "centerY":447, "entities":[]
+        }))
+        .unwrap();
+        let mut state = RuntimeEntityRenderState::default();
+        state.snapshot = Some(snapshot);
+        let mut poses = presentation_pose::PresentationPoseBuffer::default();
+        poses.begin_frame(0.0, true);
+        poses.set_applied_map_provenance(
+            Some(presentation_pose::PresentationGridCenter { x: 302, y: 445 }),
+            Some(1),
+        );
+        poses.set_applied_entity_center(Some(presentation_pose::PresentationGridCenter {
+            x: 302,
+            y: 445,
+        }));
+        poses.set_camera(
+            Vec2::new(-16.0, 16.0),
+            presentation_pose::CameraPoseSource::LocalCommand,
+        );
+        app.insert_resource(state)
+            .insert_resource(poses)
+            .insert_resource(motion::EntityMotionTable::default())
+            .insert_resource(local_motion::LocalMotionPresentationShadow::default())
+            .add_systems(Update, begin_presentation_pose_frame);
+        // Repeat the delay: neither a later phase nor a repeated tick may move
+        // the camera while sync_entity_render_layers keeps the old body.
+        for now in [120.0, 140.0, 240.0] {
+            app.world_mut()
+                .resource_mut::<motion::EntityMotionTable>()
+                .now_ms = now;
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<presentation_pose::PresentationPoseBuffer>()
+                    .camera_screen_offset(),
+                Vec2::new(-16.0, 16.0)
+            );
+        }
     }
 
     fn entity_sync_test_app() -> App {
@@ -6138,6 +7378,61 @@ mod entity_atlas_tests {
             .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
             .add_systems(Update, sync_entity_render_layers);
         app
+    }
+
+    #[test]
+    fn retained_self_advances_during_center_wait_without_changing_its_screen_anchor() {
+        let mut app = entity_sync_test_app();
+        let state = |center| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled":true,"stageWidth":1024,"stageHeight":768,"centerX":center,"centerY":10,
+                "entities":[{"objectId":"self","isSelf":true,"gridX":center,"gridY":10,
+                    "layers":[{"key":"self:body","path":"/original-ui/CArmour/00/body.png",
+                        "left":478,"top":350,"width":32,"height":48,"z":101005}]}]
+            }))
+            .unwrap()
+        };
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(10));
+        {
+            let mut poses = app
+                .world_mut()
+                .resource_mut::<presentation_pose::PresentationPoseBuffer>();
+            poses.begin_frame(0.0, true);
+            poses.set_applied_map_provenance(
+                Some(presentation_pose::PresentationGridCenter { x: 10, y: 10 }),
+                Some(1),
+            );
+        }
+        app.update();
+        let body = app.world().resource::<SceneRegistry>().entity_render_layers["self:body"].entity;
+        let old_body = app.world().get::<Transform>(body).unwrap().translation;
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(12));
+        for distance in [1.6, 3.2, 4.8] {
+            app.world_mut()
+                .resource_mut::<presentation_pose::PresentationPoseBuffer>()
+                .set_camera(
+                    Vec2::new(-distance, 0.0),
+                    presentation_pose::CameraPoseSource::LocalCommand,
+                );
+            app.update();
+            let root = app
+                .world()
+                .resource::<SceneRegistry>()
+                .entity_render_actor_roots["self"];
+            assert!((root.x - distance + 32.0).abs() < 0.001);
+            let moved = app.world().get::<Transform>(body).unwrap().translation;
+            assert!((moved.x - old_body.x - distance).abs() < 0.001);
+            assert_eq!(
+                app.world()
+                    .resource::<presentation_pose::PresentationPoseBuffer>()
+                    .coherent_applied_center(),
+                Some(presentation_pose::PresentationGridCenter { x: 10, y: 10 })
+            );
+        }
     }
 
     fn rect(key: &str) -> EntityRenderAtlasRect {
@@ -7048,6 +8343,325 @@ mod entity_atlas_tests {
         );
     }
 
+    fn map_handoff_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_asset::<Mesh>()
+            .init_asset::<TextureAtlasLayout>()
+            .init_asset::<additive_material::CrystalAdditiveMaterial>()
+            .init_resource::<RuntimeMapRenderState>()
+            .init_resource::<RuntimeEntityRenderState>()
+            .init_resource::<RuntimeMapCameraOffset>()
+            .init_resource::<RuntimeMapRenderAtlases>()
+            .init_resource::<SceneRegistry>()
+            .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
+            .init_resource::<presentation_pose::PresentationPoseBuffer>()
+            .add_systems(Update, sync_map_render);
+        app
+    }
+
+    fn map_handoff_snapshot() -> MapRenderState {
+        serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024, "stageHeight": 768, "revision": 1,
+            "atlases": [{"key": "page", "width": 512, "height": 512,
+                "rects": [{"key": "first", "x": 0, "y": 0, "width": 48, "height": 32}]}],
+            "tiles": [{"key": "floor", "atlasKey": "page", "rectKey": "first",
+                "left": 0, "top": 0, "width": 48, "height": 32, "z": 0}]
+        }))
+        .unwrap()
+    }
+
+    fn additive_standalone_map_snapshot(revision: u64, include_glow: bool) -> MapRenderState {
+        serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024, "stageHeight": 768, "revision": revision,
+            "standaloneTiles": if include_glow { serde_json::json!([{
+                "key": "standalone:additive:12:34:WemadeMir2/Objects#7",
+                "imageKey": "standalone-additive:WemadeMir2/Objects#7",
+                "left": 0, "top": 0, "width": 48, "height": 64, "z": 1,
+                "additive": true
+            }]) } else { serde_json::json!([]) }
+        }))
+        .unwrap()
+    }
+
+    fn install_additive_map_image(app: &mut App) {
+        let image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderAtlases>()
+            .images
+            .insert("standalone-additive:WemadeMir2/Objects#7".into(), image);
+    }
+
+    fn apply_map_handoff_baseline(app: &mut App) {
+        let image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderAtlases>()
+            .images
+            .insert("page".into(), image);
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(map_handoff_snapshot());
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1)
+        );
+    }
+
+    #[test]
+    fn map_handoff_keeps_previous_layout_while_next_page_is_pending() {
+        let mut app = map_handoff_test_app();
+        apply_map_handoff_baseline(&mut app);
+        let entity = app.world().resource::<SceneRegistry>().map_render.tiles["floor"].entity;
+        let old_layout = app
+            .world()
+            .get::<Sprite>(entity)
+            .unwrap()
+            .texture_atlas
+            .as_ref()
+            .unwrap()
+            .layout
+            .clone();
+        let mut next = map_handoff_snapshot();
+        next.revision = Some(2);
+        next.atlases[0].rects.push(MapRenderAtlasRect {
+            key: "second".into(),
+            x: 48,
+            y: 0,
+            width: 48,
+            height: 32,
+        });
+        next.atlases.push(MapRenderAtlas {
+            key: "pending-page".into(),
+            width: 512,
+            height: 512,
+            image_url: None,
+            rects: vec![],
+        });
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(next);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1)
+        );
+        assert!(
+            app.world()
+                .resource::<Assets<TextureAtlasLayout>>()
+                .get(&old_layout)
+                .is_some(),
+            "the retained sprite must still resolve its old layout while the next frame waits"
+        );
+
+        let image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderAtlases>()
+            .images
+            .insert("pending-page".into(), image);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(2)
+        );
+        assert_ne!(
+            app.world()
+                .get::<Sprite>(entity)
+                .unwrap()
+                .texture_atlas
+                .as_ref()
+                .unwrap()
+                .layout,
+            old_layout
+        );
+        let old_id = old_layout.id();
+        drop(old_layout);
+        app.update();
+        app.update();
+        assert!(
+            app.world()
+                .resource::<Assets<TextureAtlasLayout>>()
+                .get(old_id)
+                .is_none(),
+            "superseded layouts are reclaimed after the old sprites release them"
+        );
+    }
+
+    #[test]
+    fn map_handoff_waits_for_url_standalone_pixels_not_just_handle() {
+        let mut app = map_handoff_test_app();
+        apply_map_handoff_baseline(&mut app);
+        let mut next = map_handoff_snapshot();
+        next.revision = Some(2);
+        next.standalone_tiles = serde_json::from_value(serde_json::json!([{
+            "key": "gate", "imageKey": "gate-image", "imageUrl": "/handoff-test-not-loaded.png",
+            "left": 0, "top": 0, "width": 48, "height": 64, "z": 1
+        }]))
+        .unwrap();
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(next);
+        app.update();
+        assert!(app
+            .world()
+            .resource::<RuntimeMapRenderAtlases>()
+            .images
+            .contains_key("gate-image"));
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1),
+            "queuing a URL image cannot commit a frame before its pixels load"
+        );
+        assert!(!app
+            .world()
+            .resource::<SceneRegistry>()
+            .map_render
+            .tiles
+            .contains_key("gate"));
+    }
+
+    #[test]
+    fn map_handoff_waits_for_retained_url_animation_pixels() {
+        let mut app = map_handoff_test_app();
+        apply_map_handoff_baseline(&mut app);
+        let image: Handle<Image> = app
+            .world()
+            .resource::<AssetServer>()
+            .load("handoff-retained-not-loaded.png");
+        {
+            let mut assets = app.world_mut().resource_mut::<RuntimeMapRenderAtlases>();
+            assets.images.insert("animation-phase".into(), image);
+            assets.url_image_keys.insert("animation-phase".into());
+        }
+        let mut next = map_handoff_snapshot();
+        next.revision = Some(2);
+        next.retained_image_keys.push("animation-phase".into());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(next);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1)
+        );
+    }
+
+    #[test]
+    fn stale_additive_map_tile_releases_its_material_and_image_handle() {
+        let mut app = map_handoff_test_app();
+        install_additive_map_image(&mut app);
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(additive_standalone_map_snapshot(1, true));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            1
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(additive_standalone_map_snapshot(2, false));
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .map_render
+            .tiles
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0,
+            "a tile that leaves the viewport must not retain its material/image handle"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
+    fn disabled_map_render_releases_additive_map_materials() {
+        let mut app = map_handoff_test_app();
+        install_additive_map_image(&mut app);
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(additive_standalone_map_snapshot(1, true));
+        app.update();
+
+        let mut disabled = additive_standalone_map_snapshot(2, false);
+        disabled.enabled = false;
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(disabled);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            0
+        );
+    }
+
     #[test]
     fn map_atlas_layout_accumulates_rects_across_viewports() {
         let atlas = |rect_key: &str, width: u32| MapRenderAtlas {
@@ -7281,6 +8895,49 @@ mod effect_mask_shadow_tests {
                     .chain(),
             );
         app
+    }
+
+    #[test]
+    fn lighting_buffer_and_composite_follow_the_presented_main_camera() {
+        let mut app = App::new();
+        app.add_systems(Update, follow_lighting_camera);
+
+        app.world_mut()
+            .spawn((MainCamera, Transform::from_xyz(-47.5, 31.25, 0.0)));
+        let buffer_camera = app
+            .world_mut()
+            .spawn((MirLightingBufferCamera, Transform::from_xyz(0.0, 0.0, -2.0)))
+            .id();
+        let composite = app
+            .world_mut()
+            .spawn((
+                MirLightingComposite,
+                Transform::from_translation(Vec3::new(0.0, 0.0, 500.0))
+                    .with_scale(Vec3::new(1312.0, 960.0, 1.0)),
+            ))
+            .id();
+
+        app.update();
+
+        let buffer_transform = app
+            .world()
+            .get::<Transform>(buffer_camera)
+            .expect("lighting buffer camera transform exists");
+        assert_eq!(buffer_transform.translation, Vec3::new(-47.5, 31.25, -2.0));
+
+        let composite_transform = app
+            .world()
+            .get::<Transform>(composite)
+            .expect("lighting composite transform exists");
+        assert_eq!(
+            composite_transform.translation,
+            Vec3::new(-47.5, 31.25, 500.0)
+        );
+        assert_eq!(
+            composite_transform.scale,
+            Vec3::new(1312.0, 960.0, 1.0),
+            "camera following must not disturb the guarded composite geometry"
+        );
     }
 
     #[test]
@@ -7737,11 +9394,83 @@ mod effect_mask_shadow_tests {
     }
 
     #[test]
+    fn shared_light_material_rebinds_an_opacity_only_change_without_fading_its_neighbor() {
+        let mut app = sync_test_app();
+        let state: lighting::LightingRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024, "stageHeight": 768,
+            "timeOfDayLightSetting": 4,
+            "entityLights": [
+                {"key":"left", "drawX":100, "drawY":100, "kind":"player", "light":3},
+                {"key":"right", "drawX":200, "drawY":100, "kind":"player", "light":3}
+            ]
+        }))
+        .unwrap();
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(state);
+        app.update();
+        let (left, right) = {
+            let registry = app.world().resource::<SceneRegistry>();
+            (
+                registry.lighting_layers["entity:left"].entity,
+                registry.lighting_layers["entity:right"].entity,
+            )
+        };
+        let binding = |app: &App, entity| {
+            app.world()
+                .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+                .unwrap()
+                .0
+                .clone()
+        };
+        let original = binding(&app, left);
+        assert_eq!(original, binding(&app, right));
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot
+            .as_mut()
+            .unwrap()
+            .entity_lights[0]
+            .light = Some(18); // Same range, brighter torch.
+        app.update();
+        let brighter = binding(&app, left);
+        assert_ne!(brighter, original);
+        assert_eq!(binding(&app, right), original);
+        let materials = app
+            .world()
+            .resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
+        assert_eq!(materials.get(&original).unwrap().opacity(), 60.0 / 255.0);
+        assert_eq!(materials.get(&brighter).unwrap().opacity(), 120.0 / 255.0);
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot
+            .as_mut()
+            .unwrap()
+            .entity_lights
+            .pop();
+        app.update();
+        let materials = app
+            .world()
+            .resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
+        assert!(!materials.contains(original.id()));
+        assert!(materials.contains(brighter.id()));
+        app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
     fn sync_lighting_is_bounded_and_clears_on_map_logout_or_reconnect_reset() {
         let mut app = sync_test_app();
         app.world_mut()
             .resource_mut::<RuntimeLightingRenderState>()
             .snapshot = Some(lighting::LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
@@ -7803,19 +9532,39 @@ mod effect_mask_shadow_tests {
             app.world().get::<RenderLayers>(first_layer).is_some(),
             "light sprite cannot leak into the main scene pass"
         );
-        assert!(
-            app.world()
-                .resource::<Assets<Image>>()
-                .get(&buffer_image)
-                .is_some(),
-            "offscreen target is retained while active"
+        let light_buffer = app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&buffer_image)
+            .expect("offscreen target is retained while active");
+        assert_eq!(
+            (light_buffer.width(), light_buffer.height()),
+            (1024, 768),
+            "the offscreen light pass remains stage-sized"
         );
-        assert!(
-            app.world()
-                .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
-                .get(&multiply_material)
-                .is_some(),
-            "multiply material samples the retained target"
+        let composite_transform = app
+            .world()
+            .get::<Transform>(composite_entity)
+            .expect("lighting composite transform exists");
+        assert_eq!(
+            composite_transform.scale,
+            Vec3::new(1312.0, 960.0, 1.0),
+            "the multiply mesh carries the virtual three-cell guard"
+        );
+        let multiply = app
+            .world()
+            .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .get(&multiply_material)
+            .expect("multiply material samples the retained target");
+        assert_eq!(
+            multiply.uv_scale_offset,
+            Vec4::new(1.28125, 1.25, -0.140625, -0.125),
+            "the guarded quad keeps the central stage at 1:1 sampling"
+        );
+        assert_eq!(
+            multiply.border_darkness,
+            Color::srgb_u8(119, 136, 153).to_linear(),
+            "the virtual guard uses the exact offscreen clear colour"
         );
 
         // Map change, logout and reconnect all advance SceneResetRevision. Run
@@ -7851,6 +9600,7 @@ mod effect_mask_shadow_tests {
     fn sync_lighting_stage_resize_rebuilds_without_leaking_old_targets() {
         let mut app = sync_test_app();
         let state = |width, height| lighting::LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: width,
             stage_height: height,
@@ -7935,9 +9685,12 @@ mod native_data_path_tests {
             .insert_resource(mir2_client_bevy::inventory::InventoryModel::default())
             .insert_resource(mir2_client_bevy::chat::ChatModel::default())
             .insert_resource(mir2_client_bevy::mail::MailModel::default())
+            .insert_resource(mir2_client_bevy::mail_service::MailServiceInbox::default())
             .insert_resource(mir2_client_bevy::shop::ShopModel::default())
             .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
             .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+            .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
             .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
             .insert_resource(mir2_client_bevy::social::SocialModel::default())
             .insert_resource(PendingOperations::default())
@@ -7981,6 +9734,7 @@ mod native_data_path_tests {
                     ingest_pending_inventory_operation_ack,
                     ingest_pending_wallet_patch,
                     ingest_pending_mail_model,
+                    ingest_pending_mail_service,
                     ingest_pending_shop_model,
                     ingest_pending_game_shop_info,
                     ingest_pending_game_shop_stock,
@@ -8000,6 +9754,133 @@ mod native_data_path_tests {
     }
 
     #[test]
+    fn stage5_mail_snapshot_retains_packet_metadata_for_exact_sender() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":71,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true,"body":"packet","claimed":false,"locked":false,"read":false}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":71,"sender":"GM","body":"snapshot","claimed":true,"locked":true,"read":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+
+        let mail = &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails[0];
+        assert_eq!(mail.body, "snapshot");
+        assert!(mail.claimed && mail.locked && mail.read);
+        assert!(mail.can_reply);
+        assert_eq!(mail.date_sent_binary_datetime, 638000000000000000);
+        assert!(mail.metadata_known);
+    }
+
+    #[test]
+    fn known_stage5_mail_metadata_explicitly_replaces_packet_metadata() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":72,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":72,"sender":"GM","can_reply":false,"date_sent_binary_datetime":0,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+
+        let mail = &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails[0];
+        assert!(!mail.can_reply);
+        assert_eq!(mail.date_sent_binary_datetime, 0);
+        assert!(mail.metadata_known);
+    }
+
+    #[test]
+    fn stage5_mail_snapshot_never_reuses_metadata_across_id_or_sender() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":73,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true},{"id":74,"sender":"Guide","can_reply":true,"date_sent_binary_datetime":638000000000000001,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":73,"sender":"Impostor"},{"id":75,"sender":"Guide"}]}"#.to_owned()
+        ));
+        app.update();
+
+        for mail in &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails
+        {
+            assert!(!mail.can_reply);
+            assert_eq!(mail.date_sent_binary_datetime, 0);
+            assert!(!mail.metadata_known);
+        }
+    }
+
+    #[test]
+    fn stage5_mail_snapshot_does_not_reuse_packet_metadata_after_session_reset() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":76,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_data_reset());
+        app.update();
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails
+            .is_empty());
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":76,"sender":"GM"}]}"#.to_owned()
+        ));
+        app.update();
+
+        let mail = &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails[0];
+        assert!(!mail.can_reply);
+        assert_eq!(mail.date_sent_binary_datetime, 0);
+        assert!(!mail.metadata_known);
+    }
+
+    #[test]
+    fn skill_ingest_keeps_full_receipt_when_newer_model_arrives_in_same_frame() {
+        let _guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>();
+        assert!(native_ingest::push_native_skill_model(r#"{"authority":{"sessionEpoch":7,"snapshotSerial":9,"playerObjectId":3},"skillKeyAck":{"requestId":73,"spell":"FireBall","key":16,"oldKey":0,"accepted":true},"skills":[{"id":1,"name":"Fire Ball","hotkey":16}]}"#.into()));
+        assert!(native_ingest::push_native_skill_model(r#"{"authority":{"sessionEpoch":7,"snapshotSerial":10,"playerObjectId":3},"skills":[{"id":1,"name":"Fire Ball","hotkey":3}]}"#.into()));
+        app.update();
+        let latest = app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModel>();
+        assert_eq!(latest.bindings[0].hotkey, Some(3));
+        assert!(latest.skill_key_ack.is_none());
+        let receipts = app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModelReceipts>();
+        assert_eq!(receipts.0.len(), 1);
+        assert_eq!(receipts.0[0].bindings[0].hotkey, Some(16));
+        assert_eq!(receipts.0[0].authority.snapshot_serial, 9);
+        assert_eq!(receipts.0[0].skill_key_ack.as_ref().unwrap().request_id, 73);
+    }
+
+    #[test]
     fn native_mail_shop_storage_payloads_update_preserve_reject_and_reset() {
         let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
@@ -8008,7 +9889,7 @@ mod native_data_path_tests {
             r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Hello","gold":10,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":false}]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_shop_model(
-            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}],"hide_added_stats":true}"#.to_owned()
         ));
         assert!(native_ingest::push_native_storage_model(
             r#"{"items":[{"key":"sword","name":"Iron Sword","quantity":1,"slot":3,"container":4}],"size":30,"has_password":false,"unlocked":true,"has_expanded":false,"expiry":0}"#.to_owned()
@@ -8043,6 +9924,11 @@ mod native_data_path_tests {
                 .goods
                 .len(),
             1
+        );
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .hide_added_stats
         );
         assert_eq!(
             app.world()
@@ -8079,7 +9965,7 @@ mod native_data_path_tests {
             r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Updated","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":true}]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_shop_model(
-            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}],"hide_added_stats":false}"#.to_owned()
         ));
         assert!(native_ingest::push_native_npc_shop_service(
             r#"{"mode":"buy","repairRate":null}"#.to_owned()
@@ -8105,6 +9991,7 @@ mod native_data_path_tests {
             let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
             assert_eq!(shop.selected_id, None);
             assert!(shop.allows_buy());
+            assert!(!shop.hide_added_stats);
         }
         assert!(native_ingest::push_native_npc_shop_service(
             r#"{"mode":"repair","repairRate":1.5}"#.to_owned()
@@ -8207,6 +10094,11 @@ mod native_data_path_tests {
             .resource::<mir2_client_bevy::shop::ShopModel>()
             .goods
             .is_empty());
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .hide_added_stats
+        );
         assert!(app
             .world()
             .resource::<mir2_client_bevy::storage::StorageModel>()
@@ -8260,6 +10152,218 @@ mod native_data_path_tests {
         assert!(!storage.has_password);
         assert!(!storage.unlocked);
         assert!(storage.items.is_empty());
+    }
+
+    #[test]
+    fn storage_password_receipt_emits_system_feedback_without_mutating_the_model() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        let before = app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>()
+            .clone();
+        let unlock = PendingOperationKey::StorageUnlock;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(unlock.clone()));
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"unlock","success":false},"password_result":{"operation":"unlock","result":2},"password":"never-render-or-log-this"}"#.to_owned()
+        ));
+        app.update();
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageModel>(),
+            &before,
+            "a receipt without storage fields must not fabricate a model update"
+        );
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&unlock));
+        let lines = &app
+            .world()
+            .resource::<mir2_client_bevy::chat::ChatModel>()
+            .lines;
+        assert_eq!(
+            lines,
+            &[mir2_client_bevy::chat::ChatLine {
+                text: "Incorrect storage password.".to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+        assert!(lines
+            .iter()
+            .all(|line| !line.text.contains("never-render-or-log-this")));
+    }
+
+    #[test]
+    fn storage_password_results_use_pre_result_state_and_snapshots_stay_silent() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+
+        // The ingest chain runs the receipt patch before the following storage
+        // snapshot, so this is a first set rather than a false "changed" notice.
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"has_password":true,"password_result":{"operation":"password","result":4}}"#
+                .to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_model(
+            r#"{"items":[],"has_password":true,"unlocked":true}"#.to_owned()
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::chat::ChatModel>()
+                .lines,
+            vec![mir2_client_bevy::chat::ChatLine {
+                text: "Storage password set.".to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+
+        assert!(native_ingest::push_native_storage_model(
+            r#"{"items":[],"has_password":true,"unlocked":true}"#.to_owned()
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::chat::ChatModel>()
+                .lines
+                .len(),
+            1,
+            "ordinary snapshots are not password-result feedback"
+        );
+
+        for result in [
+            r#"{"operation":"unlock","result":1}"#,
+            r#"{"operation":"unlock","result":2}"#,
+            r#"{"operation":"unlock","result":3}"#,
+            r#"{"operation":"password","result":0}"#,
+            r#"{"operation":"password","result":1}"#,
+            r#"{"operation":"password","result":2}"#,
+            r#"{"operation":"password","result":3}"#,
+            r#"{"operation":"password","result":5}"#,
+            r#"{"operation":"password","result":4}"#,
+            r#"{"operation":"unknown","result":2}"#,
+        ] {
+            assert!(native_ingest::push_native_storage_patch(format!(
+                r#"{{"password_result":{result}}}"#
+            )));
+        }
+        app.update();
+        let texts = app
+            .world()
+            .resource::<mir2_client_bevy::chat::ChatModel>()
+            .lines
+            .iter()
+            .map(|line| line.text.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            texts,
+            vec![
+                "Storage password set.",
+                "Password not acceptable.",
+                "Incorrect storage password.",
+                "Storage is not available.",
+                "Storage is not available.",
+                "Password not acceptable.",
+                "Incorrect storage password.",
+                "Password not acceptable.",
+                "No storage password is set.",
+                "Storage password changed.",
+            ]
+        );
+    }
+
+    #[test]
+    fn storage_password_remove_success_relocks_and_acknowledges_once() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::storage::StorageUiFeedback>();
+        {
+            let mut storage = app
+                .world_mut()
+                .resource_mut::<mir2_client_bevy::storage::StorageModel>();
+            storage.has_password = true;
+            storage.unlocked = true;
+        }
+        let remove = PendingOperationKey::StorageRemovePassword;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(remove.clone()));
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"has_password":false,"unlocked":true,"ack":{"operation":"removePassword","success":true},"password_result":{"operation":"password","result":4,"removing":true}}"#.to_owned()
+        ));
+        app.update();
+
+        let storage = app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>();
+        assert!(!storage.has_password);
+        assert!(!storage.unlocked, "source Hide relocks after removal");
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageUiFeedback>()
+                .close_requested,
+            "the native host closes only StorageDialog from this explicit receipt"
+        );
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&remove));
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::chat::ChatModel>()
+                .lines,
+            vec![mir2_client_bevy::chat::ChatLine {
+                text: "Storage password removed.".to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+    }
+
+    #[test]
+    fn storage_password_remove_failure_does_not_request_close() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::storage::StorageUiFeedback>();
+        {
+            let mut storage = app
+                .world_mut()
+                .resource_mut::<mir2_client_bevy::storage::StorageModel>();
+            storage.has_password = true;
+            storage.unlocked = true;
+        }
+        let remove = PendingOperationKey::StorageRemovePassword;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(remove.clone()));
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"removePassword","success":false},"password_result":{"operation":"password","result":2,"removing":true}}"#.to_owned()
+        ));
+        app.update();
+
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageModel>()
+                .unlocked
+        );
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::storage::StorageUiFeedback>()
+                .close_requested
+        );
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&remove));
     }
 
     #[test]
@@ -8333,6 +10437,7 @@ mod native_data_path_tests {
         let map_entity = app.world_mut().spawn_empty().id();
         let effect_entity = app.world_mut().spawn_empty().id();
         let additive_entity = app.world_mut().spawn_empty().id();
+        let map_additive_entity = app.world_mut().spawn_empty().id();
         app.world_mut().resource_scope(
             |world, mut cache: Mut<additive_material::CrystalAdditiveMaterialCache>| {
                 let mut materials =
@@ -8343,11 +10448,25 @@ mod native_data_path_tests {
                     1.0,
                     &mut materials,
                 );
+                cache.material(
+                    "standalone:additive:12:34:WemadeMir2/Objects#7",
+                    Handle::<Image>::default(),
+                    1.0,
+                    &mut materials,
+                );
             },
         );
         {
             let mut registry = app.world_mut().resource_mut::<SceneRegistry>();
             registry.map.spawned.push(map_entity);
+            registry.map_render.tiles.insert(
+                "standalone:additive:12:34:WemadeMir2/Objects#7".to_owned(),
+                MapRenderTileHandle {
+                    entity: map_additive_entity,
+                    last_seen_generation: 1,
+                    additive: true,
+                },
+            );
             registry.effect_render.insert(
                 "fx".to_owned(),
                 EffectRenderLayerHandle {
@@ -8443,11 +10562,13 @@ mod native_data_path_tests {
             .is_empty());
         let registry = app.world().resource::<SceneRegistry>();
         assert!(registry.map.spawned.is_empty());
+        assert!(registry.map_render.tiles.is_empty());
         assert!(registry.effect_render.is_empty());
         assert!(registry.entity_render_layers.is_empty());
         assert!(!app.world().entities().contains(map_entity));
         assert!(!app.world().entities().contains(effect_entity));
         assert!(!app.world().entities().contains(additive_entity));
+        assert!(!app.world().entities().contains(map_additive_entity));
         assert_eq!(
             app.world()
                 .resource::<additive_material::CrystalAdditiveMaterialCache>()
@@ -8490,11 +10611,99 @@ mod native_data_path_tests {
     }
 
     #[test]
+    fn scene_reset_retires_confirmed_old_map_handoff_but_keeps_new_map_command() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let _motion_guard = local_motion::local_motion_test_guard();
+        local_motion::reset_local_motion_bridge_for_test();
+        clear_mir2_self_camera_motion();
+
+        let mut app = ingest_app();
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            local_motion::LocalMotionPresentationShadowPlugin,
+        ));
+        app.insert_resource(motion::MoveClockSource::Manual(
+            mir2_client_core::clock::ManualClock::new(600),
+        ));
+
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"reset","atMs":0.0,"objectId":"self","x":10,"y":10,"direction":"Right"}"#
+                .to_owned(),
+        );
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"commandSent","atMs":0.0,"direction":"Right","mode":"run","fromX":10,"fromY":10,"toX":12,"toY":10,"phaseCount":6}"#.to_owned(),
+        );
+        app.update();
+        match &mut *app.world_mut().resource_mut::<motion::MoveClockSource>() {
+            motion::MoveClockSource::Manual(clock) => clock.set_ms(650),
+            motion::MoveClockSource::Wall => unreachable!("test installs a manual clock"),
+        }
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"authoritative","atMs":650.0,"objectId":"self","isSelf":true,"x":12,"y":10,"tsDisposition":"confirmed"}"#.to_owned(),
+        );
+        app.update();
+
+        // `PreUpdate` accepts the first command from the new map before the
+        // queued SceneReset reaches Update. Its coordinates overlap the old
+        // map's source/target, which would otherwise admit the old handoff.
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"commandSent","atMs":650.0,"direction":"Right","mode":"run","fromX":12,"fromY":10,"toX":14,"toY":10,"phaseCount":6}"#.to_owned(),
+        );
+        set_mir2_self_camera_motion(12.0, 10.0, 14.0, 10.0, 650.0, 1_250.0);
+        assert!(native_ingest::push_native_scene_reset());
+        app.update();
+
+        let mut shadow = app
+            .world_mut()
+            .resource_mut::<local_motion::LocalMotionPresentationShadow>();
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 650.0, 48.0, 32.0)
+            .is_none());
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 12, 10, 650.0, 48.0, 32.0)
+            .is_some());
+        assert_eq!(
+            pending_self_camera_motion(),
+            Some((12.0, 10.0, 14.0, 10.0, 650.0, 1_250.0))
+        );
+
+        clear_mir2_self_camera_motion();
+        local_motion::reset_local_motion_bridge_for_test();
+    }
+
+    #[test]
+    fn scene_reset_clears_retained_camera_without_a_new_map_command() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let _motion_guard = local_motion::local_motion_test_guard();
+        local_motion::reset_local_motion_bridge_for_test();
+        let mut app = ingest_app();
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            local_motion::LocalMotionPresentationShadowPlugin,
+        ));
+        app.insert_resource(motion::MoveClockSource::Manual(
+            mir2_client_core::clock::ManualClock::new(650),
+        ));
+        app.update();
+
+        set_mir2_self_camera_motion(10.0, 10.0, 12.0, 10.0, 0.0, 600.0);
+        assert!(native_ingest::push_native_scene_reset());
+        app.update();
+        assert_eq!(pending_self_camera_motion(), None);
+        clear_mir2_self_camera_motion();
+        local_motion::reset_local_motion_bridge_for_test();
+    }
+
+    #[test]
     fn data_reset_includes_scene_reset_and_clears_all_models_and_pending() {
         let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         app.world_mut().resource_mut::<RuntimeWorldState>().snapshot =
             Some(serde_json::from_str(r#"{"entities":[]}"#).unwrap());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("starter:p1".to_owned(), Handle::<Image>::default());
         let scene_entity = app.world_mut().spawn_empty().id();
         app.world_mut()
             .resource_mut::<SceneRegistry>()
@@ -8524,6 +10733,11 @@ mod native_data_path_tests {
             .resource::<RuntimeWorldState>()
             .snapshot
             .is_none());
+        assert!(app
+            .world()
+            .resource::<RuntimeEntityRenderAtlases>()
+            .images
+            .contains_key("starter:p1"));
         assert!(app
             .world()
             .resource::<SceneRegistry>()
@@ -8694,12 +10908,15 @@ mod native_data_path_tests {
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":111,"items":[]}"#.to_owned()
         ));
+        assert!(native_ingest::push_native_ui_read_model(
+            r#"{"player":{"name":"Account A","wingEffect":1}}"#.to_owned()
+        ));
         assert!(native_ingest::push_native_data_reset());
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":222,"items":[]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_ui_read_model(
-            r#"{"player":{"name":"Account B","hp":10,"maxHp":10}}"#.to_owned()
+            r#"{"player":{"name":"Account B","hp":10,"maxHp":10,"wingEffect":2}}"#.to_owned()
         ));
 
         app.update();
@@ -8717,6 +10934,13 @@ mod native_data_path_tests {
                 .name
                 .as_deref(),
             Some("Account B")
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>()
+                .player
+                .wing_effect,
+            Some(2)
         );
     }
 }
@@ -8810,6 +11034,7 @@ mod native_soak_metrics_tests {
             MapRenderTileHandle {
                 entity: Entity::PLACEHOLDER,
                 last_seen_generation: 1,
+                additive: false,
             },
         );
         registry.map.spawned.push(Entity::PLACEHOLDER);
@@ -8882,7 +11107,8 @@ mod native_soak_metrics_tests {
         assert_eq!(counts.additive_cache_live_entries, 1);
         assert_eq!(counts.additive_asset_count, 1);
 
-        let encoded = native_soak_metrics_json(4_242, 12_345, &counts);
+        let encoded =
+            native_soak_metrics_json(4_242, 12_345, &counts, &NativeImagePathTelemetry::default());
         let payload: serde_json::Value =
             serde_json::from_str(&encoded).expect("native soak metrics should be valid JSON");
         assert_eq!(payload["processId"], 4_242);
@@ -8902,5 +11128,70 @@ mod native_soak_metrics_tests {
         assert_eq!(stale.additive_cache_entries, 1);
         assert_eq!(stale.additive_cache_live_entries, 0);
         assert_eq!(stale.additive_asset_count, 0);
+    }
+
+    #[test]
+    fn native_image_asset_counts_sum_cpu_payload_bytes() {
+        let mut images = Assets::<Image>::default();
+        let mut image_with_pixels = Image::default();
+        image_with_pixels.data = Some(vec![0xAB; 17]);
+        images.add(image_with_pixels);
+        let mut image_without_pixels = Image::default();
+        image_without_pixels.data = None;
+        images.add(image_without_pixels);
+
+        assert_eq!(native_image_asset_counts(&images), (2, 17));
+    }
+
+    #[test]
+    fn native_soak_metrics_json_includes_memory_diagnostic_fields() {
+        let counts = NativeSoakCounts {
+            image_asset_count: 2,
+            image_data_bytes: 17,
+            native_queue_messages: 3,
+            native_queue_bytes: 4096,
+            font_atlas_keys: 4,
+            font_atlas_pages: 5,
+            font_atlas_bytes: 6_291_456,
+            font_atlas_font_ids: vec![3, 9],
+            font_atlas_font_size_bits: vec![12.0_f32.to_bits(), 18.0_f32.to_bits()],
+            ..NativeSoakCounts::default()
+        };
+        let payload: serde_json::Value = serde_json::from_str(&native_soak_metrics_json(
+            4_242,
+            12_345,
+            &counts,
+            &NativeImagePathTelemetry::default(),
+        ))
+        .expect("native soak metrics should be valid JSON");
+
+        assert_eq!(payload["imageAssetCount"], 2);
+        assert_eq!(payload["imageDataBytes"], 17);
+        assert_eq!(payload["nativeQueueMessages"], 3);
+        assert_eq!(payload["nativeQueueBytes"], 4096);
+        assert_eq!(payload["fontAtlasKeys"], 4);
+        assert_eq!(payload["fontAtlasPages"], 5);
+        assert_eq!(payload["fontAtlasBytes"], 6_291_456);
+        assert_eq!(payload["fontAtlasFontIds"], serde_json::json!([3, 9]));
+        assert_eq!(
+            payload["fontAtlasFontSizeBits"],
+            serde_json::json!([12.0_f32.to_bits(), 18.0_f32.to_bits()])
+        );
+    }
+
+    #[test]
+    fn native_image_path_bucket_preserves_source_library_identity() {
+        assert_eq!(
+            native_image_path_bucket("original-ui/CArmour/00/42.png"),
+            "original-ui/CArmour"
+        );
+        assert_eq!(
+            native_image_path_bucket("generated/native-map-keyed/ground.png"),
+            "generated/native-map-keyed"
+        );
+        assert_eq!(
+            native_image_path_bucket("bevy-entity-atlases/p0.png"),
+            "bevy-entity-atlases"
+        );
     }
 }

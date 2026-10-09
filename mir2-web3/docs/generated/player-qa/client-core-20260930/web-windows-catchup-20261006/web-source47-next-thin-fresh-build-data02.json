@@ -1,0 +1,165 @@
+{
+  "owner": "Root",
+  "kind": "Source47 fresh original Next/Thin configuration data with own mutable tsconfig copy; not executed",
+  "generatedAtUtc": "2026-10-08T16:55:30.815Z",
+  "parentCommit": "22d814ad2ae5e45cf177f3505e0ed0f993b47195",
+  "readyToExecute": false,
+  "wasmStaticApiAnswerObserved": false,
+  "requiredPriorFullRendererCoreGates": "All original actual validation/name/normalizedABI/defaultgzip/budgets and immutable publication must pass first; current public bundle is historicalSource25, do not run fresh Next now.",
+  "productConfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\next.config.ts",
+    "bytes": 13454,
+    "sha256": "9df1068e2257c21a2bc2063e160e61121ab4cb662b95ba21484c68b0d783846c"
+  },
+  "originalUserConfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "ownFutureMutableTypeConfigCopy": {
+    "pin": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.source47-build01.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    "nlink": 1,
+    "identicalUserInitialBytes": true,
+    "nextMayModifyThisOwnedCopy": true,
+    "postModifiedCopyNotExpectedToMatchOriginalInput": true
+  },
+  "originalNext": {
+    "executable": {
+      "path": "C:/Program Files/nodejs/node.exe",
+      "bytes": 85202416,
+      "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+    },
+    "args": [
+      "node_modules/next/dist/bin/next",
+      "build",
+      "--webpack"
+    ],
+    "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\web",
+    "environment": {
+      "SystemRoot": "C:/Windows",
+      "windir": "C:/Windows",
+      "SystemDrive": "C:",
+      "ComSpec": "C:/Windows/System32/cmd.exe",
+      "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+      "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+      "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+      "USERPROFILE": "C:/Users/Administrator",
+      "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+      "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+      "NUMBER_OF_PROCESSORS": "1",
+      "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+      "MIR2_SKIP_RUSTUP_TARGET_CHECK": "1",
+      "MIR2_WASM_BINDGEN_ATTEMPTS": "1",
+      "NODE_ENV": "production",
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "VERCEL": "0",
+      "MIR2_NEXT_DIST_DIR": ".next-web-windows-catchup-source47-20261009-01",
+      "MIR2_NEXT_STANDALONE": "1",
+      "MIR2_USE_PREBUILT_CLIENT_CORE": "1",
+      "MIR2_USE_PREBUILT_BEVY_RUNTIME": "1",
+      "MIR2_WEB_QUEST_UI": "1",
+      "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL": "ws://127.0.0.1:19110/ws",
+      "NEXT_PUBLIC_MIR2_ASSET_BASE_URL": "",
+      "MIR2_ORIGINAL_ASSET_MANIFEST_MODE": "filesystem",
+      "MIR2_NEXT_TSCONFIG_PATH": "tsconfig.source47-build01.json"
+    },
+    "snapshotAndToolsBinding": "Root must freeze matching newly published full Web inputs and original tools after original full runtime publication. Not a runnable config."
+  },
+  "originalThin": {
+    "executable": {
+      "path": "C:/Program Files/nodejs/node.exe",
+      "bytes": 85202416,
+      "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+    },
+    "args": [
+      "scripts/build-thin-client.mjs",
+      "--skipBuild",
+      "true",
+      "--nextDir",
+      ".next-web-windows-catchup-source47-20261009-01",
+      "--output",
+      ".mir2-thin-client-web-windows-catchup-source47-20261009-01",
+      "--report",
+      "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-build-source47-thin01-size-report.json"
+    ],
+    "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\web",
+    "environment": {
+      "SystemRoot": "C:/Windows",
+      "windir": "C:/Windows",
+      "SystemDrive": "C:",
+      "ComSpec": "C:/Windows/System32/cmd.exe",
+      "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+      "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+      "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+      "USERPROFILE": "C:/Users/Administrator",
+      "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+      "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+      "NUMBER_OF_PROCESSORS": "1",
+      "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+      "MIR2_SKIP_RUSTUP_TARGET_CHECK": "1",
+      "MIR2_WASM_BINDGEN_ATTEMPTS": "1",
+      "NODE_ENV": "production",
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "VERCEL": "0",
+      "MIR2_NEXT_DIST_DIR": ".next-web-windows-catchup-source47-20261009-01",
+      "MIR2_NEXT_STANDALONE": "1",
+      "MIR2_USE_PREBUILT_CLIENT_CORE": "1",
+      "MIR2_USE_PREBUILT_BEVY_RUNTIME": "1",
+      "MIR2_WEB_QUEST_UI": "1",
+      "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL": "ws://127.0.0.1:19110/ws",
+      "NEXT_PUBLIC_MIR2_ASSET_BASE_URL": "",
+      "MIR2_ORIGINAL_ASSET_MANIFEST_MODE": "filesystem",
+      "MIR2_NEXT_TSCONFIG_PATH": "tsconfig.source47-build01.json"
+    },
+    "originalCapBytes": 377487360,
+    "acceptedNextRequired": true,
+    "skipBuildRequiresExistingAcceptedFreshNext": true
+  },
+  "oldOutputRoots": {
+    "next": {
+      "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-08",
+      "elapsedMs": 142075,
+      "files": 19007,
+      "bytes": 610069210
+    },
+    "thin": {
+      "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-08",
+      "elapsedMs": 38386,
+      "stats": {
+        "exists": true,
+        "bytes": 373130249,
+        "files": 7301,
+        "directories": 776,
+        "links": 0
+      },
+      "capBytes": 377487360,
+      "headroomBytes": 4357111
+    },
+    "qualification": "Source25 Next08/Thin08 remains last complete static package and excludesSource26-45. It is not latest Candidate/player proof."
+  },
+  "freshOutputAbsenceObserved": true,
+  "sourceConfigDefaultBehaviorPreserved": true,
+  "strictTypeCheckPreserved": true,
+  "processStarted": false,
+  "apiUsed": false,
+  "uiOperated": false,
+  "playableAccepted": false,
+  "candidate100": false,
+  "goalComplete": false,
+  "supersedesDataDraftOnly": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-next-thin-fresh-build-data01.json",
+    "bytes": 6537,
+    "sha256": "66e762ac1b41a46486a4d7e261a4330aad780b45f6e951c24e60e844c829e2f7"
+  },
+  "draftCorrection": {
+    "onlyArg": "--report path separators",
+    "sameResolvedPath": true,
+    "originalCallerLiteralArgRegexAccepted": true,
+    "noCallerTemplateChanged": true,
+    "noProcessLaunched": true
+  }
+}

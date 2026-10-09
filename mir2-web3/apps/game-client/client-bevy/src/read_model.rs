@@ -8,6 +8,21 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalPlayerStatModel {
+    pub stat: u8,
+    pub value: i32,
+}
+
+/// Exact server display weights; a missing block remains unknown.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlayerWeights {
+    pub bag: u32,
+    pub wear: u32,
+    pub hand: u32,
+}
+
 /// Player stats surfaced by the HUD.
 ///
 /// All values are `Option`-safe and clamped by [`UiReadModel::normalized_hp`]
@@ -23,16 +38,35 @@ pub struct PlayerStats {
     pub max_mp: i32,
     pub gold: u32,
     pub credit: u32,
+    /// `Some` means the server supplied its authoritative Crystal stat block;
+    /// a missing id inside that block is zero. `None` is a legacy/partial
+    /// snapshot and must not be treated as proof that a requirement is met.
+    pub crystal_stats: Option<Vec<CrystalPlayerStatModel>>,
     pub level: u32,
     pub experience: i64,
     pub max_experience: i64,
     pub current_weight: u16,
+    /// Distinguishes an authoritative empty bag from missing legacy weight data.
+    pub current_weight_known: bool,
+    pub weights: Option<PlayerWeights>,
     pub max_weight: u16,
     pub name: Option<String>,
     /// Authoritative class name used to apply GameShop class restrictions.
     /// Older snapshots may omit it; `None` keeps the catalog visible while the
     /// server remains the final authority for a purchase.
     pub class_name: Option<String>,
+    /// Crystal `UserInformation.Gender`. Kept optional so an old or partial
+    /// snapshot cannot silently invent the CharacterDialog paper doll.
+    pub gender: Option<String>,
+    /// Crystal's zero-based hair style index. `0` is a real style, therefore
+    /// absence is represented by `None` rather than a numeric sentinel.
+    pub hair: Option<u8>,
+    /// Crystal `UserObject.WingEffect`. Only values 1 and 2 select a
+    /// CharacterDialog wing frame; `0` and other values intentionally draw
+    /// nothing. Kept optional so partial snapshots cannot invent an effect.
+    pub wing_effect: Option<u8>,
+    pub guild_name: Option<String>,
+    pub guild_rank_name: Option<String>,
     pub map_name: Option<String>,
     /// Server-authoritative safe-zone membership for the local player.
     pub in_safe_zone: bool,
@@ -52,6 +86,18 @@ impl PlayerStats {
     }
 
     pub fn normalized_weight(&self) -> f32 {
+        if let Some((weights, stats)) = self.weights.zip(self.crystal_stats.as_ref()) {
+            return ratio_i64(
+                i64::from(weights.bag),
+                i64::from(
+                    stats
+                        .iter()
+                        .find(|s| s.stat == 16)
+                        .map_or(0, |s| s.value)
+                        .max(0),
+                ),
+            );
+        }
         ratio_i64(i64::from(self.current_weight), i64::from(self.max_weight))
     }
 
@@ -84,6 +130,82 @@ impl PlayerStats {
 #[derive(Debug, Clone, Default, Resource, Serialize, Deserialize)]
 pub struct UiReadModel {
     pub player: PlayerStats,
+}
+
+/// The portable host has one read-model ingress. Complete HUD snapshots own
+/// player data for their generation; strict ABI1 Quest players are compatibility
+/// patches only and cannot erase or supersede that complete authority.
+#[derive(Debug, Default, Resource)]
+pub struct UiReadModelIngress {
+    pub generation: u64,
+    pub revision: u64,
+    pub navigation_revision: u64,
+    complete: bool,
+}
+
+impl UiReadModelIngress {
+    pub fn has_complete_generation(&self, generation: u64) -> bool {
+        self.complete && self.generation == generation
+    }
+    pub fn apply_full(
+        &mut self,
+        model: &mut UiReadModel,
+        generation: u64,
+        revision: u64,
+        player: Option<PlayerStats>,
+    ) -> bool {
+        if generation == 0
+            || generation < self.generation
+            || (generation == self.generation && self.complete && revision <= self.revision)
+        {
+            return false;
+        }
+        if generation != self.generation {
+            self.navigation_revision = 0;
+        }
+        self.generation = generation;
+        self.revision = revision;
+        self.complete = true;
+        model.player = player.unwrap_or_default();
+        true
+    }
+    pub fn apply_legacy_quest(
+        &mut self,
+        model: &mut UiReadModel,
+        generation: u64,
+        revision: u64,
+        player: PlayerStats,
+    ) -> bool {
+        if generation == 0
+            || generation < self.generation
+            || (generation == self.generation && (self.complete || revision <= self.revision))
+        {
+            return false;
+        }
+        if generation > self.generation {
+            model.player = PlayerStats::default();
+            self.navigation_revision = 0;
+        }
+        self.generation = generation;
+        self.revision = revision;
+        self.complete = false;
+        // ABI1 never supplied these fields. Preserve them on partial updates.
+        let saved = &model.player;
+        model.player = PlayerStats {
+            gold: saved.gold,
+            credit: saved.credit,
+            crystal_stats: saved.crystal_stats.clone(),
+            weights: saved.weights,
+            current_weight_known: player.current_weight_known,
+            gender: saved.gender.clone(),
+            hair: saved.hair,
+            wing_effect: saved.wing_effect,
+            guild_name: saved.guild_name.clone(),
+            guild_rank_name: saved.guild_rank_name.clone(),
+            ..player
+        };
+        true
+    }
 }
 
 /// Host-to-UI surface requests that are not part of the persistent world
@@ -137,13 +259,21 @@ mod tests {
                 max_mp: 50,
                 gold: 1234,
                 credit: 45,
+                crystal_stats: Some(vec![CrystalPlayerStatModel { stat: 5, value: 4 }]),
                 level: 3,
                 experience: 435,
                 max_experience: 900,
                 current_weight: 1,
+                current_weight_known: true,
+                weights: None,
                 max_weight: 50,
                 name: Some("Demo".to_owned()),
                 class_name: Some("Warrior".to_owned()),
+                gender: Some("Male".to_owned()),
+                hair: Some(0),
+                wing_effect: Some(1),
+                guild_name: Some("DemoGuild".to_owned()),
+                guild_rank_name: Some("Member".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
                 in_safe_zone: true,
             },
@@ -188,5 +318,21 @@ mod tests {
         assert_eq!(model.player.normalized_experience(), 1.0);
         assert_eq!(model.player.normalized_weight(), 1.0);
         assert_eq!(model.player.available_weight(), 0);
+    }
+
+    #[test]
+    fn wing_effect_round_trips_without_defaulting_missing_authority() {
+        let json = serde_json::to_value(sample()).expect("serialize player read model");
+        assert_eq!(json["player"]["wingEffect"], serde_json::json!(1));
+        let restored: UiReadModel = serde_json::from_value(json).expect("player read model");
+        assert_eq!(restored.player.wing_effect, Some(1));
+
+        let legacy: UiReadModel =
+            serde_json::from_value(serde_json::json!({"player": {}})).expect("legacy player");
+        assert_eq!(legacy.player.wing_effect, None);
+        let cleared: UiReadModel =
+            serde_json::from_value(serde_json::json!({"player": {"wingEffect": 0}}))
+                .expect("explicit no-wing state");
+        assert_eq!(cleared.player.wing_effect, Some(0));
     }
 }

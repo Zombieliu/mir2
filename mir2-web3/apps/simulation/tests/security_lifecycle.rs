@@ -28,6 +28,77 @@ fn login_demo_runtime(runtime: &mut InProcessWorldRuntime) {
 }
 
 #[test]
+fn logout_updates_the_crystal_select_roster_last_access() {
+    let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+    let login = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        }))
+        .expect("demo account should authenticate");
+    assert!(matches!(
+        login.as_slice(),
+        [ServerPacket::LoginSuccess { characters }]
+            if characters.iter().all(|character| character.last_access_binary_datetime == 0)
+    ));
+
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        }))
+        .expect("fixture character should start");
+    let logout = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
+        .expect("logout should persist the final character state");
+    let last_access = logout
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::LogOutSuccess { characters } => characters
+                .iter()
+                .find(|character| character.index == 0)
+                .map(|character| character.last_access_binary_datetime),
+            _ => None,
+        })
+        .expect("logout roster should contain the active character");
+
+    assert_ne!(last_access, 0, "logout must no longer report Never");
+    assert_eq!(
+        (last_access as u64) & 0xc000_0000_0000_0000,
+        0x4000_0000_0000_0000,
+        "Crystal LastLogoutDate originates from DateTime.UtcNow"
+    );
+}
+
+#[test]
+fn abnormal_teardown_save_updates_the_crystal_select_roster_last_access() {
+    let config = SimulationConfig::default();
+    let mut runtime = InProcessWorldRuntime::new(config.clone());
+    login_demo_runtime(&mut runtime);
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        }))
+        .expect("fixture character should start");
+    runtime
+        .save_active_character_for_logout()
+        .expect("abnormal teardown should persist LastLogoutDate");
+
+    let mut next_connection = InProcessWorldRuntime::new(config);
+    let login = next_connection
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        }))
+        .expect("next connection should authenticate");
+    assert!(matches!(
+        login.as_slice(),
+        [ServerPacket::LoginSuccess { characters }]
+            if characters.iter().any(|character|
+                character.index == 0 && character.last_access_binary_datetime != 0)
+    ));
+}
+
+#[test]
 fn unauthenticated_start_game_rejected() {
     let command = WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 });
 
@@ -50,6 +121,22 @@ fn unauthenticated_delete_character_rejected() {
     let command = WorldCommand::ClientPacket(ClientPacket::DeleteCharacter { character_index: 0 });
 
     assert!(validate_production_player_command(false, &command).is_err());
+}
+
+#[test]
+fn unauthenticated_inspect_rejected_in_every_id_namespace() {
+    for (ranking, hero) in [(false, false), (true, false), (false, true), (true, true)] {
+        let command = WorldCommand::ClientPacket(ClientPacket::Inspect {
+            object_id: 0,
+            ranking,
+            hero,
+        });
+        assert!(validate_production_player_command(false, &command).is_err());
+        assert!(validate_production_player_command(true, &command).is_ok());
+        let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+        assert!(runtime.execute_production_player_command(false, command).is_err());
+        assert!(runtime.active_identity().is_none());
+    }
 }
 
 #[test]

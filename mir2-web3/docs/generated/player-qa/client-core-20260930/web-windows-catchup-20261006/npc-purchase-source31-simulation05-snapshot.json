@@ -1,0 +1,2235 @@
+{
+  "owner": "Root",
+  "kind": "Source31 actual same-turn shared goods presentation and finite eight Simulation tests",
+  "generatedAtUtc": "2026-10-07T16:08:23.160Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "previousSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation04-snapshot.json",
+    "bytes": 111570,
+    "sha256": "cdd16a34bbae53b005f4fd4e7770621324343abc1f60579b5b92a5becf75acad"
+  },
+  "sources": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\Cargo.lock",
+      "bytes": 240514,
+      "sha256": "5b9b881ee51bdbcb079ad02ea3036e3d68ad89e2b4ea5e64c3d65cb3ae6d1a91",
+      "relativePath": "Cargo.lock"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\Cargo.toml",
+      "bytes": 338,
+      "sha256": "af587253adac5458836fd6fea060e236af8cb33632bf08039fc68537b975afa8",
+      "relativePath": "Cargo.toml"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\Cargo.toml",
+      "bytes": 741,
+      "sha256": "f1412e2b57c15aeb025e96d8a1b839889e1ca053637aa7ca223fbb8a2c742027",
+      "relativePath": "apps/simulation/Cargo.toml"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\bin\\zone_replay.rs",
+      "bytes": 2457,
+      "sha256": "6d900fe0963b61591b583d1d1176116cd169d22514829d96cab2c3f97316348b",
+      "relativePath": "apps/simulation/src/bin/zone_replay.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 299403,
+      "sha256": "358ab5cd968c129061a6ce11d229fff4f5c0813d530ef94119d6d205cfa6f71b",
+      "relativePath": "apps/simulation/src/config.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_account_store_durability_tests.rs",
+      "bytes": 5489,
+      "sha256": "195a76501d192738f983ded1809e71c2e2c08f8a95e3e4a19c8645f9bda3dec0",
+      "relativePath": "apps/simulation/src/config_account_store_durability_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_file_authority.rs",
+      "bytes": 23658,
+      "sha256": "2b05ffa956ebbf198997357c3b90c02a2f8b0b465ae486014f6d2d1d2ccbffb0",
+      "relativePath": "apps/simulation/src/config_file_authority.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock.rs",
+      "bytes": 18643,
+      "sha256": "2a26860fd7fb34208d8b94943b6f727899ee54f63b3ea50439c19a374850b4f9",
+      "relativePath": "apps/simulation/src/config_guild_clock.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock_driver.rs",
+      "bytes": 21723,
+      "sha256": "a80fc6c512951f9d23828041407a6d028a1a755313fab566660f144718c957f4",
+      "relativePath": "apps/simulation/src/config_guild_clock_driver.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock_late_pg_tests.rs",
+      "bytes": 5293,
+      "sha256": "557df713670c992045e0e7a213240af7cda6126652e751007728ad907c5cc700",
+      "relativePath": "apps/simulation/src/config_guild_clock_late_pg_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock_pg_tests.rs",
+      "bytes": 21887,
+      "sha256": "3e54ff2a8afea7916f5dba14c8aba0079fa2a0e08f0796494d669c235ddf8908",
+      "relativePath": "apps/simulation/src/config_guild_clock_pg_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock_schema_tests.rs",
+      "bytes": 8139,
+      "sha256": "a6142629ec28dd137e8d6827e9a0e109d1d2d4f78070581061f7eaa6740a63bc",
+      "relativePath": "apps/simulation/src/config_guild_clock_schema_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock_transactions.rs",
+      "bytes": 9377,
+      "sha256": "4e8ab8b4530c961606fffeb058edeeb404e8f06e7ecccd080747bcf337bfbef3",
+      "relativePath": "apps/simulation/src/config_guild_clock_transactions.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_experience.rs",
+      "bytes": 8162,
+      "sha256": "95508910039346218a2d1104181f2b298fc986b4478e386e1dcc16695d7db2d3",
+      "relativePath": "apps/simulation/src/config_guild_experience.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_experience_capture_tests.rs",
+      "bytes": 6892,
+      "sha256": "91f9a09464c68de9aecde699af2074bca75c6413b86189eeb667adba8b3a3593",
+      "relativePath": "apps/simulation/src/config_guild_experience_capture_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_experience_commit.rs",
+      "bytes": 13060,
+      "sha256": "b29fafb9aa597db7be714d53ad4714d915407501cf5f3192604f93ab512c18ed",
+      "relativePath": "apps/simulation/src/config_guild_experience_commit.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_experience_permit.rs",
+      "bytes": 3400,
+      "sha256": "57663fb5603e77e6e3b06a522ba2a0b3ab0e71b722eb9d797e0cdf9006ef9bd6",
+      "relativePath": "apps/simulation/src/config_guild_experience_permit.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_experience_tests.rs",
+      "bytes": 8303,
+      "sha256": "42795fce20740a79c8de7f3c9ea39b90a012d7dddeb4e782683684046a2eeddd",
+      "relativePath": "apps/simulation/src/config_guild_experience_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_xp_pg_tests.rs",
+      "bytes": 4898,
+      "sha256": "7b897031c4783fbc19a549aafaa35d92380cff6daf87ec104287e158696827ca",
+      "relativePath": "apps/simulation/src/config_guild_xp_pg_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_authority.rs",
+      "bytes": 1654,
+      "sha256": "77c781fd809b78d94b4b2fcdb999dd0832d8525dcc615be3041f448b1491e61e",
+      "relativePath": "apps/simulation/src/config_hero_authority.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_compensation.rs",
+      "bytes": 1933,
+      "sha256": "f1979bd2684a800f811e7477a1b126ff11232b9283b9f462b8837f2fe32d1624",
+      "relativePath": "apps/simulation/src/config_hero_compensation.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_map.rs",
+      "bytes": 1054,
+      "sha256": "580895e2f687645f50ad1e578f9f8a6b4cbc43a4b5291332d1c46dccd3d2d1a8",
+      "relativePath": "apps/simulation/src/config_hero_map.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_postgres.rs",
+      "bytes": 7954,
+      "sha256": "cc61e027e7ed449179d58a145e9984ace44b30878c70e52957b35b8872f45726",
+      "relativePath": "apps/simulation/src/config_hero_postgres.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_postgres_tests.rs",
+      "bytes": 10922,
+      "sha256": "299acc316d75a1f76c7889dc2f549d842f35fa79cd8656acbe9394cc3050fb8b",
+      "relativePath": "apps/simulation/src/config_hero_postgres_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_registry.rs",
+      "bytes": 13380,
+      "sha256": "cd9afcebb5ed61beb4d1f69cff6ce61cd53503ad18644bb326885a6d36d0203b",
+      "relativePath": "apps/simulation/src/config_hero_registry.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_scope.rs",
+      "bytes": 5897,
+      "sha256": "b82af653acb3414f4cfda1fef375d791c07683e24474b33581a8281f7917a969",
+      "relativePath": "apps/simulation/src/config_hero_scope.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_hero_transaction_tests.rs",
+      "bytes": 7310,
+      "sha256": "11849dde582e7c587564cc5197b52ab60b834989b19748ecd2ea2f6c963dfa32",
+      "relativePath": "apps/simulation/src/config_hero_transaction_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_item_identity.rs",
+      "bytes": 11014,
+      "sha256": "33bf6ac2d1806aea75e97598e608e3a3faed9b03c90776f8dbe90ef2081a244c",
+      "relativePath": "apps/simulation/src/config_item_identity.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_item_identity_tests.rs",
+      "bytes": 6448,
+      "sha256": "7ff630d64ddef0ce611a7c76e393de5f31858b44307aef3f4b7bef4e9311222b",
+      "relativePath": "apps/simulation/src/config_item_identity_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_prepared_kill.rs",
+      "bytes": 15432,
+      "sha256": "774eaea5e9c18f9e0a98223cfb48b17610d965782de6e84f3b14fead24615152",
+      "relativePath": "apps/simulation/src/config_prepared_kill.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_refresh_fail_closed_tests.rs",
+      "bytes": 66276,
+      "sha256": "5b31fabd2899857cc98b15e2f4fe0ac2cdb6f3965b8f3f624eec902ce8bdebf3",
+      "relativePath": "apps/simulation/src/config_refresh_fail_closed_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_shared_guild_pg_tests.rs",
+      "bytes": 6437,
+      "sha256": "aa499589fac01f04fef0c7855ecc27c08f5c8180160222150cd6791c4bad6570",
+      "relativePath": "apps/simulation/src/config_shared_guild_pg_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_shared_guilds.rs",
+      "bytes": 46478,
+      "sha256": "6d4b233c6adcef4028e222eb0392c08b9f8d6f84faa074b62d1dd25eb0515edd",
+      "relativePath": "apps/simulation/src/config_shared_guilds.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\db_projection.rs",
+      "bytes": 32981,
+      "sha256": "d3d289d57e3e38eb2b5d25d4d4781583db88c12ef0562cb90f40e42684bcf554",
+      "relativePath": "apps/simulation/src/db_projection.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\item_identity_postgres.rs",
+      "bytes": 6878,
+      "sha256": "81ab8a2563160346e68a111aef91106fdf38eb476c2d071034ad839f341c7113",
+      "relativePath": "apps/simulation/src/item_identity_postgres.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\item_identity_postgres_tests.rs",
+      "bytes": 6951,
+      "sha256": "f97cc69712b975919364d7ae0f4f7acd86116847cbe7dee282349778d1d33ebd",
+      "relativePath": "apps/simulation/src/item_identity_postgres_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\item_identity_reservation.rs",
+      "bytes": 6321,
+      "sha256": "0b6af5e7d3ed7f3171d05d4fda82f46b83bf29ac5d84a079283542d0e9824a38",
+      "relativePath": "apps/simulation/src/item_identity_reservation.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\lib.rs",
+      "bytes": 5486,
+      "sha256": "aa8d769c56edc833a1a68f03e8b5e60fcdd75294dd3bf9b265e3615f65a6f733",
+      "relativePath": "apps/simulation/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\npc_purchase_journal.rs",
+      "bytes": 33037,
+      "sha256": "e823494a615353310329d8ee0faec6ab8288dbca6da72bbf1138caf76aa76580",
+      "relativePath": "apps/simulation/src/npc_purchase_journal.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\npc_purchase_owner.rs",
+      "bytes": 21830,
+      "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\big_map\\mod.rs",
+      "bytes": 24773,
+      "sha256": "06c423d98c652f7ebb7bde6a97732d4d58839ec9c1d0688beafdbb61d35771c8",
+      "relativePath": "apps/simulation/src/runtime/big_map/mod.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\buff_duration.rs",
+      "bytes": 2863,
+      "sha256": "01050e2c0274342082a246ccd49502aad0e574bed7028167fe56d643663df921",
+      "relativePath": "apps/simulation/src/runtime/buff_duration.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\buffs.rs",
+      "bytes": 22087,
+      "sha256": "4f9e9347fdda70d9a0eb6666557ec5b86da4cbec547f9cae77115fabe8df1e7d",
+      "relativePath": "apps/simulation/src/runtime/buffs.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\combat.rs",
+      "bytes": 142417,
+      "sha256": "64d4a2cb4facfd16cce451ec370c41b5ec333ace6de6a22570bf5504b7c2be65",
+      "relativePath": "apps/simulation/src/runtime/combat.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\components.rs",
+      "bytes": 8626,
+      "sha256": "2a0476d302bd7dee542e7bc70dda720b72d67752cd68ba2b8e74fdfafe10da42",
+      "relativePath": "apps/simulation/src/runtime/components.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\crystal_compat.rs",
+      "bytes": 19231,
+      "sha256": "0bef0f11e4c61cd5e52a57175a4cb54978564f45ad4ffb96f76143ec011eacb7",
+      "relativePath": "apps/simulation/src/runtime/crystal_compat.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\door.rs",
+      "bytes": 3300,
+      "sha256": "01e0e313e26966bd9f9ad879a7009081532dbfc5a2f28f5a1e8aecf6dc4bf451",
+      "relativePath": "apps/simulation/src/runtime/door.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\drops.rs",
+      "bytes": 173251,
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+      "relativePath": "apps/simulation/src/runtime/drops.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\drops\\zone_harvest_drop_tests.rs",
+      "bytes": 2182,
+      "sha256": "a25534bfe2c1a3117c3e20f9fe4460d46937683951a404ae650973a714bf4fc0",
+      "relativePath": "apps/simulation/src/runtime/drops/zone_harvest_drop_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\equipment.rs",
+      "bytes": 109597,
+      "sha256": "5dff2b5879a7aff4fbf11de0c9376dd1819fe5649194121726920a62ca998589",
+      "relativePath": "apps/simulation/src/runtime/equipment.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\equipment_storage_merge_tests.rs",
+      "bytes": 20097,
+      "sha256": "ce191845687c9c03995b82b9bb6aae707077fd4c23c14e26efc3eb5716a87f03",
+      "relativePath": "apps/simulation/src/runtime/equipment_storage_merge_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\experience_rates.rs",
+      "bytes": 1389,
+      "sha256": "0c1ecb8b34697b5e0e24d209b10acbc44343d0526bf2b086c0a2e46cefb015cd",
+      "relativePath": "apps/simulation/src/runtime/experience_rates.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\fishing.rs",
+      "bytes": 31126,
+      "sha256": "6046c709c179a3e1f8398c6e7b398913e3a9e5338b47b4297c0176670aaad679",
+      "relativePath": "apps/simulation/src/runtime/fishing.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\fishing_equipment_tests.rs",
+      "bytes": 8953,
+      "sha256": "77fab0af804cd96dae97d3a31ca2181b652e7cd43cbd3f55cad12dc23d1b47ec",
+      "relativePath": "apps/simulation/src/runtime/fishing_equipment_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\fixtures\\d401.map.gz",
+      "bytes": 22951,
+      "sha256": "734f2c5ce06defd46ebb3fc9a7d02a38c00ac7b070be03b317b0e6fa9aa78a71",
+      "relativePath": "apps/simulation/src/runtime/fixtures/d401.map.gz"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\gm_commands.rs",
+      "bytes": 64858,
+      "sha256": "855ad6f85cfc82f2f20b24dbd8504acd60d11bfc7158111370df9802c56610a7",
+      "relativePath": "apps/simulation/src/runtime/gm_commands.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hazard.rs",
+      "bytes": 6820,
+      "sha256": "ed19dc0fca477ff637e82e12f77225966cc0fc3cfc703cf22a102441377aa4b1",
+      "relativePath": "apps/simulation/src/runtime/hazard.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_ai.rs",
+      "bytes": 57005,
+      "sha256": "776768e0ce53ce14f2730de26d7ad198190ca81bbef2d3531a4693ce6fed681c",
+      "relativePath": "apps/simulation/src/runtime/hero_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_buffs.rs",
+      "bytes": 8260,
+      "sha256": "45cecbeb718a86fc3d0c16dd9cc95db376305d8fb36285809fd7a59c44d23ce6",
+      "relativePath": "apps/simulation/src/runtime/hero_buffs.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_cadence.rs",
+      "bytes": 3256,
+      "sha256": "bf78c1e38ff993604b47e5d912562623b5d0ea5d29d0cb6643be1339bb53fbad",
+      "relativePath": "apps/simulation/src/runtime/hero_cadence.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_cast.rs",
+      "bytes": 9729,
+      "sha256": "155f60c243bdca6c7652fcca07f53c9279813a89daadec4f3828f0ae6c044e47",
+      "relativePath": "apps/simulation/src/runtime/hero_cast.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_combat_math.rs",
+      "bytes": 3518,
+      "sha256": "0ead5c2e98e84421f719fe76950815e55506f2b2c5319d0f07a4a617c7052911",
+      "relativePath": "apps/simulation/src/runtime/hero_combat_math.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_delayed_actions.rs",
+      "bytes": 6470,
+      "sha256": "16fac37898fa1039c8e6d0ebeb58c72b62c7d06ad3fb5a2e856395f04d782f8d",
+      "relativePath": "apps/simulation/src/runtime/hero_delayed_actions.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_hit_dispatch.rs",
+      "bytes": 2723,
+      "sha256": "a9ca334d94d4c5a85485e6b5fa0b87913fbbae8def1f44b984276e6898f7e907",
+      "relativePath": "apps/simulation/src/runtime/hero_hit_dispatch.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_hit_math.rs",
+      "bytes": 3788,
+      "sha256": "d78df03731e00d2782352dbfa661a7cb2dce0480276c81a5ae20e7f84e50802c",
+      "relativePath": "apps/simulation/src/runtime/hero_hit_math.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_inventory.rs",
+      "bytes": 38638,
+      "sha256": "51cb2df88d438e09e506162f7ae3fb3183d62d9fbb06d040e2b58bbd00ab594f",
+      "relativePath": "apps/simulation/src/runtime/hero_inventory.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_legacy_migration_tests.rs",
+      "bytes": 4484,
+      "sha256": "d074c04a999c7958c349841d9e86a592177a146fe14473d429565927c4c87f4d",
+      "relativePath": "apps/simulation/src/runtime/hero_legacy_migration_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_merge.rs",
+      "bytes": 11874,
+      "sha256": "8ab4c0d52396eb476597d572ce8cb3b8346beb7311777aaff1c36ab782f38f6f",
+      "relativePath": "apps/simulation/src/runtime/hero_merge.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_mount.rs",
+      "bytes": 10327,
+      "sha256": "82ee9de8deb3072f7a6fc3848ea0a6831020f488d42a64734fe08ef26558268a",
+      "relativePath": "apps/simulation/src/runtime/hero_mount.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_registry_carriers.rs",
+      "bytes": 9932,
+      "sha256": "7519ad8ad4ff02050b15f31eda8e0182ee4c0cff9928b887f09d3942dc8632a4",
+      "relativePath": "apps/simulation/src/runtime/hero_registry_carriers.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_registry_scan.rs",
+      "bytes": 8532,
+      "sha256": "f530670cac4d0c2266413c8dbc21318669d79603535ae3ffe210c2c9ae463d44",
+      "relativePath": "apps/simulation/src/runtime/hero_registry_scan.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_registry_scan_tests.rs",
+      "bytes": 5685,
+      "sha256": "04b921af2ac563b24c8e71d46074d30c553459d32f4d28177542eef2f78b638d",
+      "relativePath": "apps/simulation/src/runtime/hero_registry_scan_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_registry_validation.rs",
+      "bytes": 946,
+      "sha256": "079f87e0350e7ff7630de198386c8ca9b722730e821a1412c09d9cdb7804d33a",
+      "relativePath": "apps/simulation/src/runtime/hero_registry_validation.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_stats.rs",
+      "bytes": 10622,
+      "sha256": "b4c6a3712820593c38105caccb64df365c806cfd4c81a1a2846c52bf42567021",
+      "relativePath": "apps/simulation/src/runtime/hero_stats.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_stats_rod_tests.rs",
+      "bytes": 1937,
+      "sha256": "8d857c7e93aa7ad7a6d1e74aa247cf96945feff4e06e2a3f497878193bbaa99d",
+      "relativePath": "apps/simulation/src/runtime/hero_stats_rod_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\hero_transient.rs",
+      "bytes": 3284,
+      "sha256": "08c7465c1635ab1d20f0b2bdaaedc0d61fd309014e761b8b70faf792f08d3304",
+      "relativePath": "apps/simulation/src/runtime/hero_transient.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\intelligent_creature_item_tests.rs",
+      "bytes": 31087,
+      "sha256": "b2e7b333941ab449019c3e350ac40dc64fa8d185c7dd3f8e84986e3aa3105616",
+      "relativePath": "apps/simulation/src/runtime/intelligent_creature_item_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\intelligent_creatures.rs",
+      "bytes": 22960,
+      "sha256": "07a00b3214b0801ac36c3c7f3eb00e161d18525a7dfd91f2273418c1a68d392d",
+      "relativePath": "apps/simulation/src/runtime/intelligent_creatures.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\inventory.rs",
+      "bytes": 182354,
+      "sha256": "e8cb44b483eff80593576f0c0f799f989fbc14edceaff312048f0ae7c7326c55",
+      "relativePath": "apps/simulation/src/runtime/inventory.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\item_custody.rs",
+      "bytes": 7836,
+      "sha256": "19f571b6165ea632dd8807bac53c5c52469f24b871279d05a31225b640c443f7",
+      "relativePath": "apps/simulation/src/runtime/item_custody.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\item_custody_tests.rs",
+      "bytes": 5681,
+      "sha256": "6f5d536cf1149a138018d6feb78318ba0e0b2e37f2b87c254e39f42c278b287f",
+      "relativePath": "apps/simulation/src/runtime/item_custody_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\item_sets.rs",
+      "bytes": 4875,
+      "sha256": "2180da4e9710e7c0fa040b0cac523e19f38ade6b9fea699667d57cb1680dc3f8",
+      "relativePath": "apps/simulation/src/runtime/item_sets.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\items.rs",
+      "bytes": 166139,
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "relativePath": "apps/simulation/src/runtime/items.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\leveling.rs",
+      "bytes": 14467,
+      "sha256": "6760018dc57f9663b3f5ea48272750600f3af2c3ae3348e4026bd142ca1b4d3a",
+      "relativePath": "apps/simulation/src/runtime/leveling.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\magic_key_preflight_tests.rs",
+      "bytes": 3575,
+      "sha256": "0c84bfd33aa8cb6fe4072b91e85ddfc88c58ba730c52b9aee6120b2fc6bec177",
+      "relativePath": "apps/simulation/src/runtime/magic_key_preflight_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mail_body_validation_tests.rs",
+      "bytes": 1263,
+      "sha256": "8f7f649d296701892ad4f2ea38899b28db133ec6b95532df3d940111f044e05d",
+      "relativePath": "apps/simulation/src/runtime/mail_body_validation_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mail_parcel_tests.rs",
+      "bytes": 8761,
+      "sha256": "060c7ecf1739745d33367f963fc62a829fe461e6ef6d3236dbfb984109c61fbf",
+      "relativePath": "apps/simulation/src/runtime/mail_parcel_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\map.rs",
+      "bytes": 81371,
+      "sha256": "033dc58683075939152fa4134cc89c3b12a22c706cf731767baa4cdf1a3bb72b",
+      "relativePath": "apps/simulation/src/runtime/map.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\map_collision_source_tests.rs",
+      "bytes": 23486,
+      "sha256": "d4cc2dc9c3f29abc8535f7fad2ae57fee2d939a8fe66d7d3b6ae60f384214de7",
+      "relativePath": "apps/simulation/src/runtime/map_collision_source_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\map_events.rs",
+      "bytes": 9732,
+      "sha256": "6dc066136cbcd32ae1bd205c8619532aa7f96f8632f2047ca1dd691a6d14a128",
+      "relativePath": "apps/simulation/src/runtime/map_events.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\map_transfer_metadata_tests.rs",
+      "bytes": 3499,
+      "sha256": "1028310e84631d0f293324d78f19b7ca1d94dcf873e42244af1503fee7b11722",
+      "relativePath": "apps/simulation/src/runtime/map_transfer_metadata_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mentor_reward_tests.rs",
+      "bytes": 7222,
+      "sha256": "9a9256cff05f72ff84e81b2dd36df55480d8d22962e700762a3dccaca3f3ce3b",
+      "relativePath": "apps/simulation/src/runtime/mentor_reward_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mining.rs",
+      "bytes": 14488,
+      "sha256": "9ca67da9f19a5eaaff66bc5716a5fb2df62b386e9d0a3e787aa794729f2b3b08",
+      "relativePath": "apps/simulation/src/runtime/mining.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\mod.rs",
+      "bytes": 7014,
+      "sha256": "5b6f5e2b1afcb2d26a148a4837d2499ace251f410b01d3e33cb4c9f979be8cd6",
+      "relativePath": "apps/simulation/src/runtime/mod.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\armadillo.rs",
+      "bytes": 3697,
+      "sha256": "639ab9871db19fb68a5226f209b089d154e87ebf9fbf0a71a2bf6db39257f45e",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/armadillo.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\axe_skeleton_fear.rs",
+      "bytes": 2535,
+      "sha256": "0de0bd96032fbd2715f20abc04f47d5576bf19f2f6fcf23f7620e1595809f080",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/axe_skeleton_fear.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\bomb_spider.rs",
+      "bytes": 933,
+      "sha256": "87cd50a55a00de48b4601e83dec73ea0fbefc17b4c61646aeec45698e5823baf",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/bomb_spider.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\bone_lord.rs",
+      "bytes": 2432,
+      "sha256": "e4d6df13f705f2ce5389bbaa9811496117ecb7f7f73592b3792348baa6dac7be",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/bone_lord.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\boulder_spirit.rs",
+      "bytes": 14767,
+      "sha256": "4cf124041f0448a680ce442b9fc1dcf2c59586838a7d1507140776ee50668af8",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/boulder_spirit.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\cannibal_plant.rs",
+      "bytes": 1823,
+      "sha256": "af08123c51a2691012667248c656ba3dcb1b388e601408c4e05ae8eab257057f",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/cannibal_plant.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\common.rs",
+      "bytes": 20496,
+      "sha256": "ed5f258530ca1e889ddcfb013b5a4005c16fcf95cfe9679bf28630848d149f93",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/common.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\deer_run_away.rs",
+      "bytes": 2099,
+      "sha256": "cca567a9b141d39158b3a7703a1104edd48fa8d9b34e343b3bf133c4422f533d",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/deer_run_away.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\dig_out_zombie.rs",
+      "bytes": 1109,
+      "sha256": "18a7fa57bdcd84df6a97b37f8384c1897683bed9d8d8c609df1aa98538e56fdc",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/dig_out_zombie.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\dragon_statue_sleep.rs",
+      "bytes": 1209,
+      "sha256": "d8b2d7747eddbabaf8b68c42cdde3fdebee9aaef77409be1a2846eb9e23496af",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/dragon_statue_sleep.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\evil_centipede.rs",
+      "bytes": 1936,
+      "sha256": "1435637092433bba657985c4ab8524abb400ddd1964acdcd5c871f7ebdb4d44f",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/evil_centipede.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\evil_mir.rs",
+      "bytes": 24229,
+      "sha256": "6501bcf4cd9a1aa29d41deb6b4d7c5211e35c7877ab16f1b9d43f27963588557",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/evil_mir.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\football.rs",
+      "bytes": 8316,
+      "sha256": "e02f7cd8fc6036f8aaddeeb5b2032667bb6b797c562c9af1b6c5c8b111f42228",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/football.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\foxman_fear.rs",
+      "bytes": 5013,
+      "sha256": "0c1f3c1501cf84964ec34040d2d0205464e2fc11353a165c671f8c0d4349f4d2",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/foxman_fear.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\frost_tiger_sitting.rs",
+      "bytes": 1510,
+      "sha256": "7f69ff5c125eef6a687847ee0274d4e0d66c1ed4d9fb9c548b7445af5e99ff37",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/frost_tiger_sitting.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\gate.rs",
+      "bytes": 11886,
+      "sha256": "456f68578b15639265cd21c5ede8ee74f555d5cfdbc6420f15f8e0b791c2d6a4",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/gate.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\general_meow_meow.rs",
+      "bytes": 6474,
+      "sha256": "4ece265827196493bfb7c8f4538ca3c7b15fc065f61df614829d4305e17f96e1",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/general_meow_meow.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\great_fox_spirit.rs",
+      "bytes": 11691,
+      "sha256": "28e4bf2003444d2e2d931cadbb836ea2d4a99099f05b62a36daabb1c637c4913",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/great_fox_spirit.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\hell_bomb.rs",
+      "bytes": 2016,
+      "sha256": "de10255a71a755a1f0b43eb29869d99d94e4e2e5095381d8a41d0e4c971692a6",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/hell_bomb.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\hell_lord.rs",
+      "bytes": 5058,
+      "sha256": "febbb1583275f87ec7ad6603eb943947f62807c180c37525dbedf2fe5e77848c",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/hell_lord.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\holy_deva_fear.rs",
+      "bytes": 2309,
+      "sha256": "6bdc829381729270f8fdfa7e9a91a1c56990f78cd0af2d09fe46d820838a80d6",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/holy_deva_fear.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\horned_archer.rs",
+      "bytes": 9973,
+      "sha256": "89253283148c2b14dbdab1e3d047631bc49e5d1d479d06e43dbf56074e543ee6",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/horned_archer.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\horned_commander.rs",
+      "bytes": 33485,
+      "sha256": "c041c3666d6afd9423025067642b7b525a6e0c278280a6f82563514db9a2115c",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/horned_commander.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\horned_mage.rs",
+      "bytes": 19484,
+      "sha256": "21d4ad791ce61fefa912e3458fb85ee494142b23b450ad35e6c2b8885d669701",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/horned_mage.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\horned_sorceror.rs",
+      "bytes": 38263,
+      "sha256": "292151b63f1ceb2af19c9c47ee681463a521f7eb8511d16c1dbb13dcb73104b0",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/horned_sorceror.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\horned_warrior.rs",
+      "bytes": 22629,
+      "sha256": "4fbc0ca1d9438a59990dbbe97cb610149d5b8360a017cabf38b0af773788ca92",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/horned_warrior.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\hugger.rs",
+      "bytes": 13653,
+      "sha256": "6429730a034e7fac5cfbc93e0672713ae23b309fb132acffa024c7b3ffbe5a58",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/hugger.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\kirin_ice_thrust.rs",
+      "bytes": 2970,
+      "sha256": "51b711681e87903441e913d350f7b19535e7b432b62f76712786f59425e48017",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/kirin_ice_thrust.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\mod.rs",
+      "bytes": 123239,
+      "sha256": "47aff00da1116f5a266d5adeaebd35890b4c5e303d98617d3a595eb31fcf3982",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/mod.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\mud_zombie.rs",
+      "bytes": 21559,
+      "sha256": "a58dd3ae19e40d0fc3439027563249ff374e8ad07b13425c8926eadb329b13d8",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/mud_zombie.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\poison_hugger.rs",
+      "bytes": 20855,
+      "sha256": "5d886076b6eaa9fc7d5ee57a849a9b689bd1d13d6f07d9262c941c64548db727",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/poison_hugger.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\reviving_zombie.rs",
+      "bytes": 1591,
+      "sha256": "64aadbe1f12c2609cc2782603661053528debce2a56394d0d88b2a158c24ef38",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/reviving_zombie.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\shinsu.rs",
+      "bytes": 1988,
+      "sha256": "0c3241467edeff46537ca3cd499795fdad3813dfc5f6084a3f0bc004696f87d3",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/shinsu.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\snake_totem.rs",
+      "bytes": 5144,
+      "sha256": "3f9b728c0ba4b01b1ebd5de5b6d3a85ade73cabe894022da0c52ad2f171d45e7",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/snake_totem.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\snow_wolf_king.rs",
+      "bytes": 3935,
+      "sha256": "88a9860d22cea6e58e00a7ffe1545419062e97a1b0041b9897e75b1f68055f1e",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/snow_wolf_king.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\spitting_toad.rs",
+      "bytes": 532,
+      "sha256": "d5faeffc3463713a68a55c23f309905ed86d3bb1dbb418f8fd1eb6f56e329953",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/spitting_toad.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\stone_trap.rs",
+      "bytes": 1882,
+      "sha256": "d2aae9821b3e975513103a6eedc0522123e0beb870155c2beb65a1c20daa361a",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/stone_trap.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\summoned_monster.rs",
+      "bytes": 3270,
+      "sha256": "46793edf62dea626c127f8251406ffd5b4a3c835a995b8337a4f3d57772df608",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/summoned_monster.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\thunder_element.rs",
+      "bytes": 4221,
+      "sha256": "2883e9b155ffd3ec40b2177bc0f7d4b18d13f02006a1497e16993eef89f3ae51",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/thunder_element.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\town_archer.rs",
+      "bytes": 3054,
+      "sha256": "a78138310bd4b954538fbf71b9ababcc74d4a949f0cdcf3dcb7133c7745cb65d",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/town_archer.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\trap_rock.rs",
+      "bytes": 7601,
+      "sha256": "53c58c2ad24836c0d171c69e1b3854a60cbe2cdb8f123899b64e64c6b356bae1",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/trap_rock.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\tree_queen.rs",
+      "bytes": 26672,
+      "sha256": "fb54bda02701bdfe38bd8822570be61ef783df79843b960fea508291a7c9cd00",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/tree_queen.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\tucson_general.rs",
+      "bytes": 8029,
+      "sha256": "c94ab8e96f1827a1fd7e480c73c7c96fb724fa4cb7e2f5ace217b86be8beae8d",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/tucson_general.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\vampire_spider.rs",
+      "bytes": 939,
+      "sha256": "89e0a45474ee69eb28024668f0ad5df122e2cfa6b4cd373aebbe2522ba46eee1",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/vampire_spider.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\wooma_taurus.rs",
+      "bytes": 5520,
+      "sha256": "46c1fc4c458823d2543cdb699f88e6389747e08cfb3d90b0a6392cf3ef23304a",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/wooma_taurus.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\yimoogi.rs",
+      "bytes": 9001,
+      "sha256": "ff02e0af5175e2fc74b5adf7a8bbff433662a4d1f047c051f325ec6547a87c56",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/yimoogi.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\yin_devil_node.rs",
+      "bytes": 6525,
+      "sha256": "dfa2c1b84bf8bff329bf5e3464697e86844aa80254d3fd397dfdd9e618766d96",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/yin_devil_node.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\zuma_monster.rs",
+      "bytes": 2566,
+      "sha256": "0b3513fdf7a521dc91e70f4acdab0a33e7090f50de5748d35425a9cc9f573181",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/zuma_monster.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monster_ai\\zuma_taurus_stage.rs",
+      "bytes": 1878,
+      "sha256": "24f9a3691dbe514cdd639f4408eaad27000ac13e46d9d2bc9fd01271984a1e95",
+      "relativePath": "apps/simulation/src/runtime/monster_ai/zuma_taurus_stage.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\monsters.rs",
+      "bytes": 104131,
+      "sha256": "73c0899977fc06963466eca9991d939e391933b7dfa88bf32c93c13019b884ba",
+      "relativePath": "apps/simulation/src/runtime/monsters.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\movement.rs",
+      "bytes": 36326,
+      "sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7",
+      "relativePath": "apps/simulation/src/runtime/movement.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_journey_tests.rs",
+      "bytes": 20299,
+      "sha256": "ce44d4db719dd7c6a8b88bae2878a1fcc6892ac7fa7969383f1d1e0182db1d71",
+      "relativePath": "apps/simulation/src/runtime/newcomer_journey_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_npc_visibility_tests.rs",
+      "bytes": 1450,
+      "sha256": "f359b16c84e2b150ccea0ece9e889c4b113dd1043af875e5f0599072061b73bc",
+      "relativePath": "apps/simulation/src/runtime/newcomer_npc_visibility_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_progression.rs",
+      "bytes": 20768,
+      "sha256": "621be98d0887d837a6be2d43d226bbee494462713fd364033c7c974c0f77a944",
+      "relativePath": "apps/simulation/src/runtime/newcomer_progression.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_progression_tests.rs",
+      "bytes": 31659,
+      "sha256": "1be3c17b402e5a14b3663b0b54ce17964ac1221d710adf384854bd421f5a7201",
+      "relativePath": "apps/simulation/src/runtime/newcomer_progression_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_v2.rs",
+      "bytes": 20374,
+      "sha256": "b5aea984220a5a841c4bfa7607b369c9a1a0d0a76601341300bf1b65e9e2a80d",
+      "relativePath": "apps/simulation/src/runtime/newcomer_v2.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_v2_event_tests.rs",
+      "bytes": 23241,
+      "sha256": "eef5009245f5884b61f21126978b207446e93562b3b4d148843242a680cebfdc",
+      "relativePath": "apps/simulation/src/runtime/newcomer_v2_event_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_v2_events.rs",
+      "bytes": 18652,
+      "sha256": "c4f3b5342af58d3692212b15fdeec21c124336a51c9fa1ed2030037be63de1d2",
+      "relativePath": "apps/simulation/src/runtime/newcomer_v2_events.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\newcomer_v2_tests.rs",
+      "bytes": 5184,
+      "sha256": "2d47911cb48b0ce762602bb7b81c1bb93c524e67b88344c515317986ce373fae",
+      "relativePath": "apps/simulation/src/runtime/newcomer_v2_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc.rs",
+      "bytes": 51729,
+      "sha256": "39683f63f38eb8f91eb74c4ffc04a073585e1645adea4b4bf14a6e2321dd2972",
+      "relativePath": "apps/simulation/src/runtime/npc.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_gold_buy_outcome.rs",
+      "bytes": 2577,
+      "sha256": "3d250c5cf021588b5d1a32a7ece79dbd7c70a2c41b84c5d02af2314400464b20",
+      "relativePath": "apps/simulation/src/runtime/npc_gold_buy_outcome.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_gold_buy_outcome_tests.rs",
+      "bytes": 17751,
+      "sha256": "c5adf2f95960ab79b9919875584e3703e692729fbef6f68ceae8fb22e956d431",
+      "relativePath": "apps/simulation/src/runtime/npc_gold_buy_outcome_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_gold_trade_capacity_tests.rs",
+      "bytes": 27872,
+      "sha256": "42cc763a537b7ddeb0f03a9451d5499da3a28729764d7c5950480e6733c4dba2",
+      "relativePath": "apps/simulation/src/runtime/npc_gold_trade_capacity_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_gold_trade_evidence_tests.rs",
+      "bytes": 13922,
+      "sha256": "2683b4703f25b40692cbbd427a151786681eb314a25da206022ce99dd628dc9f",
+      "relativePath": "apps/simulation/src/runtime/npc_gold_trade_evidence_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_gold_trade_expiry.rs",
+      "bytes": 8688,
+      "sha256": "2700aab9de243b4596e92ff0a8bb045b3b81e90b87e941c96780f80ceee9dcc5",
+      "relativePath": "apps/simulation/src/runtime/npc_gold_trade_expiry.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_gold_trade_expiry_tests.rs",
+      "bytes": 11695,
+      "sha256": "778a084605e390aa48a5dcd2671d420c6697ce192c3a2c8cd7498bcbaa3b8029",
+      "relativePath": "apps/simulation/src/runtime/npc_gold_trade_expiry_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_item_price_tests.rs",
+      "bytes": 3052,
+      "sha256": "1df18d1dddf588597a3e5bbbf376747509c8fe1da3e143e3bd07bbab496cdde8",
+      "relativePath": "apps/simulation/src/runtime/npc_item_price_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_parcel_tests.rs",
+      "bytes": 2159,
+      "sha256": "e4d727777a8af06284368fe06fe0fa0f128629415eff3051cf7a971c1d41f0f8",
+      "relativePath": "apps/simulation/src/runtime/npc_parcel_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_pearl_tests.rs",
+      "bytes": 13486,
+      "sha256": "f46f21f3d3aed9a70c858471a449e92cc1347fcaa0fc41e3f1f2431baf96e6d3",
+      "relativePath": "apps/simulation/src/runtime/npc_pearl_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_outcome.rs",
+      "bytes": 4786,
+      "sha256": "00e8a7917dad13477e572d99945261faa1558be4abc4c40807647e9ba162a79f",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_outcome.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_outcome_tests.rs",
+      "bytes": 17858,
+      "sha256": "7dc5817e482628624734e0d9794c5939cfd20db2aef1591c04a4bc77511f37ef",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_outcome_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_owner_tests.rs",
+      "bytes": 34132,
+      "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_snapshot.rs",
+      "bytes": 12597,
+      "sha256": "946c4fcbb8ce955919ffb70d81a6dfa943b2b7494f685a5906035db3985a0073",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_snapshot.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction.rs",
+      "bytes": 38728,
+      "sha256": "c31ac61eb2561ffc19aa384eeba8ddbc9b46f97094e4f4277a4e749ad68e05ef",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction_tests.rs",
+      "bytes": 40988,
+      "sha256": "693b73b83b7d1d5ceee7a8e23b898383b39e579902bfabdc7de53c2eb66206d7",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_script.rs",
+      "bytes": 125816,
+      "sha256": "c98feebeec8f80f059608d7ee0dfc5c6f23e611270c0c96e904812e76dc1358e",
+      "relativePath": "apps/simulation/src/runtime/npc_script.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\onchain.rs",
+      "bytes": 9748,
+      "sha256": "2f9fbc67ff170c0ea17d2a3f97dee282a4d4922c0bd8ad6062cbe6b9924e62bd",
+      "relativePath": "apps/simulation/src/runtime/onchain.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\packets.rs",
+      "bytes": 400120,
+      "sha256": "069fbfbd47ad4cb99e2866cb543cae6c44657b54be2b3820ecd4238f09a3bedf",
+      "relativePath": "apps/simulation/src/runtime/packets.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\packets_diary_quest_tests.rs",
+      "bytes": 9050,
+      "sha256": "b6fdc745704377bb9c94c5aa01b94f4226b46392527b6f936ddd16448d5d1914",
+      "relativePath": "apps/simulation/src/runtime/packets_diary_quest_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\pathfind.rs",
+      "bytes": 13929,
+      "sha256": "1aaa0e81c731256fa2dcf571dade45f7c61288200b1695a3c664c763cfa942a9",
+      "relativePath": "apps/simulation/src/runtime/pathfind.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\player_weights.rs",
+      "bytes": 5470,
+      "sha256": "e93384181e5fa3a0cef52373d812a28b230b1009f165b75eb9651c90ecac57d7",
+      "relativePath": "apps/simulation/src/runtime/player_weights.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\prepared_kill_experience.rs",
+      "bytes": 10361,
+      "sha256": "de218dd898b15011ce561d81e191b3ceb2fb2598d13986174972fc96965bf805",
+      "relativePath": "apps/simulation/src/runtime/prepared_kill_experience.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\quest_endpoint_identity_tests.rs",
+      "bytes": 1451,
+      "sha256": "36a14adc60e380830202523286514a077db7dcde1c3dc094a188e79b8c74568e",
+      "relativePath": "apps/simulation/src/runtime/quest_endpoint_identity_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\quest_level15_tests.rs",
+      "bytes": 2340,
+      "sha256": "2b69e332e8bb53281341292580b9299f80549cada1679ee5af33fec48628e604",
+      "relativePath": "apps/simulation/src/runtime/quest_level15_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\quest_reconcile_tests.rs",
+      "bytes": 3325,
+      "sha256": "424934cd6c325a097c222b433f5b40780145f3d9cecb73408cad50c8bdb5055d",
+      "relativePath": "apps/simulation/src/runtime/quest_reconcile_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\quest_recurrence.rs",
+      "bytes": 9054,
+      "sha256": "c98625794540ed8115fa2a5657ffe8108ded20e5b62b5fdc3ede3c9311febdf9",
+      "relativePath": "apps/simulation/src/runtime/quest_recurrence.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\quest_recurrence_tests.rs",
+      "bytes": 10743,
+      "sha256": "08ceddc0b483afe167b0f6a8c4334155ae369720b9ef62a7b5e5c79fcb7c7da4",
+      "relativePath": "apps/simulation/src/runtime/quest_recurrence_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\quests.rs",
+      "bytes": 78895,
+      "sha256": "d90286c816e6ef89b53502477145fef57b5a4c30b9b992f2332293b499ab4dc4",
+      "relativePath": "apps/simulation/src/runtime/quests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\ranking_inspect.rs",
+      "bytes": 55407,
+      "sha256": "94ff5fa5337e3c9d792a4ac84062f9ac7c4db52ad0eb5891f63aece171a89677",
+      "relativePath": "apps/simulation/src/runtime/ranking_inspect.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\refine_oven.rs",
+      "bytes": 15082,
+      "sha256": "0a48100fffc7737e2bc0c955cb7eb968c544c9a443b9e7e6777fd6f12e2736b8",
+      "relativePath": "apps/simulation/src/runtime/refine_oven.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\rental.rs",
+      "bytes": 26116,
+      "sha256": "6b8520706c7db5d74257064ae4c0ab84cef6f4f9390e60a6bd7325c08d8f0936",
+      "relativePath": "apps/simulation/src/runtime/rental.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\resources.rs",
+      "bytes": 39044,
+      "sha256": "bee1f2c2bdd38ea8f835147ad6a398734108ffa49a1fcb4d8282c27e771fb97c",
+      "relativePath": "apps/simulation/src/runtime/resources.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\save.rs",
+      "bytes": 165084,
+      "sha256": "eedc8dc96064617d19fff58b68b9a562ba0e85e481e1a2f08ca5ce581818dbc8",
+      "relativePath": "apps/simulation/src/runtime/save.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\save_fail_closed_tests.rs",
+      "bytes": 87234,
+      "sha256": "08ff0eed15853a653af202f6ec17013103e8d5f63422a42d209b5845228329a3",
+      "relativePath": "apps/simulation/src/runtime/save_fail_closed_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session.rs",
+      "bytes": 90004,
+      "sha256": "81ad1a3aab3782b85374a64abcbe1ad550861aa9442f079a201ab33f61486d9d",
+      "relativePath": "apps/simulation/src/runtime/session.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session_active_monster_ids_tests.rs",
+      "bytes": 15263,
+      "sha256": "a277daa4cca08f57279019643dc45033a7cf46856328ea7b95632b5d8578617f",
+      "relativePath": "apps/simulation/src/runtime/session_active_monster_ids_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\session_lightweight_snapshot_tests.rs",
+      "bytes": 7471,
+      "sha256": "93e45e8c737ec07423fe3fe29c9b9b19eda11e05e1f39dbd0e1eab189d692a9a",
+      "relativePath": "apps/simulation/src/runtime/session_lightweight_snapshot_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_bank.rs",
+      "bytes": 13748,
+      "sha256": "c417ac65112c0903dc603218ae858ff7fd4b6a5dd2d151d99a631c8892e65ba2",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_bank.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_bank_tests.rs",
+      "bytes": 4724,
+      "sha256": "f7e9d778d6bb610ad851d00a4bcc06beb11b37222ca2f533e1f5300beb1ef4f2",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_bank_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_buff_tests.rs",
+      "bytes": 6351,
+      "sha256": "c5394d4a8762c838eb45df1f703db72abf2b5a6d4862b605b9e1abf9479dfdb5",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_buff_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_buffs.rs",
+      "bytes": 7694,
+      "sha256": "ee7b0d308913103e5fba0251a6b45ea93d568c0a9440c071e1f93b83b58e2848",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_buffs.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_experience.rs",
+      "bytes": 13175,
+      "sha256": "c24dc1489ddf4e6b4509fac1fcd1ed2241264908bd7efbd5a1790e65565bf84a",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_experience.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_experience_tests.rs",
+      "bytes": 13179,
+      "sha256": "94ce33eac85eba58dd517f3a757421c5b1fa560b52a99e3120397029b650585b",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_experience_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guild_item_tests.rs",
+      "bytes": 6647,
+      "sha256": "43475eae6ba203fd0548715a1387fa560763992bfdb0df0f320435183a920754",
+      "relativePath": "apps/simulation/src/runtime/shared_guild_item_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_guilds.rs",
+      "bytes": 36532,
+      "sha256": "42e6a59f71f41cbb5792754735fa77e2fc055d25b5ecff7277fe26d70994bfda",
+      "relativePath": "apps/simulation/src/runtime/shared_guilds.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_kill_experience.rs",
+      "bytes": 6421,
+      "sha256": "42c0c507c37969b0321391d32313913ba5895130124fcd7a642a8e0b1e8f9e8c",
+      "relativePath": "apps/simulation/src/runtime/shared_kill_experience.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_marriage.rs",
+      "bytes": 12402,
+      "sha256": "096539ceecf236f3b2c56d1d34deaee0deee4dedde57784a78de34a1a9ff3969",
+      "relativePath": "apps/simulation/src/runtime/shared_marriage.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_mentor_rewards.rs",
+      "bytes": 9656,
+      "sha256": "efd7446ea6bfc1c25a1915e062402a81e5c1d28f4806a34fcbc5fa2cbd4c709d",
+      "relativePath": "apps/simulation/src/runtime/shared_mentor_rewards.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_relationships.rs",
+      "bytes": 13507,
+      "sha256": "8c70353282a6bdded68823bd527e82ab63631fc8bd529979aed469d505ece1fb",
+      "relativePath": "apps/simulation/src/runtime/shared_relationships.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_social_buffs.rs",
+      "bytes": 9772,
+      "sha256": "d2f4ea5926ba99f02dd511e5613303313505ee11d3d70200e9857f37314919c7",
+      "relativePath": "apps/simulation/src/runtime/shared_social_buffs.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\skill_cooldown_restore_tests.rs",
+      "bytes": 5677,
+      "sha256": "53c93efb6c9afb60d065dac752fad6e75b320bb8132f78966bf394bb3c79112d",
+      "relativePath": "apps/simulation/src/runtime/skill_cooldown_restore_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\skills.rs",
+      "bytes": 299799,
+      "sha256": "74432f52560f1ef5955ceb5f09faa8cbccc2395168b3cbfc7004bd5124e4bae9",
+      "relativePath": "apps/simulation/src/runtime/skills.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\slaying_passive_tests.rs",
+      "bytes": 3057,
+      "sha256": "6aac5ee3e3707e30dde2a8207af4ab56159fad622061f5f3f6320fb977504c34",
+      "relativePath": "apps/simulation/src/runtime/slaying_passive_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\social_economy.rs",
+      "bytes": 3288,
+      "sha256": "2aa05c85e4f49ad3798840da6ecdc7e400217570f1d51b8385d25b01d5dd72eb",
+      "relativePath": "apps/simulation/src/runtime/social_economy.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\social_experience.rs",
+      "bytes": 4943,
+      "sha256": "45a7f1d5e1bb1539af1d947f0e3452a2f7ea4a30e13f8c734d5c79eba8483460",
+      "relativePath": "apps/simulation/src/runtime/social_experience.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\special_monster_sprite_tests.rs",
+      "bytes": 676,
+      "sha256": "f53b7a3bee2f5a3b7011b97022ff2061fff6aa3579299afeb78508f7487b2984",
+      "relativePath": "apps/simulation/src/runtime/special_monster_sprite_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\stage5.rs",
+      "bytes": 225843,
+      "sha256": "bf2556bb355e0afff5a996c684d72737a49489a430f66e5b82cd51ce6a4212e2",
+      "relativePath": "apps/simulation/src/runtime/stage5.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\stats.rs",
+      "bytes": 29086,
+      "sha256": "ec2ef7fddc47f57c87e23e621198c30e9de80cd97eff21803a17926036fc9752",
+      "relativePath": "apps/simulation/src/runtime/stats.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\storage_rental_tests.rs",
+      "bytes": 8210,
+      "sha256": "524d44bd9f35a78d5fd729b4f5f3adaccc27a10edcfb0b2fe657d53b5a78c16d",
+      "relativePath": "apps/simulation/src/runtime/storage_rental_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\tests.rs",
+      "bytes": 2431698,
+      "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+      "relativePath": "apps/simulation/src/runtime/tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\warrior_preparation_tests.rs",
+      "bytes": 5576,
+      "sha256": "1c883d97a25d938052af6274dc566d811782973f6c163ebcbc54075cc2931ca8",
+      "relativePath": "apps/simulation/src/runtime/warrior_preparation_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\aoi.rs",
+      "bytes": 486,
+      "sha256": "efd99aca9b94490df20f6fff4da4b3614f0a936f48af7426858185a398baf32f",
+      "relativePath": "apps/simulation/src/runtime/zone/aoi.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\aoi_grid.rs",
+      "bytes": 10290,
+      "sha256": "7df99f8b71a303ff13c2aed8b598f7c58442b1f3fdc3dcd7210ed149564d0344",
+      "relativePath": "apps/simulation/src/runtime/zone/aoi_grid.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\collision.rs",
+      "bytes": 4497,
+      "sha256": "7ba3ef1c37ba45c75cbb4107b5cbbfe41f751ce66dbe067a1daa43e9d95b430e",
+      "relativePath": "apps/simulation/src/runtime/zone/collision.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\ecs.rs",
+      "bytes": 7498,
+      "sha256": "d1f094c3f37fa77e0797bc4f6df18bc27f716184aac1ec8b3c8307a960f93265",
+      "relativePath": "apps/simulation/src/runtime/zone/ecs.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\experience.rs",
+      "bytes": 4623,
+      "sha256": "8697585b481d09aad2df42c3b84e9fe9e8da7ef918adba3aabe71717ce04e755",
+      "relativePath": "apps/simulation/src/runtime/zone/experience.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\intelligent_creature_host.rs",
+      "bytes": 41611,
+      "sha256": "45214bbeed948732ea47f70cff3363a4915bab2c17e38a5221ce06d3d6a2235e",
+      "relativePath": "apps/simulation/src/runtime/zone/intelligent_creature_host.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\intelligent_creatures.rs",
+      "bytes": 20576,
+      "sha256": "30302a9cbd99efd997d8b959007b27d69fd64f2d4b8df61ed535f5d8cd360964",
+      "relativePath": "apps/simulation/src/runtime/zone/intelligent_creatures.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\intelligent_creatures_tests.rs",
+      "bytes": 14084,
+      "sha256": "41d5d59285d3ad93127fd8d878fadd0eb2487a56ac3a0f450d1e405495a1524b",
+      "relativePath": "apps/simulation/src/runtime/zone/intelligent_creatures_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\manager.rs",
+      "bytes": 27961,
+      "sha256": "e956f72f961ea7f45cf888567f95b56a24d4744ad8850fce9222c725439875f2",
+      "relativePath": "apps/simulation/src/runtime/zone/manager.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\mod.rs",
+      "bytes": 1306,
+      "sha256": "2893588003d00798da1a5272c6070be00172027356821e1b83b3d9d705432b92",
+      "relativePath": "apps/simulation/src/runtime/zone/mod.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\movement.rs",
+      "bytes": 934,
+      "sha256": "994d82a13b5a304ef85535d9755a6ae5c0e5eaf4336cd0111d59fee6aae9b393",
+      "relativePath": "apps/simulation/src/runtime/zone/movement.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\movement_deadline_tests.rs",
+      "bytes": 3372,
+      "sha256": "35991cd2e8f89efaa2ed9b448d0cb889f317f379d5401ad4e515ac389ae55cba",
+      "relativePath": "apps/simulation/src/runtime/zone/movement_deadline_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\packets.rs",
+      "bytes": 50490,
+      "sha256": "7dde306dec5a6fe288f7b96d6dc60bf8ed371cbdc704c4a373368dadf1eade76",
+      "relativePath": "apps/simulation/src/runtime/zone/packets.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\replay.rs",
+      "bytes": 23650,
+      "sha256": "eaa9ff590815d04723920a567ec2b125dc4a1889253cd524ae8c150d267a2a4a",
+      "relativePath": "apps/simulation/src/runtime/zone/replay.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\replication.rs",
+      "bytes": 7520,
+      "sha256": "9e3806372fedd8aef59e8682f6639ed9835d518a8213353b40f9ed3336b84e6a",
+      "relativePath": "apps/simulation/src/runtime/zone/replication.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 649363,
+      "sha256": "c5f356c4e8153255ffafcd3ee7f8cd4c9a3cf7c6e4cc9c73b45fc3206f66df43",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\armadillo_ai.rs",
+      "bytes": 22067,
+      "sha256": "ed4276db1e18dffe704d02d9e6612659feb5f66a476a3cf4dc3671f08e679e7e",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\checkpoint.rs",
+      "bytes": 77000,
+      "sha256": "4a9fec360bfc3ac29e1e339045d7224d0f945c651b7f5b4ba9d62beab1d05dd9",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\entity_combat.rs",
+      "bytes": 104492,
+      "sha256": "30501abac1c0f2c617813964f424efa7464d3ae39fd0b52b0847628702062561",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/entity_combat.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\evil_mir_ai.rs",
+      "bytes": 15701,
+      "sha256": "fe0355c1bbcb3a6ad9d3772bcb66eff625bfa122d14b1822a4beeea451bbdb38",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/evil_mir_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\football_ai.rs",
+      "bytes": 3901,
+      "sha256": "bb320b3d8ab676088c0a72aa7cc6b3d5b1feb07c6aba914497dc15e2877dc92f",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/football_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\gate_ai.rs",
+      "bytes": 3391,
+      "sha256": "ab78b66d769c9fa6d41401b474e19caf20771d42541922bab5eb7ae6ebdbff8d",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/gate_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\great_fox_ai.rs",
+      "bytes": 42551,
+      "sha256": "788e63f6371aec6bcda09fa0404da9e658b0a2aa5f667ba5272d08abd6eb4d1f",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/great_fox_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\hell_ai.rs",
+      "bytes": 30891,
+      "sha256": "2b59dd5f7e0659e5392b9eacd6bc3cd2fab7c210bbe3cc8117092986ea3f3352",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/hell_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\horned_ai.rs",
+      "bytes": 36305,
+      "sha256": "12486989589da72da789180886dcf532962d2217c4fb419a7de42bc96c380f44",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/horned_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\horned_encounter_ai.rs",
+      "bytes": 61887,
+      "sha256": "e12145c6d371fb9f8c01cbc7ae2a9e8018318dd7e420c536af28e9a4195782c0",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\hugger_ai.rs",
+      "bytes": 30776,
+      "sha256": "24355425bec3be142f0f69fded67f23a1334658128a2969c21a10f9ddd81807b",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/hugger_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\journey_events.rs",
+      "bytes": 17975,
+      "sha256": "761e382d6d026faa016c3a3419edaec0f7961ea850564f8e379d892873587a63",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/journey_events.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\kirin_snow_ai.rs",
+      "bytes": 39105,
+      "sha256": "f43d7a532a1d4b6e7f3b5f16aa4c870bfe26fa0b348cc2f9cdbfbd4dd03c4b70",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/kirin_snow_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\meow_ai.rs",
+      "bytes": 17949,
+      "sha256": "d078e6ac6be7f2a59201be6bc62d62ce301acb8bf1f4cce1c355f2b4cd859d0f",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/meow_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\mud_boulder_ai.rs",
+      "bytes": 34228,
+      "sha256": "0ac9aa8f8d599797da078ab5097343efc0e491f18896127a1d3fc93ad04f7d82",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/mud_boulder_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\node_ai.rs",
+      "bytes": 7684,
+      "sha256": "047b05dadbc1e9f4ea21aa89179198620d79f401ae91cabcc3f0b68feb9601c7",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/node_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\passive_ai.rs",
+      "bytes": 7779,
+      "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\periodic_poison.rs",
+      "bytes": 8194,
+      "sha256": "6f45c370ee36a7fdc80eee7b2bf13c7ae61c7ad2b4f5c89ff37224d28ff142a5",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/periodic_poison.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\pet_special_ai.rs",
+      "bytes": 11463,
+      "sha256": "aa8730cd61f52a31d3effe0956fd040f523ed98fcc6d11251bb397843cb97498",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\player_magic_cooldown_tests.rs",
+      "bytes": 7260,
+      "sha256": "c1938539621deb890eb445172f6f20f9324c4239a807ad9bab0edab5db33e8b1",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\reactive_ai.rs",
+      "bytes": 15145,
+      "sha256": "a765a4906b638dcc53af3089acd2b84c6f7eaff960e4e708116ba7417fb55ba7",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/reactive_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\revival_ai.rs",
+      "bytes": 15833,
+      "sha256": "35943499b020141181529898d7291622c78a4d04b4b05ea8352618fe87d88e08",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/revival_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\reward_rate_tests.rs",
+      "bytes": 3170,
+      "sha256": "48e6e52922717c8876beb1b8a26f2056ec95ba3243294fcd643869e564e521db",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/reward_rate_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\safe_zone_profile_tests.rs",
+      "bytes": 6341,
+      "sha256": "25dbd35fc07377857d40d7d30c4e0d3e4ffd40a31df793eb4a67fb24838991a1",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/safe_zone_profile_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\shared_harvest_tests.rs",
+      "bytes": 5773,
+      "sha256": "c20bd9c4f0570ba62061d32df9414f2a66c0d68a68dad8678456a3e7a40a8ddb",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/shared_harvest_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\shinsu_ai.rs",
+      "bytes": 17685,
+      "sha256": "0549b8594285df09a5692399abc3ae1845b6eecf7320f57e7baa3164702da4d2",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\sleep_ai.rs",
+      "bytes": 9752,
+      "sha256": "1e4008eb5d357358f87bb2cc14fce959bc7143ab33dd958aaf7c2860fb0a6dc4",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\snake_totem_ai.rs",
+      "bytes": 13870,
+      "sha256": "be491656c3bd91a1e49ea2a16e272d5cf29f7d535146fbe00299299a4cca2023",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/snake_totem_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\soulfire_practice_tests.rs",
+      "bytes": 10763,
+      "sha256": "0529d74b49e6a4167cc1c695b96e2df195b4f010b7a36845eb97e2ed5a43ef45",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/soulfire_practice_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\special_ai.rs",
+      "bytes": 13390,
+      "sha256": "270273b4b6f032d647827f0e758333e3bbb914433b29e1679cf5f21b278dd2e7",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/special_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\spider_ai.rs",
+      "bytes": 33847,
+      "sha256": "e9f7fa16beb5a068cbe345e4901b319f656f6e22f38201d788f8f12a0aedf9a8",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\stage_summons.rs",
+      "bytes": 17382,
+      "sha256": "8226075d45f0edcb179b87b92d4bd3978f089510e002df0a1f87296560bedb99",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\statue_centipede_ai.rs",
+      "bytes": 12352,
+      "sha256": "96260c9910c0fa88688fe4a8978e554b636050e197900524095fb17d33de8233",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/statue_centipede_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\status_poison.rs",
+      "bytes": 14535,
+      "sha256": "2ca1e0ab5d75b4c5e2c124e0cc2591623603d4b8417471f8d9e1a309c9b2a025",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/status_poison.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\stone_trap_ai.rs",
+      "bytes": 13740,
+      "sha256": "d6090b129c760b6b0bdab688761ef2c37d2eeca3e8f85014598472f3d1c373f2",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/stone_trap_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\thunder_ai.rs",
+      "bytes": 18130,
+      "sha256": "3cafab5a6fe71c2b034ce0ae75d4a0647d51eca7592b1cd84e60e65c37018977",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\town_archer_ai.rs",
+      "bytes": 8477,
+      "sha256": "eb9b45eb532af7a36e81d79198b9b19060aea1533afa024447a0865e9eadb2b7",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/town_archer_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\trap_rock_ai.rs",
+      "bytes": 15789,
+      "sha256": "be71fcc136f9524b024ea44db58045608e912547ae67ac4f610272f259b88c4f",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\tree_queen_ai.rs",
+      "bytes": 29582,
+      "sha256": "e2d7fbdef4ed22645fe837a80c1d7ca8643700507263fc0e56ca22c29c6c9195",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/tree_queen_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\tucson_ai.rs",
+      "bytes": 20058,
+      "sha256": "626f1f02bc66ecc6dac64346349474473c38dea3cb2e1fe6a7375f92ad6deabe",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/tucson_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\vampire_ai.rs",
+      "bytes": 19323,
+      "sha256": "9a1fd8c45eeb1b0418ef45f543965b6eeda74554b1cd39e82f7a753c35062835",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/vampire_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\visibility_ai.rs",
+      "bytes": 12443,
+      "sha256": "92dd817ffe8798ea2998bf5417ba037c8478b222d7c318950ec5a1b58c4bf7ea",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\yimoogi_ai.rs",
+      "bytes": 26658,
+      "sha256": "d13ef0705478e535987aa0bc30b4f508fc1309994b2b86eafe830ce4de9e4e01",
+      "relativePath": "apps/simulation/src/runtime/zone/runtime/yimoogi_ai.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\types.rs",
+      "bytes": 47980,
+      "sha256": "c41433b761de53816a4682400a9a3505c6bfb50350dd3f59174e8fc3d5c07725",
+      "relativePath": "apps/simulation/src/runtime/zone/types.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone_melee_passive_progression_tests.rs",
+      "bytes": 3997,
+      "sha256": "7707f56a93c9e416dfadbb69acec9b5970f1b2a91c7337c780653b829add30fc",
+      "relativePath": "apps/simulation/src/runtime/zone_melee_passive_progression_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\user_item_uid.rs",
+      "bytes": 43171,
+      "sha256": "d5cfc56cd10f83726ecfa20af5e285fea47ee057aa36200d29e22a4af1e8357a",
+      "relativePath": "apps/simulation/src/user_item_uid.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\world_runtime.rs",
+      "bytes": 61873,
+      "sha256": "d7bfcf3cddda49b26e56121eee78ca7d25b8c875a2ba66969746ba2279dd9dd2",
+      "relativePath": "apps/simulation/src/world_runtime.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\fishing_transform.rs",
+      "bytes": 5581,
+      "sha256": "690782db8caac6b31efaafddecce1cd8df5e33cd3f3389f421aef1f338880e3c",
+      "relativePath": "apps/simulation/tests/fishing_transform.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\great_fox_spirit_recall.rs",
+      "bytes": 7665,
+      "sha256": "749ed4054f9554024deda5ca55fa49091799c388dfa9176801244e3ca341c41e",
+      "relativePath": "apps/simulation/tests/great_fox_spirit_recall.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\ranking.rs",
+      "bytes": 15875,
+      "sha256": "ecde747dc4c9e969fb96a82a54c5d728f3ec47a1205aa365d9b8ba0925de6fdf",
+      "relativePath": "apps/simulation/tests/ranking.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\ranking_shared_presence.rs",
+      "bytes": 18832,
+      "sha256": "60292d7f0658f0c608fa518312e33bc7cc779cd6f0f021e5489dec1070cf2b83",
+      "relativePath": "apps/simulation/tests/ranking_shared_presence.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\security_lifecycle.rs",
+      "bytes": 22337,
+      "sha256": "645142945ea96bacd8ac0ca7a72e9be160fce666df4e5b5d45875ccc5a3faebb",
+      "relativePath": "apps/simulation/tests/security_lifecycle.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\shared_zone.rs",
+      "bytes": 469443,
+      "sha256": "c39b155461cc9e1236e76296a889bc846aee4fb0a784ebe1934fec3f87225583",
+      "relativePath": "apps/simulation/tests/shared_zone.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v1.json",
+      "bytes": 41856,
+      "sha256": "6952068b9827aa90f44a0b58296637cf83b298d57483912ca274fdfba3c0822e",
+      "relativePath": "config/quest-guidance/newcomer-journey-v1.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v2-ui.json",
+      "bytes": 5436,
+      "sha256": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+      "relativePath": "config/quest-guidance/newcomer-journey-v2-ui.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v2.json",
+      "bytes": 28606,
+      "sha256": "e72e9ac2131af268f637097e3472618b93c539a1b59a5a168a31b875c13efd11",
+      "relativePath": "config/quest-guidance/newcomer-journey-v2.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-supplies.json",
+      "bytes": 1152,
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2",
+      "relativePath": "config/quest-guidance/newcomer-supplies.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-v1.json",
+      "bytes": 28662,
+      "sha256": "49c1ba49d4c3af4fadf3a53ea2618ba5d998ec829fd72f45349498e246e941b3",
+      "relativePath": "config/quest-guidance/newcomer-v1.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-v2-graduation.json",
+      "bytes": 2664,
+      "sha256": "4e3b37f8ac9969219e1e03b566c391f59860f083e1156b7cf88d5f433ccb5655",
+      "relativePath": "config/quest-guidance/newcomer-v2-graduation.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-v2.json",
+      "bytes": 4624,
+      "sha256": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819",
+      "relativePath": "config/quest-guidance/newcomer-v2.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\clickhouse\\initdb\\002_gameplay_events.sql",
+      "bytes": 1889,
+      "sha256": "8169c4e64b27dfd4085dda75186d9838ef3ff033e2e5ec5aeace5e7f1a05fd38",
+      "relativePath": "infra/clickhouse/initdb/002_gameplay_events.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0001_core.sql",
+      "bytes": 11513,
+      "sha256": "ff8bcd1a7f9622d5f2ad9e8a3f396b1f06169a2355826693cefc6b3ff8966ab5",
+      "relativePath": "infra/postgres/migrations/0001_core.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0002_normalized_projections.sql",
+      "bytes": 6405,
+      "sha256": "baba05dba3003b5304e3aa42fdab328d24ad0b8fb80b88d7fff5f59482a37a65",
+      "relativePath": "infra/postgres/migrations/0002_normalized_projections.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0003_zone_owner_leases.sql",
+      "bytes": 1259,
+      "sha256": "71db28dd5266c65e8707c08de11347afbf0b67f4facf736f1378927904049701",
+      "relativePath": "infra/postgres/migrations/0003_zone_owner_leases.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0004_city_currencies.sql",
+      "bytes": 806,
+      "sha256": "50bab7a2af67203c2396fede441e3f97089a32b45a336cdff74b146a9595d80d",
+      "relativePath": "infra/postgres/migrations/0004_city_currencies.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0005_game_economy_outbox.sql",
+      "bytes": 2351,
+      "sha256": "cbd39219803f894d627e50d806df3179125f3ce4164f34dbb03c2a842c3077c4",
+      "relativePath": "infra/postgres/migrations/0005_game_economy_outbox.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0006_game_economy_bootstrap.sql",
+      "bytes": 1002,
+      "sha256": "f126e33bb5cbe9c0c5edec60bb1fb725038c8e5975fba44dcf4db8eb8c742321",
+      "relativePath": "infra/postgres/migrations/0006_game_economy_bootstrap.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0007_admin_read_audits.sql",
+      "bytes": 296,
+      "sha256": "194b85230db671b63ac8da4e2d02df903a4d4084f0d8cd8f49266102ae7a4e0b",
+      "relativePath": "infra/postgres/migrations/0007_admin_read_audits.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0008_ai_daily_reports.sql",
+      "bytes": 3033,
+      "sha256": "69f9cc152f059b1091841e5a222e358124f0321622952066ed81df6ff679bd66",
+      "relativePath": "infra/postgres/migrations/0008_ai_daily_reports.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0009_world_director_approval.sql",
+      "bytes": 1103,
+      "sha256": "e746ded0a561aa086052e72e986d14f8b6da5a4802ff31c35bd2f7dcf8d4d2bd",
+      "relativePath": "infra/postgres/migrations/0009_world_director_approval.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0010_commercial_identity.sql",
+      "bytes": 4233,
+      "sha256": "3745a1f1ac34fa2b7e2a26ee3d38959131464a0d922eb0d1f1ea47e2f57c86c9",
+      "relativePath": "infra/postgres/migrations/0010_commercial_identity.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0011_game_economy_trade_projections.sql",
+      "bytes": 2124,
+      "sha256": "9dfcf2b5fee50f67710342eb929571ba84fe709fa0be99148d6847e4298d3499",
+      "relativePath": "infra/postgres/migrations/0011_game_economy_trade_projections.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0012_shared_guild_authority.sql",
+      "bytes": 1103,
+      "sha256": "f22b56a3b8da24cb65e5bee552b2e28018c10614833635bab26b585b4910a79d",
+      "relativePath": "infra/postgres/migrations/0012_shared_guild_authority.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0013_shared_guild_clock.sql",
+      "bytes": 959,
+      "sha256": "69020f2ae1503f4ab73ce4129b95ceeccc487d189327d6b7c580d5ff2d90a355",
+      "relativePath": "infra/postgres/migrations/0013_shared_guild_clock.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0014_shared_hero_authority.sql",
+      "bytes": 2620,
+      "sha256": "37cadf609973dc542c5a09ab4e4e60bfa77ec10f424617703c6b460825990cbd",
+      "relativePath": "infra/postgres/migrations/0014_shared_hero_authority.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0015_shared_item_identity.sql",
+      "bytes": 790,
+      "sha256": "4870f4f07eb2a9c921a3c96e523edc0c7a871127ce99a6b83e824d2ff11f95f2",
+      "relativePath": "infra/postgres/migrations/0015_shared_item_identity.sql"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\infra\\regional\\profile.json",
+      "bytes": 2378,
+      "sha256": "9038048609fb03827b8a578e2faf66ea7f0933dd7b262a159f2694c2af66cf45",
+      "relativePath": "infra/regional/profile.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\Cargo.toml",
+      "bytes": 327,
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091",
+      "relativePath": "packages/game-data/Cargo.toml"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\content_profiles\\platinum_176.json",
+      "bytes": 42725,
+      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd",
+      "relativePath": "packages/game-data/data/content_profiles/platinum_176.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_base_stats_packet_manifest.json",
+      "bytes": 3449,
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4",
+      "relativePath": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_buff_manifest.json",
+      "bytes": 10919,
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b",
+      "relativePath": "packages/game-data/data/generated/crystal_buff_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_creature_settings.json",
+      "bytes": 166,
+      "sha256": "cf098d6df97e50217f212fc13873964a096c156611835f2d5654668db8da7297",
+      "relativePath": "packages/game-data/data/generated/crystal_creature_settings.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_drop_manifest.json",
+      "bytes": 24076631,
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7",
+      "relativePath": "packages/game-data/data/generated/crystal_drop_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_game_shop_packet_manifest.json",
+      "bytes": 96259,
+      "sha256": "ff5bce2f32b0013f3ccd2705fdf7e4a93de89e1c8a6ea1ee58050e52f4124571",
+      "relativePath": "packages/game-data/data/generated/crystal_game_shop_packet_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_guild_buff_packet_manifest.json",
+      "bytes": 1492,
+      "sha256": "21a00a9feabb53542cee7f05fe65f93463eede949c56cf6e4feffea8464dd94b",
+      "relativePath": "packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_guild_settings.json",
+      "bytes": 1015,
+      "sha256": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4",
+      "relativePath": "packages/game-data/data/generated/crystal_guild_settings.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_hero_settings.json",
+      "bytes": 23460,
+      "sha256": "1cd6aea695708bca17dd66e535477854fb332a744155ea472919dffc1e964754",
+      "relativePath": "packages/game-data/data/generated/crystal_hero_settings.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+      "relativePath": "packages/game-data/data/generated/crystal_item_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_magic_manifest.json",
+      "bytes": 51696,
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d",
+      "relativePath": "packages/game-data/data/generated/crystal_magic_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_map_event_manifest.json",
+      "bytes": 50155,
+      "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29",
+      "relativePath": "packages/game-data/data/generated/crystal_map_event_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_ai_summary.json",
+      "bytes": 134815,
+      "sha256": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79",
+      "relativePath": "packages/game-data/data/generated/crystal_monster_ai_summary.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec",
+      "relativePath": "packages/game-data/data/generated/crystal_monster_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_command_summary.json",
+      "bytes": 59118,
+      "sha256": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414",
+      "relativePath": "packages/game-data/data/generated/crystal_npc_command_summary.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105",
+      "relativePath": "packages/game-data/data/generated/crystal_npc_info_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_manifest.json",
+      "bytes": 5244108,
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93",
+      "relativePath": "packages/game-data/data/generated/crystal_npc_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_quest_packet_manifest.json",
+      "bytes": 189239,
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6",
+      "relativePath": "packages/game-data/data/generated/crystal_quest_packet_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_random_item_stats_manifest.json",
+      "bytes": 25753,
+      "sha256": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449",
+      "relativePath": "packages/game-data/data/generated/crystal_random_item_stats_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_recipe_packet_manifest.json",
+      "bytes": 64271,
+      "sha256": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5",
+      "relativePath": "packages/game-data/data/generated/crystal_recipe_packet_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6741323,
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3",
+      "relativePath": "packages/game-data/data/generated/crystal_respawn_manifest.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_starter_map_collision.json",
+      "bytes": 57421,
+      "sha256": "38ac56c53ce6c9ba0e1849e7750fd48636754f4e33113c63b19b6a61d8f3f690",
+      "relativePath": "packages/game-data/data/generated/crystal_starter_map_collision.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\localization_bundle.json",
+      "bytes": 737385,
+      "sha256": "60b425e830bdbd538c2257b8cba4ca8eb2a3f0331b5db4eecbd3403ac1d6b6f8",
+      "relativePath": "packages/game-data/data/generated/localization_bundle.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\platinum_176_bundle.json",
+      "bytes": 3361,
+      "sha256": "6ab5d376e3f43f540329e776fa3a971aedd0ebe78cefc0d36b10508adfa47c59",
+      "relativePath": "packages/game-data/data/generated/platinum_176_bundle.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\quest_presentation_text.rs",
+      "bytes": 2168,
+      "sha256": "2b7bf21b2518dadb6ff92603021885453e9e5e85ccc898df2fbd220dabe68e03",
+      "relativePath": "packages/game-data/data/generated/quest_presentation_text.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\i18n-overrides.json",
+      "bytes": 328063,
+      "sha256": "9e57e1b4a4dac063601e2d3ed36f2ebf8601de83c0b40f59e77e234324d189a1",
+      "relativePath": "packages/game-data/data/i18n-overrides.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\starter_scene.json",
+      "bytes": 2893,
+      "sha256": "f06c92e72843f7c8bfd8f78aeb1714098107a184f4012a3f86649620ab5451f7",
+      "relativePath": "packages/game-data/data/starter_scene.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\starter_server_data.json",
+      "bytes": 8207,
+      "sha256": "d4349ff4e2d2753d0be95de27341a8a9bb59ea04d3062868b03c7e1d80f72e4d",
+      "relativePath": "packages/game-data/data/starter_server_data.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_creature_settings.rs",
+      "bytes": 2162,
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95",
+      "relativePath": "packages/game-data/src/crystal_creature_settings.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_guild_settings.rs",
+      "bytes": 4046,
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38",
+      "relativePath": "packages/game-data/src/crystal_guild_settings.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_hero_settings.rs",
+      "bytes": 7918,
+      "sha256": "58a19687be4d6794dfed69f6a16608f76adb82722b9cf000eaca2f6b73daaf27",
+      "relativePath": "packages/game-data/src/crystal_hero_settings.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_item_image.rs",
+      "bytes": 2932,
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e",
+      "relativePath": "packages/game-data/src/crystal_item_image.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_map_events.rs",
+      "bytes": 6669,
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8",
+      "relativePath": "packages/game-data/src/crystal_map_events.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_npc_goods.rs",
+      "bytes": 5045,
+      "sha256": "4144f851d4d6b98e06989e294c1c6e5f5b6ca831459fcd49d5539982b67ada21",
+      "relativePath": "packages/game-data/src/crystal_npc_goods.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\lib.rs",
+      "bytes": 167372,
+      "sha256": "035c3a4f23c2ae5a0665c2bb857e4bd66c8f783f5bedbe99d4c8de55576fc987",
+      "relativePath": "packages/game-data/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\Cargo.toml",
+      "bytes": 378,
+      "sha256": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3",
+      "relativePath": "packages/protocol/Cargo.toml"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\crystal-mvp-v1.json",
+      "bytes": 10992,
+      "sha256": "6dbb3af8f20dd13a7812fce28be77ae7d877f6aa5c74e30ddf61bd9a78a610c0",
+      "relativePath": "packages/protocol/crystal-mvp-v1.json"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\catalog_transport.rs",
+      "bytes": 11788,
+      "sha256": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d",
+      "relativePath": "packages/protocol/src/catalog_transport.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\error.rs",
+      "bytes": 3373,
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba",
+      "relativePath": "packages/protocol/src/error.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\frame.rs",
+      "bytes": 1275,
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad",
+      "relativePath": "packages/protocol/src/frame.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\ids.rs",
+      "bytes": 30620,
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126",
+      "relativePath": "packages/protocol/src/ids.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\io.rs",
+      "bytes": 5117,
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046",
+      "relativePath": "packages/protocol/src/io.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\item_image.rs",
+      "bytes": 1218,
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72",
+      "relativePath": "packages/protocol/src/item_image.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\lib.rs",
+      "bytes": 1969,
+      "sha256": "b5fc91187079005e0b19945c3c43e68736bb1786f7098e83134dead5e302766d",
+      "relativePath": "packages/protocol/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\packets.rs",
+      "bytes": 307016,
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7",
+      "relativePath": "packages/protocol/src/packets.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\trace.rs",
+      "bytes": 29621,
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89",
+      "relativePath": "packages/protocol/src/trace.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\types.rs",
+      "bytes": 120048,
+      "sha256": "c25a956e371aee4e1b56276c3203c541473d04235cb52feaf391480662a1a7d6",
+      "relativePath": "packages/protocol/src/types.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\Cargo.toml",
+      "bytes": 703,
+      "sha256": "69ea6ba4d25f55d5dc41bc582d5a91ac95289dfc98f0f5f03711b9f551d20c74",
+      "relativePath": "vendor/dubhe-network-core/Cargo.toml"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\agent.rs",
+      "bytes": 40350,
+      "sha256": "b89bf25c840504481336d86549ed5c584a7d76b6250163c37cea6f5b84ac1d4c",
+      "relativePath": "vendor/dubhe-network-core/src/agent.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\beta.rs",
+      "bytes": 18292,
+      "sha256": "7c5755e2491ecc19141e5d1f3a03ad76f99e3ece7966b5bb7fe31978776c8379",
+      "relativePath": "vendor/dubhe-network-core/src/beta.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\capacity.rs",
+      "bytes": 20279,
+      "sha256": "3b7576bac6b0a1c78f08655e2bfd49e4b8588b3b3ca4c4e1c184d707081f1279",
+      "relativePath": "vendor/dubhe-network-core/src/capacity.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\enrollment.rs",
+      "bytes": 21393,
+      "sha256": "5216ef79fb0e234fe0763e45cfac7a86a9a32aea507c04d1617b313b2e647070",
+      "relativePath": "vendor/dubhe-network-core/src/enrollment.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\identity.rs",
+      "bytes": 8200,
+      "sha256": "6ddbf2d80bc47154dfc135583336086ec2c0981e158f326960d27e2745ccb16c",
+      "relativePath": "vendor/dubhe-network-core/src/identity.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\lib.rs",
+      "bytes": 3157,
+      "sha256": "9c9df83d296fa5f12efdaa17aa48a356ffd7e0fed13919a04ac7792eb85c6ea7",
+      "relativePath": "vendor/dubhe-network-core/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\rewards.rs",
+      "bytes": 28115,
+      "sha256": "805f187af01316b595e7dc222820e67242b6cbd16aed7c11a0f349661d67bb26",
+      "relativePath": "vendor/dubhe-network-core/src/rewards.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\sandbox.rs",
+      "bytes": 16123,
+      "sha256": "1c4a695f5cada5e52ef9d11852c218b7036b954c9d4dfd7cc33929a0c34b7735",
+      "relativePath": "vendor/dubhe-network-core/src/sandbox.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\telemetry.rs",
+      "bytes": 48570,
+      "sha256": "31b0b4b08f9a9b159f50edf280ce4f7b68c4128da4fa6eda33941cd6652dc40d",
+      "relativePath": "vendor/dubhe-network-core/src/telemetry.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\vendor\\dubhe-network-core\\src\\tunnel.rs",
+      "bytes": 32123,
+      "sha256": "d1149efdd8ca99c7bbb7853abcf0b78faaf41953205431b98222445a807f7677",
+      "relativePath": "vendor/dubhe-network-core/src/tunnel.rs"
+    }
+  ],
+  "uniqueInputCount": 367,
+  "finiteMemoryOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "limitations": [
+    "Only pure snapshot helper and existing in-memory SimulationSession library dispatch selected; no product client/server/renderer launched, no real listener/socket or private store.",
+    "Native/Web edits remain in progress and are not inputs to this Simulation test selection."
+  ],
+  "previousPrepared": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-simulation03-snapshot.json",
+    "bytes": 111398,
+    "sha256": "d663d71b444f845038685182b5604dc3e6f14e291cb76e10b16d93d162119e43"
+  },
+  "productionCorrection": "Shared original Gateway goods template projection; current same-owner snapshot now carries enriched displayGoods. Actual Used row is consumed whole, actual BuyItem request panel0, display BUY_SUB panel1."
+}

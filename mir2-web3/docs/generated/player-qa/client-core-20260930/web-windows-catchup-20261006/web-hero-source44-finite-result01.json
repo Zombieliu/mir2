@@ -1,0 +1,1155 @@
+{
+  "owner": "Root",
+  "kind": "Source44 actual finite implementation verification",
+  "generatedAtUtc": "2026-10-08T13:55:29.831Z",
+  "parentCommit": "f359d5b5d0cebd964eadd99b8a46d1ca52ecbd1f",
+  "changedSourcePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hero_ui_host.rs",
+      "bytes": 101634,
+      "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hero_ui.rs",
+      "bytes": 48418,
+      "sha256": "4a06df4ced85c5e63365c775eac2018f4b5a3c3e214acad7c7163a0bf39a4542"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-ui.ts",
+      "bytes": 27141,
+      "sha256": "892dd87dd857486b504d7a02274a5f36770d83105256f9ff073f819f742b22e1"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-host.ts",
+      "bytes": 37310,
+      "sha256": "62fe12c38fbe739f6f2b1ac29ad71ffaa9d1dbb47261518dbbf8fa0d85fb5122"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-hero-ui.ts",
+      "bytes": 3206,
+      "sha256": "1b9546cb6380b836e0cec2c666c41522ace852b1d75c2f459cd26cc3002e12c4"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1057610,
+      "sha256": "aee83fbdd2e463bfb78b32a97e354a96b39d532769317e576bb442fa13512ef6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 331360,
+      "sha256": "9e014ad2578dc6105462bcee2c73d7748ba7cab9650946c934da476a676a52bb"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 18732,
+      "sha256": "55b7cdb51cb4e4f144b2cadd26b8bc68b48c7b34821754cf6f55244d1e93d81c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 719838,
+      "sha256": "02ca191dab829467667ab64646cc3897a9146b0de78b4cf786c701ce4ec70c9c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs",
+      "bytes": 57445,
+      "sha256": "985a9f9d8316218caea52ee5b59486195fbec5876a8735f3fcc700094556b628"
+    }
+  ],
+  "rust": {
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+      "bytes": 1507271,
+      "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+    },
+    "review": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+      "bytes": 13086,
+      "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+    },
+    "preparation": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-finite-prepared02.json",
+      "bytes": 12377,
+      "sha256": "0a6f7b4c6ca62858917ba99027844b4e0e2b0ed5a41892f5efb4f1320b8dde3b"
+    },
+    "sourceCount": 917,
+    "copiedProductDataFiles": 909,
+    "originalReferences": 8,
+    "postCallRehashMatched": 917,
+    "successfulExecutions": 92,
+    "newTestFunctions": 5,
+    "runtimePass": 26,
+    "portablePass": 66,
+    "freshNativeAcceptance": false,
+    "staticChecks": [
+      {
+        "kind": "WebGL2 shared",
+        "exitCode": 0
+      },
+      {
+        "kind": "WebGPU",
+        "exitCode": 0
+      }
+    ],
+    "actual": [
+      {
+        "id": "runtime-hero-test02",
+        "config": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test02.config02.json",
+          "bytes": 7218,
+          "sha256": "8b53fdc37663dcc8b88bb6426cf4d17e9fab52ce73fdb703283103a60ed5db86"
+        },
+        "policy": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test02.policy02.json",
+          "bytes": 2312,
+          "sha256": "4dd133be882087b7eef262fa8f37271bec0f028371f245b73fcd70545cea1b05"
+        },
+        "source": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+          "bytes": 1507271,
+          "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+        },
+        "sourceReview": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+          "bytes": 13086,
+          "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+        },
+        "stdout": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02.stdout.log",
+          "bytes": 2947,
+          "sha256": "15cae4e2377e6d6d651406806dd98ffa1831287af0c28968b48fd13ad94f4348"
+        },
+        "stderr": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02.stderr.log",
+          "bytes": 18153,
+          "sha256": "97d0b1a65a78589aa4a7a5c9d04d1a9418c30c8f842185a66a660bc39972a059"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02.outer.json",
+          "bytes": 453,
+          "sha256": "4ac76cd8ff9ad2eb684723008839dc8f57e1d4c5fc8ba4b7a02615b183c52df7"
+        },
+        "outerValue": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 182336,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 122315,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test02.config02.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "nonceRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f",
+        "nonceFiles": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\after.json",
+            "bytes": 321,
+            "sha256": "4e3b5ec1bf7f67709dbfcdf1c70b74ab98a07f4e5fa5b81c081e8eef55d40895"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\before.json",
+            "bytes": 3684,
+            "sha256": "ba972922ebb5dc61f86c5b456aaabdd08c68a7b4dfe589fd9ee45d261311154e"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\probe-process.json",
+            "bytes": 433,
+            "sha256": "ad2ecff44c08156eb70728617fb20522fb1a50725a7cc2be3b6e3af8f36a3d4d"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\probe.stderr.bin",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\probe.stdout.bin",
+            "bytes": 197,
+            "sha256": "f2c0a1f52d9dcb4ad17dfbfac1cf4c03f47d8bd508ef8c9169706bdacfd17129"
+          }
+        ],
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "d5ed2f92855048b89933ae3db249f80f",
+          "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test02.policy02.json",
+          "policySha": "4dd133be882087b7eef262fa8f37271bec0f028371f245b73fcd70545cea1b05",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--features",
+            "web-quest-ui",
+            "--lib",
+            "--",
+            "--test-threads=1",
+            "--exact",
+            "hero_ui_host::tests::hero_host_separates_rust_source_from_web_counters_and_ignored_raw_cursor",
+            "hero_ui_host::tests::hero_host_stale_control_and_duplicate_json_do_not_poison_current_owner",
+            "hero_ui_host::tests::hero_host_old_cleanup_cannot_retire_replacement_run_or_sink",
+            "hero_ui_host::tests::hero_host_bounded_input_overflow_keeps_accepted_fifo_for_one_world_consumer",
+            "hero_ui_host::tests::hero_host_consumer_reapplies_current_projection_after_unscoped_world_reset",
+            "hero_ui_host::tests::hero_host_receipts_apply_in_fifo_before_latest_without_an_unbounded_world_queue",
+            "hero_ui_host::tests::hero_host_checkpoint_is_held_string_and_new_run_restores_before_live_input",
+            "hero_ui_host::tests::hero_host_reentrant_scope_or_sink_change_invalidates_acceptance_feedback",
+            "hero_ui_host::tests::hero_host_same_stamp_new_web_lease_cancels_queued_and_held_old_input",
+            "hero_ui_host::tests::hero_host_clearing_current_sink_revokes_input_but_old_cleanup_cannot",
+            "hero_ui_host::tests::hero_host_actual_layout_rejects_missing_duplicate_misplaced_and_wrong_page_cells",
+            "hero_ui_host::tests::hero_host_checkpoint_keeps_first_packet_clock_across_ignored_frames",
+            "hero_ui_host::tests::hero_host_old_same_scope_sink_cleanup_and_input_cannot_touch_replacement_binding",
+            "hero_ui_host::tests::hero_host_disabled_control_cancels_old_press_even_without_an_intervening_world_frame",
+            "hero_ui_host::tests::hero_host_clock_and_scope_boundary_refuse_unsafe_values",
+            "hero_ui_host::tests::hero_host_verified_owner_is_display_source_without_core_or_ledger_side_effects",
+            "hero_ui_host::tests::hero_host_legacy_control_cannot_authorize_input_or_installed_ready_proof",
+            "hero_ui_host::tests::hero_host_copied_source_with_old_health_data_is_rejected_until_real_consume",
+            "hero_ui_host::tests::hero_host_witness_queries_and_rejection_preserve_receipt_fifo_and_original_clock",
+            "hero_ui_host::tests::hero_host_unscoped_reset_cannot_preserve_old_ready_or_held_press_with_same_witness",
+            "hero_ui_host::tests::hero_host_malformed_or_stale_witness_control_cannot_poison_current_bound_source",
+            "hero_ui_host::tests::hero_host_independent_web_and_rust_empty_source_share_one_exact_golden",
+            "hero_ui_host::tests::hero_host_prepared_hidden_root_needs_enabled_actual_inherited_visibility_for_ready",
+            "hero_ui_host::tests::hero_host_same_witness_owner_refresh_preserves_drag_but_revokes_old_edges_and_feedback",
+            "hero_ui_host::tests::hero_host_control_revision_clears_pending_edges_without_resetting_equal_data_drag",
+            "hero_ui_host::tests::hero_host_drag_continuity_rejects_changed_data_complete_lease_and_either_world_reset"
+          ],
+          "cwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T13:17:38.4494960Z",
+            "sampleEndUtc": "2026-10-08T13:17:39.2542016Z",
+            "remainingBytes": "202049495040",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 181868,
+          "probeLaunchMs": 103.2724,
+          "probeEndMs": 1153.8135,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 185616,
+          "childStartedUtc": "/Date(1791465459332)/",
+          "childStartMs": 1177.6083,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791465580418)/",
+          "completionMs": 122260.7155,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "passedNames": [
+          "hero_ui_host::tests::hero_host_actual_layout_rejects_missing_duplicate_misplaced_and_wrong_page_cells",
+          "hero_ui_host::tests::hero_host_bounded_input_overflow_keeps_accepted_fifo_for_one_world_consumer",
+          "hero_ui_host::tests::hero_host_checkpoint_is_held_string_and_new_run_restores_before_live_input",
+          "hero_ui_host::tests::hero_host_checkpoint_keeps_first_packet_clock_across_ignored_frames",
+          "hero_ui_host::tests::hero_host_clearing_current_sink_revokes_input_but_old_cleanup_cannot",
+          "hero_ui_host::tests::hero_host_clock_and_scope_boundary_refuse_unsafe_values",
+          "hero_ui_host::tests::hero_host_consumer_reapplies_current_projection_after_unscoped_world_reset",
+          "hero_ui_host::tests::hero_host_control_revision_clears_pending_edges_without_resetting_equal_data_drag",
+          "hero_ui_host::tests::hero_host_copied_source_with_old_health_data_is_rejected_until_real_consume",
+          "hero_ui_host::tests::hero_host_disabled_control_cancels_old_press_even_without_an_intervening_world_frame",
+          "hero_ui_host::tests::hero_host_drag_continuity_rejects_changed_data_complete_lease_and_either_world_reset",
+          "hero_ui_host::tests::hero_host_independent_web_and_rust_empty_source_share_one_exact_golden",
+          "hero_ui_host::tests::hero_host_legacy_control_cannot_authorize_input_or_installed_ready_proof",
+          "hero_ui_host::tests::hero_host_malformed_or_stale_witness_control_cannot_poison_current_bound_source",
+          "hero_ui_host::tests::hero_host_old_cleanup_cannot_retire_replacement_run_or_sink",
+          "hero_ui_host::tests::hero_host_old_same_scope_sink_cleanup_and_input_cannot_touch_replacement_binding",
+          "hero_ui_host::tests::hero_host_prepared_hidden_root_needs_enabled_actual_inherited_visibility_for_ready",
+          "hero_ui_host::tests::hero_host_receipts_apply_in_fifo_before_latest_without_an_unbounded_world_queue",
+          "hero_ui_host::tests::hero_host_reentrant_scope_or_sink_change_invalidates_acceptance_feedback",
+          "hero_ui_host::tests::hero_host_same_stamp_new_web_lease_cancels_queued_and_held_old_input",
+          "hero_ui_host::tests::hero_host_same_witness_owner_refresh_preserves_drag_but_revokes_old_edges_and_feedback",
+          "hero_ui_host::tests::hero_host_separates_rust_source_from_web_counters_and_ignored_raw_cursor",
+          "hero_ui_host::tests::hero_host_stale_control_and_duplicate_json_do_not_poison_current_owner",
+          "hero_ui_host::tests::hero_host_unscoped_reset_cannot_preserve_old_ready_or_held_press_with_same_witness",
+          "hero_ui_host::tests::hero_host_verified_owner_is_display_source_without_core_or_ledger_side_effects",
+          "hero_ui_host::tests::hero_host_witness_queries_and_rejection_preserve_receipt_fifo_and_original_clock"
+        ],
+        "failedNames": [],
+        "expectedPassed": 26,
+        "freshnessConservativeUpperMs": 79,
+        "stderrTail": "  ^^^^^^^^^\n   |\n   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default\n\nwarning: unused imports: `BagUiHostContext` and `BagUiReadModel`\n  --> src\\bag_ui_host.rs:19:62\n   |\n19 |     BagIdentity, BagPage, BagPointerOrigin, BagPointerPhase, BagUiHostContext,\n   |                                                              ^^^^^^^^^^^^^^^^\n20 |     BagUiIntent, BagUiIntentKind, BagUiPointerEdge, BagUiReadModel,\n   |                                                     ^^^^^^^^^^^^^^\n\nwarning: unused import: `Serialize`\n --> src\\character_ui_host.rs:5:26\n  |\n5 | use serde::{Deserialize, Serialize};\n  |                          ^^^^^^^^^\n\nwarning: unused imports: `CombatController`, `CombatEdge`, `CombatOutput`, and `CombatSnapshot`\n --> src\\combat_input_host.rs:2:38\n  |\n2 | use mir2_client_bevy::combat_input::{CombatController, CombatEdge, CombatOutput, CombatSnapshot};\n  |                                      ^^^^^^^^^^^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^^^^\n\nwarning: unused import: `PanelAction`\n --> src\\hud_ui_host.rs:2:54\n  |\n2 | use mir2_client_bevy::crystal_ui::panel_navigation::{PanelAction, PanelNavigation};\n  |                                                      ^^^^^^^^^^^\n\nwarning: unused import: `Serialize`\n --> src\\hud_ui_host.rs:4:26\n  |\n4 | use serde::{Deserialize, Serialize};\n  |                          ^^^^^^^^^\n\nwarning: unused imports: `ExperienceBarObservationSet` and `ExperienceBarRect`\n  --> src\\quest_ui_host.rs:42:57\n   |\n42 |     ExperienceBarHostContext, ExperienceBarObservation, ExperienceBarObservationSet,\n   |                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n43 |     ExperienceBarRect, Mir2PortableExperienceBarUiPlugin,\n   |     ^^^^^^^^^^^^^^^^^\n\nwarning: unused imports: `WeightBarObservationSet` and `WeightBarRect`\n  --> src\\quest_ui_host.rs:58:5\n   |\n58 |     WeightBarObservationSet, WeightBarRect,\n   |     ^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^\n\nwarning: unused import: `Serialize`\n --> src\\spells_ui_host.rs:7:26\n  |\n7 | use serde::{Deserialize, Serialize};\n  |                          ^^^^^^^^^\n\nwarning: unused import: `NpcShopSurfaceAction`\n  --> src\\npc_shop_ui_host_tests.rs:44:54\n   |\n44 |     portable_npc_shop_ui::{NpcShopSurfaceIntentQueue,NpcShopSurfaceAction}};\n   |                                                      ^^^^^^^^^^^^^^^^^^^^\n\nwarning: unused imports: `StorageUiContext` and `StorageUiReadModel`\n --> src\\storage_ui_host.rs:9:29\n  |\n9 |         StoragePointerPhase,StorageUiContext,StorageUiReadModel,StorageUiIntent,StorageUiIntentKind,SAFE},\n  |                             ^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^\n\nwarning: unused imports: `ComposePointerEdge`, `ComposePointerRouter`, `PromptMutation`, `TextEdge`, and `TextIntent`\n   --> src\\mail_ui_host.rs:227:41\n    |\n227 | ...aint,TextProof,TextEdge,TextIntent,ComposeAction,GoldPaint,ComposePointerEdge,ComposePointerRouter,PromptMutation};\n    |                   ^^^^^^^^ ^^^^^^^^^^                         ^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^\n\nwarning: fields `bag_open`, `page`, `input_enabled`, and `player` are never read\n   --> src\\bag_ui_host.rs:137:5\n    |\n131 | struct WebBagSnapshot {\n    |        -------------- fields in this struct\n...\n137 |     bag_open: bool,\n    |     ^^^^^^^^\n138 |     page: WebBagPage,\n    |     ^^^^\n139 |     input_enabled: bool,\n    |     ^^^^^^^^^^^^^\n...\n142 |     player: PlayerStats,\n    |     ^^^^^^\n    |\n    = note: `WebBagSnapshot` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis\n    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default\n\nwarning: struct `WebBagPointerEdge` is never constructed\n   --> src\\bag_ui_host.rs:228:8\n    |\n228 | struct WebBagPointerEdge {\n    |        ^^^^^^^^^^^^^^^^^\n\nwarning: enum `WebBagPointerPhase` is never used\n   --> src\\bag_ui_host.rs:243:6\n    |\n243 | enum WebBagPointerPhase { Down, Move, Up, Cancel, Blur }\n    |      ^^^^^^^^^^^^^^^^^^\n\nwarning: enum `WebBagPointerOrigin` is never used\n   --> src\\bag_ui_host.rs:246:6\n    |\n246 | enum WebBagPointerOrigin { Bag, World }\n    |      ^^^^^^^^^^^^^^^^^^^\n\nwarning: methods `validate` and `into_shared` are never used\n   --> src\\bag_ui_host.rs:249:8\n    |\n248 | impl WebBagPointerEdge {\n    | ---------------------- methods in this implementation\n249 |     fn validate(self) -> bool {\n    |        ^^^^^^^^\n...\n258 |     fn into_shared(self) -> BagUiPointerEdge {\n    |        ^^^^^^^^^^^\n\nwarning: fields `host_visible`, `quest_log_open`, `blocks_gameplay_keys`, `turn_in_blocked`, and `presentation` are never read\n   --> src\\quest_ui_host.rs:89:9\n    |\n 83 | pub(crate) struct WebQuestUiSnapshot {\n    |                   ------------------ fields in this struct\n...\n 89 |     pub host_visible: bool,\n    |         ^^^^^^^^^^^^\n 90 |     pub quest_log_open: bool,\n    |         ^^^^^^^^^^^^^^\n 91 |     pub open_revision: u64,\n 92 |     pub blocks_gameplay_keys: bool,\n    |         ^^^^^^^^^^^^^^^^^^^^\n 93 |     pub turn_in_blocked: bool,\n    |         ^^^^^^^^^^^^^^^\n...\n101 |     pub presentation: Option<WebQuestUiPresentation>,\n    |         ^^^^^^^^^^^^\n    |\n    = note: `WebQuestUiSnapshot` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis\n\nwarning: field `has_input` is never read\n   --> src\\quest_ui_host.rs:402:9\n    |\n392 | pub(crate) struct WebNpcDialog {\n    |                   ------------ field in this struct\n...\n402 |     pub has_input: bool,\n    |         ^^^^^^^^^\n    |\n    = note: `WebNpcDialog` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis\n\nwarning: fields `completed` and `dialog` are never read\n   --> src\\quest_ui_host.rs:439:9\n    |\n437 | pub(crate) struct QuestUiModels {\n    |                   ------------- fields in this struct\n438 |     pub quests: QuestTracker,\n439 |     pub completed: CompletedQuestTracker,\n    |         ^^^^^^^^^\n440 |     pub dialog: NpcDialogModel,\n    |         ^^^^^^\n\nwarning: field `cancel_pointer` is never read\n   --> src\\storage_ui_host.rs:127:61\n    |\n124 | struct StorageIngress {\n    |        -------------- field in this struct\n...\n127 |     last_edge_sequence:u64,lease:Option<StoragePointerEdge>,cancel_pointer:bool,error:Option<String>,\n    |                                                             ^^^^^^^^^^^^^^\n\nwarning: struct `WebGl2SharedUiPrototype` is never constructed\n --> src\\webgl2_shared_ui.rs:8:19\n  |\n8 | pub(crate) struct WebGl2SharedUiPrototype;\n  |                   ^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: `mir2-bevy-runtime` (lib test) generated 22 warnings (run `cargo fix --lib -p mir2-bevy-runtime --tests` to apply 12 suggestions)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 00s\n     Running unittests src\\lib.rs (C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-f23baa2315f22fb9.exe)\n"
+      },
+      {
+        "id": "bevy-portable-hero-test02",
+        "config": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test02.config02.json",
+          "bytes": 11282,
+          "sha256": "ffdbdf4878a2d0c17177007119645ad139a44a84d7d79de19d4783c91e6ab21c"
+        },
+        "policy": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test02.policy02.json",
+          "bytes": 2318,
+          "sha256": "99518971da539fe39343599c9e0801f3608d60b42da68f6b4b48e08d43d11af7"
+        },
+        "source": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+          "bytes": 1507271,
+          "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+        },
+        "sourceReview": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+          "bytes": 13086,
+          "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+        },
+        "stdout": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02.stdout.log",
+          "bytes": 7148,
+          "sha256": "e2d2ba7b48217a913b994b4f081c39d99e1fe86d0ff8113c437f142bb42fd986"
+        },
+        "stderr": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02.stderr.log",
+          "bytes": 7350,
+          "sha256": "d7ff7c0fc4394970b5e97ab5a88cc003742e28f743b843b19fb6df3b3db5548d"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02.outer.json",
+          "bytes": 458,
+          "sha256": "5881276e6397ca3a9ea9e830d3c6a07ae51f0033a45c280a3b89c4f60c80e59e"
+        },
+        "outerValue": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 187656,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 96122,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test02.config02.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "nonceRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b",
+        "nonceFiles": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\after.json",
+            "bytes": 319,
+            "sha256": "3c0d69fddf9140636fdfc56fb32311cb65d026fe6bab8ddf448807581e758cef"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\before.json",
+            "bytes": 7510,
+            "sha256": "d9dfd6618cee539c2b19b7ebd1e7bad1b7ae2ee490204c1dbcd6b1d0ec7c39c1"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\probe-process.json",
+            "bytes": 443,
+            "sha256": "9abbe8f2e332227437dacfa31f521056ae56afdf3e5201937d3b4e11047bf57e"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\probe.stderr.bin",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\probe.stdout.bin",
+            "bytes": 197,
+            "sha256": "8061eea7dba63351c1debdab4bfde6d297fccf2ca2345d4d8efce47b5c37d4c9"
+          }
+        ],
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "57fb8ff6af4043ac9cab4731b1f2f22b",
+          "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test02.policy02.json",
+          "policySha": "99518971da539fe39343599c9e0801f3608d60b42da68f6b4b48e08d43d11af7",
+          "args": [
+            "+1.95.0",
+            "test",
+            "--manifest-path",
+            "apps/game-client/client-bevy/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--features",
+            "portable-quest-ui",
+            "--lib",
+            "--",
+            "--test-threads=1",
+            "--exact",
+            "hero_model::tests::native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity",
+            "hero_model::tests::native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair",
+            "hero_model::tests::hero_cast_clock_reanchors_negative_elapsed_without_restarting_cooldown",
+            "hero_model::tests::full_bootstrap_and_live_health_are_independent_of_player_data",
+            "hero_model::tests::hero_receipt_uses_exact_actor_epoch_keys_and_preserves_zero_zero_source_routing",
+            "hero_model::tests::early_actor_is_applied_only_after_exact_hero_information_and_identity_match",
+            "hero_model::tests::item_result_receipt_marks_each_operation_but_not_later_snapshots_or_health",
+            "hero_model::tests::auto_pot_echo_uses_crystal_stats_and_switching_identity_invalidates_pending_generation",
+            "hero_model::tests::shared_hero_owner_preserves_wide_identity_items_and_sparse_slots",
+            "hero_model::tests::shared_hero_owner_rejects_partial_identity_slots_keys_and_withdrawal_pair",
+            "hero_model::tests::shared_hero_owner_keeps_complete_tooltip_carriers_and_rejects_conflicting_custody",
+            "hero_ingress::tests::hero_ingress_raw_world_and_information_preserve_exact_wide_values",
+            "hero_ingress::tests::hero_ingress_strict_raw_parser_rejects_duplicates_depth_bounds_and_trailing",
+            "hero_ingress::tests::hero_ingress_exact_skill_and_item_receipts_are_fifo_before_latest",
+            "hero_ingress::tests::hero_ingress_clock_anchor_survives_owner_updates_drain_and_scene_carry",
+            "hero_ingress::tests::hero_ingress_scope_sequence_clock_and_retirement_high_waters_are_exact",
+            "hero_ingress::tests::hero_ingress_personal_bag_is_strict_and_explicitly_excludes_equipment",
+            "hero_ingress::tests::hero_ingress_receipt_and_byte_overflow_preserve_accepted_fifo_and_close",
+            "hero_ingress::tests::hero_ingress_checkpoint_handoff_preserves_first_clock_without_receipt_replay",
+            "hero_ingress::tests::hero_ingress_closed_phase_rejects_older_batch_and_restore",
+            "hero_ingress::tests::hero_ingress_anonymous_items_are_slot_bound_and_dynamic_metadata_waits_for_owner",
+            "portable_hero_ui::tests::secondary_pointer_does_not_consume_primary_button_or_drag",
+            "portable_hero_ui::tests::new_source_stamp_cancels_held_action",
+            "portable_hero_ui::tests::hero_reopen_restores_personal_transfer_window",
+            "portable_hero_ui::tests::locked_personal_page_stays_in_first_bag_and_shrink_resets_it",
+            "portable_hero_ui::tests::modal_blocks_stage_and_pending_does_not_settle_drafts",
+            "portable_hero_ui::tests::rejected_and_stale_use_feedback_never_advances_cadence",
+            "portable_hero_ui::tests::hero_intent_encodes_host_old_key_without_native_pending",
+            "portable_hero_ui::tests::personal_front_matches_hit_order_and_full_stage_modal_wins",
+            "portable_hero_ui::tests::anonymous_and_stale_items_have_no_transfer_custody",
+            "portable_hero_ui::tests::checkpoint_from_other_hero_never_reuses_packet_hair",
+            "portable_hero_ui::tests::absent_presentation_cancels_drag_without_panic_and_idle_escape_passes",
+            "crystal_ui::hero_dialog::tests::native_npc_economy_hero_checkpoint_opens_read_only_status_without_packet_actions",
+            "crystal_ui::hero_dialog::tests::item_result_matches_exact_slots_and_failed_operations_keep_selection",
+            "crystal_ui::hero_dialog::tests::absent_hero_never_uses_player_inventory_or_opens_pages",
+            "crystal_ui::hero_dialog::tests::original_capacity_keeps_two_belt_cells_and_unlocks_rows_without_inventing_items",
+            "crystal_ui::hero_dialog::tests::page_toggle_health_and_session_are_actor_scoped",
+            "crystal_ui::hero_dialog::geometry::tests::own_modal_regions_never_click_a_covered_belt_or_character_tab",
+            "crystal_ui::hero_dialog::assign::tests::hero_none_to_none_never_dispatches_the_player_unbind_branch",
+            "crystal_ui::hero_dialog::assign::tests::hero_draft_survives_send_failure_and_does_not_accept_player_keys",
+            "crystal_ui::hero_dialog::assign::tests::hero_optimistic_key_waits_for_transport_then_exact_receipt",
+            "crystal_ui::hero_dialog::item_use::tests::auto_equip_and_potion_plans_keep_exact_hero_grid_and_uid",
+            "crystal_ui::hero_dialog::item_use::tests::restock_waits_for_empty_belt_and_revalidates_source_uid",
+            "crystal_ui::hero_dialog::item_use::tests::remove_uses_raw_belt_fallback_without_negative_index",
+            "crystal_ui::hero_dialog::item_use::tests::player_hero_transfers_reject_occupied_incompatible_and_preserve_stack_uids",
+            "portable_hero_ui::tests::close_hero_inventory_removes_personal_hit_region_in_the_same_reducer_frame",
+            "hero_ingress::tests::hero_ingress_verified_owner_preserves_wide_values_and_first_packet_clock",
+            "hero_ingress::tests::hero_ingress_verified_owner_requires_separate_entry_before_raw_cursor_advances",
+            "hero_ingress::tests::hero_ingress_verified_owner_correlation_rejects_old_identity_without_poisoning_current",
+            "hero_ingress::tests::hero_ingress_verified_owner_strict_raw_shape_cannot_manufacture_a_snapshot",
+            "hero_ingress::tests::hero_ingress_verified_owner_keeps_two_exact_receipts_before_latest",
+            "hero_ingress::tests::hero_ingress_verified_owner_no_hero_clears_private_info_and_clocks",
+            "hero_action_basis::tests::hero_basis_automatic_remove_keeps_null_semantic_and_exact_first_empty_raw_slot",
+            "hero_action_basis::tests::hero_basis_use_keeps_actual_effective_auto_merge_and_base_explicit_merge_policy",
+            "hero_action_basis::tests::hero_basis_confirmation_restock_and_key_facts_are_exact_without_request_allocator",
+            "hero_action_basis::tests::hero_basis_transfer_uses_original_cross_planner_and_never_grants_anonymous_target",
+            "hero_action_basis::tests::hero_basis_missing_metadata_duplicate_keys_and_oversize_fail_closed",
+            "portable_hero_ui::tests::hero_reducer_real_actions_include_basis_and_window_intents_have_no_basis",
+            "hero_source_witness::tests::hero_source_witness_health_packet_changes_planner_without_borrowing_old_display",
+            "hero_source_witness::tests::hero_source_witness_uses_actual_checkpoint_display_and_packet_hair",
+            "hero_source_witness::tests::hero_source_witness_changes_with_config_stats_weights_slots_and_skill_definitions",
+            "hero_source_witness::tests::hero_source_witness_preserves_wide_signed_values_zero_uids_and_canonical_order",
+            "hero_source_witness::tests::hero_source_witness_full_capacities_and_all_valid_skill_variants_fit",
+            "hero_source_witness::tests::hero_source_witness_exact_byte_limit_and_unicode_overflow_fail_closed",
+            "hero_source_witness::tests::hero_source_witness_rejects_incomplete_mismatched_and_duplicate_model_fields",
+            "portable_hero_ui::tests::escape_capture_uses_actual_private_selection_held_and_modal_state"
+          ],
+          "cwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T13:20:45.7135305Z",
+            "sampleEndUtc": "2026-10-08T13:20:46.5384951Z",
+            "remainingBytes": "200223891456",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 173828,
+          "probeLaunchMs": 122.01400000000001,
+          "probeEndMs": 1231.0851,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 189528,
+          "childStartedUtc": "/Date(1791465646616)/",
+          "childStartMs": 1256.392,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791465741417)/",
+          "completionMs": 96055.6146,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "passedNames": [
+          "crystal_ui::hero_dialog::assign::tests::hero_draft_survives_send_failure_and_does_not_accept_player_keys",
+          "crystal_ui::hero_dialog::assign::tests::hero_none_to_none_never_dispatches_the_player_unbind_branch",
+          "crystal_ui::hero_dialog::assign::tests::hero_optimistic_key_waits_for_transport_then_exact_receipt",
+          "crystal_ui::hero_dialog::geometry::tests::own_modal_regions_never_click_a_covered_belt_or_character_tab",
+          "crystal_ui::hero_dialog::item_use::tests::auto_equip_and_potion_plans_keep_exact_hero_grid_and_uid",
+          "crystal_ui::hero_dialog::item_use::tests::player_hero_transfers_reject_occupied_incompatible_and_preserve_stack_uids",
+          "crystal_ui::hero_dialog::item_use::tests::remove_uses_raw_belt_fallback_without_negative_index",
+          "crystal_ui::hero_dialog::item_use::tests::restock_waits_for_empty_belt_and_revalidates_source_uid",
+          "crystal_ui::hero_dialog::tests::absent_hero_never_uses_player_inventory_or_opens_pages",
+          "crystal_ui::hero_dialog::tests::item_result_matches_exact_slots_and_failed_operations_keep_selection",
+          "crystal_ui::hero_dialog::tests::native_npc_economy_hero_checkpoint_opens_read_only_status_without_packet_actions",
+          "crystal_ui::hero_dialog::tests::original_capacity_keeps_two_belt_cells_and_unlocks_rows_without_inventing_items",
+          "crystal_ui::hero_dialog::tests::page_toggle_health_and_session_are_actor_scoped",
+          "hero_action_basis::tests::hero_basis_automatic_remove_keeps_null_semantic_and_exact_first_empty_raw_slot",
+          "hero_action_basis::tests::hero_basis_confirmation_restock_and_key_facts_are_exact_without_request_allocator",
+          "hero_action_basis::tests::hero_basis_missing_metadata_duplicate_keys_and_oversize_fail_closed",
+          "hero_action_basis::tests::hero_basis_transfer_uses_original_cross_planner_and_never_grants_anonymous_target",
+          "hero_action_basis::tests::hero_basis_use_keeps_actual_effective_auto_merge_and_base_explicit_merge_policy",
+          "hero_ingress::tests::hero_ingress_anonymous_items_are_slot_bound_and_dynamic_metadata_waits_for_owner",
+          "hero_ingress::tests::hero_ingress_checkpoint_handoff_preserves_first_clock_without_receipt_replay",
+          "hero_ingress::tests::hero_ingress_clock_anchor_survives_owner_updates_drain_and_scene_carry",
+          "hero_ingress::tests::hero_ingress_closed_phase_rejects_older_batch_and_restore",
+          "hero_ingress::tests::hero_ingress_exact_skill_and_item_receipts_are_fifo_before_latest",
+          "hero_ingress::tests::hero_ingress_personal_bag_is_strict_and_explicitly_excludes_equipment",
+          "hero_ingress::tests::hero_ingress_raw_world_and_information_preserve_exact_wide_values",
+          "hero_ingress::tests::hero_ingress_receipt_and_byte_overflow_preserve_accepted_fifo_and_close",
+          "hero_ingress::tests::hero_ingress_scope_sequence_clock_and_retirement_high_waters_are_exact",
+          "hero_ingress::tests::hero_ingress_strict_raw_parser_rejects_duplicates_depth_bounds_and_trailing",
+          "hero_ingress::tests::hero_ingress_verified_owner_correlation_rejects_old_identity_without_poisoning_current",
+          "hero_ingress::tests::hero_ingress_verified_owner_keeps_two_exact_receipts_before_latest",
+          "hero_ingress::tests::hero_ingress_verified_owner_no_hero_clears_private_info_and_clocks",
+          "hero_ingress::tests::hero_ingress_verified_owner_preserves_wide_values_and_first_packet_clock",
+          "hero_ingress::tests::hero_ingress_verified_owner_requires_separate_entry_before_raw_cursor_advances",
+          "hero_ingress::tests::hero_ingress_verified_owner_strict_raw_shape_cannot_manufacture_a_snapshot",
+          "hero_model::tests::auto_pot_echo_uses_crystal_stats_and_switching_identity_invalidates_pending_generation",
+          "hero_model::tests::early_actor_is_applied_only_after_exact_hero_information_and_identity_match",
+          "hero_model::tests::full_bootstrap_and_live_health_are_independent_of_player_data",
+          "hero_model::tests::hero_cast_clock_reanchors_negative_elapsed_without_restarting_cooldown",
+          "hero_model::tests::hero_receipt_uses_exact_actor_epoch_keys_and_preserves_zero_zero_source_routing",
+          "hero_model::tests::item_result_receipt_marks_each_operation_but_not_later_snapshots_or_health",
+          "hero_model::tests::native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair",
+          "hero_model::tests::native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity",
+          "hero_model::tests::shared_hero_owner_keeps_complete_tooltip_carriers_and_rejects_conflicting_custody",
+          "hero_model::tests::shared_hero_owner_preserves_wide_identity_items_and_sparse_slots",
+          "hero_model::tests::shared_hero_owner_rejects_partial_identity_slots_keys_and_withdrawal_pair",
+          "hero_source_witness::tests::hero_source_witness_changes_with_config_stats_weights_slots_and_skill_definitions",
+          "hero_source_witness::tests::hero_source_witness_exact_byte_limit_and_unicode_overflow_fail_closed",
+          "hero_source_witness::tests::hero_source_witness_full_capacities_and_all_valid_skill_variants_fit",
+          "hero_source_witness::tests::hero_source_witness_health_packet_changes_planner_without_borrowing_old_display",
+          "hero_source_witness::tests::hero_source_witness_preserves_wide_signed_values_zero_uids_and_canonical_order",
+          "hero_source_witness::tests::hero_source_witness_rejects_incomplete_mismatched_and_duplicate_model_fields",
+          "hero_source_witness::tests::hero_source_witness_uses_actual_checkpoint_display_and_packet_hair",
+          "portable_hero_ui::tests::absent_presentation_cancels_drag_without_panic_and_idle_escape_passes",
+          "portable_hero_ui::tests::anonymous_and_stale_items_have_no_transfer_custody",
+          "portable_hero_ui::tests::checkpoint_from_other_hero_never_reuses_packet_hair",
+          "portable_hero_ui::tests::close_hero_inventory_removes_personal_hit_region_in_the_same_reducer_frame",
+          "portable_hero_ui::tests::escape_capture_uses_actual_private_selection_held_and_modal_state",
+          "portable_hero_ui::tests::hero_intent_encodes_host_old_key_without_native_pending",
+          "portable_hero_ui::tests::hero_reducer_real_actions_include_basis_and_window_intents_have_no_basis",
+          "portable_hero_ui::tests::hero_reopen_restores_personal_transfer_window",
+          "portable_hero_ui::tests::locked_personal_page_stays_in_first_bag_and_shrink_resets_it",
+          "portable_hero_ui::tests::modal_blocks_stage_and_pending_does_not_settle_drafts",
+          "portable_hero_ui::tests::new_source_stamp_cancels_held_action",
+          "portable_hero_ui::tests::personal_front_matches_hit_order_and_full_stage_modal_wins",
+          "portable_hero_ui::tests::rejected_and_stale_use_feedback_never_advances_cadence",
+          "portable_hero_ui::tests::secondary_pointer_does_not_consume_primary_button_or_drag"
+        ],
+        "failedNames": [],
+        "expectedPassed": 66,
+        "freshnessConservativeUpperMs": 79,
+        "stderrTail": "ng mir2-game-data v0.1.0 (C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\packages\\game-data)\n   Compiling mir2-client-bevy v0.1.0 (C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy)\nwarning: unnecessary parentheses around type\n  --> src\\crystal_ui\\skill_page_shared.rs:67:20\n   |\n67 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)\n   |                    ^                                   ^\n   |\n   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default\nhelp: remove these parentheses\n   |\n67 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)\n67 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)\n   |\n\nwarning: unnecessary parentheses around method argument\n   --> src\\portable_character_ui.rs:514:25\n    |\n514 |                         (Node {\n    |                         ^\n...\n523 |                         }),\n    |                          ^\n    |\nhelp: remove these parentheses\n    |\n514 ~                         Node {\n515 |                             position_type: PositionType::Absolute,\n...\n522 |                             ..default()\n523 ~                         },\n    |\n\nwarning: variable does not need to be mutable\n   --> src\\crystal_ui\\mail_editor_tests.rs:123:9\n    |\n123 |     let mut draft = draft(\"abcd\");\n    |         ----^^^^^\n    |         |\n    |         help: remove this `mut`\n    |\n    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default\n\nwarning: variable does not need to be mutable\n   --> src\\crystal_ui\\mail_editor_tests.rs:168:9\n    |\n168 |     let mut draft = draft(\"letter body\");\n    |         ----^^^^^\n    |         |\n    |         help: remove this `mut`\n\nwarning: variable does not need to be mutable\n   --> src\\crystal_ui\\mail_editor_tests.rs:185:9\n    |\n185 |     let mut draft = draft(&message);\n    |         ----^^^^^\n    |         |\n    |         help: remove this `mut`\n\nwarning: unused variable: `nearby`\n    --> src\\quest_ui.rs:2189:5\n     |\n2189 |     nearby: Option<Res<NearbyNpcModel>>,\n     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`\n     |\n     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default\n\nwarning: constant `TEXT` is never used\n --> src\\crystal_ui\\mail_editor.rs:8:7\n  |\n8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);\n  |       ^^^^\n  |\n  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default\n\nwarning: constant `MAIL_PARCEL_BODY_RECT` is never used\n  --> src\\crystal_ui\\mail_editor.rs:15:18\n   |\n15 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);\n   |                  ^^^^^^^^^^^^^^^^^^^^^\n\nwarning: methods `set_selecting`, `selecting`, `render`, and `render_at` are never used\n   --> src\\crystal_ui\\mail_editor.rs:429:19\n    |\n 75 | impl MailLetterEditor {\n    | --------------------- methods in this implementation\n...\n429 |     pub(crate) fn set_selecting(&mut self, selecting: bool) {\n    |                   ^^^^^^^^^^^^^\n...\n433 |     pub(crate) fn selecting(&self) -> bool {\n    |                   ^^^^^^^^^\n...\n464 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {\n    |                   ^^^^^^\n...\n468 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {\n    |                   ^^^^^^^^^\n\nwarning: function `item` is never used\n  --> src\\crystal_ui\\hero_cross_inventory.rs:44:4\n   |\n44 | fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Option<&'a ItemModel> {\n   |    ^^^^\n\nwarning: constant `QUEST_LOG_BG` is never used\n  --> src\\quest_ui.rs:78:7\n   |\n78 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);\n   |       ^^^^^^^^^^^^\n\nwarning: variants `SelectQuestFilter` and `QuestHelp` are never constructed\n    --> src\\quest_ui.rs:1196:5\n     |\n1151 | pub(crate) enum QuestUiButton {\n     |                 ------------- variants in this enum\n...\n1196 |     SelectQuestFilter {\n     |     ^^^^^^^^^^^^^^^^^\n...\n1199 |     QuestHelp,\n     |     ^^^^^^^^^\n     |\n     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis\n\nwarning: fields `map` and `big_map` are never read\n    --> src\\quest_ui.rs:1998:5\n     |\n1985 | pub(crate) struct QuestInputModels<'w> {\n     |                   ---------------- fields in this struct\n...\n1998 |     map: Option<Res<'w, MapModel>>,\n     |     ^^^\n...\n2006 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,\n     |     ^^^^^^^\n\nwarning: function `explicit_quest_dialog_button` is never used\n    --> src\\quest_ui.rs:4749:4\n     |\n4749 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `wrap_guidance_hint` is never used\n    --> src\\quest_ui.rs:5568:4\n     |\n5568 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `quest_list_message_lines` is never used\n    --> src\\quest_ui.rs:5730:4\n     |\n5730 | fn quest_list_message_lines(\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_quest_block` is never used\n    --> src\\quest_ui.rs:7683:4\n     |\n7683 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,\n     |    ^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_title_line` is never used\n    --> src\\quest_ui.rs:7875:4\n     |\n7875 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_title_line_raw` is never used\n    --> src\\quest_ui.rs:7885:4\n     |\n7885 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_body_line_raw` is never used\n    --> src\\quest_ui.rs:7899:4\n     |\n7899 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `intent_from_button` is never used\n    --> src\\quest_ui.rs:8047:4\n     |\n8047 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: method `normalize_bindings` is never used\n   --> src\\skill_binding_ui.rs:331:8\n    |\n133 | impl SkillBindingUi {\n    | ------------------- method in this implementation\n...\n331 |     fn normalize_bindings(&mut self) {\n    |        ^^^^^^^^^^^^^^^^^^\n\nwarning: `mir2-client-bevy` (lib test) generated 22 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 6 suggestions)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 33s\n     Running unittests src\\lib.rs (C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-d6c14f2ff200f181.exe)\n"
+      },
+      {
+        "id": "runtime-wasm-webgl2-shared-check02",
+        "config": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check02.config02.json",
+          "bytes": 4820,
+          "sha256": "d7fe5529883808b9853d29fb932b4eb5807cecffeef777fb21395dc0332ee7f7"
+        },
+        "policy": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check02.policy02.json",
+          "bytes": 2327,
+          "sha256": "e6b6a3fe985d1a7c9399180a80d9d9cf6387f2ea657dd913ac4607772adb91e8"
+        },
+        "source": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+          "bytes": 1507271,
+          "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+        },
+        "sourceReview": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+          "bytes": 13086,
+          "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+        },
+        "stdout": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02.stderr.log",
+          "bytes": 12479,
+          "sha256": "d01b9b9e3da931f11c6cc5af89d4bdfacef6c67408525214b467b44fdb147fb2"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02.outer.json",
+          "bytes": 467,
+          "sha256": "af6777131e41e553cc5fb679df65651ebf35baffeef18a87a170a96690f5725d"
+        },
+        "outerValue": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 176448,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 22952,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check02.config02.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "nonceRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819",
+        "nonceFiles": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\after.json",
+            "bytes": 319,
+            "sha256": "2697a1f3467e283d3061ae77110b0e74b00be5a4bd93905c68e89d3b07fa4bdb"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\before.json",
+            "bytes": 1216,
+            "sha256": "3574cdebbb9d5a286b8a7b626c69e8eabdbc53a2ddbce4767ae9fa3721fe4b26"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\probe-process.json",
+            "bytes": 442,
+            "sha256": "0fec84c2c683ea764e28709edec107f2604df3553a200634f1d68bb73dd106cb"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\probe.stderr.bin",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\probe.stdout.bin",
+            "bytes": 197,
+            "sha256": "1155ed74a31396d0011ac9ea140682a84601ded8a217457f17ff05003778de28"
+          }
+        ],
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "8b8a9899a50a4f2b86fc2f0dded07819",
+          "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check02.policy02.json",
+          "policySha": "e6b6a3fe985d1a7c9399180a80d9d9cf6387f2ea657dd913ac4607772adb91e8",
+          "args": [
+            "+1.95.0",
+            "check",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--target",
+            "wasm32-unknown-unknown",
+            "--profile",
+            "wasm-release",
+            "--no-default-features",
+            "--features",
+            "webgl2,web-quest-ui,webgl2-shared-ui",
+            "--lib"
+          ],
+          "cwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T13:23:22.1801842Z",
+            "sampleEndUtc": "2026-10-08T13:23:22.9565562Z",
+            "remainingBytes": "199290814464",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 168456,
+          "probeLaunchMs": 99.25720000000001,
+          "probeEndMs": 1115.933,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 188612,
+          "childStartedUtc": "/Date(1791465803029)/",
+          "childStartMs": 1138.5453,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791465824794)/",
+          "completionMs": 22902.919,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "passedNames": [],
+        "failedNames": [],
+        "expectedPassed": 0,
+        "freshnessConservativeUpperMs": 74,
+        "stderrTail": "  |\n651 | impl JourneyStep {\n    | ---------------- associated function in this implementation\n652 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {\n    |        ^^^^^^^^^^\n\nwarning: constant `QUEST_LOG_BG` is never used\n  --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:78:7\n   |\n78 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);\n   |       ^^^^^^^^^^^^\n\nwarning: variants `SelectQuestFilter` and `QuestHelp` are never constructed\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:1196:5\n     |\n1151 | pub(crate) enum QuestUiButton {\n     |                 ------------- variants in this enum\n...\n1196 |     SelectQuestFilter {\n     |     ^^^^^^^^^^^^^^^^^\n...\n1199 |     QuestHelp,\n     |     ^^^^^^^^^\n     |\n     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis\n\nwarning: fields `map` and `big_map` are never read\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:1998:5\n     |\n1985 | pub(crate) struct QuestInputModels<'w> {\n     |                   ---------------- fields in this struct\n...\n1998 |     map: Option<Res<'w, MapModel>>,\n     |     ^^^\n...\n2006 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,\n     |     ^^^^^^^\n\nwarning: function `explicit_quest_dialog_button` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:4749:4\n     |\n4749 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `wrap_guidance_hint` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:5568:4\n     |\n5568 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `quest_detail_lines` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:5640:4\n     |\n5640 | fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str) -> Vec<QuestDetailLine> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `quest_list_message_lines` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:5730:4\n     |\n5730 | fn quest_list_message_lines(\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_quest_block` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7683:4\n     |\n7683 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,\n     |    ^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_title_line` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7875:4\n     |\n7875 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_title_line_raw` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7885:4\n     |\n7885 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_body_line_raw` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7899:4\n     |\n7899 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `intent_from_button` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:8047:4\n     |\n8047 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: method `normalize_bindings` is never used\n   --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_binding_ui.rs:331:8\n    |\n133 | impl SkillBindingUi {\n    | ------------------- method in this implementation\n...\n331 |     fn normalize_bindings(&mut self) {\n    |        ^^^^^^^^^^^^^^^^^^\n\nwarning: `mir2-client-bevy` (lib) generated 22 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 3 suggestions)\n    Checking mir2-bevy-runtime v0.1.0 (C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\runtime)\nwarning: unused import: `HeroUiIntent`\n  --> src\\hero_ui_host.rs:11:24\n   |\n11 |         HeroUiContext, HeroUiIntent, HeroUiReadModel, HeroUiState, HeroWindows,\n   |                        ^^^^^^^^^^^^\n   |\n   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default\n\nwarning: unused import: `skill_page_shared::SkillPageAction`\n   --> src\\spells_ui_host.rs:253:13\n    |\n253 |             skill_page_shared::SkillPageAction,\n    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: unused import: `BTreeMap`\n  --> src\\lib.rs:62:24\n   |\n62 | use std::collections::{BTreeMap, HashMap, HashSet};\n   |                        ^^^^^^^^\n\nwarning: unused import: `wasm_bindgen::JsCast`\n  --> src\\lib.rs:86:5\n   |\n86 | use wasm_bindgen::JsCast;\n   |     ^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `self_camera_offset_for_applied_center` is never used\n    --> src\\lib.rs:6179:4\n     |\n6179 | fn self_camera_offset_for_applied_center(\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n     |\n     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default\n\nwarning: method `contains` is never used\n   --> src\\bag_ui_host.rs:287:8\n    |\n284 | impl BagInputRegion {\n    | ------------------- method in this implementation\n...\n287 |     fn contains(self, x: f32, y: f32) -> bool {\n    |        ^^^^^^^^\n\nwarning: `mir2-bevy-runtime` (lib) generated 6 warnings (run `cargo fix --lib -p mir2-bevy-runtime` to apply 4 suggestions)\n    Finished `wasm-release` profile [optimized] target(s) in 21.68s\n"
+      },
+      {
+        "id": "runtime-wasm-webgpu-check02",
+        "config": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check02.config02.json",
+          "bytes": 4740,
+          "sha256": "ac6ef9984b1415e76aa6446091aaa0983c18112999ed23ff37d2cd38ebb6c47a"
+        },
+        "policy": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check02.policy02.json",
+          "bytes": 2320,
+          "sha256": "87b7d9fc2e583a9030a67d96c694eac4c9ff987c3ac821a838d302f7eec3064b"
+        },
+        "source": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+          "bytes": 1507271,
+          "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+        },
+        "sourceReview": {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+          "bytes": 13086,
+          "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+        },
+        "stdout": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02.stderr.log",
+          "bytes": 12157,
+          "sha256": "ae7277079f5ef2a6dbfc97b03584850afcaed344a39ebc64b9eda13e5c450a22"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02.outer.json",
+          "bytes": 460,
+          "sha256": "4b0b84d8e45e67d899ce2aabb1de608cb4562dbb7fb5a5f5e346588771a48027"
+        },
+        "outerValue": {
+          "owner": "Root",
+          "exitCode": 0,
+          "guardPid": 181680,
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 16100,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check02.config02.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "nonceRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c",
+        "nonceFiles": [
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\after.json",
+            "bytes": 319,
+            "sha256": "f6d929f581a84ea35aa2f01d8e0862c8bd6997c1209c5dcb2592a5a82f0df78a"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\before.json",
+            "bytes": 1191,
+            "sha256": "3df0b95fa16cacfaae674e70ed079fd41e610b0972c21e79005e2e88bf859f70"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\probe-process.json",
+            "bytes": 441,
+            "sha256": "bae3ddf5ba8f6732b60c127f3d1d5201e2424d0d43a3bba89e97c3ec6c8b2bcf"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\probe.stderr.bin",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\probe.stdout.bin",
+            "bytes": 197,
+            "sha256": "9605c8931a9543ebde8f0915ba7a4c35a21058c0f3bb68cd37d7ab69ed04f1b5"
+          }
+        ],
+        "before": {
+          "schemaVersion": 1,
+          "mode": "real-cargo",
+          "nonce": "a9291cdca4ab41889390a62caac8194c",
+          "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check02.policy02.json",
+          "policySha": "87b7d9fc2e583a9030a67d96c694eac4c9ff987c3ac821a838d302f7eec3064b",
+          "args": [
+            "+1.95.0",
+            "check",
+            "--manifest-path",
+            "apps/game-client/runtime/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--jobs",
+            "1",
+            "--target",
+            "wasm32-unknown-unknown",
+            "--profile",
+            "wasm-release",
+            "--no-default-features",
+            "--features",
+            "webgpu,web-quest-ui",
+            "--lib"
+          ],
+          "cwd": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3",
+          "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+          "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+          "sample": {
+            "schemaVersion": "1",
+            "driveLetter": "C",
+            "sampleBeginUtc": "2026-10-08T13:27:46.7128614Z",
+            "sampleEndUtc": "2026-10-08T13:27:47.4460991Z",
+            "remainingBytes": "199272189952",
+            "requiredBytes": "53687091200"
+          },
+          "probePid": 173060,
+          "probeLaunchMs": 97.3835,
+          "probeEndMs": 1049.2838000000002,
+          "decision": "FORWARD",
+          "thresholdBytes": "53687091200",
+          "sampleProof": "actualGetVolumeC"
+        },
+        "after": {
+          "childPid": 176352,
+          "childStartedUtc": "/Date(1791466067513)/",
+          "childStartMs": 1072.122,
+          "completed": true,
+          "exited": true,
+          "disposed": true,
+          "exitCode": 0,
+          "exitBits": "0",
+          "completedUtc": "/Date(1791466082490)/",
+          "completionMs": 16049.1329,
+          "postChildPolicy": "B",
+          "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+        },
+        "passedNames": [],
+        "failedNames": [],
+        "expectedPassed": 0,
+        "freshnessConservativeUpperMs": 68,
+        "stderrTail": "^^^^^^^^^^\n\nwarning: constant `QUEST_LOG_BG` is never used\n  --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:78:7\n   |\n78 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);\n   |       ^^^^^^^^^^^^\n\nwarning: variants `SelectQuestFilter` and `QuestHelp` are never constructed\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:1196:5\n     |\n1151 | pub(crate) enum QuestUiButton {\n     |                 ------------- variants in this enum\n...\n1196 |     SelectQuestFilter {\n     |     ^^^^^^^^^^^^^^^^^\n...\n1199 |     QuestHelp,\n     |     ^^^^^^^^^\n     |\n     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis\n\nwarning: fields `map` and `big_map` are never read\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:1998:5\n     |\n1985 | pub(crate) struct QuestInputModels<'w> {\n     |                   ---------------- fields in this struct\n...\n1998 |     map: Option<Res<'w, MapModel>>,\n     |     ^^^\n...\n2006 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,\n     |     ^^^^^^^\n\nwarning: function `explicit_quest_dialog_button` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:4749:4\n     |\n4749 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `wrap_guidance_hint` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:5568:4\n     |\n5568 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `quest_detail_lines` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:5640:4\n     |\n5640 | fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str) -> Vec<QuestDetailLine> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `quest_list_message_lines` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:5730:4\n     |\n5730 | fn quest_list_message_lines(\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_quest_block` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7683:4\n     |\n7683 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,\n     |    ^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_title_line` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7875:4\n     |\n7875 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_title_line_raw` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7885:4\n     |\n7885 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `tracker_body_line_raw` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:7899:4\n     |\n7899 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {\n     |    ^^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `intent_from_button` is never used\n    --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs:8047:4\n     |\n8047 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {\n     |    ^^^^^^^^^^^^^^^^^^\n\nwarning: method `normalize_bindings` is never used\n   --> C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_binding_ui.rs:331:8\n    |\n133 | impl SkillBindingUi {\n    | ------------------- method in this implementation\n...\n331 |     fn normalize_bindings(&mut self) {\n    |        ^^^^^^^^^^^^^^^^^^\n\nwarning: `mir2-client-bevy` (lib) generated 22 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 3 suggestions)\n    Checking mir2-bevy-runtime v0.1.0 (C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\source44-frozen-rust02\\mir2-web3\\apps\\game-client\\runtime)\nwarning: unused import: `HeroUiIntent`\n  --> src\\hero_ui_host.rs:11:24\n   |\n11 |         HeroUiContext, HeroUiIntent, HeroUiReadModel, HeroUiState, HeroWindows,\n   |                        ^^^^^^^^^^^^\n   |\n   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default\n\nwarning: unused import: `skill_page_shared::SkillPageAction`\n   --> src\\spells_ui_host.rs:253:13\n    |\n253 |             skill_page_shared::SkillPageAction,\n    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: unused import: `BTreeMap`\n  --> src\\lib.rs:62:24\n   |\n62 | use std::collections::{BTreeMap, HashMap, HashSet};\n   |                        ^^^^^^^^\n\nwarning: unused import: `wasm_bindgen::JsCast`\n  --> src\\lib.rs:86:5\n   |\n86 | use wasm_bindgen::JsCast;\n   |     ^^^^^^^^^^^^^^^^^^^^\n\nwarning: function `self_camera_offset_for_applied_center` is never used\n    --> src\\lib.rs:6179:4\n     |\n6179 | fn self_camera_offset_for_applied_center(\n     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n     |\n     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default\n\nwarning: method `contains` is never used\n   --> src\\bag_ui_host.rs:287:8\n    |\n284 | impl BagInputRegion {\n    | ------------------- method in this implementation\n...\n287 |     fn contains(self, x: f32, y: f32) -> bool {\n    |        ^^^^^^^^\n\nwarning: struct `WebGl2SharedUiPrototype` is never constructed\n --> src\\webgl2_shared_ui.rs:8:19\n  |\n8 | pub(crate) struct WebGl2SharedUiPrototype;\n  |                   ^^^^^^^^^^^^^^^^^^^^^^^\n\nwarning: `mir2-bevy-runtime` (lib) generated 7 warnings (run `cargo fix --lib -p mir2-bevy-runtime` to apply 4 suggestions)\n    Finished `wasm-release` profile [optimized] target(s) in 14.91s\n"
+      }
+    ]
+  },
+  "web": {
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-snapshot.json",
+      "bytes": 5970623,
+      "sha256": "5089f4573b7597fbd859decf734ca4678d492272dee1d6ed4e8b39afad38b57d"
+    },
+    "review": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-review01.json",
+      "bytes": 4558,
+      "sha256": "41d28cbe37c571df4b032ce2994d921bd32e87f63b5a75203794e4e64fab8d03"
+    },
+    "preparation": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-finite-prepared03.json",
+      "bytes": 5099,
+      "sha256": "59f1e6829fb8501e1d9c71013e278a9b34dc71d8b1ef0b50ff3c248736ca7e1c"
+    },
+    "sourceCount": 17130,
+    "postCallRehashMatched": 17130,
+    "testExecutions": 185,
+    "testPass": 185,
+    "testFail": 0,
+    "testSkipped": 0,
+    "npcBuyTests": 155,
+    "npcSurfaceTests": 29,
+    "stage5ScriptTests": 1,
+    "stage5LogicalGroups": 494,
+    "stage5PriorGroups": 477,
+    "stage5NewGroups": 17,
+    "npcSurfaceNewTests": 1,
+    "typeScriptVersion": "5.9.3",
+    "typeCheckExitCode": 0,
+    "typeDiagnosticBytes": 0,
+    "actual": [
+      {
+        "id": "web-test03",
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.config03.json",
+          "bytes": 4501,
+          "sha256": "5b0f6bc7989cabdb058efb313b5de40e44ee5619f24abda04ebe4125bab856bc"
+        },
+        "source": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-snapshot.json",
+          "bytes": 5970623,
+          "sha256": "5089f4573b7597fbd859decf734ca4678d492272dee1d6ed4e8b39afad38b57d"
+        },
+        "sourceReview": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-review01.json",
+          "bytes": 4558,
+          "sha256": "41d28cbe37c571df4b032ce2994d921bd32e87f63b5a75203794e4e64fab8d03"
+        },
+        "args": [
+          "--test",
+          "--test-concurrency=1",
+          "--test-reporter=spec",
+          "scripts/test-stage5-adapters.mjs",
+          "scripts/test-bevy-npc-shop-buy.mjs",
+          "scripts/test-npc-shop-surface-integration.mjs"
+        ],
+        "stdout": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.stdout.log",
+          "bytes": 20445,
+          "sha256": "21596e30e64d482f61eb990018b6abdfe09afb835c0f1f081e2056cc6848c931"
+        },
+        "stderr": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.outer.json",
+          "bytes": 530,
+          "sha256": "923fbdd4828277057bbd1946a0dc08626d2a5084e2ba98b1fec819668c421de3"
+        },
+        "outerValue": {
+          "owner": "Root",
+          "exitCode": 0,
+          "builderPid": 188724,
+          "kind": "Source44 web-test03 original existing finite verification generation03",
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 34475,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-web-test03.config03.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "stdoutText": "✔ Source30 durable receiver and retained facade pass strict no-emit type checking (665.0684ms)\n✔ quote calls the actual runtime hook with exact full request and preserves Rust values (2.1745ms)\n✔ blocked Rust quotes retain computed amounts and never create a sending proof (6.7098ms)\n✔ response and wire shapes fail closed without rounding or transport extension (15.837ms)\n✔ caller capture must match the live snapshot before the first Rust call (0.8762ms)\n✔ returned DTO and opaque token reject mutation, forgery and a foreign dispatcher (4.2379ms)\n✔ final listener changes to every bound owner, model, raw item, wallet or layout reject the send (27.1044ms)\n✔ altered or extended mutable wire is rejected and consumes its token (9.568ms)\n✔ runtime refusal, throw, replacement and unavailable source fail at the final claim (7.7181ms)\n✔ runtime mutation during preparation or final revalidation cannot authorize a stale command (3.1035ms)\n✔ read and Rust synchronous reentry cannot claim or prepare a second command (4.7038ms)\n✔ a recursive final listener cannot reserve a second proof before the first Core flight enters (4.166ms)\n✔ spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal (6.192ms)\n✔ same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA (113.014ms)\n✔ an unclaimed old proof cannot revive after an observed model ABA (6.1838ms)\n✔ socket throw after claim retains the Core pending barrier without replaying a command (4.3529ms)\n✔ non-JSON transport values are refused rather than silently coerced or invoking user callbacks (1.9615ms)\n✔ missing raw purchase rate stays null and delegates invalidRate to Rust (1.3633ms)\n✔ actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust (52.366ms)\n✔ actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener (9.3755ms)\n✔ actual Page final listener catalogue replacement rejects even a same-template selected UID (15.9285ms)\n✔ actual Page NPC service retirement during action withdraws current source before final claim (3.8712ms)\n✔ actual Page synchronous action reentry is refused by the existing reserved Core flight (6.8852ms)\n✔ actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade (5.9245ms)\n✔ actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound (1.1622ms)\n✔ actual Page unmarked legacy final listener cannot send through changed catalogue service or owner (1.9607ms)\n✔ actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket (0.6698ms)\n✔ actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence (30.2265ms)\n✔ actual Core facade forwards all nine exact operations and retains u64 decimal precision (0.4218ms)\n✔ actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry (16.2245ms)\n✔ actual Core result validator rejects noncanonical malformed contradictory or imprecise responses (0.6427ms)\n✔ persistent document version facade survives module reevaluation without a second Core bridge (0.8249ms)\n✔ missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable (2.7572ms)\n✔ producer handoff prevents stale cleanup commands while forwarding only exact old receipts (0.256ms)\n✔ actual facade transport identities bind current open object and retain decimal socket tickets (1.2063ms)\n✔ dispatcher requires exact body and exact socket at entry and never exposes a token on the wire (4.653ms)\n✔ failed bind retires only the exact unpublished token and a later manual attempt gets a new token (3.0271ms)\n✔ ownerRevision invalidates a gesture proof but cannot change the entered Core authority (6.738ms)\n✔ player object identity is required and authority changes bind the actual selected player (2.7778ms)\n✔ two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer (8.6335ms)\n✔ actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token (7.6637ms)\n✔ actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup (10.3975ms)\n✔ actual Page enter is directly before socket send and all terminal receipts keep exact token ticket (6.3908ms)\n✔ actual Page malformed receipt result poisons the slot without replaying an already sent purchase (4.2548ms)\n✔ actual NPCResponse clause synchronously retires old preentry proof before any later rendered service (7.6276ms)\n✔ actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings (5.6266ms)\n✔ temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof (12.1181ms)\n✔ shared UI status reads only an already attached producer and cannot discover or observe a Core (0.7968ms)\n✔ shared UI status preserves canonical full-u64 data and does not manufacture receipt history (0.7834ms)\n✔ shared UI exact revision withdrawal rejects malformed and stale strings before availability (0.7458ms)\n✔ shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK (9.5061ms)\n✔ shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease (3.3206ms)\n✔ shared UI availability refusal throw and mismatched post-status cannot certify withdrawal (2.8501ms)\n✔ final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter (4.9341ms)\n✔ last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof (2.8093ms)\n✔ capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged (2.4781ms)\n✔ evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response (7.4024ms)\n✔ inventory readiness retires stale projection stages and owner replacements synchronously (0.2009ms)\n✔ canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority (6.7494ms)\n✔ old unsafe expiry uses actual source while no-source null is retained through the NPC transport (16.0499ms)\n✔ expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority (3.4753ms)\n✔ trusted socket connection is observed before complete authority availability and reserve (1.4721ms)\n✔ public connection forgery and malformed trusted epoch fields never reach the Core bridge (0.3299ms)\n✔ only entered flushed and unknown results may retain a canonical old authority revision (0.323ms)\n✔ connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve (0.7187ms)\n✔ preparation read and planner socket changes cannot publish a stale or replacement-socket proof (3.5728ms)\n✔ postproof planner Core allows and final callback socket changes produce zero entry (7.3304ms)\n✔ same socket close reopen HMR and dual producers retain every unresolved phase (22.9653ms)\n✔ new actual socket requires fresh complete observation and a new explicit manual token (4.4691ms)\n✔ returning to a known older socket refuses without any Core operation on the new flight (2.2009ms)\n✔ connection and Core model callbacks cannot admit an old full model on the current socket (2.0282ms)\n✔ final beforeEntry sees same-socket last-read source changes before any Core entry (8.2905ms)\n✔ same-content old72 holder is poisoned and rejected without returning its pre-connection facade (1.106ms)\n✔ matching connection facade contract reuses the immutable holder and socket epoch across HMR (0.2969ms)\n✔ Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price (15.4285ms)\n✔ Pearl actual Page final claim enters the existing Core immediately before exact four-key send (25.4883ms)\n✔ Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods (28.0963ms)\n✔ Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID (83.5557ms)\n✔ Pearl actual Page missing or invalid wallet never admits a free host quote (33.3513ms)\n✔ Pearl actual Page wallet catalog and service ABA invalidate exact captured source (75.6227ms)\n✔ Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration (188.7448ms)\n✔ Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade (78.7206ms)\n✔ Pearl actual Page action and final Core entry reentrancy cannot publish a second flight (62.6684ms)\n✔ Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement (163.0874ms)\n✔ Pearl actual Page own parcel hero and storage reservations reject before Core entry (78.9262ms)\n✔ Pearl actual Page retires catalog while retaining personal wallet on service close (1.0127ms)\n✔ Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount (9.6243ms)\n✔ Pearl full snapshot wallet observation remains inside completed owner inventory projection (27.8294ms)\n✔ Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry (538.8746ms)\n✔ Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0 (7.6207ms)\n✔ Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows (13.3164ms)\n✔ Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row (2.1177ms)\n✔ Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read (321.0192ms)\n✔ Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof (76.8034ms)\n✔ Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation (189.8881ms)\n✔ receipt_facade_document_remount_retains_one_host_and_original_operation (2.3485ms)\n✔ receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host (0.4451ms)\n✔ receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket (0.5311ms)\n✔ receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket (0.4028ms)\n✔ receipt_facade_operation_accessor_is_rejected_without_invocation (0.3437ms)\n✔ receipt_facade_nested_nondata_and_lossy_values_never_enter_abi (0.6268ms)\n✔ receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition (0.5618ms)\n✔ receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection (0.4234ms)\n✔ receipt_facade_bound_bridge_method_survives_old_instance_method_replacement (0.2634ms)\n✔ receipt_facade_invalid_output_poison_keeps_original_host_unavailable (0.3326ms)\n✔ receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer (0.1324ms)\n✔ receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector (0.32ms)\n✔ Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings (0.3537ms)\n✔ Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow (0.4574ms)\n✔ Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields (7.5606ms)\n✔ Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view (1.5713ms)\n✔ Source30 paired Begin applies frozen full source before exact complete witness (13.6463ms)\n✔ Source30 partial application unsafe original integer and omitted bundle never issue complete witness (5.1727ms)\n✔ Source30 actual gold trade explicit gesture Quote Reserve Enter sends once (3.4868ms)\n✔ Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once (3.4454ms)\n✔ Source30 actual gold used explicit gesture Quote Reserve Enter sends once (3.335ms)\n✔ Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once (3.6468ms)\n✔ Source30 quote rejects changed source currency request and stale physical owner before reserve (12.3238ms)\n✔ Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only (4.6565ms)\n✔ Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry (28.3688ms)\n✔ Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody (13.9066ms)\n✔ Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody (3.0902ms)\n✔ Source30 dispatcher malformed extra fields or accessor decisions cannot send (0.5128ms)\n✔ Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays (1.6246ms)\n✔ Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors (4.6948ms)\n✔ Source30 terminal frame applies its entire same revision economic source before complete witness (5.9195ms)\n✔ Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase (2.9623ms)\n✔ Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance (7.6451ms)\n✔ Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves (0.5856ms)\n✔ Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes (0.3711ms)\n✔ Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict (0.8454ms)\n✔ Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness (30.2009ms)\n✔ Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry (21.5279ms)\n✔ Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority (2.8824ms)\n✔ Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments (2.0232ms)\n✔ Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values (3.0472ms)\n✔ Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model (2.0708ms)\n✔ Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves (5.9374ms)\n✔ Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads (9.9408ms)\n✔ Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable (20.0662ms)\n✔ Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase (205.0629ms)\n✔ Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source (94.7063ms)\n✔ Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter (4.6669ms)\n✔ Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops (23.6043ms)\n✔ Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown (30.0686ms)\n✔ Source31 packet refresh final fences reject reentrant connection change or service withdrawal (17.5691ms)\n✔ Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application (16.3307ms)\n✔ Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody (326.3628ms)\n✔ Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter (52.9306ms)\n✔ Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws (21.5166ms)\n✔ Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder (53.5478ms)\n✔ Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement (49.6029ms)\n✔ Source31 exact integer consumers pass bounded strict no-emit type checking (1123.6848ms)\n✔ Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding (12.293ms)\n✔ Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates (5.296ms)\n✔ actual combat NPC channel holds only the current opaque token and leaves other channels intact (2.3157ms)\n✔ actual combat channel rejects unknown labels and retires old-owner NPC hold before publishing (0.5019ms)\n✔ actual Page read model carries full player raw inventory and readonly canonical Core without observing in final checks (391.7829ms)\n✔ actual Page shared Buy uses common selected quantity and claims UI then exact Core body immediately before socket (257.8488ms)\n✔ actual Page final synchronous listener rejects changed service raw inventory owner layout status and socket before entry (2639.4244ms)\n✔ actual Page nonBuy two-phase local actions retire exact preentry before claim and never send a wire (2458.5233ms)\n✔ actual Page Close and Sell defer retirement before source or compatibility tab mutation (892.0295ms)\n✔ actual Page entered socket exception reports Unknown plus exact unentered cleanup without inventing an ACK (470.7503ms)\n✔ actual final Page checkpoint rejects deferred UI withdraw or stop after all Core callbacks despite unchanged status (742.0738ms)\n✔ actual Page hook and Shell props carry the same host without acquiring Bag ownership (435.4062ms)\n✔ actual shared Page denies naked legacy mixed DTO and stale current status before reservation (3010.9685ms)\n✔ actual Shell arming blocks synchronously before pointer context and clears keyboard direction combat intent (96.9613ms)\n✔ actual Shell routes shop origin with an exact combat hold and consumes world origin without a shop hold (149.0933ms)\n✔ actual Shell rejects wrong canvas invalid pointer and a competing panel without leaking to legacy gameplay (442.9709ms)\n✔ actual Shell old nonce terminal cannot clear the new same-pointer lease or its combat hold (70.3527ms)\n✔ actual Shell refused RPC cleans its own lease but synchronous replacement cannot be canceled by the old finally (152.3378ms)\n✔ actual gamepad and touch props evaluate arming active and synchronous blocker without relying on a React update (9.6616ms)\n✔ actual gamepad and touch render props use pure Hero and parity blockers without invoking their live methods (10.825ms)\n✔ actual mobile menu close feedback always cleans up while opening remains blocked by the current NPC host (8.4926ms)\n✔ actual Shell refused current Up sends one exact cancel and the next manual Down is admitted (73.5498ms)\n✔ actual Shell failed old terminal cannot cancel a synchronous new Down quarantine or new scene state (148.761ms)\n✔ actual compatibility Buy final Core callback refuses synchronous shared arming or changed closed socket before entry (2119.4712ms)\n✔ actual Page retires inventory availability before log-only gain, merge and extended item patch handlers (4422.4108ms)\n✔ actual Page restores only a successful full current-owner snapshot and refuses reentrant invalidation (2494.6186ms)\n✔ actual Page full snapshot and every Native inventory invalidator revoke Web availability at ingress (412.0702ms)\n✔ NPC-only bag projection accepts attested cross-grid aliases and validates listed identity without weakening ordinary Bag (0.8388ms)\n✔ a successful nested full snapshot cannot authorize an older outer inventory during synchronous publication (278.3013ms)\n✔ actual Page collected mail barrier needs same physical receiver and a strictly later valid full snapshot (303.062ms)\n✔ actual ordinary unqualified snapshot delegates readiness while stale physical owners stay blocked (1614.9839ms)\nstage5 adapter tests passed (494 groups)\n✔ scripts\\test-stage5-adapters.mjs (2852.2883ms)\nℹ tests 185\nℹ suites 0\nℹ pass 185\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 34408.8903\n",
+        "stderrText": ""
+      },
+      {
+        "id": "tsc03",
+        "config": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.config03.json",
+          "bytes": 5039,
+          "sha256": "2e3d8b1df45c4fbe603a2fce98fe8ebf0a93559bba26e5a8d253211aa12aee24"
+        },
+        "source": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-snapshot.json",
+          "bytes": 5970623,
+          "sha256": "5089f4573b7597fbd859decf734ca4678d492272dee1d6ed4e8b39afad38b57d"
+        },
+        "sourceReview": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-review01.json",
+          "bytes": 4558,
+          "sha256": "41d28cbe37c571df4b032ce2994d921bd32e87f63b5a75203794e4e64fab8d03"
+        },
+        "args": [
+          "node_modules/typescript/bin/tsc",
+          "--noEmit",
+          "--incremental",
+          "false",
+          "--pretty",
+          "false"
+        ],
+        "stdout": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "outer": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.outer.json",
+          "bytes": 520,
+          "sha256": "d6522043707c3096160161bda20530588481f778a5cdc5a7a3eda3c0afc2df42"
+        },
+        "outerValue": {
+          "owner": "Root",
+          "exitCode": 0,
+          "builderPid": 181736,
+          "kind": "Source44 tsc03 original existing finite verification generation03",
+          "exited": true,
+          "disposed": true,
+          "elapsedMs": 22584,
+          "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-tsc03.config03.json",
+          "uiOperated": false,
+          "runtimeLaunched": false,
+          "networkUsed": false,
+          "productionBuildAccepted": false,
+          "candidateAccepted": false,
+          "goalComplete": false
+        },
+        "stdoutText": "",
+        "stderrText": ""
+      }
+    ]
+  },
+  "originalGuard": {
+    "realActualGetVolumeC": true,
+    "minimumActualRemainingBytes": 199272189952,
+    "thresholdBytes": 53687091200,
+    "maximumConservativeFreshnessMs": 79,
+    "freshnessThresholdMs": 2000,
+    "probeTimeoutMs": 15000,
+    "finalCargoCallsSerial": 4,
+    "finalPolicyBAllCompletedExitedDisposed": true,
+    "enforcedDeadlineClaim": false
+  },
+  "history": {
+    "originalRust01Failure": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust01-historical-failure01.json",
+      "bytes": 52860,
+      "sha256": "0a9a35053a3de9358186d83344f377cd976abd2c0c940c4aff4acf10001776fa"
+    },
+    "web01Failure": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web01-historical-failure01.json",
+      "bytes": 36546,
+      "sha256": "fb1a2ed6270be7a193b0fcbba898c6ecdfbb9f327a1252f456ceab239ba21c57"
+    },
+    "web02Failure": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web02-historical-failure01.json",
+      "bytes": 27509,
+      "sha256": "63186c613fdc7b18cedabe2a271a84287da838b99113ec0f339aa83f15dc2da3"
+    },
+    "priorForeignPreflightDrift": [
+      {
+        "relativePath": "apps/simulation/src/config.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+          "bytes": 300126,
+          "sha256": "55a4e14811e04d96131f1eef3f679be77ee422f6944dd25ea0e0704374c033a1",
+          "relativePath": "apps/simulation/src/config.rs"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+          "bytes": 300129,
+          "sha256": "f9f7ca7fbb54d01f0edb29f9e1cb02ae3de4219448660c3ffed0c5853477e894",
+          "relativePath": "apps/simulation/src/config.rs"
+        }
+      },
+      {
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction_tests.rs",
+          "bytes": 40988,
+          "sha256": "693b73b83b7d1d5ceee7a8e23b898383b39e579902bfabdc7de53c2eb66206d7",
+          "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction_tests.rs",
+          "bytes": 41045,
+          "sha256": "1ddfc16001f1516011809ba1ac583c092f9db5932ebc1fb575c269077581915e",
+          "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs"
+        }
+      },
+      {
+        "relativePath": "apps/simulation/src/runtime/production_tests.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\production_tests.rs",
+          "bytes": 27046,
+          "sha256": "3af4b6f5c074a4ba74004f6eadbd2f1becbffe6490b2a1e8e7a6e675ef3da960",
+          "relativePath": "apps/simulation/src/runtime/production_tests.rs"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\production_tests.rs",
+          "bytes": 30083,
+          "sha256": "7071b84ec558a2f31c48455d144cf350a4dda03a658a954e9c5ce1b342800ae5",
+          "relativePath": "apps/simulation/src/runtime/production_tests.rs"
+        }
+      },
+      {
+        "relativePath": "apps/simulation/src/runtime/production.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\production.rs",
+          "bytes": 32402,
+          "sha256": "8fd92d5629d9ad0a879fcef739e03ee6ce6a08c2aed3de8ffec6024d72aef3dd",
+          "relativePath": "apps/simulation/src/runtime/production.rs"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\production.rs",
+          "bytes": 32768,
+          "sha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a",
+          "relativePath": "apps/simulation/src/runtime/production.rs"
+        }
+      },
+      {
+        "relativePath": "apps/simulation/src/runtime/item_uid_issuance.rs",
+        "before": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\item_uid_issuance.rs",
+          "bytes": 6994,
+          "sha256": "f8eba8f22e28eb3c3624b44b366f192e5c0fc1bebfffbf54d22ddb72eff7ef04",
+          "relativePath": "apps/simulation/src/runtime/item_uid_issuance.rs"
+        },
+        "after": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\item_uid_issuance.rs",
+          "bytes": 8418,
+          "sha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4",
+          "relativePath": "apps/simulation/src/runtime/item_uid_issuance.rs"
+        }
+      }
+    ],
+    "qualification": "First Rust new test fixture wrongly conflated spawned=false and spawned=true; corrected only new fixture and expectations. Web prior fixtures missed new real Hero closure dependencies; repaired existing original harness without weakening business assertions. Original outputs preserved."
+  },
+  "rawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-hero-source44-raw-evidence01.json",
+    "bytes": 714122,
+    "sha256": "ff2e39a19e0dad80690cb53949b7d6c8bc9a4c1340be830b0e259f26e7ce9e62"
+  },
+  "source43Publication": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-hero-source43-publication01.json",
+    "bytes": 14435,
+    "sha256": "bb56518c0a497bf15ad48b2b031df0b5b174915c8be2c514bd5303ba9905da88"
+  },
+  "matrix": {
+    "pin": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.json",
+      "bytes": 3228933,
+      "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+    },
+    "shared": 103,
+    "legacy": 206,
+    "common": 8,
+    "total": 317,
+    "sharedClassificationPercent": 32.49211356466877,
+    "implementationRecordCoveragePercent": 97.47634069400631,
+    "overallPercentage": null,
+    "candidate100": false,
+    "goalStatus": "active",
+    "allRowsPlayerVerification": "not-run"
+  },
+  "package": {
+    "lastFullWeb": "Source25 Next08/Thin08",
+    "doesNotInclude": "Source26 through Source44",
+    "newFullPackageAccepted": false
+  },
+  "tsconfigPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "remaining": [
+    "Default shared entry and remaining compatibility takeover/fallback",
+    "Nine Quest action chains",
+    "Source matching renderer/Core/EXE/Web complete packages through original unchanged validation",
+    "Actual login, quest/battle, save and relogin; mobile hardware and human frontend acceptance"
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "backendParityChanged": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "qualification": "Finite pure regression and static compile acceptance only. Host fake ports in finite tests do not prove live Ready. No whole current backend/checkout or playable package claim."
+}

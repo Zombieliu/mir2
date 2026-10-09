@@ -1,0 +1,66 @@
+{
+  "owner": "Root",
+  "kind": "Source33 initial configuration rejected by immutable CargoGuard before forwarding",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-abi-default-test01.config.json",
+    "bytes": 4201,
+    "sha256": "b2a1c2f298e1394fbea25cf201bb37a907f53f8390174f1e21e52b3533905e83"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-abi-default-test01.policy.json",
+    "bytes": 2348,
+    "sha256": "acba16b8bf50c9dbf6a0dbf3253a2f08502f42bbb3d3c2b249bdcc0a56587256"
+  },
+  "review": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-source01-review.json",
+    "bytes": 3290,
+    "sha256": "8f6e9f929973b761f48df8606d304cdfbc96be66948c0fe225dab0fcd277b453"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-source01-snapshot.json",
+    "bytes": 274421,
+    "sha256": "275bed7bbeaffce9ab15195564e30f066386f34f1b265ab3ba4228c18909ec87"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-abi-default-test01.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-abi-default-test01.stderr.log",
+    "bytes": 31,
+    "sha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-abi-default-test01.outer.json",
+    "bytes": 456,
+    "sha256": "4dac0fe1ab56798b8313aeff21d8ab731d6f8570bd053a943860a4d540a3095c"
+  },
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 90,
+    "guardPid": 144060,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 74,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-abi-default-test01.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "receiptDirectoryEntries": [],
+  "cause": "Root sourceReview used a path string for sourceSnapshot; original Guard requires pin object with sha256. Correct binding only; immutable Guard/policy gates unchanged.",
+  "cargoForwarded": false,
+  "volumeSampleClaimed": false,
+  "testsPassed": null,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

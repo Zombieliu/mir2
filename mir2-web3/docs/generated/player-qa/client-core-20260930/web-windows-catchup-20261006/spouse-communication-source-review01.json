@@ -1,0 +1,107 @@
+{
+  "schema": "w0-spouse-communication-source-review01",
+  "generatedAt": "2026-10-06T11:06:06.9918643Z",
+  "reviewType": "independent read-only source review",
+  "parentCommit": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+  "fixedNativeBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "reviewConstraints": {
+    "productCodeExecuted": false,
+    "readOnly": true,
+    "uiHttpOrProcessUsed": false,
+    "buildExecuted": false,
+    "testsExecuted": false
+  },
+  "frozenWebFiles": [
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "bytes": 888773,
+      "sha256": "e6c5d598f2f5f2cf436691586281fb442caff65f939aed5df6fcbd52ae613b7a",
+      "parentBlobAtF1cf963": "33c4999b6d64cf91c7f219cd94fd98d5eef573a5",
+      "diffAgainstParent": "reviewed; only spouse mail/whisper source capture, Bonds controls/prop forwarding, and finite source-harness coverage in scope"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-bonds-window.tsx",
+      "bytes": 26224,
+      "sha256": "904ccaaea9addc9cab506bd6e79715b85913b0afb22829efbb514da693c16782",
+      "parentBlobAtF1cf963": "35db40788ddcf4b9e3576364b41e6301f27aee4f",
+      "diffAgainstParent": "reviewed; only spouse mail/whisper source capture, Bonds controls/prop forwarding, and finite source-harness coverage in scope"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+      "bytes": 19659,
+      "sha256": "f5aaa5419748b84c94c7f011286062d2d81d5c1635a1a6b7f9f2d46774d57c1b",
+      "parentBlobAtF1cf963": "73a0487f3da50e675f9248dd1df1b6c33f7cb8de",
+      "diffAgainstParent": "reviewed; only spouse mail/whisper source capture, Bonds controls/prop forwarding, and finite source-harness coverage in scope"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-storage-page-gate.mjs",
+      "bytes": 98730,
+      "sha256": "a808517c7b08cf999c2ee5b019a4f5c92f4638c5334da6799b24a8c38a00614a",
+      "parentBlobAtF1cf963": "020e4c9221e55919beab72dacc2fd78e3ced6e1f",
+      "diffAgainstParent": "reviewed; only spouse mail/whisper source capture, Bonds controls/prop forwarding, and finite source-harness coverage in scope"
+    }
+  ],
+  "nativeBaselineEvidence": {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+    "blobSha": "8bbe90aa33761676417e3901ca00810fb6257623",
+    "mailBehavior": "If relationship.name is nonempty, BondAction::Mail returns ComposeMail(name); no send action occurs at this layer.",
+    "whisperBehavior": "Requires nonempty relationship.name and map_name, then returns Whisper(\":)\"); no packet send occurs at this layer.",
+    "lines": {
+      "whisper": "229-236",
+      "mail": "223-228"
+    }
+  },
+  "reviewedCurrentEntrypoints": [
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "lines": "9317-9340",
+      "details": "Capture requires current SocialReplyOwner, open Bonds lease/window, nonempty displayed spouse name, and equality with live adapted relationship. Callback rechecks connection/session/player physical owner, scene revision, map, window epoch/open state, current spouse name/map, and complete relationship projection. Mail opens local named draft only; Whisper sets local chat input to :) only."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "lines": "10197-10201",
+      "details": "openMailWindow optional spouse source is revalidated before opening and again before composing; calls without spouseSource preserve existing friend/local compose path."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "lines": "2639-2646",
+      "details": "Bonds lease epoch increments on open/close transitions, invalidating captured callbacks after close/reopen."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "lines": "17193,17902",
+      "details": "Only capture when Bonds visible; captured callbacks passed to Bonds prop object."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-bonds-window.tsx",
+      "lines": "71-79,120-127,254-277",
+      "details": "Optional callbacks; Mail enabled only when married and callback exists; Whisper additionally requires partnerMap. Native buttons use type=button, disabled, 44px minimum height, and explicit aria-label."
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+      "lines": "260-267,500-509",
+      "details": "Both props are included in the Bonds prop type and forwarded directly to BondsWindow."
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-storage-page-gate.mjs",
+      "lines": "1166-1325",
+      "details": "Five finite source-harness/AST cases cover local draft/no-send, exact :) text, absent map/unmarried/stale projection, owner/scene/visibility/window epoch invalidation, recheck after open, button enabled/disabled derivation and exact callback forwarding. This is source-harness evidence, not UI/browser proof."
+    }
+  ],
+  "findings": [],
+  "findingCount": 0,
+  "confirmedP0": 0,
+  "confirmedP1": 0,
+  "reviewConclusion": "No confirmed P0/P1 findings in the frozen spouse communication changes. The source preserves the Native preconditions and payload text, keeps effects local until the user later sends through existing UI, guards retained callbacks against stale owner/window/relationship state, and preserves friend openMailWindow behavior. Static finite tests are not UI or gameplay acceptance.",
+  "reactReview": {
+    "limitations": "Static component and AST review only; no accessibility tree, keyboard, screen reader or visual browser inspection.",
+    "skill": "vercel:react-best-practices",
+    "considerations": [
+      "Availability is derived during render from current relationship props and callback presence; no effect-maintained derived state.",
+      "Button handlers invoke the supplied callbacks only; no nested component declarations or async waterfalls introduced.",
+      "Native buttons have explicit type, disabled state and aria-label; visible text is Mail/Whisper."
+    ]
+  },
+  "diffStat": [],
+  "excludedConclusion": "No claim of UI acceptance, runtime/player validation, or full project parity."
+}

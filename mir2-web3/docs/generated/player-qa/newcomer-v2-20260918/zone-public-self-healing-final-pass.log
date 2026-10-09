@@ -1,0 +1,12 @@
+
+running 7 tests
+test runtime::zone::runtime::journey_events::journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_owner_epoch ... ok
+test runtime::zone::runtime::journey_events::journey_healing_records_accepted_full_hp_cast_but_rejected_cast_is_quiet ... ok
+test runtime::zone::runtime::journey_events::journey_lightning_and_firewall_receipts_wait_for_positive_effects_and_respect_gate ... ok
+test runtime::zone::runtime::journey_events::journey_physical_receipts_follow_committed_native_skill_hits ... ok
+test runtime::zone::runtime::journey_events::journey_poison_receipt_requires_material_effect_commit ... ok
+test runtime::zone::runtime::journey_events::journey_public_healing_with_explicit_self_id_uses_self_route_at_full_and_partial_hp ... ok
+test runtime::zone::runtime::journey_events::journey_summon_receipts_require_real_spawn_and_owned_skeleton_damage ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1849 filtered out; finished in 0.11s
+

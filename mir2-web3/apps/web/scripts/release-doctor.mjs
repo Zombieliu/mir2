@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -49,10 +50,9 @@ const REQUIRED_ASSETS = [
   ...BEVY_ENTITY_ATLAS_PATHS,
   MAP_ATLAS_MANIFEST_PATH,
 ];
-const BEVY_RUNTIME_PATHS = [
-  `/bevy-runtime/v/${BEVY_RUNTIME_VERSION}/pkg-webgpu/mir2_bevy_runtime.js`,
-  `/bevy-runtime/v/${BEVY_RUNTIME_VERSION}/pkg-webgl2/mir2_bevy_runtime.js`,
-];
+const BEVY_RUNTIME_PATHS = verifyBevyRuntimeVersion(BEVY_RUNTIME_MANIFEST).files.map((entry) =>
+  `/bevy-runtime/v/${BEVY_RUNTIME_VERSION}/${entry.path.replace(/^public\/bevy-runtime\//, "")}`,
+);
 
 const args = parseArgs(process.argv.slice(2));
 const manifestPath = path.resolve(args.manifest ?? process.env.MIR2_REMOTE_ASSET_RELEASE_MANIFEST ?? DEFAULT_MANIFEST);

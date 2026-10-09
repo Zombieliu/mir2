@@ -1,6 +1,12 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Deserializer, Serialize};
 
+/// Shared request namespace for player and Hero C.MagicKey operations.
+pub fn next_skill_key_request_id() -> u64 {
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+    NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+}
+
 /// Maximum number of learned skills and per-skill authoritative metadata kept
 /// from one host payload.  The two collections are kept in lock-step so a
 /// truncated skill list can never retain metadata for skills that were
@@ -15,10 +21,35 @@ pub const MAX_LEARNED_SKILLS: usize = 512;
 /// ignored by older producers.
 #[derive(Debug, Clone, Default, Resource, Serialize)]
 pub struct SkillModel {
+    pub authority: SkillModelAuthority,
+    pub skill_key_ack: Option<SkillKeyAck>,
     pub skills: Vec<SkillEntry>,
     #[serde(default)]
     pub bindings: Vec<SkillBinding>,
 }
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillModelAuthority {
+    pub session_epoch: u64,
+    pub snapshot_serial: u64,
+    pub player_object_id: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillKeyAck {
+    pub request_id: u64,
+    pub spell: String,
+    pub key: u8,
+    pub old_key: u8,
+    pub accepted: bool,
+}
+
+/// Complete processed skill snapshots, retained separately from the latest
+/// model so same-frame coalescing cannot detach an ACK from its server keys.
+#[derive(Debug, Default, Resource)]
+pub struct SkillModelReceipts(pub std::collections::VecDeque<SkillModel>);
 
 impl<'de> Deserialize<'de> for SkillModel {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -55,6 +86,12 @@ impl<'de> Deserialize<'de> for SkillModel {
                 .find(|binding| binding.skill_id == skill.id);
             bindings.push(SkillBinding {
                 skill_id: skill.id,
+                icon: explicit.and_then(|b| b.icon).or(raw_skill.icon),
+                experience: explicit.and_then(|b| b.experience).or(raw_skill.experience),
+                need1: explicit.and_then(|b| b.need1).or(raw_skill.need1),
+                need2: explicit.and_then(|b| b.need2).or(raw_skill.need2),
+                need3: explicit.and_then(|b| b.need3).or(raw_skill.need3),
+
                 spell: explicit
                     .and_then(|binding| binding.spell.clone())
                     .or(raw_skill.spell),
@@ -70,6 +107,9 @@ impl<'de> Deserialize<'de> for SkillModel {
                 offensive: explicit
                     .and_then(|binding| binding.offensive)
                     .or(raw_skill.offensive),
+                cast_sequence: explicit
+                    .map(|binding| binding.cast_sequence)
+                    .unwrap_or(raw_skill.cast_sequence),
                 cooldown_remaining_ticks: explicit
                     .map(|binding| binding.cooldown_remaining_ticks)
                     .unwrap_or(raw_skill.cooldown_remaining_ticks),
@@ -87,7 +127,12 @@ impl<'de> Deserialize<'de> for SkillModel {
         }
 
         debug_assert_eq!(skills.len(), bindings.len());
-        Ok(Self { skills, bindings })
+        Ok(Self {
+            skills,
+            bindings,
+            authority: raw.authority,
+            skill_key_ack: raw.skill_key_ack,
+        })
     }
 }
 
@@ -95,6 +140,17 @@ impl<'de> Deserialize<'de> for SkillModel {
 #[serde(rename_all = "camelCase")]
 pub struct SkillBinding {
     pub skill_id: u32,
+    #[serde(default)]
+    pub icon: Option<u8>,
+    #[serde(default)]
+    pub experience: Option<u16>,
+    #[serde(default)]
+    pub need1: Option<u16>,
+    #[serde(default)]
+    pub need2: Option<u16>,
+    #[serde(default)]
+    pub need3: Option<u16>,
+
     #[serde(default)]
     pub spell: Option<String>,
     #[serde(default)]
@@ -112,6 +168,8 @@ pub struct SkillBinding {
     #[serde(default)]
     pub cooldown_remaining_ticks: u32,
     #[serde(default)]
+    pub cast_sequence: u64,
+    #[serde(default)]
     pub mp_cost: Option<u32>,
     #[serde(default)]
     pub delay_ms: Option<u32>,
@@ -123,6 +181,12 @@ impl Default for SkillBinding {
     fn default() -> Self {
         Self {
             skill_id: 0,
+            icon: None,
+            experience: None,
+            need1: None,
+            need2: None,
+            need3: None,
+
             spell: None,
             hotkey: None,
             // A default value must not assign active-cast semantics. Every
@@ -131,6 +195,7 @@ impl Default for SkillBinding {
             can_use: None,
             offensive: None,
             cooldown_remaining_ticks: 0,
+            cast_sequence: 0,
             mp_cost: None,
             delay_ms: None,
             cast_time_ms: None,
@@ -153,6 +218,10 @@ pub struct SkillCastSelection {
 
 #[derive(Debug, Deserialize)]
 struct RawSkillModel {
+    #[serde(default, alias = "skillKeyAck")]
+    skill_key_ack: Option<SkillKeyAck>,
+    #[serde(default)]
+    authority: SkillModelAuthority,
     #[serde(default)]
     skills: Vec<RawSkillEntry>,
     #[serde(default)]
@@ -170,12 +239,23 @@ struct RawSkillEntry {
     level: u8,
     #[serde(default)]
     key: Option<String>,
-    #[serde(default, alias = "delayMs", alias = "delay_ms", alias = "cooldownMs")]
+    #[serde(default, alias = "delayMs", alias = "delay_ms", alias = "cooldown_ms")]
     cooldown_ms: u32,
     #[serde(default, alias = "mp_cost")]
     mp_cost: Option<u32>,
     #[serde(default)]
     spell: Option<String>,
+    #[serde(default)]
+    icon: Option<u8>,
+    #[serde(default)]
+    experience: Option<u16>,
+    #[serde(default)]
+    need1: Option<u16>,
+    #[serde(default)]
+    need2: Option<u16>,
+    #[serde(default)]
+    need3: Option<u16>,
+
     #[serde(default)]
     hotkey: Option<i32>,
     #[serde(default, alias = "cast_kind")]
@@ -186,30 +266,51 @@ struct RawSkillEntry {
     offensive: Option<bool>,
     #[serde(default, alias = "cooldown_remaining_ticks")]
     cooldown_remaining_ticks: u32,
+    #[serde(default, alias = "cast_sequence")]
+    cast_sequence: u64,
     #[serde(default, alias = "cast_time_ms")]
     cast_time_ms: Option<i64>,
 }
 
 impl SkillModel {
-    /// Resolve the deterministic F1-F8 mapping.
+    /// Compare learned identity/definition rows without rewinding later packet state.
+    /// Numeric hotkeys, levels/XP, MP/use state and cast timing may advance independently.
+    /// The caller still owns the session/player/serial lifetime check.
+    pub fn has_same_learned_descriptors(&self, expected: &Self) -> bool {
+        self.skills.len() == expected.skills.len()
+            && self.bindings.len() == self.skills.len()
+            && expected.bindings.len() == expected.skills.len()
+            && self.skills.iter().zip(&self.bindings)
+                .zip(expected.skills.iter().zip(&expected.bindings))
+                .all(|((actual, binding), (source, source_binding))| {
+                    actual.id == source.id && actual.name == source.name && actual.key == source.key
+                        && binding.skill_id == actual.id && source_binding.skill_id == source.id
+                        && binding.spell == source_binding.spell
+                        && binding.icon == source_binding.icon
+                        && binding.need1 == source_binding.need1
+                        && binding.need2 == source_binding.need2
+                        && binding.need3 == source_binding.need3
+                        && binding.cast_kind == source_binding.cast_kind
+                        && binding.offensive == source_binding.offensive
+                })
+    }
+    /// Resolve the sixteen player skill slots.
     ///
     /// Valid explicit hotkeys win first. If two learned entries claim the
     /// same slot, the first entry in authoritative learned order wins and the
     /// later conflicting entry stays unassigned; it is not silently moved to
-    /// another slot. Entries without a valid hotkey then fill the remaining
-    /// slots in learned order, so an explicitly bound skill can never be
-    /// selected a second time by fallback.
+    /// another slot. Missing and zero keys remain unassigned, matching
+    /// Crystal's explicit ClientMagic.Key lookup.
     pub fn skill_for_shortcut(&self, slot: u8) -> Option<&SkillEntry> {
-        if !(1..=8).contains(&slot) {
+        if !(1..=16).contains(&slot) {
             return None;
         }
         let slots = self.shortcut_skill_indices();
         slots[usize::from(slot - 1)].and_then(|index| self.skills.get(index))
     }
 
-    fn shortcut_skill_indices(&self) -> [Option<usize>; 8] {
-        let mut slots = [None; 8];
-        let mut explicitly_assigned = vec![false; self.skills.len()];
+    fn shortcut_skill_indices(&self) -> [Option<usize>; 16] {
+        let mut slots = [None; 16];
 
         // First pass: claim each valid explicit slot in learned order. This
         // makes duplicate-hotkey precedence stable and independent of map
@@ -221,20 +322,7 @@ impl SkillModel {
             };
             if slots[slot].is_none() {
                 slots[slot] = Some(index);
-                explicitly_assigned[index] = true;
             }
-        }
-
-        // Second pass: only entries without an explicit hotkey may fill holes.
-        // Duplicate and invalid explicit values are not unbound skills.
-        for (index, skill) in self.skills.iter().enumerate() {
-            if explicitly_assigned[index] || self.binding_for(skill.id).hotkey.is_some() {
-                continue;
-            }
-            let Some(empty_slot) = slots.iter().position(|slot| slot.is_none()) else {
-                break;
-            };
-            slots[empty_slot] = Some(index);
         }
 
         slots
@@ -281,7 +369,7 @@ fn non_empty(value: Option<String>) -> Option<String> {
 
 fn valid_shortcut_index(hotkey: Option<i32>) -> Option<usize> {
     hotkey.and_then(|hotkey| {
-        if (1..=8).contains(&hotkey) {
+        if (1..=16).contains(&hotkey) {
             Some((hotkey - 1) as usize)
         } else {
             None
@@ -312,6 +400,54 @@ pub struct SkillEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn original_skill_experience_is_optional_and_round_trips_without_fabrication() {
+        let model: SkillModel = serde_json::from_value(serde_json::json!({"skills":[
+            {"id":1,"experience":0,"need1":100,"need2":200,"need3":300},
+            {"id":2}
+        ]}))
+        .unwrap();
+        assert_eq!(model.bindings[0].experience, Some(0));
+        assert_eq!(
+            (
+                model.bindings[0].need1,
+                model.bindings[0].need2,
+                model.bindings[0].need3
+            ),
+            (Some(100), Some(200), Some(300))
+        );
+        assert_eq!(model.bindings[1].experience, None);
+        assert_eq!(model.bindings[1].need1, None);
+        let round: SkillModel =
+            serde_json::from_value(serde_json::to_value(&model).unwrap()).unwrap();
+        let progress = |model: &SkillModel| {
+            model
+                .bindings
+                .iter()
+                .map(|b| (b.skill_id, b.experience, b.need1, b.need2, b.need3))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(progress(&round), progress(&model));
+    }
+
+    #[test]
+    fn explicit_experience_sidecar_overrides_only_fields_it_supplies() {
+        let model: SkillModel = serde_json::from_value(serde_json::json!({
+            "skills":[{"id":1,"experience":55,"need1":100,"need2":200,"need3":300}],
+            "bindings":[{"skillId":1,"experience":0,"need2":999}]
+        }))
+        .unwrap();
+        assert_eq!(model.bindings[0].experience, Some(0));
+        assert_eq!(
+            (
+                model.bindings[0].need1,
+                model.bindings[0].need2,
+                model.bindings[0].need3
+            ),
+            (Some(100), Some(999), Some(300))
+        );
+    }
 
     #[test]
     fn rich_server_skill_json_is_backward_compatible_and_selectable() {
@@ -345,7 +481,7 @@ mod tests {
     }
 
     #[test]
-    fn missing_hotkeys_fall_back_to_learned_order_without_inventing_a_skill() {
+    fn missing_hotkeys_remain_unassigned() {
         let model: SkillModel = serde_json::from_value(serde_json::json!({
             "skills": [{
                 "id": 1,
@@ -355,9 +491,7 @@ mod tests {
             }]
         }))
         .expect("legacy skill model");
-        let selected = model.selection_for_shortcut(1).expect("learned skill");
-        assert_eq!(selected.spell, None);
-        assert_eq!(selected.cast_kind.as_deref(), Some("target"));
+        assert!(model.selection_for_shortcut(1).is_none());
         assert!(model.selection_for_shortcut(2).is_none());
         assert!(model.selection_for_shortcut(9).is_none());
     }
@@ -400,7 +534,7 @@ mod tests {
     }
 
     #[test]
-    fn explicit_hotkeys_are_resolved_before_unbound_learned_order() {
+    fn only_explicit_server_hotkeys_are_resolved() {
         let model: SkillModel = serde_json::from_value(serde_json::json!({
             "skills": [
                 {"id": 10, "spell": "ThirdSlot", "castKind": "target", "hotkey": 3},
@@ -412,9 +546,9 @@ mod tests {
         .expect("ordered shortcut fixture");
 
         assert_eq!(model.skill_for_shortcut(1).map(|skill| skill.id), Some(12));
-        assert_eq!(model.skill_for_shortcut(2).map(|skill| skill.id), Some(11));
+        assert_eq!(model.skill_for_shortcut(2).map(|skill| skill.id), None);
         assert_eq!(model.skill_for_shortcut(3).map(|skill| skill.id), Some(10));
-        assert_eq!(model.skill_for_shortcut(4).map(|skill| skill.id), Some(13));
+        assert_eq!(model.skill_for_shortcut(4).map(|skill| skill.id), None);
     }
 
     #[test]
@@ -428,7 +562,7 @@ mod tests {
         }))
         .expect("duplicate shortcut fixture");
 
-        assert_eq!(model.skill_for_shortcut(1).map(|skill| skill.id), Some(22));
+        assert_eq!(model.skill_for_shortcut(1).map(|skill| skill.id), None);
         assert_eq!(model.skill_for_shortcut(2).map(|skill| skill.id), Some(20));
         for slot in 3_u8..=8_u8 {
             assert_ne!(
@@ -443,17 +577,17 @@ mod tests {
         let model: SkillModel = serde_json::from_value(serde_json::json!({
             "skills": [
                 {"id": 1, "spell": "InvalidZero", "castKind": "target", "hotkey": 0},
-                {"id": 2, "spell": "InvalidNine", "castKind": "target", "hotkey": 9},
+                {"id": 2, "spell": "InvalidSeventeen", "castKind": "target", "hotkey": 17},
                 {"id": 3, "spell": "MissingHotkey", "castKind": "target"}
             ]
         }))
         .expect("invalid shortcut fixture");
 
-        assert_eq!(model.skill_for_shortcut(1).map(|skill| skill.id), Some(3));
+        assert_eq!(model.skill_for_shortcut(1).map(|skill| skill.id), None);
         assert!(model.skill_for_shortcut(2).is_none());
         assert!(model.skill_for_shortcut(3).is_none());
         assert_eq!(model.binding_for(1).hotkey, Some(0));
-        assert_eq!(model.binding_for(2).hotkey, Some(9));
+        assert_eq!(model.binding_for(2).hotkey, Some(17));
     }
 
     #[test]
@@ -495,7 +629,7 @@ mod tests {
             let mut skill = serde_json::json!({
                 "id": 1,
                 "name": "FireBall",
-                "spell": "FireBall"
+                "spell": "FireBall", "hotkey":1
             });
             if let Some(cast_kind) = cast_kind {
                 skill["castKind"] = serde_json::json!(cast_kind);
@@ -613,4 +747,59 @@ mod tests {
             .iter()
             .all(|binding| binding.skill_id < MAX_LEARNED_SKILLS as u32));
     }
+
+    #[test]
+    fn source36_skill_descriptors_reject_same_count_identity_and_binding_splices() {
+        let expected: SkillModel = serde_json::from_value(serde_json::json!({"skills":[
+            {"id":1,"name":"FireBall","key":"fireball","spell":"FireBall","icon":0,
+             "need1":0,"need2":200,"need3":300,"castKind":"target","offensive":true},
+            {"id":2,"name":"Healing","key":"healing","spell":"Healing","icon":1,
+             "need1":100,"need2":200,"need3":300,"castKind":"target","offensive":false}
+        ]})).unwrap();
+        assert!(expected.has_same_learned_descriptors(&expected));
+        for field in ["id","name","key","spell","icon","need1","need2","need3","castKind","offensive",
+            "row-order","binding-order","missing-binding","extra-binding","wrong-binding-id"] {
+            let mut actual = expected.clone();
+            match field {
+                "id" => actual.skills[0].id=8,
+                "name" => actual.skills[0].name="different learned name".into(),
+                "key" => actual.skills[0].key=Some("other-string-key".into()),
+                "spell" => actual.bindings[0].spell=Some("Lightning".into()),
+                "icon" => actual.bindings[0].icon=Some(9),
+                "need1" => actual.bindings[0].need1=None,
+                "need2" => actual.bindings[0].need2=Some(0),
+                "need3" => actual.bindings[0].need3=Some(0),
+                "castKind" => actual.bindings[0].cast_kind=Some("self".into()),
+                "offensive" => actual.bindings[0].offensive=Some(false),
+                "row-order" => { actual.skills.reverse();actual.bindings.reverse(); }
+                "binding-order" => actual.bindings.reverse(),
+                "missing-binding" => { actual.bindings.pop(); }
+                "extra-binding" => actual.bindings.push(actual.bindings[0].clone()),
+                "wrong-binding-id" => actual.bindings[0].skill_id=2,
+                _ => unreachable!(),
+            }
+            assert!(!actual.has_same_learned_descriptors(&expected),"{field}");
+        }
+    }
+
+    #[test]
+    fn source36_skill_descriptors_preserve_later_runtime_key_and_clock_fields() {
+        let expected: SkillModel = serde_json::from_value(serde_json::json!({"skills":[
+            {"id":1,"name":"FireBall","key":"fireball","spell":"FireBall","icon":0,
+             "need1":0,"need2":200,"need3":300,"castKind":"target","offensive":true,
+             "level":1,"experience":5,"mpCost":5,"canUse":true,"hotkey":1,"delayMs":1000}
+        ]})).unwrap();
+        let mut live=expected.clone();
+        live.skills[0].level=2;live.skills[0].mp_cost=7;live.skills[0].cooldown_ms=2200;
+        let binding=&mut live.bindings[0];
+        binding.experience=Some(42);binding.hotkey=Some(16);binding.mp_cost=Some(7);
+        binding.can_use=Some(false);binding.cooldown_remaining_ticks=9;binding.cast_sequence=17;
+        binding.delay_ms=Some(2200);binding.cast_time_ms=Some(101);
+        live.authority.snapshot_serial=12;
+        live.skill_key_ack=Some(SkillKeyAck{request_id:73,spell:"FireBall".into(),key:16,old_key:1,accepted:true});
+        assert!(live.has_same_learned_descriptors(&expected));
+        assert_eq!(live.binding_for(1).hotkey,Some(16));
+        assert_eq!(live.selection_for_shortcut(16).unwrap().mp_cost,Some(7));
+    }
+
 }

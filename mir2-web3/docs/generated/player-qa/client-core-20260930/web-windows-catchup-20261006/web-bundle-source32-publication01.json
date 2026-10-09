@@ -1,0 +1,171 @@
+{
+  "owner": "Root",
+  "kind": "Source32 actual scoped commit push and independent remote verification",
+  "createdAtUtc": "2026-10-07T21:00:11.241Z",
+  "parentCommit": "06da30011e4a98599bfee568e652f6d0839e894d",
+  "commit": "1c786cf494a7dd9394b3c5de65a9c6b7944491d5",
+  "branch": "codex/windows-player-journey",
+  "actualCommitSucceeded": true,
+  "actualPushSucceeded": true,
+  "remoteHeadVerified": true,
+  "scopeFiles": 22,
+  "productFiles": 2,
+  "progressDocs": 8,
+  "qaFiles": 12,
+  "initialIgnoredQaAddFailureRetained": true,
+  "ignoredQaExplicitPathsOnlyForceAdded": true,
+  "userTsconfigExcluded": true,
+  "remainingTrackedChange": "apps/web/tsconfig.json",
+  "finiteResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-finite-result01.json",
+    "bytes": 331952,
+    "sha256": "e40d3976e5bdc70d76530791ccb3ea59371f7c20e14641c6d47414532b5c384a"
+  },
+  "independentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-independent-review01.json",
+    "bytes": 3079,
+    "sha256": "4eae469984a432cee8f22132719e2ddbefddbbb99e47528dff11229071ee32f2"
+  },
+  "coreBuild": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust04-core-build-result01.json",
+    "bytes": 17748,
+    "sha256": "39b934c6c74d184f6d5e5696c8db4a01bad562d0691c75d1eed5820113bc880b"
+  },
+  "rawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-raw-evidence01.json",
+    "bytes": 1350740,
+    "sha256": "34c4dd52c4d4c4075339073516bbf5b252549ec3752058bcd5d1c0c740fc406c"
+  },
+  "nextStructure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-next-structure01.json",
+    "bytes": 3448,
+    "sha256": "205928b229675d5a4091a2ffa47e00b75380c7e5b6943cf01656de66719b7f74"
+  },
+  "evidence": {
+    "scope": [
+      "apps/game-client/client-wire/src/lib.rs",
+      "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+      "docs/AGENT-ORCHESTRATION.md",
+      "docs/AGENT-TASK-QUEUE.md",
+      "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "docs/BACKEND-1TO1-PROGRESS.md",
+      "docs/CRYSTAL-SERVER-PARITY.md",
+      "docs/FRONTEND-1TO1-GAPS.md",
+      "docs/PLAYER-QA-PLAYTHROUGH.md",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-finite-result01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-core-build-result01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-initial-build-result01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-intermediate-build-result01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust03-finite-result01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-abi-test01-failure.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-next-structure01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-snapshot.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-review.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-publication01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-independent-review01.json"
+    ],
+    "initialAdd": {
+      "chunk_id": "532bde",
+      "wall_time_seconds": 0.2699499,
+      "exit_code": 1,
+      "original_token_count": 122,
+      "output": "warning: in the working copy of 'mir2-web3/docs/BACKEND-1TO1-PROGRESS.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'mir2-web3/docs/CRYSTAL-SERVER-PARITY.md', CRLF will be replaced by LF the next time Git touches it\nThe following paths are ignored by one of your .gitignore files:\nmir2-web3/docs/generated/player-qa\nhint: Use -f if you really want to add them.\nhint: Disable this message with \"git config set advice.addIgnoredFile false\"\n"
+    },
+    "ignoreCheck": {
+      "chunk_id": "50bfec",
+      "wall_time_seconds": 0.1324692,
+      "exit_code": 0,
+      "original_token_count": 42,
+      "output": "mir2-web3/.gitignore:11:docs/generated/player-qa/\tdocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json\n"
+    },
+    "qaAdd": {
+      "chunk_id": "8fa9c2",
+      "wall_time_seconds": 0.2118879,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "stagedNames": {
+      "chunk_id": "14dfea",
+      "wall_time_seconds": 0.1243548,
+      "exit_code": 0,
+      "original_token_count": 455,
+      "output": "apps/game-client/client-wire/src/lib.rs\napps/game-client/platform-web/src/npc_purchase_receipt.rs\ndocs/AGENT-ORCHESTRATION.md\ndocs/AGENT-TASK-QUEUE.md\ndocs/BACKEND-1TO1-PROGRESS.md\ndocs/CRYSTAL-1TO1-ROADMAP.md\ndocs/CRYSTAL-SERVER-PARITY.md\ndocs/FRONTEND-1TO1-GAPS.md\ndocs/PLAYER-QA-PLAYTHROUGH.md\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-publication01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-abi-test01-failure.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-finite-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-independent-review01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-initial-build-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-intermediate-build-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-next-structure01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust03-finite-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-core-build-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-review.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-snapshot.json\n"
+    },
+    "cachedCheck": {
+      "chunk_id": "460ba5",
+      "wall_time_seconds": 0.1455795,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "commit": {
+      "chunk_id": "3844ab",
+      "wall_time_seconds": 0.3407897,
+      "exit_code": 0,
+      "original_token_count": 490,
+      "output": "[codex/windows-player-journey 1c786cf494] Reduce purchase codec size while preserving strict wire semantics\n 22 files changed, 16039 insertions(+), 24 deletions(-)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-abi-test01-failure.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-independent-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-initial-build-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-intermediate-build-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-next-structure01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust03-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-core-build-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-review.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-snapshot.json\n"
+    },
+    "head": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "5a1661",
+        "wall_time_seconds": 0.1210164,
+        "exit_code": 0,
+        "original_token_count": 11,
+        "output": "1c786cf494a7dd9394b3c5de65a9c6b7944491d5\n"
+      }
+    },
+    "status": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "823ea2",
+        "wall_time_seconds": 0.1715913,
+        "exit_code": 0,
+        "original_token_count": 7,
+        "output": " M apps/web/tsconfig.json\n"
+      }
+    },
+    "parentAndFiles": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "c3cec7",
+        "wall_time_seconds": 0.1148615,
+        "exit_code": 0,
+        "original_token_count": 465,
+        "output": "06da30011e4a98599bfee568e652f6d0839e894d\n\napps/game-client/client-wire/src/lib.rs\napps/game-client/platform-web/src/npc_purchase_receipt.rs\ndocs/AGENT-ORCHESTRATION.md\ndocs/AGENT-TASK-QUEUE.md\ndocs/BACKEND-1TO1-PROGRESS.md\ndocs/CRYSTAL-1TO1-ROADMAP.md\ndocs/CRYSTAL-SERVER-PARITY.md\ndocs/FRONTEND-1TO1-GAPS.md\ndocs/PLAYER-QA-PLAYTHROUGH.md\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-publication01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-abi-test01-failure.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-finite-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-independent-review01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-initial-build-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-intermediate-build-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-next-structure01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust03-finite-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-core-build-result01.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-review.json\ndocs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-snapshot.json\n"
+      }
+    },
+    "pushInitial": {
+      "chunk_id": "e3d603",
+      "wall_time_seconds": 10.00737,
+      "session_id": 13635,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "pushFinal": {
+      "chunk_id": "36d954",
+      "wall_time_seconds": 0.0000072,
+      "exit_code": 0,
+      "original_token_count": 25,
+      "output": "To github.com:Zombieliu/mir2.git\n   06da30011e..1c786cf494  HEAD -> codex/windows-player-journey\n"
+    },
+    "remoteVerify": {
+      "chunk_id": "83e514",
+      "wall_time_seconds": 3.971552,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "1c786cf494a7dd9394b3c5de65a9c6b7944491d5\trefs/heads/codex/windows-player-journey\n"
+    }
+  },
+  "networkUsedForGitOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalStatus": "active"
+}

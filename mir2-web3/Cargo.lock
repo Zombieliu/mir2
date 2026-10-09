@@ -4759,6 +4759,7 @@ dependencies = [
  "hmac 0.13.0",
  "jsonwebtoken",
  "keyring",
+ "mir2-client-wire",
  "mir2-game-data",
  "mir2-protocol",
  "mir2-simulation",
@@ -4780,6 +4781,7 @@ dependencies = [
  "tar",
  "time",
  "tokio",
+ "tokio-rustls",
  "tokio-tungstenite",
  "tracing",
  "tracing-subscriber",
@@ -4787,9 +4789,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-client-core"
+version = "0.1.0"
+
+[[package]]
+name = "mir2-client-wire"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "mir2-protocol"
 version = "0.1.0"
 dependencies = [
+ "flate2",
  "serde",
 ]
 
@@ -4818,6 +4833,7 @@ name = "mir2-ui-core"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "mir2-client-core",
  "serde",
  "serde_json",
 ]

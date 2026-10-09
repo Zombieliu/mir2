@@ -6,6 +6,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { computeBevyRuntimeVersion, verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
+import { prepareImmutableBevyRuntimeBundle } from "./lib/immutable-bevy-runtime-bundle.mjs";
+import { optimizeRendererReleaseWasm, resolveRendererWasmOptConfig, validateRendererReleasePackage, formatRendererOptimizationError } from "./lib/renderer-wasm-opt.mjs";
 
 const profiles = {
   dev: { cargoProfileDir: "debug", cargoFlags: [] },
@@ -28,17 +31,33 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
 const runtimeDir = path.resolve(webRoot, "..", "game-client", "runtime");
 const pkgParentDir = path.resolve(webRoot, "public", "bevy-runtime");
+// Candidate capability is explicit in each complete versioned package.
+const questUiFeature = process.env.MIR2_BEVY_QUEST_UI === "1" ? ",web-quest-ui" : "";
+const uiAbiVersion = questUiFeature ? 1 : 0;
+// The compatibility GL2 package keeps pure item queries without the Bevy UI tree.
+const itemTooltipFeature = questUiFeature ? ",web-item-tooltip" : "";
 const runtimePackages = [
   {
+    id: "webgpu",
     backend: "webgpu",
     packageDirName: "pkg-webgpu",
-    cargoFeatureFlags: ["--no-default-features", "--features", "webgpu"],
+    uiAbiVersion,
+    cargoFeatureFlags: ["--no-default-features", "--features", `webgpu${questUiFeature}`],
   },
   {
+    id: "webgl2",
     backend: "webgl2",
     packageDirName: "pkg-webgl2",
-    cargoFeatureFlags: ["--no-default-features", "--features", "webgl2"],
+    uiAbiVersion: 0,
+    cargoFeatureFlags: ["--no-default-features", "--features", `webgl2${itemTooltipFeature}`],
   },
+  ...(questUiFeature ? [{
+    id: "webgl2-shared",
+    backend: "webgl2",
+    packageDirName: "pkg-webgl2-shared",
+    uiAbiVersion: 1,
+    cargoFeatureFlags: ["--no-default-features", "--features", "webgl2,web-quest-ui,webgl2-shared-ui"],
+  }] : []),
 ];
 const runtimeVersionPath = path.resolve(webRoot, "lib", "generated", "bevy_runtime_version.json");
 const buildNonce = `${process.pid}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
@@ -134,39 +153,29 @@ function buildRuntimeFromSource() {
 
 function usePrebuiltRuntime() {
   const fetchScript = path.join(scriptDir, "fetch-prebuilt-bevy-runtime.mjs");
-  const fetchReason = prebuiltRuntimeReady() ? "verifying" : "fetching";
-  console.log(`[bevy-runtime] ${fetchReason} the pinned prebuilt packages with ${fetchScript}`);
+  console.log(`[bevy-runtime] verifying or fetching the pinned prebuilt packages with ${fetchScript}`);
   runChecked(process.execPath, [fetchScript], { cwd: webRoot, label: "verify or fetch pinned prebuilt runtime" });
-  ensurePrebuiltRuntime();
-  fs.mkdirSync(publishLayout.stagingParentDir, { recursive: true });
-  const manifest = writeRuntimeVersionManifest({
+  const manifest = validateRuntimeBundle({
     sourcePkgParentDir: pkgParentDir,
-    outputPath: publishLayout.stagedManifestPath,
+    manifestPath: runtimeVersionPath,
     publishedPkgParentDir: pkgParentDir,
     manifestRootDir: webRoot,
   });
-  validateRuntimeBundle({
-    sourcePkgParentDir: pkgParentDir,
-    manifestPath: publishLayout.stagedManifestPath,
-    publishedPkgParentDir: pkgParentDir,
-    manifestRootDir: webRoot,
-  });
-  publishManifestAtomically(
-    publishLayout.stagedManifestPath,
-    runtimeVersionPath,
-    publishLayout.manifestTempPath,
-  );
+  const releasesParentDir = ensureImmutableReleaseParent(pkgParentDir);
+  prepareImmutableBevyRuntimeBundle({ sourcePkgParentDir: pkgParentDir, manifest, releasesParentDir, nonce: buildNonce });
+  // Preserve the pinned metadata and immutable URL. Local feature env vars
+  // cannot re-label downloaded bytes as a newly compiled capability.
   console.log(`[bevy-runtime] version=${manifest.version}`);
   console.log(`[bevy-runtime] using prebuilt packages at ${pkgParentDir}`);
 }
 
 function buildRuntimePackage(runtimePackage, stagedPkgParentDir) {
   const packageDir = path.join(stagedPkgParentDir, runtimePackage.packageDirName);
-  const targetDir = cargoTargetDirForBackend(cargoTargetRootDir, runtimePackage.backend);
+  const targetDir = cargoTargetDirForBackend(cargoTargetRootDir, runtimePackage.id);
   const wasmFile = cargoWasmArtifactPath(targetDir, profile);
   const cargoBuildEnv = buildCargoEnv(profile, targetDir);
 
-  console.log(`[bevy-runtime] backend=${runtimePackage.backend}`);
+  console.log(`[bevy-runtime] package=${runtimePackage.id} backend=${runtimePackage.backend}`);
   console.log(`[bevy-runtime] backend-target=${targetDir}`);
   console.log(`[bevy-runtime] backend-wasm=${wasmFile}`);
   if (process.platform === "win32") {
@@ -179,6 +188,7 @@ function buildRuntimePackage(runtimePackage, stagedPkgParentDir) {
     cargoBin,
     [
       "build",
+      "--locked",
       "--target",
       "wasm32-unknown-unknown",
       ...profiles[profile].cargoFlags,
@@ -205,6 +215,9 @@ function buildRuntimePackage(runtimePackage, stagedPkgParentDir) {
       packageDir,
       "--out-name",
       "mir2_bevy_runtime",
+      // Rust's debuginfo stripping leaves wasm-bindgen's demangled function
+      // names. Keep those in dev; release downloads do not need this section.
+      ...(profile === "release" ? ["--remove-name-section"] : []),
       wasmFile,
     ],
     {
@@ -215,6 +228,22 @@ function buildRuntimePackage(runtimePackage, stagedPkgParentDir) {
       validateWasmPath: path.join(packageDir, "mir2_bevy_runtime_bg.wasm"),
     },
   );
+  if (profile === "release" && questUiFeature) {
+    const optimization = optimizeRendererReleaseWasm({
+      wasmPath: path.join(packageDir, "mir2_bevy_runtime_bg.wasm"),
+      jsPath: path.join(packageDir, "mir2_bevy_runtime.js"),
+      stagingRoot: stagedPkgParentDir,
+      label: runtimePackage.id,
+      toolConfig: resolveRendererWasmOptConfig(process.env),
+    });
+    console.log(`[bevy-runtime] renderer-opt=${JSON.stringify({ packageId: runtimePackage.id, ...optimization })}`);
+  }
+  if (profile === "release") {
+    const module = new WebAssembly.Module(fs.readFileSync(path.join(packageDir, "mir2_bevy_runtime_bg.wasm")));
+    if (WebAssembly.Module.customSections(module, "name").length !== 0) {
+      fail(`Generated ${runtimePackage.backend} release WASM still contains debugging names`);
+    }
+  }
 }
 
 function runtimeOutputFiles(packageDir) {
@@ -245,18 +274,21 @@ function createRuntimeVersionManifest(records) {
     };
   });
 
-  const combined = crypto.createHash("sha256");
-  for (const file of files) {
-    combined.update(file.path);
-    combined.update("\0");
-    combined.update(file.sha256);
-    combined.update("\0");
-  }
-
-  return {
-    version: `bevy-${combined.digest("hex").slice(0, 16)}`,
+  const manifest = {
+    schemaVersion: 2,
+    version: "",
+    packages: runtimePackages.map((entry) => ({
+      id: entry.id,
+      backend: entry.backend,
+      packageDir: entry.packageDirName,
+      questUiAbiVersion: entry.uiAbiVersion,
+      bagUiAbiVersion: entry.uiAbiVersion,
+      primarySharedUiCompiled: entry.id === "webgl2-shared",
+    })),
     files,
   };
+  manifest.version = computeBevyRuntimeVersion(manifest);
+  return manifest;
 }
 
 function writeRuntimeVersionManifest({
@@ -278,16 +310,6 @@ function validateRuntimeBundle({
   publishedPkgParentDir,
   manifestRootDir,
 }) {
-  const records = runtimeArtifactRecords(sourcePkgParentDir, publishedPkgParentDir, manifestRootDir);
-  for (const record of records) {
-    if (!isNonEmptyFile(record.sourcePath)) {
-      fail(`Generated ${record.backend} runtime file is missing or empty: ${record.sourcePath}`);
-    }
-    if (record.sourcePath.endsWith(".wasm")) {
-      validateGeneratedWasm(record.sourcePath, record.backend);
-    }
-  }
-
   if (!isNonEmptyFile(manifestPath)) {
     fail(`Generated runtime version manifest is missing or empty: ${manifestPath}`);
   }
@@ -299,11 +321,26 @@ function validateRuntimeBundle({
     fail(`Generated runtime version manifest is invalid JSON: ${manifestPath}\n${errorMessage(error)}`);
   }
 
-  const expectedManifest = createRuntimeVersionManifest(records);
-  if (JSON.stringify(actualManifest) !== JSON.stringify(expectedManifest)) {
-    fail(`Generated runtime version manifest does not match the staged runtime files: ${manifestPath}`);
+  const normalized = verifyBevyRuntimeVersion(actualManifest, manifestPath);
+  for (const record of normalized.files) {
+    const relative = record.path.replace(/^public\/bevy-runtime\//, "");
+    const sourcePath = path.join(sourcePkgParentDir, ...relative.split("/"));
+    if (!isNonEmptyFile(sourcePath)) fail(`Generated runtime file is missing or empty: ${sourcePath}`);
+    const hash = crypto.createHash("sha256").update(fs.readFileSync(sourcePath)).digest("hex");
+    if (hash !== record.sha256) fail(`Generated runtime version manifest does not match the staged runtime files: ${manifestPath}`);
+    if (sourcePath.endsWith(".wasm")) validateGeneratedWasm(sourcePath, relative);
   }
 
+  if (profile === "release") {
+    for (const runtimePackage of normalized.packages) {
+      const packageDir = path.join(sourcePkgParentDir, runtimePackage.packageDir);
+      validateRendererReleasePackage({
+        wasmPath: path.join(packageDir, "mir2_bevy_runtime_bg.wasm"),
+        jsPath: path.join(packageDir, "mir2_bevy_runtime.js"),
+        label: runtimePackage.id,
+      });
+    }
+  }
   console.log(`[bevy-runtime] validated version=${actualManifest.version}`);
   return actualManifest;
 }
@@ -320,19 +357,6 @@ function validateGeneratedWasm(wasmPath, backend) {
   }
 }
 
-function ensurePrebuiltRuntime() {
-  const records = runtimeArtifactRecords(pkgParentDir, pkgParentDir, webRoot);
-  const missing = records.map(({ sourcePath }) => sourcePath).filter((filePath) => !isNonEmptyFile(filePath));
-  if (missing.length > 0) {
-    fail(`MIR2_USE_PREBUILT_BEVY_RUNTIME=1 but required files are missing: ${missing.join(", ")}`);
-  }
-}
-
-function prebuiltRuntimeReady() {
-  return runtimeArtifactRecords(pkgParentDir, pkgParentDir, webRoot)
-    .every(({ sourcePath }) => isNonEmptyFile(sourcePath));
-}
-
 function resolveCargoTargetRoot(root, env) {
   const configuredRoot = env.MIR2_BEVY_CARGO_TARGET_ROOT || env.CARGO_TARGET_DIR;
   const targetBase = configuredRoot ? path.resolve(root, configuredRoot) : path.join(root, "target");
@@ -340,7 +364,7 @@ function resolveCargoTargetRoot(root, env) {
 }
 
 function cargoTargetDirForBackend(targetRoot, backend) {
-  if (!runtimePackages.some((runtimePackage) => runtimePackage.backend === backend)) {
+  if (!runtimePackages.some((runtimePackage) => runtimePackage.id === backend)) {
     fail(`Unsupported Bevy runtime backend target: ${backend}`);
   }
   return path.join(targetRoot, backend);
@@ -526,6 +550,47 @@ function createPublishLayout(finalPkgParentDir, finalManifestPath, nonce) {
   };
 }
 
+function ensureImmutableReleaseParent(packageParentDir) {
+  const publicRoot = path.resolve(path.dirname(packageParentDir));
+  const root = path.parse(publicRoot).root;
+  let cursor = root;
+  for (const segment of ["", ...path.relative(root, publicRoot).split(path.sep).filter(Boolean)]) {
+    if (segment) cursor = path.join(cursor, segment);
+    const stat = fs.lstatSync(cursor);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) fail("Runtime public root must contain only normal directories");
+  }
+  const releasesParentDir = path.join(publicRoot, "bevy-runtime-releases");
+  try {
+    const stat = fs.lstatSync(releasesParentDir);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) fail("Runtime releases root must be a normal directory");
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+    fs.mkdirSync(releasesParentDir);
+  }
+  return releasesParentDir;
+}
+
+function preparePublicationVersions(layout) {
+  const releasesParentDir = ensureImmutableReleaseParent(layout.finalPkgParentDir);
+  // Preserve a valid old publication before swapping the flat directory. A
+  // missing/incomplete previous checkout has no bytes eligible for this URL.
+  if (fs.existsSync(layout.finalPkgParentDir) && isNonEmptyFile(layout.finalManifestPath)) {
+    let oldManifest = null;
+    try {
+      oldManifest = validateRuntimeBundle({ sourcePkgParentDir: layout.finalPkgParentDir, manifestPath: layout.finalManifestPath });
+    } catch (error) {
+      console.warn("[bevy-runtime] previous flat bundle is not valid; no version directory seeded: " + errorMessage(error));
+    }
+    if (oldManifest) prepareImmutableBevyRuntimeBundle({
+      sourcePkgParentDir: layout.finalPkgParentDir, manifest: oldManifest, releasesParentDir, nonce: layout.nonce + "-old",
+    });
+  }
+  const candidate = validateRuntimeBundle({ sourcePkgParentDir: layout.stagedPkgParentDir, manifestPath: layout.stagedManifestPath });
+  return prepareImmutableBevyRuntimeBundle({
+    sourcePkgParentDir: layout.stagedPkgParentDir, manifest: candidate, releasesParentDir, nonce: layout.nonce,
+  });
+}
+
 function publishStagedArtifacts(layout, hooks = {}) {
   if (!fs.statSync(layout.stagedPkgParentDir).isDirectory()) {
     fail(`Staged runtime directory is missing: ${layout.stagedPkgParentDir}`);
@@ -534,6 +599,8 @@ function publishStagedArtifacts(layout, hooks = {}) {
     fail(`Staged runtime manifest is missing: ${layout.stagedManifestPath}`);
   }
 
+  const immutableVersionDirectory = preparePublicationVersions(layout);
+  hooks.afterVersionPrepared?.(immutableVersionDirectory);
   fs.mkdirSync(layout.backupParentDir, { recursive: true });
   const state = {
     version: 1,
@@ -1066,6 +1133,8 @@ function selfCheckPublication(tempRoot) {
     manifestRootDir: fakeWebRoot,
   });
 
+  const oldManifest = JSON.parse(fs.readFileSync(finalManifestPath, "utf8"));
+  const oldVersionDirectory = path.join(fakeWebRoot, "public", "bevy-runtime-releases", oldManifest.version);
   const rollbackLayout = createPublishLayout(finalPackageDir, finalManifestPath, "self-check-rollback");
   writeFakeRuntimeBundle(rollbackLayout.stagedPkgParentDir, "new-rollback");
   writeRuntimeVersionManifest({
@@ -1083,7 +1152,14 @@ function selfCheckPublication(tempRoot) {
   expectSelfCheckFailure(
     () =>
       publishStagedArtifacts(rollbackLayout, {
+        afterVersionPrepared: (versionDirectory) => {
+          assertSelfCheck(readFakeRuntimeMarker(versionDirectory) === "new-rollback", "candidate version was not prepared before the flat swap");
+          assertSelfCheck(readFakeRuntimeMarker(oldVersionDirectory) === "old", "old immutable bytes were not preserved");
+        },
         beforeManifestPublish: () => {
+          assertSelfCheck(readFakeRuntimeMarker(finalPackageDir) === "new-rollback", "flat swap did not occur");
+          assertSelfCheck(readFakeRuntimeMarker(oldVersionDirectory) === "old", "old URL now points to new bytes");
+          assertSelfCheck(JSON.parse(fs.readFileSync(finalManifestPath, "utf8")).version === oldManifest.version, "old pointer changed before manifest publish");
           throw new Error("intentional self-check publish failure");
         },
       }),
@@ -1113,6 +1189,10 @@ function selfCheckPublication(tempRoot) {
   });
   publishStagedArtifacts(successLayout);
   assertSelfCheck(readFakeRuntimeMarker(finalPackageDir) === "new-success", "validated package was not published");
+  assertSelfCheck(readFakeRuntimeMarker(oldVersionDirectory) === "old", "successful publication modified old immutable bytes");
+  const newManifest = JSON.parse(fs.readFileSync(finalManifestPath, "utf8"));
+  const newVersionDirectory = path.join(fakeWebRoot, "public", "bevy-runtime-releases", newManifest.version);
+  assertSelfCheck(readFakeRuntimeMarker(newVersionDirectory) === "new-success", "new pointer has no complete version directory");
   validateRuntimeBundle({
     sourcePkgParentDir: finalPackageDir,
     manifestPath: finalManifestPath,
@@ -1336,7 +1416,7 @@ function outputOf(result) {
 }
 
 function errorMessage(error) {
-  return error instanceof Error ? error.message : String(error);
+  return formatRendererOptimizationError(error);
 }
 
 function fail(message) {

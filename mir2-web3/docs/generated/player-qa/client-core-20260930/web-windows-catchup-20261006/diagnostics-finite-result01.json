@@ -1,0 +1,48 @@
+{
+  "owner": "Root",
+  "actualToolChunk": "2bc34d",
+  "command": [
+    "--test",
+    "--test-concurrency=1",
+    "--test-reporter=spec",
+    "scripts/test-portable-next-standalone.mjs"
+  ],
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-trace-diagnostics01-finite.config.json",
+    "bytes": 3693,
+    "sha256": "31cd16e9f768566c245b70d829d9c146b46f00a5e5da226c120f41452390a34f"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-trace-diagnostics01-finite-snapshot.json",
+    "bytes": 9725094,
+    "sha256": "c8912af24cdaa03607c61322f95500da3ed10de6bee46babf3ee526f1e681bcd"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-trace-diagnostics01-finite.outer.json",
+    "bytes": 516,
+    "sha256": "9943beb1ec938d24a3b8cc6a1ba29b6cd70f3cb813bb51ee7f00ac050c9ed6ef"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-trace-diagnostics01-finite.stdout.log",
+    "bytes": 1869,
+    "sha256": "736d4d8138c91ac37cc07be2ed012be59884bc9088ba90780956637fe31f23c9"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-trace-diagnostics01-finite.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "result": {
+    "tests": 16,
+    "pass": 16,
+    "fail": 0,
+    "skipped": 0,
+    "originalRosterPreserved": true,
+    "addedAssertions": 6
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "goalComplete": false
+}

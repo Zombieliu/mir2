@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "stage": "Source24 actual current Web finite results",
+  "currentNodeSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-node03-snapshot.json",
+    "bytes": 9771565,
+    "sha256": "0b764b130443b8eec17975d6d1b63b0e1e3898a89bcb744132d20dc3ccc0e89f"
+  },
+  "declaredUniqueInputs": 27448,
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03-source-review.json",
+    "bytes": 2690,
+    "sha256": "eccdd30c0d6f9eed44904c2b607a2c334912976e4abd440e30bd19db675eba61"
+  },
+  "independentObservation": {
+    "reviewer": "/root/source24_actual_result_review",
+    "matched": 27448,
+    "missing": 0,
+    "drift": 0,
+    "scope": "read-only FS observation before Next metadata generation"
+  },
+  "runs": [
+    {
+      "name": "stage5-03",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-stage5-03.config.json",
+        "bytes": 4359,
+        "sha256": "63f89554a67dc942a26ccfe7090007b54a0d665894325df208b97c572e5bb194"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03-snapshot.json",
+        "bytes": 9771565,
+        "sha256": "0b764b130443b8eec17975d6d1b63b0e1e3898a89bcb744132d20dc3ccc0e89f"
+      },
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "scripts/test-stage5-adapters.mjs"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 121140,
+        "kind": "Source24 original stage5-03 final finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 2098,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-03.outer.json",
+        "bytes": 534,
+        "sha256": "47904d8b17979e36cf6e49058d24c5c54be397564b56741f8a9957d06ee03a6f"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-03.stdout.log",
+        "bytes": 205,
+        "sha256": "e7b867132284105a89940dce8a605776c63aee56e0e601c512db9081ebc69de3"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": 1,
+      "internalGroups": 392
+    },
+    {
+      "name": "npc-buy03",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-npc-buy03.config.json",
+        "bytes": 4361,
+        "sha256": "434486e7fa5723e3b2a1d0c69519fdd07fcc4bf0551485b5870cdd11b2b6475b"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03-snapshot.json",
+        "bytes": 9771565,
+        "sha256": "0b764b130443b8eec17975d6d1b63b0e1e3898a89bcb744132d20dc3ccc0e89f"
+      },
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "scripts/test-bevy-npc-shop-buy.mjs"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 123012,
+        "kind": "Source24 original npc-buy03 final finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 3104,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-npc-buy03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-npc-buy03.outer.json",
+        "bytes": 534,
+        "sha256": "940d9da8bb6e12c52f9378e7d502887b8ae8999b3fbc0dbcd673bf6511f64498"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-npc-buy03.stdout.log",
+        "bytes": 10200,
+        "sha256": "c0a0aa4c7824c9de346a77f88d3bf52a815098285dfaeae38ecb6a1f5ef45e20"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-npc-buy03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": 94,
+      "internalGroups": null
+    },
+    {
+      "name": "node03",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-node03.config.json",
+        "bytes": 4785,
+        "sha256": "bfefa259fd8706b46bbeddc800af728066f1595847cdf37feff95ef0c88c2814"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03-snapshot.json",
+        "bytes": 9771565,
+        "sha256": "0b764b130443b8eec17975d6d1b63b0e1e3898a89bcb744132d20dc3ccc0e89f"
+      },
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "scripts/test-stage5-adapters.mjs",
+        "scripts/test-minimap-transform.mjs",
+        "scripts/test-crystal-chat-history.mjs",
+        "scripts/test-bevy-combat-input.mjs",
+        "scripts/test-bevy-quest-ui.mjs",
+        "scripts/test-native-keyed-map-pack.mjs",
+        "scripts/test-storage-page-gate.mjs",
+        "scripts/test-renderer-wasm-opt.mjs",
+        "scripts/test-client-core-build.mjs",
+        "scripts/test-client-core-release-files.mjs",
+        "scripts/test-portable-next-standalone.mjs"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 111352,
+        "kind": "Source24 original node03 final finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 12943,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03.outer.json",
+        "bytes": 529,
+        "sha256": "3ffa8207dd742ee75f08976101c0dd4379929f3c41f5c229807408c7b1db0e88"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03.stdout.log",
+        "bytes": 23494,
+        "sha256": "0d741676716bffac8a7e927eeb3cebff97d2c18a43e6cdd5fa043eb12c0af047"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": 220,
+      "internalGroups": null
+    },
+    {
+      "name": "tsc02",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-tsc02.config.json",
+        "bytes": 4431,
+        "sha256": "54ba431a6963f5e0cf665f93ed9900e521f8db2487d396735e54595a49992d19"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node02-snapshot.json",
+        "bytes": 9771032,
+        "sha256": "e280622ce63e0e5523b48e5315ca7a869dc02baa769f1a2caa45791a4c4ed9a5"
+      },
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-web-code-tsconfig01.json",
+        "--pretty",
+        "false"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 95712,
+        "kind": "Source24 original tsc02 current finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 7407,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc02.outer.json",
+        "bytes": 527,
+        "sha256": "da83cd70b2a9518a8c2d813b039e004c873e39c9bd51fc40a953f5b91c278481"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc02.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc02.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": null,
+      "internalGroups": null
+    }
+  ],
+  "counting": {
+    "original11NodeScripts": 220,
+    "separateNpcShopBuy": 94,
+    "stage5InternalGroups": 392,
+    "stage5NodeFileTest": 1,
+    "stage5IncludedInOriginal11": true,
+    "notAddedInternalGroupsToNodeTotal": true
+  },
+  "strictCodeTypecheck": {
+    "actualTsc02": true,
+    "tsConfig": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-web-code-tsconfig01.json",
+      "bytes": 533,
+      "sha256": "bfacf0dc29c7cd400f866789a96738e18dd6a9e408e7a34958a81ea2065043b7"
+    },
+    "nonIncremental": true,
+    "changesAfterTsc02": [
+      {
+        "relativePath": "apps/web/scripts/test-stage5-adapters.mjs",
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+        "bytes": 588841,
+        "sha256": "3a8a5bd145e2ab48e1d67f75ffe6d0f4d8ad7b30741127a69a824072593a7d2d"
+      }
+    ],
+    "qualification": "Only excluded test-stage5-adapters.mjs changed between Node02 and Node03; effective TypeScript input unchanged. Full snapshot02 is historical, not current zero-drift."
+  },
+  "historicalFailures": [
+    {
+      "name": "stage5-01",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-stage5-01.config.json",
+        "bytes": 4353,
+        "sha256": "4dcfc2d8a421b4f6ee87e576e37231aac5e997939edfdf1140ae604f411eeb72"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node01-snapshot.json",
+        "bytes": 9769652,
+        "sha256": "f7aba3aaa180a6d905825642df32e91862d9dee7883822f291ae731a87adf03e"
+      },
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "scripts/test-stage5-adapters.mjs"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 1,
+        "builderPid": 109748,
+        "kind": "Source24 original stage5-01 finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 1199,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-01.outer.json",
+        "bytes": 528,
+        "sha256": "877f15f2a598a9766324c4028cf7ad7e24c6abb4ebbe3bed5d9810ca50a5a8b9"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-01.stdout.log",
+        "bytes": 953,
+        "sha256": "3c2ab7511a2985dca48421b02663fb26252cc3e9aee4c240f397c9ec3347eaa3"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": null,
+      "internalGroups": null
+    },
+    {
+      "name": "stage5-02",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-stage5-02.config.json",
+        "bytes": 4361,
+        "sha256": "ad988bf3e9fb69685fc22df9e25d4a6110e017c07f98b24a586b72aec6729fbc"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node02-snapshot.json",
+        "bytes": 9771032,
+        "sha256": "e280622ce63e0e5523b48e5315ca7a869dc02baa769f1a2caa45791a4c4ed9a5"
+      },
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "scripts/test-stage5-adapters.mjs"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 1,
+        "builderPid": 111252,
+        "kind": "Source24 original stage5-02 current finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 1394,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-02.outer.json",
+        "bytes": 536,
+        "sha256": "7a3bc40745537f269f5d59454418075039a87bd55dbbd45190eae38e974454ac"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-02.stdout.log",
+        "bytes": 952,
+        "sha256": "98ceee3b07fdd3f9aded9982f7f01910e808c9b0b5f7a3f5fa9a604763cac676"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-stage5-02.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": null,
+      "internalGroups": null
+    },
+    {
+      "name": "tsc01",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-tsc01.config.json",
+        "bytes": 4423,
+        "sha256": "987332f389871d90925d7810a1d5bd591ce5b1d58355aa3f84709ce0c85b7eb5"
+      },
+      "inputSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-node01-snapshot.json",
+        "bytes": 9769652,
+        "sha256": "f7aba3aaa180a6d905825642df32e91862d9dee7883822f291ae731a87adf03e"
+      },
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-final-web-code-tsconfig01.json",
+        "--pretty",
+        "false"
+      ],
+      "outer": {
+        "owner": "Root",
+        "exitCode": 2,
+        "builderPid": 111540,
+        "kind": "Source24 original tsc01 finite code-only; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 7268,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc01.outer.json",
+        "bytes": 520,
+        "sha256": "e262e81a17a5ee0cf75e2ca4752f2ec064001f664ad7771c9d4e97d11fc774d1"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc01.stdout.log",
+        "bytes": 1158,
+        "sha256": "aae65c0de1cf587ca989bf7dd2bd43f0717e738d5860bfce476bdb01f873de43"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-tsc01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "passed": null,
+      "internalGroups": null
+    }
+  ],
+  "repairs": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-root-tsc-stage5-before02.json",
+      "bytes": 1644710,
+      "sha256": "fa70b9184f4a2c97b5e14daea36ce2fdbe918cf0080d0b02ba028fd9acb20cc7"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-root-stage5-before03.json",
+      "bytes": 605051,
+      "sha256": "06a3dcd3d85646e1cf0b427e04c59aa36e5d190eeaa6ae60862bb9dc87709a2e"
+    }
+  ],
+  "limits": [
+    "Scripted Core/PUI ABI fixtures exercise product wiring; actual Rust CPU tests separately exercise shared policy.",
+    "No UI/browser/game/server/renderer launch, HTTP/socket, WebAssembly API, mobile or player acceptance.",
+    "Entering/flushed/unknown NPC buy attempts remain held without correlated economic receipt; ordinary snapshots do not establish purchase outcome."
+  ],
+  "scope": {
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "wasmApiUsed": false,
+    "candidateAccepted": false,
+    "playerAccepted": false,
+    "goalComplete": false
+  }
+}

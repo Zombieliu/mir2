@@ -1,0 +1,28 @@
+MagicShield bounded fix validation — 2026-09-10
+Source: e7fd008b287607f15e2ab6f67519d77ea71ebeb2
+Branch: codex/r4-shield-lifecycle-20260910
+
+[PASS] simulation lifecycle
+command: CARGO_TARGET_DIR=C:/mir2-three-class-r4-gateway-target cargo +1.95.0 test --locked -j1 -p mir2-simulation --lib magic_shield_lifecycle -- --test-threads=1 --nocapture
+result: 2 passed; 0 failed; 1736 filtered out
+elapsed: approximately 2m24s
+
+[PASS] Windows effect lifecycle and snapshot ordering
+command: CARGO_TARGET_DIR=C:/Users/Administrator/AppData/Local/Temp/mir2-trade-completion-windows-340f7ca3b1f44af6a6ae18576bb183e1 MIR2_NATIVE_ASSET_ROOT=C:/mir2-three-class-effects-r2-20260910 cargo +1.95.0 test --locked -j1 --bin mir2-platform-windows magic_shield_ -- --test-threads=1 --nocapture
+result: 2 passed; 0 failed; 621 filtered out; tests finished in 0.02s
+build elapsed: 13m16s
+tests:
+- effects::tests::magic_shield_late_join_restores_without_stale_snapshot_overriding_down
+- effects::tests::magic_shield_up_is_idempotent_down_clears_and_recast_restores
+
+[PASS] Gateway owner/observer ids and personal mirror
+command: CARGO_TARGET_DIR=C:/mir2-three-class-r4-gateway-target cargo +1.95.0 test --locked -j1 -p mir2-gateway --lib shared_in_process_runtime_mirrors_pending_zone_self_buff_to_session_snapshot -- --test-threads=1 --nocapture
+result: 1 passed; 0 failed; 732 filtered out; test finished in 3.92s
+build elapsed: 2m15s
+test:
+- routing::tests::shared_in_process_runtime_mirrors_pending_zone_self_buff_to_session_snapshot
+
+[PASS] git diff --check
+result: no whitespace errors
+
+Expected pre-existing compiler warnings were emitted. No new warning was identified as caused by this patch.

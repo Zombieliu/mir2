@@ -1,0 +1,236 @@
+{
+  "schemaVersion": "mir2.audit-content-inventory.v1",
+  "observedAtUtc": "2026-09-08T12:27:22.755669+00:00",
+  "countsAreNotParity": true,
+  "inventory": {
+    "maps": {
+      "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "generatedAt": "2026-08-25T17:51:53.819Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "e885c879a8fda4bf1967c41d4f271b1c82f6cbe9cb499505e9c3c7ce036015b6",
+      "array": "maps",
+      "arrayCount": 464,
+      "nonemptyMapNames": 463,
+      "movementRows": 1999,
+      "respawnRules": 6341,
+      "configuredSpawnSlots": 76181,
+      "countingRule": "sum movements.length; sum respawns.length; sum respawn.count, not activated entities"
+    },
+    "monsters": {
+      "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "29aa645f3293911e42bbd7ede519335cce61af4c074d7a7a2d6cdf495ac982d3",
+      "array": "monsters",
+      "arrayCount": 555,
+      "distinctAiValues": 116,
+      "distinctImageValues": 296
+    },
+    "classes": {
+      "path": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Configs",
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4",
+      "array": "classes",
+      "arrayCount": 5
+    },
+    "magics": {
+      "path": "packages/game-data/data/generated/crystal_magic_manifest.json",
+      "generatedAt": "2026-08-17T11:24:07.846Z",
+      "source": "Crystal/Server/MirEnvir/Envir.cs",
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d",
+      "array": "magics",
+      "arrayCount": 109
+    },
+    "buffs": {
+      "path": "packages/game-data/data/generated/crystal_buff_manifest.json",
+      "generatedAt": "2026-04-22T14:48:06.532Z",
+      "source": "Crystal/Server/MirDatabase/BuffInfo.cs",
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b",
+      "array": "buffs",
+      "arrayCount": 59
+    },
+    "items": {
+      "path": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+      "array": "items",
+      "arrayCount": 1628
+    },
+    "recipes": {
+      "path": "packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5",
+      "array": "recipes",
+      "arrayCount": 79
+    },
+    "gameShop": {
+      "path": "packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "f23a61b0ae67106dddca5868beb391f9c51dee0808bfe451c129612dd6a558fb",
+      "array": "items",
+      "arrayCount": 105
+    },
+    "quests": {
+      "path": "packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6",
+      "array": "quests",
+      "arrayCount": 154
+    },
+    "npcs": {
+      "path": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "generatedAt": "2026-04-27T22:19:17.824Z",
+      "source": "Crystal/Build/Server/Debug/Server.MirDB",
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105",
+      "array": "npcs",
+      "arrayCount": 375
+    },
+    "npcScripts": {
+      "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "generatedAt": "2026-04-22T14:48:06.584Z",
+      "source": "Crystal/Build/Server/Debug/Envir/NPCs",
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93",
+      "array": "scripts",
+      "arrayCount": 634,
+      "reportedLabels": 5709
+    },
+    "drops": {
+      "path": "packages/game-data/data/generated/crystal_drop_manifest.json",
+      "generatedAt": "2026-04-22T14:48:06.532Z",
+      "source": "Crystal/Build/Server/Debug/Envir/Drops",
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7",
+      "array": "tables",
+      "arrayCount": 1640,
+      "reportedEntries": 70542
+    },
+    "frameSets": {
+      "path": "apps/web/public/original-ui/frame-sets.generated.json",
+      "sha256": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9",
+      "libraryCount": 703,
+      "actionCount": 3643
+    },
+    "installedEntityAtlas": {
+      "path": "C:\\mir2-ground-label-20260908\\mir2-assets\\bevy-entity-atlases\\manifest.json",
+      "sha256": "2ae6fb0dfe626bc90b41caac027a1fa219aaa11471ac27e42cc9980c286f48bd",
+      "atlasCount": 1,
+      "stats": {
+        "sourceCount": 10482,
+        "roots": [
+          "CArmour/00",
+          "CHair/00",
+          "CWeapon/00",
+          "CWeapon/01",
+          "AArmour/00",
+          "AHair/00",
+          "AWeapon/00 L",
+          "AWeapon/00 R",
+          "NPC",
+          "Monster/000",
+          "Monster/003",
+          "Monster/004",
+          "Monster/005",
+          "Monster/007",
+          "Monster/010",
+          "Monster/012",
+          "Monster/139"
+        ],
+        "imageBytes": 13249890,
+        "rgbaBytes": 117440512,
+        "pageCount": 7,
+        "durationMs": 214452
+      },
+      "monsterLibraries": [
+        "Monster/000",
+        "Monster/003",
+        "Monster/004",
+        "Monster/005",
+        "Monster/007",
+        "Monster/010",
+        "Monster/012",
+        "Monster/139"
+      ]
+    },
+    "installedKeyedMap": {
+      "path": "C:\\mir2-ground-label-20260908\\mir2-assets\\generated\\native-map-keyed\\manifest.json",
+      "sha256": "db7e2ff3beb37caad85242ace063afa498f89972928b06a73be4c603b9533a00",
+      "stats": {
+        "mapCount": 2,
+        "referenceCount": 7979,
+        "emittedEntryCount": 5010,
+        "keyedEntryCount": 4827,
+        "additiveEntryCount": 183,
+        "fullPackEntryCount": 307,
+        "noDrawReferenceCount": 0,
+        "missingSourceCount": 2969,
+        "removedArtifacts": 4899,
+        "imageBytes": 30002835
+      },
+      "mapFileNames": [
+        "0",
+        "0141"
+      ]
+    },
+    "installedMapAtlas": {
+      "path": "C:\\mir2-ground-label-20260908\\mir2-assets\\generated\\map-atlas\\manifest.json",
+      "sha256": "732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7",
+      "stats": {
+        "libraryCount": 13,
+        "atlasPageCount": 57,
+        "sourceCount": 2305,
+        "imageBytes": 17410401,
+        "maxPageBytes": 468963,
+        "maxPagePixels": 262144
+      }
+    },
+    "installedSound": {
+      "directory": "C:\\mir2-ground-label-20260908\\mir2-assets\\original-ui\\Sound",
+      "fileCount": 49
+    },
+    "installedFullPackIndexExists": false,
+    "nativeBacklog": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\windows-visual-parity\\VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md",
+      "count": 33,
+      "ids": [
+        "WN-BOOT-001",
+        "WN-BOOT-002",
+        "WN-QA-001",
+        "WN-QA-002",
+        "WN-WORLD-001",
+        "WN-WORLD-002",
+        "WN-WORLD-003",
+        "WN-WORLD-004",
+        "WN-WORLD-005",
+        "WN-ACTOR-001",
+        "WN-ACTOR-002",
+        "WN-INPUT-001",
+        "WN-INPUT-002",
+        "WN-INPUT-003",
+        "WN-QUEST-001",
+        "WN-QUEST-002",
+        "WN-QUEST-003",
+        "WN-QUEST-004",
+        "WN-HUD-001",
+        "WN-HUD-002",
+        "WN-HUD-003",
+        "WN-HUD-004",
+        "WN-CHAT-001",
+        "WN-CHAT-002",
+        "WN-CHAT-003",
+        "WN-ITEM-001",
+        "WN-ITEM-004",
+        "WN-ITEM-002",
+        "WN-ITEM-003",
+        "WN-UI-001",
+        "WN-CHAR-001",
+        "WN-CHAR-002",
+        "WN-AUDIO-001"
+      ],
+      "meaning": "retained backlog rows, not wholly unimplemented features"
+    }
+  }
+}

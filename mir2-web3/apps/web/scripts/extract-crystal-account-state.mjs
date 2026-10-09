@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,6 +16,9 @@ const DEFAULT_ITEM_MANIFEST_PATH = path.resolve(
 );
 const FLAG_INDEX_COUNT = 1999;
 const BELT_SIZE = 6;
+const STATE_SCHEMA = "mir2-crystal-account-state-v2";
+const DOTNET_DATETIME_MAX_BINARY = 3155378975999999999n;
+const DOTNET_DATETIME_TICKS_MASK = (1n << 62n) - 1n;
 const EQUIPMENT_SLOTS = [
   "weapon",
   "armour",
@@ -38,6 +42,7 @@ const itemManifestPath = path.resolve(args.items ?? args.itemManifest ?? DEFAULT
 const accountFilter = args.account ?? process.env.MIR2_QA_ACCOUNT ?? null;
 const characterFilter = args.character ?? args.characterName ?? process.env.MIR2_QA_CHARACTER ?? null;
 const outputPath = args.output ? path.resolve(args.output) : null;
+const redactIdentity = booleanArg(args.redactIdentity ?? args.redact, false);
 
 async function main() {
   const [dbBuffer, itemManifest] = await Promise.all([
@@ -48,12 +53,15 @@ async function main() {
   const reader = new BinaryReader(dbBuffer);
   const parsed = readAccountDatabase(reader, itemByIndex);
   const account = findAccount(parsed.accounts, accountFilter, characterFilter);
+  const selectedAccount = account ? sanitizeAccount(account, characterFilter, redactIdentity) : null;
   const result = {
+    schemaVersion: STATE_SCHEMA,
     ok: Boolean(account),
     generatedAt: new Date().toISOString(),
     source: {
-      dbPath,
-      itemManifestPath,
+      dbPath: redactIdentity ? path.basename(dbPath) : dbPath,
+      itemManifestPath: redactIdentity ? path.basename(itemManifestPath) : itemManifestPath,
+      dbSha256: sha256(dbBuffer),
       finalOffset: parsed.finalOffset,
       byteLength: dbBuffer.length,
       fullyConsumed: parsed.finalOffset === dbBuffer.length,
@@ -61,10 +69,19 @@ async function main() {
     header: parsed.header,
     accountCount: parsed.accountCount,
     filters: {
-      account: accountFilter,
+      account: redactIdentity && accountFilter
+        ? `[redacted:${sha256(Buffer.from(accountFilter, "utf8")).slice(0, 12)}]`
+        : accountFilter,
       character: characterFilter,
     },
-    account: account ? sanitizeAccount(account, characterFilter) : null,
+    identity: account
+      ? {
+          accountIdSha256: sha256(Buffer.from(account.accountID, "utf8")),
+          redacted: redactIdentity,
+        }
+      : null,
+    stateFingerprint: selectedAccount ? canonicalStateFingerprint(selectedAccount) : null,
+    account: selectedAccount,
   };
 
   const json = `${JSON.stringify(result, null, 2)}\n`;
@@ -77,9 +94,16 @@ async function main() {
 }
 
 function readAccountDatabase(reader, itemByIndex) {
+  const version = reader.i32();
+  const customVersion = reader.i32();
+  if (version !== 117 || customVersion !== 0) {
+    throw new Error(
+      `Unsupported Crystal account database version ${version}/${customVersion}; only the audited 117/0 layout is accepted.`,
+    );
+  }
   const header = {
-    version: reader.i32(),
-    customVersion: reader.i32(),
+    version,
+    customVersion,
     nextAccountId: reader.i32(),
     nextCharacterId: reader.i32(),
     nextUserItemId: String(reader.u64()),
@@ -139,7 +163,7 @@ function readAccount(reader, version, customVersion, itemByIndex) {
   account.requirePasswordChange = reader.bool();
   const storagePassword = reader.string();
   reader.bytes(reader.i32()); // storage salt
-  reader.i64(); // storage password last set
+  account.storagePasswordLastSetBinary = String(reader.i64());
 
   account.hasStoragePassword = storagePassword.length > 0;
   account.userName = reader.string();
@@ -213,7 +237,10 @@ function readCharacter(reader, version, customVersion, itemByIndex) {
   character.questInventory = readItemArray(reader, version, customVersion, itemByIndex, "questInventory");
 
   character.magicCount = reader.i32();
-  for (let index = 0; index < character.magicCount; index += 1) skipUserMagic(reader);
+  character.magics = [];
+  for (let index = 0; index < character.magicCount; index += 1) {
+    character.magics.push(readUserMagic(reader, version));
+  }
   character.thrusting = reader.bool();
   character.halfMoon = reader.bool();
   character.crossHalfMoon = reader.bool();
@@ -222,21 +249,33 @@ function readCharacter(reader, version, customVersion, itemByIndex) {
   character.petCount = reader.i32();
   for (let index = 0; index < character.petCount; index += 1) skipPet(reader);
   character.allowGroup = reader.bool();
-  for (let index = 0; index < FLAG_INDEX_COUNT; index += 1) reader.bool();
+  character.flags = [];
+  for (let index = 0; index < FLAG_INDEX_COUNT; index += 1) {
+    if (reader.bool()) character.flags.push(index);
+  }
   character.guildIndex = reader.i32();
   character.allowTrade = reader.bool();
-  character.allowObserve = reader.bool();
+  character.allowObserve = version > 104 ? reader.bool() : false;
   character.questCount = reader.i32();
-  for (let index = 0; index < character.questCount; index += 1) skipQuestProgress(reader);
+  character.currentQuests = [];
+  for (let index = 0; index < character.questCount; index += 1) {
+    character.currentQuests.push(readQuestProgress(reader, version));
+  }
   character.buffCount = reader.i32();
-  for (let index = 0; index < character.buffCount; index += 1) skipBuff(reader, version, customVersion);
+  character.buffs = [];
+  for (let index = 0; index < character.buffCount; index += 1) {
+    character.buffs.push(readBuff(reader, version, customVersion));
+  }
   character.mailCount = reader.i32();
   for (let index = 0; index < character.mailCount; index += 1) skipMail(reader, version, customVersion, itemByIndex);
   character.intelligentCreatureCount = reader.i32();
   for (let index = 0; index < character.intelligentCreatureCount; index += 1) skipIntelligentCreature(reader);
   character.pearlCount = reader.i32();
   character.completedQuestCount = reader.i32();
-  for (let index = 0; index < character.completedQuestCount; index += 1) reader.i32();
+  character.completedQuests = [];
+  for (let index = 0; index < character.completedQuestCount; index += 1) {
+    character.completedQuests.push(reader.i32());
+  }
   character.currentRefine = reader.bool() ? readUserItem(reader, version, customVersion, itemByIndex, null) : null;
   character.refineTimeRemaining = String(reader.i64());
   character.friendCount = reader.i32();
@@ -291,9 +330,14 @@ function readUserItem(reader, version, customVersion, itemByIndex, slot) {
   item.cursed = Boolean(flags & 0x02);
   const slotCount = reader.i32();
   item.socketItems = [];
+  item.socketSlots = Array.from({ length: slotCount }, () => null);
   for (let index = 0; index < slotCount; index += 1) {
     const empty = reader.bool();
-    if (!empty) item.socketItems.push(readUserItem(reader, version, customVersion, itemByIndex, index));
+    if (!empty) {
+      const socketItem = readUserItem(reader, version, customVersion, itemByIndex, index);
+      item.socketSlots[index] = socketItem;
+      item.socketItems.push(socketItem);
+    }
   }
   item.gemCount = reader.u16();
   item.addedStats = readStats(reader);
@@ -330,8 +374,9 @@ function readStats(reader) {
 function readAwake(reader) {
   const type = reader.u8();
   const count = reader.i32();
-  for (let index = 0; index < count; index += 1) reader.u8();
-  return { type, count };
+  const values = [];
+  for (let index = 0; index < count; index += 1) values.push(reader.u8());
+  return { type, count, values };
 }
 
 function readRentalInformation(reader) {
@@ -343,13 +388,18 @@ function readRentalInformation(reader) {
   };
 }
 
-function skipUserMagic(reader) {
-  reader.u8();
-  reader.u8();
-  reader.u8();
-  reader.u16();
-  reader.bool();
-  reader.i64();
+function readUserMagic(reader, version) {
+  const magic = {
+    spell: reader.u8(),
+    level: reader.u8(),
+    key: reader.u8(),
+    experience: reader.u16(),
+    isTempSpell: false,
+    castTime: "0",
+  };
+  if (version >= 15) magic.isTempSpell = reader.bool();
+  if (version >= 65) magic.castTime = String(reader.i64());
+  return magic;
 }
 
 function skipPet(reader) {
@@ -360,39 +410,83 @@ function skipPet(reader) {
   reader.u8();
 }
 
-function skipQuestProgress(reader) {
-  reader.i32();
-  reader.i64();
-  reader.i64();
+function readQuestProgress(reader, version) {
+  const index = reader.i32();
+  const startDateBinary = reader.i64();
+  const endDateBinary = reader.i64();
+  const quest = {
+    index,
+    startDateBinary: String(startDateBinary),
+    endDateBinary: String(endDateBinary),
+    taken: dotNetDateTimeTicks(startDateBinary) > 0n,
+    completed: dotNetDateTimeTicks(endDateBinary) < DOTNET_DATETIME_MAX_BINARY,
+    killTasks: [],
+    itemTasks: [],
+    flagTasks: [],
+  };
+
   let count = reader.i32();
-  for (let index = 0; index < count; index += 1) {
-    reader.i32();
-    reader.i32();
+  for (let taskIndex = 0; taskIndex < count; taskIndex += 1) {
+    quest.killTasks.push(
+      version < 90
+        ? { ordinal: taskIndex, monsterId: null, count: reader.i32() }
+        : { monsterId: reader.i32(), count: reader.i32() },
+    );
   }
   count = reader.i32();
-  for (let index = 0; index < count; index += 1) {
-    reader.i32();
-    reader.i32();
+  for (let taskIndex = 0; taskIndex < count; taskIndex += 1) {
+    quest.itemTasks.push(
+      version < 90
+        ? { ordinal: taskIndex, itemId: null, count: reader.i32() }
+        : { itemId: reader.i32(), count: reader.i32() },
+    );
   }
   count = reader.i32();
-  for (let index = 0; index < count; index += 1) {
-    reader.i32();
-    reader.bool();
+  for (let taskIndex = 0; taskIndex < count; taskIndex += 1) {
+    quest.flagTasks.push(
+      version < 90
+        ? { ordinal: taskIndex, number: null, state: reader.bool() }
+        : { number: reader.i32(), state: reader.bool() },
+    );
   }
+  return quest;
 }
 
-function skipBuff(reader, version, customVersion) {
-  reader.u8();
-  reader.u32();
-  reader.i64();
-  readStats(reader, version, customVersion);
+function dotNetDateTimeTicks(binary) {
+  return binary & DOTNET_DATETIME_TICKS_MASK;
+}
+
+function readBuff(reader, version, customVersion) {
+  const buff = {
+    type: reader.u8(),
+    objectId: 0,
+    expireTimeMs: "0",
+    stats: [],
+    data: [],
+    values: [],
+  };
+  if (version < 88) buff.legacyVisible = reader.bool();
+  buff.objectId = reader.u32();
+  buff.expireTimeMs = String(reader.i64());
+  if (version <= 84) {
+    const valueCount = reader.i32();
+    for (let index = 0; index < valueCount; index += 1) buff.values.push(reader.i32());
+    if (version < 88) buff.legacyInfinite = reader.bool();
+    return buff;
+  }
+  if (version < 88) buff.legacyStackable = reader.bool();
+  buff.stats = readStats(reader, version, customVersion);
   let count = reader.i32();
   for (let index = 0; index < count; index += 1) {
-    reader.string();
-    reader.bytes(reader.i32());
+    const key = reader.string();
+    const bytes = reader.bytes(reader.i32());
+    buff.data.push({ key, valueBase64: bytes.toString("base64") });
   }
-  count = reader.i32();
-  for (let index = 0; index < count; index += 1) reader.i32();
+  if (version > 86) {
+    count = reader.i32();
+    for (let index = 0; index < count; index += 1) buff.values.push(reader.i32());
+  }
+  return buff;
 }
 
 function skipMail(reader, version, customVersion, itemByIndex) {
@@ -459,42 +553,173 @@ function findAccount(accounts, account, character) {
   );
 }
 
-function sanitizeAccount(account, characterFilter) {
+function sanitizeAccount(account, characterFilter, redact = false) {
   const characterNeedle = characterFilter?.toLowerCase() ?? null;
   const characters = characterNeedle
     ? account.characters.filter((character) => character.name.toLowerCase() === characterNeedle)
     : account.characters;
   return {
     index: account.index,
-    accountID: account.accountID,
-    userName: account.userName,
-    email: account.email,
+    accountID: redact ? `[redacted:${sha256(Buffer.from(account.accountID, "utf8")).slice(0, 12)}]` : account.accountID,
+    userName: redact ? null : account.userName,
+    email: redact ? null : account.email,
     gold: account.gold,
     credit: account.credit,
     hasExpandedStorage: account.hasExpandedStorage,
+    expandedStorageExpiryDateBinary: account.expandedStorageExpiryDateBinary,
+    hasStoragePassword: account.hasStoragePassword,
+    storagePasswordLastSetBinary: account.storagePasswordLastSetBinary,
+    storageCapacity: account.storage.count,
     storageItemCount: account.storage.items.length,
+    storageItems: sanitizeUserItems(account.storage.items, redact),
     characters: characters.map((character) => ({
       index: character.index,
       name: character.name,
       level: character.level,
       class: character.class,
       gender: character.gender,
+      hair: character.hair,
       currentMapIndex: character.currentMapIndex,
       currentLocation: character.currentLocation,
       direction: character.direction,
       hp: character.hp,
       mp: character.mp,
       experience: character.experience,
-      beltItems: character.beltItems,
-      bagItems: character.bagItems,
-      equipmentItems: character.equipment.items,
+      attackMode: character.attackMode,
+      petMode: character.petMode,
+      pkPoints: character.pkPoints,
+      inventoryCapacity: character.inventory.count,
+      beltItems: sanitizeUserItems(character.beltItems, redact),
+      bagItems: sanitizeUserItems(character.bagItems, redact),
+      equipmentItems: sanitizeUserItems(character.equipment.items, redact),
+      questInventoryCapacity: character.questInventory.count,
       questInventoryItemCount: character.questInventory.items.length,
+      questInventoryItems: sanitizeUserItems(character.questInventory.items, redact),
       magicCount: character.magicCount,
+      magics: character.magics,
+      thrusting: character.thrusting,
+      halfMoon: character.halfMoon,
+      crossHalfMoon: character.crossHalfMoon,
+      doubleSlash: character.doubleSlash,
+      mentalState: character.mentalState,
+      allowGroup: character.allowGroup,
+      flags: character.flags,
+      guildIndex: character.guildIndex,
+      allowTrade: character.allowTrade,
+      allowObserve: character.allowObserve,
+      questCount: character.questCount,
+      currentQuests: character.currentQuests,
       buffCount: character.buffCount,
+      buffs: character.buffs,
       mailCount: character.mailCount,
       petCount: character.petCount,
+      intelligentCreatureCount: character.intelligentCreatureCount,
+      completedQuestCount: character.completedQuestCount,
+      completedQuests: character.completedQuests,
+      currentRefine: character.currentRefine,
+      refineTimeRemaining: character.refineTimeRemaining,
+      friendCount: character.friendCount,
+      rentedItemCount: character.rentedItemCount,
+      hasRentedItem: character.hasRentedItem,
+      maximumHeroCount: character.maximumHeroCount,
+      heroes: character.heroes,
+      currentHeroIndex: character.currentHeroIndex,
+      heroSpawned: character.heroSpawned,
+      heroBehaviour: character.heroBehaviour,
     })),
   };
+}
+
+function sanitizeUserItems(items, redact) {
+  return (items ?? []).map((item) => {
+    const sanitized = {
+      ...item,
+      socketItems: sanitizeUserItems(item.socketItems, redact),
+      socketSlots: (item.socketSlots ?? []).map((socket) =>
+        socket ? sanitizeUserItems([socket], redact)[0] : null,
+      ),
+    };
+    if (redact && sanitized.rentalInformation?.ownerName) {
+      sanitized.rentalInformation = {
+        ...sanitized.rentalInformation,
+        ownerName: `[redacted:${sha256(Buffer.from(sanitized.rentalInformation.ownerName, "utf8")).slice(0, 12)}]`,
+      };
+    }
+    return sanitized;
+  });
+}
+
+function redactExtractedNativeState(nativeState) {
+  const redacted = JSON.parse(JSON.stringify(nativeState));
+  const account = redacted.account;
+  if (!account || typeof account !== "object") return redacted;
+
+  const rawAccountId = String(account.accountID ?? "");
+  const existingHash = redacted.identity?.accountIdSha256 ?? null;
+  const accountIdSha256 = existingHash
+    ?? (rawAccountId && !rawAccountId.startsWith("[redacted:")
+      ? sha256(Buffer.from(rawAccountId, "utf8"))
+      : null);
+  const redactedAccountId = accountIdSha256
+    ? `[redacted:${accountIdSha256.slice(0, 12)}]`
+    : "[redacted]";
+
+  account.accountID = redactedAccountId;
+  account.userName = null;
+  account.email = null;
+  account.storageItems = sanitizeUserItems(account.storageItems, true);
+  for (const character of account.characters ?? []) {
+    character.beltItems = sanitizeUserItems(character.beltItems, true);
+    character.bagItems = sanitizeUserItems(character.bagItems, true);
+    character.equipmentItems = sanitizeUserItems(character.equipmentItems, true);
+    character.questInventoryItems = sanitizeUserItems(character.questInventoryItems, true);
+  }
+
+  if (redacted.filters?.account) redacted.filters.account = redactedAccountId;
+  redacted.identity = {
+    ...(redacted.identity ?? {}),
+    accountIdSha256,
+    redacted: true,
+  };
+  if (redacted.source?.dbPath) redacted.source.dbPath = basenameAnyPath(redacted.source.dbPath);
+  if (redacted.source?.itemManifestPath) {
+    redacted.source.itemManifestPath = basenameAnyPath(redacted.source.itemManifestPath);
+  }
+  redacted.stateFingerprint = canonicalStateFingerprint(account);
+  return redacted;
+}
+
+function basenameAnyPath(value) {
+  return String(value).split(/[\\/]/).at(-1) ?? String(value);
+}
+
+function canonicalStateFingerprint(account) {
+  const canonical = {
+    gold: account.gold,
+    credit: account.credit,
+    hasExpandedStorage: account.hasExpandedStorage,
+    expandedStorageExpiryDateBinary: account.expandedStorageExpiryDateBinary,
+    hasStoragePassword: account.hasStoragePassword,
+    storageCapacity: account.storageCapacity,
+    storageItems: account.storageItems,
+    characters: account.characters,
+  };
+  return sha256(Buffer.from(stableStringify(canonical), "utf8"));
+}
+
+function stableStringify(value) {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function sha256(buffer) {
+  return createHash("sha256").update(buffer).digest("hex");
 }
 
 async function readJson(filePath) {
@@ -516,6 +741,12 @@ function parseArgs(argv) {
     index += 1;
   }
   return parsed;
+}
+
+function booleanArg(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "boolean") return value;
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
 class BinaryReader {
@@ -575,8 +806,14 @@ class BinaryReader {
   }
 
   bytes(byteCount) {
+    return this.take(byteCount);
+  }
+
+  take(byteCount) {
     this.ensure(byteCount);
+    const value = this.buffer.subarray(this.offset, this.offset + byteCount);
     this.offset += byteCount;
+    return value;
   }
 
   string() {
@@ -596,4 +833,18 @@ class BinaryReader {
   }
 }
 
-await main();
+const isMainModule = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMainModule) await main();
+
+export {
+  BinaryReader,
+  canonicalStateFingerprint,
+  dotNetDateTimeTicks,
+  readAccountDatabase,
+  readBuff,
+  readQuestProgress,
+  readUserMagic,
+  redactExtractedNativeState,
+  sanitizeAccount,
+  stableStringify,
+};

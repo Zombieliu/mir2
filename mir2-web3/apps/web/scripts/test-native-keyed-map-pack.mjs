@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
 import sharp from "sharp";
+import ts from "typescript";
 
 import {
   alphaKeyMapObjectPixels,
@@ -91,6 +92,199 @@ function sha256(bytes) {
 }
 
 {
+  // Call the actual collision/parser functions with one bounded in-memory map
+  // scope. No real map, private configuration, HTTP listener or resource loader
+  // is available to this scope; these fixtures remain in this existing suite.
+  const sourcePath = new URL("../lib/crystal-map-loader.ts", import.meta.url);
+  const source = readFileSync(sourcePath, "utf8");
+  const ast = ts.createSourceFile(String(sourcePath), source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const declarations = new Map();
+  for (const statement of ast.statements) {
+    if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) && statement.name) {
+      declarations.set(statement.name.text, statement.getText(ast));
+    } else if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name)) declarations.set(declaration.name.text, statement.getText(ast));
+      }
+    }
+  }
+  const names = [
+    "QuestCollisionError", "MAX_QUEST_COLLISION_CELLS", "completeQuestCollisionMaps",
+    "questMapFileName", "completeQuestCollisionMap", "strictQuestGeometry", "loadCrystalQuestCollisionRegion",
+    "loadCrystalCollisionRegion", "parsedCellAt", "parsedCellBlocksMovement", "normalizeMapFileName", "clampInt",
+    "parseMapBytes", "parseMapGeometry", "parseType100Map", "detectMapType", "detectMapWidth", "detectMapHeight",
+  ];
+  for (const name of names) assert.ok(declarations.has(name), `actual collision declaration ${name}`);
+  const module = { exports: {} };
+  const fixtureMaps = new Map();
+  let fixtureManifest = { maps: [] };
+  let fixtureMapReads = 0;
+  let fixtureManifestReads = 0;
+  const compiled = ts.transpileModule(names.map((name) => declarations.get(name)).join("\n"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const actual = new Function("exports", "module", "createHash", "readFileSync", "RESPAWN_MANIFEST_PATH", "loadParsedMap",
+    `${compiled}\nreturn {loadCrystalQuestCollisionRegion,loadCrystalCollisionRegion,QuestCollisionError,parseMapBytes};`)(
+    module.exports, module, createHash,
+    (requested) => {
+      assert.equal(requested, "fixture-manifest", "only the in-memory public manifest may be read");
+      fixtureManifestReads++;
+      return Buffer.from(JSON.stringify(fixtureManifest));
+    }, "fixture-manifest",
+    (file) => {
+      fixtureMapReads++;
+      assert.ok(fixtureMaps.has(file), `only an in-memory map may be loaded: ${file}`);
+      return fixtureMaps.get(file);
+    },
+  );
+  const sourceBytes = makeType100MapBytes(Array.from({ length: 6 }, () => (bytes, offset) => bytes.writeInt16LE(-32768, offset + 12)));
+  const landingBytes = makeType100MapBytes([
+    () => {}, () => {}, (bytes, offset) => bytes.writeInt16LE(-32768, offset + 12),
+  ]);
+  const parsedSource = actual.parseMapBytes("source.map", sourceBytes);
+  fixtureMaps.set("source", parsedSource);
+  fixtureMaps.set("landing", actual.parseMapBytes("landing.map", landingBytes));
+  fixtureMaps.set("0", actual.parseMapBytes("0.map", sourceBytes));
+  const movement = (x, destinationX, overrides = {}) => ({
+    map_index: 2, source: { x, y: 0 }, destination: { x: destinationX, y: 0 },
+    need_hole: false, need_move: false, conquest_index: 0, ...overrides,
+  });
+  fixtureManifest = { maps: [
+    { map_index: 1, map_file_name: "SOURCE", movements: [
+      movement(0, 1), movement(1, 1, { need_hole: true }), movement(2, 1, { need_move: true }),
+      movement(3, 1, { conquest_index: 1 }), movement(4, 2), movement(5, 0),
+    ] },
+    { map_index: 2, map_file_name: "LANDING", movements: [] },
+  ] };
+  const region = { mapFileName: "source", minX: 0, maxX: 5, minY: 0, maxY: 0 };
+
+  // strict_full_map_and_ordinary_entrance_keep_conditional_invalid_landings_blocked
+  const initial = actual.loadCrystalQuestCollisionRegion(region);
+  assert.equal(initial.schemaVersion, 1);
+  assert.equal(initial.source, "crystalMap");
+  assert.equal(initial.mapFileName, "source");
+  assert.equal(initial.mapWidth, 6);
+  assert.equal(initial.mapHeight, 1);
+  assert.match(initial.geometryFingerprint, /^[0-9a-f]{64}$/);
+  assert.equal(parsedSource.geometrySourceFingerprint, sha256(sourceBytes));
+  assert.deepEqual(initial.blockedCells, [1, 2, 3, 4, 5].map((x) => ({ x, y: 0 })),
+    "ordinary entrance is exempt; needHole/needMove/conquest/blocked landing/(0,0) are not");
+
+  // strict_chunks_share_the_same_complete_geometry_fingerprint
+  const first = actual.loadCrystalQuestCollisionRegion({ ...region, maxX: 2 });
+  const last = actual.loadCrystalQuestCollisionRegion({ ...region, minX: 3 });
+  assert.equal(first.geometryFingerprint, initial.geometryFingerprint);
+  assert.equal(last.geometryFingerprint, initial.geometryFingerprint);
+  assert.deepEqual([...first.blockedCells, ...last.blockedCells], initial.blockedCells);
+  assert.deepEqual(actual.loadCrystalQuestCollisionRegion({ ...region, maxX: 255 }).bounds,
+    { minX: 0, maxX: 5, minY: 0, maxY: 0 });
+
+  // strict_geometry_rejects_synthetic_partial_and_sparse_maps
+  const synthetic = { fileName: "synthetic", width: 6, height: 1, type: -1, cells: null,
+    syntheticResourcePath: "fixture-unavailable.map" };
+  const partial = actual.parseMapBytes("partial.map", sourceBytes.subarray(0, 8 + 26));
+  const starter = { fileName: "starter", width: 6, height: 1, type: -1, cells: null,
+    fallbackOriginalMapRegion: { regionBounds: { minX: 0, maxX: 1, minY: 0, maxY: 0 },
+      cells: [{ x: 0, y: 0, blocked: true }] } };
+  const sparse = { ...parsedSource, fileName: "sparse.map", cells: Array(6) };
+  fixtureMaps.set("synthetic", synthetic);
+  fixtureMaps.set("partial", partial);
+  fixtureMaps.set("starter", starter);
+  fixtureMaps.set("sparse", sparse);
+  for (const file of ["synthetic", "partial", "starter", "sparse"]) {
+    assert.throws(() => actual.loadCrystalQuestCollisionRegion({ ...region, mapFileName: file }),
+      (error) => error instanceof actual.QuestCollisionError && error.code === "collisionUnavailable", file);
+  }
+
+  // strict_geometry_rejects_paths_devices_bad_bounds_and_oversized_chunks
+  for (const file of ["../source", "source/other", "SOURCE", " source", "con", "nul.map", "source."]) {
+    assert.throws(() => actual.loadCrystalQuestCollisionRegion({ ...region, mapFileName: file }),
+      (error) => error instanceof actual.QuestCollisionError && error.code === "invalidInput", file);
+  }
+  for (const patch of [{ minX: -1 }, { minX: 6 }, { maxX: 256 }, { maxX: 0.5 }, { maxX: -1 }]) {
+    assert.throws(() => actual.loadCrystalQuestCollisionRegion({ ...region, ...patch }),
+      (error) => error instanceof actual.QuestCollisionError && error.code === "invalidInput");
+  }
+
+  // strict_fingerprint_changes_when_real_source_bytes_or_manifest_change
+  const changedSourceBytes = Buffer.from(sourceBytes);
+  changedSourceBytes[8 + 25] = 1; // Different real bytes; static walls intentionally unchanged.
+  fixtureMaps.set("source", actual.parseMapBytes("source.map", changedSourceBytes));
+  const changedSource = actual.loadCrystalQuestCollisionRegion(region);
+  assert.notEqual(changedSource.geometryFingerprint, initial.geometryFingerprint);
+  assert.deepEqual(changedSource.blockedCells, initial.blockedCells);
+  fixtureManifest.maps[0].movements[1].need_hole = false;
+  const changedManifest = actual.loadCrystalQuestCollisionRegion(region);
+  assert.notEqual(changedManifest.geometryFingerprint, changedSource.geometryFingerprint);
+  assert.deepEqual(changedManifest.blockedCells, [2, 3, 4, 5].map((x) => ({ x, y: 0 })));
+
+  // strict_cached_source_observes_changed_landing_bytes_and_collision
+  const sameSource = fixtureMaps.get("source");
+  const changedLandingBytes = Buffer.from(landingBytes);
+  changedLandingBytes.writeInt16LE(-32768, 8 + 26 + 12); // Ordinary landing is now a wall.
+  fixtureMaps.set("landing", actual.parseMapBytes("landing.map", changedLandingBytes));
+  const changedLanding = actual.loadCrystalQuestCollisionRegion(region);
+  assert.equal(fixtureMaps.get("source"), sameSource, "source map remains cached");
+  assert.notEqual(changedLanding.geometryFingerprint, changedManifest.geometryFingerprint);
+  assert.deepEqual(changedLanding.blockedCells, [0, 1, 2, 3, 4, 5].map((x) => ({ x, y: 0 })));
+
+  // Invoke the production GET function through a JSON response stub, never HTTP.
+  const routePath = new URL("../app/api/scene/collision/route.ts", import.meta.url);
+  const routeModule = { exports: {} };
+  const routeCode = ts.transpileModule(readFileSync(routePath, "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  new Function("exports", "module", "require", routeCode)(routeModule.exports, routeModule, (id) => {
+    if (id === "next/server") return { NextResponse: { json: (body, options = {}) => ({
+      body, status: options.status ?? 200, headers: options.headers ?? {},
+    }) } };
+    assert.equal(id, "../../../../lib/crystal-map-loader");
+    return actual;
+  });
+  const completeParams = new URLSearchParams({ quest: "1", map: "source", minX: "0", maxX: "5", minY: "0", maxY: "0" });
+  const strictResponse = await routeModule.exports.GET({ url: `https://fixture.invalid/api/scene/collision?${completeParams}` });
+  assert.equal(strictResponse.status, 200);
+  assert.deepEqual(strictResponse.body, changedLanding);
+
+  // strict_api_requires_map_and_all_four_explicit_bounds_before_loading
+  for (const key of ["map", "minX", "maxX", "minY", "maxY"]) {
+    const missing = new URLSearchParams(completeParams);
+    missing.delete(key);
+    const beforeReads = [fixtureMapReads, fixtureManifestReads];
+    const result = await routeModule.exports.GET({ url: `https://fixture.invalid/api/scene/collision?${missing}` });
+    assert.equal(result.status, 400, `strict query missing ${key}`);
+    assert.deepEqual(result.body, { schemaVersion: 1, error: "invalidInput" });
+    assert.equal(result.headers["Cache-Control"], "no-store");
+    assert.deepEqual([fixtureMapReads, fixtureManifestReads], beforeReads,
+      `missing ${key} must be rejected before map or manifest access`);
+  }
+  for (const value of ["", "NaN", "1.5", "-1", "0oops"]) {
+    const invalid = new URLSearchParams(completeParams);
+    invalid.set("minX", value);
+    const result = await routeModule.exports.GET({ url: `https://fixture.invalid/api/scene/collision?${invalid}` });
+    assert.equal(result.status, 400, `invalid strict numeric bound ${JSON.stringify(value)}`);
+    assert.deepEqual(result.body, { schemaVersion: 1, error: "invalidInput" });
+  }
+  const unavailableParams = new URLSearchParams(completeParams);
+  unavailableParams.set("map", "synthetic");
+  const unavailable = await routeModule.exports.GET({ url: `https://fixture.invalid/api/scene/collision?${unavailableParams}` });
+  assert.equal(unavailable.status, 424);
+  assert.deepEqual(unavailable.body, { schemaVersion: 1, error: "collisionUnavailable" });
+
+  // legacy_api_without_quest_retains_clamping_raw_walls_and_default_map
+  const legacy = await routeModule.exports.GET({ url: "https://fixture.invalid/api/scene/collision?map=source&minX=0&maxX=999&minY=0&maxY=0" });
+  assert.equal(legacy.status, 200);
+  assert.equal(legacy.body.schemaVersion, undefined);
+  assert.equal(legacy.body.mapFileName, "source.map");
+  assert.deepEqual(legacy.body.bounds, { minX: 0, maxX: 5, minY: 0, maxY: 0 });
+  assert.deepEqual(legacy.body.blockedCells, [0, 1, 2, 3, 4, 5].map((x) => ({ x, y: 0 })));
+  const defaultLegacy = await routeModule.exports.GET({ url: "https://fixture.invalid/api/scene/collision" });
+  assert.equal(defaultLegacy.body.mapFileName, "0.map");
+  assert.deepEqual(defaultLegacy.body.bounds, { minX: 0, maxX: 0, minY: 0, maxY: 0 });
+  assert.deepEqual(defaultLegacy.body.blockedCells, [{ x: 0, y: 0 }]);
+}
+
+{
   const mir3Names = [
     "Tilesc",
     "Tiles30c",
@@ -159,6 +353,20 @@ function sha256(bytes) {
 }
 
 {
+  for (const index of [210,225,240,255,270,310,325,340,355,370]) {
+    const library = mapLibraryKeyForIndex(index);
+    assert.equal(mapAtlasPathRequiresAlphaKey(`/original-map/${library}/2766.png`), true, library);
+    const map = { width:1, height:1, cells:[{backIndex:-1,backImage:0,
+      middleIndex:index,middleImage:2767,middleAnimationFrame:0,
+      frontIndex:-1,frontImage:0,frontAnimationFrame:0}] };
+    assert.ok(collectStandaloneMapReferences(map).some(r => r.key === `${library}#2766`));
+  }
+  for (const name of ["SmObjectsbad", "SmObjectsc2", "SmObjectscwoods"]) {
+    assert.equal(mapAtlasPathRequiresAlphaKey(`/original-map/WemadeMir3/${name}/1.png`),false);
+  }
+}
+
+{
   assert.equal(decodeCrystalMiddleAnimationCount(0), 0);
   assert.equal(decodeCrystalMiddleAnimationCount(8), 8);
   assert.equal(decodeCrystalMiddleAnimationCount(0x88), 8);
@@ -208,6 +416,28 @@ function sha256(bytes) {
 }
 
 {
+  const bytes = makeType100MapBytes([
+    (target, base) => {
+      target.writeInt16LE(2, base + 10);
+      target.writeInt16LE(2724, base + 12); // front base frame 2723
+      target[base + 16] = 0x8a; // ten-frame additive Crystal lamp flame
+    },
+  ]);
+  const parsed = parseType100Map(bytes);
+  assert.ok(parsed);
+  const refs = collectStandaloneMapReferences(parsed);
+  assert.deepEqual(
+    refs.map((reference) => reference.key),
+    Array.from(
+      { length: 10 },
+      (_, phase) => `WemadeMir2/Objects#${2723 + phase}`,
+    ),
+    "native keyed pack must close every phase in a Crystal animation family",
+  );
+  assert.ok(refs.every((reference) => reference.additive));
+}
+
+{
   const bytes = makeType1MapBytes([
     (target, base, xor) => {
       target.writeInt32LE(0xaa38aa38 | 0, base);
@@ -254,6 +484,13 @@ function sha256(bytes) {
       { key: "WemadeMir3/Dungeonsc#1", additive: false, layer: "back" },
       { key: "WemadeMir3/Object1c#3", additive: true, layer: "front" },
       { key: "WemadeMir3/Tilesc#2", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#3", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#4", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#5", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#6", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#7", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#8", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#9", additive: true, layer: "middle" },
     ],
   );
 }
@@ -343,7 +580,7 @@ function sha256(bytes) {
   const mapBytes = makeType100MapBytes([
     (target, base) => {
       target.writeInt16LE(2, base + 6);
-      target.writeInt16LE(2, base + 8); // frame 1 -> alpha-key
+      target.writeInt16LE(2, base + 8); // frame 1 -> authoritative Crystal RGBA
     },
     (target, base) => {
       target.writeInt16LE(2, base + 10);
@@ -355,14 +592,18 @@ function sha256(bytes) {
     path.join(packagedMapRoot, "0.map.gz"),
     gzipSync(mapBytes),
   );
-  const keyedSource = await sharp({
-    create: {
-      width: 2,
-      height: 2,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 1 },
-    },
-  })
+  // Crystal exports ordinary map objects with authoritative alpha. In particular,
+  // dark opaque art is allowed to touch a narrow frame's edge; treating that art
+  // as a second black-key background is the regression that made buildings pale.
+  const keyedSource = await sharp(
+    Buffer.from([
+      8, 8, 8, 255,
+      0, 0, 0, 0,
+      32, 24, 16, 255,
+      200, 180, 120, 255,
+    ]),
+    { raw: { width: 2, height: 2, channels: 4 } },
+  )
     .png()
     .toBuffer();
   const additiveSource = await sharp({
@@ -458,6 +699,11 @@ function sha256(bytes) {
     ),
     false,
     "custom output must not leak additive pages into the default generated tree",
+  );
+  assert.deepEqual(
+    readFileSync(keyedPagePath),
+    keyedSource,
+    "normal staged PNG must preserve authoritative Crystal RGBA byte-for-byte",
   );
   assert.deepEqual(
     readFileSync(additivePagePath),

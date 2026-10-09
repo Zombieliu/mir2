@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 import { constants as zlibConstants, gzipSync } from "node:zlib";
 
 import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
+import { computeBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
+import { prepareImmutableBevyRuntimeBundle } from "./lib/immutable-bevy-runtime-bundle.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const BUILD_SCRIPT = path.join(SCRIPT_DIR, "build-remote-asset-release.mjs");
@@ -36,6 +38,63 @@ const R2_RELEASE_WORKFLOW = path.resolve(
   "web-assets-r2-release.yml",
 );
 let passedTestCount = 0;
+
+await test("runtime producers bind legacy/UI0/UI1 packages to immutable versioned bytes and gzip", async () => {
+  for (const mode of ["legacy", "ui0", "ui1"]) {
+    await withTempDir(async (root) => {
+      const env = await installRuntimeProducerFixture(root, mode);
+      const server = await listen((_request, response) => {
+        response.setHeader("content-type", "application/json");
+        response.end(JSON.stringify({ version: "fixture-assets", resourcePacks: [{
+          name: "stale-runtime", urls: ["/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js"],
+        }] }));
+      });
+      try {
+        const outputDir = path.join(root, "release-output");
+        const remoteArgs = runtimeProducerArgs(server.url, root, outputDir);
+        await runNode(env.fixtureScript, remoteArgs);
+        const release = JSON.parse(await fs.readFile(path.join(outputDir, "remote-asset-release.json"), "utf8"));
+        const runtimeFiles = release.files.filter((file) => file.relativePath.startsWith("bevy-runtime/"));
+        assert.equal(runtimeFiles.length, env.manifest.files.length);
+        assert.equal(release.bevyRuntime.version, env.manifest.version);
+        assert.equal(release.bevyRuntime.schemaVersion, mode === "legacy" ? 1 : 2);
+        assert.equal(release.bevyRuntime.packages.length, mode === "ui1" ? 3 : 2);
+        for (const file of runtimeFiles) {
+          assert.ok(file.path.startsWith("/bevy-runtime/v/" + env.manifest.version + "/"));
+          assert.ok(file.localPath.startsWith(env.versionDirectory + path.sep));
+          const bytes = await fs.readFile(file.stagePath);
+          assert.equal(createHash("sha256").update(bytes).digest("hex"), file.sha256);
+          const suffix = file.relativePath.split("/").slice(3).join("/");
+          assert.equal(file.sha256, env.manifest.files.find((entry) => entry.path.endsWith("/" + suffix)).sha256);
+          if (file.relativePath.endsWith(".wasm")) {
+            const gzip = gzipSync(bytes, { level: zlibConstants.Z_BEST_COMPRESSION, mtime: 0 });
+            assert.equal(file.contentEncoding, "gzip");
+            assert.equal(file.encodedSha256, createHash("sha256").update(gzip).digest("hex"));
+            assert.equal(file.encodedSize, gzip.length);
+          }
+        }
+        const r2Output = path.join(root, "r2-runtime.json");
+        await runNode(env.r2Script, ["--assetVersion", "fixture-assets", "--objectPrefix", "mir2/v/fixture-assets", "--output", r2Output]);
+        const r2 = JSON.parse(await fs.readFile(r2Output, "utf8"));
+        assert.equal(r2.files.length, env.manifest.files.length);
+        assert.equal(r2.bevyRuntime.version, env.manifest.version);
+        assert.equal(r2.bevyRuntime.packages.length, mode === "ui1" ? 3 : 2);
+        for (const file of r2.files) {
+          assert.ok(file.stagePath.startsWith(env.versionDirectory + path.sep));
+          const remoteFile = runtimeFiles.find((entry) => entry.path === file.path);
+          assert.ok(remoteFile);
+          assert.equal(file.sha256, remoteFile.sha256);
+          assert.equal(file.encodedSha256, remoteFile.encodedSha256);
+        }
+        await assert.rejects(() => runNode(env.fixtureScript, [...remoteArgs, "--hashMode", "skip"]), /sha256 is required/);
+        const sharedOrGlWasm = path.join(env.versionDirectory, mode === "ui1" ? "pkg-webgl2-shared" : "pkg-webgl2", "mir2_bevy_runtime_bg.wasm");
+        await fs.rename(sharedOrGlWasm, path.join(root, "held-wasm"));
+        await assert.rejects(() => runNode(env.fixtureScript, remoteArgs), /missing or undeclared/);
+        await assert.rejects(() => runNode(env.r2Script, ["--assetVersion", "fixture", "--objectPrefix", "fixture", "--output", r2Output]), /missing or undeclared/);
+      } finally { await server.close(); }
+    });
+  }
+});
 
 await test("map-atlas pages accompany a referenced map-atlas manifest", async () => {
   await withTempDir(async (root) => {
@@ -1165,6 +1224,9 @@ async function withTempDir(fn) {
   try {
     await fn(root);
   } finally {
+    const resolved = path.resolve(root);
+    if (path.dirname(resolved) !== path.resolve(os.tmpdir()) || !path.basename(resolved).startsWith("mir2-asset-release-safety-")
+        || (await fs.lstat(resolved)).isSymbolicLink()) throw new Error("Refusing unexpected release fixture cleanup");
     await fs.rm(root, { recursive: true, force: true });
   }
 }
@@ -1202,6 +1264,13 @@ function runNode(script, args, env = {}) {
 }
 
 async function installQuestItemIconClosureFixture(root, fixtureScript, publicRoot) {
+  const webRoot = path.dirname(path.dirname(fixtureScript));
+  await fs.mkdir(path.join(path.dirname(fixtureScript), "lib"), { recursive: true });
+  await fs.mkdir(path.join(webRoot, "lib"), { recursive: true });
+  for (const name of ["bevy-runtime-release-files.mjs", "bevy-runtime-version.mjs"]) {
+    await fs.copyFile(path.join(SCRIPT_DIR, "lib", name), path.join(path.dirname(fixtureScript), "lib", name));
+  }
+  await fs.copyFile(path.join(SCRIPT_DIR, "..", "lib", "bevy-runtime-manifest.mjs"), path.join(webRoot, "lib", "bevy-runtime-manifest.mjs"));
   const generatedDataRoot = path.join(root, "packages", "game-data", "data", "generated");
   const itemIconRoot = path.join(publicRoot, "original-ui", "Items");
   await fs.copyFile(
@@ -1219,4 +1288,63 @@ async function installQuestItemIconClosureFixture(root, fixtureScript, publicRoo
     JSON.stringify({ items: [] }),
   );
   await fs.writeFile(path.join(itemIconRoot, "meta.json"), JSON.stringify({ frames: [] }));
+}
+
+async function installRuntimeProducerFixture(root, mode) {
+  const webRoot = path.join(root, "apps", "web");
+  const scriptRoot = path.join(webRoot, "scripts");
+  const publicRoot = path.join(webRoot, "public");
+  await fs.mkdir(path.join(scriptRoot, "asset-pipeline"), { recursive: true });
+  await fs.mkdir(publicRoot, { recursive: true });
+  const fixtureScript = path.join(scriptRoot, path.basename(BUILD_SCRIPT));
+  const r2Script = path.join(scriptRoot, "build-bevy-runtime-r2-release.mjs");
+  await fs.copyFile(BUILD_SCRIPT, fixtureScript);
+  await fs.copyFile(path.join(SCRIPT_DIR, "build-bevy-runtime-r2-release.mjs"), r2Script);
+  for (const source of [CAS_RELEASE_MODULE, FULL_PACK_CLOSURE_MODULE]) {
+    await fs.copyFile(source, path.join(scriptRoot, "asset-pipeline", path.basename(source)));
+  }
+  await fs.copyFile(VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT, path.join(scriptRoot, path.basename(VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT)));
+  await installQuestItemIconClosureFixture(root, fixtureScript, publicRoot);
+  await fs.mkdir(path.join(publicRoot, "original-map"), { recursive: true });
+  await fs.writeFile(path.join(publicRoot, "original-map", "fixture.png"), "fixture");
+  await fs.writeFile(path.join(publicRoot, "original-asset-manifest.generated.json"),
+    JSON.stringify({ schemaVersion: 1, assets: { "/original-map/fixture.png": {} } }));
+  const source = path.join(publicRoot, "bevy-runtime");
+  const releases = path.join(publicRoot, "bevy-runtime-releases");
+  await fs.mkdir(source);
+  await fs.mkdir(releases);
+  const ids = mode === "ui1" ? ["webgpu", "webgl2", "webgl2-shared"] : ["webgpu", "webgl2"];
+  const files = [];
+  for (const id of ids) {
+    const pkg = path.join(source, "pkg-" + id);
+    await fs.mkdir(pkg);
+    for (const name of ["mir2_bevy_runtime.js", "mir2_bevy_runtime_bg.wasm"]) {
+      const bytes = name.endsWith(".wasm") ? Buffer.from([0, 97, 115, 109, 1, 0, 0, 0]) : Buffer.from("export const fixture = " + JSON.stringify(id) + ";");
+      await fs.writeFile(path.join(pkg, name), bytes);
+      files.push({ path: "public/bevy-runtime/pkg-" + id + "/" + name, sha256: createHash("sha256").update(bytes).digest("hex") });
+    }
+  }
+  const manifest = mode === "legacy" ? { version: "", files } : {
+    schemaVersion: 2, version: "", files, packages: ids.map((id) => ({
+      id, backend: id === "webgpu" ? "webgpu" : "webgl2", packageDir: "pkg-" + id,
+      questUiAbiVersion: mode === "ui1" ? 1 : 0, bagUiAbiVersion: mode === "ui1" ? 1 : 0,
+      primarySharedUiCompiled: id === "webgl2-shared",
+    })),
+  };
+  manifest.version = computeBevyRuntimeVersion(manifest);
+  await fs.mkdir(path.join(webRoot, "lib", "generated"));
+  await fs.writeFile(path.join(webRoot, "lib", "generated", "bevy_runtime_version.json"), JSON.stringify(manifest));
+  const versionDirectory = prepareImmutableBevyRuntimeBundle({ sourcePkgParentDir: source, manifest, releasesParentDir: releases, nonce: "producer-fixture" });
+  // Prove that a new flat tree and its undeclared files are irrelevant.
+  await fs.rename(source, path.join(publicRoot, "retired-flat"));
+  await fs.mkdir(source);
+  await fs.writeFile(path.join(source, "stale.js"), "undeclared new flat bytes");
+  return { fixtureScript, r2Script, manifest, versionDirectory };
+}
+
+function runtimeProducerArgs(baseUrl, root, outputDir) {
+  return ["--baseUrl", baseUrl, "--outDir", outputDir, "--stageDir", path.join(root, "stage"),
+    "--stageFileMode", "reference", "--cas", "false", "--includeSceneSprites", "false",
+    "--includePublicAssetRoots", "true", "--publicAssetRoots", "bevy-runtime,bevy-runtime-releases",
+    "--includeBevyRuntime", "true", "--allowMissing", "true"];
 }

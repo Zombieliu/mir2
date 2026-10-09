@@ -2579,8 +2579,49 @@ fn encode_stat_values(writer: &mut PacketWriter, stats: &[UserItemStat]) {
     }
 }
 
+/// Exact JSON transport for the signed .NET datetime in UserItemExpireInfo.
+/// Binary packets still read/write i64. Legacy integers remain readable;
+/// strings must be the canonical decimal spelling of an i64.
+pub mod item_expiry_json {
+    use serde::{de::{self, Visitor}, Deserializer, Serializer};
+    use std::fmt;
+
+    pub fn serialize<S: Serializer>(value: &i64, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.collect_str(value)
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<i64, D::Error> {
+        struct ExactSignedInteger;
+        impl<'de> Visitor<'de> for ExactSignedInteger {
+            type Value = i64;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("an i64 integer or its canonical decimal string")
+            }
+            fn visit_i64<E: de::Error>(self, value: i64) -> Result<i64, E> {
+                Ok(value)
+            }
+            fn visit_u64<E: de::Error>(self, value: u64) -> Result<i64, E> {
+                i64::try_from(value).map_err(|_| E::custom("expiry integer out of range"))
+            }
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<i64, E> {
+                let parsed = value.parse::<i64>()
+                    .map_err(|_| E::custom("invalid expiry integer"))?;
+                if parsed.to_string() != value {
+                    return Err(E::custom("noncanonical expiry integer"));
+                }
+                Ok(parsed)
+            }
+            fn visit_string<E: de::Error>(self, value: String) -> Result<i64, E> {
+                self.visit_str(&value)
+            }
+        }
+        deserializer.deserialize_any(ExactSignedInteger)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UserItemExpireInfo {
+    #[serde(with = "item_expiry_json")]
     pub expiry_binary_datetime: i64,
 }
 

@@ -1,12 +1,16 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-core-runtime";
+import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
+
+import { memo, useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 
 import { useWorldSelector } from "../../lib/world-model";
 import type { WorldStore } from "../../lib/world-model";
 import type { CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import { IS_PLATINUM_176_PROFILE } from "../../lib/content-profile";
-import { MainHud } from "./original-client-overlays";
+import { MainHud, MainHudStatus, HudSpriteFallback } from "./original-client-overlays";
 import {
   BeltDialog,
   ChatFilterBar,
@@ -17,10 +21,14 @@ import {
   type ChatFilterKey,
   type ChatOptionFilterKey,
 } from "./original-client-panels";
-import { MailPanel, NpcDialogPanel, ReportPanel } from "./original-client-dialogs";
+import { NpcDialogPanel, ReportPanel } from "./original-client-dialogs";
 import { ObjectiveTracker } from "./original-client-objective-tracker";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
 import { GameShopWindow, NpcShopWindow } from "./original-client-game-shop";
+import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { BagBeltButtonBinding } from "../../lib/bag-belt-gesture";
+import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
+import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
@@ -32,12 +40,15 @@ import {
 } from "./original-client-system-menu";
 import type {
   DisplayEntity,
+  DisplayItem,
+  DisplayEquipmentItem,
   DisplayLogLine,
   DisplayNpcShopService,
   DisplayWorld,
   EquipmentActionRef,
   EquipmentSlot,
   ItemActionRef,
+  ItemContainer,
   MergeItemRef,
   MoveItemRef,
   TranslateFn,
@@ -54,22 +65,62 @@ type GameUiSceneProps = {
   showInventory: boolean;
   showCharacter: boolean;
   showQuestLog: boolean;
+  sharedQuestUiActive?: boolean;
+  sharedQuestWorldUiActive?: boolean;
+  sharedBagUiActive?: boolean;
+  sharedStorageUiActive?: boolean;
+  sharedHudUiActive?: boolean;
+  hpView?: boolean;
+  sharedHudPlan?: import("../../lib/bevy-hud-ui").MainHudPlan | null;
+  experienceSpriteOwned?: boolean;
+  weightSpriteOwned?: boolean;
+  sharedCharacterStatsActive?: boolean;
+  inventoryInitialDeleteMode?: boolean;
+  onInventoryCompatibilityInteraction?: () => void;
+  onQuestUiModalChange?: (blocked: boolean) => void;
+  onHpOrbModalChange?: (blocked: boolean) => void;
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  storagePasswordOpenVersion?: number;
   npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
+  npcRepairView?: NpcRepairView | null;
+  onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
+  onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
+  onToggleNpcRepairHold?: (view: NpcRepairView) => void;
+  npcRepairTargetSelection?: NpcRepairSelection | null;
+  onRegisterNpcRepairTarget?: (view: NpcRepairView, node: HTMLElement) => () => void;
+  onNpcRepairBagPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
+  onBagBeltPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void) => boolean;
+  onRegisterBeltTargets?: (targets: readonly BagBeltButtonBinding[]) => () => void;
+  onFenceBeltMouse?: (event: { target: EventTarget | null; detail?: number; timeStamp: number; preventDefault(): void; stopPropagation(): void }) => boolean;
   defaultChatExpanded?: boolean;
+  chatUi?: ChatUiControls;
+  mapImageRouteSource?: MapImageRouteSource | null;
+  onMapImageRoute?: (intent: MapImageRouteIntent) => void;
+  onMapImageRoutePress?: (source: MapImageRouteSource | null) => void;
+  onMapRouteModalChange?: (blocked: boolean) => void;
   onChatMessageChange: (value: string) => void;
   onSendChat: (message: string) => void;
   onRequestTrade: () => void;
   onRentExpandedStorage: () => void;
+  storageRentalPrompt?: { id: number; renewing: boolean } | null;
+  onConfirmStorageRental?: (id: number) => void;
+  onCancelStorageRental?: (id: number) => void;
   onLogout: () => void;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
   onToggleQuestLog: () => void;
+  onToggleOptions?: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseStorage?: () => void;
+  bevyNpcShopUiActive?: boolean;
+  bevyNpcShopUiTransitioning?: boolean;
+  getBevyNpcShopInputBlocked?: () => boolean;
+  npcShopTab?: "buy" | "sell";
+  onNpcShopTabChange?: (tab: "buy" | "sell") => void;
   onCloseNpcShopService: () => void;
   onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
@@ -77,26 +128,39 @@ type GameUiSceneProps = {
   onSelectNpcDialogTarget: (target: string) => void;
   onSubmitNpcInput: (value: string) => void;
   onUseItem: (item: ItemActionRef) => void;
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
+  onReadEquipmentItemTooltip?: (item: Readonly<DisplayEquipmentItem>) => CrystalTooltipDocument | null;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
   onRemoveItem: (item: EquipmentActionRef) => void;
-  onMoveItem: (item: MoveItemRef, toSlot: number) => void;
+  onMoveItem: (item: MoveItemRef, toSlot: number, toContainer?: ItemContainer) => boolean;
   onMergeItem: (from: MergeItemRef, to: MergeItemRef) => void;
   onSplitItem: (item: ItemActionRef, count: number) => void;
-  onStoreItem: (item: MoveItemRef, toSlot: number) => void;
-  onTakeBackItem: (item: MoveItemRef, toSlot: number) => void;
+  onStoreItem: (item: MoveItemRef, toSlot: number) => boolean;
+  onTakeBackItem: (item: MoveItemRef, toSlot: number, toContainer: ItemContainer) => boolean;
   onUnlockStorage: (password: string) => void;
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
   onRemoveStoragePassword: (currentPassword: string) => void;
   onSellItem: (item: ItemActionRef, count: number) => void;
   onBuyNpcShopItem: (id: number, quantity: number, panelType: number) => void;
+  onQuoteNpcShopItem: (id: number, quantity: number) => NpcGoldBuyQuote | null;
   onDropGold: (amount: number) => void;
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
   onClaimMail: (mailId: number) => void;
+  mailOpen?: boolean;
+  onToggleMail?: () => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
+  cashGameShopSource?: CashGameShopSource | null;
+  cashGameShopPending?: boolean;
+  onConfirmCashGameShopPurchase?: (confirmation: CashGameShopConfirmation) => void;
+  onReadCashGameShopItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  cashPreviewSourceKey?: string | null;
+  onReadCashPreviewLayers?: (item: CashGameShopEntry, direction: number, elapsedMs: number) => CashPreviewLayerDocument | null;
+  onTurnCashPreview?: (direction: number, right: boolean) => number | null;
+  onGameShopVisibilityChange?: (open: boolean) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   inputProfile: Mir2InputProfile;
   gamepadFamily: Mir2GamepadFamily;
@@ -114,29 +178,52 @@ function GameUiSceneInner({
   showInventory,
   showCharacter,
   showQuestLog,
+  sharedQuestUiActive = false,
+  sharedQuestWorldUiActive = false,
+  sharedBagUiActive = false,
+  sharedStorageUiActive = false,
+  sharedHudUiActive = false,
+  hpView = true,
+  sharedHudPlan = null,
+  experienceSpriteOwned = false,
+  weightSpriteOwned = false,
+  sharedCharacterStatsActive = false,
+  inventoryInitialDeleteMode = false,
+  onInventoryCompatibilityInteraction,
+  onQuestUiModalChange,
+  onHpOrbModalChange,
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
+  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
+  onToggleNpcRepairHold, npcRepairTargetSelection, onRegisterNpcRepairTarget, onNpcRepairBagPointerDown,
+  onBagBeltPointerDown, onRegisterBeltTargets, onFenceBeltMouse,
   defaultChatExpanded = true,
+  chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
   onChatMessageChange,
   onSendChat,
   onRequestTrade,
   onRentExpandedStorage,
+  storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
   onLogout,
   onToggleCharacter,
   onToggleInventory,
   onToggleQuestLog,
+  onToggleOptions,
   onCloseCharacter,
   onCloseInventory,
+  onCloseStorage,
+  bevyNpcShopUiActive = false, bevyNpcShopUiTransitioning = false, getBevyNpcShopInputBlocked, npcShopTab, onNpcShopTabChange,
   onCloseNpcShopService,
   onCloseNpcRepairService,
   onOpenCharacterTab,
   onOpenInventoryTab,
   onSelectNpcDialogTarget,
   onSubmitNpcInput,
-  onUseItem,
+  onUseItem, onReadItemTooltip, onReadEquipmentItemTooltip,
   onDropItem,
   onEquipItem,
   onRemoveItem,
@@ -149,14 +236,18 @@ function GameUiSceneInner({
   onSetStoragePassword,
   onRemoveStoragePassword,
   onSellItem,
-  onBuyNpcShopItem,
+  onBuyNpcShopItem, onQuoteNpcShopItem,
   onDropGold,
   onRepairItem,
   onSpecialRepairItem,
   onCastSkill,
   onClaimMail,
+  mailOpen = false,
+  onToggleMail,
   onDeleteMail,
   onBuyGameShopItem,
+  cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip, onGameShopVisibilityChange,
+  cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview,
   onSendClientCommand,
   inputProfile,
   gamepadFamily,
@@ -170,13 +261,72 @@ function GameUiSceneInner({
   const [transparentChat, setTransparentChat] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(defaultChatExpanded);
   const [showChatSettings, setShowChatSettings] = useState(false);
-  const [showMailPanel, setShowMailPanel] = useState(false);
+  const effectiveChatSettingsOpen=chatUi?.document.open??showChatSettings;
+  const chatUiEpoch=chatUi?.document.epoch;
+  const chatUiRef=useRef(chatUi);chatUiRef.current=chatUi;
+  const [chatPointerHeld,setChatPointerHeld]=useState(false);const chatPointerHeldRef=useRef(false);
+  const showMailPanel = mailOpen;
   const [showBigMap, setShowBigMap] = useState(false);
+  const [showMinimap, setShowMinimap] = useState(true);
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showGameShop, setShowGameShop] = useState(false);
+  const gameShopOpenRef = useRef(false);
+  const gameShopVisibilityRef = useRef(onGameShopVisibilityChange);
+  gameShopVisibilityRef.current = onGameShopVisibilityChange;
+  function changeGameShopOpen(open: boolean) {
+    gameShopOpenRef.current = open; gameShopVisibilityRef.current?.(open); setShowGameShop(open);
+  }
+  useEffect(() => () => {gameShopOpenRef.current = false; gameShopVisibilityRef.current?.(false);}, []);
+  const storageRentalDialogRef = useRef<HTMLDivElement>(null);
+  const storageRentalCancelRef = useRef(onCancelStorageRental);
+  storageRentalCancelRef.current = onCancelStorageRental;
+  useEffect(() => {
+    if (!storageRentalPrompt) return;
+    const prior = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = storageRentalDialogRef.current;
+    dialog?.querySelector<HTMLButtonElement>("[data-rental-cancel]")?.focus();
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); storageRentalCancelRef.current?.(storageRentalPrompt.id); }
+      if (event.key === "Tab") {
+        const buttons = dialog?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)");
+        if (!buttons?.length) return;
+        const index = Array.from(buttons).indexOf(document.activeElement as HTMLButtonElement);
+        event.preventDefault(); buttons[(index + (event.shiftKey ? buttons.length - 1 : 1)) % buttons.length].focus();
+      }
+    };
+    document.addEventListener("keydown", key, true);
+    return () => { document.removeEventListener("keydown", key, true); if (prior?.isConnected) prior.focus(); };
+  }, [storageRentalPrompt?.id]);
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const action = (event as CustomEvent<string>).detail;
+      if (action === "gameShop") changeGameShopOpen(!gameShopOpenRef.current);
+      else if (action === "menu") setShowSystemMenu(current => !current);
+      else if (action === "belt") setShowBelt(current => !current);
+      else if (action === "beltFlip") setBeltVertical(current => !current);
+      else if (action === "minimap") setShowMinimap(current => !current);
+      else if (action === "bigmap") setShowBigMap(current => !current);
+      else if (action === "closeAll") {
+        changeGameShopOpen(false); setShowBigMap(false); setShowSystemMenu(false); setShowSystemMenuFeaturePanel(null);
+        setShowReportPanel(false); const chat=chatUiRef.current;if(chat?.document.open)chat.cancel(chat.document.epoch);
+        setShowChatSettings(false); setShowDuraPanel(false);
+      }
+    };
+    window.addEventListener("mir2:hud-host-action", handler);
+    return () => window.removeEventListener("mir2:hud-host-action", handler);
+  }, []);
+  const previousQuestLogOpenRef = useRef(showQuestLog);
   const [showSystemMenuFeaturePanel, setShowSystemMenuFeaturePanel] = useState<SystemMenuSurfacePanel | null>(null);
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    const openingDiary = showQuestLog && !previousQuestLogOpenRef.current;
+    previousQuestLogOpenRef.current = showQuestLog;
+    if (inputProfile === "touch" && openingDiary && showSystemMenu) {
+      setShowSystemMenu(false);
+    }
+  }, [inputProfile, showQuestLog, showSystemMenu]);
 
   const dialogKey = world.activeNpcDialog
     ? JSON.stringify([
@@ -189,8 +339,27 @@ function GameUiSceneInner({
       ])
     : null;
   const visibleDialog =
-    world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
+    !sharedQuestUiActive && world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
+  // Mail has one Page-owned presentation; do not report its own-open as a competing modal.
+  const questUiModalBlocked = Boolean(showBigMap || showReportPanel || showSystemMenu
+    || showSystemMenuFeaturePanel || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt);
+  const hpOrbModalBlocked = Boolean(questUiModalBlocked || showDuraPanel || visibleDialog);
+  const mapRouteModalBlocked = Boolean(showReportPanel || showSystemMenu || showSystemMenuFeaturePanel
+    || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt || visibleDialog);
+  useLayoutEffect(() => {
+    onMapRouteModalChange?.(mapRouteModalBlocked);
+    return () => onMapRouteModalChange?.(false);
+  }, [mapRouteModalBlocked, onMapRouteModalChange]);
+  useLayoutEffect(() => {
+    onHpOrbModalChange?.(hpOrbModalBlocked);
+    return () => onHpOrbModalChange?.(false);
+  }, [hpOrbModalBlocked, onHpOrbModalChange]);
+  useEffect(() => {
+    onQuestUiModalChange?.(questUiModalBlocked);
+    return () => onQuestUiModalChange?.(false);
+  }, [onQuestUiModalChange, questUiModalBlocked]);
   const gamepadUiOpen = Boolean(
+    storageRentalPrompt ||
     showMailPanel ||
       showBigMap ||
       showReportPanel ||
@@ -202,6 +371,26 @@ function GameUiSceneInner({
       showCharacter ||
       showQuestLog,
   );
+
+
+  function changeChatSettings(open:boolean) {
+    const ui=chatUi;
+    if(open){onHpOrbModalChange?.(true);onQuestUiModalChange?.(true);onMapRouteModalChange?.(true);}
+    if(ui&&chatUiEpoch!==undefined) {if(open&&!effectiveChatSettingsOpen)ui.open(chatUiEpoch);else if(!open&&effectiveChatSettingsOpen)ui.cancel(chatUiEpoch);}
+    else setShowChatSettings(open);
+  }
+  function resizeChatWindow() {
+    if(chatUi&&chatUiEpoch!==undefined){chatUi.resize(chatUiEpoch);setChatExpanded(true);}
+    else setChatExpanded(current=>!current);
+  }
+  function changeChatPointerHold(held:boolean) {
+    chatPointerHeldRef.current=held;setChatPointerHeld(held);
+    const base=Boolean(showBigMap||showReportPanel||showSystemMenu||showSystemMenuFeaturePanel||showGameShop||effectiveChatSettingsOpen||storageRentalPrompt);
+    onQuestUiModalChange?.(held||base);
+    onHpOrbModalChange?.(held||base||showDuraPanel||Boolean(visibleDialog));
+    onMapRouteModalChange?.(held||Boolean(showReportPanel||showSystemMenu||showSystemMenuFeaturePanel
+      ||showGameShop||effectiveChatSettingsOpen||storageRentalPrompt||visibleDialog));
+  }
 
   function selectChatFilter(filter: ChatFilterKey) {
     const previousPrefix = chatPrefixForFilter(activeChatFilter);
@@ -255,17 +444,20 @@ function GameUiSceneInner({
       data-gamepad-ui-open={gamepadUiOpen ? "true" : "false"}
       data-chat-expanded={chatExpanded ? "true" : "false"}
     >
-      <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />
-      <MiniMapPanel
+      {!sharedQuestWorldUiActive && <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />}
+      {showMinimap && <MiniMapPanel
         t={t}
         world={world}
         player={player}
+        routeSource={mapImageRouteSource}
+        onImageRoute={onMapImageRoute}
+        onImageRoutePress={onMapImageRoutePress}
         showMailPanel={showMailPanel}
         showBigMap={showBigMap}
-        onToggleMail={() => setShowMailPanel((current) => !current)}
+        onToggleMail={() => onToggleMail?.()}
         onToggleBigMap={() => setShowBigMap((current) => !current)}
         showMailAction={!IS_PLATINUM_176_PROFILE}
-      />
+      />}
       <DuraPanel
         t={t}
         visible={showDuraPanel}
@@ -276,21 +468,25 @@ function GameUiSceneInner({
         <BeltDialog
           t={t}
           items={world.beltItems}
+          onRegisterBeltTargets={onRegisterBeltTargets}
+          onFenceBeltMouse={onFenceBeltMouse}
           vertical={beltVertical}
           onClose={() => setShowBelt(false)}
           onRotate={() => setBeltVertical((current) => !current)}
           onUseItem={onUseItem}
+          onReadItemTooltip={onReadItemTooltip}
         />
       ) : null}
       <ChatFilterBar
         t={t}
         activeFilter={activeChatFilter}
         chatExpanded={chatExpanded}
-        showSettings={showChatSettings}
+        chatUi={chatUi}
+        showSettings={effectiveChatSettingsOpen}
         onSelectFilter={selectChatFilter}
         onRequestTrade={onRequestTrade}
-        onToggleExpanded={() => setChatExpanded((current) => !current)}
-        onToggleSettings={() => setShowChatSettings((current) => !current)}
+        onToggleExpanded={resizeChatWindow}
+        onToggleSettings={()=>changeChatSettings(!effectiveChatSettingsOpen)}
         onToggleReport={() => setShowReportPanel((current) => !current)}
       />
       <ChatFrame
@@ -301,22 +497,25 @@ function GameUiSceneInner({
         hints={world.interactionHints}
         activeFilter={activeChatFilter}
         hiddenFilters={hiddenChatFilters}
+        chatUi={chatUi} onInputHoldChange={changeChatPointerHold}
         expanded={chatExpanded}
-        showSettings={showChatSettings}
+        showSettings={effectiveChatSettingsOpen}
         transparent={transparentChat}
         onChatMessageChange={onChatMessageChange}
         onSendChat={sendActiveChatMessage}
-        onCloseSettings={() => setShowChatSettings(false)}
+        onCloseSettings={()=>changeChatSettings(false)}
         onToggleHiddenFilter={toggleHiddenChatFilter}
         onToggleAllHiddenFilters={toggleAllHiddenChatFilters}
         onToggleTransparent={() => setTransparentChat((current) => !current)}
       />
-      <MainHud
+      {sharedHudUiActive ? <><MainHudStatus t={t} mapTitle={world.mapTitle} world={world} />
+        <HudSpriteFallback plan={sharedHudPlan} experienceOwned={experienceSpriteOwned} weightOwned={weightSpriteOwned} /></> : <MainHud
         t={t}
         connected={world.connected}
         mapTitle={world.mapTitle}
         player={player}
         world={world}
+        hpView={hpView}
         showCharacter={showCharacter}
         showInventory={showInventory}
         showQuestLog={showQuestLog}
@@ -325,30 +524,25 @@ function GameUiSceneInner({
         onToggleCharacter={onToggleCharacter}
         onToggleInventory={onToggleInventory}
         onToggleQuestLog={onToggleQuestLog}
+        onToggleOptions={onToggleOptions}
         onOpenCharacterTab={onOpenCharacterTab}
         onOpenInventoryTab={onOpenInventoryTab}
         onDropGold={() => onDropGold(100)}
         onLogout={onLogout}
         showGameShop={showGameShop}
-        onToggleGameShop={() => setShowGameShop((current) => !current)}
+        onToggleGameShop={() => changeGameShopOpen(!gameShopOpenRef.current)}
         showGameShopAction={!IS_PLATINUM_176_PROFILE}
         showMenu={showSystemMenu}
         onToggleMenu={() => setShowSystemMenu((current) => !current)}
-      />
-      {showMailPanel ? (
-        <MailPanel
-          t={t}
-          mail={world.stage5Systems?.mail ?? []}
-          onClaim={onClaimMail}
-          onDelete={onDeleteMail}
-          onClose={() => setShowMailPanel(false)}
-        />
-      ) : null}
+      />}
       {showBigMap ? (
         <BigMapDialog
           t={t}
           world={world}
           player={player}
+          routeSource={mapImageRouteSource}
+          onImageRoute={onMapImageRoute}
+          onImageRoutePress={onMapImageRoutePress}
           onClose={() => setShowBigMap(false)}
         />
       ) : null}
@@ -400,21 +594,35 @@ function GameUiSceneInner({
           credits={world.credit}
           playerClass={player?.classKey ?? "warrior"}
           onBuy={onBuyGameShopItem}
-          onClose={() => setShowGameShop(false)}
+          source={cashGameShopSource}
+          purchasePending={cashGameShopPending}
+          onConfirmPurchase={onConfirmCashGameShopPurchase}
+          onReadItemTooltip={onReadCashGameShopItemTooltip}
+          previewSourceKey={cashPreviewSourceKey}
+          onReadPreviewLayers={onReadCashPreviewLayers}
+          onTurnPreview={onTurnCashPreview}
+          onClose={() => changeGameShopOpen(false)}
         />
       ) : null}
-      {npcShopService ? (
+      {npcShopService && !(bevyNpcShopUiActive && npcShopTab === "buy") ? (
         <NpcShopWindow
-          key={`${npcShopService.npcName}:${npcShopService.panelType}:${npcShopService.buyItems.map((item) => item.id).join(",")}`}
+          key={`${npcShopService.serviceRevision}:${npcShopService.catalogRevision}`}
           t={t}
           npcName={npcShopService.npcName}
+          currency={npcShopService.currency ?? "gold"}
+          pearlBalance={npcShopService.pearlBalance ?? null}
           gold={world.gold}
           initialTab={npcShopService.supportsBuy ? "buy" : "sell"}
+          tab={npcShopTab}
+          onTabChange={(tab) => { if (tab === "buy" || tab === "sell") onNpcShopTabChange?.(tab); }}
+          inputBlocked={bevyNpcShopUiActive || bevyNpcShopUiTransitioning}
+          getInputBlocked={getBevyNpcShopInputBlocked}
           availableTabs={[
             ...(npcShopService.supportsBuy ? (["buy"] as const) : []),
             ...(npcShopService.supportsSell ? (["sell"] as const) : []),
           ]}
           buyItems={npcShopService.buyItems}
+          onQuoteBuy={(id, quantity) => onQuoteNpcShopItem(Number(id), quantity)}
           sellItems={world.inventoryItems.map((item) => ({
             id: item.uniqueId,
             name: item.name,
@@ -437,46 +645,50 @@ function GameUiSceneInner({
         <NpcShopWindow
           key={npcRepairService}
           t={t}
-          npcName={npcRepairService === "special" ? t("ui.shopSpecialRepair", [], "Special Repair") : t("ui.shopRepair", [], "Repair")}
-          gold={world.gold}
+          npcName={npcRepairView?.name || (npcRepairService === "special" ? t("ui.shopSpecialRepair", [], "Special Repair") : t("ui.shopRepair", [], "Repair"))}
+          gold={npcRepairView?.gold}
+          repairView={npcRepairView}
+          onSelectRepair={onSelectNpcRepair}
+          onConfirmRepair={onConfirmNpcRepair}
+          onToggleRepairHold={onToggleNpcRepairHold}
+          repairTargetSelection={npcRepairTargetSelection}
+          onRegisterRepairTarget={onRegisterNpcRepairTarget}
           initialTab={npcRepairService}
           availableTabs={[npcRepairService]}
           repairItems={
             npcRepairService === "repair"
-              ? world.equipmentItems.map((item) => ({
-                  id: item.slot,
+              ? npcRepairView?.rows.map((item) => ({
+                  id: item.uniqueId ?? `unknown:${item.slot}`,
                   name: item.name,
                   icon: item.icon,
-                  price: 0,
-                  description: item.description,
-                  durabilityCurrent: item.durabilityCurrent,
-                  durabilityMax: item.durabilityMax,
-                  disabled: item.durabilityMax <= 0 || item.durabilityCurrent >= item.durabilityMax,
+                  price: item.quote?.displayedTotal ?? 0,
+                  description: item.reason === "gold" ? t("client.LowGold", [], "Not enough gold.")
+                    : item.reason === "unknown" ? t("ui.itemStateSync", [], "Item state is not ready. Wait for it to sync, then try again.")
+                    : item.reason === "busy" ? t("ui.itemBusy", [], "Waiting for the previous repair result.")
+                    : item.reason === "locked" ? t("ui.itemLocked", [], "This item is reserved by another operation.") : undefined,
+                  durabilityCurrent: item.input?.currentDura,
+                  durabilityMax: item.input?.maxDura,
+                  disabled: item.disabled,
                 }))
               : undefined
           }
           specialRepairItems={
             npcRepairService === "special"
-              ? world.equipmentItems.map((item) => ({
-                  id: item.slot,
+              ? npcRepairView?.rows.map((item) => ({
+                  id: item.uniqueId ?? `unknown:${item.slot}`,
                   name: item.name,
                   icon: item.icon,
-                  price: 0,
-                  description: item.description,
-                  durabilityCurrent: item.durabilityCurrent,
-                  durabilityMax: item.durabilityMax,
-                  disabled: item.durabilityMax <= 0 || item.durabilityCurrent >= item.durabilityMax,
+                  price: item.quote?.displayedTotal ?? 0,
+                  description: item.reason === "gold" ? t("client.LowGold", [], "Not enough gold.")
+                    : item.reason === "unknown" ? t("ui.itemStateSync", [], "Item state is not ready. Wait for it to sync, then try again.")
+                    : item.reason === "busy" ? t("ui.itemBusy", [], "Waiting for the previous repair result.")
+                    : item.reason === "locked" ? t("ui.itemLocked", [], "This item is reserved by another operation.") : undefined,
+                  durabilityCurrent: item.input?.currentDura,
+                  durabilityMax: item.input?.maxDura,
+                  disabled: item.disabled,
                 }))
               : undefined
           }
-          onRepair={(id) => {
-            const item = world.equipmentItems.find((entry) => entry.slot === id);
-            if (item) onRepairItem({ slot: item.slot });
-          }}
-          onSpecialRepair={(id) => {
-            const item = world.equipmentItems.find((entry) => entry.slot === id);
-            if (item) onSpecialRepairItem({ slot: item.slot });
-          }}
           onClose={onCloseNpcRepairService}
         />
       ) : null}
@@ -493,16 +705,24 @@ function GameUiSceneInner({
           onSubmitInput={onSubmitNpcInput}
         />
       ) : null}
-      {showInventory ? (
+      {showInventory && !sharedBagUiActive && !sharedStorageUiActive ? (
         <InventoryWindow
+          initialDeleteMode={inventoryInitialDeleteMode}
+          onCompatibilityInteraction={onInventoryCompatibilityInteraction}
+          repairMode={npcRepairService !== null}
+          onRepairPointerDown={onNpcRepairBagPointerDown}
+          onBagBeltPointerDown={onBagBeltPointerDown}
           t={t}
           locale={locale}
           activeTab={activeInventoryTab}
           world={world}
           storageServiceOpenVersion={storageServiceOpenVersion}
+          storagePasswordOpenVersion={storagePasswordOpenVersion}
           onClose={onCloseInventory}
+          onCloseStorage={onCloseStorage}
           onTabChange={onOpenInventoryTab}
           onUseItem={onUseItem}
+          onReadItemTooltip={onReadItemTooltip}
           onDropItem={onDropItem}
           onEquipItem={onEquipItem}
           onMoveItem={onMoveItem}
@@ -518,7 +738,7 @@ function GameUiSceneInner({
           onDropGold={onDropGold}
         />
       ) : null}
-      {showCharacter ? (
+      {showCharacter && !sharedCharacterStatsActive ? (
         <CharacterWindow
           t={t}
           activeTab={activeCharacterTab}
@@ -527,10 +747,30 @@ function GameUiSceneInner({
           player={player}
           world={world}
           onRemoveItem={onRemoveItem}
+          onReadEquipmentItemTooltip={onReadEquipmentItemTooltip}
           onRepairItem={onRepairItem}
           onSpecialRepairItem={onSpecialRepairItem}
           onCastSkill={onCastSkill}
         />
+      ) : null}
+      {storageRentalPrompt ? (
+        <div data-ui-interactive="true" data-storage-rental-confirmation={storageRentalPrompt.id}
+          onPointerDown={event => event.stopPropagation()} onClick={event => event.stopPropagation()}
+          style={{ position: "absolute", inset: 0, zIndex: 1000, background: "rgba(0,0,0,.45)", display: "grid", placeItems: "center", pointerEvents: "auto" }}>
+          <div ref={storageRentalDialogRef} role="dialog" aria-modal="true" aria-labelledby="storage-rental-title"
+            style={{ width: 340, maxWidth: "90%", padding: 20, background: "#201a12", border: "1px solid #967642", color: "#f2dfb6" }}>
+            <strong id="storage-rental-title">{t("client.Storage", [], "Storage")}</strong>
+            <p>{locale.startsWith("zh")
+              ? (storageRentalPrompt.renewing ? "是否支付 1,000,000 金币，将扩展仓库续租 10 天？" : "是否支付 1,000,000 金币，租用扩展仓库 10 天？")
+              : (storageRentalPrompt.renewing ? "Extend your storage rental for 10 days at a cost of 1,000,000 gold?" : "Rent extra storage for 10 days at a cost of 1,000,000 gold?")}</p>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button type="button" style={{ minHeight: 44, flex: 1 }} disabled={!onConfirmStorageRental}
+                onClick={() => onConfirmStorageRental?.(storageRentalPrompt.id)}>{t("client.OK", [], "OK")}</button>
+              <button type="button" data-rental-cancel style={{ minHeight: 44, flex: 1 }}
+                onClick={() => onCancelStorageRental?.(storageRentalPrompt.id)}>{t("client.Cancel", [], "Cancel")}</button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

@@ -3,7 +3,9 @@ use mir2_game_data::{DoorMapCellTemplate, LanguageCode, MapBounds};
 use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
 
-use crate::config::{CharacterRecord, SimulationConfig, Stage5SystemsState};
+use crate::config::{
+    default_inventory_capacity, CharacterRecord, SimulationConfig, Stage5SystemsState,
+};
 
 use super::buffs::BuffState;
 use super::combat::PendingCombatAction;
@@ -446,7 +448,12 @@ pub(super) struct SessionResource {
     pub(super) account_id: Option<String>,
     pub(super) characters: Vec<CharacterRecord>,
     pub(super) selected_character: Option<CharacterRecord>,
+    ranking_inspect_generation: u64,
+    ranking_inspect_active: bool,
     active_save_revision: Arc<AtomicU64>,
+    pub(super) npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
+    pub(super) npc_purchase_producer: Option<[u8; 32]>,
+    pub(super) npc_purchase_owner_epoch: Option<[u8; 32]>,
 }
 
 impl SessionResource {
@@ -457,7 +464,12 @@ impl SessionResource {
             account_id: None,
             characters: vec![config.default_character.clone()],
             selected_character: None,
+            ranking_inspect_generation: 0,
+            ranking_inspect_active: false,
             active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
+            npc_purchase_journal: None,
+            npc_purchase_producer: None,
+            npc_purchase_owner_epoch: None,
         }
     }
 
@@ -470,7 +482,26 @@ impl SessionResource {
         self.active_save_revision.store(revision, Ordering::Release);
     }
 
-    pub(super) fn clear_active_save_revision(&self) {
+    pub(super) fn ranking_inspect_generation(&self) -> Option<u64> {
+        self.ranking_inspect_active.then_some(self.ranking_inspect_generation)
+    }
+
+    pub(super) fn activate_ranking_inspect(&mut self) {
+        self.ranking_inspect_active = false;
+        if let Some(generation) = self.ranking_inspect_generation.checked_add(1) {
+            self.ranking_inspect_generation = generation;
+            self.ranking_inspect_active = true;
+        }
+    }
+
+    pub(super) fn retire_ranking_inspect(&mut self) {
+        self.ranking_inspect_active = false;
+    }
+
+    pub(super) fn clear_active_save_revision(&mut self) {
+        self.npc_purchase_journal = None;
+        self.npc_purchase_producer = None;
+        self.npc_purchase_owner_epoch = None;
         self.active_save_revision
             .store(UNKNOWN_ACTIVE_SAVE_REVISION, Ordering::Release);
     }
@@ -486,6 +517,7 @@ impl SessionResource {
 pub(super) struct PlayerRuntimeResource {
     pub(super) player_position: Point,
     pub(super) player_direction: MirDirection,
+    pub(super) bind_point: Option<crate::config::CharacterBindPoint>,
     pub(super) player_vitals: PlayerVitals,
     pub(super) experience: i64,
     pub(super) max_experience: i64,
@@ -515,6 +547,10 @@ impl PlayerRuntimeResource {
         Self {
             player_position: config.spawn.clone(),
             player_direction: MirDirection::Down,
+            bind_point: Some(crate::config::CharacterBindPoint {
+                map_file_name: config.map.file_name.clone(),
+                position: config.spawn.clone(),
+            }),
             player_vitals: PlayerVitals {
                 hp: default_max_hp,
                 max_hp: default_max_hp,
@@ -623,11 +659,11 @@ impl DoorRegistry {
 pub(super) struct MapRuntimeResource {
     pub(super) current_map: MapInformation,
     pub(super) map_region_bounds: MapBounds,
-    pub(super) blocked_cells: BTreeSet<(i32, i32)>,
+    pub(super) blocked_cells: Arc<BTreeSet<(i32, i32)>>,
     pub(super) closed_door_cells: BTreeSet<(i32, i32)>,
     pub(super) doors: DoorRegistry,
     /// Cells flagged fishable in the `.map` file → their fishing attribute.
-    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
+    pub(super) fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
     /// Conquest index → owning guild name (gates conquest movements).
     pub(super) conquest_owners: BTreeMap<i32, String>,
@@ -637,10 +673,10 @@ impl MapRuntimeResource {
     pub(super) fn new(
         config: &SimulationConfig,
         map_region_bounds: MapBounds,
-        blocked_cells: BTreeSet<(i32, i32)>,
+        blocked_cells: Arc<BTreeSet<(i32, i32)>>,
         closed_door_cells: BTreeSet<(i32, i32)>,
         doors: DoorRegistry,
-        fishing_cells: BTreeMap<(i32, i32), i8>,
+        fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
     ) -> Self {
         Self {
             current_map: config.map.clone(),
@@ -657,6 +693,8 @@ impl MapRuntimeResource {
 
 #[derive(Resource, Debug, Clone)]
 pub(super) struct InventoryResource {
+    pub(super) reserved_item_unique_ids: std::collections::BTreeSet<u64>,
+    pub(super) inventory_capacity: u16,
     pub(super) inventory_items: Vec<ItemState>,
     pub(super) belt_items: Vec<ItemState>,
     pub(super) storage_items: Vec<ItemState>,
@@ -674,6 +712,8 @@ pub(super) struct InventoryResource {
 impl InventoryResource {
     pub(super) fn new(base_storage_slots: u16) -> Self {
         Self {
+            reserved_item_unique_ids: Default::default(),
+            inventory_capacity: default_inventory_capacity(),
             inventory_items: Vec::new(),
             belt_items: Vec::new(),
             storage_items: Vec::new(),
@@ -693,11 +733,16 @@ impl InventoryResource {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct HeroInventoryResource {
     pub(super) items: Vec<ItemState>,
+    pub(super) equipment: Vec<ItemState>,
+    pub(super) capacity: u8,
+    pub(super) legacy_40: bool,
+    pub(super) saved_vitals: Option<crate::config::HeroVitalsState>,
+    pub(super) registry_attachment: Option<crate::config::SharedHeroAttachmentRef>,
 }
 
 impl HeroInventoryResource {
     pub(super) fn new() -> Self {
-        Self { items: Vec::new() }
+        Self { items: Vec::new(), equipment: Vec::new(), capacity: 10, legacy_40: false, saved_vitals: None, registry_attachment: None }
     }
 }
 
@@ -774,11 +819,23 @@ impl FishingResource {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct QuestResource {
     pub(super) quests: Vec<QuestState>,
+    /// Cached once per simulation session. Environment changes never alter an
+    /// already running character's quest cadence/profile presentation.
+    pub(super) newcomer_v1_cadence: bool,
+    pub(super) newcomer_v2_cadence: bool,
 }
 
 impl QuestResource {
     pub(super) fn new() -> Self {
-        Self { quests: Vec::new() }
+        let newcomer_v1_cadence =
+            super::quests::quest_recurrence::server_newcomer_v1_enabled();
+        let newcomer_v2_cadence =
+            super::quests::quest_recurrence::server_newcomer_v2_enabled();
+        Self {
+            quests: Vec::new(),
+            newcomer_v1_cadence,
+            newcomer_v2_cadence,
+        }
     }
 }
 
@@ -1094,5 +1151,28 @@ impl ObjectIdAllocatorResource {
         let id = self.next_runtime_monster_object_id;
         self.next_runtime_monster_object_id += 1;
         id
+    }
+}
+
+#[cfg(test)]
+mod ranking_inspect_lifecycle_tests {
+    use super::*;
+    #[test]
+    fn ranking_inspect_game_generation_retires_and_never_wraps() {
+        let mut session = SessionResource::new(&SimulationConfig::default());
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), Some(1));
+        session.retire_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), Some(2));
+        session.ranking_inspect_generation = u64::MAX;
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.retire_ranking_inspect();
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        assert_eq!(session.ranking_inspect_generation, u64::MAX);
     }
 }

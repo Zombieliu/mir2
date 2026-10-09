@@ -62,7 +62,7 @@ export function isStaticAssetRequest(url: URL): boolean {
 }
 
 export function isVersionedBevyRuntimeRequest(url: URL): boolean {
-  return /^\/bevy-runtime\/v\/[^/]+\/pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(
+  return /^\/bevy-runtime\/v\/[^/]+\/pkg-(?:webgpu|webgl2(?:-shared)?)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(
     url.pathname,
   );
 }
@@ -72,7 +72,7 @@ export function bevyRuntimeObjectKeyForPath(
   prefix: string,
   expectedRuntimeVersion: string,
 ): string {
-  const match = /^\/bevy-runtime\/v\/([^/]+)\/(pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js))$/.exec(
+  const match = /^\/bevy-runtime\/v\/([^/]+)\/(pkg-(?:webgpu|webgl2(?:-shared)?)\/mir2_bevy_runtime(?:_bg\.wasm|\.js))$/.exec(
     pathname,
   );
   if (!match || !prefix || !expectedRuntimeVersion) return "";

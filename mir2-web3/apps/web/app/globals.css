@@ -148,6 +148,103 @@ html[data-display-mode="standalone"] .mir-client-page {
   pointer-events: none;
 }
 
+/* WebGL2 prototype: the primary GL surface is a fixed stage child for its
+   entire lifetime, laid out for UI while the DOM scene owns world painting. */
+#mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+
+#mir2-web3-canvas.bevy-shared-ui-canvas.shared-quest-ui-visible {
+  visibility: visible;
+}
+
+/* A second Window of the same Bevy App keeps shared UI above DOM world
+   lighting/weather/nameplates without lifting the world renderer over HUD. */
+#mir2-quest-ui-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
+  background: transparent;
+  visibility: hidden;
+  touch-action: none;
+}
+
+#mir2-quest-ui-canvas.shared-quest-ui-visible {
+  visibility: visible;
+}
+
+.hud-bar-draw-plan {
+  position: absolute;
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  image-rendering: pixelated;
+  background: transparent;
+}
+
+.client-stage-frame[data-experience-bar-owner="canvas2d"] .hud-bar-draw-plan-experience,
+.client-stage-frame[data-weight-bar-owner="canvas2d"] .hud-bar-draw-plan-weight {
+  visibility: visible;
+}
+
+/* A ready HUD image painter sits between retained HUD artwork and its contents.
+   The UI canvas stays non-interactive until Bag/Quest owns input. */
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .game-ui-scene,
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud-shell {
+  z-index: auto;
+}
+
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud > :not(.hud-base):not(.hud-cap) {
+  z-index: 10;
+}
+
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .hud-base,
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .hud-cap {
+  z-index: 8;
+}
+
+.client-stage-frame[data-hp-orb-owner="bevy"] .hud-orb-fill.hp {
+  visibility: hidden;
+}
+
+.client-stage-frame[data-mp-orb-owner="bevy"] .hud-orb-fill.mp {
+  visibility: hidden;
+}
+
+/* Touch quest sheets use the full readable height, including the desktop HUD
+   area. Keep their footer and close controls above the retained HUD. */
+[data-shared-touch-quest-open="true"] #mir2-quest-ui-canvas {
+  z-index: 40;
+}
+
+[data-shared-touch-quest-open="true"] #mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 40;
+}
+
+/* The active touch bag owns this canvas above the mobile control deck. */
+[data-shared-touch-bag-open="true"] #mir2-quest-ui-canvas {
+  z-index: 90;
+}
+
+[data-shared-touch-bag-open="true"] #mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 90;
+}
+
+[data-shared-touch-bag-open="true"] .mir-mobile-controls {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="true"]) .mir-pwa-shell {
+  visibility: hidden;
+}
+
 .webgl2-entity-atlas-canvas {
   position: absolute;
   inset: 0;
@@ -1097,6 +1194,105 @@ html[data-display-mode="standalone"] .mir-client-page {
   transform: translateX(-50%);
 }
 
+
+/* Ordinary account forms are host-controlled; the backdrop keeps their focus and scrolling local. */
+.login-utility-actions {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 116px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.login-utility-actions button,
+.login-auth-panel button {
+  border: 1px solid rgba(190, 157, 99, 0.64);
+  background: linear-gradient(180deg, rgba(78, 45, 21, 0.98), rgba(30, 18, 10, 0.98));
+  color: #f4dcaf;
+  font: inherit;
+  text-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+}
+
+.login-utility-actions button { min-height: 28px; padding: 4px 10px; font-size: 11px; }
+.login-auth-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.58);
+  pointer-events: auto;
+}
+
+.login-auth-panel {
+  position: relative;
+  isolation: isolate;
+  width: min(440px, 100%);
+  max-width: calc(100vw - 24px);
+  max-height: min(100%, calc(100dvh - 24px));
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid #947546;
+  background: #17100a;
+  color: #eadcbc;
+  text-shadow: 1px 1px 0 #000;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+  overscroll-behavior: contain;
+}
+
+.login-auth-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.login-auth-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.login-auth-header h2 { margin: 0; font-size: 16px; color: #f0d69b; }
+.login-auth-panel .login-auth-close { min-width: 44px; min-height: 44px; padding: 4px; font-size: 22px; }
+.login-auth-fields { display: grid; gap: 10px; }
+.login-auth-field { display: grid; grid-template-columns: minmax(110px, 0.85fr) minmax(0, 1.15fr); align-items: center; gap: 8px; font-size: 12px; }
+.login-auth-field input {
+  min-width: 0;
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #66533a;
+  background: rgba(10, 7, 4, 0.85);
+  padding: 5px 8px;
+  color: #f4e3c1;
+  font: inherit;
+  color-scheme: dark;
+}
+.login-auth-field.active input { border-color: #c19b56; }
+.login-auth-panel button:focus-visible,
+.login-auth-field input:focus-visible,
+.login-input:focus-visible,
+.login-utility-actions button:focus-visible { outline: 2px solid #f5cf82; outline-offset: 2px; }
+.login-auth-panel button:disabled,
+.login-auth-field input:disabled,
+.login-utility-actions button:disabled { opacity: 0.5; cursor: default; }
+.login-auth-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.login-auth-actions button,
+.login-safe-key-tools button { min-height: 44px; padding: 6px 14px; }
+.login-auth-notice { margin-top: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; color: #f1d493; }
+.login-safe-key-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin-top: 14px; }
+.login-safe-key-grid button { min-width: 0; min-height: 44px; padding: 4px; font-size: 16px; }
+.login-safe-key-tools { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
+
+@media (max-width: 520px) {
+  .login-auth-panel { padding: 10px; }
+  .login-auth-field { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .login-auth-field input { min-height: 44px; }
+  .login-auth-actions button { flex: 1; }
+}
+
 .login-runtime-stamp {
   position: absolute;
   left: 12px;
@@ -1822,6 +2018,14 @@ html[data-display-mode="standalone"] .mir-client-page {
   white-space: nowrap;
   overflow: hidden;
 }
+
+.chat-frame[data-chat-size="1"] .chat-feed { height: 91px; }
+.chat-frame[data-chat-size="2"] .chat-feed { height: 143px; }
+.chat-frame[data-chat-size] .chat-feed { overflow: hidden; }
+.chat-frame[data-chat-size="1"] .chat-scroll-buttons { grid-template-rows: 8px 78px 6px 8px; }
+.chat-frame[data-chat-size="2"] .chat-scroll-buttons { grid-template-rows: 8px 126px 6px 8px; }
+.chat-frame[data-chat-size] .chat-position-knob { cursor: ns-resize; }
+.chat-settings-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .chat-feed-line.system {
   color: #c00000;
@@ -3692,6 +3896,9 @@ html[data-display-mode="standalone"] .mir-client-page {
   bottom: calc(100% + 6px);
 }
 
+.trade-item-card:hover .original-item-tooltip,
+.trade-item-card:focus .original-item-tooltip,
+.trade-item-card:focus-visible .original-item-tooltip,
 .inventory-item-card:hover .original-item-tooltip,
 .inventory-item-card:focus .original-item-tooltip,
 .inventory-item-card:focus-visible .original-item-tooltip,
@@ -4629,10 +4836,14 @@ button.character-spell-value:hover {
 .hud-exp-bar {
   left: 9px;
   top: 143px;
+  width: 1004px;
   height: 8px;
-  overflow: hidden;
   pointer-events: none;
 }
+
+.hud-exp-bar-clip { height: 8px; overflow: hidden; }
+.client-stage-frame[data-experience-bar-owner="bevy"] .hud-exp-bar-fill,
+.client-stage-frame[data-experience-bar-owner="canvas2d"] .hud-exp-bar-fill { visibility: hidden; }
 
 .hud-exp-bar-fill {
   display: block;
@@ -4660,6 +4871,8 @@ button.character-spell-value:hover {
   height: 12px;
   max-width: none;
 }
+.client-stage-frame[data-weight-bar-owner="bevy"] .hud-weight-bar-fill,
+.client-stage-frame[data-weight-bar-owner="canvas2d"] .hud-weight-bar-fill { visibility: hidden; }
 
 .hud-cap { display: none; bottom: 0; }
 .hud-cap.left { left: -67px; }
@@ -4676,6 +4889,9 @@ button.character-spell-value:hover {
 
 .hud-orb-fill.hp {
   left: 0;
+  /* Native Crystal moves the clipped destination down as HP drains. Keep the
+     full 80px child image at its fixed layout origin for host measurement. */
+  transform: translateY(calc(80px - 100%));
 }
 
 .hud-orb-fill.hp-only {
@@ -5142,6 +5358,14 @@ button.character-spell-value:hover {
   overscroll-behavior: none;
 }
 
+/* Short landscape stages put the centered HUD Quest button under the lower
+   left action. Keep both touch actions reachable by stacking Approach above Pick. */
+@media (orientation: landscape) and (max-height: 430px) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-action.approach {
+    bottom: calc(var(--mir-mobile-pick-bottom, 48px) + var(--mir-mobile-action-size, 44px) + 8px);
+  }
+}
+
 /* Experimental wide-mobile shell: keep the captured 4:3 HUD cluster centered
    while edge-anchored controls (mini-map, status, etc.) can use the expanded
    virtual stage. The flag is opt-in and does not alter the default client. */
@@ -5151,6 +5375,12 @@ button.character-spell-value:hover {
   .mir-client-page[data-wide-mobile="true"] .game-ui-scene .chat-filter-bar,
   .mir-client-page[data-wide-mobile="true"] .game-ui-scene .belt-dialog.horizontal {
     transform: translateX(var(--mir-wide-hud-offset-x, 0px));
+  }
+
+  /* transform would isolate the HUD labels behind the shared image layer. */
+  .mir-client-page[data-wide-mobile="true"] :is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud-shell {
+    left: var(--mir-wide-hud-offset-x, 0px);
+    transform: none;
   }
 }
 

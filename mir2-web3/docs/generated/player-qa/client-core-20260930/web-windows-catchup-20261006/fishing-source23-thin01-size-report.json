@@ -1,0 +1,466 @@
+{
+  "ok": true,
+  "generatedAt": "2026-10-07T01:54:12.890Z",
+  "mode": "standalone-thin-client",
+  "webRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web",
+  "outputRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-06",
+  "serverEntry": "mir2-web3/apps/web/server.js",
+  "budgetBytes": 377487360,
+  "sourceStats": {
+    "public": {
+      "exists": true,
+      "bytes": 3807697886,
+      "files": 129123,
+      "directories": 492,
+      "links": 1
+    },
+    "nextTotal": {
+      "exists": true,
+      "bytes": 599650114,
+      "files": 19006,
+      "directories": 308,
+      "links": 1
+    },
+    "nextCache": {
+      "exists": true,
+      "bytes": 369240083,
+      "files": 9,
+      "directories": 8,
+      "links": 0
+    },
+    "nextDev": {
+      "exists": false,
+      "bytes": 0,
+      "files": 0,
+      "directories": 0,
+      "links": 0
+    },
+    "nextServer": {
+      "exists": true,
+      "bytes": 12991059,
+      "files": 183,
+      "directories": 59,
+      "links": 0
+    },
+    "nextStatic": {
+      "exists": true,
+      "bytes": 5104740,
+      "files": 62,
+      "directories": 50,
+      "links": 0
+    }
+  },
+  "runtimeStats": {
+    "webgpu": {
+      "exists": true,
+      "bytes": 31015020,
+      "files": 2,
+      "directories": 1,
+      "links": 0
+    },
+    "webgl2": {
+      "exists": true,
+      "bytes": 17861017,
+      "files": 2,
+      "directories": 1,
+      "links": 0
+    },
+    "webgl2-shared": {
+      "exists": true,
+      "bytes": 31974985,
+      "files": 2,
+      "directories": 1,
+      "links": 0
+    },
+    "removedLegacyMirror": {
+      "exists": false,
+      "bytes": 0,
+      "files": 0,
+      "directories": 0,
+      "links": 0
+    }
+  },
+  "package": {
+    "exists": true,
+    "bytes": 373049068,
+    "files": 7301,
+    "directories": 776,
+    "links": 0
+  },
+  "excluded": [
+    {
+      "reason": "scene cache seed",
+      "entries": 1
+    },
+    {
+      "reason": "copied NFT metadata",
+      "entries": 29
+    },
+    {
+      "reason": "external dependency junction",
+      "entries": 1
+    },
+    {
+      "reason": "thin public selection",
+      "entries": 1
+    }
+  ],
+  "copyStats": {
+    "files": 1945,
+    "bytes": 97000743,
+    "sourceBytes": 116888371,
+    "skipped": {
+      "scene cache seed": 1,
+      "copied NFT metadata": 29,
+      "external dependency junction": 1,
+      "thin public selection": 1
+    }
+  },
+  "dependencyStats": {
+    "entries": 36,
+    "files": 1932,
+    "bytes": 58577016,
+    "nativeBindings": 1,
+    "directoryRecords": 1,
+    "targetPlatform": "win32-x64",
+    "nativePackages": [
+      {
+        "name": "@img/sharp-win32-x64",
+        "files": 7,
+        "bytes": 19890145,
+        "destination": "node_modules/@img/sharp-win32-x64"
+      }
+    ],
+    "nativePackageFiles": 7,
+    "nativePackageBytes": 19890145,
+    "warningCount": 44,
+    "warningCodes": {
+      "Error": 44
+    },
+    "warningDetails": [
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-wasm32/versions\":\nCannot find module '@img/sharp-wasm32/versions' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\utility.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"\u001a\\server\\\u001a\":\nCannot find module '\u001a\\server\\\u001a' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\next-server.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@opentelemetry/api\":\nCannot find module '@opentelemetry/api' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\lib\\trace\\tracer.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"\u001a\\server\\middleware.js\":\nCannot find module '\u001a\\server\\middleware.ts' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\next-server.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-libvips-\u001a/package\":\nCannot find module '@img/sharp-libvips-\u001a/package' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\sharp.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-libvips-dev/include\":\nCannot find module '@img/sharp-libvips-dev/include' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\libvips.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@img/sharp-libvips-dev/cplusplus\":\nCannot find module '@img/sharp-libvips-dev/cplusplus' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\libvips.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@opentelemetry/api\":\nCannot find module '@opentelemetry/api' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\instrumentation-node-extensions.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@next/swc/native/next-swc.\u001a.node\":\nCannot find module '@next/swc/native/next-swc.\u001a.node' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\swc\\index.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"\u001a/package.json\":\nCannot find module '\u001a/package.json' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\telemetry\\events\\swc-load-failure.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages.runtime.dev.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages-turbo.runtime.dev.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages-turbo.runtime.prod.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\next-server\\pages.runtime.prod.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack\":\nCannot find module 'webpack' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"next-rspack/rspack-core\":\nCannot find module 'next-rspack/rspack-core' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/ModuleFilenameHelpers\":\nCannot find module 'webpack/lib/ModuleFilenameHelpers' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/RuntimeGlobals\":\nCannot find module 'webpack/lib/RuntimeGlobals' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/SourceMapDevToolModuleOptionsPlugin\":\nCannot find module 'webpack/lib/SourceMapDevToolModuleOptionsPlugin' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/NormalModule\":\nCannot find module 'webpack/lib/NormalModule' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/javascript/BasicEvaluatedExpression\":\nCannot find module 'webpack/lib/javascript/BasicEvaluatedExpression' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/optimize/ConcatenatedModule\":\nCannot find module 'webpack/lib/optimize/ConcatenatedModule' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/util/identifier\":\nCannot find module 'webpack/lib/util/identifier' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/node/NodeTargetPlugin\":\nCannot find module 'webpack/lib/node/NodeTargetPlugin' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack/lib/util/StringXor\":\nCannot find module 'webpack/lib/util/StringXor' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"critters\":\nCannot find module 'critters' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\post-process.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"next-rspack/rspack-core\":\nCannot find module 'next-rspack/rspack-core' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\shared\\lib\\get-rspack.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-turbopack/client\":\nCannot find module 'react-server-dom-turbopack/client' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\ssr\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\ssr\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-turbopack/server\":\nCannot find module 'react-server-dom-turbopack/server' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-turbopack/static\":\nCannot find module 'react-server-dom-turbopack/static' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/server\":\nCannot find module 'react-server-dom-webpack/server' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/static\":\nCannot find module 'react-server-dom-webpack/static' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\app-render\\use-flight-response.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"next/dist/build/webpack/plugins/terser-webpack-plugin/src\":\nCannot find module 'next/dist/build/webpack/plugins/terser-webpack-plugin/src' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\bundle5.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@opentelemetry/api\":\nCannot find module '@opentelemetry/api' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\webpack-config.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/server.node\":\nCannot find module 'react-server-dom-webpack/server.node' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\app-render\\react-server.node.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\components\\router-reducer\\fetch-server-response.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\hot-reloader-app.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"babel-plugin-react-compiler\":\nCannot find module 'babel-plugin-react-compiler' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\get-babel-loader-config.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"react-server-dom-webpack/client\":\nCannot find module 'react-server-dom-webpack/client' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\components\\router-reducer\\reducers\\server-action-reducer.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"webpack\":\nCannot find module 'webpack' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\@next\\react-refresh-utils\\dist\\ReactRefreshWebpackPlugin.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts\":\nCannot find module '@vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\web-socket.js",
+        "messageTruncated": false
+      },
+      {
+        "code": "Error",
+        "message": "Failed to resolve dependency \"sass\":\nCannot find module 'sass' loaded from E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\sass-loader\\cjs.js",
+        "messageTruncated": false
+      }
+    ]
+  },
+  "publicCopyStats": {
+    "files": 3367,
+    "collisions": 7
+  },
+  "mapAtlasSelection": {
+    "manifests": [
+      "generated/map-atlas/manifest.json"
+    ],
+    "pages": 79,
+    "selectedPaths": 80
+  },
+  "jsonCompaction": {
+    "files": 231,
+    "sourceBytes": 100349931,
+    "outputBytes": 68042309,
+    "savedBytes": 32307622,
+    "detailsPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-thin01-size-report.json-compaction-details.json"
+  },
+  "coreSelection": {
+    "compiledManifest": {
+      "abiVersion": 1,
+      "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+      "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 252590,
+          "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b",
+        "sourceSha256": "9b921866ec6ca604f89e165123782a7a5499dd527a88cd136ee11dcc1138501b",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 22264,
+            "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 259415,
+            "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+          }
+        }
+      }
+    },
+    "selectedPaths": [
+      "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+      "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+      "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web.js",
+      "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web_bg.wasm"
+    ],
+    "packagedClosure": {
+      "version": "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+      "abiVersion": 1,
+      "activeVersions": [
+        "c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa",
+        "45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b"
+      ],
+      "files": [
+        {
+          "relativePath": "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        {
+          "relativePath": "client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+          "bytes": 252590,
+          "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+        },
+        {
+          "relativePath": "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web.js",
+          "bytes": 22264,
+          "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+        },
+        {
+          "relativePath": "client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web_bg.wasm",
+          "bytes": 259415,
+          "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+        }
+      ],
+      "exactActiveBundleClosure": true,
+      "leavesPerBundle": 2
+    }
+  },
+  "remoteOriginalUiMediaRootsAdded": [
+    "Mount",
+    "Pet",
+    "Gate"
+  ],
+  "remoteAssetOriginRequired": "Configure MIR2_R2_PROXY_BASE to serve omitted original-ui media paths through the same-origin miss proxy from an immutable asset origin.",
+  "notes": [
+    ".next/cache and .next/dev are compiler caches, not player distribution files.",
+    "The source public directory stays complete for deterministic generation and offline development.",
+    "A browser downloads only the selected WebGPU or WebGL2 runtime, never both backends.",
+    "Original map and allowlisted UI/entity media, including Mount, Pet and Gate non-JSON files, require MIR2_R2_PROXY_BASE for same-origin misses and are cached by mir2-asset-worker.js.",
+    "The audited source original-asset-manifest has Mount entries but no Pet or Gate entries; it is not a complete remote inventory and public release coverage is unverified.",
+    "Selected original-ui JSON and exact root original-asset-manifest.generated.json retain parsed data and token spelling after compaction; output physical sizes change the deterministic asset-version namespace.",
+    "Promote this package only after release:doctor and browser smoke pass against the configured immutable R2 prefix."
+  ]
+}

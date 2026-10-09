@@ -1,0 +1,67 @@
+{
+  "owner": "Root",
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-source01-snapshot.json",
+    "bytes": 274421,
+    "sha256": "275bed7bbeaffce9ab15195564e30f066386f34f1b265ab3ba4228c18909ec87"
+  },
+  "sourceSnapshotSha": "275bed7bbeaffce9ab15195564e30f066386f34f1b265ab3ba4228c18909ec87",
+  "sourceCount": 895,
+  "reviewers": [
+    "Root frontier integration source review",
+    "/root/source30_native_bundle independent eight-product review"
+  ],
+  "review": "Independent reviewer accepted five Rust pins and byte-for-byte visitor/import reversals to Source32; prior tests retained. Root reviewed browser loader, exact release schema and three-bundle builder against unchanged optimizer; Web independent integration review remains pending separately. Three production modes are default Core, presentation-ui and npc-purchase-policy; mutually incompatible named features explicitly fail. NPC raw exports were not in published Source25 Core/PUI. Synchronous ClientCoreRuntime facade preserved; declared NPC initializes before Runtime publication and host binds NPC immutable version; legacy dual throws only when host requested. Pure tests/build only. No UI/socket/server/WASM API/instance, no publication accepted. Independent reviewer subsequently accepted all eight product files, recalculated895 snapshot inputs at current pins with zero drift, and verified manifest/loader/closure/publication ordering.",
+  "independentRustPins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\Cargo.toml",
+      "bytes": 710,
+      "sha256": "ef797825e86c499ece3528c8bcea25b3cb2ec564f4c4b2633bdf757b5ab49b7b",
+      "relativePath": "apps/game-client/platform-web/Cargo.toml"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+      "bytes": 3051,
+      "sha256": "c7ed74d8fe6fc2d243942ce488a16742868ab96b8c524138ed4eef0562fe6062",
+      "relativePath": "apps/game-client/platform-web/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\mail_compose.rs",
+      "bytes": 33223,
+      "sha256": "2b8e71002931549269489e0ef8662ea65604aaeb08fa2d40c182df5fdfb921a9",
+      "relativePath": "apps/game-client/platform-web/src/mail_compose.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_purchase_receipt.rs",
+      "bytes": 69876,
+      "sha256": "679fc449ea536d65fa0290a1834ea27691a74ebb10d97bc16a3065284b417b8d",
+      "relativePath": "apps/game-client/platform-web/src/npc_purchase_receipt.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\strict_json.rs",
+      "bytes": 2338,
+      "sha256": "7f8bfc46a2b38fc8c24ae43bb78fc557f4acfe27592643ff904e97a5d06baf98",
+      "relativePath": "apps/game-client/platform-web/src/strict_json.rs"
+    }
+  ],
+  "previousSource32": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust04-snapshot.json",
+    "bytes": 274835,
+    "sha256": "7f72b8128add0a5589abf7b358b31ed1063729638807eccafa8254e1c8ad249e"
+  },
+  "testsPreparedOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "initialGuardFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-initial-guard-config-rejection01.json",
+    "bytes": 2963,
+    "sha256": "4d4bbfed13308c916cc8892e745639fccb56083e9c041d0ad30daef862f2161a"
+  }
+}

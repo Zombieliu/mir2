@@ -8,6 +8,10 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::{Resource, SystemSet};
+use mir2_client_core::equipment_pending::{
+    EquipmentOperation, EquipmentOperationKind, EquipmentPendingLedger, InventoryLayout,
+    InventoryPlacement,
+};
 use serde::{Deserialize, Serialize};
 
 pub const MAX_PENDING_OPERATIONS: usize = 128;
@@ -92,6 +96,16 @@ pub enum PendingOperationKey {
     },
     Repair(u64),
     SpecialRepair(u64),
+    Equip {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+    },
+    Remove {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+    },
     StorageDeposit {
         unique_id: u64,
         from: i32,
@@ -121,6 +135,10 @@ pub enum PendingOperationKey {
         unique_id: u64,
         count: u16,
         hero_inventory: bool,
+    },
+    DeleteItem {
+        unique_id: u64,
+        count: u16,
     },
     Move {
         grid: String,
@@ -154,6 +172,29 @@ pub enum PendingOperationKey {
     QuestAbandon {
         quest_index: i32,
     },
+}
+
+fn equipment_operation(key: &PendingOperationKey) -> Option<EquipmentOperation> {
+    match key {
+        PendingOperationKey::Equip { grid, unique_id, to } => Some(EquipmentOperation {
+            kind: EquipmentOperationKind::Equip, grid: grid.clone(), unique_id: *unique_id, to: *to,
+        }),
+        PendingOperationKey::Remove { grid, unique_id, to } => Some(EquipmentOperation {
+            kind: EquipmentOperationKind::Remove, grid: grid.clone(), unique_id: *unique_id, to: *to,
+        }),
+        _ => None,
+    }
+}
+
+fn pending_equipment_key(operation: &EquipmentOperation) -> PendingOperationKey {
+    match operation.kind {
+        EquipmentOperationKind::Equip => PendingOperationKey::Equip {
+            grid: operation.grid.clone(), unique_id: operation.unique_id, to: operation.to,
+        },
+        EquipmentOperationKind::Remove => PendingOperationKey::Remove {
+            grid: operation.grid.clone(), unique_id: operation.unique_id, to: operation.to,
+        },
+    }
 }
 
 /// Correlatable acknowledgement for one native quest submission. Both ACK and
@@ -254,6 +295,11 @@ pub enum InventoryOperationAck {
         hero_inventory: bool,
         success: bool,
     },
+    Delete {
+        unique_id: u64,
+        count: u16,
+        success: bool,
+    },
     Move {
         grid: String,
         from: i32,
@@ -278,26 +324,44 @@ pub enum InventoryOperationAck {
         count: u16,
         success: bool,
     },
+    Equip {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+        success: bool,
+    },
+    Remove {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+        success: bool,
+    },
 }
 
 impl InventoryOperationAck {
     pub fn success(&self) -> bool {
         match self {
             Self::Drop { success, .. }
+            | Self::Delete { success, .. }
             | Self::Move { success, .. }
             | Self::Merge { success, .. }
             | Self::Split { success, .. }
-            | Self::Sell { success, .. } => *success,
+            | Self::Sell { success, .. }
+            | Self::Equip { success, .. }
+            | Self::Remove { success, .. } => *success,
         }
     }
 
     pub fn label(&self) -> &'static str {
         match self {
             Self::Drop { .. } => "Drop",
+            Self::Delete { .. } => "Delete",
             Self::Move { .. } => "Move",
             Self::Merge { .. } => "Merge",
             Self::Split { .. } => "Split",
             Self::Sell { .. } => "Sell",
+            Self::Equip { .. } => "Equip",
+            Self::Remove { .. } => "Remove",
         }
     }
 }
@@ -307,14 +371,31 @@ pub struct InventoryOperationFeedback {
     pub last: Option<InventoryOperationAck>,
 }
 
-/// ACK and NACK both terminate the exact in-flight command; neither mutates
-/// inventory state. The next authoritative snapshot remains the source of
-/// truth for item contents and slots.
+/// ACK and NACK both terminate the exact transport command; neither mutates
+/// inventory state. A successful Equip/Remove remains instance-reserved until
+/// its authoritative placement is observed. The snapshot owns item contents.
 pub fn apply_inventory_operation_ack(
     pending: &mut PendingOperations,
     feedback: &mut InventoryOperationFeedback,
     ack: InventoryOperationAck,
 ) -> usize {
+    // Equipment packets have no request id. A success receipt ends the
+    // transport request, but keeps the instance reserved until its new
+    // authoritative placement is visible. A snapshot may arrive first.
+    if matches!(ack, InventoryOperationAck::Equip { .. } | InventoryOperationAck::Remove { .. }) {
+        let operation = match &ack {
+            InventoryOperationAck::Equip { grid, unique_id, to, .. } => EquipmentOperation {
+                kind: EquipmentOperationKind::Equip, grid: grid.clone(), unique_id: *unique_id, to: *to,
+            },
+            InventoryOperationAck::Remove { grid, unique_id, to, .. } => EquipmentOperation {
+                kind: EquipmentOperationKind::Remove, grid: grid.clone(), unique_id: *unique_id, to: *to,
+            },
+            _ => unreachable!("equipment ACK arm"),
+        };
+        let released = usize::from(pending.equipment.acknowledge(&operation, ack.success()));
+        feedback.last = Some(ack);
+        return released;
+    }
     let released = pending.release_matching(|key| match (&ack, key) {
         (
             InventoryOperationAck::Drop {
@@ -329,6 +410,15 @@ pub fn apply_inventory_operation_ack(
                 hero_inventory: pending_hero,
             },
         ) => unique_id == pending_id && count == pending_count && hero_inventory == pending_hero,
+        (
+            InventoryOperationAck::Delete {
+                unique_id, count, ..
+            },
+            PendingOperationKey::DeleteItem {
+                unique_id: pending_id,
+                count: pending_count,
+            },
+        ) => unique_id == pending_id && count == pending_count,
         (
             InventoryOperationAck::Move { grid, from, to, .. },
             PendingOperationKey::Move {
@@ -515,35 +605,56 @@ pub fn apply_storage_operation_ack(
 #[derive(Debug, Resource)]
 pub struct PendingOperations {
     entries: HashSet<PendingOperationKey>,
+    equipment: EquipmentPendingLedger,
     quest_request_ids: HashMap<PendingOperationKey, String>,
     next_quest_request_sequence: Option<u64>,
+    native_mail_send: Option<(u64, Option<crate::mail_service::MailSendTicket>, PendingOperationKey)>,
 }
 
 impl Default for PendingOperations {
     fn default() -> Self {
         Self {
             entries: HashSet::new(),
+            equipment: EquipmentPendingLedger::default(),
             quest_request_ids: HashMap::new(),
             next_quest_request_sequence: Some(1),
+            native_mail_send: None,
         }
     }
 }
 
 impl PendingOperations {
+    pub fn begin_native_mail_send(&mut self, token:u64, key:PendingOperationKey)->bool {
+        if token==0||self.native_mail_send.is_some()||!matches!(key,PendingOperationKey::SendMail{..})||self.has_pending_mail_operation()||!self.try_begin(key.clone()){return false;}
+        self.native_mail_send=Some((token,None,key));true
+    }
+    pub fn bind_native_mail_send(&mut self,token:u64,ticket:crate::mail_service::MailSendTicket)->bool {
+        let Some((current,bound,_))=self.native_mail_send.as_mut()else{return false;};
+        if *current!=token||bound.is_some()||!ticket.is_valid()||ticket.local_send_token!=token{return false;}*bound=Some(ticket);true
+    }
+    pub fn settle_native_mail_send(&mut self,token:u64,ticket:Option<crate::mail_service::MailSendTicket>)->bool {
+        if !self.native_mail_send.as_ref().is_some_and(|(current,bound,_)|*current==token&&*bound==ticket){return false;}
+        let (_,_,key)=self.native_mail_send.take().unwrap();self.entries.remove(&key);true
+    }
     /// Register a logical operation.
     ///
-    /// Crystal's storage transfer ACKs do not contain the source item id. A
-    /// deposit/withdraw pair therefore acts as an indistinguishable protocol
-    /// slot: allowing two item ids in the same slot would make a later ACK
-    /// impossible to correlate safely. Other operation families retain their
+    /// Storage gestures reserve their live source/destination identities until
+    /// the corresponding authoritative result. Other operation families retain
     /// exact-key de-duplication semantics.
     pub fn try_begin(&mut self, key: PendingOperationKey) -> bool {
+        if matches!(key,PendingOperationKey::SendMail{..})&&self.native_mail_send.is_some(){return false;}
+        if let Some(operation) = equipment_operation(&key) {
+            return self.equipment.reserve(operation,
+                MAX_PENDING_OPERATIONS.saturating_sub(self.entries.len())).is_ok();
+        }
         if self.entries.contains(&key)
+            || matches!(&key, PendingOperationKey::QuestFinish { quest_index, .. }
+                if self.has_pending_quest_finish(*quest_index))
             || self
                 .entries
                 .iter()
                 .any(|pending| storage_transfer_slot_conflicts(pending, &key))
-            || self.entries.len() >= MAX_PENDING_OPERATIONS
+            || self.len() >= MAX_PENDING_OPERATIONS
         {
             return false;
         }
@@ -553,12 +664,18 @@ impl PendingOperations {
     /// Explicit host-side ACK/NACK hook. Revisions alone never call this;
     /// uncorrelatable operations remain locked until a true session reset.
     pub fn release(&mut self, key: &PendingOperationKey) -> bool {
+        if self.native_mail_send.as_ref().is_some_and(|(_,_,bound)|bound==key){return false;}
         self.quest_request_ids.remove(key);
-        self.entries.remove(key)
+        if let Some(operation) = equipment_operation(key) {
+            self.equipment.release(&operation)
+        } else {
+            self.entries.remove(key)
+        }
     }
 
     pub fn clear(&mut self) {
         self.entries.clear();
+        self.equipment.clear();
         self.quest_request_ids.clear();
     }
 
@@ -582,14 +699,48 @@ impl PendingOperations {
         if let Some(request_id) = self.quest_request_ids.get(&key) {
             return Some(request_id.clone());
         }
-        let Some(sequence) = self.next_quest_request_sequence else {
-            self.release(&key);
-            return None;
+        let request_id = loop {
+            let Some(sequence) = self.next_quest_request_sequence else {
+                self.release(&key);
+                return None;
+            };
+            self.next_quest_request_sequence = sequence.checked_add(1);
+            let candidate = format!("qs-{sequence:016}");
+            if !self.quest_request_ids.values().any(|id| id == &candidate) {
+                break candidate;
+            }
         };
-        self.next_quest_request_sequence = sequence.checked_add(1);
-        let request_id = format!("qs-{sequence:016}");
         self.quest_request_ids.insert(key, request_id.clone());
         Some(request_id)
+    }
+
+    /// Register a host-allocated id for an already pending quest request.
+    /// This lets a web host keep one allocator across all of its transports.
+    /// Rebinding the same key and id is harmless for transport retries.
+    pub fn bind_external_quest_request_id(
+        &mut self,
+        key: PendingOperationKey,
+        request_id: &str,
+    ) -> bool {
+        if request_id.is_empty()
+            || !matches!(
+                key,
+                PendingOperationKey::QuestAccept { .. }
+                    | PendingOperationKey::QuestFinish { .. }
+                    | PendingOperationKey::QuestAbandon { .. }
+            )
+            || !self.entries.contains(&key)
+        {
+            return false;
+        }
+        if let Some(bound) = self.quest_request_ids.get(&key) {
+            return bound == request_id;
+        }
+        if self.quest_request_ids.values().any(|bound| bound == request_id) {
+            return false;
+        }
+        self.quest_request_ids.insert(key, request_id.to_owned());
+        true
     }
 
     /// Release only when both the logical operation and the echoed request id
@@ -635,18 +786,55 @@ impl PendingOperations {
             |key| matches!(key, PendingOperationKey::GameShop(pending) if pending == request_id),
         );
         self.quest_request_ids.clear();
+        self.equipment.clear();
+    }
+
+    /// Native warehouse drag input calls this before it reserves a new
+    /// Store/TakeBack/Merge operation. Unlike the general pending registry,
+    /// this deliberately locks an item or known cell across the three storage
+    /// gesture variants until an authoritative result arrives.
+    pub fn has_storage_drag_conflict(&self, key: &PendingOperationKey) -> bool {
+        self.entries
+            .iter()
+            .any(|pending| storage_drag_conflicts(pending, key))
+            || self.equipment.iter().any(|operation|
+                storage_drag_conflicts(&pending_equipment_key(operation), key))
     }
 
     pub fn contains(&self, key: &PendingOperationKey) -> bool {
-        self.entries.contains(key)
+        equipment_operation(key).map_or_else(|| self.entries.contains(key),
+            |operation| self.equipment.contains(&operation))
+    }
+
+    /// Equip/Remove receipts have no request id. Reserve one concrete item
+    /// across both operations, even if a later target slot differs.
+    pub fn has_pending_equipment_instance(&self, unique_id: u64) -> bool {
+        self.equipment.has_instance(unique_id)
+    }
+
+    /// A second item cannot overwrite an equipment cell before the first
+    /// request's authoritative placement is observed. This includes storage
+    /// equip requests while they are in flight.
+    pub fn has_pending_equipment_slot(&self, slot: i32) -> bool {
+        self.equipment.has_equipment_slot(slot)
+    }
+
+    /// A reward choice does not create a second concurrent turn-in for the
+    /// same quest. Exact choice and request id remain on the stored key so
+    /// only its matching ACK/NACK can release it.
+    pub fn has_pending_quest_finish(&self, quest_index: i32) -> bool {
+        self.entries.iter().any(|key| {
+            matches!(key, PendingOperationKey::QuestFinish { quest_index: pending, .. }
+                if *pending == quest_index)
+        })
     }
 
     pub fn len(&self) -> usize {
-        self.entries.len()
+        self.entries.len() + self.equipment.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.entries.is_empty()
+        self.entries.is_empty() && self.equipment.is_empty()
     }
 
     /// Mail ACKs carry no request id. The native gateway therefore permits
@@ -659,7 +847,7 @@ impl PendingOperations {
     }
 
     pub fn has_pending_mail_send(&self) -> bool {
-        self.entries
+        self.native_mail_send.is_some() || self.entries
             .iter()
             .any(|key| matches!(key, PendingOperationKey::SendMail { .. }))
     }
@@ -669,11 +857,16 @@ impl PendingOperations {
     }
 
     fn release_matching(&mut self, mut proven: impl FnMut(&PendingOperationKey) -> bool) -> usize {
-        let before = self.entries.len();
-        self.entries.retain(|key| !proven(key));
+        let before = self.len();
+        let native_key=self.native_mail_send.as_ref().map(|(_,_,key)|key);
+        self.entries.retain(|key| native_key==Some(key)||!proven(key));
+        let equipment = self.equipment.iter()
+            .filter(|operation| proven(&pending_equipment_key(operation)))
+            .cloned().collect::<Vec<_>>();
+        for operation in equipment { self.equipment.release(&operation); }
         self.quest_request_ids
             .retain(|key, _| self.entries.contains(key));
-        before - self.entries.len()
+        before - self.len()
     }
 
     /// Release at most one entry for protocol receipts that lack a request
@@ -684,12 +877,17 @@ impl PendingOperations {
         &mut self,
         mut proven: impl FnMut(&PendingOperationKey) -> bool,
     ) -> usize {
-        let key = self.entries.iter().find(|key| proven(key)).cloned();
+        let native_key=self.native_mail_send.as_ref().map(|(_,_,key)|key);
+        let key = self.entries.iter().find(|key|native_key!=Some(*key)&&proven(key)).cloned();
         key.map(|key| if self.release(&key) { 1 } else { 0 })
             .unwrap_or_default()
     }
 }
 
+/// Preserve legacy `try_begin` semantics for transport callers. Their V2
+/// request ids are exact acknowledgement identities, so multiple V2 packets
+/// sharing coordinates remain correlatable; the native drag surface applies
+/// its stronger per-item/cell lock through `has_storage_drag_conflict`.
 fn storage_transfer_slot_conflicts(
     pending: &PendingOperationKey,
     candidate: &PendingOperationKey,
@@ -721,6 +919,117 @@ fn storage_transfer_slot_conflicts(
         ) => pending_from == candidate_from && pending_to == candidate_to,
         _ => false,
     }
+}
+
+/// Storage drag operations lock only the item identities and concrete cells
+/// they touch. A Store/TakeBack request supplies both cells; a MergeItem has
+/// the two live item identities. This keeps independent warehouse gestures
+/// concurrent while preventing a second release from retargeting an item that
+/// is still awaiting an authoritative result.
+fn storage_drag_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    let pending_cells = storage_drag_cells(pending);
+    let candidate_cells = storage_drag_cells(candidate);
+    let cells_conflict = pending_cells.iter().flatten().any(|(pending_grid, pending_slot)| {
+        candidate_cells
+            .iter()
+            .flatten()
+            .any(|(candidate_grid, candidate_slot)| {
+                pending_grid == candidate_grid && pending_slot == candidate_slot
+            })
+    });
+    cells_conflict || storage_drag_item_conflicts(pending, candidate)
+}
+
+fn storage_drag_cells(key: &PendingOperationKey) -> [Option<(&'static str, i32)>; 2] {
+    match key {
+        PendingOperationKey::StorageDeposit { from, to, .. }
+        | PendingOperationKey::StorageDepositV2 { from, to, .. } => {
+            [Some(("inventory", *from)), Some(("storage", *to))]
+        }
+        PendingOperationKey::StorageWithdraw { from, to, .. }
+        | PendingOperationKey::StorageWithdrawV2 { from, to, .. } => {
+            [Some(("storage", *from)), Some(("inventory", *to))]
+        }
+        PendingOperationKey::Move { grid, from, to, .. } if grid == "storage" => {
+            [Some(("storage", *from)), Some(("storage", *to))]
+        }
+        PendingOperationKey::Equip { grid, to, .. } if grid == "storage" => {
+            [None, Some(("equipment", *to))]
+        }
+        PendingOperationKey::Remove { grid, to, .. } if grid == "storage" => {
+            [None, Some(("storage", *to))]
+        }
+        _ => [None, None],
+    }
+}
+
+fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a str, u64)>; 2] {
+    match key {
+        PendingOperationKey::StorageDeposit { unique_id, .. }
+        | PendingOperationKey::StorageDepositV2 { unique_id, .. } => {
+            [Some(("inventory", *unique_id)), None]
+        }
+        PendingOperationKey::StorageWithdraw { unique_id, .. }
+        | PendingOperationKey::StorageWithdrawV2 { unique_id, .. } => {
+            [Some(("storage", *unique_id)), None]
+        }
+        PendingOperationKey::Move {
+            grid, unique_id, ..
+        } if matches!(grid.as_str(), "inventory" | "storage") => {
+            [Some((grid, *unique_id)), None]
+        }
+        PendingOperationKey::Equip {
+            grid, unique_id, ..
+        } if grid == "storage" => [Some(("storage", *unique_id)), None],
+        PendingOperationKey::Remove {
+            grid, unique_id, ..
+        } if grid == "storage" => [Some(("equipment", *unique_id)), None],
+        PendingOperationKey::Split {
+            grid, unique_id, ..
+        } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
+        PendingOperationKey::Sell { unique_id, .. }
+        | PendingOperationKey::Repair(unique_id)
+        | PendingOperationKey::SpecialRepair(unique_id)
+        | PendingOperationKey::DeleteItem { unique_id, .. }
+        | PendingOperationKey::Drop { unique_id, .. } => {
+            [Some(("inventory", *unique_id)), None]
+        }
+        PendingOperationKey::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } if matches!(
+            (grid_from.as_str(), grid_to.as_str()),
+            ("inventory", "storage")
+                | ("storage", "inventory")
+                | ("inventory", "inventory")
+                | ("storage", "storage")
+                | ("equipment", "storage")
+                | ("storage", "equipment")
+        ) => [Some((grid_from, *id_from)), Some((grid_to, *id_to))],
+        _ => [None, None],
+    }
+}
+
+fn storage_drag_item_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    storage_drag_item_endpoints(pending)
+        .iter()
+        .flatten()
+        .any(|(pending_grid, pending_id)| {
+            storage_drag_item_endpoints(candidate)
+                .iter()
+                .flatten()
+                .any(|(candidate_grid, candidate_id)| {
+                    pending_grid == candidate_grid && pending_id == candidate_id
+                })
+        })
 }
 
 /// Monotonic counters proving that a renderer-neutral authoritative model was
@@ -903,10 +1212,25 @@ pub fn reconcile_inventory_refresh(
     old: &crate::inventory::InventoryModel,
     new: &crate::inventory::InventoryModel,
 ) -> usize {
-    pending.release_matching(|key| match key {
+    let released_barriers = if pending.equipment.is_empty() {
+        0
+    } else {
+        let old_placements = old.items.iter().map(|item| InventoryPlacement {
+            unique_id: item.unique_id, container: item.container, slot: item.slot,
+        }).collect::<Vec<_>>();
+        let new_placements = new.items.iter().map(|item| InventoryPlacement {
+            unique_id: item.unique_id, container: item.container, slot: item.slot,
+        }).collect::<Vec<_>>();
+        pending.equipment.reconcile(
+            InventoryLayout { bag_capacity: old.bag_slot_capacity(), placements: &old_placements },
+            InventoryLayout { bag_capacity: new.bag_slot_capacity(), placements: &new_placements },
+        )
+    };
+    released_barriers + pending.release_matching(|key| match key {
         PendingOperationKey::Drop {
             unique_id, count, ..
         }
+        | PendingOperationKey::DeleteItem { unique_id, count }
         | PendingOperationKey::Sell { unique_id, count }
         | PendingOperationKey::Split {
             unique_id, count, ..
@@ -937,7 +1261,12 @@ pub fn reconcile_inventory_refresh(
             });
             old_at_source && new_at_target
         }
-        PendingOperationKey::Merge { id_from, id_to, .. } => {
+        PendingOperationKey::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } if !grid_from.eq_ignore_ascii_case("Trade") && !grid_to.eq_ignore_ascii_case("Trade") => {
             if has_ambiguous_replacement_without_instance_id(old, new, *id_from)
                 || has_ambiguous_replacement_without_instance_id(old, new, *id_to)
             {
@@ -1070,6 +1399,9 @@ pub fn reconcile_storage_refresh(
         PendingOperationKey::StorageRemovePassword => old.has_password && !new.has_password,
         PendingOperationKey::StorageExpand => {
             (!old.has_expanded && new.has_expanded) || new.size > old.size
+                || (new.has_expanded
+                    && ((new.expiry as u64) & 0x3fff_ffff_ffff_ffff)
+                        > ((old.expiry as u64) & 0x3fff_ffff_ffff_ffff))
         }
         _ => false,
     })
@@ -1353,10 +1685,21 @@ mod tests {
         }
     }
 
+    fn equipment_key(id: u64, grid: &str, to: i32) -> PendingOperationKey {
+        PendingOperationKey::Equip { grid: grid.into(), unique_id: id, to }
+    }
+
+    fn equipment_ack(id: u64, grid: &str, to: i32, success: bool) -> InventoryOperationAck {
+        InventoryOperationAck::Equip { grid: grid.into(), unique_id: id, to, success }
+    }
+
     fn mail(id: u64) -> crate::mail::MailMessage {
         crate::mail::MailMessage {
             id,
             sender: "System".into(),
+            can_reply: false,
+            date_sent_binary_datetime: 0,
+            metadata_known: false,
             subject: "Subject".into(),
             body: "Body".into(),
             gold: 10,
@@ -1433,6 +1776,7 @@ mod tests {
                     claimed: false,
                     locked: true,
                     read: true,
+                    ..Default::default()
                 },
             ],
             selected_id: None,
@@ -1457,6 +1801,7 @@ mod tests {
                 claimed: false,
                 locked: true,
                 read: true,
+                ..Default::default()
             }],
             selected_id: None,
         };
@@ -1537,6 +1882,296 @@ mod tests {
         assert_eq!(
             feedback.last.as_ref().map(InventoryOperationAck::success),
             Some(false)
+        );
+    }
+
+    #[test]
+    fn equip_instance_stays_pending_through_refresh_and_only_exact_receipt_releases() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(42, 1, 4, 0)], ..Default::default()
+        };
+        let mut pending = PendingOperations::default();
+        let key = PendingOperationKey::Equip {
+            grid: "inventory".into(), unique_id: 42, to: 0,
+        };
+        assert!(pending.try_begin(key.clone()));
+        assert!(!pending.try_begin(PendingOperationKey::Equip {
+            grid: "inventory".into(), unique_id: 42, to: 1,
+        }));
+        assert!(!pending.try_begin(PendingOperationKey::Remove {
+            grid: "inventory".into(), unique_id: 42, to: 2,
+        }));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &old), 0);
+        let changed = crate::inventory::InventoryModel {
+            items: vec![item(42, 1, 0, 2)], ..Default::default()
+        };
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &changed), 0);
+        assert!(pending.contains(&key));
+        let mut feedback = InventoryOperationFeedback::default();
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            InventoryOperationAck::Equip { grid: "inventory".into(),
+                unique_id: 43, to: 0, success: true }), 0);
+        assert!(pending.contains(&key));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            InventoryOperationAck::Equip { grid: "Inventory".into(),
+                unique_id: 42, to: 0, success: false }), 1);
+        assert!(!pending.contains(&key));
+        assert!(pending.try_begin(key));
+    }
+
+    #[test]
+    fn equipment_success_ack_waits_for_exact_authoritative_placement() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(0, 1, 4, 0)], ..Default::default()
+        };
+        let moved = crate::inventory::InventoryModel {
+            items: vec![item(0, 1, 0, 2)], ..Default::default()
+        };
+        let key = equipment_key(0, "inventory", 0);
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(0, "Inventory", 0, true)), 1);
+        assert!(pending.contains(&key));
+        assert_eq!(pending.len(), 1);
+        assert!(!pending.is_empty());
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &old), 0);
+        assert!(!pending.try_begin(key.clone()));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &moved), 1);
+        assert!(!pending.contains(&key));
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn equipment_snapshot_before_success_ack_does_not_create_a_stale_barrier() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(7, 1, 3, 1)], ..Default::default()
+        };
+        let moved = crate::inventory::InventoryModel {
+            items: vec![item(7, 1, 4, 2)], ..Default::default()
+        };
+        let key = equipment_key(7, "belt", 4);
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &moved), 0);
+        assert!(pending.contains(&key));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(7, "Belt", 4, true)), 1);
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn equipment_nack_and_transport_release_clear_observed_state() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(8, 1, 1, 0)], ..Default::default()
+        };
+        let moved = crate::inventory::InventoryModel {
+            items: vec![item(8, 1, 0, 2)], ..Default::default()
+        };
+        let key = equipment_key(8, "inventory", 0);
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &moved), 0);
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(8, "inventory", 0, false)), 1);
+        assert!(pending.is_empty());
+        assert_eq!(pending.equipment.observed_len(), 0);
+        assert!(pending.try_begin(key.clone()));
+        assert!(pending.release(&key));
+        assert_eq!(pending.equipment.observed_len(), 0);
+    }
+
+    #[test]
+    fn duplicate_uid_projection_never_proves_equipment_success() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(9, 1, 3, 0)], ..Default::default()
+        };
+        let duplicated = crate::inventory::InventoryModel {
+            items: vec![item(9, 1, 0, 2), item(9, 1, 3, 0)], ..Default::default()
+        };
+        let crowded_target = crate::inventory::InventoryModel {
+            items: vec![item(9, 1, 0, 2), item(10, 1, 0, 2)], ..Default::default()
+        };
+        let moved = crate::inventory::InventoryModel {
+            items: vec![item(9, 1, 0, 2)], ..Default::default()
+        };
+        let key = equipment_key(9, "inventory", 0);
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(9, "inventory", 0, true)), 1);
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &duplicated), 0);
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &crowded_target), 0);
+        assert!(pending.contains(&key));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &moved), 1);
+    }
+
+    #[test]
+    fn equipment_barrier_counts_toward_capacity_and_session_reset_clears_it() {
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        let key = equipment_key(10, "inventory", 0);
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(10, "inventory", 0, true)), 1);
+        for id in 0..(MAX_PENDING_OPERATIONS - 1) {
+            assert!(pending.try_begin(PendingOperationKey::ClaimMail(id as u64)));
+        }
+        assert_eq!(pending.len(), MAX_PENDING_OPERATIONS);
+        assert!(!pending.try_begin(PendingOperationKey::ClaimMail(10_000)));
+        let mut revisions = AuthoritativeModelRevisions::default();
+        let mut reset = SessionResetRevision::default();
+        request_session_reset(&mut reset, &mut revisions, &mut pending);
+        assert!(pending.is_empty());
+        assert_eq!(pending.equipment.observed_len(), 0);
+        assert_eq!(pending.equipment.success_barrier_len(), 0);
+    }
+
+    #[test]
+    fn core_equipment_reservation_still_blocks_native_storage_drag_conflicts() {
+        let mut pending = PendingOperations::default();
+        let storage_equip = equipment_key(0, "storage", 5);
+        let storage_withdraw = PendingOperationKey::StorageWithdrawV2 {
+            request_id: "st-1".into(), unique_id: 0, from: 3, to: 4,
+        };
+        assert!(pending.try_begin(storage_equip.clone()));
+        assert!(pending.has_storage_drag_conflict(&storage_withdraw),
+            "moving equipment state into core must not bypass native storage item locks");
+        let mut feedback = InventoryOperationFeedback::default();
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(0, "Storage", 5, true)), 1);
+        assert!(!pending.has_storage_drag_conflict(&storage_withdraw),
+            "storage equip remains the existing ACK-only exception");
+
+        let storage_remove = PendingOperationKey::Remove {
+            grid: "storage".into(), unique_id: 7, to: 9,
+        };
+        let deposit_into_same_cell = PendingOperationKey::StorageDepositV2 {
+            request_id: "st-2".into(), unique_id: 8, from: 1, to: 9,
+        };
+        assert!(pending.try_begin(storage_remove.clone()));
+        assert!(pending.has_storage_drag_conflict(&deposit_into_same_cell),
+            "Remove into a storage cell still conflicts with Store into that cell");
+        assert!(pending.release(&storage_remove));
+        assert!(!pending.has_storage_drag_conflict(&deposit_into_same_cell));
+    }
+
+    #[test]
+    fn remove_to_bag_waits_for_placement_but_storage_and_unknown_grids_do_not_barrier() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(11, 1, 1, 2)], ..Default::default()
+        };
+        let moved = crate::inventory::InventoryModel {
+            items: vec![item(11, 1, 5, 0)], ..Default::default()
+        };
+        let key = PendingOperationKey::Remove {
+            grid: "inventory".into(), unique_id: 11, to: 5,
+        };
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            InventoryOperationAck::Remove { grid: "inventory".into(), unique_id: 11,
+                to: 5, success: true }), 1);
+        assert!(pending.contains(&key));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &moved), 1);
+        assert!(pending.is_empty());
+
+        for grid in ["storage", "heroInventory", "unknown"] {
+            let key = equipment_key(12, grid, 1);
+            assert!(pending.try_begin(key.clone()));
+            assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+                equipment_ack(12, grid, 1, true)), 1);
+            assert!(!pending.contains(&key), "unsupported {grid} cannot lock permanently");
+        }
+    }
+
+    #[test]
+    fn remove_success_survives_coalesced_followup_move_without_accepting_stale_equipment() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(30, 1, 0, 2), item(31, 1, 1, 0)], ..Default::default()
+        };
+        let still_worn = crate::inventory::InventoryModel {
+            items: vec![item(30, 1, 0, 2), item(31, 1, 0, 0)], ..Default::default()
+        };
+        let coalesced = crate::inventory::InventoryModel {
+            items: vec![item(30, 1, 1, 0), item(31, 1, 0, 0)], ..Default::default()
+        };
+        let key = PendingOperationKey::Remove {
+            grid: "inventory".into(), unique_id: 30, to: 0,
+        };
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(key.clone()));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            InventoryOperationAck::Remove { grid: "Inventory".into(), unique_id: 30,
+                to: 0, success: true }), 1);
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &still_worn), 0);
+        assert!(pending.contains(&key), "same equipment container is not removal evidence");
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &coalesced), 1);
+        assert!(pending.is_empty(), "followup Move may change the final bag slot");
+    }
+
+    #[test]
+    fn different_items_to_same_equipment_slot_serialize_until_first_placement() {
+        let first = equipment_key(20, "inventory", 0);
+        let second = equipment_key(21, "storage", 0);
+        let other_slot = equipment_key(21, "storage", 1);
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(20, 1, 2, 0), item(21, 1, 3, 0)], ..Default::default()
+        };
+        let moved = crate::inventory::InventoryModel {
+            items: vec![item(20, 1, 0, 2), item(21, 1, 3, 0)], ..Default::default()
+        };
+        let mut pending = PendingOperations::default();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert!(pending.try_begin(first.clone()));
+        assert!(!pending.try_begin(second.clone()));
+        assert!(pending.try_begin(other_slot.clone()));
+        assert!(pending.release(&other_slot));
+        assert_eq!(apply_inventory_operation_ack(&mut pending, &mut feedback,
+            equipment_ack(20, "inventory", 0, true)), 1);
+        assert!(!pending.try_begin(second.clone()));
+        assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &moved), 1);
+        assert!(pending.try_begin(second));
+    }
+
+    #[test]
+    fn delete_receipt_releases_only_matching_instance_and_count() {
+        let mut pending = PendingOperations::default();
+        let exact = PendingOperationKey::DeleteItem {
+            unique_id: 70,
+            count: 2,
+        };
+        let other_count = PendingOperationKey::DeleteItem {
+            unique_id: 70,
+            count: 1,
+        };
+        assert!(pending.try_begin(exact.clone()));
+        assert!(pending.try_begin(other_count.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Delete {
+                    unique_id: 70,
+                    count: 2,
+                    success: true,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&exact));
+        assert!(pending.contains(&other_count));
+        assert_eq!(
+            feedback.last.as_ref().map(InventoryOperationAck::label),
+            Some("Delete")
         );
     }
 
@@ -1632,6 +2267,71 @@ mod tests {
         }
         assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &new), 5);
         assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn trade_merge_inventory_deltas_never_substitute_for_matching_ack() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(20, 5, 0, 0), item(21, 3, 1, 0)],
+            ..Default::default()
+        };
+        let new = crate::inventory::InventoryModel {
+            items: vec![item(20, 2, 0, 0), item(21, 6, 1, 0)],
+            ..Default::default()
+        };
+        for (grid_from, grid_to) in [
+            ("Trade", "inventory"),
+            ("inventory", "tRaDe"),
+            ("TRADE", "Trade"),
+        ] {
+            for success in [true, false] {
+                let mut pending = PendingOperations::default();
+                let key = PendingOperationKey::Merge {
+                    grid_from: grid_from.into(),
+                    grid_to: grid_to.into(),
+                    id_from: 20,
+                    id_to: 21,
+                };
+                assert!(pending.try_begin(key.clone()));
+                assert_eq!(
+                    reconcile_inventory_refresh(&mut pending, &old, &new),
+                    0,
+                    "balanced quantities do not prove a trade receipt"
+                );
+                assert!(pending.contains(&key));
+                let mut feedback = InventoryOperationFeedback::default();
+                assert_eq!(
+                    apply_inventory_operation_ack(
+                        &mut pending,
+                        &mut feedback,
+                        InventoryOperationAck::Merge {
+                            grid_from: grid_from.into(),
+                            grid_to: grid_to.into(),
+                            id_from: 20,
+                            id_to: 99,
+                            success
+                        }
+                    ),
+                    0
+                );
+                assert!(pending.contains(&key));
+                assert_eq!(
+                    apply_inventory_operation_ack(
+                        &mut pending,
+                        &mut feedback,
+                        InventoryOperationAck::Merge {
+                            grid_from: grid_from.into(),
+                            grid_to: grid_to.into(),
+                            id_from: 20,
+                            id_to: 21,
+                            success
+                        }
+                    ),
+                    1
+                );
+                assert!(pending.is_empty());
+            }
+        }
     }
 
     #[test]
@@ -2038,6 +2738,26 @@ mod tests {
         assert!(pending.contains(&PendingOperationKey::StorageRemovePassword));
     }
 
+    #[test]
+    fn external_quest_ids_are_unique_and_require_a_pending_quest() {
+        let mut pending = PendingOperations::default();
+        let first = PendingOperationKey::QuestAccept { npc_index: 0, quest_index: 1 };
+        let second = PendingOperationKey::QuestFinish { quest_index: 2, selected_item_index: -1 };
+        assert!(!pending.bind_external_quest_request_id(first.clone(), "external"));
+        assert!(pending.try_begin(first.clone()));
+        assert!(pending.try_begin(second.clone()));
+        assert!(!pending.bind_external_quest_request_id(first.clone(), ""));
+        assert!(pending.bind_external_quest_request_id(first.clone(), "external"));
+        assert!(pending.bind_external_quest_request_id(first.clone(), "external"));
+        assert!(!pending.bind_external_quest_request_id(first.clone(), "changed"));
+        assert!(!pending.bind_external_quest_request_id(second.clone(), "external"));
+        assert!(pending.bind_external_quest_request_id(second.clone(), "qs-0000000000000001"));
+        assert!(!pending.release_exact_quest_request(&first, "changed"));
+        assert!(pending.release_exact_quest_request(&first, "external"));
+        assert!(pending.try_begin(first.clone()));
+        assert_eq!(pending.bind_quest_request_id(first).as_deref(), Some("qs-0000000000000002"));
+    }
+
     #[cfg(feature = "native-ui")]
     #[test]
     fn quest_ack_and_nack_release_only_the_exact_submission() {
@@ -2050,12 +2770,18 @@ mod tests {
             quest_index: 32,
             selected_item_index: 2,
         };
-        let unrelated = PendingOperationKey::QuestFinish {
+        let alternative = PendingOperationKey::QuestFinish {
             quest_index: 32,
+            selected_item_index: 3,
+        };
+        let unrelated = PendingOperationKey::QuestFinish {
+            quest_index: 34,
             selected_item_index: 3,
         };
         assert!(pending.try_begin(accepted.clone()));
         assert!(pending.try_begin(rejected.clone()));
+        assert!(pending.has_pending_quest_finish(32));
+        assert!(!pending.try_begin(alternative.clone()));
         assert!(pending.try_begin(unrelated.clone()));
         let accepted_request_id = pending
             .bind_quest_request_id(accepted.clone())
@@ -2100,7 +2826,15 @@ mod tests {
         assert!(!finish_nack.success());
         assert_eq!(apply_quest_operation_ack(&mut pending, &finish_nack), 1);
         assert!(!pending.contains(&rejected));
+        assert!(!pending.has_pending_quest_finish(32));
         assert!(pending.contains(&unrelated));
+        assert!(pending.try_begin(alternative.clone()));
+        let alternative_request_id = pending
+            .bind_quest_request_id(alternative.clone())
+            .expect("replacement reward request id");
+        assert_eq!(apply_quest_operation_ack(&mut pending, &finish_nack), 0);
+        assert!(pending.contains(&alternative));
+        assert!(pending.release_exact_quest_request(&alternative, &alternative_request_id));
 
         let abandon = PendingOperationKey::QuestAbandon { quest_index: 33 };
         assert!(pending.try_begin(abandon.clone()));
@@ -2126,6 +2860,9 @@ mod tests {
             finish_npc_index: Some(2),
             title: format!("Quest {quest_index}"),
             npc_name: None,
+            group: None,
+            min_level_needed: 0,
+            detail: Default::default(),
             status,
             objectives: Vec::new(),
             rewards: Vec::new(),
@@ -2172,6 +2909,9 @@ mod tests {
             finish_npc_index: Some(2),
             title: "Quest 40".to_owned(),
             npc_name: None,
+            group: None,
+            min_level_needed: 0,
+            detail: Default::default(),
             status,
             objectives: Vec::new(),
             rewards: Vec::new(),
@@ -2191,6 +2931,89 @@ mod tests {
         assert!(pending.contains(&key));
         assert_eq!(reconcile_quest_refresh(&mut pending, &old, &aborted), 1);
         assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn storage_renewal_releases_only_after_authoritative_expiry_extension() {
+        let old = crate::storage::StorageModel {
+            has_expanded: true,
+            size: crate::storage::STORAGE_EXPANDED_SIZE,
+            expiry: 1000,
+            ..Default::default()
+        };
+        let mut pending = PendingOperations::default();
+        let key = PendingOperationKey::StorageExpand;
+        assert!(pending.try_begin(key.clone()));
+        let inventory = crate::inventory::InventoryModel::default();
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &old), 0);
+        let mut new = old.clone();
+        new.expiry = 999;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        // DateTime kind bits are not elapsed time or renewal evidence.
+        new.expiry = ((1u64 << 63) | 1000) as i64;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        new.expiry = ((1u64 << 63) | 1001) as i64;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 1);
+        assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn equipment_storage_receipts_release_only_the_exact_grid_item_and_slot() {
+        let mut pending = PendingOperations::default();
+        let remove = PendingOperationKey::Remove {
+            grid: "storage".into(),
+            unique_id: 90,
+            to: 5,
+        };
+        let equip = PendingOperationKey::Equip {
+            grid: "storage".into(),
+            unique_id: 91,
+            to: 9,
+        };
+        let other_slot = PendingOperationKey::Remove {
+            grid: "storage".into(),
+            unique_id: 90,
+            to: 6,
+        };
+        assert!(pending.try_begin(remove.clone()));
+        assert!(pending.try_begin(equip.clone()));
+        assert!(!pending.try_begin(other_slot.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Remove {
+                    grid: "Storage".into(),
+                    unique_id: 90,
+                    to: 5,
+                    success: false,
+                },
+            ),
+            1,
+        );
+        assert!(!pending.contains(&remove));
+        assert!(pending.contains(&equip));
+        assert!(pending.try_begin(other_slot.clone()));
+        assert!(pending.contains(&other_slot));
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Equip {
+                    grid: "STORAGE".into(),
+                    unique_id: 91,
+                    to: 9,
+                    success: true,
+                },
+            ),
+            1,
+        );
+        assert!(!pending.contains(&equip));
+        assert!(pending.contains(&other_slot));
+        assert_eq!(feedback.last.as_ref().map(InventoryOperationAck::label), Some("Equip"));
     }
 
     #[test]
@@ -2315,6 +3138,7 @@ mod native_ui_tests {
             ui.inspect = Some(crate::crystal_ui::overlays::ItemInspect {
                 container: 0,
                 slot: 1,
+                unique_id: None,
                 key: "10".to_owned(),
                 name: "A item".to_owned(),
                 quantity: 1,
@@ -2343,7 +3167,7 @@ mod native_ui_tests {
         {
             let mut state = app.world_mut().resource_mut::<QuestUiState>();
             state.selected_quest_index = Some(7);
-            state.tracking_quest_index = Some(7);
+            state.tracked_quest_indices.push(7);
             state.set_feedback("A quest", false);
         }
         app.world_mut()
@@ -2355,6 +3179,9 @@ mod native_ui_tests {
                 finish_npc_index: Some(2),
                 title: "A quest".to_owned(),
                 npc_name: Some("A NPC".to_owned()),
+                group: None,
+                min_level_needed: 0,
+                detail: Default::default(),
                 status: QuestStatus::InProgress,
                 objectives: Vec::new(),
                 rewards: Vec::new(),
@@ -2393,10 +3220,11 @@ mod native_ui_tests {
             .active_quests
             .is_empty());
         assert!(app.world().resource::<CombatTargetModel>().target.is_none());
-        assert_eq!(
-            app.world().resource::<QuestUiState>().tracking_quest_index,
-            None
-        );
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .tracked_quest_indices
+            .is_empty());
         assert!(app
             .world_mut()
             .resource_mut::<QuestUiIntentQueue>()
@@ -2427,12 +3255,14 @@ mod native_ui_tests {
             message: "one".into(),
             gold: 1,
             attachment_unique_ids: vec![7],
+            stamped: false,
         };
         let second_send = NativePlayerUiIntent::SendMail {
             recipient: "B".into(),
             message: "two".into(),
             gold: 2,
             attachment_unique_ids: vec![8],
+            stamped: false,
         };
         assert!(!queue.push_pending_intent(&mut pending, first_send.clone()));
         assert_eq!(queue.drain_intents().len(), 1);

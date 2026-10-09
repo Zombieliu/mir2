@@ -1,0 +1,927 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling windows-link v0.2.1
+   Compiling serde_core v1.0.229
+   Compiling libm v0.2.16
+   Compiling equivalent v1.0.2
+   Compiling cfg-if v1.0.4
+   Compiling foldhash v0.2.0
+   Compiling pin-project-lite v0.2.17
+   Compiling serde v1.0.229
+   Compiling allocator-api2 v0.2.21
+   Compiling thiserror v2.0.20
+   Compiling autocfg v1.5.1
+   Compiling parking v2.2.1
+   Compiling log v0.4.33
+   Compiling hashbrown v0.17.1
+   Compiling crossbeam-utils v0.8.22
+   Compiling winnow v1.0.4
+   Compiling smallvec v1.15.2
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling futures-core v0.3.33
+   Compiling futures-io v0.3.33
+   Compiling raw-window-handle v0.6.2
+   Compiling fastrand v2.5.0
+   Compiling arrayvec v0.7.8
+   Compiling getrandom v0.4.3
+   Compiling unicode-segmentation v1.13.3
+   Compiling once_cell v1.21.4
+   Compiling typewit v1.15.2
+   Compiling typeid v1.0.3
+   Compiling rand_core v0.10.1
+   Compiling windows-sys v0.61.2
+   Compiling unicode-xid v0.2.6
+   Compiling spin v0.10.1
+   Compiling thread_local v1.1.10
+   Compiling erased-serde v0.4.10
+   Compiling event-listener v5.4.2
+   Compiling disqualified v1.0.0
+   Compiling atomic-waker v1.1.2
+   Compiling futures-lite v2.6.1
+   Compiling version_check v0.9.5
+   Compiling rand v0.10.2
+   Compiling async-task v4.7.1
+   Compiling inventory v0.3.24
+   Compiling downcast-rs v2.0.2
+   Compiling bevy_ptr v0.19.0
+   Compiling slab v0.4.12
+   Compiling nonmax v0.5.5
+   Compiling fixedbitset v0.5.7
+   Compiling bumpalo v3.20.3
+   Compiling cfg_aliases v0.2.2
+   Compiling tracing-core v0.1.36
+   Compiling num-traits v0.2.19
+   Compiling event-listener-strategy v0.5.4
+   Compiling const_panic v0.2.15
+   Compiling windows-strings v0.5.1
+   Compiling windows-result v0.4.1
+   Compiling zerocopy v0.8.56
+   Compiling either v1.17.0
+   Compiling windows-threading v0.2.1
+   Compiling memchr v2.8.3
+   Compiling stable_deref_trait v1.2.1
+   Compiling shlex v2.0.1
+   Compiling convert_case v0.10.0
+   Compiling find-msvc-tools v0.1.10
+   Compiling slotmap v1.1.1
+   Compiling indexmap v2.14.0
+   Compiling regex-syntax v0.8.11
+   Compiling piper v0.2.5
+   Compiling async-lock v3.4.2
+   Compiling itertools v0.14.0
+   Compiling const-fnv1a-hash v1.1.0
+   Compiling constant_time_eq v0.4.2
+   Compiling arrayref v0.3.9
+   Compiling futures-task v0.3.33
+   Compiling cpufeatures v0.3.0
+   Compiling async-broadcast v0.7.2
+   Compiling stackfuture v0.3.1
+   Compiling simd-adler32 v0.3.10
+   Compiling writeable v0.6.3
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.13
+   Compiling crossbeam-channel v0.5.16
+   Compiling crc32fast v1.5.0
+   Compiling unicode-width v0.2.2
+   Compiling atomicow v1.2.0
+   Compiling naga v29.0.4
+   Compiling bit-vec v0.9.1
+   Compiling cc v1.4.2
+   Compiling aho-corasick v1.1.5
+   Compiling adler2 v2.0.1
+   Compiling litemap v0.8.2
+   Compiling lazy_static v1.5.0
+   Compiling async-channel v2.5.0
+   Compiling async-executor v1.14.0
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling rustc-hash v1.1.0
+   Compiling hexf-parse v0.2.1
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling bit-set v0.9.1
+   Compiling miniz_oxide v0.8.9
+   Compiling sharded-slab v0.1.7
+   Compiling fdeflate v0.3.7
+   Compiling tracing-log v0.2.0
+   Compiling blocking v1.6.2
+   Compiling const_soft_float v0.1.4
+   Compiling utf8_iter v1.0.4
+   Compiling pxfm v0.1.30
+   Compiling ash v0.38.0+1.3.281
+   Compiling parking_lot_core v0.9.12
+   Compiling svg_fmt v0.4.5
+   Compiling byteorder-lite v0.1.0
+   Compiling libloading v0.8.9
+   Compiling rectangle-pack v0.4.2
+   Compiling icu_properties_data v2.2.0
+   Compiling async-fs v2.2.0
+   Compiling constgebra v0.1.4
+   Compiling scopeguard v1.2.0
+   Compiling icu_locale_data v2.2.0
+   Compiling foldhash v0.1.5
+   Compiling toml_edit v0.25.13+spec-1.1.0
+   Compiling lock_api v0.4.14
+   Compiling wgpu-hal v29.0.4
+   Compiling icu_segmenter_data v2.2.0
+   Compiling presser v0.3.1
+   Compiling icu_normalizer_data v2.2.0
+   Compiling profiling v1.0.18
+   Compiling flate2 v1.1.9
+   Compiling renderdoc-sys v1.1.0
+   Compiling hashbrown v0.15.5
+   Compiling static_assertions v1.1.0
+   Compiling range-alloc v0.1.5
+   Compiling core_maths v0.1.1
+   Compiling wgpu-core v29.0.4
+   Compiling rand_distr v0.6.0
+   Compiling euclid v0.22.14
+   Compiling ordered-float v5.3.0
+   Compiling memmap2 v0.9.11
+   Compiling litrs v1.0.0
+   Compiling parking_lot v0.12.5
+   Compiling linebender_resource_handle v0.1.1
+   Compiling parlance v0.1.0
+   Compiling data-encoding v2.11.1
+   Compiling windows_x86_64_msvc v0.52.6
+   Compiling wgpu v29.0.4
+   Compiling yazi v0.2.1
+   Compiling zeno v0.3.3
+   Compiling sys-locale v0.3.2
+   Compiling num-integer v0.1.47
+   Compiling ctrlc v3.5.2
+   Compiling winapi-util v0.1.11
+   Compiling nu-ansi-term v0.50.3
+   Compiling offset-allocator v0.2.0
+   Compiling winit v0.30.13
+   Compiling radsort v0.1.1
+   Compiling byteorder v1.5.0
+   Compiling cpal v0.17.3
+   Compiling bitflags v2.13.1
+   Compiling hashbrown v0.16.1
+   Compiling uuid v1.24.0
+   Compiling regex-automata v0.4.18
+   Compiling blake3 v1.8.6
+   Compiling termcolor v1.4.1
+   Compiling document-features v0.2.12
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling png v0.18.1
+   Compiling gpu-descriptor-types v0.2.0
+   Compiling windows-targets v0.52.6
+   Compiling guillotiere v0.6.2
+   Compiling tinyvec_macros v0.1.1
+   Compiling weak-table v0.3.2
+   Compiling ogg v0.8.0
+   Compiling num-bigint v0.4.8
+   Compiling dpi v0.1.2
+   Compiling windows-sys v0.52.0
+   Compiling tinyvec v1.12.0
+   Compiling cursor-icon v1.2.0
+   Compiling grid v1.0.1
+   Compiling dasp_sample v0.11.0
+   Compiling codespan-reporting v0.13.1
+   Compiling gpu-descriptor v0.3.2
+   Compiling accesskit v0.24.1
+   Compiling codespan-reporting v0.12.0
+   Compiling hound v3.5.1
+   Compiling approx v0.5.1
+   Compiling zmij v1.0.23
+   Compiling taffy v0.10.1
+   Compiling serde_json v1.0.151
+   Compiling itoa v1.0.18
+   Compiling chrono v0.4.45
+   Compiling mir2-client-core v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-core)
+   Compiling lewton v0.10.2
+   Compiling accesskit_consumer v0.35.0
+   Compiling bytemuck_derive v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.20
+   Compiling displaydoc v0.2.7
+   Compiling num-rational v0.4.2
+   Compiling moxcms v0.8.1
+   Compiling bytemuck v1.25.2
+   Compiling font-types v0.11.3
+   Compiling font-types v0.12.2
+   Compiling bevy_macro_utils v0.19.0
+   Compiling encase_derive_impl v0.12.0
+   Compiling synstructure v0.13.2
+   Compiling bevy_ecs_macro_logic v0.19.0
+   Compiling read-fonts v0.39.2
+   Compiling read-fonts v0.41.0
+   Compiling matchers v0.2.0
+   Compiling regex v1.13.1
+   Compiling encase_derive v0.12.0
+   Compiling derive_more-impl v2.1.1
+   Compiling variadics_please v1.1.0
+   Compiling bevy_reflect_derive v0.19.0
+   Compiling assert_type_match v0.1.1
+   Compiling bevy_derive v0.19.0
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+   Compiling tracing-attributes v0.1.31
+   Compiling zerocopy-derive v0.8.56
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling futures-macro v0.3.33
+   Compiling bevy_asset_macros v0.19.0
+   Compiling bevy_encase_derive v0.19.0
+   Compiling bevy_ecs_macros v0.19.0
+   Compiling bevy_material_macros v0.19.0
+   Compiling bevy_render_macros v0.19.0
+   Compiling encase v0.12.0
+   Compiling futures-util v0.3.33
+   Compiling glam v0.32.1
+   Compiling windows-core v0.62.2
+   Compiling wgpu-types v29.0.4
+   Compiling bevy_platform v0.19.0
+   Compiling smol_str v0.2.2
+   Compiling ron v0.12.2
+   Compiling mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling tracing v0.1.44
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling windows-numerics v0.3.1
+   Compiling windows-collections v0.3.2
+   Compiling windows-future v0.3.2
+   Compiling bevy_utils v0.19.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling windows v0.62.2
+   Compiling image v0.25.10
+   Compiling derive_more v2.1.1
+   Compiling bevy_tasks v0.19.0
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_locale v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling icu_segmenter v2.2.0
+   Compiling parley_data v0.9.0
+   Compiling half v2.7.1
+   Compiling harfrust v0.6.2
+   Compiling skrifa v0.42.1
+   Compiling skrifa v0.44.0
+   Compiling swash v0.2.10
+   Compiling bevy_reflect v0.19.0
+   Compiling hexasphere v18.0.0
+   Compiling wgpu-naga-bridge v29.0.4
+   Compiling naga_oil v0.22.0
+   Compiling bevy_ecs v0.19.0
+   Compiling bevy_math v0.19.0
+   Compiling bevy_color v0.19.0
+   Compiling bevy_app v0.19.0
+   Compiling bevy_time v0.19.0
+   Compiling bevy_input v0.19.0
+   Compiling bevy_transform v0.19.0
+   Compiling bevy_log v0.19.0
+   Compiling bevy_a11y v0.19.0
+   Compiling bevy_clipboard v0.19.0
+   Compiling bevy_diagnostic v0.19.0
+   Compiling bevy_asset v0.19.0
+   Compiling bevy_window v0.19.0
+   Compiling bevy_input_focus v0.19.0
+   Compiling bevy_image v0.19.0
+   Compiling bevy_mesh v0.19.0
+   Compiling bevy_shader v0.19.0
+   Compiling bevy_camera v0.19.0
+   Compiling bevy_material v0.19.0
+   Compiling bevy_light v0.19.0
+   Compiling gpu-allocator v0.28.0
+   Compiling fontique v0.9.0
+   Compiling accesskit_windows v0.32.1
+   Compiling rodio v0.22.2
+   Compiling accesskit_winit v0.32.2
+   Compiling parley v0.9.0
+   Compiling bevy_winit v0.19.0
+   Compiling bevy_audio v0.19.0
+   Compiling bevy_text v0.19.0
+   Compiling wgpu-core-deps-windows-linux-android v29.0.4
+   Compiling bevy_sprite v0.19.0
+   Compiling bevy_ui v0.19.0
+   Compiling bevy_render v0.19.0
+   Compiling bevy_core_pipeline v0.19.0
+   Compiling bevy_sprite_render v0.19.0
+   Compiling bevy_ui_render v0.19.0
+   Compiling bevy_internal v0.19.0
+   Compiling bevy v0.19.0
+   Compiling mir2-ui-core v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\ui-core)
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:187:21
+    |
+187 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+187 -                     (32. / 3.),
+187 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:391:29
+    |
+391 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+391 -                             (32. / 3.),
+391 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:398:29
+    |
+398 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+398 -                             (32. / 3.),
+398 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:453:25
+    |
+453 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+453 -                         (32. / 3.),
+453 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:616:33
+    |
+616 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+616 -                                 (32. / 3.),
+616 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:623:33
+    |
+623 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+623 -                                 (32. / 3.),
+623 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:636:33
+    |
+636 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+636 -                                 (32. / 3.),
+636 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:648:33
+    |
+648 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+648 -                                 (32. / 3.),
+648 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:752:29
+    |
+752 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+752 -                             (32. / 3.),
+752 +                             32. / 3. ,
+    |
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:40:58
+   |
+40 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+41 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:43:51
+   |
+43 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:65:5
+   |
+65 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, and `SKILL_ROW_SIZE`
+  --> src\crystal_ui\overlays.rs:91:5
+   |
+91 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+   |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+92 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+   |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+97 |     INVENTORY_WEIGHT_BAR_SIZE, SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+   |                                                                                     ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:4876:8
+     |
+4876 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+4877 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+4876 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+4877 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:4240:17
+     |
+4240 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:4241:28
+     |
+4241 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:4241:28
+     |
+4241 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:4535:18
+     |
+4535 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:5122:25
+     |
+5122 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:5123:36
+     |
+5123 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:5107:5
+     |
+5107 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:5123:36
+     |
+5123 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+    --> src\crystal_ui\overlays.rs:7711:9
+     |
+7711 |         skill_binding,
+     |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:7712:9
+     |
+7712 |         skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:1585:5
+     |
+1585 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::OverlayInventory` is more private than the item `render_order`
+    --> src\crystal_ui\hero_cross_inventory.rs:290:1
+     |
+ 290 | / pub fn render_order(
+ 291 | |     mut commands: Commands,
+ 292 | |     state: Res<NativePlayerUiState>,
+ 293 | |     panels: Query<Entity, With<OverlayInventory>>,
+ 294 | | ) {
+     | |_^ function `render_order` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayInventory` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2293:1
+     |
+2293 | struct OverlayInventory;
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_dialog::render::render`
+    --> src\crystal_ui\hero_dialog_render.rs:211:1
+     |
+ 211 | / pub fn render(
+ 212 | |     mut commands: Commands,
+ 213 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 214 | |     old: Query<Entity, With<HeroRoot>>,
+...    |
+ 219 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+ 220 | | ) {
+     | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2290:1
+     |
+2290 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> src\crystal_ui\hero_dialog_render.rs:211:1
+    |
+211 | / pub fn render(
+212 | |     mut commands: Commands,
+213 | |     roots: Query<Entity, With<OverlayRoot>>,
+214 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+219 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+220 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> src\crystal_ui\overlays.rs:169:1
+    |
+169 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `skill_bars::host::render`
+    --> src\crystal_ui\skill_bars_host.rs:131:1
+     |
+ 131 | / pub fn render(
+ 132 | |     mut commands: Commands,
+ 133 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 134 | |     old: Query<Entity, With<SkillBarRoot>>,
+...    |
+ 138 | |     assets: Option<Res<AssetServer>>,
+ 139 | | ) {
+     | |_^ function `skill_bars::host::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2290:1
+     |
+2290 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::render`
+    --> src\crystal_ui\hero_buff_hud.rs:121:1
+     |
+ 121 | / pub fn render(
+ 122 | |     mut commands: Commands,
+ 123 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 124 | |     old: Query<Entity, With<HeroBuffRoot>>,
+...    |
+ 127 | |     assets: Option<Res<AssetServer>>,
+ 128 | | ) {
+     | |_^ function `hero_buff_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2290:1
+     |
+2290 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::hint`
+    --> src\crystal_ui\hero_buff_hud.rs:213:1
+     |
+ 213 | / pub fn hint(
+ 214 | |     mut commands: Commands,
+ 215 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 216 | |     old: Query<(Entity, &ComputedNode), With<HeroBuffHint>>,
+...    |
+ 219 | |     shell: Res<NativeShellModel>,
+ 220 | | ) {
+     | |_^ function `hero_buff_hud::hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2290:1
+     |
+2290 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::status_hud::render`
+    --> src\crystal_ui\status_hud.rs:407:1
+     |
+ 407 | / pub fn render(
+ 408 | |     mut commands: Commands,
+ 409 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 410 | |     old: Query<Entity, With<StatusRoot>>,
+...    |
+ 414 | |     assets: Option<Res<AssetServer>>,
+ 415 | | ) {
+     | |_^ function `overlays::status_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2290:1
+     |
+2290 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `render_hint`
+    --> src\crystal_ui\status_hud.rs:685:1
+     |
+ 685 | / pub fn render_hint(
+ 686 | |     mut commands: Commands,
+ 687 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 688 | |     old: Query<(Entity, &ComputedNode), With<StatusHint>>,
+...    |
+ 691 | |     shell: Res<NativeShellModel>,
+ 692 | | ) {
+     | |_^ function `render_hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2290:1
+     |
+2290 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src\crystal_ui\overlays.rs:2469:5
+     |
+2435 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+2469 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+2470 |     ToggleShop,
+     |     ^^^^^^^^^^
+2471 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+2472 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+2475 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+2480 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+2499 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+2500 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+2503 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+2507 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+2511 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+2512 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+2513 |     GuildKickMember(u8),
+2514 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+2517 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+2526 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+2612 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+2613 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src\crystal_ui\overlays.rs:11005:4
+      |
+11005 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src\crystal_ui\overlays.rs:11208:4
+      |
+11208 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: constant `BUTTON_BG` is never used
+  --> src\native_shell_ui.rs:36:7
+   |
+36 | const BUTTON_BG: Color = Color::srgba(0.29, 0.19, 0.11, 1.0);
+   |       ^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src\native_shell_ui.rs:38:7
+   |
+38 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src\native_shell_ui.rs:292:5
+    |
+286 | enum NativeShellButton {
+    |      ----------------- variants in this enum
+...
+292 |     CycleClass,
+    |     ^^^^^^^^^^
+293 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+299 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+300 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_text_button` is never used
+    --> src\native_shell_ui.rs:1840:4
+     |
+1840 | fn spawn_aux_text_button(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src\native_shell_ui.rs:1893:4
+     |
+1893 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src\native_shell_ui.rs:1929:4
+     |
+1929 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src\native_shell_ui.rs:1966:4
+     |
+1966 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:51:7
+   |
+51 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+   --> src\quest_ui.rs:864:5
+    |
+833 | enum QuestUiButton {
+    |      ------------- variants in this enum
+...
+864 |     SelectQuestFilter {
+    |     ^^^^^^^^^^^^^^^^^
+...
+867 |     QuestHelp,
+    |     ^^^^^^^^^
+868 |     QuestPagePrevious,
+    |     ^^^^^^^^^^^^^^^^^
+869 |     QuestPageNext,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `tracker_quest_block` is never used
+    --> src\quest_ui.rs:5164:4
+     |
+5164 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src\quest_ui.rs:5354:4
+     |
+5354 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:4239:9
+     |
+4239 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:4240:9
+     |
+4240 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:4241:9
+     |
+4241 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:5121:17
+     |
+5121 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:5122:17
+     |
+5122 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:5123:17
+     |
+5123 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: `mir2-client-bevy` (lib test) generated 55 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 32 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 41s
+     Running unittests src\lib.rs (C:/mir2-build/platform-windows-r33-tests\debug\deps\mir2_client_bevy-8ddc6ec7d22328ee.exe)
+
+running 10 tests
+test crystal_ui::overlays::game_shop_dialog::tests::categories_keep_server_order_and_class_section_search_filter_real_flags ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::confirmation_revalidates_price_stock_and_wallet_then_queues_once ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::consumed_clipboard_shortcut_never_inserts_its_v_literal ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::ctrl_a_selects_the_search_draft_without_appending_its_literal ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::preview_keeps_crystal_direction_gender_clock_and_weapon_depth ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::quantities_are_per_product_and_respect_five_stacks_stock_and_flags ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::raw_home_and_end_clear_ctrl_a_selection_when_button_edge_is_missing ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::raw_navigation_and_delete_are_single_shot_with_press_release_stream ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::recent_filter_excludes_zero_old_and_exact_seven_day_boundary ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::search_editor_caps_edits_and_resets_filter_page_state ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 842 filtered out; finished in 0.02s
+

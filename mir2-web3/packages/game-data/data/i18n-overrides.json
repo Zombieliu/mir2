@@ -16,6 +16,8 @@
     "gapFillNote": "Gap-fill pass added native pt-BR/es for keys a dropped bulk batch had left as English fallback (codes/brand/autonyms intentionally kept)."
   },
   "esES": {
+    "ui.questProgressHeading": "Progreso",
+    "ui.questReturnHeading": "Lugar de entrega",
     "client.AC": "CA + {0}~{1}",
     "client.AccessoryItems": "Accesorios",
     "client.AccountBannedReasonDuration": "Esta cuenta está baneada.\n\nMotivo: {0}\nFecha de caducidad: {1}\nDuración: {2:#,##0} horas, {3} minutos, {4} segundos",
@@ -2059,6 +2061,15 @@
     "server.ICannotSummon": "No puedo convocar a {0} en este momento."
   },
   "ptBR": {
+    "ui.questProgressHeading": "Progresso",
+    "ui.questReturnHeading": "Local de entrega",
+    "ui.questClientLoading": "Preparando as ações de missão…",
+    "ui.questClientUnavailable": "As ações de missão estão temporariamente indisponíveis. Tente novamente.",
+    "ui.questActionPending": "Sua solicitação está sendo processada. Aguarde.",
+    "ui.questActionRewardRequired": "Selecione uma recompensa primeiro.",
+    "ui.questActionTalkToNpc": "Fale com o NPC da missão para continuar.",
+    "ui.questActionStateChanged": "A missão mudou. Confira os detalhes e tente novamente.",
+    "ui.retry": "Tentar novamente",
     "client.AC": "CA + {0}~{1}",
     "client.AccessoryItems": "Acessórios",
     "client.AccountBannedReasonDuration": "Esta conta está banida.\n\nMotivo: {0}\nData de expiração: {1}\nDuração: {2:#,##0} horas, {3} minutos, {4} segundos",

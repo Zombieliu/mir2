@@ -151,3 +151,86 @@ while shared code grows through tested seams. Some adapters and duplicate UI
 read-model plumbing will exist temporarily. The payoff is one gameplay client,
 one protocol and one server authority across all release targets rather than
 four drifting implementations.
+
+## 2026-09-30 clarification: consistency and reuse across desktop, Web and mobile
+
+The user explicitly prioritizes multi-platform consistency and reuse because
+Android/iOS delivery follows Windows and Web. This confirms the shared-client
+direction above. Closing Web gaps by maintaining a second independent gameplay
+controller is not the default migration strategy. The work below is planned;
+this clarification records no new implementation, build or device acceptance.
+
+### Current boundary and intended ownership
+
+Windows enables `client-bevy/native-ui`; the production Web runtime does not.
+Quest guidance, practice, supplies and the Crystal UI are behind that feature,
+while Web still owns separate TypeScript interaction and React presentation.
+Android has shared reducer and host-bridge foundations, but those do not establish
+complete native gameplay or device acceptance. `platform-web` and a native
+`platform-ios` remain unfinished extraction targets. Existing Capacitor shells
+are separate delivery paths, not proof of native-client feature convergence.
+
+Shared ownership must include:
+
+- client replica/read models and UI state transitions;
+- movement/combat intent scheduling and presentation reconciliation;
+- quest, inventory, equipment, trade, mail and shop interaction policies;
+- operation correlation, pending/unknown/result handling and session recovery
+  decisions, with protocol decoding kept at the adapter boundary;
+- Bevy in-game UI components, render assets and presentation behavior.
+
+Platform hosts supply transport I/O, clocks, resource loading/cache, persistence,
+identity/secure storage, window or canvas lifecycle, IME/clipboard and normalized
+input. Extract OS/browser dependencies from current native modules rather than
+merely renaming or enabling the `native-ui` feature. Keep independent platform
+capabilities small, following the capability rule above. Shared client code must
+not import authoritative server rules or acquire gameplay authority.
+
+Consistency means equivalent actions, state and results. Desktop, touch and
+gamepad presentations may use different layouts, hit areas and bindings while
+emitting the same intents. Mobile must support safe areas, soft keyboards and
+foreground/background transitions; the desktop 1024x768 acceptance viewport is
+not a mandatory mobile layout. View-specific changes still require their own
+visual and input evidence.
+
+### Migration sequence and acceptance
+
+1. **CP-00 — map and isolate the boundary.** Map current Windows and Web intent,
+   protocol, receipt and read-model fields before extending the frozen M1-A
+   primitives. Identify native-only dependencies and establish native/WASM build
+   checks for each extracted common module. Retain existing protocol semantics.
+2. **CP-01 — shared newcomer quest slice.** Extract the quest endpoint metadata,
+   enabled-profile policy, action eligibility and feedback into a common module
+   consumed by both hosts. Explicit zero-NPC diary templates must work alongside
+   ordinary NPC quests; absent metadata must not authorize diary operations.
+   Generate or validate quest text against the same public content contract,
+   including the current N16 Zombie2 target. An interim React view may consume
+   the WASM-exported common model/actions, without duplicating those decisions.
+   Gate completion on an ordinary N2 accept/equip/finish/save/relogin flow in
+   both actual clients against matched Gateway/content, plus rejection and stale
+   response checks. Source tests or a Node protocol driver alone are insufficient.
+3. **CP-02 — executable shared browser UI.** Build the `platform-web` host around
+   the existing WASM renderer and extracted common client. Prove a bounded Bevy
+   task/HUD/inventory surface with browser input, fonts, resources and actual
+   gateway responses. Retire the equivalent React owner only after this slice
+   passes; each surface and operation must have one active owner. React may
+   remain for launcher/account integrations. Preserve existing Web identity and
+   accessibility/platform capabilities during the transition.
+4. **CP-03 — early mobile validation.** Exercise the same slice through the
+   existing Android foundation and a bounded iOS host when its build environment
+   is available. Verify touch layout, safe areas, IME, suspend/resume and memory
+   on real devices early, before expanding desktop-specific UI assumptions.
+   Compilation and desktop host tests are separate from device acceptance.
+5. **CP-04 — converge remaining interactions.** Migrate navigation/supplies,
+   movement/combat input, trade/mail/storage/shop, settings and recovery one
+   bounded surface at a time. Use the audited Windows behavior as the reference
+   for its verified improvements, retain working Web/mobile capabilities, and
+   derive gameplay truth from the shared server/content. Keep unaccepted native
+   behavior explicitly unaccepted instead of inheriting an acceptance label.
+
+For subsequent client work, place common behavior and regression fixtures in the
+shared layer first. Platform tests then verify that keyboard/mouse, browser and
+touch adapters produce equivalent intents and render the resulting state. Track
+shared implementation, per-host integration and actual device/player acceptance
+separately; a fix in shared source does not prove any deployed artifact contains
+it. Existing capacity and release follow-ups retain their evidence and status.

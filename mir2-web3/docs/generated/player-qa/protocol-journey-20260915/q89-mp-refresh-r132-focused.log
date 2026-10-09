@@ -1,0 +1,46 @@
+ok - equips a strictly dominating eligible class upgrade
+ok - equips BronzeShortSword over SharpDagger by expected damage at zero Luck
+ok - Taoist without a learned offensive skill equips a held DC upgrade for melee
+ok - Taoist with a learned offensive skill keeps an SC-neutral weapon tradeoff
+ok - Wizard may improve held melee damage only while preserving MC
+ok - expected-damage weapon selection requires zero authoritative Luck and no other regression
+ok - keeps GoldenPendant because PrecisionPendant is an attack-versus-agility tradeoff
+ok - equips a left-labelled bracelet into the empty opposite wrist
+ok - does not replace either occupied wrist with an incomparable bracelet
+ok - does not replace gear for a tradeoff, wrong class, excess level, or missing metadata
+ok - honours a stat-based item requirement
+ok - reads real Gateway snake_case requirements and instance added_stats
+ok - learns only the class beginner book at its authoritative level
+ok - learns every held eligible approved progression book without inventing levels
+ok - approved later books still obey their authoritative required level
+ok - approved book sets cover the three newcomer class progressions
+ok - uses held HP and MP drugs only at conservative deficits
+ok - a fresh own ObjectMana refresh prevents a duplicate MP dose after the exact snapshot recovers
+ok - a fresh own ObjectMana still permits one MP dose when the refreshed exact MP remains low
+ok - MP reuse delay starts at the actual dose after a delayed exact snapshot probe
+ok - another player ObjectMana or a newer exact MP snapshot never probes before an ordinary MP dose
+ok - unknown or empty player object ids never classify ObjectMana as own
+ok - useSupplies accepts the real first-item uniqueId zero
+ok - useSupplies accepts a higher explicit HP recovery threshold
+ok - q89 opt-in prefers held HP Medium without rewriting inventory
+ok - emergency HP recovery sends immediately without awaiting an item acknowledgement
+ok - emergency HP recovery waits for the prior gradual potion dose before using another
+ok - opt-in restorative reuse cannot go below 2500ms
+ok - dead players emit no restorative item or Healing commands
+ok - a rejected restorative refreshes authoritative state without aborting the journey
+ok - Wizard casts exact known FireBall at a target in range
+ok - Wizard prefers ready GreatFireBall and falls back while it cools down
+ok - Wizard falls back to affordable FireBall when GreatFireBall lacks MP
+ok - combat approach keeps a ready Wizard FireBall at a safe ranged distance
+ok - Wizard holds spell range and waits without a command while FireBall cools down
+ok - combat approach closes to melee without enough authoritative MP
+ok - combat approach remains melee for other classes
+ok - Taoist Healing targets self when badly hurt
+ok - Taoist class recovery can heal during a non-combat interaction
+ok - class recovery emits no action for Warrior or a Taoist without affordable Healing
+ok - Taoist uses SoulFireBall only with a real equipped standard Amulet
+ok - Taoist reloads a consumed equipped Amulet stack before the next SoulFireBall
+ok - Warrior passive and unknown skills never produce a magic cast
+ok - paralysis waits without spending an attack attempt and attacks after it clears
+ok - unavailable or out-of-range FireBall falls back to ordinary attack
+45/45 protocol loadout tests passed

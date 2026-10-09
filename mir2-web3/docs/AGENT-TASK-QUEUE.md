@@ -1,5 +1,2865 @@
 # Agent Task Queue
 
+## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
+
+最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。
+
+原 Next build --webpack 实际 exit0，162013ms，19556项完整输入在原调用前后匹配，严格 TypeScript 和13页静态生成通过。Thin 首次因当前 Sharp0.35.3将 sharp.node 导出指向 index.cjs 失败（实际 exit1/25289ms）；本轮仅修真实打包 helper，支持包根有界单句入口并检查其实际版本化 .node，保留版本、许可、DLL、regular file/path/COPY_EXCL和原预算。55个现有Sharp输入仍等于此前恢复记录，没有安装或混入旧版本。该 helper 只供 Thin 消费，Next 原编译区间及不变产物明确限定承接；不声称当前整个旧广义快照仍匹配。
+
+Source50 原 Thin --skipBuild true 实际 exit0，38463ms，55303项完整当前输入在原调用前后匹配。新包7331 regular files、778目录（含根）、0链接、373987154B，原377487360B上限余3500206B；三套renderer和Core/PUI/NPC均与已编译版本一致。包位于 apps/web/.mir2-thin-client-web-windows-catchup-source50-20261009-01。231项JSON压缩及59条原NFT追踪警告保留，产物与依赖另有只读复核；原失败输出、历史旧08及不可变旧版本均保留。
+
+继续遵守“继续代码，暂不操作界面”：真实资源初始化、登录→任务/战斗→保存退出重登、移动真机及人类前端验收仍未执行；省略媒体的不可变资源origin和覆盖仍待真实验证，构建成功不证明在线可玩。Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅有界代码记录，overallPercentage=null、Candidate100=false、goal未完成，无可信可玩日期。用户主4932B tsconfig保留；外来Cargo/simulation/后端及制作加工文档正文保留且排除本轮提交。
+
+证据：[本轮交付](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-delivery01.json)、[64份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-raw-evidence02.json)、[完整Thin实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual01.json)、[实际产物复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual-independent-review01.json)、[依赖及警告复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-dependency-actual-review01.json)、[Source47实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-publication01.json)。本轮提交推送随后另存真实记录，下方原正文及其他工作保持。
+
+## Source47：构建配置副本入口通过严格类型检查；完整 Web 包待生成（2026-10-09）
+
+next.config.ts 新增可选 MIR2_NEXT_TSCONFIG_PATH，未设置时保留原行为，未放宽类型检查。原严格 TSC 实际 exit0、零诊断、12188ms，17136声明输入在调用前后匹配；用户主 tsconfig 原4932B保留。路径校验为代码与源码审阅结果，尚未实际执行 Next 配置。
+
+完整 Core/PUI/NPC 859项与 Bevy 607项声明输入已核对并绑定原 builder；旧36套renderer版本及12份公开flat文件字节保留。未来 Thin 的 report 参数只修正等价路径分隔符，未启动构建。原静态 WASM API边界问答未收到回答，完整runtime校验、不可变发布和新Next/Thin仍未执行；最新完整Web仍Source25。真实登录/任务/战斗/保存/重登及移动验收未运行，overallPercentage=null、Candidate100=false，goal active，无可信可玩日期。
+
+证据：[实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json)、[20份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json)、[严格TSC](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json)、[限定实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json)、[Source46实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json)。本轮提交推送随后另存实际记录，下方原正文及其他工作保留。
+
+## Source46：更新 EXE 实际编译通过；完整 Web 打包边界待确认（2026-10-08）
+
+原守卫下最新 Native EXE 实际编译 exit0，835593ms，保留原 dev/debug（optimized＋debuginfo）配置。917项隔离声明输入在实际调用前后重核匹配，原50GiB/2000ms/15000ms和PolicyB保持；实际C197697568768B、freshness保守上界74ms，完整completed/exited/disposed后才接受。新EXE106106368B已保存独立副本，旧Source31 EXE106137600B同字节历史副本保留。正常Native编译闭包成立；5个仅cfg(test)未声明资产不计全测试。本轮未新跑Rust/Web/TSC、未启动EXE、未打包完整运行资源。
+
+三套renderer编译与静态转换继续以Source45限定结果为依据，完整metadata/name/normalizedABI/defaultgzip/init未通过。原完整builder可条件性用现有CargoGuard直接逐次守卫（Bevy通常4nonce、Core3nonce），没有fresh预构建候选直接接纳入口；原Bevy锁若存在即拒绝启动，不读取锁内容或查询PID。当前任务保留禁WASM API约束，已问一次是否允许原静态构建校验，未收到回答前不执行依赖步骤；旧immutable版本与Next08/Thin08保护。最新完整Web仍Source25；登录/任务/战斗/保存/重登、移动及人类验收未执行，overallPercentage=null、Candidate100=false、goal active，无可信可玩日期。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-finite-result01.json)、[实际Native编译](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-actual01.json)、[14份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-raw-evidence01.json)、[原完整流程守卫路线](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-original-builder-guard-route-review01.json)、[Source45实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-publication01.json)。Source45远端429fe0eb2a860da30f6327702b29395df62c3afc已核验，本轮随后单独保存实际提交推送；用户tsconfig及外来后端/文档正文保留并排除提交。下方历史保留。
+
+## Source45：最新 renderer 编译与动作回归通过；完整包及实玩仍待完成（2026-10-08）
+
+默认共享入口/任务四原脚本实际48/48 TAP通过；Hero原Stage5脚本实际1/1文件TAP、501逻辑组通过，其中原494组字节和断言保留，新增7组/11正向场景覆盖装备、卸装、合并、跨背包转移及补药配置。实际SharedHost→Page发送/claim→唯一台账→回执/完整快照接收路径执行，最终UID/数量/配置另有断言；Prepared/Ready、socket和权威结果仍为有限夹具，非真实服务器或玩家验收。两个输入区间分开记录，不声称整个当前checkout通过。
+
+三个renderer实际release Cargo及六次原bindgen/Binaryen静态转换全部exit0；优化WASM为31467818/17745325/32429102B，均在原32505856B内，共享WebGL2余76754B；JS均在原204800B内。917隔离Rust输入与当前17136项Web声明输入最终重核匹配，三Cargo严格串行、实际PolicyB关闭，原50GiB/2000ms门槛保留。本轮未新跑Rust测试、Native测试或TSC；源未变的Source44类型检查仅限定承接。
+
+Core/PUI/NPC只按56个相关源文件＋4个控制文件未变及18份产物pin限定保留Source33静态候选，旧完整workspace不承接。Windows EXE需要fresh编译；完整renderer metadata/name/ABI/defaultgzip/init、不可变发布与Next/Thin打包仍待完成。最新完整Web仍Source25，尚不含Source26–45。功能记录309/317≈97.5%含旧实现；共享分类103/317≈32.5%也不是总体进度。overallPercentage=null、Candidate100=false、goal active，可玩日期未知；继续代码且暂不操作界面，登录/任务/战斗/保存/重登与移动、人类验收未执行。
+
+证据：[本轮实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json)、[74份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json)、[最小交付输入审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json)、[Source44实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json)。Source44远端ad6f915a693e1322b69afeed926f36318caefdb4已核验；本轮随后单独记录实际提交推送。用户tsconfig及外来后端/文档正文保留并排除本轮提交，下方历史保留。
+
+## Source44：Hero 共享页面及输入接线通过有限验证；新版完整包仍待交付（2026-10-08）
+
+Page 与 Shell 已接入共享 Hero Host：隐藏根先完成布局，Prepared 后同步卸载旧 DOM，再启用控制并等待实际 matching Ready；渲染期只读投影，事件和原发送前 claim 重核来源、租约、sink、布局及500ms帧健康。鼠标、键盘、悬停与移动菜单接原输入仲裁；旧 pointer/cleanup 不得跨场景或接管新手势。同内容完整快照保留合法拖拽，新来源或控制变化清除旧排队输入和反馈。继续复用原唯一操作台账、精确ACK与后续完整快照屏障及 Unknown custody。以上为代码接线与有限回归，不是 live World/Ready 或玩家验收。
+
+实际隔离 Rust02 Runtime26/26＋portable66/66，共92次通过，新增5个测试函数；本轮未重新执行 Native。WebGL2 shared 与 WebGPU 两项静态 cargo check exit0。实际 Web03 原脚本185/185 TAP通过（155NPC购买＋29surface＋1Stage5脚本），Stage5另有494逻辑组＝原477＋新增17；TypeScript5.9.3 no-emit/nonincremental exit0、stdout/stderr均0B。旧测试业务断言继续执行；修复夹具依赖不表示整个旧runner逐字不变。
+
+917项隔离 Rust 输入、17130项 Web 输入及10个本轮源码在各自有限区间冻结，最终全量重核匹配；不合并声称当前整checkout或后端全部通过。四次最终 Cargo 均严格串行且原PolicyB completed/exited/disposed，实际C最低199272189952B、freshness保守上界最大79ms，原50GiB/2000ms门槛不变。原始64份最终/历史输出与配置归档；Rust01新夹具 spawned 状态不一致的一项失败、Web01/02遗漏新增Hero闭包依赖的失败完整保留，仅修夹具后通过。
+
+下一步复核默认共享入口与九类任务动作整链，再交付源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common；32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–44；真实登录/任务/战斗/保存/重登、移动真机及最终人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。用户tsconfig、外来制作加工/Cargo/simulation/文档变更保留且排除本轮提交。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-finite-result01.json)、[64份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-raw-evidence01.json)、[独立实际复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-actual-review01.json)、[Rust首次夹具失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-rust01-historical-failure01.json)、[Web首次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web01-historical-failure01.json)、[Web第二次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web02-historical-failure01.json)、[Source43实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-publication01.json)。Source43已推送f359d5b5d0cebd964eadd99b8a46d1ca52ecbd1f；本轮提交推送随后另存实际记录，下方保留历史。
+
+## Source43：Hero 真实消费模型与独立显示一致性门通过代码验证；完整接管仍待完成（2026-10-08）
+
+Rust 与 TS 分别捕获 plannerInfo 和实际 actor_view 显示，按有界规范字符串比较，保留宽 UID、经验和有符号数的精确值。真实 HeroHealthChanged 已进入独立 TS 显示侧；Host 的 appliedWitness 只在 World 实际安装模型后产生，旧 bootstrap 或 setter 成功不能代替 Ready。既有精确 ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail 和唯一操作账本保持。
+
+最终隔离 Rust 生成05实际 Runtime22/22、portable65/65、Native24/24，共111次执行、0失败/ignored，原函数归一化98项，新增13项；WebGL2 shared 与 WebGPU 静态 cargo check exit0。Web生成02有效调用区间实际184/184 TAP（155NPC＋28surface＋1Stage5脚本），Stage5逻辑477组另列，新增11组；TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。未执行 WASM API、实例或 UI，不代表完整生产包。
+
+Rust隔离声明917项含909份同字节真实产品/数据和8个原脚本引用，最终全量重核匹配；Web17128项仅接受生成02各自有效调用区间，两类证据不可合并称当前整checkout或完整server通过。9个本轮源码始终匹配。5次最终Cargo均先实际PolicyB completed/exited/disposed再启动下一项；C最低204420620288 B、freshness保守上界最大83ms，原50GiB/2000ms门槛不变。原始148文件及85nonce保留全部历史：两个外来源码漂移区间不接受，GPU02在原preflight拒绝且未启Cargo；隔离portable03/native04缺少原include资产的编译失败保留，补齐同字节原PNG/JSON后全部通过，未削弱断言。
+
+下一Source44须接Page control/sink、Prepared后才绘制、实际visibility和capturesEscape、Shell输入仲裁及500ms帧健康；来源/control变化清旧输入队列、同内容完整快照保持合法拖拽也待修复。随后完成默认共享入口、九项任务动作整链及源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common：32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–43；登录/战斗/保存/重登、移动真机及人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-finite-result01.json)、[完整原始输出及历史](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-raw-evidence01.json)、[实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-actual-review01.json)、[隔离资产失败03](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-historical-scope-drift03.json)、[隔离资产失败04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-historical-scope-drift04.json)、[Source42实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-publication01.json)。Source42已推送0a2bb7cee34fb3e330d087eaa3ad363598ab49db，本轮提交推送随后单独记录；下方保留历史。
+
+## Source42：Hero 动作依据与发送前校验通过回归；完整接管和可玩包仍待完成（2026-10-08）
+
+真实 Rust Hero reducer 的动作现必带原 planner 依据，独立 TS 模型捕获相同字段后精确比较：原物品 UID/数量/槽位、基础与生效政策、要求、原自动目标、补药和快捷键配置均保留。16KiB 有界依据支持实际42格背包，宽 UID 仅用于精确比较，旧数值 mutation 限制不扩大。Page 原 submitHeroAction 改为严格 transport-accepted boolean；发送前失败仅撤销 definitely-unsent，进入原最终 claim 后的未知结果仍保留 custody。原唯一 ledger 的 proof 另捕获最初 raw high-water，同步 listener 后在原 claim 前重核，不把后来帧或新模型贴回旧动作。
+
+实际 Runtime16/16＋portable58/58＋Native24/24，共98次通过、0失败/ignored，归一化原函数85项，新Rust函数6项。Web02 原有限脚本184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑466组另列，原457组加9组。TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。WebGL2 shared 与 WebGPU cargo check exit0，仅静态编译，0次WASM API/初始化，不代表新完整生产包。
+
+908声明Rust输入、17126声明Web输入、去重17135输入在实际调用前后匹配，最终声明集重核亦匹配；原905/17123集合保留，另加真实Hero模块和两个当前制作加工simulation依赖，外来工作保留且排除本轮提交。5次Cargo原Guard均先PolicyB completed/exited/disposed后才开始下一Cargo，25份nonce，C最低221675769856 B、freshness保守上界最大72ms，原50GiB/2000ms门槛不变。首次Web01的旧纯Page夹具缺少新增WeakMap引用而失败；保留完整输出，仅补42B真实闭包依赖后重跑，原457组与新增9组断言不削弱。未执行的TSC01不计通过，原工具、探针、模板与发布门槛保持，不声称强制deadline。
+
+本轮完成动作依据及发送前保护基础，尚未启用共享Hero的Page control/sink/matching Ready/Shell输入全链。下一步须补独立冻结TS模型与真实Rust已消费模型的数据一致性门，尤其实时HeroHealthChanged与checkpoint显示可能不同；来源戳、bootstrap或setter成功均不能据此隐藏React。继续接完整布局、帧推进、源/租约/sink/输入清理及回退，再完成默认共享入口、九项任务动作整链和源码匹配的renderer/Core/EXE/Web完整包。精确ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail与原账本不变。
+
+Matrix11仍103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–42；公开manifest及用户tsconfig保持，未改后端/共享Zone/协议parity。登录→任务/战斗→保存→重登、移动真机及最终玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信可玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json)、[49份完整原始文件与25nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json)、[首次失败与修复](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json)、[Source41实际提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json)。Source41已核验推送1ff247c37bb9c420cfff6b5e7c280691fe949c02；本轮Git发布以随后实际记录为准。下方保留历史。
+
+## Source41：Page Hero 原始数据接线通过代码回归；完整可玩包仍未交付（2026-10-08）
+
+Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首次物理消息 performance 时钟在应用前捕获；不把 Hero snapshot 经过 JS 重编码。实际验证通过的 NPC purchase owner 回调以独立关联 tuple 加原文进入严格 Rust 接口，保留精确 u64/i64、noHero 清除和 receipt FIFO。Socket/connection/session、renderer run 与 scene 分开；恢复 held checkpoint 后按顺序补齐完整尾队列，未完成旧帧不可被后帧越过。Renderer 缺失/故障保留 Page custody，换图直接 activate；同步跨 scene 重入明确拒绝。
+
+当前 Source02 实际 Runtime16/16＋portable52/52＋Native24/24，共92次通过、0失败/ignored；跨 feature 原函数去重79项，新Rust函数7项。Web05 原有限脚本实际184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑457组另列，新17组；surface新增1组真实 ordinary 快照委托/旧物理owner拒绝。严格 TypeScript5.9.3 no-emit/nonincremental 实际exit0、零诊断。WebGL2 shared与WebGPU两个 WASM cargo check exit0，仅静态编译，未生成或初始化新的完整生产包。
+
+905声明Rust输入、17123声明Web输入、去重17132输入在各实际调用前后冻结检查匹配，Root初次去重复核也匹配；最终审阅时其他任务继续编辑7个simulation/production输入，当前整checkout不再完全匹配。七个本轮源码仍匹配，后续其他任务变更另列保留并排除本轮提交，原测试冻结与工具/源码门槛不变；当前5次Cargo原Guard均PolicyB completed/exited/disposed，25份nonce，C最低236199809024 B、freshness保守上界最大122ms（门槛50GiB/2000ms）。原Source01 portable51通过/1失败、新测试误解available的noHero语义，修正新测试后当前全部通过；旧2Cargo和3CLI失败输出完整保留。原测试业务断言保留，NPCsurface26块原文不变、1块静态调用断言移至真实委托链；不替换原Guard、探针、模板、政策、预算或发布门槛，不声称强制Cargo/CLI deadline。
+
+本轮只接数据来源，不关闭Hero整条操作链：实际Rust planner动作依据须与独立捕获TS模型比较；控制、sink、布局、matching Ready及Shell输入仲裁尚待接线，bootstrap source不能当Ready，也不能据setter成功隐藏React。沿用唯一原Hero操作账本，原Core Applied、精确ACK后完整快照屏障及Unknown custody保持。下一轮继续这些功能、源码匹配的完整renderer/Core/EXE/Web包，以及默认共享入口和任务整链；宽UID操作、旧引擎宽日期与NewMagic完整producer限制仍开放。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–41；公开manifest和用户tsconfig未替换。未改后端/共享Zone/协议parity，其他制作加工/Cargo/simulation/production工作保持且排除本轮提交。登录→任务/战斗→保存→重登、移动真机及玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信试玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留，未绕过原helper WASM API限制。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json)、[完整原始71文件与35nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json)、[晚期其他任务源码资格](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json)、[历史失败与修正记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json)、[Source40真实提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-publication01.json)。Source40已核验推送8e64c987849137b56a67fda4b64f18b0645917eb；本轮Git发布以随后实际结果为准。下方旧记录保留为历史。
+
+## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
+
+本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。
+
+Ready 代码现在读取实际 PostLayout 坐标、面板/控制/个人格子的完整集合、当前角色页图像、字体 glyph、物品 image 0、材质与传播后的可见性；未绑定当前 sink 或未消费 reset 时撤回接管。关闭 Hero 库存同帧移除个人包/输入区域，提示框按实际接管及字体加载选择。上述是接入代码与有限数据回归，尚无真实界面 Ready 验收。
+
+最终 Source02 实际 Runtime15/15＋portable46/46＋Native24/24，共85次通过、0失败/ignored；跨 feature 同一原函数去重72项，新增16项。WebGL2 shared与WebGPU两个 WASM cargo check实际exit0，仅静态编译，不是新renderer/Core/EXE/完整Web产物。900声明Rust输入5改/895保护，五次实际转发全部原Guard PolicyB completed/exited/disposed；C最低256589996032 B、freshness保守上界最大67ms。首次Guard exit90没有转发Cargo、0测试/0nonce/无C采样；Root错误的普通authority布尔字段按原Flat字符串接口修正，完整失败输出保留，Guard/探针/模板/预算未改。
+
+当前固定状态：Runtime接入已实现并有限编译；Page/TS Hero hook、真实验证过的npcPurchaseOwner raw extractor、renderer checkpoint/replay、输入仲裁、fallback接管和现有唯一Hero账本仍待接线。后续必须分开bootstrap source查询与完整matchingReady；禁止把新Rust revision自动绑定旧TS模型，动作来源须可比较；换图直接activate保留私有Hero bootstrap，不先withdraw；send boolean只表示传输接受，精确receipt及后续完整authority仍按原ledger结算。继续全goal，不能将其缩小为本轮Host。
+
+Matrix11不变：103 shared＋206 legacy＋8 common，309/317≈97.5%仅为含旧实现的功能记录覆盖，103/317≈32.5%仅为shared分类覆盖；overallPercentage=null、Candidate100=false。完整公开Web仍Source25 Next08/Thin08，不含Source26–40；本轮无新TSC/MJS/Core/PUI/EXE/renderer包/完整Web，公开manifest及用户tsconfig保持。原metadata/name/normalized ABI/default-gzip/初始化/源码匹配门槛全部保留，未绕过原helper的WASM API限制。登录→战斗→保存→重登、移动真机及玩家验收not-run，无可信试玩日期。用户“继续代码，暂不操作界面”与全goal active保持；未改后端/共享Zone/协议parity。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-finite-result01.json)、[原始完整输出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-raw-evidence01.json)、[原Guard拒绝记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-guard-refusal01.json)、[Source39实际提交与推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-publication01.json)。下面各Source记录保留为历史。
+
+## Source39：Hero 共享原始数据与面板模块完成有限验证；完整 Web 接线仍待交付（2026-10-08）
+
+共享库新增严格 raw Hero ingress 和 portable Hero painter/reducer，Native 与 Web 共用同一 Crystal 绘制及物品规划。保留原始 u64/i64、首次到达的相对技能时钟、scope/scene/run 退休门槛和 bounded FIFO；未消费回执禁止 checkpoint 交接。UID0 只读并保留真实目标占位，动态实例 metadata 不一致等新 owner；Native 默认入口、控件及操作逻辑保留。多指针、过期反馈、背包重开/锁定页/前景、模态全 stage 拦截和缺失布局保护均有回归。
+
+最终 Source03 实际 portable 45/45＋Native 24/24，共69次执行、0失败/ignored；同原函数跨feature去重56项，新增21项，不能说69项新功能。原两次编译失败均执行0测试，完整失败凭据保留，分别修复错误常量import与Root清理误伤的font函数调用。WASM shared-runtime cargo check 实际exit0，仅静态编译，不计测试或完整生产包。899声明Rust输入11改/888保护；原5次Guard、25份nonce文件全部PolicyB completed/exited/disposed，C最低264547229696 B、freshness保守上界最大70ms；没有强制Cargo deadline声明。
+
+下一队列必须完成实际 Runtime Hero consumer/ABI/sink/匹配Ready、现有tooltip surface与真实auto-pot catalog preview，然后接Page原始帧缓存、renderer交接及现有唯一操作账本。当前只在共享库实现，不表示Web已接通Hero；不能只凭setter接受切掉React fallback，精确ACK仍须新完整snapshot后才结算。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，shared分类103/317≈32.5%也不是整体验收率。overallPercentage=null、Candidate100=false、goal active，未新增关闭Hero整链行。完整公开Web仍Source25 Next08/Thin08，不含Source26–39；本轮未构建新EXE/Core/PUI/renderer包/完整Web，manifest不变、TS未改/未新跑TSC。原metadata/name/normalized ABI/default-gzip/初始化及源码匹配打包门槛仍须保留，未绕过原helper的WASM API限制。登录→战斗→保存→重登、移动真机与玩家验收not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-finite-result01.json)、[五次真实Guard和完整原始输出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-raw-evidence01.json)、[Source38实际发布失败与远端6116记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-publication01.json)。本轮Git发布状态以随后真实发布记录为准。未改后端/共享Zone/协议parity；下面旧轮次均为历史。
+
+
+## Source38：英雄共享数据基础及物品回执保留修复，50项回归通过；新版可玩包仍待交付（2026-10-08）
+
+完整Hero owner projector与item/tooltip校验移入client-bevy::hero_model；Native原签名用Incomplete/Decode/Projection三错误映射调用同一实现。完整inventory、Info/realInfo/UserItem/socket、UID0/u64MAX、i64 XP、容量/稀疏装备/keys/null配对保持原语义，gate/World/Applied/结算仍在Native。两个现有Hero consumer分支均保留item_result_receipt或skill ACK再应用最新模型，修复同批后续状态覆盖物品回执的问题。这不是完整WASM Hero adapter或共享面板完成。
+
+实际精确50/50、0失败/0ignored、50唯一名称：Bevy默认Hero11、Runtime Native economy/消费链38、Runtime默认配置1；新4均具名执行，原断言保持。独立只读复核10个迁移helper body、四文件逆替恢复及冻结pins通过。897声明Rust输入4改/893保护；原3次Guard/完整15份nonce，实际C最低269566263296 B、freshness保守上界最大102ms、PolicyB全部completed/exited/disposed。整次Guard耗时18831/35334/25942ms、测试0.01/0.20/0.00s，仅纯JSON/裸World/本地受控队列；未启动渲染器/游戏/界面/网络/WASM API，不声称强制Cargo deadline。
+
+Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅功能实现记录覆盖率；overallPercentage=null、Candidate100=false、goal active。本轮基础层不额外关闭共享Hero界面行。完整可分发Web仍Source25 Next08/Thin08，不含Source26–38；本轮无生产EXE/Core/PUI/NPC/renderer/完整Web构建，公开manifest未替换。TS输入未改且未新跑TSC，Source35仅按有效TS子集保留限定历史结果。实际资源初始化、登录→战斗→保存→重登、移动设备及玩家验收not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+下一步仍须完成Hero原raw ingress、owner/scene/run/reset与相对cast_time生命周期、bounded receipt、portable painter/字体/tooltip/input、Page独立ABI/ready/fallback及原Web单操作账本。现有React Hero操作仍在；setter接受不等于ready，精确ACK还须等待新完整快照。宽UID动作ABI、旧引擎宽日期、NewMagic定义变化的匹配完整producer，以及原metadata/name/normalized ABI/default-gzip/初始化/源码匹配完整打包仍开放；未绕过原helper的WASM API限制。未改后端/共享Zone/协议parity。
+
+Source37已实际提交推送并独立核验6116c2e640227b2408b98682a66ebdafa092ea18；Source38发布以随后真实Git结果为准。证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json)、[原始38文件含完整15份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json)、[Source37真实发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json)。数据reader路径/字符串唯一性/跨realm比较等修正未改产品断言，不计产品测试失败或通过。下面Source37及更旧段落为历史。
+
+
+## Source37：Native 通信超时修复，53 项选定回归通过；完整 Web 可玩包仍待交付（2026-10-08）
+
+Native owned/control/Purchase 使用真实 Tokio 单次10秒绝对时限覆盖 readiness→最终准入→flush。未进入发送的超时精确退役原 envelope 并返回 Unavailable；已进入则发布 Unknown、保留原购买/UI/durable custody，重连只 Query 原操作。普通 connect 另有10秒预算，整个普通 capabilities＋credential handshake 共用另一10秒，keepalive有界；Shutdown观察原 fence，不消费排队Login/StartGame。同时关闭优先；原 resume 绝对deadline、Origin/TLS、credential校验及协议保持。不是 connect＋handshake 合计10秒。
+
+当前Source02实际53/53、0失败/0ignored、53唯一名称，新11均具名执行。原Gateway153和NPC17测试/业务断言保持，纯NPC测试显式手动时钟调用同一生产body；旧模块经有限逆替换逐字恢复。独立复核发现的MutexGuard跨await来源风险已在同步block修正。897声明Rust输入2改/895保护，原Guard单次/完整5份nonce，实际C≥50GiB、freshness保守上界65ms，PolicyB全部关闭。整次Guard耗时373317ms、测试0.29s均为实际记录；10秒写入预算不限制Cargo编译。仅受控Sink/本地队列/裸World/最小App与真实1ms timer，不证明实际WebSocket卡住10秒。
+
+台账103 shared＋206 legacy＋8 common＝309/317≈97.5%仅实现记录覆盖率；Matrix11原字节保持，overallPercentage=null、Candidate100=false、goal active。可分发Web仍Source25 Next08/Thin08，不含Source26–37；本轮无生产EXE/Core/PUI/NPC/renderer/完整Web构建。严格TSC未重跑，只保留Source35按未变有效TS输入的限定历史结果，不能称整个当前Web已构建通过。公开manifests未替换。实际登录→战斗→保存→重登、资源初始化、移动设备、玩家验收not-run；用户“继续代码，暂不操作界面”保持，无可信试玩日期。
+
+下一项补Web shared Hero入口、完整物品/精确ACK生命周期及portable painter：现有React Hero功能仍在，不能将缺setter说成全部英雄操作不可用，也不能仅补setter就关闭共享面板。宽UID动作ABI、旧引擎宽日期限制、NewMagic定义变更待匹配完整producer，以及原metadata/name/normalized ABI/default-gzip/初始化/源码匹配打包仍未关闭；原helper当前禁止的WASM API未调用或绕过。本轮只改两Native客户端文件，服务器/共享Zone/协议parity不变。Source36已实际提交推送04d8780054e0fdfb66a5783679953ccc11c342b1；本轮发布以后续真实Git结果为准。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json)、[原始20文件含完整5份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json)、[Source36真实发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json)。原数据reader误将4个mail_夹具函数计入测试，执行前拒绝并保留修正记录，不计产品测试失败。下面Source36及更旧段落为历史。
+
+## Source36：完整技能与操作准入修复；最新可玩 Web 包未交付（2026-10-08）
+
+Native 技能 projector 移入现有 Runtime 供 producer 与 owner checkpoint 共用，保留原 null/0/catalog/alias 语义。完整快照核对 learned 行和绑定内容，显式 owner authority/ACK 才强匹配，保留独立宿主 epoch 刷新。Native 操作权限核对 learned 身份、顺序和不可变定义；真实后续 Cast/Delay/Leveled/Toggle、数字热键与 exact ACK 保留，不回滚 live model。NewMagic 改变定义仍等待匹配的完整 producer。
+
+当前选定57项通过：最终Source02新跑默认配置1＋Native economy34，Source01 Bevy15＋Native7按有效测试正文未变限定承接；整轮91次执行/57独立名字，新9项均具名执行，旧Runtime34只保留历史。独立复核找到的可选game-data依赖风险已修复，disabled owner API明确拒绝且无Applied。最终897声明Rust输入4改/893保护；原5次Guard/25份nonce、C≥50GiB、freshness上界最大65ms、PolicyB全部关闭。Native7编译593310ms不代表强制deadline。本轮无新生产EXE/renderer/Web构建。
+
+固定台账103 shared/206 legacy/8 common，309/317≈97.5%仅实现记录覆盖率；overallPercentage=null、Candidate100=false、goal active。可分发Web仍Source25 Next08/Thin08，不含Source26–36；完整metadata/name/normalized ABI/gzip/初始化及最新源码匹配打包未完成，公开manifest未替换。严格TSC仅按未变有效TS输入限定承接Source35，广泛快照有4处Rust变化。实际登录→战斗→保存→重登、移动设备及玩家验收 not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+下一项落实Native整个readiness/flush/普通handshake/keepalive写入deadline；宽UID动作ABI、Hero WASM drain/setter与旧引擎宽日期限制仍未关闭。本轮不改simulation、gateway服务、协议或后端parity。Source35已实际提交推送e068bbe9e0c5397255598edde7528d472fd6f08d；Source36发布以随后真实Git结果为准。
+
+证据：[有限结果02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-finite-result02.json)、[原始61文件含全部25份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-raw-evidence01.json)、[Source35实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-publication01.json)。独立复核73个嵌套pin/实际logs/原始字节通过；只读数据reader修正不计产品测试失败或通过。下面Source35及更旧段落为历史。
+
+
+
+## Source35：共享仓库日期修复；代码覆盖97.5%，实际可玩待验证（2026-10-08）
+
+共享 Storage 现在接受精确 canonical signed i64 日期字符串；兼容原安全 Number、Rust i64 数值序列化、默认0与 expiryTimeBinaryDatetime 别名。Web projector/direct host 使用同一原有谓词，拒绝 unsafe Number、溢出及非规范字符串；UID、authority与日历规则保持。本轮仅客户端和测试，未改变 simulation、gateway、协议或后端 parity。
+
+实际 Rust26＋原三个 Web脚本204次通过＝230次/227唯一名称，新增7项（Rust4/Web3），另3项为已有测试重命名。严格 TypeScript5.9.3 非增量 no-emit 实际 exit0、零诊断；用户 tsconfig 不纳入提交。897 Rust输入2改/895保护、17120 Web输入7改/17113保护，17121唯一声明输入在各调用前后及最终复核匹配；不是全 workspace 覆盖。独立只读复核原收据、日志、134个嵌套pins与17121源pins通过。
+
+三 renderer 原 Cargo、wasm-bindgen 与 Binaryen131 静态转换/优化均实际 exit0。optimized WASM30889189/17749024/31851030 B、JS134346/117176/132320 B 满足原 WASM≤32505856/JS≤204800。普通WebGL2 ABI0无共享Storage路径、产物保持旧字节；WebGPU/WebGL2-shared ABI1编译实际修改。原Guard5次/25份nonce、C≥50GiB、freshness上界最大96ms、PolicyB全部关闭。原CLI无强制deadline，实际优化小于600000ms。
+
+完整 metadata/name/normalized ABI/default-gzip/初始化/发布仍 not-run，原helper的WASM API当前禁止，未替换公开manifest。可分发Web仍Source25 Next08/Thin08，不含Source26–35。下一交付项是源码匹配的完整Web包；Shared SkillModel内容一致性、Native完整写入deadline、宽UID动作ABI、Hero WASM adapter与旧引擎packet-only宽日期仍未关闭。
+
+固定清单103 shared/206 legacy/8 common/0 raw open，309/317≈97.5%只是有界代码记录，overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持；实际登录→战斗→保存→重登、移动真机及玩家验收未执行，无可信试玩日期。Source34已实际提交推送核验64b2d675c83a22fb2c54f2d1a8753272ea87c94c；本轮提交以后续实际Git结果为准。
+
+证据：[实际有限结果02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json)、[原始字节含全部25份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json)、[Source34发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json)。两次Root数据reader错误（展示括号、拒绝归档WASM字节）保留，不计产品/测试失败，未启动进程或改断言。下面Source34及更旧段落为历史。
+
+
+## Source34：三 renderer 静态编译及 WASM/JS 体积通过，完整交付待验证（2026-10-08）
+
+原 WebGPU 构建实际发现4个 WASM 编译错误：普通 Hero ingress 引用了 Native-only owner 消息和 NPC economy 模块。Root 只改 runtime/src/lib.rs 的条件编译边界，保留 Native 三类消息、owner checkpoint 与 packet 回执；独立逆替换恢复旧文件 SHA，897 声明输入1改/896保护。WASM 不再引用 Native owner/module，普通 Hero model/ACK 路径保留；但 wasm adapter drain 原本为空且无 Hero setter ABI/TS 接线，本修复不证明新 Bevy Hero 实时输入，普通 Web React/owner 投影未改。
+
+修复后原 Cargo 参数实际完成 webgpu、webgl2、webgl2-shared 三种 wasm-release 构建。原 wasm-bindgen0.2.118 与 Binaryen131 静态 CLI 转换/优化各3次实际 exit0；-O1/--strip-debug 顺序、原工具 SHA 与预算未改。optimized WASM为30888672/17749024/31850513 B，JS为134346/117176/132320 B，均满足原 inclusive WASM≤32505856 / JS≤204800。现有6项 Native Hero 内存/受控队列回归实际6/6通过；没有新增具名测试。四次成功 Cargo＋一次保留初始失败共5次原 Guard/25份 nonce 文件，实际 C≥53687091200 B、freshness上界最大86ms、PolicyB全部 completed/exited/disposed。声明输入在实际调用前后匹配，不等于全 workspace/工具链覆盖。
+
+原 full-module validation/name/normalized imports-exports 及 renderer default-gzip≤7340032 尚未运行；静态 CLI 分解不替代原完整 helper，原 helper 的 WASM API 当前仍禁止。未交换或发布未校验产物，public Core/renderer manifests字节保持；最新 Web 交付仍Source25 Next08/Thin08，不含Source26–34。Source33 Core/PUI/NPC尺寸与严格TSC只按未改变的有效输入子集限定承接，不称当前广泛快照未漂移或重新跑TSC。下一步继续完整三包/三renderer校验与 matching Next/Thin，待允许的验证成立后再交付候选包。
+
+用户“继续代码，暂不操作界面”保持；资源/WASM初始化、登录→战斗→保存→重登、移动真机及玩家验收 not-run。Shared SkillModel同行数不同内容、Native整个写入 deadline、仓库宽i64输入及宽UID动作ABI仍是未完成或共同限制；本轮不关闭这些问题。Matrix11保持103 shared/206 legacy/8 common/0 raw open，309/317≈97.5%有界代码记录，overallPercentage=null、Candidate100=false、goal active，无可信试玩日期。首次编译失败、未执行plan01参数次序纠正、Root纯数据reader跨realm数组比较及两次未启动命令的配置桥接错误均保留，不计产品/测试通过或改原断言。
+
+Source33已实际提交推送核验262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04，本轮携带其事后publication；Source34发布以Root后续实际Git结果为准。[Source34实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-finite-result01.json)。下面Source33及更旧段落为历史，当前以上述Source34为准。
+
+
+## Source33：三包体积达标，完整 Web 交付与实际可玩验收仍待验证（2026-10-08）
+
+Core / Presentation / NPC Purchase 已按同一 Rust crate 的三个互斥生产 feature 拆分；原严格 JSON visitor 逐字迁移、Core/PUI 已发布 JS 保持字节一致，永久购买 facade 绑定独立 NPC 包版本且不因重试重建 ledger。原 optimizer、预算与 publication gates 保持；三包全部校验后才允许 immutable leaves 和 manifest-last。
+
+实际原工具链编译及静态优化尺寸：Core 252883 B、Presentation 261542 B、NPC 167607 B；JS 24393/24721/8332 B，全部满足原 WASM<262144 / JS≤204800。原 Guard 六次 Cargo 实际 C≥50GiB、freshness 上界最大65ms、PolicyB全部关闭，30份 nonce 文件。选定 Rust 17＋9＋17=43次通过（26独立名称，两个原 Mail capture ignored 不计），Node20＋5＋1=26独立名称，共69次/52独立通过；新增10项Node测试。严格非增量 TypeScript5.9.3实际exit0、零诊断。895声明产品输入8改/887保护；17720声明Web输入在各验证调用前后匹配，后续文档变更只作限定承接。
+
+尺寸通过不等于完整交付：原 full-module validation / name / normalized imports-exports 未运行，三 renderer、源码匹配 Next/Thin、完整当前 prebuilt 套件及 WASM/资源初始化均待验证。旧 Source25 prebuilt success 测试因真实双包manifest缺NPC而失败的日志、首次 Guard 审核配置绑定错误均保留；未改原断言或绕过门槛。Web交付仍Source25 Next08/Thin08，不含Source26–33。用户“继续代码，暂不操作界面”保持；实际登录→战斗→保存→重登、移动真机、玩家验收 not-run，无可信试玩日期。Matrix11保持309/317≈97.5%有界功能记录，含206 legacy、103 shared、8 common；overallPercentage=null、Candidate100=false、goal active。
+
+Source32已实际提交推送并核验1c786cf494a7dd9394b3c5de65a9c6b7944491d5，本轮携带其事后publication；Source33 Git发布另以Root随后实际结果为准。[Source33实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-finite-result01.json)。下面Source32及更旧段落保留为历史，当前以上述Source33为准。
+
+
+## Source32：严格编解码92项通过，最新 Web 包仍超过原体积预算（2026-10-08）
+
+Root 在两个原产品文件收缩 JSON 边界：保留原 typed serde 与 Native/Gateway encoders、校验和购买 host ledger；Web 改用严格 Value 解码、经校验的 Value 输出及逐字节等价的请求编码，并复用现有递归 StrictMailValue walker。外层按原MAX_INPUT（6×2MiB＋64KiB）限长，内层frame独立按原2MiB限长；两个raw walker仍拒绝重复/escaped duplicate、过深与尾随JSON。完整 snapshot 仍是原始 carrier，不能作为真实 Applied 或 live authority 证明。
+
+最终 Rust04 实际 Wire26＋Web ABI17＋Native36＋Gateway13＝92/92、92唯一具名测试；Source32新增14（Wire10＋bridge4）全部具名执行。864组 exact-byte specimens 是一个测试中的断言，不另加测试总数。893声明的普通 repository 输入中2改/891保护，冻结前后零漂移；不是全 workspace 或工具链覆盖。最终四次测试与一次Core编译均由原 immutable CargoGuard 串行运行，actual GetVolume C≥53687091200 B，sampleEnd→childStarted 截断UTC上界最大82ms<2000ms，PolicyB completed/exited/disposed，共25份原 nonce 文件。Rust03历史87通过、首轮 ABI14/15失败及空对象 unit enum 的原Serde兼容修复均保留，不累加为当前通过数或放宽断言。
+
+原 Rust1.95.0 Cargo、wasm-bindgen0.2.118 和 Binaryen131 CLI 参数实际完成 Core 编译与静态优化，未使用 WASM API/instance。optimized Core 从460011降到365241再降到351501 B，累计减少108510 B（约23.6%）；生成 JS 与两个DTS保持原字节一致。351501仍不满足原严格<262144 B，JS26545≤204800通过。PUI首轮261472只通过旧输入的体积检查，不称最终源码重建；name/normalized imports-exports/full-module validation、三renderer、Next/Thin与最新Web组合交付仍未完成。预算、原helper/probe/Guard与publication gates均未改，原manifest/公开资产未换成未通过的产物。Windows/Gateway生产EXE仍是Source31只编译证据；本轮Native/Gateway运行的是有限测试binary，没有新EXE或产品启动。
+
+下一轮Source33按独立只读调查落实第三个NPC policy feature/bundle。保护已发布Source25 Core/PUI全部导出，保留尚未交付的NPC Receipt ABI1及永久document facade；明确其raw export的包位置将改变。提取原无导出的StrictMailValue供两个模块复用，避免拉入Mail WASM exports；三包继续使用相同原预算与metadata gates，全部通过后才immutable publication、manifest-last。现有loader须绑定NPC包版本且不因重挂载/重连/加载重试重建ledger。该方案尚未实现或实测尺寸，不声明新包通过。
+
+最新Web交付仍Source25（7b1afe2706a4eec037f085d1f599d2ea987f031f），Next08/Thin08不含Source26–32。Matrix11原字节保持103 shared/206 legacy/0 raw open/8 common：309/317≈97.5%只是有界记录，含legacy实现，overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持有效；资源/WASM初始化、实际登录→战斗→保存→重登、移动真机及玩家验收全部not-run，当前没有可承诺试玩日期。
+
+Source31已实际提交推送并核验远端06da30011e4a98599bfee568e652f6d0839e894d，本轮携带事后publication。Source32 Git提交推送由Root随后实际操作另记，本文和测试不证明已推送。下面Source31及更旧段落均保留为历史，当前以上述Source32为准。
+
+证据：[最终有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-finite-result01.json)、[独立结果复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-independent-review01.json)、[最新Core实际构建与体积失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-core-build-result01.json)、[初轮构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-initial-build-result01.json)、[中间构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-intermediate-build-result01.json)、[历史87项](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust03-finite-result01.json)、[保留的ABI失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-abi-test01-failure.json)、[结构方案](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-next-structure01.json)、[冻结源码](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-snapshot.json)、[独立源码复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-review.json)、[选定75份原始字节](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json)、[Source31发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-publication01.json)。原始容器仅归档选定实际证据，不是全历史；源码SHA、未改的manifest/matrix与真实输入同实际结果记录对应。
+
+
+## Source31：Native 完整购买接线与 Web 无损投影通过，最新 Web 交付包待重建（2026-10-08）
+
+Native 永久 client 已接实际 gateway receiver、同源 projector、主线程整体经济应用和有类型的 Applied 回传；Quote、poll_ready、最终 Enter 使用原 UI inventory/catalog/parent proof，单次 Purchase、重连只查原 operation。每个 BuyItem 在同步发布时保存原完整来源；普通移动、钱包同值、有效同源更新保留该来源，修改目录或 owner 会退役旧手势。新普通 Hero/NPC 来源驱动真实经验/maxXP、装备/邮件/tooltip 和 Trade/BuyBack/Used 显示，Used 显示1、请求0。共享 game-data goods 投影复用原真实 Info/raw 数据；个人 Used checkpoint 仍不证明 shared-zone 全局 stock 原子所有权。
+
+Web 在普通 decoder 前保留原 raw；声明的 u64/i64 叶子保留 canonical decimal string，safe Number 保持兼容。真实 Page 同步投影普通完整经济来源，并先于 movement-only 快路径替换变化内容；普通显示不能 settle 未决购买或循环 Begin/Query。宽 UID sidecar 保真，但既有 numeric selector/action/tooltip ABI 继续拒绝 unsafe 值。Storage 日期 DOM 从严格 i64 binary/ticks 转为可验证日历；Bevy numeric ABI 不接宽字符串或 unsafe Number。Hero 使用 fresh XP/maxXP。
+
+Root 实际最终 Rust91（Native36＋Runtime39＋Hero3＋Core2＋Bevy1＋Simulation8＋GameData2），原3个 Web 脚本201/201（NPC155＋Storage25＋integration21；198唯一名称，跨脚本重复3），共292次选定通过、289唯一名称；新增47 Rust＋27 NPC＋2 Storage＝76项 distinct。Native03 仅按依赖不编译后续 cfg(test) 夹具修正限定承接；不称新 Native 测试执行。881/367 为声明的 Rust 输入快照，不称全 workspace/工具链覆盖。Web07 的15504声明输入前后零漂移。首轮失败、注册中止、旧不安全日期夹具及后续 AST/纯依赖夹具修复均保留；所有业务/exact-one 断言保留，未跳过。
+
+原锁匹配的104公开 npm 包从本机 cache 按 SHA512 离线恢复，15209普通文件/0链接或额外文件，无安装器、生命周期或网络；原 TypeScript5.9.3 完整132文件已恢复。严格非增量 TSC02 实际 exit0/零诊断；其后仅声明 superset 中两个 MJS 测试夹具改变，有效 TS/JSON/依赖未变而限定承接，不称16827当前零漂移或重跑。用户 tsconfig 保持原状且不纳入本轮提交。
+
+Windows EXE106137600 B、Gateway108321280 B 实际编译通过，未启动。最终 Native02/Gateway01 用原命令、串行原 CargoGuard 和886普通 repository 输入，加入真实 MMap/MagIcon include_str、Cargo配置与两个 workspace 解析 manifest；输入前后零漂移。实际 GetVolume C≥50GiB、sampleEnd→childStarted 截断 UTC 上界64.8447ms/62.3821ms<2000ms，PolicyB completed/exited/disposed。Native02 复用 Cargo 已有产物0.33s，不能称全量重新链接；前一 Native01 真实3m56s产物与之 SHA 相同。完整 Web/Windows 组合仍未完成：Core/PUI、三 renderer、Next/Thin 未匹配 Source31；原 optimizer 必须使用 WebAssembly.Module API，按本轮禁止 WASM API 边界尚未调用，原 helper 与 metadata/体积门槛未改或绕过。现有 Web 包仍 Source25 Next08/Thin08，不含 Source26–31。
+
+Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common；309/317≈97.5%只是固定清单中的有界代码记录，overallPercentage=null、Candidate100=false、goal active。SkillModel 同数量行不等于逐行内容校验，poll_flush 无 deadline，controlled Sink/bare World/提取 Page 声明不等于 live UI/socket。用户“继续代码，暂不操作界面”保持有效；资源/WASM初始化、实际登录→战斗→保存→重登、移动真机和玩家验收全部 not-run，没有可承诺试玩日期。下一项先交付匹配 Web 包，再继续未穷尽的数值 ABI/技能内容/运输时限和共同缺陷；不以原始缺口分类关闭替代可玩验收。
+
+Source30 已实际提交推送并核验远端 cb30715f53322f31304ed5c449b0347bdcfd95dd；本轮携带其事后 publication。Source31 发布另由 Root 实际 Git 操作核验，测试、构建和本文不证明已推送。以下 Source30 与更旧段落，包括旧 Current Round 状态，均为历史；当前以上述 Source31 为准。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-finite-result01.json)、[Web实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-web-finite-result01.json)、[严格类型检查](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-tsc-finite-result01.json)、[静态构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-static-build-result01.json)、[独立源码范围复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-independent-review01.json)、[选定原始字节](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-raw-evidence01.json)、[Source30发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-publication01.json)。原始字节容器仅归档选定执行证据，完整历史/cache恢复台账仍在原外部QA路径；可读JSON副本与原SHA对应，CRLF归一不替代精确原始收据。
+
+## Source30：Web 购买回执实际接线通过代码回归，Native 整体应用有限回归通过（2026-10-07）
+
+Web 原始 owner frame 在普通日期/数值 decoder 前进入永久 Core host；仅明确购买手势走 Quote→Reserve→Enter→单次 socket send，重连只查询原 operation。完整经济来源同步替换钱包、背包/装备、邮件及 Stage5，并绕过 movement-only 和 packetRefresh 旧投影；随后才提供 Applied。修正真实非空英雄装备 WorldItem 格式、钱包相同值的目录 custody、过期/重入 Enter 保留 Unknown、fraction/exponent 舍入边界。wire Cargo.toml/src 已纳入实际 Core/PUI 构建指纹。
+
+Root 实际原 NPC 脚本 128/128（原106＋新增22，含两个纯模块严格 no-emit 类型检查），构建指纹2/2，共130次最终选定 Node 测试；144＋64输入前后复核零漂移。本机原 Web/root依赖已缺失，仅复用已安装官方 TypeScript5.9.2 的121普通文件用于有限源代码测试，不等于项目原工具链、Page全量类型检查或生产构建。首轮126/128失败保留并修正；一次配置仍引用旧快照而被前置哈希拒绝，修正配置后通过。
+
+Native 已新增永久购买 client、整体预解码经济 bundle、独占 World 应用及有类型的 Applied 回传；修正 same revision 正常移动/时钟误判、稀疏14装备槽、公开 Hero/city/Character 领域和 mail reserve 展开容量。877 Rust 输入已冻结，Root 实际 Native14/14＋Runtime30/30＝44个唯一 Rust 测试，加 Node130 共174次最终选定执行，新增68个 distinct（44 Rust＋22 NPC＋2指纹）。两个原 CargoGuard 实际 GetVolume C≥50GiB，sampleEnd→childStarted 实际毫秒截断上界分别78.5672ms/75.501ms<2000ms，PolicyB Completed/Exited/Dispose；877 Rust 输入前后零漂移。实际 Native gateway receiver/source projector/Applied pump、只读 Quote 保持原 UI proof 和最终 Purchase sender 仍未接线；Hero/Social、邮件内容与 tooltip 的同源投影也须在该入口落实。
+
+大整数 UID/i64 日期 Web 投影仍 fail closed，英雄可视经验/maxXP 仍有旧包缓存来源；下一步继续无损快照与实际 Native 接线，再恢复匹配依赖、重建两端候选包。当前实际包仍 Source25 Next08/Thin08，不含 Source26–30。Matrix11保持309/317≈97.5%有界代码记录，不是可玩或全项目完成率；overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持有效，登录→战斗→保存→重登、资源/WASM、移动真机及玩家验收均 not-run，尚无可承诺试玩日期。Source29已实际提交推送并核验 a04462cb48e1d22acff1a2c532ba8faaabb5e474，本轮发布另以实际Git结果为准。
+
+证据：[Source30完整有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-finite-result01.json)、[Source30 Web实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-web-finite-result01.json)、[Source29发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-publication01.json)。以下历史正文保留。
+
+
+## Source29：严格购买 wire、永久 Core host 与 Web ABI 已通过，实际客户端应用继续接线（2026-10-07）
+
+新增独立轻量 client-wire，外部 u64 采用 canonical decimal string，保留 UID0 与 MAX selector；递归拒 duplicate/escaped duplicate、unknown 和数值型 ID。control request ID 与完整 actor/scope/sequence/intent 分开关联，producer/snapshot/authority 必须同对；terminal revision 不能取 MAX，快照 JSON 本身不证明客户端完整应用。
+
+共享 Core host 按 Actor 保留 ledger，跨 UI、同 producer 重连及更换角色不清原 operation、不换 ID、不自动重发；容量与 allocator 耗尽不驱逐历史。Begin/连接更换先撤回 availability，再等 fresh receipt 与完整 applied witness。Web ABI 独立保留 control/ticket，严格 raw frame 匹配后才观察结果；document 永久 facade 将 token 同原 producer/physical socket 绑定，拒 getter/toJSON 和反射重入越过最终 generation fence，旧回调不能借新连接权限。
+
+Gateway actual reader 重新严格解析原 message 后进入专用 serial 队列，实际 authenticated/verified 当前身份、opt-in 和真实 owner 能力共同准入；不走旧 BuyItem fallback。同 owner turn 的 snapshot 与 authority 一起输出，2MiB projection 失败仅保留精确关联的真实 PostCommit receipt。Gold/Pearl goods 增加 purchaseItemIndex 字符串，在 JS Number 转换前保留完整 selector。
+
+Root 最终 Rust02 实际 Gateway13＋wire16＋Core187＋ABI13＋旧Gold16＝245个唯一具名测试；原 NPC 脚本106/106（新增12），严格非增量 TSC exit0/无诊断，共351次最终选定执行，新增48 Rust＋12 Web＝60项 distinct。897 Rust 与27915 Node 普通输入全部独立核验、零漂移；原888 Rust 中11改/877保护，9个快照输入新增，零移除。9次实际原 CargoGuard、45 nonce files 全部 actual GetVolume C≥50GiB、sampleEnd→childStart 上界≤85.5647ms<2000ms、PolicyB Exited/Dispose。
+
+首轮 Gateway workspace roots 编译101/0测试保留，最小修复仅将 client-wire 加到根 exclude；历史 wire/Core/ABI 216次不累加进最终245。结果01派生 freshness 曾误用 probeEnd 差值；独立复核后结果02改为实际 sampleEnd 到 childStarted 的截断毫秒界限，原收据、源码、计数不变，不重复测试。
+
+下一项是 Native/Web actual receiver/dispatcher 与完整经济 bundle。Native 实际用 WS JSON，当前 Applied 只证明入队，多个模型各自 coalesce；须整体预解码、主线程完整应用后回传 witness。Web 新 owner frame 须在普通 decoder 前保留 raw string，完整应用同 revision 的个人经济状态并绕过 movement-only 快路径；inventory/equipment readiness、incoming UID、tick 或入队都不能代替完整应用。
+
+匹配重建前须将 client-wire manifests/src 纳入实际 Core/PUI builder fingerprint 及原 fixture copy。当前已构建包仍是 Source25 Next08/Thin08，不含 Source26–29；原 full11 包回归 node01 本轮只准备未运行，不改旧 manifest/资产伪造新包。Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common，309/317≈97.5%仅是有界代码记录，不是可玩或全项目百分比；overall percentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”持续有效，登录→战斗→保存→重登、资源/WASM与移动/frontend验收均 not-run，当前不承诺可玩日期。
+
+Source28 已实际提交推送并核验远端 fdd3abc37d3ab6df45b428013dda85501d7404c5；本轮承接其事后 publication。Source29 Git 发布由 Root 实际操作后另记，不以测试或文档代替推送证据。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result02.json)、[独立结果复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-independent-review01.json)、[Source28 实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-publication01.json)。以下 Source28 及更早正文完整保留为历史。
+
+
+## Source28：真实 owner/Hosted/RPC 购买恢复通过，客户端完整应用继续接线（2026-10-07）
+
+真实 durable source、已认证活动角色和 held owner lease 才能启用独立 Begin/Quote/Query/Purchase。默认能力为 false，Hosted/RPC 使用真实 owner，不查本地 shadow。Begin/Purchase 走单次 mutation；Quote 与原完整 operation 的 Query 只读，不进入旧 BuyItem fallback，也不 drain unrelated gameplay/economy。Shared 专用 leaf 只同步已有角色 transform/vitals、执行购买和更新已有 presence/ranking，避免在 PG lease 行锁内进入旧 pending economy 的二次 FOR UPDATE。
+
+回执必须先匹配原 actor/scope/sequence/full intent，并通过 terminal outcome 的 request/currency/source/count/revision 校验，才能作为已知 PostCommit 保留；后续 frame/metadata/projection/journal 错误不吞真实 receipt。当前 live 钱包或交付未完整发布时不给 authority，完整 snapshot 与其经济 revision 在同一次 owner turn 捕获，不能以 tick 或只收到 incoming UID 替代。
+
+Host 内部 journal 记录已提交的完整 character checkpoint，不重放扣款/交付/producer enrollment；仅 isolated replica image 可安装，普通 client command 转换拒绝。相同 revision 只接受完整内容一致的幂等重放；最终 account store 锁内 compare-and-set 防止另一 Session 推进后被覆盖，restore 先退役 producer/owner authority。复制 build ID 恒含 npc-checkpoint-v1 与完整 source label hash，旧 pkg fallback 不再被误作相同恢复 schema。个人 NPC Used-stock checkpoint 仍不证明 shared-zone 全局 stock 原子所有权。
+
+Root 最终 Rust05 实际 Simulation72＋旧 Gold15＋Pearl6＋Save59＋Demo1＝153，Gateway 新 owner8＋旧 Gold16＝24，共177次成功执行/176个唯一测试；新增 DTO11＋Session owner11＋Gateway8＝30项 distinct 全部具名执行。888唯一普通输入0漂移，原884中14改/870保护、新增4。11次实际串行原 CargoGuard 全部 actual GetVolume C≥50GiB、fresh≤2000ms、PolicyB exited/Dispose，共55份 nonce 文件；7份配置只准备未执行。新旧 Gateway 有限夹具使用预插同步 primary ZoneState 和断开的 movement ingress，不启动 owner后台 loop、listener/socket或产品进程。
+
+提交前仅清理新 route 文件末尾1个 LF；独立逆核可精确恢复实测字节，其他887输入不变。177次实际执行仍绑定 Rust05，最终出版快照只承接无语义格式差异，未重复执行，也未扩大接受范围。
+
+历史2轮 compile101/0 tests、Simulation68/72与Gateway7/8均保留，不累计其部分通过。实际测试发现并修复了 Serde internally-tagged unit Begin 会吞额外字段的问题，现以空 struct variant 严格 decode 且保留公开 Begin 及 wire shape。另两处只修正真实药品658到 Belt0/UID0 的夹具期望，保留完整 checkpoint/源 File 不写；最后一处只去掉 standby 夹具提前 save，保留同 revision 冲突保护和重复 replay 验证。
+
+下一项接严格客户端 wire/ABI 与 Native/Web 实际 dispatcher/receiver：新外部 u64 使用 canonical decimal string，原始 JSON 拒 duplicate/unknown，实际服务端 accepted capability/Begin 后才允许购买。共享 Actor ledger 跨 UI/重连保留原 operation，只读恢复且 Unknown 不换 ID/不重发。Native 目前 Applied 仅证明入队，各模型独立 coalesce；须补同一经济 snapshot bundle 在主线程完整应用后的确认，Web 也不能以 inventory-only readiness 或移动快路径发 witness。源码/lib测试不证明真实 TCP/PG/复制部署或另一个 OS process 冷启动。
+
+已构建包仍为 Source25 的 Next08/Thin08，不含 Source26/27/28，待完整接线后重建匹配组合。用户“继续代码，暂不操作界面”持续有效；资源/WASM、登录→战斗→保存→重登、移动真机和 frontend 验收未运行。Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common；309/317≈97.5%仅为有界功能记录，overall percentage=null、Candidate100=false、goal active，当前不承诺可玩日期。
+
+Source27 已实际提交推送并核验远端 e2c42e066b48313309f62d65a2b320b9d93f4495，本轮承接其事后 publication。Source28 发布由 Root 后续实际 Git 操作与独立 publication 记录核验，测试通过本身不证明提交推送。以下 Source27 及更早正文完整保留为历史。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-finite-result01.json)、[独立有限结果复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-independent-review01.json)、[Source27 实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-publication01.json)。
+
+
+## Source27：本地购买存档与恢复通过，网关及两端回执继续接线（2026-10-07）
+
+新增私有 Actor journal，把原 request scope/sequence/full intent、实际 Gold/Pearls、Trade/BuyBack/Used 结果及权威 revision 与完整 character checkpoint 放进既有 account source 的同一次 transaction。当前活动 Session 提供 producer enrollment、实际 catalog proof、原 ID 只读 query 和单次 durable purchase；精确 duplicate 不再次写档、扣款、交付或删除 stock，terminal rejection 保留。journal 不进入普通 WorldSnapshot，旧存档的 optional 缺失保持兼容。
+
+购买先在同一个过期维护 clone 上校验 proof/currency/source，再规划钱包、库存、所选 stock 和输出；完整 commit 后才发布 live 状态。mail、mentor、relationship、经济标记、Pearls、婚戒装备及 XP/level/roster 的合并结果同步发布。File rename 结果不明时保留 Unknown 并冻结旧 cache；已确认 PostCommit 的精确 receipt 不被后处理错误或 panic 吞掉。失败 LogOut/Disconnect save 仍先退役购买 authority，同 Session restore 不允许回滚旧 actor/history。
+
+本轮真实重登夹具发现已保存的空 bag/storage 会被旧 demo 初始化补种，现以 committed revision 或已有 journal 保护整个 checkpoint，保留 revision0/无 journal 的旧初始化。首轮46/48与第二轮49/50原日志保留：另一处是夹具只改 sequence、未改实际 request；新增 legacy 期望则明确保留既有 TownTeleport Bag2/slot0 UID0→40 规范化，仅更正该独立期望，完整 checkpoint、两次 load 与 File 不变断言均保持。
+
+Root 最终 Rust03 实际 Simulation50＋旧Gold15＋Pearl6＋Save59＋Demo1＝131，再加既有 Gateway Gold owner16＝147次成功执行/146个唯一测试（Pearl一项重复选中）；新增 journal18＋Session/File19＝37项 distinct 全部具名执行。全部6次成功调用使用最终 Rust03，2次历史失败不累加其部分通过。884唯一普通输入0漂移，原881中7改/874保护、新增3；8次串行原 CargoGuard 均为 actual GetVolume C≥50GiB、fresh≤2000ms、PolicyB exited/Dispose。5份 Rust02 回归配置只准备未执行，不计测试。
+
+这里完成的是本地 Session/File 边界。下一项接真实 Gateway owner/Hosted/RPC 的能力与原 ID query、mutation 单次发送且 Unknown 不 fallback，再接 strict wire/ABI、Native/Web 实际 dispatcher/receiver 和含权威经济 revision 的完整 applied snapshot。当前个人 NPC checkpoint 不证明 shared-zone Used stock 原子所有权；当前新 Session/独立 File 检查也不代表另一个 OS process 的冷启动或并发 owner 验收，继续单列验证。客户端 opt-in 不能当服务端已接受能力。
+
+已构建包仍是 Source25 的 Next08/Thin08，不含 Source26/27，待完整接线后重建匹配组合。用户“继续代码，暂不操作界面”持续有效；实际资源/WASM 初始化、登录→战斗→保存→重登、移动真机和最终 frontend 验收未运行。Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common；317条是有界记录，不是全项目分母，overall percentage=null、Candidate100=false、goal active。
+
+Source26 已实际提交推送并核验远端4cbba7a193e5283b8f7d92ee2be8416262cd8d68；本轮承接其事后 publication 收据。Source27 的提交推送状态另由 Root 实际操作核验，文档和测试本身不证明发布。证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-finite-result01.json)、[Source26 实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-publication01.json)。以下 Source26 及更早正文完整保留为历史，本轮状态以上述 Source27 为准。
+
+
+## Source26：购买本地结果与共享未决状态通过有限回归，完整回执链继续（2026-10-07）
+
+服务端新增全NPC购买的直接本地处理结果，实际标明Gold/Pearls、Trade/BuyBack/Used、扣款、实际准入数量及incoming UID。Gold回购/二手路径先完整规划库存、所选stock与输出，再提交钱包/库存/NPC；零数量有限stock提交前拒绝。旧Gold严格接口、价格、数量clamp、整条resale stock删除与合法旧SomeDura载体保持，UID0允许。stock expiry预处理仍是独立维护，不承诺失败回滚过期维护、复制全部额外属性或durable提交。
+
+共享Core新增独立于transport的Actor绑定单笔经济状态：保留original request ID/full intent与checked sequence；当前producer完整baseline＋checked revision门槛，精确terminal receipt与当前已应用完整snapshot两序都具备才结算。Unknown、旧producer、错Actor、错tuple及partial snapshot不清未决；同Actor重连仅给原ID只读恢复信息，foreign Actor不能覆盖旧ledger。此纯模块尚未接ABI、Native/Web真实dispatcher、网络协议或持久journal，不能把定义或测试当成前端购买恢复已完成。
+
+Root实际Core173＋Simulation新12/旧Gold15/Pearl6＋Gateway旧Gold owner16＝222次选定成功执行，新增Core21＋Simulation12＝33项distinct声明均具名执行。Core173在Rust02运行，之后仅Simulation新测试夹具改变、Core有效输入完全未变而限定承接；其余49在最终Rust04 fresh。Simulation01编译失败/0测试与02的11通过/1失败原日志保留；分别只纠正测试数量类型u16和错误非零UID假设，完整carrier比较及真实交付身份断言保持。881唯一regular输入0漂移，原878中7改/871保护、新增3；七次串行原CargoGuard actual GetVolume C≥50GiB、fresh≤2000ms、PolicyB退出/Dispose均核对。这里不是全workspace或玩家验收。
+
+下一项继续全货币/source的durable journal＋完整character checkpoint＋receipt/revision原子提交，再贯通owner/remote版本化结果与只读查询、实际capability接受、严格wire/ABI及两端receiver/full snapshot。Matrix11逐字保持103shared/206legacy/0raw open/8common；317条有界记录不是全项目分母，overall percentage仍为null、Candidate100=false、goal active。不能把原始缺口分类关闭当成已经稳定可玩。
+
+已构建并推送核验的包仍是Source25提交7b1afe2706a4eec037f085d1f599d2ea987f031f的Next08/Thin08；本轮没有重建生产组合，该包不含Source26购买代码。用户“继续代码，暂不操作界面”持续有效，实际资源/WASM初始化、登录→战斗→保存→重登、移动真机与最终frontend验收未运行。Source26 Git发布由Root实际提交推送后另报，文档/收据本身不证明发布。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source26-finite-result01.json)、[Source25实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-publication01.json)。以下Source25及更早正文保留为历史，本轮状态以上述Source26为准。
+
+
+## Source25：排名查看代码与候选包已完成，实际游玩待验收（2026-10-07）
+
+排名查看已接入共享Rust准入、可选PUI严格ABI、Native真实排名身份及Web实际发送入口；返回PlayerInspect使用真实14装备位置与raw carrier/tooltip，窗口只读。后端采用严格离线快照和本地在线当前owner投影，登录、保存失败、退出及旧连接退役均有具名回归；远端owner仍Unknown、Observe禁用、旧wire无request nonce，不宣称跨服完整能力。
+
+实际客户端选定Rust240/240，Backend80/80（新增12＋56＝68项distinct Rust均执行），原11个Web脚本220/220；Stage5内部440组只计一个文件级测试。严格非增量类型检查通过。Simulation63、Gateway unit5按已执行且未变有效输入限定承接，Gateway chain12在最终Backend06 fresh；历史失败及原断言保留，不称全workspace或全部320在最后快照重跑。
+
+Core/PUI、Windows EXE、Gateway、三renderer、Next08和Thin08均已实际构建通过并独立静态复核，未启动。PUI WASM261575 B，原strict262144 B门槛余569 B。Next08 fresh strictTypeScript20.9s/13静态页、19007files/610069210 B；Thin08 63203冻结输入，7301files/776dirs含根/0links/373130249 B，原377487360 B cap余4357111 B。11 runtime副本、231实际JSON source/output pairs与44 warning完整多重集均核对；JSON仅按相同字节限定承接历史token结论，无新parser。包位于apps/web/.mir2-thin-client-web-windows-catchup-20261007-08。
+
+Matrix11仅F11.RANKING.INSPECT由open转为legacy/sourceCandidate，103shared/206legacy/0open/8common；其余316整row、317ordered IDs、native/originalAudit和raw历史保持。358关联/226唯一声明/每row去重357是具名检查映射，不能当执行或验收数量。317不是全项目分母，overall percentage=null、Candidate100=false、goal active。
+
+用户“继续代码，暂不操作界面”继续有效；实际资源/WASM初始化、标准登录→角色→移动换图→任务/战斗/掉落→保存退出重登、移动真机及玩家验收全部not-run。Mount/Pet/Gate等遗漏资源需要配置不可变origin并通过release:doctor/真实smoke，静态包不证明在线可玩。下一代码项是跨Gold/Pearl/BuyBack/Used关联购买回执及恢复去重，entered/flushed/unknown不能当成功或自动释放；之后继续宽队列和未穷尽变体。
+
+Source24已实际提交推送并核验远端6562c474a67cf1c377a600ae254997be744879b4。本段记录Source25源码和构建结果；本轮Git发布状态由Root实际commit、push及远端核验单独报告。以下Source24及更旧状态保留为历史，旧pending/unhooked句不是当前结果。
+
+证据：[矩阵11](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix11.json)、[当前静态组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-combined-build-result01.json)、[客户端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-client-finite-result01.json)、[后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-backend-finite-result01.json)、[Web有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-web-finite-result01.json)。
+
+## Source24：Pearl 源码候选闭合，玩家验收待运行（2026-10-07）
+
+仅 `F09.NPC.PEARL` 由open转为legacy/sourceCandidate closed：完整raw Pearl目录与已知钱包接入实际GameShop confirm/double-click、Page共享Core报价/准入与单用opaque claim紧邻socket.send；UID0保留，数量/价格由共同Rust planner与f32单价oracle决定，optional PUI Pearl ABI2拒绝缺失或失效事实。Gold授权继续独立；共同规则不将整个DOM painter升为shared，raw BuyItem三字段未变。
+
+实际客户端Rust148＋70＋24＝242/242，17项新增distinct；后端Gold54＋Pearl6＝60/60，4项新增distinct。Pearl01错误filter实际0 tests仅证明compile，不计60，旧记录保留。Web原11脚本220/220与独立NPC购买94/94分开；Stage5内部392组只计220中的一个file-level测试。strict非增量TSC02实际退出0，其后仅排除的MJS夹具改变、有效TS输入未变而限定承接；Next07 fresh strict TypeScript14.4s/13静态页。以上是有限CPU/源夹具与静态构建，关联数不等于执行数。
+
+Core/PUI实际WASM252590 / 262065 B、JS24393 / 23779 B，原WASM<262144 B与JS≤204800 B预算保持，PUI距门槛仅79 B。Native实际104700416 B/SHA256 `2d36a8a24120f2de8ccbb80221b7994a31c784333d1dfc515c71237c909c2224`，Gateway105727488 B/SHA256 `b9302153eead156227169fa3e5f94d6024145f590c5fa75d124d66df481ef347`；三renderer fresh构建退出0，版本仍 `bevy-8e38472ba5cf5ef3`。均未启动，renderer immutable release仍为原ignored生成资源。
+
+Next07实际19007文件/308目录含根/608768029 B，61 NFT/122259 raw引用→37094 canonical（37092 regular＋2 declared junction），0missing/private且不遍历junction。Thin07实际退出0、23988ms，63195 canonical输入/7301文件/776目录含根/373096153 B/0links；原cap377487360 B余4391207 B。独立source-only静态bundle审查接受、0 blocker；44 warning完整多重集及231 JSON actual source/output pairs与Source23相同，仅限定承接historical token结论，未新跑parser/lexer。
+
+后端先选择真实合法空槽，库存/NPC所选stock/输出转换先staging，最后连续写钱包/库存/NPC；失败不扣款、不失目标Used stock，保留旧SomeDura/legacy metadata/UID allocator。既有expiry预处理是独立维护，不是rollback；不承诺全部stats/sockets复制或catalog UID成为delivery UID。共同经济wire仍无correlated ACK，entered/flushed/unknown保持未决，Native无限stock同UID/count pending；完整structured catalog上限2MiB与既有complete authority1MiB分开，超后者fail closed。
+
+矩阵10为103 shared/205 legacy/1 open/8 common limitation；只改Pearl一行，其余316整row、317 ordered IDs、全部native/originalAudit/rawCounts及玩家not-run保持。当前有限字段实际332关联/200唯一声明/按row去重331，path＋name/declaration身份；F01.safe-key.open原duplicate保留，Pearl旧声明转historical，当前仅21个NPC-buy literal Pearl声明（94 actual包含这些）。唯一remainingConfirmedRawGapId是 `F11.RANKING.INSPECT`，317不是完整验收分母，无overall percentage、Candidate100=false、goal active。
+
+Source23已实际push并核验远端 `c63136131bf9bc65e482188920c1c2a37730aeba`；Source24 commit/push仍pending，由Root实际执行后报告。下一项Source25 Ranking Inspect与PUI体积优化，再跨货币correlated经济回执及宽队列；新增ranking_inspect.rs仍unhooked/uncompiled，不计done。用户“继续代码，暂不操作界面”持续有效，真实UI/HTTP/socket/网络游戏/WASM API或实例、登录/游戏/保存重登、mobile与最终frontend玩家验收均未运行。
+
+证据：[矩阵10](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix10.json)、[当前证据10](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/current-evidence10.json)、[客户端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-client-finite02.json)、[Web有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-web-finite01.json)、[后端有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-backend-finite01.json)、[动作链复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-action-chain-review01.json)、[组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/pearl-source24-combined-build-result01.json)、[Source23实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-publication02.json)。以下全部旧正文（包括Progress77后端有限段）逐字保留为历史，旧pending与“未修复”仅表示当时状态，当前以上述Source24为准。
+
+## Source23：世界钓鱼源码候选闭合，玩家验收待运行（2026-10-07）
+
+仅`F02.world.fishing-click`由open转为legacy/sourceCandidate closed。实际Page/Shell主鼠标或stage touch Walk接入共享Rust钓鱼几何、转向/一秒cast clock及自有动画状态机；raw fishing/有符号i16 transform、三邻格阻挡与water均取typed事实，unknown不补standing或0。useLayoutEffect提交的只读pose绑定独立epoch/incarnation/continuity和≤250ms新鲜度；真实rod UID0、layout、owner/socket/session/map/Core与物理指针共同约束授权。terminal先burn再callback，第二指针/blur/旧cleanup与重入不得复活旧手势；unknown必须fresh down，合法cooldown/nonstanding/nonwater None可保留held retry。最后不透明单用proof紧邻真实socket.send，发送unknown保留cast clock且不自动重试；这不证明真实运行或经济ACK。共同规则不将整个DOM world painter升为shared。
+
+原11个Node脚本Node05实际218/218、0失败/0跳过；Stage5原318＋新增39＝357内部组只计218中的一个file-level测试，不能相加。strict code-only非增量TSC05与Next生成metadata后的TSC06均退出0。原具名夹具保持，真实Fishing取消依赖及空refs已接入；Combat保留Auth/Repair/Bag proof，新增精确Fishing拒绝门令socket索引+4→+5、尾部3→4；Storage原Equipment位置-1→-2并追加Fishing -1，Social保留，Quest仅增加空queued ref。字符串label与lexical `test(`统计口径已在有限证据06更正，均不等于展开执行数量。原三次体积失败、Bag63通过/1失败、Node04实际130通过/22失败/152 reported（Storage早停）全部保留。
+
+Backend实际7 jobs/242次通过、6项新增distinct；最终PUI Rust07 fresh64通过/0失败含新增6项手工decoder oracle，旧Fish/Tooltip/Bag测试保持。历史Rust04五jobs266通过＋3项原ignored（Core141/PUI58/default44/NativeFish6/Runtime17），PUI58由当前64替代；NativeInput133及其余历史配置仅按未变有效输入限定承接，不称全Rust07重跑、完整suite或总distinct。
+
+Core/PUI actual build05通过，WASM/JS分别252590/24393 B与259415/22264 B，原strict WASM<262144 B及JS≤204800 B保持；PUI距WASM门槛2729 B。三renderer实际通过、版本`bevy-8e38472ba5cf5ef3`。Native104656384 B/SHA256`2c473cae9153b8af53e4dddb5fb700d214f5cf1ece780cad32dd4eaa5a5563ee`及Gateway105714688 B/SHA256`ac512de8899da64c0c82c4273f08c4954dce2a03780518e716774221f862f544`已实际构建且未启动；renderer immutable release仍为既有ignored生成资源。
+
+Next06实际退出0、80826ms，strict TypeScript11.7s/13静态页；27439声明输入、19006文件/308目录含根/599650114 B，61 NFT/37094引用（37092 regular＋2声明junction），0missing/private且不遍历junction。Thin06实际退出0、19976ms，7301文件/776目录含根/0links/373049068 B，原cap377487360 B余4438292 B；63205声明记录实际为63187 canonical unique路径，18项同hash斜线别名不能计unique。独立pureFS复核保留44 warning完整多重集及231 JSON实际source/output pairs与Source22一致，仅限定承接旧token结论，未新跑parser/lexer；04/05 route types仍是明确的historical TS输入，不能称零旧路径。
+
+Matrix09当前103 shared/204 legacy/2 open/8 common limitation；其他316整row、317 ordered IDs、全部native/originalAudit历史与rawCounts保持，player全部not-run。有限字段实际312关联/179唯一decl、每row去重311，F01.safe-key原一处duplicate保留；这不是执行数或完整验收分母，无overall percentage、Candidate100=false、goal active。Source22已实际push `4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef`；Source23 commit/push在证据创建时pending，由Root后续实际完成并报告。
+
+下一项Source24 Pearl共享准入/钱包与actual Web DOM接线；无经济correlated ACK、Native无限stock同UID/count保持pending是必须明示处理的共同协议限制，不能fake ACK。随后Source25 Ranking Inspect及宽队列。用户暂缓界面操作持续有效：UI/browser/headless/server/renderer、HTTP/socket、WASM API/实例、登录/游戏/保存重登和移动真机及最终frontend验收均未运行。
+
+证据：[矩阵09](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix09.json)、[有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-finite-result01.json)、[动作链复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-action-chain-review01.json)、[组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-combined-build-result01.json)。以下Source22及更早段落逐字保留为历史，旧pending、下一步与产物路径只表示当时状态，当前以本段为准。
+
+
+## Source22：Bag→Belt源码候选闭合，玩家验收待运行（2026-10-07）
+
+仅`F05.belt.move-from-bag`由open转为legacy/sourceCandidate closed：实际CompatDOM Bag与默认sharedBevy Bag均可拖到六个真实Belt button，覆盖空槽及occupied swap、UID0和Bag2。共享Core纯planner返回raw from=globalBagSlot+6、to=0..5，原MoveItem仅保留type/grid/from/to四键，grid=belt；不发送EquipSlotItem。旧native outbound误注通过追加来源更正说明，originalAudit/native历史字段保留。共享规则和移动端复用不将整个DOM Belt painter升为shared类别，也不强制compat模式。
+
+原始inventoryCapacity含六Belt槽，canonical值仅46/54/58/62/66/70/74/78/82/86；Native无效容量fallback46，严格Web ABI拒绝非canonical。源实例完整raw来源与全局唯一UID必须存在，UID0保留，Bag2首格global40映射raw46。缺可选PUI能力只拒绝新动作，不破坏普通Core接口；JS不另做索引规划。
+
+真实Page/Shell/Belt源码的有限DOM/ABI夹具检查覆盖最后Core getter及pending重入、旧指针失效后恢复、second pointer隔离、四logical px拖动阈值、六真实槽geometry/elementFromPoint/隐层/scale/DPR、blur及successor cleanup。terminal先burn再callback，最后owner/source/layout、parity/mail/social/storage门槛及opaque proof紧邻dispatcher.enter与真实socket.send。已进入或unknown发送保护source/target UID及两格，不因超时/owner/等价layout清锁、不自动重试；精确grid/from/to/success同owner ACK失败可释放，成功还需更新完整source/target raw snapshot，ACK与snapshot两序都验证后才释放。这里的“真实”指受测产品源码入口，未操作实际页面或连接。
+
+Root八组当前Rust实际230次跨配置通过、3项原ignored，21项新增distinct（Core3/Native1/PUI5/portable Bag9/Runtime Bag3）全部执行。最终Node03原11脚本218/218、0失败/0跳过；Stage5原299＋新增19＝318内部组只计一个文件级Node测试，不能218＋318。严格code-only非增量TSC03通过。Storage原65具名组标签/断言行保留；Combat原23组标签/顺序保留，三处必要AST位置期望+3→+4及末尾2→3保留原Repair/Auth并追加BagProof，装配真实Shell依赖，不声称全部旧assert字节不变。
+
+当前Core/PUI实际build02退出0：Core WASM252417 B/JS24393 B、版本cdbc1b7c…字节和版本不变，source指纹bf004f2a…；新PUI WASM221108 B/JS17931 B、版本c5517ce7…，满足原WASM<262144 B及JS≤204800 B预算。三renderer实际build01退出0、版本bevy-b8b16a3145ac75f2并通过原预算。Native实际fresh build01退出0、757642ms，EXE104760832 B/SHA256`400f36509204e4983a3f620641333d721b3042c81656bd37035c48d182e0a1f2`，未启动。Renderer immutable release沿既有.gitignore列为生成资源，文档不证明发布。
+
+Next01实际退出0、159683ms，dist`.next-web-windows-catchup-20261007-05`，strict TypeScript24.1s/13静态页；27417声明输入、19007文件/308目录含根/604720042 B。61 NFT/37094引用（37092 regular＋2 declared junction），0missing/private，junction未遍历。Thin02实际退出0、40097ms，包`.mir2-thin-client-web-windows-catchup-20261007-05`，63166声明输入、7301文件/776目录含根/0links/372988592 B；原377487360 B cap余4498768 B。独立pureFS复核完整输入/输出/包树、11 runtime copies，0确认P0/P1/P2、0执行/0写；44 warning完整多重集不变，231 JSON source/output pairs实际hash与Source21一致，仅限定承接历史token结论，未新跑parser/lexer。旧Next04输出成员被替换，但一项04/types/routes.d.ts作为既有Node03/strict TS输入重新纳入，未进入当前NFT/包；不能声称完全没有04路径。
+
+15次实际CargoGuard调用严格串行，原threshold53687091200 B与fresh≤2000ms策略保持，每次actual GetVolume C≥50GiB，sampleEnd→childStart实际61–97ms，PolicyB退出/Dispose闭环。Node01实际151/218、67失败历史保留，真实依赖夹具与过期Core修正后02及最终03通过；TSC01仅prepared未跑。Corebuild01因receiptRoot不存在被原guard90挡在Cargo前，Core02仅先建收据目录后通过；Thin01因不可变process helper拒绝反斜杠参数而prelaunch失败，Thin02仅将data参数改为正斜杠后通过，原日志/配置/回执保留。
+
+当前103 shared/203 legacy/3 open/8 common limitation；仅一行闭合，其余316整row、317 ordered IDs、全部originalAudit/native与historical rawCounts保持，player全部not-run。最终Matrix08实际row有限字段展平273关联/140唯一声明、每row去重272；仅新增19项Stage5声明关联，保留F01.safe-key.open原Overlay行内重复1次。关联数不等于Rust21、新执行数、Node218、Stage5318或玩家验收。317为有界审计记录，没有完整验收分母或overall percentage，Candidate100=false、goal active；源码/CPU有限检查/静态构建不证明可玩。
+
+Source21已实际commit/push并经HTTPS remote核验`229ae772d7bd3acdb1b21ef3e8005bf817a393d4`。Source22 commit/push在证据创建时pending，由Root实际完成后报告。下一项Source23处理`F02.world.fishing-click`，需实际共同local pose/action与raw transform类型事实，不猜standing；随后`F09.NPC.PEARL`、`F11.RANKING.INSPECT`。这三条raw open不是整体剩余分母。UI/HTTP/socket/WASMAPI或实例、登录/游戏/战斗/保存重登、移动真机及最终frontend验收均未运行，用户“继续代码，暂不操作界面”持续有效。
+
+证据：[矩阵08](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix08.md)、[有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-finite-result01.json)、[动作链复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-action-chain-review01.json)、[组合构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-combined-build-result01.json)、[QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
+以下Source21及更旧段落完整保留为历史阶段；其旧pending、下一步和包路径只表示当时状态，当前状态以上述Source22为准。
+
+
+## Source21：两tooltip源码候选闭合，玩家验收待运行（2026-10-07）
+
+Source21为实际自有Bag/Belt/装备提示接入共享Rust纯formatter、neutral DTO/name表和renderer-free可选PUI ABI1；Native四个公共API与默认ShiftClick选项保留，Web按真实MoreActions入口展示拆分提示。完整document含11类sections/10种colours、原始/真实/解析/socket属性与unknown viewer；raw UID0、signed i32 item index、count/dura/unit sale及完整carrier从实际显示对象独立克隆，catalog/label/slot不能补实例来源。ABI getter custody、canonical i64 .NET ticks与exact formatter clock缓存保持；缺可选能力不阻断普通Core接口，缺字段/partial不伪装完整。
+
+真实Page reader在useLayoutEffect提交后才格式化，调用前后核验物理owner/socket/connection/session/scene/map、Core对象、来源签名、window/tab/epoch和raw对象唯一性；Bag/Belt/Character真实mount传入相应callback，hover/focus/touch只读。active-only1000ms刷新，blur/visibility/pointercancel/resize/pagehide/unmount及旧cleanup不能清掉successor；原basic fallback保留。movement-only itemIdentity纳入sellValue，金币售价单项变化能刷新提示。本批不产生装备/使用/修理/发送权限。
+
+Root选定Rust跨配置169次通过：Core101＋default44（另3项原ignored）＋Native3＋finalPUI21。最终PUI hint修正后只有21新执行，其余148为本次Source21先前实际执行，仅按未变有效配置输入限定承接；不称169都在最终修正后跑过。18项新增distinct、30项tooltip/name执行，原12个Native具名tooltip测试保留（11迁到Core、1留Native）。现有11个Node脚本Node03实际218/218、0失败/0跳过，Stage5原290＋9新增＝299内部组只计一个文件级Node测试，不能218＋299。原clock组名称/断言强化exact formatter clock，旧负index拒绝替换为below-i32拒绝＋合法negative index覆盖；实际组件唯一button AST selector收窄，保留card count1与六events检查，不声称全部旧断言字节不变。Combat23原测试/断言保持。strict code-only非增量TSC03通过。Node01的217/218及失败日志、初始PUI20、旧prepared/build配置完整保留；source-review旧pending句只表示创建时态，最终回执更正当前状态。
+
+当前Core/PUI实际build02通过：Core WASM252417 B/JS24393 B，PUI WASM211995 B/JS16829 B，均满足原WASM<262144 B及JS≤204800 B预算；Core版本cdbc1b7c…、PUI23059247…、source49a8ea7b…，完整hash见组合证据。三renderer实际build02通过原预算，发布版本bevy-e9f57ef01a6282c7。Native EXE实际build01为104760320 B/SHA256`0b54aee401aa2504939dd3dbae80615f597ec83ae19da1321e7170ff43baaf30`；最终rust02仅改PUI，Native有效输入未变，按限定条件承接该实构建，不另称第二次Native构建；EXE未启动。既有.gitignore将Renderer immutable release列为生成资源，未强制入Git；selected Core/PUI四叶提交由Root完成，文档写入不证明发布。
+
+Next04实际退出0（PID101008，142707ms），dist`.next-web-windows-catchup-20261007-04`，strict TypeScript21.9s与13静态页；27404声明输入，19007文件/308目录含根/603079321 B；61 NFT/37094引用（37092文件＋2目录），0missing/private，声明junction未遍历，仅原允许的生成元数据更新。Thin04实际退出0（PID82236，25804ms），包`.mir2-thin-client-web-windows-catchup-20261007-04`，63153输入；7301文件/776目录含根/0links/372903563 B，原377487360 B cap余4583797 B。独立purefs复核63153inputs/19007Nextfiles/7301Thinfiles与11 runtime copies全部一致，0确认blocker、0执行/0写；44 warning完整多重集保持，231JSON实际source/output pairs一致，仅限定承接历史token结论，未新跑parser/lexer。
+
+仅`F05.bag.tooltip-compat`（含装备）与`F05.belt.tooltip`两行open→legacy/sourceCandidate closed。共享formatter不将整个DOM host升级为shared controller；当前103 shared/202 legacy/4 open/8 common limitation。其余315整row、317 ordered IDs、全部originalAudit/native和历史rawCounts保持，player全部not-run；实际row有限字段展平254关联/121唯一声明，每row去重后253关联；F01.safe-key.open原Overlay声明有1处行内重复并保留。旧Matrix06 summary230/118＋新增18/9＝248/127仅为历史summary算术，不是fresh当前总数；旧06实际字段展平236/112。关联数不等于执行、Node218、Stage5299内部组或玩家验收数量。317条只是有界审计记录，没有完整验收分母或总体百分比，Candidate100=false、goal active；源码/CPU有限检查/静态构建不证明可玩。
+
+Source20已实际提交push`463d6f1ce42fefdd4244cbd801f92715e29674a1`；Source21 commit/push在证据创建时仍pending，由Root最终实际报告。下一项Source22真实Bag→Belt，随后`F02.world.fishing-click`、`F09.NPC.PEARL`、`F11.RANKING.INSPECT`，这4项raw open不是总体分母。W6实际UI、HTTP/socket、WASMAPI/实例、登录/战斗/保存重登、移动真机及最终frontend验收仍未运行，用户暂缓界面操作持续有效。
+
+证据：[矩阵07](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix07.md)、[Source21组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/tooltip-source21-combined-build-result01.json)、[QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。以下Source20及更旧段落均为历史阶段，旧pending/下一步/包路径不表示Source21当前状态。
+
+
+## 历史Source20：三维修源码候选闭合，玩家验收待运行（2026-10-07）
+
+Source20已闭合普通维修Bag、特殊维修Bag与维修报价三个有界源码动作：实际Bag DOM button捕获primary mouse/touch、raw UID0/container0/Bag2+40来源，经不透明单用gesture token投放当前75×75目标；维修框为Native176×147布局，Hold/Confirm已接真实控件。最终发送仍受当前owner/stamp/source/geometry/page/scale/DPR/node identity、物理socket UID屏障及精确ItemRepaired ACK门槛保护。terminal先burn再callback，second pointer取消并隔离至terminal和兼容click，close后原Bag button的兼容mousedown保留WeakSet custody。已知金币不足可选择/投放但禁止确认，unknown/locked/busy拒绝；Hold toggle不发送，每fresh accepted drop至多发送一次，正常ACK/dura/gold刷新保留Hold，unknown/owner/mode/close清掉，transient unknown后same key不能复活旧stamp。没有ACK自动重发。
+
+Root实际Node03 11脚本218/218、0失败/0跳过；Stage5原282具名组＋8新增＝290内部组只计一个文件级Node测试，不与218相加。三条旧不可达UI结构断言替换为更强的实际可达Native维修branch AST断言，其余保留；Combat原23测试/断言保留并装配真实Shell依赖。strict code-only非增量TSC03退出0、零日志。Node01/TSC01失败历史保留，prepared02配置未执行。
+
+Root实际Next01退出0（PID77812，112130ms），新dist为`.next-web-windows-catchup-20261007-03`，严格TypeScript13.8s与13静态页；27387原输入fresh hash零漂移，另两项仅允许03 include/route import元数据更新。Next19007文件/308目录含根/602553319 B，61 NFT/37094引用（37092 regular＋2目录），0missing/private；已声明node_modules junction未遍历。Thin01实际退出0（PID103048，28428ms），新包`.mir2-thin-client-web-windows-catchup-20261007-03`，63136输入零漂移；7301文件/776目录含根/0links/372719297 B，原377487360 B cap余4768063 B。独立pure-fs静态审查接受，0确认blocker、0执行/0写，实际复核63136 inputs、19007 Next输出、7301全包与11 runtime leaves；44 warning完整多重集保持，231 JSON source/output逐对字节匹配，仅限定承接历史token结论，未新跑parser/lexer。
+
+Source18 Core/PUI、Native、renderer Rust有效输入图保持不变，421 high-level输入零漂移，本批未新运行其Rust测试或三组构建；默认Core WASM252205 B/JS24393 B、PUI WASM70277 B/JS14472 B按指纹限定承接。Native archive104710144 B只重hash，未启动。当前仅三维修行open→legacy/sourceCandidate closed：103 shared/200 legacy/6 open/8 common limitation；其余314行不变，317 ordered IDs、originalAudit及Native历史完整保留，全部player not-run。这不是完整验收分母，无overall percentage，Candidate100=false、goal active；源码/有限检查/静态构建均不证明可玩。
+
+下一项Source21先提取共享Rust轻量tooltip与renderer-free PUI，接入真实Bag/Belt/Character mount（含装备）；记录集其余6项为`F02.world.fishing-click`、`F05.bag.tooltip-compat`、`F05.belt.move-from-bag`、`F05.belt.tooltip`、`F09.NPC.PEARL`、`F11.RANKING.INSPECT`。W6实际UI/玩家、移动真机与最终frontend验收依用户要求暂缓。Source19 c400与Source18父7567已实际push并经HTTPS ls-remote确认；Source20新提交仍pending，不能称已发布。
+
+证据：[矩阵06](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix06.md)、[Source20组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source20-combined-build-result01.json)、[QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。以下Source19及更早段落是历史阶段记录，当前状态以上述Source20为准。
+
+
+## 历史Source19：NPC维修为 partial/open（2026-10-07）
+
+当前固定记录类别仍为103 shared、197 legacy、9 open、8共同限制；不作为完整分母。Source19的Node 218/218与strict TSC通过，Next01静态类型/13页和Thin01包检查也已实际通过，均不等同玩家验收，且本批未新编译Rust/native/Core/renderer。NPC普通/特殊维修现有候选已能用实际Bag UID、捕获NPC rate与物理owner、共享报价、单用proof和精确ACK关联，但Windows基线的Bag拖拽目标和Hold自动确认未在Web闭合，三个复合行继续open。优先工作是补齐这两种真实输入；之后处理兼容tooltip、Bag到Belt、钓鱼、Pearl、Ranking Inspect。317行仍player `not-run`，无全局验收百分比；W6按用户要求暂缓。
+
+## 历史Source18执行摘要（2026-10-06）
+
+Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+
+当前Source18代码与静态构建已闭合：认证七条、地图/聊天/Cash九条源码候选；剩余九条已确认差距继续推进，未审范围保留。后续顺序：
+
+1. F01：注册全字段、修改密码及SafeKey代码/构建候选已完成；成功码6/8、失败焦点与精确banned expiry、物理socket单用lane及epoch屏障已修，真实账号与UI仍未验。认证前沿模型主导审查保持。
+2. F02大/小地图图像寻路、F04历史拖动/4-7-11行/settings draft和F09 Cash预览/转向九条已通过源码、有限检查及当前五阶段构建；DOM呈现和玩家行为待验。
+3. 下一轮先补F09普通/特殊维修：使用真实Bag UID、NPC rate与共享报价，贯通当前owner和邮件锁校验；已提取的纯报价不等于服务接线完成。随后F05轻量共享tooltip、Bag→Belt，F02钓鱼、F09 Pearl与F11 Ranking Inspect。
+4. W0继续核对控件→host→wire和未知范围；九条只是317记录集剩余已确认源码缺口，不能用作整体分母。W6按用户界面暂缓保留，不请求例行确认。
+
+## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
+
+本批 Source03 已通过独立源代码与实际结果审查，0 blocker；现有串行 CargoGuard 下 **3/3 组、53/53 项执行通过**（购买 18、会话 34、商城 1），其中 **16 项新增测试**。两轮历史测试失败保留，不计入 53 项通过数；修正仅涉及新增测试夹具和预期，产品代码保持一致。
+
+网关将本次 Committed / Rejected / Unknown 结果沿真实本地 owner 调用传递；身份、租约和能力检查在执行前完成。提交后的元数据、事件或协调异常保留本次已知结果，捕获前异常保持 Unknown。原 804 行共享通道可逐字节逆向恢复；现有 BuyItem 三字段、四键 JSON、GameShop 及共享尾部处理保持原契约。
+
+队列闭环项：本地 typed owner route。下一项：关联请求与权威处理回执、重复请求只执行一次、提交后投影失败保留已知结果、客户端 Unknown 恢复，再更新组合生产构建。
+
+本批不计网络购买 ACK、幂等性、客户端恢复、新生产组合、UI/玩家/移动设备验收、Candidate 或总 goal 完成。详见 [本批 QA 及剩余工作](generated/player-qa/client-core-20260930/npc-gold-buy-owner-route/README.md)。
+
+## Progress73：连接内未决购买保护已通过有限检查（2026-10-05）
+
+Windows 与 Web 共用 Core 的 entered/flushed/unknown 保护：同一实际连接上的角色、完整模型、目录、界面关闭和 HMR 变化不能清除未决请求；严格更新的可信连接才可退役旧请求，仍要求新的完整模型和玩家新的明确意图，不自动重发或推断成交/拒绝。旧 holder 契约缺失会 poison 并拒绝；最后来源复核必须是真实完整 checkpoint。
+
+本批 11/11 组完成：Rust 286 次跨配置执行、14 项新增 distinct；Node 256 项、13 项新增 distinct；严格 TSC 与 shared WASM 编译检查退出 0。994 项声明输入中 13 项既有授权变更、981 项保护、0 新源码文件，Source02/实际回执经独立只读复核 0 blocker；Source01 缺陷与原执行证据保留。Node Core 响应是夹具，完整 TSC 消费依赖图未冻结；未运行 WASM Instance。Progress72 的 155 次服务端执行仅限定承接，不算本批新执行。
+
+下一项贯通 Gateway owner lease 的 typed NPC outcome，再接关联/幂等购买回执和完整投影到两端 Core，随后构建新的生产组合。本批不提高整体 parity 百分比；此前“整体 35%”缺少固定验收分母，不再使用。实际客户端、浏览器、移动真机、生产组合及 Candidate 仍未验收，整体 goal 未完成；用户“继续代码，暂不操作界面”的限制持续有效。详见 [Progress73 QA](generated/player-qa/client-core-20260930/npc-gold-buy-connection-barrier/README.md)。
+
+
+## Progress72 · 2026-10-05 UTC · 普通金币购买 typed 本地处理结果
+
+Session / InProcess Runtime 新入口要求 canonical 认证和 StartGame，默认 unsupported 不执行旧购买；普通 BUY 实际解析 Used 也被 typed 路径拒绝。每笔局部 capture 在真实校验或金币、库存两次提交后产生 Rejected / Committed，incoming_unique_id 仅为入包增量身份。已知结果经后处理 Err 或 unwind panic 仍保留；缺结果为 Unknown，不推断拒绝或自动重发。旧 Buy 内层四字段、binary、特殊经济、GameShop 与原完整收尾保持。
+
+Source02 994 current / 994 after / 992 before，5既有变更＋2新增、987保护；Source01 panic审查问题原样保留且未执行。实际 Simulation153＋Gateway2＝155次测试执行通过，15项新增全执行，独立复核0 blocker；每次 fresh actual C≥50GiB 与原 Guard PolicyB 退出闭环齐全。Web243 / TSC / 共同客户端与WASM仅以未变有效输入限定承接71历史通过，不计新执行。
+
+本批是领域接口与有限检查，未发行公开 processing receipt，未解决客户端 Unknown 恢复、未重建生产组合。下一项同连接未决屏障，再接精确请求关联与两端回执；实际界面按用户“继续代码，暂不操作界面”暂缓。玩家/保存重登/移动真机/最终 frontend / Candidate 未验收，goal active。
+
+详见 [Progress72 QA](generated/player-qa/client-core-20260930/npc-gold-buy-processing-outcome/README.md)。
+
+
+## Progress71 · 2026-10-05 UTC · 普通金币购买有效期与共同日期精度
+
+服务端普通 Gold Trade fresh 物品按 Crystal 名称标签创建有效期：首个成功括号匹配、Int32 前缀及溢出归零，m/h/d 使用时长，M/y 按日历钳制月末，未知单位使用 Unspecified MaxValue。一次 UTC 捕获用于本笔购买；完整交付载体与 live sidecar 一致，日期超界、距离/金币不足或容量失败均在金币和库存提交前拒绝。带标签模板仅占格，不贡献客户端 fresh-compatible 容量证明。Pearl/BuyBack/Used 保持原路径。
+
+公共 Rust 的 plain UserItemExpireInfo JSON 改为规范 signed i64 十进制字符串，同时读取旧整数；原 Crystal binary i64 不变。Windows/portable 共用同一编解码与严格完整载体门槛。Web 仅在 expiry 单字段形状下用原始 JSON source 恢复旧 unsafe 整数，无 source 时保留 unknown；新字符串原样透传，不放松 UID/count/dura。安全 legacy 数字仍保留既有 JSON 语义，Rental/Sealed 未在本批迁移。
+
+Source01 联合992输入及完整 current/after/before核对：12既有改动＋2新增、978原文件保护。实际 Rust 138＋112＋73＋32＋19＋2＝376次跨配置测试通过，shared WASM 编译通过；17项新增 Rust 具名测试已执行，Native/portable 的5项重复不加成独立场景。Web Node 实际111＋84＋48＝243项通过，parser 的35内部断言组已含于一项文件测试，不另加总；9项新增 Node 与实际严格 TSC 通过。每次 Cargo 使用 fresh actual C≥50GiB、原 immutable Guard PolicyB，首个漏建收据目录的 pre-Cargo 拒绝保留且不计通过。
+
+当前自然 Trade 目录没有 timed 商品，新增事务由 test-only World-local 目录经真实 Session BuyItem 入口验证。本批是源码与有限检查；Progress70 的 EXE/renderer/Next/独立包不能视为包含新代码。下一项先增加服务端直接返回的 typed 普通金币购买处理结果，再接精确请求关联与客户端恢复；完整 NPC 服务与后续组合重建继续排队。用户“继续代码，暂不操作界面”持续有效，实际玩家/保存重登/UI/移动真机/最终 frontend/Candidate 未验收，整体 goal active。
+
+详见 [Progress71 QA](generated/player-qa/client-core-20260930/npc-gold-trade-expiry/README.md)。
+
+
+## Progress69 · 2026-10-05 UTC · 共同NPC金币买入容量证据
+
+服务端完整快照提供可空的 `npcGoldTradeCapacity` 两字段证据，Windows/Web 原样传入共同 Rust planner。None 保留旧严格身份与仅空格准入，false 禁用；true 只让 listed、身份无歧义且完整 raw Info/载体与 canonical fresh 相容的现代 Bag/Belt 堆叠贡献容量。Bag1/Bag2 同为 container0；Native 保留完整 u64，Web 限安全整数，旧跨 grid alias 仅在 NPC 专用证据门槛内允许。
+
+局部物品/金币 mutation 在任何 handler 前同步撤销可用性，完整同 owner、当前 source stage 与库存指纹匹配才恢复；完整请求与发送 proof 保留证据，只有持久 Core authority 排除它，证据变化不释放 Entered/Unknown 屏障。没有新增购买 ACK、超时重试或 JS 容量算法。
+
+Source02 的 990 当前源码/after 备份及 989 before 完整核对，25 旧文件变更＋1 新文件、964 旧文件保护。实际 Rust 五组 128＋107＋68＋32＋19＝354 次跨配置执行及 shared WASM 编译检查通过；Node 108＋83＋48＝239 项通过，新增 Rust28/Node10。TSC 仅限定承接 Source01 实际通过：Source02 只改四个 mjs 夹具，生产 TS/TSX 与编译有效输入未变，不称新 TSC 执行。Source01 的 19/1/1 失败及原日志保留，夹具精确修复且原断言未弱化。
+
+下一项 Progress70 复用既有有限 builders，按原预算重建 Native、三 renderer、Next 与 Thin；Core24 输入/18 Rust 未改，仅限定承接。生产组合本轮尚未重建；name-tag expiry、无购买 ACK 恢复与完整 NPC 服务边界仍 open。用户“继续代码，暂不操作界面”持续有效，实际 UI/JS sink/HTTP/移动真机/最终 frontend/Candidate 未验收，goal active。详见 [Progress69 QA](generated/player-qa/client-core-20260930/shared-npc-gold-capacity/README.md)。
+
+
+## Progress68 · 2026-10-05 UTC · 普通Gold Trade整笔购买修复
+
+服务端普通Trade/Gold购买先在库存克隆中完成真实格位、自身数量上限、完整载体及身份检查；兼容的完整现代堆叠依合法Bag/Belt分区吸收数量，剩余量必须有真实空格。全部转换和容量规划成功后才一起写入金币与库存；fresh交付排除catalog UID与0，模板基础属性不写入AddedStats，失败不扣款、不保留部分合并。旧sidecarless根保留各packet grid内的编号，真实exact/nested/reserved冲突继续拒绝，旧物品只占格。Pearl/BuyBack/Used原路径保持。
+
+最终Source04实际购买16/16、相邻NPC115/115通过（115已包含全部16，两个命令131次执行），独立复核0个确认blocker；两次真实失败原日志保留，旧runtime/tests.rs及全局allocator/codec/兼容谓词未改。813 Rust输入与备份匹配，前端553输入未改。
+
+下一项接共同Rust客户端的兼容堆叠容量：由服务端完整快照提供可空roster/compatible-UID证据，Windows/Web原样透传，局部物品包同步撤销可用性，保持Core的Entered/Unknown屏障。客户端满包准入、name-tag expiry创建、无专用购买ACK恢复及生产组合仍需继续；用户“继续代码，暂不操作界面”持续有效，实际玩家/移动真机/最终frontend/Candidate与整体goal保持open/active。详见 [Progress68 QA](generated/player-qa/client-core-20260930/npc-gold-trade-capacity/README.md)。
+
+
+## Progress67 · 2026-10-05 UTC · 普通NPC商店组合构建
+
+当前共享商店源码的Windows开发EXE、生产Core、三种renderer、Next与独立包完成实际有限构建及独立复核。静态导出测试26/26；Core完整24输入/18 Rust，WASM258772B；三renderer均保留原预算。Next严格TSC及13页面通过；独立包377152588B（359.68 MiB）/7299文件/775目录/零链接，360 MiB预算余334772B。553源码与备份、Core8/Bevy166历史叶保留；完整Next/依赖43897文件核验通过。Next实际只改tsconfig与next-env两项生成元数据，旧失败记录保留。
+
+下一项修服务端普通Gold Trade购买的容量预检与元数据入包不一致，确保整笔成功后才扣款；随后同步共同客户端的兼容堆叠容量规则。用户“继续代码，暂不操作界面”持续有效；当前登录/战斗/保存重登、JS sink运行语义、远端资源覆盖、移动真机、最终frontend/Candidate与整体goal仍未验收。详见 [Progress67 QA](generated/player-qa/client-core-20260930/shared-npc-shop-combined-build/README.md)。
+
+
+## Progress66 · 2026-10-04 UTC · Web普通商店共同控件接线
+
+Web普通Gold/unlimited/panel0商店已接入Windows同一Rust controller/painter与既有持久Core购买dispatcher；完整584×334布局及两块实际输入区域确认就绪后，才交接整棵React Buy树。arming期间旧树可见但不可输入，键盘、场景定时移动、手柄和移动控件均使用实时阻断；较窄触屏及混合/特殊目录仍整棵legacy。
+
+购买在实际socket.send前核验完整当前owner/service/catalog/source/布局和精确wire，先消费唯一UI proof，最后通过Core entry前checkpoint；状态变化/关闭/换面板/旧pointer terminal不可发送或清除新hold。renderer不创建Core token/slot/ACK，Flushed/Unknown不表示服务端购买成功。Close/Sell延迟退役避免同步回调改写ABI状态，Sell/Repair仍既有入口。
+
+最终选定Node249项通过：Source04新执行仓库接线20+相邻82=102；NPC03 99与Storage03 48在其余986输入及实际消费依赖逐字节未变条件下限定承接，严格TSC03亦限定承接，均无skip。NPC99包含53项新增（buy8/host24/Page-Shell21）。Source02真实NPC/TSC失败与Source03旧夹具16项失败保留，修复未削弱原断言。组合553/Rust812/Web988，联合979；10既有授权/4新增，前批974输入中965保护，9旧变+5新图输入；Rust未改未重跑，仅限定承接Progress65证据。
+
+下一批复用既有有限runner，按固定预算重建Windows EXE、生产Core、三种renderer、Next及独立包。用户“继续代码，暂不操作界面”持续有效；本批无WASM Instance/JS sink真实调用、浏览器/原生窗口/HTTP/玩家/移动真机或新生产组合验收。完整NPC商店、无专用购买ACK恢复、服务端容量/元数据一致性、最终frontend/Candidate与整体goal保持open/active。详见 [Progress66 QA](generated/player-qa/client-core-20260930/web-npc-shop-ui/README.md)。
+
+
+## Progress65 · 2026-10-04 UTC · portable/runtime普通商店共同host
+
+portable/runtime普通NPC商店已复用Native共同Rust controller/painter，新增独立host与7个ABI出口；原有精确能力对象保持。指针仅提交冻结proof/gesture，Runtime同步回调前后核验完整owner/source、ingress与sink状态，接受后才修改共同选择/数量/分页；renderer只读取既有Core authority/feedback，不创建token/slot/ACK。
+
+最终Source02实际19项portable（含真实字体CPU布局、touch1.28/DPR2、完整584px范围）、17项runtime host、6项能力回归和20项Native共同商店回归通过，合计62次跨配置执行，36项新增；shared WASM编译检查通过。Source01测试所有权编译失败/零执行保留，精确两处as_ref借用修复，未削弱断言。548组合/812Rust输入含同一公共字体，union974；每次fresh actual C≥50GiB Guard PolicyB与child/outer close完成，18个已知自有PID实际查询absent。
+
+下一批接Web唯一共同商店控件树与既有持久Core dispatcher。较窄触屏布局仍整体legacy，混合目录整体交接；Sell/Repair/BUYBACK/USED、无专用购买ACK恢复、服务端容量/元数据一致性保持open。用户“暂不操作界面”持续有效；本批无JS sink实际调用、界面/浏览器/玩家/移动真机或生产组合验收，最终frontend/Candidate及goal保持open/active。详见 [Progress65 QA](generated/player-qa/client-core-20260930/portable-npc-shop-ui/README.md)。
+
+
+## Progress64 · 2026-10-04 UTC · Native普通商店共同控件接线
+
+普通NPC商店的共同controller/painter已接Native实际按钮、数量快捷键与绘制入口；快捷键遗漏Bound撤销已闭合。控件先校验Gate实例与source/presentation stamp再撤销/修改，Entered/Flushed/Unknown屏障保留；每帧同source观察支持后续手动购买。
+
+最终Source03实际七组88次通过：Native controller/接线20、painter10、购买入口5、NPC对话7、聊天29，portable controller7/painter10。跨配置执行次数不等于独立场景；新controller7、真实Native系统13、真实painter10项。543源码/配置+字体=544，Rust807+字体=808，union970；4既有授权变更/4新增，535/799保护，完整before匹配。每组fresh actual C≥50GiB .NETGuard PolicyB与child/外层close0，27已知PID实际查询absent。
+
+下一批先接portable/runtime普通商店host，再接Web唯一控件树与既有持久Core dispatcher；规范decimal-string Core revision不可转JS Number，renderer不创建新的token/slot。混合目录保留整棵legacy；Sell/Repair/BUYBACK/USED、无专用购买ACK恢复及服务端容量/元数据一致性仍open。用户“暂不操作界面”持续有效，本批无生产组合重建/界面/浏览器/移动真机验收，最终frontend/Candidate及goal保持open/active。详见 [Progress64 QA](generated/player-qa/client-core-20260930/shared-npc-shop-ui/README.md)。
+
+
+## Progress63 · 2026-10-04 UTC · Web购买进入共享Core
+
+普通Gold/unlimited/panel0购买现由持久Core holder管理token/authority/entry，重挂载不重置发送屏障。真实Page最终同步socket.send前精确entry，已观察来源变化先退役旧proof；Flushed/Unknown只表示本地发送观察，不当作购买成功，不自动重试。
+
+选定有限检查：Node237（最终Web03新执行38，其余199及严格TSC按未变有效依赖限定承接），Rust51次跨配置通过（最终803图新执行29、Core/Native22限定承接，3项Mail回放ignored）。组合539/Rust803/Web156/Core派生805，联合970唯一输入；12既有变更、525保护、2新Rust，完整before与失败历史保留。
+
+当前QA Core完整WASM258772B/JS19003B，原严格WASM<262144B和JS≤204800B预算不变。固定Binaryen131优化及正式optimizer API均实际通过，产物字节一致；38项构建库测试/语法通过，正式builder已加入发布前/verify预算与优化库指纹。仅QA构建步骤和metadata验证，完整生产Builder/publish、组合产物及实际玩家流程未验收。
+
+下一批先接Native普通商店共同controller/painter，修复数量热键遗漏Bound未entry撤销，再接portable/runtime/Web host。混合特殊货币/有限库存/resale保留整体旧入口；Sell/Repair/BUYBACK/USED、无专用购买ACK结果恢复与服务端容量/元数据插入不一致仍open。用户“暂不操作界面”持续有效，触屏/移动真机、最终frontend/Candidate与goal保持open/active。详见 [Progress63 QA](generated/player-qa/client-core-20260930/web-npc-gold-buy-attempt/README.md)。
+
+
+## Progress62 · 2026-10-04 · Native本地购买锁已闭合
+
+普通Gold/unlimited/panel0购买现携带精确Core token和transport ticket，发布前绑定、实际start_send前核验完整owner/service/catalog/inventory。队列满、断线、关闭/换面板等确定未入传输时只撤销对应请求；进入传输后的Flushed/Unknown保留屏障。旧回执不能释放新请求，legacy sender=false也只释放被拒的精确BuyPending。
+
+有限检查通过：Core17、Windows网关28、Native商店64/购买入口5/对话7/聊天29/交易25、portable商店41/购买状态4、Runtime1，以及shared WASM编译检查。合计221次跨配置测试执行，并非221个独立场景；其中Source04新执行176次，Core17与Windows28仅按未变有效依赖图承接，未冒称整图Source04重新执行。
+
+下一批先让Web购买状态接入持久共享Core，再接共同商店controller/painter和portable/runtime host；保留既有价格planner与Native传输边界。用户“暂不操作界面”持续有效，实际玩家流程、触屏和Android/iOS真机、完整NPC商店、最终frontend/Candidate及整体goal保持open/active。服务端容量预检与带元数据插入不一致仍另排；无专用购买ACK的结果恢复未关闭。详见 [Progress62 QA](generated/player-qa/client-core-20260930/npc-gold-buy-attempt/README.md)。
+
+## Progress61 · 2026-10-04 · 普通 NPC 金币购买共享规则
+
+Native 两个购买入口与 Web 实际页面已接入同一 Rust planner，使用 catalog UID、原始 price/rate、合法容量和完整 raw 来源；Web 在实际 sendRaw 最终一次性 claim，旧目录、owner/模型变化和同步重入不能发送旧凭据。关闭 Native 默认补齐字段/行覆盖 panel、Web 移动快路径漏新对话三处缺陷。
+
+实际 Web 180/180；Rust 各配置 Native64、portable41、Runtime1、Windows投影3、Gateway投影2 均通过，严格 TSC 和 shared WASM check 通过。533 源输入（15既有变更、514保护、4新增），797 声明 Rust 输入经独立复核；原失败与精确夹具修复记录保留。本轮仅源码/有限检查，前轮组合产物不代表新购买接口已构建或玩家验收。
+
+下一项先闭合 Native 确定未入 transport 却遗留 Buy 锁的精确 attempt 生命周期，再做共同 Rust controller/painter/portable host 与无专用 ACK 的观察/未知反馈；另排服务端容量预检和元数据插入不一致的修复。用户“暂不操作界面”持续有效；生产组合、实际玩家流程、移动真机、最终 frontend/Candidate 与整体 goal 保持 open/active。详见 [Progress61 QA](generated/player-qa/client-core-20260930/npc-gold-buy/README.md)。
+
+
+## Progress60 · 2026-10-04 · 普通仓库组合产物
+
+当前仓库共享源码已构建新的Windows开发profile EXE、三种release+QUEST renderer、Next01和独立包。小Core19输入/完整14个Rust成员/两叶产物未变，限定复用已验收b17版本；新增Storage导出静态校验实际16/16，三种renderer及复制后的三对产物均通过7接口检查。Next Webpack/TSC/13页面通过，独立包376,489,742 B（359.05 MiB）/7,299文件/775目录/零链接，原360 MiB预算余997,618 B。Source529与备份、旧Core6/renderer152保留；新增renderer恰好7叶，现有renderer159。完整Next/依赖43,897文件摘要稳定；独立实际复核0个确认blocker。
+
+下一项代码推进普通NPC金币买入的共同planner/painter/host，先关闭原始price/rate、catalog UID、堆叠容量与无专用ACK的恢复边界。用户“暂不操作界面”持续有效；实际玩家仓库/登录战斗/保存重登、移动真机、媒体覆盖、最终frontend/Candidate与整体goal保持open/active。详见 [Progress60 QA](generated/player-qa/client-core-20260930/shared-storage-combined-build/README.md)。
+
+
+
+## Progress70 · 2026-10-05 UTC · 共同NPC容量两端组合构建
+
+本批将 Progress68/69 的普通金币购买与共同容量证据修复构建进 Windows 开发 EXE、三种 Web renderer、Next 与独立包，并完成独立实际产物复核。未改服务端购买规则、协议或 Zone，不据此增加 backend/server parity 百分比。Core 完整24输入及18 Rust成员逐字节未变，仅限定承接既有实际生产构建；不称新的 Core 构建。
+
+Windows EXE 104599040B 已归档且未启动。GPU/GL/shared WASM 为30547434/21966635/31510131B，gzip 为5902438/5384473/6243678B，原 WASM/gzip/JS预算不变。每对当前及复制后的 Storage/NPC 各7静态导出检查通过；Module 检查不代表 Instance 或 JS sink运行。Next实际严格TSC与13页面通过，双编译manifest绑定 Core9191/Bevy1808。
+
+独立包实际377189647B（359.72 MiB）/7299文件/775目录含根/零链接，原360 MiB上限余297713B。完整 Next与依赖43897文件实际流式哈希及最终成员稳定；553源和完整备份匹配，Native814输入、Core8/Bevy173历史保留。Next实际仅改tsconfig与next-env两项生成元数据；无未授权漂移。
+
+下一项修 name-tag expiry创建及 Web JSON日期精度，再处理无专用购买ACK恢复与完整NPC服务边界。用户“继续代码，暂不操作界面”持续有效，实际登录/战斗/保存重登、UI/JS sink/HTTP、移动真机、最终frontend/Candidate未验收；整体goal active。详见 [Progress70 QA](generated/player-qa/client-core-20260930/shared-npc-gold-capacity-combined-build/README.md)。
+
+## Progress59 · 2026-10-04 · 普通仓库共享控件树接通
+
+已完成共同 Rust 仓库 painter、portable 桌面/触屏布局与 Runtime ABI1；Web 接入独立能力门、准备/启用交接、精确 model/layout/service/owner proof 和带 downSequence 的固定来源指针租约。关闭恢复背包，密码交接现有窗口，租赁沿用既有协议；存取保留原 receipt Map，最终 socket 入口再验当前身份和冻结 DTO。
+
+实际 Web 150/150，Native 113/113、portable 56/56、runtime 20/20；严格 TSC 与 shared WASM check 通过。Source490 及失败历史已归档。详见 [Progress59 QA](generated/player-qa/client-core-20260930/shared-storage-ui/README.md)。
+
+下一项：从当前 Storage 源码重建 Windows EXE、三种 renderer、Next 和独立包，并限定校验未变小 Core 与原体积预算。当前不启动 UI、HTTP 或 renderer Instance；实际密码/租赁、存取 ACK、保存重登、触屏和 Android/iOS 真机、最终 frontend/Candidate 与整体 goal 仍待验收。
+
+## Progress58 · 2026-10-04 · 普通仓库存取边界
+
+已提取公共 Rust 存取 planner 并接入 Native，修复权威背包容量判断；Web 修复 Bag2 协议格子映射、过期 UID、同步重入、空目标与 Mail 交叉占用及会话退役清理。实际 Node 96/96，Native Rust 105/105、portable Rust 34/34，严格 TSC 通过。详见 [Progress58 QA](generated/player-qa/client-core-20260930/storage-transfers/README.md)。
+
+下一项：贯通普通仓库的共同 Rust 控件树、Storage host 和意图出口；Web 当前仍是 React painter/既有 receipt Map。生产组合重建、实际界面和移动真机验收仍待后续，用户“暂不操作界面”的边界持续有效。
+
+## Progress57 · 2026-10-04 · Shared Mail 组合构建
+
+共享 Mail 的 Windows EXE、生产 Core、三种 renderer、Next03 与独立包的有限构建检查已完成。三种 release + QUEST renderer 使用固定保守优化；修复严格 TSC 误扫描保留独立包的目录排除。实际 Node30/30、既有23处 builder self-check、Webpack/TSC/静态页面及打包通过。新独立包375,942,789 B（358.53 MiB），7,299文件、775目录、零链接，比原360 MiB预算低1,544,571 B；预算未改，原失败记录保留。
+
+本轮未启动界面、HTTP服务或 renderer Instance。当前登录/战斗/保存重登、IME/剪贴板、触屏与移动真机、远端资源覆盖、最终 frontend、Candidate与整体goal仍未验收；按用户要求继续可独立完成的代码工作。详见 [Progress57 QA](generated/player-qa/client-core-20260930/shared-mail-combined-build/README.md)。
+
+
+## Progress56 · 2026-10-04 · Shared Mail editor/painter
+
+Windows 与 Web 已接入共同 Rust Mail 编辑器和 painter；Web 仅保留浏览器输入适配，完整草稿、金额和发送 proof 仍由同一 Core 管理。修复实际字体负 leading/边框造成的光标越界，并用 Core 当前附带金币值生成快照，钱包余额仅用于输入上限。Source06：470 输入、17 个既有变更、451 个既有保护、2 个新增。
+
+本轮实际 Node 86/86；Rust 共 92 次通过执行（跨配置，非独立测试总数）：portable 29、Native 27、runtime 21、Core 12、三项显式回放 3；另 1 个历史 runtime 环境样例未执行。TSC 与 shared WASM check 通过；84 个 SendSlot 会话的 1,508 对完整 inputJson/outputJson 在 Rust 中逐字节一致。实际 QA Core WASM 259,714 B，严格低于 262,144 B 上限。独立复核 0 个确认 P0/P1/P2。详见 [Progress56 QA](generated/player-qa/client-core-20260930/common-mail-editor/README.md)。
+
+下一项：新 Windows EXE、生产 Core、三种 renderer、Next 与独立包组合构建及固定体积预算检查。用户要求继续代码、暂不操作界面；本次仅验收源码/有限检查，实际界面、IME/剪贴板、触屏/移动真机、最终 frontend、整体 Candidate 与 goal 均保持未验收。
+
+## Progress55 · 2026-10-04 · Web shared Core SendSlot
+
+Web 邮件发送已在 Source04 接入同一 Rust Core SendSlot / fullraw draft clock；旧或已变更草稿的 ACK 只结算传输，清理当前草稿须完整当前 proof 匹配。实际 Node 63/63、Rust 13 次本轮通过（含三项显式回放），另 Core 4 / TSC 仅按未变输入图继承。实际 Core WASM 259,237 B，严格低于 262,144 B 上限；仅移除非执行 name 调试段。Source04 为 468 输入、6 变更、462 保护、无新增源码。详见 [Progress55 QA](generated/player-qa/client-core-20260930/web-mail-send-slot/README.md)。
+
+下一项：合入已独立审阅的 C2 common editor/painter，再验证 Native/portable/runtime/Web 编译及纯代码输入链。生产组合包、实际界面/IME/触屏/移动真机、最终 frontend 与整体 goal 均未据此验收；用户要求继续代码、暂不操作界面。
+
+> 2026-10-01 UTC bounded707 DPR2 browser round is sealed. The quest_ui.rs idle
+> mutation guard keeps active turn-in/cancel/stale policy; fixture19/19, turn-in5/5,
+> old-source negative control, independent reviews, native/three-WASM/canonical/Next
+> and copy gates pass. Root matches365 current/frozen inputs and six archived runtime
+> files; the clean copy is376,235,649 bytes /7,300 files /zero links below360MiB.
+> Actual600×320 DPR2 sharedGL2 Diary is readable/current across24 distinct samples,
+> ordinary close restores Bevy17/17 MP, and its640/844/history controls pass.
+> A single Rust4.png abort has305,224ms same-generation endpoints; DOM MP remains
+> supported, and separate normal reload restores Bevy MP. Desktop WebGPU secondary
+> UI and leanGL2 DOM controls pass. Five accepted cases hash their own JS/WASM
+> bodies; case01 body eviction remains rejected. Six ordinary Logout saves
+> 21/23/25/27/29/31 equal Wizard2 across11 public fields, excluding HP/MP/experience.
+> No movement/item/Quest gameplay or continuous-frame proof is inferred here.
+> All seven owned browser-round processes and five ports closed. Raw shutdown bytes
+> differ in exactly two derived guildClock fields while accounts/all other decoded
+> content match; that raw-byte gate stays failed. No store restore/substituted pass.
+> Root accepts corrected fault/recovery v2 (127 inputs/13 references) and final
+> matrix (453 inputs); v1 false references/overbroad04 and historical839 failures
+> are retained. Case04 has600 controls only; its touch input is the JSONL, close
+> JSON is resulting state. Older driver/StartGame/preload causes stay unproven.
+> Separate pinned707 native QA case01 receives Wizard5 HP15/15 MP17/17, then its
+> QA proxy fails forward_queue_limit.639 metadata rows=636 frame+3 lifecycle;
+> the old shared code cannot identify frame-count/queued-byte/single-frame cause.
+> No native Welcome/Diary/Bag/normal Logout or retained capture is accepted.
+> Disconnect save32=Wizard2 and Warrior260=258 across11 fields. Owned Gateway
+> exits0 normally with immediate shutdown bytes equal; this separate boundary
+> does not override the browser raw-byte failure. Proxy exited; native window and
+> launcher remain unclosed after the user's physical Escape stopped Computer Use.
+> v4's4096-frame cap is a bounded hypothesis; v5 scalar queue diagnosis keeps all
+> budgets/privacy/FIFO/close policy. Root/separate Sol-high39/39 fake+3syntax and
+> root15-file integrity pass. Desktop resumption is pending; tests are not live QA.
+> Shared EXP v2 is a bounded source/build candidate:18 product files and369 declared
+> runtime/product inputs are frozen; the single writer released source ownership.
+> Raw-pair provenance accepts genuine max1 and rejects missing/invalid display defaults.
+> Independent source review accepts bounded integration; Web28/28 and Rust15 focused
+> fixtures pass (pure tests, not live ECS painting). V1 review failures stay retained.
+> Canonical63280e has all three release WASM backends within unchanged budgets.
+> Windows debug EXE, Next, and376,348,122-byte/7,300-file/zero-link preboot copy pass;
+> actual clean Sharp uses42 files inside the copy. Framework-added tsconfig includes
+> are supplemental build inputs, outside the369 declared freeze. HTTP helper v1 was
+> rejected before use; v2 cold01 assumed omitted Prguse files were local and is retained.
+> Reviewed v3 cold02 passes27 actual loopback GETs, including six runtime bodies,
+> startup JS/CSS, font, native image optimization and two same-origin HUD images.
+> Those two images use a bounded local fixture via the existing miss proxy, not a
+> verified public origin. Both owned HTTP processes/ports are absent. Copy identity
+> is preboot; the independent post-HTTP audit matches all7,300 baseline files, with
+> one721-byte image cache addition (7,301 files /376,348,843 bytes /zero links).
+> No new EXP browser/native/device acceptance is claimed. Commit-triggered refresh
+> reduces the polling gap; mixed old-crop/DOM fallback pixels and EXP persistence
+> remain actual-client gates. WEIGHT v2 is a separate frozen source/build/HTTP candidate:372 declared files
+> and17 product changes against369, with13 read-only references verified at that
+> boundary. Four v1 corrections fix mobile interleaving and proven same-player raw
+> pair retention through the actual Web projection; both focused Web matrices pass
+>36/36. TypeScript/diff pass; Rust is unchanged and prior v1 receipts are reused.
+> Windows DEBUG, all three release backends (immutable34b06f, six files83,939,043
+> bytes), Next and376,442,716-byte/7,300-file/zero-link preboot copy pass. Clean
+> Sharp loads42 files inside the copy. Generated Next type inputs stay outside372.
+> Helper01 media assumptions and helper02 H1 cleanup were blocked before use and
+> retained. Reviewed helper03 cold01 passes30 declared actual local HTTP checks:
+> six runtime bodies, startup assets/font/native optimizer and five source PNGs.
+> Prguse/8,1,76 use the bounded local fixture; UI_32bit/473,472 use the verified copy.
+> Public media delivery and pixels are not accepted. Actual owned-child close and
+> fixture/log cleanup pass; both HTTP-owned PIDs/ports are absent. The independent
+> post-HTTP audit matches all7,300 baseline files, plus one721-byte optimizer cache:
+>7,301 files /376,443,437 bytes /778 directories /zero links. Whole-copy identity is
+> preboot; exact new directory names are limited by the old aggregate-only record.
+> The separate Rust draw-plan/Canvas2D v1 remains archived:375 sources and15 changes
+> from372, with20 refs. Its D1/D2 BLOCK and cache0/2/gap0/1 failures remain preserved
+> beside Web42/42/tsc0. Separate stale-host D3 has two passing fresh controls and one
+> failing stale case; no actual device reproduction is claimed. Corrected v2 accepts
+> bounded source:375 files, six existing Web changes/369 unchanged,20 refs, independent
+> source review and full current/archive checks. Writer and independent final Web49/49
+> and tsc/diff0 pass;263 Rust/11 Cargo are unchanged and prior results are reused.
+> Root Windows DEBUG and all three canonical releases pass:immutable b3bb1b56, six
+> files83,848,758 bytes; prior63280e/34b06f immutable runtimes remain intact. Next and
+>376,369,636-byte/7,300-file/776-directory/zero-link package pass the unchanged360MiB
+> cap. Generated Next type changes are recorded outside375; lock/buildinfo unchanged.
+> Next external asset-manifest trace warning and44 packaging dependency warnings stay
+> retained. Clean copied package has all7,300 hashes matched; six resolutions and42
+> actual Sharp-loaded files stay inside the copy, with no global/ancestor dependencies.
+> Exact776 preboot directory names are archived. Reviewed HTTP passes30 declared
+> actual local checks: six runtime bodies, startup/font/PWA/native optimizer and five
+> source PNGs. Prguse8/1/76 use three local fixtures; UI473/472 use copied files, so
+> public origin/pixels are not accepted. Owned child actual close/fixture/log cleanup
+> pass;56208/55872 and19130/19131 are absent. Independent post-HTTP audit accepts all
+>7,300 baseline hashes intact:7,301 files /376,370,357 bytes /779 named directories
+> /zero links. Exactly one721-byte optimizer cache and three named cache directories
+> are added; root parsed all rows and traversed paths. Report fixture-count wording is
+> corrected by a sealed addendum. Whole-copy identity is preboot; v1/v2 remain retained.
+> The5433/3921-byte supplements stay pinned; no draw-plan browser/native/phone or
+> persistence acceptance exists. Current product tip is separately licensed M2 work.
+> Mobile joystick M1 v1 froze375 files with two product changes/373 unchanged and
+>20 refs intact. Original13/13/tsc0 pass, but independent real-component M1-R1
+> diagnostic fails: a retired Run debug timeout overwrites the successor debug view.
+> Combined focused command13/14 exit1 remains preserved; no extra game step or
+> phone fault is proved. The3718-byte correction licenses only controls/test for v2.
+> Corrected v2 source candidate is independently reviewed and mechanically accepted:
+>375 files, two existing changes/373 unchanged,20 refs; writer16/16/tsc/diff0 and
+> repeated independent diagnostic1/1 pass. Combined raw17 is not17 unique cases.
+> Owned Run timer cancellation plus lifecycle/instance fencing retain all original
+> movement thresholds and actions. Fresh real start is required after retirement;
+> already-issued/accepted authoritative movement is not cancelled.263 Rust/11 Cargo
+> and282 native build inputs match draw-plan, so b3bb1b56/six83,848,758-byte runtime
+> and the7449 native executable are explicitly reused without a new Rust/native run.
+> New Next production build passes with375 frozen before/after source rows. Generated
+> two type includes/new dist import stay outside375; package lock/buildinfo unchanged.
+> The external asset-manifest trace-copy warning and44 dependency warnings remain.
+> New376,372,016-byte/7,300-file/776-directory/zero-link package passes360MiB cap.
+> All7,300 file hashes match the fresh isolated preboot copy; six package resolutions
+> and42 actual Sharp-loaded files stay inside it. Reviewed new HTTP passes30 declared
+> local checks, including six runtime bodies, startup/font/PWA/native optimizer and
+> five source PNGs. Three short Prguse8/1/76 fixtures and two copied UI473/472 images
+> supply those media checks; public delivery/pixels remain unaccepted. Actual owned
+> Next55684/fixture51056 close and fixture/log cleanup pass; both PIDs and19140/19141
+> are absent. Root and independent post-HTTP checks accept all7,300 baseline hashes
+> intact:7,301 files /376,372,737 bytes /779 named directories /zero links. Only one
+>721-byte optimizer cache and three named cache directories are added. The original
+> audit used an absent optional check field; its vacuous predicate remains archived.
+> An append-only raw-report supplement plus root projection verifies30/30 HTTP200,
+>26/26 required hashes and4/4 contracts; corrected audit-v2 is prepared, not run.
+> No extra HTTP/tree/OS rerun is claimed. Whole-copy identity remains preboot.
+> Prepared HTTP docs were corrected append-only before real execution: product QA is
+> first argument, isolated app second. Prior wrong docs/raw receipts stay pinned.
+> M2 Web chat IME Enter has a frozen two-file source candidate under the4442-byte
+> contract and2664-byte baseline supplement. The inherited375 manifest omitted both
+> allowed existing files; that historical boundary and failed read-only pin attempt
+> remain archived. Root recovered exact original bytes from its earlier full-read
+> buffers, matching independent pre-edit pins; no Git HEAD/substituted baseline or
+> source rollback was used. Corrected377 contains the old375 plus two recovered rows:
+> exactly2 allowed changes and375 unchanged. Production ChatFrame guards composition
+> flag or legacy229 before submission; normal Enter/filter/draft routing remains.
+> Independent source review accepts the real ChatFrame-to-GameUiScene send closure.
+> Writer focused4/4, TypeScript noEmit0 and two-path diff-check0 are retained.
+> Independent review found three original static-test dependencies outside377.
+> A new21-reference manifest preserves17 originals and adds four explicitly current
+> read-only static dependencies (one overlaps377); these are not pre-edit proof.
+> One fresh execution of the same4 tests passes4/4 with actual close0/null and1182
+> before/after source/archive/reference/config guards intact; repeated runs do not
+> make8 unique tests. Independent addendum closes the current binding gap; full
+>377-source/21-reference mechanical audit and root row-level checks pass. Historical
+> source-review report keeps its former gap status; the addendum is separate. New
+> Next production build and package pass with377 before/after guards and21 references
+> intact. Framework type includes/dist import are supplemental inputs outside377;
+> lock/buildinfo stay unchanged during Next/package. New376,371,552-byte/7,300-file
+> /776-directory/zero-link package meets the unchanged360MiB cap. External asset trace
+> and44 dependency warnings remain retained; public media coverage is not accepted.
+> All7,300 hashes match the isolated preboot copy, with776 named directories and
+> zero links. Six resolutions and42 actual Sharp-loaded files stay inside the copy.
+> Seven reviewed label/port-only helpers pass7 syntax and6 fake lifecycle checks,
+> separately from actual service checks. New HTTP passes30 declared local checks,
+> including26 required body hashes and4 contracts; three Prguse8/1/76 fixtures and
+> two copied UI473/472 images supply media. Actual Next55692/fixture46920 close and
+> fixture/log cleanup pass; both PIDs and19150/19151 are absent. Independent post-HTTP
+> audit and root row/path checks accept all7,300 baseline hashes intact:7,301 files /
+>376,372,273 bytes /779 named directories /zero links. Only one721-byte optimizer
+> cache and three named directories are added; whole-copy identity remains preboot.
+> Audit self-written exit metadata is not used as actual process-close proof.
+>263 Rust/11 Cargo/282 native inputs and b3bb runtime
+> remain unchanged; six83,848,758-byte artifacts and7449 native EXE are explicitly
+> reused without new Rust/native builds or launch. Actual React DOM/browser/device
+> IME, native Escape, Android/iOS keyboard and persistence are not accepted.
+> M3 portable standalone full-pack trace has a frozen bounded source candidate:
+>379 declared sources comprise377 existing plus2 explicitly new paths; exactly one
+> config change and2 new helper/test files leave376 existing rows byte-identical.
+> All40 current references and archives match. Root and Sol/high independent review
+> accept the public awaited post-compile hook for one exact asset-manifest NFT,
+> production standalone-only serial tracing and one safe shared descendant glob.
+> No private plugin, custom webpack callback, route, dependency or full-pack link
+> change was made. Windows fixture proofs are prerequisites, not Next/Linux parity.
+> Initial harness esModuleInterop failure1/8 is retained; final8/8 pass repeats the
+> same eight cases. Writer direct tsc history omitted _tsc/config input binding;
+> root archives those current inputs and one new direct tsc run exits0/null/error0
+> with1708 before/after source/archive/reference/supplementary guards intact.
+> Current binding is closed without retroactively rewriting prior receipts.
+>379-source/runtime aliases are frozen at55b49a97; review confirms zero protected
+> drift. Seven exact-derived helpers pass syntax7/fake6; actual services are unrun.
+>263 Rust/11 Cargo/282 native inputs and six b3bb artifacts totaling83,848,758 bytes
+> are reused with matching hashes;7449 EXE is not launched and no new Rust/native
+> build is claimed. One actual normal next build --webpack passes close0/null in
+>55,749ms. Its unique awaited public hook filters17 to15 rows before collection;
+> final metadata is separately audited across all32 NFT files:61,164 to61,162 rows,
+> exactly two full-pack namespace references removed and zero other dependency loss
+> or addition. Asset-manifest final30 to28 retains all other bytes/fields/order; two
+> large manifests only reorder rows. Independent Sol/high metadata review agrees.
+> Runtime version remains unchanged. Next updates only its supplemental tsconfig
+> type includes and next-env dist import outside379; source/reference guards hold.
+> Actual package exits0 in22,972ms:376,371,942 bytes /7,300 files /776 directories
+> /zero reported links, below unchanged360MiB cap by1,115,418 bytes. All904 immutable
+> rows match before/after; four supplementary configs are unchanged during packaging.
+>44 dependency warnings remain recorded. Actual isolated copy passes all7,300
+> source hashes; root independently reads the exact7,300-file/776-directory physical
+> tree with376,371,942 bytes/zero links before boot. Six dependency resolutions stay
+> inside the app; global and ancestor node_modules are absent. New Sharp child
+> close0/null/noerrors executes native import+resize; all42 loaded files stay inside.
+> Actual HTTP31 passes26 required body hashes and5 contracts, including one public
+> asset-manifest GET. Its9,515-byte raw JSON passes19 named metadata checks and two
+> absent-full-node observations; only local unpublished full/remote=false metadata
+> is accepted. Original30 requests and three fixture/two package images remain.
+> Next46736 closes by owned SIGTERM (exitCode:null, not natural0); fixture55776 and
+> both log handles close. Separate actual OS proof confirms46736/55776/53356 absent
+> and19160/19161 without listeners. All908 immutable/supplementary plus43 extra
+> input guards match after HTTP. Independent post-HTTP physical audit is accepted:
+> all7,300 baseline files remain exact;7,301 files/376,372,663 bytes/779 named
+> directories/zero links add only one721-byte optimizer cache and its three parent
+> directories. Cache SHA matches actual HTTP; preboot whole-copy identity stays
+> bounded to preboot. Root parses every baseline/addition/directory row, freshly
+> reads the cache/parents, checks996 protected pins and final908 frozen guards.
+> Auditor wrapper exit metadata is not credited as independent tool-close proof;
+> its unused summary/gate fields are closed by root actual HTTP/Sharp input checks.
+> Early auditor script/schema failures and handoff65-hex typo/correct sealed64-hex
+> pin remain append-only history. Successful final audit is one audit; no services,
+> browser, devices, persistence or full-media tests were rerun or inferred.
+> Root first read-only owner proof assertion expected an omitted LocalPort; its
+> correction binds the executed fixed-port queries plus actual OS proof and does
+> not invent historic fields. Raw receipts/failure note remain unchanged.
+> Reviewed HTTPv2 adds exactly one metadata GET to the original30 requests and binds
+> the observed route schema; original fake lifecycle6 is reused, not rerun. Initial
+> prep schema error, metadata audit cap/path-gate correction, root SHA typo and
+> read-only resume binding-name failures remain append-only history. Actual Linux,
+> UI/phones/public delivery and persistence remain open; standalone startup is not
+> whole-media acceptance.
+> M4 document-language source/build candidate is sealed under
+> `docs/architecture/web-document-language-host-contract.md` and
+> `F:/mir2-cross-platform-20260930/repo-qa-web-document-language-01`. Exactly one
+> existing Page gained11 lines/353bytes keyed by its existing locale, plus one
+> 13446-byte real-source fixture; all378 other declared sources and51 references
+> remain unchanged (380 final sources). Cleanup is one-shot and preserves a later
+> different declaration; same-value external ownership remains outside the contract.
+> Actual fixture20 unique cases and direct tsc close0 pass; actual tsc1270 listed
+> source files exactly match the bound program and1332 archived host inputs. Sol/high
+> independent review and root accept the frozen source; repeated logical pin counts
+> are not unique files/tests, and ordinary receipt/source association is not a
+> fabricated historical per-run self attestation. Earlier harness/lookup failures
+> are retained and corrected, not product passes.
+> Root actual normal standalone Next16.2.11 webpack completes in58252ms with natural
+> exit0/null/no spawn error. All2234 immutable build inputs match before/after.
+> The public hook runs before trace collection (17→15, one full directory and one
+> descendant removed). All32 final NFT paths retain61162 rows with zero full-pack
+> namespace rows; ordered-multiset dependencies/other properties equal the bound
+> M3 metadata, with only two row-order differences. No trace-row target is followed.
+> Generated SSR8282bytes keeps html lang=en/translate=no/notranslate; this is built
+> HTML, not hydrated browser DOM. Next adds only its two type includes and changes
+> the next-env dist import; direct tsc buildinfo340394bytes remains unchanged during
+> Next. Existing b3bb runtime aliases/archives are reused, not rebuilt or launched.
+> No package/copy/Sharp/HTTP rerun is needed for this bounded CSR metadata change;
+> M3 isolated31 requests remain historical M3 evidence, not new M4 client acceptance.
+> Four-language Login/Select DOM, saved preference/reload, route cleanup/hydration,
+> assistive reading, native locale/HUD/Login/save, touch/renderers and physical
+> Android/iOS remain open; desktop resumption is pending and goal stays active.
+> Root also accepts bounded locale inventories:15 inputs/36 exact excerpts and
+> four-language key/value coverage; native handoff10 new inputs plus3 prior references
+> (one omitted prior Bevy DTO reference explicitly added by root),26 exact excerpts.
+> Shared Quest chrome/Chinese ID remapping and separate navigator-based PWA copy are
+> proven source boundaries. Simulation supports four LanguageCode values but the
+> client host had no corresponding locale carrier before M5; inferred native default
+> was not a runtime observation. M5 shared Quest presentation-locale SOURCE was
+> licensed under docs/architecture/shared-quest-presentation-locale-contract.md
+> (10987B / 476612a7). Root verified proposal01:21 current/archive inputs,28 excerpts,
+> six output pins; proposal02:nine reused inputs,38 excerpts,36 exact function
+> signatures,22 canonical four-language keys and six output pins. No proposal ran
+> tests/builds/clients. Baseline392 entries =386 full current archives +six new
+> absence entries;57 protected references. Sol/high held the initial12-path source lease;
+> independent Sol/high reviewed the contract/source, Luna/medium archived
+> a source-backed QA matrix. Root owns integration, docs and artifact promotion.
+> The shared LanguageCode presentation Resource defaults legacy native/missing DTO
+> to zh-CN; new Web supplies exact en/zh-CN/es/pt-BR, rejects alias/null/invalid/
+> duplicate fields and probes capability v1 before serializing to an older runtime.
+> Locale-only revisions must redraw and invalidate old compact/input stamps without
+> resetting open_revision/scroll/selection/reward/pending. Explicit context/raw leaves
+> prevent second Chinese remapping of selected Quest chrome/non-Chinese display and
+> bypass Chinese text/name for opaque NPC/player/custom strings. The exact22-key
+> generated subset comes from unchanged canonical mirrors; no full-bundle WASM lookup
+> or dictionary/native-preference/backend/session/auth/save modification is licensed.
+> Unkeyed tabs/back/primary/confirmation/journey/practice/supply/tooltip and PWA/HUD/
+> full content remain OPEN. M4 Page effect must stay byte-identical. M5 source tests,
+> independent frozen code review, native DEBUG/all three release WASMs, bound tsc,
+> Next/NFT/clean standalone and actual client/device/save gates are not yet accepted.
+> Existing31MiB per-WASM and360MiB standalone caps remain; M3 clean376371942B
+> leaves1115418B headroom, not a prediction of final M5 build/package delta.
+> Sol/high owns bounded changes; Luna/medium audits evidence; root integrates and
+> verifies source/build boundaries. Actual device/UI/persistence and full media stay open.
+> Ordinary native Login, trusted capture/human inputs, phones, partial/zeroMP,
+> MP/EXP/WEIGHT persistence, full locale/HUD, compositor/performance/public delivery
+> and CP02–04 remain open. Desktop resumption is pending; goal active.
+> M5 review/recovery checkpoint (2026-10-02): F volume has0 free bytes; actual
+> Cargo101 logs retain no-space and rustc stack-buffer-overrun diagnostics. No
+> files/cache/evidence were cleaned, moved or deleted. A fresh C continuation
+> has measured disk margin; sequential Cargo uses its new target with a50GiB
+> pre-command floor. C runtime compiles and actually executes16 tests:15pass/1fail
+> because the new inGame DTO fixture omits the required player, not a production
+> validation bypass. Its raw failure is preserved; final checks must be rebound.
+> Root stable392 full-byte archives show exactly12 authorized changes,380 other
+> sources/57 current+archive references unchanged, and the M4 effect byte-identical.
+> Independent Sol/high initially blocked source acceptance on four actual-source findings:
+> four scroll count sites still use legacy Chinese; three desktop close/Quest
+> captions bypass current chrome; manual App fixtures lack the locale Resource;
+> two Quest body paths lost legacy zh conversion. Valid scroll positions must
+> survive locale-only changes; bounds use the currently rendered body. Root grants
+> only four existing paths for these fixes, new real regressions and the minimal
+> player fixture;388 stable paths remain protected. Unique writer stays Sol/high.
+> Review evidence1290 before/after rows includes1284 explicit external pins and six
+> observed-only rows; Root checks1316 unique byte files,14 exact excerpt groups and
+> the two Page hunks. A sealed append corrects Page prose: actual object shorthand
+> language and callback dependency language; snapshot.language belongs to bridge
+> code. Luna/medium reviews the C helper five-site derivation/unchanged copied Next
+> and package helpers. Syntax-only exit0 is not a client build/child-close proof.
+> M5 source/independent repair review/native/WASM/Next/NFT/package/client/save/device
+> acceptance remain false. Existing31MiB/360MiB caps stand. New QA is
+> C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-locale-boundary-02;
+> original F artifacts remain historical and unchanged; GUI resumption is pending.
+> Goal active; no frontend Accepted, no full parity percent and no deployment.
+> M5 compatibility checkpoint: Root independently verifies sealed repair review02,
+> 2867 logical inputs,1581 own full archives,1593 pinned outputs and4454 unique
+> full-byte reads. Four initial repairs are resolved in observation02: only two
+> repair files changed and390 other source entries/57 references remained stable.
+> Quest body compatibility includes three sites over completion/unknown fields;
+> repaired04 is historical489391B, while final portable21/tree4/integration4
+> actually bind490610B. Node19/generator22/M4-controlled20/actualCLI tsc close0
+> are evidence for their used inputs; they are not native/browser acceptance.
+> Final native adjacent actually closes101:79 executed,78pass/1fail at the
+> unchanged legacy section test. Root and independent Sol/high establish that
+> both Chinese Time Limit paths lost Blank/Heading/Body structure; distinct
+> Progress was conflated with Objectives. Progress is a static second defect,
+> not a second executed failure. Old assertions must remain; do not weaken them.
+> Root grants only quest_ui.rs for two Chinese section branches plus the distinct
+> existing Progress heading and meaningful current-builder regressions. Other391
+> source entries are protected. Non-Chinese canonical time formatting stays;
+> unkeyed Progress remains authored legacy Chinese and future locale work OPEN.
+> Sol/high remains the sole source/Cargo writer in fresh implementation04. All
+> final native/portable/runtime runs and392 frozen aliases must bind the final
+> corrected source before independent acceptance or any new client build.
+> Read-only PWA locale proposal is sealed and Root-verified:8 inputs,14 exact
+> excerpts and14 outputs. Architecture remains undecided and code unlicensed;
+> installing/offline/device behavior was not tested and worker caches no HTML
+> navigation shell. Current route/install-listener timing must be settled before
+> moving the PWA shell mount. Existing31MiB/360MiB budgets remain unchanged.
+> Source/build/client/save/mobile acceptance remain false; desktop resumption is
+> pending. No native/browser launch is authorized. Goal stays ACTIVE.
+> M5 final SOURCE checkpoint (2026-10-02): independent Sol/high cumulative review05
+> recommends the exact freeze. Root verifies11497 logical observations:
+> 11479 explicit expected pins and18 observed-only stable rows;9422 normalized
+> path inputs (not inode dedup),200 full own archives and208 output pins. All
+> final392 current/worker/Root archives match; original386 archives bind exactly
+> twelve changed paths including six new files,380 protected sources unchanged.
+> Current57 references/archives remain stable. Source aliases are byte-identical
+> 255669B /64f32eb1d7bcef89ffbfe05ba1a0fd09b2cc26d967247a4a8c210f04d78e8fba,
+> SOURCE manifests rather than WASM manifests. Root accepts source and independent
+> source review only; worker historicalfalse metadata remains sealed.
+> Final11 commands actually close0: Rust host16/portable integration4/mobile21/
+> tree6/native integration4/adjacent79/tree6; Node19/M4controlled20/generator22/
+> actual CLI tsc1360rows=3before+1357reads. Root verifies132 per-run12 source
+> current/archive bindings,2023 current outputs and6106 retained historical outputs.
+> These repeated feature runs are not summed as unique coverage. All old failed
+> runs,zero-test nonpass,withdrawn expectation-change proposal and corrections stay.
+> Actual14 outer tool closes have4 fulfilled/value and10 direct shapes:13exit0,
+> one preserved negative outer1/childCargo101, no running worker sessions. Page
+> report prose is corrected by sealed Root append: object shorthand language and
+> language dependency; the M4 effect is byte-identical at its350/352 boundaries.
+> Writer releases source/Cargo ownership. Root licenses sequential local native
+> DEBUG/three canonical release WASMs/production Next+NFT/fresh standalone only;
+> native build started with measured C253717393408B free,50GiB floor. No new
+> native/WASM/Next/package build is accepted yet.31MiB/WASM and360MiB package stand.
+> PWA refined proposal02 is Root-verified evidence only:8 frozen reused inputs,
+> nine exact excerpts,four outputs. It corrects global-mount interpretation:
+> existing install/display listeners are pathname-gated to / and cleaned on route
+> change. Candidate lifecycle-only Root context preserves gate/timing/state;
+> visiblePage shell would receive its single existing language. No language mirror,
+> all-route capture,new dictionary/offline HTML behavior or code license is granted.
+> Actual browser/native/device/pixel/install/persistence checks remain OPEN; GUI
+> resumption pending. Overall/frontend Candidate and Accepted remain false; goalACTIVE.
+> Root preparation update 2026-10-02 04:35 UTC: native DEBUG remains running
+> (owned exec session11505); no new native/WASM/Next/package result is accepted.
+> Actual C free-space observation251192930304B (tool4e6567) satisfies the fixed
+> 53687091200B floor. No cleanup, cap increase, GUI/client launch or deployment.
+> PWA proposal03 draft evidence accepted only: eight frozen full archives, nine
+> exact excerpt groups, five output pins; contract6944B/a4521efb259ebf79fb0971f66d4f0d16a76b8131c02d0d313ca087d6bffeab7a.
+> Draft retains root / route gate and pending install lifecycle; Page language is
+> single owner, semantic status uses latest copy, es English fallback remains OPEN.
+> No M6 product implementation license until M5 build gates.
+> Sol medium completed QA-only standalone and NFT preparation; Root verified25
+> complete standalone inputs/33 outputs/seven exact HTTP replacements, and41
+> NFT inputs/48 outputs/32 historical M4 raw archives (61162rows/4201100B).
+> Root actual Node --check passes (1b85e3,2d1f67,71c2f7) and PowerShell static
+> parser pass4f5046 are syntax-only. No helper execution/service/NFT/HTTP pass.
+> NFT draft records canonical and other subtree copies separately, full raw/order/
+> multiset/nonfiles deltas, no target operations, no assumed M5 count. Observed
+> configured tracingRoot is outer repository; verify final generated config later.
+> QA helper source/evidence review and syntax receipts live in C continuation
+> standalone-verification-preparation01 and nft-verification-preparation01.
+> GUI resumption remains pending; actual play/device/save/Candidate/Accepted remain
+> OPEN. Next bounded implementation/review uses Sol high after Root build gates;
+> total goal remains ACTIVE.
+> Root native build accepted 2026-10-02 04:49 UTC: owned exec11505 actually
+> completed exit0 (b7ce43); Cargo child58344 spawn/exit0/close0, no signal/error,
+> pinned1.95.0 locked/offline dev optimized+debuginfo elapsed2534983ms.
+> Root independently hashed both target and QA executable:103561216B,
+> ec0981d0d656ebe6239de4e312f6217569a2286cd7433a5d67c6c70a8a5a7d92.
+> All392 Source rows and57 reference rows/current+full archives match before/after;
+> 449logical rows cover443unique paths (six Source/reference overlaps, none dropped).
+> The Root pathname-key assumption correction is retained in native-build01; it
+> was a read-only validation correction, not a product/build change. All19 old
+> runtime pins and Source-only alias bytes are preserved. Compiler warnings retained.
+> Root receipt root-native-build-acceptance01.json157296B/
+> 1736bd2189dd01226bc0c16cf581cbbfa8e9f29943f14cb9ca5716316abb405e.
+> Native build acceptance is Source-bound compilation only: executableLaunched=false,
+> actual client/save/device/Human acceptance remains false/open.
+> Canonical three-WASM build started04:49:17Z (4e0a6e, owned exec75733), actual
+> C free246606901248B exceeds fixed50GiB floor; one Cargo writer/jobs1/inc0/64MiB
+> stack. WebGPU stage observed first, release canonical helper remains8278B/
+> 2eb8eb277099d205894f33dc9b6d668beb5f388a7ca302cdedef33f7f309a0fd.
+> Native gate is accepted; canonical/31MiB-WASM/Next-NFT/fresh360MiB package gates
+> remain pending, aggregateBuildAccepted=false. M6 license remains pending those
+> gates. GUI resumption pending; overall Candidate/Accepted false and goalACTIVE.
+> Actual canonical failure retained 2026-10-02 05:04 UTC: first WebGPU stage
+> Node child44540 exit/close1, no signal/error; outerexec75733 actuallyclosed1
+> (4b0c94), elapsed511294ms. stderr28472B/
+> 1e085ac0b20f65b3a0aaf52fbe64b230f296685a030bcbe2c90b25c3cdd7ae73.
+> Compiler E0599 quest_ui_host.rs559: cfg(wasm32) snapshot ingest now has17
+> top-level system parameters. Root verified actual Bevy0.19.0 function_system.rs
+> line950 supports0..16, and system_param.rs supports resource tuples. Native
+> build/tests did not compile this target-specific registration path.
+> Before repair Root rehashed all392Source+57reference rows and all19 old runtime
+> pins unchanged. No newWASM/publish/Next/package acceptance; lock absent normally.
+> Failure stdout/stderr/result and Root full post-failure guard evidence stay
+> sealed in02/root-canonical-failure-evidence01.json; no expectation/cap weakening.
+> Root opened fresh C repo-qa-shared-quest-locale-boundary-03 with all392 full
+> before backups,57reference manifest and complete local framework evidence.
+> Sol high single worker may group applied+locale into one tuple SystemParam only
+> in wasm32 function signature; entire function body/other391Sources/57refs/old
+> assertions remain protected. Actual wasm32 check matching webgpu,web-quest-ui
+> canonical features and original16native-host semantics required; oneCargo/jobs1/
+> inc0/64MiB stack/50GiB fixedfloor/lockedoffline. Root owns rebuilt Native/WASM/
+> Next/package, and Sol high independent read-only review follows final freeze.
+> Parent64fSource/native acceptance stays historical and source-bound; current
+> repair Source/review/build is not yetaccepted. Unchanged JS/TSC/otherRust tests
+> remain identified as historical, never relabeled byte-bound to repaired host.
+> M6 remains unlicensed until repaired M5 build gates; actual GUI/client/device/
+> save/frontend Candidate/Accepted remains OPEN and total goalACTIVE.
+> M5 repaired SOURCE checkpoint (2026-10-02): QA03 worker and independent Sol/high
+> final review are sealed. Root verifies392 current/final/before source rows plus
+> 57 current/archive references,433 worker outputs,49 reviewer direct inputs/own
+> archives and56 reviewer outputs;1821 before/after reported observations match
+> actual Root readback. The only repair is wasm ingest applied+locale tuple17→16;
+> complete4653B body and391 other sources stay byte-identical. SOURCE-only aliases
+> 331882B/39f56e81dc7a2f408ed1c1db0383dadb77e6f86cc2ce8d822224aa7575e4fd6c
+> accepted, including independent source review. Actual specified WebGPU check
+> closes0; existing native host16/16 pass. Inherited command backup/repairChanged
+> metadata is phase-before, not final archive; actual hashes bind source-after.
+> Worker full Rust env purge was not recorded; Root final builders sanitize Rust
+> override names. Old11 test commands remain prior-source history, not new runs.
+> [Repair evidence](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-locale-boundary-03/root-source-acceptance01.json).
+> Fresh repaired-source Windows Cargo build actual child/outer close0,449 domain
+> guards preserve392 sources+57 references across443 distinct filenames. Warm
+> native result remains103561216B/ec0981d0d656ebe6239de4e312f6217569a2286cd7433a5d67c6c70a8a5a7d92,
+> consistent with wasm-only signature repair; target and freshQA copy each hashed.
+> Neither was launched. Root accepts native build only. Three canonical Web
+> packages are running in actual exec61177; precommand C free245405192192B exceeds
+> fixed50GiB floor. Source-only acceptance is distinct from pending canonical/Next/
+> NFT/fresh360MiB package/copy/Sharp/HTTP gates. Old runtime19 files remain old
+> b3bb before builder. Fixed31MiB perWASM/360MiB package caps remain unchanged.
+> Root owns the sole Cargo/build lease, product writer released. Sol/medium is
+> doing a read-only Android/iOS boundary inventory. M6 remains unlicensed until
+> repaired M5 build gates; actual GUI/player/device/save acceptance and Candidate/
+> overall goal remain OPEN. Escape desktop consent remains unanswered.
+> Root repaired M5 build update (2026-10-02): actual canonical exec61177 closes0
+> (1b215d), Node58692 spawn/exit0/close0; independent Sol/high final review and
+> Root readback960 observations/24 outputs accepted canonical-only. Runtime is
+> bevy-4e3a46d90b6b8134, schema2 metadata1711B/dee14eba4231489e3781e0523a6b40a7f70cc38c65b04adf81738386340b0f76.
+> Source-only39f56e81dc7a2f408ed1c1db0383dadb77e6f86cc2ce8d822224aa7575e4fd6c
+> remains bound to392 rows. Final WebGPU30541483B/WebGL221442182B/shared31561948B
+> each satisfy unchanged32505856B cap; shared headroom943908B. Old immutable/F
+> runtime13 protected files remain old b3bb; actual build lock absent normally.
+> Next actual27741/d4f6ea closes0 in64502ms,13 static pages; Source392 and new
+> runtime bytes unchanged. Only generated tsconfig includes and next-env routes
+> import change, reviewed by Root; config/TS buildinfo unchanged. TraceRoot is
+> actual outer E:/mir2-player-journey, NFT rows resolve from each NFT directory.
+> Whole-dist NFT actual acac3a exit1 is retained: source standalone node_modules
+> junction prevents complete full-tree metadata enumeration. Canonical32/61162
+> rows compare raw/order/multiset/properties exactly to M4;29 copied metadata
+> entries compare to canonical, but do not close the junction. Root-reviewed
+> strict canonical-only helper actual dba43d exit0 covers root NFTs+server; all
+> scope links/nonregularNFT/errors block. Its coverage is canonical only and
+> widerWholeDistAudit binds original85374B/9fc71784ecf5a0ae45006a2c7528e480e9894b4541a62c1c9343ec25986c387a exit1.
+> No target operations or whole-dist success is inferred.
+> Actual package23003/f21739 closes0:376400980B/7300files/776dirs/0links below
+> unchanged377487360B cap, headroom1086380B; trace warnings44 retained. Fresh
+> outside-checkout physical copy98543/e76f18 closes0, all7300 hashes identical,
+> no ancestor/global modules;6 dependency resolutions internal. Actual Sharp
+> b694b0 child57788 closes0,42 loaded files verified internal; native resize2134B
+> succeeds using installed0.34.5 (declared0.35.3 mismatch remains recorded).
+> Actual cold HTTP f267ee closes0,31 selectedGET pass against immutable runtime,
+> startup/font and static bodies/contracts. TwoPNG are packaged; threePrgusePNG
+> are exact localfixtures through same-origin miss, not public origin coverage.
+> Owned server59596 closesSIGTERM; fixture56368 closes, logs close. Independent
+> OS15427b confirms ownedPIDs59596/56368/57788 absent and19160/19161 no listeners.
+> Full physical postHTTP audit70f82b includes every cache:7301files/779dirs/
+> 376401701B/0links, original7300 unchanged, one721B image cache+3dirs added;
+> whole-tree-identical=false, no cache exclusion. Root frozen pipeline69kB/f63f16e6ea4f1d27a1b1e3045611cd3fed245dd3ce7dbd73b3345dc12347e9c6
+> awaits final independent standalone review; aggregateBuildAccepted remainsfalse.
+> Root read-only receipt/filename/reconstruction mistakes and actual first
+> copy224b89 MODULE_NOT_FOUND remain in diagnostic/recovery receipts; actual
+> corrected file invocation closes0. No product fail, old result or scope was
+> silently rewritten. [Build evidence](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-locale-boundary-03/root-standalone-pipeline-frozen01.json).
+> Sol/medium Android/iOS inventory accepted as evidence only: Capacitor uses
+> remoteWeb; Root primary route preference is sharedWindows/WebRust plus thin
+> Capacitor device adaptation. Separate AndroidBevy host has unfinished production
+> lifecycle/input/effects/transport connections; no nativeiOS host observed.
+> Device execution and implementation remain OPEN. M6 verification feasibility
+> preparation accepted: actualTSX controlled hooks/context harness is possible
+> with existingTS5.9.3/React19.2.3;12 cases planned, no component cases executed.
+> Preserve uncanceled350ms orientation timer and deniedStorage later-timer behavior;
+> current3copygroups/esEnglishfallback stay explicit. M6 still unlicensed until
+> final M5 build gate; next single writer Sol/high, independent review Sol/high.
+> Root applies React best-practices checklist for lifecycle/state ownership.
+> All GUI/native/browser/device/gameplay/save/publicdelivery/Candidate/Accepted
+> remain OPEN; Escape desktop consent unanswered. Overall goal remainsACTIVE.
+> Root final M5 local-build checkpoint (2026-10-02): independent Sol/high
+> standalone review7241B/48c60056e2171e75fa5a5cf84b9b7a143b404b64767e142298fcc68a308db464 recommends aggregate local build.
+> Root actual1353input and161output observations all match; Root accepts complete
+> source-bound localNative/canonicalWASM/Next/canonicalNFT/physicaldistribution/
+> selectedSharp+HTTP pipeline in root-aggregate-local-build-acceptance01.json
+> 408067B/ed1ee18f34019288ce1f0652f8542c643c3b1d6b653deb4c67dd8606e832671b.
+> Existing whole-dist acac3a exit1 remains incomplete; current strictcanonical
+> scope and materializedphysicalpackage closure are separately accepted. Reviewer
+> selected70unique physicalfiles supplement Root real7300copy comparison; no
+> fabricated reviewer7300physicalreads, whole-tree-identical or gameLogout/save.
+> Reviewer naiveURL inventory error/correctedactualproxy/static mapping stay sealed.
+> Actual GUI/player/device/install/save/publicdelivery/Candidate/Accepted remain OPEN.
+> [M5 local-build acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-locale-boundary-03/root-aggregate-local-build-acceptance01.json).
+> Root licenses M6 in fresh C repo-qa-pwa-selected-locale-01, effectivecontract
+> 11653B/7f438c42f473e1a80b5f25ceb5b115af34771cb4e7ac06f964e81395cadd3088 and grant2832B/2a6218db484e7ba165721bfb23dac21d61271c2243bead5f0ce7ac8149a8cefd.
+> Exactlyfive paths: PWA module/layout/Page/oldPWA test/newPWA locale test. Root
+> Capture keeps existing / routegate,7listeners/5000hint/uncanceled350orientation
+> and deniedStorage later-timer behavior; visiblePage consumer follows its sole
+> canonical language and derives semanticstatus copy eachrender. No locale mirror,
+> screen/locale key, newdictionary/dependency or CSS/worker/metadata change. Es
+> Englishfallback remains OPEN. Pendinginstall/fullscreen state survives locale
+> and consumer changes. Page onlyoneimport+onemount before OriginalClientShell.
+> Root393before rows=392current fullyverified reusedM5fullarchives+absentnewtest;
+> 388existingprotected. New57reference fullCbeforearchives rebase only licensed
+> M5 currentmetadata to4e; oldreference/M5/M4 archives unchanged. All27new/old
+> current/immutable/F runtime pins protected; M6 reuses accepted runtime exactly,
+> noRust/native/WASM edit/rebuild or newpass inference. HistoricalpreM4 Page negative
+> control655847B/bd9db38ccb4c72ebb18fd6157785e692d76f0c582f438d726f8a5651dbc4f8ab copied into newQA test-reference for actualdoclanguageCLI.
+> Sol/high singleSource writer nowimplements exactfivepaths plus actualnew/oldPWA,
+> boundedtsc(no incremental output),questlocale anddoclanguage tests. Sol/medium
+> prepares newNext/package/NFT/copy/Sharp/HTTP helpers inQA only; secondSol/high
+> prepares independent source review from frozenbefore, no live5unstable reads.
+> Root architecture/integration owns leases/globaldocs and later freshWebbuild.
+> GenericcontrolledTSX harness must execute actual callbacks/context/effects,
+> queuedObject.is hooks and deferredPromises; realReactDOM/hydration/device remains
+> separate. M6 Source/test/build are not yetaccepted. NoGUI or services licensed
+> toworkers; desktopEscape consent remains pending and overallgoal staysACTIVE.
+> M6 pre-implementation protection correction (2026-10-02): independent
+> Sol/high preparation finds actual393before inventory omitted Layout, which was
+> only a57reference entry. Original388protected count and statement that all57
+> currentreferences stayfixed were inconsistent with alreadylicensed Layout change.
+> Root immediately paused newworker edits/tests; worker confirms only QA/preflight
+> a8fbad close0 had run, no productfile changes/newtest/tests/ongoing process.
+> Root preserves original393before/grant/contract/preflight immutable history,
+> adds Layout exactfull pregrant1434B/70734ba87af5abfbb7943dac2a0ef54d827fd363ad967f4c1b1867b588831c23 from C reference-before,
+> and seals authoritative source-before-v2.json394/b62158e6e4c39ee67dd40631f07655dc0c68689a3520f42d3afb2570355e61cf.
+> FinalSource mustinclude394 rows;389protected existing Source stayfixed. Only
+> currentLayout is an authorizedreference change and mustequal finalSourceLayout/
+> fullafterarchive/precise reviewedlayoutdiff. Other56current refs includingM5
+> runtime4e and all57before archives stayfixed;27runtime guards remainfixed.
+> Source/reference obligations use domainkind+path despite duplicates; never
+> silentlywaive allrefs or reinterpret393preflight as394 coverage. Five authorized
+> productpaths unchanged. [Supplement](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-grant-supplement02.json)
+> 2892B/13ae72e219667459dad8388c4b259a4c5edd4a846afa10d3b04d3cbf858e3867 and contract-supplement02.md2745B/aa0a5a2fd7f36a63cb0a16dfd3c598dcccba0f03b065ee5beeaacd462ab7e43c
+> supersede originalcounts/rule; Root didnot read/write live5files to repairmetadata.
+> SingleSol/high worker nowresumes originalimplementation and fresh394preflight;
+> readonlyreview andQAhelperpreparation bind supplement. M6 Source/build/client
+> acceptance stillfalse, parentM5localbuild acceptance unchanged, overallgoalACTIVE.
+
+> M6 preparation independently reviewed by Root:42+13 helper-preparation inputs,
+> their complete archives,60+20 outputs, and25 source-review inputs+25 ownarchives/
+> 33 outputs all match actual full-byte hashes (273 recorded observations). Six
+> helper derivations replay exactly; two reused helpers are byte-identical. All10
+> helper sources were reviewed. Eight Node syntax checks and two PowerShell parser
+> checks actually exited0 (outer d9a501/05d578); no helper build/network executed.
+> [Preparation acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-build-and-review-preparation-acceptance01.json)
+> is107324B/2dacd1b2e810bc4c4944f4c4cbc5fb9a62496ccb607c5e528031ebe3948ba7ea.
+> Root QA reader initially omitted the separate completeOwnArchives domain; its
+> diagnostic and corrected83 checks are retained, not a product failure. The next
+> pipeline requires Root-accepted actual394 frozen sources, exact path-set/layout
+> dual-domain equality, unchanged runtime4e/27 guards, fixed31MiB WASM and360MiB
+> package caps. Canonical NFT comparisons use actual M5 parent32 metadata; a changed
+> M6 count/content must be reviewed rather than forcing32 or claiming whole-dist.
+> Worker-reported fresh394preflight and corrected selected-locale counterexample
+> remain pending Root receipt review. A generic React19 Context-metadata harness
+> failure is retained and being repaired only in the licensed new test; no product
+> expectation weakened. Sol/high owns sole five-path implementation and later
+> independent Source review; Sol/medium now prepares a bounded read-only next
+> shared Quest-copy inventory from frozen M5 archives. M6 Source/build acceptance
+> stillfalse. Real browser/native/PWA/device/save/Candidate remainOPEN; goalACTIVE.
+
+> M6 Root Source-only and independent Source review are now ACCEPTED. SOURCE-only
+> aliases497276B/d7377e17b64bdd35a6bc492ff18e67d87f8e926fc7f9b5e9427bc8a3b09f6686 contain
+> current394fullafter/393fullbefore; exactfivechanges/389protected. Layout is
+> independently verified in Source/currentReference while57before archives remain
+> fixed and other56current refs+27runtime remainfixed. Root actual1322logical
+> guards,1580workeroutputs,4414independent physicalafter inputs and521outputs match.
+> Page importblock includes its separatornewline; removing it and actual4space
+> mount restores656228before bytes. Layout twoedits andoldtest oneassert restore
+> entirebefore files. PWA root listener/device/state helpers and24authored strings
+> match; semantic status and Page-derived visiblecopy retain both install awaits,
+> both fullscreen/landscape awaits,absence/route/storage/original timer behavior.
+> [Source acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-source-acceptance01.json)
+> 4765B/823b9a927e718f8d4b4bd4517e14cb2d39c6cd663d279a62b60e4852e571bb6d binds
+> final fiveactualexit/close0: PWA16/16 (2generic14product), Quest4/4, doc20unique
+> cases withactualpreM4negative, actualTSCnoEmit/incrementalfalse andoldPWAactual
+> manifest+4awaitedSharp metadata checks. References inpreinputs arefixedbefore57,
+> not currentLayout; currentLayout1459 binds currentSource394/actualAST/fullafter.
+> JSFS/.node readtrace1456rows/1437unique isnotOSloader or ESMselfattestation; old
+> PWA47rows do notcapture libvipsPNGopens, fourphysicalPNG guards areseparate.
+> Stale final-inventory labels, baseline1FAIL/two15+1genericFAIL, corrected historical
+> Quest19 claim, Root reader boundaries/errors and reviewer probefailures remain
+> retained; noneconverted to newpass. Real ReactDOM/hydration/concurrency/StrictMode
+> andestranslation stillOPEN. [Independent report](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/source-review01/final01/report.md)
+> 9447B/5364e5c6f64c21d27c2d509b82448b3d444bdbfa4e61d22968f3a7e708497e86 accepted.
+> Root reclaimed both leases andstarted freshNext .next-pwa-selected-locale via
+> realouter9ec963/liveexec97919; Next child/aggregatebuild acceptance stillfalse.
+> Runtime4e exactM5reuse1711/dee14... isfrozen, no newRust/native/WASM build. Root
+> archived allfour currentNextmetadata beforeinputs. LatercanonicalNFT/360MiBpackage/
+> outsidecopy/Sharp/ownedHTTP/posttree/OS closure gates stillpending. GUI remains
+> disallowed pendingexplicit consent afterEscape. Actualbrowser/native/device/
+> PWAinstall/fullscreen/save/publicmedia/Candidate/goal completion stillfalse.
+> The readonly nextQuestcopy inventory24inputs/fullarchives/28outputs isRoot
+> accepted aspreparationonly (22614B/76fd3581090c33805e51aba696561a09bcc678caf032b1482ff3de3614fa8287).
+> Sol/high prepares9path Return/Progress heading proposal using actual existing
+> quest_presentation_text.rs andcanonical owner, noABI/DTO/protocol change; no
+> proposedproduct writes/Cargo/imports authorized. Importer metadata/absolute
+> source provenance requires explicitbounded generation, notwholebundle churn.
+> Overallgoal remainsACTIVE, parentM5aggregate localbuild acceptance unchanged.
+
+
+> M6 actual Next build is Root ACCEPTED (outer af8bab exit0; child close0/null,
+> 58118ms). Current394 Source and27 runtime guards stay unchanged. Runtime4e/M5
+> bytes are reused; no Rust/native/WASM rebuild. Only generated Next tsconfig two
+> includes and next-env route path changed; tsbuildinfo and next.config remain
+> exact. Four before/after metadata are archived outside394 Source.
+> [Next acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-next-build-acceptance01.json)
+> 95520B/041836547cc2b0de4052a059908bc6a63ab974e85af6c0b66afc3f564a6a0099.
+> Strict canonical NFT audit outer916342 exit1 is RETAINED:32 files/61162 rows,
+> 0 namespace/errors/uncertainties. Root three reader assumptions failed and remain
+> diagnostic history. Exact full raw reconstruction and independent Sol/high review
+> establish only30 same-prefix chunks249->989 sorted-block relocations, plus2
+> three-backslash-config-row rotations;336 moved positions,2 rootNFT raw-identical.
+> All other bytes/properties/multiplicity are preserved. Root96 metadata reads,
+> independent206 current/archive inputs and109 outputs are actually verified.
+> [Scoped NFT acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-canonical-nft-acceptance01.json)
+> 144986B/a124ceaf918ba7eb1b5e84b281b6ebccb94bf164b3774d9f84adc54782a80a34
+> accepts ONLY canonical metadata after reviewing real differences; no exit1
+> relabeled0, no NFT dependency-target operations, no whole-dist coverage/status
+> inheritance. M6 whole-dist audit remains unperformed, completenessfalse/exitnull.
+> Root started fresh standalone package actual866d3a/live42424 with unchanged
+> 360MiB cap, source-only receipt and exactM5 runtime reuse pin. Package/copy/Sharp/
+> HTTP/posttree/owned OS closure and independent pipeline acceptance are pending.
+> Single product writer is null; Root alone owns generated outputs/globaldocs.
+> M7 proposal evidence20 fullfrozen/archive inputs,16 liveprotected product checks
+> and29 outputs is accepted as preparation ONLY; no implementation or tests/build.
+> [Proposal acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-proposal-evidence-acceptance01.json)
+> 26599B/48360471b7477e4ae17692c24e7311c42c9e5c7c21d652a4c1fc9bd23f84d083.
+> Nine paths/two semantic headings/eight authored UI values are proposed; existing
+> nonChinese OPEN Progress assertions may strengthen only to explicit newgoldens.
+> Actual project-relative importer client JSON inputs exist and are fully archived;
+> its two Build/Server/Debug inputs are absent. Discovered Server.MirForms source
+> JSON is separately bound; Chinese766 matches, English766 lacks two committed768
+> keys HeroDesummonCountdown/StoragePasswordCleared, other values unchanged.
+> No normal/full importer ran, no source alias or unrelated dictionary repair is
+> accepted. Root will bound new UI-key materialization while preserving every old
+> token/metadata byte; full-importer smoke remainsOPEN. GUI consent afterEscape
+> is still pending. Actual browser/native/device/install/fullscreen/save/public
+> media/Candidate/goal-completion gates remainfalse; overallgoalACTIVE.
+> Progress32: package actual51c8fc exit0 and isolated copy actualb9a655 exit0 completed.
+> Package/copy beforeHTTP7301files/376406497B/776named directories/0links; 360MiB cap unchanged.
+> Actual isolated Sharp d4b882 child57116 close0/null produced the expected PNG;42 JS/.node loads bind the copy. Runtime0.34.5 versus declaration0.35.3 retained; no OS-DLL/ESM closure claim.
+> HTTP01 aa3912 exit1 is retained: new Page context contributes13 startup chunks versus prior12, so original specs31 plus manifest1 total32. Root accepted only six edit groups/seven occurrences in freshHTTP02; inverse recovers full old helper, unchanged lifecycle, ports, URLs and max32.
+> HTTP02 actuald9461c exit0 performed32 real200 requests:27 SHA bindings+5 contracts, immutable M5 release bevy-4e3a46d90b6b8134, controlled local Prguse fixture only/public originfalse.
+> All owned HTTP02 server49280 and fixture/helper60124 actual closes/log handles are complete; separate read-only OS receipts779ff5 and d74b09 confirm both owned PIDs and Sharp57116 absent, ports19160/19161 free. HTTP01 failed processes were independently closed too.
+> Exact postHTTP tree7302files/376407218B/779named directories/0links preserves all7301 old files; only a721B optimizer PNG and three named cache directories added. Whole-tree-identicalfalse retained; no cache exclusions.
+> Root source394+reference57 guards+runtime27 rechecked; four generated Next metadata files remain separately bound. No M6 Rust/native/WASM rebuild: runtime1711B/dee14eba... is exact M5 reuse, not a new binary acceptance.
+> [Pipeline freeze](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-standalone-pipeline-frozen01.json) 1004043B/4c23eef59cd950b604a023ae4cc79f95b8073d3655b3f30b948f75a6cbe9713d binds1608 unique physical direct inputs and all actual phase receipts. Independent Sol high final LOCAL BUILD review is running; aggregate/build acceptance remainsfalse pending sealed review.
+> Canonical NFT real916342 exit1 and reviewed generated chunk reorder remain retained scoped metadata acceptance only; M6 whole-dist audit unperformed/completenessfalse/exitnull. Neither missing whole-dist coverage nor old M5 failure is relabeled pass.
+> [M7 bounded preparation acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-bounded-generation-preparation-acceptance01.json) 48735B/b793d751ffebb883a064d44251fefb322ef38bfa46cf74aa6e0fdd47b9138f5f: Root full31 actual inputs+31 fullarchives,44 outputs,16 live protected sources and real Node executable are matched.
+> M7 helper syntax-only c8e14f exit0 with empty stdout/stderr; .NET WaitForExit/Close are actual, not fabricated Node ChildProcess events. No AST/helper/materializer/generator/tests ran. Eight future authored headings must be AST literal-extracted under a fresh five-input Root license, exact eight JSON lines and inverse whole-buffer equality; existing actual subset builder generates Rust24keys/old22rows unchanged.
+> Superseded full importer/VM/public-source aliases remain stopped; original server Build paths absent and historical two English server keys stay in frozen canonical unchanged. Nine product-path writer is still unassigned; M6 source frozen until independent aggregate acceptance.
+> Model allocation: Root frontier architecture/integration, Sol high bounded implementation and independent review, Sol medium bounded verification helper work. No full-time MAX requirement. Actual browser/nativeGUI/device/install/fullscreen/save/public-media/Candidate/goal gates remainfalse; GUI Escape consent still pending and overallgoalACTIVE.
+> Progress33: independent Sol high final pipeline review sealed and Root accepted aggregate LOCAL BUILD. [Aggregate receipt](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-aggregate-local-build-acceptance01.json) 5778B/551f76a6177fcb49f005fdfdb13371f3bf79bba5a705c3fabffbe37bb4bbc14a; [Root full independent proof](C:/mir2-cross-platform-storage-20261002/repo-qa-pwa-selected-locale-01/root-independent-standalone-pipeline-acceptance01.json) 9639162B/7a1379aee60e4882a35e4a7c354dfcc802ae8a5d99d28ae57e3bd3b0d517b89c.
+> Root actually reread24162 unique files binding1642direct+14603physical current inputs/7903full independent archives/7916sealed outputs; all before/after maps and actual bytes match.32current canonical metadata are separately licensed beyond1608frozen direct; no dependency-target operations.19asset-metadata checks are actual, not20. Raw audit916342 exit1/HTTP01aa3912 exit1/whole-distunperformed/44warnings/Sharp0.34.5vs0.35.3/Root variable reader diagnostic and three independent reader assumptions remain retained.
+> M6 accepted Source394/Next/scoped canonical metadata/package/copy/Sharp/localHTTP only; no M6 Rust/native/WASM build, exactM5 version4e reuse. Acceptance attaches to frozen M6 artifacts and does not make later M7 mutable source or binaries accepted.
+> M7 Root captured394fullsources/57references/27runtime/4supplemental metadata before all product edits. [Before freeze](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-before-frozen01.json) 249755B/d9a991ce6db071bc11006fca0f03c1a0bad038071ae23f34ad1f102208c3ce5e.
+> [Formal9path grant](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-implementation-grant01.json) 12136B/b9e9f4984d031a3e0716827261e3f5eaae06b42860a6d7fe8a5716c5ad338d52 and reviewedcontract7682B/ed7f561eb4a08802e76535bdd6e3906998afd8cca1e7f271b66f3ce050c19349 assign exactly9 existing product files to shared_quest_locale_impl Solhigh; other385Source/56currentreferences/runtime27/Next4 protected, only Webmirror reference licensed to change.
+> Actual prior wrapper/physical inventory confirms Cargo cache rust-target/windows. Supplement1960B/8008cc9a79764fff55c64f673676811931e7c4bfeda7f23600ec3fd27ee4e162 corrects only targetpath; locked/offline/jobs1/stack64MiB and actualC>=50GiB before each Cargo remain. No simultaneous Root Cargo or runtime publication.
+> Phase1 meaningful native/portable heading assertion BEFOREFAIL required with production22rows/threeold expressions untouched. New authored2keys/eightstrings then literal owners freeze for separate fresh five-input Root materializer execution license. Source grant does not run materializer/full importer/VM; actual subset builder must generate24rows and old22remain byte-identical. All final source/tests/new runtime acceptance pending.
+> [Solmedium build preparation grant](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-build-preparation-grant01.json) 29180B/660449a2539c80aa2d8cb8e73774876cdfe87efe77a5d8af453af7b6d86c7af7 binds53fixedinputs and separate QA-only directory; only syntaxchecks, no active source reads/Cargo/helpersemantic/build/network/GUI execution.11futurehelpers preserve caps and require newM7 canonical authority instead of exactM5reuse.
+> Root owns docs/integration, one Solhigh code/Cargo writer, one Solmedium prep writer. Independent high review follows source freeze. GUI Escape consent still pending; browser/nativeGUI/device/install/fullscreen/save/publicmedia/Candidate/wholegoal remainfalse and goalACTIVE.
+> Progress34: M7 shared Return/Progress headings now have actual semantic beforeFAIL in both native-ui and portable-quest-ui (three assertion failures each with old22 rows/old production arguments). Source work resumes under [Root sole-writer grant02](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-implementation-resume-grant02.json) after prior agent loss; no simultaneous real Cargo.
+> Literal owners are corrected inside actual esES/ptBR objects. The original misplaced-owner negative suite01 remains unaccepted, including its missing seventh independent child-event archive; no retrospective pass. Fresh positive02 produced equal737385-byte mirrors and seven actual expected-failure children closed1. [Root materializer review02](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-materializer-artifact-acceptance02.json) 19954B/ad6629eaea8f3b6f39c48be570e4eee142cb9c3800c3741b49e3a149e68011a0 verifies eight authored lines/four independent locale goldens/full inverse736994 bytes/unchanged old keys-values-order-tags-metadata and actual Node22.18/TypeScript5.9.3 bindings. This is materializer evidence only.
+> Pre-spawn runtime stop47430c is retained. Root repeated actual original historical F WebGPU full reads and independent PS/current pinnedNode checks; original30527815B/ca9 SHA and all old27 runtime guards currently match. [Revalidation01](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-protected-runtime-revalidation01.json) retains causeunproven/original SHA/no F writes; recurrence still stops. A later actual builder code1 found malformed canonical mirror bytes near client.Statistics; full bad bytes retained, then only licensed canonical was recopied from the exact good candidate. Fresh actual subset builder03 passed0 and generated24 rows; old22 remain byte exact.
+> Four required Rust runs passed nonzero11/6/11/6 and both adjacent portable filters1/1; four Node calls passed0. Three new compact test fixture failures remain realFAIL101: too-small simultaneous viewport, invalid tail top, and wrong active sheet. Corrected DetailReturn/DetailProgress/NpcReturn locale-current-stamp regression passed1/1, with explicit sheet identity/body probes/valid scroll/stale rejection. Final receipts and full394 Source/57refs/27runtime/Next4 freeze plus independent review are still pending; no Source acceptance or new runtime acceptance yet.
+> [Root accepted build preparation only](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-build-preparation-acceptance01.json) 67355B/61ce894fca78915b07351fba6df69ddee1c1491b89cb1e561a5cf0cb41e4c5bd verifies54fixed inputs/111outputs/six exact forward-and-inverse derivations/four exact copies;9Node syntax exits0/two PS parses0 are not semantic execution. Native draft and three-renderer canonical draft require separately accepted final M7 Source and new canonical authority; canonical stays PENDING. Next supplemental metadata changes must be reviewed explicitly before later gates.
+> [Per-call Cargo guard plan](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-cargo-per-call-plan-acceptance01.json) is accepted preparation only:44outputs/six inputs with full before-after archives, original partial14file history and actual API reader diagnostics preserved. Root chooses exact child exit with mandatory independent completion-evidence audit. A Solhigh worker is separately licensed for QA-only ConsoleApplication implementation/compilation/controlled fixtures; no real Rust Cargo/product build under that guard grant. Existing CARGO_BIN and original lexical cargo.exe dispatch, actual freshC>=50GiB before every version/build/retry, raw argv/cwd/env/stdhandles and receipts remain required.
+> Root leads architecture/integration and owns global docs; Solhigh owns one bounded source/Cargo lane and one disjoint QA guard lane, independent high Source review follows freeze. Prior Solmedium build preparation is sealed. GUI Escape consent remains pending; no browser/nativeGUI/device/install/fullscreen/save/publicmedia/Candidate/wholegoal acceptance, overall goalACTIVE.
+> 2026-10-02 UTC progress35: M7 shared quest Return/Progress headings SOURCE
+> is now Root accepted after independent review (no actionable P0/P1/P2).
+> Exactly9 allowed sources changed;385 protected sources remain unchanged.
+> Final37 Rust cases,5 presentation tests,4 Bevy-locale tests,22 current V2
+> definition checks and the24-row generator pass; all previous22 rows survive.
+> This is source/test acceptance. It does not inherit M5/M6 running-client proof.
+> [Root source acceptance](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-source-acceptance01.json).
+>
+> The QA-only per-Cargo guard has29 actual controlled fixture passes and an
+> independent static review with0 P0/P1/P2. Root verified686 artifact pins and9
+> public tools, then issued separately pinned real-Cargo authority. First actual
+> guarded cargo1.95.0 --version finished with actual spawn/exit/close0 and one
+> fresh Get-Volume C before/after receipt. Policy B still rejects missing after
+> evidence. Windows native-build02 is now actually running, not yet accepted;
+> the unchanged repository three-package canonical build is next in the sole
+> Root Cargo lane. Latest Next/package/HTTP/client gates remain pending.
+> [Execution authority](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-real-cargo-build-execution-grant01.json).
+>
+> Next metadata helpers have bounded Root-reviewed preparation: original before4
+> pins; only two tsconfig include appends and one next-env routes-import change;
+> every other metadata/source/reference/runtime byte remains guarded. Syntax
+> checks are preparation only. Actual Next/runtime/package results must be read
+> before acceptance. Original failures and reconstruction limitations remain.
+>
+> User requested visible playable progress after two days. Work is narrowed to
+> fresh runnable clients and player-flow proof; review/helper completion alone
+> is not parity. Full HUD/compositor/combat/social/settings/device work remains
+> OPEN. Escape GUI reauthorization is still pending; no browser/native GUI was
+> resumed. Actual-client/device/save/public-media/Candidate/goal remain false.
+
+> Progress36: latest M7 Windows executable has actual guarded build exit/close0
+> in544s; all482 source/reference/runtime/Next guard rows match before/after.
+> Root accepts the compiled103572480-byte executable as build only; it was
+> never launched. The original three-package canonical release build is now
+> actually running (webgpu stage), sole Root lane. Next/package/HTTP/GUI remain
+> pending. [Actual current build status](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-live-build-status02.json).
+> Candidate/goal/client/device acceptance stays false.
+
+> Progress37 (2026-10-02): M7 local builds and standalone startup are complete:
+> Windows executable, all three WASM packages, Next, isolated 359 MiB package,
+> actual Sharp loading and 32/32 HTTP requests passed. No latest GUI/gameplay,
+> device, save or public-origin acceptance is implied.
+> [Build evidence](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/root-aggregate-local-build-acceptance02.json).
+> M8 now implements the shared main HUD, authoritative Character Stats and
+> Character/Bag/Quest navigation. Sol xhigh is the sole Source/Cargo-test writer;
+> Root leads architecture and integration. Full combat/social/settings/devices
+> and Candidate remain OPEN.
+> [M8 scope](C:/mir2-cross-platform-storage-20261002/repo-qa-shared-hud-stats-01/root-implementation-grant02.json).
+
+> [Cross-platform Progress38 / 2026-10-02] M8 shared main HUD, authoritative Stats1/Stats2/header and Character/Bag/Quest navigation have Root SOURCE + focused-test acceptance: 28 changed/new paths, 406 frozen Source and 371 protected originals. Actual Native6/Portable6/Runtime5/ABI2/Node21 pass; focused WASM and nonincremental TSC exit0. Independent bounded ingress review has 0 remaining P0/P1/P2 and nine final input hashes matched. Root owns the Windows and three-runtime build lane; Windows build is running, with no new build accepted yet. M7 local artifacts remain prior evidence. Latest GUI/gameplay, device/save, full HUD/compositor, compatibility menus/economy, 100% Candidate and goal remain OPEN. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-hud-stats-01/root-source-acceptance01.json.
+
+> [Cross-platform Progress39 / 2026-10-02] M8 shared main HUD and Stats1/Stats2 have accepted Source/focused tests, Windows binary, three canonical runtimes (bevy-bcfaf1f4d568d1f5), Next and isolated standalone startup. Package376,804,095 bytes/7,301 files/zero links is under360MiB; actual Sharp loads42 files inside the copy. Actual local HTTP32/32 and19 metadata checks pass; both owned PIDs/ports are absent. All original copy hashes remain exact, plus one721-byte optimizer cache. Three media images use local fixtures; public delivery and current GUI/gameplay/device/save/Candidate/whole goal remain OPEN. M9 shared Character paperdoll/14 equipment slots/inspect/remove is authorized to one Sol-high Source writer across29 paths, reusing the current controller/ordinary RemoveItem ACK; no implementation acceptance yet. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-hud-stats-01/root-aggregate-local-build-acceptance01.json.
+
+> [Cross-platform Progress40 / 2026-10-03] M9 shared Character paperdoll and 14 equipment cells/inspect/remove have Root Source and focused-test acceptance across30 authorized changed/new paths:421 declared Source,391 protected originals and one current-only item-identity dependency. Root42 Rust and39 Web regressions, actual Host-to-Router pointer deserialization, focused WASM check and prior unchanged-Web TSC pass. Two real compile errors were repaired; independent original/delta reviews have0 remaining actionable P0/P1/P2, with missed compile checks and failed histories preserved. Old Quest/Bag/HUD ABIs stay exact. Root owns the Windows build now running, followed by three canonical runtimes, Next and package checks; no M9 binary/package acceptance yet. Spells/hotkeys next boundary retains7 learned rows/16 keys and existing request-scoped receipt semantics, but has no implementation acceptance. Latest GUI/gameplay, live equipment ACK, resource delivery, mobile layout/devices/save, economy/settings/recovery,100% Candidate and whole goal remain OPEN. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-character-equipment-01/root-source-acceptance01.json.
+
+> [Cross-platform Progress41 / 2026-10-03] M9 shared Character/equipment now has Root native build acceptance: actual guarded Cargo exit0 and child close0, 517 source/reference/runtime/Next guards unchanged, and an exact unlaunched Windows EXE. The interrupted native01 attempt remains unaccepted; retry02 provides the complete exit and executable evidence. The original three-backend canonical Web build is actually running under the sole Root lane; M9 Web/Next/package acceptance is still pending. For the user-facing Windows/Web/future-mobile consistency and reuse goal, approximately35% (30–40%) is an engineering estimate, not a measured Crystal parity or Candidate percentage. Shared quest/bag/HUD/EXP/weight and this Character slice are bounded progress; skills/combat/economy/settings/recovery, current gameplay/resources/save and physical Android/iOS acceptance remain OPEN. M10 must fence HMR request IDs and validate local id plus explicit spell before pending projection; these two safeguards are identified but not implemented. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-character-equipment-01/root-native-build-acceptance01.json.
+
+> [Cross-platform Progress42 / 2026-10-03] M9 shared Character/equipment has Root bounded Source/tests, Windows build, three canonical Web runtimes (bevy-8f5daa54ba368731), Next and isolated standalone startup acceptance. Package377,397,312 bytes/7,301 files/zero links passes360MiB with90,048-byte margin. Actual COPY02 preserves every file; native Sharp imports/resizes using42 measured in-copy dependencies, distinct from21 physical Sharp/native package files. Actual local HTTP32/32 and19 metadata checks pass; all7,301 original copy hashes remain exact with one721-byte optimizer cache, final966 Source/runtime/Next checks pass, and owned PIDs/ports are absent. Interrupted native01, failed copy01 and QA inspection/runner mistakes remain retained. Two media images are copied and three use local fixtures; public delivery and current native/browser gameplay, live equipment ACK, save, mobile layout/devices and100% Candidate remain OPEN. M10 shared Spells/key assignment is the next implementation, with7 learned rows,16 keys, one Rust state/painter, burned HMR request namespaces and exact owner/id/spell receipt/projection validation; no M10 implementation acceptance yet. Whole-goal approximately35% (30–40%) remains an engineering estimate, not measured Crystal parity. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-character-equipment-01/root-aggregate-local-build-acceptance01.json.
+
+> [Cross-platform Progress43 / 2026-10-03] M10 shared Spells state and common Native/portable painter have Root preliminary compile-check acceptance: actual non-test Windows Cargo check exit0/close0 and wasm-release/webgl2-shared-ui Cargo check exit0/close0, with985 before/after guards matching in each run. The partial426-Source candidate contains6 changed originals,4 new files and416 protected originals;11 new integration files were unapplied at that historical freeze. Native02 actual E0425/E0308 and incomplete clipping review are retained; repairs passed the actual checks and independent core static review03 has0 remaining P0/P1/P2. Common outcome-unknown requests wait for exact receipts without projecting key changes; ordinary text clipping and the existing centered assignment prompt policy are restored. The sole Sol-high Source writer has resumed the remaining portable/runtime/Web implementation within the original29-path grant. Complete M10 Source/tests/review, production binaries/runtimes/Next/package, current native/browser gameplay, live skill ACK, resources/save, mobile layout/devices and100% Candidate remain OPEN. Whole-goal approximately35% (30–40%) remains an engineering estimate; the complete goal stays active. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-spells-keys-01/root-core-checks-acceptance01.json.
+
+> [Cross-platform Progress44 / 2026-10-03] M10 shared Spells is now Root-accepted at the complete 437-file Source and focused-test level. Its nine actual Cargo jobs recorded 126 passing Rust test executions (15 portable, 67 Native, 32 Host, 5 independent ABI, 5 HUD-ingest and 2 explicitly invoked JS-captured DTO tests; repeated executions are not unique tests), plus Node 24/24, current setter capture 13/13, unchanged compatibility 39/39, nonincremental TSC exit 0, and Native/shared-WASM checks exit 0. Independent full01 and delta02 reviews report zero remaining P0/P1/P2 findings; all 1,011 before/after guards matched on each job. M11 now implements the authorized complete shared ordinary skill-and-melee rules within 17 paths (10 existing, 7 new), against 437 starting Source files and 66 references/41 runtime/4 Next metadata inputs; its implementation is not yet accepted. M10 and M11 production Native, all three canonical runtimes, Next and package will be validated together once, with no separate M10 production pass claimed. Production builds, current GUI/native/browser play, live skill ACK, save, public resource delivery, mobile/device behavior, Candidate and whole goal remain OPEN. Following user criticism, prioritize complete end-to-end play and parity evidence; do not publish another percentage estimate. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-spells-keys-01/root-source-acceptance01.json; C:/mir2-cross-platform-storage-20261002/repo-qa-shared-combat-input-01/ROOT-CONTRACT.md.
+
+> [Cross-platform Progress45 / 2026-10-03] M11 is Root-accepted at the Source and focused-test level: 444 Source files (17-path delta: 10 existing and 7 new; 427 protected starting files; 18 allowed rows including the extra cfg(test) capture compile fix), 66 references, 41 runtime files, 4 Next metadata files, and zero supplemental current-only inputs. Nine actual Cargo jobs exited and closed 0 with all 1,089 before/after guards matching per job. Focused Rust execution count is 388 (Native common 83, portable 31, Native adapter 235, Host/ABI 38, plus one actual-JS-snapshot/edge Rust consumer); these are executions across configurations, not unique tests. Three default-ignored tests remain uncounted; the M11 consumer was explicitly run with --ignored. Four native/three-WASM compile checks passed; Node 39 Root-run whole-JS/AST/router checks passed; nonincremental TSC exited 0. Static full01 and delta02–05 reviews have zero remaining P0/P1/P2 findings. M11 production Native, canonical runtimes, Next and package are not yet accepted and remain planned with M10 as one combined batch. Production artifacts, current GUI/native/browser gameplay, live ACK/save, Native queue/socket isolation, public resource delivery, Android/iOS real-device behavior, Candidate and whole-goal acceptance remain OPEN. Following user criticism, prioritize complete end-to-end play and parity evidence; no percentage estimate is reported. Evidence: C:/mir2-cross-platform-storage-20261002/repo-qa-shared-combat-input-01/root-source-acceptance01.json (18,368 B; SHA-256 0fb94513f6b2d41e4012ee72ec7f5ad5326d69b9969971acc85286ba9a0ed1bf); source snapshot root-source-snapshot01.json (247,041 B; SHA-256 4dd10c12a4786b5127632715315226d5e277be3598bd54d64152a5d7984a58ac).
+
+> [Cross-platform Progress46 / 2026-10-03] The combined M10+M11 local Native, all three canonical WASM runtime and Next builds, independent package copy and HTTP checks are Root-technically accepted at runtime `bevy-49c4a8559bee071c`; this is local build/HTTP evidence, not GUI or gameplay acceptance. Focused compile checks were four total: one Native and three WASM. The original 360 MiB package attempt exited 1 and is preserved; only the assembled package’s generated respawn JSON received authorized whitespace-only compaction, after which the package passed at 375,633,540 B / 7,301 files / 776 directories / 0 links under the unchanged 377,487,360 B cap. Isolated-copy verification checked all file hashes, Sharp 42 closure, 32 declared HTTP responses, 19 metadata responses, 2 copies and 3 fixtures; post-boot the original package retained its 7,301 files, with only 721 B / 1 file / 3 directories of boot output, and owned HTTP PIDs/ports exited. The current compiled consumer read the original or compact manifest six times per run across map `0` and `D011`; complete blueprints matched, including respawn fallback centers `(350,200)` and `(200,200)`. Native transport has a minimal design prepared but remains unimplemented. Production GUI, complete gameplay, live ACK/save, public assets, Android/iOS devices, Candidate and whole-goal acceptance remain OPEN. GUI restoration was requested from the human and is not authorized; do not operate it without new authorization. No percentage estimate is reported. Evidence: [shared Spells and combat QA](generated/player-qa/client-core-20260930/shared-spells-combat/README.md); combined build acceptance: `root-aggregate-local-build-acceptance01.json` (7,975 B, SHA-256 `8043b195c098a08aef6d1f8524234d326c63e598e94a6b9d68f53fe56b223a16`).
+
+> [Cross-platform Progress47 / 2026-10-03] M12 Native command ownership and final socket fence have Root Source, regression and fresh EXE build acceptance: 444 Source files, 6 changed originals and 438 protected; 66 references, 48 runtime files and 4 Next metadata preserved. Final actual Native check passed and bin regression passed 377/377 including all 18 ownership tests, with 1,091 guards per job; final independent review has zero confirmed P0/P1/P2 findings. Five bounded fixes cover exact unsent storage cancellation, packet-first full-world/Skill identity, canceled-entry late flush, unsent personal-owner reset, and valid pending retention across empty frames while awaiting Skill. Real server full snapshots without mapIndex retain raw mapFileName compatibility. One actual Native build exited/closed 0; .NET child Exited/Disposed are true under Policy B, 562 build guards match and child/guard/probe PIDs are absent. EXE is 104,005,120 B, SHA-256 d4be4c8c1a6cbe0c4beced90bde5914ee2163b3e7cf2a425bb59c926c8bde0a3; it was not launched. Original test compile101 (zero executions), output-directory preflight failure, 376/1 invalid fixture and subsequent 376/1 genuine pending defect remain retained before final Source06 pass. No WASM/Next/package rebuild was performed for this Native-only delta; M11 Web artifacts remain prior evidence. Latest human direction is continue code and temporarily do not operate UI; no GUI operation is authorized. Same-filename protocol ambiguity and initial connection-cancellation scope remain open; live play/ACK/save, public resources, mobile devices, Candidate and whole goal remain OPEN. M13 shared Mail list/reader common Native/portable painter and single Web owner/handoff are next, not yet accepted. No percentage estimate. Evidence: [M12 QA](generated/player-qa/client-core-20260930/native-command-ownership/README.md), root-source-acceptance01.json (13,279 B;75bda24da8dd9f1da140d18a4c5e195711a037d9e06cb9ab109d37faa9722824), root-native-build-acceptance01.json (4,797 B;1f047805b481329c56128717c7225ec6dde3852209fdb9a270c4f6a2d4a2425c).
+
+> [Cross-platform Progress48 / 2026-10-03] M13 shared Mail list and letter/parcel readers now use one Rust Native/portable painter with sole Web ownership and acknowledged retirement before DOM fallback. Frozen Source08: 455 source files, 19 changed originals, seven additions and 429 protected originals. Root accepts eight focused Rust jobs (175 passing executions, not unique tests), fresh Windows EXE, three canonical WASM builds, 46 compiled exports and Next. The exact Source04 Web tests carry 22 Mail + 118 related passes and TypeScript exit0; Source08 did not regenerate Node fixtures. Fresh pure WASM consumers compare all21 original Node captures on three backends: 63 full parsed outputs equal and15 negative inputs reject; no boot or graphics. Runtime bevy-b070e88b10ce12c4 shared WASM is32,499,664 B, 6,192 B below the unchanged cap. The original thin-package build exited1 at380,426,871 B; preserved package-only whitespace compaction of two generated JSONs produces377,468,964 B, 18,396 B below the fixed360 MiB cap. All7,301 files/776 directories/zero links are verified; only two JSON files changed and7,299 files stayed exact. Two complete isolated copies pass18 actual HTTP responses (14 full JSON +4 exact WebP) and8 direct compiled-consumer calls; real0/D011 null-center fallback blueprints match explicit manifest centers. HTTP omitted-center8,8 normalization stays separate; literalN16 is a diagnostic with no map cells, not public quest-content acceptance. After execution, all original/copy trees and1,105 physical input pins (1,096 source/runtime/Next guard rows,22 metadata-only aliases) match; Root observed all six owned helper/server/probe PIDs absent and22741/22742 free. Original failed builds/preflights are retained. Latest human direction remains continue code, temporarily no UI. Shared compose/editor/IME/stamp/attachments/send, actual GUI/play/live ACK/save/relogin/public resources/mobile devices/Candidate and overall goal remain OPEN; no percentage estimate. Evidence: [M13 QA](generated/player-qa/client-core-20260930/shared-mail-inbox/README.md), root-reviewed-package01.json (8,622 B; f1a176cdf85ccd0ec15311cd8dbc24b3f05ae9aad3e384c108e8293f8ab0fbcc).
+
+> [Cross-platform Progress49 / 2026-10-03] M14a common compose validation and actual Native/Web send consumers have Root SOURCE + focused-test acceptance on Source04:462 pinned source files,18 changed existing files,two new modules and442 protected existing files. Native reducer/actual Submit and compatibility Web Page call the same dependency-free Rust500 UTF16 whole-reject/normalization/trim/gold/ordered-UID policy via the independent small-WASM edge; Web draft/single-flight/exact final socket proof/failure retention/success ACK and same-connection retired-owner ACK slot are covered. Actual Node36/36, six Rust test jobs130 passing executions (not unique tests), explicit compiled replay of nine actual Page/wrapper captures, Native check and nonincremental TypeScript exit0 pass. Source03 Node/core/strict-host/replay consumers stay byte-exact on Source04; they are carried, not regenerated. Original reducer startup101/zero executions is preserved; adding only client-core to root workspace exclude repairs its independent workspace boundary. All1091/1093/1094 per-job guards match and Root observed all20 known child/probe PIDs absent. Final independent reviews confirm no remaining P0/P1/P2. This accepts source/focused checks only: fresh Native EXE/small-WASM/three canonical/Next/package production builds will run together after M14b parcel/quote and M14c common painter/text adapter; unchanged caps and prior M13 artifacts remain separate evidence. Latest human direction remains code only, no UI. Actual GUI/play/live ACK/save/relogin/public resources/mobile devices/Candidate and whole goal remain OPEN; no percentage. Evidence: [M14a QA](generated/player-qa/client-core-20260930/shared-mail-compose/README.md), root-source-acceptance01.json (12,010 B;604b6552026e96e37dfd05671350dddc7b0135d914ec92e9a1e7451facdbf306).
+
+> [Cross-platform Progress50 / 2026-10-03] M14b shared parcel selection/lock/stamp/postage has bounded Root SOURCE + focused acceptance on frozen Source05:465 source files,14 changed originals,3 additions and448 protected originals. Fresh Web Mail52/52, portable26/26, explicit compiled parcel replay42 sessions/294 full outputs and compose replay11 actual captures pass; exact unchanged consumers carry Native100, core7, strict-host5 (2 default ignores), adjacent36 and nonincremental TypeScript exit0. Six Rust test jobs total140 passing executions, not unique tests. All per-job1102/1105/1106/1107/1113 guards match; known child/probe absence and independent zero confirmed P0/P1/P2 are recorded. Original Source01 failures, two51/52 test-harness failures and unexecuted Source02 preparations remain retained. Native true connection epoch through buffer/inbox/UI and exact quote socket-entry receipts are still OPEN: local FIFO acceptance does not prove transmission, and same-connection DataReset must preserve late Cost. Next is bounded Native transport code, then M14c common composer/editor/IME and combined fresh production builds under unchanged caps. No UI operated; gameplay/live ACK/save/relogin/public delivery/mobile/Candidate/full goal remain OPEN. Evidence: [M14b QA](generated/player-qa/client-core-20260930/shared-mail-parcel/README.md), root-source-acceptance01.json (16,858 B;4406ba1c07538f414e89733f5bf0985e3f660be8c1b779cbb3f7f87f8b4b5af6).
+
+> [Cross-platform Progress51 / 2026-10-03] Bounded Native Mail stream/reset/marker SOURCE + focused acceptance is complete on Source04:467 declared existing inputs,9 changed product files and458 protected inputs. Trusted positive (run,connection) is captured before packet delivery and survives buffer/inbox/UI; current-stream Cost survives all three reset layers. ACK-safe marker byte admission fixes the independently confirmed P2. Native103 and production check carry by exact consumed inputs; fresh runtime16/32, portable27, shared-WASM check, Windows802 (3 default ignores), platform-web host5 (2 default ignores), and explicit parcel/compose compiled replay each pass. Old fixtures supply42 actual Web sessions/294 full outputs and11 actual Page/wrapper captures; no new JS producer run is claimed. Earlier platform-web Cargo.toml/lock content was absent from the465 freeze, so Progress50 old host/replay pins are historical only; Source04 explicitly pins both and fresh host/replays close current inputs. Original pre-spawn, two runtime compile failures and Windows PATH failure remain retained. All83 references/73 runtime/4 Next metadata/22 aliases match;26 known owned children actually exited/closed and final snapshot is empty. Independent review reports zero remaining confirmed P0/P1/P2 for this scope. Exact quote socket entry and old MailSent ACK remain OPEN; next is one12-path quote-ticket writer, then typed send ACK, M14c common painter/editor/IME and combined fresh production builds under unchanged caps. Code only; no UI, production-build, live gameplay/save/relogin/public/mobile/Candidate or goal acceptance. Evidence: [Native stream QA](generated/player-qa/client-core-20260930/native-mail-stream/README.md), root-source-acceptance01.json (18,322 B;ed0c3a40571fc267c0e36e7d564b40d9aad85e4d2c1dc6a76b990bbce35aa292).
+
+> [Cross-platform Progress52 / 2026-10-04] Native Mail quote-ticket SOURCE + focused checks are accepted on Source04:467 existing inputs,12 changed files and455 protected inputs. Exact token/ticket binding precedes publication; timeout starts at actual start_send entry, and definitely-unsent retirement is identity-bound. Receipt/Cost order and tombstones survive all three same-stream reset layers; true stream change and poison handling fail closed. Core11, Native110, runtime Mail23/ingest36, portable30, Windows812 (3 default ignores), Web host5 (2 default ignores), shared-WASM type check and two explicit compiled replays pass:1029 Rust test executions, not unique scenarios. Seven earlier positive jobs carry by exact consumed inputs; three real fixture/compile failures are retained. All467 current/final/before archives,84 references,73 runtime pins,4 Next metadata and22 aliases match; all28 known Cargo/probe children exited/closed and are absent. Independent review reports zero remaining confirmed P0/P1/P2 for this bounded scope. Controlled production Sink entry is not full socket/client evidence; dedicated quote-receipt byte-refusal coverage and interruption of permanently blocked flush are not claimed. Next:17-path Native typed MailSent flight/complete-draft ABA protection, then M14c shared composer/editor/IME and combined production builds within unchanged caps. Code only; actual clients/mobile/Candidate and goal stay open. Evidence: [Native quote QA](generated/player-qa/client-core-20260930/native-mail-quote-ticket/README.md), root-source-acceptance01.json (21,941 B;a8d9e8d49af4dbf69f0c79aabce8a8312b550511ab114a0d9fd48f6820b7674a).
+
+> [Cross-platform Progress53 / 2026-10-04] Native Mail send-flight SOURCE + focused checks are accepted on Source05:467 existing inputs,17 changed files and450 protected inputs. Shared Core owns one checked send token and persistent full-raw draft generation; actual queue admission, prepublish ticket binding and irreversible start_send entry preserve exact unsent/entered/unknown outcomes. Legal 1/-1 settles only the old transport and Pending binding; draft/incarnation/raw generation separately gate UI effects, including reducer/editor/UID/stamp ABA. Critical FIFO and tombstones survive all three same-stream reset layers. Eleven actual positive jobs cover Core13, Native121, runtime Mail28/ingest40, portable31, Windows820 (3 default ignores), Web host5 (2 default ignores), Native/shared-WASM checks and two explicit compiled replays:1060 Rust test executions, not unique scenarios. Seven exact-input qualified jobs carry and four are fresh on Source05; two actual fixture/compile failures are retained. All26 full authored test names match passing raw stdout. Current/final/before source,86 references,73 runtime pins,4 Next metadata and22 actual alias realpaths match. All26 known job/probe children exited/closed and were absent at the recorded snapshot. Windows was serial --test-threads=1; default parallel queue safety is not claimed. Independent reviews report zero remaining Native P0/P1/P2. Controlled channels/Sinks and pure App are code evidence; permanently blocked poll_flush interruption, actual connected clients/mobile and new production artifacts remain open. Evidence: [Native send QA](generated/player-qa/client-core-20260930/native-mail-send-flight/README.md), Root acceptance C:/mir2-cross-platform-storage-20261002/repo-qa-native-mail-sent-01/root-source-acceptance01.json.
+
+> [Cross-platform Progress54 / 2026-10-04] The Web arbitrary-integer MailSent P1 is closed in bounded SOURCE + focused checks:only primitive numeric 1/-1 may retire an entered send barrier, including ownerless old ACKs. Source01 changes two existing files against Native Source05 and preserves465 other inputs; both guard lines and the5698-byte additive actual-Page AST test block reverse exactly, retaining every prior assertion. Fresh Node55/55, nonincremental TypeScript and both current compiled exact ignored Rust replays pass (one test each). The actual producer emits19 compose captures and47 parcel sessions/361 outputs; these controlled captures are bound to replay evidence. All467 current/final/before source rows,86 references,73 runtime pins,4 Next metadata and22 alias realpaths match; all8 known finite-check/probe children exited/closed and were absent at the recorded snapshot. No browser/socket/client was operated. This closes the malformed-result defect only; M14c1 stable pure-Core send-slot ABI/facade and M14c2 shared composer/editor/IME/painter remain next, followed by matched production artifacts within unchanged size caps. Code-only authorization remains; actual login/combat/save/relogin, device/frontend/Candidate acceptance and the goal stay open. Evidence: [Web ACK QA](generated/player-qa/client-core-20260930/web-mail-ack/README.md).
+
+> [Cross-platform M14b Native send ACK next / 2026-10-04] Stream/reset/marker and exact quote ticket are bounded SOURCE + focused accepted as Progress51/52. Next single writer owns17 existing paths for common SendSlot, typed MailSent ACK, pending token/ticket binding, complete-draft checked ABA generation and ordered critical terminal reserve. Old same-stream ACK retires its original barrier only. M14c common composer/editor/IME and combined builds follow. Root alone executes after each source freeze; wire/auth/server/simulation/store/save/dependencies/versions/caps and UI remain protected. Production and player/device acceptance stay open.
+
+
+> [Sealed707 evidence](generated/player-qa/client-core-20260930/shared-mp-orb-dpr2/README.md) ·
+> [Native failed entry/retry boundary](generated/player-qa/client-core-20260930/shared-mp-native-entry/README.md) ·
+> [Shared EXP contract](architecture/shared-experience-bar-host-contract.md) ·
+> [Shared weight contract](architecture/shared-weight-bar-host-contract.md).
+
+> 2026-10-01 HP retry5a7c9a closes the bounded Rust image-request defect.
+> Portable8/8, nativeHUD38/38, runtime10/10, native/three-WASM checks, canonical
+> artifacts, actual Next and a 376,190,199-byte/7,300-file/zero-link clean copy
+> pass the unchanged budgets. Actual sharedGL2 fault01 has one abort over
+> 231,234ms at generation2; same-page Login generation4 allows one new abort
+> over114,653ms. Ordinary reload recovers HP; GPU secondary UI, lean React and
+> process-DPR2 touch also work. Five fresh runtime hash cases plus one same-App
+> reuse,70 retained PNGs,10 movement ACKs and six normal Logout/save revisions
+> 248–258 match246 across11 public fields. All owned services/listeners exited;
+> shutdown store bytes match. Root364-source/35-helper/86-audit and7,300 copied
+> file checks pass. Retained driver mistakes and corrective core audit v2 stay
+> explicit. Native physical/Welcome/trusted capture/Logout, partial HP, phones,
+> full HUD/composition, performance, public delivery and human acceptance stay
+> open. Shared MP is selected by read-only audit, pending a separate code lease.
+> Root owns architecture/integration/actual clients, Sol/high bounded code and
+> independent review, Luna/medium fixed evidence. Overall goal remains active.
+> [Retry results](generated/player-qa/client-core-20260930/shared-hp-orb-retry/README.md) ·
+> [Original HP evidence](generated/player-qa/client-core-20260930/shared-hp-orb/README.md) ·
+> [Retry contract](architecture/shared-hp-orb-retry-contract.md).
+
+> 2026-10-01 portable thin03 passes the unchanged 360 MiB gate: 376,070,623
+> bytes / 7,300 files / zero links, leaving 1,416,737 bytes of margin.
+> Rejected 01/02 and 01's external ancestor module resolution remain retained.
+> The new clean copy has no ancestor dependency paths; all 42 actual Sharp
+> require-cache files stay inside its Windows x64 app. Cold HTTP 107/107,
+> 230 equal-data compacted JSONs, 79 current atlas pages and six immutable
+> f506 runtime hashes pass. Three ordinary shared GL2/GPU/lean clients retain
+> 29 PNGs (24 passing, five initial/failure captures), 12 walk ACKs, three
+> normal LogoutACKs and saves 215/217/219 matching 213. Four QA driver mistakes
+> remain explicit. Final root 114-source/four-build-identity/28-helper hashes,
+> process/store cleanup and the root-reviewed independent audit pass; all 322
+> indexed source/evidence rows still match at this closed source boundary.
+> Loopback media is configured; Pet/Gate coverage in the old manifest is zero
+> and release-manifest 404 does not accept public delivery. Phones, cross-OS
+> native closure, performance, full locale/HUD/compositor and CP-02–04 stay open.
+> Packaging leases are closed. Read-only audits selected a shared HP orb painter
+> and a thin display handoff as the next bounded slice; its active leases are
+> described above. Root owns architecture/integration/actual clients,
+> Sol/high bounded code and independent review, Luna/medium fixed evidence.
+> The overall goal remains active.
+> [Portable results](generated/player-qa/client-core-20260930/portable-thin/README.md) ·
+> [Round03 contract](architecture/portable-web-thin-round03-contract.md).
+
+> 2026-10-01 input-routing f506 is sealed: ordinary primary mouse compatibility,
+> nipplejs Y-up adapter/active-to-null Stop and touch GAME PWA ownership are
+> repaired. Frozen105 sources/11 initial helpers, three late helper markers,
+> six launchers, canonical three-package/actual Next builds and unchanged budgets
+> are verified. Four browser cases have58 PNGs,16 matching walk ACKs,
+> four normal LogoutACKs and saves207/209/211/213 matching205. Eight touch gestures
+> remain centered with a finger down for more than900ms without extra outbound.
+> Responsive600/640/844 entries and independent GPU UI windows pass their bounded
+> gates. Retained driver/timing errors and case02 response-body eviction remain
+> explicit; fresh case03 hashes its own files. Independent audits are root-reviewed;
+> all QA processes/listeners stopped, correct store hash stable.
+> Current write set is portable thin copying/dependency materialization: one
+> Sol/high writer owns three packaging/helper/test files, separate Sol/high review
+> is read-only, root owns isolated boot/actual clients, Luna/medium seals evidence.
+> No new portable360MiB pass, physical device or whole-client acceptance yet.
+> [Input results](generated/player-qa/client-core-20260930/web-input-routing/README.md) ·
+> [Current portable contract](architecture/portable-web-thin-contract.md).
+
+> 2026-10-01 selectable runtime49d3 is built and the actual Next/copy identity
+> agrees. GPU/leanGL2/sharedGL2 are30,410,423/21,422,374/31,429,360 raw bytes;
+> all unchanged byte limits pass. Frozen104 client sources/ten helpers match;
+> six artifacts and three read-only no-App ABI processes are archived. Actual
+> lean/shared/GPU core panels, cached shared payloads and controlled JS/WASM
+> transport failure→DOM→ordinary reload are recorded. Normal saves191–205
+> match181; initial movement failures and ordinary restoration189 stay separate.
+> GPU-requested07 is GL fallback,08 login-only support failure; realGPU09 has
+> an844 More/PWA interception failure despite classic/600 panel success. The
+> thin copy is10.94GB with external junctions, not portable accepted. Independent
+> final Luna/medium evidence audit is complete and root-reviewed. Current write set fixes
+> primary-canvas compatibility mouse, nipplejs vertical inversion and all-size
+> touch-game PWA ownership and active→null joystick Stop; root owns Rust/integration/actual clients, Sol/high
+> the frontend leaf and independent review. Following work is bounded Windows
+> trace/materialization and portable-size repair. Devices, mixed-input desktops,
+> compositor/performance and CP-02–04 remain open; goal stays active.
+> [Selection results](generated/player-qa/client-core-20260930/webgl2-package-selection/README.md) ·
+> [Current input contract](architecture/web-input-routing-contract.md).
+
+> 2026-10-01 controlled GL2 capability pair is built: default21,421,645 raw/
+>5,277,527gzip vs shared31,428,414/5,871,169, a10,006,769/593,642-byte reduction.
+> Full GL2 WASM export sets and42 JS names/arities agree; isolated read-only
+> Bag ABI1/status checks pass. The canonical95e4 two-package build keeps the
+> current UI-capable GL2 path; ordinary pages do not yet select the lean package.
+> Three actual DPR1 touch-emulation branches31 PNGs have zero movement/item/Quest
+> requests/errors and normal saves177/179/181 match175. Four final WASM/native
+> combinations, builder checks and unchanged budgets pass; root's initial UI-only
+> cfg failure and driver mistakes remain retained. Independent Luna/medium audit is complete and root-reviewed.
+> Next: complete selectable GPU/defaultGL2/sharedGL2 versioning/publication and
+> fixed page choice/failure recovery, then actual transfer/startup evidence.
+> The source freeze for this sealed round is complete; the next selection slice has a separate write set. CP-02–04 remain
+> open. [Weight evidence and limits](generated/player-qa/client-core-20260930/webgl2-weight-pair/README.md).
+
+> 2026-10-01 compact Quest f7 now passes bounded ordinary600×320 shared
+> Diary/Detail Text/Rewards/confirmation Cancel,640/844 entries, lifecycle and
+> save/relogin in desktop DPR1 touch emulation. Final63 sources/four artifacts
+> and nine helpers are frozen. Three current branches have53 PNGs, zero movement,
+> quest operations or runtime exceptions, and normal saves169/171/173/175 match165.
+> ba90's real scaled-panel failure, seven PNGs and recovery/save167 remain retained;
+> only compact subtree rounding was disabled, with no relaxed size gate.
+> Compact18/18, applicable portable410/410 (one native-only assertion excluded),
+> host9/9, native/WASM checks, Web38/tsc and byte budgets have explicit scopes.
+> Independent Luna audit is complete and root-reviewed. Next: controlled default/shared GL2
+> feature-pair weight evidence and complete package selection/publication contract.
+> Full locale/HUD, devices, DPR2/IME, compositor/performance and CP-02–04 remain
+> open; the overall goal stays active.
+> [Current compact evidence](generated/player-qa/client-core-20260930/compact-quest/README.md).
+
+> The compact checkpoint's next round was to separate compiled WebGL2 shared-UI capability and measure
+> a frozen default/shared release pair. The canonical two-package builder keeps
+> its existing UI-capable GL2 behavior. Root owns integration and release builds,
+> one Sol/high writer owns the six-file leaf, a separate Sol/high reviewer is
+> read-only and Luna/medium audits retained metrics. No browser package selection
+> or production route changes in that first slice; its result is now recorded above.
+> [Weight contract](architecture/webgl2-runtime-weight-contract.md).
+
+> 2026-10-01 mobile More Diary entry now has final63-source/four unchanged109d
+> artifact evidence: localized Quest callback,40/44px panel targets, PWA entry
+> spacing and touch menu dismissal. English/Chinese/Portuguese600/640/844 routes
+> pass their bounded geometry/ordinary touch gates;600 retains React Diary,
+>640/844 use shared Diary and all three sizes use shared Bag. Default GL2 React
+> and GPU shared paths have fresh regressions. Final Web28/tsc and normal
+> saves150/152/159/161/163/165 preserve baseline144. Independent Luna/medium audit
+> is complete and root-reviewed. Failed Chinese resize/restoration has20 walks and separate normal facing
+> restoration two; those records stay separate from zero-movement passing routes.
+> Its next600×320 shared Quest slice is followed up above under the
+> [compact contract](architecture/compact-landscape-quest-contract.md).
+> Physical devices, whole HUD, locale/HTML declaration, B2 and CP-02–04 remain
+> open. Root owns integration/actual clients, Sol/high bounded code and
+> Luna/medium evidence. The goal stays active.
+> [Entry contract](architecture/mobile-diary-entry-contract.md) ·
+> [Exact current-source QA](generated/player-qa/client-core-20260930/mobile-diary-entry/README.md).
+
+> 2026-10-01 WebGL2 prototype109d has frozen57-source/four-artifact evidence:
+> transparent primary-canvas shared Bag/Diary, four mouse plus four touch item
+> receipts,600/640/844 Inspect, lifecycle/More handoff and normal saves136/138.
+> Default GL2 React/save140 and GPU shared equipment/Diary/save144 pass their
+> bounded regressions. Native294/1 ignored, two WASM checks, final Web15/tsc and
+> release budgets pass; broad rustfmt does not. The full DOM world remains below
+> the UI for the experimental page lifetime. Final world composition, payload
+> performance, physical devices, B2 and full CP-02–04 remain open. Next bounded
+> work at that checkpoint was the mobile More Diary entry, now recorded above
+> under its [contract](architecture/mobile-diary-entry-contract.md). Root
+> owns architecture/integration/actual clients, Sol/high bounded implementation
+> and Luna/medium sealed audits. The goal stays active.
+> [Contract](architecture/webgl2-shared-ui-prototype-contract.md) ·
+> [QA round](generated/player-qa/client-core-20260930/webgl2-shared-ui/README.md).
+
+> 2026-10-01 landscape touch Bag follow-up: WebGPU7fca core actions and the
+> separate entry CSS repair have ordinary touch/Diary/save evidence. Rebuilt
+> e275 now verifies explicit current-document Inspect, complete pages at actual
+> 600/640/844, measured overlay input, background/resize/portrait invalidation,
+> More/page handoff and session2/save118/120. Desktop hover and Use/Equip/Move
+> regressions receive four success ACKs and restore the baseline. Portable24,
+> hint18, final host7/WASM, Web routing10 and both release budgets pass within
+> their recorded source scopes. Failed b4b/4fdd, the older observation gap and
+> profile/resize harness mistakes remain retained. Root owns architecture,
+> integration/actual clients/docs; Sol/high implements bounded leaves and
+> Luna/medium audits sealed evidence. Next: measure the single-surface WebGL2
+> compositor and remaining shared surfaces/HUD controls. Physical devices,
+> current DPR2 touch, B2 and CP-02–04 remain open; the goal is active.
+> A separate exact-e275 session3 now also verifies touch Inspect→Back→Use_weapon,
+> Equip UID0 restoration and Move4→0→4, four success ACKs and unchanged save126.
+> [Evidence and remaining gates](generated/player-qa/client-core-20260930/touch-bag/README.md).
+
+> 2026-09-30 shared bag B2 checkpoint: WebGPU now uses the shared Crystal
+> painter with one existing equipment ledger. a58 ordinary move/equip/use,
+> normal saves79/81 and same-page restoration pass; independent DPR2 startup,
+> pointer coordinates and window resize have bounded evidence. Earlier d924
+> DPR change failure and the 2b263300×150 repair failure remain retained.
+> a58 also exposes an empty first focus-return frame despite ready status.
+> Read-only2090 diagnostics do not reproduce it in two background replays;
+> touch compatibility open/close and normal save88 pass. Rebuilt616f now
+> gates ownership on the current item subtree and layout:13portable/4host,
+> actual empty-page/hidden-pending/item-refresh/More checks and normal
+> saves92/96/98 with same-page restoration pass. The old transient's root
+> cause remains unproven; B2 is not accepted. WebGL2 composition,
+> shared touch bag and physical-device/whole-client gates remain open.
+> [Builds, receipts, screenshots and limits](generated/player-qa/client-core-20260930/shared-bag/README.md).
+
+> 2026-09-30 shared equipment/hints: Windows and the small Web WASM now use
+> one Rust equipment ledger. Final Web regression106/106 and TypeScript pass;
+> actual final page9D1AAC5F moves/equips/restores, saves revision61 and restores
+> session2 on the same page. Invalid unexpanded Bag II targets emit no request
+> and show failure. Native99d2d08a repairs reward ItemInfo lost during ingest;
+> actual tooltip/clearing, two equipment receipts and normal save34 pass.
+> Earlier failed moves and missing/misleading hints remain retained. The Web
+> bag is still React; next is shared Bevy visual/input ownership with one
+> submission controller. WebGL2, physical mobile and full CP-02–04 remain open.
+> [Equipment evidence](generated/player-qa/client-core-20260930/shared-equipment/README.md) ·
+> [Hints/native repair](generated/player-qa/client-core-20260930/portable-hints/README.md).
+
+> 2026-09-30 shared bag model: Web retains original tooltip/state-image data;
+> the actual refreshed ordinary login matches all five item sources on wire.
+> Web client-core 52/52, TypeScript and real-input Rust contract 4/4 pass.
+> Normal logout saves revision 33. The bag is still React. Next: extract one
+> renderer-independent equipment ledger before Bevy ownership. Portable hints
+> build as 03c845d2, but actual reward hover exposed discarded reward ItemInfo;
+> repair and visual revalidation are in progress.
+> [Evidence](generated/player-qa/client-core-20260930/bag-model/README.md).
+
+> 2026-09-30 shared bag B1: native inventory now calls the portable Crystal
+> painter. Library 1124/1 ignored, WASM check and rebuilt Windows 7535d4d5 pass.
+> Actual tabs, stack tooltip, item drag placement, three exact equipment ACKs,
+> zero world movement and normal save/exit are recorded. Web shared bag owner,
+> pending handoff, portable tooltips and physical mobile remain open.
+> [Evidence](generated/player-qa/client-core-20260930/bag-painter/README.md).
+
+> 2026-09-30 shared-client follow-up: WebGPU 5b8093c8 preserves selected Quest
+> detail and reading position through 844×390→640×360→portrait→landscape.
+> Ordinary Web UID4 equip/remove and UID0 restoration have exact receipts and
+> normal-save evidence. Shared native equipment plans and equipment Use pass
+> 1122 tests/1 ignore and an actual saved route. A later UI-origin drag failure
+> on eea91b54 is retained; 8646ca71 replays it with zero leaked movement, while
+> outside/transparent-margin clicks work. Same-frame edges have unit coverage;
+> this GUI replay used adjacent frames. Next: shared native/portable bag painter
+> and host integration. Web shared pending, WebGL2, other mobile UI and physical
+> devices remain open. Goal stays active.
+> [Native replay](generated/player-qa/client-core-20260930/native-pointer/README.md) ·
+> [Touch evidence](generated/player-qa/client-core-20260930/mobile-quest/README.md).
+> [Resize and Web equipment](generated/player-qa/client-core-20260930/lifecycle-inventory/README.md).
+> [Native equipment and final drag replay](generated/player-qa/client-core-20260930/input-equipment/README.md).
+
+> 2026-09-30 actual Windows task route: current-source EXE b2e5ce67 completed
+> N1/N2 with native mouse interaction, successful equipment/quest receipts,
+> normal logout and fresh-process save restoration. Test login used the existing
+> environment entry; the credential form is not accepted. Three Quest clicks
+> also sent movement, retained for a geometry-based PreUpdate repair and actual
+> replay. CP-03 shared touch layout and host-size handshake are in progress.
+> [Evidence](generated/player-qa/client-core-20260930/native-ui/README.md).
+
+> 2026-09-30 shared browser UI slice: the same Bevy Diary/NPC source now runs
+> in WebGPU. Actual ordinary N1/N2, equipment, exact receipts and normal
+> save/relogin pass on the isolated existing Gateway. WebGL2 safely retains
+> its compatibility UI after a confirmed single-context surface limitation.
+> Browser clock panic and stale-ready/input ownership defects are repaired;
+> both backend builds pass the unchanged byte budgets. Windows GUI, shared
+> HUD/inventory, full locale consistency, mobile readability and devices remain
+> open. Goal stays active. [Evidence](generated/player-qa/client-core-20260930/bevy-ui/README.md).
+
+> 2026-09-30 shared-client implementation: CP-00 reviewed; CP-01 now uses one
+> Rust quest policy in Windows and a 124 KiB browser WASM host. Explicit diary
+> endpoints, same-quest pending suppression, localized retry and N16 current
+> copy are verified. Actual compatibility browser N1/N2 and logout/login pass
+> on an isolated existing Gateway. Windows GUI, full shared browser UI, public
+> release and mobile-device acceptance stay open. Touch emulation exposes a
+> too-small diary, retained for the layout round. Goal remains active.
+> [Plan](CROSS-PLATFORM-CLIENT-GOAL.md) · [Evidence](generated/player-qa/client-core-20260930/README.md).
+
+> 2026-09-30 initial planning checkpoint: the user prioritizes Windows/Web/mobile
+> consistency and reuse. Continue the shared Rust/Bevy client migration under
+> ADR-0001, with thin platform adapters and desktop/touch layout variants.
+> CP-00 maps the actual boundaries; CP-01 first shares newcomer diary actions
+> and content validation across Windows and Web, followed by executable browser
+> UI and early mobile validation. At that checkpoint these were planned gates;
+> the implementation checkpoint above records subsequent evidence. Existing
+> capacity/release evidence is retained.
+> [Ownership, sequence and acceptance](architecture/ADR-0001-cross-platform-bevy-client.md#2026-09-30-clarification-consistency-and-reuse-across-desktop-web-and-mobile).
+
+> 2026-09-29 transport follow-up: public bootstrap delays correlate with TCP
+> retransmission; the fourteen-actor AOI stop also contains stale cross-client
+> owner positions. Failed verdicts remain. Opt-in bounded catalog compression
+> preserves legacy Text and reduces a real local TLS catalog batch by87.3%.
+> Shared5/native5 plus real native resume1, Gateway7 plus adjacent29, and Node
+> transport13/adjacent29 pass. Complete final Node regression passes115/115,
+> including73 capacity checks after the bounded chase-strategy change. Paired clean packaging/deployment,
+> public revalidation and stable50/100 acceptance remain open. The requested
+> approximate twelve-hour window ended without the playability goal achieved.
+> [Evidence](generated/player-qa/server-capacity-20260929/catalog-transport.md).
+
+> 2026-09-29 capacity follow-up: second full Gateway regression passes845/0
+> with18 ignored; runner/observation passes80/80. Pushed9ac is deployed to the
+> backed-up isolated realm; original production is unchanged. The first new
+> 50-target attempt stops on the fourth ordinary bootstrap, before any stage.
+> Diagnose that retained failure; no50-player acceptance yet. The execution
+> gap00:46–04:22 UTC earns no stability time. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
+> 2026-09-29 capacity ordering follow-up: deterministic player-AOI and owner
+> acknowledgement races now have fixes and focused regressions. WSS viewport
+> overflow cancels the affected transport through the normal save/resume path;
+> stale player-ID cleanup stays bounded. Hydration selects active monster IDs
+> without constructing full entity presentation. The earlier integrated build
+> passes829 Gateway tests/18 ignored; the final combined full run, deployment
+> and50/100 hour-long workloads are still required. A captured stale self-Struck
+> overwrite was a test-runner defect; native XY was already protected. Retained
+> two-player failures are not capacity limits. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
+> 2026-09-29 continued capacity work: calibrated650/750ms real movement/combat
+> probes on664 pass with resume/save checks, but are only short probes. The first
+> 50-target forest run stops at10 admitted actors on AOI membership validation;
+> diagnose the retained failure before retrying. Immutable static-map sharing
+> now passes319 selected regressions and explicit Debug/Release clone benchmarks;
+> private doors remain independent. Deployment and50/100 long-soak gates remain
+> open. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
+> 2026-09-29 active capacity goal: user authorized approximately 10–12 hours of
+> continuous work to measure the existing limit, reach at least 50 stable active
+> ordinary sessions and attempt100. Preserve original production/data and auth
+> limits. The first 2-total-player short probe stopped on memory protection;
+> it is not stable capacity. Normal native exit and backed-up test-only
+> spectator-off configuration are complete. Corrected baseline passes90-second
+> stages through8 actors, then fails the eleventh StartGame snapshot deadline;
+> no five-minute stable result on that old binary. Pushed318d3e772 is now deployed
+> to the isolated realm: Linux normal stop exits0, and renewed1–15 baseline plus
+> 15 actors/300s passes with movement P95=556ms, zero steady-stage timeouts and
+> two matching saved-state relogins. Original production is unchanged. Test
+> admission is now51 for the next bounded run; this is only a configured limit.
+> 100 ordinary accounts are prepared;50/100 hour-long acceptance remains open.
+> Follow-up hydration getter/timing candidate passes65 focused Gateway checks;
+> its explicit15-session benchmark removes full snapshots from map-name reads.
+> Follow-up6643009e8 is now deployed after backup/drain; both normal stop checks
+> exit0 and original production is unchanged. Native probes exposed patrol/NPC
+> selection and sparse-zero-stat driver defects, now covered by focused checks;
+> calibrated native-cadence capacity runs remain open.
+> [Acceptance and retained evidence](generated/player-qa/server-capacity-20260929/README.md).
+
+> 2026-09-29 invited release delivered: native d33708e1f and Gateway20aeb345f
+> are the verified source pair. Independent PostgreSQL/Redis realm is live at
+> `/playtest/ws`; original service/data remain unchanged. Strict signed package,
+> independent ZIP extraction, public ordinary two-account11/11, real native-resume
+> protocol9/9 and exact-EXE WSS login/map/quest/bag observations pass. Gateway
+> resolved regression totals813 unique passes with8 environment tests unexecuted;
+> original failed runs and focused fixture corrections remain recorded.
+> Next: clean-PC/DPI/soak and load gates, Wizard/Taoist human routes, remaining
+> English text and focused panel-click consumption follow-up. Native GUI reconnect
+> and server-restart recovery are not proven by the protocol resume test.
+> [Exact artifacts and limits](generated/player-qa/invited-playtest-20260929/README.md).
+
+> 2026-09-28 release-readiness audit: public Web and Gateway health are live,
+> but this September development client still uses loopback and linked assets.
+> External testers need a matching WSS test realm and a self-contained client
+> ZIP; the existing formal packager still emits a placeholder Gateway URL.
+> Installer creation is not required for the first invited playtest. Full Git
+> fsck found two damaged base objects and two affected dependents in old local
+> WebAssembly history; none is reachable from current release HEAD. The pack
+> is hash-backed up, no old copy is known, and old-history recovery remains open.
+> An independent current-source shallow snapshot was rebuilt without object
+> links and passes full fsck; its commit matches the verified remote release.
+> [Investigation and handoff plan](PLAYER-PLAYTEST-RELEASE-20260928.md).
+
+> 2026-09-28 class-supply and Chinese newcomer UI pass shared 1100/native
+> 749/Node 166 tests, the native release build and one explicit offline GPU
+> fixture (three screenshots/nine cases). Source `dee30a74d` is pushed and the
+> hash-verified local package is running on client52320/Gateway33580 with the
+> backed-up original store and active diagnostics. Next: fresh
+> ordinary Wizard/Taoist 0–30 routes with actual mid-route purchases and normal
+> save/relogin evidence. Preserve Warrior acceptance and historical ledgers.
+> Legacy English NPC prose/UI, including Bull's outdated scroll dialogue,
+> remains a separate localization gap. These tests do not establish caster
+> survival or whole-game localization.
+> Separate repository maintenance: automatic GC found corrupt historical
+> WebAssembly blob `1ae7f886`; push and native startup succeeded, repair remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
+
+> 2026-09-24 user-reported Warrior 0–30 acceptance is recorded. Next caster
+> gates: explicit material vendors and class-aware supply guidance; V2 MP/
+> poison departure checks; two fresh ordinary Wizard/Taoist routes with
+> per-chapter expenditure, actual restocking and save/relogin evidence, then
+> native player acceptance. Existing rewards, source tests and the Warrior
+> result do not establish either caster's completed route or supply balance.
+> [Audit and acceptance sequence](generated/player-qa/ui-goal-20260921/caster-acceptance-supplies-20260924.md).
+
+> 2026-09-24 practice/combat candidate: V2 class requirements now name each
+> skill in the task card and detail; hunting uses the actual training points,
+> remains available until practice completes, and clears stale arrival text.
+> Each of nine D022 training points now has three actors within radius 3;
+> original-cadence populations are unchanged. Shared Zone fixes Thrusting
+> primary/secondary damage and accepted primary-target skill experience.
+> Native action/motion clocks are unified. Resource-root caching removes a
+> measured filesystem hot path; material/visibility changes preserve D021
+> GPU pixels. Shared UI1083, native738, renderer275, Zone209+10, training1,
+> Gateway2 and Node64 pass. Matched release binaries are hash-verified in
+> `20260924-practice-combat`. After confirmed normal logout, source `abee09b21`
+> is running on client55648/Gateway61900 with a verified save backup and
+> movement/render/soak diagnostics; local WebSocket connection is established.
+> Actual D021 frame improvement and physical acceptance remain open.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
+> 2026-09-24 candidate: newcomer V2 Quest Diary separates the current main
+> route, ready turn-ins and imported side quests with paging; task-card rows
+> reserve wrapped text height. Native combat no longer pauses on a delayed
+> single movement ACK or passive HUD hover, and stale attacks are not retried
+> ahead of a new target. Shared Zone cancels pre-attack queued steps only after
+> accepted combat. Crystal's latest-safe-zone binding is saved and used for
+> TownTeleport, DungeonEscape and TownRevive, including immediate Zone→UseItem.
+> Shared UI 1079/1079, native 732/732 (two GPU soaks excluded), Zone 209/209,
+> scroll 7/7 and focused Gateway/revive cases pass. Source `c1bc4187a` is
+> packaged and running after normal logout (client56428/Gateway57160) with
+> the original store and a hash-verified backup. Physical gameplay acceptance
+> remains open. Do not edit the
+> running a1 save: the user selected original latest-safe-zone semantics and
+> the old save currently stands in the village safe area.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
+
+> 2026-09-23 map-pointer UI: Big Map XY now follows the displayed image's
+> mouse tile; a retained label and bounded render cache avoid hover rebuilds.
+> Mini Map left/right clicks invert the actual rendered crop and use ordinary
+> ACK-bounded movement, with map-epoch/collision/UI protection and no NewMapInfo
+> prerequisite. Old/hidden frame and collapsed footer input are shielded.
+> Shared 1074/1074 and native 728/728 pass (two existing GPU soaks excluded).
+> Release `d26e0d73e` is hash-verified in the `20260923-map-ui` package;
+> after ordinary logout, client43284 is responsive and connected to unchanged
+> Gateway39152 with the backed-up original store and active diagnostics.
+> Mini Map navigation is a convenience extension; physical acceptance remains pending.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-pointer-navigation-20260923.md).
+
+> 2026-09-23 font-cache OOM: reproduced unpinned system fallback source expiry
+> growing identical text from 9 to 49 MiB in eight cycles. Shared source lookup
+> plus retained actual layout font blobs keeps original glyph selection and
+> prevents new IDs after UI teardown. Windows 722/722 passes; explicit GPU
+> negative control reproduces growth, while the fixed 660-second/39,375-frame
+> GPU run holds 5 IDs/8 MiB and 12 CPU/12 GPU images. Mixed glyph pixels and
+> positions remain identical. Release `5c0b381c7` is deployed (client25920,
+> Gateway39152) with original store/keys and active diagnostics; physical gameplay acceptance
+> is separate from this verified cache-lifetime repair.
+> [Evidence](generated/player-qa/ui-goal-20260921/font-fallback-identity-20260923.md).
+
+> 2026-09-23 NPC appearance and turn-in: native packet-only NPCs now retain
+> their image-derived library rather than NPC/00. Quest endpoint lookup uses
+> canonical loaded IDs, fixing Board24/static35 versus Kyle17/static24 and
+> preserving Alice33 on imported quests. Detail Finish opens the correct
+> ordinary NPC conversation and waits for its offered operation; stale/map/
+> range/modal/reward guards remain enforced. Shared 159/159, native bridge
+> 95/95, atlas 33/33 and cave-patrol server authorization/settlement 1/1 pass.
+> Release `8d567e93b` is packaged and launched (client4196/Gateway32864),
+> retaining the original backed-up store and keys. Physical acceptance remains
+> pending. Prior client PID49816 also
+> exited with a separately observed font-atlas OOM; this patch does not fix it.
+> [Evidence](generated/player-qa/ui-goal-20260921/npc-appearance-turn-in-20260923.md).
+
+> 2026-09-23 hunting-area follow-up: local task cards now have a typed ordinary
+> hunt-region route, independent of live target visibility. Shared/native
+> validation rejects stale progress/primary/map/area metadata. Real D001 collision
+> plus dynamic endpoint occupancy passes 18 fixture-ACK moves; native input
+> 104/104 and shared quest filter 154/154 pass. `ReadyToTurnIn` now says `可交付`;
+> the three Skeleton tasks are distinct authored content, not duplicate progress.
+> Release `215ea95b7` is packaged and launched as PID49816. Prior client PID29460
+> exited with rendering OOM; new launch enables exact image/font/cache telemetry.
+> Gateway PID45232 stays running. OOM/visual acceptance is not claimed.
+> [Evidence](generated/player-qa/ui-goal-20260921/hunt-navigation-20260923.md).
+
+> 2026-09-23 missing arrival navigation: quest 2110009's `Oma Cave` flag text
+> incorrectly matched a nearby Oma and replaced its entrance button. V2 hints
+> now use declared kills plus authoritative counters, and map destinations
+> take priority until the target map is reached. New regressions improve from
+> 0/4 to 4/4; shared-client quest filter 151/151 passes. Native release build
+> passes. Client `37e0dcacb` is deployed as PID29460 from
+> `C:/numeron-legend-of-rebirth-20260923-task-target` and its WebSocket is connected.
+> Both prior processes were absent; the unchanged Gateway was restored as PID45232
+> with the original store/keys after backup. Gameplay stays with the user.
+> Native visual acceptance remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-target-priority-20260923.md).
+
+> 2026-09-23 route stop near Bichon `(205,62)`: the live trace records
+> `worldInputBlocked` after a confirmed move, not a collision correction.
+> Passive UI hover incorrectly cancelled established map routes; a dedicated
+> guard now excludes hover while retaining modal/drag/press/service-panel
+> protection. Windows input 100/100 and shared UI guards 12/12 pass; actual
+> Bichon collision plus a new entity is avoided over 58 fixture ACK steps.
+> Client `841da03dc` is deployed as PID29732 from
+> `C:/numeron-legend-of-rebirth-20260923-route-hover` after normal user exit;
+> WebSocket is connected to unchanged Gateway PID36484.
+> Native visual acceptance stays open; the user retains gameplay control.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-route-hover-20260923.md).
+
+> 2026-09-23 latest task-card fix: the entrance button incorrectly depended on
+> the separate Quest Diary being open and cached Big Map definitions. Native
+> input now uses current authoritative identity plus the real collision map;
+> visible card feedback and bounded route diagnostics are added. Reproduction
+> changes 0/3 to 3/3; Windows input 97/97 and shared-client route tests 9/9 pass.
+> Client `47efc7896` is deployed as PID44352 from
+> `C:/numeron-legend-of-rebirth-20260923-quest-route-card` after normal user
+> exit; WebSocket is connected to retained Gateway `e65bdc4eb` / PID36484.
+> The user retains gameplay control. Native visual acceptance remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-route-card-20260923.md).
+
+> 2026-09-23 immediate handoff: ordinary entrance metadata repair `e65bdc4eb`
+> is deployed as Gateway PID36484 with native client `192e14ce1` / PID35936
+> after user close and saved-position/backup verification. Original store/keys
+> are preserved. Simulation 7/7,
+> Gateway 6/6, Windows 5/5 and isolated public Bichon/D401 roundtrip/save evidence
+> pass; the previous client-only fix failed the user's screenshot acceptance.
+> The user retains gameplay control. Native screenshots and seam/whole UI
+> acceptance remain open. [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
+
+> 2026-09-20 V2 functional route/save gate: **78/78**, using B Warrior/Taoist
+> and E Wizard ordinary-player evidence with explicit mixed-cohort provenance.
+> All three are real level 30 and have public LogOutSuccess plus final snapshot
+> matching persistent character level, map, transform, gold, experience and
+> all 26 V2 quest states. [Verifier output](generated/player-qa/newcomer-v2-20260918/ordinary-evidence-mixed-b-e.json)
+> and [repair/evidence notes](generated/player-qa/newcomer-v2-20260918/blocking-repairs.md).
+> This is not a clean same-build two-hour trial or human timing result; native
+> UI, animations, Crystal comparison and graduation-equipment source checks
+> remain separate. B/C/D failed Wizard evidence and the paused V1 goal remain
+> independent. Stop the completed V2 functional replay and work these open
+> acceptance gates without calling the whole game 100%.
+
+> 2026-09-19 V2 current work: release-build and deploy nine separated authored
+> D022 actors plus corrected BoneFamiliar
+> damage after all normal logout sessions. Resume ordinary Warrior/Taoist
+> rechecks on the separately labelled clock without increasing the 20-attack,
+> 30-second search or three-revival limits. Warrior HalfMoon already has live
+> positive damage; Thrusting action spacing is tested but not live-proven.
+> Strict cohort B remains 66/78 with Wizard's fourth death and cannot pass.
+> Fresh full three-class 120-minute evidence, save parity, UI, animation and
+> original Crystal comparison are separate pending gates.
+
+> 2026-09-19 current V2 priority: finish the D022 safety repair and normal
+> Warrior/Taoist saved runs without interrupting their active sessions. The
+> first dense V2 WoomaSoldier foothold contributed to Wizard's fourth death
+> at N19; strict cohort B 78/78 is no longer possible. A separated one-monster
+> candidate has static walk paths and 57/57 Node checks; release build and
+> live recheck remain open. Do not reset the clocks or revival ledger, and do
+> not represent functional checks as visual/Crystal acceptance.
+
+> 2026-09-19 14:39 UTC read-only strict cohort B verifier records 66/78:
+> Warrior 23/26 level 28, Wizard 21/26 level 26, Taoist 22/26 level 27.
+> Each public LogOut succeeded and snapshot transform matches the saved
+> character. The new V2 Taoist N20/N21 shop preflight for 100 real Amulets
+> addresses the observed SoulFireBall-to-melee depletion; Node tests pass,
+> live proof remains open. Release deployment must follow a safe all-runner
+> logout; keep all original clocks and recovery limits.
+
+> 2026-09-19 active V2 cohort B: Wizard N12 and Warrior N16 passed normally;
+> Wizard continues N16, while Warrior and Taoist are paused at N19 after
+> real bounded D022 Dung searches. The V2-only three-foothold gateway build
+> is pinned and awaits a safe all-runner logout handoff. Preserve cohort B's
+> original 120-minute clocks and cumulative revival counts. Continue public
+> player routes, verify three level-30 saves, then separately record visual,
+> animation, Crystal comparison, and measured human time. Cohort A 51/78
+> remains separate and cannot be turned into a pass.
+
+> 2026-09-19 V2 same-clock update: Wizard N19 suffered a real fourth death
+> with its cumulative three revivals already spent; 78/78 is impossible under
+> the retained rules. Continue lawful Warrior/Taoist checks and keep the
+> original clock, deaths and saved-state evidence intact. Verified: 40/78.
+
+> 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
+> claims, six chapters and trusted committed server/Zone evidence are implemented.
+> Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
+> V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
+> Web guidance/goal and localization plus TypeScript pass; earlier controller checkpoint 288/288.
+> Latest affected V2/supply controller regressions pass 105/105; ordinary revalidation remains open.
+> Gateway pending-Zone monster lifecycle regressions pass 2/2 after a real
+> Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
+> Separate functional recheck clock and recovery-ledger checks pass 62/62;
+> original two-hour route evidence and revival caps remain unchanged.
+> Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
+> input grace (focused 1/1); release `3e5a29924` is deployed and prompt hits are live-proven.
+> Warrior N15 and Taoist N10 passed; Wizard N12, Warrior N16 and Taoist N11
+> have scoped practice/target-policy repairs and require normal saved retries.
+> Additional ordinary functional recheck verifies 40/78 after normal logout;
+> levels 24/19/18, with Warrior N15 and Taoist N10 newly completed.
+> All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
+> Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
+> Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.
+> Actual Gateway N4 self-Healing 1/1 and N5 arrival/autosave/rejection 4/4 pass;
+> movement map-transfer 4/4 and Simulation V2 15/15 plus Zone 7/7 reruns pass.
+> N5 release is deployed; safe-profile Zone 4/4, Gateway snapshot 1/1 and arrival 4/4 pass.
+> Safe-profile release is deployed; legacy safe-area/PvP plus profile reruns 9/9 pass.
+> Shared spell cooldown getter 3/3 and fresh Gateway journey bridge 11/11 pass.
+> Public owner readiness follows the Zone clock; the 6e1778957 release is deployed.
+> Fresh ordinary three-class accounts started on isolated ports 19800/19810, with unextended 120-minute ledgers.
+> Native clean-source release build and unauthenticated startup diagnostic pass; visual capture remains unaccepted.
+> Fresh Wizard N4 practice reservation/accounting repair passes affected suites 87/87;
+> the 180-attempt/120-step caps and original fresh timing ledger remain unchanged.
+> Fresh Taoist N7 stale-hint priority repair passes combat 156/156; V2 resume
+> preserves cumulative recoveries (ledger 14/14, V2 38/38). No caps or clocks grow.
+> Remaining ordinary route, timing, survival,
+> suitable equipment, exact native package and visual acceptance remain open.
+> This adds custom onboarding, no Crystal parity percentage. V1 evidence stays
+> separate. [Implementation evidence](generated/player-qa/newcomer-v2-20260918/runtime.md).
+
+> 2026-09-18 newcomer V2 design: six chapters, 22 new main quests and four growth
+> claims per class; 90-minute core plus 30-minute allowance targets a two-hour
+> journey. Design only: definitions, server event bridges, region certification,
+> guidance, ordinary three-class timing and visual acceptance remain open.
+> V1 runs/evidence and Crystal defaults retain their existing contracts.
+> [Design and implementation order](NEWCOMER-1-30-V2-DESIGN.md).
+
+> 2026-09-17 R154 controller 723/723 passes. Ordinary route units
+> remain **158/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-fresh-material-town-capital-r154.md).
+
+> 2026-09-17 actual Wizard R153 q113 completed: public finish45596,
+> CompleteQuest45598 and snapshot45599 prove BM3/3, Wedge3/3 and exact
+> +12500 gold/+544444 EXP. Aggregate **158/177**; both caster routes continue,
+> final normal logout/store and separate visual gates remain open.
+> [Receipts](generated/player-qa/protocol-journey-20260915/wizard-r153-q113-completed-proof.md).
+
+> 2026-09-17 R153 ordinary recovery: live Wizard q113 is BlackMaggot3/3,
+> WedgeMoth2/3; Taoist normal earned sales/purchases restored the full
+> Amulet100/MP12/Town2 departure stocks. Both continue; completed units remain
+> **157/177**, with final logout/store and separate visual gates open.
+> [Public receipts](generated/player-qa/protocol-journey-20260915/r153-ordinary-recovery-partial-proof.md).
+
+> 2026-09-17 R152/R153 controller 719/719 passes. Actual ordinary route units
+> remain **157/177**; the same accounts resumed after verified escape-memory
+> and Scott-only supply fixes. Final route/logout/store and visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-escape-memory-town-restock-r152-r153.md).
+
+> 2026-09-17 R151 controller 712/712 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-fresh-cycle-nearest-source-r150-r151.md).
+
+> 2026-09-17 R149 controller 707/707 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-transit-cycle-and-fuel-r148-r149.md).
+
+> 2026-09-17 R147 controller 699/699 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-final-landing-r146-tao-range-r147.md).
+
+> 2026-09-17 R145 controller 692/692 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-transit-avoidance-r145.md).
+
+> 2026-09-16 R144 controller 689/689 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-town-backup-r144.md).
+
+> 2026-09-16 R143 controller 687/687 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-shared-hunt-r143.md).
+
+> 2026-09-16 R142 controller 685/685 passes. Ordinary route units
+> remain **156/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-wizard-escape-choice-r142.md).
+
+> 2026-09-16 actual R141 Taoist q89 completed: Priest339200 death3748,
+> Ready3754, normal finishQuest10270→CompleteQuest10272→snapshot10273.
+> Gold105→6705, level25→26 and configured EXP/item rewards match.
+> Taoist46/55+3/4; aggregate **156/177**. Wizard and later Taoist routes,
+> final normal logout/store proof and separate visual gates remain open.
+> [Receipts](generated/player-qa/protocol-journey-20260915/taoist-r141-q89-completed-proof.md).
+
+> 2026-09-16 R141 controller 683/683 passes: q89 casters use eligible
+> normal seven-to-nine Shaman firing positions and up to six bounded
+> receipt-proved clears. A sealed route gets one guarded planning retry;
+> the total combat cap remains 200. Ordinary route units remain155/177;
+> final save and separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-two-caster-blockers-r141.md).
+
+> 2026-09-16 R140 controller 680/680 passes: existing q89 Wizard transit
+> now plans around live named Shaman six-cell halos and retains fresh packet
+> guards. Real D2031 collision test proves a sealed corridor fails closed;
+> a separate synthetic detour is not actual-map acceptance. Route units remain
+> 155/177, with final save and visual gates open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-transit-planning-r140.md).
+
+> 2026-09-16 R139 controller 679/679 passes: a living startup evasive
+> recovery timeout now defers into the existing guarded quest loop. Death
+> retains normal town revival; missing self and unrelated errors remain fatal.
+> Actual route units remain 155/177, with final logout/save and visual gates open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-startup-recovery-r139.md).
+
+> 2026-09-16 R137/R138 controller 678/678 passes: q89 Taoist may use
+> the existing normal D2031→D2032 fallback after an unsafe/stalled search.
+> Both casters replenish twelve MP doses before town departure while retaining
+> the four-dose field trigger. Ordinary route units remain 155/177; actual
+> fallback landing, final logout/save and separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-caster-fallback-departure-r137-r138.md).
+
+> 2026-09-16 R136 controller 676/676 passes: configured q89 Wizard approaches
+> and action movement recheck fresh named-Shaman physical cells; existing halos
+> permit strict outward escape. Captured actions use the fresh live target.
+> R134 Taoist MP restoration and self-Healing now have actual ordinary receipts.
+> Completed units remain 155/177; final logout/save and separate visual gates
+> remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-fresh-shaman-escape-r136.md).
+
+> 2026-09-16 R134/R135 controller 668/668 passes: q89 Taoist post-retreat
+> recovery can restore held MP before affordable self-Healing using fresh exact
+> values. Bootstrap can turn in already-earned optional ready quests for ordinary
+> supplies, preserving the 55+4 denominator. Both same-account casters restarted
+> on natural R54; completed units remain 155/177. Final logout/save and separate
+> visual gates remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-recovery-and-earned-funding-r134-r135.md).
+
+> 2026-09-16 R131–R133 controller668/668 passes: q89 Taoist admits measured
+> 0-adjacent/2-nearby Priest targets. A newer own Mana receipt prompts one exact
+> snapshot before another low-MP potion; escape Town scrolls are protected from
+> obsolete-material sales. Both ordinary casters resumed on natural R54.
+> Completed units remain155/177 at restart; final normal logout/save and separate
+> visual gates remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-admission-mana-and-custody-r131-r133.md).
+
+> 2026-09-16 R129/R130 controller667/667 passes: q89 Taoist critical proven-pack
+> pressure stops offense before captured kiting/travel breakout; healthy travel
+> remains available. Wizard ordinary funding includes its Medium reserve.
+> Both casters resumed on natural R54; completed units remain155/177 at launch.
+> Final normal logout/save and native/Crystal visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-caster-survival-r129-r130.md).
+
+> 2026-09-16 R128: a known stationary D2031 full Priest spread now enables the
+> existing q89 Wizard exact live-key/source D2032 fallback before respawn wait.
+> Controller660/660 passes; Wizard resumed normally, Taoist R127 continues.
+> Taoist's public 69-Amulet purchase is proven by fresh owned stock31→100 and
+> gold20343→18618. Completed units remain155/177 at launch; final/visual gates
+> remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-stalled-search-r128.md).
+
+> 2026-09-16 R126/R127 active continuation: q89 Wizard checks fresh AOI before
+> both Run cells/Walk dispatch, including action-owned kiting; unresolved live
+> blocker recovery is bounded. Taoist q89 normally buys a 100-Amulet departure
+> reserve with field minimum 32. Joint controller 655/655 passes. Both ordinary
+> casters resumed on natural R54; no new completed unit is claimed yet.
+> Warrior's fresh completed-route public login/logout verifies revision7447,
+> Lv30, 55/55 +4/4, map0 (334,270), HP419/MP116 against persisted state.
+> Full route remains 155/177; native UI/animation and Crystal pairing remain open.
+> See [R126/R127 evidence](generated/player-qa/protocol-journey-20260915/q89-transit-and-resupply-r126-r127.md).
+
+> Earlier acceptance checkpoint, 2026-09-16 R34/R122: native Game Shop/mail
+> Candidate behavior has real restored-mail/read/collect/backpack proof; the
+> observed Mail image-growth regression is bounded after tree retention.
+> Gateway 778 passed / 8 ignored, Windows 655/655 with complete C assets,
+> native-ui R34 852/852, including retained-shop/raw-navigation regressions. All five
+> initial simulation fixture failures pass focused reruns; a final full-suite
+> rerun is not claimed. R30 new purchase immediately updates mail total 2 → 3;
+> normal relogin preserves claimed status/two bag items without duplication.
+> R34 visually passes Ctrl+A, Home/End, Left, Backspace/Delete, selection
+> replacement and RedTiger preview rotation. Original paired acceptance is open.
+> Wizard R122 uses existing Medium potions after a fresh direct Shaman hit at
+> 85% HP; controller 634/634. Quest/monster values and escape guards are unchanged.
+> Taoist R104 has stopped; its saved Lv25 checkpoint is retained. Natural completed units remain 155/177; partial
+> kills and these UI leaves do not increase full-route/global acceptance.
+> R35 source alignment/preview asset repair builds; native-ui 853/853 passes.
+> Real original screenshots are retained; repaired paired visual pass remains
+> pending. R123 live search exhausted391 waypoints without q89 advancement;
+> R124 protected-blocker follow-up is wired only for q89 Wizard. Full controller
+> regression passes 645/645; real D2031 collision tests cover every travelled cell
+> and blocker-specific death proof. The normal R54 live run has cleared two
+> Shaman blockers and advanced its search position; q89 completion remains open.
+> See generated/player-qa/protocol-journey-20260915/q89-range-and-blocker-r122-r124.md.
+> R125 separates conservative percent-zero HP from authoritative death; full
+> controller 647/647 passes. Taoist has resumed normally and its valid saved
+> death produced self Revived plus a later healthy HP180 town snapshot.
+> Wizard R124 continues; completed quest units remain 155/177 at this observation.
+> Evidence: generated/player-qa/protocol-journey-20260915/percent-zero-death-r125.md.
+> Evidence: generated/player-qa/native-game-shop-20260915/README.md.
+
+> Historical controller checkpoint follows; R122 supersedes the active Wizard run.
+
+> Latest controller checkpoint, 2026-09-15 R121: Warrior is Lv30, 55/55 mandatory
+> + 4/4 milestones; Wizard and Taoist are Lv25, each 45/55 + 3/4. This is
+> 155/177 units (87.57%), with 20 mandatory tasks and two milestones remaining.
+> R119–R121 retain live-door validation and recover an alive emergency-escape
+> map change without a stale cast. Full controller regression passes 630/630.
+> Wizard R121 resumed normally on R54; Taoist R104 remains active. Partial kills,
+> native UI/animation and full active-play timing remain open. See
+> [evidence](generated/player-qa/protocol-journey-20260915/q89-navigation-r119-r121.md).
+> The older checkpoints below preserve the counts at their observation times.
+
+> Historical checkpoint, 2026-09-15: isolated Gateway R54 is active at
+> localhost 17800/17810. Independent saved-state validation confirms Warrior
+> Lv30, 55/55 mandatory + 4/4 milestones; Wizard Lv25, 45/55 + 3/4, q89 6/9;
+> Taoist Lv23, 39/55 + 2/4, q99 3/6. This is 148/177 quest/milestone units
+> (83.62%), with 26 mandatory quests and three milestones left; partial kill
+> progress and visual gates are not counted as completed units.
+> Full controller regression passes 610/610. The latest fixes recheck paralysis
+> and death immediately after movement cadence waiting, preserve Wizard's
+> legal nine-tile fireball range, buy ordinary Ruben Medium HP reserve only
+> for q89 town departures, and require Taoist q98/q99 to leave town with
+> 12 MP drugs while retaining the four-drug field trigger. q89 held Mediums
+> are preferred with a bounded 2.5-second reuse; other play retains six seconds.
+> Missing/unaffordable Medium rows fall back to held Small HP and normal retreat.
+> Wizard R115 and Taoist R104 are now running the ordinary public journey on
+> R54. R53 Taoist SoulFireBall XP193 persisted normally; natural R54 fireball
+> progression and the remaining route/visual results are pending.
+> The 375-minute budget is a design target, not measured full 0→30 playtime.
+> Native 30-minute telemetry is stable but the observer gate remains FAIL for
+> missing successful-reconnect evidence; it does not certify held-right input.
+> See [checkpoint](generated/player-qa/protocol-journey-20260915/three-class-checkpoint-1910.md),
+> [tests](generated/player-qa/protocol-journey-20260915/quest-agent-tests-r117-root.log)
+> and [R54 practice](generated/player-qa/shared-fireball-practice-20260915/README.md).
+> Full route, animation/UI and complete active-play timing remain unaccepted;
+> formalCandidate=false, accepted=false, visualAccepted=false.
+
+> Historical 2026-09-15 R52 newcomer checkpoint: Gateway R52 is active on
+> `127.0.0.1:17800/17810`; the opt-in route has 55 mandatory quests plus four
+> separate milestones per class and a 375-minute design budget. Chapters target
+> 20/25/60/75/90/105 minutes, with quest-only XP budgets
+> 1,600/49,558/65,742/480,000/1,800,000/4,900,000 (7,296,900 total),
+> 110 bounded kills and 11 needed quest items. Warrior journey R88 completed
+> the ordinary chain across saved checkpoints: Lv30, 55/55 mandatory quests,
+> 4/4 milestones, normal LogOutSuccess and matching account revision 7427.
+> Its 3,387 movement sends include 3,385 paired responses and two Death
+> interruptions; live unmatched requests and responses above 2.5 seconds are
+> zero, maximum response is 1,146 ms, and navigation movement timeout is zero.
+> All four deaths recovered normally. Wizard R110 resumed at Lv25,
+> q89 3/9; Taoist R98 resumed at Lv23, q98 5/6. Current runner fixes
+> include `b846f2a64` cadence serialization, paralysis-aware breakout and
+> authoritative retreat-state refresh. `1e8931561` adds a measured 48/64
+> Taoist Wooma Amulet reserve and alternative unfinished kill targets during
+> search; full regression is 582/582 with no
+> failures, cancellations or skips. Evidence:
+> [quest-agent-tests-r110.log](generated/player-qa/protocol-journey-20260915/quest-agent-tests-r110.log),
+> [Warrior R88](generated/player-qa/protocol-journey-20260915/warrior-r88.md),
+> [protocol status](PROTOCOL-NEWCOMER-ACCEPTANCE.md) and
+> [current design](NEWCOMER-1-30-DESIGN.md).
+> Next: continue the existing ordinary Wizard/Taoist saves through all 55 tasks
+> and four milestones to Lv30, saving exact blockers and retesting repairs.
+> Native UI/animation, three-class completion and complete 0→30 active-play
+> timing remain unaccepted. Overall `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; Warrior R88's 49m44 closing segment is not full-route
+> timing, and protocol acceptance does not change Crystal parity scores.
+
+Earlier checkpoints below are historical and preserve the route counts and
+versions observed at that time. Warrior journey R88 (2026-09-15) is distinct
+from the older backend completed-round R88 entries.
+
+> Historical r25 checkpoint: compile/build passed at SHA-256
+> `5EFB51A48211897F8B1559E793AEDC9E28B24A68FEC89CC41F99FD7C84908A87`.
+> Five simulation tests, four Gateway cadence tests and all 129 Node protocol
+> tests pass. The selected-character ECS position getter narrows pending
+> transform reads; candidate travel selects the nearest graph route while
+> retaining its fallback, and search/approach interruption stays bounded to a
+> proven aggressor. r24's failure came from selecting map 3 before the nearer
+> map 2 candidate, not from the interruption path. r24 exited 0 with writer
+> count 0. Survival/kiting protocol tests pass 143/143 and all quest-agent tests
+> pass 344/344. Ordinary post-objective restocking is bounded, HP supply checks
+> cover all Drug types, and Wizard retreats retain collision, range, hostile,
+> death and map-change guards. The final Wizard run cast six FireBalls, then
+> stopped alive at 45/45 with no collision-safe local retreat. Server 26160
+> exited 0 with writer lock 0; persisted revision 697 matches map 2 position
+> 471,409, HP 45 and MP 105. All three are paused at level 12, 15/53 core quests
+> and 0/4 milestones; Warrior q33 is 7/16 and the others are 0/16. Next: safe
+> escape/target selection beyond the strict local three-cell range. Kiting,
+> latency, one-day pacing, full routes and visuals remain unaccepted.
+
+> r17 build checkpoint: scheduled harvest lifecycle 2/2 and Gateway private
+> projection suppression 2/2 now pass. Both ObjectHarvested conversion and result
+> anchoring are corrected; legitimate scheduled revival remains visible. Resume
+> normal saved players after this build. Concurrent harvest reward custody is
+> still a separate open gate; whole-route and visual acceptance remain open.
+
+> 2026-09-12 latest checkpoint: all three are level 10; Warrior 14/53 core,
+> Wizard/Taoist 12/53. r16 live verified distant SpittingSpider activation and
+> post-relogin FireBall use. All runners ended and isolated r16 is stopped.
+> Next: finish scheduled-corpse projection regression, build r17, resume saved
+> characters with authoritative damage-triggered vitals refresh and paired-slot
+> equipment handling. Newcomer class milestone rewards pass 4 focused tests;
+> full newcomer module 11/11 and protocol suite 118/118 pass. Complete routes
+> additionally require four Board reward claims. No one-day/visual acceptance.
+
+> Latest active checkpoint: Warrior/Taoist reached level 10 and completed q25
+> (12/53 each); Wizard remains level 9, q25 2/4 (11/53). All runners are paused.
+> r15 live proved Fencing progression and harvesting, then exposed missing
+> asynchronous-movement monster hydration (q26) and relogin absolute skill
+> cooldown persistence. Fixes and final focused/adjacent tests are in progress;
+> isolated r15 is stopped, r16 has not been built. Resume normal saved characters
+> after verified r16. Protocol suite 104/104; no whole-route/visual acceptance.
+
+> Active protocol checkpoint: Warrior and Wizard have 11/53 mandatory quests
+> completed at level 9; Taoist has 8/53 at level 6. Actual MapInformation handling
+> is implemented and the combined harness suite passes 100 tests. Runners are
+> paused for the confirmed TownRevive/queued-monster visibility defect. The first
+> focused AOI regression failed at fixture initial spawn; independent review also
+> identified the pre-revival queue-drain ordering gap. Fix and retest before
+> rebuilding the isolated Gateway and resuming ordinary saved characters.
+> Full routes, one-day pacing and visual acceptance remain unverified.
+
+> 2026-09-12 current next step: recognize actual Gateway MapInformation packets
+> in the protocol observer/traveler, fetch fresh destination state, then resume
+> Wizard q11 and the other classes' full-spread searches. Isolated r14 fixed the
+> delayed shared-cadence exit (4 focused + 2 adjacent tests, live MapInformation
+> to map0). Full 53-task routes, pacing and visual acceptance remain open.
+
+> 2026-09-11 active protocol journey: rebuild isolated QA Gateway with the tested
+> dialogue-quest restore fix, reconnect normally, verify Wizard q10/Taoist q13,
+> then continue all 53 mandatory tasks per class. Warrior reached q22 after eight
+> authoritative completions. Do not seed progress or treat 76 passing harness
+> tests as complete route/visual acceptance. Evidence:
+> `docs/PROTOCOL-NEWCOMER-ACCEPTANCE.md`.
+
+> 2026-09-11 active: continue three normal protocol-player newcomer journeys.
+> All classes passed normal account/character/bootstrap and q1–q3. Server Diary
+> correction passes five focused and two adjacent tests; new QA Gateway build
+> and Native Diary tests are pending. No desktop takeover or visual acceptance
+> is claimed. See PROTOCOL-NEWCOMER-ACCEPTANCE.md for evidence and limitations.
+
+> 2026-09-11 newcomer 1–30 implementation checkpoint: opt-in `newcomer-v1`
+> now has six chapters and 53 mandatory quests per class. Quest-only XP covers
+> every route level gate through 30; q4 harvesting and q84 thread collection
+> are optional. Material hints name real sources. Data checks pass 10/10;
+> simulation journey tests pass 7/7, progression 8/8, recurrence 9/9 and four
+> adjacent drop/harvest cases pass. Next: finish native tests and package,
+> then natural Warrior/Wizard/Taoist play to calibrate the one-day target.
+> Time-to-30 and visual acceptance remain unverified. See NEWCOMER-1-30-DESIGN.md.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`.
+
+> 2026-09-11 NPC-dialog usability checkpoint: the native Board at (335,259)
+> renders clean labels without raw markup, pages to ReviveHero/SealHero/Use,
+> follows Use to the server shop list, reaches Hairdresser/Close on its last
+> page, opens a separate five-item quest list, and closes dialog plus quest list
+> from the top-right X. Real Board parser and feature-enabled native pagination
+> tests pass 1/1 each; Gateway and native builds pass. Only QA position changed;
+> quest progress did not. Hero business actions were not exercised, and inline
+> coloured/large-button Crystal layout plus duplicate fallback footer entries
+> remain open. The related native UI regression set passes 4/4, including the
+> focused pagination case; it is one overlapping set, not five tests.
+> `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 combat-fix partial native checkpoint: a persisted HP=0 character
+> revived with V to Bichon (288,616) at 224/224. A separate position-only seed
+> at map 1 (278,180), with quest counts left untouched, produced one natural
+> ForestYeti kill: 0/8→1/8 and EXP 14.29%→14.31%. A respawned Yeti's live HUD
+> descended 137/224→106→63→27→0 instead of jumping from full health to death.
+> Relog returned safely to Bichon (288,616) at 224/224 and retained Yeti 1/8,
+> 14.31% and stored experience 20036.
+> Gateway owner ObjectHealth-ID normalization and native dead-V/default-Minimap
+> conflict tests pass 1/1 each; both builds pass. Eight natural Yeti kills, a
+> natural Oma kill, full route/balance coverage and all three classes remain
+> open. Tree/night occlusion and difficult attack operation also leave animation
+> acceptance open. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 partial native quest checkpoint: the real Board UI verified the
+> two-choice cap, abandon-and-replace flow, corrected single-count objective,
+> hidden old choice after replacement, and level-15/20 milestone payouts with
+> relog/no-reclaim. An explicitly `QA-progress-seeded` continuation verified
+> two ordinary hand-ins, bonus 0/2→1/2→2/2, 26,000 final gold, 20,000 quest EXP,
+> and relog/no-reclaim; natural monster-kill progression remains open. Focused
+> newcomer tests pass 8/8. The BaseDress equipment-slot fix was also worn live.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 internal QA package ready: fresh optimized-dev client/Gateway, 50,400
+> asset hashes verified. Isolated level-20 Board fixture and protocol smoke pass
+> (10 definitions, 6 eligible quests). Desktop takeover awaits user pause while
+> DeltaForce runs. No native visual acceptance or signed Release claim. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+
+> 2026-09-11 newcomer progression follow-up implemented: 1–40 guidance (138
+> quests per class / 144 source IDs), three daily choices with a two-quest cap,
+> current-day 2/2 claimable bonus, and one-time gold milestones at 15/20/25/30/35/40.
+> Ten independent IDs are server newcomer-v1 only; default Crystal is preserved.
+> Exact Board binding, distinct claims, persistence/profile isolation and daily
+> high-watermark checks pass. Gateway now sends changed quest snapshots even on
+> Tick/KeepAlive without expanding ordinary movement snapshots. Verification:
+> Node193, Bevy88, Windows1, simulation68, store6, Gateway29 pass. No package or
+> live visual/three-class balance acceptance. This is optional content, not a
+> new Crystal parity percentage. Next: matched package and live Board/Diary/
+> reward/relogin acceptance. Details: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 first progression/cadence slice delivered: 1–25 guidance, actual
+> daily141/repeatable142, optional weekly140 and exact Gateway Finish ACK.
+> Checks pass: Node193/native88/simulation61/store3/Gateway28. Next: matched
+> package/visual quest flow, normal class progression timings, then 26–40 guidance
+> and level-appropriate alternative daily tasks/two-of-three milestone rewards.
+> Current board level ranges are retained; this is not all-level daily coverage.
+> Evidence: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 optional newcomer guidance implemented and source-tested:
+> 22 recommended / 15 optional / 4 challenge / 1 deferred per class;
+> native list/diary/detail integration and zero-fixed-reward presentation.
+> Rust quest 87/87 and Node 192/192 pass. Next: package with the explicit
+> newcomer-v1 profile and verify screenshots, then normal three-class level-15
+> timings/supplies/deaths before changing balance. Crystal default is preserved.
+> Evidence and live checklist: QUEST-NEWCOMER-ACCEPTANCE.md.
+
+> 2026-09-11 level 1–15 quest closeout: generated class-specific 42-quest
+> route manifests (39 shared + 3 instructor quests per class). Fixed route
+> segment bounds, exact Oma kill matching for q8/q11/q14 and zero-count reward
+> handling for source q37/q41. Current-source checks pass: route 15, policy 139,
+> Rust new 2 + adjacent 2 + full bag 1 + progress restoration 1. No game launch,
+> package, continuous three-class playthrough or paired visual acceptance.
+> Evidence: generated/player-qa/quest-level15-20260911/README.md.
+
+
+> 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
+> stable account/character identity across local factory Zones, excluding
+> replicas and leaving players (simulation 3/3, Gateway integration 1/1).
+> Creature updates now preserve server-owned properties, reject fabricated
+> pets and separate summon state from pickup mode; authority/migration 5/5,
+> simulation regressions 4/4 and Gateway regressions 8/8 pass. Legitimate
+> creature acquisition/actor rendering, distributed ranking and final native
+> visual acceptance remain open. See `NATIVE-MENU-CRYSTAL-PARITY.md`.
+> No global completion percentage or final acceptance is claimed.
+
+> 2026-09-09 trade merge/reorder: native item selection now sends exact-UID
+> merges across Inventory/Trade and slot moves/swaps within own Trade.
+> Partial merges preserve the remainder and target identity; server validates
+> metadata, capacity, logical grid membership and editable offer state.
+> Shared routing blocks edits when either participant is prepared and refreshes
+> the partner offer. Trade merges require exact ACK/NACK, not inventory-delta
+> inference. Evidence: `docs/generated/player-qa/native-trade-merge-20260909/README.md`.
+> This deliberately completes a client interaction rejected by this Crystal
+> server checkout. Full custody/prepared editing and live package/visual gates
+> remain open; no global UI completion or acceptance percentage is claimed.
+
+> 2026-09-09 native trade item operations: inventory-to-own-trade deposit and
+> own-trade-to-selected-bag retrieval are connected to ordinary packet intents.
+> Server retrieval now validates the exact offered instance and destination,
+> preserves item identity/metadata, and rejects occupied/out-of-capacity cells.
+> UI selection is bound to item state and the current exchange; guest cells,
+> locked trades and covering dialogs reject input. Failed host sends release
+> only the matching unsent operation. Automated evidence and remaining gaps:
+> `docs/generated/player-qa/native-trade-items-20260909/README.md`.
+> Merge, trade-slot movement, complete item custody and live Windows visual
+> acceptance remain open. All 33 global UI backlog IDs remain open;
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-09 bounded shared update integration implemented for all 47 existing
+> personal dedicated monster modules: owned-monster combat, status leases,
+> targets, summons, death/retirement and checkpoint/fork are connected.
+> Full simulation baseline: 2193 passed; later HellKnight guard: Zone
+> 102 + Hell/shared Zone 221 passed. Inventory restore fix: 98 passed.
+> Gateway full baseline: 785 passed / 7 failed / 1 ignored; all initial
+> failures resolved across persistence reruns (4 + Q1-Q4) and RPC 30 reruns.
+> Receipt namespace 4, drop regression 47, economy/replay 39 and Gate11 2 pass.
+> Later corpse expiry fix: full simulation 2197, Gateway expiry 2 pass.
+> These are version-bound, overlapping results, not a fresh final-source full Gateway run.
+> Evidence and remaining Crystal-only gaps:
+> `docs/generated/shared-monster-ai-20260908/shared-update-delivery-20260909.md`.
+> Next gaps include independent respawn groups/live IDs and legacy corpse migration.
+> No Windows package or visual acceptance; globalComplete=false, accepted=false.
+
+> 2026-09-08 active user request: integrate personal special monster mechanics
+> into shared Zone updates. Current work: shared state/checkpoint boundary,
+> Wooma stage/teleport, hidden/stone visibility and stage summon mechanisms.
+> Attack plans and damage/death/lifecycle hooks are included in the requested
+> scope; no blanket completion is claimed. Ledger:
+> `docs/generated/shared-monster-ai-20260908/integration-ledger.json`.
+> Windows visual J01 remains deferred while this gameplay integration proceeds.
+
+> 2026-09-08 J00/J01: current dirty-source client Release and Gateway dev build
+> launched in isolated `C:/mir2-journey-20260908` (WS7330/TCP7320). 37,524 assets
+> match the prior package; new login window and one WS connection verified.
+> J01 awaits manual authentication; gameplay is not yet tested. Evidence:
+> `docs/generated/player-qa/player-journey-20260908/README.md`. Not a new signed
+> Candidate package; `accepted=false`, `visualAccepted=false`.
+
+> 2026-09-08 whole-game delivery plan established (planning only):
+> `docs/WHOLE-GAME-DELIVERY-PLAN-20260908.zh-CN.md` maps all 36 audit domains
+> to M0–M5 and defines J00–J07 player-journey tasks with version-bound evidence.
+> Current next task: J00 isolated build/version baseline, then J01 login/reentry,
+> J02 movement/camera, J03 combat/loot, J04 real NPC quest chain.
+> This supersedes older next-step pointers below; existing repair evidence remains.
+> No new build, native acceptance or whole-game percentage is claimed by this plan.
+
+> 2026-09-08 F02-B refine oven custody: full target moves out of the bag,
+> timer-gated NPC collection preserves the instance and retries safely on full bags.
+> Collected pending refinement belongs to each item; successful check uses ItemUpgraded,
+> and repeat requests cannot charge/collect/upgrade twice. Legacy migration requires
+> an existing unambiguous target; corrupt clocks and custody collisions fail closed.
+> New oven integration 10/10, previous market/material integration 9/9, focused
+> refine library 9/9 pass. Evidence: `docs/generated/player-qa/refine-oven-custody-20260908/README.md`.
+> This supersedes the oven-target implementation gap below, not all refine parity:
+> deterministic RNG and last-persisted-remaining restart semantics remain explicit
+> deviations. Windows core journey, same-version package and visual acceptance are next.
+> No live-store write or deployment. `accepted=false`, `visualAccepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-08 whole-game audit F01/F02 custody repair: ordinary market and
+> refine-material custody now persist full instances, stage capacity/merges before
+> transfer, and preserve held items on failure/reload. Custody reserves recursive
+> UIDs; MAX/zero/legacy aliases and storage split/equipment return collisions are
+> covered. New regressions: 9 ordinary-packet + 5 UID tests pass; adjacent market,
+> refine, UID, split and remove tests pass; Gateway/Admin API test targets compile.
+> Evidence: `docs/generated/player-qa/market-refine-custody-20260908/README.md`.
+> Broad intermediate runs also pass: 1491 library tests and 383
+> integration tests; final UID hardening has separate focused/adjacent results.
+> These are version-bounded runs, not a final-source full rerun.
+> Next bounded leaf: F02-B refine target/oven/time custody, specified in
+> `docs/generated/player-qa/market-refine-custody-20260908/NEXT-REFINE-OVEN.md`;
+> then same-version Windows core journey and package verification.
+> This closes the bounded instance-loss repair only: shared market service and
+> full refine target/oven/timer remain open, as do Windows journey/package/visual
+> gates. Legacy key-only records remain held and cannot mint template replacements.
+> No live-store write, deployment or package. `accepted=false`,
+> `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows repackaging checkpoint: clean snapshot `4264b9149`
+> builds and passes the signed Candidate verifier (37,534 files). Sound104
+> package/allowlist mismatch and malformed-Unicode PE scan false positive are
+> fixed with self-tests and independent review; 704 required paths are checked
+> against the verifier allowlist. The exact final EXE opened the real native
+> login window and connected to the rebuilt isolated local Gateway. Authentication
+> is a manual handoff; in-game trade/map, DPI/soak/human acceptance remain open.
+> Evidence: `docs/generated/player-qa/windows-repackage-20260908/README.md`.
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade gold custody checkpoint: positive incremental offers
+> now debit the wallet immediately; preparation/recovery only debit outstanding
+> gold. Persisted heldGold preserves legacy snapshots and is independent from
+> prepared item custody. Cancel/teardown and orphan positive-hold recovery refund
+> once; save failure restores custody. Cap/materialization failures retain final
+> retry authority. Ledger bootstrap occurs before the first eligible debit.
+> Any prepared participant blocks gold and item edits; item failure ACKs prevent
+> withdrawing an offer while reusing the peer's previous confirmation.
+> Simulation 1491 unit + 374 unique integration tests are verified. Gateway resolved
+> coverage is 695 passed / one existing environmental ignore: the initial full
+> run had one queued-notification fixture assertion, corrected by a test-only
+> change and a passing 10/10 gold rerun. Production code did not change for that
+> correction. Format/diff and independent bounded review pass. Exact raw results:
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-gold/README.md`.
+> Next: separate confirmation tickets from exact held-item custody, then editable
+> prepared offers and native deposit/retrieve/merge. Prepared unlock still cancels/
+> refunds; source capacity rejection retention, zero-held orphan cleanup, request
+> throttle/error chats, screenshots and all 33 backlog IDs remain open. No UI/
+> Windows-host rerun, package, interactive launch, live-store write or deployment
+> occurred. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade invitation/private-pair checkpoint: native source
+> MirMessageBox Yes/No and cancellation OK, invitation revision ownership,
+> keyboard disposal and modal input isolation are implemented. Shared Gateway
+> invitations go only to the facing recipient; accepted reciprocal presence
+> pairs own guest gold/item notifications and settlement matching. Refusal,
+> teardown, old-cleanup/new-invite ordering and bootstrap failure are covered.
+> Native UI 598/598, Windows 537/537, Gateway 685 passed / one existing ignored,
+> and new Gateway security tests 13/13 pass;
+> the final full Gateway result and source hashes are recorded in
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-invitation/README.md`.
+> Next: positive-delta/immediate editable gold escrow and bilateral unlock,
+> then exact item custody and native deposit/retrieve/merge operations. Cells
+> remain read-only; prepared unlock still cancels/refunds. Request throttle,
+> complete error chats, original paired screenshots, package/light/DPI/soak/
+> legal/signing/human gates and all 33 IDs remain open. No interactive launch,
+> screenshot, production rollout or live-store write occurred this round.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+
+> 2026-09-03 user-requested Mac Android handoff: the Windows map-relocation
+> repair is committed as `63b80fda3cdb4fda54fa4b1867c1c140b9e6db01`.
+> `docs/ANDROID-MAC-HANDOFF.md` defines safe branch synchronization and a
+> separate `codex/android-player-journey` lane: existing Capacitor device
+> baseline first, then a bounded native Bevy follow-up based on evidence.
+> AND-MAC-00..03 are not executed or accepted here; no Mac task was dispatched.
+> Git does not transfer the local full resource pack or update the remote Web
+> loaded by the mobile shell. Android does not inherit the next Windows trade
+> backend leaf; shared files remain single-writer. Windows work and all
+> current acceptance gates remain open.
+
+> 2026-09-03 user-requested native launch repair: fixed the directory-junction
+> map-layout lookup and added startup presence/decode checks. Native host
+> 537/537 serial tests, the reported Bichon viewport's 849 draws/221 local
+> images and the offline build pass. Three parallel GameShop queue failures
+> remain recorded outside this fix. User explicitly resumed Computer Use;
+> repaired client opened at login, pending manual login/world visual check.
+> No resources, store or server logic were changed. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+> After this launch handoff, the source trade invitation/pair/private-routing
+> leaf below remains the next shared-logic candidate. Mac work is a proposal,
+> not a dispatched task. All 33 IDs and global/human gates remain open.
+
+> Shared-trade completion checkpoint (2026-09-03): personal confirmation now
+> locks only; a typed shared preparation reserves outgoing assets without
+> S.TradeConfirm. Successful delivery sends completion once, and the durable
+> path waits for the saved projection/event marker. New escrowPrepared state
+> remains distinct from completed; legacy completed debit snapshots recover
+> without another debit. Matching ownership and held-state guards prevent
+> replay credit or direct release outside the shared settlement owner.
+>
+> Final Simulation 1491/1491 plus dedicated completion 7/7, Gateway 672 passed / one existing ignored,
+> protocol 40/40, game-data 39/39, native UI 591/591, Windows
+> 534/534, runtime 212/212 and UI core 43/43 pass. The fixed durable empty-
+> incoming completion/mark-retry test and five two-session conservation tests
+> also pass. Native source, assets, wire definitions and locks are unchanged.
+> Windows uses an isolated host target after a mixed-cache compile failure.
+> Initial fixture/expectation failures and all exact hashes/results are in
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+>
+> This supersedes only premature completion, not full source trade. Next CLI
+> work: original invitation/pair ownership and private notifications, then
+> positive-delta/immediate editable gold escrow, bilateral unlock and exact
+> item custody/operations. Preserve conservation, save/restart, cancellation/
+> mail fallback and durable unknown-outcome holds. Candidate capacity failure
+> still cancels/refunds instead of source Unlock=true retaining the offer;
+> native trade cells remain read-only. Do not patch += or debit timing alone.
+>
+> Computer Use remains paused after user Escape; no GUI/input/capture occurred.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain open. Goal incomplete; PR #250 Draft. visualAccepted=false, accepted=false,
+> globalParityPercent=null.
+
+> Historical Windows accepted-exchange TradeDialog checkpoint (2026-09-03): original
+> independent 204x152 own/guest windows, ten fixed 2*x+y cells per side,
+> Prguse/389-390, Title/520-522, source controls and the gold MirAmountBox
+> replace the generic accepted-trade panel. Inventory stays independent;
+> Escape follows source Closeall and does not cancel the pair. Sparse cells,
+> current-count images/hints, exact own-offer identity, exchange/unlock
+> revisions and pending/modal ownership have headless coverage. Cells remain
+> read-only: legacy first-ten-bag/to=0 shortcuts are removed, not accepted as
+> source deposit/retrieve/merge. Invitation UI and full editing remain open.
+> Final native UI 591/591, Windows 534/534, runtime 212/212, UI core 43/43,
+> item-icon 11/11 with 924 images, and formatting pass. Original asset checks
+> match 561 PNGs, preserve all 552 prior Prguse/Title PNGs byte-for-byte and
+> reject 32 negative controls. Five source PNGs are added.
+>
+> Next priority CLI leaf: separate shared-trade lock/prepare from completed
+> settlement. Candidate currently emits S.TradeConfirm before partner match
+> and durable outcome, but Crystal uses it only for completed exchange.
+> Also audit TradeGold's positive-delta/immediate-escrow contract: Candidate
+> currently overwrites the offer and defers debit. Preserve conservation,
+> idempotence, cancellation/refunds, save/disconnect and unknown-outcome holds;
+> do not patch += or suppress completion in isolation. Then finish exact
+> native item operations/slot addressing and paired packet routing. Backend
+> source is unchanged this round; no full-server test claim is made.
+>
+> Report: `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> This advances only the previous trade window/basic-control leaf, not full
+> transactions, invitation/cancel messages, gold audio, state overlays or
+> all-window input/topmost behavior. Computer Use stays paused after user
+> Escape; no GUI/input/capture occurred. All 33 IDs, original-pair/package/
+> light/DPI/soak/legal/signing/human gates and the goal remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`;
+> stacked PR #250 stays Draft.
+
+> Windows primary-item true-size checkpoint (2026-09-03): bag, belt,
+> equipment, personal storage and NPC goods now share source alpha-bound
+> GetTrueSize centring, full unstretched original images and valid source
+> Items/0. Fourteen equipment cells and personal storage use original 36x32
+> bounds; oversized images are not clipped, and source stackable count 1
+> is visible. Persistent belt late-load/change/clear ordering is tested.
+> Warehouse-side, trade and amount icon regions reuse the helper without
+> claiming their whole layouts/operations. All 1003 exported PNGs match
+> original RGBA/metadata; 5015 native node geometries pass. Final native UI
+> 562/562, Windows 528/528, runtime 212/212, UI core 43/43, the 11-test/
+> 924-image gate, fixture reproduction and formatting pass. Historical
+> server tests are not reused as current results.
+>
+> Next bounded CLI leaf: original TradeDialog/GuestTradeDialog window/cell
+> geometry and gold/confirm/cancel state; preserve authoritative transactions.
+> Other open leaves include Guild operations/overlays/full editing, window
+> overlap/movement/shared throttle, other concrete-item and base-preview
+> surfaces, FloorItems and WN-CHAR-002 source operations/slot addressing.
+> Computer Use remains paused after user Escape; no GUI launch/input/capture
+> occurred. All 33 backlog IDs and final-source original-pair/package/light/
+> DPI/soak/human gates remain. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-true-size/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; goal
+> and stacked Draft PR #250 stay open. This supersedes only the primary
+> GetTrueSize/zero-image gaps in the historical Guild checkpoint below.
+
+> Historical Windows Guild storage source/logic checkpoint (2026-09-03): replace the
+> four-column text/page substitute with the original 8x14 storage grid,
+> eight-row viewport, stable 112 slot IDs, source integer wheel/drag behavior,
+> original tabs/arrows and MirAmountBox gold flow. Actual current counts select
+> UserItem.Image before alpha-bound GetTrueSize centring; full bitmaps still
+> draw unchanged and known Items/0 is drawable on the new Guild path.
+> Gold remains authoritative with identity/rank/balance, modal ownership and
+> pending/cooldown guards. Final shared native UI 551/551, focused Guild 44/44,
+> UI core 43/43, protocol 40/40, game-data 39/39, all 924 item images and
+> direct original RGBA/geometry comparison of 41 relevant frames pass.
+> The pure shared image rule moves into protocol without wire/semantic changes;
+> runtime/Android/Windows dependency locks are synchronized. Final Windows
+> 527/527, runtime 212/212 and stack integration 4/4 pass; no full-server
+> result is inferred from older runs. A source alpha audit finds 550/1003
+> frame-size differences and 478 different 35-pixel-cell offsets.
+>
+> Computer Use stays paused after user Escape: no GUI launch or fresh capture
+> occurred. Next bounded CLI leaf is primary bag/belt/equipment/storage/NPC
+> GetTrueSize centring and Items/0 handling: this Guild fix does not close
+> those paths, and older PNG-frame pixel checks did not prove true-size parity.
+> Other leaves retain Guild item operations/overlays/full text editing,
+> window overlap/movement/shared throttle, trade/other concrete-item surfaces,
+> FloorItems and final-source real-input, original pairs, package/light, DPI
+> and human gates. All 33 backlog IDs remain. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-guild-storage/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; goal
+> and stacked Draft PR #250 remain open. A second exact generated test PDB
+> was relocated to a hash-verified recoverable system-temp backup; no source,
+> asset, save, EXE or unrelated process was removed.
+
+> Windows source UserItem.Image checkpoint (2026-09-03): exact Amulet/Poison
+> quantity bands now drive personal bag/belt/storage/equipment snapshots,
+> NPC goods and native icon geometry. Known ordinary items also use source
+> Info.Image instead of stale legacy icon fields. Raw source data, instance
+> state and catalogue-preview images are preserved. Windows 527/527, shared
+> game-data 39/39, four real split/merge/equip/save/reload integration tests,
+> item-icon 11/11 plus all 924 images, and formatting checks pass. Full
+> Simulation 1491/1491 and Gateway 667 passed / one existing ignored now pass
+> on the final source in `2cb9098407e21c47fbd43863aea6b3655a609c8b`.
+>
+> The initial native inventory capture contains all eleven quantity images.
+> An independent fixed-coordinate check matches 6,161 opaque pixels across
+> 24 bag slots, rejecting 86 wrong frames and 96 one-pixel translations.
+> The capture binaries predate the final ordinary-item base-icon correction;
+> this is not a final-source same-EXE capture. The user stopped Computer Use
+> with Escape; do not resume foreground/window interaction without a new
+> explicit user request. The normal output files are locked and the work
+> volume nearly full; backend regression uses an isolated system-temp target,
+> without closing unrelated programs or purging caches. After regression, one
+> exact 209 MiB generated test PDB was relocated to a hash-verified system-temp
+> backup to recover work-volume space; source/assets/stores/EXEs are unchanged.
+>
+> Next WN-ITEM-002 leaves: guild/trade/other actual-item surfaces, FloorItems,
+> overlays and final-source manual transitions; preserve source base-image
+> exceptions for GameShop/Quest/craft shadows/mail-list thumbnails. All 33
+> backlog IDs, source-operation gaps, world actor gaps, original paired
+> state, trusted package/light, real DPI and human gates remain open as
+> recorded. Evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; goal
+> and stacked draft PR #250 remain open. Older quantity-selection notes below
+> are superseded only for the explicitly implemented primary surfaces.
+
+> Windows item-icon/high-armour asset checkpoint (2026-09-03): the complete
+> 1,628-row catalogue requires 913 base images plus eleven source
+> `UserItem.Image` Amulet/Poison quantity images. All 924 are now exported and
+> integrity-gated; 643 missing PNGs were added without changing the 360 older
+> PNGs. CArmour/09 and /10 each retain all 1,616 source frames, closing the
+> observed HeavenArmour/MirArmour self-body asset hole. Direct comparison of
+> all 3,232 new body frames matches original pixels and geometry; 512
+> Warrior gender/direction/stand/walk/run composites pass. The fresh Debug
+> EXE SHA-256 is
+> `55CA1D61A6977F164B1D6222DE2AAAFD4E21FEF4A1C5DB898EBEE6FF0FBDB993`.
+> Four live cases and an auto-capture -> manual Inventory -> unequip ->
+> first-bag-icon -> re-equip cycle are recorded under
+> `docs/generated/player-qa/native-ui-parity-20260903-item-actor-assets/`.
+> The one-shot capture helper now releases UI control before preparing again.
+> Windows 524/524, item gate 11/11 and 924-image closure, source exporter
+> regression, and the ten-control Windows PowerShell 5.1 gate self-test pass.
+>
+> This supersedes the missing-icon/head-only/one-shot notes in the older
+> checkpoint below. WN-ITEM-002 still retains runtime quantity selection,
+> overlays and live stack coverage; WN-ACTOR-001 retains world CHumEffect
+> wings and the full class/action/soak denominator. New WN-ACTOR-002 records
+> name-only prior-player observations during rapid QA process switches.
+> Source item operations, original same-state pairs, trusted package/light,
+> DPI and human acceptance remain open. Full frontend logic still fails at
+> the absent local WebGPU WASM artifact, not the icon gate; its five later
+> checks pass independently. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`; goal and draft stacked PR #250 remain open.
+
+> Windows Character wing and real unequip checkpoint (2026-09-03): source
+> `HumanObject.RefreshEquipmentStats` now supplies the real armour's
+> `WingEffect` to the self-only native read model. Source `Prguse2/1202..1205`
+> frames use exact intrinsic geometry and additive DrawBlend, with explicit
+> zero/reset handling and no wing without armour. The current EXE SHA-256 is
+> `8BA170AA654FCE1EB911033203C22F018EAD2A4B973F04A4F80A8679E2FF6F20`.
+> Four gender/effect captures and a same-process Bichon `(290,620)` real-input
+> equip -> unequip -> first bag cell -> re-equip cycle are recorded under
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/`.
+> Unequip now targets the first free normalized Gateway bag slot, not
+> `equipment/-1` or a raw Crystal +6 offset, and does not mutate locally.
+> Native UI 519/519, runtime 212/212, Windows 521/521, Simulation 1491/1491,
+> Gateway 666 active/1 ignored, wing integration 5/5 and recall integration
+> 2/2 pass. The Archer CI fixture's availability now comes from its own
+> manifest; the production asset fallback remains unchanged.
+>
+> Next leaves remain in the complete immutable backlog: source item-cell
+> operation UI and belt/amulet slot semantics (`WN-CHAR-002`), MirArmour
+> original icons `Items/595`/`605` (`WN-ITEM-002`), the head-only high-armour
+> world actors (`WN-ACTOR-001`), remaining Character tabs and class/gear matrix,
+> specialized item surfaces, capture-helper one-shot release (`WN-QA-002`),
+> original same-state pairs, trusted package/light, DPI and human comparison.
+> The stale Character/Quest/fixture rows are updated without deleting any
+> denominator leaf. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`; the current goal and draft stacked PR #250 stay
+> open. No final human acceptance or whole-game completion is claimed.
+
+> Windows-native Crystal NPC `MirGoodsCell` checkpoint (2026-09-03): the
+> bounded NPC-goods row now follows the source `205x32` hit/hover rectangle,
+> `40x32` true-size icon centring, labels at `(44,0)`, `(23,17)` and `(44,14)`,
+> Lime selected border/divider, and `Prguse/550` New marker rule. The
+> `NPCGoods.HideAddedStats` packet bit now survives Gateway, shared model and
+> runtime ingestion and affects only NPC-shop hints: mutable added attack/
+> defence values and `Cursed` are suppressed while base stats and other bind
+> text remain. Authority is Crystal `MirGoodsCell.cs:20-140`,
+> `NPCDialogs.cs:1071-1082,1348`, `ServerPackets.cs:3082-3104` and
+> `GameScene.cs:4199`. Native UI passes 514/514; runtime passes 212/212;
+> Windows reaches 519/520 with only the already tracked Archer atlas fixture
+> assertion for `/ARArmour/00/24.png`; a fresh Debug EXE builds with SHA-256
+> `159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`.
+> Real Windows input exercised login -> Scott -> View and produced baseline
+> plus selected/hover F12 evidence under
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/`. This closes
+> the bounded NPC row/HideAddedStats leaf, not the complete shop/item-detail
+> denominator: duplicate/sub-goods topology, other item-surface layouts and
+> populated captures, trusted build/light provenance, DPI and human Crystal
+> comparison remain open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+>
+> Windows-native Crystal remaining item-surface tooltip projection checkpoint
+> (2026-09-03): NPC goods, GameShop entries, fixed/selectable quest rewards,
+> guild storage and both sides of trade now retain a complete tooltip source
+> instead of reconstructing details from display names. Actual NPC/trade/guild
+> `UserItem` records keep instance durability, additions, sockets and binding;
+> GameShop mirrors Crystal's full-durability/count preview constructor, while
+> Quest keeps its synthetic item count at zero and paints reward quantity
+> separately. Class/level `GetRealItem` resolution is viewer-aware, and absent
+> or duplicate item indexes fail closed. All five surfaces enter the same
+> delayed Crystal hint lifecycle already used by personal items. Native UI is
+> 511/511; Windows is 519/520 with only the previously registered Archer atlas
+> fixture assertion for `/ARArmour/00/24.png`; the current Windows Debug build
+> succeeds. This supersedes the earlier statement below that these models lack
+> full source, but it does not close their exact panel geometry, icon-only hit
+> regions, NPC hide-added-stat option, live populated same-EXE captures, DPI or
+> human comparison. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+>
+> Windows-native Crystal item-tooltip bounded checkpoint (2026-09-03):
+> Simulation/Gateway/client now carry and render the exact personal-item source
+> needed for Crystal's eleven-section hint on inventory, belt, equipment,
+> personal storage and the warehouse-side bag. Requirement colours,
+> unidentified masking, sockets, bind/expiry/seal/rental text and `+(28,28)`
+> clamped placement are covered; native-ui passes 509/509 and focused backend/
+> game-data tests pass. Exact EXE SHA-256
+> `5257E859B4AB173A8076B58778C59D09D291A7EB90F0FCFA38F696E46181A56F`
+> produced a real-pointer WoodenSword F12 capture at
+> `docs/generated/player-qa/native-ui-parity-20260903-item-tooltip/item-tooltip-in-game-1788370099170-2.png`.
+> This closes the bounded personal-item tooltip implementation, not the parent
+> denominator: NPC/cash shops, quest rewards, guild storage and trade lack the
+> full source; trusted package/light, DPI and human acceptance remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Windows-native Bichon map/light/movement follow-up (2026-09-01): the current
+> map-0 keyed baseline is SHA-256
+> `E82E5573E98BDFC65B7EF463C9F09585F12805399E0783F7837D95F2D0AC1B1D`
+> with 7,672 refs, 4,703 entries, 4,520 keyed frames, 183 additive frames and
+> `missingSourceCount=2969`. This supersedes 2,508 only as the current
+> all-animation-phase denominator; the 2,508 statements below remain historical
+> evidence for their earlier builds. The pack includes all ten
+> `Objects#2723..2732` frames, and live Bichon reports `tiles=1090`,
+> `standalone=334`, `missingBindings=0`, `incompleteFamilies=0`. Crystal
+> authoritative RGBA is now staged byte-for-byte for ordinary local map
+> frames; the former second black-key/feather pass no longer makes dark
+> buildings translucent. Same-coordinate `(294,616)` live inspection and the
+> focused pack regression pass. Crystal
+> `16x17+25` object retention, required native-keyed-manifest startup, UTC
+> dynamic light without gamma compensation, unified keyboard/pointer NewMove,
+> release-surviving right-click auto-path, two/three-cell Run prediction and
+> real 600 ms Zone Walk/Run readiness are implemented. Focused Windows suites
+> are 42/42, 35/35 and 28/28; the Node pack regression and `shared_zone`
+> 204/204 pass. Exact packaged-EXE, broader map/device/soak coverage and human
+> frontend acceptance remain open; `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
 > Windows-native NPC click/DataRange follow-up (2026-08-29): revision
 > `dd3179559` replaces the native adjacent-auto-approach compatibility bridge
 > with the behavior verified directly from Crystal `GameScene.OnMouseClick`

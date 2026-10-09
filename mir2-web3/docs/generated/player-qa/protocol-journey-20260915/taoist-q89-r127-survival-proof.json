@@ -1,0 +1,405 @@
+{
+  "trace": "C:\\mir2-protocol-journey-20260911\\Taoist.2026-09-15T20-40-27-269Z.trace.jsonl",
+  "traceSha256": "3CDBB807DD266D7C9DEF3644CD58677CAF53C41DC84E09BBF2822DF91CCCDB0B",
+  "window": {
+    "fromSeq": 13970,
+    "toSeq": 15498,
+    "fromAt": "2026-09-15T21:04:23.318Z",
+    "lastAt": "2026-09-15T21:08:14.760Z"
+  },
+  "explicitLifecycle": [
+    {
+      "seq": 14092,
+      "at": "2026-09-15T21:04:30.628Z",
+      "kind": "Death",
+      "loc": {
+        "x": 212,
+        "y": 92
+      }
+    },
+    {
+      "seq": 14098,
+      "at": "2026-09-15T21:04:30.777Z",
+      "kind": "townRevive",
+      "loc": null
+    },
+    {
+      "seq": 14130,
+      "at": "2026-09-15T21:04:32.069Z",
+      "kind": "Revived",
+      "loc": null
+    }
+  ],
+  "preDeath": {
+    "seq": 13973,
+    "at": "2026-09-15T21:04:23.970Z",
+    "map": "D2031",
+    "hp": 51,
+    "maxHp": 180,
+    "mp": 58,
+    "maxMp": 184,
+    "inventory": {
+      "hpSmall": 20,
+      "mpSmall": 2,
+      "amulet": 77
+    },
+    "gold": 18618,
+    "entityCount": 12,
+    "x": 212,
+    "y": 92,
+    "dead": false,
+    "level": 25,
+    "name": "JT3f4a4e1f"
+  },
+  "lowPoint": {
+    "seq": 14027,
+    "at": "2026-09-15T21:04:27.531Z",
+    "map": "D2031",
+    "hp": 7,
+    "maxHp": 180,
+    "mp": 46,
+    "maxMp": 184,
+    "inventory": {
+      "hpSmall": 19,
+      "mpSmall": 1,
+      "amulet": 77
+    },
+    "gold": 18618,
+    "entityCount": 12,
+    "x": 212,
+    "y": 92,
+    "dead": false,
+    "level": 25,
+    "name": "JT3f4a4e1f"
+  },
+  "deathState": {
+    "seq": 14100,
+    "at": "2026-09-15T21:04:30.859Z",
+    "map": "D2031",
+    "hp": 0,
+    "maxHp": 180,
+    "mp": 74,
+    "maxMp": 184,
+    "inventory": {
+      "hpSmall": 19,
+      "mpSmall": 1,
+      "amulet": 75
+    },
+    "gold": 18618,
+    "entityCount": 12,
+    "x": 212,
+    "y": 92,
+    "dead": true,
+    "level": 25,
+    "name": "JT3f4a4e1f"
+  },
+  "postRevive": {
+    "seq": 14182,
+    "at": "2026-09-15T21:04:32.134Z",
+    "map": "0",
+    "hp": 180,
+    "maxHp": 180,
+    "mp": 184,
+    "maxMp": 184,
+    "inventory": {
+      "hpSmall": 19,
+      "mpSmall": 1,
+      "amulet": 75
+    },
+    "gold": 18618,
+    "entityCount": 33,
+    "x": 288,
+    "y": 616,
+    "dead": false,
+    "level": 25,
+    "name": "JT3f4a4e1f"
+  },
+  "postRestock": {
+    "seq": 14253,
+    "at": "2026-09-15T21:04:39.931Z",
+    "map": "0",
+    "hp": 180,
+    "maxHp": 180,
+    "mp": 184,
+    "maxMp": 184,
+    "inventory": {
+      "hpSmall": 80,
+      "mpSmall": 12,
+      "amulet": 100
+    },
+    "gold": 14313,
+    "entityCount": 34,
+    "x": 288,
+    "y": 609,
+    "dead": false,
+    "level": 25,
+    "name": "JT3f4a4e1f"
+  },
+  "damageAndStruck": [
+    {
+      "seq": 13977,
+      "at": "2026-09-15T21:04:24.824Z",
+      "attackerId": 338505,
+      "attackerName": "ShiZombie",
+      "attackerKind": "monster",
+      "attackerX": 211,
+      "attackerY": 92,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 13978,
+      "at": "2026-09-15T21:04:24.825Z",
+      "damage": 7
+    },
+    {
+      "seq": 13981,
+      "at": "2026-09-15T21:04:24.825Z",
+      "attackerId": 339001,
+      "attackerName": "HungryZombie",
+      "attackerKind": "monster",
+      "attackerX": 212,
+      "attackerY": 93,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 13982,
+      "at": "2026-09-15T21:04:24.825Z",
+      "damage": 11
+    },
+    {
+      "seq": 13984,
+      "at": "2026-09-15T21:04:24.825Z",
+      "attackerId": 339906,
+      "attackerName": "HungryZombie",
+      "attackerKind": "monster",
+      "attackerX": 211,
+      "attackerY": 91,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 13985,
+      "at": "2026-09-15T21:04:24.825Z",
+      "damage": 7
+    },
+    {
+      "seq": 14015,
+      "at": "2026-09-15T21:04:27.459Z",
+      "attackerId": 338505,
+      "attackerName": "ShiZombie",
+      "attackerKind": "monster",
+      "attackerX": 211,
+      "attackerY": 92,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14016,
+      "at": "2026-09-15T21:04:27.459Z",
+      "damage": 4
+    },
+    {
+      "seq": 14018,
+      "at": "2026-09-15T21:04:27.459Z",
+      "attackerId": 339001,
+      "attackerName": "HungryZombie",
+      "attackerKind": "monster",
+      "attackerX": 212,
+      "attackerY": 93,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14019,
+      "at": "2026-09-15T21:04:27.459Z",
+      "damage": 8
+    },
+    {
+      "seq": 14020,
+      "at": "2026-09-15T21:04:27.459Z",
+      "attackerId": 339906,
+      "attackerName": "HungryZombie",
+      "attackerKind": "monster",
+      "attackerX": 211,
+      "attackerY": 91,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14021,
+      "at": "2026-09-15T21:04:27.459Z",
+      "damage": 7
+    },
+    {
+      "seq": 14028,
+      "at": "2026-09-15T21:04:27.707Z",
+      "attackerId": 339106,
+      "attackerName": "CursedZombie",
+      "attackerKind": "monster",
+      "attackerX": 212,
+      "attackerY": 91,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14029,
+      "at": "2026-09-15T21:04:27.707Z",
+      "damage": 7
+    },
+    {
+      "seq": 14068,
+      "at": "2026-09-15T21:04:29.688Z",
+      "attackerId": 338505,
+      "attackerName": "ShiZombie",
+      "attackerKind": "monster",
+      "attackerX": 211,
+      "attackerY": 92,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14069,
+      "at": "2026-09-15T21:04:29.688Z",
+      "damage": 7
+    },
+    {
+      "seq": 14071,
+      "at": "2026-09-15T21:04:29.688Z",
+      "attackerId": 339001,
+      "attackerName": "HungryZombie",
+      "attackerKind": "monster",
+      "attackerX": 212,
+      "attackerY": 93,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14072,
+      "at": "2026-09-15T21:04:29.688Z",
+      "damage": 11
+    },
+    {
+      "seq": 14073,
+      "at": "2026-09-15T21:04:29.688Z",
+      "attackerId": 339906,
+      "attackerName": "HungryZombie",
+      "attackerKind": "monster",
+      "attackerX": 211,
+      "attackerY": 91,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14074,
+      "at": "2026-09-15T21:04:29.688Z",
+      "damage": 7
+    },
+    {
+      "seq": 14093,
+      "at": "2026-09-15T21:04:30.628Z",
+      "attackerId": 339106,
+      "attackerName": "CursedZombie",
+      "attackerKind": "monster",
+      "attackerX": 212,
+      "attackerY": 91,
+      "playerX": 212,
+      "playerY": 92
+    },
+    {
+      "seq": 14094,
+      "at": "2026-09-15T21:04:30.628Z",
+      "damage": 12
+    }
+  ],
+  "healingActions": [
+    {
+      "seq": 13976,
+      "at": "2026-09-15T21:04:23.993Z",
+      "packet": "magic",
+      "spell": "Healing",
+      "item": null,
+      "targetId": 1000
+    },
+    {
+      "seq": 14010,
+      "at": "2026-09-15T21:04:26.704Z",
+      "packet": "magic",
+      "spell": "Healing",
+      "item": null,
+      "targetId": 1000
+    },
+    {
+      "seq": 14056,
+      "at": "2026-09-15T21:04:28.735Z",
+      "packet": "magic",
+      "spell": "Healing",
+      "item": null,
+      "targetId": 1000
+    }
+  ],
+  "soulFireBallActions": [
+    {
+      "seq": 14033,
+      "at": "2026-09-15T21:04:27.707Z",
+      "packet": "magic",
+      "spell": "SoulFireBall",
+      "item": null,
+      "targetId": 339001
+    },
+    {
+      "seq": 14078,
+      "at": "2026-09-15T21:04:29.748Z",
+      "packet": "magic",
+      "spell": "SoulFireBall",
+      "item": null,
+      "targetId": 339001
+    }
+  ],
+  "healingAcks": [
+    {
+      "seq": 13991,
+      "at": "2026-09-15T21:04:24.825Z",
+      "targetId": 1000
+    },
+    {
+      "seq": 14026,
+      "at": "2026-09-15T21:04:27.459Z",
+      "targetId": 1000
+    },
+    {
+      "seq": 14065,
+      "at": "2026-09-15T21:04:29.445Z",
+      "targetId": 1000
+    }
+  ],
+  "petEvidence": {
+    "observed": false,
+    "records": []
+  },
+  "interpretation": {
+    "explicitDeathBeforeRevived": true,
+    "roundedHealthAloneNotUsed": true,
+    "amuletExhaustedAtDeath": false,
+    "stationaryClusterAtDeath": true
+  },
+  "itemActions": [
+    {
+      "seq": 13995,
+      "at": "2026-09-15T21:04:24.996Z",
+      "packet": "useItem",
+      "spell": null,
+      "item": null,
+      "targetId": null
+    },
+    {
+      "seq": 14003,
+      "at": "2026-09-15T21:04:25.917Z",
+      "packet": "useItem",
+      "spell": null,
+      "item": null,
+      "targetId": null
+    }
+  ]
+}

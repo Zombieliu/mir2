@@ -321,7 +321,9 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(routeSource, /MIR2_PINNED_CRYSTAL_FULL_PACK_CONTENT_HASH/);
   assert.match(routeSource, /MIR2_PINNED_MAP_ATLAS_CONTENT_HASH/);
   assert.match(routeSource, /browserFallbackBaseUrls/);
-  assert.match(nextConfigSource, /\/bevy-runtime\/v\/:version/);
+  const runtimeProxySource = readFileSync(new URL("../proxy.ts", import.meta.url), "utf8");
+  assert.match(runtimeProxySource, /bevyRuntimeLocalRewrite\(runtimeManifest, request\.nextUrl\.pathname\)/);
+  assert.doesNotMatch(nextConfigSource, /destination: "\/bevy-runtime\/:backend/);
   assert.match(nextConfigSource, /max-age=31536000, immutable/);
   assert.match(pageSource, /const BEVY_RUNTIME_VERSION = bevyRuntimeVersion\.version \|\| "local"/);
   assert.match(pageSource, /process\.env\.NEXT_PUBLIC_MIR2_ASSET_BASE_URL\?\.trim\(\) \|\| null/);

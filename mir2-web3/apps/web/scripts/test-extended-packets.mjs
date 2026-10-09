@@ -14,6 +14,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { createContext, runInContext } from "node:vm";
 
 function loadTypeScriptModule(url, requireMap = {}) {
   const source = readFileSync(url, "utf8");
@@ -257,7 +258,7 @@ check("normalizeFriendList drops nameless / junk rows and non-arrays", () => {
 // normalizeMailList (camelCase + snake_case tolerance)
 // ---------------------------------------------------------------------------
 
-check("normalizeMailList maps ClientMail rows with item count", () => {
+check("normalizeMailList preserves ClientMail attachments and honest date metadata", () => {
   const mail = normalizeMailList([
     {
       mailId: 10,
@@ -268,7 +269,8 @@ check("normalizeMailList maps ClientMail rows with item count", () => {
       canReply: true,
       collected: false,
       gold: 500,
-      items: [{}, {}, {}],
+      items: [{unique_id:77,item_index:1,count:2,current_dura:3,max_dura:4,soul_bound_id:0,identified:true,cursed:false,gem_count:1}],
+      dateSentBinaryDatetime:638962902000000000,
     },
   ]);
   assert.equal(mail.length, 1);
@@ -276,12 +278,16 @@ check("normalizeMailList maps ClientMail rows with item count", () => {
     mailId: 10,
     senderName: "GM",
     message: "Welcome",
+    subject: "",
     opened: true,
     locked: false,
     canReply: true,
     collected: false,
     gold: 500,
-    itemCount: 3,
+    items:[{uniqueId:77,itemIndex:1,name:null,key:null,count:2,currentDura:3,maxDura:4,soulBoundId:0,identified:true,cursed:false,gemCount:1}],
+    itemCount: 1,
+    dateSentBinaryDatetime:null,
+    metadataKnown:false,
   });
 });
 
@@ -296,12 +302,24 @@ check("normalizeMailList tolerates snake_case + applies defaults", () => {
   assert.equal(mail[0].canReply, false);
 });
 
-check("normalizeMailList drops rows without a numeric mailId / non-arrays", () => {
+check("normalizeMailList withdraws invalid/unsafe/duplicate current mailbox rather than partially reusing identities", () => {
   assert.deepEqual(normalizeMailList(null), []);
   assert.deepEqual(normalizeMailList({}), []);
   const mail = normalizeMailList([{ senderName: "NoId" }, null, 5, { mailId: 1 }]);
-  assert.equal(mail.length, 1);
-  assert.equal(mail[0].mailId, 1);
+  assert.deepEqual(mail,[]);
+  assert.deepEqual(normalizeMailList([{mailId:1},{mailId:1}]),[]);
+  assert.deepEqual(normalizeMailList([{mailId:Number.MAX_SAFE_INTEGER+1}]),[]);
+  assert.deepEqual(normalizeMailList([{mailId:1,items:[{unique_id:Number.MAX_SAFE_INTEGER+1,item_index:1}]}]),[]);
+  assert.deepEqual(normalizeMailList(Array.from({length:257},(_,i)=>({mailId:i+1}))),[]);
+  const legacy=normalizeMailList([{id:8,from:"Legacy",body:"Text",read:true,claimed:true,items:["Wooden Sword"]}]);
+  assert.equal(legacy[0].mailId,8);assert.equal(legacy[0].items[0].name,"Wooden Sword");assert.equal(legacy[0].metadataKnown,false);
+});
+
+check("normalizeMailList filters deleted Stage5 and reads persisted attachment identity",()=>{
+ const item={unique_id:77,name:"Wooden Sword",key:"wooden-sword",quantity:2,durability_current:3,durability_max:4,user_item_metadata:{item_index:1}};
+ const mail=normalizeMailList([{id:8,from:"Sender",subject:"Subject",body:"Body",gold:0,items:[],itemStatesJson:[JSON.stringify(item)],deleted:false},{id:9,deleted:true}]);
+ assert.equal(mail.length,1);assert.equal(mail[0].message,"Subject\nBody");assert.equal(mail[0].items[0].uniqueId,77);assert.equal(mail[0].items[0].itemIndex,1);assert.equal(mail[0].items[0].count,2);
+ assert.deepEqual(normalizeMailList([{id:8,itemStatesJson:["{bad"]}]),[]);
 });
 
 // ---------------------------------------------------------------------------
@@ -409,6 +427,92 @@ check("groupMembersAfterChange handles undefined current + no-op", () => {
   const next = groupMembersAfterChange(current, {});
   assert.deepEqual(next, ["A"]);
   assert.notEqual(next, current, "returns a fresh array, not the original reference");
+});
+
+
+// Plain UserItemExpireInfo is the only newly lossless gateway number carrier.
+function expiryPacketRealm({ withoutSource = false, sourceOverride = null } = {}) {
+  const realmModule = { exports: {} };
+  const realm = createContext({ module: realmModule, exports: realmModule.exports, withoutSource, sourceOverride });
+  const actualSource = runInContext('JSON.parse("9007199254740993", function(key,value,context){ return context?.source; })', realm);
+  if (withoutSource || sourceOverride !== null) runInContext(
+    'const nativeParse=JSON.parse; JSON.parse=function(text,reviver){return nativeParse(text,reviver?function(key,value,context){'
+      + 'return reviver.call(this,key,value,withoutSource?undefined:key==="expiry_binary_datetime"?{source:sourceOverride}:context);}:undefined);};', realm);
+  const compiled = ts.transpileModule(readFileSync(new URL("../lib/extended-server-packets.ts", import.meta.url), "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  runInContext(compiled, realm);
+  return { packets: realmModule.exports, actualSource };
+}
+const expiryWire = literal => '{"type":"worldSnapshot","payload":{"tooltipSource":{"userItem":{"expire_info":{"expiry_binary_datetime":' + literal + '}}}}}';
+const expiryValue = (api, literal) => api.parseGatewayMailDates(expiryWire(literal)).payload.tooltipSource.userItem.expire_info.expiry_binary_datetime;
+
+check("plain item expiry retains canonical i64 strings and safe legacy integers", () => {
+  for (const value of ["-9223372036854775808", "-9007199254740993", "0", "9007199254740993", "9223372036854775807"]) {
+    assert.equal(expiryValue(packets, JSON.stringify(value)), value);
+  }
+  for (const value of [Number.MIN_SAFE_INTEGER, -1, 0, 1, Number.MAX_SAFE_INTEGER]) {
+    assert.equal(expiryValue(packets, String(value)), value);
+  }
+  // Safe numeric legacy values remain value-compatible; this does not validate all raw float syntax.
+  assert.equal(expiryValue(packets, "1e0"), 1);
+  assert.equal(expiryValue(packets, "1.0"), 1);
+});
+
+check("actual Node VM JSON source recovers adjacent unsafe expiry integers exactly", () => {
+  const { packets: actual, actualSource } = expiryPacketRealm();
+  assert.equal(actualSource, "9007199254740993", "this test requires the actual Node reviver source API");
+  for (const value of ["-9223372036854775808", "-9007199254740993", "9007199254740992", "9007199254740993", "9223372036854775807"]) {
+    assert.equal(expiryValue(actual, value), value);
+    assert.equal(expiryValue(packets, value), value, "the normal production loader uses actual Node JSON too");
+  }
+  assert.notEqual(expiryValue(actual, "9007199254740992"), expiryValue(actual, "9007199254740993"));
+});
+
+check("no-source parser makes unsafe plain expiry unknown without changing safe values or new strings", () => {
+  const { packets: old } = expiryPacketRealm({ withoutSource: true });
+  for (const literal of ["9007199254740993", "-9223372036854775808", "9223372036854775807"]) {
+    assert.equal(expiryValue(old, literal), null);
+  }
+  assert.equal(expiryValue(old, "17"), 17);
+  assert.equal(expiryValue(old, '"9007199254740993"'), "9007199254740993");
+});
+
+check("unsafe expiry refuses noncanonical source, exponent syntax and i64 overflow", () => {
+  for (const sourceOverride of ["01", "-0", "+9007199254740993", " 9007199254740993", "9007199254740993.0", "9e18", "9223372036854775808", "-9223372036854775809"]) {
+    const { packets: invalid } = expiryPacketRealm({ sourceOverride });
+    assert.equal(expiryValue(invalid, "9007199254740993"), null, sourceOverride);
+  }
+  for (const literal of ["9e18", "9007199254740993.0", "9223372036854775808", "-9223372036854775809"]) {
+    assert.equal(expiryValue(packets, literal), null, literal);
+  }
+});
+
+check("expiry rescue leaves Rental Sealed UID count dura and unrelated date fields untouched", () => {
+  const encoded = '{"expire_info":{"expiry_binary_datetime":9007199254740993}}';
+  const wire = '{"type":"packet","packet":"GainedItem","payload":{"item":{"unique_id":9007199254740993,"count":9007199254740993,"current_dura":9007199254740993,"max_dura":9007199254740993,"expire_info":{"expiry_binary_datetime":9007199254740993},"rental_information":{"expiry_binary_datetime":9007199254740993,"rental_locked":false,"binding_flags":0,"owner_name":"A"},"sealed_info":{"expiry_binary_datetime":9007199254740993,"next_seal_binary_datetime":9007199254740993},"dateSentBinaryDatetime":9007199254740993},"itemsJson":' + JSON.stringify(encoded) + '}}';
+  const parsed = packets.parseGatewayMailDates(wire), ordinary = JSON.parse(wire);
+  const actualItem = parsed.payload.item, ordinaryItem = ordinary.payload.item;
+  assert.equal(actualItem.expire_info.expiry_binary_datetime, "9007199254740993");
+  for (const key of ["unique_id", "count", "current_dura", "max_dura", "rental_information", "sealed_info", "dateSentBinaryDatetime"]) {
+    assert.deepEqual(actualItem[key], ordinaryItem[key], key);
+  }
+  assert.equal(parsed.payload.itemsJson, ordinary.payload.itemsJson, "encoded legacy JSON text is not reparsed or rescued");
+  const arrayWire = '{"expiry_binary_datetime":[9007199254740993],"other":9007199254740993}';
+  assert.deepEqual(packets.parseGatewayMailDates(arrayWire), JSON.parse(arrayWire));
+});
+
+check("ReceiveMail second parse preserves both dateSent and every attachment plain expiry", () => {
+  const wire = '{"type":"packet","packet":"ReceiveMail","payload":{"mail":[{"mailId":7,"dateSentBinaryDatetime":638962902000000001,"items":[{"expire_info":{"expiry_binary_datetime":9007199254740993}},{"expire_info":{"expiry_binary_datetime":"-9223372036854775808"}}]}]}}';
+  const actual = packets.parseGatewayMailDates(wire).payload.mail[0];
+  assert.equal(actual.dateSentBinaryDatetime, "638962902000000001");
+  assert.equal(actual.items[0].expire_info.expiry_binary_datetime, "9007199254740993");
+  assert.equal(actual.items[1].expire_info.expiry_binary_datetime, "-9223372036854775808");
+  const { packets: old } = expiryPacketRealm({ withoutSource: true });
+  const fallback = old.parseGatewayMailDates(wire).payload.mail[0];
+  assert.equal(fallback.items[0].expire_info.expiry_binary_datetime, null);
+  assert.equal(fallback.items[1].expire_info.expiry_binary_datetime, "-9223372036854775808");
+  assert.equal(old.parseMailList([{mailId:7,canReply:true,dateSentBinaryDatetime:fallback.dateSentBinaryDatetime}])[0].metadataKnown, false);
 });
 
 console.log(`extended server packet tests passed (${passed} groups)`);

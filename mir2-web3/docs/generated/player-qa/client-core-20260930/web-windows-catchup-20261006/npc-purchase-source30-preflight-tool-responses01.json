@@ -1,0 +1,20 @@
+{
+  "owner": "Root",
+  "kind": "Retained actual tool responses, not fabricated child receipts",
+  "recordedAtUtc": "2026-10-07 14:40:48 UTC",
+  "web02": {
+    "chunk_id": "0331cb",
+    "wall_time_seconds": 0.3187027,
+    "exit_code": 1,
+    "original_token_count": 64,
+    "output": "Exception: \r\nLine |\r\n  11 |  … t.sha256) { throw ('source pin mismatch: ' + $taskInput.relativePath) …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | source pin mismatch: apps/web/lib/npc-purchase-client.ts\r\n"
+  },
+  "fingerprint01": {
+    "chunk_id": "8c7f68",
+    "wall_time_seconds": 0.3846542,
+    "exit_code": 1,
+    "original_token_count": 78,
+    "output": "Get-FileHash: \r\nLine |\r\n  14 |  … ols) { if ((Get-FileHash -LiteralPath $taskTool.path -Algorithm SHA25 …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Could not find a part of the path 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\bin\\next'.\r\n"
+  },
+  "scope": "Immutable preflight failures; zero tests counted. No physical child receipt available; process-start inference follows actual immutable template order."
+}

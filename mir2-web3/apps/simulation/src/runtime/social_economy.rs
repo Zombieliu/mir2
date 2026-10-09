@@ -91,14 +91,18 @@ pub(super) fn stage5_trade_item_can_enter(item: &ItemState) -> bool {
 pub(super) fn stage5_mail_exact_item_slots(
     inventory_items: &[ItemState],
     item_states: &[ItemState],
+    inventory_capacity: u16,
 ) -> Option<Vec<(ItemContainer, u8)>> {
     let mut reserved_items = inventory_items.to_vec();
     let mut slots = Vec::with_capacity(item_states.len());
     for item in item_states {
-        let (container, slot) =
-            empty_slots_for_inventory_container(&reserved_items, ItemContainer::Bag1)
-                .into_iter()
-                .next()?;
+        let (container, slot) = empty_slots_for_inventory_container(
+            &reserved_items,
+            ItemContainer::Bag1,
+            inventory_capacity,
+        )
+        .into_iter()
+        .next()?;
         let mut reserved = item.clone();
         reserved.container = container;
         reserved.slot = slot;

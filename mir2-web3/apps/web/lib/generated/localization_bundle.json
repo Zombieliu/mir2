@@ -2316,6 +2316,8 @@
         "ui.questFilter.ready": "Ready",
         "ui.questNoReward": "No reward listed.",
         "ui.questObjective": "Objective",
+        "ui.questProgressHeading": "Progress",
+        "ui.questReturnHeading": "Return",
         "ui.questReturnTo": "Return to: {0}",
         "ui.questReward": "Reward",
         "ui.questRewardCredit": "Credit {0}",
@@ -2366,7 +2368,14 @@
         "ui.visitor": "Visitor",
         "ui.worldChatPlaceholder": "Say something in world chat",
         "ui.ws": "WS",
-        "ui.xboxController": "Xbox controller"
+        "ui.xboxController": "Xbox controller",
+        "ui.questClientLoading": "Preparing quest actions…",
+        "ui.questClientUnavailable": "Quest actions are temporarily unavailable. Please retry.",
+        "ui.questActionPending": "Your request is being processed. Please wait.",
+        "ui.questActionRewardRequired": "Select a reward first.",
+        "ui.questActionTalkToNpc": "Talk to the quest NPC to continue.",
+        "ui.questActionStateChanged": "The quest has changed. Review it and try again.",
+        "ui.retry": "Retry"
       }
     },
     "zh-CN": {
@@ -4675,6 +4684,8 @@
         "ui.questFilter.ready": "可提交",
         "ui.questNoReward": "暂无奖励。",
         "ui.questObjective": "任务目标",
+        "ui.questProgressHeading": "任务进度",
+        "ui.questReturnHeading": "交付地点",
         "ui.questReturnTo": "返回：{0}",
         "ui.questReward": "任务奖励",
         "ui.questRewardCredit": "声望 {0}",
@@ -4725,7 +4736,14 @@
         "ui.visitor": "访客",
         "ui.worldChatPlaceholder": "在世界聊天中输入内容",
         "ui.ws": "网络",
-        "ui.xboxController": "Xbox 手柄"
+        "ui.xboxController": "Xbox 手柄",
+        "ui.questClientLoading": "正在准备任务操作…",
+        "ui.questClientUnavailable": "任务操作暂时无法使用，请重试。",
+        "ui.questActionPending": "请求处理中，请稍候。",
+        "ui.questActionRewardRequired": "请先选择奖励。",
+        "ui.questActionTalkToNpc": "请与任务 NPC 交谈后继续。",
+        "ui.questActionStateChanged": "任务状态已变化，请查看任务后重试。",
+        "ui.retry": "重试"
       }
     },
     "es": {
@@ -6811,6 +6829,8 @@
         "ui.questFilter.ready": "Listas",
         "ui.questNoReward": "No hay recompensa indicada.",
         "ui.questObjective": "Objetivo",
+        "ui.questProgressHeading": "Progreso",
+        "ui.questReturnHeading": "Lugar de entrega",
         "ui.questReturnTo": "Regresa con: {0}",
         "ui.questReward": "Recompensa",
         "ui.questRewardCredit": "Crédito {0}",
@@ -6861,7 +6881,14 @@
         "ui.visitor": "Visitante",
         "ui.worldChatPlaceholder": "Escribe algo en el chat global",
         "ui.ws": "WS",
-        "ui.xboxController": "Mando Xbox"
+        "ui.xboxController": "Mando Xbox",
+        "ui.questClientLoading": "Preparando las acciones de misión…",
+        "ui.questClientUnavailable": "Las acciones de misión no están disponibles temporalmente. Vuelve a intentarlo.",
+        "ui.questActionPending": "Tu solicitud se está procesando. Espera un momento.",
+        "ui.questActionRewardRequired": "Selecciona primero una recompensa.",
+        "ui.questActionTalkToNpc": "Habla con el PNJ de la misión para continuar.",
+        "ui.questActionStateChanged": "La misión ha cambiado. Revísala y vuelve a intentarlo.",
+        "ui.retry": "Reintentar"
       }
     },
     "pt-BR": {
@@ -9172,6 +9199,8 @@
         "ui.questFilter.ready": "Ready",
         "ui.questNoReward": "No reward listed.",
         "ui.questObjective": "Objective",
+        "ui.questProgressHeading": "Progresso",
+        "ui.questReturnHeading": "Local de entrega",
         "ui.questReturnTo": "Return to: {0}",
         "ui.questReward": "Reward",
         "ui.questRewardCredit": "Credit {0}",
@@ -9222,7 +9251,14 @@
         "ui.visitor": "Visitante",
         "ui.worldChatPlaceholder": "Diga algo no chat global",
         "ui.ws": "WS",
-        "ui.xboxController": "Controle Xbox"
+        "ui.xboxController": "Controle Xbox",
+        "ui.questClientLoading": "Preparando as ações de missão…",
+        "ui.questClientUnavailable": "As ações de missão estão temporariamente indisponíveis. Tente novamente.",
+        "ui.questActionPending": "Sua solicitação está sendo processada. Aguarde.",
+        "ui.questActionRewardRequired": "Selecione uma recompensa primeiro.",
+        "ui.questActionTalkToNpc": "Fale com o NPC da missão para continuar.",
+        "ui.questActionStateChanged": "A missão mudou. Confira os detalhes e tente novamente.",
+        "ui.retry": "Tentar novamente"
       }
     }
   }

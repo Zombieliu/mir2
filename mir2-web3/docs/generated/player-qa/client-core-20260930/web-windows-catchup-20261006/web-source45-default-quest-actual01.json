@@ -1,0 +1,63 @@
+{
+  "owner": "Root",
+  "kind": "Actual48 finite original default/Quest tests; no player acceptance",
+  "generatedAtUtc": "2026-10-08T14:16:04.580Z",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-source45-default-quest01.config.json",
+    "bytes": 4578,
+    "sha256": "9c8bfa23046404e6ff59f8401c3af9d79384498dc895e9cdfa61d9fc068ad460"
+  },
+  "source": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-source45-default-quest01-snapshot.json",
+    "bytes": 5967327,
+    "sha256": "7156eea7112f04310c0df1e58bcb6a8c3d9b00c5228fe80b4946436d49759ec7"
+  },
+  "review": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-source45-default-quest01-review.json",
+    "bytes": 2964,
+    "sha256": "f6c8b45fb5e251f1932323232aecac31e1532eebcff8e54bff7a5aa83fc9548f"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-source45-default-quest01.stdout.log",
+    "bytes": 4653,
+    "sha256": "5606d4522880c4608d1e96fe1839fa52fbe8f6b8888da1f0baa2d09627a0ea76"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-source45-default-quest01.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-source45-default-quest01.outer.json",
+    "bytes": 522,
+    "sha256": "c1ba796ae1558a8d65a48c1871e39c045209a400178be30ce25697b75602dad5"
+  },
+  "outerValue": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 179732,
+    "kind": "Source45 default shared entry and Quest finite original tests",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2331,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-source45-default-quest01.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdoutText": "✔ 844×390 touch stage, DPR and resize project the shell's actual CSS scale (1.368ms)\n✔ missing or inconsistent stage/canvas geometry cannot transfer UI ownership (0.2069ms)\n✔ static definitions never become available quests without an authoritative stage (0.7033ms)\n✔ missing endpoints, source sections, counters and exact reward indices survive projection (0.3042ms)\n✔ malformed selectable rewards fail closed instead of becoming another valid choice (0.224ms)\n✔ fixed and selectable reward previews retain their exact source through the Bevy DTO (3.9837ms)\n✔ NPC links retain exact wire targets, disabled state and required-input fallback (0.214ms)\n✔ session and request sequences survive independent module loads (34.3141ms)\n✔ old generation and malformed renderer status cannot take UI ownership (0.6244ms)\n✔ Quest world context requires a complete same-player projection and exact version capability (1.2632ms)\n✔ the actual Page capture retires raw Quest skills for self NewMagic only on the current connection (119.2028ms)\n✔ renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner (103.1558ms)\n✔ v2 Quest world preserves nullable facts, canonical IDs and unknown current map (0.7233ms)\n✔ local Quest actions require exact seven-field stamp, role and nested route payload (2.7035ms)\n✔ ordinary map packets retire same-map transitions and images never supply map authority (0.2626ms)\n✔ Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence (0.2042ms)\n✔ the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint (1.202ms)\n✔ route execution follows bends, validates each 2/3-tile run and replans deviations (0.2247ms)\n✔ collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures (1.8871ms)\n✔ world control reader requires actual current stamped rectangles and claims only button hits (0.7955ms)\n✔ actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send (95.2825ms)\n✔ actual Page map-image press and route ownership retire only the captured source and preserve sent movement (86.0566ms)\n✔ packaged CJK font matches its pinned upstream bytes and retains its license (12.9391ms)\n✔ invalid metadata falls back to DOM before runtime import (1.8959ms)\n✔ exact shared mode selects shared GL2 only when the complete package exists (0.6613ms)\n✔ ordinary empty query freezes the shared GL2 package while preserving GPU priority (0.4479ms)\n✔ heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1 (1.8686ms)\n✔ heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out (1.233ms)\n✔ explicit opt-outs and absent shared packages retain lean GL2 selection (0.2097ms)\n✔ live startup agreement rejects relevant query changes without losing unrelated flags (0.4069ms)\n✔ encoded and duplicate raw opt-ins retain ordinary package selection (0.2106ms)\n✔ legacy exact shared request is unsafe while ordinary legacy remains usable (0.2653ms)\n✔ getter agreement checks backend, ABI, compiled primary, startup, and live query (0.4731ms)\n✔ legacy getter may report unknown compiled GL2 capability but cannot start shared (0.2043ms)\n✔ one document gate forbids a second boot even after synchronous or asynchronous failure (11.3526ms)\n✔ third URL variant preserves old positional callers and immutable package path (0.6113ms)\n✔ desktop keeps the Bevy runtime enhancement enabled (0.6613ms)\n✔ touch-first phones and tablets use the immediately playable compatibility renderer (0.161ms)\n✔ a fine-pointer desktop with a touch screen is not misclassified as mobile (0.0616ms)\n✔ QA query controls override automatic device policy (0.0711ms)\n✔ network failures never trigger a second full runtime download (0.2371ms)\n✔ shared UI requests default on and allow independent first-value opt-outs (1.2847ms)\n✔ strict shared UI requests reject encoded aliases and values (0.1218ms)\n✔ ordinary shared UI requests retain URLSearchParams decoded first values (0.1474ms)\n✔ default shared canvas intent keeps every explicit override exact (0.2141ms)\n✔ only exact first raw startup values opt WebGL2 into the primary shared canvas (0.1692ms)\n✔ shared UI uses the fixed stage canvas while GL2 activation follows actual backend (0.0693ms)\n✔ the selected primary canvas supplies existing stage presentation geometry (0.2202ms)\nℹ tests 48\nℹ suites 0\nℹ pass 48\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2265.5623\n",
+  "stderrText": "",
+  "actualTests": 48,
+  "pass": 48,
+  "fail": 0,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "qualification": "Existing original tests use finite fake adapters and pinned data; actual buttons/real WASM/World/player flows not-run."
+}

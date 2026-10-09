@@ -11,6 +11,7 @@ pub mod economy;
 pub mod events;
 pub mod gate14;
 pub mod gate15;
+pub mod guild_clock;
 pub mod guild_node_foundation {
     pub use dubhe_network_core::capacity::*;
 }
@@ -41,6 +42,9 @@ pub mod node_identity {
     pub use dubhe_network_core::identity::*;
 }
 pub mod node_security;
+pub mod npc_gold_buy_route;
+pub mod npc_purchase_owner_route;
+pub mod npc_purchase_browser;
 pub mod operator;
 pub mod regional;
 mod resume;
@@ -96,6 +100,7 @@ pub use control_plane::{
     ZoneHostSnapshot, ZonePlacementEndpoint, ZonePlacementLease, ZoneRebalanceMove,
 };
 pub use economy::PostgresEconomyAccountInventoryService;
+pub use npc_gold_buy_route::{NpcGoldBuyRouteError, NpcGoldBuyRouteExecution};
 pub use events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSink,
     GameplayEventSinkStatus, GatewayGameplayEvent, InMemoryGameplayEventSink,
