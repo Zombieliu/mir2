@@ -491,9 +491,23 @@ export async function collectSharpNativePackages(dependencyRoot) {
     if (name === binaryName) {
       const exportedBinary = metadata.exports?.["./sharp.node"];
       if (typeof exportedBinary !== "string" || !exportedBinary.startsWith("./") ||
-          !exportedBinary.endsWith(".node") ||
           !included.has(segmentsOf(exportedBinary.slice(2)).join("/")) ||
           !included.has("versions.json")) {
+        throw new Error(`Sharp target binary or version metadata missing: ${name}`);
+      }
+      let nativeBinary = exportedBinary;
+      if (exportedBinary.endsWith(".cjs")) {
+        const bootstrapPath = path.join(packageRoot, ...segmentsOf(exportedBinary.slice(2)));
+        if (exportedBinary !== "./index.cjs" || (await fs.lstat(bootstrapPath)).size > 4096) {
+          throw new Error(`Unrecognized Sharp native bootstrap: ${name}`);
+        }
+        const bootstrap = await fs.readFile(bootstrapPath, "utf8");
+        const match = /^\s*module\.exports\s*=\s*require\((["'])(\.\/[A-Za-z0-9_./-]+\.node)\1\);?\s*$/.exec(bootstrap);
+        if (!match) throw new Error(`Unrecognized Sharp native bootstrap: ${name}`);
+        nativeBinary = match[2];
+      }
+      if (!nativeBinary.endsWith(".node") ||
+          !included.has(segmentsOf(nativeBinary.slice(2)).join("/"))) {
         throw new Error(`Sharp target binary or version metadata missing: ${name}`);
       }
       if (process.platform === "win32" && ![...included].some((file) => file.endsWith(".dll"))) {

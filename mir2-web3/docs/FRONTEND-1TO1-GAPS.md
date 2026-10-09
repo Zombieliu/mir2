@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
+
+最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。
+
+原 Next build --webpack 实际 exit0，162013ms，19556项完整输入在原调用前后匹配，严格 TypeScript 和13页静态生成通过。Thin 首次因当前 Sharp0.35.3将 sharp.node 导出指向 index.cjs 失败（实际 exit1/25289ms）；本轮仅修真实打包 helper，支持包根有界单句入口并检查其实际版本化 .node，保留版本、许可、DLL、regular file/path/COPY_EXCL和原预算。55个现有Sharp输入仍等于此前恢复记录，没有安装或混入旧版本。该 helper 只供 Thin 消费，Next 原编译区间及不变产物明确限定承接；不声称当前整个旧广义快照仍匹配。
+
+Source50 原 Thin --skipBuild true 实际 exit0，38463ms，55303项完整当前输入在原调用前后匹配。新包7331 regular files、778目录（含根）、0链接、373987154B，原377487360B上限余3500206B；三套renderer和Core/PUI/NPC均与已编译版本一致。包位于 apps/web/.mir2-thin-client-web-windows-catchup-source50-20261009-01。231项JSON压缩及59条原NFT追踪警告保留，产物与依赖另有只读复核；原失败输出、历史旧08及不可变旧版本均保留。
+
+继续遵守“继续代码，暂不操作界面”：真实资源初始化、登录→任务/战斗→保存退出重登、移动真机及人类前端验收仍未执行；省略媒体的不可变资源origin和覆盖仍待真实验证，构建成功不证明在线可玩。Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅有界代码记录，overallPercentage=null、Candidate100=false、goal未完成，无可信可玩日期。用户主4932B tsconfig保留；外来Cargo/simulation/后端及制作加工文档正文保留且排除本轮提交。
+
+证据：[本轮交付](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-delivery01.json)、[64份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-raw-evidence02.json)、[完整Thin实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual01.json)、[实际产物复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual-independent-review01.json)、[依赖及警告复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-dependency-actual-review01.json)、[Source47实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-publication01.json)。本轮提交推送随后另存真实记录，下方原正文及其他工作保持。
+
 ## Source47：构建配置副本入口通过严格类型检查；完整 Web 包待生成（2026-10-09）
 
 next.config.ts 新增可选 MIR2_NEXT_TSCONFIG_PATH，未设置时保留原行为，未放宽类型检查。原严格 TSC 实际 exit0、零诊断、12188ms，17136声明输入在调用前后匹配；用户主 tsconfig 原4932B保留。路径校验为代码与源码审阅结果，尚未实际执行 Next 配置。
