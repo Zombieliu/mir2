@@ -1,5 +1,20 @@
 # Agent Run Log
 
+## 2026-10-10 — Real Stripe sandbox credential verification
+
+Read the operator's private test-mode server key without printing or copying
+it into Git. Four provider GETs return200. Real Checkout initially returns400
+because Endive no longer accepts `payment_method_types`; the supported
+`allowed_payment_method_types` card filter returns200. The unpaid probe is
+expired200. A separate temporary webhook and signing secret are created200
+and the endpoint is deleted200. No charge or game order is created.
+The matching Gateway request and captured-form contract are corrected, with
+all36 billing tests passing. USD1/100 Credits and30-day monthly1000 prices are
+saved only in disabled private configuration; public services/feeds/saves are
+unchanged. A permanent callback, completed payment/refund, live key, fleet
+rollout and native purchase remain open. Original provider failure is retained.
+[Secret-free evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
 ## 2026-10-09 — Stripe Credits / monthly consumable Candidate
 
 Implemented the user's one-time Stripe recharge and monthly GameShop item

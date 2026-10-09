@@ -224,7 +224,9 @@ impl StripeBilling {
             // retried; a different SKU cannot replace the order's payment.
             let params = vec![
                 ("mode", "payment".to_owned()),
-                ("payment_method_types[0]", "card".to_owned()),
+                // Endive uses Dashboard-managed methods; preserve our card-only
+                // policy with its supported per-session eligibility filter.
+                ("allowed_payment_method_types[0]", "card".to_owned()),
                 (
                     "line_items[0][price_data][currency]",
                     order.offer.currency.clone(),

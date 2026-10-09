@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-10-10 Stripe sandbox key and provisioning acceptance: real provider
+> reads, unpaid Checkout create/expire and temporary webhook create/delete
+> pass. The supported Endive card filter replaces the rejected old parameter;
+> Gateway billing36 passes. USD1/100 Credits and monthly1000/30 days are confirmed.
+> This proves credentials/provisioning, not paid settlement or native behavior.
+> Public R22/Gatewaya41/feed17, live billing and full P1–P7 remain unchanged.
+> [Provider evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
 > 2026-10-09 commercial extension is Candidate only: Stripe Credits and a
 >30-day paid consumable are separate from original Crystal parity. Local
 > simulation44, Gateway36/shared4/adjacent4 prove bounded financial/ownership

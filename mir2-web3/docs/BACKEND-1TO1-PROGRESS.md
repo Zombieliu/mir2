@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-10 Stripe provider follow-up: four authenticated sandbox reads and
+> Checkout/temporary webhook creation and cleanup pass on real Stripe. Endive
+> rejected the obsolete payment-method field; its supported card eligibility
+> filter now passes Gateway billing36. Operator pricing is USD1/100 Credits and
+> monthly1000/30 days. No financial schema, settlement authority, production
+> service or save changes; private test configuration remains disabled.
+> Completed payment/refund and paired schema8 rollout remain open.
+> [Provider evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
 > 2026-10-09 unpublished billing Candidate: account schema8 retains immutable
 > recharge/payment/application and monthly-item receipts. Webhooks only record
 > PaidPending; serialized Source consumes current owner state. Capacity fitting,

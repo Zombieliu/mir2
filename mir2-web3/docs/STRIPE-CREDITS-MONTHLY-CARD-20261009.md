@@ -7,6 +7,25 @@ Gateway a41 and signed feed17 remain unchanged. No real Stripe account,
 charge, webhook registration, production database migration or native human
 acceptance is claimed by local fixtures.
 
+## 2026-10-10 provider credential and pricing follow-up
+
+The operator supplied a sandbox server key in a user-only private file outside
+Git. Real Stripe authenticated Checkout, PaymentIntent, Charge and webhook
+list requests return200. The pinned Endive API rejects `payment_method_types`
+with400; `allowed_payment_method_types[0]=card` succeeds while retaining the
+card-only policy. The Gateway request and captured HTTP form regression are
+corrected, and all36 billing tests pass. The unpaid provider probe is expired;
+a temporary webhook/signing-secret creation is verified and its endpoint
+deleted. There is no real charge, game-wallet award or completed payment test.
+
+Confirmed operator pricing is **USD1 =100 Credits**, with a **30-day card
+costing1000 Credits** (USD10). Private test configuration supplies USD1/5/10/20
+offers with100/500/1000/2000 Credits and keeps billing disabled. No prices or
+keys are installed into public services. A permanent matching webhook, public
+test purchase/refund, live credentials, paired deployment and native acceptance
+remain open. [Evidence and original failure](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+The earlier fixture/CI results below remain valid within their stated scope.
+
 ## Player flow
 
 1. Log in normally. Open **Recharge** in the native GameShop, or use the
@@ -39,9 +58,10 @@ or human acceptance on another Windows machine.
 
 ## Server configuration
 
-Payments and the monthly product are disabled by default. Before enabling,
-the operator must specify the real currency, recharge tiers and monthly-card
-Credits price. No production prices are invented in this Candidate.
+Payments and the monthly product are disabled by default. The operator has
+confirmed USD1/100 Credits and monthly1000 pricing; it is saved only in private
+test configuration. Provision the matching callback and deploy all compatible
+writers before enabling. Production provider acceptance is still pending.
 
 | Setting | Purpose |
 | --- | --- |
@@ -146,7 +166,7 @@ transport fixtures, durable restart checks and original assertions. It retains
 failed runs/logs. It never contacts Stripe or publishes a Gateway/client/feed.
 The adjacent monthly-card acceptance toolchain is aligned to installed1.95.
 
-Release still requires real prices/credentials, exact-source Linux and Windows
+Release still requires live credentials, exact-source Linux and Windows
 builds, a Stripe test-mode purchase/refund/retry story through the public HTTPS
 endpoint, normal owner drain/backup and paired schema-compatible rollout, plus
 native human purchase/claim/use/expired-renewal acceptance. Current installers

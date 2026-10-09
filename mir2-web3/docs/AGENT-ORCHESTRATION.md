@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+> 2026-10-10 Stripe credential follow-up: the operator's sandbox server key
+> passes four real provider reads, Checkout creation/expiration and temporary
+> webhook creation/deletion. The real Endive API rejected the obsolete
+> `payment_method_types` field; the supported card eligibility filter replaces
+> it, with Gateway billing36 passing. Confirmed pricing is USD1/100 Credits and
+> 30 days/1000 Credits. Private test configuration remains disabled; permanent
+> callback, completed payment/native acceptance and paired rollout remain open.
+> Public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+> [Provider evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
 > 2026-10-09 unpublished Stripe Credits/monthly-item Candidate: native recharge
 > and expired-selection renewal, frozen Checkout orders, authenticated raw
 > webhooks, Source-owned settlement, permanent card units and single-attempt

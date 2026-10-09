@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-10 commercial extension follow-up: real sandbox credentials and
+> Checkout/webhook provisioning are verified, with temporary objects cleaned.
+> Endive's removed payment-method parameter is replaced by its supported
+> card filter; Gateway billing36 passes. The operator confirms USD1/100 Credits
+> and monthly1000/30 days. Private configuration is disabled; completed payment,
+> permanent callback, native purchase and paired rollout remain unaccepted.
+> This does not change public R22/Gatewaya41/feed17 or full parity progress.
+> [Provider evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
 > 2026-10-09 authorized commercial extension Candidate: Stripe Hosted Checkout
 > credits the existing character wallet; a custom30-day monthly item extends
 > account access exactly once. Original Crystal manifests remain unchanged.

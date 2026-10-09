@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-10 Stripe credentials and pricing are now confirmed: sandbox provider
+> reads and unpaid Checkout/temporary webhook provisioning pass. The obsolete
+> Endive payment-method request field is corrected; Gateway billing36 passes.
+> USD1 buys100 Credits; a30-day monthly card costs1000. Keys and test prices are
+> saved privately outside Git, with billing disabled. Completed payment/refund,
+> permanent callback, live credentials, all-writer rollout and native acceptance
+> remain open. Public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+> [Provider evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
 > 2026-10-09 Stripe recharge request: one-time Checkout to character Credits and
 > a30-day consumable monthly card are implemented as an unpublished Candidate.
 > Local simulation44, Gateway36/shared4/adjacent4 and native5/model10/URL2 checks
@@ -15,7 +24,8 @@
 | [x] | Candidate Credit purchase and exact-UID monthly consumable | Native GameShop mail/claim/use, expired selection, renewal, pool-safe shared owner checks |
 | [x] | Candidate native billing presentation | Compile/model/correlation/URL/localization checks; no human visual acceptance |
 | [x] | Real isolated PostgreSQL competing writers | Actual CI37946216332, independent writers and stale owner/restart assertions; adjacent code ledger PG also passes |
-| [ ] | Real Stripe activation and release | Operator prices/credentials, test-mode purchase/refund, fleet schema8 upgrade and native acceptance |
+| [x] | Sandbox credentials and operator pricing | Real provider reads, unpaid Checkout create/expire, temporary callback create/delete; USD1/100 Credits, monthly1000 |
+| [ ] | Real Stripe activation and release | Permanent callback, completed test-mode purchase/refund, live keys, fleet schema8 upgrade and native acceptance |
 
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and

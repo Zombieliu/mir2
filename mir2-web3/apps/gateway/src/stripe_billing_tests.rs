@@ -233,7 +233,10 @@ async fn stripe_http_checkout_binding_failure_retries_same_frozen_order_and_key(
         params["payment_intent_data[metadata][mir2_account_id]"],
         "demo"
     );
-    assert_eq!(params["payment_method_types[0]"], "card");
+    assert_eq!(params["allowed_payment_method_types[0]"], "card");
+    assert!(!params.keys().any(|key| {
+        key == "payment_method_types" || key.starts_with("payment_method_types[")
+    }));
     assert_eq!(
         c.recharge_credit_status("demo", o.character_index).unwrap(),
         (0, 0)
