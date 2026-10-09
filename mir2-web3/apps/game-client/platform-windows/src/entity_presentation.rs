@@ -30,6 +30,66 @@ const CRYSTAL_MOVE_PHASE_MS: u64 = 100;
 const MAX_SMOOTH_TILE_DISTANCE: u32 = 3;
 const MAX_NATIVE_MOVE_PHASE_COUNT: u16 = 8;
 
+const SABUK_GATE_BLOCKING_OFFSETS: &[(i32, i32)] = &[
+    (0, 0),
+    (0, -1),
+    (0, -2),
+    (1, -1),
+    (1, -2),
+    (-1, 0),
+    (-2, 0),
+    (-1, -1),
+    (-1, 1),
+];
+
+// Collision checks and failed-route invalidation must use the same footprint.
+// In particular AI81's open gate has no occupied cells, even at its center.
+fn entity_movement_footprint(
+    entity: &Value,
+    map: Option<&str>,
+    self_object_id: &str,
+    point: Option<(i32, i32)>,
+) -> Option<((i32, i32), &'static [(i32, i32)])> {
+    let kind = entity.get("kind").and_then(Value::as_str);
+    let is_sabuk_gate = kind == Some("monster")
+        && map.is_some_and(|map| map.trim_end_matches(".map").eq_ignore_ascii_case("3"))
+        && entity.get("ai").and_then(Value::as_u64) == Some(81)
+        && entity.get("image").and_then(Value::as_u64) == Some(950)
+        && entity.get("name").and_then(Value::as_str) == Some("SabukGate")
+        && entity.get("x").and_then(Value::as_i64) == Some(672)
+        && entity.get("y").and_then(Value::as_i64) == Some(330);
+    if is_sabuk_gate {
+        if entity.get("dead").and_then(Value::as_bool) == Some(true)
+            || entity
+                .get("direction")
+                .and_then(Value::as_str)
+                .is_some_and(|direction| direction.eq_ignore_ascii_case("left"))
+        {
+            return None;
+        }
+        return Some(((672, 330), SABUK_GATE_BLOCKING_OFFSETS));
+    }
+    // A* asks about one tile at a time. Reject other ordinary coordinates
+    // before allocating an object ID string or constructing a footprint.
+    // The signature caller passes None and collects every occupied cell once.
+    if point.is_some_and(|point| {
+        entity.get("x").and_then(Value::as_i64) != Some(i64::from(point.0))
+            || entity.get("y").and_then(Value::as_i64) != Some(i64::from(point.1))
+    }) || !matches!(kind, Some("selfPlayer" | "player" | "monster" | "npc"))
+        || entity.get("dead").and_then(Value::as_bool) == Some(true)
+        || entity.get("objectId").and_then(value_object_id).as_deref() == Some(self_object_id)
+    {
+        return None;
+    }
+    Some((
+        (
+            i32::try_from(entity.get("x")?.as_i64()?).ok()?,
+            i32::try_from(entity.get("y")?.as_i64()?).ok()?,
+        ),
+        &[(0, 0)],
+    ))
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct NativeMotionWindow {
     from_x: f32,
@@ -384,47 +444,36 @@ impl NativeEntityPresentation {
     ) -> Option<bool> {
         let entities = self.latest_payload.as_ref()?.get("entities")?.as_array()?;
         Some(entities.iter().any(|entity| {
-            let kind = entity.get("kind").and_then(Value::as_str);
-            let is_sabuk_gate = kind == Some("monster")
-                && self
-                    .current_map_file_name()
-                    .is_some_and(|map| map.trim_end_matches(".map").eq_ignore_ascii_case("3"))
-                && entity.get("ai").and_then(Value::as_u64) == Some(81)
-                && entity.get("image").and_then(Value::as_u64) == Some(950)
-                && entity.get("name").and_then(Value::as_str) == Some("SabukGate")
-                && entity.get("x").and_then(Value::as_i64) == Some(672)
-                && entity.get("y").and_then(Value::as_i64) == Some(330);
-            if is_sabuk_gate {
-                if entity.get("dead").and_then(Value::as_bool) == Some(true)
-                    || entity
-                        .get("direction")
-                        .and_then(Value::as_str)
-                        .is_some_and(|direction| direction.eq_ignore_ascii_case("left"))
-                {
-                    return false;
-                }
-                // Source AI81, effect 1: center plus the eight closed cells.
-                return [
-                    (0, 0),
-                    (0, -1),
-                    (0, -2),
-                    (1, -1),
-                    (1, -2),
-                    (-1, 0),
-                    (-2, 0),
-                    (-1, -1),
-                    (-1, 1),
-                ]
-                .iter()
-                .any(|(dx, dy)| point == (672 + dx, 330 + dy));
-            }
-            matches!(kind, Some("selfPlayer" | "player" | "monster" | "npc"))
-                && entity.get("dead").and_then(Value::as_bool) != Some(true)
-                && entity.get("x").and_then(Value::as_i64) == Some(i64::from(point.0))
-                && entity.get("y").and_then(Value::as_i64) == Some(i64::from(point.1))
-                && entity.get("objectId").and_then(value_object_id).as_deref()
-                    != Some(self_object_id)
+            entity_movement_footprint(
+                entity,
+                self.current_map_file_name(),
+                self_object_id,
+                Some(point),
+            )
+            .is_some_and(|((x, y), offsets)| {
+                offsets.iter().any(|(dx, dy)| point == (x + dx, y + dy))
+            })
         }))
+    }
+
+    /// Exact occupied cells, independent of animation, health and packet order.
+    /// Constructed once per failed-route comparison rather than per A* node.
+    pub(crate) fn movement_blocking_cells(&self, self_object_id: &str) -> Option<Vec<(i32, i32)>> {
+        let entities = self.latest_payload.as_ref()?.get("entities")?.as_array()?;
+        let mut cells = Vec::with_capacity(entities.len());
+        for entity in entities {
+            if let Some(((x, y), offsets)) = entity_movement_footprint(
+                entity,
+                self.current_map_file_name(),
+                self_object_id,
+                None,
+            ) {
+                cells.extend(offsets.iter().map(|(dx, dy)| (x + dx, y + dy)));
+            }
+        }
+        cells.sort_unstable();
+        cells.dedup();
+        Some(cells)
     }
 
     pub(crate) fn has_active_motion(&self, now_ms: u64) -> bool {
@@ -2068,6 +2117,10 @@ mod tests {
             Some(false),
             "self never blocks its own route"
         );
+        assert_eq!(
+            presentation.movement_blocking_cells("1"),
+            Some(vec![(12, 10)])
+        );
     }
 
     #[test]
@@ -2091,6 +2144,12 @@ mod tests {
         for cell in cells {
             assert_eq!(presentation.tile_has_blocking_entity("1", cell), Some(true));
         }
+        let mut sorted_cells = cells.to_vec();
+        sorted_cells.sort_unstable();
+        assert_eq!(
+            presentation.movement_blocking_cells("1"),
+            Some(sorted_cells)
+        );
         assert_eq!(
             presentation.tile_has_blocking_entity("1", (674, 330)),
             Some(false)
@@ -2104,6 +2163,7 @@ mod tests {
                     Some(false)
                 );
             }
+            assert_eq!(presentation.movement_blocking_cells("1"), Some(Vec::new()));
         }
         payload["entities"][1]["direction"] = json!("up");
         payload["entities"][1]["dead"] = json!(true);
@@ -2114,6 +2174,7 @@ mod tests {
                 Some(false)
             );
         }
+        assert_eq!(presentation.movement_blocking_cells("1"), Some(Vec::new()));
         payload["entities"][1]["dead"] = json!(false);
         payload["entities"][1]["direction"] = json!("left");
         payload["entities"]

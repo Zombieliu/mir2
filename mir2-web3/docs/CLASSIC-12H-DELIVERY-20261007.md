@@ -7,6 +7,17 @@ not complete and no older blocked Goal is presented as complete.
 
 ## Actual delivery checkpoint — 2026-10-09
 
+The user continued work after the missed deadline. The new P1 target/route/owner
+ACK Candidate passes native900/0/7ignored plus actual three-class native/Gateway
+socket movement and normal logout. It is implemented and locally tested, not yet
+published or human accepted. [Current P1 Candidate](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
+The full Zone regression remains198pass/11fail, identically reproduced on clean
+7fea; it is not a green baseline. [Source/fixture audit](CLASSIC-ZONE-BASELINE-AUDIT-20261009.md).
+P7 source inspection identifies seven real shared-world gaps and ordered action/
+CAS/recovery requirements; none is counted complete by the new P1 tests.
+[P7 implementation plan](CLASSIC-P7-SOURCE-WORLD-AUDIT-20261009.md).
+
+
 The published Windows client is R22/source7fea, signed feed17. The playtest
 Gateway now runs536b4a59f3, replacinga41 with the compatible disconnect/frozen-save
 fix after strict session/TCP/spectator drain. Successful exact-source Linux
@@ -20,7 +31,7 @@ There is no client reinstall for this server-only fix.
 
 | Priority | Actual implementation/test/release state | Still required before complete gameplay acceptance |
 | --- | --- | --- |
-| P1 movement/combat | Earlier escape/old-intent changes are in R22. New independent transport-close signaling, real movement-work drain and frozen save/recovery are in the published Gateway536; local Gateway270/recovery7, Linux CI and public disconnect/relogin gates pass. | Strict all-class seven-monster held-right escape, continued attack and no-drift native acceptance remains RED/inconclusive; ordinary WSS smoke does not replace it. |
+| P1 movement/combat | Earlier escape/old-intent changes are in R22. New independent transport-close signaling, real movement-work drain and frozen save/recovery are in the published Gateway536; local Gateway270/recovery7, Linux CI and public disconnect/relogin gates pass. Subsequent live-target failed-route caching and invalid-target owner ACK fixes pass local native900 and three-class real native/Gateway transport, awaiting new paired publication. | Strict all-class seven-monster held-right escape, continued attack and no-drift native acceptance remains RED/inconclusive; ordinary WSS smoke does not replace it. |
 | P2 late maps/Boss/loot | R22 includes the previously verified208 runtime maps/209 native resource maps and bounded controller/doorway/book rules. Source implementation is included in the published pair. | Natural three-class progression, conditional entrances, actual Boss/equipment/book acquisition at original odds and native resource/render acceptance. |
 | P3 XP/drop ownership | Original party distance/level/f32 allocation, Source CAS and bounded Boss/PK/potion ownership work are included; exact-source Linux classic/source gates pass. | Remaining original Hero/Pet group-health refresh and broad natural Boss/PK/group ownership, cross-zone/death/save recovery acceptance. |
 | P4 Taoist pets/PK | Shared typed targets/modes/group/Guild/safe/life guards, growth/save/recall/logout/cold restore and bounded TCP/WS source stories are included. | Source NPC shared-pet/world outbox, unsupported Totem owner chain and natural native/public lifecycle acceptance. |

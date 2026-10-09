@@ -1,5 +1,39 @@
 # Agent Task Queue
 
+> 2026-10-09 target/movement lifecycle Candidate: temporary blocked pursuit now
+> keeps a live target and caches only failed routes against the exact shared
+> collision footprint. A blocker death/position/blocked-hint change replans;
+> cosmetic changes do not repeat A*. Invalid/dead/removed attacks cancel stale
+> movement and acknowledge the real bound owner even if the Zone queue is empty,
+> without shortening action/Struck/spell clocks. Local native900/0/7ignored,
+> Gateway21, native focused5 and the actual three-class native/Gateway socket
+> cohort pass; corrections68/68/71ms, fresh movement,5s quiet, three normal logouts.
+> The genuine mining91.wav is now tracked and required by the generic packager.
+> Linux/Windows exact-source release CI and paired publication are pending;
+> this Candidate does not change the last verified R22/feed17/Gateway536 pair.
+> Full seven-monster/native-human and P1-P7/Mentor gates remain open.
+> [Scope, original evidence and remaining work](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
+
+Current sole source writer: root in the isolated gateway-lifecycle lane. The two
+read-only audit agents completed their assigned docs and hold no source writes.
+Next bounded rounds, preserving this Candidate and real source saves:
+
+1. Commit/push this exact P1 source, run Linux original release/security/clock
+   gates and clean Windows attested build; then publish the paired client/Gateway
+   only with verified saved/drained sessions. Qualify real seven-monster pressure
+   for all three classes without lowering the gate or changing source clocks.
+2. Repair the actual Snake Totem immediate-master typed owner chain and strict
+   source birth/action clock; keep the nine other baseline story corrections
+   separate. [11-failure clean-source audit](CLASSIC-ZONE-BASELINE-AUDIT-20261009.md).
+3. Implement source NPC ordered logical world actions and same Source-CAS durable
+   Zone outbox, then actual group admission/save and CHECKHUM capacity semantics.
+   [P7 rules and staged acceptance](CLASSIC-P7-SOURCE-WORLD-AUDIT-20261009.md).
+4. Finish normal native Carlos deposit/start/check/collect/failure and two-account
+   Guild/Mentor, original Boss/loot/party progression; rendered/human acceptance
+   stays distinct from headless protocol/source checks.
+
+
+
 > 2026-10-09 disconnect fix released: source536b4a59f3 is committed/pushed and
 > exact-source Linux CI37810114063 passed the original appearance, trusted
 > recovery, classic source, PostgreSQL and siege gates. The playtest Gateway

@@ -301,6 +301,19 @@ struct BlockedSelfMove {
     observed_at_ms: f64,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct UnreachableAttackRoute {
+    owner: String,
+    generation: Option<u64>,
+    new_move: bool,
+    map: Option<String>,
+    origin: (i32, i32),
+    target_id: u32,
+    target_position: (i32, i32),
+    blocking_cells: Vec<(i32, i32)>,
+    rejected_steps: Vec<BlockedSelfMove>,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum MovementAckOutcome {
     Confirmed,
@@ -350,6 +363,9 @@ pub struct WorldPointerMovementState {
     last_tile_pickup_at_ms: Option<f64>,
     blocked_steps: Vec<BlockedSelfMove>,
     last_plan_block_trace_at_ms: Option<f64>,
+    unreachable_attack_route: Option<UnreachableAttackRoute>,
+    #[cfg(test)]
+    attack_route_searches: usize,
 }
 
 const HUNT_ARRIVAL_FEEDBACK: &str = "已到达狩猎区域，请选择怪物战斗";
@@ -368,6 +384,13 @@ impl WorldPointerMovementState {
     /// other front-map objects while the chase/attack controller is active.
     pub(crate) fn attack_target(&self) -> Option<u32> {
         self.attack_target
+    }
+
+    #[cfg(test)]
+    pub(crate) fn pending_move_for_test(&self) -> Option<(&'static str, (i32, i32), (i32, i32))> {
+        self.pending
+            .front()
+            .map(|pending| (pending.direction, pending.from, pending.to))
     }
 
     pub(crate) fn current_directional_attack(
@@ -389,6 +412,7 @@ impl WorldPointerMovementState {
         self.map_auto_path = None;
         self.pending_hunt_route = None;
         self.attack_target = Some(object_id);
+        self.unreachable_attack_route = None;
         self.next_attack_request_at_ms = 0.0;
         self.harvest_target = None;
         self.harvest_direction = None;
@@ -677,6 +701,7 @@ impl WorldPointerMovementState {
             return false;
         }
         self.pending.clear();
+        self.unreachable_attack_route = None;
         self.movement_stall_reported = false;
         self.attack_target = None;
         self.next_attack_request_at_ms = 0.0;
@@ -1245,6 +1270,45 @@ fn find_crystal_auto_path(
 struct PlannedPointerMove {
     direction: &'static str,
     mode: WorldPointerMovementMode,
+}
+
+#[allow(clippy::too_many_arguments)]
+fn unreachable_attack_route_key(
+    movement: &WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: &NativeEntityPresentation,
+    owner: &str,
+    new_move: bool,
+    origin: (i32, i32),
+    target_id: u32,
+    target_position: (i32, i32),
+) -> UnreachableAttackRoute {
+    let blocking_cells = presentation
+        .movement_blocking_cells(owner)
+        .unwrap_or_else(|| {
+            // Match the collision fallback when no authoritative payload is ready.
+            let mut cells: Vec<_> = entities
+                .entities
+                .iter()
+                .filter(|entity| entity.object_id != owner)
+                .map(|entity| (entity.x, entity.y))
+                .collect();
+            cells.sort_unstable();
+            cells.dedup();
+            cells
+        });
+    UnreachableAttackRoute {
+        owner: owner.to_owned(),
+        generation: movement.owner_struck_generation,
+        new_move,
+        map: presentation.current_map_file_name().map(ToOwned::to_owned),
+        origin,
+        target_id,
+        target_position,
+        blocking_cells,
+        // The normal input pass has already pruned expired rejection hints.
+        rejected_steps: movement.blocked_steps.clone(),
+    }
 }
 
 fn entity_blocks_movement(
@@ -3014,6 +3078,7 @@ pub fn mouse_world_interaction_system(
         let reach = if ranged { 9 } else { 1 };
         let origin = movement.authoritative_position.unwrap_or(entity_position);
         if (target.x - origin.0).abs().max((target.y - origin.1).abs()) <= reach {
+            movement.unreachable_attack_route = None;
             movement.stop_auto_path(now_ms, "targetInRange");
             // This origin is packet-authoritative. An unrelated, delayed move
             // ACK must not lock combat when the target is already in range;
@@ -3065,11 +3130,49 @@ pub fn mouse_world_interaction_system(
         // Never route into the occupied target tile. Replan towards a reachable
         // attack neighbour using the latest authoritative target position.
         let map = presentation.current_map_file_name();
+        let cached_failure_key = movement.unreachable_attack_route.as_ref().map(|_| {
+            unreachable_attack_route_key(
+                &movement,
+                &entities,
+                presentation,
+                &object_id,
+                new_move,
+                planning_origin,
+                target_id,
+                (target.x, target.y),
+            )
+        });
+        if cached_failure_key
+            .as_ref()
+            .is_some_and(|key| movement.unreachable_attack_route.as_ref() == Some(key))
+        {
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.clear_attack_intents();
+            }
+            movement.stop_auto_path(now_ms, "targetUnreachable");
+            return;
+        }
         let mut best: Option<Vec<(i32, i32)>> = None;
         for dx in -1..=1 {
             for dy in -1..=1 {
                 if dx == 0 && dy == 0 {
                     continue;
+                }
+                let neighbour = (target.x + dx, target.y + dy);
+                if entity_blocks_movement(&entities, Some(presentation), &object_id, neighbour)
+                    || map.is_some_and(|map| {
+                        crate::map_parser::map_cell_blocks_player_movement(
+                            map,
+                            neighbour.0,
+                            neighbour.1,
+                        ) == Some(true)
+                    })
+                {
+                    continue;
+                }
+                #[cfg(test)]
+                {
+                    movement.attack_route_searches += 1;
                 }
                 if let Some(path) = find_crystal_auto_path(
                     &movement,
@@ -3078,7 +3181,7 @@ pub fn mouse_world_interaction_system(
                     &object_id,
                     map,
                     planning_origin,
-                    (target.x + dx, target.y + dy),
+                    neighbour,
                 ) {
                     if !path.is_empty() && best.as_ref().is_none_or(|old| path.len() < old.len()) {
                         best = Some(path);
@@ -3087,13 +3190,28 @@ pub fn mouse_world_interaction_system(
             }
         }
         let Some(destination) = best.and_then(|path| path.last().copied()) else {
-            movement.attack_target = None;
+            // Crystal CanWalk failure leaves the live selected target intact.
+            // Occupancy is transient: stop this route and retry from the next
+            // authoritative entity refresh without requiring another click.
             if let Some(queue) = queue.as_deref_mut() {
                 queue.clear_attack_intents();
             }
+            movement.unreachable_attack_route = Some(cached_failure_key.unwrap_or_else(|| {
+                unreachable_attack_route_key(
+                    &movement,
+                    &entities,
+                    presentation,
+                    &object_id,
+                    new_move,
+                    planning_origin,
+                    target_id,
+                    (target.x, target.y),
+                )
+            }));
             movement.stop_auto_path(now_ms, "targetUnreachable");
             return;
         };
+        movement.unreachable_attack_route = None;
         movement.auto_path_destination = Some(destination);
         movement.pointer_auto_path = false;
     }
@@ -5324,6 +5442,381 @@ mod tests {
             drain_world_intents(&mut app),
             vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
         );
+    }
+
+    #[test]
+    fn selected_monster_payload_blocker_death_replans_without_changing_entity_models() {
+        let test_started = std::time::Instant::now();
+        let (mut app, receiver) = crowded_escape_input_app(false);
+        app.world_mut().resource_mut::<EntityModelSet>().entities[2].x = 15;
+        app.world_mut().resource_mut::<EntityModelSet>().entities[2].y = 10;
+        let mut actors = vec![
+            serde_json::json!({"objectId":1000,"kind":"selfPlayer","x":10,"y":10}),
+            serde_json::json!({"objectId":2001,"kind":"monster","x":15,"y":10}),
+        ];
+        for x in 13..=17 {
+            for y in 8..=12 {
+                if x == 13 || x == 17 || y == 8 || y == 12 {
+                    actors.push(serde_json::json!({"objectId":3000 + actors.len(),
+                        "kind":"monster","x":x,"y":y,"dead":false}));
+                }
+            }
+        }
+        let mut payload = serde_json::json!({"entities":actors});
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .observe_packet_payload(
+                payload.clone(),
+                crate::entity_presentation::native_motion_clock_ms(),
+            );
+        app.world_mut()
+            .resource_mut::<WorldPointerMovementState>()
+            .pursue_attack_target(2001);
+        app.update();
+        let searches = app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .attack_route_searches;
+        eprintln!(
+            "[target-route-payload] initial_closed_ms={}",
+            test_started.elapsed().as_millis()
+        );
+        assert!(searches > 0);
+        for actor in payload["entities"].as_array_mut().unwrap() {
+            actor["hp"] = serde_json::json!(100);
+            actor["direction"] = serde_json::json!("up");
+        }
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .observe_packet_payload(
+                payload.clone(),
+                crate::entity_presentation::native_motion_clock_ms(),
+            );
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_route_searches,
+            searches
+        );
+        eprintln!(
+            "[target-route-payload] cosmetic_refresh_ms={}",
+            test_started.elapsed().as_millis()
+        );
+        assert!(receiver.try_recv().is_err());
+        payload["entities"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .find(|actor| actor["x"] == 13 && actor["y"] == 10)
+            .unwrap()["dead"] = serde_json::json!(true);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .observe_packet_payload(
+                payload,
+                crate::entity_presentation::native_motion_clock_ms(),
+            );
+        app.update();
+        eprintln!(
+            "[target-route-payload] dead_blocker_open_ms={}",
+            test_started.elapsed().as_millis()
+        );
+        assert!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_route_searches
+                > searches
+        );
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))
+        ));
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            Some(2001)
+        );
+        assert_eq!(app.world().resource::<EntityModelSet>().entities[2].x, 15);
+    }
+
+    #[test]
+    fn selected_monster_sealed_corridor_reuses_no_path_and_replans_when_gate_vacates() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            {
+                let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                entities.entities[2].x = 15;
+                entities.entities[2].y = 10;
+                let mut id = 3000;
+                for x in 13..=17 {
+                    for y in 8..=12 {
+                        if x != 13 && x != 17 && y != 8 && y != 12 {
+                            continue;
+                        }
+                        entities.entities.push(EntityModel {
+                            object_id: id.to_string(),
+                            kind: EntityKind::Monster,
+                            name: "Corridor blocker".into(),
+                            x,
+                            y,
+                            level: Some(3),
+                            direction: Some("left".into()),
+                        });
+                        id += 1;
+                    }
+                }
+            }
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .pursue_attack_target(2001);
+            app.update();
+            let searches = app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .attack_route_searches;
+            assert!(
+                searches > 0,
+                "open attack neighbours require a real route search"
+            );
+            for _ in 0..3 {
+                advance_movement_clock(&mut app, 600);
+                app.update();
+            }
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_route_searches,
+                searches,
+                "an unchanged sealed corridor must not repeat A* each frame"
+            );
+            // Cosmetic refreshes and packet ordering do not change occupancy.
+            {
+                let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                entities.entities.reverse();
+                for entity in &mut entities.entities {
+                    entity.name.push('!');
+                    entity.direction = Some("up".into());
+                }
+            }
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_route_searches,
+                searches
+            );
+            let observed_at_ms = app.world().resource::<Time>().elapsed_secs_f64() * 1000.0;
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .blocked_steps
+                .push(BlockedSelfMove {
+                    from: (10, 10),
+                    direction: "left",
+                    mode: WorldPointerMovementMode::Walk,
+                    observed_at_ms,
+                });
+            app.update();
+            let searches_with_hint = app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .attack_route_searches;
+            assert!(
+                searches_with_hint > searches,
+                "a new correction hint must invalidate the failed route"
+            );
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_route_searches,
+                searches_with_hint
+            );
+            advance_movement_clock(&mut app, MOVEMENT_BLOCKED_STEP_MAX_AGE_MS as u64 + 1);
+            app.update();
+            let searches_after_expiry = app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .attack_route_searches;
+            assert!(
+                searches_after_expiry > searches_with_hint,
+                "hint expiry must invalidate without a new packet"
+            );
+            assert!(app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .blocked_steps
+                .is_empty());
+            assert!(receiver.try_recv().is_err());
+            assert!(drain_world_intents(&mut app).is_empty());
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(state.attack_target, Some(2001));
+            assert_eq!(state.next_move_send_at_ms, 0.0);
+            assert_eq!(state.next_attack_request_at_ms, 0.0);
+            assert_eq!(state.run_primed_until_ms, 0.0);
+            assert!(state.pending.is_empty());
+            // The opening is two cells from the target, outside all eight
+            // attack neighbours. A neighbour-only signature would stay stuck.
+            app.world_mut()
+                .resource_mut::<EntityModelSet>()
+                .entities
+                .retain(|entity| (entity.x, entity.y) != (13, 10));
+            app.update();
+            assert!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_route_searches
+                    > searches_after_expiry
+            );
+            assert!(matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))
+            ));
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_target,
+                Some(2001)
+            );
+            assert!(app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .unreachable_attack_route
+                .is_none());
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .observe_gameplay_generation(2, 10_000.0);
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .observe_gameplay_generation(3, 10_001.0);
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert!(
+                state.attack_target.is_none()
+                    && state.pending.is_empty()
+                    && state.unreachable_attack_route.is_none(),
+                "a new transport generation must retain no old pursuit or failed route"
+            );
+        }
+    }
+
+    #[test]
+    fn selected_monster_survives_temporary_blocked_neighbors_and_resumes_without_reclick() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            {
+                let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                entities.entities[2].x = 15;
+                entities.entities[2].y = 10;
+                let mut id = 3000;
+                for dx in -1..=1 {
+                    for dy in -1..=1 {
+                        if dx == 0 && dy == 0 {
+                            continue;
+                        }
+                        entities.entities.push(EntityModel {
+                            object_id: id.to_string(),
+                            kind: EntityKind::Monster,
+                            name: "Temporary blocker".into(),
+                            x: 15 + dx,
+                            y: 10 + dy,
+                            level: Some(3),
+                            direction: Some("left".into()),
+                        });
+                        id += 1;
+                    }
+                }
+            }
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .set_hovered_object_id_for_test(Some("2001"));
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Left);
+            app.update();
+            assert!(
+                receiver.try_recv().is_err(),
+                "no route means no speculative movement"
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_target,
+                Some(2001),
+                "temporary occupancy must not retire a live selected target"
+            );
+            assert!(drain_world_intents(&mut app).is_empty());
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .auto_path_destination = Some((14, 9));
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
+            {
+                let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+                mouse.clear_just_pressed(MouseButton::Left);
+                mouse.release(MouseButton::Left);
+            }
+            advance_movement_clock(&mut app, 600);
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_target,
+                Some(2001)
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .auto_path_destination,
+                None
+            );
+            assert!(
+                drain_world_intents(&mut app).is_empty(),
+                "discard only the stale queued attack"
+            );
+            assert!(receiver.try_recv().is_err());
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_released(MouseButton::Left);
+            // The ordinary entity refresh vacates the neighbours. No new click.
+            app.world_mut()
+                .resource_mut::<EntityModelSet>()
+                .entities
+                .retain(|entity| entity.object_id.parse::<u32>().unwrap() < 3000);
+            let mut attacked = false;
+            for _ in 0..16 {
+                advance_movement_clock(&mut app, 600);
+                app.update();
+                let pending = app
+                    .world()
+                    .resource::<WorldPointerMovementState>()
+                    .pending
+                    .front()
+                    .cloned();
+                if let Some(pending) = pending {
+                    assert_ne!(pending.to, (15, 10));
+                    let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                    entities.entities[0].x = pending.to.0;
+                    entities.entities[0].y = pending.to.1;
+                    drop(entities);
+                    push_test_movement_ack(&app, pending.to.0, pending.to.1, pending.direction);
+                }
+                while receiver.try_recv().is_ok() {}
+                let intents = drain_world_intents(&mut app);
+                if !intents.is_empty() {
+                    assert_eq!(
+                        intents,
+                        vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+                    );
+                    attacked = true;
+                    break;
+                }
+            }
+            assert!(
+                attacked,
+                "a vacated neighbour must resume the original pursuit and attack"
+            );
+        }
     }
 
     #[test]

@@ -54,6 +54,13 @@ jobs:
           MIR2_REQUIRE_LINUX_SECURITY_GATE: "1"
         run: bash scripts/selftest-gateway-save-recovery.sh
 
+      - name: Verify rejected combat targets acknowledge and retire old movement
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib movement_deadline_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 unavailable_combat_target owner_location_order owner_attack_animation movement_deadline crowded_escape_tests
+
       - name: Verify classic shared gameplay and durable source receipts
         working-directory: mir2-web3
         run: |

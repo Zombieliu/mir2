@@ -10037,6 +10037,20 @@ impl SharedInProcessZoneSessionRuntime {
             .map(|key| SharedInProcessZoneState::zone_session_id_for_key(&key))
     }
 
+    fn has_bound_zone_player(&self) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        let state = self.zone_state.lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(session_id) = state.zone_sessions.get(&key) else {
+            return false;
+        };
+        *session_id == SharedInProcessZoneState::zone_session_id_for_key(&key)
+            && state.zone_manager.zone_key_for_session(session_id).is_some()
+            && state.zone_manager.player_transform(session_id).is_some()
+    }
+
     fn sync_newly_active_private_monsters_to_zone(&mut self) -> Vec<ServerPacket> {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
@@ -14789,7 +14803,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let mut unavailable_shared_target = !routes_zone_native_player_attack
             && match &command {
                 WorldCommand::Attack { object_id } => {
-                    !self.shared_action_target_available(*object_id)
+                    // Unknown IDs have no dead/remove tombstone. A bound
+                    // Zone attack that could not prepare is still rejected,
+                    // rather than falling through to a silent private no-op.
+                    self.has_bound_zone_player()
+                        || !self.shared_action_target_available(*object_id)
                 }
                 WorldCommand::ClientPacket(ClientPacket::RangeAttack { target_id, .. })
                 | WorldCommand::ClientPacket(ClientPacket::Magic { target_id, .. })
@@ -14947,10 +14965,14 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let mut command_packets = if blocks_durable_trade_mutation {
             trade_item_failure.clone().into_iter().collect()
         } else if unavailable_shared_target {
-            if shared_harvest_direction.is_some() {
-                self.authoritative_zone_owner_correction()
+            if self.has_bound_zone_player() {
+                // The native sender may have discarded an unsent movement
+                // step at this attack boundary. Rejecting a vanished target
+                // still cancels earlier Zone movement and acknowledges the
+                // real transform through the existing owner FIFO.
+                self.cancel_pending_zone_player_movement()
             } else {
-                Vec::new()
+                self.authoritative_zone_owner_correction()
             }
         } else if let Some(result) = self.execute_shared_group_packet(&command) {
             result?
@@ -15978,6 +16000,10 @@ mod tests {
     mod ordered_economy_replay_tests;
     #[path = "owner_attack_animation_tests.rs"]
     mod owner_attack_animation_tests;
+    #[path = "unavailable_combat_target_tests.rs"]
+    mod unavailable_combat_target_tests;
+    #[path = "native_target_lifecycle_transport_tests.rs"]
+    mod native_target_lifecycle_transport_tests;
     #[path = "owner_packet_normalization_tests.rs"]
     mod owner_packet_normalization_tests;
     #[path = "live_owner_wire_ids_tests.rs"]

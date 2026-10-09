@@ -2767,11 +2767,13 @@ impl ZoneRuntime {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
-        if player.movement_actions.is_empty() {
-            return Vec::new();
+        if !player.movement_actions.is_empty() {
+            player.movement_actions.clear();
+            player.run_step_until_ms = 0;
         }
-        player.movement_actions.clear();
-        player.run_step_until_ms = 0;
+        // A native step can be canceled before it reaches this queue. Always
+        // reconcile its owner, while an empty cancellation leaves every
+        // original action/cooldown clock and completed transform unchanged.
         let packet = user_location_packet(player);
         vec![ZoneOutbound::ToSession {
             session_id: session_id.clone(),
