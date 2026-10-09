@@ -26,6 +26,7 @@ use sha2::{Digest, Sha256};
 use tokio::sync::mpsc;
 
 use crate::routing::{
+    OwnerHealthDelivery, OwnerHealthValidator,
     HostedZoneOwnerCommandClient, SharedInProcessZoneRuntimeFactory, SharedZoneLiveOutbound,
     SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender, SharedZoneMutationGate,
     SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandMode,
@@ -36,6 +37,9 @@ use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
 pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
+#[cfg(test)]
+#[path = "zone_rpc/owner_health_sync_tests.rs"]
+mod owner_health_sync_tests;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2: &str = "nativeGameShopPurchaseV2";
 pub const ZONE_RPC_STORAGE_REQUEST_ID_V1: &str = "storageRequestIdV1";
@@ -1218,6 +1222,9 @@ impl ZoneHostJournal {
 pub struct SequencedZoneHostPacket {
     pub sequence: u64,
     pub packet: ServerPacket,
+    pub(crate) owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>,
+    pub(crate) source_registration_id: u64,
+    pub(crate) source_endpoint: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -1227,6 +1234,7 @@ pub struct ZoneHostOutboundBatch {
     pub reset: bool,
     pub last_issued_sequence: u64,
     pub has_more: bool,
+    pub current_source_registration_id: Option<u64>,
 }
 
 #[derive(Debug, Clone)]
@@ -1676,17 +1684,19 @@ impl TcpZoneOwnerRpcTransport {
             .lock()
             .map_err(|_| "zone RPC outbound stream mutex poisoned".to_string())?
             .clone();
-        match self.call(ZoneRpcRequest::PollOutbounds {
+        let (source_endpoint, payload) = self.call_with_response_endpoint(ZoneRpcRequest::PollOutbounds {
             stream_id,
             acknowledged_sequence,
             max_items,
-        })? {
+        }, None)?;
+        match payload {
             ZoneRpcPayload::Outbounds {
                 items,
                 stream_id,
                 reset,
                 last_issued_sequence,
                 has_more,
+                current_source_registration_id,
             } => {
                 if reset {
                     self.outbound_acknowledged.store(0, Ordering::Release);
@@ -1699,6 +1709,9 @@ impl TcpZoneOwnerRpcTransport {
                 let mut decoded = Vec::with_capacity(items.len());
                 for item in items {
                     decoded.push(SequencedZoneHostPacket {
+                        owner_health: item.owner_health,
+                        source_registration_id: item.source_registration_id,
+                        source_endpoint,
                         sequence: item.sequence,
                         packet: decode_server_packet(&item.frame).map_err(|error| {
                             format!("zone RPC outbound packet decode failed: {error}")
@@ -1711,6 +1724,7 @@ impl TcpZoneOwnerRpcTransport {
                     reset,
                     last_issued_sequence,
                     has_more,
+                    current_source_registration_id,
                 })
             }
             payload => Err(unexpected_payload("poll_outbounds", &payload)),
@@ -1771,6 +1785,12 @@ impl TcpZoneOwnerRpcTransport {
         request: ZoneRpcRequest,
         required_capability: Option<&str>,
     ) -> Result<ZoneRpcPayload, String> {
+        self.call_with_response_endpoint(request, required_capability).map(|(_, payload)| payload)
+    }
+
+    fn call_with_response_endpoint(
+        &self, request: ZoneRpcRequest, required_capability: Option<&str>,
+    ) -> Result<(usize, ZoneRpcPayload), String> {
         validate_identifier("RPC session id", &self.session_id)?;
         if let ZoneRpcRequest::Execute { command, .. } = &request {
             if wire_correlated_mutation_policy(command)?.is_some() {
@@ -1840,7 +1860,7 @@ impl TcpZoneOwnerRpcTransport {
             match response {
                 Ok(ZoneRpcResponse::Ok { payload }) => {
                     self.active_endpoint.store(index, Ordering::Release);
-                    return Ok(*payload);
+                    return Ok((index, *payload));
                 }
                 Ok(ZoneRpcResponse::Error { code, message })
                     if matches!(
@@ -2198,6 +2218,8 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         let transport = self.clone();
         let acknowledged = Arc::clone(&self.outbound_acknowledged);
         let current_generation = Arc::clone(&self.outbound_generation);
+        let highest_health_sent_sequence = Arc::new(Mutex::new(0));
+        let transport_failed = Arc::new(AtomicBool::new(false));
         let handle = thread::spawn(move || {
             let minimum_idle_poll = Duration::from_millis(20);
             let maximum_idle_poll = Duration::from_millis(100);
@@ -2217,6 +2239,7 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                             continue;
                         }
                         idle_poll = minimum_idle_poll;
+                        let source_registration = batch.current_source_registration_id;
                         for item in batch.items {
                             if worker_stop.load(Ordering::Acquire)
                                 || current_generation.load(Ordering::Acquire) != generation
@@ -2224,11 +2247,31 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                                 return;
                             }
                             let sequence = item.sequence;
+                            if !source_viewport_frame_is_current(&item, source_registration) {
+                                // Retain the Host frame and numbering until the
+                                // normal ACK. A replaced Source viewport must
+                                // never be relabelled as this new Gateway view.
+                                if worker_stop.load(Ordering::Acquire)
+                                    || current_generation.load(Ordering::Acquire) != generation { return; }
+                                acknowledged.store(sequence, Ordering::Release);
+                                continue;
+                            }
+                            let mut outbound = SharedZoneLiveOutbound::new(registration_id, item.packet);
+                            outbound.with_transport_failure_flag(transport_failed.clone());
+                            if let Some(change) = item.owner_health {
+                                outbound = outbound.with_owner_health(OwnerHealthDelivery {
+                                    change,
+                                    validator: Arc::new(RemoteOwnerHealthValidator {
+                                        transport: transport.clone(), endpoint: item.source_endpoint,
+                                        source_registration_id: item.source_registration_id,
+                                        generation, current_generation: current_generation.clone(),
+                                        stop: worker_stop.clone(),
+                                    }),
+                                    highest_sent_sequence: highest_health_sent_sequence.clone(),
+                                });
+                            }
                             if sender
-                                .blocking_send(SharedZoneLiveOutbound::new(
-                                    registration_id,
-                                    item.packet,
-                                ))
+                                .blocking_send(outbound)
                                 .is_err()
                             {
                                 return;
@@ -2240,8 +2283,13 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                         }
                     }
                     Err(error) => {
-                        if error.contains("outbound_gap") {
+                        if worker_stop.load(Ordering::Acquire)
+                            || current_generation.load(Ordering::Acquire) != generation {
+                            return;
+                        }
+                        if error.contains("outbound_gap") || error.contains("health_validation") {
                             eprintln!("zone RPC live outbound requires snapshot resync: {error}");
+                            sender.cancel_registration(registration_id, transport_failed.clone());
                             return;
                         }
                         thread::sleep(Duration::from_millis(50));
@@ -2263,6 +2311,51 @@ struct RemoteZoneLiveOutboundRegistration {
     stop: Arc<AtomicBool>,
     active: Arc<AtomicBool>,
     handle: Option<thread::JoinHandle<()>>,
+}
+
+fn source_viewport_frame_is_current(item: &SequencedZoneHostPacket,
+    current_source_registration: Option<u64>) -> bool {
+    item.source_registration_id == 0
+        || !(crate::routing::is_owner_health_fifo_packet(&item.packet)
+            || matches!(item.packet, ServerPacket::UserLocation { .. }))
+        || current_source_registration == Some(item.source_registration_id)
+}
+
+#[derive(Debug)]
+struct RemoteOwnerHealthValidator {
+    transport: TcpZoneOwnerRpcTransport,
+    endpoint: usize,
+    source_registration_id: u64,
+    generation: u64,
+    current_generation: Arc<AtomicU64>,
+    stop: Arc<AtomicBool>,
+}
+
+impl OwnerHealthValidator for RemoteOwnerHealthValidator {
+    fn validate(&self, change: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String> {
+        if self.stop.load(Ordering::Acquire)
+            || self.current_generation.load(Ordering::Acquire) != self.generation { return Ok(false); }
+        let encoded = encode_rpc_envelope(&ZoneRpcEnvelope {
+            protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+            session_id: self.transport.session_id.clone(), zone_id: self.transport.zone_id.as_str().into(),
+            auth_token: self.transport.auth_token.clone(),
+            request: ZoneRpcRequest::ValidateOwnerHealth {
+                source_registration_id: self.source_registration_id, change: change.clone(),
+            },
+        }, self.transport.codec).map_err(|e| format!("owner health validation encode failed: {e}"))?;
+        // Use the Host that actually returned this frame. A fallback Host or a
+        // concurrent active_endpoint change cannot authenticate its old Node.
+        let response = self.transport.call_endpoint_index(self.endpoint, &encoded, ZoneRpcPriority::Outbound)?;
+        if self.stop.load(Ordering::Acquire)
+            || self.current_generation.load(Ordering::Acquire) != self.generation { return Ok(false); }
+        match response {
+            ZoneRpcResponse::Ok { payload } => match *payload {
+                ZoneRpcPayload::Bool { value } => Ok(value),
+                payload => Err(unexpected_payload("validate_owner_health", &payload)),
+            },
+            ZoneRpcResponse::Error { code, message } => Err(format!("owner health validation {code}: {message}")),
+        }
+    }
 }
 
 impl fmt::Debug for RemoteZoneLiveOutboundRegistration {
@@ -2299,6 +2392,7 @@ struct ZoneHostSession {
     outbound_sender: SharedZoneLiveOutboundSender,
     outbound_receiver: Mutex<mpsc::Receiver<SharedZoneLiveOutbound>>,
     live_registration: Mutex<Option<SharedZoneLiveOutboundRegistration>>,
+    registration_refresh_gate: Mutex<()>,
     outbox: Mutex<ZoneHostOutbox>,
     max_outbound_messages: usize,
 }
@@ -2312,27 +2406,39 @@ impl ZoneHostSession {
             outbound_sender: SharedZoneLiveOutboundSender::single(outbound_sender),
             outbound_receiver: Mutex::new(outbound_receiver),
             live_registration: Mutex::new(None),
+            registration_refresh_gate: Mutex::new(()),
             outbox: Mutex::new(ZoneHostOutbox::new()),
             max_outbound_messages: capacity,
         }
     }
 
     fn refresh_live_registration(&self, force: bool) -> Result<(), ZoneRpcFault> {
+        // Poll and Execute may overlap. Keep the whole replacement serialized
+        // without holding live_registration while acquiring the Zone writer.
+        let _refresh = self.registration_refresh_gate.lock().map_err(|_| {
+            ZoneRpcFault::new("internal", "zone host registration refresh mutex poisoned")
+        })?;
+        self.refresh_live_registration_locked(force)
+    }
+
+    fn refresh_live_registration_locked(&self, force: bool) -> Result<(), ZoneRpcFault> {
         let mut live_registration = self.live_registration.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
         })?;
-        if !force && live_registration.is_some() {
+        if live_registration.as_ref().is_some_and(|registration| registration.resync_required()) {
+            return Err(ZoneRpcFault::new("outbound_gap", "zone host presentation overflow requires snapshot resync"));
+        }
+        if !force && live_registration.as_ref().is_some_and(|registration| registration.is_current()) {
             return Ok(());
         }
-        if force {
-            *live_registration = None;
-        }
+        *live_registration = None;
         drop(live_registration);
         let registration = self
             .hosted
             .register_live_outbound(self.outbound_sender.clone())
             .map_err(classify_runtime_error)?;
         if let Some(registration) = registration {
+            registration.activate();
             *self.live_registration.lock().map_err(|_| {
                 ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
             })? = Some(registration);
@@ -2372,7 +2478,16 @@ impl ZoneHostSession {
         acknowledged_sequence: u64,
         max_items: usize,
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
-        self.refresh_live_registration(false)?;
+        // Registration replacement must not occur between this snapshot and
+        // receiver drain: a new registration's packets cannot be discarded as
+        // if they belonged to the old viewport.
+        let _refresh = self.registration_refresh_gate.lock().map_err(|_| {
+            ZoneRpcFault::new("internal", "zone host registration refresh mutex poisoned")
+        })?;
+        self.refresh_live_registration_locked(false)?;
+        let current_registration = self.live_registration.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host live registration mutex poisoned"))?
+            .as_ref().map(|registration| registration.registration_id());
         let mut receiver = self.outbound_receiver.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host outbound receiver mutex poisoned")
         })?;
@@ -2381,13 +2496,23 @@ impl ZoneHostSession {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host outbox mutex poisoned"))?;
         while let Ok(outbound) = receiver.try_recv() {
+            if current_registration != Some(outbound.registration_id()) { continue; }
+            if outbound.is_overloaded() {
+                return Err(ZoneRpcFault::new("outbound_gap", "zone host presentation requires snapshot resync"));
+            }
+            let source_registration_id = outbound.registration_id();
+            let owner_health = outbound.owner_health().map(|delivery| delivery.change.clone());
+            if let Some(delivery) = outbound.owner_health() {
+                if !delivery.validator.validate(&delivery.change)
+                    .map_err(|e| ZoneRpcFault::new("health_validation", e))? { continue; }
+            }
             let frame = encode_server_packet(&outbound.into_packet()).map_err(|error| {
                 ZoneRpcFault::new(
                     "packet_encode",
                     format!("live outbound packet encode failed: {error}"),
                 )
             })?;
-            outbox.push(frame, self.max_outbound_messages);
+            outbox.push_stamped(frame, self.max_outbound_messages, owner_health, source_registration_id);
         }
         let reset = stream_id != Some(outbox.stream_id.as_str());
         let acknowledged_sequence = if reset { 0 } else { acknowledged_sequence };
@@ -2409,6 +2534,7 @@ impl ZoneHostSession {
             reset,
             last_issued_sequence: outbox.last_issued_sequence,
             has_more,
+            current_source_registration_id: current_registration,
         })
     }
 }
@@ -2431,10 +2557,17 @@ impl ZoneHostOutbox {
     }
 
     fn push(&mut self, frame: Vec<u8>, capacity: usize) {
+        self.push_stamped(frame, capacity, None, 0);
+    }
+
+    fn push_stamped(&mut self, frame: Vec<u8>, capacity: usize,
+        owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>, source_registration_id: u64) {
         self.last_issued_sequence = self.last_issued_sequence.saturating_add(1).max(1);
         self.messages.push_back(WireSequencedServerFrame {
             sequence: self.last_issued_sequence,
             frame,
+            owner_health,
+            source_registration_id,
         });
         while self.messages.len() > capacity.max(1) {
             if let Some(dropped) = self.messages.pop_front() {
@@ -3723,6 +3856,31 @@ impl ZoneHostServer {
             }
         }
         match request {
+            ZoneRpcRequest::ValidateOwnerHealth { source_registration_id, change } => {
+                let zone_id = ZoneId::new(&envelope.zone_id);
+                let lease = self.owner_lease_authority.owner_lease(&zone_id);
+                let legacy_owner = lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
+                let blocked = (!legacy_owner && !self.owner_ids.contains(lease.owner_id()))
+                    || self.owner_lease_authority.validate_owner_lease(&lease).is_err()
+                    || self.quiesced_zones.lock().map_err(|_| ZoneRpcFault::new("internal", "quiesce mutex poisoned"))?.contains(&envelope.zone_id)
+                    || self.promotion_frozen_zones.lock().map_err(|_| ZoneRpcFault::new("internal", "freeze mutex poisoned"))?.contains(&envelope.zone_id);
+                if blocked { return Ok(ZoneRpcPayload::Bool { value: false }); }
+                // Validation must never create a missing session, execute a
+                // snapshot/Tick, save state, or append a mutation journal row.
+                let session = self.sessions.lock().map_err(|_| ZoneRpcFault::new("internal", "session mutex poisoned"))?
+                    .get(&(envelope.session_id.clone(), envelope.zone_id.clone())).cloned();
+                let Some(session) = session else { return Ok(ZoneRpcPayload::Bool { value: false }); };
+                let validator = session.live_registration.lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "registration mutex poisoned"))?
+                    .as_ref().filter(|reg| reg.registration_id() == source_registration_id)
+                    .and_then(|reg| reg.owner_health_validator());
+                let value = match validator {
+                    Some(validator) => validator.validate(&change)
+                        .map_err(|e| ZoneRpcFault::new("health_validation", e))?,
+                    None => false,
+                };
+                return Ok(ZoneRpcPayload::Bool { value });
+            }
             ZoneRpcRequest::ReplicationHead => {
                 return self
                     .replication_head(&ZoneId::new(&envelope.zone_id))
@@ -3837,7 +3995,7 @@ impl ZoneHostServer {
         request: ZoneRpcRequest,
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
         match request {
-            ZoneRpcRequest::Health => unreachable!(),
+            ZoneRpcRequest::Health | ZoneRpcRequest::ValidateOwnerHealth { .. } => unreachable!(),
             ZoneRpcRequest::ReplicationHead
             | ZoneRpcRequest::ExportMutationBatch { .. }
             | ZoneRpcRequest::ExportBaseSnapshot
@@ -5048,6 +5206,10 @@ struct ZoneRpcEnvelope {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "operation", content = "arguments", rename_all = "camelCase")]
 enum ZoneRpcRequest {
+    ValidateOwnerHealth {
+        source_registration_id: u64,
+        change: mir2_simulation::ZoneOwnerHealthChange,
+    },
     Health,
     ReplicationHead,
     ExportMutationBatch {
@@ -5133,7 +5295,7 @@ impl ZoneRpcRequest {
             | Self::SaveActiveCharacter
             | Self::RefreshActiveExternalMail
             | Self::CloseSession { .. } => ZoneRpcPriority::Gameplay,
-            Self::PollOutbounds { .. } => ZoneRpcPriority::Outbound,
+            Self::PollOutbounds { .. } | Self::ValidateOwnerHealth { .. } => ZoneRpcPriority::Outbound,
         }
     }
 }
@@ -5201,6 +5363,8 @@ enum ZoneRpcPayload {
         reset: bool,
         last_issued_sequence: u64,
         has_more: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        current_source_registration_id: Option<u64>,
     },
     WorldSnapshot {
         snapshot: Box<WorldSnapshot>,
@@ -5225,6 +5389,10 @@ enum ZoneRpcPayload {
 struct WireSequencedServerFrame {
     sequence: u64,
     frame: Vec<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>,
+    #[serde(default)]
+    source_registration_id: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -6654,6 +6822,7 @@ fn zone_rpc_request_requires_active_session(request: &ZoneRpcRequest) -> bool {
         ZoneRpcRequest::OnConnect
             | ZoneRpcRequest::Execute { .. }
             | ZoneRpcRequest::PollOutbounds { .. }
+            | ZoneRpcRequest::ValidateOwnerHealth { .. }
             | ZoneRpcRequest::WorldSnapshot
             | ZoneRpcRequest::ActiveIdentity
             | ZoneRpcRequest::SaveActiveCharacter

@@ -7,6 +7,22 @@ The03:36 Goal API read returned no active goal, not a completed result;
 the authorized unfinished scope was subsequently recorded as an active Goal.
 That does not reset the original12-hour deadline or imply completion.
 
+## Manual continuation checkpoint — 2026-10-09
+
+The user requested continuation. The Goal API still reports paused at the last
+read; manual authorized work progressed without resetting the missed deadline.
+The unpublished owner-health Candidate now passes simulation23, Gateway68,
+mentor lifecycle6 and genuine mentor socket1 checks. It fixes exact owner pool
+presentation, recovery/concurrent-life fencing, level/mentor and teardown
+settlement, and old Source registration delivery. All original failures remain
+retained. [Scope and limits](OWNER-HEALTH-PRESENTATION-20261009.md).
+
+No public service/installer/feed or native acceptance changed in this checkpoint.
+P1-P7 remains incomplete: natural crowd escape, late-map/Boss/loot stories, full
+Source health recipients/ordered event outbox and native visual/shop wheel gates
+are still required. Payment-provider recharge remains outside the authorized
+implementation; existing monthly cards use operator codes.
+
 ## Current actual R22 paired public delivery — 2026-10-08
 
 The invited playtest now runs Gateway

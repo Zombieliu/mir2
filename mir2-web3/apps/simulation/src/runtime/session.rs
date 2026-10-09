@@ -131,6 +131,7 @@ pub struct LocalPlayerVitalsSnapshot {
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
+    pub player_max_mp: Option<i32>,
     pub player_dead: Option<bool>,
 }
 
@@ -722,6 +723,7 @@ impl SimulationSession {
             player_hp: player_vitals.map(|vitals| vitals.hp),
             player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
             player_mp: player_vitals.map(|vitals| vitals.mp),
+            player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
             player_dead: player_vitals.map(|_| current_player_is_dead(world)),
         }
     }

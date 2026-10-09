@@ -292,6 +292,50 @@ fn mentorship_uses_live_unsaved_teacher_level_for_commit_and_projection() {
 }
 
 #[test]
+fn mentorship_graduates_from_live_pupil_level_without_overwriting_peer_save() {
+    let config = fixture();
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let pupil = store.accounts.get_mut("demo").unwrap();
+        pupil.characters[0].level = 16;
+        pupil.saves.get_mut(&0).unwrap().character.level = 16;
+    }
+    let factory = SharedInProcessZoneRuntimeFactory::new();
+    let mut pupil = factory.create_runtime(config.clone(), &ZoneId::new("mentor-live-pupil"));
+    let mut teacher = factory.create_runtime(config.clone(), &ZoneId::new("mentor-live-teacher"));
+    login(&mut pupil, "demo", 0);
+    login(&mut teacher, "peer", 1);
+    command(&mut teacher, ClientPacket::AllowMentor);
+    // Prepared relationship predates the live pupil's level-up. The stale
+    // durable save must neither block graduation nor replace the live level.
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let account = store.accounts.get_mut("demo").unwrap();
+        account.characters[0].level = 10;
+        account.saves.get_mut(&0).unwrap().character.level = 10;
+    }
+    config.commit_shared_mentor_mutation(
+        &id("peer", 1),
+        mir2_simulation::SharedMentorMutation::Accept { student: id("demo", 0) },
+        10,
+    ).unwrap();
+    let before_teacher = config.account_store.lock().unwrap().accounts["peer"].saves[&1].clone();
+    let packets = pupil.execute(WorldCommand::Tick).unwrap();
+    assert!(packets.iter().any(|p| matches!(p, ServerPacket::MentorUpdate { name, .. }
+        if name.is_empty())), "{packets:?}");
+    for identity in [id("demo", 0), id("peer", 1)] {
+        let state = config.shared_mentor_profile_for(&identity).unwrap().mentor;
+        assert!(state.partner_identity.is_none());
+        assert_eq!(state.cooldown_until_ms, 0);
+    }
+    let store = config.account_store.lock().unwrap();
+    let after_teacher = &store.accounts["peer"].saves[&1];
+    assert_eq!(after_teacher.revision, before_teacher.revision);
+    assert_eq!(after_teacher.character, before_teacher.character);
+    assert_eq!(after_teacher.experience, before_teacher.experience);
+}
+
+#[test]
 fn mentorship_pending_dialog_cannot_be_replaced_by_another_student() {
     let (config, factory, mut pupil, mut teacher) = pair();
     {

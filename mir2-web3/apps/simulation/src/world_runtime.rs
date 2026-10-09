@@ -756,6 +756,10 @@ impl InProcessWorldRuntime {
         self.session.tick_shared_zone_personal_state()
     }
 
+    pub fn try_tick_shared_zone_personal_state(&mut self) -> Result<Vec<ServerPacket>, String> {
+        self.session.try_tick_shared_zone_personal_state()
+    }
+
     pub fn zone_melee_attack_damage(&self) -> i32 {
         self.session.zone_melee_attack_damage()
     }

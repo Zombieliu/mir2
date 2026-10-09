@@ -3,6 +3,76 @@
 //! supplied timing scalar is used to authorize a cast.
 use super::super::gateway_zone_magic_targets_self;
 use super::*;
+use super::super::{SharedZoneLiveOutboundSender, ZoneLiveOutboundRegistration};
+
+fn drain_registered_health_packets(rx: &mut tokio::sync::mpsc::Receiver<super::super::SharedZoneLiveOutbound>) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    while let Ok(outbound) = rx.try_recv() {
+        if let Some(packet) = outbound.claim_for_send().unwrap() { packets.push(packet); }
+    }
+    packets
+}
+
+#[test]
+fn owner_health_registered_three_class_casts_commit_personal_mp_and_cooldown() {
+    for (name, class, spell, key) in [
+        ("HealthCastWarrior", MirClass::Warrior, Spell::ShoulderDash, "shoulderdash"),
+        ("HealthCastWizard", MirClass::Wizard, Spell::FireBall, "fireball"),
+        ("HealthCastTaoist", MirClass::Taoist, Spell::Healing, "minor-heal"),
+    ] {
+        let (mut runtime, target) = fixture(name, class, &[(spell, key)]);
+        let (tx, mut rx) = tokio::sync::mpsc::channel(256);
+        let registration = runtime.movement_ingress.register_live_outbound(
+            SharedZoneLiveOutboundSender::single(tx)).unwrap().unwrap();
+        registration.activate(); drain_registered_health_packets(&mut rx);
+        let before = runtime.inner.world_snapshot().player_mp.unwrap();
+        let (_, _, cost, cooldown) = runtime.inner.zone_magic_attack_profile(spell).unwrap();
+        let mut packets = runtime.execute(command(&runtime, spell, &target)).unwrap();
+        packets.extend(drain_registered_health_packets(&mut rx));
+        assert!(accepted(&packets, spell), "{class:?}: {packets:?}");
+        let health = packets.iter().position(|p| matches!(p, ServerPacket::HealthChanged { .. })).unwrap();
+        let cast = packets.iter().position(|p| matches!(p,
+            ServerPacket::Magic { cast: true, spell: actual, .. } | ServerPacket::MagicCast { spell: actual }
+                if *actual == spell)).unwrap();
+        assert!(health < cast, "{class:?}: {packets:?}");
+        let personal = runtime.inner.world_snapshot();
+        assert_eq!(personal.player_mp, Some(before - cost), "personal mana must commit exactly once");
+        let skill = personal.known_skills.iter().find(|s| s.key == key).unwrap();
+        assert!(skill.cast_time_ms > 0);
+        assert_eq!(skill.delay_ms, cooldown as i64);
+        assert!(remaining(&runtime, spell) > 0);
+        let retry = command(&runtime, spell, &target);
+        let mut rejected = runtime.execute(retry).unwrap();
+        rejected.extend(drain_registered_health_packets(&mut rx));
+        assert!(!accepted(&rejected, spell));
+        assert!(!rejected.iter().any(|p| matches!(p, ServerPacket::HealthChanged { .. })));
+        assert_eq!(runtime.inner.world_snapshot().player_mp, Some(before - cost));
+    }
+}
+
+#[test]
+fn owner_health_registered_melee_consumes_flame_and_orders_reset_after_attack() {
+    let (mut runtime, _) = fixture("HealthFlameHit", MirClass::Warrior,
+        &[(Spell::FlamingSword, "flamingsword")]);
+    let (tx, mut rx) = tokio::sync::mpsc::channel(256);
+    let registration = runtime.movement_ingress.register_live_outbound(
+        SharedZoneLiveOutboundSender::single(tx)).unwrap().unwrap();
+    registration.activate(); drain_registered_health_packets(&mut rx);
+    let mut armed = runtime.execute(flame_prepare(0)).unwrap();
+    armed.extend(drain_registered_health_packets(&mut rx));
+    assert_eq!(flame_ack(&armed, true), 1, "{armed:?}");
+    let mut hit = runtime.execute(WorldCommand::ClientPacket(ClientPacket::Attack {
+        direction: MirDirection::Right, spell: Spell::None,
+    })).unwrap();
+    hit.extend(drain_registered_health_packets(&mut rx));
+    let attack = hit.iter().position(|p| matches!(p,
+        ServerPacket::ObjectAttack { info } if info.spell == Spell::FlamingSword as u8)).unwrap();
+    let reset = hit.iter().position(|p| matches!(p,
+        ServerPacket::SpellToggle { spell: Spell::FlamingSword, can_use: false, .. })).unwrap();
+    assert!(attack < reset, "{hit:?}");
+    assert_eq!(flame_ack(&hit, false), 1);
+    assert_ne!(runtime.inner.zone_melee_attack_profile(Spell::None).0, Spell::FlamingSword);
+}
 
 fn fixture(
     name: &str,

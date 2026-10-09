@@ -2814,10 +2814,14 @@ impl SimulationSession {
     }
 
     pub(crate) fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
-        let before=match self.begin_default_npc_source_command(){Ok(before)=>before,Err(_)=>return Vec::new()};
+        self.try_tick_shared_zone_personal_state().unwrap_or_default()
+    }
+
+    pub(crate) fn try_tick_shared_zone_personal_state(&mut self) -> Result<Vec<ServerPacket>, String> {
+        let before = self.begin_default_npc_source_command()?;
         let mut packets = advance_shared_zone_personal_world(self.app.world_mut());
         super::default_npc_events::dispatch_source_packets(self.app.world_mut(),&mut packets);
         let packets=self.finalize_packets(packets);
-        self.finish_guild_experience_command(before,packets).unwrap_or_default()
+        self.finish_guild_experience_command(before,packets)
     }
 }

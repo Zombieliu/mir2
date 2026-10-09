@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
+> events, FIFO/final-send fencing, confirmed personal recovery/level deltas and
+> authenticated Source RPC registration validation are implemented. Simulation
+> 23, Gateway68, mentor lifecycle6 and genuine mentor socket1 checks pass;
+> mentor live-level graduation and generation-forced online status are fixed;
+> confirmed peer level changes also notify on ordinary Tick.
+> original failures and fixture boundaries remain retained. R22/game7fea,
+> Gatewaya41/feed17 and installed files/services are unchanged by this work.
+> Full recipients, native/crowd acceptance and P1-P7 remain open. Real-payment
+> recharge is not integrated. [Scope and evidence](OWNER-HEALTH-PRESENTATION-20261009.md).
+
 > 2026-10-08 current public delivery: R22/game7fea, invited Gatewaya41 and
 > signed feed17 are actually live on origin and R2/CDN. Prior normal exit0,
 > strict six-counter/TCP drain, private backup, both normal service stops and

@@ -67,6 +67,7 @@ pub use runtime::{
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
     ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
     ZoneOwnedPetPlayerKillReceipt, ZoneExperienceProfile, ZoneExperiencePartner,
     ZoneExperienceSelection, ZoneGuildExperienceMembership, ZoneExperienceRateSource,

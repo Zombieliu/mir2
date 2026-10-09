@@ -175,6 +175,26 @@ fn source_reward_and_receipt_rollback_together_before_ack_then_commit_once() {
     assert!(events::dispatch(session.app.world_mut()).unwrap().is_empty());
 }
 
+#[test]
+fn owner_health_checked_personal_tick_propagates_source_rollback_before_publication() {
+    let config = SimulationConfig::default();
+    let mut session = fixture(&config);
+    session.save_active_character().unwrap();
+    let before = session.local_player_vitals_snapshot();
+    let gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+    events::enqueue(session.app.world_mut(), DefaultNpcEvent::UseItem { shape: 500 }).unwrap();
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
+    assert!(session.try_tick_shared_zone_personal_state().is_err());
+    assert_eq!(session.local_player_vitals_snapshot(), before);
+    assert_eq!(session.app.world().resource::<PlayerRuntimeResource>().gold, gold);
+    // The pending Source event was restored, and one later successful Tick
+    // settles it exactly once. A Gateway may publish only after this success.
+    session.try_tick_shared_zone_personal_state().unwrap();
+    assert_eq!(session.app.world().resource::<PlayerRuntimeResource>().gold, gold + 1_000_000);
+    session.try_tick_shared_zone_personal_state().unwrap();
+    assert_eq!(session.app.world().resource::<PlayerRuntimeResource>().gold, gold + 1_000_000);
+}
+
 fn gain_exp_action(session:&mut SimulationSession,line:&str) {
     let mut packets=Vec::new();
     let mut state=super::npc_script::CrystalNpcExecutionState::default();

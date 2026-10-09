@@ -111,6 +111,37 @@ impl ZoneManager {
     pub fn online_owner_proof_for_session(&self, session_id: &SessionId) -> Option<String> {
         Some(self.online_identities.owner(session_id)?.encoded())
     }
+    pub fn owner_health_cursor(&self, session_id: &SessionId) -> Option<super::ZoneOwnerHealthCursor> {
+        let cursor = self.zones.get(self.session_zones.get(session_id)?)?.owner_health_cursor(session_id)?;
+        self.online_owner_proof_matches_session(&cursor.online_owner, session_id).then_some(cursor)
+    }
+
+    pub fn commit_owner_vitals(&mut self, session_id: &SessionId,
+        hp: i32, max_hp: i32, mp: i32, dead: bool) -> Vec<ZoneOutbound> {
+        self.refresh_online_presence();
+        let out = self.session_zones.get(session_id).and_then(|key| self.zones.get_mut(key))
+            .map(|zone| zone.commit_owner_vitals(session_id, hp, max_hp, mp, dead)).unwrap_or_default();
+        self.refresh_online_presence();
+        out
+    }
+
+    pub fn owner_health_change_is_current(&self, change: &super::ZoneOwnerHealthChange) -> bool {
+        self.owner_health_cursor(&change.cursor.session_id).is_some_and(|current| {
+            current.online_owner == change.cursor.online_owner
+                && current.object_id == change.cursor.object_id
+                && current.life_generation == change.cursor.life_generation
+                // Earlier live pool operations remain valid in this life
+                // after lethal damage. Revival advances the life generation.
+                && change.cursor.health_sequence > 0
+                && change.cursor.health_sequence <= current.health_sequence
+                && change.hp >= 0 && change.mp >= 0
+                // Crystal can refill a dead player's pools on LevelUp without
+                // reviving it. HP0 still requires Dead; positive HP is display,
+                // and a historical dead receipt cannot belong to a live life.
+                && (change.hp > 0 || change.cursor.dead)
+                && (!change.cursor.dead || current.dead)
+        })
+    }
     /// An online Node alone cannot choose an award's source map or payload.
     /// Only the named source Zone's retained issuance can authorize delivery.
     pub fn issued_monster_award_is_current(&self, source: &ZoneKey, session_id: &SessionId,

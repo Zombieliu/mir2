@@ -1,0 +1,513 @@
+{
+  "schema": "mir2.owner-health.test-results.v1",
+  "outcomes": [
+    {
+      "file": "owner-health-root-20261008-01-simulation-check.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261008-02-gateway-check.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261008-03-gateway-rpc-check.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-04-gateway-check.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-05-source-order-check.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-06-simulation-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-07-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-08-simulation-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 8,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "runtime::zone::runtime::owner_health_tests::owner_health_normal_magic_cost_precedes_action_and_rejection_is_silent"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-09-gateway-rpc-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-10-gateway-rpc-web-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-11-gateway-rpc-web-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 10,
+          "failed": 5,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_full_channel_preserves_death_then_health_then_revived_fifo",
+        "routing::tests::owner_health_sync_tests::owner_health_routing_normal_drug_tick_starts_at_latest_zone_hp_and_keeps_recovery",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_changed_map_rebuilds_host_registration_and_new_drug_still_arrives",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_retained_expired_frame_keeps_sequence_until_normal_ack",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_validation_is_authenticated_read_only_and_rejects_wrong_source"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-12-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-13-gateway-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 14,
+          "failed": 8,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_cast_and_toggle_cannot_overtake_mp_on_the_live_channel",
+        "routing::tests::owner_health_sync_tests::owner_health_routing_normal_drug_tick_starts_at_latest_zone_hp_and_keeps_recovery",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_changed_map_rebuilds_host_registration_and_new_drug_still_arrives",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_concurrent_refresh_keeps_the_installed_registration_current",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_drain_never_serializes_a_private_cancellation_sentinel",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_retained_expired_frame_keeps_sequence_until_normal_ack",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_source_overflow_requires_resync_and_cancels_remote_transport",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_validation_is_authenticated_read_only_and_rejects_wrong_source"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-14-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-15-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-16-gateway-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 17,
+          "failed": 7,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::zone_skill_cadence_tests::owner_health_registered_melee_consumes_flame_and_orders_reset_after_attack",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_changed_map_rebuilds_host_registration_and_new_drug_still_arrives",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_concurrent_refresh_keeps_the_installed_registration_current",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_drain_never_serializes_a_private_cancellation_sentinel",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_retained_expired_frame_keeps_sequence_until_normal_ack",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_source_overflow_requires_resync_and_cancels_remote_transport",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_validation_is_authenticated_read_only_and_rejects_wrong_source"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-17-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-18-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-19-gateway-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 22,
+          "failed": 2,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::zone_skill_cadence_tests::owner_health_registered_melee_consumes_flame_and_orders_reset_after_attack",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_changed_map_rebuilds_host_registration_and_new_drug_still_arrives"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-20-gateway-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-21-gateway-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 27,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_normal_drug_tick_starts_at_latest_zone_hp_and_keeps_recovery"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-22-gateway-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 31,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-23-simulation-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 9,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "runtime::zone::runtime::owner_health_tests::owner_health_normal_magic_cost_precedes_action_and_rejection_is_silent"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-24-simulation-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 9,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "runtime::zone::runtime::owner_health_tests::owner_health_normal_magic_cost_precedes_action_and_rejection_is_silent"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-25-simulation-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-26-gateway-regression-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-27-gateway-regression-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 52,
+          "failed": 12,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::dead_experience_chain_tests::dead_poison_fenced_teardown_saves_latest_level_pools",
+        "routing::tests::dead_experience_chain_tests::dead_poison_known_save_failure_preserves_life_then_retry_and_duplicate",
+        "routing::tests::dead_experience_chain_tests::dead_poison_level_refills_pools_without_online_revive",
+        "routing::tests::dead_experience_chain_tests::dead_poison_level_rejects_actions_and_town_revive_still_works",
+        "routing::tests::dead_experience_chain_tests::dead_poison_non_level_award_is_durable_and_does_not_revive",
+        "routing::tests::dead_experience_chain_tests::dead_poison_retained_bootstrap_preserves_online_life",
+        "routing::tests::dead_experience_chain_tests::full_hp_poison_level_corpse_blocks_normal_potion_but_scroll_explicitly_revives",
+        "routing::tests::dead_experience_chain_tests::genuine_dead_receipts_replayed_after_level_and_revive_do_not_repeat_penalty",
+        "routing::tests::dead_experience_chain_tests::native_zero_hp_death_rejects_valid_magic_without_spend_hit_or_turn",
+        "routing::tests::dead_experience_chain_tests::real_poison_logout_relogin_distinguishes_zero_hp_from_full_hp_dead_save",
+        "routing::tests::dead_experience_chain_tests::unknown_poison_award_publication_freezes_without_fake_success_or_revive",
+        "zone_rpc::owner_health_sync_tests::owner_health_rpc_retained_expired_frame_keeps_sequence_until_normal_ack"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-28-gateway-regression-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 64,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-29-gateway-regression-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 66,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-30-mentor-integration-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 3,
+          "failed": 2,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "mentorship_permission_and_disconnect_invalidate_old_ticket",
+        "mentorship_uses_live_unsaved_teacher_level_for_commit_and_projection"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-31-simulation-mentor-regression-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": true,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-32-simulation-mentor-regression-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 23,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-33-gateway-mentor-regression-tests.log",
+      "executedTestResults": [],
+      "compilerOrLinkFailure": true,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-34-gateway-mentor-regression-tests.log",
+      "executedTestResults": [
+        {
+          "status": "FAILED",
+          "passed": 67,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_refresh"
+      ],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-35-gateway-mentor-regression-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 68,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-36-mentor-integration-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-37-gateway-mentor-notification-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 68,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    },
+    {
+      "file": "owner-health-root-20261009-38-mentor-integration-tests.log",
+      "executedTestResults": [
+        {
+          "status": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "compilerOrLinkFailure": false,
+      "commandRejectedBeforeTests": false,
+      "failedTests": [],
+      "encoding": "utf-8"
+    }
+  ]
+}

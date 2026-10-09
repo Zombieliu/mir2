@@ -105,10 +105,19 @@ impl SharedInProcessZoneSessionRuntime {
                     continue;
                 }
                 if let Some(session) = state.zone_sessions.get(key) {
+                    let mut entity = player.entity.clone();
+                    // Tick can publish a confirmed level through the experience
+                    // authority before the slower viewport metadata refresh.
+                    if let Some(profile) = state.zone_manager.player_experience_profile(session)
+                        .filter(|p| p.account_id == key.account_id
+                            && p.character_index == key.character_index)
+                    {
+                        entity.level = Some(profile.level);
+                    }
                     result.push(MentorPresence {
                         key: key.clone(),
                         session: session.clone(),
-                        entity: player.entity.clone(),
+                        entity,
                         object_id: player.zone_object_id,
                         map_file_name: player.map_file_name.clone(),
                         zone: zone.clone(),

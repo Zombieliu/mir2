@@ -4834,6 +4834,7 @@ fn spawn_zone_outbound_sender(
     sender: SharedWebSocketSender,
     serial_execution_gate: SharedSerialExecutionGate,
     active_registration_id: Arc<AtomicU64>,
+    failure_signal: tokio::sync::watch::Sender<u64>,
 ) -> ZoneOutboundSenderTask {
     let handle = tokio::spawn(async move {
         loop {
@@ -4871,12 +4872,28 @@ fn spawn_zone_outbound_sender(
                 continue;
             }
             if outbound.is_overloaded() {
+                failure_signal.send_replace(registration_id);
                 return;
             }
-            if send_server_packet(&sender, &outbound.into_packet())
+            // Health may have waited through a death/revival while this read
+            // gate was blocked. Validate its server-only stamp at final send.
+            let packet = if outbound.owner_health().is_some() {
+                match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
+                    Ok(Ok(Some(packet))) => packet,
+                    Ok(Ok(None)) => continue,
+                    _ => {
+                        if active_registration_id.load(Ordering::Acquire) != registration_id { continue; }
+                        failure_signal.send_replace(registration_id);
+                        return;
+                    },
+                }
+            } else { outbound.into_packet() };
+            if active_registration_id.load(Ordering::Acquire) != registration_id { continue; }
+            if send_server_packet(&sender, &packet)
                 .await
                 .is_err()
             {
+                failure_signal.send_replace(registration_id);
                 return;
             }
         }
@@ -5395,13 +5412,14 @@ async fn handle_socket_work(
         zone_outbound_tx,
         owner_location_outbound_tx,
     )
-    .with_overload_signal(overload_tx);
+    .with_overload_signal(overload_tx.clone());
     let _zone_outbound_sender_task = spawn_zone_outbound_sender(
         zone_outbound_rx,
         owner_location_outbound_rx,
         Arc::clone(&sender),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
+        overload_tx,
     );
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;

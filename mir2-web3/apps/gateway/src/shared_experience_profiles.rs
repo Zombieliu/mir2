@@ -159,11 +159,18 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session) = state.zone_sessions.get(&key).cloned() else {
             return Ok(());
         };
+        let previous_level = state.zone_manager.player_experience_profile(&session).map(|p| p.level);
+        let next_level = profile.as_ref().map(|p| p.level);
         if !state
             .zone_manager
             .update_experience_profile(&session, profile)
         {
             return Err("current experience profile does not match the online character".into());
+        }
+        if previous_level != next_level {
+            // Peers must refresh MentorUpdate on their next normal command even
+            // when the viewport metadata and daily social timer have not moved.
+            self.shared_social_generation.fetch_add(1, Ordering::AcqRel);
         }
         Ok(())
     }

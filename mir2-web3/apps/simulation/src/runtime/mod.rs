@@ -115,6 +115,7 @@ pub use zone::{
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
+    ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
     ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
     ZoneOwnedPetPlayerKillReceipt, ZoneExperienceProfile, ZoneExperiencePartner,
     ZoneExperienceSelection, ZoneGuildExperienceMembership, ZoneExperienceRateSource,
