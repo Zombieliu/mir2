@@ -5,7 +5,8 @@
 > simulation44, Gateway36/shared4/adjacent4 prove bounded financial/ownership
 > stories, including genuine loopback HTTP/WS and authenticated private TCP.
 > They do not prove actual Stripe or production multi-process acceptance.
-> Real isolated PostgreSQL CI, prices/keys, all-writer schema8 rollout and native
+> Actual isolated PostgreSQL passes at code4a26 in CI37946216332; adjacent monthly
+> CI37946216237 also passes. Prices/keys, all-writer schema8 rollout and native
 > human gates remain. Public R22/Gatewaya41/feed17 and full P1–P7 are unchanged.
 > [Scope and remaining gates](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
 

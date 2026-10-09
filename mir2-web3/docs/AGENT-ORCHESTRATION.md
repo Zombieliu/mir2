@@ -5,7 +5,8 @@
 > webhooks, Source-owned settlement, permanent card units and single-attempt
 > capability-gated RPC are implemented. Local simulation44, Gateway36, shared
 > owner4 and adjacent monthly4 checks pass; native5/model10/URL2 plus test-check
-> evidence is retained. Real isolated PostgreSQL CI is pending. Prices, Stripe
+> evidence is retained. Exact code4a26 CI37946216332 passes actual isolated PG,
+> Gateway36 and shared4; adjacent monthly CI37946216237 also passes. Prices, Stripe
 > credentials, real provider acceptance and paired rollout remain open; payments
 > default disabled. Public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
 > [Scope, configuration and limits](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).

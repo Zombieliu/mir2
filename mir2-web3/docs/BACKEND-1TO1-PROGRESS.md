@@ -5,7 +5,8 @@
 > PaidPending; serialized Source consumes current owner state. Capacity fitting,
 > protected deletion, archived lookup, receipt replay and unknown-commit fencing
 > pass26 recharge/9 item/9 existing-code tests; Gateway36/shared4/adjacent4 pass.
-> Actual isolated PG concurrency is still pending CI. Live keys require PG
+> Actual isolated PG concurrency passes at exact code4a26 in Stripe CI37946216332;
+> adjacent monthly PG passes in37946216237. Live keys require PG
 > SourceOfTruth; all writers must upgrade before enablement. Public services,
 > pricing and real payments remain unchanged. [Details](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
 

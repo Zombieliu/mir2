@@ -4,7 +4,8 @@
 > credits the existing character wallet; a custom30-day monthly item extends
 > account access exactly once. Original Crystal manifests remain unchanged.
 > Simulation44, Gateway36/shared4/adjacent4 and native checks pass locally;
-> PostgreSQL CI, operator prices/credentials, provider/native acceptance and
+> exact code4a26 passes Stripe37946216332/monthly37946216237 CI and actual isolated
+> PostgreSQL. Operator prices/credentials, provider/native acceptance and
 > rollout remain pending. This does not advance full parity to100% or alter
 > public R22/Gatewaya41/feed17. [Details](STRIPE-CREDITS-MONTHLY-CARD-20261009.md).
 

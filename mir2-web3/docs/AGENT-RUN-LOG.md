@@ -9,8 +9,10 @@ Local final simulation44, Gateway billing36/shared4/adjacent4 and native
 host5/model10/URL2 checks pass. The initial compilation/fixture failures remain
 in evidence; the actual socket test now supplies the mandatory fixture MAC key
 and permits the ordinary full bootstrap within its bounded ten-second deadline.
-All financial/identity/packet-order assertions remain. Actual isolated PostgreSQL
-CI is pending. Real prices/Stripe configuration, paired schema8 rollout and native
+All financial/identity/packet-order assertions remain. Exact code4a26 is pushed;
+Stripe CI37946216332 passes35 Source/1 actual isolated PG/36 Gateway/4 shared
+tests. Adjacent monthly CI37946216237 passes9 Source/1 PG/4 Gateway checks.
+Real prices/Stripe configuration, paired schema8 rollout and native
 human acceptance remain open; public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
 [Feature](STRIPE-CREDITS-MONTHLY-CARD-20261009.md),
 [evidence](generated/player-qa/stripe-billing-20261009/README.md).

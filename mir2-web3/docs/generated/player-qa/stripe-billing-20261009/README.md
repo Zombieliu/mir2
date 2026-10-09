@@ -1,8 +1,11 @@
 # Stripe Credits / monthly-item local checkpoint
 
 Base source: `f4475aad32bdc57411737de2ab2eca917cae8e29`.
-The committed `SOURCE-FILES.json` binds candidate Rust/workflow file SHA-256
-and retained log SHA-256. CI source/run results will be appended after push.
+The initial committed `SOURCE-FILES.json` binds Windows-worktree SHA-256 and
+staged Git blob IDs for candidate Rust/workflow files and retained logs. Git
+blob IDs distinguish normalized repository bytes from platform line endings.
+`CI.json` binds the authenticated completed runs and extracted artifact files
+to exact code commit`4a26a543110a4810296ba1992f60b811d6509424`.
 No installer, feed, installed file, public Gateway or production account is changed.
 
 | Evidence | Result | Scope |
@@ -15,7 +18,7 @@ No installer, feed, installed file, public Gateway or production account is chan
 | native-model10-root |10 retained fresh-rlib model checks pass | Billing state, stable retry, keyboard, exact item ID and all nine locale name/tooltip/error keys |
 | browser2-root |2 isolated URL checks pass | Trusted origin/raw argument characters; repeats one host unit case, never calls browser API |
 | native-root-final-check |`cargo check --tests` pass | Final Windows host/client source compile, Rust1.95 offline |
-| billing_postgres |1 test compiles; default ignored locally | Explicit isolated CI must run `--ignored`; compilation is not PG acceptance |
+| billing_postgres |1 actual PG test passes in CI37946216332 | Four independent writers, CAS, immutable provider tuple, single card consumption, raw JSON/restart and ordinary Tick/current checkpoint; default ignored locally |
 
 Server commands use Rust1.95, locked/offline dependencies, target
 `C:/mir2-build/shared-classic-target`, jobs2 and test opt-level1/debug1/
@@ -61,7 +64,24 @@ Independent bounded read-only review found no reproducible new funds-loss,
 auth or replay blocker. Its CI path-trigger observation was fixed by listing
 all financial integration seams. Review did not execute Stripe or PostgreSQL.
 
-Actual PostgreSQL CI result: **pending**. Real keys, prices, provider test-mode
+Actual Stripe CI: [37946216332](https://github.com/Zombieliu/mir2/actions/runs/37946216332)
+is GREEN at code`4a26a543110a4810296ba1992f60b811d6509424`;35 Source tests,
+the1 actual isolated PostgreSQL test,36 Gateway tests and4 unfiltered shared
+owner tests pass. Extracted logs and the exact `source-sha.txt` are retained in
+`ci-37946216332/`. Authenticated artifact11624502233 names that exact source;
+its API-reported digest is retained, but the raw ZIP was not independently hashed.
+The downloaded files have their own local SHA-256 receipts.
+
+Adjacent [monthly CI37946216237](https://github.com/Zombieliu/mir2/actions/runs/37946216237)
+also passes9 code tests,1 actual isolated PostgreSQL test and4 Gateway checks at
+the same source. Its original run log is retained. These repeat local checks;
+neither run executes a Stripe payment or installs/publishes a binary.
+The initial receipt's pending-PG limit is historical, before these CI runs.
+Raw stdout logs retain intentional blank EOF lines and GitHub's timestamped
+empty-line whitespace; code/docs checks pass normally. Archival logs are checked
+separately with only blank-EOF/blank-EOL whitespace exempted, preserving originals.
+
+Real keys, prices, provider test-mode
 acceptance, normal owner drain/backup, all-writer schema8 paired rollout and
 native human acceptance remain open. Payments are default disabled.
 [Feature configuration and limits](../../../STRIPE-CREDITS-MONTHLY-CARD-20261009.md).

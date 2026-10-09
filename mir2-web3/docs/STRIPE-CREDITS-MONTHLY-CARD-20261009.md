@@ -131,8 +131,11 @@ SQL unique provider-ID constraint or cross-process JSON-file authority is claime
 
 Local final simulation evidence: **26 recharge +9 item/card +9 existing code
 tests passed**. The PostgreSQL test compiles but is default-ignored locally;
-its actual multi-writer run is delegated to the isolated CI service, not a
-production database. Gateway final and CI results are recorded in
+its actual multi-writer run now passes in isolated CI37946216332 at exact
+code commit`4a26a543110a4810296ba1992f60b811d6509424`, never a production database.
+That Stripe workflow passes35 Source/1 PostgreSQL/36 Gateway/4 shared tests;
+adjacent monthly workflow37946216237 passes9 Source/1 PostgreSQL/4 Gateway checks.
+The repeated checks are not summed as new unique coverage. Gateway and CI results are recorded in
 [the evidence checkpoint](generated/player-qa/stripe-billing-20261009/README.md).
 Windows host billing tests5, fresh client-rlib model tests10 and isolated URL
 checks2 were run; final native `--tests` check passes. No screenshot was taken.
