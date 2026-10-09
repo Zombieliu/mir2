@@ -510,6 +510,265 @@ fn purification_transaction_fork_preserves_live_cast_without_mutating_original()
 }
 
 #[test]
+fn player_magic_item_preflight_admits_the_real_hostile_player_target() {
+    let (mut zone, now) = source_fixture();
+    let now = now + 2_000;
+    assert!(zone.can_player_cast_magic(
+        &sid("enemy"),
+        102,
+        Spell::Poisoning,
+        MirDirection::Left,
+        &Point { x: 12, y: 10 },
+        true,
+        10,
+        5,
+        500,
+        now,
+    ));
+    let before_mp = zone.players[&sid("enemy")].mp;
+    let cast = zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+        session_id: sid("enemy"),
+        object_id: 102,
+        spell: Spell::Poisoning,
+        direction: MirDirection::Left,
+        target: Point { x: 12, y: 10 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 5,
+        cooldown_ms: 500,
+        item_param: 1,
+        now_ms: now,
+    });
+    assert!(contains(&cast, |packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::Poisoning,
+            cast: true,
+            ..
+        }
+    )));
+    assert_eq!(zone.players[&sid("enemy")].mp, before_mp - 5);
+}
+
+#[test]
+fn player_magic_item_preflight_and_dispatch_recheck_the_same_live_rejections() {
+    for rejected in [
+        "peace",
+        "group",
+        "guild",
+        "safe_caster",
+        "safe_target",
+        "dead_caster",
+        "dead_target",
+        "point",
+        "range",
+        "mp",
+        "spell_clock",
+        "action_clock",
+        "movement_clock",
+        "status",
+        "hallucination",
+    ] {
+        let (mut zone, now) = source_fixture();
+        let now = now + 2_000;
+        let mut point = Point { x: 12, y: 10 };
+        let mut spell = Spell::Poisoning;
+        match rejected {
+            "peace" => {
+                zone.players
+                    .get_mut(&sid("enemy"))
+                    .unwrap()
+                    .chat_profile
+                    .attack_mode = 0
+            }
+            "group" => {
+                zone.players
+                    .get_mut(&sid("enemy"))
+                    .unwrap()
+                    .chat_profile
+                    .attack_mode = 1;
+                zone.players
+                    .get_mut(&sid("friend"))
+                    .unwrap()
+                    .chat_profile
+                    .group_members = vec!["enemy".into()];
+            }
+            "guild" => {
+                let enemy = zone.players.get_mut(&sid("enemy")).unwrap();
+                enemy.chat_profile.attack_mode = 2;
+                enemy.chat_profile.guild_name = Some("same-source-guild".into());
+                zone.players
+                    .get_mut(&sid("friend"))
+                    .unwrap()
+                    .chat_profile
+                    .guild_name = Some("same-source-guild".into());
+            }
+            "safe_caster" => {
+                zone.players
+                    .get_mut(&sid("enemy"))
+                    .unwrap()
+                    .chat_profile
+                    .in_safe_zone = true
+            }
+            "safe_target" => {
+                zone.players
+                    .get_mut(&sid("friend"))
+                    .unwrap()
+                    .chat_profile
+                    .in_safe_zone = true
+            }
+            "dead_caster" | "dead_target" => {
+                let name = if rejected == "dead_caster" {
+                    "enemy"
+                } else {
+                    "friend"
+                };
+                zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                    session_id: sid(name),
+                    hp: 0,
+                    max_hp: 1_000,
+                    mp: 1_000,
+                    dead: true,
+                });
+            }
+            "point" => point.x += 1,
+            "range" => {
+                point.x = 80;
+                zone.handle(ZoneCommand::SyncPlayerTransform {
+                    session_id: sid("friend"),
+                    position: point.clone(),
+                    direction: MirDirection::Left,
+                });
+            }
+            "mp" => zone.players.get_mut(&sid("enemy")).unwrap().mp = 0,
+            "spell_clock" => {
+                zone.players
+                    .get_mut(&sid("enemy"))
+                    .unwrap()
+                    .magic_ready_at_ms
+                    .insert(Spell::Poisoning as u8, now + 1);
+            }
+            "action_clock" => {
+                zone.players
+                    .get_mut(&sid("enemy"))
+                    .unwrap()
+                    .next_spell_ready_at_ms = now + 1
+            }
+            "movement_clock" => {
+                zone.players
+                    .get_mut(&sid("enemy"))
+                    .unwrap()
+                    .movement_ready_at_ms = now + 1
+            }
+            "status" => {
+                let enemy = zone.players.get_mut(&sid("enemy")).unwrap();
+                enemy.native_status_poison |= CRYSTAL_POISON_PARALYSIS;
+                enemy.native_status_poison_expires_at_ms = Some(now + 1_000);
+            }
+            "hallucination" => spell = Spell::Hallucination,
+            _ => unreachable!(),
+        }
+        assert!(
+            !zone.can_player_cast_magic(
+                &sid("enemy"),
+                102,
+                spell,
+                MirDirection::Left,
+                &point,
+                true,
+                10,
+                5,
+                500,
+                now,
+            ),
+            "{rejected}"
+        );
+        let before_mp = zone.players[&sid("enemy")].mp;
+        let before_clock = zone.players[&sid("enemy")].magic_ready_at_ms.clone();
+        let cast = zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+            session_id: sid("enemy"),
+            object_id: 102,
+            spell,
+            direction: MirDirection::Left,
+            target: point,
+            cast: true,
+            level: 3,
+            damage: 10,
+            mp_cost: 5,
+            cooldown_ms: 500,
+            item_param: 1,
+            now_ms: now,
+        });
+        assert!(
+            !contains(&cast, |p| matches!(
+                p,
+                ServerPacket::Magic { cast: true, .. }
+                    | ServerPacket::ObjectMagic { cast: true, .. }
+            )),
+            "{rejected}"
+        );
+        assert_eq!(zone.players[&sid("enemy")].mp, before_mp, "{rejected}");
+        assert_eq!(
+            zone.players[&sid("enemy")].magic_ready_at_ms,
+            before_clock,
+            "{rejected}"
+        );
+        if matches!(
+            rejected,
+            "mp" | "spell_clock" | "action_clock" | "movement_clock" | "status"
+        ) {
+            assert!(
+                contains(&cast, |p| matches!(p, ServerPacket::UserLocation { .. })),
+                "source readiness rejection keeps owner correction: {rejected}: {cast:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn player_magic_item_preflight_is_read_only_and_never_grants_a_changed_target() {
+    let (mut zone, now) = source_fixture();
+    let now = now + 2_000;
+    let before = zone.checkpoint_bytes().unwrap();
+    assert!(zone.can_player_cast_magic(
+        &sid("enemy"),
+        102,
+        Spell::Poisoning,
+        MirDirection::Left,
+        &Point { x: 12, y: 10 },
+        true,
+        10,
+        5,
+        500,
+        now,
+    ));
+    assert_eq!(zone.checkpoint_bytes().unwrap(), before);
+    zone.players
+        .get_mut(&sid("friend"))
+        .unwrap()
+        .chat_profile
+        .in_safe_zone = true;
+    let before_mp = zone.players[&sid("enemy")].mp;
+    let cast = zone.player_cast_native_player_magic(
+        &sid("enemy"),
+        &sid("friend"),
+        Spell::Poisoning,
+        MirDirection::Left,
+        Point { x: 12, y: 10 },
+        true,
+        3,
+        10,
+        5,
+        500,
+        1,
+        now,
+    );
+    assert!(cast.is_empty());
+    assert_eq!(zone.players[&sid("enemy")].mp, before_mp);
+}
+
+#[test]
 fn purification_accepts_current_source_group_guild_enemy_guild_and_pk_199() {
     for relation in ["group", "guild", "enemy_guild", "no_caster_guild", "pk199"] {
         let (mut zone, now) = source_fixture();
@@ -811,4 +1070,105 @@ fn purification_completion_rechecks_real_brown_time_with_strict_expiry() {
     let friend = &zone.players[&sid("friend")];
     assert!(!zone.native_purification_players_are_friendly(healer, friend, deadline));
     assert!(zone.native_purification_players_are_friendly(healer, friend, deadline + 1));
+}
+
+#[test]
+fn purification_live_transfer_moves_only_the_exact_caster_and_preserves_original_records() {
+    let (mut zone, now) = source_fixture();
+    cast(&mut zone, now, 3);
+    let self_cast = self_cast(&mut zone, now);
+    assert!(contains(&self_cast, |p| matches!(
+        p,
+        ServerPacket::Magic {
+            spell: Spell::Purification,
+            cast: true,
+            ..
+        }
+    )));
+    let original = zone.pending_native_purifications.clone();
+    let buffs = serde_json::to_value(&zone.players[&sid("friend")].buffs).unwrap();
+    let healer = zone
+        .take_online_purification_transfer(&sid("healer"))
+        .unwrap();
+    assert_eq!(healer.pending.len(), 1);
+    assert_eq!(healer.pending[0].caster, original[0].caster);
+    assert_eq!(healer.pending[0].target, original[0].target);
+    assert_eq!(healer.pending[0].level, original[0].level);
+    assert_eq!(healer.pending[0].ready_at_ms, original[0].ready_at_ms);
+    assert_eq!(zone.pending_native_purifications.len(), 1);
+    assert_eq!(
+        zone.pending_native_purifications[0].caster,
+        original[1].caster
+    );
+    let friend = zone
+        .take_online_purification_transfer(&sid("friend"))
+        .unwrap();
+    assert_eq!(serde_json::to_value(&friend.buffs).unwrap(), buffs);
+    assert!(zone.pending_native_purifications.is_empty());
+    assert!(zone.players[&sid("friend")].buffs.is_empty());
+    zone.adopt_online_purification_transfer(&sid("healer"), healer, &mut []);
+    zone.adopt_online_purification_transfer(&sid("friend"), friend, &mut []);
+    assert_eq!(zone.pending_native_purifications.len(), 2);
+    assert_eq!(
+        serde_json::to_value(&zone.players[&sid("friend")].buffs).unwrap(),
+        buffs
+    );
+    for (actual, expected) in zone.pending_native_purifications.iter().zip(original) {
+        assert_eq!(actual.caster, expected.caster);
+        assert_eq!(actual.target, expected.target);
+        assert_eq!(actual.level, expected.level);
+        assert_eq!(actual.ready_at_ms, expected.ready_at_ms);
+    }
+}
+
+#[test]
+fn purification_live_transfer_cannot_adopt_into_a_rejoined_same_id_node_or_new_life() {
+    for replacement in ["rejoin", "revive"] {
+        let (mut zone, now) = source_fixture();
+        self_cast(&mut zone, now);
+        let transfer = zone
+            .take_online_purification_transfer(&sid("friend"))
+            .unwrap();
+        if replacement == "rejoin" {
+            zone.handle(ZoneCommand::Join(join("friend", 102, 12)));
+        } else {
+            zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                session_id: sid("friend"),
+                hp: 0,
+                max_hp: 1_000,
+                mp: 1_000,
+                dead: true,
+            });
+            zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                session_id: sid("friend"),
+                hp: 1_000,
+                max_hp: 1_000,
+                mp: 1_000,
+                dead: false,
+            });
+        }
+        zone.adopt_online_purification_transfer(&sid("friend"), transfer, &mut []);
+        assert!(
+            zone.pending_native_purifications.is_empty(),
+            "{replacement}"
+        );
+        assert!(
+            zone.players[&sid("friend")].buffs.is_empty(),
+            "{replacement}"
+        );
+    }
+}
+
+#[test]
+fn purification_live_transfer_cannot_restore_owner_authority_after_cold_decode() {
+    let (mut zone, now) = source_fixture();
+    self_cast(&mut zone, now);
+    let transfer = zone
+        .take_online_purification_transfer(&sid("friend"))
+        .unwrap();
+    let checkpoint = zone.checkpoint_bytes().unwrap();
+    let mut cold = ZoneRuntime::restore_checkpoint(&checkpoint).unwrap();
+    cold.adopt_online_purification_transfer(&sid("friend"), transfer, &mut []);
+    assert!(cold.pending_native_purifications.is_empty());
+    assert!(cold.players[&sid("friend")].buffs.is_empty());
 }

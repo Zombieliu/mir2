@@ -1,10 +1,12 @@
 # Original Purification lifecycle Candidate — 2026-10-09
 
-Implemented and locally tested for the current same-map lifecycle. Exact-source
-Linux CI, publication, natural TCP/WebSocket gameplay and native/human acceptance
-are separate gates. Simultaneous live transfer of both original actors to the
-same destination during the 500ms cast remains open; this Candidate conservatively
-cancels that case and is not complete Crystal parity.
+Historical same-map Candidate committed as5860815944. Actual Linux CI37901046490
+has passed and its genuine artifact has been independently verified. Publication,
+natural TCP/WebSocket gameplay and native/human acceptance remain separate gates.
+The subsequent [live map transfer/Player powder Candidate](CLASSIC-PURIFICATION-MAP-TRANSFER-20261009.md)
+now implements and tests the formerly open simultaneous same-destination500ms
+case; this historical commit itself conservatively cancels it. Neither slice is
+complete Crystal parity.
 
 Original `HumanObject.cs`4440–4446 queues the effect on the caster's ActionList
 for cast+500ms. Completion at6249 checks the actual current target Node, map,
@@ -33,7 +35,7 @@ the current target observers. No movement, attack, damage or spell clock is shor
 | Original shared_zone | Root ran all209 cases:201 pass /8 fail. The Purification story now passes, including its later assertions; the other8 failures stay RED. |
 | Original shared_monster_hell_ai | Root ran all17 cases:17 pass,0 fail. |
 | Legacy fixture corrections | Only Purification's actual +499/+500 completion and monotonic follow-up clocks changed. Original business assertions remain. |
-| CI gate | The release workflow retains every existing security/appearance/classic/Source/PostgreSQL/siege gate and adds Purification, its original Zone story and all17 Hell-AI tests. Not yet dispatched for this Candidate. |
+| CI gate | Actual Linux37901046490 succeeds in both original jobs, retaining every security/appearance/classic/Source/PostgreSQL/siege gate and the Purification, original Zone story and all17 Hell-AI checks. Genuine digest/ELF/source metadata are verified; not published. |
 | Online/native/human acceptance | Not run; not published. Prepared Rhino/Blindness projections are explicitly not natural monster-producer acceptance. |
 
 Early real failures remain in the raw archive: immediate-effect assumptions,
@@ -49,7 +51,7 @@ is442661 bytes, SHA256
 bind all six tested source files to parent97a942a66dc184aeb0731e02dbf59c22414a1513.
 The archive is the actual pre-commit tested source; no future commit ID is invented.
 
-Next, transfer the original opaque cast record only across a trusted live map
+The next slice transfers the original opaque cast record only across a trusted live map
 transition, preserving both proofs and absolute time. Original Crystal Teleport
 keeps Node and ActionList; cold/login/despawn paths revoke them. Destination Join
 must not erase the target's real Curse before a test reaches499ms, otherwise a

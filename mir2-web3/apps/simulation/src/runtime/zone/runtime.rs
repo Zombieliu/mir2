@@ -517,6 +517,23 @@ struct PendingNativePurification {
     target: owned_pet_combat::OwnedPetOwner,
 }
 
+/// An actual live Human's state moving between manager-owned maps. Only the
+/// source runtime can construct it; neither checkpoints nor packets carry it.
+/// Moving this value preserves both action proofs and every absolute deadline.
+#[derive(Debug)]
+pub(super) struct OnlinePurificationTransfer {
+    owner: owned_pet_combat::OwnedPetOwner,
+    pending: Vec<PendingNativePurification>,
+    buffs: BTreeMap<u8, super::types::ZonePlayerBuff>,
+    hidden: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum NativePlayerMagicRejection {
+    InvalidTarget,
+    CasterNotReady,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeSummon {
     ready_at_ms: u64,
@@ -2070,6 +2087,22 @@ impl ZoneRuntime {
                 cooldown_ms,
                 now_ms,
             );
+        }
+
+        if let Some(target_session_id) = self.players.iter().find_map(|(session, target)| {
+            (target.object_id == object_id).then_some(session)
+        }) {
+            return self
+                .native_player_magic_admission(
+                    session_id,
+                    target_session_id,
+                    spell,
+                    target,
+                    cast,
+                    mp_cost,
+                    now_ms,
+                )
+                .is_ok();
         }
 
         let Some(monster) = self.native_monsters.get(&object_id) else {
@@ -5667,6 +5700,55 @@ impl ZoneRuntime {
         outbounds
     }
 
+    /// The item preflight and actual dispatch read the same current Player
+    /// permissions and clocks. A successful preflight never grants a later
+    /// cast permission; dispatch evaluates the current state again.
+    #[allow(clippy::too_many_arguments)]
+    fn native_player_magic_admission(
+        &self,
+        session_id: &SessionId,
+        target_session_id: &SessionId,
+        spell: Spell,
+        target_point: &Point,
+        cast: bool,
+        mp_cost: i32,
+        now_ms: u64,
+    ) -> Result<(), NativePlayerMagicRejection> {
+        let Some(attacker) = self.players.get(session_id) else {
+            return Err(NativePlayerMagicRejection::InvalidTarget);
+        };
+        let Some(target) = self.players.get(target_session_id) else {
+            return Err(NativePlayerMagicRejection::InvalidTarget);
+        };
+        if spell == Spell::Hallucination
+            || !self.conquest_player_can_attack_player(attacker, target, now_ms)
+            || *target_point != target.position
+            || !points_within_action_range(
+                &attacker.position,
+                &target.position,
+                ZONE_NATIVE_PLAYER_MAGIC_MAX,
+            )
+        {
+            return Err(NativePlayerMagicRejection::InvalidTarget);
+        }
+        if cast {
+            let ready_at_ms = attacker
+                .magic_ready_at_ms
+                .get(&(spell as u8))
+                .copied()
+                .unwrap_or_default();
+            if attacker.mp < mp_cost.max(0)
+                || now_ms < ready_at_ms
+                || now_ms < attacker.next_spell_ready_at_ms
+                || now_ms < attacker.movement_ready_at_ms
+                || zone_player_status_blocks_cast(attacker, now_ms)
+            {
+                return Err(NativePlayerMagicRejection::CasterNotReady);
+            }
+        }
+        Ok(())
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn player_cast_native_player_magic(
         &mut self,
@@ -5683,33 +5765,21 @@ impl ZoneRuntime {
         item_param: u8,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some(attacker) = self.players.get(session_id).cloned() else {
-            return Vec::new();
-        };
         let Some(target) = self.players.get(target_session_id).cloned() else {
             return Vec::new();
         };
-        if spell == Spell::Hallucination {
-            return Vec::new();
-        }
-        if !self.conquest_player_can_attack_player(&attacker, &target, now_ms)
-            || target_point != target.position
-            || !points_within_action_range(
-                &attacker.position,
-                &target.position,
-                ZONE_NATIVE_PLAYER_MAGIC_MAX,
-            )
-        {
-            return Vec::new();
-        }
-        if cast {
-            let spell_key = spell as u8;
-            let ready_at_ms = attacker
-                .magic_ready_at_ms
-                .get(&spell_key)
-                .copied()
-                .unwrap_or_default();
-            if attacker.mp < mp_cost.max(0) || now_ms < ready_at_ms {
+        match self.native_player_magic_admission(
+            session_id,
+            target_session_id,
+            spell,
+            &target_point,
+            cast,
+            mp_cost,
+            now_ms,
+        ) {
+            Ok(()) => {}
+            Err(NativePlayerMagicRejection::InvalidTarget) => return Vec::new(),
+            Err(NativePlayerMagicRejection::CasterNotReady) => {
                 return self.correct_player_location(session_id, now_ms);
             }
         }
@@ -7493,6 +7563,69 @@ impl ZoneRuntime {
             return None;
         }
         self.owned_pet_owner(session_id)
+    }
+
+    pub(super) fn take_online_purification_transfer(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Option<OnlinePurificationTransfer> {
+        let owner = self.current_native_purification_owner(session_id)?;
+        let (pending, retained) = std::mem::take(&mut self.pending_native_purifications)
+            .into_iter()
+            .partition(|action| action.caster == owner);
+        self.pending_native_purifications = retained;
+        let player = self.players.get_mut(session_id)?;
+        let buffs = std::mem::take(&mut player.buffs);
+        let hidden = player.hidden;
+        Some(OnlinePurificationTransfer {
+            owner,
+            pending,
+            buffs,
+            hidden,
+        })
+    }
+
+    pub(super) fn adopt_online_purification_transfer(
+        &mut self,
+        session_id: &SessionId,
+        transfer: OnlinePurificationTransfer,
+        joined: &mut [ZoneOutbound],
+    ) {
+        if self.current_native_purification_owner(session_id).as_ref() != Some(&transfer.owner) {
+            return;
+        }
+        // Target-first and caster-first transfers are both valid. The original
+        // target proof is checked only when the original +500ms action is due.
+        self.pending_native_purifications.extend(transfer.pending);
+        let player = self.players.get_mut(session_id).unwrap();
+        player.buffs = transfer.buffs;
+        // MapObject.Teleport retains the live Human, including its actual
+        // Hidden flag. A moved Hiding buff cannot substitute for that state.
+        player.hidden = transfer.hidden;
+        let visible_buffs = player
+            .buffs
+            .values()
+            .filter(|state| state.buff.visible)
+            .map(|state| state.buff.buff_type)
+            .collect::<Vec<_>>();
+        // Join produced these unsent projections before adoption. Describe the
+        // actual moved buff map; do not create or refresh any buff from a packet.
+        for outbound in joined {
+            let packets = match outbound {
+                ZoneOutbound::ToSession { packets, .. }
+                | ZoneOutbound::ToMany { packets, .. }
+                | ZoneOutbound::ToAll { packets } => packets,
+                _ => continue,
+            };
+            for packet in packets {
+                if let ServerPacket::ObjectPlayer { info } = packet {
+                    if info.object_id == player.object_id {
+                        info.buffs = visible_buffs.clone();
+                        info.hidden = player.hidden;
+                    }
+                }
+            }
+        }
     }
 
     fn native_purification_players_are_friendly(

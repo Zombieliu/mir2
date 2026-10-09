@@ -1,5 +1,28 @@
 # Agent Orchestration
 
+> 2026-10-09 live Purification map/Player powder Candidate: the original
+> opaque action, complete actor proofs, actual buffs/deadlines and Hidden state
+> survive only a true retained live map change. Shared Player magic preflight
+> now matches dispatch before carried powder consumption; clocks/permissions
+> remain unchanged. Ordinary Manager14, Purification23, pet/Human38+Hell17 and
+> optimized ordinary Gateway4 pass. Broad library305/8 matches a clean pinned
+> source586 baseline299/the same8; original shared_zone201/8 stays RED.
+> New exact-source CI/deployment/native-human gates remain open. Historical
+> source586 actual Linux37901046490 and genuine artifact verification pass.
+> [Current behavior, evidence and limits](CLASSIC-PURIFICATION-MAP-TRANSFER-20261009.md).
+>
+> Actual current published pair is R23/sourcefaef, signedfeed18/Gatewayfaef:
+> 40 complete CDN objects, same-head separate stage/promote, real Windows
+> HTTPS/CMS/206 and71 public checks/20 normal logouts pass. Its immutable
+> publication record is pushed asf93ed212; older R22/feed17/536 entries below
+> are historical. Full P1–P7/Mentor is unfinished; no100% claim or expired
+> heartbeat restart. [Actual R23 publication](https://github.com/Zombieliu/mir2/blob/f93ed2121046962f9c39dfc62f7696e90b0cc458/mir2-web3/docs/CLASSIC-TARGET-MOVEMENT-PUBLISHED-R23-20261009.md).
+>
+> Ownership: Root is the only writer of shared runtime/manager/save/routing and
+> owns tests, Git and rollout. P7 audit is explicitly reassigned to one bounded
+> new npc_world_plan.rs module; it cannot edit common files or publish. Its
+> ordered pet shadow is not yet an integrated durable outbox/shared-world flow.
+
 > 2026-10-09 Purification Candidate: Source cast+500ms now rechecks both typed
 > actor Nodes/lives, current friendship and original level chance; clears actual
 > poison and Source Debuffs12/53/57 without removing beneficial buffs or unrelated
