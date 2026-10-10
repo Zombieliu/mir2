@@ -79,6 +79,10 @@ impl ZoneCollision {
         }
     }
 
+    pub(crate) fn is_available(&self) -> bool {
+        !self.unavailable
+    }
+
     /// Door index → cells, for building the zone's dynamic door state.
     pub(crate) fn doors(&self) -> &BTreeMap<u8, Vec<(i32, i32)>> {
         &self.doors

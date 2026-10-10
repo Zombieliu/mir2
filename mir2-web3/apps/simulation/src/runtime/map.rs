@@ -506,7 +506,7 @@ fn crystal_manifest_movement_destination_is_valid(
     map_file_name: &str,
     destination: &Point,
 ) -> bool {
-    runtime_full_map_collision_data(map_file_name)
+    runtime_world_map_collision_data(map_file_name)
         .map(|collision| {
             // Crystal's `Map.ValidPoint` checks the map cell's terrain validity
             // before a movement completes. A closed door is a separate dynamic
@@ -518,7 +518,7 @@ fn crystal_manifest_movement_destination_is_valid(
             point_in_bounds(&collision.collision.region_bounds, destination)
                 && !collision.blocked_set.contains(&tile_key(destination))
         })
-        .unwrap_or(true)
+        .unwrap_or(false)
 }
 
 pub(super) fn crystal_movement_transfer_key(
@@ -1814,6 +1814,10 @@ mod map_collision_source_tests;
 #[cfg(test)]
 #[path = "map_transfer_metadata_tests.rs"]
 mod map_transfer_metadata_tests;
+
+#[cfg(test)]
+#[path = "map_transfer_availability_tests.rs"]
+mod map_transfer_availability_tests;
 
 pub(super) fn current_map_disallows_intelligent_creatures(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();

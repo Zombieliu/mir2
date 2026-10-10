@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> Continued transfer round, 2026-10-10: installed unavailable terrain and stale
+> session/map bindings cannot trigger configured portals. Crystal movement
+> destinations use raw/gzip collision and reject missing/blocked/out-of-bounds
+> terrain; trusted explicit arenas and valid closed-door landings stay valid.
+> Final146 distinct local checks pass (11 new,135 retained;1 benchmark ignored).
+> Actual431520 Linux38013314930 failed five synthetic owner-order cases; only
+> seven explicit arena setup lines fix that fixture, with original clocks and
+> assertions unchanged. Io9fe7 own Linux38006259110 genuinely passed.
+> New exact Git/Linux/publication remain separate; public64b6/R23/feed18 stays
+> current. Root is sole writer. [Scope/evidence and open action-receipt gates](CLASSIC-MAP-TRANSFER-AVAILABILITY-20261010.md).
+> FullP1-P7/Mentor/native/human remains open; expired heartbeat stays paused.
+
+
 > Continued collision round, 2026-10-10: unavailable ordinary terrain now
 > rejects walking/running before door/transfer-cell exceptions and cannot mint
 > mineable walls. Final73 distinct local checks pass, including strict cold

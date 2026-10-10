@@ -789,6 +789,12 @@ impl ZoneRuntime {
         &self.key
     }
 
+    /// Known terrain or an explicitly configured open arena. This query reads
+    /// the installed collision identity; it does not certify Source Map.Load.
+    pub fn has_available_collision(&self) -> bool {
+        self.collision.is_available()
+    }
+
     #[cfg(test)]
     pub(crate) fn set_journey_evidence_enabled_for_test(&mut self, enabled: bool) {
         self.journey_evidence_enabled = enabled;
