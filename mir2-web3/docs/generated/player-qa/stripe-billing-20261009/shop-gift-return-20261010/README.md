@@ -257,3 +257,12 @@ The paired local candidates are ready; a running human client is retained.
 Normal exit and the active/connection counters must be clear before switching.
 No public installer, feed pointer, Gateway service or R22 release was changed.
 Native human acceptance and public commercial rollout remain open.
+
+[Prepared binary identities](MAIL-CANDIDATE-PREPARED.json) bind native8aafbb60db
+to its final tested projection/rendering code and Gateway92912f25c1 to the
+verified production Source recovery. Only test/docs/client files differ between
+that Gateway source and passing backend CI1429e70e90. Its runtime/Gateway/game-data/
+protocol source diff is empty. Native configuration hash is retained. Human switch
+authorization was received, but the first preflight still showed the old native
+process and1 active/1 WebSocket; no active character was forcibly closed. Actual
+normal exit is required before the six admission counters permit the switch.
