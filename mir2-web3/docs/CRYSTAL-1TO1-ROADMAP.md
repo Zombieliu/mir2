@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-10 commercial UI follow-up: the monthly-card consumable is prioritized
+> on the normal GameShop All first page by exact item/product identity, after
+> existing filters. Client14 and Source fixture9 tests plus Windows build pass.
+> Server pricing/financial authority and original catalog ordering are unchanged.
+> The local replacement is prepared; the running user client and public R22/
+> Gatewaya41/feed17 are preserved. Native human acceptance and public commercial
+> rollout remain open. This adds no original parity completion or P1–P7 progress.
+> [Exact scope and evidence](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/README.md).
+
 > 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
 > registration/password login/creation, expired entry rejection, one sandbox
 > USD10 Checkout, signed CLI callback/provider readback and Source-owned1000

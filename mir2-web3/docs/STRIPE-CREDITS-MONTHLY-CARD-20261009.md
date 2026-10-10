@@ -1,5 +1,19 @@
 # Stripe Credits and monthly-card Candidate — 2026-10-09
 
+## 2026-10-10 ordinary GameShop visibility
+
+The monthly card is a real purchasable consumable. Native code0399bbdd puts
+the exact application-owned product first on All page one after normal
+filters, rather than leaving it buried under its canonical name in Scroll.
+The configured local price remains1000 Credits for30 days; Gold is disabled.
+Ordinary in-world Buy delivers a parcel, claim puts the card in the bag, and
+UseItem activates it. Buying alone does not start the30-day term. Existing
+valid time is extended; expired access starts from use. Native shop14 and
+Source monthly-card9 fixture tests pass, and Windows builds successfully.
+The user's running local client is preserved; a replacement is prepared.
+Human native acceptance and public commercial publication remain open.
+[Commands, retained zero-filter attempt and binary proof](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/README.md).
+
 ## 2026-10-10 actual local payment and monthly trial
 
 The refilled test key works. Official Stripe CLI forwards signed Endive events

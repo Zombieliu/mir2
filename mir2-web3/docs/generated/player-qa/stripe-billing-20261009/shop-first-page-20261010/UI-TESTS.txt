@@ -1,0 +1,18 @@
+running 14 tests
+test crystal_ui::overlays::game_shop_dialog::tests::categories_keep_server_order_and_class_section_search_filter_real_flags ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::confirmation_revalidates_price_stock_and_wallet_then_queues_once ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::consumed_clipboard_shortcut_never_inserts_its_v_literal ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::ctrl_a_selects_the_search_draft_without_appending_its_literal ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::game_shop_names_match_crystal_friendly_name_and_grade_color ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::monthly_card_is_on_page_one_without_reordering_original_products_or_bypassing_filters ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::monthly_card_localized_name_and_credit_only_purchase_stay_in_the_ordinary_shop ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::preview_keeps_crystal_direction_gender_clock_and_weapon_depth ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::quantities_are_per_product_and_respect_five_stacks_stock_and_flags ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::raw_home_and_end_clear_ctrl_a_selection_when_button_edge_is_missing ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::raw_navigation_and_delete_are_single_shot_with_press_release_stream ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::recent_filter_excludes_zero_old_and_exact_seven_day_boundary ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::search_editor_caps_edits_and_resets_filter_page_state ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::shop_search_accepts_raw_and_localized_names_without_rewriting_item_identity ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 1285 filtered out; finished in 0.27s
+

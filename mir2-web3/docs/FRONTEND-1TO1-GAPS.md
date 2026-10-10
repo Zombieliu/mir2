@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-10 monthly-card discoverability Candidate: exact custom item/product
+> 1000001 is first on the ordinary GameShop All first page. Original catalog
+> order and filters remain intact; server1000-Credit pricing, parcel delivery
+> and exact-UID activation are unchanged. Client14 and Source fixture9 tests
+> plus compatible Windows build pass. A local binary is prepared, while the
+> user's running client and public R22/Gatewaya41/feed17 remain unchanged.
+> Native human visual/purchase and commercial rollout gates stay open; this
+> does not close an original Crystal parity gap.
+> [Evidence and manual route](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/README.md).
+
 > 2026-10-08 current public delivery: R22/game7fea, invited Gatewaya41 and
 > signed feed17 are actually live on origin and R2/CDN. Prior normal exit0,
 > strict six-counter/TCP drain, private backup, both normal service stops and

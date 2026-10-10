@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-10 monthly-card UI follow-up: native code0399bbdd puts the existing
+> consumable on ordinary GameShop All page one. Source price/parcel/exact-UID
+> use are preserved. Client14 and Source fixture9 checks pass; Windows binary
+> is prepared, without replacing the human's running test client or restarting
+> its Gateway. Native human acceptance and public commercial rollout remain
+> open; public R22/Gatewaya41/feed17 and unfinished P1–P7 are unchanged.
+> [Proof and pending manual route](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/README.md).
+
 > 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
 > registration/password login/creation, expired entry rejection, one sandbox
 > USD10 Checkout, signed CLI callback/provider readback and Source-owned1000
