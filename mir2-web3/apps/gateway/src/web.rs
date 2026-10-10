@@ -5778,7 +5778,7 @@ async fn handle_socket_work(
                         request.clone(), Arc::clone(&sender), Arc::clone(&session_cache),
                         Arc::clone(&socket_authenticated), Arc::clone(&billing_generation)).await {
                         let reply = billing::error_reply(request, error);
-                        if sender.lock().await.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                        if sender.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
                     }
                     continue;
                 }

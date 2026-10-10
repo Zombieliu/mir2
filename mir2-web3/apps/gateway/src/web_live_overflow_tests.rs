@@ -16,7 +16,7 @@ impl crate::routing::OwnerHealthValidator for HealthValidationProbe {
 
 // This probe isolates actual WS scheduling and cancellation. Current-life
 // Source validation is covered by the real Zone and authenticated RPC tests.
-async fn health_sender_socket_case(validation: usize) -> (Vec<Value>, Result<(), u64>) {
+async fn health_sender_socket_case(validation: usize) -> (Vec<Value>, Result<(), transport::TransportEnd>) {
     let (done_tx, done_rx) = oneshot::channel::<()>();
     let (result_tx, result_rx) = oneshot::channel();
     let handoff = Arc::new(Mutex::new(Some((done_rx, result_tx))));
@@ -26,7 +26,8 @@ async fn health_sender_socket_case(validation: usize) -> (Vec<Value>, Result<(),
         let (done, result) = handoff.lock().unwrap().take().unwrap();
         async move { upgrade.on_upgrade(move |socket| async move {
             let (sink, _stream) = socket.split();
-            let sender = Arc::new(AsyncMutex::new(sink));
+            let terminal = transport::TransportSignal::new();
+            let sender = Arc::new(transport::SocketSender::new(sink, terminal.clone()));
             let gate = Arc::new(AsyncRwLock::new(()));
             let active = Arc::new(AtomicU64::new(42));
             let (failure_tx, failure_rx) = watch::channel(0);
@@ -58,7 +59,7 @@ async fn health_sender_socket_case(validation: usize) -> (Vec<Value>, Result<(),
                 normal_tx.send(SharedZoneLiveOutbound::new(42, ServerPacket::KeepAlive { time: 99 })).await.unwrap();
                 let _ = done.await;
             };
-            let outcome = run_until_zone_overload(work, failure_rx, active.clone()).await;
+            let outcome = run_until_transport_end(work, failure_rx, active.clone(), terminal).await;
             let _ = result.send(outcome);
         }) }
     }));
@@ -101,7 +102,7 @@ async fn owner_health_web_current_health_is_sent_once_before_next_normal_packet(
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn owner_health_web_validation_failure_cancels_the_whole_current_transport() {
     let (received, outcome) = health_sender_socket_case(2).await;
-    assert_eq!(outcome, Err(42));
+    assert_eq!(outcome, Err(transport::TransportEnd::ZoneOverload(42)));
     assert!(received.is_empty());
 }
 

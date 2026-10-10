@@ -288,8 +288,6 @@ pub(super) async fn socket_action(
         Ok(a) => a,
         Err(e) => {
             sender
-                .lock()
-                .await
                 .send(Message::Text(reply(&request, Err(e)).to_string().into()))
                 .await
                 .map_err(|_| "billingSendFailed")?;
@@ -323,8 +321,6 @@ pub(super) async fn socket_action(
             Ok(order) => order,
             Err(e) => {
                 sender
-                    .lock()
-                    .await
                     .send(Message::Text(reply(&request, Err(e)).to_string().into()))
                     .await
                     .map_err(|_| "billingSendFailed")?;
@@ -360,8 +356,6 @@ pub(super) async fn socket_action(
                 && identity.touch_session(&verified).is_ok()
             {
                 let _ = sender
-                    .lock()
-                    .await
                     .send(Message::Text(reply(&request, result).to_string().into()))
                     .await;
             }
@@ -431,8 +425,6 @@ pub(super) async fn socket_action(
             .map_err(|_| "billingSendFailed")?;
     }
     sender
-        .lock()
-        .await
         .send(Message::Text(reply(&request, result).to_string().into()))
         .await
         .map_err(|_| "billingSendFailed".into())
