@@ -1568,10 +1568,9 @@ mod tests {
     #[test]
     fn complete_zone_checkpoint_restores_authoritative_and_derived_state() {
         let session_id = SessionId::new("checkpoint-player");
-        let mut runtime = ZoneRuntime::new_with_collision(
-            ZoneKey::for_map("checkpoint-map"),
-            ZoneCollision::unbounded(),
-        );
+        // Strict recovery reloads this map's ordinary collision identity. A
+        // missing map must be checkpointed as unavailable, not an open arena.
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("checkpoint-map"));
         runtime.handle(ZoneCommand::Join(ZoneJoin {
             session_id: session_id.clone(),
             account_id: "checkpoint-account".to_string(),

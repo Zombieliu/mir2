@@ -1,5 +1,10 @@
 # Bounded Source map I/O Candidate — 2026-10-10
 
+> Actual follow-up: source9fe7 is pushed with exact Git ref/commit/tree readbacks.
+> Linux38006259110 is tracked separately from local63/byte comparisons. Terrain64b6
+> is now published; it does not include this I/O round or later collision guard.
+> [Actual follow-up evidence](CLASSIC-UNAVAILABLE-MAP-COLLISION-20261010.md).
+
 Raw and packaged map reads now have a real input/output limit rather than
 reading an arbitrary file or decompression stream into memory before rejecting
 it. The shared terrain domain is128 MiB for raw/decoded bytes. Actual compressed

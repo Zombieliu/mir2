@@ -38,6 +38,10 @@ pub struct ZoneCollision {
     transfer_source_cells: BTreeSet<(i32, i32)>,
     /// Door index → its cells (start closed, i.e. present in `blocked_cells`).
     doors: BTreeMap<u8, Vec<(i32, i32)>>,
+    // Missing ordinary terrain is not an explicitly open arena. Omit false so
+    // known-map and trusted unbounded checkpoint roots keep their original bytes.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    unavailable: bool,
 }
 
 impl ZoneCollision {
@@ -53,8 +57,9 @@ impl ZoneCollision {
                 blocked_cells: data.blocked_cells,
                 transfer_source_cells: data.transfer_source_cells,
                 doors: data.doors,
+                unavailable: false,
             })
-            .unwrap_or_else(Self::unbounded)
+            .unwrap_or_else(Self::unavailable)
     }
 
     pub fn unbounded() -> Self {
@@ -63,6 +68,14 @@ impl ZoneCollision {
             blocked_cells: BTreeSet::new(),
             transfer_source_cells: BTreeSet::new(),
             doors: BTreeMap::new(),
+            unavailable: false,
+        }
+    }
+
+    fn unavailable() -> Self {
+        Self {
+            unavailable: true,
+            ..Self::unbounded()
         }
     }
 
@@ -114,15 +127,18 @@ impl ZoneCollision {
     }
 
     pub(crate) fn is_blocked(&self, point: &Point) -> bool {
-        self.bounds
-            .map(|bounds| !bounds.contains(point))
-            .unwrap_or(false)
+        self.unavailable
+            || self
+                .bounds
+                .map(|bounds| !bounds.contains(point))
+                .unwrap_or(false)
             || self.blocked_cells.contains(&(point.x, point.y))
     }
 
-    pub(crate) fn is_mineable_wall(&self,point:&Point)->bool {
-        self.bounds.is_some_and(|bounds|bounds.contains(point))
-            && self.blocked_cells.contains(&(point.x,point.y))
+    pub(crate) fn is_mineable_wall(&self, point: &Point) -> bool {
+        !self.unavailable
+            && self.bounds.is_some_and(|bounds| bounds.contains(point))
+            && self.blocked_cells.contains(&(point.x, point.y))
     }
 
     pub(crate) fn bounds(&self) -> Option<ZoneBounds> {
@@ -135,6 +151,10 @@ impl ZoneCollision {
     }
 
     pub(crate) fn is_player_movement_blocked(&self, point: &Point) -> bool {
+        if self.unavailable {
+            return true;
+        }
+
         // A direct-movement transfer source is always steppable by a player:
         // stepping onto it immediately fires the map transfer, so it must bypass
         // both the region-bounds and static-collision checks. The full original
@@ -155,5 +175,72 @@ impl ZoneCollision {
         }
 
         self.blocked_cells.contains(&(point.x, point.y))
+    }
+}
+
+#[cfg(test)]
+mod unavailable_collision_tests {
+    use super::*;
+
+    const MISSING: &str = "missing-collision-regression-20261010";
+
+    #[test]
+    fn missing_terrain_blocks_transfer_exception_and_door_changes() {
+        let point = Point { x: 10, y: 10 };
+        let mut collision = ZoneCollision::for_map(MISSING)
+            .with_bounds(ZoneBounds::new(0, 20, 0, 20))
+            .with_door(7, vec![(10, 10)]);
+        collision.transfer_source_cells.insert((10, 10));
+        assert!(collision.is_blocked(&point));
+        assert!(collision.is_player_movement_blocked(&point));
+        assert!(!collision.is_mineable_wall(&point));
+        collision.open_door(7);
+        assert!(collision.is_blocked(&point));
+        assert!(collision.is_player_movement_blocked(&point));
+        collision.close_door(7);
+        assert!(collision.is_player_movement_blocked(&point));
+        assert!(!collision.is_mineable_wall(&point));
+    }
+
+    #[test]
+    fn missing_terrain_clone_retains_closed_authority() {
+        let collision = ZoneCollision::for_map(MISSING).clone();
+        for point in [
+            Point { x: 0, y: 0 },
+            Point { x: -1, y: -1 },
+            Point {
+                x: i32::MAX,
+                y: i32::MIN,
+            },
+        ] {
+            assert!(collision.is_blocked(&point));
+            assert!(collision.is_player_movement_blocked(&point));
+            assert!(!collision.is_mineable_wall(&point));
+        }
+    }
+
+    #[test]
+    fn explicit_unbounded_keeps_original_serialized_checkpoint_shape() {
+        let collision = ZoneCollision::unbounded();
+        assert_eq!(
+            serde_json::to_string(&collision).unwrap(),
+            r#"{"bounds":null,"blocked_cells":[],"transfer_source_cells":[],"doors":{}}"#
+        );
+        assert!(!collision.is_player_movement_blocked(&Point { x: -1, y: -1 }));
+    }
+
+    #[test]
+    fn missing_terrain_cannot_share_the_explicit_unbounded_state_root_input() {
+        let missing = serde_json::to_value(ZoneCollision::for_map(MISSING)).unwrap();
+        let explicit = serde_json::to_value(ZoneCollision::unbounded()).unwrap();
+        assert_eq!(
+            missing.get("unavailable"),
+            Some(&serde_json::Value::Bool(true))
+        );
+        assert_ne!(missing, explicit);
+        assert!(serde_json::to_value(ZoneCollision::for_map("0"))
+            .unwrap()
+            .get("unavailable")
+            .is_none());
     }
 }

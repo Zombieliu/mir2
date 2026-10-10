@@ -1,5 +1,11 @@
 # Source terrain and ordinary collision Candidate — 2026-10-10
 
+> Actual follow-up: exact64b6 Linux38001876065 succeeds; genuine artifact02 is
+> verified after the retained partial EOF download. Drained c704→64b6 publication,
+> private backup, normal/cold stops and62 original public protocol checks succeed.
+> No Windows reinstall or complete Source Map.Load/P1-P7/human acceptance is claimed.
+> [Actual original follow-up evidence](CLASSIC-UNAVAILABLE-MAP-COLLISION-20261010.md).
+
 Status: implemented in the normal collision entry, locally verified as stated
 below; new commit/push, exact new Linux package, deployment and human acceptance
 are separate gates. This is not complete Source `Map.Load`, CHECKHUM, P7 or

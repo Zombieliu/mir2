@@ -1,5 +1,20 @@
 # Agent Orchestration
 
+> Continued collision round, 2026-10-10: unavailable ordinary terrain now
+> rejects walking/running before door/transfer-cell exceptions and cannot mint
+> mineable walls. Final73 distinct local checks pass, including strict cold
+> recovery, original movement/security/mining and optimized Gateway500ms flow.
+> Original red baselines and fixture-only repairs are retained. Root is the
+> sole writer; read-only review reports no blocker. New exact Git/Linux/publication
+> are separate. [Scope and original evidence](CLASSIC-UNAVAILABLE-MAP-COLLISION-20261010.md).
+> Earlier terrain64b6 is now truly Linux-qualified and published from drained
+> c704 with private backups, normal/cold stops and62 public protocol checks.
+> This publishes neither source-I/O9fe7 nor the new unavailable-collision fix.
+> Io9fe7 is actually pushed; its Linux38006259110 is still separately tracked.
+> Source Map.Load/population, current-foot transfer/Join rejection, Source-CAS
+> world outbox and fullP1-P7/Mentor/native/human remain open. Expired heartbeat
+> stays paused and the blocked Goal is not marked complete. Older entries are history.
+
 > Current bounded map I/O round, 2026-10-10 local: raw/gzip map byte reads now
 > stop at preparation limits, validate the complete first gzip footer and retain
 > typed ordinary fallback behavior. Final 59 library + 4 original optimized
