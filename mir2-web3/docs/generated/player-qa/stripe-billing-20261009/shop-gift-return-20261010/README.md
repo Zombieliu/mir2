@@ -162,3 +162,30 @@ confirm → mail claim → bag use. Separately GIFT → exact friend name → co
 recipient mail/claim/use. Check unsupported Gold, low balance, invalid name,
 recipient full, cancel, normal logout/relogin and unknown connection loss.
 
+
+## Concurrent PostgreSQL follow-up — recovery remains receipt-only
+
+CI38043856064 completed both ordinary authenticated writer bootstraps, then one
+actual Gift attempt returned a redacted error. [Failure](CI-GIFT-AUTH-SETUP-FINAL-FAILURE.txt)
+is retained; it did not pass. Static review identified a reachable cache split:
+a competitor may atomically commit between payer and recipient refresh reads.
+The pre-persistence `gameShopGiftItemReceiptMissingOutcome` path now refreshes
+the payer and accepts only its complete matching immutable GiftV1 receipt.
+If absent or inconsistent, it still fails without writing a replacement. No
+unknown-outcome retry is added. A known CAS retry now freezes the first resolved
+recipient identity, preserving rename/name-reuse rejection.
+
+[Source Gift15](SOURCE-GIFT-CAS-RECOVERY-01.txt) and
+[Gateway shop35](GATEWAY-SHOP-CAS-RECOVERY-01.txt) pass. The new local negative
+fixture retains a recipient unit while removing the payer receipt and requires
+exact error, unchanged state, one debit and one parcel. The isolated PostgreSQL
+fixture adds the same negative case after its existing competing-writer, online
+recipient and activation assertions. CI diagnostics now print only fixed domain
+labels, never arbitrary repository errors or credentials. Actual PostgreSQL CI
+is still pending. A concurrency pass alone does not prove which recovery path
+was exercised.
+
+The user also exposed a native mail presentation bug: exact `itemStatesJson`
+contains the monthly card but a later key-only snapshot clears its icon. Native
+mail projection and the application-owned monthly-card metadata fix are in
+progress. The active user session and its unclaimed parcel are preserved.

@@ -925,6 +925,31 @@ fn gift_stale_owner_and_malformed_ledger_fail_without_debit_or_delivery() {
 }
 
 #[test]
+fn gift_recipient_unit_without_payer_receipt_never_recreates_a_paid_outcome() {
+    let fixture = fixture(false);
+    let config = &fixture.config;
+    let mut sender = start(config, SENDER, SENDER_INDEX);
+    assert!(gift(&mut sender, request(20)).unwrap().outcome.success);
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let payer = store.accounts.get_mut(SENDER).unwrap()
+            .saves.get_mut(&SENDER_INDEX).unwrap();
+        let mut state: Stage5SystemsState = serde_json::from_str(
+            payer.stage5_systems_json.as_deref().unwrap(),
+        ).unwrap();
+        state.mail.retain(|mail| mail.subject != "NativeGameShopGiftLedgerV1");
+        payer.stage5_systems_json = Some(serde_json::to_string(&state).unwrap());
+    }
+    let mut fresh_sender = start(config, SENDER, SENDER_INDEX);
+    let before = serialized(config);
+    assert_eq!(gift(&mut fresh_sender, request(20)).unwrap_err(),
+        "gameShopGiftItemReceiptMissingOutcome");
+    assert_eq!(serialized(config), before);
+    assert_eq!(save(config, SENDER, SENDER_INDEX).credit, 990);
+    assert_eq!(mail(config, RECEIVER, RECEIVER_INDEX).len(), 1);
+}
+
+#[test]
 #[ignore = "requires MIR2_BILLING_TEST_ISOLATED=1 and a dedicated mir2_billing_qa_ PostgreSQL database"]
 fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     use mir2_simulation::AccountStoreDatabaseMode;
@@ -1054,7 +1079,21 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
                 let mut runtime = runtime.unwrap();
                 eprintln!("gift-pg: writer gift transaction begins");
                 gift(&mut runtime, request(19))
-                    .unwrap_or_else(|_| panic!("QA Gift CAS failed; credentials suppressed"))
+                    .unwrap_or_else(|error| {
+                        // Print only fixed, allowlisted domain labels. Repository
+                        // errors may contain a private URI or account details.
+                        let label = match error.as_str() {
+                            "gameShopGiftItemReceiptMissingOutcome" => "item-receipt-without-outcome",
+                            "gameShopGiftOwnerCheckpointStale" => "owner-checkpoint-stale",
+                            "gameShopGiftReplayMismatch" => "request-replay-mismatch",
+                            _ if error.starts_with("stale postgres account-store write") => "account-cas-stale",
+                            _ if error.starts_with("stale postgres character-save write") => "character-cas-stale",
+                            _ if error.starts_with("stale postgres game-shop global-stock write") => "stock-cas-stale",
+                            _ if error.contains("OUTCOME_UNKNOWN") => "outcome-unknown",
+                            _ => "other-error-redacted",
+                        };
+                        panic!("QA Gift CAS failed: {label}; credentials suppressed")
+                    })
                     .outcome
             })
         })
@@ -1135,6 +1174,31 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     );
     assert_eq!(save(&open(&scoped), SENDER, SENDER_INDEX).credit, 990);
     eprintln!("gift-pg: durable receipt and activation replay verified");
+    // A recipient unit is not proof of a complete payer transaction. Exercise
+    // the PostgreSQL reread path against an intentionally incomplete receipt in
+    // this owned fixture, and require failure without minting or another debit.
+    let orphaned = open(&scoped);
+    {
+        let mut store = orphaned.account_store.lock().unwrap();
+        let payer = store.accounts.get_mut(SENDER).unwrap()
+            .saves.get_mut(&SENDER_INDEX).unwrap();
+        let mut state: Stage5SystemsState = serde_json::from_str(
+            payer.stage5_systems_json.as_deref().unwrap(),
+        ).unwrap();
+        state.mail.retain(|mail| mail.subject != "NativeGameShopGiftLedgerV1");
+        payer.stage5_systems_json = Some(serde_json::to_string(&state).unwrap());
+    }
+    orphaned.save_account_store_account(SENDER)
+        .unwrap_or_else(|_| panic!("QA orphan fixture save failed; credentials suppressed"));
+    let observed = open(&scoped);
+    let mut fresh_sender = start(&observed, SENDER, SENDER_INDEX);
+    let before = serialized(&observed);
+    assert_eq!(gift(&mut fresh_sender, request(19)).unwrap_err(),
+        "gameShopGiftItemReceiptMissingOutcome");
+    assert_eq!(serialized(&observed), before);
+    assert_eq!(save(&open(&scoped), SENDER, SENDER_INDEX).credit, 990);
+    assert_eq!(mail(&open(&scoped), RECEIVER, RECEIVER_INDEX).len(), 1);
+    eprintln!("gift-pg: incomplete payer receipt rejected without write");
     // This schema was generated above inside the verified dedicated QA DB.
     base.batch_execute(&format!("DROP SCHEMA {schema} CASCADE"))
         .unwrap();

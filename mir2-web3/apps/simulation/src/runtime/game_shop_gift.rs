@@ -41,6 +41,13 @@ struct Recipient {
     character: CharacterRecord,
 }
 
+// A known-no-commit CAS retry must retain the originally resolved character.
+// Looking up its name again could redirect a pending gift after name reuse.
+enum RecipientSelection {
+    Resolve,
+    Frozen(Option<Recipient>),
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct GiftEntry {
@@ -543,13 +550,14 @@ impl SimulationSession {
         &mut self,
         request: NativeGameShopGiftRequest,
     ) -> Result<GameShopPurchaseExecution, String> {
-        self.game_shop_gift_attempt(request, true)
+        self.game_shop_gift_attempt(request, true, RecipientSelection::Resolve)
     }
 
     fn game_shop_gift_attempt(
         &mut self,
         request: NativeGameShopGiftRequest,
         retry_known_cas: bool,
+        recipient_selection: RecipientSelection,
     ) -> Result<GameShopPurchaseExecution, String> {
         validate_native_game_shop_purchase_request(&request.purchase)?;
         if !valid_name(&request.recipient_name) {
@@ -593,7 +601,11 @@ impl SimulationSession {
         validate_character_save_record(&checkpoint)?;
         let expected_revision = checkpoint.revision;
         let product = product(self.app.world(), &request.purchase, &checkpoint.character);
-        let recipient = resolve_recipient(&config, &request.recipient_name)?;
+        let recipient = match recipient_selection {
+            RecipientSelection::Resolve => resolve_recipient(&config, &request.recipient_name)?,
+            RecipientSelection::Frozen(recipient) => recipient,
+        };
+        let retry_recipient = recipient.clone();
         let uses_global = product
             .as_ref()
             .is_ok_and(|product| product.item.stock > 0 && !product.item.i_stock);
@@ -878,6 +890,28 @@ impl SimulationSession {
             Ok(committed) => committed,
             Err(error)
                 if retry_known_cas
+                    && config.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth
+                    && error == "gameShopGiftItemReceiptMissingOutcome" =>
+            {
+                // Payer and recipient refreshes are separate reads. A competing
+                // atomic gift may commit between them, leaving a stale payer
+                // receipt and an already issued recipient unit in this cache.
+                // This callback error occurs before persistence. Recover only
+                // the complete, matching durable payer receipt; never write a
+                // replacement outcome or parcel from a recipient unit alone.
+                config.refresh_account_store_account(&identity.account_id)?;
+                let store = config.account_store.lock()
+                    .map_err(|_| "gameShopGiftStoreUnavailable")?;
+                let save = store.accounts.get(&identity.account_id)
+                    .and_then(|account| account.saves.get(&identity.character_index))
+                    .ok_or("gameShopGiftSenderMissing")?;
+                if let Some(outcome) = existing_outcome(&systems(save)?, &request)? {
+                    return Ok(GameShopPurchaseExecution { packets: Vec::new(), outcome });
+                }
+                return Err(error);
+            }
+            Err(error)
+                if retry_known_cas
                     && !error.contains("OUTCOME_UNKNOWN")
                     && !error.contains("frozen")
                     && (error.starts_with("stale postgres account-store write")
@@ -890,7 +924,9 @@ impl SimulationSession {
                 if uses_global {
                     config.refresh_game_shop_global_stock()?;
                 }
-                return self.game_shop_gift_attempt(request, false);
+                return self.game_shop_gift_attempt(
+                    request, false, RecipientSelection::Frozen(retry_recipient),
+                );
             }
             Err(error) => return Err(error),
         };

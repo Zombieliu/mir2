@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-10 Gift concurrency follow-up: Source Gift15 and Gateway shop35
+> checks pass. A known pre-persistence split-read error may recover only a
+> matching complete durable payer receipt; an orphan recipient unit cannot
+> create another outcome, debit or parcel. One known CAS retry keeps the first
+> resolved recipient identity. Unknown/frozen outcomes remain closed. Actual
+> PostgreSQL CI and the newly observed native monthly-mail icon fix are still
+> pending; public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Evidence and retained failures](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
 > 2026-10-10 authorized commercial gift Candidate: authenticated Credits-only
 > gifting atomically commits payer debit, frozen recipient parcel, stock and
 > permanent monthly-card units. Dedicated Source/RPC capability and immutable
