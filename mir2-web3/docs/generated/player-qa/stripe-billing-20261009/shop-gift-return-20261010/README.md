@@ -253,8 +253,27 @@ both independent Gift outcomes, exact debit/one parcel, online recipient tick,
 unsaved gold/transform save, activation replay and the missing-payer-receipt
 negative case. All previous failed/hanging diagnostics remain preserved.
 
-The paired local candidates are ready; a running human client is retained.
-Normal exit and the active/connection counters must be clear before switching.
+The paired local candidates have now been started after the user completed a
+normal logout and closed the old client. All six Gateway admission counters
+were zero before the switch. The latest private save and settings were backed
+up; the complete saved accounts object was identical after the old Gateway
+stopped and again after the new Gateway started, before launching the client.
+The old tool session's stdin was closed, so its operator shutdown command did
+not reach the server. Only the drained sandbox Gateway process was stopped;
+its publication marker was empty afterward. This was not a graceful stdin
+shutdown. No freeze marker, lease or account record was manually cleared.
+
+New native289764 runs the final8aafbb60db binary; new Gateway285912 runs the
+92912f25c1 binary. The existing test Stripe listener, webhook configuration,
+client TOML, isolated profile and read-only assets were retained. The sandbox
+shortcut now points to the new client. Startup reaches first_main_update;
+Gateway health is true, one client socket is connected and zero characters
+are active at the recorded observation. The return page bytes and its security
+headers match the tested version. No agent purchase, claim, gift, payment or
+monthly activation was made.
+[Actual switch and startup receipt](MAIL-LOCAL-SWITCH-RECEIPT.json) records the
+new process/binary identities, drain and preservation checks. The prepared
+receipt and older startup records remain historical evidence.
 No public installer, feed pointer, Gateway service or R22 release was changed.
 Native human acceptance and public commercial rollout remain open.
 

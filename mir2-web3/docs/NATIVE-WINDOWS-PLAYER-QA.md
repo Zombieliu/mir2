@@ -1,5 +1,13 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-10 monthly-mail sandbox switch completed after the user's normal
+> logout and all six admission counters reached zero. Native8aafbb60db and
+> Gateway92912f25c1 are running; first_main_update, healthy connection and
+> unchanged saved accounts/private settings are verified. Existing parcels
+> were not claimed or activated by the agent. Native human acceptance remains
+> open; public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Actual switch and startup receipt](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/MAIL-LOCAL-SWITCH-RECEIPT.json).
+
 > 2026-10-10 monthly parcel presentation Candidate: concrete Stage5
 > itemStatesJson now survives the subsequent native snapshot; reserved monthly
 > item metadata supplies its1813 icon, localized name and activation-on-use
