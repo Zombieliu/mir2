@@ -312,7 +312,7 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String>;
 
-    /// Execute one native-receipt purchase only after proving that this exact
+    /// Execute one native-receipt purchase or gift only after proving that this exact
     /// command path can return the authoritative typed transaction outcome.
     /// Generic Web/Crystal purchases intentionally continue through
     /// `execute`, including against rolling old Zone Hosts.
@@ -321,23 +321,38 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime: &mut ZoneRuntimeHandle,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
-            return Err(
-                "typed GameShop outcome execution requires a native idempotent purchase"
-                    .to_string(),
-            );
-        }
-        if !self.supports_typed_game_shop_purchase_outcome(runtime) {
-            return Err(
-                "typed GameShop purchase outcome capability is unavailable before execution"
-                    .to_string(),
-            );
+        match request.command() {
+            WorldCommand::NativeGameShopPurchase(_)
+                if !self.supports_typed_game_shop_purchase_outcome(runtime) =>
+            {
+                return Err(
+                    "typed GameShop purchase outcome capability is unavailable before execution"
+                        .to_string(),
+                );
+            }
+            WorldCommand::NativeGameShopGift(_)
+                if !self.supports_native_game_shop_gifts(runtime) =>
+            {
+                return Err("native GameShop gift capability is unavailable before execution".into());
+            }
+            WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_) => {}
+            _ => {
+                return Err(
+                    "typed GameShop outcome execution requires a native idempotent purchase or gift"
+                        .to_string(),
+                );
+            }
         }
         self.execute(runtime, request)
     }
 
     fn supports_typed_game_shop_purchase_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
         runtime.supports_typed_game_shop_purchase_outcome()
+    }
+
+    /// Alternate/old command clients must explicitly opt in to gift execution.
+    fn supports_native_game_shop_gifts(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        false
     }
 
     fn world_snapshot(&self, runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
@@ -433,22 +448,34 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
-            return Err(
-                "typed GameShop outcome execution requires a native idempotent purchase"
-                    .to_string(),
-            );
-        }
-        if !self.supports_typed_game_shop_purchase_outcome() {
-            return Err(
-                "typed GameShop purchase outcome capability is unavailable before execution"
-                    .to_string(),
-            );
+        match request.command() {
+            WorldCommand::NativeGameShopPurchase(_)
+                if !self.supports_typed_game_shop_purchase_outcome() =>
+            {
+                return Err(
+                    "typed GameShop purchase outcome capability is unavailable before execution"
+                        .to_string(),
+                );
+            }
+            WorldCommand::NativeGameShopGift(_) if !self.supports_native_game_shop_gifts() => {
+                return Err("native GameShop gift capability is unavailable before execution".into());
+            }
+            WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_) => {}
+            _ => {
+                return Err(
+                    "typed GameShop outcome execution requires a native idempotent purchase or gift"
+                        .to_string(),
+                );
+            }
         }
         self.execute(request)
     }
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        false
+    }
+
+    fn supports_native_game_shop_gifts(&self) -> bool {
         false
     }
 
@@ -547,6 +574,10 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
 
     fn supports_typed_game_shop_purchase_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
         self.transport.supports_typed_game_shop_purchase_outcome()
+    }
+
+    fn supports_native_game_shop_gifts(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.transport.supports_native_game_shop_gifts()
     }
 
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
@@ -670,6 +701,10 @@ impl InProcessZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+    fn supports_native_game_shop_gifts(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        runtime.supports_native_game_shop_gifts()
+    }
+
     fn execute(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -1057,6 +1092,18 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
             .unwrap_or(false)
     }
 
+    fn supports_native_game_shop_gifts(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.runtime
+            .lock()
+            .ok()
+            .and_then(|runtime| {
+                runtime
+                    .as_ref()
+                    .map(|runtime| runtime.supports_native_game_shop_gifts())
+            })
+            .unwrap_or(false)
+    }
+
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         HostedZoneOwnerCommandClient::world_snapshot(self)
     }
@@ -1153,6 +1200,18 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
                 runtime
                     .as_ref()
                     .map(|runtime| runtime.supports_typed_game_shop_purchase_outcome())
+            })
+            .unwrap_or(false)
+    }
+
+    fn supports_native_game_shop_gifts(&self) -> bool {
+        self.runtime
+            .lock()
+            .ok()
+            .and_then(|runtime| {
+                runtime
+                    .as_ref()
+                    .map(|runtime| runtime.supports_native_game_shop_gifts())
             })
             .unwrap_or(false)
     }
@@ -14742,6 +14801,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             &command,
             WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. })
                 | WorldCommand::NativeGameShopPurchase(_)
+                | WorldCommand::NativeGameShopGift(_)
         );
         let skip_tail_zone_snapshot = is_low_latency_zone_packet
             || is_world_tick
@@ -15553,6 +15613,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         self.inner.supports_typed_game_shop_purchase_outcome()
+    }
+
+    fn supports_native_game_shop_gifts(&self) -> bool {
+        self.inner.supports_native_game_shop_gifts()
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {

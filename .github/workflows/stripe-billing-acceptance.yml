@@ -5,6 +5,7 @@ on:
     branches: ["codex/**"]
     paths:
       - "mir2-web3/apps/simulation/**/billing*"
+      - "mir2-web3/apps/simulation/**/game_shop_gift*"
       - "mir2-web3/apps/simulation/src/monthly_card.rs"
       - "mir2-web3/apps/simulation/src/config.rs"
       - "mir2-web3/apps/simulation/src/world_runtime.rs"
@@ -17,7 +18,9 @@ on:
       - "mir2-web3/apps/gateway/**/billing*"
       - "mir2-web3/apps/gateway/src/*billing*"
       - "mir2-web3/apps/gateway/src/web.rs"
+      - "mir2-web3/apps/gateway/src/web_game_shop_gift_tests.rs"
       - "mir2-web3/apps/gateway/src/routing.rs"
+      - "mir2-web3/apps/gateway/src/zone_rpc_game_shop_gift_tests.rs"
       - "mir2-web3/apps/gateway/src/zone_rpc.rs"
       - "mir2-web3/apps/gateway/src/events.rs"
       - "mir2-web3/apps/gateway/src/lib.rs"
@@ -71,6 +74,12 @@ jobs:
         run: cargo test --locked -p mir2-simulation --features test-support --test billing_recharge --test billing_monthly_card 2>&1 | tee billing-evidence/simulation.log
       - name: Real PostgreSQL competing writers and restart
         run: cargo test --locked -p mir2-simulation --test billing_postgres -- --ignored --test-threads=1 2>&1 | tee billing-evidence/postgres.log
+      - name: Source gift debit, recipient mail, restart and failure boundaries
+        run: cargo test --locked -p mir2-simulation --features test-support --test game_shop_gift 2>&1 | tee billing-evidence/gift-source.log
+      - name: Real PostgreSQL independent gift writers and online recipient
+        run: cargo test --locked -p mir2-simulation --test game_shop_gift -- --ignored --test-threads=1 2>&1 | tee billing-evidence/gift-postgres.log
+      - name: Dedicated gift Source RPC and old-host failure boundaries
+        run: cargo test --locked -p mir2-gateway --lib game_shop_gift -- --test-threads=1 2>&1 | tee billing-evidence/gift-rpc.log
       - name: Provider fixture HTTP, authenticated socket and private Source RPC
         run: cargo test --locked -p mir2-gateway --lib billing -- --test-threads=1 2>&1 | tee billing-evidence/gateway.log
       - name: Expired shared owner and authoritative pools

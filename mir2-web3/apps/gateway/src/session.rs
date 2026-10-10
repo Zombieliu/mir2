@@ -589,6 +589,12 @@ impl GatewaySession {
             .supports_typed_game_shop_purchase_outcome(&self.runtime)
     }
 
+    /// Gifts require their own capability; support for buying for oneself is insufficient.
+    pub fn supports_native_game_shop_gifts(&self) -> bool {
+        self.zone_owner_command_client
+            .supports_native_game_shop_gifts(&self.runtime)
+    }
+
     pub fn execute_with_zone_owner_lease(
         &mut self,
         zone_owner_lease: &ZoneOwnerLease,
@@ -983,11 +989,14 @@ impl GatewaySession {
         require_typed_game_shop_purchase_outcome: bool,
     ) -> Result<WorldCommandExecution, String> {
         self.validate_zone_owner_lease(request.owner_lease())?;
-        // Native purchases must never reach the generic transport method. This
+        // Native purchases/gifts must never reach the generic transport method. This
         // is a session-level invariant as well as an RPC transport invariant,
-        // so alternate/custom command clients cannot bypass typed V2 execution.
+        // so alternate/custom command clients cannot bypass typed/capability-gated execution.
         let require_typed_game_shop_purchase_outcome = require_typed_game_shop_purchase_outcome
-            || matches!(request.command(), WorldCommand::NativeGameShopPurchase(_));
+            || matches!(
+                request.command(),
+                WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_)
+            );
         let may_change_map = command_may_change_map(request.command());
         let previous_snapshot = if may_change_map && self.active_identity().is_some() {
             Some(self.world_snapshot())
@@ -1418,8 +1427,8 @@ mod tests {
     };
     use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
     use mir2_simulation::{
-        NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandKind,
-        ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+        NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution,
+        WorldCommandKind, ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
     };
     use std::sync::{Arc, Mutex};
 
@@ -1618,6 +1627,39 @@ mod tests {
         assert!(
             client.calls().is_empty(),
             "Native purchase must not reach the generic command-client method"
+        );
+    }
+
+    #[test]
+    fn gateway_session_generic_gift_forces_typed_path_and_separate_capability() {
+        let client = Arc::new(RecordingZoneOwnerCommandClient::default());
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        session.zone_owner_command_client = client.clone() as SharedZoneOwnerCommandClient;
+        assert!(
+            !session.supports_native_game_shop_gifts(),
+            "an old/custom command client must opt in separately to gifting"
+        );
+        let request = NativeGameShopGiftRequest {
+            purchase: NativeGameShopPurchaseRequest {
+                protocol_version: NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+                server_idempotency_key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".into(),
+                gateway_session_id: "generic-session-native-gift".into(),
+                account_id: "demo".into(),
+                character_index: 0,
+                client_request_id: "gs-generic-gift".into(),
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+            },
+            recipient_name: "FixtureFriend".into(),
+        };
+
+        let _ = session.execute_with_outcome(WorldCommand::NativeGameShopGift(request));
+
+        assert_eq!(client.typed_game_shop_calls(), 1);
+        assert!(
+            client.calls().is_empty(),
+            "a gift must never reach the generic command-client method"
         );
     }
 

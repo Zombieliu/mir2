@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-10 local commercial follow-up: GameShop now defaults to Credits;
+> explicit Gold selection is retained and currency/balance failures are visible.
+> GIFT adds a complete recipient name and a separate confirmation, sharing the
+> single purchase transaction slot. Client59 checks and Windows build pass.
+> The return page has nine locales, RTL and narrow-screen layout;54 browser
+> state/layout checks pass. Source28, Gateway shop35/billing39/generic-gift1
+> checks include genuine dual authenticated shared-Zone sockets, mail delivery,
+> exact-UID use and normal new-socket password relogin. Native manual acceptance,
+> real PostgreSQL gift CI and public commercial rollout are still open.
+> This is a project extension; public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+> [Scope, retained failures and proofs](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
 > 2026-10-10 the authorized local monthly-card UI client switch is now executed.
 > The old exe's unrelated DeltaForce sharing lock is retained; a verified
 > separate-name new binary starts using the existing config/profile, with the

@@ -9,6 +9,23 @@ const OPERATIONS: [&str; 4] = [
     "activateMonthlyCard",
 ];
 
+#[test]
+fn return_page_csp_pins_only_its_trusted_script() {
+    use base64::Engine;
+    use sha2::{Digest, Sha256};
+    let html = include_str!("billing_return.html");
+    let (before, after) = html.split_once("<script>").expect("one trusted script");
+    assert!(!before.contains("<script"));
+    let (script, tail) = after.split_once("</script>").unwrap();
+    assert!(!tail.contains("<script"));
+    let hash = base64::engine::general_purpose::STANDARD.encode(Sha256::digest(script.as_bytes()));
+    assert!(BILLING_RETURN_CSP.contains(&format!("script-src 'sha256-{hash}'")));
+    for directive in ["default-src 'none'", "connect-src 'none'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"] {
+        assert!(BILLING_RETURN_CSP.contains(directive));
+    }
+    assert!(!BILLING_RETURN_CSP.contains("unsafe-eval"));
+}
+
 fn request_json(operation: &str) -> Value {
     let mut value = json!({"characterIndex": 7, "requestId": u64::MAX});
     match operation {
@@ -735,6 +752,9 @@ async fn unsigned_webhook_and_cosmetic_return_never_grant_credit_or_change_accou
     let mut original_body = None;
     for query in [
         "",
+        "?result=paid&lang=zh-Hant",
+        "?result=cancelled&lang=ar",
+        "?result=%3Cscript%3Ealert(1)%3C/script%3E&lang=%3Csvg%3E",
         "?paid=true&accountId=demo&characterIndex=0&credits=4294967295",
         "?session_id=cs_test_cosmetic&payment_status=paid&orderId=client-order",
         "?paid=false&cancelled=true",

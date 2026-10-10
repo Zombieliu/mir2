@@ -3341,6 +3341,19 @@ pub fn forward_quest_ui_intents(
                 quantity,
                 price_type,
             },
+            NativePlayerUiIntent::GameShopGift {
+                request_id,
+                g_index,
+                quantity,
+                price_type,
+                recipient_name,
+            } => NativeOutboundCommand::GameShopGift {
+                request_id,
+                g_index,
+                quantity,
+                price_type,
+                recipient_name,
+            },
             NativePlayerUiIntent::SellItem { unique_id, count } => {
                 NativeOutboundCommand::SellItem { unique_id, count }
             }
@@ -3563,7 +3576,8 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::TradeCancel => NativeOutboundCommand::TradeCancel,
         };
         let game_shop_request_id = match &command {
-            NativeOutboundCommand::GameShopBuy { request_id, .. } => Some(request_id.clone()),
+            NativeOutboundCommand::GameShopBuy { request_id, .. }
+            | NativeOutboundCommand::GameShopGift { request_id, .. } => Some(request_id.clone()),
             _ => None,
         };
         let ranking_request = match &command {

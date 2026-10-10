@@ -882,6 +882,9 @@ pub enum GameShopPurchaseFailure {
     StockUnavailable,
     InsufficientCurrency,
     MailFull,
+    RecipientUnavailable,
+    SelfGiftUnavailable,
+    GiftUnavailable,
     CommitFailed,
 }
 
@@ -897,6 +900,9 @@ impl GameShopPurchaseFailure {
             Self::StockUnavailable => "stockUnavailable",
             Self::InsufficientCurrency => "insufficientCurrency",
             Self::MailFull => "mailFull",
+            Self::RecipientUnavailable => "recipientUnavailable",
+            Self::SelfGiftUnavailable => "selfGiftUnavailable",
+            Self::GiftUnavailable => "giftUnavailable",
             Self::CommitFailed => "commitFailed",
         }
     }
@@ -1165,7 +1171,7 @@ pub(super) fn merge_native_game_shop_ledger_mail(
     Ok(Some(changed))
 }
 
-fn validate_native_game_shop_purchase_request(
+pub(super) fn validate_native_game_shop_purchase_request(
     request: &NativeGameShopPurchaseRequest,
 ) -> Result<(), String> {
     if request.protocol_version != NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2 {
@@ -1316,7 +1322,7 @@ struct GameShopPurchaseDetails {
     price_type: GameShopPriceType,
 }
 
-fn game_shop_class_matches(product_class: &str, player_class: MirClass) -> bool {
+pub(super) fn game_shop_class_matches(product_class: &str, player_class: MirClass) -> bool {
     match product_class.trim().to_ascii_lowercase().as_str() {
         "" | "all" | "show all" => true,
         "warrior" => player_class == MirClass::Warrior,
@@ -1340,7 +1346,7 @@ fn authoritative_game_shop_product(game_shop_index: i32) -> Option<(GameShopItem
         .find(|(item, _)| item.g_index == game_shop_index)
 }
 
-fn authoritative_game_shop_product_for_world(world: &World, game_shop_index: i32) -> Option<(GameShopItem, i32)> {
+pub(super) fn authoritative_game_shop_product_for_world(world: &World, game_shop_index: i32) -> Option<(GameShopItem, i32)> {
     if game_shop_index == mir2_game_data::BILLING_MONTHLY_CARD_GAME_SHOP_INDEX {
         return super::billing_monthly_card::game_shop_product(&world.resource::<RuntimeConfigResource>().config);
     }
@@ -1358,7 +1364,7 @@ fn game_shop_payment_allowed(
     }
 }
 
-fn game_shop_stock_available(stock: i32, purchases: u64, quantity: u8) -> bool {
+pub(super) fn game_shop_stock_available(stock: i32, purchases: u64, quantity: u8) -> bool {
     if stock == 0 {
         return true;
     }
@@ -1377,7 +1383,7 @@ pub(super) fn game_shop_stock_level(stock: i32, purchases: u64) -> i32 {
     i32::try_from((stock as u64).saturating_sub(purchases)).unwrap_or(0)
 }
 
-fn game_shop_attachment_states_json(
+pub(super) fn game_shop_attachment_states_json(
     template: &mir2_game_data::CrystalItemTemplate,
     item_key: &str,
     item_count: u32,
@@ -4843,7 +4849,7 @@ impl SimulationSession {
         }
     }
 
-    fn game_shop_rejection_execution(
+    pub(super) fn game_shop_rejection_execution(
         &self,
         game_shop_index: i32,
         quantity: u8,
@@ -4916,6 +4922,9 @@ impl SimulationSession {
                 "server.MailOverflowing",
             ),
             GameShopPurchaseFailure::InvalidQuantity => return Vec::new(),
+            GameShopPurchaseFailure::RecipientUnavailable => "The recipient character is unavailable.".to_string(),
+            GameShopPurchaseFailure::SelfGiftUnavailable => "Choose another character to receive this gift.".to_string(),
+            GameShopPurchaseFailure::GiftUnavailable => "This product cannot be gifted.".to_string(),
             GameShopPurchaseFailure::NotInGame
             | GameShopPurchaseFailure::InvalidPriceType
             | GameShopPurchaseFailure::CommitFailed => format_localized_text(

@@ -7793,6 +7793,19 @@ impl Serialize for WorldSnapshotClientView<'_> {
             }
         }
         if let Some(systems) = value.get_mut("stage5Systems") {
+            // Durable transaction ledgers are Source state, never a mailbox
+            // payload for players or spectators. Keep them in the lossless
+            // snapshot/checkpoint but omit their identities and replay keys
+            // from every untrusted client projection.
+            if let Some(mail) = systems.get_mut("mail").and_then(Value::as_array_mut) {
+                mail.retain(|row| {
+                    !matches!(row.get("deliveryNonce").and_then(Value::as_str),
+                        Some("native-gameshop-ledger-v2" | "native-gameshop-gift-ledger-v1"))
+                        && !(row.get("from").and_then(Value::as_str) == Some("Mir2.Internal")
+                            && matches!(row.get("subject").and_then(Value::as_str),
+                                Some("NativeGameShopLedgerV2" | "NativeGameShopGiftLedgerV1")))
+                });
+            }
             if let Some(object) = systems.as_object_mut() {
                 object.remove("intelligentCreatureStateVersion");
                 object.remove("intelligentCreatureOperationReceipts");

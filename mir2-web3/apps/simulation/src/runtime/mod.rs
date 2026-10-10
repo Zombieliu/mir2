@@ -82,6 +82,7 @@ pub use shared_relationships::{
 mod skills;
 mod social_economy;
 mod stage5;
+mod game_shop_gift;
 mod stats;
 pub mod zone;
 pub use zone::ZoneMentorBankAttribution;

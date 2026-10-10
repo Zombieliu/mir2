@@ -32,8 +32,8 @@ pub const GAME_SHOP_PAGE_SIZE: usize = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum GameShopPaymentType {
-    Credit,
     #[default]
+    Credit,
     Gold,
 }
 
@@ -192,7 +192,7 @@ impl Default for GameShopModel {
             pending_stock_patches: Vec::new(),
             selected_game_shop_index: None,
             quantity: GAME_SHOP_QUANTITY_MIN,
-            payment: GameShopPaymentType::Gold,
+            payment: GameShopPaymentType::Credit,
             next_request_id: 1,
             pending_purchase: None,
             last_receipt: None,
@@ -420,7 +420,7 @@ impl GameShopModel {
         self.pending_stock_patches.clear();
         self.selected_game_shop_index = None;
         self.quantity = GAME_SHOP_QUANTITY_MIN;
-        self.payment = GameShopPaymentType::Gold;
+        self.payment = GameShopPaymentType::Credit;
         self.next_request_id = 1;
         self.pending_purchase = None;
         self.last_receipt = None;
@@ -433,19 +433,14 @@ impl GameShopModel {
         if !receipt.is_valid() {
             return false;
         }
-        let Some(request) = GameShopRequest::new(
-            receipt.request_id.clone(),
-            receipt.g_index,
-            receipt.quantity,
-            receipt.price_type,
-        ) else {
+        let Some(request) = GameShopRequest::from_receipt(receipt) else {
             return false;
         };
         self.items.clear();
         self.pending_stock_patches.clear();
         self.selected_game_shop_index = None;
         self.quantity = GAME_SHOP_QUANTITY_MIN;
-        self.payment = GameShopPaymentType::Gold;
+        self.payment = GameShopPaymentType::Credit;
         self.next_request_id = 1;
         self.pending_purchase = Some(request);
         self.last_receipt = None;
@@ -514,6 +509,7 @@ mod tests {
     #[test]
     fn purchase_guard_checks_payment_stock_class_balance_and_overflow() {
         let mut model = GameShopModel::default();
+        model.payment = GameShopPaymentType::Gold;
         model.upsert(entry(31));
         model.selected_game_shop_index = Some(31);
         model.set_quantity(2);
@@ -569,7 +565,7 @@ mod tests {
         assert!(model.items.is_empty());
         assert_eq!(model.selected_game_shop_index, None);
         assert_eq!(model.quantity, 1);
-        assert_eq!(model.payment, GameShopPaymentType::Gold);
+        assert_eq!(model.payment, GameShopPaymentType::Credit);
     }
 
     #[test]
@@ -677,6 +673,7 @@ mod tests {
         let mut model = GameShopModel::default();
         let request = model.begin_purchase(31, 2, 1).unwrap();
         let wrong = GameShopReceipt {
+            recipient_name: None,
             protocol: "nativeGameShopReceiptV1".into(),
             request_id: "gs-other".into(),
             success: true,
@@ -689,6 +686,7 @@ mod tests {
         };
         assert!(!model.apply_receipt(wrong));
         let receipt = GameShopReceipt {
+            recipient_name: None,
             protocol: "nativeGameShopReceiptV1".into(),
             request_id: request.request_id,
             success: true,
@@ -723,6 +721,7 @@ mod tests {
         assert_eq!(request.request_id, "gs-18446744073709551615");
         assert_eq!(model.next_request_id, 0);
         let receipt = GameShopReceipt {
+            recipient_name: None,
             protocol: "nativeGameShopReceiptV1".into(),
             request_id: request.request_id,
             success: true,
@@ -747,6 +746,7 @@ mod tests {
         assert_eq!(ui.game_shop_pending, Some(request.clone()));
 
         let wrong = GameShopReceipt {
+            recipient_name: None,
             protocol: "nativeGameShopReceiptV1".into(),
             request_id: request.request_id.clone(),
             success: true,
@@ -763,6 +763,7 @@ mod tests {
         assert!(ui.game_shop_pending.is_some());
 
         let receipt = GameShopReceipt {
+            recipient_name: None,
             protocol: "nativeGameShopReceiptV1".into(),
             request_id: request.request_id,
             success: true,
@@ -777,5 +778,34 @@ mod tests {
         assert!(ui.apply_game_shop_receipt(receipt));
         assert!(model.pending_purchase.is_none());
         assert!(ui.game_shop_pending.is_none());
+    }
+
+    #[test]
+    fn gift_operation_and_recipient_survive_terminal_model_reset() {
+        let mut ui = mir2_ui_core::state::UiState::default();
+        let request = ui.begin_game_shop_gift(31, 1, "Friend_1".into()).unwrap();
+        let receipt = GameShopReceipt {
+            protocol: mir2_ui_core::game_shop::NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL.into(),
+            request_id: request.request_id.clone(),
+            success: true,
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+            recipient_name: request.recipient_name.clone(),
+            new_stock_level: Some(3),
+            mail_id: Some(7),
+            code: None,
+        };
+        let mut model = GameShopModel::default();
+        assert!(model.reserve_purchase(request.clone()));
+        assert!(model.clear_session_preserving_exact_receipt(&receipt));
+        assert_eq!(model.pending_purchase, Some(request));
+        let mut wrong = receipt.clone();
+        wrong.recipient_name = Some("Friend_2".into());
+        assert!(!model.apply_receipt(wrong));
+        assert!(model.apply_receipt(receipt.clone()));
+        assert!(!model.purchase_unknown);
+        assert_eq!(model.last_receipt, Some(receipt));
+        assert_eq!(model.payment, GameShopPaymentType::Credit);
     }
 }

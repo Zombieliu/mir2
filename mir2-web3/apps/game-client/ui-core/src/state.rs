@@ -495,6 +495,28 @@ impl Default for UiState {
 }
 
 impl UiState {
+    pub fn begin_game_shop_gift(
+        &mut self,
+        g_index: i32,
+        quantity: u8,
+        recipient_name: String,
+    ) -> Option<GameShopRequest> {
+        if self.game_shop_pending.is_some() || self.game_shop_next_request_id == 0 {
+            return None;
+        }
+        let request = GameShopRequest::new_gift(
+            crate::game_shop::request_id_for_sequence(self.game_shop_next_request_id),
+            g_index,
+            quantity,
+            recipient_name,
+        )?;
+        self.game_shop_next_request_id =
+            crate::game_shop::next_request_sequence(self.game_shop_next_request_id);
+        self.game_shop_pending = Some(request.clone());
+        self.game_shop_unknown = false;
+        Some(request)
+    }
+
     pub fn begin_game_shop_purchase(
         &mut self,
         g_index: i32,
@@ -556,17 +578,12 @@ impl UiState {
 
     /// Prepare this UI owner to consume an exact receipt across a terminal
     /// session reset. Other UI/session state is reset by the host adapter; this
-    /// method retains only the receipt's exact request four-tuple.
+    /// method retains the exact operation, request tuple and recipient.
     pub fn preserve_exact_game_shop_receipt_boundary(&mut self, receipt: &GameShopReceipt) -> bool {
         if !receipt.is_valid() {
             return false;
         }
-        let Some(request) = GameShopRequest::new(
-            receipt.request_id.clone(),
-            receipt.g_index,
-            receipt.quantity,
-            receipt.price_type,
-        ) else {
+        let Some(request) = GameShopRequest::from_receipt(receipt) else {
             return false;
         };
         self.game_shop_next_request_id = 1;

@@ -25,6 +25,9 @@ pub enum GameShopAction {
     Search,
     Quantity(i32, bool),
     Buy(i32),
+    Gift(i32),
+    GiftRecipient,
+    GiftContinue,
     Confirm,
     Cancel,
     Preview(i32),
@@ -57,6 +60,10 @@ pub struct GameShopDialogUi {
     pub search_input: friend_dialog::FriendDialogUi,
     pub quantities: BTreeMap<i32, u8>,
     pub confirmation: Option<PurchasePrompt>,
+    pub gift: Option<PurchasePrompt>,
+    pub gift_input: friend_dialog::FriendDialogUi,
+    pub gift_recipient: Option<String>,
+    pub notice: Option<String>,
     pub preview: Option<i32>,
     pub preview_left: f32,
     pub direction: u8,
@@ -71,6 +78,35 @@ pub struct GameShopDialogUi {
 const CLASSES: [&str; 6] = [
     "Show All", "Warrior", "Assassin", "Taoist", "Wizard", "Archer",
 ];
+
+fn shop_text(key: &str) -> String {
+    crate::native_i18n::for_locale(crate::native_i18n::locale(), key, key)
+}
+
+pub(super) fn receipt_notice(receipt: &crate::game_shop::GameShopReceipt) -> String {
+    if receipt.success {
+        if let Some(recipient) = receipt.recipient_name.as_ref() {
+            return crate::native_i18n::format_for(
+                crate::native_i18n::locale(),
+                "game.shop.giftSent",
+                "Gift mailed to {recipient}.",
+                &[("recipient", recipient)],
+            );
+        }
+        return shop_text("game.shop.bought");
+    }
+    let key = match receipt.code.as_ref().map(|code| code.as_str()) {
+        Some("insufficientCurrency") => "game.shop.insufficientCurrency",
+        Some("paymentUnavailable") => "game.shop.paymentUnavailable",
+        Some("stockUnavailable") => "game.shop.stockUnavailable",
+        Some("recipientUnavailable") => "game.shop.recipientUnavailable",
+        Some("selfGiftUnavailable") => "game.shop.selfGiftUnavailable",
+        Some("giftUnavailable") => "game.shop.giftUnavailable",
+        Some("mailFull") => "game.shop.mailFull",
+        _ => "game.shop.failed",
+    };
+    shop_text(key)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PreviewFrame {
@@ -243,6 +279,43 @@ fn preview(
 }
 
 impl GameShopDialogUi {
+    pub fn modal(&self) -> bool {
+        self.confirmation.is_some() || self.gift.is_some()
+    }
+
+    pub fn sync_gift_editor(&mut self) {
+        if self.gift.is_some() && self.gift_recipient.is_none() {
+            self.gift_input.open = true;
+            self.gift_input.name_limit =
+                Some(mir2_ui_core::game_shop::GAME_SHOP_RECIPIENT_MAX_CHARS);
+            self.gift_input.reject_over_budget = true;
+            if self.gift_input.modal.is_none() {
+                self.gift_input.modal = Some(friend_dialog::FriendModal::Add {
+                    blocked: false,
+                    text: String::new(),
+                });
+            }
+            self.gift_input.sync_editor();
+        } else {
+            self.gift_input.cancel_modal();
+            self.gift_input.open = false;
+        }
+    }
+
+    pub fn cancel_gift(&mut self) {
+        self.gift = None;
+        self.gift_recipient = None;
+        self.gift_input.cancel_modal();
+        self.gift_input.open = false;
+    }
+
+    fn gift_name(&self) -> String {
+        match self.gift_input.modal.as_ref() {
+            Some(friend_dialog::FriendModal::Add { text, .. }) => text.trim().to_owned(),
+            _ => String::new(),
+        }
+    }
+
     fn focus_search(&mut self) {
         self.search_focused = true;
         self.search_input.open = true;
@@ -271,7 +344,7 @@ impl GameShopDialogUi {
 
     /// Establish the shared editor only while this field is the active target.
     pub fn sync_search_editor(&mut self) {
-        if self.search_focused && self.confirmation.is_none() {
+        if self.search_focused && !self.modal() {
             if self.search_input.modal.is_none() {
                 self.focus_search();
             }
@@ -456,10 +529,38 @@ pub(super) fn process_pointer(
     mut wheel: MessageReader<MouseWheel>,
 ) {
     let scroll: f32 = wheel.read().map(|event| event.y).sum();
+    if state.shop_open() && state.game_shop_dialog.gift.is_some() {
+        if state.game_shop_dialog.gift_recipient.is_none() {
+            if let (Some(mouse), Ok(window)) = (mouse.as_deref(), windows.single()) {
+                if mouse.just_pressed(MouseButton::Left) {
+                    if let Some(cursor) = window.cursor_position() {
+                        let transform = super::super::metrics::CrystalStageTransform::fit_native(
+                            window.width(),
+                            window.height(),
+                        );
+                        let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                        let local = Vec2::new(x - 308.0, y - 370.0);
+                        if (0.0..408.0).contains(&local.x) && (0.0..28.0).contains(&local.y) {
+                            state.game_shop_dialog.sync_gift_editor();
+                            let extend = state.game_shop_dialog.shift;
+                            friend_dialog::host::focus_editor(
+                                &mut state.game_shop_dialog.gift_input,
+                                local,
+                                extend,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        state.game_shop_dialog.dragging = None;
+        state.game_shop_dialog.scrollbar_dragging = false;
+        return;
+    }
     if !state.shop_open()
         || state.billing_open
         || state.billing_input_consumed
-        || state.game_shop_dialog.confirmation.is_some()
+        || state.game_shop_dialog.modal()
         || state.leave_game.blocks()
         || state.friends.modal.is_some()
     {
@@ -559,6 +660,31 @@ fn can_buy(
         })
 }
 
+fn unavailable_reason(
+    item: &GameShopEntry,
+    payment: GameShopPaymentType,
+    quantity: u8,
+    gold: u32,
+    credit: u32,
+) -> Option<&'static str> {
+    if quantity == 0 || quantity > quantity_limit(item) || !item.stock_available(quantity) {
+        return Some("game.shop.stockUnavailable");
+    }
+    let Some(total) = item.total_price(payment, quantity) else {
+        return Some("game.shop.paymentUnavailable");
+    };
+    if total
+        > if payment == GameShopPaymentType::Gold {
+            gold
+        } else {
+            credit
+        }
+    {
+        return Some("game.shop.insufficientCurrency");
+    }
+    None
+}
+
 pub(super) fn sync(
     mut state: ResMut<NativePlayerUiState>,
     keys: Option<Res<ButtonInput<KeyCode>>>,
@@ -590,6 +716,8 @@ pub(super) fn sync(
     if !open {
         state.game_shop_dialog.blur_search();
         state.game_shop_dialog.confirmation = None;
+        state.game_shop_dialog.cancel_gift();
+        state.game_shop_dialog.notice = None;
         state.game_shop_dialog.preview = None;
     }
     state.game_shop_dialog.was_open = open;
@@ -605,6 +733,31 @@ pub(super) fn keyboard(
     keys: &ButtonInput<KeyCode>,
     typed: &mut MessageReader<KeyboardInput>,
 ) -> bool {
+    if state.game_shop_dialog.gift.is_some() {
+        if keys.just_pressed(KeyCode::Escape) {
+            state.game_shop_dialog.cancel_gift();
+            typed.clear();
+            return true;
+        }
+        if state.game_shop_dialog.gift_recipient.is_none() {
+            state.game_shop_dialog.sync_gift_editor();
+            if state.game_shop_dialog.gift_input.input_consumed {
+                state.game_shop_dialog.gift_input.input_consumed = false;
+                typed.clear();
+                return true;
+            }
+            for event in typed.read() {
+                if event.state == ButtonState::Pressed && event.key_code == KeyCode::Escape {
+                    state.game_shop_dialog.cancel_gift();
+                    break;
+                }
+                friend_dialog::host::edit_key(&mut state.game_shop_dialog.gift_input, event);
+            }
+        } else {
+            typed.clear();
+        }
+        return true;
+    }
     if state.game_shop_dialog.confirmation.is_some() {
         if keys.just_pressed(KeyCode::Escape) {
             state.game_shop_dialog.confirmation = None;
@@ -770,8 +923,14 @@ pub(super) fn action(
         return;
     }
     let shop = &mut state.game_shop_dialog;
-    if shop.confirmation.is_some()
-        && !matches!(action, GameShopAction::Confirm | GameShopAction::Cancel)
+    if shop.modal()
+        && !matches!(
+            action,
+            GameShopAction::Confirm
+                | GameShopAction::Cancel
+                | GameShopAction::GiftRecipient
+                | GameShopAction::GiftContinue
+        )
     {
         return;
     }
@@ -834,6 +993,7 @@ pub(super) fn action(
             {
                 let q = shop.quantity(item);
                 if can_buy(item, model.payment, q, gold, credit) {
+                    shop.notice = None;
                     shop.confirmation = Some(PurchasePrompt {
                         index,
                         name: item.item_name.clone(),
@@ -842,10 +1002,110 @@ pub(super) fn action(
                         payment: model.payment,
                         total: item.total_price(model.payment, q).unwrap(),
                     });
+                } else {
+                    shop.notice =
+                        unavailable_reason(item, model.payment, q, gold, credit).map(shop_text);
                 }
             }
         }
+        GameShopAction::Gift(index)
+            if model.pending_purchase.is_none() && !model.purchase_unknown =>
+        {
+            if let Some(item) = model
+                .items
+                .iter()
+                .find(|item| item.game_shop_index == index)
+            {
+                let quantity = shop.quantity(item);
+                if can_buy(item, GameShopPaymentType::Credit, quantity, gold, credit) {
+                    shop.blur_search();
+                    shop.notice = None;
+                    shop.gift = Some(PurchasePrompt {
+                        index,
+                        name: item.item_name.clone(),
+                        quantity,
+                        count: item.count,
+                        payment: GameShopPaymentType::Credit,
+                        total: item
+                            .total_price(GameShopPaymentType::Credit, quantity)
+                            .unwrap(),
+                    });
+                    shop.gift_recipient = None;
+                    shop.sync_gift_editor();
+                } else {
+                    shop.notice = unavailable_reason(
+                        item,
+                        GameShopPaymentType::Credit,
+                        quantity,
+                        gold,
+                        credit,
+                    )
+                    .map(shop_text);
+                }
+            }
+        }
+        GameShopAction::GiftRecipient => {
+            if shop.gift.is_some() && shop.gift_recipient.is_none() {
+                shop.sync_gift_editor();
+                shop.gift_input.editor_focused = true;
+            }
+        }
+        GameShopAction::GiftContinue => {
+            let name = shop.gift_name();
+            if shop.gift_input.edit_notice.is_none()
+                && shop.gift_input.composition.is_none()
+                && mir2_ui_core::game_shop::is_valid_recipient_name(&name)
+            {
+                shop.gift_recipient = Some(name);
+                shop.gift_input.cancel_modal();
+                shop.notice = None;
+            } else {
+                shop.notice = Some(shop_text("game.shop.invalidRecipient"));
+            }
+        }
         GameShopAction::Confirm => {
+            if let Some(prompt) = shop.gift.clone() {
+                let Some(recipient) = shop.gift_recipient.clone() else {
+                    return;
+                };
+                let valid = model
+                    .items
+                    .iter()
+                    .find(|item| item.game_shop_index == prompt.index)
+                    .is_some_and(|item| {
+                        item.item_name == prompt.name
+                            && item.count == prompt.count
+                            && item.total_price(GameShopPaymentType::Credit, prompt.quantity)
+                                == Some(prompt.total)
+                            && can_buy(
+                                item,
+                                GameShopPaymentType::Credit,
+                                prompt.quantity,
+                                gold,
+                                credit,
+                            )
+                    });
+                if valid {
+                    if intents
+                        .enqueue_game_shop_gift(
+                            &mut state.core,
+                            model,
+                            pending,
+                            prompt.index,
+                            prompt.quantity,
+                            recipient,
+                        )
+                        .is_some()
+                    {
+                        shop.cancel_gift();
+                        shop.notice = Some(shop_text("game.shop.pending"));
+                    }
+                } else {
+                    shop.cancel_gift();
+                    shop.notice = Some(shop_text("game.shop.changed"));
+                }
+                return;
+            }
             if let Some(prompt) = shop.confirmation.clone() {
                 let valid = model
                     .items
@@ -874,13 +1134,19 @@ pub(super) fn action(
                         .is_some()
                     {
                         shop.confirmation = None;
+                        shop.notice = Some(shop_text("game.shop.pending"));
                     }
                 } else {
                     shop.confirmation = None;
+                    shop.notice = Some(shop_text("game.shop.changed"));
                 }
             }
         }
-        GameShopAction::Cancel => shop.confirmation = None,
+        GameShopAction::Cancel => {
+            shop.confirmation = None;
+            shop.cancel_gift();
+            shop.notice = None;
+        }
         GameShopAction::Preview(index) => {
             let column = shop
                 .entries(model, player, now_ticks())
@@ -923,6 +1189,47 @@ fn button(
     }
 }
 
+fn labeled_button(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    rect: CrystalRect,
+    action: OverlayButton,
+    enabled: bool,
+) {
+    let mut control = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            border: UiRect::all(Val::Px(1.0)),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(Color::srgb_u8(42, 32, 15)),
+        BorderColor::all(Color::srgb_u8(160, 136, 78)),
+        FocusPolicy::Block,
+    ));
+    if enabled {
+        control.insert((Button, action));
+    }
+    control.with_children(|label_node| {
+        label_node.spawn((
+            Text::new(label),
+            crate::crystal_ui::typography::crystal_text_font(9.33),
+            TextColor(if enabled {
+                TEXT
+            } else {
+                Color::srgb_u8(115, 115, 115)
+            }),
+            TextLayout::new(Justify::Center, LineBreak::NoWrap),
+        ));
+    });
+}
+
 fn text(
     parent: &mut ChildSpawnerCommands,
     value: &str,
@@ -957,6 +1264,37 @@ fn text(
                 TextLayout::new(Justify::Left, LineBreak::NoWrap),
             ));
         });
+}
+
+fn paragraph(
+    parent: &mut ChildSpawnerCommands,
+    value: &str,
+    rect: CrystalRect,
+    font: f32,
+    color: Color,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        Text::new(value),
+        crate::crystal_ui::typography::crystal_text_font(font),
+        TextColor(color),
+        TextLayout::new(Justify::Left, LineBreak::WordBoundary),
+    ));
+}
+
+fn payment_label_rect(payment: GameShopPaymentType) -> CrystalRect {
+    match payment {
+        GameShopPaymentType::Gold => CrystalRect::new(266.0, 446.0, 73.0, 22.0),
+        GameShopPaymentType::Credit => CrystalRect::new(356.0, 446.0, 116.0, 22.0),
+    }
 }
 
 fn game_shop_display_name(name: &str) -> String {
@@ -1262,9 +1600,27 @@ pub(super) fn render(
         text(
             parent,
             &crate::native_i18n::tr(label),
-            CrystalRect::new(x + 15.0, 449.0, 85.0, 18.0),
+            CrystalRect::new(x + 16.0, 449.0, payment_label_rect(payment).width, 18.0),
             9.33,
             TEXT,
+            Justify::Left,
+        );
+        spawn_invisible_overlay_button(parent, payment_label_rect(payment), action);
+    }
+    let notice = if model.purchase_unknown {
+        Some(shop_text("game.shop.unknown"))
+    } else if model.pending_purchase.is_some() {
+        Some(shop_text("game.shop.pending"))
+    } else {
+        shop.notice.clone()
+    };
+    if let Some(notice) = notice {
+        text(
+            parent,
+            &notice,
+            CrystalRect::new(152.0, 426.0, 523.0, 19.0),
+            9.33,
+            Color::srgb_u8(255, 175, 80),
             Justify::Left,
         );
     }
@@ -1444,7 +1800,7 @@ fn product(
                     781,
                     782,
                     783,
-                    CrystalRect::new(8.0, 122.0, 44.0, 20.0),
+                    CrystalRect::new(5.0, 122.0, 32.0, 20.0),
                     OverlayButton::GameShopControl(GameShopAction::Preview(item.game_shop_index)),
                     true,
                 );
@@ -1492,11 +1848,26 @@ fn product(
                 778,
                 779,
                 780,
-                CrystalRect::new(if preview { 75.0 } else { 42.0 }, 122.0, 44.0, 20.0),
+                CrystalRect::new(
+                    if preview { 41.0 } else { 13.0 },
+                    122.0,
+                    if preview { 36.0 } else { 44.0 },
+                    20.0,
+                ),
                 OverlayButton::GameShopControl(GameShopAction::Buy(item.game_shop_index)),
-                model.pending_purchase.is_none()
-                    && !model.purchase_unknown
-                    && can_buy(item, model.payment, quantity, player.gold, player.credit),
+                model.pending_purchase.is_none() && !model.purchase_unknown,
+            );
+            labeled_button(
+                cell,
+                &shop_text("game.shop.gift"),
+                CrystalRect::new(
+                    if preview { 81.0 } else { 65.0 },
+                    122.0,
+                    if preview { 39.0 } else { 44.0 },
+                    20.0,
+                ),
+                OverlayButton::GameShopControl(GameShopAction::Gift(item.game_shop_index)),
+                model.pending_purchase.is_none() && !model.purchase_unknown,
             );
         });
 }
@@ -1524,28 +1895,164 @@ pub(super) fn render_confirmation_system(
     // and IME placement use the actual rendered text. `capture_layout` rejects
     // stale revisions/text, which prevents another editor's block from updating
     // this shop editor when systems overlap in the same frame.
-    if state.shop_open()
-        && state.game_shop_dialog.search_focused
-        && state.game_shop_dialog.search_input.modal.is_some()
-    {
+    if state.shop_open() {
         for (tag, block, info) in &text_blocks {
-            friend_dialog::host::capture_layout(
-                &mut state.game_shop_dialog.search_input,
-                tag,
-                block,
-                info,
-            );
+            if state.game_shop_dialog.search_focused
+                && state.game_shop_dialog.search_input.modal.is_some()
+            {
+                friend_dialog::host::capture_layout(
+                    &mut state.game_shop_dialog.search_input,
+                    tag,
+                    block,
+                    info,
+                );
+            }
+            if state.game_shop_dialog.gift_input.modal.is_some() {
+                friend_dialog::host::capture_layout(
+                    &mut state.game_shop_dialog.gift_input,
+                    tag,
+                    block,
+                    info,
+                );
+            }
         }
     }
     if !state.shop_open() {
         return;
     }
-    let (Some(prompt), Ok(root)) = (&state.game_shop_dialog.confirmation, roots.single()) else {
+    let Ok(root) = roots.single() else {
         return;
     };
-    commands
-        .entity(root)
-        .with_children(|parent| confirmation(parent, assets.as_deref(), prompt));
+    if let Some(prompt) = &state.game_shop_dialog.confirmation {
+        commands
+            .entity(root)
+            .with_children(|parent| confirmation(parent, assets.as_deref(), prompt));
+    } else if let Some(prompt) = &state.game_shop_dialog.gift {
+        commands.entity(root).with_children(|parent| {
+            gift_dialog(parent, assets.as_deref(), prompt, &state.game_shop_dialog)
+        });
+    }
+}
+
+fn gift_dialog(
+    parent: &mut ChildSpawnerCommands,
+    assets: Option<&AssetServer>,
+    prompt: &PurchasePrompt,
+    shop: &GameShopDialogUi,
+) {
+    parent
+        .spawn((
+            GameShopConfirmationOverlay,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(284.0),
+                top: Val::Px(229.0),
+                width: Val::Px(456.0),
+                height: Val::Px(310.0),
+                ..default()
+            },
+            GlobalZIndex(OVERLAY_NPC_DIALOG_Z + 100),
+            FocusPolicy::Block,
+        ))
+        .with_children(|dialog| {
+            if let Some(assets) = assets {
+                spawn_overlay_frame(dialog, assets, "original-ui/Prguse/360.png", 456.0, 310.0);
+            }
+            text(
+                dialog,
+                &shop_text("game.shop.giftTitle"),
+                CrystalRect::new(24.0, 22.0, 408.0, 24.0),
+                14.0,
+                TEXT,
+                Justify::Center,
+            );
+            let summary = crate::native_i18n::format_key(
+                "game.shop.giftSummary",
+                "{quantity} x {item} ({count})\n{total} Credits",
+                &[
+                    ("quantity", &prompt.quantity.to_string()),
+                    ("item", &crate::player_text::name(&prompt.name)),
+                    ("count", &prompt.count.to_string()),
+                    ("total", &format_number(u64::from(prompt.total))),
+                ],
+            );
+            paragraph(
+                dialog,
+                &summary,
+                CrystalRect::new(24.0, 54.0, 408.0, 56.0),
+                12.0,
+                TEXT,
+            );
+            if let Some(recipient) = shop.gift_recipient.as_ref() {
+                let message = crate::native_i18n::format_key("game.shop.giftConfirm",
+                "Recipient: {recipient}\nYou pay Credits. The gift is mailed to this character.",
+                &[("recipient", recipient)]);
+                paragraph(
+                    dialog,
+                    &message,
+                    CrystalRect::new(24.0, 119.0, 408.0, 82.0),
+                    12.0,
+                    TEXT,
+                );
+            } else {
+                text(
+                    dialog,
+                    &shop_text("game.shop.recipient"),
+                    CrystalRect::new(24.0, 114.0, 408.0, 20.0),
+                    12.0,
+                    TEXT,
+                    Justify::Left,
+                );
+                friend_dialog::view::render_editor_styled(
+                    dialog,
+                    &shop.gift_input,
+                    CrystalRect::new(24.0, 141.0, 408.0, 28.0),
+                    false,
+                    Color::srgb_u8(0, 255, 0),
+                );
+                spawn_invisible_overlay_button(
+                    dialog,
+                    CrystalRect::new(24.0, 141.0, 408.0, 28.0),
+                    OverlayButton::GameShopControl(GameShopAction::GiftRecipient),
+                );
+            }
+            let notice = if shop.gift_input.edit_notice.is_some() {
+                Some(shop_text("game.shop.invalidRecipient"))
+            } else {
+                shop.notice.clone()
+            };
+            if let Some(notice) = notice {
+                paragraph(
+                    dialog,
+                    &notice,
+                    CrystalRect::new(24.0, 201.0, 408.0, 54.0),
+                    11.0,
+                    Color::srgb_u8(255, 175, 80),
+                );
+            }
+            labeled_button(
+                dialog,
+                &shop_text(if shop.gift_recipient.is_some() {
+                    "game.shop.sendGift"
+                } else {
+                    "game.shop.next"
+                }),
+                CrystalRect::new(231.0, 271.0, 100.0, 25.0),
+                OverlayButton::GameShopControl(if shop.gift_recipient.is_some() {
+                    GameShopAction::Confirm
+                } else {
+                    GameShopAction::GiftContinue
+                }),
+                true,
+            );
+            labeled_button(
+                dialog,
+                &shop_text("game.shop.cancel"),
+                CrystalRect::new(341.0, 271.0, 91.0, 25.0),
+                OverlayButton::GameShopControl(GameShopAction::Cancel),
+                true,
+            );
+        });
 }
 
 fn confirmation(
@@ -1644,6 +2151,24 @@ mod tests {
     }
 
     #[test]
+    fn currency_label_hitboxes_cover_text_without_covering_other_currency() {
+        let gold = payment_label_rect(GameShopPaymentType::Gold);
+        let credit = payment_label_rect(GameShopPaymentType::Credit);
+        assert_eq!(gold.left, 266.0);
+        assert!(gold.width > 16.0);
+        assert!(
+            gold.left + gold.width < 340.0,
+            "Gold label must not cover Credits checkbox"
+        );
+        assert_eq!(credit.left, 356.0);
+        assert!(credit.width >= 100.0);
+        assert!(
+            credit.left + credit.width < 597.0,
+            "label must not cover page controls"
+        );
+    }
+
+    #[test]
     fn monthly_card_is_on_page_one_without_reordering_original_products_or_bypassing_filters() {
         let mut model = GameShopModel::default();
         for (index, name) in [
@@ -1730,6 +2255,344 @@ mod tests {
         let mut wrong_identity = item;
         wrong_identity.item_index = 1;
         assert!(!is_monthly_card_product(&wrong_identity));
+    }
+
+    #[test]
+    fn monthly_card_buy_defaults_to_credits_and_wrong_currency_gives_feedback() {
+        let mut state = NativePlayerUiState::default();
+        state.core.panel = mir2_ui_core::state::UiPanel::GameShop;
+        let mut model = GameShopModel::default();
+        model.upsert(monthly_card_product());
+        let mut intents = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        assert_eq!(model.payment, GameShopPaymentType::Credit);
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Buy(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert_eq!(
+            state
+                .game_shop_dialog
+                .confirmation
+                .as_ref()
+                .unwrap()
+                .payment,
+            GameShopPaymentType::Credit
+        );
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Confirm,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(matches!(
+            intents.drain_intents().as_slice(),
+            [NativePlayerUiIntent::GameShopBuy {
+                price_type: 0,
+                quantity: 1,
+                g_index: BILLING_MONTHLY_CARD_GAME_SHOP_INDEX,
+                ..
+            }]
+        ));
+
+        model = GameShopModel::default();
+        state.core.clear_game_shop_session();
+        pending.clear();
+        model.upsert(monthly_card_product());
+        model.payment = GameShopPaymentType::Gold; // Explicit choice is never silently changed.
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Buy(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+            "Warrior",
+            u32::MAX,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(state.game_shop_dialog.confirmation.is_none());
+        assert_eq!(model.payment, GameShopPaymentType::Gold);
+        assert_eq!(
+            state.game_shop_dialog.notice.as_deref(),
+            Some(shop_text("game.shop.paymentUnavailable").as_str())
+        );
+        assert!(intents.drain_intents().is_empty());
+        model.payment = GameShopPaymentType::Credit;
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Buy(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+            "Warrior",
+            u32::MAX,
+            999,
+            &mut intents,
+            &mut pending,
+        );
+        assert_eq!(
+            state.game_shop_dialog.notice.as_deref(),
+            Some(shop_text("game.shop.insufficientCurrency").as_str())
+        );
+    }
+
+    #[test]
+    fn gift_requires_recipient_confirmation_and_shares_buy_reservation() {
+        let mut state = NativePlayerUiState::default();
+        state.core.panel = mir2_ui_core::state::UiPanel::GameShop;
+        let mut model = GameShopModel::default();
+        model.payment = GameShopPaymentType::Gold;
+        model.upsert(monthly_card_product());
+        let mut intents = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Gift(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert_eq!(
+            state.game_shop_dialog.gift.as_ref().unwrap().payment,
+            GameShopPaymentType::Credit
+        );
+        assert_eq!(
+            super::text_input::editor_owner(&state),
+            Some(super::text_input::EditorOwner::GameShopGift)
+        );
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Confirm,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(model.pending_purchase.is_none());
+        state.game_shop_dialog.gift_input.paste(" Friend_1 ");
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::GiftContinue,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert_eq!(
+            state.game_shop_dialog.gift_recipient.as_deref(),
+            Some("Friend_1")
+        );
+        assert!(model.pending_purchase.is_none());
+        assert_eq!(super::text_input::editor_owner(&state), None);
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Confirm,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        let request = model.pending_purchase.clone().unwrap();
+        assert_eq!(request.recipient_name.as_deref(), Some("Friend_1"));
+        assert_eq!(request.price_type, 0);
+        assert_eq!(state.core.game_shop_pending, Some(request.clone()));
+        assert_eq!(model.payment, GameShopPaymentType::Gold);
+        assert!(pending.contains(&PendingOperationKey::GameShop(request.request_id.clone())));
+        assert!(state.game_shop_dialog.gift.is_none());
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Buy(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Confirm,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(
+            matches!(intents.drain_intents().as_slice(), [NativePlayerUiIntent::GameShopGift {
+            recipient_name, price_type: 0, quantity: 1, ..
+        }] if recipient_name == "Friend_1")
+        );
+    }
+
+    #[test]
+    fn gift_overflow_rejects_the_whole_edit_and_never_targets_a_truncated_name() {
+        let mut state = NativePlayerUiState::default();
+        state.core.panel = mir2_ui_core::state::UiPanel::GameShop;
+        let mut model = GameShopModel::default();
+        model.upsert(monthly_card_product());
+        let mut intents = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Gift(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert_eq!(
+            state.game_shop_dialog.gift_input.paste("CharacterName1234"),
+            super::friend_dialog::text_editor::EditResult::OverBudget
+        );
+        assert_eq!(state.game_shop_dialog.gift_name(), "");
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::GiftContinue,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(state.game_shop_dialog.gift_recipient.is_none());
+        state.game_shop_dialog.gift_input.paste("CharacterName12");
+        assert_eq!(state.game_shop_dialog.gift_name(), "CharacterName12");
+        state.game_shop_dialog.gift_input.paste("3");
+        assert_eq!(state.game_shop_dialog.gift_name(), "CharacterName12");
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::GiftContinue,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(
+            state.game_shop_dialog.gift_recipient.is_none(),
+            "rejected suffix must require correction"
+        );
+        assert!(model.pending_purchase.is_none());
+        assert!(intents.drain_intents().is_empty());
+        action(
+            &mut state,
+            &mut model,
+            GameShopAction::Cancel,
+            "Warrior",
+            0,
+            1_000,
+            &mut intents,
+            &mut pending,
+        );
+        assert!(!state.game_shop_dialog.modal());
+        assert_eq!(super::text_input::editor_owner(&state), None);
+    }
+
+    #[test]
+    fn gift_confirmation_revalidates_the_frozen_price_and_wallet() {
+        for changed_price in [true, false] {
+            let mut state = NativePlayerUiState::default();
+            state.core.panel = mir2_ui_core::state::UiPanel::GameShop;
+            let mut model = GameShopModel::default();
+            model.upsert(monthly_card_product());
+            let mut intents = NativePlayerUiIntentQueue::default();
+            let mut pending = PendingOperations::default();
+            action(
+                &mut state,
+                &mut model,
+                GameShopAction::Gift(BILLING_MONTHLY_CARD_GAME_SHOP_INDEX),
+                "Warrior",
+                0,
+                1_000,
+                &mut intents,
+                &mut pending,
+            );
+            state.game_shop_dialog.gift_input.paste("Friend_1");
+            action(
+                &mut state,
+                &mut model,
+                GameShopAction::GiftContinue,
+                "Warrior",
+                0,
+                1_000,
+                &mut intents,
+                &mut pending,
+            );
+            if changed_price {
+                model.items[0].credit_price += 1;
+            }
+            action(
+                &mut state,
+                &mut model,
+                GameShopAction::Confirm,
+                "Warrior",
+                0,
+                if changed_price { 2_000 } else { 999 },
+                &mut intents,
+                &mut pending,
+            );
+            assert!(model.pending_purchase.is_none());
+            assert!(state.core.game_shop_pending.is_none());
+            assert!(intents.drain_intents().is_empty());
+            assert!(state.game_shop_dialog.gift.is_none());
+            assert_eq!(
+                state.game_shop_dialog.notice.as_deref(),
+                Some(shop_text("game.shop.changed").as_str())
+            );
+        }
+    }
+
+    #[test]
+    fn gift_failure_and_success_notices_are_localized_without_mutating_recipient_identity() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let mut receipt = crate::game_shop::GameShopReceipt {
+                    protocol: mir2_ui_core::game_shop::NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL
+                        .into(),
+                    request_id: "gs-1".into(),
+                    success: false,
+                    g_index: 31,
+                    quantity: 1,
+                    price_type: 0,
+                    recipient_name: Some("Friend_1".into()),
+                    new_stock_level: None,
+                    mail_id: None,
+                    code: Some(crate::game_shop::GameShopFailureCode::RecipientUnavailable),
+                };
+                let failure = receipt_notice(&receipt);
+                assert!(!failure.is_empty());
+                assert!(!failure.contains("game.shop."));
+                receipt.success = true;
+                receipt.mail_id = Some(7);
+                receipt.code = None;
+                let success = receipt_notice(&receipt);
+                assert!(success.contains("Friend_1"));
+                assert!(!success.contains("game.shop."));
+            });
+        }
     }
 
     #[test]
@@ -1872,6 +2735,7 @@ mod tests {
         let mut state = NativePlayerUiState::default();
         state.core.panel = mir2_ui_core::state::UiPanel::GameShop;
         let mut model = GameShopModel::default();
+        model.payment = GameShopPaymentType::Gold;
         model.items = vec![GameShopEntry {
             game_shop_index: 31,
             item_name: "Potion".into(),

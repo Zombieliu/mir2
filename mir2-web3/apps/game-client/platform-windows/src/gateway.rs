@@ -53,6 +53,7 @@ mod account_feedback;
 pub const DEFAULT_GATEWAY_WS_URL: &str = "wss://165.154.65.136.sslip.io/playtest/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
+const NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL: &str = "nativeGameShopGiftReceiptV1";
 const MAX_CREDENTIAL_LENGTH: usize = 43;
 const MAX_COMMANDS_PER_POLL: usize = 256;
 const MAX_GATEWAY_FRAME_BYTES: usize = 16 * 1024 * 1024;
@@ -357,7 +358,9 @@ fn is_priority_command(command: &GatewayCommand) -> bool {
 fn is_game_shop_transaction(command: &GatewayCommand) -> bool {
     matches!(
         command,
-        GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy { .. })
+        GatewayCommand::Wire(
+            NativeOutboundCommand::GameShopBuy { .. } | NativeOutboundCommand::GameShopGift { .. }
+        )
     )
 }
 
@@ -375,16 +378,27 @@ fn is_correlated_transaction(command: &GatewayCommand) -> bool {
 }
 
 fn game_shop_request_from_command(command: &GatewayCommand) -> Option<GameShopRequest> {
-    let GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
-        request_id,
-        g_index,
-        quantity,
-        price_type,
-    }) = command
-    else {
-        return None;
-    };
-    GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type)
+    match command {
+        GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+        }) => GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type),
+        GatewayCommand::Wire(NativeOutboundCommand::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type: 0,
+            recipient_name,
+        }) => GameShopRequest::new_gift(
+            request_id.clone(),
+            *g_index,
+            *quantity,
+            recipient_name.clone(),
+        ),
+        _ => None,
+    }
 }
 
 /// Resolve a correlated mutation that was removed from its bounded lane but
@@ -2780,6 +2794,7 @@ async fn send_resume_handshake(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL.to_owned(),
         ],
     }
     .to_wire_json();
@@ -2850,6 +2865,7 @@ async fn send_resume_handshake_with_resume_controls<R: CommandSource>(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL.to_owned(),
         ],
     }
     .to_wire_json();
@@ -8280,6 +8296,70 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn game_shop_gift_shares_transaction_lane_and_wrong_recipient_fails_closed() {
+        let (sender, mut receiver) = command_channel(8);
+        let gift = GatewayCommand::Wire(NativeOutboundCommand::GameShopGift {
+            request_id: "gs-1".into(),
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+            recipient_name: "Friend_1".into(),
+        });
+        let request = game_shop_request_from_command(&gift).unwrap();
+        assert_eq!(request.recipient_name.as_deref(), Some("Friend_1"));
+        sender.send(gift).unwrap();
+        assert!(sender
+            .send(GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
+                request_id: "gs-2".into(),
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+            }))
+            .is_err());
+        assert!(matches!(drain_command_batch(&mut receiver, 8).as_slice(),
+            [GatewayCommand::Wire(NativeOutboundCommand::GameShopGift { recipient_name, .. })]
+            if recipient_name == "Friend_1"));
+        let mut gate = GameShopReceiptGate::default();
+        assert!(gate.record_successful_send(request.clone()));
+        let mut wrong = terminal_game_shop_receipt(&request, true);
+        wrong.recipient_name = Some("Friend_2".into());
+        let mut delivered = false;
+        let mut reset = false;
+        assert!(!correlate_and_deliver_game_shop_receipt(
+            &mut gate,
+            &wrong,
+            |_| {
+                delivered = true;
+                true
+            },
+            || {
+                reset = true;
+                true
+            }
+        )
+        .unwrap());
+        assert!(!delivered && reset);
+        assert!(gate.pending.is_none() && gate.reserved.is_none());
+        assert!(gate.record_successful_send(request.clone()));
+        let exact = terminal_game_shop_receipt(&request, true);
+        assert!(
+            correlate_and_deliver_game_shop_receipt(&mut gate, &exact, |_| true, || false).unwrap()
+        );
+        assert_eq!(gate.reserved.as_ref(), Some(&exact));
+        let mut preserved = None;
+        assert!(terminate_session_with_game_shop_boundary(
+            &mut gate,
+            || false,
+            |receipt| {
+                preserved = Some(receipt);
+                true
+            }
+        ));
+        assert_eq!(preserved, Some(exact));
+        assert!(gate.pending.is_none() && gate.reserved.is_none());
+    }
+
     fn purchase_command(request: &GameShopRequest) -> GatewayCommand {
         GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
             request_id: request.request_id.clone(),
@@ -8656,6 +8736,7 @@ mod tests {
 
     fn successful_game_shop_receipt(request_id: &str, g_index: i32) -> GameShopReceipt {
         GameShopReceipt {
+            recipient_name: None,
             protocol: NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
             request_id: request_id.to_owned(),
             success: true,
@@ -11780,7 +11861,8 @@ mod tests {
 
     fn terminal_game_shop_receipt(request: &GameShopRequest, success: bool) -> GameShopReceipt {
         GameShopReceipt {
-            protocol: NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            recipient_name: request.recipient_name.clone(),
+            protocol: request.protocol().to_owned(),
             request_id: request.request_id.clone(),
             success,
             g_index: request.g_index,

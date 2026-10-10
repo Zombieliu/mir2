@@ -65,6 +65,10 @@ pub struct FriendDialogUi {
     pub preferred_x: Option<f32>,
     pub text_scroll: [f32; 2],
     pub modifiers: [bool; 4],
+    /// Explicit identity submissions (shop gifts) reject whole over-budget
+    /// edits. Original friend/memo fields retain WinForms prefix behavior.
+    pub reject_over_budget: bool,
+    pub name_limit: Option<usize>,
 }
 
 impl FriendDialogUi {
@@ -203,9 +207,12 @@ impl FriendDialogUi {
     }
     pub fn sync_editor(&mut self) {
         let draft = match &self.modal {
-            Some(FriendModal::Add { blocked, text }) => {
-                Some((EditorTarget::Add(*blocked), text.clone(), 50, false))
-            }
+            Some(FriendModal::Add { blocked, text }) => Some((
+                EditorTarget::Add(*blocked),
+                text.clone(),
+                self.name_limit.unwrap_or(50),
+                false,
+            )),
             Some(FriendModal::Memo {
                 character_index,
                 text,
@@ -246,6 +253,8 @@ impl FriendDialogUi {
             self.edit_notice = Some(
                 if matches!(self.modal, Some(FriendModal::Memo { .. })) {
                     "Memo editor cannot exceed 32767 characters."
+                } else if self.name_limit.is_some() {
+                    "Name cannot exceed the character limit."
                 } else {
                     "Name cannot exceed 50 characters."
                 }
@@ -270,7 +279,16 @@ impl FriendDialogUi {
         let result = self
             .editor
             .as_mut()
-            .map(|e| e.insert_with_policy(text, text_editor::InsertPolicy::FitPrefix))
+            .map(|e| {
+                e.insert_with_policy(
+                    text,
+                    if self.reject_over_budget {
+                        text_editor::InsertPolicy::RejectOverflow
+                    } else {
+                        text_editor::InsertPolicy::FitPrefix
+                    },
+                )
+            })
             .unwrap_or(EditResult::Unchanged);
         self.commit_editor(result);
         result

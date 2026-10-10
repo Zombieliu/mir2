@@ -316,6 +316,38 @@ pub(super) fn issue_credit_purchase(
     now_ms: u64,
     delivery: MonthlyCardItemDelivery,
 ) -> Result<(Vec<ItemState>, bool), String> {
+    // Issuance is also used by a Gift transaction, where this account owns the
+    // unit but another account pays. Stage the ledger until this owner's debit
+    // is validated so the existing self-purchase helper remains all-or-nothing.
+    let mut staged_account = account.clone();
+    let (items, replayed) = issue_paid_items(
+        &mut staged_account, save, account_id, character, request, quantity, price,
+        now_ms, delivery,
+    )?;
+    if !replayed {
+        let total = price.checked_mul(u32::from(quantity)).ok_or("monthlyCardPriceOverflow")?;
+        let remaining = save.credit.checked_sub(total)
+            .ok_or("insufficient game-shop credit at commit")?;
+        account.monthly_card = staged_account.monthly_card;
+        save.credit = remaining;
+    }
+    Ok((items, replayed))
+}
+
+/// Issue exact paid units to their owner inside an enclosing Source transaction.
+/// The caller commits its payer debit and delivery together with this ledger;
+/// this helper never spends or changes the recipient's character checkpoint.
+pub(super) fn issue_paid_items(
+    account: &mut AccountRecord,
+    save: &CharacterSaveRecord,
+    account_id: &str,
+    character: i32,
+    request: &str,
+    quantity: u16,
+    price: u32,
+    now_ms: u64,
+    delivery: MonthlyCardItemDelivery,
+) -> Result<(Vec<ItemState>, bool), String> {
     if !valid_request_id(request) || !(1..=99).contains(&quantity) || price == 0 {
         return Err("monthlyCardPurchaseInvalid".into());
     }
@@ -362,13 +394,6 @@ pub(super) fn issue_credit_purchase(
     {
         return Err("monthlyCardLedgerFull".into());
     }
-    let total = price
-        .checked_mul(u32::from(quantity))
-        .ok_or("monthlyCardPriceOverflow")?;
-    let remaining_credit = save
-        .credit
-        .checked_sub(total)
-        .ok_or("insufficient game-shop credit at commit")?;
     let mut seen = std::collections::BTreeSet::new();
     for stored in account.saves.values() {
         collect_saved_unique_ids(stored, &mut seen)?;
@@ -409,7 +434,6 @@ pub(super) fn issue_credit_purchase(
     }
     staged_ledger.validate()?;
     account.monthly_card = Some(staged_ledger);
-    save.credit = remaining_credit;
     Ok((result, false))
 }
 

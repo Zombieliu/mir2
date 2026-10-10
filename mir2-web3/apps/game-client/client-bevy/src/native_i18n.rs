@@ -347,6 +347,28 @@ fn catalog() -> &'static Catalog {
 const MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
 const MONTHLY_CARD_ITEM_TOOLTIP: &str = "Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.";
 const BILLING_TRANSLATIONS: &[(&str, [&str; Locale::COUNT])] = &[
+    ("game.shop.gift", ["GIFT", "贈送", "Dar", "Дар", "भेंट", "Kirim", "Tặng", "ให้", "هدية"]),
+    ("game.shop.giftTitle", ["Send a shop gift", "商城贈送", "Enviar presente da loja", "Подарок из магазина", "दुकान से उपहार भेजें", "Kirim hadiah toko", "Tặng quà từ cửa hàng", "ส่งของขวัญจากร้าน", "إرسال هدية من المتجر"]),
+    ("game.shop.giftSummary", ["{quantity} x {item} ({count})\n{total} Credits", "{quantity} x {item}（{count}）\n{total} 點券", "{quantity} x {item} ({count})\n{total} créditos", "{quantity} x {item} ({count})\n{total} кредитов", "{quantity} x {item} ({count})\n{total} क्रेडिट", "{quantity} x {item} ({count})\n{total} kredit", "{quantity} x {item} ({count})\n{total} điểm", "{quantity} x {item} ({count})\n{total} เครดิต", "{quantity} x {item} ({count})\n{total} رصيد"]),
+    ("game.shop.recipient", ["Friend's character name:", "好友角色名稱：", "Nome do personagem do amigo:", "Имя персонажа друга:", "दोस्त के पात्र का नाम:", "Nama karakter teman:", "Tên nhân vật của bạn:", "ชื่อตัวละครของเพื่อน:", "اسم شخصية الصديق:"]),
+    ("game.shop.giftConfirm", ["Recipient: {recipient}\nYou pay Credits. Delivery is by mail.", "收件人：{recipient}\n由你支付點券，商品以郵件送達好友。", "Destinatário: {recipient}\nVocê paga créditos. Entrega pelo correio.", "Получатель: {recipient}\nВы платите кредитами. Доставка почтой.", "प्राप्तकर्ता: {recipient}\nक्रेडिट आप देंगे। डिलीवरी मेल से होगी।", "Penerima: {recipient}\nAnda membayar kredit. Dikirim lewat surat.", "Người nhận: {recipient}\nBạn trả điểm. Quà được gửi qua thư.", "ผู้รับ: {recipient}\nคุณจ่ายเครดิต ส่งของทางจดหมาย", "المستلم: {recipient}\nتدفع أنت الرصيد. تُرسل الهدية بالبريد."]),
+    ("game.shop.next", ["Next", "下一步", "Avançar", "Далее", "आगे", "Lanjut", "Tiếp", "ถัดไป", "التالي"]),
+    ("game.shop.sendGift", ["Send gift", "確認贈送", "Enviar", "Подарить", "उपहार भेजें", "Kirim hadiah", "Gửi quà", "ส่งของขวัญ", "إرسال الهدية"]),
+    ("game.shop.cancel", ["Cancel", "取消", "Cancelar", "Отмена", "रद्द करें", "Batal", "Hủy", "ยกเลิก", "إلغاء"]),
+    ("game.shop.invalidRecipient", ["Name: 3–15 Chinese/ASCII letters, digits or _.\nOverlong names are rejected, never shortened.", "名稱需為 3–15 個中文字、英文字母、數字或底線。\n超長名稱會拒絕提交，不會截斷。", "Nome: 3–15 caracteres chineses, letras ASCII,\nalgarismos ou _. Nomes longos são rejeitados.", "Имя: 3–15 китайских знаков, ASCII-букв,\nцифр или _. Длинные имена отклоняются.", "नाम: 3–15 चीनी/ASCII अक्षर, अंक या _।\nलंबे नाम अस्वीकार होंगे, छोटे नहीं किए जाएँगे।", "Nama: 3–15 huruf Tionghoa/ASCII, angka atau _.\nNama terlalu panjang ditolak, tidak dipotong.", "Tên: 3–15 chữ Trung/ASCII, số hoặc _.\nTên quá dài bị từ chối, không bị cắt.", "ชื่อ: อักษรจีน/ASCII ตัวเลขหรือ _ จำนวน 3–15 ตัว\nชื่อยาวเกินกำหนดจะถูกปฏิเสธ ไม่ตัดชื่อ", "الاسم: 3–15 حرفًا صينيًا أو ASCII أو رقمًا أو _.\nتُرفض الأسماء الطويلة ولا تُختصر."]),
+    ("game.shop.stockUnavailable", ["This quantity is out of stock.", "此數量庫存不足。", "Estoque insuficiente para esta quantidade.", "Недостаточно товара.", "इस मात्रा के लिए स्टॉक नहीं है।", "Stok tidak cukup untuk jumlah ini.", "Không đủ hàng cho số lượng này.", "สินค้าไม่พอตามจำนวนนี้", "لا يتوفر مخزون لهذه الكمية."]),
+    ("game.shop.paymentUnavailable", ["Choose a currency accepted by this product.", "請選擇此商品接受的貨幣；月卡需使用點券。", "Escolha uma moeda aceita por este produto.", "Выберите доступную валюту товара.", "इस वस्तु के लिए मान्य मुद्रा चुनें।", "Pilih mata uang yang diterima produk ini.", "Chọn loại tiền mà món hàng chấp nhận.", "เลือกสกุลเงินที่สินค้านี้รับ", "اختر عملة يقبلها هذا المنتج."]),
+    ("game.shop.insufficientCurrency", ["Not enough of the selected currency.", "目前選擇的貨幣餘額不足。", "Saldo insuficiente na moeda selecionada.", "Недостаточно выбранной валюты.", "चुनी हुई मुद्रा पर्याप्त नहीं है।", "Saldo mata uang yang dipilih tidak cukup.", "Không đủ loại tiền đã chọn.", "เงินที่เลือกมีไม่เพียงพอ", "رصيد العملة المختارة غير كافٍ."]),
+    ("game.shop.pending", ["Waiting for the purchase result...", "正在等待商城交易結果……", "Aguardando o resultado da compra...", "Ожидание результата покупки...", "खरीद का परिणाम आने की प्रतीक्षा...", "Menunggu hasil pembelian...", "Đang chờ kết quả mua hàng...", "กำลังรอผลการซื้อ...", "بانتظار نتيجة الشراء..."]),
+    ("game.shop.unknown", ["Result unknown. Reconnect and check your balance/mail.", "交易結果尚未確認，請重連並檢查餘額與郵件。", "Resultado desconhecido. Reconecte e confira saldo/correio.", "Результат неизвестен. Войдите заново и проверьте баланс/почту.", "परिणाम अज्ञात है। फिर जुड़ें और बैलेंस/मेल देखें।", "Hasil belum diketahui. Sambungkan ulang dan periksa saldo/surat.", "Chưa rõ kết quả. Kết nối lại và kiểm tra điểm/thư.", "ยังไม่ทราบผล เชื่อมต่อใหม่แล้วตรวจเงินและจดหมาย", "النتيجة غير معروفة. أعد الاتصال وتحقق من الرصيد والبريد."]),
+    ("game.shop.changed", ["Product or balance changed. Please review again.", "商品或餘額已變更，請重新確認。", "Produto ou saldo mudou. Confira novamente.", "Товар или баланс изменён. Проверьте снова.", "वस्तु या बैलेंस बदल गया। दोबारा जाँचें।", "Produk atau saldo berubah. Periksa kembali.", "Món hàng hoặc điểm đã đổi. Hãy kiểm tra lại.", "สินค้าหรือเงินเปลี่ยน โปรดตรวจใหม่", "تغيّر المنتج أو الرصيد. راجع مجددًا."]),
+    ("game.shop.bought", ["Purchased. Collect the item from your mail.", "購買成功，請從郵件領取商品。", "Compra concluída. Retire o item no correio.", "Куплено. Заберите предмет из почты.", "खरीद पूरी हुई। वस्तु मेल से लें।", "Pembelian berhasil. Ambil barang dari surat.", "Mua thành công. Nhận món hàng trong thư.", "ซื้อสำเร็จ รับของจากจดหมาย", "تم الشراء. استلم العنصر من بريدك."]),
+    ("game.shop.giftSent", ["Gift mailed to {recipient}.", "已將禮物寄給 {recipient}。", "Presente enviado a {recipient}.", "Подарок отправлен {recipient}.", "उपहार {recipient} को मेल किया गया।", "Hadiah dikirim ke {recipient}.", "Đã gửi quà cho {recipient}.", "ส่งของขวัญให้ {recipient} แล้ว", "أُرسلت الهدية إلى {recipient}."]),
+    ("game.shop.recipientUnavailable", ["Recipient not found or unavailable.", "找不到收件人，或對方目前無法收件。", "Destinatário não encontrado ou indisponível.", "Получатель не найден или недоступен.", "प्राप्तकर्ता नहीं मिला या उपलब्ध नहीं है।", "Penerima tidak ditemukan atau tidak tersedia.", "Không tìm thấy người nhận hoặc không thể nhận.", "ไม่พบผู้รับหรือผู้รับไม่พร้อม", "المستلم غير موجود أو غير متاح."]),
+    ("game.shop.selfGiftUnavailable", ["Choose another character for the gift.", "請選擇其他角色收取禮物。", "Escolha outro personagem para o presente.", "Выберите другого персонажа для подарка.", "उपहार के लिए दूसरा पात्र चुनें।", "Pilih karakter lain untuk hadiah.", "Hãy chọn nhân vật khác nhận quà.", "เลือกตัวละครอื่นรับของขวัญ", "اختر شخصية أخرى لتلقي الهدية."]),
+    ("game.shop.giftUnavailable", ["Gifting is unavailable for this product/server.", "此商品或伺服器目前不支援贈送。", "Este produto/servidor não permite presentes.", "Подарки недоступны для товара/сервера.", "इस वस्तु/सर्वर पर उपहार उपलब्ध नहीं है।", "Hadiah tidak tersedia untuk produk/server ini.", "Món hàng/máy chủ này không hỗ trợ tặng.", "สินค้าหรือเซิร์ฟเวอร์นี้ไม่รองรับของขวัญ", "الإهداء غير متاح لهذا المنتج أو الخادم."]),
+    ("game.shop.mailFull", ["The recipient's mail is full.", "收件人的郵箱已滿。", "O correio do destinatário está cheio.", "Почта получателя заполнена.", "प्राप्तकर्ता का मेल भरा हुआ है।", "Kotak surat penerima penuh.", "Hộp thư người nhận đã đầy.", "กล่องจดหมายผู้รับเต็ม", "بريد المستلم ممتلئ."]),
+    ("game.shop.failed", ["Purchase failed. No delivery was confirmed.", "交易失敗，未確認發貨。", "Compra falhou. A entrega não foi confirmada.", "Покупка не удалась. Доставка не подтверждена.", "खरीद विफल हुई। डिलीवरी की पुष्टि नहीं हुई।", "Pembelian gagal. Pengiriman belum dikonfirmasi.", "Mua thất bại. Chưa xác nhận giao hàng.", "ซื้อไม่สำเร็จ ยังไม่ยืนยันการส่งของ", "فشل الشراء. لم يتم تأكيد التسليم."]),
     ("billing.monthlyCardItemName", ["Monthly Card (30 Days)", "30 天月卡", "Cartão mensal (30 dias)", "Месячная карта (30 дней)", "मासिक कार्ड (30 दिन)", "Kartu Bulanan (30 Hari)", "Thẻ tháng (30 ngày)", "บัตรรายเดือน (30 วัน)", "بطاقة شهرية (30 يومًا)"]),
     ("billing.monthlyCardItemTooltip", [MONTHLY_CARD_ITEM_TOOLTIP, "使用後增加 30 天全帳號遊戲使用期限。已有使用權限時，從目前到期時間起延長。離線時間也會計入。僅可使用一次。", "Ao usar, adiciona 30 dias de acesso ao jogo para toda a conta. Se o acesso estiver ativo, o prazo é prorrogado a partir do vencimento atual. O tempo offline conta. Uso único.", "При использовании добавляет 30 дней доступа к игре для всего аккаунта. Активный доступ продлевается от текущей даты окончания. Время вне игры учитывается. Одноразовое использование.", "इस्तेमाल करने पर पूरे खाते के लिए 30 दिन की गेम पहुँच जोड़ता है। सक्रिय पहुँच की अवधि मौजूदा समाप्ति समय से आगे बढ़ती है। ऑफ़लाइन समय भी गिना जाता है। केवल एक बार इस्तेमाल किया जा सकता है।", "Saat digunakan, menambah 30 hari akses game untuk seluruh akun. Akses yang masih aktif diperpanjang dari waktu kedaluwarsa saat ini. Waktu offline tetap dihitung. Sekali pakai.", "Khi sử dụng, thêm 30 ngày truy cập trò chơi cho toàn bộ tài khoản. Quyền truy cập đang còn hạn được gia hạn từ thời điểm hết hạn hiện tại. Thời gian ngoại tuyến vẫn được tính. Chỉ dùng một lần.", "เมื่อใช้จะเพิ่มสิทธิ์เข้าเกม 30 วันสำหรับทั้งบัญชี หากสิทธิ์ยังไม่หมดอายุ จะต่อเวลาจากวันหมดอายุปัจจุบัน เวลาที่ออฟไลน์จะถูกนับด้วย ใช้ได้ครั้งเดียว", "تضيف عند استخدامها 30 يومًا من الوصول إلى اللعبة للحساب بأكمله. يُمدَّد الوصول النشط بدءًا من موعد انتهائه الحالي. يُحتسب الوقت خارج الاتصال. تُستخدم مرة واحدة."]),
     ("billing.updated", ["Account status refreshed.", "已更新帳號狀態。", "Status da conta atualizado.", "Статус аккаунта обновлён.", "खाते की स्थिति अपडेट हो गई।", "Status akun diperbarui.", "Đã cập nhật trạng thái tài khoản.", "อัปเดตสถานะบัญชีแล้ว", "تم تحديث حالة الحساب."]),
@@ -1037,20 +1059,33 @@ mod tests {
                 let name = crate::player_text::name(MONTHLY_CARD_ITEM_NAME);
                 let tooltip = crate::player_text::text(MONTHLY_CARD_ITEM_TOOLTIP);
                 assert_eq!(name, translate(language, "billing.monthlyCardItemName"));
-                assert_eq!(tooltip, translate(language, "billing.monthlyCardItemTooltip"));
+                assert_eq!(
+                    tooltip,
+                    translate(language, "billing.monthlyCardItemTooltip")
+                );
                 assert!(name.contains("30"));
                 assert!(tooltip.contains("30"));
                 assert_ne!(name, MONTHLY_CARD_ITEM_NAME);
                 if language != Locale::English {
                     assert_ne!(tooltip, MONTHLY_CARD_ITEM_TOOLTIP);
                 }
-                for opaque in ["monthlyCard30Days", "MonthlyCard30DaysFromPlayer", "MonthlyCard60Days"] {
+                for opaque in [
+                    "monthlyCard30Days",
+                    "MonthlyCard30DaysFromPlayer",
+                    "MonthlyCard60Days",
+                ] {
                     assert_eq!(crate::player_text::name(opaque), opaque);
                 }
             });
         }
-        assert_eq!(translate(Locale::English, MONTHLY_CARD_ITEM_NAME), "Monthly Card (30 Days)");
-        assert_eq!(translate(Locale::English, MONTHLY_CARD_ITEM_TOOLTIP), MONTHLY_CARD_ITEM_TOOLTIP);
+        assert_eq!(
+            translate(Locale::English, MONTHLY_CARD_ITEM_NAME),
+            "Monthly Card (30 Days)"
+        );
+        assert_eq!(
+            translate(Locale::English, MONTHLY_CARD_ITEM_TOOLTIP),
+            MONTHLY_CARD_ITEM_TOOLTIP
+        );
     }
 
     #[test]

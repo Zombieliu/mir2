@@ -1,0 +1,13 @@
+{
+  "sourceBase": "052ab0bd0c0f3d4a01b33ea15cd1f2f4d89d93fc",
+  "scope": "Local sandbox only; prepared but not started",
+  "nativeBinary": "C:/mir2-build/stripe-sandbox-20261010/native/mir2-platform-windows-shop-gift.next.exe",
+  "nativeSha256": "89a760034275bda1cdb932a4fe327b7d0b9e27def774537c2675773fb820a421",
+  "nativeBytes": 127634432,
+  "gatewayStarted": false,
+  "nativeStarted": false,
+  "publicReleaseChanged": false,
+  "gatewayBinary": "F:/mir2-build/stripe-sandbox-20261010/mir2-gateway-shop-gift.next.exe",
+  "gatewaySha256": "4f8d6ace09aa02fe4a2f1618a09129c7f463681767914d069fd762a0b094c1f3",
+  "gatewayBytes": 115451904
+}

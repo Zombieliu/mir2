@@ -61,6 +61,7 @@ use super::stage5::{
     merge_native_game_shop_ledger_mail, validate_stage5_mail_item_carriers,
     validate_stage5_systems_item_carriers,
 };
+use super::game_shop_gift::merge_game_shop_gift_ledger_mail;
 
 #[derive(Debug, Clone)]
 pub(super) struct ActiveCharacterRuntimeState {
@@ -680,6 +681,10 @@ fn merge_external_stage5_mail_staged(
         {
             let local = &mut local_mail[local_index];
             if let Some(ledger_changed) = merge_native_game_shop_ledger_mail(local, &external)? {
+                changed |= ledger_changed;
+                continue;
+            }
+            if let Some(ledger_changed) = merge_game_shop_gift_ledger_mail(local, &external)? {
                 changed |= ledger_changed;
                 continue;
             }

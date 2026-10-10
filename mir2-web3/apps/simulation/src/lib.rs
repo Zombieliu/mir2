@@ -75,7 +75,7 @@ pub use runtime::{
     ZoneExperienceRateBuff, ZoneExperienceRateStat, ZoneSavedPetSnapshot, ZonePetExperienceAdmission,
 };
 pub use world_runtime::{
-    validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest,
+    validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest, NativeGameShopGiftRequest,
     WorldCommand, WorldCommandExecution, WorldCommandKind, WorldCommandOutcome, WorldRuntime,
     ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
 };

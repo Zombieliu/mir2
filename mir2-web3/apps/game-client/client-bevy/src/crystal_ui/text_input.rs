@@ -15,6 +15,7 @@ pub fn friend_clipboard_target(ui: &NativePlayerUiState) -> bool {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EditorOwner {
     GameShop,
+    GameShopGift,
     Friend,
     Creature,
     Bond,
@@ -58,6 +59,11 @@ pub fn editor_owner(ui: &NativePlayerUiState) -> Option<EditorOwner> {
             .text_input
             .editor_focused
             .then_some(EditorOwner::Creature);
+    }
+    if ui.shop_open() && ui.game_shop_dialog.gift.is_some() {
+        return (ui.game_shop_dialog.gift_recipient.is_none()
+            && ui.game_shop_dialog.gift_input.editor_focused)
+            .then_some(EditorOwner::GameShopGift);
     }
     if ui.keyboard.open
         || ui.hero.modal()
@@ -104,6 +110,7 @@ pub fn editor_mut(
 ) -> &mut friend_dialog::FriendDialogUi {
     match owner {
         EditorOwner::GameShop => &mut ui.game_shop_dialog.search_input,
+        EditorOwner::GameShopGift => &mut ui.game_shop_dialog.gift_input,
         EditorOwner::Friend => &mut ui.friends,
         EditorOwner::Creature => &mut ui.creature.text_input,
         EditorOwner::Bond => &mut ui.social_bonds.input,
@@ -121,6 +128,7 @@ pub fn sync_draft(ui: &mut NativePlayerUiState, owner: EditorOwner) {
                 ui.game_shop_page = 0;
             }
         }
+        EditorOwner::GameShopGift => {}
         EditorOwner::GuildNotice => ui.guild_notice_draft = ui.guild_panel.notice_draft(),
         EditorOwner::GuildRank => {
             ui.guild_rank_name_draft = ui
@@ -176,6 +184,7 @@ pub fn process_ime(
     ui.creature.sync_input_editor();
     ui.social_bonds.sync_editor();
     ui.game_shop_dialog.sync_search_editor();
+    ui.game_shop_dialog.sync_gift_editor();
     let Ok((window_id, mut window)) = windows.single_mut() else {
         return;
     };
@@ -406,6 +415,7 @@ pub fn position_ime(
     }
     let model = match owner {
         EditorOwner::GameShop => &ui.game_shop_dialog.search_input,
+        EditorOwner::GameShopGift => &ui.game_shop_dialog.gift_input,
         EditorOwner::Friend => &ui.friends,
         EditorOwner::Creature => &ui.creature.text_input,
         EditorOwner::Bond => &ui.social_bonds.input,

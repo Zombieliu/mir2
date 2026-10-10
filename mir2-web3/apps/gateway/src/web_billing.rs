@@ -627,7 +627,9 @@ async fn http_checkout(
 }
 async fn return_page() -> Response {
     // Query parameters (including "paid") are cosmetic and never fulfill an order.
-    ([("cache-control","no-store"),("content-security-policy","default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'"),
-        ("referrer-policy","no-referrer")],Html("<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content='width=device-width'><title>Numeron</title><body><h1>Return to the game</h1><p>Select Check status in the recharge panel. Points are available after the server verifies payment.</p></body></html>"))
+    ([("cache-control","no-store"),("content-security-policy", BILLING_RETURN_CSP),
+        ("referrer-policy","no-referrer"), ("x-content-type-options", "nosniff")],Html(include_str!("billing_return.html")))
         .into_response()
 }
+
+const BILLING_RETURN_CSP: &str = "default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-1xRCNPFcbB6K0cfn8LT1xKt5sTrLO7B1tKoDJM1SUBs='; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";

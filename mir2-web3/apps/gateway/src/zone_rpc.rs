@@ -18,8 +18,8 @@ use mir2_protocol::{
 };
 use mir2_simulation::{
     AccountRecord, ActiveSessionIdentity, CharacterSaveRecord, GameShopPurchaseOutcome,
-    NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandOutcome,
-    WorldSnapshot,
+    NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution,
+    WorldCommandOutcome, WorldSnapshot,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -42,6 +42,7 @@ pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
 mod owner_health_sync_tests;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2: &str = "nativeGameShopPurchaseV2";
+pub const ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1: &str = "nativeGameShopGiftV1";
 pub const ZONE_RPC_STORAGE_REQUEST_ID_V1: &str = "storageRequestIdV1";
 pub const ZONE_RPC_BILLING_V1: &str = "billingCreditsMonthlyCardV1";
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
@@ -2047,6 +2048,7 @@ impl TcpZoneOwnerRpcTransport {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum CorrelatedMutationPolicy {
     NativePurchaseV2,
+    NativeGiftV1,
     OrdinaryPurchase,
     StorageRequestV2,
     Billing,
@@ -2056,6 +2058,10 @@ enum CorrelatedMutationPolicy {
 #[path = "zone_rpc_billing_tests.rs"]
 mod billing_tests;
 
+#[cfg(test)]
+#[path = "zone_rpc_game_shop_gift_tests.rs"]
+mod game_shop_gift_tests;
+
 /// Keep the no-fallback rule narrow: correlated GameShop and Storage writes
 /// must never be replayed after an endpoint may have committed them. Read-only
 /// and unrelated gameplay commands retain endpoint fallback behavior.
@@ -2064,6 +2070,7 @@ fn correlated_mutation_policy(command: &WorldCommand) -> Option<CorrelatedMutati
         WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
             | WorldCommand::BillingActivateMonthlyCard { .. } => Some(CorrelatedMutationPolicy::Billing),
         WorldCommand::NativeGameShopPurchase(_) => Some(CorrelatedMutationPolicy::NativePurchaseV2),
+        WorldCommand::NativeGameShopGift(_) => Some(CorrelatedMutationPolicy::NativeGiftV1),
         WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) => {
             Some(CorrelatedMutationPolicy::OrdinaryPurchase)
         }
@@ -2082,6 +2089,9 @@ fn wire_correlated_mutation_policy(
             | WireWorldCommand::BillingActivateMonthlyCard { .. } => Ok(Some(CorrelatedMutationPolicy::Billing)),
         WireWorldCommand::NativeGameShopPurchaseV2 { .. } => {
             Ok(Some(CorrelatedMutationPolicy::NativePurchaseV2))
+        }
+        WireWorldCommand::NativeGameShopGiftV1 { .. } => {
+            Ok(Some(CorrelatedMutationPolicy::NativeGiftV1))
         }
         WireWorldCommand::ClientPacket { frame } => match decode_client_packet(frame)
             .map_err(|error| format!("client packet decode failed: {error}"))?
@@ -2114,6 +2124,11 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                 Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2),
                 true,
             ),
+            Some(CorrelatedMutationPolicy::NativeGiftV1) => self.execute_owner_request(
+                request,
+                Some(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1),
+                true,
+            ),
             Some(CorrelatedMutationPolicy::OrdinaryPurchase) => {
                 // Preserve old-host compatibility (no capability probe), but
                 // never replay an economic write to another endpoint after the
@@ -2131,13 +2146,17 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
-            return Err(
-                "typed GameShop outcome execution requires a native idempotent purchase"
-                    .to_string(),
-            );
-        }
-        self.execute_owner_request(request, Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2), true)
+        let required = match request.command() {
+            WorldCommand::NativeGameShopPurchase(_) => ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2,
+            WorldCommand::NativeGameShopGift(_) => ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1,
+            _ => {
+                return Err(
+                    "typed GameShop outcome execution requires a native idempotent purchase or gift"
+                        .to_string(),
+                );
+            }
+        };
+        self.execute_owner_request(request, Some(required), true)
     }
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
@@ -2147,6 +2166,16 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                 if capabilities
                     .iter()
                     .any(|capability| capability == ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2)
+        )
+    }
+
+    fn supports_native_game_shop_gifts(&self) -> bool {
+        matches!(
+            self.call(ZoneRpcRequest::Health),
+            Ok(ZoneRpcPayload::Health { capabilities, .. })
+                if capabilities
+                    .iter()
+                    .any(|capability| capability == ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1)
         )
     }
 
@@ -3777,6 +3806,25 @@ impl ZoneHostServer {
 
         if matches!(envelope.request, ZoneRpcRequest::Health) {
             let health = self.health();
+            // Only the exact existing Source runtime can opt this Session in.
+            // Missing, old, handed-off or poisoned runtimes fail closed without
+            // creating a runtime or performing any economic work during Health.
+            let hosted = self.sessions.lock().ok().and_then(|sessions| {
+                sessions
+                    .get(&(envelope.session_id.clone(), envelope.zone_id.clone()))
+                    .map(|session| Arc::clone(&session.hosted))
+            });
+            let mut capabilities = vec![
+                ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
+                ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
+                ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
+                ZONE_RPC_BILLING_V1.to_string(),
+            ];
+            if hosted.is_some_and(|hosted| {
+                ZoneOwnerRpcTransport::supports_native_game_shop_gifts(hosted.as_ref())
+            }) {
+                capabilities.push(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1.to_string());
+            }
             return Ok(ZoneRpcPayload::Health {
                 host_id: health.host_id,
                 process_id: health.process_id,
@@ -3789,12 +3837,7 @@ impl ZoneHostServer {
                 zone_capacity: health.zone_capacity,
                 draining: health.draining,
                 protocol_version: health.protocol_version,
-                capabilities: vec![
-                    ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
-                    ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
-                    ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
-                    ZONE_RPC_BILLING_V1.to_string(),
-                ],
+                capabilities,
             });
         }
 
@@ -5484,6 +5527,9 @@ enum WireWorldCommand {
     NativeGameShopPurchaseV2 {
         request: NativeGameShopPurchaseRequest,
     },
+    NativeGameShopGiftV1 {
+        request: NativeGameShopGiftRequest,
+    },
     PasskeyLogin {
         account_id: String,
     },
@@ -5575,6 +5621,7 @@ impl WireWorldCommand {
             WorldCommand::NativeGameShopPurchase(request) => {
                 Self::NativeGameShopPurchaseV2 { request }
             }
+            WorldCommand::NativeGameShopGift(request) => Self::NativeGameShopGiftV1 { request },
             WorldCommand::PasskeyLogin { account_id } => Self::PasskeyLogin { account_id },
             WorldCommand::MoveTo { position, running } => Self::MoveTo { position, running },
             WorldCommand::Attack { object_id } => Self::Attack { object_id },
@@ -5656,6 +5703,7 @@ impl WireWorldCommand {
             Self::NativeGameShopPurchaseV2 { request } => {
                 WorldCommand::NativeGameShopPurchase(request)
             }
+            Self::NativeGameShopGiftV1 { request } => WorldCommand::NativeGameShopGift(request),
             Self::PasskeyLogin { account_id } => WorldCommand::PasskeyLogin { account_id },
             Self::MoveTo { position, running } => WorldCommand::MoveTo { position, running },
             Self::Attack { object_id } => WorldCommand::Attack { object_id },

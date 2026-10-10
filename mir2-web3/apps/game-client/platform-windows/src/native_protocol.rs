@@ -461,6 +461,17 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "priceType")]
         price_type: i32,
     },
+    GameShopGift {
+        #[serde(rename = "requestId")]
+        request_id: String,
+        #[serde(rename = "gIndex")]
+        g_index: i32,
+        quantity: u8,
+        #[serde(rename = "priceType")]
+        price_type: i32,
+        #[serde(rename = "recipientName")]
+        recipient_name: String,
+    },
     SellItem {
         #[serde(rename = "uniqueId")]
         unique_id: u64,
@@ -753,6 +764,7 @@ impl NativeOutboundCommand {
             Self::SpellToggle { .. } => "spellToggle",
             Self::BuyItem { .. } => "buyItem",
             Self::GameShopBuy { .. } => "gameShopBuy",
+            Self::GameShopGift { .. } => "gameShopGift",
             Self::SellItem { .. } => "sellItem",
             Self::RepairItem { .. } => "repairItem",
             Self::SpecialRepairItem { .. } => "specialRepairItem",
@@ -2049,6 +2061,38 @@ mod tests {
             malformed,
             InboundEvent::GameShopReceipt(receipt) if !receipt.is_valid()
         ));
+    }
+
+    #[test]
+    fn game_shop_gift_wire_is_distinct_and_receipt_keeps_exact_recipient() {
+        let command = NativeOutboundCommand::GameShopGift {
+            request_id: "gs-1".into(),
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+            recipient_name: "Friend_1".into(),
+        };
+        assert_eq!(command.command_type(), "gameShopGift");
+        assert_serialized(
+            command,
+            json!({"type":"gameShopGift", "requestId":"gs-1",
+            "gIndex":31, "quantity":1, "priceType":0, "recipientName":"Friend_1"}),
+        );
+        let gift = parse_inbound_value(json!({
+            "type":"gameShopReceipt", "protocol":"nativeGameShopGiftReceiptV1",
+            "requestId":"gs-1", "success":true, "gIndex":31,
+            "quantity":1, "priceType":0, "recipientName":"Friend_1", "mailId":7
+        }))
+        .unwrap();
+        assert!(matches!(gift, InboundEvent::GameShopReceipt(receipt)
+            if receipt.is_valid() && receipt.recipient_name.as_deref() == Some("Friend_1")));
+        let wrong = parse_inbound_value(json!({
+            "type":"gameShopReceipt", "protocol":"nativeGameShopReceiptV1",
+            "requestId":"gs-1", "success":true, "gIndex":31,
+            "quantity":1, "priceType":0, "recipientName":"Friend_1", "mailId":7
+        }))
+        .unwrap();
+        assert!(matches!(wrong, InboundEvent::GameShopReceipt(receipt) if !receipt.is_valid()));
     }
 
     #[test]

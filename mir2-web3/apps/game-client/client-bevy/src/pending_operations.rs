@@ -2622,6 +2622,7 @@ mod tests {
     #[test]
     fn preserving_reset_keeps_only_exact_game_shop_key_for_receipt_ingest() {
         let receipt = crate::game_shop::GameShopReceipt {
+            recipient_name: None,
             protocol: "nativeGameShopReceiptV1".to_owned(),
             request_id: "gs-preserve".to_owned(),
             success: false,

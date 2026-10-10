@@ -1,0 +1,536 @@
+{
+  "scope": "Own standalone loopback preview only; no installed client, Gateway, payment-provider or wallet calls",
+  "source": "C:/Users/Administrator/.codex/worktrees/classic-gateway-budget-20261008/mir2-player-journey/mir2-web3/apps/gateway/src/billing_return.html",
+  "sourceSha256": "b3476392d221966a03ac09a6bebd02b33c44b3a10cce991f9cb7b99e1196fc94",
+  "scriptSha256Base64": "1xRCNPFcbB6K0cfn8LT1xKt5sTrLO7B1tKoDJM1SUBs=",
+  "contentSecurityPolicy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-1xRCNPFcbB6K0cfn8LT1xKt5sTrLO7B1tKoDJM1SUBs='; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+  "localeStateDesktopChecks": 27,
+  "localeStateNarrowChecks": 27,
+  "browserLanguageDetection": "zh-CN maps to zh-Hant",
+  "localPreference": "Allowlisted selection survives navigation",
+  "queryInjection": "Unknown result and disallowed lang are ignored; unrelated query is not displayed",
+  "keyboard": "Skip link, language selector, primary instructions anchor; anchor focuses steps",
+  "externalRequests": [],
+  "pageErrors": [],
+  "screenshots": [
+    "en-cancelled-desktop.png",
+    "zh-Hant-paid-desktop.png",
+    "ar-paid-desktop.png",
+    "zh-Hant-paid-mobile.png"
+  ],
+  "observations": [
+    {
+      "locale": "en",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Return to your adventure.",
+      "status": "Check your Credits in game",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "en",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "en",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Pick up where you left off.",
+      "status": "Checkout cancelled",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "en",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "en",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Return to Numeron.",
+      "status": "Check recharge status",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "en",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "zh-Hant",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "zh-Hant",
+      "dir": "ltr",
+      "title": "返回你的冒險。",
+      "status": "請到遊戲內確認點數",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "zh-Hant",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "zh-Hant",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "zh-Hant",
+      "dir": "ltr",
+      "title": "隨時繼續你的冒險。",
+      "status": "已返回取消付款頁面",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "zh-Hant",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "zh-Hant",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "zh-Hant",
+      "dir": "ltr",
+      "title": "返回 Numeron。",
+      "status": "請確認充值狀態",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "zh-Hant",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "pt-BR",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "pt-BR",
+      "dir": "ltr",
+      "title": "Volte à sua aventura.",
+      "status": "Confira os créditos no jogo",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "pt-BR",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "pt-BR",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "pt-BR",
+      "dir": "ltr",
+      "title": "Continue sua aventura.",
+      "status": "Pagamento cancelado",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "pt-BR",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "pt-BR",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "pt-BR",
+      "dir": "ltr",
+      "title": "Volte ao Numeron.",
+      "status": "Consulte o status da recarga",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "pt-BR",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "ru",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "ru",
+      "dir": "ltr",
+      "title": "Вернитесь к приключению.",
+      "status": "Проверьте кредиты в игре",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "ru",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "ru",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "ru",
+      "dir": "ltr",
+      "title": "Продолжите приключение.",
+      "status": "Оплата отменена",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "ru",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "ru",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "ru",
+      "dir": "ltr",
+      "title": "Вернитесь в Numeron.",
+      "status": "Проверьте статус пополнения",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "ru",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "hi",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "hi",
+      "dir": "ltr",
+      "title": "अपने रोमांच पर लौटें।",
+      "status": "गेम में क्रेडिट जाँचें",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "hi",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "hi",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "hi",
+      "dir": "ltr",
+      "title": "अपना रोमांच जारी रखें।",
+      "status": "भुगतान रद्द किया गया",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "hi",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "hi",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "hi",
+      "dir": "ltr",
+      "title": "Numeron पर लौटें।",
+      "status": "रिचार्ज की स्थिति जाँचें",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "hi",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "id",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "id",
+      "dir": "ltr",
+      "title": "Kembali ke petualanganmu.",
+      "status": "Periksa kredit di dalam game",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "id",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "id",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "id",
+      "dir": "ltr",
+      "title": "Lanjutkan petualanganmu.",
+      "status": "Pembayaran dibatalkan",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "id",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "id",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "id",
+      "dir": "ltr",
+      "title": "Kembali ke Numeron.",
+      "status": "Periksa status isi ulang",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "id",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "vi",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "vi",
+      "dir": "ltr",
+      "title": "Trở lại cuộc phiêu lưu.",
+      "status": "Kiểm tra điểm trong trò chơi",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "vi",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "vi",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "vi",
+      "dir": "ltr",
+      "title": "Tiếp tục cuộc phiêu lưu.",
+      "status": "Đã hủy thanh toán",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "vi",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "vi",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "vi",
+      "dir": "ltr",
+      "title": "Trở lại Numeron.",
+      "status": "Kiểm tra trạng thái nạp điểm",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "vi",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "th",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "th",
+      "dir": "ltr",
+      "title": "กลับไปผจญภัยต่อ",
+      "status": "ตรวจสอบเครดิตในเกม",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "th",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "th",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "th",
+      "dir": "ltr",
+      "title": "ผจญภัยต่อได้ทุกเมื่อ",
+      "status": "ยกเลิกการชำระเงิน",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "th",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "th",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "th",
+      "dir": "ltr",
+      "title": "กลับไปที่ Numeron",
+      "status": "ตรวจสอบสถานะการเติมเครดิต",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "th",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "state": "state-paid",
+      "viewport": "1320x900",
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "عد إلى مغامرتك.",
+      "status": "تحقق من الرصيد داخل اللعبة",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "ar",
+      "state": "paid",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "state": "state-cancelled",
+      "viewport": "1320x900",
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "تابع مغامرتك.",
+      "status": "تم إلغاء الدفع",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "ar",
+      "state": "cancelled",
+      "viewport": 320,
+      "overflow": false
+    },
+    {
+      "locale": "ar",
+      "state": "state-unknown",
+      "viewport": "1320x900",
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "عد إلى Numeron.",
+      "status": "تحقق من حالة الشحن",
+      "noUndefined": true,
+      "overflow": false,
+      "policyViolations": [],
+      "steps": 3
+    },
+    {
+      "locale": "ar",
+      "state": "unknown",
+      "viewport": 320,
+      "overflow": false
+    }
+  ]
+}

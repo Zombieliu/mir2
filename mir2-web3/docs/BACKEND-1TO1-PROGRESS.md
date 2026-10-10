@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> 2026-10-10 authorized commercial gift Candidate: authenticated Credits-only
+> gifting atomically commits payer debit, frozen recipient parcel, stock and
+> permanent monthly-card units. Dedicated Source/RPC capability and immutable
+> receipt checks prevent fallback to self-purchase or another endpoint after
+> an unknown commit. Online recipients receive mail on ordinary shared Tick;
+> hidden ledgers are excluded from client snapshots. Source28 and Gateway
+> shop35/billing39/generic-gift1 checks pass, including real dual sockets and
+> normal logout/new password login. Real PostgreSQL gift CI, native human and
+> public rollout are still open. No original-parity completion is added;
+> public R22/Gatewaya41/feed17 and unfinished P1–P7 are unchanged.
+> [Feature, failure boundaries and proofs](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
 > 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
 > registration/password login/creation, expired entry rejection, one sandbox
 > USD10 Checkout, signed CLI callback/provider readback and Source-owned1000
