@@ -219,3 +219,41 @@ attachment projection, packet-to-snapshot retention, instance/count, app
 monthly metadata,1813 asset rendering, hint and unknown-date placeholder.
 The actual Source sentence localization is receiving an additional exact-template
 check before the prepared native replaces the active user client.
+
+## Final monthly-mail presentation Candidate
+
+The user-provided native screenshot shows an unclaimed Gameshop monthly parcel
+with a blank green attachment square and missing date. Read-only validation of
+the existing sandbox save confirms one exact `itemStatesJson` monthly attachment;
+no attachment was lost. Windows projection previously ignored that array and
+the next snapshot erased packet metadata. It now prefers the concrete carriers,
+preserves identity/count, rejects malformed concrete carriers and resolves the
+reserved application monthly index through its server template. This also
+provides the claimed bag item's icon and tooltip. Unknown imported item identity
+still cannot guess an arbitrary catalogue row. No user parcel was claimed or
+changed, and no payment/gift was performed on the user's behalf.
+
+Native mail reader/list render the monthly1813 icon and activation-on-use hint;
+unknown DateTime displays a localized 'Not recorded' placeholder without
+manufacturing a timestamp. The actual Source purchase and gift body templates
+are localized in all nine supported languages only for Gameshop and an exact
+reserved monthly attachment with matching quantity. Player names and unrelated
+free text remain intact. Existing claim/lock and authority gates are preserved.
+
+[Final Bevy mail94](NATIVE-MONTHLY-MAIL-BEVY-02.txt),
+[Windows projection8](NATIVE-MONTHLY-MAIL-WINDOWS-01.txt) and
+[final Windows build](NATIVE-MONTHLY-MAIL-BUILD-02.txt) pass. These are automated
+projection/assets/rendering checks, not a screenshot of the human native client.
+
+Actual isolated PostgreSQL CI[38050349344](https://github.com/Zombieliu/mir2/actions/runs/38050349344)
+at source1429e70e9032689327c345e884c5ca4d528d0396 passes recharge26/monthly9,
+billing PG1, Gift15 plus actual PG1, dedicated Gift RPC9, Gateway billing39 and
+shared-owner4. Its [complete retained log](CI-GIFT-CANONICAL-SETUP-PASS.txt) includes
+both independent Gift outcomes, exact debit/one parcel, online recipient tick,
+unsaved gold/transform save, activation replay and the missing-payer-receipt
+negative case. All previous failed/hanging diagnostics remain preserved.
+
+The paired local candidates are ready; a running human client is retained.
+Normal exit and the active/connection counters must be clear before switching.
+No public installer, feed pointer, Gateway service or R22 release was changed.
+Native human acceptance and public commercial rollout remain open.

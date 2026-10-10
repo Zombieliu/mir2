@@ -4,6 +4,7 @@
 //! Windows Mail panel shows the same inbox as the browser. UI selection is kept
 //! alongside the authoritative list but is not overwritten by the server.
 
+use crate::inventory::{CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel};
 use bevy::prelude::Resource;
 use serde::de::{self, SeqAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -111,10 +112,65 @@ pub struct MailAttachment {
     pub identified: bool,
     pub cursed: bool,
     pub gem_count: u16,
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 impl MailAttachment {
+    pub fn is_monthly_card(&self) -> bool {
+        // Identity comes from the reserved index/key, never a player's free
+        // text that happens to resemble a shop item name.
+        self.item_index == Some(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX)
+            || (self.item_index.is_none() && self.key.as_deref() == Some("crystal-item-1000001"))
+    }
+
+    pub fn image_index(&self) -> Option<u16> {
+        self.tooltip_source
+            .as_ref()
+            .map(|source| source.user_item_image(u32::from(self.count)))
+            .or_else(|| self.image.and_then(|image| u16::try_from(image).ok()))
+            .or_else(|| {
+                self.is_monthly_card()
+                    .then(|| mir2_game_data::billing_monthly_card_item_template().image)
+            })
+    }
+
+    pub fn display_tooltip_source(&self) -> Option<CrystalItemTooltipSourceModel> {
+        self.tooltip_source.clone().or_else(|| {
+            if !self.is_monthly_card() {
+                return None;
+            }
+            let info: CrystalItemInfoModel = serde_json::from_value(
+                serde_json::to_value(mir2_game_data::billing_monthly_card_item_template()).ok()?,
+            )
+            .ok()?;
+            Some(CrystalItemTooltipSourceModel {
+                real_info: Some(info.clone()),
+                info,
+                user_item: self.unique_id.map(|unique_id| CrystalUserItemModel {
+                    unique_id,
+                    item_index: mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX,
+                    count: self.count,
+                    current_dura: self.current_dura,
+                    max_dura: self.max_dura,
+                    soul_bound_id: self.soul_bound_id,
+                    identified: self.identified,
+                    cursed: self.cursed,
+                    gem_count: self.gem_count,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            })
+        })
+    }
+
     pub fn label(&self) -> String {
+        if self.is_monthly_card() {
+            return crate::native_i18n::for_locale(
+                crate::native_i18n::locale(),
+                "billing.monthlyCardItemName",
+                mir2_game_data::BILLING_MONTHLY_CARD_ITEM_NAME,
+            );
+        }
         self.name
             .as_deref()
             .filter(|name| !name.trim().is_empty())
@@ -171,6 +227,73 @@ pub struct MailMessage {
 }
 
 impl MailMessage {
+    pub fn display_body(&self) -> String {
+        self.display_body_for_locale(crate::native_i18n::locale())
+    }
+
+    fn display_body_for_locale(&self, language: crate::native_i18n::Locale) -> String {
+        let body = self.body.replace("\\r\\n", "\r\n");
+        let quantity: u32 = self
+            .items
+            .iter()
+            .filter(|item| item.is_monthly_card())
+            .map(|item| u32::from(item.count))
+            .sum();
+        if self.sender != "Gameshop" || quantity == 0 {
+            return body;
+        }
+        // Match complete Source-authored templates and the actual attachment
+        // quantity. Never rewrite substrings in opaque letters/player text.
+        let name = mir2_game_data::BILLING_MONTHLY_CARD_ITEM_NAME;
+        let localized_name =
+            crate::native_i18n::for_locale(language, "billing.monthlyCardItemName", name);
+        let quantity = quantity.to_string();
+        let bare = format!("{name} x{quantity}");
+        let purchase = format!("{name} x {quantity} was sent from the game shop.");
+        let gift_suffix = format!(" sent {name} x {quantity} from the game shop.");
+        body.split('\n')
+            .map(|line| {
+                let trimmed = line.strip_suffix('\r').unwrap_or(line);
+                let replacement = if trimmed == bare {
+                    Some(format!("{localized_name} x{quantity}"))
+                } else if trimmed == purchase {
+                    Some(crate::native_i18n::format_for(
+                        language,
+                        "game.mail.shopPurchaseBody",
+                        "{item} x {quantity} was sent from the game shop.",
+                        &[("item", &localized_name), ("quantity", &quantity)],
+                    ))
+                } else if let Some(sender) = trimmed
+                    .strip_suffix(&gift_suffix)
+                    .filter(|sender| mir2_ui_core::game_shop::is_valid_recipient_name(sender))
+                {
+                    Some(crate::native_i18n::format_for(
+                        language,
+                        "game.mail.shopGiftBody",
+                        "{sender} sent {item} x {quantity} from the game shop.",
+                        &[
+                            ("sender", sender),
+                            ("item", &localized_name),
+                            ("quantity", &quantity),
+                        ],
+                    ))
+                } else {
+                    None
+                };
+                match replacement {
+                    Some(mut text) => {
+                        if line.ends_with('\r') {
+                            text.push('\r');
+                        }
+                        text
+                    }
+                    None => line.to_owned(),
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
     pub fn has_attachment(&self) -> bool {
         self.gold > 0 || !self.items.is_empty()
     }
@@ -310,6 +433,19 @@ pub fn mail_attachment_label(item: &MailAttachment) -> String {
 }
 
 /// Crystal DateTime.FromBinary display; unknown/invalid dates remain blank.
+pub fn mail_date_display_label(binary: i64) -> String {
+    let label = mail_date_label(binary);
+    if label.is_empty() {
+        crate::native_i18n::for_locale(
+            crate::native_i18n::locale(),
+            "game.mail.dateUnknown",
+            "Not recorded",
+        )
+    } else {
+        label
+    }
+}
+
 pub fn mail_date_label(binary: i64) -> String {
     const EPOCH_TICKS: i64 = 621_355_968_000_000_000;
     const MAX_TICKS: u64 = 3_155_378_975_999_999_999;
@@ -345,6 +481,174 @@ pub fn mail_delete_enabled(msg: &MailMessage) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn monthly_card_mail_display_uses_exact_identity_and_does_not_rewrite_letters() {
+        let attachment = MailAttachment {
+            key: Some("crystal-item-1000001".into()),
+            name: Some("MonthlyCard30Days".into()),
+            unique_id: Some(71),
+            count: 1,
+            ..Default::default()
+        };
+        assert!(attachment.is_monthly_card());
+        assert_eq!(attachment.image_index(), Some(1813));
+        let source = attachment.display_tooltip_source().unwrap();
+        assert_eq!(source.info.item_index, 1_000_001);
+        assert_eq!(source.user_item.as_ref().unwrap().unique_id, 71);
+        let mut mail = MailMessage {
+            sender: "Gameshop".into(),
+            body: "Purchase\r\nMonthlyCard30Days x1\r\nOpaque MonthlyCard30Days text".into(),
+            items: vec![attachment.clone()],
+            ..Default::default()
+        };
+        let expected_name = crate::native_i18n::for_locale(
+            crate::native_i18n::locale(),
+            "billing.monthlyCardItemName",
+            "MonthlyCard30Days",
+        );
+        assert_eq!(attachment.label(), expected_name);
+        assert_eq!(
+            mail.display_body(),
+            format!("Purchase\r\n{expected_name} x1\r\nOpaque MonthlyCard30Days text")
+        );
+        mail.sender = "Friend".into();
+        assert_eq!(mail.display_body(), mail.body);
+        let mut unknown = attachment;
+        unknown.key = Some("unknown".into());
+        assert!(
+            !unknown.is_monthly_card(),
+            "display names cannot supply item identity"
+        );
+        assert!(unknown.image_index().is_none());
+        assert!(unknown.display_tooltip_source().is_none());
+        unknown.key = Some("crystal-item-1000001".into());
+        unknown.item_index = Some(1_000_002);
+        assert!(
+            !unknown.is_monthly_card(),
+            "an explicit other index cannot become a monthly card"
+        );
+    }
+
+    #[test]
+    fn monthly_card_mail_localizes_actual_source_purchase_and_gift_templates_in_all_languages() {
+        use crate::native_i18n::{for_locale, format_for, Locale};
+        for quantity in [1, 2] {
+            let mut mail = MailMessage {
+                sender: "Gameshop".into(),
+                items: (0..quantity)
+                    .map(|slot| MailAttachment {
+                        key: Some("crystal-item-1000001".into()),
+                        item_index: Some(1_000_001),
+                        unique_id: Some(90 + slot),
+                        count: 1,
+                        ..Default::default()
+                    })
+                    .collect(),
+                ..Default::default()
+            };
+            let count = quantity.to_string();
+            for language in Locale::ALL {
+                let name = for_locale(language, "billing.monthlyCardItemName", "MonthlyCard30Days");
+                mail.body = format!("Game shop purchase\r\nMonthlyCard30Days x {quantity} was sent from the game shop.\r\nOpaque MonthlyCard30Days text");
+                let original_body = mail.body.clone();
+                let purchase = format_for(
+                    language,
+                    "game.mail.shopPurchaseBody",
+                    "{item} x {quantity} was sent from the game shop.",
+                    &[("item", &name), ("quantity", &count)],
+                );
+                assert!(purchase.contains(&name));
+                assert_eq!(
+                    mail.display_body_for_locale(language),
+                    format!("Game shop purchase\r\n{purchase}\r\nOpaque MonthlyCard30Days text")
+                );
+                assert_eq!(
+                    mail.body, original_body,
+                    "display cannot mutate Source mail"
+                );
+                if language != Locale::English {
+                    assert!(!purchase.contains("was sent from the game shop."));
+                }
+                for sender in ["GiftSender", "贈送者"] {
+                    mail.body = format!("Game shop gift\n{sender} sent MonthlyCard30Days x {quantity} from the game shop.");
+                    let gift = format_for(
+                        language,
+                        "game.mail.shopGiftBody",
+                        "{sender} sent {item} x {quantity} from the game shop.",
+                        &[("sender", sender), ("item", &name), ("quantity", &count)],
+                    );
+                    assert!(gift.contains(sender), "a character name remains literal");
+                    assert_eq!(
+                        mail.display_body_for_locale(language),
+                        format!("Game shop gift\n{gift}")
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn monthly_card_mail_keeps_wrong_quantity_and_opaque_shop_text_unchanged() {
+        let mut mail = MailMessage {
+            sender: "Gameshop".into(),
+            items: vec![MailAttachment {
+                item_index: Some(1_000_001),
+                key: Some("crystal-item-1000001".into()),
+                count: 1,
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        for body in [
+            "MonthlyCard30Days x2",
+            "MonthlyCard30Days x 2 was sent from the game shop.",
+            "GiftSender sent MonthlyCard30Days x 2 from the game shop.",
+            "MonthlyCard30Days x 01 was sent from the game shop.",
+            "Story: MonthlyCard30Days x 1 was sent from the game shop.",
+            "A story says GiftSender sent MonthlyCard30Days x 1 from the game shop.",
+            " sent MonthlyCard30Days x 1 from the game shop.",
+            "GiftSender sent MonthlyCard30Days x 1 from the game shop. Extra text.",
+            "MonthlyCard30DaysFromPlayer x 1 was sent from the game shop.",
+        ] {
+            mail.body = body.into();
+            assert_eq!(
+                mail.display_body_for_locale(crate::native_i18n::Locale::TraditionalChinese),
+                body
+            );
+        }
+        mail.body = "MonthlyCard30Days x 1 was sent from the game shop.".into();
+        mail.sender = "Friend".into();
+        assert_eq!(mail.display_body(), mail.body);
+        mail.sender = "Gameshop".into();
+        mail.items[0].item_index = Some(1_000_002);
+        assert_eq!(
+            mail.display_body(),
+            mail.body,
+            "exact attachment identity is required"
+        );
+        mail.items.clear();
+        assert_eq!(mail.display_body(), mail.body);
+    }
+
+    #[test]
+    fn missing_mail_date_has_a_visible_placeholder_without_inventing_a_timestamp() {
+        assert_eq!(mail_date_label(0), "");
+        assert_eq!(
+            mail_date_display_label(0),
+            crate::native_i18n::for_locale(
+                crate::native_i18n::locale(),
+                "game.mail.dateUnknown",
+                "Not recorded"
+            )
+        );
+        let timestamp = 621_355_968_000_000_000;
+        assert_eq!(
+            mail_date_display_label(timestamp),
+            mail_date_label(timestamp)
+        );
+        assert!(!mail_date_display_label(-1).is_empty());
+    }
 
     #[test]
     fn mail_dates_follow_source_format_and_leave_unknown_values_blank() {

@@ -11880,7 +11880,7 @@ fn render_overlays(
             reader.is_some_and(|(reader, _)| reader.kind == MailReaderKind::Parcel),
             |parent| {
                 if let Some((_, message)) = reader {
-                    render_mail_reader_parcel(parent, asset_server.as_deref(), message);
+                    render_mail_reader_parcel(parent, asset_server.as_deref(), message, &ui.player);
                 }
             },
         );
@@ -15687,7 +15687,7 @@ fn mail_reader_message<'a>(
 }
 
 fn mail_reader_text(message: &MailMessage) -> String {
-    message.body.replace("\\r\\n", "\r\n")
+    message.display_body()
 }
 
 fn overlay_wrapped_text_at(
@@ -15775,7 +15775,7 @@ fn render_mail_reader_header(
     );
     overlay_text_at(
         parent,
-        &mail_date_label(message.date_sent_binary_datetime),
+        &crate::mail::mail_date_display_label(message.date_sent_binary_datetime),
         CrystalRect::new(70.0, 56.0, 150.0, 15.0),
         10.0,
         TEXT,
@@ -15845,6 +15845,7 @@ fn render_mail_reader_parcel(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
     message: &MailMessage,
+    player: &crate::read_model::PlayerStats,
 ) {
     render_mail_reader_header(
         parent,
@@ -15869,7 +15870,7 @@ fn render_mail_reader_parcel(
     );
     for (index, attachment) in message.items.iter().take(5).enumerate() {
         let left = 27.0 + index as f32 * 36.0;
-        parent.spawn((
+        let mut cell = parent.spawn((
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(left),
@@ -15881,23 +15882,24 @@ fn render_mail_reader_parcel(
             },
             BorderColor::all(Color::srgb(0.0, 1.0, 0.0)),
             BackgroundColor(Color::NONE),
+            Interaction::None,
+            FocusPolicy::Block,
         ));
-        if let (Some(asset_server), Some(image)) = (
-            asset_server,
-            attachment.image.and_then(|image| u16::try_from(image).ok()),
+        let source = attachment.display_tooltip_source();
+        let image = attachment.image_index();
+        if let Some(document) = crystal_item_tooltip_document_from_source(
+            &attachment.label(),
+            image.unwrap_or_default(),
+            u32::from(attachment.count),
+            source.as_ref(),
+            player,
         ) {
-            parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(left),
-                    top: Val::Px(311.0),
-                    width: Val::Px(35.0),
-                    height: Val::Px(31.0),
-                    ..default()
-                })
-                .with_children(|cell| {
-                    spawn_original_item_image(cell, asset_server, image, 35, 31);
-                });
+            cell.insert(CrystalItemHint(document));
+        }
+        if let (Some(asset_server), Some(image)) = (asset_server, image) {
+            cell.with_children(|content| {
+                spawn_original_item_image(content, asset_server, image, 35, 31);
+            });
         }
         if attachment.count > 1 {
             overlay_text_at(

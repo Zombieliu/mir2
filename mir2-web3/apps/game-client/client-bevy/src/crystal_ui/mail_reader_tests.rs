@@ -392,6 +392,76 @@ fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
 }
 
 #[test]
+fn monthly_card_mail_renders_original_icon_hint_and_missing_date_placeholder() {
+    let mut app = super::tests::overlay_render_test_app();
+    let parcel = MailMessage {
+        id: 51,
+        sender: "Gameshop".into(),
+        body: "MonthlyCard30Days x1".into(),
+        read: true,
+        items: vec![MailAttachment {
+            key: Some("crystal-item-1000001".into()),
+            item_index: Some(1_000_001),
+            unique_id: Some(8751),
+            name: Some("MonthlyCard30Days".into()),
+            count: 1,
+            identified: true,
+            soul_bound_id: -1,
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(parcel.clone());
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
+        mail_id: 51,
+        kind: MailReaderKind::Parcel,
+    });
+    app.update();
+    let world = app.world_mut();
+    super::primary_item_image_tests::load_original_images(world);
+    let (_, image, node) = world
+        .query::<(&OriginalItemImage, &ImageNode, &Node)>()
+        .iter(world)
+        .find(|(_, image, _)| {
+            image
+                .image
+                .path()
+                .is_some_and(|path| path.to_string() == "original-ui/Items/1813.png")
+        })
+        .expect("monthly card uses its packaged original item PNG");
+    assert_eq!(node.display, Display::Flex);
+    assert!(world
+        .resource::<Assets<Image>>()
+        .get(&image.image)
+        .is_some());
+    let texts = world
+        .query::<&Text>()
+        .iter(world)
+        .map(|text| text.0.clone())
+        .collect::<Vec<_>>();
+    assert!(texts.contains(&crate::mail::mail_date_display_label(0)));
+    assert!(texts.contains(&parcel.display_body()));
+    let hints = world
+        .query::<&CrystalItemHint>()
+        .iter(world)
+        .map(|hint| hint.0.plain_text())
+        .collect::<Vec<_>>();
+    assert!(
+        hints
+            .iter()
+            .any(|text| text.contains("30") && text.contains("when used")),
+        "attachment hover explains activation on use"
+    );
+    assert!(mail_claim_enabled(&parcel));
+    assert_eq!(parcel.date_sent_binary_datetime, 0);
+}
+
+#[test]
 fn escape_closes_reader_and_session_reset_clears_it() {
     let mut app = reader_test_app();
     app.world_mut()

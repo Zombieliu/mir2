@@ -27,7 +27,7 @@ fn preview(message: &MailMessage) -> String {
     format!(
         "{}{}",
         if message.locked { "[*] " } else { "" },
-        message.body.replace("\r\n", " ")
+        message.display_body().replace("\r\n", " ")
     )
 }
 
@@ -56,7 +56,7 @@ pub(super) fn row(
         .with_children(|row| {
             if let Some(assets) = assets {
                 let path = if let Some(item) = message.items.first() {
-                    item.image
+                    item.image_index()
                         .map(|image| format!("original-ui/Items/{image}.png"))
                 } else {
                     Some(format!(

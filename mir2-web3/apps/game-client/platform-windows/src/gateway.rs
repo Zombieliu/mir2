@@ -1082,6 +1082,12 @@ fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClas
 /// when that index names exactly one row in the extracted Crystal database;
 /// an ambiguous or absent index must stay partial rather than choosing a row.
 fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplate> {
+    // Application-owned items are deliberately absent from the imported
+    // Crystal catalogue. Resolve their exact reserved index from the same
+    // template used by the server, without guessing unknown native items.
+    if item_index == mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return Some(mir2_game_data::billing_monthly_card_item_template());
+    }
     let mut matches = crystal_item_manifest()
         .items
         .into_iter()
@@ -5721,12 +5727,29 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
             format!("{subject}\n{body}")
         }
     });
-    let items = mail
-        .get("items")?
-        .as_array()?
-        .iter()
-        .map(mail_attachment_json)
-        .collect::<Option<Vec<_>>>()?;
+    // Stage5's items are template keys; the concrete instance carrier lives
+    // in itemStatesJson. Prefer it just as Source's ClientMail builder does,
+    // so the next snapshot cannot erase packet-originated attachment data.
+    let items = if let Some(states) = mail
+        .get("itemStatesJson")
+        .or_else(|| mail.get("item_states_json"))
+        .and_then(Value::as_array)
+        .filter(|states| !states.is_empty())
+    {
+        states
+            .iter()
+            .map(|state| {
+                let item: Value = serde_json::from_str(state.as_str()?).ok()?;
+                mail_attachment_json(&item)
+            })
+            .collect::<Option<Vec<_>>>()?
+    } else {
+        mail.get("items")?
+            .as_array()?
+            .iter()
+            .map(mail_attachment_json)
+            .collect::<Option<Vec<_>>>()?
+    };
     Some(json!({
         "id": id,
         "sender": mail.get("senderName").or_else(|| mail.get("sender")).or_else(|| mail.get("from")).and_then(Value::as_str).unwrap_or("System"),
@@ -5746,31 +5769,135 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
 
 fn mail_attachment_json(item: &Value) -> Option<Value> {
     if let Some(name) = item.as_str().filter(|name| !name.is_empty()) {
-        return Some(json!({ "name": name, "count": 1,
-            "image": mir2_game_data::crystal_item_by_name(name).map(|template| template.image) }));
+        let index = crystal_item_index_from_key(name);
+        let template = index
+            .and_then(unique_crystal_tooltip_template)
+            .or_else(|| mir2_game_data::crystal_item_by_name(name));
+        return Some(json!({ "key": name, "itemIndex": index,
+            "name": template.as_ref().map(|item| item.name.as_str()).unwrap_or(name),
+            "count": 1, "image": template.map(|item| item.image) }));
     }
-    let item_index = value_i32(item.get("itemIndex").or_else(|| item.get("item_index")));
-    let name = value_string(item.get("name"));
+    let item_index = concrete_item_index(item);
+    let template = item_index
+        .and_then(unique_crystal_tooltip_template)
+        .or_else(|| {
+            item.get("name")
+                .and_then(Value::as_str)
+                .and_then(mir2_game_data::crystal_item_by_name)
+        });
+    let name = value_string(item.get("name"))
+        .filter(|name| !name.trim().is_empty())
+        .or_else(|| template.as_ref().map(|item| item.name.clone()));
     let key = value_string(item.get("key"));
     if item_index.is_none() && name.is_none() && key.is_none() {
         return None;
     }
+    let count = value_u32(item.get("quantity").or_else(|| item.get("count")))
+        .map(u16::try_from)
+        .transpose()
+        .ok()?
+        .unwrap_or(1);
+    let source = mail_attachment_tooltip_source(item, item_index, count);
+    let image = source
+        .as_ref()
+        .map(|source| source.user_item_image(u32::from(count)))
+        .or_else(|| {
+            template.as_ref().map(|info| {
+                mir2_game_data::crystal_user_item_image(
+                    info.item_type,
+                    info.shape,
+                    info.stack_size,
+                    info.image,
+                    u32::from(count),
+                )
+            })
+        })
+        .map(u32::from)
+        .or_else(|| value_u32(item.get("image").or_else(|| item.get("icon"))));
     Some(json!({
         "uniqueId": value_u64(item.get("uniqueId").or_else(|| item.get("unique_id"))),
         "itemIndex": item_index,
-        "image": item_index.and_then(mir2_game_data::crystal_item_by_index)
-            .or_else(|| name.as_deref().and_then(mir2_game_data::crystal_item_by_name))
-            .map(|template| template.image),
+        "image": image,
         "key": key,
         "name": name,
-        "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
-        "currentDura": value_u32(item.get("currentDura").or_else(|| item.get("current_dura"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
-        "maxDura": value_u32(item.get("maxDura").or_else(|| item.get("max_dura"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "count": count,
+        "currentDura": value_u32(item.get("currentDura").or_else(|| item.get("current_dura")).or_else(|| item.get("durabilityCurrent")).or_else(|| item.get("durability_current"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "maxDura": value_u32(item.get("maxDura").or_else(|| item.get("max_dura")).or_else(|| item.get("durabilityMax")).or_else(|| item.get("durability_max"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
         "soulBoundId": value_i32(item.get("soulBoundId").or_else(|| item.get("soul_bound_id"))).unwrap_or_default(),
         "identified": item.get("identified").and_then(Value::as_bool).unwrap_or(false),
         "cursed": item.get("cursed").and_then(Value::as_bool).unwrap_or(false),
         "gemCount": value_u32(item.get("gemCount").or_else(|| item.get("gem_count"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "tooltipSource": source,
     }))
+}
+
+fn crystal_item_index_from_key(key: &str) -> Option<i32> {
+    key.strip_prefix("crystal-item-")?.parse().ok()
+}
+
+fn concrete_item_index(item: &Value) -> Option<i32> {
+    value_i32(item.get("itemIndex").or_else(|| item.get("item_index")))
+        .or_else(|| {
+            item.get("user_item_metadata")
+                .and_then(|metadata| value_i32(metadata.get("item_index")))
+        })
+        .or_else(|| {
+            item.get("key")
+                .and_then(Value::as_str)
+                .and_then(crystal_item_index_from_key)
+        })
+}
+
+fn mail_attachment_tooltip_source(
+    item: &Value,
+    item_index: Option<i32>,
+    count: u16,
+) -> Option<CrystalItemTooltipSourceModel> {
+    if let Some(source) = item
+        .get("tooltipSource")
+        .or_else(|| item.get("tooltip_source"))
+        .filter(|source| !source.is_null())
+    {
+        return serde_json::from_value(source.clone()).ok();
+    }
+    let index = item_index?;
+    // Raw ItemState is not a full generic UserItem carrier (e.g. sockets and
+    // refinement sidecars differ). Only the reserved, non-equipment monthly
+    // card gets a catalogue fallback; wire UserItems retain their full fields.
+    if item.get("quantity").is_some() && index != mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return None;
+    }
+    let mut normalized = item.as_object()?.clone();
+    normalized.retain(|_, value| !value.is_null());
+    normalized.insert("item_index".into(), json!(index));
+    normalized.insert("count".into(), json!(count));
+    for (target, aliases) in [
+        ("unique_id", &["uniqueId"][..]),
+        (
+            "current_dura",
+            &["currentDura", "durability_current", "durabilityCurrent"][..],
+        ),
+        (
+            "max_dura",
+            &["maxDura", "durability_max", "durabilityMax"][..],
+        ),
+        ("soul_bound_id", &["soulBoundId"][..]),
+        ("gem_count", &["gemCount"][..]),
+    ] {
+        if !normalized.contains_key(target) {
+            if let Some(value) = aliases
+                .iter()
+                .find_map(|alias| item.get(*alias))
+                .filter(|value| !value.is_null())
+            {
+                normalized.insert(target.into(), value.clone());
+            }
+        }
+    }
+    crystal_tooltip_source_for_user_item(
+        &Value::Object(normalized),
+        &NativeUiPlayerCursor::default(),
+    )
 }
 
 fn mail_packet_body(payload: &Value) -> &Value {
@@ -6639,6 +6766,32 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
             target.insert(target_name.to_owned(), value);
         }
     }
+    if concrete_item_index(item) == Some(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX) {
+        if target.get("tooltipSource").is_none_or(Value::is_null) {
+            if let Some(source) = value_u32(target.get("quantity"))
+                .and_then(|count| u16::try_from(count).ok())
+                .and_then(|count| {
+                    mail_attachment_tooltip_source(
+                        item,
+                        Some(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX),
+                        count,
+                    )
+                })
+            {
+                target.insert("tooltipSource".into(), json!(source));
+            }
+        }
+        if target
+            .get("name")
+            .and_then(Value::as_str)
+            .is_none_or(|name| name.trim().is_empty())
+        {
+            target.insert(
+                "name".into(),
+                json!(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_NAME),
+            );
+        }
+    }
     let source_icon = value_u32(target.get("quantity"))
         .and_then(|quantity| crystal_user_item_icon(item, quantity));
     if let Some(icon) = source_icon {
@@ -6681,7 +6834,7 @@ fn crystal_user_item_icon(item: &Value, count: u32) -> Option<u16> {
             count,
         ));
     }
-    let index = value_i32(item.get("item_index").or_else(|| item.get("itemIndex")))?;
+    let index = concrete_item_index(item)?;
     let info = unique_crystal_tooltip_template(index)?;
     Some(mir2_game_data::crystal_user_item_image(
         info.item_type,
@@ -11011,6 +11164,129 @@ mod tests {
         let wire = serde_json::to_value(command).unwrap();
         assert_eq!(wire["mailId"], 42);
         assert_eq!(wire["lock"], true);
+    }
+
+    #[test]
+    fn mail_monthly_card_packet_then_snapshot_keeps_concrete_attachment_and_bag_identity() {
+        use mir2_client_bevy::mail::{mail_claim_enabled, MailModel};
+        let state = json!({"key":"crystal-item-1000001","name":"MonthlyCard30Days",
+            "icon":1813,"unique_id":8701,"container":"Bag1","slot":0,"quantity":1,
+            "durability_current":null,"durability_max":null,"identified":true,
+            "soul_bound_id":-1,"cursed":false,"gem_count":0});
+        let packet: MailModel = serde_json::from_value(
+            try_transform_mail_model_from_packet(&json!({
+                "mail":[{"mailId":1,"senderName":"Gameshop","message":"MonthlyCard30Days x1",
+                    "dateSentBinaryDatetime":0,"canReply":true,"collected":false,
+                    "items":[{"item_index":1000001,"unique_id":8701,"count":1,
+                        "identified":true,"soul_bound_id":-1}]}]
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        let persisted = json!({"id":1,"from":"Gameshop","subject":"Purchase",
+            "body":"MonthlyCard30Days x1","items":["crystal-item-1000001"],
+            "itemStatesJson":[state.to_string()],"claimed":false,"locked":false});
+        let snapshot: MailModel = serde_json::from_value(
+            try_transform_mail_model_from_snapshot(&json!({
+                "stage5Systems":{"mail":[persisted.clone()]}
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        let attachment = &snapshot.mails[0].items[0];
+        assert_eq!(attachment.key.as_deref(), Some("crystal-item-1000001"));
+        assert_eq!(attachment.unique_id, packet.mails[0].items[0].unique_id);
+        assert_eq!(attachment.item_index, Some(1_000_001));
+        assert_eq!(attachment.count, 1);
+        assert_eq!(
+            attachment.image_index(),
+            packet.mails[0].items[0].image_index()
+        );
+        assert_eq!(attachment.image_index(), Some(1813));
+        assert_eq!(
+            attachment.tooltip_source,
+            packet.mails[0].items[0].tooltip_source
+        );
+        assert_eq!(snapshot.mails[0].date_sent_binary_datetime, 0);
+        assert!(mail_claim_enabled(&snapshot.mails[0]));
+
+        let inventory: mir2_client_bevy::inventory::InventoryModel = serde_json::from_value(
+            transform_inventory_model(&json!({"gold":55,"inventoryItems":[state]})),
+        )
+        .unwrap();
+        assert_eq!(inventory.items.len(), 1);
+        let item = &inventory.items[0];
+        assert_eq!(item.key, "crystal-item-1000001");
+        assert_eq!(item.unique_id, attachment.unique_id);
+        assert_eq!(item.quantity, 1);
+        assert_eq!(item.icon, 1813);
+        let source = item.tooltip_source.as_ref().unwrap();
+        assert_eq!(source.info.item_index, 1_000_001);
+        assert_eq!(source.user_item.as_ref().unwrap().unique_id, 8701);
+        assert_eq!(source.user_item.as_ref().unwrap().count, 1);
+        assert!(source
+            .info
+            .tooltip
+            .as_deref()
+            .unwrap()
+            .contains("when used"));
+        assert_eq!(inventory.gold, 55);
+
+        let mut collected = persisted;
+        collected["claimed"] = json!(true);
+        let collected: MailModel = serde_json::from_value(
+            try_transform_mail_model_from_snapshot(&json!({"stage5Systems":{"mail":[collected]}}))
+                .unwrap(),
+        )
+        .unwrap();
+        assert!(collected.mails[0].claimed);
+        assert!(
+            !mail_claim_enabled(&collected.mails[0]),
+            "claim state is exclusively Source-owned"
+        );
+    }
+
+    #[test]
+    fn mail_item_states_do_not_fall_back_to_keys_when_concrete_carrier_is_invalid() {
+        for states in [
+            json!(["invalid json"]),
+            json!(["{\"quantity\":70000,\"key\":\"crystal-item-1000001\"}"]),
+        ] {
+            assert!(
+                mail_message_json(&json!({"id":1,"items":["crystal-item-1000001"],
+                "itemStatesJson":states}))
+                .is_none()
+            );
+        }
+        let snake = mail_message_json(&json!({"id":1,"items":["old-display-key"],
+            "item_states_json":[json!({"key":"unknown","icon":44,"unique_id":19,
+                "quantity":2,"durability_current":7,"durability_max":9}).to_string()]}))
+        .unwrap();
+        assert_eq!(snake["items"][0]["uniqueId"], 19);
+        assert_eq!(snake["items"][0]["image"], 44);
+        assert_eq!(snake["items"][0]["count"], 2);
+        assert_eq!(snake["items"][0]["currentDura"], 7);
+        assert_eq!(snake["items"][0]["maxDura"], 9);
+        assert!(snake["items"][0]["itemIndex"].is_null());
+        assert!(snake["items"][0]["tooltipSource"].is_null());
+    }
+
+    #[test]
+    fn mail_monthly_card_legacy_exact_key_resolves_without_a_late_item_info_packet() {
+        assert_eq!(
+            unique_crystal_tooltip_template(1_000_001).unwrap().image,
+            1813
+        );
+        let known = mail_attachment_json(&json!("crystal-item-1000001")).unwrap();
+        assert_eq!(known["itemIndex"], 1_000_001);
+        assert_eq!(known["name"], "MonthlyCard30Days");
+        assert_eq!(known["image"], 1813);
+        let unknown = mail_attachment_json(&json!("crystal-item-1000002")).unwrap();
+        assert!(unknown["image"].is_null());
+        assert!(unique_crystal_tooltip_template(1_000_002).is_none());
+        assert!(
+            mail_attachment_json(&json!("MonthlyCard30DaysFromPlayer")).unwrap()["image"].is_null()
+        );
     }
 
     #[test]
