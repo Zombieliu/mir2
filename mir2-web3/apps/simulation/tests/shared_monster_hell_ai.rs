@@ -94,6 +94,61 @@ fn packets(out: &[ZoneOutbound]) -> Vec<&ServerPacket> {
         })
         .collect()
 }
+fn assert_checkpoint_tick(
+    original: &mut ZoneRuntime,
+    restored: &mut ZoneRuntime,
+    now_ms: u64,
+) -> Vec<ZoneOutbound> {
+    let out = original.tick(now_ms);
+    let replay = restored.tick(now_ms);
+    // A checkpoint restores gameplay, not ownership of a live socket. Keep
+    // every gameplay output and the complete durable state comparison, while
+    // checking live health receipts against the original owner separately.
+    for name in ["a", "b"] {
+        let session = SessionId::new(name);
+        assert!(original.owner_health_cursor(&session).is_some());
+        assert!(restored.owner_health_cursor(&session).is_none());
+        assert_eq!(original.player_vitals(&session), restored.player_vitals(&session));
+    }
+    for event in &out {
+        if let ZoneOutbound::OwnerHealthChanged { change } = event {
+            let owner = original.owner_health_cursor(&change.cursor.session_id).unwrap();
+            assert_eq!(change.cursor.online_owner, owner.online_owner);
+            assert_eq!(change.cursor.object_id, owner.object_id);
+            assert_eq!(change.cursor.life_generation, owner.life_generation);
+            assert!(change.cursor.health_sequence > 0);
+            assert!(change.cursor.health_sequence <= owner.health_sequence);
+        }
+        if let ZoneOutbound::PlayerDamaged { session_id, damage, settlement: Some(receipt) } = event {
+            assert_eq!(receipt.hp_before - receipt.hp_after, *damage);
+            assert!(out.iter().any(|candidate| matches!(candidate,
+                ZoneOutbound::OwnerHealthChanged { change }
+                    if change.cursor.session_id == *session_id
+                    && change.cursor.object_id == receipt.object_id
+                    && change.cursor.life_generation == receipt.life_generation
+                    && change.hp_before == receipt.hp_before
+                    && change.hp == receipt.hp_after)));
+        }
+    }
+    assert!(!replay.iter().any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    let gameplay = |events: &[ZoneOutbound]| events.iter()
+        .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
+        .cloned().collect::<Vec<_>>();
+    assert_eq!(gameplay(&out), gameplay(&replay));
+    let before = state(original);
+    let after = state(restored);
+    assert_eq!(before["online_presence"].as_object().unwrap().len(), 2);
+    assert!(after["online_presence"].as_object().unwrap().is_empty());
+    // Live retaliation ownership also expires at restore. Compare the Hell
+    // gameplay state explicitly; a restored instance cannot inherit sockets
+    // or their owner-bound PK records merely by loading world state.
+    for key in ["players", "native_monsters", "native_monster_respawns",
+        "pending_native_hits", "pending_native_projectiles", "pending_native_player_hits",
+        "native_periodic_player_poisons", "hell_world"] {
+        assert_eq!(before[key], after[key], "checkpoint field {key}");
+    }
+    out
+}
 #[test]
 fn bomb_expires_strictly_after_ten_seconds_and_explodes_after_death_once() {
     let mut z = fixture(99, "HellBomb1");
@@ -109,9 +164,8 @@ fn bomb_expires_strictly_after_ten_seconds_and_explodes_after_death_once() {
         .iter()
         .any(|p| matches!(p,ServerPacket::ObjectDied{info}if info.object_id==9999)));
     let mut restored = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
-    assert_eq!(z.tick(10500), restored.tick(10500));
-    let out = z.tick(10501);
-    assert_eq!(out, restored.tick(10501));
+    assert_checkpoint_tick(&mut z, &mut restored, 10500);
+    let out = assert_checkpoint_tick(&mut z, &mut restored, 10501);
     for name in ["a", "b"] {
         assert!(out.iter().any(|o|matches!(o,ZoneOutbound::PlayerDamaged { session_id, damage, .. }if *session_id==SessionId::new(name)&&*damage>0)));
     }
@@ -164,13 +218,12 @@ fn lord_delayed_knight_and_quakes_are_shared_checkpoint_state() {
         .unwrap()
         .is_empty());
     let mut restored = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
-    assert_eq!(z.tick(501), restored.tick(501));
+    assert_checkpoint_tick(&mut z, &mut restored, 501);
     assert!(!z
         .native_monster_snapshots()
         .iter()
         .any(|m| m.name == "HellKnight1"));
-    let out = z.tick(502);
-    assert_eq!(out, restored.tick(502));
+    assert_checkpoint_tick(&mut z, &mut restored, 502);
     assert!(z
         .native_monster_snapshots()
         .iter()
@@ -183,8 +236,7 @@ fn lord_delayed_knight_and_quakes_are_shared_checkpoint_state() {
         .min_by_key(|q| q["start"].as_u64().unwrap())
         .unwrap();
     let start = quake["start"].as_u64().unwrap().max(503);
-    let out = z.tick(start);
-    assert_eq!(out, restored.tick(start));
+    let out = assert_checkpoint_tick(&mut z, &mut restored, start);
     // A quake already started at 502 is retained for late observers too.
     let late = z.handle(ZoneCommand::Join(ZoneJoin {
         session_id: SessionId::new("late"),
