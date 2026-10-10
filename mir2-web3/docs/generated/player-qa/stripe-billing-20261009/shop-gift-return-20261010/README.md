@@ -189,3 +189,33 @@ The user also exposed a native mail presentation bug: exact `itemStatesJson`
 contains the monthly card but a later key-only snapshot clears its icon. Native
 mail projection and the application-owned monthly-card metadata fix are in
 progress. The active user session and its unclaimed parcel are preserved.
+
+### Canonical Source contender setup
+
+CI38047285888 failed with the safe label `owner-checkpoint-stale`; the previous
+redacted error cannot be classified retrospectively. [Exact log](CI-GIFT-CAS-RECOVERY-01-FAILURE.txt)
+is preserved. Read-only tracing identifies the normal StartGame forced save:
+each successful startup advances the owner revision, so the second legitimate
+startup supersedes the first contender before any Gift executes. This is the
+correct stale-owner fence, not a reason to rebase a production purchase.
+
+The PG fixture now completes both normal password logins/StartGames first,
+reads one complete canonical payer checkpoint from its owned scoped Source,
+and restores that complete checkpoint to both already authenticated fixture
+runtimes through the existing trusted identity-checked restore API before
+the barrier. It asserts payer identity, revision,1000 Credits and no Gift
+receipt. The recipient's unsaved gold and transform are untouched. Independent
+repositories, locks, Source versions, identical immutable request, debit/mail/
+activation and stale-owner negative assertions remain. This prepares Source
+contender checkpoints; it is not proof of real-player simultaneous same-account
+login. [Local Gift15](SOURCE-GIFT-CANONICAL-SETUP-01.txt) passes; actual PG CI pending.
+
+[Existing monthly9](SOURCE-MONTHLY-CAS-RECOVERY-01.txt),
+[ledger5](SOURCE-GIFT-LEDGER-CAS-RECOVERY-01.txt) and
+[Gateway build](GATEWAY-CAS-RECOVERY-BUILD-01.txt) pass after the production recovery
+change. [Native mail92](NATIVE-MONTHLY-MAIL-BEVY-01.txt) and
+[Windows projection8](NATIVE-MONTHLY-MAIL-WINDOWS-01.txt) pass for concrete
+attachment projection, packet-to-snapshot retention, instance/count, app
+monthly metadata,1813 asset rendering, hint and unknown-date placeholder.
+The actual Source sentence localization is receiving an additional exact-template
+check before the prepared native replaces the active user client.

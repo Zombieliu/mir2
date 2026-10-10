@@ -80,17 +80,19 @@ fn fixture(file: bool) -> Fixture {
 
 fn start(config: &SimulationConfig, account: &str, index: i32) -> InProcessWorldRuntime {
     let mut runtime = InProcessWorldRuntime::new(config.clone());
-    runtime
+    let login = runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::Login {
             account_id: account.into(),
             password: PASSWORD.into(),
         }))
         .unwrap();
-    runtime
+    assert!(login.iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    let bootstrap = runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
             character_index: index,
         }))
         .unwrap();
+    assert!(bootstrap.iter().any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
     assert_eq!(runtime.active_identity().unwrap().account_id, account);
     runtime
 }
@@ -1062,21 +1064,39 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     recipient.force_authoritative_player_transform(position.clone(), MirDirection::Left);
     let configs = [open(&scoped), open(&scoped)];
     eprintln!("gift-pg: independent writer repositories opened");
-    let barrier = Arc::new(Barrier::new(2));
-    let threads: Vec<_> = configs
-        .into_iter()
+    // Every ordinary StartGame intentionally saves the owner and advances its
+    // revision. Complete both before preparing this Source CAS race; otherwise
+    // the second startup correctly makes the first live checkpoint stale.
+    let mut writers: Vec<_> = configs.into_iter()
         .map(|writer| {
+            let runtime = start(&writer, SENDER, SENDER_INDEX);
+            (writer, runtime)
+        }).collect();
+    let canonical = save(&open(&scoped), SENDER, SENDER_INDEX);
+    assert_eq!(canonical.character.name, "GiftSender");
+    assert_eq!(canonical.character.index, SENDER_INDEX);
+    assert_eq!(canonical.credit, 1000);
+    assert!(serde_json::from_str::<Stage5SystemsState>(
+        canonical.stage5_systems_json.as_deref().unwrap(),
+    ).unwrap().mail.iter().all(|mail| mail.subject != "NativeGameShopGiftLedgerV1"));
+    for (_, runtime) in &mut writers {
+        // Trusted, test-only preparation of the complete authoritative owner
+        // checkpoint, not a revision-only rebase or a public client command.
+        // No game action has run on either sender. Recipient state is untouched.
+        runtime.restore_active_character_checkpoint(&canonical).unwrap();
+        let checkpoint = runtime.active_character_checkpoint().unwrap();
+        assert_eq!(checkpoint.revision, canonical.revision);
+        assert_eq!(checkpoint.character, canonical.character);
+        assert_eq!(checkpoint.credit, 1000);
+    }
+    eprintln!("gift-pg: both authenticated Source contender checkpoints prepared");
+    let barrier = Arc::new(Barrier::new(2));
+    let threads: Vec<_> = writers
+        .into_iter()
+        .map(|(_writer, mut runtime)| {
             let barrier = Arc::clone(&barrier);
             std::thread::spawn(move || {
-                // A bootstrap panic must still release every barrier participant.
-                // The joined panic remains a test failure; it is never converted
-                // into a receipt or counted as a successful contender.
-                let runtime = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    start(&writer, SENDER, SENDER_INDEX)
-                }));
-                eprintln!("gift-pg: writer bootstrap completed; entering gift barrier");
                 barrier.wait();
-                let mut runtime = runtime.unwrap();
                 eprintln!("gift-pg: writer gift transaction begins");
                 gift(&mut runtime, request(19))
                     .unwrap_or_else(|error| {
