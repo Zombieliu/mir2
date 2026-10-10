@@ -1,5 +1,21 @@
 # Classic map transfer terrain availability — 2026-10-10
 
+> Continued fixture recovery, 2026-10-10: actual transfer348 Linux38019332713
+> failed its original Snake cold-root check; siege passed, no deploy. Eight
+> retained fixtures now use bundled ordinary terrain and equivalent geometry.
+> Production collision/recovery/permissions/clocks and the full workflow stay
+> canonically unchanged. 544 Rust+6 Node tests passed at least once;
+> one original benchmark is excluded. Strict500ms scroll failed once by31ms,
+> then passed one identical diagnostic repeat; it is not claimed fixed or green.
+> Original RED, compiler allocation failure
+> and mixed-EOL scope correction are retained. Root is sole writer; next review
+> explores the isolated movement receipt read-only. Exact new Git/Linux/package,
+> fresh drained public rollout and native/human acceptance remain separate.
+> [Scope, original evidence and remaining gates](CLASSIC-TERRAIN-FIXTURE-RECOVERY-20261010.md).
+> Public64b6/R23/feed18 stays current at closure. FullP1-P7/Mentor remains open;
+> the expired heartbeat stays paused, with no blocked Goal completion claim.
+
+
 The current Candidate closes two terrain availability gaps in ordinary map
 transfer observation. A configured transfer cannot be triggered from an
 unavailable installed Zone. Crystal movement destinations use the existing

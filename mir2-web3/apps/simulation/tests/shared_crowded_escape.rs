@@ -4,10 +4,11 @@
 //! semantics; it does not prove an ordinary boss-poison player journey.
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
-    SessionId, WorldEntityDisposition, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
+    SessionId, WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey,
     ZoneMonsterSpawn, ZoneOutbound, ZoneRuntime,
 };
 
+const MAP: &str = "D024";
 const OWNER: &str = "crowded-escape-owner";
 const OBSERVER: &str = "crowded-escape-observer";
 const OWNER_ID: u32 = 101;
@@ -28,14 +29,14 @@ fn session(name: &str) -> SessionId {
     SessionId::new(name)
 }
 fn point(x: i32, y: i32) -> Point {
-    Point { x, y }
+    // Translate every actor, ring, corridor and expected location together.
+    Point { x: x + 20, y: y + 42 }
 }
 
 fn fixture(class: MirClass) -> ZoneRuntime {
-    let mut zone = ZoneRuntime::new_with_collision(
-        ZoneKey::for_map("crowded-escape-fixture"),
-        ZoneCollision::unbounded(),
-    );
+    // Ordinary terrain has the same signed identity after strict cold reload.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
+    assert!(zone.has_available_collision(), "real fixture terrain must load");
     for (name, object_id, position) in [
         (OWNER, OWNER_ID, point(10, 10)),
         (OBSERVER, OBSERVER_ID, point(22, 10)),
@@ -52,7 +53,7 @@ fn fixture(class: MirClass) -> ZoneRuntime {
             hp: HP,
             max_hp: HP,
             mp: 100,
-            map_file_name: "crowded-escape-fixture".into(),
+            map_file_name: MAP.into(),
             position,
             direction: MirDirection::Right,
             chat_profile: Default::default(),

@@ -1,11 +1,12 @@
 //! Ordinary shared SummonSnakes and the immediate Monster Master lifetime.
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
-    SessionId, WorldEntityDisposition, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
+    SessionId, WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey,
     ZoneMonsterDefense, ZoneMonsterSpawn, ZoneOutbound, ZoneRuntime,
 };
 
 const TARGET: u32 = 9100;
+const MAP: &str = "0";
 
 fn packets(out: &[ZoneOutbound], owner: &SessionId) -> Vec<ServerPacket> {
     out.iter()
@@ -39,7 +40,7 @@ fn target() -> ZoneMonsterSpawn {
         move_speed_ms: 600,
         attack_speed_ms: 1200,
         friendly_guild: None,
-        position: Point { x: 106, y: 100 },
+        position: Point { x: 328, y: 299 },
         direction: MirDirection::Left,
         defense: Default::default(),
         respawn: None,
@@ -53,10 +54,12 @@ fn fixture() -> (ZoneRuntime, SessionId, u32, u32, u64) {
 
 fn fixture_with_ac(ac: i32) -> (ZoneRuntime, SessionId, u32, u32, u64) {
     let owner = SessionId::new("snake-owner");
-    let mut zone = ZoneRuntime::new_with_collision(
-        ZoneKey::for_map("snake-master-lifecycle"),
-        ZoneCollision::unbounded(),
-    );
+    // Strict cold recovery reloads this actual map's collision. A synthetic
+    // unbounded arena has no identical terrain identity to restore from disk.
+    // Translate the original geometry by (+222,+199) into walkable terrain;
+    // all actor offsets, distances, deadlines and lifecycle assertions remain.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
+    assert!(zone.has_available_collision(), "real fixture terrain must load");
     zone.handle(ZoneCommand::Join(ZoneJoin {
         session_id: owner.clone(),
         account_id: "snake-source-account".into(),
@@ -69,8 +72,8 @@ fn fixture_with_ac(ac: i32) -> (ZoneRuntime, SessionId, u32, u32, u64) {
         hp: 10000,
         max_hp: 10000,
         mp: 1000,
-        map_file_name: "snake-master-lifecycle".into(),
-        position: Point { x: 100, y: 100 },
+        map_file_name: MAP.into(),
+        position: Point { x: 322, y: 299 },
         direction: MirDirection::Right,
         chat_profile: Default::default(),
         combat_stats: Default::default(),
@@ -92,7 +95,7 @@ fn fixture_with_ac(ac: i32) -> (ZoneRuntime, SessionId, u32, u32, u64) {
         object_id: 0,
         spell: Spell::SummonSnakes,
         direction: MirDirection::Right,
-        target: Point { x: 104, y: 100 },
+        target: Point { x: 326, y: 299 },
         cast: true,
         level: 3,
         damage: 0,
@@ -339,8 +342,8 @@ fn ordinary_snake_pending_hit_rejects_actual_parent_hp_zero() {
         hp: 10000,
         max_hp: 10000,
         mp: 1000,
-        map_file_name: "snake-master-lifecycle".into(),
-        position: Point { x: 100, y: 101 },
+        map_file_name: MAP.into(),
+        position: Point { x: 322, y: 300 },
         direction: MirDirection::Right,
         chat_profile: mir2_simulation::ZoneChatProfile {
             attack_mode: 5,

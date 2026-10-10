@@ -1,6 +1,13 @@
 use super::*;
 use mir2_protocol::MirGender;
 
+const MAP: &str = "D024";
+
+// Preserve the original geometry on real open terrain: translate (+20,+42).
+fn fixture_point(x: i32, y: i32) -> Point {
+    Point { x: x + 20, y: y + 42 }
+}
+
 fn sid(name: &str) -> SessionId {
     SessionId::new(name)
 }
@@ -18,8 +25,8 @@ fn join(name: &str, object_id: u32, x: i32) -> ZoneJoin {
         hp: 1_000,
         max_hp: 1_000,
         mp: 1_000,
-        map_file_name: "purification-source".into(),
-        position: Point { x, y: 10 },
+        map_file_name: MAP.into(),
+        position: fixture_point(x, 10),
         direction: MirDirection::Right,
         chat_profile: Default::default(),
         combat_stats: Default::default(),
@@ -98,7 +105,7 @@ fn self_cast(zone: &mut ZoneRuntime, now: u64) -> Vec<ZoneOutbound> {
         object_id: 102,
         spell: Spell::Purification,
         direction: MirDirection::Left,
-        target: Point { x: 12, y: 10 },
+        target: fixture_point(12, 10),
         cast: true,
         level: 3,
         damage: 0,
@@ -111,10 +118,9 @@ fn self_cast(zone: &mut ZoneRuntime, now: u64) -> Vec<ZoneOutbound> {
 // Poison, Curse and the beneficial buff all come from accepted ordinary Zone
 // spell commands. No private poison, permission or pending proof is assigned.
 fn source_fixture() -> (ZoneRuntime, u64) {
-    let mut zone = ZoneRuntime::new_with_collision(
-        ZoneKey::for_map("purification-source"),
-        ZoneCollision::unbounded(),
-    );
+    // Strict recovery must reload the same ordinary map collision.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
+    assert!(zone.has_available_collision(), "real fixture terrain must load");
     zone.handle(ZoneCommand::Join(join("healer", 101, 10)));
     zone.handle(ZoneCommand::Join(join("friend", 102, 12)));
     let mut enemy = join("enemy", 103, 14);
@@ -125,7 +131,7 @@ fn source_fixture() -> (ZoneRuntime, u64) {
         object_id: 102,
         spell: Spell::UltimateEnhancer,
         direction: MirDirection::Right,
-        target: Point { x: 12, y: 10 },
+        target: fixture_point(12, 10),
         cast: true,
         level: 3,
         damage: 0,
@@ -140,7 +146,7 @@ fn source_fixture() -> (ZoneRuntime, u64) {
         object_id: 102,
         spell: Spell::Poisoning,
         direction: MirDirection::Left,
-        target: Point { x: 12, y: 10 },
+        target: fixture_point(12, 10),
         cast: true,
         level: 3,
         damage: 10,
@@ -165,7 +171,7 @@ fn source_fixture() -> (ZoneRuntime, u64) {
             object_id: 0,
             spell: Spell::Curse,
             direction: MirDirection::Left,
-            target: Point { x: 12, y: 10 },
+            target: fixture_point(12, 10),
             cast: true,
             level: 3,
             damage: 30,
@@ -445,7 +451,7 @@ fn purification_cleanup_does_not_remove_a_new_life_poison_with_the_same_object_i
         object_id: 102,
         spell: Spell::Poisoning,
         direction: MirDirection::Left,
-        target: Point { x: 12, y: 10 },
+        target: fixture_point(12, 10),
         cast: true,
         level: 3,
         damage: 10,
@@ -518,7 +524,7 @@ fn player_magic_item_preflight_admits_the_real_hostile_player_target() {
         102,
         Spell::Poisoning,
         MirDirection::Left,
-        &Point { x: 12, y: 10 },
+        &fixture_point(12, 10),
         true,
         10,
         5,
@@ -531,7 +537,7 @@ fn player_magic_item_preflight_admits_the_real_hostile_player_target() {
         object_id: 102,
         spell: Spell::Poisoning,
         direction: MirDirection::Left,
-        target: Point { x: 12, y: 10 },
+        target: fixture_point(12, 10),
         cast: true,
         level: 3,
         damage: 10,
@@ -572,7 +578,7 @@ fn player_magic_item_preflight_and_dispatch_recheck_the_same_live_rejections() {
     ] {
         let (mut zone, now) = source_fixture();
         let now = now + 2_000;
-        let mut point = Point { x: 12, y: 10 };
+        let mut point = fixture_point(12, 10);
         let mut spell = Spell::Poisoning;
         match rejected {
             "peace" => {
@@ -634,7 +640,7 @@ fn player_magic_item_preflight_and_dispatch_recheck_the_same_live_rejections() {
             }
             "point" => point.x += 1,
             "range" => {
-                point.x = 80;
+                point.x = 80 + 20;
                 zone.handle(ZoneCommand::SyncPlayerTransform {
                     session_id: sid("friend"),
                     position: point.clone(),
@@ -736,7 +742,7 @@ fn player_magic_item_preflight_is_read_only_and_never_grants_a_changed_target() 
         102,
         Spell::Poisoning,
         MirDirection::Left,
-        &Point { x: 12, y: 10 },
+        &fixture_point(12, 10),
         true,
         10,
         5,
@@ -755,7 +761,7 @@ fn player_magic_item_preflight_is_read_only_and_never_grants_a_changed_target() 
         &sid("friend"),
         Spell::Poisoning,
         MirDirection::Left,
-        Point { x: 12, y: 10 },
+        fixture_point(12, 10),
         true,
         3,
         10,
@@ -834,7 +840,7 @@ fn purification_completion_uses_current_relationship_and_target_position() {
     });
     zone.handle(ZoneCommand::SyncPlayerTransform {
         session_id: sid("friend"),
-        position: Point { x: 80, y: 80 },
+        position: fixture_point(80, 80),
         direction: MirDirection::Left,
     });
     let completion = zone.tick(now + 500);
@@ -1033,7 +1039,7 @@ fn purification_completion_rechecks_real_brown_time_with_strict_expiry() {
         object_id: 101,
         spell: Spell::Poisoning,
         direction: MirDirection::Left,
-        target: Point { x: 10, y: 10 },
+        target: fixture_point(10, 10),
         cast: true,
         level: 3,
         damage: 10,

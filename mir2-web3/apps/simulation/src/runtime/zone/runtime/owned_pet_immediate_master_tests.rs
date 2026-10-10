@@ -3,6 +3,7 @@ use super::*;
 use mir2_protocol::MirGender;
 
 const TARGET: u32 = 9100;
+const MAP: &str = "0";
 
 fn join(name: &str, id: u32, position: Point) -> ZoneJoin {
     ZoneJoin {
@@ -17,7 +18,7 @@ fn join(name: &str, id: u32, position: Point) -> ZoneJoin {
         hp: 10000,
         max_hp: 10000,
         mp: 1000,
-        map_file_name: "snake-master-unit".into(),
+        map_file_name: MAP.into(),
         position,
         direction: MirDirection::Right,
         chat_profile: Default::default(),
@@ -70,19 +71,20 @@ fn monster(id: u32, name: &str, ai: u8, position: Point) -> ZoneMonsterSpawn {
 }
 
 fn fixture() -> (ZoneRuntime, u32, u32, u64) {
-    let mut z = ZoneRuntime::new_with_collision(
-        ZoneKey::for_map("snake-master-unit"),
-        crate::runtime::zone::collision::ZoneCollision::unbounded(),
-    );
+    // Strict cold recovery reconstructs this ordinary map's collision identity.
+    // Translate every original actor/target point by (+222,+199); the source
+    // offsets, birth/impact clocks and all retired-identity checks stay intact.
+    let mut z = ZoneRuntime::new(ZoneKey::for_map(MAP));
+    assert!(z.has_available_collision(), "real fixture terrain must load");
     let owner = SessionId::new("owner");
     z.handle(ZoneCommand::Join(join(
         "owner",
         101,
-        Point { x: 100, y: 100 },
+        Point { x: 322, y: 299 },
     )));
     z.handle(ZoneCommand::SpawnMonster {
         session_id: owner.clone(),
-        monster: monster(TARGET, "Field Wasp", 0, Point { x: 106, y: 100 }),
+        monster: monster(TARGET, "Field Wasp", 0, Point { x: 328, y: 299 }),
         now_ms: 0,
     });
     z.handle(ZoneCommand::PlayerCastMagic {
@@ -90,7 +92,7 @@ fn fixture() -> (ZoneRuntime, u32, u32, u64) {
         object_id: 0,
         spell: Spell::SummonSnakes,
         direction: MirDirection::Right,
-        target: Point { x: 104, y: 100 },
+        target: Point { x: 326, y: 299 },
         cast: true,
         level: 3,
         damage: 0,

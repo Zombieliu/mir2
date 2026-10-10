@@ -4,8 +4,30 @@ use mir2_simulation::{
     ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 use serde_json::Value;
+
+// Ordinary D024 terrain contains the translated Hell-Lord/bomb neighbourhood;
+// the owned-bomb fixture uses its own ordinary D022 terrain and translation.
+const MAP: &str = "D024";
+const OWNED_MAP: &str = "D022";
+
 fn p(x: i32, y: i32) -> Point {
-    Point { x, y }
+    Point {
+        x: x + 16,
+        y: y - 8,
+    }
+}
+
+fn owned_p(x: i32, y: i32) -> Point {
+    Point {
+        x: x + 214,
+        y: y + 172,
+    }
+}
+
+fn ordinary_zone(map: &str) -> ZoneRuntime {
+    let zone = ZoneRuntime::new(ZoneKey::for_map(map));
+    assert!(zone.has_available_collision(), "ordinary terrain {map}");
+    zone
 }
 fn join_resist(z: &mut ZoneRuntime, name: &str, id: u32, pos: Point, resist: i32) {
     z.handle(ZoneCommand::Join(ZoneJoin {
@@ -20,7 +42,7 @@ fn join_resist(z: &mut ZoneRuntime, name: &str, id: u32, pos: Point, resist: i32
         hp: 1000000,
         max_hp: 1000000,
         mp: 100,
-        map_file_name: "hell-shared-fixture".into(),
+        map_file_name: MAP.into(),
         position: pos,
         direction: MirDirection::Up,
         chat_profile: Default::default(),
@@ -75,7 +97,7 @@ fn spawn(ai: u8, name: &str, pos: Point) -> ZoneMonsterSpawn {
     }
 }
 fn fixture(ai: u8, name: &str) -> ZoneRuntime {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join(&mut z, "a", 101, p(40, 41));
     join(&mut z, "b", 102, p(42, 42));
     z.spawn_world_event_monster(&spawn(ai, name, p(40, 40)), 0);
@@ -198,11 +220,11 @@ fn lord_delayed_knight_and_quakes_are_shared_checkpoint_state() {
         hp: 100,
         max_hp: 100,
         mp: 10,
-        map_file_name: "hell-shared-fixture".into(),
-        position: p(
-            quake["position"]["x"].as_i64().unwrap() as i32,
-            quake["position"]["y"].as_i64().unwrap() as i32,
-        ),
+        map_file_name: MAP.into(),
+        position: Point {
+            x: quake["position"]["x"].as_i64().unwrap() as i32,
+            y: quake["position"]["y"].as_i64().unwrap() as i32,
+        },
         direction: MirDirection::Up,
         chat_profile: Default::default(),
         combat_stats: Default::default(),
@@ -223,7 +245,10 @@ fn knight_death_advances_lord_once_and_empty_map_resets_the_stage() {
         &mut z,
         "killer",
         104,
-        p(knight.position.x, knight.position.y + 1),
+        Point {
+            x: knight.position.x,
+            y: knight.position.y + 1,
+        },
     );
     z.handle(ZoneCommand::PlayerAttackObject {
         session_id: SessionId::new("killer"),
@@ -298,7 +323,10 @@ fn hell_knight_parent_life_survives_checkpoint_without_binding_reused_lord_id() 
                 runtime,
                 "killer",
                 104,
-                p(child.position.x, child.position.y + 1),
+                Point {
+                    x: child.position.x,
+                    y: child.position.y + 1,
+                },
             );
             runtime.handle(ZoneCommand::PlayerAttackObject {
                 session_id: SessionId::new("killer"),
@@ -356,7 +384,7 @@ fn hell_map_spawn_outlives_removed_parent_without_a_replacement() {
 
 #[test]
 fn bomb_bleeding_ticks_on_next_update_and_does_not_cross_player_lives() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     z.spawn_world_event_monster(&spawn(99, "HellBomb3", p(40, 40)), 0);
     z.tick(10001);
@@ -385,7 +413,7 @@ fn bomb_bleeding_ticks_on_next_update_and_does_not_cross_player_lives() {
 
 #[test]
 fn bomb_poison_counted_end_clears_all_legacy_projections_without_reappearing() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     z.spawn_world_event_monster(&spawn(99, "HellBomb3", p(40, 40)), 0);
     z.tick(10001);
@@ -416,7 +444,7 @@ fn bomb_poison_counted_end_clears_all_legacy_projections_without_reappearing() {
 
 #[test]
 fn bomb_source_replacement_with_same_id_cannot_keep_the_old_poison_lease() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     z.spawn_world_event_monster(&spawn(99, "HellBomb3", p(40, 40)), 0);
     z.tick(10001);
@@ -443,7 +471,7 @@ fn bomb_source_replacement_with_same_id_cannot_keep_the_old_poison_lease() {
 // Explicit nonzero SC fixture: AI99 behavior with ArcherGuard's DC/SC=255,
 // while the retained image selects Bleeding. This does not alter live data.
 fn active_nonzero_bleed() -> ZoneRuntime {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     let mut bomb = spawn(99, "ArcherGuard", p(40, 40));
     bomb.image = 905;
@@ -571,7 +599,7 @@ fn positive_bleeding_and_green_periodic_damage_never_emits_object_struck() {
     }
     let mut green = None;
     for id in 9157..9189 {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+        let mut z = ordinary_zone(MAP);
         join_resist(&mut z, "a", 101, p(40, 41), 0);
         let mut hugger = spawn(69, "ArcherGuard", p(40, 40));
         hugger.object_id = id;
@@ -616,7 +644,7 @@ fn canonical_checkpoint_rejects_modified_periodic_and_hell_world_state() {
 }
 
 fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-owned-fixture"));
+    let mut z = ordinary_zone(OWNED_MAP);
     z.handle(ZoneCommand::Join(ZoneJoin {
         session_id: SessionId::new("owner"),
         account_id: "owner".into(),
@@ -629,8 +657,8 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         hp: 100000,
         max_hp: 100000,
         mp: 100,
-        map_file_name: "hell-owned-fixture".into(),
-        position: p(20, 24),
+        map_file_name: OWNED_MAP.into(),
+        position: owned_p(20, 24),
         direction: MirDirection::Up,
         chat_profile: Default::default(),
         combat_stats: ZonePlayerCombatStats::default(),
@@ -640,7 +668,7 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         object_id: 0,
         spell: Spell::SummonToad,
         direction: MirDirection::Up,
-        target: p(20, 20),
+        target: owned_p(20, 20),
         cast: true,
         level: 3,
         damage: 0,
@@ -660,7 +688,10 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         .expect("real owned toad");
     z.handle(ZoneCommand::SyncPlayerTransform {
         session_id: SessionId::new("owner"),
-        position: p(pos.x + 10, pos.y),
+        position: Point {
+            x: pos.x + 10,
+            y: pos.y,
+        },
         direction: MirDirection::Up,
     });
     let mut profile = z.player_chat_profile(&SessionId::new("owner")).unwrap();
@@ -669,7 +700,14 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         session_id: SessionId::new("owner"),
         profile,
     });
-    let mut source = spawn(99, "Guard", p(pos.x, pos.y - 1));
+    let mut source = spawn(
+        99,
+        "Guard",
+        Point {
+            x: pos.x,
+            y: pos.y - 1,
+        },
+    );
     source.object_id = id;
     source.image = image;
     source.hp = 100000;
@@ -721,7 +759,14 @@ fn hell_bomb_removed_source_does_not_transfer_queued_blast_to_reused_id() {
     z.tick(11501);
     let old = state(&z)["native_monsters"]["98799"]["incarnation"].clone();
     z.despawn_world_event_monster(98799, 11502);
-    let mut replacement = spawn(99, "Guard", p(pos.x, pos.y - 1));
+    let mut replacement = spawn(
+        99,
+        "Guard",
+        Point {
+            x: pos.x,
+            y: pos.y - 1,
+        },
+    );
     replacement.object_id = 98799;
     replacement.max_hp = 100000;
     replacement.hp = 100000;
@@ -774,7 +819,7 @@ fn hell_bomb_native_dazed_and_bleeding_are_real_periodic_statuses() {
 
 #[test]
 fn hell_map_quake_strikes_unowned_native_without_caster_and_survives_restore() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join(&mut z, "a", 101, p(40, 41));
     let mut lord = spawn(98, "Guard", p(40, 40));
     lord.attack_speed_ms = 100000;

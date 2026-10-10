@@ -1,6 +1,9 @@
 use super::*;
 use mir2_protocol::MirGender;
 
+// The bundled D024 terrain has the original line-hit and recall cells open.
+const REAL_MAP: &str = "d024";
+
 fn point(x: i32, y: i32) -> Point {
     Point { x, y }
 }
@@ -715,8 +718,10 @@ fn owned_pet_brown_uses_victim_at_war_and_pet_hits_do_not_brown_owner() {
 
 #[test]
 fn owned_shinsu_pve_hits_real_hostile_line_cells() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("owned-pet-unit"));
+    let mut z = ZoneRuntime::new(ZoneKey::for_map(REAL_MAP));
+    assert!(z.has_available_collision(), "real fixture terrain must load");
     let mut owner = join("owner", 101, point(20, 20));
+    owner.map_file_name = REAL_MAP.into();
     owner.chat_profile.attack_mode = 0;
     owner.hp = 100_000;
     owner.max_hp = 100_000;
@@ -1831,7 +1836,11 @@ fn detached_online_pet_fixture(
     });
     assert!(!source.players.contains_key(&sid));
     assert!(source.native_monsters.contains_key(&pet));
-    let mut destination = ZoneRuntime::new(ZoneKey::for_map("owned-pet-destination"));
+    let mut destination = ZoneRuntime::new(ZoneKey::for_map(REAL_MAP));
+    assert!(
+        destination.has_available_collision(),
+        "real recall terrain must load"
+    );
     owned_pet_test_map_flags(&mut destination, false, false);
     destination
         .npc_teleport_config
@@ -2108,7 +2117,9 @@ fn owned_pet_recall_uses_static_back_then_owner_and_does_not_teleport_same_map()
         current.handle(ZoneCommand::Join(occupant));
         assert_eq!(current.players[&SessionId::new("occupant")].position, back);
         if blocked_back {
-            current.collision = current.collision.clone().with_blocked_cells([back.clone()]);
+            // Only this synthetic static-wall branch installs a trusted arena;
+            // ordinary recall and strict cold recovery retain the real terrain.
+            current.collision = ZoneCollision::unbounded().with_blocked_cells([back.clone()]);
         }
         let (mut recalls, _) = old.drain_online_pet_recalls(2600);
         let out = current.adopt_online_pet_recall(recalls.remove(0), 2600);

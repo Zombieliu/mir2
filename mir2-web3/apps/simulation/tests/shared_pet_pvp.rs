@@ -5,12 +5,37 @@ use mir2_simulation::{
     ZoneRuntime,
 };
 
+// Ordinary bundled terrain. Each map has its own fixed translation of the
+// original logical fixture coordinates; real cross-map proofs remain distinct.
+const MAP_A: &str = "D024";
+const MAP_B: &str = "D022";
+const MAP_C: &str = "D023";
+
+fn map_point(map: &str, x: i32, y: i32) -> Point {
+    let (dx, dy) = match map {
+        MAP_A => (36, 12),
+        MAP_B => (249, -4),
+        MAP_C => (225, -14),
+        _ => panic!("unknown prepared map"),
+    };
+    Point {
+        x: x + dx,
+        y: y + dy,
+    }
+}
+
+fn ordinary_zone(map: &str) -> ZoneRuntime {
+    let zone = ZoneRuntime::new(ZoneKey::for_map(map));
+    assert!(zone.has_available_collision(), "ordinary terrain {map}");
+    zone
+}
+
 fn saved_pet_manager() -> ZoneManager {
     let mut config = mir2_simulation::ZoneNpcTeleportConfig::disabled(0);
     for (index, name, no_pets) in [
-        (1, "pet-map-a", false),
-        (2, "pet-map-b", false),
-        (3, "pet-map-no-pets", true),
+        (1, MAP_A, false),
+        (2, MAP_B, false),
+        (3, MAP_C, true),
     ] {
         config.maps.insert(
             name.into(),
@@ -33,19 +58,22 @@ fn saved_pet_manager() -> ZoneManager {
         );
     }
     let mut manager = ZoneManager::new();
-    for name in ["pet-map-a", "pet-map-b", "pet-map-no-pets"] {
-        assert!(manager.install_empty_zone(
-            ZoneRuntime::new_with_collision_and_npc_teleport_config(
-                ZoneKey::for_map(name),
-                mir2_simulation::ZoneCollision::unbounded(),
-                config.clone(),
-            )
-        ));
+    for name in [MAP_A, MAP_B, MAP_C] {
+        let zone = ZoneRuntime::new_with_collision_and_npc_teleport_config(
+            ZoneKey::for_map(name),
+            mir2_simulation::ZoneCollision::for_map(name),
+            config.clone(),
+        );
+        assert!(zone.has_available_collision(), "ordinary terrain {name}");
+        assert!(manager.install_empty_zone(zone));
     }
     manager
 }
 
 fn saved_pet_join(name: &str, id: u32, map: &str, position: Point, mode: u8) -> ZoneJoin {
+    // Callers supply the shared logical p() geometry on MAP_A; retain that
+    // geometry when admitting the actor into a different real map.
+    let position = map_point(map, position.x - 36, position.y - 12);
     let mut player = join(name, id, position);
     player.map_file_name = map.into();
     player.chat_profile.pet_mode = mode;
@@ -53,12 +81,14 @@ fn saved_pet_join(name: &str, id: u32, map: &str, position: Point, mode: u8) -> 
 }
 
 fn manager_summon(manager: &mut ZoneManager, spell: Spell, now: u64) -> u32 {
+    let map = manager.zone_key_for_session(&SessionId::new("owner")).unwrap();
+    let target = map_point(&map.map_file_name, 11, 20);
     manager.handle(ZoneCommand::PlayerCastMagic {
         session_id: SessionId::new("owner"),
         object_id: 0,
         spell,
         direction: MirDirection::Right,
-        target: p(11, 20),
+        target,
         cast: true,
         level: 2,
         damage: 0,
@@ -104,12 +134,12 @@ fn sorted_saved_pet_records(snapshot: &mir2_simulation::ZoneSavedPetSnapshot) ->
 #[test]
 fn shared_owned_pet_manager_normal_map_transfer_preserves_source_modes_and_real_master() {
     let sid = SessionId::new("owner");
-    let a = ZoneKey::for_map("pet-map-a");
-    let b = ZoneKey::for_map("pet-map-b");
+    let a = ZoneKey::for_map(MAP_A);
+    let b = ZoneKey::for_map(MAP_B);
     for mode in [0, 1, 2, 3, 4] {
         let mut manager = saved_pet_manager();
-        manager.join(saved_pet_join("owner", 101, "pet-map-a", p(10, 20), mode));
-        manager.join(saved_pet_join("observer", 102, "pet-map-a", p(12, 20), 0));
+        manager.join(saved_pet_join("owner", 101, MAP_A, p(10, 20), mode));
+        manager.join(saved_pet_join("observer", 102, MAP_A, p(12, 20), 0));
         let pet = manager_summon(&mut manager, Spell::SummonSkeleton, 10);
         let original = manager
             .native_monster_snapshots(&a)
@@ -119,7 +149,7 @@ fn shared_owned_pet_manager_normal_map_transfer_preserves_source_modes_and_real_
         let saved = manager.capture_player_saved_pets(&sid, 600);
         let online = manager.online_owner_proof_for_session(&sid).unwrap();
         let life = manager.player_life_generation(&sid).unwrap();
-        manager.join(saved_pet_join("owner", 101, "pet-map-b", p(40, 50), mode));
+        manager.join(saved_pet_join("owner", 101, MAP_B, p(40, 50), mode));
         let recalled = manager.refresh_online_pets_at(620);
         assert_eq!(
             manager.online_owner_proof_for_session(&sid).as_ref(),
@@ -149,7 +179,7 @@ fn shared_owned_pet_manager_normal_map_transfer_preserves_source_modes_and_real_
             );
             assert_eq!(
                 current.position,
-                p(40, 49),
+                map_point(MAP_B, 40, 49),
                 "Master.Back uses Direction - 1"
             );
             assert!(packets(&recalled, "owner").iter().any(|packet| matches!(packet, ServerPacket::ObjectMonster{info} if info.object_id == pet && info.master_object_id == 101)));
@@ -166,17 +196,17 @@ fn shared_owned_pet_manager_normal_map_transfer_preserves_source_modes_and_real_
 #[test]
 fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_cleans_all_maps() {
     let sid = SessionId::new("owner");
-    let a = ZoneKey::for_map("pet-map-a");
-    let b = ZoneKey::for_map("pet-map-b");
+    let a = ZoneKey::for_map(MAP_A);
+    let b = ZoneKey::for_map(MAP_B);
     for mode in [0, 1, 2, 3, 4] {
         let mut manager = saved_pet_manager();
-        manager.join(saved_pet_join("owner", 101, "pet-map-a", p(10, 20), mode));
+        manager.join(saved_pet_join("owner", 101, MAP_A, p(10, 20), mode));
         let pet = manager_summon(&mut manager, Spell::SummonSkeleton, 10);
         let position = manager.native_monster_snapshots(&a)[0].position.clone();
         manager.join(saved_pet_join(
             "owner",
             101,
-            "pet-map-no-pets",
+            MAP_C,
             p(40, 50),
             mode,
         ));
@@ -197,7 +227,7 @@ fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_c
             ServerPacket::ObjectAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
         )));
         assert_eq!(manager.native_monster_snapshots(&a)[0].position, position);
-        manager.join(saved_pet_join("owner", 101, "pet-map-b", p(40, 50), mode));
+        manager.join(saved_pet_join("owner", 101, MAP_B, p(40, 50), mode));
         manager.refresh_online_pets_at(2610);
         assert!(manager.native_monster_snapshots(&a).is_empty());
         assert_eq!(
@@ -213,7 +243,7 @@ fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_c
         manager.handle(ZoneCommand::Leave {
             session_id: sid.clone(),
         });
-        for map in ["pet-map-a", "pet-map-b", "pet-map-no-pets"] {
+        for map in [MAP_A, MAP_B, MAP_C] {
             assert!(
                 manager
                     .native_monster_snapshots(&ZoneKey::for_map(map))
@@ -221,7 +251,7 @@ fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_c
                 "true logout removes every detached pet"
             );
         }
-        manager.join(saved_pet_join("owner", 201, "pet-map-b", p(40, 50), mode));
+        manager.join(saved_pet_join("owner", 201, MAP_B, p(40, 50), mode));
         assert_ne!(
             manager.online_owner_proof_for_session(&sid).unwrap(),
             old_online
@@ -256,12 +286,12 @@ fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_c
 fn shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_committed_current_lives()
  {
     let sid = SessionId::new("owner");
-    let a = ZoneKey::for_map("pet-map-a");
-    let b = ZoneKey::for_map("pet-map-b");
+    let a = ZoneKey::for_map(MAP_A);
+    let b = ZoneKey::for_map(MAP_B);
     let mut manager = saved_pet_manager();
-    manager.join(saved_pet_join("owner", 101, "pet-map-a", p(10, 20), 2));
+    manager.join(saved_pet_join("owner", 101, MAP_A, p(10, 20), 2));
     let skeleton = manager_summon(&mut manager, Spell::SummonSkeleton, 10);
-    manager.join(saved_pet_join("owner", 101, "pet-map-b", p(10, 20), 2));
+    manager.join(saved_pet_join("owner", 101, MAP_B, p(10, 20), 2));
     manager.refresh_online_pets_at(620);
     let shinsu = manager_summon(&mut manager, Spell::SummonShinsu, 2010);
     let admission = manager.capture_player_pet_experience(&sid, 2520).unwrap();
@@ -388,7 +418,7 @@ fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirr
     let sid = SessionId::new("owner");
     let mut manager = saved_pet_manager();
     let mut admitted = personal.active_zone_join_snapshot("owner").unwrap();
-    admitted.map_file_name = "pet-map-a".into();
+    admitted.map_file_name = MAP_A.into();
     admitted.position = p(10, 20);
     admitted.direction = MirDirection::Up;
     admitted.chat_profile.pet_mode = 2;
@@ -564,7 +594,7 @@ fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirr
 #[test]
 fn shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_flight_lives() {
     for change in ["none", "safe", "group", "revive", "logout", "cold"] {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("shared-pet-pvp"));
+        let mut z = ordinary_zone(MAP_A);
         let mut owner = join("owner", 101, p(10, 20));
         owner.class = MirClass::Archer;
         owner.hp = 800;
@@ -633,7 +663,8 @@ fn shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_fli
             .into_iter()
             .find(|m| m.object_id == pet.object_id)
             .unwrap();
-        let distance = (pet.position.x - 12).abs().max((pet.position.y - 20).abs()) as u64;
+        let target = p(12, 20);
+        let distance = (pet.position.x - target.x).abs().max((pet.position.y - target.y).abs()) as u64;
         assert!((1..=12).contains(&distance));
         let due = started + 500 + distance * 50;
         assert_eq!(hp(&z, "victim"), 1000, "no damage on range animation");
@@ -713,7 +744,7 @@ fn shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_fli
 }
 
 fn p(x: i32, y: i32) -> Point {
-    Point { x, y }
+    map_point(MAP_A, x, y)
 }
 fn join(name: &str, id: u32, position: Point) -> ZoneJoin {
     ZoneJoin {
@@ -728,7 +759,7 @@ fn join(name: &str, id: u32, position: Point) -> ZoneJoin {
         hp: 1000,
         max_hp: 1000,
         mp: 1000,
-        map_file_name: "shared-pet-pvp".into(),
+        map_file_name: MAP_A.into(),
         position,
         direction: MirDirection::Down,
         chat_profile: ZoneChatProfile {
@@ -792,7 +823,7 @@ fn fixture(mode: u8) -> (ZoneRuntime, u32) {
 }
 
 fn fixture_with_attacker_class(mode: u8, attacker_class: MirClass) -> (ZoneRuntime, u32) {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("shared-pet-pvp"));
+    let mut z = ordinary_zone(MAP_A);
     let mut owner = join("owner", 101, p(10, 20));
     owner.chat_profile.pet_mode = mode;
     z.handle(ZoneCommand::Join(owner));
@@ -1485,7 +1516,7 @@ fn shared_human_owned_pet_fire_bounce_old_wild_leg_cannot_mint_rejoined_source_a
 #[test]
 fn shared_owned_skeleton_and_shinsu_wait_for_a_real_owner_attack_on_non_threat_wild() {
     for spell in [Spell::SummonSkeleton, Spell::SummonShinsu] {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("shared-pet-pvp"));
+        let mut z = ordinary_zone(MAP_A);
         let mut owner = join("owner", 101, p(20, 20));
         owner.chat_profile.attack_mode = 0; // Peace still permits normal PvE.
         owner.combat_stats.min_sc = 20;
@@ -1839,7 +1870,7 @@ fn shared_owned_pet_redirects_to_real_enemy_pet_without_damaging_owner_proxy() {
 #[test]
 fn shared_owned_summon_cast_cannot_cross_owner_death_revive_or_rejoin() {
     for reconnect in [false, true] {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("shared-pet-pvp"));
+        let mut z = ordinary_zone(MAP_A);
         z.handle(ZoneCommand::Join(join("owner", 101, p(10, 20))));
         z.handle(ZoneCommand::PlayerCastMagic {
             session_id: SessionId::new("owner"),
@@ -1891,7 +1922,7 @@ fn shared_owned_summon_cast_cannot_cross_owner_death_revive_or_rejoin() {
 
 #[test]
 fn shared_owned_shinsu_guard_uses_real_player_breath_and_550ms_delay() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("shared-pet-pvp"));
+    let mut z = ordinary_zone(MAP_A);
     for (name, id, pos) in [("owner", 101, p(10, 20)), ("victim", 102, p(10, 21))] {
         z.handle(ZoneCommand::Join(join(name, id, pos)));
         z.handle(ZoneCommand::sync_player_combat_state(
@@ -2020,12 +2051,12 @@ fn shared_owned_pet_issued_death_receipt_survives_online_map_handoff_and_ack_is_
         manager.issued_owned_pet_kill_is_current(&receipt),
         "owner death cannot clear an already issued kill"
     );
-    let mut transferred = join("owner", 101, p(30, 30));
-    transferred.map_file_name = "shared-pet-next-map".into();
+    let mut transferred = join("owner", 101, map_point(MAP_B, 30, 30));
+    transferred.map_file_name = MAP_B.into();
     manager.join(transferred);
     assert_eq!(
         manager.zone_key_for_session(&SessionId::new("owner")),
-        Some(ZoneKey::for_map("shared-pet-next-map"))
+        Some(ZoneKey::for_map(MAP_B))
     );
     assert!(
         manager.issued_owned_pet_kill_is_current(&receipt),
@@ -2614,13 +2645,13 @@ fn shared_human_poison_death_retains_global_node_across_maps_and_revokes_real_ne
             dead: false,
         });
         if change == "source_map" || change == "both_maps" {
-            source.map_file_name = "poison-source-next-map".into();
-            source.position = p(30, 30);
+            source.map_file_name = MAP_B.into();
+            source.position = map_point(MAP_B, 30, 30);
             manager.join(source.clone());
         }
         if change == "target_map" || change == "both_maps" {
-            target.map_file_name = "poison-target-next-map".into();
-            target.position = p(40, 40);
+            target.map_file_name = MAP_C.into();
+            target.position = map_point(MAP_C, 40, 40);
             target.hp = 1;
             manager.join(target.clone());
         }
@@ -2707,7 +2738,7 @@ fn real_vampire_summon(owner_hp: i32) -> (ZoneRuntime, u32) {
 }
 
 fn real_archer_summon(spell: Spell, owner_hp: i32) -> (ZoneRuntime, u32) {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("shared-pet-pvp"));
+    let mut z = ordinary_zone(MAP_A);
     let mut owner = join("owner", 101, p(10, 20));
     owner.class = MirClass::Archer;
     owner.hp = owner_hp;
