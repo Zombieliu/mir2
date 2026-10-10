@@ -77,7 +77,7 @@ jobs:
       - name: Source gift debit, recipient mail, restart and failure boundaries
         run: cargo test --locked -p mir2-simulation --features test-support --test game_shop_gift 2>&1 | tee billing-evidence/gift-source.log
       - name: Real PostgreSQL independent gift writers and online recipient
-        run: cargo test --locked -p mir2-simulation --test game_shop_gift -- --ignored --test-threads=1 2>&1 | tee billing-evidence/gift-postgres.log
+        run: timeout --signal=TERM --kill-after=10s 180s cargo test --locked -p mir2-simulation --test game_shop_gift -- --ignored --test-threads=1 --nocapture 2>&1 | tee billing-evidence/gift-postgres.log
       - name: Dedicated gift Source RPC and old-host failure boundaries
         run: cargo test --locked -p mir2-gateway --lib game_shop_gift -- --test-threads=1 2>&1 | tee billing-evidence/gift-rpc.log
       - name: Provider fixture HTTP, authenticated socket and private Source RPC

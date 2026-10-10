@@ -1,0 +1,42 @@
+{
+  "ObservedAtUtc": "2026-10-10T09:34:18.0286291Z",
+  "SourceCommit": "9ccec1c2148a6047b33c58d9f4083ced6612d2f0",
+  "GatewayPid": 278076,
+  "NativePid": 277304,
+  "ListenerPid": 280220,
+  "HealthOk": true,
+  "Capacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 1,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "OriginalPersonalAccountDataEqualAtStartup": true,
+  "OriginalSecurityKeysAndPricesRetained": true,
+  "OnlyWebhookSecretRefreshed": true,
+  "SharedActivityClocksAdvancedNormally": true,
+  "NativeLaunchEvents": 7,
+  "NativeStartupStages": [
+    "configuration",
+    "asset_validation_and_map_decode",
+    "build_runtime_app",
+    "host_configured",
+    "enter_event_loop",
+    "first_main_update"
+  ],
+  "ReturnHtmlSha256": "b3476392d221966a03ac09a6bebd02b33c44b3a10cce991f9cb7b99e1196fc94",
+  "NewActualStripePayment": false,
+  "PublicReleaseChanged": false,
+  "HumanShopAcceptance": "open",
+  "NativeUiCapture": "Helper initialization failed with missing kernel-assets path; no visual acceptance claimed",
+  "BillingCiRun": 38041347387,
+  "BillingCiStatus": "cancelled: actual PostgreSQL Gift stalled; diagnostics added without waiving assertions"
+}

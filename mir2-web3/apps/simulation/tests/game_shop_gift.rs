@@ -975,6 +975,7 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     );
     base.batch_execute(&format!("CREATE SCHEMA {schema}"))
         .unwrap();
+    eprintln!("gift-pg: owned schema created");
     let scoped = format!("{url}{}options=-csearch_path%3D{schema}%20-clock_timeout%3D5000%20-cstatement_timeout%3D15000",
         if url.contains('?') { "&" } else { "?" });
     let open = |uri: &str| {
@@ -991,14 +992,18 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
         config
     };
     let seed_config = open(&scoped);
+    eprintln!("gift-pg: seed repository opened");
     seed(&seed_config);
     for account in [SENDER, RECEIVER] {
         seed_config
             .save_account_store_account(account)
             .unwrap_or_else(|_| panic!("QA seed failed; credentials suppressed"));
     }
+    eprintln!("gift-pg: sender and recipient persisted");
     let recipient_config = open(&scoped);
+    eprintln!("gift-pg: recipient repository opened");
     let mut recipient = start(&recipient_config, RECEIVER, RECEIVER_INDEX);
+    eprintln!("gift-pg: recipient authenticated and entered");
     let original = save(&recipient_config, RECEIVER, RECEIVER_INDEX);
     assert!(!recipient
         .execute(WorldCommand::CreditGoldFromOre {
@@ -1008,20 +1013,30 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
         })
         .unwrap()
         .is_empty());
+    eprintln!("gift-pg: unsaved recipient gold staged");
     let position = Point {
         x: original.position.x + 2,
         y: original.position.y + 1,
     };
     recipient.force_authoritative_player_transform(position.clone(), MirDirection::Left);
     let configs = [open(&scoped), open(&scoped)];
+    eprintln!("gift-pg: independent writer repositories opened");
     let barrier = Arc::new(Barrier::new(2));
     let threads: Vec<_> = configs
         .into_iter()
         .map(|writer| {
             let barrier = Arc::clone(&barrier);
             std::thread::spawn(move || {
-                let mut runtime = start(&writer, SENDER, SENDER_INDEX);
+                // A bootstrap panic must still release every barrier participant.
+                // The joined panic remains a test failure; it is never converted
+                // into a receipt or counted as a successful contender.
+                let runtime = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    start(&writer, SENDER, SENDER_INDEX)
+                }));
+                eprintln!("gift-pg: writer bootstrap completed; entering gift barrier");
                 barrier.wait();
+                let mut runtime = runtime.unwrap();
+                eprintln!("gift-pg: writer gift transaction begins");
                 gift(&mut runtime, request(19))
                     .unwrap_or_else(|_| panic!("QA Gift CAS failed; credentials suppressed"))
                     .outcome
@@ -1030,6 +1045,7 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
         .collect();
     let joined: Vec<_> = threads.into_iter().map(|thread| thread.join()).collect();
     let outcomes: Vec<_> = joined.into_iter().map(|result| result.unwrap()).collect();
+    eprintln!("gift-pg: competing writers joined");
     assert!(outcomes[0].success);
     assert_eq!(outcomes[0], outcomes[1]);
     let observer = open(&scoped);
@@ -1052,6 +1068,7 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     // Ordinary commercial Source polling discovers a Gift written by another
     // process even though this recipient has never had a recharge order.
     let notifications = recipient.execute(WorldCommand::Tick).unwrap();
+    eprintln!("gift-pg: ordinary recipient tick returned");
     let delivered_id = outcomes[0].mail_id.unwrap();
     assert!(notifications.iter().any(|packet| matches!(
         packet,
@@ -1067,6 +1084,7 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     recipient
         .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
         .unwrap();
+    eprintln!("gift-pg: recipient logout completed");
     let reopened = open(&scoped);
     let durable = save(&reopened, RECEIVER, RECEIVER_INDEX);
     assert_eq!(durable.gold, original.gold + 77);
@@ -1100,6 +1118,7 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
             .replayed
     );
     assert_eq!(save(&open(&scoped), SENDER, SENDER_INDEX).credit, 990);
+    eprintln!("gift-pg: durable receipt and activation replay verified");
     // This schema was generated above inside the verified dedicated QA DB.
     base.batch_execute(&format!("DROP SCHEMA {schema} CASCADE"))
         .unwrap();

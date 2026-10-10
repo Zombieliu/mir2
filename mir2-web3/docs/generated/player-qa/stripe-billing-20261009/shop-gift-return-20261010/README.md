@@ -122,12 +122,28 @@ No new actual Stripe payment, live key, public callback or public release occurr
 
 ## Release and remaining acceptance
 
-A separate-name compatible native is prepared; original installed files are kept.
-At the most recent process/port inspection the old local sandbox Gateway and
-native were already absent; they were not forcibly stopped by this work.
-Local paired startup, real PostgreSQL Gift CI and native human BUY/GIFT visual
-acceptance remain open at this preparation checkpoint. Deployment evidence, if
-performed, is recorded separately. The installer/public update feed is unchanged.
+A separate-name compatible native and Gateway are running in the existing local
+loopback sandbox. Original installed files are kept. Before startup the old local
+Gateway and native were already absent; they were not forcibly stopped by this
+work. Private settings/accounts were backed up. Personal account data and wallets
+remain equal at startup; existing shared activity clocks advance normally.
+Only the test listener webhook secret was refreshed; prices and security keys
+were retained. Active binary hashes, health, a native connection, startup stages
+and the exact HTML/CSP are recorded in [startup](LOCAL-STARTUP-RECEIPT.json).
+
+Source commit9ccec1c214 is pushed and its adjacent monthly-access CI38041347418
+passes. Gift CI38041347387 reached the actual PostgreSQL test but stalled; it was
+cancelled without claiming a pass. [Original CI log](CI-GIFT-INITIAL-CANCELLED.txt)
+is retained. The PostgreSQL fixture now releases its barrier even if bootstrap
+panics, retains that failure, and emits non-sensitive phase diagnostics. Its CI
+step has a180-second process bound and uncaptured diagnostics. All debit/mail/CAS,
+unsaved-recipient state and activation/replay assertions are retained.
+
+Actual PostgreSQL Gift CI and native human BUY/GIFT visual acceptance remain open.
+The Computer Use helper failed to initialize its kernel-assets path after one
+reset/retry; no native shop screenshot or human acceptance is claimed. The local
+test shortcut points to the compatible native. The installer/public update feed
+is unchanged.
 
 Manual route: normal login → GameShop All → monthly card1000 Credits → BUY →
 confirm → mail claim → bag use. Separately GIFT → exact friend name → confirm →
