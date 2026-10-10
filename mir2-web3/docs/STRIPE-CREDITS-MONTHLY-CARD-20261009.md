@@ -1,6 +1,30 @@
 # Stripe Credits and monthly-card Candidate — 2026-10-09
 
-## 2026-10-10 local trial preparation — waiting for the test key
+## 2026-10-10 actual local payment and monthly trial
+
+The refilled test key works. Official Stripe CLI forwards signed Endive events
+to a separate loopback Gateway; no public tunnel or permanent endpoint is
+created. One actual sandbox Checkout is paid with the official fake card after
+explicitly selecting USD10. Signed callback200 and real Checkout/PaymentIntent
+readback confirm canonical1000/usd. Ordinary password login/creation, expired
+entry denial, Source settlement1000 Credits,1000-Credit card purchase/replay,
+exact-UID activation/replay, normal entry/logout and relogin pass. Final credit
+is0 and the same account-wide30-day expiry persists. No real money is charged.
+Exact code703ebadb CI37969367117 passes; compatible nativefd660003 launches
+with independent preferences and an observed empty1024×768 login screen.
+Native human billing UI, actual provider refunds/disputes and production rollout
+remain open. Gateway/listener remain running for manual local acceptance; the
+native client later exits normally with exit0 and has an isolated restart script.
+[Actual provider/wire evidence and limits](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
+
+Stripe may initially show a local-currency Adaptive Pricing option. This trial
+selected USD; an actual SGD-paid trial is not claimed. Stripe reports canonical
+Checkout/PaymentIntent amounts in the integration currency, with local values
+in separate presentment details. Keep the frozen amount/currency checks strict;
+the initial SGD display is not evidence of a settlement bug.
+[Official reporting behavior](https://docs.stripe.com/payments/currencies/localize-prices/adaptive-pricing?payment-ui=stripe-hosted).
+
+## Historical preparation checkpoint — waiting for the test key
 
 The local Gateway and compatible native binary are built, with an explicit
 test-only loopback return option and Gateway billing38/38 passing. Automatic
@@ -16,11 +40,12 @@ open. Public R22/Gatewaya41/feed17 and original P1–P7 are unchanged.
 The authorized change connects one-time Stripe Hosted Checkout payments to
 the existing character **Credits** wallet and sells a **30-day monthly-card
 consumable** for Credits. This is an unpublished Candidate. Public R22,
-Gateway a41 and signed feed17 remain unchanged. No real Stripe account,
-charge, webhook registration, production database migration or native human
-acceptance is claimed by local fixtures.
+Gateway a41 and signed feed17 remain unchanged. The actual sandbox trial above
+is separate from local fixtures; it does not prove live-money processing,
+permanent public callback, production database migration or native human
+acceptance.
 
-## 2026-10-10 provider credential and pricing follow-up
+## Historical provider credential and pricing checkpoint
 
 The operator supplied a sandbox server key in a user-only private file outside
 Git. Real Stripe authenticated Checkout, PaymentIntent, Charge and webhook
@@ -32,8 +57,9 @@ a temporary webhook/signing-secret creation is verified and its endpoint
 deleted. There is no real charge, game-wallet award or completed payment test.
 
 Confirmed operator pricing is **USD1 =100 Credits**, with a **30-day card
-costing1000 Credits** (USD10). Private test configuration supplies USD1/5/10/20
-offers with100/500/1000/2000 Credits and keeps billing disabled. No prices or
+costing1000 Credits** (USD10). At this provisioning checkpoint private test
+configuration supplied USD1/5/10/20 offers with100/500/1000/2000 Credits and kept
+billing disabled. No prices or
 keys are installed into public services. A permanent matching webhook, public
 test purchase/refund, live credentials, paired deployment and native acceptance
 remain open. [Evidence and original failure](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
@@ -181,7 +207,9 @@ adjacent monthly workflow37946216237 passes9 Source/1 PostgreSQL/4 Gateway check
 The repeated checks are not summed as new unique coverage. Gateway and CI results are recorded in
 [the evidence checkpoint](generated/player-qa/stripe-billing-20261009/README.md).
 Windows host billing tests5, fresh client-rlib model tests10 and isolated URL
-checks2 were run; final native `--tests` check passes. No screenshot was taken.
+checks2 were run; final native `--tests` check passes. That original fixture
+checkpoint had no screenshot; the later actual local launch above has a login
+screenshot, without native billing human acceptance.
 
 The new Stripe acceptance workflow uses an explicitly named isolated Postgres16
 database, four independently loaded writers, real local HTTP/WS/private TCP

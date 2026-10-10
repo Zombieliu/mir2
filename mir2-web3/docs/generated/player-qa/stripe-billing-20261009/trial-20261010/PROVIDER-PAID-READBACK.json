@@ -1,0 +1,54 @@
+{
+  "verifiedAtUtc": "2026-10-10T01:12:53.803509+00:00",
+  "sourceCommit": "703ebadb73c1bde83710301e6795bffe748ca640",
+  "apiVersion": "2026-09-30.endive",
+  "livemode": false,
+  "verification": "Read-only real Stripe GET for the exact owned Checkout and PaymentIntent; no additional payment",
+  "checkout": {
+    "httpStatus": 200,
+    "idSha256": "c33871d8508cd2cf415e6a4458f8ef481e31c584e5747c3f93743d210699d65e",
+    "status": "complete",
+    "paymentStatus": "paid",
+    "amountTotal": 1000,
+    "currency": "usd",
+    "frozenOwnerCharacterOrderMatches": true
+  },
+  "paymentIntent": {
+    "httpStatus": 200,
+    "idSha256": "3d9f5b7178fa2ddb41034486ecdb7bb0460a36e1b6fd23415ce85ff117b42514",
+    "status": "succeeded",
+    "amount": 1000,
+    "amountReceived": 1000,
+    "currency": "usd",
+    "metadataMatches": true
+  },
+  "signedCliCallback": {
+    "apiVersionReady": true,
+    "matchingCompletedAccepted200": 1,
+    "eventIdSha256": [
+      "b869c2f35e3cbeae077ce7be7bc2191f642657da443d4176e525e0e4d206988c"
+    ]
+  },
+  "ordinaryPlayer": {
+    "runPhases": [
+      "prepare",
+      "status",
+      "status",
+      "monthly",
+      "status"
+    ],
+    "allPassed": true,
+    "buyReplayConfirmed": true,
+    "exactUidReplayPreservedExpiry": true,
+    "monthlyExpiresAtMs": 1794185654793,
+    "finalCredit": 0,
+    "finalPendingCredit": 0
+  },
+  "scopeLimits": [
+    "local file store only",
+    "no actual provider refund/dispute",
+    "no production rollout",
+    "native human billing UI acceptance pending",
+    "no gateway cold-restart acceptance"
+  ]
+}

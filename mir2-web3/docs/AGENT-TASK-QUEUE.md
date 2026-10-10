@@ -1,12 +1,15 @@
 # Agent Task Queue
 
-> 2026-10-10 requested local Stripe trial is prepared, not runnable yet:
-> test-only loopback guard/Gateway38/build pass; compatible native and ordinary
-> player helper are ready. Official CLI forwarding avoids the rejected public
-> Quick Tunnel. The current private key entry is empty; operator refill and
-> actual Checkout/callback/1000-Credit/monthly/native acceptance remain open.
-> Public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
-> [Prepared files, original block and limits](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+> 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
+> registration/password login/creation, expired entry rejection, one sandbox
+> USD10 Checkout, signed CLI callback/provider readback and Source-owned1000
+> Credits settlement. Buying/replaying a1000-Credit card and activating/replaying
+> its exact UID produce one30-day term; normal entry/logout/relogin preserve
+> credit0 and expiry. Exact code CI37969367117 passes. Native login is observed;
+> human billing UI and public production rollout remain open. This commercial
+> extension adds no original-parity completion. Public R22/Gatewaya41/feed17 and
+> unfinished P1–P7 are unchanged.
+> [Actual trial and limits](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
 
 > 2026-10-10 Stripe credentials and pricing are now confirmed: sandbox provider
 > reads and unpaid Checkout/temporary webhook provisioning pass. The obsolete
@@ -33,7 +36,8 @@
 | [x] | Candidate native billing presentation | Compile/model/correlation/URL/localization checks; no human visual acceptance |
 | [x] | Real isolated PostgreSQL competing writers | Actual CI37946216332, independent writers and stale owner/restart assertions; adjacent code ledger PG also passes |
 | [x] | Sandbox credentials and operator pricing | Real provider reads, unpaid Checkout create/expire, temporary callback create/delete; USD1/100 Credits, monthly1000 |
-| [ ] | Real Stripe activation and release | Permanent callback, completed test-mode purchase/refund, live keys, fleet schema8 upgrade and native acceptance |
+| [x] | Actual local Stripe payment and ordinary monthly lifecycle | USD10 paid object/callback/1000 Credits, card debit/UID replays, entry/logout/relogin; local file store only |
+| [ ] | Production Stripe activation and release | Permanent callback and actual refund/dispute, live keys, fleet schema8 upgrade and native human acceptance |
 
 > 2026-10-09 unpublished owner HP/MP Candidate: exact server-stamped pool
 > events, FIFO/final-send fencing, confirmed personal recovery/level deltas and

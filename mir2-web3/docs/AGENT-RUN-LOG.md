@@ -1,5 +1,40 @@
 # Agent Run Log
 
+## 2026-10-10 — Actual sandbox payment and ordinary monthly lifecycle
+
+The operator refilled the private test key. Official CLI1.53.1 forwards signed
+Endive events outbound to an independent loopback Gateway at7121; no public
+tunnel or permanent webhook endpoint is created. Ordinary NewAccount/password
+Login/NewCharacter and expired StartGame denial pass. One Hosted Checkout
+payment uses the official fake card, explicitly selects USD10 and disables
+saved information. The signed completed callback returns200 and actual provider
+readback confirms paid Checkout and succeeded PaymentIntent, canonical1000/usd.
+Source applies1000 Credits to the frozen owner/character. A1000-Credit purchase
+and same-ID replay create one exact-UID card. Activation and consumed-UID replay
+produce one30-day term; ordinary StartGame/LogOutSuccess and relogin retain
+credit0 and unchanged expiry. No admin grant, Passkey shortcut or fixture event
+substitutes for this story.
+
+Preserved initial failures: the helper rejected blank email before any socket or
+registration; only its private config/generator changed to a fictional address.
+Stripe initially failed a JS chunk, then recovered after reload; Chrome connector
+was unavailable. A fill call timed out, but observed fields were already filled,
+so it was not repeated. Exactly one simulated payment was submitted. Initial SGD
+display is Adaptive Pricing presentation, not evidence of a canonical tuple bug;
+read-only primary-source review confirms the USD validators should remain strict.
+
+Exact code703ebadb CI37969367117 passes. Compatible nativefd660003 is launched
+with isolated preferences and no autologin; the empty1024×768 login screen is
+observed. Later UI input/minimize is left to the user; no native login or billing
+human acceptance is claimed. Gateway/listener stay running locally; the native
+client later returns normally with exit0 and can be reopened with its isolated
+launcher. No further UI input is performed after user-input detection.
+Observed post-helper health is one anonymous native socket, zero active
+sessions/admissions/reconnect leases and a healthy empty route/session cache.
+Private credentials, hashes/saves and Checkout URLs are not published. Public
+R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+[Redacted actual evidence and remaining gates](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
+
 ## 2026-10-10 — Prepare a local Stripe trial; key refill pending
 
 Built compatible native and Gateway binaries for the user's trial request.

@@ -1,11 +1,15 @@
 # Backend 1:1 Progress
 
-> 2026-10-10 local Stripe guard: explicit opt-in/test-key/literal-loopback HTTP
-> returns pass Gateway38 and binary build; live/default HTTPS and all financial
-> checks remain. Official outbound CLI is prepared after the public tunnel's
-> auto-review rejection. The private server-key entry is empty, blocking actual
-> listener/Gateway/payment startup. No schema, public service, save or parity
-> completion is claimed. [Proof and limits](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+> 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
+> registration/password login/creation, expired entry rejection, one sandbox
+> USD10 Checkout, signed CLI callback/provider readback and Source-owned1000
+> Credits settlement. Buying/replaying a1000-Credit card and activating/replaying
+> its exact UID produce one30-day term; normal entry/logout/relogin preserve
+> credit0 and expiry. Exact code CI37969367117 passes. Native login is observed;
+> human billing UI and public production rollout remain open. This commercial
+> extension adds no original-parity completion. Public R22/Gatewaya41/feed17 and
+> unfinished P1–P7 are unchanged.
+> [Actual trial and limits](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
 
 > 2026-10-10 Stripe provider follow-up: four authenticated sandbox reads and
 > Checkout/temporary webhook creation and cleanup pass on real Stripe. Endive

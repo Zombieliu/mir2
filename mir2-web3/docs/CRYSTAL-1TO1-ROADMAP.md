@@ -1,11 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> 2026-10-10 commercial trial preparation: Gateway38 and the isolated binary
-> build pass for an explicit test-only loopback return option. Native is built;
-> official CLI outbound forwarding is prepared, but the private key entry is
-> currently empty. No running trial, paid callback, wallet/monthly item or human
-> UI acceptance is claimed. Public R22/Gatewaya41/feed17 and P1–P7 remain.
-> [Evidence and actual blocker](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+> 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
+> registration/password login/creation, expired entry rejection, one sandbox
+> USD10 Checkout, signed CLI callback/provider readback and Source-owned1000
+> Credits settlement. Buying/replaying a1000-Credit card and activating/replaying
+> its exact UID produce one30-day term; normal entry/logout/relogin preserve
+> credit0 and expiry. Exact code CI37969367117 passes. Native login is observed;
+> human billing UI and public production rollout remain open. This commercial
+> extension adds no original-parity completion. Public R22/Gatewaya41/feed17 and
+> unfinished P1–P7 are unchanged.
+> [Actual trial and limits](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
 
 > 2026-10-10 commercial extension follow-up: real sandbox credentials and
 > Checkout/webhook provisioning are verified, with temporary objects cleaned.

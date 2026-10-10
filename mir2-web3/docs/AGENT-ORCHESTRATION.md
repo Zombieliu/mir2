@@ -1,12 +1,15 @@
 # Agent Orchestration
 
-> 2026-10-10 local Stripe trial: root is the sole guard writer; a read-only
-> review passes. Gateway38 and binary build pass; compatible native is prepared.
-> Explicit test-only loopback returns permit official CLI outbound forwarding
-> after an automatic approval block stopped the proposed public Quick Tunnel.
-> The private test-key entry is now empty; refill is requested. No listener,
-> Gateway, native login or payment has started. Public R22/Gatewaya41/feed17 and
-> unfinished P1–P7 are unchanged. [Evidence and remaining gate](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+> 2026-10-10 actual local Stripe trial passes at code703ebadb: ordinary
+> registration/password login/creation, expired entry rejection, one sandbox
+> USD10 Checkout, signed CLI callback/provider readback and Source-owned1000
+> Credits settlement. Buying/replaying a1000-Credit card and activating/replaying
+> its exact UID produce one30-day term; normal entry/logout/relogin preserve
+> credit0 and expiry. Exact code CI37969367117 passes. Native login is observed;
+> human billing UI and public production rollout remain open. This commercial
+> extension adds no original-parity completion. Public R22/Gatewaya41/feed17 and
+> unfinished P1–P7 are unchanged.
+> [Actual trial and limits](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
 
 > 2026-10-10 Stripe credential follow-up: the operator's sandbox server key
 > passes four real provider reads, Checkout creation/expiration and temporary
