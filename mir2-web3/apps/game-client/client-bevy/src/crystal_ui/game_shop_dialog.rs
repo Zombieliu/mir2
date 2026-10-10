@@ -2,6 +2,7 @@
 //! Catalog, balance, stock and purchase receipts remain server-owned.
 use super::*;
 use crate::game_shop::GameShopEntry;
+use mir2_game_data::{BILLING_MONTHLY_CARD_GAME_SHOP_INDEX, BILLING_MONTHLY_CARD_ITEM_INDEX};
 use std::collections::BTreeMap;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -393,7 +394,13 @@ impl GameShopDialogUi {
                         .is_none_or(|category| &item.category == category)
             })
             .collect();
-        entries.sort_by(|a, b| a.item_name.to_lowercase().cmp(&b.item_name.to_lowercase()));
+        // Keep the application-owned access card visible on page one. Original
+        // Crystal products keep their name ordering, filters and server prices.
+        entries.sort_by(|a, b| {
+            is_monthly_card_product(b)
+                .cmp(&is_monthly_card_product(a))
+                .then_with(|| a.item_name.to_lowercase().cmp(&b.item_name.to_lowercase()))
+        });
         entries
     }
 
@@ -424,6 +431,11 @@ impl GameShopDialogUi {
         self.quantities.clear();
         self.preview = None;
     }
+}
+
+fn is_monthly_card_product(item: &GameShopEntry) -> bool {
+    item.item_index == BILLING_MONTHLY_CARD_ITEM_INDEX
+        && item.game_shop_index == BILLING_MONTHLY_CARD_GAME_SHOP_INDEX
 }
 
 fn now_ticks() -> i64 {
@@ -1616,6 +1628,109 @@ fn format_number(value: u64) -> String {
 mod tests {
     use super::*;
     use crate::inventory::CrystalItemTooltipSourceModel;
+
+    fn monthly_card_product() -> GameShopEntry {
+        GameShopEntry {
+            item_index: BILLING_MONTHLY_CARD_ITEM_INDEX,
+            game_shop_index: BILLING_MONTHLY_CARD_GAME_SHOP_INDEX,
+            item_name: mir2_game_data::BILLING_MONTHLY_CARD_ITEM_NAME.into(),
+            category: "Scroll".into(),
+            class: "All".into(),
+            count: 1,
+            credit_price: 1_000,
+            can_buy_credit: true,
+            ..default()
+        }
+    }
+
+    #[test]
+    fn monthly_card_is_on_page_one_without_reordering_original_products_or_bypassing_filters() {
+        let mut model = GameShopModel::default();
+        for (index, name) in [
+            "Z Potion", "A Sword", "B Wand", "C Scroll", "D Book", "E Torch", "F Ring", "G Helmet",
+            "H Armour", "I Boots",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            model.upsert(GameShopEntry {
+                game_shop_index: index as i32 + 1,
+                item_name: name.into(),
+                category: "Special".into(),
+                class: "All".into(),
+                ..default()
+            });
+        }
+        let mut shop = GameShopDialogUi::default();
+        let originals: Vec<_> = shop
+            .entries(&model, "Warrior", now_ticks())
+            .into_iter()
+            .map(|item| item.game_shop_index)
+            .collect();
+        model.upsert(monthly_card_product());
+        for class in ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"] {
+            let entries = shop.entries(&model, class, now_ticks());
+            assert_eq!(
+                entries[0].game_shop_index,
+                BILLING_MONTHLY_CARD_GAME_SHOP_INDEX
+            );
+            assert_eq!(
+                entries
+                    .into_iter()
+                    .skip(1)
+                    .map(|item| item.game_shop_index)
+                    .collect::<Vec<_>>(),
+                originals
+            );
+        }
+        shop.category = Some("Scroll".into());
+        assert_eq!(shop.entries(&model, "Warrior", now_ticks()).len(), 1);
+        shop.category = Some("Special".into());
+        assert_eq!(
+            shop.entries(&model, "Warrior", now_ticks()).len(),
+            originals.len()
+        );
+        shop.category = None;
+        shop.section = Section::Top;
+        assert!(shop.entries(&model, "Warrior", now_ticks()).is_empty());
+        shop.section = Section::All;
+        shop.search = "Wand".into();
+        assert_eq!(
+            shop.entries(&model, "Wizard", now_ticks())[0].item_name,
+            "B Wand"
+        );
+    }
+
+    #[test]
+    fn monthly_card_localized_name_and_credit_only_purchase_stay_in_the_ordinary_shop() {
+        let item = monthly_card_product();
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let mut shop = GameShopDialogUi::default();
+                let display = game_shop_display_name(&item.item_name);
+                assert_eq!(display, crate::native_i18n::tr(&item.item_name));
+                assert_ne!(display, item.item_name, "{}", locale.code());
+                shop.search = display.graphemes(true).take(4).collect();
+                assert!(
+                    shop.matches(&item, "Warrior", now_ticks()),
+                    "{}",
+                    locale.code()
+                );
+            });
+        }
+        assert!(can_buy(&item, GameShopPaymentType::Credit, 1, 0, 1_000));
+        assert!(!can_buy(&item, GameShopPaymentType::Credit, 1, 0, 999));
+        assert!(!can_buy(
+            &item,
+            GameShopPaymentType::Gold,
+            1,
+            u32::MAX,
+            1_000
+        ));
+        let mut wrong_identity = item;
+        wrong_identity.item_index = 1;
+        assert!(!is_monthly_card_product(&wrong_identity));
+    }
 
     #[test]
     fn shop_search_accepts_raw_and_localized_names_without_rewriting_item_identity() {
