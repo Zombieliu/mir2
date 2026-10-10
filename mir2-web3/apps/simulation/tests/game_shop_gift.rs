@@ -1000,6 +1000,22 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
             .unwrap_or_else(|_| panic!("QA seed failed; credentials suppressed"));
     }
     eprintln!("gift-pg: sender and recipient persisted");
+    // Migrate the prepared legacy password through ordinary authentication
+    // before opening contender caches. This fixture races Gift CAS, not two
+    // password migrations for the same prepared account. Each contender still
+    // performs its own normal password login and StartGame below.
+    let mut credential_bootstrap = InProcessWorldRuntime::new(seed_config.clone());
+    let bootstrap_packets = credential_bootstrap
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: SENDER.into(),
+            password: PASSWORD.into(),
+        }))
+        .unwrap();
+    assert!(bootstrap_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    drop(credential_bootstrap);
+    eprintln!("gift-pg: ordinary sender credential migration completed before contenders");
     let recipient_config = open(&scoped);
     eprintln!("gift-pg: recipient repository opened");
     let mut recipient = start(&recipient_config, RECEIVER, RECEIVER_INDEX);

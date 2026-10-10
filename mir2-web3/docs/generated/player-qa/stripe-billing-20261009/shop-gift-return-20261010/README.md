@@ -58,6 +58,7 @@ DeltaForce sharing lock; its process was not closed.
 | Gateway shop, actual dual WS and dedicated/private RPC |35 passed |[log](GATEWAY-GAME-SHOP-FINAL-03.txt) |
 | Billing HTTP/WS/provider fixtures/CSP authority |39 passed |[log](GATEWAY-BILLING-FINAL.txt) |
 | Generic Session Gift forces typed/capability path |1 passed |[log](GATEWAY-GIFT-SESSION-TESTS.txt) |
+| Expired shared owner, monthly item UID replay and current Zone pools |4 passed |[log](GATEWAY-MONTHLY-OWNER-DIRECT-FINAL.txt) |
 | Return-page browser locale/state/layout |27 desktop+27 narrow passed |[receipt](PREVIEW-RECEIPT.json) |
 | Windows binary |build passes; prepared hash recorded |[build](WINDOWS-BUILD.txt), [binary](BINARY-RECEIPT.json) |
 | Paired Gateway binary |ordinary binary build passes on F:; prepared hash recorded |[build](GATEWAY-BUILD-02.txt), [binary](BINARY-RECEIPT.json) |
@@ -112,7 +113,10 @@ No new actual Stripe payment, live key, public callback or public release occurr
 - GATEWAY-MONTHLY-OWNER-TESTS.txt retains a local parallel compiler process failure.
   Its two-job rerun built auxiliary binaries and exhausted the C: build disk;
   no assertion in that additional suite ran. This is not counted as a passing
-  check. The unchanged shared-owner suite remains required in isolated Linux CI.
+  Cargo invocation. Its already-generated dedicated test binary was subsequently
+  identified by its four test names and run directly with one test thread; all
+  four passed without rebuilding auxiliary executables. The same shared-owner
+  suite remains required in isolated Linux CI.
 - GATEWAY-BUILD.txt retains the resulting disk-space build failure. Automatic
   approval rejected cleanup of this round's generated build caches without a
   specific reason. Those caches were retained. The ordinary Gateway binary is
@@ -138,6 +142,14 @@ is retained. The PostgreSQL fixture now releases its barrier even if bootstrap
 panics, retains that failure, and emits non-sensitive phase diagnostics. Its CI
 step has a180-second process bound and uncaptured diagnostics. All debit/mail/CAS,
 unsaved-recipient state and activation/replay assertions are retained.
+
+Diagnostic CI38042948920 surfaces a fixture bootstrap failure instead of hanging:
+two prepared legacy passwords raced migration for one sender; one contender failed
+before Gift. [Diagnostic log](CI-GIFT-DIAGNOSTIC-FAILURE.txt) is retained. The fixture
+now migrates that credential once through ordinary password authentication before
+opening the independent contender repositories. Each contender still uses normal
+password login/StartGame, then the same barrier races the actual identical Gift
+transactions. No production authentication path or monetary assertion is weakened.
 
 Actual PostgreSQL Gift CI and native human BUY/GIFT visual acceptance remain open.
 The Computer Use helper failed to initialize its kernel-assets path after one
