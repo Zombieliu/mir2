@@ -43,6 +43,10 @@ use crate::session_config::NativeReconnectConfig;
 #[path = "gateway_movement_barrier_tests.rs"]
 mod movement_barrier_tests;
 
+#[cfg(test)]
+#[path = "gateway_target_lifecycle_network_tests.rs"]
+mod target_lifecycle_network_tests;
+
 #[path = "trade_projection.rs"]
 mod trade_projection;
 

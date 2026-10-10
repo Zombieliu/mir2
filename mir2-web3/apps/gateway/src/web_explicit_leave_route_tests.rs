@@ -115,8 +115,8 @@ fn explicit_leave_releases_captured_route_after_identity_cleared_before_relogin(
 #[test]
 fn explicit_leave_failed_save_preserves_identity_lease_and_refresh() {
     let config = SimulationConfig::default();
-    let mut current = login(&config, true);
-    let mut stale = login(&config, false);
+    let mut stale = login(&config, true);
+    let mut current = login(&config, false);
     let cache = InMemoryGatewaySessionCache::default();
     let refresh = cached(&cache, &stale);
     let route = OwnedSessionRoute::capture(&stale).unwrap();

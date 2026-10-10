@@ -52,3 +52,32 @@ test('source compiler omissions retain exact mode, line and absent extensionless
     { relative_path: 'NameLists/NAMELISTFILENAME.txt', exists: false },
   ]);
 });
+
+const checkHumParser = minimum => '        public void ParseCheck(string line)\n{\nswitch(line) { case "CHECKHUM":\n'
+  + `if (parts.Length < ${minimum}) return;\nCheckList.Add(new NPCChecks());\nbreak; }\n}\n`
+  + '        public void ParseAct(List<NPCActions> acts, string line)\n{\nswitch(line) { case "BREAK": break; }\n}\n'
+  + '        public void Other() {}';
+
+test('short CHECKHUM is compiled out while complete invalid checks and SAY text remain', async () => {
+  const script = parseExpandedScript('', ['[@_OnAcceptQuest(149)]', '#IF',
+    'CHECKHUM', 'CHECKHUM 1', 'CHECKHUM 1 D10071', 'checkhum   1   EM002', 'CHECKHUM %ARG(0)',
+    'CHECKHUM >= 1 D10071', 'CHECKHUM >= 1 D10071 2', 'CHECKHUM >= invalid D10071',
+    'CHECKHUM = 1 D10071', 'CHECKHUM >= 1 D10071 invalid', 'CHECKHUM >= 1 D10071 1 unused',
+    '#SAY', 'CHECKHUM 1 D10071']);
+  const before = JSON.stringify(script);
+  const compiled = await compileParserOmissions(script, checkHumParser(4), () => false);
+  assert.deepEqual(compiled.ignored_lines.map(line => [line.line_number, line.line, line.reason]), [
+    [3, 'CHECKHUM', 'missing-original-checkhum-arguments'],
+    [4, 'CHECKHUM 1', 'missing-original-checkhum-arguments'],
+    [5, 'CHECKHUM 1 D10071', 'missing-original-checkhum-arguments'],
+    [6, 'checkhum   1   EM002', 'missing-original-checkhum-arguments'],
+    [7, 'CHECKHUM %ARG(0)', 'missing-original-checkhum-arguments'],
+  ]);
+  assert.equal(JSON.stringify(script), before);
+  assert.deepEqual(compiled.name_lists, []);
+});
+
+test('CHECKHUM omission requires the supplied original minimum-argument proof', async () => {
+  const script = parseExpandedScript('', ['[@_OnAcceptQuest(149)]', '#IF', 'CHECKHUM 1 D10071']);
+  await assert.rejects(compileParserOmissions(script, checkHumParser(5), () => false), /CHECKHUM.*parser/);
+});

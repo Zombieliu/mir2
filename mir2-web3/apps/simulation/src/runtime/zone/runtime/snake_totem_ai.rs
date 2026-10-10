@@ -1,5 +1,5 @@
 //! SnakeTotem62's production and life-bound hostile monster aggro.
-use super::entity_combat::EntityTargetPurpose;
+use super::entity_combat::{EntityTargetPurpose, ZoneCombatEntityRef};
 use super::*;
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct SnakeTotemState {
@@ -25,6 +25,51 @@ pub(in crate::runtime::zone) fn initialize_snake_totem(
     m.direction = MirDirection::Up;
 }
 impl ZoneRuntime {
+    /// CharmedSnake.Die calls base.Die before IsAttackTarget, so this burst
+    /// sees Master=null. This is only the existing unowned-Monster burst path;
+    /// it does not grant Human/pet PvP or use a causal Human for permission.
+    pub(super) fn charmed_snake_death_explosion_can_attack(
+        &self,
+        source: &ZoneCombatEntityRef,
+        target: &ZoneCombatEntityRef,
+        now: u64,
+    ) -> bool {
+        let (
+            ZoneCombatEntityRef::Monster {
+                object_id: source_id,
+                ..
+            },
+            ZoneCombatEntityRef::Monster {
+                object_id: target_id,
+                ..
+            },
+        ) = (source, target)
+        else {
+            return false;
+        };
+        if source_id == target_id
+            || !self.entity_ref_exists(source, true)
+            || !self.entity_ref_exists(target, false)
+        {
+            return false;
+        }
+        let snake = &self.native_monsters[source_id];
+        let victim = &self.native_monsters[target_id];
+        if snake.ai != 63
+            || snake.name != "CharmedSnake"
+            || !snake.dead
+            || snake.hp != 0
+            || victim.master_object_id != 0
+            || victim.owner_session_id.is_some()
+        {
+            return false;
+        }
+        // MonsterObject.IsAttackTarget(MonsterObject): when both Masters are
+        // null, neither a Totem threat nor the Human's modes/Pets allow a hit.
+        // Hallucination/Rage retain their original strict active deadline.
+        now < snake.hallucination_until_ms || self.owned_monster_rage_active(*source_id, now)
+    }
+
     /// Called before removal/replacement while the retiring totem still exists.
     /// Tag the current child instances, never rescan the reused parent id later.
     pub(super) fn retire_shared_snake_totem_children(&mut self, id: u32) {
@@ -202,11 +247,14 @@ impl ZoneRuntime {
         minion.owner_player_object_id = owner_id;
         minion.summon_skill_level = totem.summon_skill_level;
         minion.visible_extra = true;
-        minion.next_ai_ready_at_ms = now + 1000;
+        // Spawned overrides the constructor's +1000 ActionTime with +2000;
+        // MonsterObject.CanMove/CanAttack require Envir.Time strictly later.
+        minion.next_ai_ready_at_ms = now.saturating_add(2001);
         minion.incarnation = self.allocate_monster_incarnation();
         self.native_monsters.insert(child, minion);
         let packet = native_summon_spawn_packet(&spawn, child, id);
         self.apply_zone_object_packets(std::slice::from_ref(&packet), now);
+        self.register_owned_snake_child_life(child, id);
         if let Some(object) = self.objects.get_mut(&child) {
             object.expires_at_ms = Some(now + 10000 + u64::from(totem.summon_skill_level) * 2000);
         }

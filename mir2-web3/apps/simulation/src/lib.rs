@@ -40,6 +40,7 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    RecoveryCharacterLoadError,
     DefaultNpcEvent, DefaultNpcEventSnapshot, QueuedDefaultNpcEvent, DefaultNpcEnterMapTicket,
     ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample,
     SharedMonsterKillCommitFailure,
@@ -62,6 +63,7 @@ pub use runtime::{
     SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
     ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
     ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata, ZoneMonsterDefense,
+    ZoneNpcPopulationReadSet,
     ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
     ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
     ZonePlayerCombatStats, ZonePlayerAppearance, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,

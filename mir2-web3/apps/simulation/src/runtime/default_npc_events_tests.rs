@@ -41,6 +41,9 @@ fn source_catalog_expands_insert_and_include_and_seals_original_parser_omissions
     // Source does not compile CLOSE; the typed dispatcher still closes an empty
     // resulting NPC page through its ordinary NPCResponse.
     assert!(script.sections.iter().find(|s| s.label == "@R001").unwrap().lines.iter().all(|line| line != "CLOSE"));
+    let arena = script.sections.iter().find(|s| s.label == "@_OnAcceptQuest(149)").unwrap();
+    assert!(arena.lines.iter().all(|line| line != "CHECKHUM 1 D10071"));
+    assert!(arena.lines.iter().any(|line| line == "There is already someone trying before you!"));
 }
 
 #[test]
@@ -57,6 +60,40 @@ fn typed_events_keep_exact_original_parameter_signatures() {
     assert_eq!(DefaultNpcEvent::OnFinishQuest { quest_id:149 }.label(), "@_OnFinishQuest(149)");
     assert_eq!(DefaultNpcEvent::Daily.label(), "@_Daily");
     assert_eq!(DefaultNpcEvent::Client.label(), "@_Client");
+}
+
+#[test]
+fn original_quest149_hook_keeps_busy_say_and_does_not_run_else_world_actions() {
+    let config = SimulationConfig::default();
+    let mut session = fixture(&config);
+    session.save_active_character().unwrap();
+    let source_before = session.active_character_checkpoint().unwrap();
+    let durable_before = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
+    let diagnostics = session.app.world().resource::<NpcStateResource>().npc_script_diagnostics.clone();
+    let queue_before = events::capture(session.app.world());
+    let checkpoint = session.begin_guild_experience_command(true).unwrap();
+    events::enqueue(session.app.world_mut(), DefaultNpcEvent::OnAcceptQuest { quest_id: 149 }).unwrap();
+    let packets = events::dispatch(session.app.world_mut()).expect("source omitted check keeps busy SAY");
+    let packets = session.finish_guild_experience_command(checkpoint, packets).unwrap();
+    assert!(packets.iter().any(|p| matches!(p, ServerPacket::NPCResponse { page }
+        if page.iter().any(|line| line == "There is already someone trying before you!")
+            && page.iter().any(|line| line == "<Come back later/@exit>"))));
+    assert!(!packets.iter().any(|p| matches!(p, ServerPacket::MapInformation { .. })));
+    assert_eq!(session.app.world().resource::<NpcStateResource>().npc_script_diagnostics, diagnostics);
+    let mut expected = source_before.clone();
+    expected.default_npc_events = events::capture(session.app.world());
+    expected.revision += 1;
+    assert!(expected.default_npc_events.pending.is_empty());
+    assert_eq!(expected.default_npc_events.committed_sequence, queue_before.committed_sequence + 1);
+    assert_eq!(serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap(),
+        serde_json::to_value(&expected).unwrap());
+    // Durable skills carry the existing private cooldown-clock envelope;
+    // compare the entire stored preimage, rather than a live export encoding.
+    let mut expected_durable = durable_before;
+    expected_durable.default_npc_events = expected.default_npc_events;
+    expected_durable.revision += 1;
+    assert_eq!(serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0]).unwrap(),
+        serde_json::to_value(expected_durable).unwrap());
 }
 
 #[test]

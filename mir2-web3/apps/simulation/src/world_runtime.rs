@@ -374,6 +374,9 @@ pub trait WorldRuntime: Send + Sync {
     fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
         None
     }
+    fn active_character_teardown_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        self.active_character_checkpoint()
+    }
     fn restore_active_character_checkpoint(
         &mut self,
         _checkpoint: &CharacterSaveRecord,
@@ -388,6 +391,15 @@ pub trait WorldRuntime: Send + Sync {
     /// exact final-save path.
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
         self.save_active_character()
+    }
+    /// Trusted prepared teardown; never exposed through player ingress.
+    /// Legacy remote/test runtimes retain their existing behavior.
+    fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.restore_active_character_checkpoint(checkpoint)?;
+        self.save_active_character_for_logout()
     }
     fn refresh_active_external_mail(&mut self) -> bool;
 }
@@ -1126,7 +1138,9 @@ impl WorldRuntime for InProcessWorldRuntime {
             |WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}
             |WorldCommand::CastSkill{..}|WorldCommand::UseItem{..}|WorldCommand::TransferMap{..}
             |WorldCommand::ApplyHandoffTransform{..}|WorldCommand::Stage5Command{..});
-        let before = if force_periodic { self.session.begin_guild_experience_command(true)? }
+        let before = if matches!(&command, WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}) {
+                self.session.begin_npc_dialog_source_command(force_periodic)?
+            } else if force_periodic { self.session.begin_guild_experience_command(true)? }
             else if default_source { self.session.begin_default_npc_source_command()? }
             else if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
         let mut billing_packets = match &command {
@@ -1327,6 +1341,10 @@ impl WorldRuntime for InProcessWorldRuntime {
         self.session.active_character_checkpoint()
     }
 
+    fn active_character_teardown_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        self.session.active_character_teardown_checkpoint()
+    }
+
     fn restore_active_character_checkpoint(
         &mut self,
         checkpoint: &CharacterSaveRecord,
@@ -1340,6 +1358,13 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
         self.session.save_active_character_for_logout()
+    }
+
+    fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session.save_frozen_character_checkpoint_for_logout(checkpoint)
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {

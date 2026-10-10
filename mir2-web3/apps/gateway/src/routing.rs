@@ -24,6 +24,8 @@ mod owner_wire_ids;
 mod owner_health;
 pub(crate) use owner_health::{OwnerHealthDelivery, OwnerHealthValidator};
 use owner_health::{LocalOwnerHealthValidator, PendingOwnerPresentation};
+#[path = "routing/npc_population_binding.rs"]
+mod npc_population_binding;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -731,14 +733,24 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         } else {
             None
         };
+        let npc_binding = npc_population_binding::accepted_execution_binding(
+            request.owner_lease(),
+            mode,
+            economy_context.as_ref().map(|context| context.source_sequence),
+            true,
+        );
         let command = request.into_command();
-        if let Some(runtime) = runtime
+        let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
             .as_any_mut()
             .downcast_mut::<SharedInProcessZoneSessionRuntime>()
         {
+            let scope = runtime.begin_npc_owner_execution_scope(npc_binding)?;
             runtime.set_economy_execution_context(economy_context);
-        }
+            Some(scope)
+        } else {
+            None
+        };
         let result = match mode {
             ZoneOwnerCommandMode::Direct => runtime.execute_with_outcome(command),
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
@@ -1013,6 +1025,12 @@ impl HostedZoneOwnerCommandClient {
                 external_commit_authorized: may_commit_externally,
             }
         });
+        let npc_binding = npc_population_binding::accepted_execution_binding(
+            request.owner_lease(),
+            mode,
+            request.source_sequence(),
+            external_commit_authorized,
+        );
         let command = request.into_command();
         let runtime_lock_wait = GatewaySlowStage::start("zone_owner.hosted.runtime_lock_wait");
         let mut runtime = self
@@ -1023,13 +1041,17 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
-        if let Some(runtime) = runtime
+        let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
             .as_any_mut()
             .downcast_mut::<SharedInProcessZoneSessionRuntime>()
         {
+            let scope = runtime.begin_npc_owner_execution_scope(npc_binding)?;
             runtime.set_economy_execution_context(economy_context);
-        }
+            Some(scope)
+        } else {
+            None
+        };
         let result = {
             let _slow_stage = GatewaySlowStage::start("zone_owner.hosted.execute_request");
             match mode {
@@ -2394,9 +2416,12 @@ impl fmt::Debug for SharedZoneLiveOutboundRegistration {
 
 impl Drop for SharedZoneLiveOutboundRegistration {
     fn drop(&mut self) {
+        let started = Instant::now();
+        eprintln!("gateway transport_registration registration_id={} stage=unregister phase=begin", self.registration_id);
         if let Ok(mut zone_state) = self.zone_state.lock() {
             zone_state.unregister_live_zone_outbound(&self.key, self.registration_id);
         }
+        eprintln!("gateway transport_registration registration_id={} stage=unregister phase=end elapsed_ms={}", self.registration_id, started.elapsed().as_millis());
     }
 }
 
@@ -8430,6 +8455,9 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             inventory_zone_id: zone_id.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
+            npc_owner_execution_slot: Arc::new(Mutex::new(
+                npc_population_binding::NpcOwnerExecutionSlot::default(),
+            )),
             last_ground_drop_projection_reconciliation_identity: None,
             trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: SharedZoneMovementIngress::new(
@@ -9118,6 +9146,8 @@ struct SharedInProcessZoneSessionRuntime {
     inventory_zone_id: ZoneId,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
+    // One process-local accepted execution; not part of world/account images.
+    npc_owner_execution_slot: Arc<Mutex<npc_population_binding::NpcOwnerExecutionSlot>>,
     last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
     trade_projection_reconciliation_state: TradeProjectionReconciliationState,
     movement_ingress: SharedZoneMovementIngress,
@@ -9168,7 +9198,7 @@ pub(crate) fn prepare_zone_teardown_checkpoint(
         return Ok(None);
     };
     let checkpoint = runtime
-        .active_character_checkpoint()
+        .active_character_teardown_checkpoint()
         .ok_or_else(|| "teardown identity has no active character checkpoint".to_string())?;
     let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
     prepared.validate_identity_checkpoint()?;
@@ -9186,8 +9216,7 @@ pub(crate) fn persist_zone_teardown_checkpoint(
     if identity != prepared.identity {
         return Err("teardown persist active identity changed after preparation".to_string());
     }
-    runtime.restore_active_character_checkpoint(prepared.checkpoint())?;
-    runtime.save_active_character_for_logout()
+    runtime.save_frozen_character_checkpoint_for_logout(prepared.checkpoint())
 }
 
 pub(crate) fn release_zone_teardown_fence(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
@@ -10210,6 +10239,20 @@ impl SharedInProcessZoneSessionRuntime {
             .map(|key| SharedInProcessZoneState::zone_session_id_for_key(&key))
     }
 
+    fn has_bound_zone_player(&self) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        let state = self.zone_state.lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(session_id) = state.zone_sessions.get(&key) else {
+            return false;
+        };
+        *session_id == SharedInProcessZoneState::zone_session_id_for_key(&key)
+            && state.zone_manager.zone_key_for_session(session_id).is_some()
+            && state.zone_manager.player_transform(session_id).is_some()
+    }
+
     fn sync_newly_active_private_monsters_to_zone(&mut self) -> Vec<ServerPacket> {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
@@ -10560,11 +10603,29 @@ impl SharedInProcessZoneSessionRuntime {
                 .lock()
                 .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
             zone_state.begin_teardown_fence(&key)?;
+            // A reply timeout does not remove a movement request from the
+            // bounded owner queue. Retire its transport epoch while holding
+            // the same Zone -> movement-state lock order as owner execution.
+            // Thawing this saved presence must not revive those old requests.
+            {
+                let mut movement = self.movement_ingress.session_state.lock()
+                    .map_err(|_| "shared movement session state is poisoned".to_string())?;
+                movement.presence_epoch = movement.presence_epoch.checked_add(1)
+                    .ok_or_else(|| "shared movement presence epoch exhausted".to_string())?;
+                movement.pending_zone_player_movement = false;
+                movement.recent_zone_player_movement_until_ms = 0;
+            }
             let session_id = zone_state
                 .zone_sessions
                 .get(&key)
                 .cloned()
                 .ok_or_else(|| "fenced shared Zone presence has no session id".to_string())?;
+            // Requests already accepted into the authoritative action clock
+            // are a second queue. Preserve completed movement, but never thaw
+            // pending Walk/Run intents from the disconnected transport.
+            let _ = zone_state.zone_manager.handle(ZoneCommand::CancelPendingMovement {
+                session_id: session_id.clone(),
+            });
             let pending = (
                 zone_state.take_pending_zone_packets(&key),
                 zone_state.take_pending_zone_transform(&key),
@@ -10660,7 +10721,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.force_authoritative_player_life(authoritative_dead);
         let checkpoint = self
             .inner
-            .active_character_checkpoint()
+            .active_character_teardown_checkpoint()
             .ok_or_else(|| "teardown drain produced no active checkpoint".to_string())?;
         let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
         prepared.validate_identity_checkpoint()?;
@@ -15025,7 +15086,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let mut unavailable_shared_target = !routes_zone_native_player_attack
             && match &command {
                 WorldCommand::Attack { object_id } => {
-                    !self.shared_action_target_available(*object_id)
+                    // Unknown IDs have no dead/remove tombstone. A bound
+                    // Zone attack that could not prepare is still rejected,
+                    // rather than falling through to a silent private no-op.
+                    self.has_bound_zone_player()
+                        || !self.shared_action_target_available(*object_id)
                 }
                 WorldCommand::ClientPacket(ClientPacket::RangeAttack { target_id, .. })
                 | WorldCommand::ClientPacket(ClientPacket::Magic { target_id, .. })
@@ -15183,10 +15248,14 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let mut command_packets = if blocks_durable_trade_mutation {
             trade_item_failure.clone().into_iter().collect()
         } else if unavailable_shared_target {
-            if shared_harvest_direction.is_some() {
-                self.authoritative_zone_owner_correction()
+            if self.has_bound_zone_player() {
+                // The native sender may have discarded an unsent movement
+                // step at this attack boundary. Rejecting a vanished target
+                // still cancels earlier Zone movement and acknowledges the
+                // real transform through the existing owner FIFO.
+                self.cancel_pending_zone_player_movement()
             } else {
-                Vec::new()
+                self.authoritative_zone_owner_correction()
             }
         } else if let Some(result) = self.execute_shared_group_packet(&command) {
             result?
@@ -15779,6 +15848,21 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.inner.save_active_character_for_logout()
     }
 
+    fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let key = self.current_presence_key()
+            .ok_or("frozen shared teardown requires its prepared presence")?;
+        let fenced = self.zone_state.lock()
+            .map_err(|_| "cannot verify frozen teardown fence: Zone mutex poisoned")?
+            .teardown_fenced(&key);
+        if !fenced {
+            return Err("frozen shared teardown requires its prepared fence".into());
+        }
+        self.inner.save_frozen_character_checkpoint_for_logout(checkpoint)
+    }
+
     fn refresh_active_external_mail(&mut self) -> bool {
         self.inner.refresh_active_external_mail()
     }
@@ -16197,6 +16281,10 @@ mod tests {
     mod ordered_economy_replay_tests;
     #[path = "owner_attack_animation_tests.rs"]
     mod owner_attack_animation_tests;
+    #[path = "unavailable_combat_target_tests.rs"]
+    mod unavailable_combat_target_tests;
+    #[path = "native_target_lifecycle_transport_tests.rs"]
+    mod native_target_lifecycle_transport_tests;
     #[path = "owner_packet_normalization_tests.rs"]
     mod owner_packet_normalization_tests;
     #[path = "live_owner_wire_ids_tests.rs"]
@@ -30427,7 +30515,7 @@ mod tests {
         (first, second)
     }
 
-    fn shared_session_runtime(
+    pub(super) fn shared_session_runtime(
         zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     ) -> SharedInProcessZoneSessionRuntime {
         shared_session_runtime_with_services(
@@ -30487,6 +30575,9 @@ mod tests {
             inventory_zone_id: ZoneId::new("test-shared-zone"),
             npc_world_service,
             economy_execution_context: None,
+            npc_owner_execution_slot: Arc::new(Mutex::new(
+                super::npc_population_binding::NpcOwnerExecutionSlot::default(),
+            )),
             last_ground_drop_projection_reconciliation_identity: None,
             trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),

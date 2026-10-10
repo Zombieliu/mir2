@@ -192,10 +192,7 @@ pub(super) async fn send_status(
     let status = session
         .monthly_card_config()?
         .monthly_card_status(account, monthly_card_now_ms())?;
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
+    sender.send(Message::Text(
             json!({"type":"monthlyCard","payload":{"operation":"status","status":status}})
                 .to_string()
                 .into(),

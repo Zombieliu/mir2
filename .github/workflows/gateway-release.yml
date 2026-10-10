@@ -41,11 +41,53 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-gateway --lib shared_player_appearance_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-gateway --lib world_checkpoint_removes_sessions_players_and_pending_packets -- --test-threads=1
 
+      - name: Verify disconnect cancellation and trusted journal recovery
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib runtime::recovery:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 web:: abnormal_teardown_ rpc_zone_owner_command_client save_recovery::tests
+
       - name: Verify Linux release and save-recovery boundary
         working-directory: mir2-web3
         env:
           MIR2_REQUIRE_LINUX_SECURITY_GATE: "1"
         run: bash scripts/selftest-gateway-save-recovery.sh
+
+      - name: Verify rejected combat targets acknowledge and retire old movement
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib movement_deadline_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 unavailable_combat_target owner_location_order owner_attack_animation movement_deadline crowded_escape_tests
+
+      - name: Verify SnakeTotem immediate master and corpse permissions
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_snake_master_lifecycle -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib owned_pet_immediate_master_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib owned_pet_combat::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib experience_ownership -- --test-threads=1
+
+      - name: Verify original Purification completion and status cleanup
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib purification -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_zone level50_taoist_purification_clears_shared_poison_and_curse_state -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_monster_hell_ai -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --test shared_purification_map_transfer -- --test-threads=1
+          # Match the optimized shipped Gateway for the real500ms TownTeleport
+          # story; no synthetic deadline or ignored debug result substitutes it.
+          cargo +1.89.0 test --locked --release -p mir2-gateway --test shared_purification_map_transfer -- --test-threads=1
+
+      - name: Verify bounded Source terrain and ordinary map collision
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib source_map_loading::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 map::map_collision_source_tests:: deadmine_entrance_collision_parses_from_pack crystal_map_v0_
 
       - name: Verify classic shared gameplay and durable source receipts
         working-directory: mir2-web3
@@ -62,6 +104,23 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --lib shared_player_kill_source_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-gateway --features mir2-simulation/test-support --test shared_pet_source_transport --test shared_mentor_source_transport -- --test-threads=1
           node --test tools/generate-crystal-default-npc-scripts.test.mjs
+
+      - name: Verify complete NPC Source acknowledgement and ordered pet interpretation
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_source_guard_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_world_plan::tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_parser_omission_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_buff_action_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_catalog_lookup_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib buff_duration::tests -- --test-threads=1
+          # Pure CHECKHUM selection and real Manager census are foundations;
+          # this gate does not attest the pending Gateway/Source invocation.
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_population:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib zone::manager:: -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib online_epoch_exhaustion -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib npc_population_binding::tests -- --test-threads=1
 
       - name: Package Gateway
         working-directory: mir2-web3

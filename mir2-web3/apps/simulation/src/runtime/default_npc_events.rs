@@ -16,7 +16,7 @@ pub(super) const MAX_PENDING: usize = 128;
 pub(super) const DRAIN_BUDGET: usize = 32;
 const SCRIPT_KEY: &str = "00Default";
 const SOURCE_EXECUTION_SHA256: &str = "5522ab1f667a363e34965f7552f7b482f93954ad53c2dc776c5eed8a03f9f8be";
-const SOURCE_PARSER_CONTRACT_SHA256: &str = "8300c1afaff55b93ce50c8f802809bc5043873a4dbac956942fec787d68c5638";
+const SOURCE_PARSER_CONTRACT_SHA256: &str = "44f92fb3f80c8fb939f442c62781685a45033bd0392d2aeb7cf5526857832e51";
 const SOURCE: &str = include_str!("../../../../packages/game-data/data/generated/crystal_default_npc_scripts.json");
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -262,7 +262,8 @@ pub(super) fn expanded_script() -> Result<&'static CrystalNpcScript, String> {
         // original parser's omitted instructions. In particular an absent
         // CHECKNAMELIST is omitted, not converted into a failed membership test.
         for ignored in &contract.ignored_lines {
-            if !matches!(ignored.reason.as_str(), "unknown-original-opcode" | "missing-original-name-list") {
+            if !matches!(ignored.reason.as_str(), "unknown-original-opcode" | "missing-original-name-list"
+                | "missing-original-checkhum-arguments") {
                 return Err("default NPC source has an unverified omission reason".into());
             }
             let section = source.script.sections.iter_mut().find(|section| {

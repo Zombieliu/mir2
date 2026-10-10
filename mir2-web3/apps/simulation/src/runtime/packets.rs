@@ -9044,6 +9044,8 @@ impl SimulationSession {
     }
 
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        // Journal capabilities must never survive into a client packet flow.
+        super::recovery::clear_binding(self.app.world_mut());
         if matches!(
             packet,
             ClientPacket::Disconnect | ClientPacket::LogOut | ClientPacket::StartGame { .. }
@@ -9111,7 +9113,9 @@ impl SimulationSession {
                 |ClientPacket::RefineItem{..}|ClientPacket::CheckRefine{..})
             || matches!(&packet, ClientPacket::CallNpc{key,..}
                 if key.trim_start_matches('@').eq_ignore_ascii_case("REFINECOLLECT"));
-        let before = if force_periodic { self.begin_guild_experience_command(true)? }
+        let before = if matches!(&packet, ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}) {
+                self.begin_npc_dialog_source_command(force_periodic)?
+            } else if force_periodic { self.begin_guild_experience_command(true)? }
             else if default_source { self.begin_default_npc_source_command()? }
             else if xp_source { self.begin_guild_experience_command(false)? } else { None };
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);

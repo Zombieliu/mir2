@@ -9,6 +9,7 @@ pub use types::ZoneMentorBankAttribution;
 mod online_identity;
 mod owner_health;
 pub use owner_health::{ZoneOwnerHealthChange, ZoneOwnerHealthCursor};
+pub(crate) use online_identity::OnlineOwner;
 mod movement;
 mod packets;
 mod replay;
@@ -19,7 +20,7 @@ mod intelligent_creatures;
 pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickupIntent};
 
 pub use collision::{ZoneBounds, ZoneCollision};
-pub use manager::ZoneManager;
+pub use manager::{ZoneManager, ZoneNpcPopulationReadSet};
 pub use replay::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, ZoneInput, ZoneOutput,
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,

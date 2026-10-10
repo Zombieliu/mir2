@@ -118,7 +118,7 @@ async fn owner_ack_order_web_sender_waits_for_prepared_registration_activation()
             async move {
                 upgrade.on_upgrade(move |socket| async move {
                     let (sink, _stream) = socket.split();
-                    let sender = Arc::new(AsyncMutex::new(sink));
+                    let sender = Arc::new(transport::SocketSender::new(sink, transport::TransportSignal::new()));
                     let gate = Arc::new(AsyncRwLock::new(()));
                     let bootstrap = gate.write().await;
                     let active = Arc::new(AtomicU64::new(0));
@@ -213,7 +213,7 @@ async fn live_overflow_old_registration_signal_cannot_stop_replacement() {
         "replacement stayed active"
     };
     assert_eq!(
-        run_until_zone_overload(work, receiver, active).await,
+        run_until_transport_end(work, receiver, active, transport::TransportSignal::new()).await,
         Ok("replacement stayed active")
     );
 }
@@ -230,12 +230,12 @@ async fn live_overflow_prepared_registration_signal_waits_for_matching_activatio
     });
     let result = tokio::time::timeout(
         Duration::from_secs(1),
-        run_until_zone_overload(std::future::pending::<()>(), receiver, active),
+        run_until_transport_end(std::future::pending::<()>(), receiver, active, transport::TransportSignal::new()),
     )
     .await
     .unwrap();
     activation.await.unwrap();
-    assert_eq!(result, Err(42));
+    assert_eq!(result, Err(transport::TransportEnd::ZoneOverload(42)));
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -255,25 +255,30 @@ async fn live_overflow_cancels_stalled_real_websocket_writer_and_closes_transpor
                 async move {
                     upgrade.on_upgrade(move |socket| async move {
                         let active = Arc::new(AtomicU64::new(23));
+                        let terminal = transport::TransportSignal::new();
+                        let writer_terminal = terminal.clone();
                         let work = async move {
                             let (sink, stream) = socket.split();
-                            let sender = Arc::new(AsyncMutex::new(sink));
+                            let sender = Arc::new(transport::SocketSender::new(sink, writer_terminal.clone()));
                             let (_inputs, _reader, _pending) = spawn_socket_reader(
                                 stream,
                                 Arc::clone(&sender),
                                 Arc::new(RwLock::new(None)),
                                 Arc::new(AsyncRwLock::new(())),
                                 Arc::new(AtomicBool::new(false)),
+                                writer_terminal,
+                                Arc::new(transport::MovementDrain::default()),
+                                "overflow-transport-fixture".to_owned(),
                             );
                             // A permanently occupied writer lock models a stalled
                             // send. The control path must not acquire this lock.
-                            let _occupied_writer = sender.lock().await;
+                            let _occupied_writer = sender.lock_for_test().await;
                             let _ = ready.send(());
                             let _ =
                                 send_server_packet(&sender, &ServerPacket::KeepAlive { time: 7 })
                                     .await;
                         };
-                        let result = run_until_zone_overload(work, overflows, active).await;
+                        let result = run_until_transport_end(work, overflows, active, terminal).await;
                         let _ = closed.send(result);
                     })
                 }
@@ -296,7 +301,7 @@ async fn live_overflow_cancels_stalled_real_websocket_writer_and_closes_transpor
             .await
             .unwrap()
             .unwrap(),
-        Err(23)
+        Err(transport::TransportEnd::ZoneOverload(23))
     );
     let received = tokio::time::timeout(Duration::from_secs(2), client.next())
         .await
@@ -590,13 +595,14 @@ async fn live_overflow_transport_loss_saves_authoritative_move_and_keeps_one_use
     let (signal, receiver) = watch::channel(0);
     signal.send_replace(9);
     assert_eq!(
-        run_until_zone_overload(
+        run_until_transport_end(
             std::future::pending::<()>(),
             receiver,
-            Arc::new(AtomicU64::new(9))
+            Arc::new(AtomicU64::new(9)),
+            transport::TransportSignal::new(),
         )
         .await,
-        Err(9)
+        Err(transport::TransportEnd::ZoneOverload(9))
     );
     let leave = ExplicitWorldLeaveState::default();
     assert!(!leave.completed);

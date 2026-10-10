@@ -161,6 +161,26 @@ impl ZoneRuntime {
                     // These source species clear EXPOwner even when Master exists.
                     if matches!(monster.ai, 6 | 58 | 113) {
                         impact.clears_owner = true;
+                    } else if monster.owner_session_id.is_some()
+                        && monster.master_object_id != zone_native_summon_owner_player_object_id(monster)
+                    {
+                        // MonsterObject.Attacked(MonsterObject): EXPOwner is
+                        // the immediate Master, not the causal Human. A real
+                        // CharmedSnake's Master is its incarnation-bound Totem;
+                        // MapObject.WinExp is empty for that Monster. Do not
+                        // mint/renew Human XP or loot from owner_session_id.
+                        // An earlier living Human first hitter keeps custody.
+                        if let Some(master) = self
+                            .owned_pet_immediate_monster_master(object_id)
+                            .and_then(|reference| self.native_monsters.get(&reference.object_id()))
+                        {
+                            impact.clears_owner = impact.current_owner_dead
+                                || !points_within_action_range(
+                                    &master.position,
+                                    &monster.position,
+                                    MASTER_CREDIT_RANGE,
+                                );
+                        }
                     } else if monster.master_object_id != 0 || monster.owner_session_id.is_some() {
                         let master = monster
                             .owner_session_id
@@ -553,9 +573,16 @@ mod tests {
         assert_eq!(restored.native_monsters[&201].hp, 80);
         let reanchored: serde_json::Value =
             serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
-        assert_eq!(reanchored["version"], 6);
+        // The current checkpoint contract includes mining (v7). Reanchoring
+        // a v4 file must still retire legacy claim authority and forced hits.
+        assert_eq!(reanchored["version"], 7);
         assert!(reanchored["native_monsters"]["201"]
             .get("experience_owner")
             .is_none());
+        let current =
+            ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&reanchored).unwrap()).unwrap();
+        assert!(current.native_monsters[&201].experience_owner.is_none());
+        assert!(!current.pending_native_hits[0].force_experience_owner);
+        assert_eq!(current.pending_native_hits[0].ready_at_ms, 1_000);
     }
 }

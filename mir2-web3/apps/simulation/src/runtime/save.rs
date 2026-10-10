@@ -380,6 +380,73 @@ fn persist_active_character_save_inner(
     let Some(save) = snapshot_active_character_save(world) else {
         return Ok(());
     };
+    persist_selected_character_save(world, save, last_access_binary_datetime)
+}
+
+// Recovery must commit the authenticated frozen checkpoint, rather than
+// resnapshotting elapsed buff/refine timers after restoring it. Reuse the same
+// identity checks, source transaction, full-save CAS and logout metadata.
+pub(super) fn persist_frozen_character_checkpoint_for_logout(
+    world: &World,
+    mut save: CharacterSaveRecord,
+) -> Result<(), String> {
+    if !has_frozen_skill_clocks(&save.skill_states_json)? {
+        // Compatibility for existing journals written without a capture clock.
+        // New teardown checkpoints already contain the original durable clock;
+        // never recompute it in the new recovery session's clock domain.
+        let skills = decode_durable_skill_states(&save.skill_states_json)
+            .ok_or("invalid recovery skill state")?
+            .into_iter().map(|(skill, _)| skill).collect::<Vec<_>>();
+        save.skill_states_json = encode_durable_skill_states(&skills, runtime_tick(world), unix_now_ms());
+    }
+    persist_selected_character_save(world, save, Some(current_crystal_logout_binary_datetime()))
+}
+
+fn has_frozen_skill_clocks(items: &[String]) -> Result<bool, String> {
+    let mut clocks = 0;
+    for item in items {
+        let value: serde_json::Value = serde_json::from_str(item).map_err(|e| e.to_string())?;
+        if let Some(metadata) = value.get(SKILL_CLOCK_METADATA_KEY) {
+            let clock: DurableSkillClock = serde_json::from_value(metadata.clone()).map_err(|e| e.to_string())?;
+            if clock.schema != DURABLE_SKILL_CLOCK_SCHEMA {
+                return Err("unsupported frozen skill clock schema".into());
+            }
+            clocks += 1;
+        }
+    }
+    if clocks != 0 && clocks != items.len() {
+        return Err("mixed frozen and legacy skill clocks".into());
+    }
+    Ok(clocks == items.len())
+}
+
+pub(super) fn frozen_recovery_checkpoints_match(
+    saved: &CharacterSaveRecord,
+    journal: &CharacterSaveRecord,
+) -> Result<bool, String> {
+    let mut saved = saved.clone();
+    let mut journal = journal.clone();
+    saved.revision = 0;
+    journal.revision = 0;
+    if !has_frozen_skill_clocks(&journal.skill_states_json)? {
+        // Legacy journal normalization is restricted to the known typed skill
+        // clock wrapper. New journals compare their captured clock bytes too.
+        for record in [&mut saved, &mut journal] {
+            let skills = decode_durable_skill_states(&record.skill_states_json)
+                .ok_or("invalid recovery comparison skill state")?
+                .into_iter().map(|(skill, _)| skill).collect::<Vec<_>>();
+            record.skill_states_json = encode_state_vec(&skills);
+        }
+    }
+    Ok(serde_json::to_vec(&saved).map_err(|e| e.to_string())?
+        == serde_json::to_vec(&journal).map_err(|e| e.to_string())?)
+}
+
+fn persist_selected_character_save(
+    world: &World,
+    save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
+) -> Result<(), String> {
     let session = world.resource::<SessionResource>();
     let Some(account_id) = active_session_mutating_account_id(session) else {
         return Err(
@@ -521,6 +588,26 @@ impl SimulationSession {
                 .skills,
         );
         Some(save)
+    }
+
+    /// Final teardown journal includes the durable skill clock captured in the
+    /// original session. Ordinary same-session rollback checkpoints stay unchanged.
+    pub fn active_character_teardown_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        snapshot_active_character_save(self.app.world())
+    }
+
+    /// Server-only prepared teardown/recovery path; no player command exposes
+    /// it. Preserve the frozen timer bytes and reuse the ordinary full-save CAS.
+    pub fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        if self.app.world().resource::<SessionResource>().active_save_revision()
+            != Some(checkpoint.revision) {
+            return Err("frozen character save revision changed".into());
+        }
+        self.restore_active_character_checkpoint(checkpoint)?;
+        persist_frozen_character_checkpoint_for_logout(self.app.world(), checkpoint.clone())
     }
 
     /// Restore the active character's durable private state after journal

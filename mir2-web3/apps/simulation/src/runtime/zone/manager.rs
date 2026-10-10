@@ -20,6 +20,10 @@ use super::types::{
     ZoneMonsterKillAward, ZoneOutbound,
 };
 
+#[path = "npc_population.rs"]
+mod npc_population;
+pub use npc_population::ZoneNpcPopulationReadSet;
+
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
 #[derive(Debug)]
@@ -638,6 +642,7 @@ impl ZoneManager {
             let mut transferred_poison_clock = None;
             let mut transferred_owned_pet_clock = None;
             let mut transferred_owned_human_poisons = None;
+            let mut transferred_purification = None;
             let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
             let retain_online = online_map_transfer && self.online_identities.owner(&session_id)
                 .is_some_and(|owner|owner.matches_join(&join));
@@ -655,6 +660,10 @@ impl ZoneManager {
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
                 if retain_online {
                     if let Some(zone)=self.zones.get_mut(&previous_key) { zone.prepare_player_online_pet_transfer(&session_id); }
+                    transferred_purification = self
+                        .zones
+                        .get_mut(&previous_key)
+                        .and_then(|zone| zone.take_online_purification_transfer(&session_id));
                     transferred_owned_human_poisons = self.zones.get(&previous_key)
                         .map(|zone| zone.capture_player_owned_human_poisons(&session_id));
                     transferred_owned_pet_clock = self.zones.get(&previous_key)
@@ -677,7 +686,7 @@ impl ZoneManager {
             let zone = self
                 .zones
                 .entry(key.clone())
-                .or_insert_with(|| ZoneRuntime::new(key));
+                .or_insert_with(|| ZoneRuntime::new(key.clone()));
             zone.ingest_online_presence(snapshot, true);
             let mut joined = zone.handle(ZoneCommand::Join(join));
             if let Some(clock) = transferred_clock {
@@ -701,8 +710,16 @@ impl ZoneManager {
                 // viewport's last ObjectPoisoned can establish that state.
                 zone.calibrate_online_join_poison(&session_id, &mut joined);
             }
-            outbounds.extend(joined);
             self.refresh_online_presence();
+            if let Some(transfer) = transferred_purification {
+                // The retained snapshot above still names the source map.
+                // Adopt only after the actual destination life and Node have
+                // been refreshed, without blessing a new life or bare ID.
+                if let Some(zone) = self.zones.get_mut(&key) {
+                    zone.adopt_online_purification_transfer(&session_id, transfer, &mut joined);
+                }
+            }
+            outbounds.extend(joined);
             return outbounds;
         }
         match &command {

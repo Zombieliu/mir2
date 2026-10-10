@@ -41,9 +41,20 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
+mod npc_population;
+pub(crate) mod source_map_loading;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_script;
+mod npc_world_plan;
+#[cfg(test)]
+mod npc_source_guard_tests;
+#[cfg(test)]
+mod npc_parser_omission_tests;
+#[cfg(test)]
+mod npc_buff_action_tests;
+#[cfg(test)]
+mod npc_catalog_lookup_tests;
 mod onchain;
 mod packets;
 mod pathfind;
@@ -52,6 +63,8 @@ pub(crate) use quests::periodic_quests::target_is_periodic as periodic_quest_tar
 mod refine_oven;
 mod rental;
 mod resources;
+mod recovery;
+pub use recovery::RecoveryCharacterLoadError;
 mod save;
 mod session;
 mod shared_guilds;
@@ -112,6 +125,7 @@ pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, GroundDropClaimTicket,
     PlayerId, SessionId, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
     ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
+    ZoneNpcPopulationReadSet,
     ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn,
     ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
     ZoneOutput, ZonePlayerAppearance, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,

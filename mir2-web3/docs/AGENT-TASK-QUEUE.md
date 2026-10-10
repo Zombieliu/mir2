@@ -1,5 +1,198 @@
 # Agent Task Queue
 
+> Current Source terrain round, 2026-10-10 local: normal collision now shares
+> the Source decoder and corrects three format discrepancies. Final library32
+> pass/1 original benchmark ignored; all463 Server Maps preparations/collisions
+> and all1,620 bundled ordinary collisions match unmodified C# readers. Strict
+> preparation remains unavailable for19 trailing-byte pack records; original
+> failed probe is retained, and no Map.Load/world population receipt is minted.
+> [Evidence and exact remaining gates](CLASSIC-SOURCE-MAP-TERRAIN-20261010.md).
+> Final optimized Gateway 4/4 passes; 36 distinct final checks pass, with
+> the original benchmark excluded. New-source Linux/publication remain separate;
+> public c704/R23/feed18 remains current with 1 undrained WS. Full
+> P1–P7/Mentor/native/human and Source-CAS world actions remain unfinished.
+> Root owns common files and the returned terrain module; review is read-only.
+> Expired heartbeat stays paused; no blocked Goal completion or new deadline.
+
+> Current priority: new borrowed NPC catalog/Buff ACT Candidate passes local
+> focused93 Rust/Node6 and original optimized Gateway4; require new exact Linux
+> and genuine artifact before drained publication.20cee is exactly pushed;
+> actual37955396469 failed unchanged500ms setup (+14ms). Narrow adjacent54/2
+> retains known failures. Root owns product/common docs; workers returned
+> ownership. Continue trusted population/Source-CAS world outbox afterward.
+> Publicc704/R23/feed18 stays current. [Round](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
+> NPC parser Candidate fixes actual149/MissMi branch errors. Node6/Rust30 and
+> optimized normal Gateway4 pass; adjacent104/2 reproduces on frozen4baa.
+> Actual4baa Linux37941832277 failed the original strict500ms fixture setup;
+> no package/deploy. Owned-UID lookup is now prepared before cast, all Source
+> assertions preserved. Next: exact new Linux CI, genuine artifact verification
+> and drained publication. Shared population/reservations/world CAS-outbox and
+> full native/human gates stay open. [Evidence](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
+> NPC source3795cbd133 is now pushed with exact remote readback. A subsequent
+> test-only File follow-up passes8 NPC tests (six repeats/two new): real known
+> rename failure can retry, unknown result suppresses ACK and survives authority
+> release/rebind frozen. Original workflow preserved plus two additional gates;
+> exact-source CI is not yet run. Product code and Gatewayc704 stay unchanged.
+> Pending+FROZEN offline reconciliation, shared world CAS/outbox and native
+> stories stay open. [File follow-up evidence](CLASSIC-NPC-SOURCE-GUARD-20261009.md).
+
+> 2026-10-09 actual publication: Gatewayc704/CI37918999132 is live; client stays
+> R23/sourcefaef, signedfeed18 (fresh TLS byte readback). Original62 public
+> protocol checks and14 acknowledged normal logouts pass, exact service/binary
+> and unchanged original realm confirmed. Two local orchestration/metadata
+> errors after successful switch/checks are retained; apply was not repeated.
+> [Published scope](CLASSIC-PURIFICATION-MAP-PUBLISHED-20261009.md).
+>
+> NPC full personal Source guard and raw refining-clock rollback, plus private
+> ordered pet interpretation, pass94 distinct selected tests. They are local
+> Candidate only, not published world integration. Root is sole common writer;
+> the pet worker has returned ownership. Next P7 work is trusted capture,
+> same-Source-CAS outbox and authoritative durable application/recovery; all
+> seven-world-action, natural/native/human and full P1–P7/Mentor gates stay open.
+> [Current Candidate and limits](CLASSIC-NPC-SOURCE-GUARD-20261009.md).
+> Earlier faef/P7 ownership/publication status below is historical. No100% claim,
+> expired heartbeat restart or blocked Goal completion.
+
+
+> Current continued round, 2026-10-10 local: Source population predecessor855863
+> is actually pushed with exact GitHub readbacks; previous Git REST/SSH/HTTPS
+> failures are retained. New Gateway owner entry scopes preserve full accepted
+> lease/real sequence/Active-Replay role, clear all return paths and bind exact
+> admitted SessionId/Node/life/presence epoch.43 distinct local checks pass,
+> including the original optimized Gateway4/strict500ms and security20.
+> [Scope, original evidence and next gates](CLASSIC-NPC-OWNER-EXECUTION-20261010.md).
+> The private population capture is not yet an ordinary CHECKHUM consumer.
+> Successful Source-load producer, actual NPC/page/body/DefaultFIFO binding,
+> deterministic read transcript and same-Source-CAS reservations/world outbox
+> remain open. Next: exact new Linux/package and those real producer boundaries.
+> Earlier ecd81 Linux/package qualifies, but a fresh1-WS preflight still holds
+> rollout before staging. Publicc704/R23/feed18 stays unchanged; no kicks/saves
+> or other games touched. Root is sole common writer; review is read-only.
+> Full P1-P7/Mentor/native/human remains unfinished. The expired heartbeat stays
+> paused; no blocked Goal completion or new deadline. Older statuses are history.
+
+
+> Latest continued round, 2026-10-10 local: exactecd81 is pushed and actual
+> Linux37970933774 passed both original jobs; genuine package/ELF/Source checks
+> are qualified. Rollout stopped before staging because1 WS connection remained;
+> publicc704/R23/feed18 is unchanged. [Linux evidence](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+> New P7 Source population selection and real Manager census foundation passes
+>32 distinct local checks (40 executions include duplicates). Ordinary CHECKHUM,
+> successful-load producer, full Gateway invocation/replay and Source-CAS world
+> outbox are still unwired. [Exact scope and next integration](CLASSIC-NPC-POPULATION-FOUNDATION-20261010.md).
+> Root owns all common files/Git/rollout; worker/reviewer ownership is returned.
+> Full P1–P7/Mentor/native/human gates remain open; no100% claim, expired heartbeat
+> restart or blocked Goal completion. Older statuses below are historical.
+
+> 2026-10-09 live Purification map/Player powder Candidate: the original
+> opaque action, complete actor proofs, actual buffs/deadlines and Hidden state
+> survive only a true retained live map change. Shared Player magic preflight
+> now matches dispatch before carried powder consumption; clocks/permissions
+> remain unchanged. Ordinary Manager14, Purification23, pet/Human38+Hell17 and
+> optimized ordinary Gateway4 pass. Broad library305/8 matches a clean pinned
+> source586 baseline299/the same8; original shared_zone201/8 stays RED.
+> New exact-source CI/deployment/native-human gates remain open. Historical
+> source586 actual Linux37901046490 and genuine artifact verification pass.
+> [Current behavior, evidence and limits](CLASSIC-PURIFICATION-MAP-TRANSFER-20261009.md).
+>
+> Actual current published pair is R23/sourcefaef, signedfeed18/Gatewayfaef:
+> 40 complete CDN objects, same-head separate stage/promote, real Windows
+> HTTPS/CMS/206 and71 public checks/20 normal logouts pass. Its immutable
+> publication record is pushed asf93ed212; older R22/feed17/536 entries below
+> are historical. Full P1–P7/Mentor is unfinished; no100% claim or expired
+> heartbeat restart. [Actual R23 publication](https://github.com/Zombieliu/mir2/blob/f93ed2121046962f9c39dfc62f7696e90b0cc458/mir2-web3/docs/CLASSIC-TARGET-MOVEMENT-PUBLISHED-R23-20261009.md).
+>
+> Ownership: Root is the only writer of shared runtime/manager/save/routing and
+> owns tests, Git and rollout. P7 audit is explicitly reassigned to one bounded
+> new npc_world_plan.rs module; it cannot edit common files or publish. Its
+> ordered pet shadow is not yet an integrated durable outbox/shared-world flow.
+
+> 2026-10-09 Purification Candidate: Source cast+500ms now rechecks both typed
+> actor Nodes/lives, current friendship and original level chance; clears actual
+> poison and Source Debuffs12/53/57 without removing beneficial buffs or unrelated
+> in-flight damage. Focused17 and existing pet/Human38 pass; Root full Zone is
+> 201pass/8fail and all17 Hell-AI cases pass. The remaining8 failures stay RED.
+> Simultaneous same-destination live map transfer during the cast is open;
+> exact-source CI/publication/native/Human acceptance for this slice are pending.
+> [Source, limits and all original evidence](CLASSIC-PURIFICATION-LIFECYCLE-20261009.md).
+>
+> Snake source97a now passed actual Linux CI37889758213, including both jobs and
+> original appearance/security/classic/Source/PostgreSQL/siege/package gates.
+> Genuine artifact digest/ELF/Source metadata were verified; no server switch.
+> R23 sourcefaef origin40 immutable files are appended and independently read back;
+> R2 stage37899098919 is running on exact publication headbaf. Feed17/Gateway536
+> remain current. [Snake CI evidence](generated/player-qa/snake-master-20261009/linux-ci-01/EVIDENCE.json).
+
+> 2026-10-09 Snake Totem immediate-master Candidate: real AI62→AI63 children
+> now bind parent/child incarnations and causal online/life identity, use their
+> immediate Totem targeting/SlaveList/follow rules, preserve strict birth+2000
+> and 300ms impact, and revoke stale pending hits. Master-null corpse bursts
+> cannot inherit former Human authority; child damage cannot mint Human XP/gold
+> or steal a living first hitter's custody. Final private64, ordinary in-process
+> Zone API5 and original test-support pet-PK38 pass on the same source. Full Zone
+> is200pass/9fail: two Snake failures fixed, remaining nine retained; no fixture
+> or checkpoint implementation rewrite. Exact-source CI/publication/native/Human
+> acceptance remain pending. SummonSnakes is the original Archer skill; this is
+> not full Taoist-PK parity. [Scope and raw evidence](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
+>
+> P1 sourcefaef is pushed; original Linux CI37880146450 and Windows CI37880146228
+> pass. Genuine clean attested EXE, strict full resource package, decoded R22
+> delta and signedfeed18 are ready, not published. Public remainsR22/feed17 and
+> Gateway536 until a separate drained paired release. No100% Candidate claim.
+
+> 2026-10-09 target/movement lifecycle Candidate: temporary blocked pursuit now
+> keeps a live target and caches only failed routes against the exact shared
+> collision footprint. A blocker death/position/blocked-hint change replans;
+> cosmetic changes do not repeat A*. Invalid/dead/removed attacks cancel stale
+> movement and acknowledge the real bound owner even if the Zone queue is empty,
+> without shortening action/Struck/spell clocks. Local native900/0/7ignored,
+> Gateway21, native focused5 and the actual three-class native/Gateway socket
+> cohort pass; corrections68/68/71ms, fresh movement,5s quiet, three normal logouts.
+> The genuine mining91.wav is now tracked and required by the generic packager.
+> Linux/Windows exact-source release CI and paired publication are pending;
+> this Candidate does not change the last verified R22/feed17/Gateway536 pair.
+> Full seven-monster/native-human and P1-P7/Mentor gates remain open.
+> [Scope, original evidence and remaining work](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
+
+Current sole source writer: root in the isolated gateway-lifecycle lane. The
+bounded Snake worker and publication worker have returned ownership; all actual
+service/Git/publication decisions remain with root. The separate publication
+worktree holds only its assigned R23 delivery files and root-reviewed integration.
+Next bounded rounds, preserving these Candidates and real source saves:
+
+1. Finish P1 sourcefaef R23/feed18 staging, exact source/security delivery gates
+   and paired publication only after saved/drained sessions. Both original
+   release CIs and clean attested Windows package already pass. Qualify genuine
+   seven-monster pressure for all three classes without lowering source clocks.
+2. Commit/push the tested Snake immediate-master Candidate, run its new Linux
+   gate and original security/Source/PostgreSQL/siege gates, then perform separate
+   Gateway-only publication and actual normal acceptance. Keep the nine remaining
+   baseline stories separate. [Current scope](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
+3. Implement source NPC ordered logical world actions and same Source-CAS durable
+   Zone outbox, then actual group admission/save and CHECKHUM capacity semantics.
+   [P7 rules and staged acceptance](CLASSIC-P7-SOURCE-WORLD-AUDIT-20261009.md).
+4. Finish normal native Carlos deposit/start/check/collect/failure and two-account
+   Guild/Mentor, original Boss/loot/party progression; rendered/human acceptance
+   stays distinct from headless protocol/source checks.
+
+
+
+> 2026-10-09 disconnect fix released: source536b4a59f3 is committed/pushed and
+> exact-source Linux CI37810114063 passed the original appearance, trusted
+> recovery, classic source, PostgreSQL and siege gates. The playtest Gateway
+> changed froma41 only after six capacity counters, TCP connections and spectator
+> viewers drained to zero, with private backups and successful normal/cold stops.
+> Public ordinary44 and final native-resume18 checks pass, including three actual
+> socket losses, ticket rotation/replay refusal and exact position/item/gold state;
+>14 normal logout acknowledgements. The first15-check WSS failure remains retained
+> and is excluded. Original realm/config/resources remain verified; R22/feed17
+> client needs no reinstall. Native dense-monster/human and fullP1-P7/Mentor gates
+> remain open; no100% claim. The expired12-hour heartbeat is stopped as instructed.
+> [Released scope and evidence](GATEWAY-DISCONNECT-LIFECYCLE-20261008.md).
+
+
 > 2026-10-10 monthly-mail sandbox switch completed after the user's normal
 > logout and all six admission counters reached zero. Native8aafbb60db and
 > Gateway92912f25c1 are running; first_main_update, healthy connection and
