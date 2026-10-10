@@ -1,5 +1,27 @@
 # Monthly card in the ordinary GameShop — 2026-10-10
 
+## Actual authorized local client switch
+
+After the human confirmed normal exit and authorized switching, no test native
+process or active Gateway session remained. Windows rejected replacement of
+the previous executable with a sharing violation. Read-only Restart Manager
+inspection identifies the already-running DeltaForce process237700 as holder;
+the previous binary and verified backup keep their exact original hash.
+No other application is stopped or changed.
+
+The verified new native binary is instead launched under its prepared separate
+filename, using a copied launcher whose only change is that executable name.
+Its executable-adjacent config, existing isolated profile, original launcher,
+asset root and GatewayPID223912 are preserved. The existing local test shortcut
+is backed up and points to the new launcher. NativePID247236 is alive/responding
+and its actual startup telemetry reaches `first_main_update`; Gateway health
+is true with one ordinary connection and no active character at observation.
+`SWITCH-RECEIPT.json` retains the failed replacement, successful delivery and
+allowlisted current-process telemetry. Native manual login, GameShop visual/
+purchase acceptance and public commercial rollout remain open.
+
+## Prepared Candidate and test history
+
 The operator requested a visible monthly-card consumable bought with Credits,
 like the existing GameShop product cards. The Source already supplies the
 application-owned item/product1000001 when a positive price is configured.

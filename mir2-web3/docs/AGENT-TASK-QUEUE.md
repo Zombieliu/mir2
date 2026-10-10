@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-10 user normal-exit/switch authorization is executed for the local
+> monthly-card-first-page client. DeltaForce holds the previous exe, so it is
+> preserved/backed up and the verified separate-name binary is launched using
+> the same config/profile. Test shortcut updates; first_main_update and healthy
+> unchanged local Gateway are observed. No forced application stop, public
+> publication or native human purchase acceptance. Original P1–P7 stays unfinished.
+> [Switch proof and retained sharing error](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/SWITCH-RECEIPT.json).
+
 > 2026-10-10 monthly-card UI follow-up: native code0399bbdd puts the existing
 > consumable on ordinary GameShop All page one. Source price/parcel/exact-UID
 > use are preserved. Client14 and Source fixture9 checks pass; Windows binary

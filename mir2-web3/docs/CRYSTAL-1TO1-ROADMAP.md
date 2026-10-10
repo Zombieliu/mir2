@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-10 the authorized local monthly-card UI client switch is now executed.
+> The old exe's unrelated DeltaForce sharing lock is retained; a verified
+> separate-name new binary starts using the existing config/profile, with the
+> test shortcut updated. Native first_main_update and healthy unchanged local
+> Gateway are observed. No other application or public service/feed changes.
+> Manual GameShop purchase/visual acceptance, public commercial delivery and
+> original unfinished P1–P7 remain open.
+> [Actual local switch evidence](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/SWITCH-RECEIPT.json).
+
 > 2026-10-10 commercial UI follow-up: the monthly-card consumable is prioritized
 > on the normal GameShop All first page by exact item/product identity, after
 > existing filters. Client14 and Source fixture9 tests plus Windows build pass.

@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-10 authorized local client switch completes after human normal exit.
+> A sharing violation from the unrelated running DeltaForce application prevents
+> overwriting the old exe; it is retained and backed up. The verified new binary
+> launches under a separate filename with the same config/profile and a copied
+> launcher. The existing test shortcut points to it. Actual startup reaches
+> first_main_update and the preserved Gateway remains healthy. No public
+> service/feed changes or native GameShop human acceptance are claimed.
+> [Actual switch and retained error](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/SWITCH-RECEIPT.json).
+
 > 2026-10-10 monthly-card discoverability Candidate: exact custom item/product
 > 1000001 is first on the ordinary GameShop All first page. Original catalog
 > order and filters remain intact; server1000-Credit pricing, parcel delivery
