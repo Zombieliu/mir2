@@ -1,5 +1,19 @@
 # Classic gameplay delivery — 12-hour resumed work
 
+> Continued hot-path round, 2026-10-10: actual6153 Linux38043237500 failed the
+> unchanged strict500ms scroll story by6ms; siege passed, no deploy. Outcome
+> tick projection now avoids full snapshots; one rebuild reuses exact respawn
+> rectangle/collision counts. Final137 distinct Rust checks pass (15 new),
+> including the original optimized scroll and adjacent movement/spawn/owned
+> pet/Purification checks. Initial added fixture failure is retained; only its
+> arrival-protected viewport was corrected. Clocks, assertions, auth and all
+> original CI gates remain. [Scope/raw evidence](CLASSIC-OUTCOME-RESPAWN-PERFORMANCE-20261010.md).
+> Root owns all returned files; new exact Git/Linux/package/drained publication
+> and native/human remain separate. Last11:33 UTC public64b6 had0 sessions;
+> R23/feed18 stays current. CanMove/receipt/world outbox and fullP1-P7/Mentor
+> remain open; expired heartbeat stays paused, no blocked Goal completion.
+
+
 > Continued fixture recovery, 2026-10-10: actual transfer348 Linux38019332713
 > failed its original Snake cold-root check; siege passed, no deploy. Eight
 > retained fixtures now use bundled ordinary terrain and equivalent geometry.

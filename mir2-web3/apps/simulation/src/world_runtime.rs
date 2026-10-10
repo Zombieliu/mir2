@@ -307,7 +307,7 @@ pub trait WorldRuntime: Send + Sync {
         let snapshot_tick = if skip_snapshot {
             0
         } else {
-            self.world_snapshot().tick
+            self.current_tick()
         };
         let packet_count = packets.len();
         Ok(WorldCommandExecution {
@@ -340,6 +340,12 @@ pub trait WorldRuntime: Send + Sync {
     }
 
     fn world_snapshot(&self) -> WorldSnapshot;
+
+    /// Read-only outcome clock projection. Other runtimes retain their
+    /// existing snapshot behavior unless they can provide the same clock.
+    fn current_tick(&self) -> u64 {
+        self.world_snapshot().tick
+    }
     fn supports_magic_key_assignment(&self,_spell:mir2_protocol::Spell,_key:u8,_old_key:u8)->bool{false}
     fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         Vec::new()
@@ -1209,7 +1215,7 @@ impl WorldRuntime for InProcessWorldRuntime {
         let snapshot_tick = if skip_snapshot {
             0
         } else {
-            self.world_snapshot().tick
+            self.current_tick()
         };
         let packet_count = packets.len();
         Ok(WorldCommandExecution {
@@ -1230,6 +1236,10 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn world_snapshot(&self) -> WorldSnapshot {
         self.session.world_snapshot()
+    }
+
+    fn current_tick(&self) -> u64 {
+        self.session.current_tick()
     }
 
     fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
@@ -1274,6 +1284,10 @@ impl WorldRuntime for InProcessWorldRuntime {
         self.session.refresh_active_external_mail()
     }
 }
+
+#[cfg(test)]
+#[path = "world_runtime_tick_tests.rs"]
+mod outcome_tick_tests;
 
 #[cfg(test)]
 mod tests {

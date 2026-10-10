@@ -15435,7 +15435,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 snapshot_tick: if skips_snapshot {
                     0
                 } else {
-                    self.world_snapshot().tick
+                    self.current_tick()
                 },
                 active_identity: self.active_identity(),
             },
@@ -15445,6 +15445,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         self.inner.supports_typed_game_shop_purchase_outcome()
+    }
+
+    fn current_tick(&self) -> u64 {
+        // Shared AOI/vitals overlays do not change the personal snapshot tick.
+        // Avoid composing that full snapshot just to read its clock.
+        self.inner.current_tick()
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {
@@ -16084,6 +16090,8 @@ mod tests {
     mod zone_skill_cadence_tests;
     #[path = "shared_session_hot_path_tests.rs"]
     mod shared_session_hot_path_tests;
+    #[path = "outcome_tick_tests.rs"]
+    mod outcome_tick_tests;
     #[path = "predrain_performance_tests.rs"]
     mod predrain_performance_tests;
     #[path = "live_chat_tests.rs"]

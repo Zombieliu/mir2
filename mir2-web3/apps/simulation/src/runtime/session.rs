@@ -714,6 +714,12 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    /// Read the same clock exposed by WorldSnapshot without materializing its
+    /// inventory, quests or entities. Reading it never advances the clock.
+    pub fn current_tick(&self) -> u64 {
+        runtime_tick(self.app.world())
+    }
+
     pub fn local_player_vitals_snapshot(&self) -> LocalPlayerVitalsSnapshot {
         let world = self.app.world();
         let player = player_entity(world);
