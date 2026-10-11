@@ -111,10 +111,17 @@ jobs:
       - name: Test and build Windows host
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          . mir2-web3/apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1
+          Assert-PetSoundClosure -OriginalUiRoot 'mir2-web3/apps/web/public/original-ui'
           powershell -NoProfile -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1 -SelfTest
+          if ($LASTEXITCODE -ne 0) { throw "Windows build self-test failed: $LASTEXITCODE" }
           cargo "+$env:RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml -- --check
+          if ($LASTEXITCODE -ne 0) { throw "Windows format check failed: $LASTEXITCODE" }
           cargo "+$env:RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { throw "Windows host tests failed: $LASTEXITCODE" }
           powershell -NoProfile -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1
+          if ($LASTEXITCODE -ne 0) { throw "Windows release build failed: $LASTEXITCODE" }
           New-Item -ItemType Directory -Force mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64 | Out-Null
           Copy-Item mir2-web3/target-attested-windows-candidate/x86_64-pc-windows-msvc/release/mir2-platform-windows.exe mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
           Copy-Item mir2-web3/target-attested-windows-candidate/BUILD-ATTESTATION.json mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/

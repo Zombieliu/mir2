@@ -7060,6 +7060,18 @@ mod handshake_tests;
 mod tests {
     use super::*;
 
+    // Native ingestion is a process-global slot. These fixtures must retain
+    // exclusive ownership through App drop and socket-task completion so an
+    // unrelated fixture cannot replace the slot or enqueue a terminal reset.
+    // Production never acquires this test-only lock.
+    static NATIVE_QUEUE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+    fn native_queue_test_guard() -> std::sync::MutexGuard<'static, ()> {
+        NATIVE_QUEUE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+
     #[test]
     fn skill_experience_projection_uses_real_snapshot_and_catalog_needs() {
         let def = mir2_game_data::crystal_magic_by_spell("FireBall").unwrap();
@@ -8031,6 +8043,7 @@ mod tests {
 
     #[test]
     fn gateway_map_information_survives_schema_snapshots_until_the_map_changes() {
+        let _native_queue_guard = native_queue_test_guard();
         let context = GatewaySessionContext::default();
         let (shell_sender, _shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
@@ -8908,6 +8921,7 @@ mod tests {
 
     #[test]
     fn exact_receipt_then_semantic_invalid_is_quarantined_and_consumed_once_by_full_plugins() {
+        let _native_queue_guard = native_queue_test_guard();
         use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
         use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
         use mir2_client_bevy::pending_operations::{
@@ -10757,6 +10771,7 @@ mod tests {
 
     #[tokio::test]
     async fn native_resume_round_trip_preserves_only_post_resume_authority() {
+        let _native_queue_guard = native_queue_test_guard();
         let listener = tokio::net::TcpListener::bind(("127.0.0.1", 0))
             .await
             .expect("bind loopback websocket listener");
@@ -12203,6 +12218,7 @@ mod tests {
 
     #[test]
     fn outer_terminal_transitions_preserve_and_apply_exact_receipt_to_all_owners() {
+        let _native_queue_guard = native_queue_test_guard();
         use mir2_client_bevy::crystal_ui::overlays::{
             NativePlayerUiIntentQueue, NativePlayerUiState,
         };
@@ -12360,6 +12376,7 @@ mod tests {
 
     #[test]
     fn outer_terminal_pending_without_receipt_still_becomes_unknown() {
+        let _native_queue_guard = native_queue_test_guard();
         use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
         use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
         use mir2_client_bevy::pending_operations::{PendingOperationKey, PendingOperations};
@@ -12483,6 +12500,7 @@ mod tests {
 
     #[tokio::test]
     async fn native_resume_minimal_socket_contract_reconnects_and_accepts_post_resume_snapshot() {
+        let _native_queue_guard = native_queue_test_guard();
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
             .expect("loopback listener");
@@ -12786,6 +12804,7 @@ mod tests {
 
     #[tokio::test]
     async fn native_resume_deadline_covers_waiting_for_resume_result_without_hanging() {
+        let _native_queue_guard = native_queue_test_guard();
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
             .expect("loopback listener");
@@ -12975,6 +12994,7 @@ mod tests {
 
     #[tokio::test]
     async fn native_resume_rejected_is_terminal_and_never_replays_queued_input() {
+        let _native_queue_guard = native_queue_test_guard();
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
             .expect("loopback listener");
@@ -13114,6 +13134,7 @@ mod tests {
 
     #[tokio::test]
     async fn native_resume_logout_cancels_pending_resume_without_retry() {
+        let _native_queue_guard = native_queue_test_guard();
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
             .expect("loopback listener");
