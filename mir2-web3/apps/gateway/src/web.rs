@@ -85,6 +85,8 @@ type SharedWebSocketSender = Arc<transport::SocketSender<WebSocketSender>>;
 mod transport;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
+#[path = "web_billing.rs"]
+mod billing;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
@@ -102,6 +104,7 @@ static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::n
 static GATEWAY_SLOW_STAGE_THRESHOLD: OnceLock<Option<Duration>> = OnceLock::new();
 const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
+const NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL: &str = "nativeGameShopGiftReceiptV1";
 
 /// Native bridge receipt metadata; the original C.MagicKey packet is unchanged.
 #[derive(Debug, Clone, Serialize)]
@@ -777,12 +780,15 @@ struct NativeGameShopRequest {
     g_index: i32,
     quantity: u8,
     price_type: i32,
+    recipient_name: Option<String>,
 }
 
 #[derive(Debug, Default)]
 struct NativeGameShopConnectionState {
     opted_in: bool,
+    gift_opted_in: bool,
     pending: Option<NativeGameShopRequest>,
+    gift_requests: HashMap<(String, i32, String), NativeGameShopRequest>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -804,6 +810,32 @@ struct NativeGameShopHandlerDispatch {
 }
 
 impl NativeGameShopConnectionState {
+    /// A repeated client envelope must retain its original server nonce.
+    /// Bind it to the authenticated payer as well as the complete gift tuple;
+    /// Source still verifies the permanent receipt before any economic write.
+    fn bind_gift_request(
+        &mut self,
+        mut request: NativeGameShopRequest,
+        account_id: &str,
+        character_index: i32,
+    ) -> Result<NativeGameShopRequest, Value> {
+        let key = (account_id.to_owned(), character_index, request.request_id.clone());
+        if let Some(original) = self.gift_requests.get(&key) {
+            request.server_idempotency_key.clone_from(&original.server_idempotency_key);
+            return if &request == original {
+                Ok(request)
+            } else {
+                Err(native_game_shop_failure_event(&request, "invalidRequest", None))
+            };
+        }
+        // Never evict a used key and silently turn its retry into a new gift.
+        if self.gift_requests.len() >= 1024 {
+            return Err(native_game_shop_failure_event(&request, "giftUnavailable", None));
+        }
+        self.gift_requests.insert(key, request.clone());
+        Ok(request)
+    }
+
     fn reserve(&mut self, request: NativeGameShopRequest) -> Result<(), Value> {
         if self.pending.is_some() {
             return Err(native_game_shop_failure_event(
@@ -841,6 +873,7 @@ fn finish_native_game_shop_pre_execution_receipt(
 struct NativeClientCapabilities {
     native_resume_v1: bool,
     native_game_shop_receipt_v1: bool,
+    native_game_shop_gift_receipt_v1: bool,
 }
 
 impl NativeResumeConnectionState {
@@ -1572,6 +1605,10 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    BillingStatus(billing::StatusRequest),
+    BillingCheckout(billing::CheckoutRequest),
+    BillingBuyMonthlyCard(billing::BuyRequest),
+    BillingActivateMonthlyCard(billing::ActivateRequest),
     MonthlyCardStatus,
     RedeemMonthlyCard { code: monthly_card::RedeemCode, #[serde(rename = "requestId")] request_id: u64 },
     ClientVersion,
@@ -1848,6 +1885,17 @@ enum BrowserCommand {
         quantity: u8,
         #[serde(alias = "priceType")]
         price_type: i32,
+    },
+    GameShopGift {
+        #[serde(alias = "requestId")]
+        request_id: String,
+        #[serde(alias = "gIndex")]
+        g_index: i32,
+        quantity: u8,
+        #[serde(alias = "priceType")]
+        price_type: i32,
+        #[serde(alias = "recipientName")]
+        recipient_name: String,
     },
     RepairItem {
         #[serde(alias = "uniqueId")]
@@ -2241,6 +2289,7 @@ enum QaControlAction {
 
 #[derive(Debug, Clone)]
 enum SessionAction {
+    Billing(billing::Request),
     MonthlyCardStatus,
     RedeemMonthlyCard { code: monthly_card::RedeemCode, request_id: u64 },
     Packet(ClientPacket),
@@ -2249,6 +2298,13 @@ enum SessionAction {
         g_index: i32,
         quantity: u8,
         price_type: i32,
+    },
+    GameShopGift {
+        request_id: String,
+        g_index: i32,
+        quantity: u8,
+        price_type: i32,
+        recipient_name: String,
     },
     PasskeyLogin {
         account_id: String,
@@ -2711,6 +2767,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         )
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .merge(monthly_card::router())
+        .merge(billing::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -4851,6 +4908,7 @@ fn spawn_zone_outbound_sender(
     sender: SharedWebSocketSender,
     serial_execution_gate: SharedSerialExecutionGate,
     active_registration_id: Arc<AtomicU64>,
+    failure_signal: tokio::sync::watch::Sender<u64>,
 ) -> ZoneOutboundSenderTask {
     let handle = tokio::spawn(async move {
         loop {
@@ -4888,12 +4946,28 @@ fn spawn_zone_outbound_sender(
                 continue;
             }
             if outbound.is_overloaded() {
+                failure_signal.send_replace(registration_id);
                 return;
             }
-            if send_server_packet(&sender, &outbound.into_packet())
+            // Health may have waited through a death/revival while this read
+            // gate was blocked. Validate its server-only stamp at final send.
+            let packet = if outbound.owner_health().is_some() {
+                match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
+                    Ok(Ok(Some(packet))) => packet,
+                    Ok(Ok(None)) => continue,
+                    _ => {
+                        if active_registration_id.load(Ordering::Acquire) != registration_id { continue; }
+                        failure_signal.send_replace(registration_id);
+                        return;
+                    },
+                }
+            } else { outbound.into_packet() };
+            if active_registration_id.load(Ordering::Acquire) != registration_id { continue; }
+            if send_server_packet(&sender, &packet)
                 .await
                 .is_err()
             {
+                failure_signal.send_replace(registration_id);
                 return;
             }
         }
@@ -5431,6 +5505,8 @@ async fn handle_socket_work(
     let movement_ingress = Arc::new(RwLock::new(initial_movement_ingress));
     let serial_execution_gate = Arc::new(AsyncRwLock::new(()));
     let socket_authenticated = Arc::new(AtomicBool::new(authenticated));
+    let billing_generation = Arc::new(AtomicU64::new(0));
+    let _billing_socket_fence = billing::socket_fence(Arc::clone(&socket_authenticated),Arc::clone(&billing_generation));
     let (zone_outbound_tx, zone_outbound_rx) = mpsc::channel(LIVE_ZONE_OUTBOUND_CAPACITY);
     let (owner_location_outbound_tx, owner_location_outbound_rx) =
         mpsc::channel(OWNER_LOCATION_OUTBOUND_CAPACITY);
@@ -5438,13 +5514,14 @@ async fn handle_socket_work(
         zone_outbound_tx,
         owner_location_outbound_tx,
     )
-    .with_overload_signal(overload_tx);
+    .with_overload_signal(overload_tx.clone());
     let _zone_outbound_sender_task = spawn_zone_outbound_sender(
         zone_outbound_rx,
         owner_location_outbound_rx,
         Arc::clone(&sender),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
+        overload_tx,
     );
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
@@ -5501,7 +5578,8 @@ async fn handle_socket_work(
                                 native_resume.opted_in = capabilities.native_resume_v1;
                                 native_game_shop.opted_in =
                                     capabilities.native_game_shop_receipt_v1;
-                                if !native_game_shop.opted_in {
+                                native_game_shop.gift_opted_in = capabilities.native_game_shop_gift_receipt_v1;
+                                if !native_game_shop.opted_in && !native_game_shop.gift_opted_in {
                                     native_game_shop.pending = None;
                                 }
                             }
@@ -5691,6 +5769,19 @@ async fn handle_socket_work(
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
                 }
+                if matches!(&action, SessionAction::Packet(ClientPacket::Login { .. } | ClientPacket::LogOut | ClientPacket::Disconnect) | SessionAction::PasskeyLogin { .. }) {
+                    billing_generation.fetch_add(1, Ordering::AcqRel);
+                }
+                if let SessionAction::Billing(request) = &action {
+                    if let Err(error) = billing::socket_action(session, Arc::clone(&identity),
+                        active_identity_session.as_ref(), authenticated, authenticated_account_id.as_deref(),
+                        request.clone(), Arc::clone(&sender), Arc::clone(&session_cache),
+                        Arc::clone(&socket_authenticated), Arc::clone(&billing_generation)).await {
+                        let reply = billing::error_reply(request, error);
+                        if sender.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                    }
+                    continue;
+                }
                 if matches!(&action, SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. }) {
                     let reply = tokio::task::block_in_place(|| monthly_card::socket_reply(
                         session, &identity, active_identity_session.as_ref(), authenticated,
@@ -5699,22 +5790,38 @@ async fn handle_socket_work(
                     if sender.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
                     continue;
                 }
-                let native_game_shop_request = if native_game_shop.opted_in {
+                let native_game_shop_request = if native_game_shop.opted_in || matches!(&action, SessionAction::GameShopGift { .. }) {
                     match native_game_shop_request_from_action(&action) {
-                        Some(Ok(request)) => {
+                        Some(Ok(mut request)) => {
+                            let in_game_identity = tokio::task::block_in_place(|| session.active_identity());
+                            if request.recipient_name.is_some() && authenticated && native_game_shop.gift_opted_in {
+                                if let Some(identity) = &in_game_identity {
+                                    request = match native_game_shop.bind_gift_request(
+                                        request, &identity.account_id, identity.character_index,
+                                    ) {
+                                        Ok(request) => request,
+                                        Err(receipt) => {
+                                            if send_native_game_shop_receipt(&sender, &receipt).await.is_err() { return; }
+                                            continue;
+                                        }
+                                    };
+                                }
+                            }
                             if let Err(receipt) = native_game_shop.reserve(request.clone()) {
                                 if send_native_game_shop_receipt(&sender, &receipt).await.is_err() {
                                     return;
                                 }
                                 continue;
                             }
-                            let in_game = tokio::task::block_in_place(|| {
-                                session.active_identity().is_some()
-                            });
+                            let in_game = in_game_identity.is_some();
                             let typed_outcome_supported = authenticated
                                 && in_game
                                 && tokio::task::block_in_place(|| {
-                                    session.supports_typed_game_shop_purchase_outcome()
+                                    if request.recipient_name.is_some() {
+                                        native_game_shop.gift_opted_in && session.supports_native_game_shop_gifts()
+                                    } else {
+                                        session.supports_typed_game_shop_purchase_outcome()
+                                    }
                                 });
                             if let Some(receipt) = native_game_shop_pre_execution_failure(
                                 &request,
@@ -7374,6 +7481,7 @@ fn execute_session_action(
         && matches!(
             &action,
             SessionAction::GameShopBuy { .. }
+                | SessionAction::GameShopGift { .. }
                 | SessionAction::Packet(ClientPacket::GameShopBuy { .. })
         )
     {
@@ -7391,6 +7499,7 @@ fn execute_session_action(
         return execute_production_session_action(session, action, authenticated, move_log);
     }
     match action {
+        SessionAction::GameShopGift { .. } => Err("GameShop gifting requires the dedicated native receipt capability".into()),
         SessionAction::Packet(packet) => {
             let responses = session.try_handle_packet(packet)?;
             log_move_action(move_log, &responses);
@@ -7432,7 +7541,7 @@ fn execute_session_action(
         SessionAction::QaControl { token, action } => {
             execute_qa_control_action(session, &token, action)
         }
-        SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => Err("monthly cards require the authenticated socket seam".into()),
+        SessionAction::Billing(_) | SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => Err("account purchases require the authenticated socket seam".into()),
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
@@ -7448,6 +7557,7 @@ fn execute_production_session_action(
         && matches!(
             &action,
             SessionAction::GameShopBuy { .. }
+                | SessionAction::GameShopGift { .. }
                 | SessionAction::Packet(ClientPacket::GameShopBuy { .. })
         )
     {
@@ -7455,6 +7565,7 @@ fn execute_production_session_action(
     }
     let zone_owner_lease = session.zone_owner_lease().clone();
     let execution = match action {
+        SessionAction::GameShopGift { .. } => return Err("GameShop gifting requires the dedicated native receipt capability".into()),
         SessionAction::Packet(packet) => {
             if let ClientPacket::Login {
                 account_id,
@@ -7563,7 +7674,7 @@ fn execute_production_session_action(
         SessionAction::QaControl { .. } => {
             return Err("QA control is not allowed on the production player path".to_string());
         }
-        SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => return Err("monthly cards require the authenticated socket seam".into()),
+        SessionAction::Billing(_) | SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => return Err("account purchases require the authenticated socket seam".into()),
         SessionAction::SetLanguage { language } => session
             .execute_production_player_command_with_zone_owner_lease(
                 &zone_owner_lease,
@@ -8190,6 +8301,8 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             quantity,
             price_type,
         }),
+        BrowserCommand::GameShopGift { request_id, g_index, quantity, price_type, recipient_name } =>
+            Ok(SessionAction::GameShopGift { request_id, g_index, quantity, price_type, recipient_name }),
         BrowserCommand::RepairItem { unique_id } => {
             Ok(SessionAction::Packet(ClientPacket::RepairItem {
                 unique_id,
@@ -8625,6 +8738,10 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::QaControl { token, action } => {
             Ok(SessionAction::QaControl { token, action })
         }
+        BrowserCommand::BillingStatus(request) => Ok(SessionAction::Billing(billing::Request::Status(request))),
+        BrowserCommand::BillingCheckout(request) => Ok(SessionAction::Billing(billing::Request::Checkout(request))),
+        BrowserCommand::BillingBuyMonthlyCard(request) => Ok(SessionAction::Billing(billing::Request::Buy(request))),
+        BrowserCommand::BillingActivateMonthlyCard(request) => Ok(SessionAction::Billing(billing::Request::Activate(request))),
         BrowserCommand::MonthlyCardStatus => Ok(SessionAction::MonthlyCardStatus),
         BrowserCommand::RedeemMonthlyCard { code, request_id } => Ok(SessionAction::RedeemMonthlyCard { code, request_id }),
         BrowserCommand::SetLanguage { language } => Ok(SessionAction::SetLanguage { language }),
@@ -8977,25 +9094,29 @@ fn validate_native_game_shop_request_id(request_id: &str) -> bool {
 fn native_game_shop_request_from_action(
     action: &SessionAction,
 ) -> Option<Result<NativeGameShopRequest, String>> {
-    let SessionAction::GameShopBuy {
-        request_id,
-        g_index,
-        quantity,
-        price_type,
-    } = action
-    else {
-        return None;
+    let (request_id, g_index, quantity, price_type, recipient_name) = match action {
+        SessionAction::GameShopBuy { request_id, g_index, quantity, price_type } =>
+            (request_id.as_deref(), *g_index, *quantity, *price_type, None),
+        SessionAction::GameShopGift { request_id, g_index, quantity, price_type, recipient_name } => {
+            if recipient_name != recipient_name.trim()
+                || recipient_name.len() > 45 || !(3..=15).contains(&recipient_name.chars().count())
+                || !recipient_name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || ('\u{4e00}'..='\u{9fa5}').contains(&c)) || *price_type != 0
+            { return Some(Err("invalid gift recipient or payment currency".into())); }
+            (Some(request_id.as_str()), *g_index, *quantity, *price_type, Some(recipient_name.clone()))
+        }
+        _ => return None,
     };
-    Some(match request_id.as_deref() {
+    Some(match request_id {
         Some(request_id) if validate_native_game_shop_request_id(request_id) => {
             let mut idempotency_bytes = [0_u8; 32];
             OsRng.fill_bytes(&mut idempotency_bytes);
             Ok(NativeGameShopRequest {
                 request_id: request_id.to_string(),
                 server_idempotency_key: URL_SAFE_NO_PAD.encode(idempotency_bytes),
-                g_index: *g_index,
-                quantity: *quantity,
-                price_type: *price_type,
+                g_index,
+                quantity,
+                price_type,
+                recipient_name,
             })
         }
         _ => Err("native GameShop purchase requires a valid requestId".to_string()),
@@ -9009,7 +9130,7 @@ fn native_game_shop_failure_event(
 ) -> Value {
     let mut event = json!({
         "type": "gameShopReceipt",
-        "protocol": NATIVE_GAME_SHOP_RECEIPT_PROTOCOL,
+        "protocol": if request.recipient_name.is_some() { NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL } else { NATIVE_GAME_SHOP_RECEIPT_PROTOCOL },
         "requestId": request.request_id,
         "success": false,
         "gIndex": request.g_index,
@@ -9017,6 +9138,7 @@ fn native_game_shop_failure_event(
         "priceType": request.price_type,
         "code": code,
     });
+    if let Some(name) = &request.recipient_name { event["recipientName"] = json!(name); }
     if code == "stockUnavailable" {
         if let Some(new_stock_level) = new_stock_level {
             event["newStockLevel"] = json!(new_stock_level);
@@ -9037,7 +9159,7 @@ fn native_game_shop_pre_execution_failure(
     if !typed_outcome_supported {
         return Some(native_game_shop_failure_event(
             request,
-            "commitFailed",
+            if request.recipient_name.is_some() { "giftUnavailable" } else { "commitFailed" },
             None,
         ));
     }
@@ -9055,6 +9177,9 @@ fn native_game_shop_failure_code(failure: GameShopPurchaseFailure) -> &'static s
         GameShopPurchaseFailure::StockUnavailable => "stockUnavailable",
         GameShopPurchaseFailure::InsufficientCurrency => "insufficientCurrency",
         GameShopPurchaseFailure::MailFull => "mailFull",
+        GameShopPurchaseFailure::RecipientUnavailable => "recipientUnavailable",
+        GameShopPurchaseFailure::SelfGiftUnavailable => "selfGiftUnavailable",
+        GameShopPurchaseFailure::GiftUnavailable => "giftUnavailable",
         GameShopPurchaseFailure::CommitFailed => "commitFailed",
     }
 }
@@ -9078,7 +9203,7 @@ fn native_game_shop_receipt_event(
         }
         let mut event = json!({
             "type": "gameShopReceipt",
-            "protocol": NATIVE_GAME_SHOP_RECEIPT_PROTOCOL,
+            "protocol": if request.recipient_name.is_some() { NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL } else { NATIVE_GAME_SHOP_RECEIPT_PROTOCOL },
             "requestId": request.request_id,
             "success": true,
             "gIndex": request.g_index,
@@ -9086,6 +9211,7 @@ fn native_game_shop_receipt_event(
             "priceType": request.price_type,
             "mailId": mail_id,
         });
+        if let Some(name) = &request.recipient_name { event["recipientName"] = json!(name); }
         if let Some(new_stock_level) = outcome.new_stock_level {
             event["newStockLevel"] = json!(new_stock_level);
         }
@@ -9135,20 +9261,27 @@ fn execute_native_game_shop_handler_seam(
     let identity = session
         .active_identity()
         .ok_or_else(|| "native GameShop purchase has no active identity".to_string())?;
+    let purchase = NativeGameShopPurchaseRequest {
+        protocol_version: NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+        server_idempotency_key: request.server_idempotency_key.clone(),
+        gateway_session_id: session.session_id().to_string(),
+        account_id: identity.account_id,
+        character_index: identity.character_index,
+        client_request_id: request.request_id.clone(),
+        g_index: request.g_index,
+        quantity: request.quantity,
+        price_type: request.price_type,
+    };
+    let command = match &request.recipient_name {
+        Some(name) => WorldCommand::NativeGameShopGift(mir2_simulation::NativeGameShopGiftRequest {
+            purchase, recipient_name: name.clone(),
+        }),
+        None => WorldCommand::NativeGameShopPurchase(purchase),
+    };
     let execution = session
         .execute_production_player_command_requiring_typed_game_shop_purchase_outcome(
             true,
-            WorldCommand::NativeGameShopPurchase(NativeGameShopPurchaseRequest {
-                protocol_version: NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
-                server_idempotency_key: request.server_idempotency_key.clone(),
-                gateway_session_id: session.session_id().to_string(),
-                account_id: identity.account_id,
-                character_index: identity.character_index,
-                client_request_id: request.request_id.clone(),
-                g_index: request.g_index,
-                quantity: request.quantity,
-                price_type: request.price_type,
-            }),
+            command,
         )?;
     Ok(NativeGameShopHandlerDispatch {
         post_execution: native_game_shop_post_execution(
@@ -9306,6 +9439,8 @@ fn validate_native_client_capabilities(
         native_game_shop_receipt_v1: capabilities
             .iter()
             .any(|capability| capability == NATIVE_GAME_SHOP_RECEIPT_PROTOCOL),
+        native_game_shop_gift_receipt_v1: capabilities.iter()
+            .any(|capability| capability == NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL),
     })
 }
 
@@ -12621,6 +12756,10 @@ mod web_auth_peer_bucket_tests;
 mod web_live_overflow_tests;
 
 #[cfg(test)]
+#[path = "web_game_shop_gift_tests.rs"]
+mod game_shop_gift_tests;
+
+#[cfg(test)]
 #[path = "web_transport_close_tests.rs"]
 mod web_transport_close_tests;
 
@@ -14571,6 +14710,7 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         let second = super::NativeGameShopRequest {
             request_id: "gs-second".to_string(),
@@ -14578,10 +14718,13 @@ mod tests {
             g_index: 32,
             quantity: 2,
             price_type: 0,
+            recipient_name: None,
         };
         let mut state = super::NativeGameShopConnectionState {
             opted_in: true,
             pending: None,
+            gift_opted_in: false,
+            gift_requests: Default::default(),
         };
         state
             .reserve(first.clone())
@@ -14604,6 +14747,7 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         let success = mir2_simulation::GameShopPurchaseOutcome {
             success: true,
@@ -14724,6 +14868,7 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         for (authenticated, in_game) in [(false, false), (false, true), (true, false)] {
             let receipt = super::native_game_shop_pre_execution_failure(
@@ -14754,10 +14899,13 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         let mut state = super::NativeGameShopConnectionState {
             opted_in: true,
             pending: None,
+            gift_opted_in: false,
+            gift_requests: Default::default(),
         };
         state.reserve(request.clone()).unwrap();
 
@@ -14932,6 +15080,7 @@ mod tests {
                     g_index,
                     quantity,
                     price_type,
+                    recipient_name: None,
                 },
                 code,
             );
@@ -14947,6 +15096,7 @@ mod tests {
                 g_index: 31,
                 quantity: 1,
                 price_type: 1,
+                recipient_name: None,
             },
             "insufficientCurrency",
         );
@@ -14984,6 +15134,7 @@ mod tests {
                 g_index: 31,
                 quantity: 1,
                 price_type: 1,
+                recipient_name: None,
             },
             "mailFull",
         );
@@ -15112,6 +15263,8 @@ mod tests {
         let mut native_state = super::NativeGameShopConnectionState {
             opted_in: capabilities.native_game_shop_receipt_v1,
             pending: None,
+            gift_opted_in: false,
+            gift_requests: Default::default(),
         };
         let browser_command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"gameShopBuy","requestId":"gs-e2e-0001","gIndex":31,"quantity":1,"priceType":1}"#,

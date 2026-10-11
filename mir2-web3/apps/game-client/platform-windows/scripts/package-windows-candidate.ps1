@@ -567,13 +567,14 @@ function Get-ManifestPayloadFiles {
 
 function Write-PackageManifest {
     param([string]$Root, [string]$OutputPath)
-    $entries = @(); $totalBytes = [int64]0
+    $entries = [Collections.Generic.List[object]]::new(); $totalBytes = [int64]0
     foreach ($file in Get-ManifestPayloadFiles -Root $Root) {
         $rel = Get-RelativeUnixPath -Root $Root -Path $file.FullName; $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant(); $totalBytes += [int64]$file.Length
-        $entries += [ordered]@{ path = $rel; size = [int64]$file.Length; sha256 = $hash }
+        [void]$entries.Add([ordered]@{ path = $rel; size = [int64]$file.Length; sha256 = $hash })
     }
-    $canonical = Get-ManifestCanonicalText -Entries $entries
-    $manifest = [ordered]@{ schema = 'mir2.windows.package-manifest.v4'; coverage = [ordered]@{ excludes = @('PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s'); rule = 'Payload files are hashed; manifest/version are bound by the detached signed release statement; statement/signature are excluded to avoid self-reference.' }; fileCount = $entries.Count; totalBytes = $totalBytes; aggregateSha256 = Get-TextSha256 -Text $canonical; files = $entries }
+    $entryArray = $entries.ToArray()
+    $canonical = Get-ManifestCanonicalText -Entries $entryArray
+    $manifest = [ordered]@{ schema = 'mir2.windows.package-manifest.v4'; coverage = [ordered]@{ excludes = @('PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s'); rule = 'Payload files are hashed; manifest/version are bound by the detached signed release statement; statement/signature are excluded to avoid self-reference.' }; fileCount = $entries.Count; totalBytes = $totalBytes; aggregateSha256 = Get-TextSha256 -Text $canonical; files = $entryArray }
     Write-Utf8NoBom -Path $OutputPath -Text ($manifest | ConvertTo-Json -Depth 8)
     return $manifest
 }

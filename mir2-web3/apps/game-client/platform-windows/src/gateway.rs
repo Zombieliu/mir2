@@ -57,6 +57,7 @@ mod account_feedback;
 pub const DEFAULT_GATEWAY_WS_URL: &str = "wss://165.154.65.136.sslip.io/playtest/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
+const NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL: &str = "nativeGameShopGiftReceiptV1";
 const MAX_CREDENTIAL_LENGTH: usize = 43;
 const MAX_COMMANDS_PER_POLL: usize = 256;
 const MAX_GATEWAY_FRAME_BYTES: usize = 16 * 1024 * 1024;
@@ -220,6 +221,12 @@ impl PlayerIntent {
 pub enum GatewayCommand {
     Connect,
     Wire(NativeOutboundCommand),
+    // Correlation metadata stays local; only `command` crosses the socket.
+    BillingWire {
+        request: mir2_client_bevy::native_billing::BillingRequest,
+        command: NativeOutboundCommand,
+    },
+    CancelBilling(u64),
     Player(PlayerIntent),
     Shutdown,
 }
@@ -355,7 +362,9 @@ fn is_priority_command(command: &GatewayCommand) -> bool {
 fn is_game_shop_transaction(command: &GatewayCommand) -> bool {
     matches!(
         command,
-        GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy { .. })
+        GatewayCommand::Wire(
+            NativeOutboundCommand::GameShopBuy { .. } | NativeOutboundCommand::GameShopGift { .. }
+        )
     )
 }
 
@@ -373,16 +382,27 @@ fn is_correlated_transaction(command: &GatewayCommand) -> bool {
 }
 
 fn game_shop_request_from_command(command: &GatewayCommand) -> Option<GameShopRequest> {
-    let GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
-        request_id,
-        g_index,
-        quantity,
-        price_type,
-    }) = command
-    else {
-        return None;
-    };
-    GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type)
+    match command {
+        GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+        }) => GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type),
+        GatewayCommand::Wire(NativeOutboundCommand::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type: 0,
+            recipient_name,
+        }) => GameShopRequest::new_gift(
+            request_id.clone(),
+            *g_index,
+            *quantity,
+            recipient_name.clone(),
+        ),
+        _ => None,
+    }
 }
 
 /// Resolve a correlated mutation that was removed from its bounded lane but
@@ -607,6 +627,7 @@ impl NativeLightingPublisher {
 struct GatewaySessionContext {
     account_id: Option<String>,
     character_index: Option<i32>,
+    billing_request: Option<mir2_client_bevy::native_billing::BillingRequest>,
 }
 
 #[derive(Default)]
@@ -1065,6 +1086,12 @@ fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClas
 /// when that index names exactly one row in the extracted Crystal database;
 /// an ambiguous or absent index must stay partial rather than choosing a row.
 fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplate> {
+    // Application-owned items are deliberately absent from the imported
+    // Crystal catalogue. Resolve their exact reserved index from the same
+    // template used by the server, without guessing unknown native items.
+    if item_index == mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return Some(mir2_game_data::billing_monthly_card_item_template());
+    }
     let mut matches = crystal_item_manifest()
         .items
         .into_iter()
@@ -2339,7 +2366,10 @@ where
                 GatewayCommand::Shutdown => return Ok(false),
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                 | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => return Ok(false),
-                GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                GatewayCommand::Wire(_)
+                | GatewayCommand::Player(_)
+                | GatewayCommand::BillingWire { .. }
+                | GatewayCommand::CancelBilling(_) => {}
             }
         }
     }
@@ -2428,7 +2458,7 @@ where
                         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                             return Ok(RetryWait::Leave)
                         }
-                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::BillingWire { .. } | GatewayCommand::CancelBilling(_) => {}
                     }
                 }
             }
@@ -2774,6 +2804,7 @@ async fn send_resume_handshake(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL.to_owned(),
         ],
     }
     .to_wire_json();
@@ -2844,6 +2875,7 @@ async fn send_resume_handshake_with_resume_controls<R: CommandSource>(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL.to_owned(),
         ],
     }
     .to_wire_json();
@@ -2897,9 +2929,11 @@ fn awaiting_resume_command_action(command: &GatewayCommand) -> AwaitingResumeCom
         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
             AwaitingResumeCommandAction::Cancel
         }
-        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {
-            AwaitingResumeCommandAction::Ignore
-        }
+        GatewayCommand::Connect
+        | GatewayCommand::Wire(_)
+        | GatewayCommand::Player(_)
+        | GatewayCommand::BillingWire { .. }
+        | GatewayCommand::CancelBilling(_) => AwaitingResumeCommandAction::Ignore,
     }
 }
 
@@ -3069,6 +3103,7 @@ where
                         _ => None,
                     };
                     let trace_player_command = matches!(&command, GatewayCommand::Player(_));
+                    let mut billing_request = None;
                     let payload = match command {
                         GatewayCommand::Connect => continue,
                         GatewayCommand::Shutdown => {
@@ -3076,6 +3111,17 @@ where
                             return Ok(ConnectedExit::Shutdown);
                         }
                         GatewayCommand::Player(intent) => intent.to_json(),
+                        GatewayCommand::CancelBilling(id) => {
+                            if context.billing_request.as_ref().is_some_and(|r| r.request_id == id) { context.billing_request = None; }
+                            continue;
+                        }
+                        GatewayCommand::BillingWire { request, command } => {
+                            if !billing_command_matches(&request, &command)
+                                || request.expired_at(mir2_client_bevy::native_billing::now_ms())
+                                || context.account_id.as_deref().is_some_and(|a| !request.belongs_to_account(a)) { continue; }
+                            billing_request = Some(request);
+                            command.to_wire_json()
+                        }
                         GatewayCommand::Wire(command) => {
                             update_session_context(&mut context, &command);
                             command.to_wire_json()
@@ -3087,6 +3133,7 @@ where
                         eprintln!("[gateway-client] sending player command {payload}");
                     }
                     if explicit_leave {
+                        connection_bootstrap_sent = false;
                         resume_state.clear();
                         // Do not leave stale darkness visible while the
                         // server processes logout/disconnect. The eventual
@@ -3111,6 +3158,7 @@ where
                         return Err(format!("gateway command send failed: {error}"));
                     }
                     crate::timing::sent(timed_request, send_started);
+                    if let Some(request) = billing_request { context.billing_request = Some(request); }
                     if let Some(request) = game_shop_request {
                         if !game_shop_receipt_gate.record_successful_send(request) {
                             game_shop_receipt_gate.clear_terminal();
@@ -3160,6 +3208,17 @@ where
                                 // Quarantined pre-resume frames are forbidden
                                 // from leaking into the new render generation.
                                 if disposition == InboundDisposition::Applied {
+                                    if let Ok(InboundEvent::Billing(reply)) = parse_inbound_event(text) {
+                                        let active_character = if connection_bootstrap_sent { context.character_index.or(resume_state.character_index) } else { None };
+                                        if synchronize_billing_credit(&mut context, &reply, active_character,
+                                            mir2_client_bevy::native_billing::now_ms(), &mut last_wallet, &mut last_world_payload, &mut ui_cursor) {
+                                            // Keep this absolute patch in the socket's packet order;
+                                            // a later Source delta must follow it in the ingest FIFO.
+                                            if let Some(wallet) = last_wallet {
+                                                let _ = mir2_bevy_runtime::native_ingest::push_native_wallet_patch(json!({"credit":wallet.credit}).to_string());
+                                            }
+                                        }
+                                    }
                                     if let Ok(envelope) = serde_json::from_str::<GatewayEnvelope>(text) {
                                         lighting_publisher.observe_envelope(&envelope);
                                     }
@@ -3209,17 +3268,115 @@ fn update_session_context(context: &mut GatewaySessionContext, command: &NativeO
     match command {
         NativeOutboundCommand::Login { account_id, .. }
         | NativeOutboundCommand::NewAccount { account_id, .. } => {
+            context.billing_request = None;
             context.account_id = Some(account_id.clone());
             context.character_index = None;
         }
         NativeOutboundCommand::StartGame { character_index } => {
+            context.billing_request = None;
             context.character_index = Some(*character_index);
         }
         NativeOutboundCommand::LogOut | NativeOutboundCommand::Disconnect => {
+            context.billing_request = None;
             context.character_index = None;
         }
         _ => {}
     }
+}
+
+fn billing_command_matches(
+    request: &mir2_client_bevy::native_billing::BillingRequest,
+    command: &NativeOutboundCommand,
+) -> bool {
+    use mir2_client_bevy::native_billing::BillingOperation;
+    let scope = match command {
+        NativeOutboundCommand::BillingStatus {
+            character_index,
+            request_id,
+        } => (BillingOperation::Status, *character_index, *request_id),
+        NativeOutboundCommand::BillingCheckout {
+            character_index,
+            request_id,
+            ..
+        } => (BillingOperation::Checkout, *character_index, *request_id),
+        NativeOutboundCommand::BillingBuyMonthlyCard {
+            character_index,
+            request_id,
+            ..
+        } => (
+            BillingOperation::BuyMonthlyCard,
+            *character_index,
+            *request_id,
+        ),
+        NativeOutboundCommand::BillingActivateMonthlyCard {
+            character_index,
+            request_id,
+            ..
+        } => (
+            BillingOperation::ActivateMonthlyCard,
+            *character_index,
+            *request_id,
+        ),
+        _ => return false,
+    };
+    scope
+        == (
+            request.operation,
+            request.character_index,
+            request.request_id,
+        )
+}
+
+fn synchronize_billing_credit(
+    context: &mut GatewaySessionContext,
+    reply: &mir2_client_bevy::native_billing::BillingReply,
+    active_character: Option<i32>,
+    now: u64,
+    last_wallet: &mut Option<WalletState>,
+    last_world_payload: &mut Option<Value>,
+    ui_cursor: &mut NativeUiPlayerCursor,
+) -> bool {
+    let Some(request) = context.billing_request.as_ref() else {
+        return false;
+    };
+    if request.expired_at(now)
+        || context
+            .account_id
+            .as_deref()
+            .is_some_and(|a| !request.belongs_to_account(a))
+        || reply.operation != request.operation
+        || reply.request_id != request.request_id
+        || reply.character_index != request.character_index
+        || reply.status.as_ref().is_some_and(|s| !s.is_valid())
+        || reply.checkout_url.as_ref().is_some_and(|url| {
+            url.len() > 4096
+                || reply.operation != mir2_client_bevy::native_billing::BillingOperation::Checkout
+                || reply.error.is_some()
+        })
+    {
+        return false;
+    }
+    // This lease lives only in this socket's context. Resumed sockets do not
+    // carry a login spelling, but still require the accepted world character.
+    context.billing_request = None;
+    let Some(status) = reply.status.as_ref().filter(|s| s.is_valid()) else {
+        return false;
+    };
+    if active_character != Some(reply.character_index) || last_world_payload.is_none() {
+        return false;
+    }
+    let mut wallet = last_wallet.unwrap_or_else(|| WalletState {
+        gold: last_world_payload
+            .as_ref()
+            .and_then(|p| value_u32(p.get("gold")))
+            .unwrap_or_default(),
+        credit: 0,
+    });
+    wallet.credit = status.credit;
+    *last_wallet = Some(wallet);
+    ui_cursor.credit = Some(status.credit);
+    merge_wallet_into_world(last_world_payload, *last_wallet);
+    true
 }
 
 fn mail_command_allowed(
@@ -3816,6 +3973,7 @@ where
                 )?;
                 return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
             }
+            gameplay_adapter.observe_world_snapshot_life(&payload);
             map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
@@ -4090,6 +4248,7 @@ where
                             wallet_value(payload, "credit"),
                             packet == "GainedCredit",
                         ) {
+                            ui_cursor.credit = Some(value);
                             let _ = mir2_bevy_runtime::native_ingest::push_native_wallet_patch(
                                 json!({"credit": value}).to_string(),
                             );
@@ -4891,6 +5050,7 @@ fn dispatch_shell_event(
         InboundEvent::MonthlyCard(reply) => {
             Some(ShellGatewayEvent::MonthlyCardReply(reply.clone()))
         }
+        InboundEvent::Billing(reply) => Some(ShellGatewayEvent::BillingReply(reply.clone())),
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
             message: account_feedback::gateway_error_message(error),
         }),
@@ -5571,12 +5731,29 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
             format!("{subject}\n{body}")
         }
     });
-    let items = mail
-        .get("items")?
-        .as_array()?
-        .iter()
-        .map(mail_attachment_json)
-        .collect::<Option<Vec<_>>>()?;
+    // Stage5's items are template keys; the concrete instance carrier lives
+    // in itemStatesJson. Prefer it just as Source's ClientMail builder does,
+    // so the next snapshot cannot erase packet-originated attachment data.
+    let items = if let Some(states) = mail
+        .get("itemStatesJson")
+        .or_else(|| mail.get("item_states_json"))
+        .and_then(Value::as_array)
+        .filter(|states| !states.is_empty())
+    {
+        states
+            .iter()
+            .map(|state| {
+                let item: Value = serde_json::from_str(state.as_str()?).ok()?;
+                mail_attachment_json(&item)
+            })
+            .collect::<Option<Vec<_>>>()?
+    } else {
+        mail.get("items")?
+            .as_array()?
+            .iter()
+            .map(mail_attachment_json)
+            .collect::<Option<Vec<_>>>()?
+    };
     Some(json!({
         "id": id,
         "sender": mail.get("senderName").or_else(|| mail.get("sender")).or_else(|| mail.get("from")).and_then(Value::as_str).unwrap_or("System"),
@@ -5596,31 +5773,135 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
 
 fn mail_attachment_json(item: &Value) -> Option<Value> {
     if let Some(name) = item.as_str().filter(|name| !name.is_empty()) {
-        return Some(json!({ "name": name, "count": 1,
-            "image": mir2_game_data::crystal_item_by_name(name).map(|template| template.image) }));
+        let index = crystal_item_index_from_key(name);
+        let template = index
+            .and_then(unique_crystal_tooltip_template)
+            .or_else(|| mir2_game_data::crystal_item_by_name(name));
+        return Some(json!({ "key": name, "itemIndex": index,
+            "name": template.as_ref().map(|item| item.name.as_str()).unwrap_or(name),
+            "count": 1, "image": template.map(|item| item.image) }));
     }
-    let item_index = value_i32(item.get("itemIndex").or_else(|| item.get("item_index")));
-    let name = value_string(item.get("name"));
+    let item_index = concrete_item_index(item);
+    let template = item_index
+        .and_then(unique_crystal_tooltip_template)
+        .or_else(|| {
+            item.get("name")
+                .and_then(Value::as_str)
+                .and_then(mir2_game_data::crystal_item_by_name)
+        });
+    let name = value_string(item.get("name"))
+        .filter(|name| !name.trim().is_empty())
+        .or_else(|| template.as_ref().map(|item| item.name.clone()));
     let key = value_string(item.get("key"));
     if item_index.is_none() && name.is_none() && key.is_none() {
         return None;
     }
+    let count = value_u32(item.get("quantity").or_else(|| item.get("count")))
+        .map(u16::try_from)
+        .transpose()
+        .ok()?
+        .unwrap_or(1);
+    let source = mail_attachment_tooltip_source(item, item_index, count);
+    let image = source
+        .as_ref()
+        .map(|source| source.user_item_image(u32::from(count)))
+        .or_else(|| {
+            template.as_ref().map(|info| {
+                mir2_game_data::crystal_user_item_image(
+                    info.item_type,
+                    info.shape,
+                    info.stack_size,
+                    info.image,
+                    u32::from(count),
+                )
+            })
+        })
+        .map(u32::from)
+        .or_else(|| value_u32(item.get("image").or_else(|| item.get("icon"))));
     Some(json!({
         "uniqueId": value_u64(item.get("uniqueId").or_else(|| item.get("unique_id"))),
         "itemIndex": item_index,
-        "image": item_index.and_then(mir2_game_data::crystal_item_by_index)
-            .or_else(|| name.as_deref().and_then(mir2_game_data::crystal_item_by_name))
-            .map(|template| template.image),
+        "image": image,
         "key": key,
         "name": name,
-        "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
-        "currentDura": value_u32(item.get("currentDura").or_else(|| item.get("current_dura"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
-        "maxDura": value_u32(item.get("maxDura").or_else(|| item.get("max_dura"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "count": count,
+        "currentDura": value_u32(item.get("currentDura").or_else(|| item.get("current_dura")).or_else(|| item.get("durabilityCurrent")).or_else(|| item.get("durability_current"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "maxDura": value_u32(item.get("maxDura").or_else(|| item.get("max_dura")).or_else(|| item.get("durabilityMax")).or_else(|| item.get("durability_max"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
         "soulBoundId": value_i32(item.get("soulBoundId").or_else(|| item.get("soul_bound_id"))).unwrap_or_default(),
         "identified": item.get("identified").and_then(Value::as_bool).unwrap_or(false),
         "cursed": item.get("cursed").and_then(Value::as_bool).unwrap_or(false),
         "gemCount": value_u32(item.get("gemCount").or_else(|| item.get("gem_count"))).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "tooltipSource": source,
     }))
+}
+
+fn crystal_item_index_from_key(key: &str) -> Option<i32> {
+    key.strip_prefix("crystal-item-")?.parse().ok()
+}
+
+fn concrete_item_index(item: &Value) -> Option<i32> {
+    value_i32(item.get("itemIndex").or_else(|| item.get("item_index")))
+        .or_else(|| {
+            item.get("user_item_metadata")
+                .and_then(|metadata| value_i32(metadata.get("item_index")))
+        })
+        .or_else(|| {
+            item.get("key")
+                .and_then(Value::as_str)
+                .and_then(crystal_item_index_from_key)
+        })
+}
+
+fn mail_attachment_tooltip_source(
+    item: &Value,
+    item_index: Option<i32>,
+    count: u16,
+) -> Option<CrystalItemTooltipSourceModel> {
+    if let Some(source) = item
+        .get("tooltipSource")
+        .or_else(|| item.get("tooltip_source"))
+        .filter(|source| !source.is_null())
+    {
+        return serde_json::from_value(source.clone()).ok();
+    }
+    let index = item_index?;
+    // Raw ItemState is not a full generic UserItem carrier (e.g. sockets and
+    // refinement sidecars differ). Only the reserved, non-equipment monthly
+    // card gets a catalogue fallback; wire UserItems retain their full fields.
+    if item.get("quantity").is_some() && index != mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return None;
+    }
+    let mut normalized = item.as_object()?.clone();
+    normalized.retain(|_, value| !value.is_null());
+    normalized.insert("item_index".into(), json!(index));
+    normalized.insert("count".into(), json!(count));
+    for (target, aliases) in [
+        ("unique_id", &["uniqueId"][..]),
+        (
+            "current_dura",
+            &["currentDura", "durability_current", "durabilityCurrent"][..],
+        ),
+        (
+            "max_dura",
+            &["maxDura", "durability_max", "durabilityMax"][..],
+        ),
+        ("soul_bound_id", &["soulBoundId"][..]),
+        ("gem_count", &["gemCount"][..]),
+    ] {
+        if !normalized.contains_key(target) {
+            if let Some(value) = aliases
+                .iter()
+                .find_map(|alias| item.get(*alias))
+                .filter(|value| !value.is_null())
+            {
+                normalized.insert(target.into(), value.clone());
+            }
+        }
+    }
+    crystal_tooltip_source_for_user_item(
+        &Value::Object(normalized),
+        &NativeUiPlayerCursor::default(),
+    )
 }
 
 fn mail_packet_body(payload: &Value) -> &Value {
@@ -6489,6 +6770,32 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
             target.insert(target_name.to_owned(), value);
         }
     }
+    if concrete_item_index(item) == Some(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX) {
+        if target.get("tooltipSource").is_none_or(Value::is_null) {
+            if let Some(source) = value_u32(target.get("quantity"))
+                .and_then(|count| u16::try_from(count).ok())
+                .and_then(|count| {
+                    mail_attachment_tooltip_source(
+                        item,
+                        Some(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_INDEX),
+                        count,
+                    )
+                })
+            {
+                target.insert("tooltipSource".into(), json!(source));
+            }
+        }
+        if target
+            .get("name")
+            .and_then(Value::as_str)
+            .is_none_or(|name| name.trim().is_empty())
+        {
+            target.insert(
+                "name".into(),
+                json!(mir2_game_data::BILLING_MONTHLY_CARD_ITEM_NAME),
+            );
+        }
+    }
     let source_icon = value_u32(target.get("quantity"))
         .and_then(|quantity| crystal_user_item_icon(item, quantity));
     if let Some(icon) = source_icon {
@@ -6531,7 +6838,7 @@ fn crystal_user_item_icon(item: &Value, count: u32) -> Option<u16> {
             count,
         ));
     }
-    let index = value_i32(item.get("item_index").or_else(|| item.get("itemIndex")))?;
+    let index = concrete_item_index(item)?;
     let info = unique_crystal_tooltip_template(index)?;
     Some(mir2_game_data::crystal_user_item_image(
         info.item_type,
@@ -8146,6 +8453,70 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn game_shop_gift_shares_transaction_lane_and_wrong_recipient_fails_closed() {
+        let (sender, mut receiver) = command_channel(8);
+        let gift = GatewayCommand::Wire(NativeOutboundCommand::GameShopGift {
+            request_id: "gs-1".into(),
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+            recipient_name: "Friend_1".into(),
+        });
+        let request = game_shop_request_from_command(&gift).unwrap();
+        assert_eq!(request.recipient_name.as_deref(), Some("Friend_1"));
+        sender.send(gift).unwrap();
+        assert!(sender
+            .send(GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
+                request_id: "gs-2".into(),
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+            }))
+            .is_err());
+        assert!(matches!(drain_command_batch(&mut receiver, 8).as_slice(),
+            [GatewayCommand::Wire(NativeOutboundCommand::GameShopGift { recipient_name, .. })]
+            if recipient_name == "Friend_1"));
+        let mut gate = GameShopReceiptGate::default();
+        assert!(gate.record_successful_send(request.clone()));
+        let mut wrong = terminal_game_shop_receipt(&request, true);
+        wrong.recipient_name = Some("Friend_2".into());
+        let mut delivered = false;
+        let mut reset = false;
+        assert!(!correlate_and_deliver_game_shop_receipt(
+            &mut gate,
+            &wrong,
+            |_| {
+                delivered = true;
+                true
+            },
+            || {
+                reset = true;
+                true
+            }
+        )
+        .unwrap());
+        assert!(!delivered && reset);
+        assert!(gate.pending.is_none() && gate.reserved.is_none());
+        assert!(gate.record_successful_send(request.clone()));
+        let exact = terminal_game_shop_receipt(&request, true);
+        assert!(
+            correlate_and_deliver_game_shop_receipt(&mut gate, &exact, |_| true, || false).unwrap()
+        );
+        assert_eq!(gate.reserved.as_ref(), Some(&exact));
+        let mut preserved = None;
+        assert!(terminate_session_with_game_shop_boundary(
+            &mut gate,
+            || false,
+            |receipt| {
+                preserved = Some(receipt);
+                true
+            }
+        ));
+        assert_eq!(preserved, Some(exact));
+        assert!(gate.pending.is_none() && gate.reserved.is_none());
+    }
+
     fn purchase_command(request: &GameShopRequest) -> GatewayCommand {
         GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
             request_id: request.request_id.clone(),
@@ -8522,6 +8893,7 @@ mod tests {
 
     fn successful_game_shop_receipt(request_id: &str, g_index: i32) -> GameShopReceipt {
         GameShopReceipt {
+            recipient_name: None,
             protocol: NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
             request_id: request_id.to_owned(),
             success: true,
@@ -10799,6 +11171,129 @@ mod tests {
     }
 
     #[test]
+    fn mail_monthly_card_packet_then_snapshot_keeps_concrete_attachment_and_bag_identity() {
+        use mir2_client_bevy::mail::{mail_claim_enabled, MailModel};
+        let state = json!({"key":"crystal-item-1000001","name":"MonthlyCard30Days",
+            "icon":1813,"unique_id":8701,"container":"Bag1","slot":0,"quantity":1,
+            "durability_current":null,"durability_max":null,"identified":true,
+            "soul_bound_id":-1,"cursed":false,"gem_count":0});
+        let packet: MailModel = serde_json::from_value(
+            try_transform_mail_model_from_packet(&json!({
+                "mail":[{"mailId":1,"senderName":"Gameshop","message":"MonthlyCard30Days x1",
+                    "dateSentBinaryDatetime":0,"canReply":true,"collected":false,
+                    "items":[{"item_index":1000001,"unique_id":8701,"count":1,
+                        "identified":true,"soul_bound_id":-1}]}]
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        let persisted = json!({"id":1,"from":"Gameshop","subject":"Purchase",
+            "body":"MonthlyCard30Days x1","items":["crystal-item-1000001"],
+            "itemStatesJson":[state.to_string()],"claimed":false,"locked":false});
+        let snapshot: MailModel = serde_json::from_value(
+            try_transform_mail_model_from_snapshot(&json!({
+                "stage5Systems":{"mail":[persisted.clone()]}
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        let attachment = &snapshot.mails[0].items[0];
+        assert_eq!(attachment.key.as_deref(), Some("crystal-item-1000001"));
+        assert_eq!(attachment.unique_id, packet.mails[0].items[0].unique_id);
+        assert_eq!(attachment.item_index, Some(1_000_001));
+        assert_eq!(attachment.count, 1);
+        assert_eq!(
+            attachment.image_index(),
+            packet.mails[0].items[0].image_index()
+        );
+        assert_eq!(attachment.image_index(), Some(1813));
+        assert_eq!(
+            attachment.tooltip_source,
+            packet.mails[0].items[0].tooltip_source
+        );
+        assert_eq!(snapshot.mails[0].date_sent_binary_datetime, 0);
+        assert!(mail_claim_enabled(&snapshot.mails[0]));
+
+        let inventory: mir2_client_bevy::inventory::InventoryModel = serde_json::from_value(
+            transform_inventory_model(&json!({"gold":55,"inventoryItems":[state]})),
+        )
+        .unwrap();
+        assert_eq!(inventory.items.len(), 1);
+        let item = &inventory.items[0];
+        assert_eq!(item.key, "crystal-item-1000001");
+        assert_eq!(item.unique_id, attachment.unique_id);
+        assert_eq!(item.quantity, 1);
+        assert_eq!(item.icon, 1813);
+        let source = item.tooltip_source.as_ref().unwrap();
+        assert_eq!(source.info.item_index, 1_000_001);
+        assert_eq!(source.user_item.as_ref().unwrap().unique_id, 8701);
+        assert_eq!(source.user_item.as_ref().unwrap().count, 1);
+        assert!(source
+            .info
+            .tooltip
+            .as_deref()
+            .unwrap()
+            .contains("when used"));
+        assert_eq!(inventory.gold, 55);
+
+        let mut collected = persisted;
+        collected["claimed"] = json!(true);
+        let collected: MailModel = serde_json::from_value(
+            try_transform_mail_model_from_snapshot(&json!({"stage5Systems":{"mail":[collected]}}))
+                .unwrap(),
+        )
+        .unwrap();
+        assert!(collected.mails[0].claimed);
+        assert!(
+            !mail_claim_enabled(&collected.mails[0]),
+            "claim state is exclusively Source-owned"
+        );
+    }
+
+    #[test]
+    fn mail_item_states_do_not_fall_back_to_keys_when_concrete_carrier_is_invalid() {
+        for states in [
+            json!(["invalid json"]),
+            json!(["{\"quantity\":70000,\"key\":\"crystal-item-1000001\"}"]),
+        ] {
+            assert!(
+                mail_message_json(&json!({"id":1,"items":["crystal-item-1000001"],
+                "itemStatesJson":states}))
+                .is_none()
+            );
+        }
+        let snake = mail_message_json(&json!({"id":1,"items":["old-display-key"],
+            "item_states_json":[json!({"key":"unknown","icon":44,"unique_id":19,
+                "quantity":2,"durability_current":7,"durability_max":9}).to_string()]}))
+        .unwrap();
+        assert_eq!(snake["items"][0]["uniqueId"], 19);
+        assert_eq!(snake["items"][0]["image"], 44);
+        assert_eq!(snake["items"][0]["count"], 2);
+        assert_eq!(snake["items"][0]["currentDura"], 7);
+        assert_eq!(snake["items"][0]["maxDura"], 9);
+        assert!(snake["items"][0]["itemIndex"].is_null());
+        assert!(snake["items"][0]["tooltipSource"].is_null());
+    }
+
+    #[test]
+    fn mail_monthly_card_legacy_exact_key_resolves_without_a_late_item_info_packet() {
+        assert_eq!(
+            unique_crystal_tooltip_template(1_000_001).unwrap().image,
+            1813
+        );
+        let known = mail_attachment_json(&json!("crystal-item-1000001")).unwrap();
+        assert_eq!(known["itemIndex"], 1_000_001);
+        assert_eq!(known["name"], "MonthlyCard30Days");
+        assert_eq!(known["image"], 1813);
+        let unknown = mail_attachment_json(&json!("crystal-item-1000002")).unwrap();
+        assert!(unknown["image"].is_null());
+        assert!(unique_crystal_tooltip_template(1_000_002).is_none());
+        assert!(
+            mail_attachment_json(&json!("MonthlyCard30DaysFromPlayer")).unwrap()["image"].is_null()
+        );
+    }
+
+    #[test]
     fn storage_password_receipts_preserve_results_without_echoing_credentials() {
         for result in 0..=6 {
             let unlock = transform_storage_patch_from_packet(
@@ -11199,6 +11694,105 @@ mod tests {
     }
 
     #[test]
+    fn billing_credit_cache_requires_the_current_request_account_and_active_character() {
+        use mir2_client_bevy::native_billing::{BillingOperation, BillingPanel, BillingReply};
+        let mut panel = BillingPanel::default();
+        panel.open_for("alice", 7, 10);
+        let request = panel.unsent_request().unwrap().clone();
+        let status = serde_json::from_value(json!({
+            "enabled":false,"checkoutEnabled":false,"credit":350,"pendingCredit":0,
+            "offers":[],"ownedMonthlyCards":[],"orders":[],
+            "monthlyCard":{"required":true,"active":false,"serverNowMs":10,"remainingMs":0,"canEnterGame":false}
+        })).unwrap();
+        let reply = BillingReply {
+            operation: BillingOperation::Status,
+            request_id: request.request_id,
+            character_index: 7,
+            status: Some(status),
+            checkout_url: None,
+            error: None,
+            replayed: None,
+        };
+        assert!(billing_command_matches(
+            &request,
+            &NativeOutboundCommand::BillingStatus {
+                character_index: 7,
+                request_id: request.request_id
+            }
+        ));
+        assert!(!billing_command_matches(
+            &request,
+            &NativeOutboundCommand::BillingStatus {
+                character_index: 8,
+                request_id: request.request_id
+            }
+        ));
+        for variant in 0..7 {
+            let mut context = GatewaySessionContext {
+                account_id: Some("alice".into()),
+                character_index: Some(7),
+                billing_request: Some(request.clone()),
+            };
+            let mut result = reply.clone();
+            let mut active = Some(7);
+            let mut now = 11;
+            match variant {
+                0 => context.billing_request = None,
+                1 => result.request_id += 1,
+                2 => result.operation = BillingOperation::Checkout,
+                3 => result.character_index = 8,
+                4 => context.account_id = Some("bob".into()),
+                5 => active = Some(8),
+                _ => now = 15_010,
+            }
+            let mut wallet = Some(WalletState {
+                gold: 100,
+                credit: 20,
+            });
+            let mut world = Some(json!({"gold":100,"credit":20}));
+            let mut cursor = NativeUiPlayerCursor::default();
+            assert!(!synchronize_billing_credit(
+                &mut context,
+                &result,
+                active,
+                now,
+                &mut wallet,
+                &mut world,
+                &mut cursor
+            ));
+            assert_eq!(wallet.unwrap().credit, 20);
+            assert_eq!(world.unwrap()["credit"], json!(20));
+        }
+        let mut context = GatewaySessionContext {
+            account_id: Some("alice".into()),
+            character_index: Some(7),
+            billing_request: Some(request),
+        };
+        let mut wallet = Some(WalletState {
+            gold: 100,
+            credit: 20,
+        });
+        let mut world = Some(json!({"gold":100,"credit":20}));
+        let mut cursor = NativeUiPlayerCursor::default();
+        assert!(synchronize_billing_credit(
+            &mut context,
+            &reply,
+            Some(7),
+            11,
+            &mut wallet,
+            &mut world,
+            &mut cursor
+        ));
+        assert!(context.billing_request.is_none());
+        assert_eq!(cursor.credit, Some(350));
+        assert_eq!(
+            apply_wallet_delta(&mut wallet, &mut world, "credit", Some(5), false),
+            Some(345)
+        );
+        assert_eq!(world.unwrap(), json!({"gold":100,"credit":345}));
+    }
+
+    #[test]
     fn wallet_cursor_overlays_stale_user_information_before_hud_transform() {
         let wallet = Some(WalletState {
             gold: 107,
@@ -11247,6 +11841,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (sender, receiver) = std::sync::mpsc::channel();
         let login = parse_inbound_event(
@@ -11288,6 +11883,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
@@ -11545,7 +12141,8 @@ mod tests {
 
     fn terminal_game_shop_receipt(request: &GameShopRequest, success: bool) -> GameShopReceipt {
         GameShopReceipt {
-            protocol: NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            recipient_name: request.recipient_name.clone(),
+            protocol: request.protocol().to_owned(),
             request_id: request.request_id.clone(),
             success,
             g_index: request.g_index,

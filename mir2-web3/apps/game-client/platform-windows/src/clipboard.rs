@@ -306,6 +306,7 @@ pub fn paste_system(
         ui.creature.sync_input_editor();
         ui.social_bonds.sync_editor();
         ui.game_shop_dialog.sync_search_editor();
+        ui.game_shop_dialog.sync_gift_editor();
         if ui.ime_frame_consumed {
             pending.0 = None;
             mail_pending.0 = None;

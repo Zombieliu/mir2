@@ -1,5 +1,29 @@
 # Player-QA playthrough loop
 
+> 2026-10-08 03:32 UTC: user's shop-wheel report was on the D/R19 client
+> mistakenly launched by root; R20 introduced that handler. Published R20
+> is now locally verified against original signed metadata and all154564
+> resource hashes, awaiting normal father logout for a client-only switch.
+> No force-close, Gateway restart, D/F overwrite or duplicate gold grant.
+> Genuine Windows build is GREEN, but R22 external atlas packaging failed;
+> retained failure and supported path retry do not count as gameplay passes.
+> Native wheel/held-right escape/refining and natural late-map acceptance
+> remain pending. [Actual status](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
+> is committed and pushed. Native Windows CI37712122111 is GREEN, but local
+> retrieval of its263037676-byte authenticated ZIP is incomplete: no R22
+> EXE/package/CMS or signed17 is claimed. Linux37712122808 hit its45-minute
+> budget after rank17 and terminal3 passed; retry37716453313 retains every
+> gate at a41dfe72 (only the workflow45-to-105-minute budget differs).
+> Current scope audit passes208 runtime/209 resource maps. Two real missing
+> refine PNGs are exported with sourceLib/full-pack/crop/output hash evidence.
+> Public remainsR20/feed16 and Gatewayc6. The requested mining launch usedD/R19;
+> empty login env removal now opens normal publicWSS. father50874 confirms gold.
+> Shop wheel was introduced inR20, absent fromR19: this root launch-version
+> error is retained. VerifiedR20 client-only staging is pending normal exit.
+> [Exact completed work and unfinished gates](CLASSIC-12H-DELIVERY-20261007.md).
+
 `apps/web/scripts/qa-playthrough.mjs` drives the **real web client over Chrome
 DevTools Protocol** through a full "real player" journey and records every
 problem it sees into a structured report. It is the browser-level complement to

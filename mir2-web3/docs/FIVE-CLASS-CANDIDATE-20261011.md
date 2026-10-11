@@ -47,11 +47,38 @@ verified and staged for local packaging but are not recursively added to Git.
 The normal package still checks genuine full-pack identities, fonts, native
 maps and the complete selected-profile asset closure.
 
-## Executed automated checks
+## First actual R24 merge — 2026-10-12 checkpoint
+
+The first working merge retains the R24 schema8, owner HP/MP/death, monthly
+card and commercial mail code. Normal no-target/direction casts use shared
+Zone admission. Six Source material-free spells no longer attempt an empty
+economic consume; PoisonSword still requires genuine powder. A real Focus
+shot uses the viewport/health FIFO, so queue saturation cannot bypass ordering
+or repeat mana/practice settlement. Map bootstrap discards that stale arrow
+while retaining committed personal skill progression.
+
+Actual selected checks pass simulation124/Gateway18, Windows bridge32 and
+health20, locale13 and game-data75. The data total includes 67 library tests
+and two integration groups of 5 and 3, rather than 75 library tests. One data
+benchmark and four original locale performance probes stay ignored. The
+wrong-package health filter that executed zero tests is excluded. Original
+compile errors, the earlier Focus queue failure, the map-fixture abort and its
+uncaptured diagnostic are retained; the final normal 18-case run has no Source
+drift. Repeated and overlapping results are not summed.
+
+[Exact runs and original evidence](../artifacts/qa-evidence/five-class-candidate-20261011/r24-first-merge-checks.json)
+bind the actual working merge, not a future final release commit. Public
+readback now verifies R25/feed20/client d917 and Gateway4006; the second actual
+merge must preserve their movement/SourceCanMove, real buff clocks, Native
+ingestion/mail boundaries and eleven real pet WAV files. Fresh final checks,
+clean-source original compiler/build, signed package and paired publication
+remain open. The older table below is the pre-R24 five-class evidence.
+
+## Executed automated checks (pre-R24 history)
 
 | Check | Result |
 | --- | --- |
-| Game-data library | 75 pass; one original benchmark ignored |
+| Game-data crate library and integrations | 75 pass; one original benchmark ignored |
 | Five-class simulation | 118 pass |
 | Five-class Gateway receipts, reconnect and settlement | 12 pass |
 | Native entity lifecycle and attack relations | 22 pass |

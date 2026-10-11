@@ -321,7 +321,7 @@ impl ZoneRuntime {
         let player = self.players.get_mut(session).unwrap();
         player.direction = direction;
         if cast {
-            player.mp = player.mp.saturating_sub(mp_cost.max(0)).max(0);
+            player.change_owner_mp(-mp_cost.max(0));
             player.movement_ready_at_ms = player.movement_ready_at_ms.max(now.saturating_add(550));
             player.next_spell_ready_at_ms =
                 now.saturating_add(zone_native_player_spell_delay_ms(spell));
@@ -384,7 +384,8 @@ impl ZoneRuntime {
             }
         }
         self.apply_zone_object_packets(&actions, now);
-        vec![
+        let mut out = self.take_owner_health_through(session, u64::MAX);
+        out.extend([
             ZoneOutbound::ToSession {
                 session_id: session.clone(),
                 packets: vec![
@@ -403,7 +404,8 @@ impl ZoneRuntime {
                 session_ids: self.player_status_recipients(source.object_id, &source.position),
                 packets: actions,
             },
-        ]
+        ]);
+        out
     }
 
     pub(super) fn tick_five_class_pvp(&mut self, now: u64) -> Vec<ZoneOutbound> {

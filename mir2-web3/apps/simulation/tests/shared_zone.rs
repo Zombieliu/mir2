@@ -3261,7 +3261,7 @@ fn retained_zone_object_mana_updates_for_late_joiner() {
 }
 
 #[test]
-fn retained_zone_object_zero_health_marks_dead_for_late_joiner() {
+fn retained_zone_object_zero_health_keeps_live_for_late_joiner() {
     let mut zone = zone();
     let first = session("first");
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
@@ -3272,7 +3272,7 @@ fn retained_zone_object_zero_health_marks_dead_for_late_joiner() {
         now_ms: 0,
     });
     zone.handle(ZoneCommand::BroadcastPackets {
-        session_id: first,
+        session_id: first.clone(),
         owner_local_object_id: 1001,
         packets: vec![ServerPacket::ObjectHealth {
             info: ObjectHealthInfo {
@@ -3289,7 +3289,57 @@ fn retained_zone_object_zero_health_marks_dead_for_late_joiner() {
 
     assert!(has_packet(&outbounds, &second, |packet| matches!(
         packet,
-        ServerPacket::ObjectMonster { info } if info.object_id == 5001 && info.dead
+        ServerPacket::ObjectMonster { info } if info.object_id == 5001 && !info.dead
+    )));
+    assert!(has_packet(&outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info } if info.object_id == 5001 && info.percent == 0
+    )));
+    let walking = zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first.clone(),
+        owner_local_object_id: 1001,
+        packets: vec![ServerPacket::ObjectWalk {
+            movement: ObjectMovement {
+                object_id: 5001,
+                position: Point { x: 333, y: 271 },
+                direction: MirDirection::Right,
+            },
+        }],
+        now_ms: 200,
+    });
+    assert!(has_packet(&walking, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement }
+            if movement.object_id == 5001 && movement.position == (Point { x: 333, y: 271 })
+    )));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first,
+        owner_local_object_id: 1001,
+        packets: vec![
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 5001,
+                    location: Point { x: 333, y: 271 },
+                    direction: MirDirection::Right,
+                    kind: 0,
+                },
+            },
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: 5001,
+                    percent: 100,
+                    expire: 5,
+                },
+            },
+        ],
+        now_ms: 300,
+    });
+    let third = session("third");
+    let dead = zone.handle(ZoneCommand::Join(join("third", 103, "Late", 334, 270)));
+    assert!(has_packet(&dead, &third, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == 5001 && info.dead && info.location == (Point { x: 333, y: 271 })
     )));
 }
 
@@ -3501,7 +3551,7 @@ fn retained_zone_object_health_does_not_increase_from_stale_runtime_packet() {
 }
 
 #[test]
-fn zero_health_before_retained_spawn_marks_late_spawn_dead() {
+fn zero_health_before_retained_spawn_keeps_late_spawn_live() {
     let mut zone = zone();
     let first = session("first");
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
@@ -3518,7 +3568,7 @@ fn zero_health_before_retained_spawn_marks_late_spawn_dead() {
         now_ms: 100,
     });
     zone.handle(ZoneCommand::BroadcastPackets {
-        session_id: first,
+        session_id: first.clone(),
         owner_local_object_id: 1001,
         packets: vec![monster_spawn_packet(5001, 1001, 331, 270)],
         now_ms: 200,
@@ -3530,8 +3580,45 @@ fn zero_health_before_retained_spawn_marks_late_spawn_dead() {
         packet,
         ServerPacket::ObjectMonster { info }
             if info.object_id == 5001
-                && info.dead
+                && !info.dead
                 && info.location == (Point { x: 331, y: 270 })
+    )));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first,
+        owner_local_object_id: 1001,
+        packets: vec![
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 5002,
+                    location: Point { x: 333, y: 271 },
+                    direction: MirDirection::Left,
+                    kind: 0,
+                },
+            },
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: 5002,
+                    percent: 0,
+                    expire: 5,
+                },
+            },
+            monster_spawn_packet(5002, 1001, 331, 270),
+            ServerPacket::ObjectWalk {
+                movement: ObjectMovement {
+                    object_id: 5002,
+                    position: Point { x: 335, y: 271 },
+                    direction: MirDirection::Right,
+                },
+            },
+        ],
+        now_ms: 300,
+    });
+    let third = session("third");
+    let outbounds = zone.handle(ZoneCommand::Join(join("third", 103, "Late", 334, 270)));
+    assert!(has_packet(&outbounds, &third, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == 5002 && info.dead && info.location == (Point { x: 333, y: 271 })
     )));
 }
 

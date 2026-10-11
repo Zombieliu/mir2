@@ -142,6 +142,15 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-gateway --lib five_class -- --test-threads=1
           node --test apps/web/scripts/asset-pipeline/five-class-skill-closure.test.mjs apps/web/scripts/asset-pipeline/five-class-sprite-closure.test.mjs
 
+      - name: Verify deployed owner-health, billing and mail compatibility
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 owner_health_tests health_zero_authority_tests health_display_source_tests
+          cargo +1.89.0 test --locked -p mir2-simulation --test billing_recharge --test billing_monthly_card --test game_shop_gift --test shared_monster_health_lifecycle --test security_lifecycle -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib -- --test-threads=1 owner_health_sync_tests health_zero_authority_tests zone_skill_cadence_tests web_billing_tests stripe_billing_tests game_shop_gift_tests zone_rpc_billing_tests
+          cargo +1.89.0 test --locked -p mir2-gateway --test billing_monthly_card --test mentor_shared_lifecycle -- --test-threads=1
+
       - name: Package Gateway
         working-directory: mir2-web3
         env:

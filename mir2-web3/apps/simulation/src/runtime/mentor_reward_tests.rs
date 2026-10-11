@@ -161,6 +161,42 @@ fn mentor_expiry_is_strict_and_graduation_uses_latest_committed_level(){
     let epoch=config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
     config.settle_shared_mentor_bank(&pupil,epoch,Some(crate::SharedMentorBreakReason::LoginExpired),deadline+1,false).unwrap();
 }
+
+#[test]
+fn mentor_live_level_graduation_preserves_epoch_save_and_retry_guards() {
+    let (config, pupil, teacher) = accounting_fixture();
+    let epoch = config.shared_mentor_profile_for(&pupil).unwrap().mentor.ledger.relationship_epoch;
+    let before = serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap();
+    let graduated = Some(crate::SharedMentorBreakReason::Graduated);
+    // An online teacher has advanced beyond a stale durable level. This must
+    // prevent false graduation while retaining the original strict gap rule.
+    assert!(config.settle_shared_mentor_bank_with_live_levels(
+        &pupil, epoch, graduated, 20, true, (Some(11), Some(25)),
+    ).is_err());
+    assert!(config.settle_shared_mentor_bank_with_live_levels(
+        &pupil, epoch + 1, graduated, 20, true, (Some(11), None),
+    ).is_err());
+    assert_eq!(serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(), before);
+    config.inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
+    assert!(config.settle_shared_mentor_bank_with_live_levels(
+        &pupil, epoch, graduated, 21, true, (Some(11), None),
+    ).is_err());
+    assert_eq!(serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(), before);
+    let receipt = config.settle_shared_mentor_bank_with_live_levels(
+        &pupil, epoch, graduated, 22, true, (Some(11), None),
+    ).unwrap();
+    assert!(receipt.ended);
+    let store = config.account_store.lock().unwrap();
+    assert_eq!(store.accounts["demo"].characters[0].level, 10);
+    assert_eq!(store.accounts["demo"].saves[&0].character.level, 10);
+    assert_eq!(store.accounts["teacher"].characters[0].level, 20);
+    assert_eq!(store.accounts["teacher"].saves[&7].character.level, 20);
+    drop(store);
+    assert!(config.shared_mentor_profile_for(&teacher).unwrap().mentor.partner_identity.is_none());
+    assert!(config.settle_shared_mentor_bank_with_live_levels(
+        &pupil, epoch, graduated, 23, true, (Some(11), None),
+    ).is_err());
+}
 #[test]
 fn mentor_closed_source_and_unminted_credit_merge_are_guarded(){
     use super::shared_mentor_rewards::merge_mentor_state;

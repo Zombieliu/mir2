@@ -3168,7 +3168,7 @@ impl ZoneRuntime {
         let player = self.players.get_mut(session_id)?;
         player.direction = direction;
         if cast {
-            player.mp = player.mp.saturating_sub(mp_cost.max(0));
+            player.change_owner_mp(-mp_cost.max(0));
             player.movement_actions.clear();
             player.movement_ready_at_ms = now_ms.saturating_add(600);
             player.next_attack_ready_at_ms = player
@@ -3181,10 +3181,11 @@ impl ZoneRuntime {
                 .insert(spell as u8, now_ms.saturating_add(cooldown_ms.max(1)));
         }
         let player = player.clone();
-        let mut out = vec![ZoneOutbound::ToSession {
+        let mut out = self.take_owner_health_through(session_id, u64::MAX);
+        out.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: vec![user_location_packet(&player)],
-        }];
+        });
         if !cast {
             return Some(out);
         }
@@ -5047,25 +5048,34 @@ impl ZoneRuntime {
         let Some(player) = self.players.get_mut(session) else {
             return Vec::new();
         };
+        // Human.ChangeMP caps the requested operation before its zero guard.
+        // A negative operation at MP0 still emits exact owner health, while
+        // the economic settlement below exists only for a real pool delta.
         let before = player.mp;
-        player.mp = player
-            .mp
-            .saturating_add(amount)
-            .clamp(0, player.combat_stats.max_mp.max(0));
-        if before == player.mp {
+        let max_mp = player.combat_stats.max_mp.max(0);
+        let amount = if player.mp.saturating_add(amount) > max_mp {
+            max_mp.saturating_sub(player.mp)
+        } else {
+            amount
+        };
+        if amount == 0 {
             return Vec::new();
         }
-        let settlement = player.mana_settlement(before);
+        player.change_owner_mp(amount);
+        let settlement = (before != player.mp).then(|| player.mana_settlement(before));
         let packet = ServerPacket::ObjectMana {
             info: ObjectManaInfo {
                 object_id: player.object_id,
                 percent: zone_five_class_mana_percent(&player),
             },
         };
-        let mut out = vec![ZoneOutbound::PlayerManaChanged {
-            session_id: session.clone(),
-            settlement,
-        }];
+        let mut out = self.take_owner_health_through(session, u64::MAX);
+        if let Some(settlement) = settlement {
+            out.push(ZoneOutbound::PlayerManaChanged {
+                session_id: session.clone(),
+                settlement,
+            });
+        }
         out.extend(self.five_class_present(session, vec![packet]));
         out
     }

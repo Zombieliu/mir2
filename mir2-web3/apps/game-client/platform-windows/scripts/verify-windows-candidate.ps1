@@ -1332,9 +1332,9 @@ if (Test-Path -LiteralPath $manifestPath -PathType Leaf) { $manifestHash=(Get-Fi
 if ($null -ne $manifest) {
     $manifestShapeValid = $true
     foreach ($field in @('schema','coverage','fileCount','totalBytes','aggregateSha256','files')) { if ($null -eq $manifest.PSObject.Properties[$field]) { Fail "package manifest missing field: $field"; $manifestShapeValid = $false } }
-    $actualEntries = @(); $actualPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal); $totalBytes = [int64]0
-    foreach ($file in $payloadFiles) { $rel = Get-RelativeUnixPath -Root $PackageRoot -Path $file.FullName; if (-not $actualPaths.Add($rel)) { Fail "duplicate actual package path: $rel" }; $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant(); $totalBytes += [int64]$file.Length; $actualEntries += [ordered]@{ path = $rel; size = [int64]$file.Length; sha256 = $hash } }
-    $canonical = Get-ManifestCanonicalText -Entries $actualEntries; $computedAggregate = Get-TextSha256 -Text $canonical
+    $actualEntries = [Collections.Generic.List[object]]::new(); $actualPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal); $totalBytes = [int64]0
+    foreach ($file in $payloadFiles) { $rel = Get-RelativeUnixPath -Root $PackageRoot -Path $file.FullName; if (-not $actualPaths.Add($rel)) { Fail "duplicate actual package path: $rel" }; $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant(); $totalBytes += [int64]$file.Length; [void]$actualEntries.Add([ordered]@{ path = $rel; size = [int64]$file.Length; sha256 = $hash }) }
+    $canonical = Get-ManifestCanonicalText -Entries $actualEntries.ToArray(); $computedAggregate = Get-TextSha256 -Text $canonical
     if ($manifestShapeValid) {
         if ($manifest.schema -ne 'mir2.windows.package-manifest.v4') { Fail 'package manifest schema mismatch' }
         $expectedExcludes=@('PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s'); $actualExcludes=@($manifest.coverage.excludes)

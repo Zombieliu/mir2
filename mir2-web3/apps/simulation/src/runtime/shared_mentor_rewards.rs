@@ -24,6 +24,19 @@ impl SimulationConfig {
         &self, actor: &Stage5FriendIdentity, expected_epoch: u64,
         end: Option<SharedMentorBreakReason>, now_ms: u64, teacher_online: bool,
     ) -> Result<SharedMentorAccountingReceipt, String> {
+        self.settle_shared_mentor_bank_with_live_levels(
+            actor, expected_epoch, end, now_ms, teacher_online, (None, None),
+        )
+    }
+
+    /// Server-captured pupil/teacher levels, never client input. Offline levels
+    /// are read inside the same durable relationship transaction; online levels
+    /// must not be written over a peer's character save or revision.
+    pub fn settle_shared_mentor_bank_with_live_levels(
+        &self, actor: &Stage5FriendIdentity, expected_epoch: u64,
+        end: Option<SharedMentorBreakReason>, now_ms: u64, teacher_online: bool,
+        live_levels: (Option<u16>, Option<u16>),
+    ) -> Result<SharedMentorAccountingReceipt, String> {
         let peer = self.shared_mentor_profile_for(actor)?.mentor.partner_identity
             .ok_or("server.NoMentorship")?;
         let mut accounts = vec![actor.account_id.clone(), peer.account_id.clone()];
@@ -49,7 +62,9 @@ impl SimulationConfig {
                         .checked_add(SHARED_MENTOR_DURATION_MS).ok_or("mentor date exhausted")? =>
                     { return Err("mentor relationship is not expired".into()); }
                 Some(SharedMentorBreakReason::Graduated)
-                    if pupil.level.saturating_add(SHARED_MENTOR_LEVEL_GAP) <= teacher.level =>
+                    if live_levels.0.unwrap_or(pupil.level)
+                        .saturating_add(SHARED_MENTOR_LEVEL_GAP)
+                        <= live_levels.1.unwrap_or(teacher.level) =>
                     { return Err("mentee has not graduated".into()); }
                 _ => {}
             }

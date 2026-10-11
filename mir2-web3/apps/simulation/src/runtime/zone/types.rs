@@ -866,6 +866,11 @@ impl ZoneCommand {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ZoneOutbound {
+    /// Exact, server-stamped owner pools. This is separate from damage/death
+    /// settlement and must retain its identity until final transport delivery.
+    OwnerHealthChanged {
+        change: super::ZoneOwnerHealthChange,
+    },
     ToSession {
         session_id: SessionId,
         packets: Vec<ServerPacket>,
@@ -1455,6 +1460,11 @@ pub(crate) struct ZonePlayer {
     pub mana_receipt_sequence: u64,
     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
     pub five_class_practice_sequence: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub owner_health_sequence: u64,
+    /// Command-local notifications are never replayed by a cold checkpoint.
+    #[serde(skip)]
+    pub pending_owner_health_changes: Vec<super::owner_health::PendingOwnerHealthChange>,
     /// Monotonic owner-local ordering for Zone journey receipts. Kept separate
     /// from vital settlements because only the Zone event bridge consumes it.
     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
@@ -1630,6 +1640,8 @@ impl ZonePlayer {
             vital_receipt_sequence: 0,
             mana_receipt_sequence: 0,
             five_class_practice_sequence: 0,
+            owner_health_sequence: 0,
+            pending_owner_health_changes: Vec::new(),
             journey_event_sequence: 0,
             hidden: false,
             sneaking: false,

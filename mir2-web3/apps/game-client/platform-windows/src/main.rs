@@ -16,6 +16,7 @@ use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 
 mod assets;
 mod atlas;
+mod billing_browser;
 mod branding;
 mod capture;
 mod clipboard;

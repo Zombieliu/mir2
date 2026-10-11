@@ -1,4 +1,6 @@
 mod big_map;
+mod billing;
+mod billing_monthly_card;
 mod buffs;
 mod combat;
 mod components;
@@ -97,6 +99,7 @@ pub use shared_relationships::{
 mod skills;
 mod social_economy;
 mod stage5;
+mod game_shop_gift;
 mod stats;
 pub mod zone;
 pub use zone::ZoneMentorBankAttribution;
@@ -137,6 +140,7 @@ pub use zone::{
     ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneSavedPetSnapshot,
     ZoneStandbyReplica, ZoneVitalSettlement,
+    ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

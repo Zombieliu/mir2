@@ -904,3 +904,412 @@ fn five_class_receipt_real_hp_watermark_does_not_consume_first_mp_settlement() {
         Some(mana.mp_after)
     );
 }
+
+
+use crate::routing::ZoneLiveOutboundRegistration;
+
+// These controls fill a real registered transport without changing a pool.
+// Outcomes still originate from ordinary authenticated casts/range packets.
+fn flush_five_class_live(
+    shared: &SharedState,
+    key: &ZonePresenceKey,
+    rx: &mut tokio::sync::mpsc::Receiver<crate::routing::SharedZoneLiveOutbound>,
+) -> Vec<(ServerPacket, Option<mir2_simulation::ZoneOwnerHealthChange>)> {
+    let mut packets = Vec::new();
+    for _ in 0..512 {
+        while let Ok(outbound) = rx.try_recv() {
+            let proof = outbound.owner_health().map(|delivery| delivery.change.clone());
+            let packet = outbound.claim_for_send().unwrap()
+                .expect("current registration/life presentation must remain valid");
+            packets.push((packet, proof));
+        }
+        let mut state = shared.lock().unwrap();
+        state.retry_pending_realtime_zone_outbounds();
+        let pending = state.pending_zone_owner_health.contains_key(key)
+            || state.pending_zone_packets.contains_key(key);
+        drop(state);
+        if !pending && rx.len() == 0 {
+            return packets;
+        }
+    }
+    panic!("bounded five-class live FIFO failed to drain");
+}
+
+fn fill_five_class_live_slot(shared: &SharedState, key: &ZonePresenceKey, id: u32) {
+    shared.lock().unwrap().queue_zone_packets(key.clone(), vec![
+        ServerPacket::ObjectMana {
+            info: mir2_protocol::ObjectManaInfo { object_id: id, percent: 100 },
+        },
+    ]);
+}
+
+#[test]
+fn five_class_receipt_registered_full_fifo_cast_spends_once_before_magic_and_retries() {
+    for (name, class, identity) in [
+        ("FcFifoHaste", MirClass::Assassin, ZoneFiveClassPracticeSpell::Haste),
+        ("FcFifoConc", MirClass::Archer, ZoneFiveClassPracticeSpell::Concentration),
+    ] {
+        let (shared, mut owner) = fixture(name, class, &[(identity, 0)]);
+        let key = owner.current_presence_key().unwrap();
+        let session = owner.current_zone_session_id().unwrap();
+        let (tx, mut rx) = tokio::sync::mpsc::channel(1);
+        let registration = owner.movement_ingress.register_live_outbound(
+            crate::routing::SharedZoneLiveOutboundSender::single(tx)).unwrap().unwrap();
+        registration.activate();
+        flush_five_class_live(&shared, &key, &mut rx);
+        let before_cursor = shared.lock().unwrap().zone_manager
+            .owner_health_cursor(&session).unwrap();
+        let before_mp = owner.inner.world_snapshot().player_mp.unwrap();
+        let (_, _, cost, _) = owner.inner.zone_magic_attack_profile(identity.spell()).unwrap();
+        assert!(cost > 0, "this Source active cast must actually consume mana");
+        let zone_id = shared.lock().unwrap().players[&key].zone_object_id;
+        fill_five_class_live_slot(&shared, &key, zone_id);
+        assert_eq!(rx.len(), 1, "the real one-slot registered channel must be full");
+        let (position, direction) = shared.lock().unwrap().zone_manager
+            .player_transform(&session).unwrap();
+        let cast = WorldCommand::ClientPacket(ClientPacket::Magic {
+            object_id: owner.local_self_object_id().unwrap(), spell: identity.spell(),
+            direction, target_id: 0, location: position, spell_target_lock: true,
+        });
+        let direct = owner.execute(cast.clone()).unwrap();
+        assert!(!direct.iter().any(|p| matches!(p,
+            ServerPacket::Magic { spell, cast: true, .. }
+                if *spell == identity.spell())),
+            "accepted launch must be owned by the full live FIFO: {direct:?}");
+        assert_eq!(owner.inner.world_snapshot().player_mp, Some(before_mp - cost),
+            "transport backpressure cannot cancel or duplicate the accepted debit");
+        let accepted_cursor = shared.lock().unwrap().zone_manager
+            .owner_health_cursor(&session).unwrap();
+        assert_eq!(accepted_cursor.health_sequence, before_cursor.health_sequence + 1);
+        assert_eq!(accepted_cursor.object_id, before_cursor.object_id);
+        assert_eq!(accepted_cursor.online_owner, before_cursor.online_owner);
+        assert_eq!(accepted_cursor.life_generation, before_cursor.life_generation);
+        assert_eq!(accepted_cursor.session_id, before_cursor.session_id);
+        let rejected = owner.execute(cast).unwrap();
+        assert!(!rejected.iter().any(|p| matches!(p,
+            ServerPacket::Magic { cast: true, .. } | ServerPacket::MagicLeveled { .. })));
+        assert_eq!(owner.inner.world_snapshot().player_mp, Some(before_mp - cost));
+        assert_eq!(shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap(),
+            accepted_cursor, "cooldown refusal cannot generate another pool operation");
+        let delivered = flush_five_class_live(&shared, &key, &mut rx);
+        let health = delivered.iter().position(|(p, _)| matches!(p,
+            ServerPacket::HealthChanged { mp, .. } if *mp == before_mp - cost)).unwrap();
+        let magic = delivered.iter().position(|(p, _)| matches!(p,
+            ServerPacket::Magic { spell, cast: true, .. }
+                if *spell == identity.spell())).unwrap();
+        assert!(health < magic, "registered FIFO must retain cost-before-action: {delivered:?}");
+        let proof = delivered[health].1.as_ref().expect("owner health requires a current capability");
+        assert_eq!(proof.cursor, accepted_cursor);
+        assert_eq!((proof.mp_before, proof.mp), (before_mp, before_mp - cost));
+        assert_eq!(proof.hp_before, proof.hp);
+        assert_eq!(delivered.iter().filter(|(p, _)| matches!(p,
+            ServerPacket::HealthChanged { .. })).count(), 1);
+        assert_eq!(delivered.iter().filter(|(p, _)| matches!(p,
+            ServerPacket::Magic { spell, cast: true, .. }
+                if *spell == identity.spell())).count(), 1);
+        assert!(flush_five_class_live(&shared, &key, &mut rx).is_empty());
+        assert_eq!(shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap(),
+            accepted_cursor, "presentation retry is not another mana operation");
+    }
+}
+
+fn equip_five_class_source_bow(owner: &mut SharedInProcessZoneSessionRuntime) {
+    // A progressed character still needs an actual class weapon. Restore a
+    // genuine Source bow through the same trusted checkpoint as learned books;
+    // do not bypass the shared Zone's authoritative range admission.
+    let bow = mir2_game_data::crystal_item_by_name("WoodenBow").unwrap();
+    assert!(bow.shape >= 200);
+    let mut save = owner.inner.active_character_checkpoint().unwrap();
+    save.equipment_items_json = vec![serde_json::json!({
+        "key": format!("crystal-item-{}", bow.item_index),
+        "slot": mir2_simulation::EquipmentSlot::Weapon,
+        "quantity": 1, "name": bow.name, "icon": bow.image, "shape": bow.shape,
+        "description": bow.tooltip.unwrap_or_default(),
+        "durability_current": bow.durability.max(1),
+        "durability_max": bow.durability.max(1), "attack": 0, "defence": 0,
+    }).to_string()];
+    save.equipment_items_explicit_empty = false;
+    owner.inner.restore_active_character_checkpoint(&save).unwrap();
+    owner.sync_zone_snapshot();
+    assert_eq!(owner.world_snapshot().entities.iter().find(|entity|
+        entity.kind == WorldEntityKind::SelfPlayer).unwrap().has_class_weapon, Some(true));
+}
+
+#[test]
+fn five_class_receipt_focus_progress_uses_accepted_outcome_when_registered_fifo_is_full() {
+    let identity = ZoneFiveClassPracticeSpell::Focus;
+    let (shared, mut owner) = fixture("FcFifoFocus", MirClass::Archer, &[(identity, 0)]);
+    equip_five_class_source_bow(&mut owner);
+    // Select a real Source Focus proc by advancing ordinary personal ticks.
+    // The wire packet has no spell scalar; the trusted profile chooses Focus.
+    let mut focus_ready = false;
+    for _ in 0..128 {
+        if owner.inner.zone_range_attack_profile().0 == Spell::Focus {
+            focus_ready = true;
+            break;
+        }
+        owner.inner.execute(WorldCommand::Tick).unwrap();
+    }
+    assert!(focus_ready, "learned Source Focus must eventually produce a real proc");
+    let key = owner.current_presence_key().unwrap();
+    let session = owner.current_zone_session_id().unwrap();
+    let (position, _) = shared.lock().unwrap().zone_manager.player_transform(&session).unwrap();
+    let target = Point { x: position.x + 3, y: position.y };
+    let target_id = 94_201;
+    owner.dispatch_zone_player_command(ZoneCommand::SpawnMonster {
+        session_id: session.clone(), now_ms: SharedInProcessZoneSessionRuntime::zone_now_ms(),
+        monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None, object_id: target_id, name: "Yob".into(),
+            name_colour_argb: -1, image: 1, ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile), level: 1,
+            hp: 100_000, max_hp: 100_000, experience: 0,
+            move_speed_ms: 1000, attack_speed_ms: 2000, friendly_guild: None,
+            position: target.clone(), direction: MirDirection::Left,
+            defense: ZoneMonsterDefense::default(), respawn: None, drops: Vec::new(),
+        },
+    }, false);
+    let command = WorldCommand::ClientPacket(ClientPacket::RangeAttack {
+        direction: MirDirection::Right, location: position,
+        target_id, target_location: target,
+    });
+    let prepared = owner.prepare_zone_native_player_attack(&command).unwrap();
+    assert!(matches!(prepared.kind,
+        crate::routing::ZoneNativePlayerAttackKind::Range { spell: Spell::Focus, .. }));
+    let (tx, mut rx) = tokio::sync::mpsc::channel(1);
+    let registration = owner.movement_ingress.register_live_outbound(
+        crate::routing::SharedZoneLiveOutboundSender::single(tx)).unwrap().unwrap();
+    registration.activate();
+    flush_five_class_live(&shared, &key, &mut rx);
+    let before_skill = skill(&owner, identity);
+    assert_eq!(before_skill, (0, 0));
+    let before_mp = owner.inner.world_snapshot().player_mp;
+    let before_cursor = shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap();
+    let zone_id = shared.lock().unwrap().players[&key].zone_object_id;
+    fill_five_class_live_slot(&shared, &key, zone_id);
+    assert_eq!(rx.len(), 1);
+    let direct = owner.execute(command.clone()).unwrap();
+    assert!(!direct.iter().any(|p| matches!(p, ServerPacket::RangeAttack { .. }
+        | ServerPacket::ObjectRangeAttack { .. })),
+        "the accepted range action must be queued, not returned: {direct:?}");
+    let accepted_skill = skill(&owner, identity);
+    assert_eq!(accepted_skill.0, 0);
+    assert!(accepted_skill.1 > 0,
+        "accepted Source Focus trains before projectile hit/miss, despite a full live channel");
+    assert_eq!(direct.iter().filter(|p| matches!(p,
+        ServerPacket::MagicLeveled { spell: Spell::Focus, .. })).count(), 1);
+    assert_eq!(owner.inner.world_snapshot().player_mp, before_mp,
+        "passive Focus does not invent an MP debit");
+    assert_eq!(shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap(),
+        before_cursor);
+    let rejected = owner.execute(command).unwrap();
+    assert!(!rejected.iter().any(|p| matches!(p,
+        ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+            | ServerPacket::MagicLeveled { spell: Spell::Focus, .. })));
+    assert_eq!(skill(&owner, identity), accepted_skill,
+        "cooldown rejection cannot repeat Focus progression");
+    let delivered = flush_five_class_live(&shared, &key, &mut rx);
+    assert_eq!(delivered.iter().filter(|(p, _)| matches!(p,
+        ServerPacket::RangeAttack { spell: Spell::Focus, target_id: actual, .. }
+            if *actual == target_id)).count(), 1, "{delivered:?}");
+    assert_eq!(delivered.iter().filter(|(p, _)| matches!(p,
+        ServerPacket::ObjectRangeAttack { info }
+            if info.target_id == target_id && info.spell == Spell::Focus as u8)).count(), 1);
+    assert!(!delivered.iter().any(|(p, _)| matches!(p, ServerPacket::HealthChanged { .. })));
+    assert_eq!(skill(&owner, identity), accepted_skill,
+        "draining/retrying presentation cannot repeat a committed practice increment");
+    assert!(flush_five_class_live(&shared, &key, &mut rx).is_empty());
+    assert_eq!(shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap(),
+        before_cursor);
+}
+
+
+fn spawn_five_class_wire_target(
+    owner: &mut SharedInProcessZoneSessionRuntime,
+    id: u32,
+    distance: i32,
+) -> Point {
+    let session = owner.current_zone_session_id().unwrap();
+    let (position, _) = owner.zone_state.lock().unwrap().zone_manager
+        .player_transform(&session).unwrap();
+    let target = Point { x: position.x + distance, y: position.y };
+    owner.dispatch_zone_player_command(ZoneCommand::SpawnMonster {
+        session_id: session, now_ms: SharedInProcessZoneSessionRuntime::zone_now_ms(),
+        monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None, object_id: id, name: "Yob".into(),
+            name_colour_argb: -1, image: 1, ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile), level: 1,
+            hp: 100_000, max_hp: 100_000, experience: 0,
+            move_speed_ms: 1000, attack_speed_ms: 2000, friendly_guild: None,
+            position: target.clone(), direction: MirDirection::Left,
+            defense: ZoneMonsterDefense::default(), respawn: None, drops: Vec::new(),
+        },
+    }, false);
+    target
+}
+
+#[test]
+fn five_class_receipt_normal_no_material_skills_do_not_commit_empty_consumption() {
+    // This service refuses every material request, as durable inventory refuses
+    // an empty consume. A legitimate material-free cast must never contact it.
+    for (index, identity) in [
+        ZoneFiveClassPracticeSpell::Trap,
+        ZoneFiveClassPracticeSpell::DelayedExplosion,
+        ZoneFiveClassPracticeSpell::ExplosiveTrap,
+        ZoneFiveClassPracticeSpell::BindingShot,
+        ZoneFiveClassPracticeSpell::PoisonShot,
+        ZoneFiveClassPracticeSpell::CrippleShot,
+    ].into_iter().enumerate() {
+        let (shared, mut owner) = fixture(&format!("FcMat{index:02}"),
+            identity.class(), &[(identity, 0)]);
+        if identity.class() == MirClass::Archer {
+            equip_five_class_source_bow(&mut owner);
+        }
+        let service = Arc::new(RecordingAccountInventoryService {
+            commands: Arc::new(Mutex::new(Vec::new())),
+            ground_drop_calls: Arc::new(Mutex::new(0)),
+            monster_award_calls: Arc::new(Mutex::new(0)),
+            skill_item_calls: Arc::new(Mutex::new(0)),
+            ground_drop_committed: false, monster_award_committed: false,
+            skill_item_committed: false,
+        });
+        owner.account_inventory_service = service.clone();
+        let session = owner.current_zone_session_id().unwrap();
+        let target_id = 94_300 + index as u32;
+        let target = spawn_five_class_wire_target(&mut owner, target_id, 3);
+        let before_mp = owner.inner.world_snapshot().player_mp.unwrap();
+        let before_cursor = shared.lock().unwrap().zone_manager
+            .owner_health_cursor(&session).unwrap();
+        let (_, _, cost, _) = owner.inner.zone_magic_attack_profile(identity.spell()).unwrap();
+        assert!(cost > 0 && before_mp >= cost);
+        let packets = owner.execute(WorldCommand::ClientPacket(ClientPacket::Magic {
+            object_id: owner.local_self_object_id().unwrap(), spell: identity.spell(),
+            direction: MirDirection::Right,
+            target_id: if identity.spell() == Spell::ExplosiveTrap { 0 } else { target_id },
+            location: target, spell_target_lock: true,
+        })).unwrap();
+        assert_eq!(*service.skill_item_calls.lock().unwrap(), 0,
+            "Source {identity:?} has no material transaction");
+        assert!(service.commands.lock().unwrap().is_empty());
+        assert!(packets.iter().any(|packet| matches!(packet,
+            ServerPacket::Magic { spell, cast: true, .. } if *spell == identity.spell())),
+            "normal {identity:?} must enter and launch in the shared Zone: {packets:?}");
+        assert_eq!(owner.inner.world_snapshot().player_mp, Some(before_mp - cost));
+        let accepted_cursor = shared.lock().unwrap().zone_manager
+            .owner_health_cursor(&session).unwrap();
+        assert_eq!(accepted_cursor.health_sequence, before_cursor.health_sequence + 1);
+        assert_eq!(accepted_cursor.object_id, before_cursor.object_id);
+        assert_eq!(accepted_cursor.life_generation, before_cursor.life_generation);
+    }
+}
+
+#[test]
+fn five_class_receipt_normal_elemental_shot_gathers_without_target_in_shared_zone() {
+    let identity = ZoneFiveClassPracticeSpell::ElementalShot;
+    let (shared, mut owner) = fixture("FcNoOrb", MirClass::Archer, &[
+        (identity, 0), (ZoneFiveClassPracticeSpell::Meditation, 0),
+    ]);
+    equip_five_class_source_bow(&mut owner);
+    let session = owner.current_zone_session_id().unwrap();
+    let (position, direction) = shared.lock().unwrap().zone_manager
+        .player_transform(&session).unwrap();
+    let before_mp = owner.inner.world_snapshot().player_mp.unwrap();
+    let (_, _, cost, _) = owner.inner.zone_magic_attack_profile(identity.spell()).unwrap();
+    let before_cursor = shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap();
+    let packets = owner.execute(WorldCommand::ClientPacket(ClientPacket::Magic {
+        object_id: owner.local_self_object_id().unwrap(), spell: identity.spell(),
+        direction, target_id: 0, location: position, spell_target_lock: true,
+    })).unwrap();
+    assert!(packets.iter().any(|p| matches!(p, ServerPacket::SetElemental {
+        enabled: true, casted: true, value, .. } if *value > 0)), "{packets:?}");
+    assert!(packets.iter().any(|p| matches!(p, ServerPacket::Magic {
+        spell: Spell::ElementalShot, cast: true, target_id: 0, .. })));
+    assert!(skill(&owner, identity).1 > 0);
+    assert_eq!(owner.inner.world_snapshot().player_mp, Some(before_mp - cost));
+    let accepted = shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap();
+    assert_eq!(accepted.health_sequence, before_cursor.health_sequence + 1);
+    assert_eq!(accepted.object_id, before_cursor.object_id);
+    assert_eq!(accepted.life_generation, before_cursor.life_generation);
+}
+
+#[test]
+fn five_class_receipt_normal_dark_body_explicit_self_target_rebases_to_shared_owner() {
+    let identity = ZoneFiveClassPracticeSpell::DarkBody;
+    let (shared, mut owner) = fixture("FcSelfClone", MirClass::Assassin, &[(identity, 0)]);
+    let session = owner.current_zone_session_id().unwrap();
+    let local_id = owner.local_self_object_id().unwrap();
+    let zone_id = owner.current_zone_player_object_id().unwrap();
+    assert_ne!(local_id, zone_id, "this proof must cross the real wire/shared identity boundary");
+    let (position, direction) = shared.lock().unwrap().zone_manager
+        .player_transform(&session).unwrap();
+    let before_mp = owner.inner.world_snapshot().player_mp.unwrap();
+    let (_, _, cost, _) = owner.inner.zone_magic_attack_profile(identity.spell()).unwrap();
+    let before_cursor = shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap();
+    let packets = owner.execute(WorldCommand::ClientPacket(ClientPacket::Magic {
+        object_id: local_id, spell: identity.spell(), direction,
+        target_id: local_id, location: position, spell_target_lock: true,
+    })).unwrap();
+    assert!(packets.iter().any(|p| matches!(p,
+        ServerPacket::Magic { spell: Spell::DarkBody, cast: true, .. })), "{packets:?}");
+    let map_key = ZoneKey::for_map(owner.inner.world_snapshot().map_file_name.as_deref().unwrap());
+    assert!(shared.lock().unwrap().zone_manager.native_monster_snapshots(&map_key)
+        .iter().any(|monster| monster.name == "AssassinClone" && !monster.dead && monster.hp > 0),
+        "the clone must belong to the real shared Zone rather than the personal mirror");
+    assert_eq!(owner.inner.world_snapshot().player_mp, Some(before_mp - cost));
+    let accepted = shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap();
+    assert_eq!(accepted.health_sequence, before_cursor.health_sequence + 1);
+    assert_eq!(accepted.object_id, before_cursor.object_id);
+    assert_eq!(accepted.life_generation, before_cursor.life_generation);
+}
+
+#[test]
+fn five_class_receipt_map_bootstrap_discards_stale_range_ack_but_keeps_skill_progress() {
+    let identity = ZoneFiveClassPracticeSpell::Focus;
+    let (shared, owner) = fixture("FcRangeMap", MirClass::Archer, &[(identity, 0)]);
+    let key = owner.current_presence_key().unwrap();
+    let session = owner.current_zone_session_id().unwrap();
+    let (tx, mut rx) = tokio::sync::mpsc::channel(1);
+    let mut registration = owner.movement_ingress
+        .register_live_outbound(crate::routing::SharedZoneLiveOutboundSender::single(tx))
+        .unwrap().unwrap();
+    registration.activate();
+    flush_five_class_live(&shared, &key, &mut rx);
+    let before_cursor = shared.lock().unwrap().zone_manager.owner_health_cursor(&session).unwrap();
+    let zone_id = shared.lock().unwrap().players[&key].zone_object_id;
+    fill_five_class_live_slot(&shared, &key, zone_id);
+    let ack = ServerPacket::RangeAttack {
+        target_id: 94_260, target: Point { x: 290, y: 616 }, spell: Spell::Focus,
+    };
+    let progress = ServerPacket::MagicLeveled {
+        object_id: owner.local_self_object_id().unwrap(),
+        spell: Spell::Focus, level: 0, experience: 9,
+    };
+    let health_ordered = crate::routing::is_owner_health_fifo_packet(&ack);
+    let mut state = shared.lock().unwrap();
+    let ordered = state.is_ordered_player_packet(&key, &ack);
+    state.queue_zone_packets(key.clone(), vec![ack, progress]);
+    // This real registration stamps current viewport packets into the owner
+    // health FIFO; it must not bypass that queue through the ordinary pending
+    // list. Inspect both lists without assuming an unstamped registration.
+    let ordinary_range = state.pending_zone_packets.get(&key).into_iter()
+        .flatten().filter(|packet| matches!(packet, ServerPacket::RangeAttack { .. })).count();
+    let health_range = state.pending_zone_owner_health.get(&key).into_iter()
+        .flatten().filter(|item| matches!(item,
+            crate::routing::PendingOwnerPresentation::Packet(ServerPacket::RangeAttack { .. }))).count();
+    // This boundary processes already-produced presentation, not another cast.
+    // A destination viewport must discard the old arrow while retaining its
+    // committed personal skill progression and authoritative health cursor.
+    state.begin_zone_bootstrap(&key);
+    let registration_removed = !state.live_zone_outbounds.contains_key(&key);
+    let retained = state.take_pending_zone_packets(&key);
+    let after_cursor = state.zone_manager.owner_health_cursor(&session).unwrap();
+    drop(state);
+    // Keep test assertion failures outside the shared mutex so an ordinary
+    // fixture failure cannot poison the runtime during teardown.
+    assert!(ordered && health_ordered);
+    assert_eq!((ordinary_range, health_range), (0, 1));
+    assert!(registration_removed);
+    assert!(!retained.iter().any(|packet| matches!(packet, ServerPacket::RangeAttack { .. })));
+    assert_eq!(retained.iter().filter(|packet| matches!(packet,
+        ServerPacket::MagicLeveled { spell: Spell::Focus, experience: 9, .. })).count(), 1);
+    assert_eq!(after_cursor, before_cursor);
+}

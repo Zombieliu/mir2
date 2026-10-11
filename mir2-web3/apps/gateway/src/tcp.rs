@@ -209,7 +209,9 @@ async fn handle_client_inner(
                         if outbound.registration_id() != active_zone_outbound_registration_id {
                             continue;
                         }
-                        send_packet(&mut writer, &outbound.into_packet()).await?;
+                        let packet = gateway_blocking(|| outbound.claim_for_send())
+                            .map_err(session_panic_io_error)?;
+                        if let Some(packet) = packet { send_packet(&mut writer, &packet).await?; }
                     }
                     outbound = zone_outbound_rx.recv() => {
                         let Some(outbound) = outbound else {
@@ -221,7 +223,9 @@ async fn handle_client_inner(
                         if outbound.registration_id() != active_zone_outbound_registration_id {
                             continue;
                         }
-                        send_packet(&mut writer, &outbound.into_packet()).await?;
+                        let packet = gateway_blocking(|| outbound.claim_for_send())
+                            .map_err(session_panic_io_error)?;
+                        if let Some(packet) = packet { send_packet(&mut writer, &packet).await?; }
                     }
                     broadcast = recv_optional_chat(&mut chat_presence) => {
                         match broadcast {

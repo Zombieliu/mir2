@@ -7,6 +7,8 @@ pub use experience::{ZoneExperienceProfile,ZoneExperiencePartner,ZoneExperienceS
 mod manager;
 pub use types::ZoneMentorBankAttribution;
 mod online_identity;
+mod owner_health;
+pub use owner_health::{ZoneOwnerHealthChange, ZoneOwnerHealthCursor};
 pub(crate) use online_identity::OnlineOwner;
 mod movement;
 mod packets;

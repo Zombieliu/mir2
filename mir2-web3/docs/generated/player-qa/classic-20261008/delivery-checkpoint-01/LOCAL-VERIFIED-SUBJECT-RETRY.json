@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.windows.local-verified-subject-retry.v1",
+  "utc": "2026-10-08T03:33:36.9099587Z",
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "sourceClean": true,
+  "originalPickup": "C:\\mir2-playtest-releases\\20261008-classic-r22\\evidence-01\\PICKUP-VERIFICATION.json",
+  "originalPickupSha256": "8C68205333F8EFFBF8B87EEE785E4878349D8156C884C592762749427B34B7DF",
+  "originalMetadataHashesVerified": true,
+  "originalAuthenticatedMetadataReused": true,
+  "newGitHubReadClaimed": false,
+  "completeArtifactVerified": true,
+  "exeBytesUnmodified": true,
+  "recipeSourceSha256": "EC49313A80D8A139D0BE563CF3F64DA99F737C7038B17D7E37847D319174A94A",
+  "resourceProvenanceSha256": "A8406D213E4E31B9720DAC73BC99169E0D9818AB7A9C43F4F1DA6912DF2FE4E1",
+  "output": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-02\\WN-CANDIDATE-20261008-invited-22",
+  "publicRelease": false,
+  "authenticodeClaimed": false
+}

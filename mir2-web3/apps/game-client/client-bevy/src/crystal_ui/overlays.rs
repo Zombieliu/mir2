@@ -880,6 +880,8 @@ pub struct NativePlayerUiState {
     /// server catalog row remains reachable.
     pub game_shop_page: usize,
     pub game_shop_dialog: game_shop_dialog::GameShopDialogUi,
+    pub billing_open: bool,
+    pub billing_input_consumed: bool,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
@@ -1338,6 +1340,8 @@ impl Default for NativePlayerUiState {
             shop_repair_slot: None,
             game_shop_page: 0,
             game_shop_dialog: Default::default(),
+            billing_open: false,
+            billing_input_consumed: false,
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
@@ -1637,7 +1641,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.refine.open
+        self.billing_open
+            || self.billing_input_consumed
+            || self.refine.open
             || self.refine.pending()
             || self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
@@ -1651,7 +1657,7 @@ impl NativePlayerUiState {
             || self.storage_password_input_consumed
             || self.storage_rental_confirmation.is_some()
             || self.storage_rental_input_consumed
-            || self.game_shop_dialog.confirmation.is_some()
+            || self.game_shop_dialog.modal()
             || (self.shop_open() && self.game_shop_dialog.search_focused)
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
@@ -1766,9 +1772,11 @@ impl NativePlayerUiState {
         panel_blocks: bool,
         hover_blocks: bool,
     ) -> bool {
-        self.refine.open
+        self.billing_open
+            || self.billing_input_consumed
+            || self.refine.open
             || self.refine.pending()
-            || self.game_shop_dialog.confirmation.is_some()
+            || self.game_shop_dialog.modal()
             || self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
             || self.storage_rental_confirmation.is_some()
@@ -1909,7 +1917,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.non_friend_amount_modal_open_except_hero()
     }
     fn non_friend_amount_modal_open_except_hero(&self) -> bool {
-        self.guild_panel.blocks()
+        self.billing_open
+            || self.billing_input_consumed
+            || self.guild_panel.blocks()
             || self.guild_panel.consumed
             || self.skill_assign.open
             || self.group_dialog.modal()
@@ -2382,6 +2392,13 @@ pub enum NativePlayerUiIntent {
         quantity: u8,
         price_type: i32,
     },
+    GameShopGift {
+        request_id: String,
+        g_index: i32,
+        quantity: u8,
+        price_type: i32,
+        recipient_name: String,
+    },
     BuyItem {
         item_index: u64,
         count: u16,
@@ -2505,7 +2522,7 @@ impl NativePlayerUiIntent {
                 item_index: *item_index,
                 count: *count,
             }),
-            Self::GameShopBuy { request_id, .. } => {
+            Self::GameShopBuy { request_id, .. } | Self::GameShopGift { request_id, .. } => {
                 Some(PendingOperationKey::GameShop(request_id.clone()))
             }
             Self::SellItem { unique_id, count } => Some(PendingOperationKey::Sell {
@@ -2694,6 +2711,7 @@ impl NativePlayerUiIntentQueue {
                     | NativePlayerUiIntent::HeroPacket(_)
                     | NativePlayerUiIntent::EquipmentCreaturePacket(_)
                     | NativePlayerUiIntent::GameShopBuy { .. }
+                    | NativePlayerUiIntent::GameShopGift { .. }
                     | NativePlayerUiIntent::GetRanking { .. }
                     | NativePlayerUiIntent::InspectRanking { .. }
                     | NativePlayerUiIntent::AddFriend { .. }
@@ -2713,6 +2731,7 @@ impl NativePlayerUiIntentQueue {
                         | NativePlayerUiIntent::HeroPacket(_)
                         | NativePlayerUiIntent::EquipmentCreaturePacket(_)
                         | NativePlayerUiIntent::GameShopBuy { .. }
+                        | NativePlayerUiIntent::GameShopGift { .. }
                         | NativePlayerUiIntent::GetRanking { .. }
                         | NativePlayerUiIntent::InspectRanking { .. }
                         | NativePlayerUiIntent::AddFriend { .. }
@@ -3018,16 +3037,58 @@ impl NativePlayerUiIntentQueue {
         quantity: u8,
         price_type: i32,
     ) -> Option<GameShopRequest> {
+        self.enqueue_game_shop_transaction(
+            core, game_shop, pending, g_index, quantity, price_type, None,
+        )
+    }
+
+    pub fn enqueue_game_shop_gift(
+        &mut self,
+        core: &mut mir2_ui_core::state::UiState,
+        game_shop: &mut GameShopModel,
+        pending: &mut PendingOperations,
+        g_index: i32,
+        quantity: u8,
+        recipient_name: String,
+    ) -> Option<GameShopRequest> {
+        self.enqueue_game_shop_transaction(
+            core,
+            game_shop,
+            pending,
+            g_index,
+            quantity,
+            0,
+            Some(recipient_name),
+        )
+    }
+
+    fn enqueue_game_shop_transaction(
+        &mut self,
+        core: &mut mir2_ui_core::state::UiState,
+        game_shop: &mut GameShopModel,
+        pending: &mut PendingOperations,
+        g_index: i32,
+        quantity: u8,
+        price_type: i32,
+        recipient_name: Option<String>,
+    ) -> Option<GameShopRequest> {
         if self.intents.len() >= MAX_QUEUED
-            || self
-                .intents
-                .iter()
-                .any(|intent| matches!(intent, NativePlayerUiIntent::GameShopBuy { .. }))
+            || self.intents.iter().any(|intent| {
+                matches!(
+                    intent,
+                    NativePlayerUiIntent::GameShopBuy { .. }
+                        | NativePlayerUiIntent::GameShopGift { .. }
+                )
+            })
         {
             return None;
         }
 
-        let request = core.begin_game_shop_purchase(g_index, quantity, price_type)?;
+        let request = if let Some(name) = recipient_name {
+            core.begin_game_shop_gift(g_index, quantity, name)?
+        } else {
+            core.begin_game_shop_purchase(g_index, quantity, price_type)?
+        };
         if !game_shop.reserve_purchase(request.clone()) {
             core.cancel_game_shop_purchase(&request.request_id);
             return None;
@@ -3038,12 +3099,23 @@ impl NativePlayerUiIntentQueue {
             core.cancel_game_shop_purchase(&request.request_id);
             return None;
         }
-        if !self.push_intent(NativePlayerUiIntent::GameShopBuy {
-            request_id: request.request_id.clone(),
-            g_index: request.g_index,
-            quantity: request.quantity,
-            price_type: request.price_type,
-        }) {
+        let intent = if let Some(name) = request.recipient_name.as_ref() {
+            NativePlayerUiIntent::GameShopGift {
+                request_id: request.request_id.clone(),
+                g_index: request.g_index,
+                quantity: request.quantity,
+                price_type: 0,
+                recipient_name: name.clone(),
+            }
+        } else {
+            NativePlayerUiIntent::GameShopBuy {
+                request_id: request.request_id.clone(),
+                g_index: request.g_index,
+                quantity: request.quantity,
+                price_type: request.price_type,
+            }
+        };
+        if !self.push_intent(intent) {
             pending.release(&key);
             game_shop.cancel_purchase_reservation(&request.request_id);
             core.cancel_game_shop_purchase(&request.request_id);
@@ -3434,6 +3506,7 @@ enum OverlayButton {
     GameShopPagePrev,
     GameShopPageNext,
     GameShopControl(game_shop_dialog::GameShopAction),
+    OpenBilling,
     // Storage
     SelectBagForStore(u32),
     SelectStorage(u32),
@@ -4238,7 +4311,9 @@ pub fn reconcile_native_game_shop_ui_state(
             .as_ref()
             .is_some_and(|request| receipt.matches_request(request))
         {
-            let _ = state.core.apply_game_shop_receipt(receipt.clone());
+            if state.core.apply_game_shop_receipt(receipt.clone()) {
+                state.game_shop_dialog.notice = Some(game_shop_dialog::receipt_notice(receipt));
+            }
         }
     } else if game_shop.purchase_unknown {
         state.core.mark_game_shop_unknown();
@@ -6943,6 +7018,10 @@ pub(crate) fn process_overlay_keyboard(
         typed.clear();
         return;
     }
+    if shell.billing.open || state.billing_input_consumed {
+        typed.clear();
+        return;
+    }
     let BigMapControls {
         model: mut big_map,
         intents: mut big_map_intents,
@@ -8066,6 +8145,9 @@ fn process_overlay_buttons(
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
+    if shell.billing.open || state.billing_input_consumed {
+        return;
+    }
     let OverlayButtonControls {
         big_map:
             BigMapControls {
@@ -8146,7 +8228,7 @@ fn process_overlay_buttons(
     let mail_feedback_modal_was_open = state.mail_feedback_prompt.is_some();
     let mail_reader_was_open = state.mail_reader.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
-    let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
+    let game_shop_modal_was_open = state.game_shop_dialog.modal();
     let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
     let parcel_gold_modal_was_open = state.parcel_gold_prompt.is_some();
     for (interaction, button) in buttons.iter() {
@@ -8232,12 +8314,14 @@ fn process_overlay_buttons(
         {
             continue;
         }
-        if (game_shop_modal_was_open || state.game_shop_dialog.confirmation.is_some())
+        if (game_shop_modal_was_open || state.game_shop_dialog.modal())
             && !matches!(
                 button,
                 OverlayButton::GameShopControl(
                     game_shop_dialog::GameShopAction::Confirm
                         | game_shop_dialog::GameShopAction::Cancel
+                        | game_shop_dialog::GameShopAction::GiftRecipient
+                        | game_shop_dialog::GameShopAction::GiftContinue
                 )
             )
         {
@@ -10014,6 +10098,13 @@ fn process_overlay_buttons(
                 }
             }
             // Shop
+            OverlayButton::OpenBilling => {
+                if state.shop_open() {
+                    state.game_shop_dialog.blur_search();
+                    shell.open_billing();
+                    state.billing_open = shell.billing.open;
+                }
+            }
             OverlayButton::GameShopControl(action) => {
                 if let Some(model) = game_shop.as_deref_mut() {
                     game_shop_dialog::action(
@@ -11789,7 +11880,7 @@ fn render_overlays(
             reader.is_some_and(|(reader, _)| reader.kind == MailReaderKind::Parcel),
             |parent| {
                 if let Some((_, message)) = reader {
-                    render_mail_reader_parcel(parent, asset_server.as_deref(), message);
+                    render_mail_reader_parcel(parent, asset_server.as_deref(), message, &ui.player);
                 }
             },
         );
@@ -12149,6 +12240,15 @@ fn fill_game_shop_panel(
         dialog.direction,
         dialog.shift,
         dialog.preview.map(|_| dialog.frame_ms / 150),
+    );
+    let dialog_key = format!(
+        "{dialog_key}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}",
+        dialog.gift,
+        dialog.gift_recipient,
+        dialog.gift_input.modal,
+        dialog.gift_input.editor_revision,
+        dialog.gift_input.display_editor(),
+        dialog.notice
     );
     let player_key = format!(
         "{:?}",
@@ -15587,7 +15687,7 @@ fn mail_reader_message<'a>(
 }
 
 fn mail_reader_text(message: &MailMessage) -> String {
-    message.body.replace("\\r\\n", "\r\n")
+    message.display_body()
 }
 
 fn overlay_wrapped_text_at(
@@ -15675,7 +15775,7 @@ fn render_mail_reader_header(
     );
     overlay_text_at(
         parent,
-        &mail_date_label(message.date_sent_binary_datetime),
+        &crate::mail::mail_date_display_label(message.date_sent_binary_datetime),
         CrystalRect::new(70.0, 56.0, 150.0, 15.0),
         10.0,
         TEXT,
@@ -15745,6 +15845,7 @@ fn render_mail_reader_parcel(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
     message: &MailMessage,
+    player: &crate::read_model::PlayerStats,
 ) {
     render_mail_reader_header(
         parent,
@@ -15769,7 +15870,7 @@ fn render_mail_reader_parcel(
     );
     for (index, attachment) in message.items.iter().take(5).enumerate() {
         let left = 27.0 + index as f32 * 36.0;
-        parent.spawn((
+        let mut cell = parent.spawn((
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(left),
@@ -15781,23 +15882,24 @@ fn render_mail_reader_parcel(
             },
             BorderColor::all(Color::srgb(0.0, 1.0, 0.0)),
             BackgroundColor(Color::NONE),
+            Interaction::None,
+            FocusPolicy::Block,
         ));
-        if let (Some(asset_server), Some(image)) = (
-            asset_server,
-            attachment.image.and_then(|image| u16::try_from(image).ok()),
+        let source = attachment.display_tooltip_source();
+        let image = attachment.image_index();
+        if let Some(document) = crystal_item_tooltip_document_from_source(
+            &attachment.label(),
+            image.unwrap_or_default(),
+            u32::from(attachment.count),
+            source.as_ref(),
+            player,
         ) {
-            parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(left),
-                    top: Val::Px(311.0),
-                    width: Val::Px(35.0),
-                    height: Val::Px(31.0),
-                    ..default()
-                })
-                .with_children(|cell| {
-                    spawn_original_item_image(cell, asset_server, image, 35, 31);
-                });
+            cell.insert(CrystalItemHint(document));
+        }
+        if let (Some(asset_server), Some(image)) = (asset_server, image) {
+            cell.with_children(|content| {
+                spawn_original_item_image(content, asset_server, image, 35, 31);
+            });
         }
         if attachment.count > 1 {
             overlay_text_at(

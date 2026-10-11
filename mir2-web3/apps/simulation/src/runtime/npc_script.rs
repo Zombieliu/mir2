@@ -2984,7 +2984,7 @@ pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
         .first()
         .and_then(|value| value.parse::<u8>().ok())
         .unwrap_or(1)
-        .clamp(1, 5);
+        .min(5);
     let pet_level = pet_count
         .get(1)
         .and_then(|value| value.parse::<u8>().ok())
@@ -3007,15 +3007,13 @@ pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
         return;
     };
 
-    for offset in 0..count {
-        let spawn_position = Point {
-            x: player_position.x + i32::from(offset % 2),
-            y: player_position.y + i32::from(offset / 2),
-        };
-        let _ = spawn_runtime_monster(
+    // Crystal applies level and ActionTime only to this action's new pets,
+    // all on the owner's exact tile (NPCSegment.cs:3435–3447).
+    for _ in 0..count {
+        if let Some(entity) = spawn_runtime_monster(
             world,
             &template,
-            spawn_position,
+            player_position.clone(),
             player_direction,
             None,
             Some(SummonedMonster {
@@ -3029,18 +3027,9 @@ pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
             }),
             Some(false),
             Some(WorldEntityDisposition::Friendly),
-            0,
-        );
-    }
-
-    for entity in crystal_npc_pet_entities(world) {
-        let is_new_pet =
-            entity_name(world, entity).is_some_and(|name| name.eq_ignore_ascii_case(monster_name));
-        if !is_new_pet {
-            continue;
-        }
-        if let Ok(mut entry) = world.get_entity_mut(entity) {
-            entry.insert(NpcPetState { pet_level });
+            crystal_speed_to_ticks(1_000),
+        ) {
+            world.entity_mut(entity).insert(NpcPetState { pet_level });
         }
     }
 }
@@ -4223,6 +4212,10 @@ fn parse_explicit_npc_quest_command(target: &str) -> Option<ExplicitNpcQuestComm
 #[cfg(test)]
 #[path = "npc_parcel_tests.rs"]
 mod npc_parcel_tests;
+
+#[cfg(test)]
+#[path = "npc_pet_source_semantics_tests.rs"]
+mod npc_pet_source_semantics_tests;
 
 #[cfg(test)]
 mod dialog_security_tests {

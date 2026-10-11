@@ -2,7 +2,7 @@
 
 use std::sync::{mpsc, Mutex};
 
-use bevy::prelude::{Res, ResMut, Resource};
+use bevy::prelude::{Local, Res, ResMut, Resource};
 use mir2_client_bevy::native_shell::{
     NativeGatewayEvent, NativeShellModel, NativeShellScreen, NativeUiIntent, NativeUiIntentQueue,
 };
@@ -74,6 +74,16 @@ pub fn drain_gateway_events(
     mut auto_login: ResMut<NativeAutoLoginFlow>,
 ) {
     for event in inbox.drain() {
+        if let NativeGatewayEvent::BillingReply(reply) = event {
+            if shell.apply_gateway_event(NativeGatewayEvent::BillingReply(reply)) {
+                if let Some(url) = shell.billing.take_checkout_url() {
+                    if crate::billing_browser::open_checkout_url(&url).is_err() {
+                        shell.billing.browser_failed();
+                    }
+                }
+            }
+            continue;
+        }
         let previous_screen = shell.screen;
         // A password response is correlated to the one in-flight request in
         // NativeShellModel.  Never let a delayed response mutate a later
@@ -168,6 +178,7 @@ pub fn forward_native_ui_intents(
     mut shell: ResMut<NativeShellModel>,
     mut intents: ResMut<NativeUiIntentQueue>,
     commands: Res<GatewayCommands>,
+    mut billing_forwarded: Local<Option<u64>>,
 ) {
     let pending = intents.drain().collect::<Vec<_>>();
     let mut login_command_sent = false;
@@ -304,12 +315,117 @@ pub fn forward_native_ui_intents(
             commands.send_command(GatewayCommand::Wire(command));
         }
     }
+    forward_billing_request(&mut shell, &commands, &mut billing_forwarded);
+}
+
+fn forward_billing_request(
+    shell: &mut NativeShellModel,
+    commands: &GatewayCommands,
+    forwarded: &mut Option<u64>,
+) {
+    use mir2_client_bevy::native_billing::BillingPurchase;
+    let valid_scope = matches!(
+        shell.screen,
+        NativeShellScreen::CharacterSelect | NativeShellScreen::InGame
+    ) && shell.billing.scope_matches(
+        shell.last_account.as_deref().unwrap_or_default(),
+        shell.billing_character_index(),
+    );
+    if !valid_scope {
+        shell.billing = Default::default();
+    }
+    let current = shell.billing.pending.as_ref().map(|r| r.request_id);
+    if let Some(id) = *forwarded {
+        if current != Some(id) {
+            if !commands.send_command(GatewayCommand::CancelBilling(id)) {
+                return;
+            }
+            *forwarded = None;
+        }
+    }
+    if !valid_scope {
+        return;
+    }
+    let Some(request) = shell.billing.unsent_request().cloned() else {
+        return;
+    };
+    let character_index = request.character_index;
+    let request_id = request.request_id;
+    let wire = match request.purchase.clone() {
+        None => NativeOutboundCommand::BillingStatus {
+            character_index,
+            request_id,
+        },
+        Some(BillingPurchase::Checkout {
+            offer_id,
+            order_request_id,
+        }) => NativeOutboundCommand::BillingCheckout {
+            character_index,
+            offer_id,
+            order_request_id,
+            request_id,
+        },
+        Some(BillingPurchase::BuyMonthlyCard { order_request_id }) => {
+            NativeOutboundCommand::BillingBuyMonthlyCard {
+                character_index,
+                order_request_id,
+                request_id,
+            }
+        }
+        Some(BillingPurchase::ActivateMonthlyCard { item_unique_id }) => {
+            NativeOutboundCommand::BillingActivateMonthlyCard {
+                character_index,
+                item_unique_id,
+                request_id,
+            }
+        }
+    };
+    if commands.send_command(GatewayCommand::BillingWire {
+        request,
+        command: wire,
+    }) {
+        shell.billing.mark_sent(request_id);
+        *forwarded = Some(request_id);
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::sync::mpsc;
+
+    #[test]
+    fn billing_scope_stays_local_and_closing_cancels_the_exact_request() {
+        use mir2_client_bevy::native_billing::{now_ms, BillingAction};
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::CharacterSelect;
+        shell.last_account = Some("alice".into());
+        shell.characters = vec![mir2_client_bevy::native_shell::CharacterSummary::new(
+            7, "Hero", 1, "Warrior", "Male",
+        )];
+        shell.selected_character_index = Some(7);
+        assert!(shell.open_billing());
+        let (sender, receiver) = mpsc::channel();
+        let commands = GatewayCommands::new(sender);
+        let mut forwarded = None;
+        forward_billing_request(&mut shell, &commands, &mut forwarded);
+        let GatewayCommand::BillingWire { request, command } = receiver.try_recv().unwrap() else {
+            panic!("missing billing request");
+        };
+        assert!(request.belongs_to_account("alice"));
+        assert_eq!(request.character_index, 7);
+        assert_eq!(
+            command.to_wire_json(),
+            serde_json::json!({"type":"billingStatus","characterIndex":7,"requestId":request.request_id})
+        );
+        assert_eq!(forwarded, Some(request.request_id));
+        shell.billing.action(BillingAction::Close, now_ms());
+        forward_billing_request(&mut shell, &commands, &mut forwarded);
+        assert!(
+            matches!(receiver.try_recv(), Ok(GatewayCommand::CancelBilling(id)) if id == request.request_id)
+        );
+        assert!(forwarded.is_none());
+    }
 
     use mir2_client_bevy::native_shell::CharacterSummary;
 

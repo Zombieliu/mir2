@@ -35,6 +35,8 @@ pub mod mail;
 pub mod mail_service;
 pub mod map;
 #[cfg(feature = "native-ui")]
+pub mod native_billing;
+#[cfg(feature = "native-ui")]
 pub mod native_display;
 #[cfg(feature = "native-ui")]
 pub mod native_i18n;

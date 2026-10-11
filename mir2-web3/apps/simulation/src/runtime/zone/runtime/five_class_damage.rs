@@ -302,17 +302,19 @@ impl ZoneRuntime {
             return Vec::new();
         }
         let before = player.hp;
-        player.hp = player.hp.saturating_add(gain).min(player.max_hp);
+        player.set_owner_hp(player.hp.saturating_add(gain).min(player.max_hp));
         let healed = player.hp.saturating_sub(before);
         if healed == 0 {
             return Vec::new();
         }
         let settlement = player.vital_settlement(before);
-        vec![ZoneOutbound::PlayerHealed {
+        let mut out = self.take_owner_health_through(session, u64::MAX);
+        out.push(ZoneOutbound::PlayerHealed {
             session_id: session.clone(),
             amount: healed,
             settlement: Some(settlement),
-        }]
+        });
+        out
     }
 
     /// Buff.ExpireTime in Crystal is remaining time, while this Zone retains

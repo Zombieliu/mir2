@@ -1,0 +1,358 @@
+[
+  {
+    "id": 113295134864,
+    "run_id": 37772462840,
+    "workflow_name": "Mir2 Web Assets R2 Release",
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "run_url": "https://api.github.com/repos/Zombieliu/mir2/actions/runs/37772462840",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOSJ7wa88AAAAaYOqQkA",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+    "url": "https://api.github.com/repos/Zombieliu/mir2/actions/jobs/113295134864",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37772462840/job/113295134864",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-08T11:48:09Z",
+    "started_at": "2026-10-08T11:48:11Z",
+    "completed_at": "2026-10-08T11:50:08Z",
+    "name": "native-download-tooling-check",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-08T11:48:12Z",
+        "completed_at": "2026-10-08T11:48:14Z"
+      },
+      {
+        "name": "Checkout native tooling without persisted credentials",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-08T11:48:14Z",
+        "completed_at": "2026-10-08T11:49:26Z"
+      },
+      {
+        "name": "Use Python 3.13 for the bounded offline checks",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-08T11:49:26Z",
+        "completed_at": "2026-10-08T11:49:26Z"
+      },
+      {
+        "name": "Use the root-verified Node version for native Worker checks",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-08T11:49:26Z",
+        "completed_at": "2026-10-08T11:49:32Z"
+      },
+      {
+        "name": "Check immutable imports, stream cancellation and pointer CAS",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-08T11:49:32Z",
+        "completed_at": "2026-10-08T11:49:33Z"
+      },
+      {
+        "name": "Check fixed routes, stream bounds, receipts and POSIX permissions",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-08T11:49:33Z",
+        "completed_at": "2026-10-08T11:49:36Z"
+      },
+      {
+        "name": "Check SIGINT termination retains uncertain write receipts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-08T11:49:36Z",
+        "completed_at": "2026-10-08T11:49:39Z"
+      },
+      {
+        "name": "Check the separate signed14 fixed table and transport policies",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-08T11:49:39Z",
+        "completed_at": "2026-10-08T11:49:45Z"
+      },
+      {
+        "name": "Check signed15 R19 admission, bounded transport and cancellation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-08T11:49:45Z",
+        "completed_at": "2026-10-08T11:49:51Z"
+      },
+      {
+        "name": "Check signed16 R20 admission, unchanged s15 engine and bounded transport",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-08T11:49:51Z",
+        "completed_at": "2026-10-08T11:49:57Z"
+      },
+      {
+        "name": "Check signed17 R22 admission and original immutable predecessor",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11,
+        "started_at": "2026-10-08T11:49:57Z",
+        "completed_at": "2026-10-08T11:50:03Z"
+      },
+      {
+        "name": "Retain raw offline checks",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-08T11:50:03Z",
+        "completed_at": "2026-10-08T11:50:04Z"
+      },
+      {
+        "name": "Post Use the root-verified Node version for native Worker checks",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22,
+        "started_at": "2026-10-08T11:50:04Z",
+        "completed_at": "2026-10-08T11:50:04Z"
+      },
+      {
+        "name": "Post Use Python 3.13 for the bounded offline checks",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23,
+        "started_at": "2026-10-08T11:50:04Z",
+        "completed_at": "2026-10-08T11:50:04Z"
+      },
+      {
+        "name": "Post Checkout native tooling without persisted credentials",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 24,
+        "started_at": "2026-10-08T11:50:04Z",
+        "completed_at": "2026-10-08T11:50:04Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 25,
+        "started_at": "2026-10-08T11:50:04Z",
+        "completed_at": "2026-10-08T11:50:04Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/Zombieliu/mir2/check-runs/113295134864",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000022860,
+    "runner_name": "GitHub Actions 1000022860",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  {
+    "id": 113295136336,
+    "run_id": 37772462840,
+    "workflow_name": "Mir2 Web Assets R2 Release",
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "run_url": "https://api.github.com/repos/Zombieliu/mir2/actions/runs/37772462840",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOSJ7wa88AAAAaYOqWUA",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+    "url": "https://api.github.com/repos/Zombieliu/mir2/actions/jobs/113295136336",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37772462840/job/113295136336",
+    "status": "completed",
+    "conclusion": "skipped",
+    "created_at": "2026-10-08T11:48:09Z",
+    "started_at": "2026-10-08T11:48:09Z",
+    "completed_at": "2026-10-08T11:48:09Z",
+    "name": "native-download-authority-probe",
+    "steps": [],
+    "check_run_url": "https://api.github.com/repos/Zombieliu/mir2/check-runs/113295136336",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": null,
+    "runner_name": null,
+    "runner_group_id": null,
+    "runner_group_name": null
+  },
+  {
+    "id": 113295136816,
+    "run_id": 37772462840,
+    "workflow_name": "Mir2 Web Assets R2 Release",
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "run_url": "https://api.github.com/repos/Zombieliu/mir2/actions/runs/37772462840",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOSJ7wa88AAAAaYOqYMA",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+    "url": "https://api.github.com/repos/Zombieliu/mir2/actions/jobs/113295136816",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37772462840/job/113295136816",
+    "status": "completed",
+    "conclusion": "skipped",
+    "created_at": "2026-10-08T11:48:09Z",
+    "started_at": "2026-10-08T11:48:09Z",
+    "completed_at": "2026-10-08T11:48:09Z",
+    "name": "build-web-assets",
+    "steps": [],
+    "check_run_url": "https://api.github.com/repos/Zombieliu/mir2/check-runs/113295136816",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": null,
+    "runner_name": null,
+    "runner_group_id": null,
+    "runner_group_name": null
+  },
+  {
+    "id": 113295137268,
+    "run_id": 37772462840,
+    "workflow_name": "Mir2 Web Assets R2 Release",
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "run_url": "https://api.github.com/repos/Zombieliu/mir2/actions/runs/37772462840",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOSJ7wa88AAAAaYOqZ9A",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+    "url": "https://api.github.com/repos/Zombieliu/mir2/actions/jobs/113295137268",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37772462840/job/113295137268",
+    "status": "completed",
+    "conclusion": "skipped",
+    "created_at": "2026-10-08T11:48:09Z",
+    "started_at": "2026-10-08T11:48:09Z",
+    "completed_at": "2026-10-08T11:48:09Z",
+    "name": "push-release-workflow-gate",
+    "steps": [],
+    "check_run_url": "https://api.github.com/repos/Zombieliu/mir2/check-runs/113295137268",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": null,
+    "runner_name": null,
+    "runner_group_id": null,
+    "runner_group_name": null
+  },
+  {
+    "id": 113295876243,
+    "run_id": 37772462840,
+    "workflow_name": "Mir2 Web Assets R2 Release",
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "run_url": "https://api.github.com/repos/Zombieliu/mir2/actions/runs/37772462840",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOSJ7wa88AAAAaYPXgkw",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+    "url": "https://api.github.com/repos/Zombieliu/mir2/actions/jobs/113295876243",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37772462840/job/113295876243",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-08T11:50:08Z",
+    "started_at": "2026-10-08T11:50:10Z",
+    "completed_at": "2026-10-08T11:50:54Z",
+    "name": "native-download-promote",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-08T11:50:11Z",
+        "completed_at": "2026-10-08T11:50:13Z"
+      },
+      {
+        "name": "Validate the separate successful stage run",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-08T11:50:13Z",
+        "completed_at": "2026-10-08T11:50:15Z"
+      },
+      {
+        "name": "Download the retained stage artifact from this repository",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-08T11:50:15Z",
+        "completed_at": "2026-10-08T11:50:16Z"
+      },
+      {
+        "name": "Checkout fixed native publication source",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-08T11:50:16Z",
+        "completed_at": "2026-10-08T11:50:40Z"
+      },
+      {
+        "name": "Promote the verified stage once and check public aliases",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-08T11:50:40Z",
+        "completed_at": "2026-10-08T11:50:50Z"
+      },
+      {
+        "name": "Retain promotion and unknown-outcome receipts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-08T11:50:50Z",
+        "completed_at": "2026-10-08T11:50:51Z"
+      },
+      {
+        "name": "Post Checkout fixed native publication source",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-08T11:50:51Z",
+        "completed_at": "2026-10-08T11:50:51Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 13,
+        "started_at": "2026-10-08T11:50:51Z",
+        "completed_at": "2026-10-08T11:50:51Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/Zombieliu/mir2/check-runs/113295876243",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000022861,
+    "runner_name": "GitHub Actions 1000022861",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  {
+    "id": 113295879010,
+    "run_id": 37772462840,
+    "workflow_name": "Mir2 Web Assets R2 Release",
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "run_url": "https://api.github.com/repos/Zombieliu/mir2/actions/runs/37772462840",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOSJ7wa88AAAAaYPXrYg",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+    "url": "https://api.github.com/repos/Zombieliu/mir2/actions/jobs/113295879010",
+    "html_url": "https://github.com/Zombieliu/mir2/actions/runs/37772462840/job/113295879010",
+    "status": "completed",
+    "conclusion": "skipped",
+    "created_at": "2026-10-08T11:50:09Z",
+    "started_at": "2026-10-08T11:50:09Z",
+    "completed_at": "2026-10-08T11:50:08Z",
+    "name": "native-download-stage",
+    "steps": [],
+    "check_run_url": "https://api.github.com/repos/Zombieliu/mir2/check-runs/113295879010",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": null,
+    "runner_name": null,
+    "runner_group_id": null,
+    "runner_group_name": null
+  }
+]
