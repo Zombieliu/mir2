@@ -665,3 +665,41 @@ fn synthetic_parameterized_menu_routes_complete_bracket_target_through_real_pack
         Some("Mary")
     );
 }
+
+#[test]
+fn synthetic_parameterized_menu_accepts_legacy_bracket_confirmation_packets() {
+    let mut session = fixture();
+    show_input_link(&mut session);
+    // This is a synthetic parameterized display, as in the preceding test.
+    let mut actual = session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap()
+        .clone();
+    actual
+        .links
+        .iter_mut()
+        .find(|link| link.target == "@@summontest")
+        .unwrap()
+        .target = "@@summontest(x,, y)".into();
+    super::npc::set_dialog(session.app.world_mut(), actual);
+    call(&mut session, "[@@SUMMONTEST](x,, y)");
+    assert_eq!(
+        session
+            .world_snapshot()
+            .active_npc_dialog
+            .unwrap()
+            .input
+            .unwrap()
+            .target,
+        "@@summontest(x,, y)"
+    );
+    confirm(&mut session, NPC, "[@@SUMMONTEST](x,, y)", "Mary");
+    assert_eq!(
+        crystal_npc_variable_value(session.app.world(), "A1").as_deref(),
+        Some("Mary")
+    );
+}

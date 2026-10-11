@@ -4181,7 +4181,10 @@ impl SimulationSession {
             };
             input.target.clone()
         } else {
-            normalize_crystal_npc_label(page_name)
+            // Preserve the argument suffix and both legacy bracket forms.
+            // Admission compares the complete target, then the parser
+            // normalizes only the label head after authorization succeeds.
+            page_name.trim().to_string()
         };
 
         self.select_npc_dialog_target_with_input_impl(&target, Some(value.to_string()))

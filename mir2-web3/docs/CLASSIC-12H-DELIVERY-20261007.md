@@ -4,7 +4,7 @@
 > added arguments and copied link/input pages cannot obtain input permission.
 > Private non-Clone menu/pending slots bind actual local identity, Entity and
 > imported script bodies, and invalidate on life/load/map/rollback/teardown.
-> Final317 distinct local Rust checks pass (23 new); focused28 are a subset.
+> Final318 distinct local Rust checks pass (24 new); focused29 are a subset.
 > All original result assertions remain. Exact parent reproduces3 old fixture
 > failures; Source-valid preparation fixes them. Original red/compile/review
 > failures and exact owned-file restoration proof remain. [Evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).

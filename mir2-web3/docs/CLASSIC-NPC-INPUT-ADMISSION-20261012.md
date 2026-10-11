@@ -54,10 +54,15 @@ relaxed assertions. All checks use isolated stores, not real player saves.
 | First broader NPC regression | 278 pass / 3 fail | `adjacent-01.log` |
 | Exact parent `02f800e1d8ebe13053d487729d7203559e6baa84`, same 3 tests | 0 pass / 3 fail | `parent-regressions-01.log` |
 | Repaired focused input/parser/old fixtures | 28 pass / 0 fail | `repair-focused-01.log` |
-| Final broader NPC/lifecycle/health/movement regression | 317 pass / 0 fail | `adjacent-02.log` |
+| First complete broader NPC/lifecycle/health/movement regression | 317 pass / 0 fail | `adjacent-02.log` |
+| Legacy bracket confirmation on c6b460b0ad | 0 pass / 1 fail | `legacy-confirm-baseline-01.log` |
+| Final focused input/parser/old fixtures | 29 pass / 0 fail | `repair-focused-02.log` |
+| Final broader NPC/lifecycle/health/movement regression | 318 pass / 0 fail | `adjacent-03.log` |
 
-The 28 checks are a subset of the final 317 distinct test names, which include
-23 new checks. Counts are not added together. The parent comparison temporarily
+The 29 focused checks are a subset of the final 318 distinct test names, which
+include 24 new checks. All earlier 317 passed names remain a subset; counts are
+not added together. `LOCAL-REGRESSION-02.json` binds the actual original logs
+and changed source hashes, retaining `LOCAL-REGRESSION-01.json`. The parent comparison temporarily
 replaced only 14 Root-owned tracked Rust files with their exact Git parent
 bytes, then restored every captured byte; `parent-baseline-01/subject.json`
 and `RESTORED.json` retain the checksums and restoration proof.
@@ -81,8 +86,16 @@ using that canonical NPC body through real CallNpc/NpcConfirmInput packets:
 the imported catalog currently has no parameterized input link.
 
 Read-only review found and prompted both the clone-link negative and complete
-bracket/parameter packet check. The new Linux workflow gate includes all 28
+bracket/parameter packet check. The new Linux workflow gate includes all 29
 focused cases alongside every original release gate.
+
+A subsequent read-only review found that confirmation normalized the full
+legacy `[@@page](args)` before full-target authorization, which incorrectly
+added another label marker. Its real packet test failed on c6b460b0ad. Keeping
+the raw trimmed target now lets the existing matcher/parser handle both
+legacy and whole-target brackets without discarding any argument bytes. The
+review reports no new blocker. Superseded Linux run38158000833 was cancelled
+after this known failure; it is not qualified or promoted.
 
 ## Publication and remaining scope
 
