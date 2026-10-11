@@ -138,6 +138,20 @@ fn drain(receiver: &mut tokio::sync::mpsc::Receiver<SharedZoneLiveOutbound>) -> 
     packets
 }
 
+fn retained_packets(state: &SharedInProcessZoneState, key: &ZonePresenceKey) -> Vec<ServerPacket> {
+    // Owner presentation now shares the ordered health FIFO. Inspect both
+    // actual queues so these assertions still require the exact global packet
+    // sequence, rather than assuming it resides in the legacy queue.
+    let mut packets = state.pending_zone_owner_health.get(key).into_iter()
+        .flatten().map(|presentation| match presentation {
+            super::super::owner_health::PendingOwnerPresentation::Packet(packet) => packet.clone(),
+            super::super::owner_health::PendingOwnerPresentation::Health(_) =>
+                panic!("quiet wire fixture must not introduce a health mutation"),
+        }).collect::<Vec<_>>();
+    packets.extend(state.pending_zone_packets.get(key).into_iter().flatten().cloned());
+    packets
+}
+
 fn assert_wire(packets: &[ServerPacket], owner: u32) {
     assert_eq!(packets.len(), 3, "one exact source sequence: {packets:?}");
     assert!(
@@ -218,7 +232,7 @@ fn live_owner_wire_ids_full_channel_retains_global_backlog_until_single_wire_pro
         }
     ));
     assert_eq!(
-        scene.state.lock().unwrap().pending_zone_packets[&scene.key],
+        retained_packets(&scene.state.lock().unwrap(), &scene.key),
         original[1..]
     );
     let mut actual = vec![first];
@@ -231,11 +245,7 @@ fn live_owner_wire_ids_full_channel_retains_global_backlog_until_single_wire_pro
         let outbound = receiver.try_recv().unwrap();
         actual.push(outbound.into_packet());
         let state = scene.state.lock().unwrap();
-        let pending = state
-            .pending_zone_packets
-            .get(&scene.key)
-            .cloned()
-            .unwrap_or_default();
+        let pending = retained_packets(&state, &scene.key);
         assert_eq!(
             pending,
             original[index + 1..],

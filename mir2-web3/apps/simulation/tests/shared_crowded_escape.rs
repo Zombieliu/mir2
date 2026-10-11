@@ -644,10 +644,46 @@ fn dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch()
     let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
     let first = original.tick(700);
     let second = restored.tick(700);
+    // Recovery preserves damage and the flinch clock, but deliberately drops
+    // socket ownership. Validate live health delivery without granting that
+    // expired owner to the restored world.
+    let owner = original.owner_health_cursor(&session(OWNER)).unwrap();
+    assert!(restored.owner_health_cursor(&session(OWNER)).is_none());
+    assert_eq!(original.player_vitals(&session(OWNER)), restored.player_vitals(&session(OWNER)));
+    for event in &first {
+        if let ZoneOutbound::OwnerHealthChanged { change } = event {
+            assert_eq!(change.cursor.session_id, session(OWNER));
+            assert_eq!(change.cursor.online_owner, owner.online_owner);
+            assert_eq!(change.cursor.object_id, OWNER_ID);
+            assert_eq!(change.cursor.life_generation, owner.life_generation);
+            assert!(change.cursor.health_sequence > 0);
+            assert!(change.cursor.health_sequence <= owner.health_sequence);
+        }
+        if let ZoneOutbound::PlayerDamaged { session_id, damage, settlement: Some(receipt) } = event {
+            assert_eq!(receipt.hp_before - receipt.hp_after, *damage);
+            assert!(first.iter().any(|candidate| matches!(candidate,
+                ZoneOutbound::OwnerHealthChanged { change }
+                    if change.cursor.session_id == *session_id
+                    && change.cursor.object_id == receipt.object_id
+                    && change.cursor.life_generation == receipt.life_generation
+                    && change.hp_before == receipt.hp_before
+                    && change.hp == receipt.hp_after)));
+        }
+    }
+    assert!(!second.iter().any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    let gameplay = |events: &[ZoneOutbound]| events.iter()
+        .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
+        .cloned().collect::<Vec<_>>();
     assert_eq!(
-        first, second,
+        gameplay(&first), gameplay(&second),
         "an exact checkpoint keeps ordinary pending impacts and presentation admission"
     );
+    let before: serde_json::Value = serde_json::from_slice(&original.checkpoint_bytes().unwrap()).unwrap();
+    let after: serde_json::Value = serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
+    for key in ["players", "native_monsters", "native_monster_respawns", "pending_native_hits",
+        "pending_native_projectiles", "pending_native_player_hits", "native_periodic_player_poisons"] {
+        assert_eq!(before[key], after[key], "checkpoint field {key}");
+    }
     assert_eq!(damaged(&second).0, 2);
     assert_eq!(
         struck_count(&second, OWNER),
