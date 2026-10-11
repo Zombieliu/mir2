@@ -14,26 +14,26 @@ import pprint
 import re
 import stat
 
-OUT = Path('C:/mir2-playtest-releases/20261010-shop-mail-r24/operators-02')
+OUT = Path('C:/mir2-playtest-releases/20261010-shop-mail-r24/operators-03')
 OLD = Path('C:/mir2-playtest-releases/20261009-target-r23')
 HERE = Path(__file__).resolve().parent
 GAME = '87fd85a0d5a819e5b38c90d192421f9239f65678'
 ENGINE = 'b4390ee4c987bbf000ba1d95761151e39fc0d54f'
 CANDIDATE = 'WN-CANDIDATE-20261010-invited-24'
-USER = '/tmp/mir2-origin-r24-s19-20261011-02'
-ROOT = '/srv/.mir2-origin-r24-s19-20261011-02'
+USER = '/tmp/mir2-origin-r24-s19-20261011-03'
+ROOT = '/srv/.mir2-origin-r24-s19-20261011-03'
 PUBLIC = '/srv/mir2-client-updates'
 OLD_WRITER_SHA = '46fa356c3a1c83944c0e73c90a475d1a8507e58476bf810f4630c529fcd1c0f8'
 GUARDS_SHA = '10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811'
 OLD_PROOF_SHA = '6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf'
 OLD_PLAN_SHA = 'a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0'
-CADDY_SHA = '4f54f9ca961771de96efff9b24d983815cfbbf5c69369bed9da5e9c61dec4632'
+CADDY_SHA = 'df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d'
 FEED18 = {
     'latest.json': {'size': 1159, 'sha256': '2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2'},
     'latest.p7s': {'size': 1614, 'sha256': '1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4'},
 }
 ENGINE_EXE_SHA = '9213ec3fe1a992f757ea48c53981afa661765b42e637c1ad811e326060b170b8'
-TEMPLATE_PINS = {'origin_r24_tail.py.in': '96aa297918fa1d401c02218a67d6e5fea49e18a0c8c7f66263ea208b8e3090cd', 'private_modes_r24.py.in': 'cfd09f11967a86b3479b6b8f3ebaab430aeff5bd9a9653f49014d52aa3d5ba33', 'seal_r24.py.in': 'f2c11d932b213c106f5ecf1a6f27bd61864a360f50645465ef58e51581e9a0ae', 'feed_promote_r24.py.in': 'a3ff51463429f57d94d584af111c347b6128489b6fb8dc90ab2ae39c86c2866d'}
+TEMPLATE_PINS = {'origin_r24_tail.py.in': '96aa297918fa1d401c02218a67d6e5fea49e18a0c8c7f66263ea208b8e3090cd', 'private_modes_r24.py.in': '46036a6650baa667f8f8f824199c090acc620417b481d67c9b87fd8fdadca3b7', 'seal_r24.py.in': 'b91d8c1b960b89d8295cb1594741e09ec807c7466b23219fef7082fe570bdeed', 'feed_promote_r24.py.in': '036638b1c3e53f189808c3716221845c74eb39194ea7232703bdce95c8a0889d'}
 MAX_OBJECTS = 100
 MAX_METADATA = 32 * 1024 * 1024
 MAX_ARTIFACT = 128 * 1024 * 1024
@@ -309,7 +309,7 @@ def main():
 def need(condition, label):
     if not condition:
         raise RuntimeError(label)
-path = pathlib.Path('/tmp/mir2-origin-r24-s19-20261011-02')
+path = pathlib.Path('/tmp/mir2-origin-r24-s19-20261011-03')
 need(os.geteuid() == 1000 and not path.exists() and not path.is_symlink(), 'fresh-user-stage-required')
 i = path.parent.lstat()
 need(stat.S_ISDIR(i.st_mode) and i.st_uid == 0, 'unsafe-tmp-parent')

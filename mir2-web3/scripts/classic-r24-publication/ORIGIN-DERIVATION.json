@@ -68,5 +68,38 @@
         "newSha256": "cc1699dd97db63fdec67698e3d0c15b51677f13dd6beb62baeab81713b88fc6a"
       }
     ]
+  },
+  "stage03Amendment": {
+    "retainedFailure": "operators-02/PREFLIGHT-01: caddy-preflight-conflict",
+    "publicMutationBeforeFailure": false,
+    "reviewedCurrentCaddySha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d",
+    "reviewedCurrentCaddyBytes": 4717,
+    "matchesPreviouslyReviewedR23Config": true,
+    "readOnlyReviewReceiptSha256": "044e7fe1f154b554cee700a55ef50355cef66d835615cbaccb525eaa1e86c93e",
+    "configurationWrites": false,
+    "strictHashEqualityUnchanged": true,
+    "freshStageRequired": true,
+    "files": [
+      {
+        "path": "private_modes_r24.py.in",
+        "previousSha256": "cfd09f11967a86b3479b6b8f3ebaab430aeff5bd9a9653f49014d52aa3d5ba33",
+        "newSha256": "46036a6650baa667f8f8f824199c090acc620417b481d67c9b87fd8fdadca3b7"
+      },
+      {
+        "path": "seal_r24.py.in",
+        "previousSha256": "f2c11d932b213c106f5ecf1a6f27bd61864a360f50645465ef58e51581e9a0ae",
+        "newSha256": "b91d8c1b960b89d8295cb1594741e09ec807c7466b23219fef7082fe570bdeed"
+      },
+      {
+        "path": "feed_promote_r24.py.in",
+        "previousSha256": "a3ff51463429f57d94d584af111c347b6128489b6fb8dc90ab2ae39c86c2866d",
+        "newSha256": "036638b1c3e53f189808c3716221845c74eb39194ea7232703bdce95c8a0889d"
+      },
+      {
+        "path": "prepare_origin_r24_s19.py",
+        "previousSha256": "758472bbb180a8f351cd0171a0177ad161e8ec100a1508adaa82b27418a2a33d",
+        "newSha256": "4cd6aaf8b63adafa1669ca93ac97f78240898e113af884c74c3705ce8698bc90"
+      }
+    ]
   }
 }

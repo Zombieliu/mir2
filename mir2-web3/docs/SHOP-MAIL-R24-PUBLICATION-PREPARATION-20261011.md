@@ -14,7 +14,9 @@ ca7a1031615bc6562bb9a5558b058113c5477d9f passes real PostgreSQL commercial CI
 [38061006701](https://github.com/Zombieliu/mir2/actions/runs/38061006701).
 The final Gateway integration source is
 01a8c48a425aecfad6adf49ff721b0aa14ce4d44; its new Linux qualification
-[38102448215](https://github.com/Zombieliu/mir2/actions/runs/38102448215) is pending.
+[38102448215](https://github.com/Zombieliu/mir2/actions/runs/38102448215)
+completed successfully in both jobs. Its archive and ELF still require the
+separate exact-byte qualification receipt before deployment.
 Subsequent changes from ca7a are tests and documentation only.
 
 The existing invited CMS signer and key pin are reused. No new trust root or
@@ -43,6 +45,17 @@ append-only, previous public bytes/fingerprints remain pinned, and public feed
 promotion is atomic. New Gateway deployment must still prove all six counters,
 TCP and spectators drained, normal stop, current private database backup, exact
 artifact identity, unchanged capacity/auth/maps/environment and original realm.
+
+Origin preflight failures are retained: stage01 rejected the incorrect R23
+directory binding; stage02 rejected the stale Caddy hash. Neither changed a
+public feed or appended resources. A fresh read confirms the exact4717-byte
+Caddy file already reviewed during R23, SHA256
+df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d.
+Stage03 pins these existing bytes without changing configuration or relaxing
+equality checks. It copies19 unchanged, fully verified private input files from
+the sealed stage02 and uploads only the two amended operator metadata files;
+all38 inputs are subsequently sealed and verified under the original guards.
+The signed feed, CMS, delivery, payloads and publication plan remain identical.
 
 Public Stripe credentials are absent. Local test keys are not publication
 inputs; this release cannot enable real charges or the mandatory monthly entry
