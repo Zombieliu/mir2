@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "sourceGenerations": [
+    "Source68",
+    "Source69"
+  ],
+  "branch": "codex/windows-player-journey",
+  "implementationCommit": "050cb633e32a908f281e30b3d18611cb3d5f174e",
+  "scopedFiles": 152,
+  "ownedCodeFiles": 6,
+  "ownedDocPrefixes": 7,
+  "ordinaryNewPngs": 116,
+  "newSelectedAssetManifest": 1,
+  "ownedQaFiles": 22,
+  "foreignDocBodiesExcludedFromIndex": true,
+  "unrelatedWorkPreserved": true,
+  "commitGcAutoDisabled": true,
+  "repositoryObjectIssueRepaired": false,
+  "push": {
+    "attempt1": {
+      "exitCode": 1,
+      "reason": "SSH connection reset",
+      "remoteStillPreviousCommitVerified": true
+    },
+    "attempt2": {
+      "exitCode": 0,
+      "ordinaryPush": true
+    }
+  },
+  "independentRemoteVerification": {
+    "verified": true,
+    "head": "050cb633e32a908f281e30b3d18611cb3d5f174e"
+  },
+  "actualBoundaries": {
+    "source68TooltipAndStoreTakeBackSaveRelogin": true,
+    "source69MapPngAndManifestPackage": true,
+    "source69StaleCachedSceneVisualFailureRetained": true,
+    "source70CacheFixInProgress": true,
+    "sharedStorageOwnerAccepted": false,
+    "mobileAccepted": false,
+    "humanAccepted": false,
+    "overallPercentage": null,
+    "candidate100": false,
+    "goalComplete": false
+  }
+}

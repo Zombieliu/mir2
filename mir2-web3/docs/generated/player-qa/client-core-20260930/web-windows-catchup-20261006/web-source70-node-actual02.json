@@ -1,0 +1,72 @@
+{
+  "owner": "Root",
+  "kind": "Source70 actual original six-script Node02",
+  "closed": true,
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 81400,
+    "kind": "Source70 actual unchanged original six-script Node02 in full strict source mirror",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 22261,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source70-scene-release-cache-20261011-01/root-approved01/node-tests02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\node-tests02-config.json",
+    "bytes": 5774,
+    "sha256": "ca2c3626049ee545c6cc73f91ae188adf33d61485e789e94fd375d9375d05cbe"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\preparation01\\source70-isolated-source-snapshot01.json",
+    "bytes": 20633764,
+    "sha256": "0bbc93f3632fba8917116a6e4d1ee24691b73ec6e45eb64ca43e1ea3be5b9bda"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\full-source-review01.json",
+    "bytes": 7940,
+    "sha256": "efec12e8eedac95463341beab3be2b5c9bd15f17c025c84452300be4dbab0472"
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "tests": 267,
+  "passed": 267,
+  "failed": 0,
+  "skipped": 0,
+  "cancelled": 0,
+  "todo": 0,
+  "sceneTests": 10,
+  "sceneTestsPassed": 10,
+  "originalSceneTestsPreserved": 2,
+  "customStage5Groups": 506,
+  "customGroupsAreNotAdditionalNodeTests": true,
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\node-tests02\\stdout.log",
+    "bytes": 68609,
+    "sha256": "0bae8eb3a94b4cda4cf4414dbe938dbd1858c3d2dae5f4be52476570846ba1e0"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\node-tests02\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "failedPreparationPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source70-node-failed01.json",
+    "bytes": 2191,
+    "sha256": "3b54de3951cef980894d9fcc97c0a9dd9cbe836d89185ad760817048d415351c"
+  },
+  "noProductSourceChangedBetweenRuns": true,
+  "completeSourceMirrorUsed": true,
+  "postSourceAndToolGuardSucceeded": true,
+  "actualNodePass": true,
+  "testsPassed": true,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

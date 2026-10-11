@@ -381,7 +381,9 @@ import {
   createCrystalSceneBlueprintRequestKey,
   createCrystalSceneBlueprintRequestUrl,
   normalizeCrystalSceneBlueprintRequest,
+  isCrystalSceneAssetReleaseId,
 } from "../lib/scene-blueprint-request";
+import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
 import crystalFrameSetCatalog from "../public/original-ui/frame-sets.generated.json";
 import type { OriginalSceneFrameSet } from "../lib/original-scene-sprite-meta";
 import { crystalFrameSetActionForState } from "./components/original-client-entity-frames";
@@ -2469,6 +2471,8 @@ export default function HomePage() {
     count: number;
   } | null>(null);
   const movementPredictionBlockedUntilRef = useRef(0);
+  const [sceneAssetReleaseId, setSceneAssetReleaseId] = useState<string | null>(null);
+  const loadedSceneAssetReleaseRef = useRef<string | null>(null);
   const loadedSceneKeyRef = useRef<string | null>(null);
   const loadingSceneKeyRef = useRef<string | null>(null);
   const lastCommandRef = useRef<Record<string, unknown> | null>(null);
@@ -5562,10 +5566,35 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    setSceneAssetReleaseId(null);
+    if (screen !== "game") return;
+    let disposed = false;
+    const controller = new AbortController();
+    async function loadSceneAssetRelease() {
+      try {
+        const capabilities = await loadAssetReleaseCapabilities(fetch, { fresh: true, signal: controller.signal });
+        if (disposed || controller.signal.aborted) return;
+        if (!isCrystalSceneAssetReleaseId(capabilities.releaseId)) throw new Error("Scene asset release is unavailable");
+        setSceneAssetReleaseId(capabilities.releaseId);
+      } catch (error) {
+        if (!disposed && !isAbortError(error)) {
+          appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
+        }
+      }
+    }
+    void loadSceneAssetRelease();
+    return () => { disposed = true; controller.abort("scene-release-superseded"); };
+    // The release is captured once per game entry. Scene chunk changes do not
+    // refetch the manifest, and a failed read never authorizes an unversioned URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
   const sceneBlueprintRequest =
-    screen === "game" && self
+    screen === "game" && self && sceneAssetReleaseId
       ? normalizeCrystalSceneBlueprintRequest({
           mapFileName: normalizeMapFileName(world.mapFileName),
+          assetReleaseId: sceneAssetReleaseId,
           centerX: self.x,
           centerY: self.y,
           width:
@@ -5581,7 +5610,7 @@ export default function HomePage() {
     : null;
 
   useEffect(() => {
-    if (screen !== "game" || !sceneBlueprintRequest || !sceneBlueprintRequestKey) return;
+    if (screen !== "game" || !sceneBlueprintRequest?.assetReleaseId || !sceneBlueprintRequestKey) return;
 
     const request = sceneBlueprintRequest;
     const sceneKey = sceneBlueprintRequestKey;
@@ -5589,7 +5618,7 @@ export default function HomePage() {
       return;
     }
     if (
-      !shouldReloadCrystalScene(
+      loadedSceneAssetReleaseRef.current === request.assetReleaseId && !shouldReloadCrystalScene(
         world.originalMapRegion,
         request.mapFileName,
         { x: request.centerX, y: request.centerY },
@@ -5612,6 +5641,7 @@ export default function HomePage() {
           cellCount: blueprint.originalMapRegion?.cells.length ?? 0,
         });
         loadedSceneKeyRef.current = sceneKey;
+        loadedSceneAssetReleaseRef.current = request.assetReleaseId ?? null;
         updateWorld((current) => ({
           ...current,
           mapTitle: blueprint.mapTitle ?? current.mapTitle,
@@ -5626,7 +5656,7 @@ export default function HomePage() {
       }
 
       async function applyStarterFallback() {
-        const fallbackResponse = await fetch("/api/scene/starter", {
+        const fallbackResponse = await fetch(createCrystalSceneBlueprintRequestUrl(request, "/api/scene/starter"), {
           signal: controller.signal,
           cache: "force-cache",
         });
@@ -5698,7 +5728,7 @@ export default function HomePage() {
           appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
         }
       } finally {
-        if (loadingSceneKeyRef.current === sceneKey) {
+        if (!disposed && loadingSceneKeyRef.current === sceneKey) {
           loadingSceneKeyRef.current = null;
         }
       }
@@ -5712,7 +5742,7 @@ export default function HomePage() {
         loadingSceneKeyRef.current = null;
       }
     };
-    // The canonical request key includes map, chunk and viewport buckets. Raw
+    // The canonical request key includes asset release, map, chunk and viewport buckets. Raw
     // self coordinates deliberately do not restart an in-flight request.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sceneBlueprintRequestKey, screen]);

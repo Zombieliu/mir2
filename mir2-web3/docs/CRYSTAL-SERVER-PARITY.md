@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+## Source70：仓库地图恢复，存取及保存重登通过（2026-10-12）
+
+游戏入口新鲜读取资源清单，活动场景以 assetRelease 区分缓存，并防止旧异步任务覆盖新加载。保留浏览器缓存的正常 Login/Start Game 实测中，Warehouse0140 恢复地板与墙面：340 cells、116 sprite 字典项、missingAssets 0；旧 Source69 响应曾为0 sprites/116 missing。7244ms完整被动区间实际观察115个独立PNG路径、120个响应，均200；其中4306.png未在区间观察到，116张打包PNG均已独立核验。背景地图0的独立未版本化请求及地图边界fallback不属于本项通过范围。
+
+普通 Anthony Access、Store Item、选择Candle和仓库空格使背包5→4、仓库0→1；hover及键盘focus均显示耐久8/8，1119ms/1131ms完整区间发送帧均为0。正常Take Back后选择Bag I、仓库Candle及背包空格，使背包4→5、仓库1→0，金币180；Alt+x保存退出、正常登录/Start Game/Access后读回背包5、仓库0、金币180。重登缓存命中的版本化Warehouse场景仍为116 sprites/0 missing。此项为React兼容仓库实测，未称sharedStorageOwner接管。
+
+原Node第二轮267/267通过、0跳过，Scene10/10，Stage5自定义506组单独记录；第一轮因镜像缺少3个本地编译导入和58个声明而265/267通过，失败证据保留。严格Next实际退出0（74005ms、13页、stderr0）；原Thin实际退出0（38038ms），4182普通文件/517目录含根/0链接/285112029B≤377487360B，59条依赖警告与Source69归一化集合一致。4个冻结代码文件、实际编译页面及全部打包叶已核验；主tsconfig保持4932B原字节。新Source70运行在 http://127.0.0.1:19205/，启动caller仍打开，关闭后校验尚待运行结束；网关保持Source65。
+
+下一项Source71先记录共享仓库准入的实际首个拒绝原因：重登截图出现共享Storage预绘制与React仓库重叠，当前不能仅凭截图断言prepare或withdraw分支。Take Back默认切到Quest页、其他共享面板、移动真机、多端完整1:1和最终人类Accepted仍开放。不新增后端候选结论；overallPercentage=null、Candidate100=false、goal active。仅新增本轮前缀，外来正文保持，提交推送以实际publication记录为准。
+
+证据：[web-source68-69-publication01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-69-publication01.json)、[web-source70-node-failed01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-node-failed01.json)、[web-source70-node-actual02.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-node-actual02.json)、[web-source70-next-actual01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-next-actual01.json)、[web-source70-thin-actual01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-thin-actual01.json)、[web-source70-thin-size-report01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-thin-size-report01.json)、[web-source70-runtime-actual01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-runtime-actual01.json)、[web-source70-scene-cache-proof01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-scene-cache-proof01.json)、[web-source70-storage-live-proof01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-live-proof01.json)、[web-source70-warehouse-map01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-warehouse-map01.png)、[web-source70-storage-tooltip-hover01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-tooltip-hover01.png)、[web-source70-storage-tab-empty01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-tab-empty01.png)、[web-source70-storage-relogin01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-relogin01.png)。
+
+
 ## Source68–69：仓库耐久提示通过，地图资源补齐后发现旧场景缓存（2026-10-11）
 
 Source68 让兼容仓库使用现有 Core tooltip 格式化器。正常 hover 和键盘 focus 均实际显示 Candle 耐久8/8；锁页、失焦和关闭清除 tooltip，完整被动区间没有发送仓庫物品操作。正常 Store/Take Back 后保存退出并重登，背包5件、仓库0件、金币180读回。此处是 React 兼容仓库证据，sharedStorageOwner 未接管。原 Node 第三轮257项全部通过、0跳过，Stage5自定义506组独立记录；前两轮缺夹具失败保持。严格Next实际退出0（60838ms，TypeScript20s，13页，stderr0）；原Thin为4066文件/513目录（含根）/0链接/284883997B。
