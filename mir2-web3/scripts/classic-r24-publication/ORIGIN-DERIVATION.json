@@ -40,5 +40,33 @@
   "signedFeedAndCaddyPinsExplicit": true,
   "limitsUnchanged": true,
   "networkCalls": false,
-  "publicStateChanged": false
+  "publicStateChanged": false,
+  "stage02Amendment": {
+    "retainedFailure": "operators-01/PREFLIGHT-01: feed18-game-binding",
+    "publicMutationBeforeFailure": false,
+    "previousGameDirectory": "releases/game-WN-CANDIDATE-20261009-invited-23",
+    "freshStageRequired": true,
+    "files": [
+      {
+        "path": "private_modes_r24.py.in",
+        "previousSha256": "6e0ad12528f3987c9e1b994279a5c4eded7493528d13cc9363d5397d0122a281",
+        "newSha256": "cfd09f11967a86b3479b6b8f3ebaab430aeff5bd9a9653f49014d52aa3d5ba33"
+      },
+      {
+        "path": "seal_r24.py.in",
+        "previousSha256": "3d4efef8fda7a640f147d3c7fca54b89937db701962f802124782f3182538f6f",
+        "newSha256": "f2c11d932b213c106f5ecf1a6f27bd61864a360f50645465ef58e51581e9a0ae"
+      },
+      {
+        "path": "feed_promote_r24.py.in",
+        "previousSha256": "c6ac64a5a9f185fef02df5a3526494ef80de8537e40802f98f78c32ad37d9d1a",
+        "newSha256": "a3ff51463429f57d94d584af111c347b6128489b6fb8dc90ab2ae39c86c2866d"
+      },
+      {
+        "path": "prepare_origin_r24_s19.py",
+        "previousSha256": "acf006bd9dbbeba43a500326ac56d7f733fc6e5086d80511009099e76525d224",
+        "newSha256": "cc1699dd97db63fdec67698e3d0c15b51677f13dd6beb62baeab81713b88fc6a"
+      }
+    ]
+  }
 }

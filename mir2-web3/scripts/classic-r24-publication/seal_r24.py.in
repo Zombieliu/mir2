@@ -74,7 +74,7 @@ def transfer(row, rootfd=None):
 
 
 need(sys.platform.startswith('linux') and os.geteuid() == 0, 'linux-root-required')
-need(str(USER) == '/tmp/mir2-origin-r24-s19-20261011-01' and str(ROOT) == '/srv/.mir2-origin-r24-s19-20261011-01'
+need(str(USER) == '/tmp/mir2-origin-r24-s19-20261011-02' and str(ROOT) == '/srv/.mir2-origin-r24-s19-20261011-02'
      and str(PUBLIC) == '/srv/mir2-client-updates', 'fixed-boundaries')
 tmp = USER.parent.lstat()
 need(stat.S_ISDIR(tmp.st_mode) and tmp.st_uid == 0, 'unsafe-tmp-parent')

@@ -9,7 +9,7 @@ def need(condition, label):
     if not condition:
         raise RuntimeError(label)
 
-stage = pathlib.Path('/srv/.mir2-origin-r24-s19-20261011-01')
+stage = pathlib.Path('/srv/.mir2-origin-r24-s19-20261011-02')
 path = stage / 'origin_r24_s19.py'
 for parent in [*reversed(stage.parents), stage]:
     info = parent.lstat()

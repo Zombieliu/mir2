@@ -14,14 +14,14 @@ import pprint
 import re
 import stat
 
-OUT = Path('C:/mir2-playtest-releases/20261010-shop-mail-r24/operators-01')
+OUT = Path('C:/mir2-playtest-releases/20261010-shop-mail-r24/operators-02')
 OLD = Path('C:/mir2-playtest-releases/20261009-target-r23')
 HERE = Path(__file__).resolve().parent
 GAME = '87fd85a0d5a819e5b38c90d192421f9239f65678'
 ENGINE = 'b4390ee4c987bbf000ba1d95761151e39fc0d54f'
 CANDIDATE = 'WN-CANDIDATE-20261010-invited-24'
-USER = '/tmp/mir2-origin-r24-s19-20261011-01'
-ROOT = '/srv/.mir2-origin-r24-s19-20261011-01'
+USER = '/tmp/mir2-origin-r24-s19-20261011-02'
+ROOT = '/srv/.mir2-origin-r24-s19-20261011-02'
 PUBLIC = '/srv/mir2-client-updates'
 OLD_WRITER_SHA = '46fa356c3a1c83944c0e73c90a475d1a8507e58476bf810f4630c529fcd1c0f8'
 GUARDS_SHA = '10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811'
@@ -33,7 +33,7 @@ FEED18 = {
     'latest.p7s': {'size': 1614, 'sha256': '1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4'},
 }
 ENGINE_EXE_SHA = '9213ec3fe1a992f757ea48c53981afa661765b42e637c1ad811e326060b170b8'
-TEMPLATE_PINS = {'origin_r24_tail.py.in': '96aa297918fa1d401c02218a67d6e5fea49e18a0c8c7f66263ea208b8e3090cd', 'private_modes_r24.py.in': '6e0ad12528f3987c9e1b994279a5c4eded7493528d13cc9363d5397d0122a281', 'seal_r24.py.in': '3d4efef8fda7a640f147d3c7fca54b89937db701962f802124782f3182538f6f', 'feed_promote_r24.py.in': 'c6ac64a5a9f185fef02df5a3526494ef80de8537e40802f98f78c32ad37d9d1a'}
+TEMPLATE_PINS = {'origin_r24_tail.py.in': '96aa297918fa1d401c02218a67d6e5fea49e18a0c8c7f66263ea208b8e3090cd', 'private_modes_r24.py.in': 'cfd09f11967a86b3479b6b8f3ebaab430aeff5bd9a9653f49014d52aa3d5ba33', 'seal_r24.py.in': 'f2c11d932b213c106f5ecf1a6f27bd61864a360f50645465ef58e51581e9a0ae', 'feed_promote_r24.py.in': 'a3ff51463429f57d94d584af111c347b6128489b6fb8dc90ab2ae39c86c2866d'}
 MAX_OBJECTS = 100
 MAX_METADATA = 32 * 1024 * 1024
 MAX_ARTIFACT = 128 * 1024 * 1024
@@ -276,10 +276,14 @@ def main():
     old_writer = old_writer_raw.decode('utf-8')
     pins = {'guards': GUARDS_SHA, 'proof': args.root_proof_sha256, 'publication': args.plan_sha256,
             'prepared': sha(prepared_raw), 'previousProof': OLD_PROOF_SHA, 'previousPublication': OLD_PLAN_SHA,
-            'config': CADDY_SHA, 'previousFeed': FEED18, 'previousGameDirectory': 'releases/game-WN-CANDIDATE-20261010-invited-24',
+            'config': CADDY_SHA, 'previousFeed': FEED18, 'previousGameDirectory': 'releases/game-WN-CANDIDATE-20261009-invited-23',
             'gameDirectory': game_directory, 'candidate': CANDIDATE, 'engineExeSha256': ENGINE_EXE_SHA,
             'new': [frozen_pin(o) for o in objects], 'previousObjects': [frozen_pin(o) for o in old_objects],
             'sourceNames': source_names}
+    previous_feed = decode(read(old_objects[0]['source'], FEED18['latest.json']['sha256'], 32768))
+    need(previous_feed['sequence'] == 18
+         and pins['previousGameDirectory'] == previous_feed['game']['directory'],
+         'exact-s18-previous-game-directory-required')
     writer = render_writer(pins, old_writer, read(HERE / 'origin_r24_tail.py.in', TEMPLATE_PINS['origin_r24_tail.py.in'], maximum=131072).decode('utf-8'))
     writer_raw = writer.encode()
     need(len(writer_raw) <= 262144, 'fixed-writer-size-bound')
@@ -305,7 +309,7 @@ def main():
 def need(condition, label):
     if not condition:
         raise RuntimeError(label)
-path = pathlib.Path('/tmp/mir2-origin-r24-s19-20261011-01')
+path = pathlib.Path('/tmp/mir2-origin-r24-s19-20261011-02')
 need(os.geteuid() == 1000 and not path.exists() and not path.is_symlink(), 'fresh-user-stage-required')
 i = path.parent.lstat()
 need(stat.S_ISDIR(i.st_mode) and i.st_uid == 0, 'unsafe-tmp-parent')
