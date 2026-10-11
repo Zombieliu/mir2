@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.origin.r24.derivation.v1",
+  "previousSourceCommit": "f93ed2121046962f9c39dfc62f7696e90b0cc458",
+  "templates": [
+    {
+      "source": "origin_r23_tail.py.in",
+      "sourceSha256": "a8edd16c43776cca96840b371642c2046885cb7389abd297c4f58a2a1e4a2252",
+      "output": "origin_r24_tail.py.in",
+      "outputSha256": "96aa297918fa1d401c02218a67d6e5fea49e18a0c8c7f66263ea208b8e3090cd"
+    },
+    {
+      "source": "private_modes_r23.py.in",
+      "sourceSha256": "5e32ffc3a47ee1972f6e3b51a23e79e17da41400a1216344fc1a5c2d86bf4960",
+      "output": "private_modes_r24.py.in",
+      "outputSha256": "6e0ad12528f3987c9e1b994279a5c4eded7493528d13cc9363d5397d0122a281"
+    },
+    {
+      "source": "seal_r23.py.in",
+      "sourceSha256": "e6d4239dbeb72b24d1476654cf8373affd9f3e7eb9f07bc96f8b4615f6698f18",
+      "output": "seal_r24.py.in",
+      "outputSha256": "3d4efef8fda7a640f147d3c7fca54b89937db701962f802124782f3182538f6f"
+    },
+    {
+      "source": "feed_promote_r23.py.in",
+      "sourceSha256": "9bcac0f0c61b8900be6039b79e12c9d569347d510f77af1c0533e13d14a82156",
+      "output": "feed_promote_r24.py.in",
+      "outputSha256": "c6ac64a5a9f185fef02df5a3526494ef80de8537e40802f98f78c32ad37d9d1a"
+    },
+    {
+      "source": "prepare_origin_r23_s18.py",
+      "sourceSha256": "22066dc95e379ec5d29c588a03e26ff67c507f13c7243f9cb6b87f1843303af6",
+      "output": "prepare_origin_r24_s19.py",
+      "outputSha256": "acf006bd9dbbeba43a500326ac56d7f733fc6e5086d80511009099e76525d224"
+    }
+  ],
+  "previousActualWriter": "operators-02/origin_r23_s18.py",
+  "fixedPredecessor": 18,
+  "candidateSequence": 19,
+  "guardsUnchanged": true,
+  "signedFeedAndCaddyPinsExplicit": true,
+  "limitsUnchanged": true,
+  "networkCalls": false,
+  "publicStateChanged": false
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.r24.s19.offline-test-derivation.v1",
+  "source": "scripts/test_prepare_native_r23_s18_offline.py",
+  "sourceSha256": "3995fb3cc461350e86aae257b77e78c5ab350bcb5c3743970a5678811ae24b5e",
+  "resultSha256": "8dc08b08e71724f929adabb68aeb37b6c09e0e45965ce7e57b30b15ba61c96ec",
+  "originalStreamOffsetsPreserved": true,
+  "policyAssertionsRetained": true,
+  "actualTestsPassed": false,
+  "publicStateChanged": false
+}

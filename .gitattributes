@@ -49,6 +49,16 @@ mir2-web3/scripts/test_native_r23_s18_r2_delivery.py -text
 mir2-web3/scripts/test_native_r23_s18_interrupt.py -text
 mir2-web3/scripts/test_prepare_native_r23_s18_offline.py -text
 
+# R24 admission and signed predecessor preserve their exact publisher bytes.
+mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r24-s19-publication-plan.json -text
+mir2-web3/scripts/fixtures/native-r24-s19/** -text whitespace=blank-at-eol,space-before-tab,cr-at-eol
+mir2-web3/scripts/classic-r24-publication/* -text
+mir2-web3/scripts/prepare_native_r24_s19_fixed.py -text
+mir2-web3/scripts/native_r24_s19_r2_delivery.py -text
+mir2-web3/scripts/test_native_r24_s19_r2_delivery.py -text
+mir2-web3/scripts/test_native_r24_s19_interrupt.py -text
+mir2-web3/scripts/test_prepare_native_r24_s19_offline.py -text
+
 *.gif binary
 *.ico binary
 *.jpg binary

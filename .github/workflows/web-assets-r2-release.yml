@@ -22,7 +22,7 @@ on:
         required: false
         type: string
       native_updater_sequence:
-        description: Fixed signed native publication; 13/14 R17, 15 R19, 16 R20, 17 R22, 18 R23
+        description: Fixed signed native publication; 13/14 R17, 15 R19, 16 R20, 17 R22, 18 R23, 19 R24
         required: false
         default: '13'
         type: choice
@@ -33,6 +33,7 @@ on:
           - '16'
           - '17'
           - '18'
+          - '19'
       native_stage_sha256:
         description: Exact SHA256 of the retained stage receipt; required only for promote
         required: false
@@ -184,7 +185,7 @@ jobs:
           python3 -B scripts/test_native_r19_s15_interrupt.py
 
       - name: Check signed16 R20 admission, unchanged s15 engine and bounded transport
-        if: ${{ inputs.native_updater_sequence == '16' || inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' }}
+        if: ${{ inputs.native_updater_sequence == '16' || inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' }}
         working-directory: mir2-web3
         run: |
           python3 -B scripts/test_prepare_native_r20_s16_fixed.py
@@ -193,7 +194,7 @@ jobs:
           python3 -B scripts/test_native_r20_s16_interrupt.py
 
       - name: Check signed17 R22 admission and original immutable predecessor
-        if: ${{ inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' }}
+        if: ${{ inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' }}
         working-directory: mir2-web3
         run: |
           python3 -B scripts/test_prepare_native_r22_s17_offline.py
@@ -202,13 +203,22 @@ jobs:
           python3 -B scripts/test_native_r22_s17_interrupt.py
 
       - name: Check signed18 R23 admission and original immutable predecessor
-        if: ${{ inputs.native_updater_sequence == '18' }}
+        if: ${{ inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' }}
         working-directory: mir2-web3
         run: |
           python3 -B scripts/test_prepare_native_r23_s18_offline.py
           node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r23-s18-publication.test.mjs
           python3 -B scripts/test_native_r23_s18_r2_delivery.py
           python3 -B scripts/test_native_r23_s18_interrupt.py
+
+      - name: Check signed19 R24 admission and original immutable predecessor
+        if: ${{ inputs.native_updater_sequence == '19' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r24_s19_offline.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r24-s19-publication.test.mjs
+          python3 -B scripts/test_native_r24_s19_r2_delivery.py
+          python3 -B scripts/test_native_r24_s19_interrupt.py
 
       - name: Retain raw offline checks
         if: ${{ always() }}
@@ -221,6 +231,7 @@ jobs:
             mir2-web3/scripts/fixtures/native-r20-s16/qa-runs/
             mir2-web3/scripts/fixtures/native-r22-s17/qa-runs/
             mir2-web3/scripts/fixtures/native-r23-s18/qa-runs/
+            mir2-web3/scripts/fixtures/native-r24-s19/qa-runs/
           if-no-files-found: error
           retention-days: 7
 
@@ -234,6 +245,24 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Use the verified Node version for authenticated upload Worker deployment
+        if: ${{ inputs.native_updater_sequence == '19' && inputs.deploy_upload_worker }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+
+      - name: Deploy the reviewed signed19 upload route after offline gates
+        if: ${{ inputs.native_updater_sequence == '19' && inputs.deploy_upload_worker }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          npx --yes wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-bulk-upload/wrangler.jsonc
 
       - name: Stage immutable objects and verify complete public bytes
         working-directory: mir2-web3
@@ -253,6 +282,7 @@ jobs:
             16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
             17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
             18) native_driver=scripts/native_r23_s18_r2_delivery.py ;;
+            19) native_driver=scripts/native_r24_s19_r2_delivery.py ;;
             *) exit 1 ;;
           esac
           timeout --signal=INT --kill-after=30s 330m python3 -B "$native_driver" --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
@@ -295,7 +325,7 @@ jobs:
           assert value['workflow_id'] == 284517107
           assert value['event'] == 'workflow_dispatch' and value['conclusion'] == 'success'
           assert value['head_branch'] == os.environ['GITHUB_REF_NAME']
-          if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16', '17', '18'):
+          if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16', '17', '18', '19'):
               assert value['head_sha'] == os.environ['GITHUB_SHA']
           PY
 
@@ -330,6 +360,7 @@ jobs:
             16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
             17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
             18) native_driver=scripts/native_r23_s18_r2_delivery.py ;;
+            19) native_driver=scripts/native_r24_s19_r2_delivery.py ;;
             *) exit 1 ;;
           esac
           timeout --signal=INT --kill-after=30s 8m python3 -B "$native_driver" --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"

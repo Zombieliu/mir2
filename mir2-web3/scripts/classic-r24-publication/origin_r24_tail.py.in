@@ -1,0 +1,155 @@
+def stable_feed(g):
+    identities = {}
+    for name, pin in PINS['previousFeed'].items():
+        path = PUBLIC / 'feed-current' / name
+        raw = g.read(path, 32768, pin)
+        identities[name] = g.identity(g.file_info(path))
+        if name == 'latest.json':
+            value = json.loads(raw)
+            require(value['sequence'] == 18 and value['game']['directory'] == PINS['previousGameDirectory'], 'feed18-game-binding')
+            require(value['expiresUnix'] >= int(time.time()), 'feed18-expired')
+    return identities
+
+
+def fixed_envelope(g):
+    values = {}
+    for name, key in [('ROOT-VERIFICATION.json', 'proof'), ('PUBLICATION-PLAN.json', 'publication'),
+                      ('APPEND-INPUTS.prepared.json', 'prepared'), ('PREVIOUS-ROOT-VERIFICATION.json', 'previousProof'),
+                      ('PREVIOUS-PUBLICATION-PLAN.json', 'previousPublication')]:
+        raw = g.read(STAGE / name, 32 * 1024 * 1024)
+        require(digest(raw) == PINS[key], 'envelope-hash:' + name)
+        values[name] = json.loads(raw)
+    for previous, plan_name, proof_name, sequence in [
+        (False, 'PUBLICATION-PLAN.json', 'ROOT-VERIFICATION.json', 19),
+        (True, 'PREVIOUS-PUBLICATION-PLAN.json', 'PREVIOUS-ROOT-VERIFICATION.json', 18)]:
+        proof = values[proof_name]
+        require(proof['passed'] is True and proof['cmsVerified'] is True and proof['candidateVerified'] is True
+                and proof['sequence'] == sequence and proof['sourceRevision'] == ENGINE, 'genuine-root-proof-binding')
+        publication = values[plan_name]
+        require(publication['verificationReceipt']['sha256'] == PINS['previousProof' if previous else 'proof'], 'plan-proof-binding')
+        objects = publication['objects']
+        pins = PINS['previousObjects' if previous else 'new']
+        require(len(objects) == len(pins) and len({o['path'] for o in objects}) == len(pins), 'fixed-closed-object-count')
+        closure = sorted([{k: o[k] for k in ('path', 'size', 'sha256')} for o in objects], key=lambda o: o['path'])
+        canonical = (json.dumps(closure, sort_keys=True, separators=(',', ':'), ensure_ascii=True) + '\n').encode()
+        require(digest(canonical) == proof['objectsSha256'], 'closed-object-proof-digest')
+        selected = {o['path']: o for o in objects}
+        for pin in pins:
+            bound = selected[pin['path']]
+            require(all(bound[k] == pin[k] for k in ('size', 'sha256')), 'fixed-object-proof-mismatch')
+    prepared = values['APPEND-INPUTS.prepared.json']
+    require(prepared['gameSource'] == GAME and prepared['engineSource'] == ENGINE and prepared['sequence'] == 19,
+            'prepared-source-binding')
+    feed = json.loads(g.read(STAGE / PINS['sourceNames'][0], 32768, PINS['new'][0]))
+    require(feed['sequence'] == 19 and feed['expiresUnix'] >= int(time.time()) and
+            feed['game']['directory'] == PINS['gameDirectory'] and feed['game']['identity'] == PINS['candidate'],
+            'feed19-expired-or-mismatch')
+    statement_pin = next(o for o in PINS['new'] if o['path'] == PINS['gameDirectory'] + '/RELEASE-STATEMENT.json')
+    statement = json.loads(g.read(STAGE / PINS['sourceNames'][statement_pin['index']], 32768, statement_pin))
+    require(statement['gitRevision'] == GAME and statement['candidate'] == PINS['candidate']
+            and statement['worktreeDirty'] is False, 'game-statement-source-binding')
+    engine_pin = next(o for o in PINS['new'] if o['path'] == feed['engine']['directory'] + '/ENGINE.json')
+    engine = json.loads(g.read(STAGE / PINS['sourceNames'][engine_pin['index']], 32768, engine_pin))
+    require(engine['sourceRevision'] == ENGINE and engine['exeSha256'].lower() == PINS['engineExeSha256'], 'reused-engine-binding')
+    return values['PUBLICATION-PLAN.json']['objects']
+
+
+def copy_frozen(g, ops, source, target, pin, mode):
+    g.parents(target)
+    with g.opened(source) as (reader, before):
+        require(before.st_size == pin['size'], 'copy-source-size')
+        fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+        with os.fdopen(fd, 'wb') as writer:
+            count, hasher = 0, hashlib.sha256()
+            while chunk := reader.read(1024 * 1024):
+                count += len(chunk)
+                require(count <= pin['size'], 'copy-source-overrun')
+                hasher.update(chunk)
+                writer.write(chunk)
+            require(count == pin['size'] and hasher.hexdigest() == pin['sha256'], 'copy-source-hash')
+            writer.flush()
+            os.fsync(writer.fileno())
+            os.fchmod(writer.fileno(), mode)
+            os.fsync(writer.fileno())
+    g.match(target, pin)
+    ops.sync_dir(g, target.parent)
+
+
+def append(g, ops, objects, feed_before):
+    baseline = {o['path']: g.match(PUBLIC / o['path'], o) for o in PINS['previousObjects']}
+    for obj in PINS['new']:
+        g.match(STAGE / PINS['sourceNames'][obj['index']], obj)
+        check_target(g, obj)
+    require(stable_feed(g) == feed_before, 'feed-changed-before-append')
+    events = []
+    for obj in reversed(PINS['new']):
+        index = obj['index']
+        status = check_target(g, obj)
+        if status == 'absent':
+            ensure_parent(g, ops, (PUBLIC / obj['path']).parent)
+            original = STAGE / PINS['sourceNames'][index]
+            staged = STAGE / f'append-{index:02}'
+            if staged.exists() or staged.is_symlink():
+                g.match(staged, obj)
+                require(stat.S_IMODE(g.file_info(staged).st_mode) == 0o444, 'staged-mode-conflict')
+            else:
+                copy_frozen(g, ops, original, staged, obj, 0o444)
+            require(stable_feed(g) == feed_before, 'feed-changed-during-append')
+            try:
+                ops.rename_new(g, staged, PUBLIC / obj['path'])
+                status = 'created'
+            except FileExistsError:
+                check_target(g, obj)
+                status = 'raced-exact-existing'
+        check_target(g, obj)
+        require(stable_feed(g) == feed_before, 'feed-changed-after-append')
+        event = {'index': index, 'path': obj['path'], 'status': status, 'size': obj['size'], 'sha256': obj['sha256']}
+        audit = STAGE / f'APPEND-EVENT-{index:02}.json'
+        if audit.exists() or audit.is_symlink():
+            previous = json.loads(g.read(audit, 32768))
+            require(all(previous[k] == event[k] for k in ('index', 'path', 'size', 'sha256')) and
+                    previous['status'] in ('created', 'exact-existing', 'raced-exact-existing'), 'append-audit-conflict')
+        else:
+            write_new(g, ops, audit, (json.dumps(event, sort_keys=True) + '\n').encode())
+        events.append(event)
+    for obj in objects:
+        g.match(PUBLIC / obj['path'], obj)
+    for obj in PINS['previousObjects']:
+        require(g.match(PUBLIC / obj['path'], obj) == baseline[obj['path']], 'previous-object-fingerprint-changed')
+    return events
+
+
+def main():
+    require(len(sys.argv) == 2 and sys.argv[1] in ('preflight', 'append'), 'fixed-operation-required')
+    mode = sys.argv[1]
+    g, ops = boot()
+    g.directory(PUBLIC)
+    g.directory(STAGE, private=True)
+    require(STAGE.stat().st_dev == PUBLIC.stat().st_dev, 'stage-filesystem-mismatch')
+    states = snapshot_services()
+    with ops.lock(g, LOCK):
+        feed_before = stable_feed(g)
+        require(digest(g.read(CONFIG, 128 * 1024)) == PINS['config'], 'caddy-preflight-conflict')
+        objects = fixed_envelope(g)
+        result = {'schema': 'mir2.origin-r24-s19.fixed-closure.v1', 'operation': mode, 'gameSource': GAME,
+                  'engineSource': ENGINE, 'sequence': 19, 'objects': len(objects), 'rootProofSha256': PINS['proof'],
+                  'createdUnix': int(time.time()), 'changedCurrentFeed': False, 'gameServiceRestart': False}
+        if mode == 'append':
+            result['events'] = append(g, ops, objects, feed_before)
+        else:
+            for obj in PINS['previousObjects']:
+                g.match(PUBLIC / obj['path'], obj)
+            result['targets'] = [{'path': o['path'], 'status': check_target(g, o)} for o in objects]
+            for obj in PINS['new']:
+                g.match(STAGE / PINS['sourceNames'][obj['index']], obj)
+        require(stable_feed(g) == feed_before, 'feed-final-conflict')
+        require(digest(g.read(CONFIG, 128 * 1024)) == PINS['config'], 'caddy-final-conflict')
+        same_pids(states, snapshot_services())
+        result.update(passed=True, feed18FingerprintPreserved=True, allServicePidsPreserved=True)
+        raw = (json.dumps(result, indent=2) + '\n').encode()
+        write_new(g, ops, STAGE / f'{mode.upper()}-01.json', raw)
+        print(raw.decode(), end='')
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,247 @@
+{
+  "schema": "mir2.r24.s19.generator-derivation.v1",
+  "template": "scripts/prepare_native_r23_s18_fixed.py",
+  "templateSha256": "f39abd5c10ed568bee58eddfdc6be9f04d242e3d77737ae9a30eef29c23f1510",
+  "templateCommit": "f93ed2121046962f9c39dfc62f7696e90b0cc458",
+  "gameSource": "87fd85a0d5a819e5b38c90d192421f9239f65678",
+  "sequence": 19,
+  "predecessor": 18,
+  "templatePins": {
+    "scripts/native_r23_s18_r2_delivery.py": "305c22cee63558d80288371df58eb491d3ef6522a34c019ec3f6be6ddea4b694",
+    "scripts/test_native_r23_s18_r2_delivery.py": "7bce1a900484b6f4d4994b8336bbf8f4b286af3e09b4a26500ed01ffc229bade",
+    "scripts/test_native_r23_s18_interrupt.py": "8c028af2d647f1cb62af921e187744ea7637a84a3c0a005736f26c3138fb4ec9",
+    "infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication.mjs": "23a4f53b14f89f6528b49ef6390a1cc02d3785ddb3d9dc0ceeee0d36ea34512d",
+    "infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication-plan.json": "66a6b73900111f2f3044f1ed1cf110091d5a02e52b57e50e097b79df577f6a69",
+    "infra/cloudflare/mir2-r2-bulk-upload/test/native-r23-s18-publication.test.mjs": "f5cd31585189c00987b8f14f6758513dfbc66d1b88f84b35fc57626275921f6c",
+    "scripts/fixtures/native-r23-s18/actual-cms18/PUBLICATION-PLAN.json": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0",
+    "scripts/fixtures/native-r23-s18/actual-cms18/ROOT-VERIFICATION.json": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf",
+    "scripts/fixtures/native-r23-s18/preview/artifacts/feed/latest.json": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2",
+    "scripts/fixtures/native-r23-s18/preview/artifacts/feed/latest.p7s": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4"
+  },
+  "identityHunks": [
+    {
+      "before": "native_r23_s18",
+      "after": "native_r24_s19",
+      "occurrences": 7
+    },
+    {
+      "before": "native_r22_s17",
+      "after": "native_r23_s18",
+      "occurrences": 13
+    },
+    {
+      "before": "native-r23-s18",
+      "after": "native-r24-s19",
+      "occurrences": 6
+    },
+    {
+      "before": "native-r22-s17",
+      "after": "native-r23-s18",
+      "occurrences": 24
+    },
+    {
+      "before": "NativeR23S18",
+      "after": "NativeR24S19",
+      "occurrences": 1
+    },
+    {
+      "before": "NativeR22S17",
+      "after": "NativeR23S18",
+      "occurrences": 1
+    },
+    {
+      "before": "nativeR23S18",
+      "after": "nativeR24S19",
+      "occurrences": 1
+    },
+    {
+      "before": "nativeR22S17",
+      "after": "nativeR23S18",
+      "occurrences": 1
+    },
+    {
+      "before": "R23/s18",
+      "after": "R24/s19",
+      "occurrences": 3
+    },
+    {
+      "before": "R22/s17",
+      "after": "R23/s18",
+      "occurrences": 1
+    },
+    {
+      "before": "mir2.native.r23.",
+      "after": "mir2.native.r24.",
+      "occurrences": 2
+    },
+    {
+      "before": "mir2.native.r22.",
+      "after": "mir2.native.r23.",
+      "occurrences": 1
+    },
+    {
+      "before": "mir2.r23.s18.",
+      "after": "mir2.r24.s19.",
+      "occurrences": 1
+    },
+    {
+      "before": "WN-CANDIDATE-20261009-invited-23",
+      "after": "WN-CANDIDATE-20261010-invited-24",
+      "occurrences": 1
+    },
+    {
+      "before": "WN-CANDIDATE-20261008-invited-22",
+      "after": "WN-CANDIDATE-20261009-invited-23",
+      "occurrences": 1
+    },
+    {
+      "before": "faefb69671272843958f68781b4f8ca2f4014522",
+      "after": "87fd85a0d5a819e5b38c90d192421f9239f65678",
+      "occurrences": 1
+    },
+    {
+      "before": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+      "after": "faefb69671272843958f68781b4f8ca2f4014522",
+      "occurrences": 1
+    },
+    {
+      "before": "actual-cms18",
+      "after": "actual-cms19",
+      "occurrences": 4
+    },
+    {
+      "before": "actual-cms17",
+      "after": "actual-cms18",
+      "occurrences": 9
+    },
+    {
+      "before": "predecessor17",
+      "after": "predecessor18",
+      "occurrences": 8
+    },
+    {
+      "before": "predecessor16",
+      "after": "predecessor17",
+      "occurrences": 3
+    },
+    {
+      "before": "SEQUENCE = 18",
+      "after": "SEQUENCE = 19",
+      "occurrences": 1
+    },
+    {
+      "before": "PREDECESSOR = 17",
+      "after": "PREDECESSOR = 18",
+      "occurrences": 1
+    },
+    {
+      "before": "feeds/s18-",
+      "after": "feeds/s19-",
+      "occurrences": 1
+    },
+    {
+      "before": "new_s18_output_scope_required",
+      "after": "new_s19_output_scope_required",
+      "occurrences": 1
+    },
+    {
+      "before": "exact_candidate18_required",
+      "after": "exact_candidate19_required",
+      "occurrences": 2
+    },
+    {
+      "before": "exact_candidate17_required",
+      "after": "exact_candidate18_required",
+      "occurrences": 1
+    },
+    {
+      "before": "actual_root18_receipt_required",
+      "after": "actual_root19_receipt_required",
+      "occurrences": 2
+    },
+    {
+      "before": "actual_root17_receipt_required",
+      "after": "actual_root18_receipt_required",
+      "occurrences": 1
+    },
+    {
+      "before": "current_signed_feed18_required",
+      "after": "current_signed_feed19_required",
+      "occurrences": 1
+    },
+    {
+      "before": "exact_r23_game_identity_required",
+      "after": "exact_r24_game_identity_required",
+      "occurrences": 1
+    },
+    {
+      "before": "r23_closed_object_scope_required",
+      "after": "r24_closed_object_scope_required",
+      "occurrences": 2
+    },
+    {
+      "before": "r22_closed_object_scope_required",
+      "after": "r23_closed_object_scope_required",
+      "occurrences": 1
+    },
+    {
+      "before": "exact_game_sourcefaefb696_required",
+      "after": "exact_game_source87fd85a0_required",
+      "occurrences": 1
+    },
+    {
+      "before": "frozen_s17_generator_subject",
+      "after": "frozen_s18_generator_subject",
+      "occurrences": 1
+    },
+    {
+      "before": "R23/sourcefaefb696",
+      "after": "R24/source87fd85a0",
+      "occurrences": 1
+    },
+    {
+      "before": "R22 proof",
+      "after": "R23 proof",
+      "occurrences": 1
+    },
+    {
+      "before": "script = replace_once(script, \"plan['candidate']['sequence'] == 17\", \"plan['candidate']['sequence'] == 18\")",
+      "after": "script = replace_once(script, \"plan['candidate']['sequence'] == 18\", \"plan['candidate']['sequence'] == 19\")",
+      "occurrences": 1
+    },
+    {
+      "before": "script = replace_once(script, \"plan['knownPrevious']['sequence'] == 16\", \"plan['knownPrevious']['sequence'] == 17\")",
+      "after": "script = replace_once(script, \"plan['knownPrevious']['sequence'] == 17\", \"plan['knownPrevious']['sequence'] == 18\")",
+      "occurrences": 1
+    },
+    {
+      "before": "module = replace_once(module, 'candidate.candidate.sequence === 17', 'candidate.candidate.sequence === 18')",
+      "after": "module = replace_once(module, 'candidate.candidate.sequence === 18', 'candidate.candidate.sequence === 19')",
+      "occurrences": 1
+    },
+    {
+      "before": "module = replace_once(module, 'candidate.knownPrevious.sequence === 16', 'candidate.knownPrevious.sequence === 17')",
+      "after": "module = replace_once(module, 'candidate.knownPrevious.sequence === 17', 'candidate.knownPrevious.sequence === 18')",
+      "occurrences": 1
+    }
+  ],
+  "derivedSha256": "d61dae5903d6994379a5f91e1ebd564349cb8d8a5e9938649c23a605bb6d813b",
+  "testTemplatesRetained": true,
+  "actualOfflineTestsPassed": false,
+  "cloudWrites": false,
+  "reviewedAmendments": {
+    "previousSha256": "bd5bd13bd3b2d12bfb1bd3c8d778b723da5a6400d57384d16c1474bc07436243",
+    "newSha256": "03ed8c8eb9659f8e78f15f61ed2a32840176900207ad6b3bf9e9e267fdcf8a00",
+    "signedPredecessorLabel": 18,
+    "negativeCandidateSequence": 20,
+    "explicitCodeCrLfPins": {
+      "scripts/native_r23_s18_r2_delivery.py": "2b565da13636a234efdf28bd5fde8d57a37493d54b541bd764cf2257f3d2b786",
+      "scripts/test_native_r23_s18_r2_delivery.py": "2199867b023bdba7ed04f11c880b6d342bf932fb60609a45ccc3cf6b82127a5b",
+      "scripts/test_native_r23_s18_interrupt.py": "f6df83258bd1167847286abcbf74a9eec01f24032bd762167d7c16ef4c2953df",
+      "infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication.mjs": "a172a8687d45d69c590ef3ce6ad34c4fed8b6be36107f835a1e011922af45ac1",
+      "infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication-plan.json": "ba26861f0c65da8a3abc26ace37856a3cd206026880a00712cba87eb95e73a3b",
+      "infra/cloudflare/mir2-r2-bulk-upload/test/native-r23-s18-publication.test.mjs": "36ecc611dc97cd5c72c01bd1bc2b7de9b9c09794a1a906223bbfd2d0759098b0"
+    },
+    "metadataNormalization": false
+  }
+}
