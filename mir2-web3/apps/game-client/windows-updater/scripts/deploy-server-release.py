@@ -34,6 +34,7 @@ ANCHOR = b'relay-hk.obelisk.build, 165.154.65.136.sslip.io {'
 MAX_TOTAL = 4 * 1024**3
 MAX_ARCHIVE = 5 * 1024**3
 MAX_FILES = 200_064
+MAX_FIVE_CLASS_FILES = 300_064
 BLOCK = b'''
     # BEGIN MIR2 NATIVE CLIENT UPDATES V1
     @mir2_native_updates path /client-updates /client-updates/*
@@ -66,6 +67,32 @@ BLOCK = b'''
     }
     # END MIR2 NATIVE CLIENT UPDATES V1
 '''
+LEGACY_BLOCK = BLOCK
+FIVE_CLASS_ROUTES = b'''
+                    @mir2_five_class_discovery path /client-updates/five-class/latest.json /client-updates/five-class/latest.p7s
+                    handle @mir2_five_class_discovery {
+                        uri strip_prefix /client-updates/five-class
+                        root * /srv/mir2-client-updates/five-class/feed-current
+                        header Cache-Control "no-store"
+                        header X-Content-Type-Options "nosniff"
+                        file_server
+                    }
+                    @mir2_five_class_payload path /client-updates/five-class/releases/*
+                    handle @mir2_five_class_payload {
+                        uri strip_prefix /client-updates/five-class
+                        root * /srv/mir2-client-updates/five-class
+                        header Cache-Control "public, max-age=31536000, immutable"
+                        header X-Content-Type-Options "nosniff"
+                        file_server
+                    }
+'''
+BLOCK = LEGACY_BLOCK.replace(b'MIR2 NATIVE CLIENT UPDATES V1', b'MIR2 NATIVE CLIENT UPDATES V2').replace(
+    b'                    @mir2_native_discovery', FIVE_CLASS_ROUTES + b'                    @mir2_native_discovery', 1)
+
+
+def channel_paths(scope):
+    need(scope in ('legacy', 'five-class'), 'unsupported fixed download scope')
+    return (ROOT / 'five-class', '/client-updates/five-class/') if scope == 'five-class' else (ROOT, '/client-updates/')
 
 
 def need(ok, message):
@@ -130,9 +157,14 @@ def copy_archive(source, target, expected):
 
 
 def inject_route(old):
-    if b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1' in old:
-        need(old.count(BLOCK) == 1 and old.count(b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1') == 1, 'existing update route differs from reviewed fragment')
+    if b'# BEGIN MIR2 NATIVE CLIENT UPDATES V2' in old:
+        need(old.count(BLOCK) == 1 and old.count(b'# BEGIN MIR2 NATIVE CLIENT UPDATES V2') == 1
+             and b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1' not in old, 'existing update route differs from reviewed fragment')
         return old
+    if b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1' in old:
+        need(old.count(LEGACY_BLOCK) == 1 and old.count(b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1') == 1,
+             'existing update route differs from reviewed fragment')
+        return old.replace(LEGACY_BLOCK, BLOCK, 1)
     need(old.count(ANCHOR) == 1 and b'/client-updates' not in old, 'unexpected Caddy site/route; manual review required')
     position = old.index(ANCHOR) + len(ANCHOR)
     new = old[:position] + BLOCK + old[position:]
@@ -189,7 +221,9 @@ def command_checked(command, log, environment=None):
     need(result.returncode == 0, 'Caddy operation failed; private diagnostics retained')
 
 
-def extract_checked(archive_path, receipt, feed, stage, helper):
+def extract_checked(archive_path, receipt, feed, stage, helper, download_scope='legacy'):
+    channel_paths(download_scope)
+    file_limit = MAX_FIVE_CLASS_FILES if download_scope == 'five-class' else MAX_FILES
     need(receipt.get('schema') == 'mir2.windows.update-archive-receipt.v1' and receipt.get('tarFormat') == 'USTAR', 'unsupported archive receipt')
     components = [feed['game'], feed['engine']]
     prefixes = [c['directory'] for c in components]
@@ -198,7 +232,7 @@ def extract_checked(archive_path, receipt, feed, stage, helper):
         helper.relative_path(p)
         need(p.startswith('releases/') and p.count('/') == 1, 'flat immutable release directory required')
     entries, total = {}, 0
-    need(isinstance(receipt.get('files'), list) and len(receipt['files']) <= MAX_FILES, 'receipt file count outside bound')
+    need(isinstance(receipt.get('files'), list) and len(receipt['files']) <= file_limit, 'receipt file count outside bound')
     for item in receipt['files']:
         need(isinstance(item, dict) and set(item) == {'path', 'size', 'sha256'}, 'invalid receipt entry')
         path = helper.relative_path(item['path'])
@@ -212,7 +246,7 @@ def extract_checked(archive_path, receipt, feed, stage, helper):
     with tarfile.open(archive_path, 'r|gz') as packed:
         for member in packed:
             members += 1
-            need(members <= 400_128 and not member.pax_headers and not packed.pax_headers, 'archive entry/PAX bound rejected')
+            need(members <= 2 * file_limit and not member.pax_headers and not packed.pax_headers, 'archive entry/PAX bound rejected')
             name = member.name
             helper.relative_path(name)
             need(member.isfile() or member.isdir(), 'archive links/special files rejected')
@@ -246,6 +280,13 @@ def extract_checked(archive_path, receipt, feed, stage, helper):
     files, _, _ = helper.scan({p: str(stage / p) for p in prefixes})
     game = helper.validate_candidate(files[prefixes[0]])
     engine = helper.validate_engine(files[prefixes[1]])
+    if download_scope == 'legacy':
+        # A sleeping old client must be able to bind the bridge's game before
+        # it can install the new engine. Do not publish larger game metadata here.
+        metadata = files[prefixes[0]]['PACKAGE-MANIFEST.json']
+        manifest, _ = helper._metadata(files[prefixes[0]], 'PACKAGE-MANIFEST.json', limit=32 * 1024**2)
+        need(metadata.size <= 32 * 1024**2 and manifest['fileCount'] <= 200_000,
+             'legacy bridge exceeds old engine game bounds')
     need(game['identity'] == feed['game']['identity'] and engine['identity'] == feed['engine']['identity'], 'feed component identity mismatch')
     for component in components:
         for item in component['metadata']:
@@ -254,8 +295,9 @@ def extract_checked(archive_path, receipt, feed, stage, helper):
     return files
 
 
-def promote_immutable(stage, component, files, helper):
-    target, source = ROOT / component, stage / component
+def promote_immutable(stage, component, files, helper, release_root=ROOT):
+    need(release_root in (ROOT, ROOT / 'five-class'), 'unsupported fixed release root')
+    target, source = release_root / component, stage / component
     if target.exists():
         plain(target, directory=True, root_owned=True)
         for folder, dirs, names in os.walk(target, followlinks=False):
@@ -296,11 +338,12 @@ class LocalTLS(http.client.HTTPSConnection):
         self.sock = self._context.wrap_socket(socket.create_connection(('127.0.0.1', self.port), self.timeout), server_hostname=self.host)
 
 
-def verify_serving(feed_bytes, signature, feed):
+def verify_serving(feed_bytes, signature, feed, download_scope='legacy'):
+    _, public_path = channel_paths(download_scope)
     for path, expected, cache in [('latest.json', feed_bytes, 'no-store'), ('latest.p7s', signature, 'no-store')]:
         connection = LocalTLS(HOST, timeout=30, context=ssl.create_default_context())
         try:
-            connection.request('GET', '/client-updates/' + path, headers={'Host': HOST})
+            connection.request('GET', public_path + path, headers={'Host': HOST})
             response = connection.getresponse()
             need(response.status == 200 and response.read(65_537) == expected and cache in response.getheader('Cache-Control', ''), 'TLS discovery/cache check failed')
         finally:
@@ -309,16 +352,16 @@ def verify_serving(feed_bytes, signature, feed):
         for entry in component['metadata']:
             connection = LocalTLS(HOST, timeout=30, context=ssl.create_default_context())
             try:
-                connection.request('HEAD', '/client-updates/' + component['directory'] + '/' + entry['path'], headers={'Host': HOST})
+                connection.request('HEAD', public_path + component['directory'] + '/' + entry['path'], headers={'Host': HOST})
                 response = connection.getresponse()
                 need(response.status == 200 and response.getheader('Content-Length') == str(entry['size']) and 'immutable' in response.getheader('Cache-Control', ''), 'TLS immutable metadata check failed')
             finally:
                 connection.close()
-    checks = [('POST', '/client-updates/latest.json', 405),
-              ('GET', '/client-updates/', 404),
-              ('GET', '/client-updates/releases/', 404),
-              ('GET', '/client-updates/feed-current/latest.json', 404)]
-    checks.extend(('GET', '/client-updates/' + component['directory'] + '/', 404) for component in [feed['game'], feed['engine']])
+    checks = [('POST', public_path + 'latest.json', 405),
+              ('GET', public_path, 404),
+              ('GET', public_path + 'releases/', 404),
+              ('GET', public_path + 'feed-current/latest.json', 404)]
+    checks.extend(('GET', public_path + component['directory'] + '/', 404) for component in [feed['game'], feed['engine']])
     for method, path, expected_status in checks:
         connection = LocalTLS(HOST, timeout=30, context=ssl.create_default_context())
         try:
@@ -337,8 +380,10 @@ def main():
         p.add_argument('--' + name + '-sha256', required=True)
     p.add_argument('--archive-helper', required=True, type=Path)
     p.add_argument('--sequence', type=int, required=True)
+    p.add_argument('--download-scope', choices=['legacy', 'five-class'], default='legacy')
     p.add_argument('--externally-verified-signatures', action='store_true', required=True)
     a = p.parse_args()
+    release_root, public_path = channel_paths(a.download_scope)
     need(os.geteuid() == 0, 'root execution required after review')
     need(a.sequence > 0, 'positive feed sequence required')
     ancestors(CADDY.parent, root_owned=True)
@@ -396,12 +441,15 @@ def main():
         owned_archive = stage / 'approved-release.tar.gz'
         archive_size = copy_archive(upload / 'release.tar.gz', owned_archive, a.archive_sha256)
         need(receipt.get('archiveSizeBytes') == archive_size, 'archive size/receipt mismatch')
-        files = extract_checked(owned_archive, receipt, feed, stage, helper)
+        files = extract_checked(owned_archive, receipt, feed, stage, helper, a.download_scope)
         ROOT.mkdir(mode=0o755, exist_ok=True)
         plain(ROOT, directory=True, root_owned=True)
-        (ROOT / 'releases').mkdir(mode=0o755, exist_ok=True)
-        plain(ROOT / 'releases', directory=True, root_owned=True)
-        promotions = {c['directory']: promote_immutable(stage, c['directory'], files[c['directory']], helper) for c in [feed['game'], feed['engine']]}
+        if release_root != ROOT:
+            release_root.mkdir(mode=0o755, exist_ok=True)
+            plain(release_root, directory=True, root_owned=True)
+        (release_root / 'releases').mkdir(mode=0o755, exist_ok=True)
+        plain(release_root / 'releases', directory=True, root_owned=True)
+        promotions = {c['directory']: promote_immutable(stage, c['directory'], files[c['directory']], helper, release_root) for c in [feed['game'], feed['engine']]}
         feed_stage = stage / 'feed-prepared'
         feed_stage.mkdir(mode=0o755)
         for name, data in [('latest.json', feed_bytes), ('latest.p7s', signature)]:
@@ -418,7 +466,7 @@ def main():
         os.chmod(replacement, stat.S_IMODE(CADDY.stat().st_mode))
         validation_environment = caddy_validation_environment(old)
         command_checked(['caddy', 'validate', '--config', str(replacement), '--adapter', 'caddyfile'], backup / 'validate.log', validation_environment)
-        current = ROOT / 'feed-current'
+        current = release_root / 'feed-current'
         old_feed_present = current.exists()
         if old_feed_present:
             plain(current, directory=True, root_owned=True)
@@ -439,7 +487,7 @@ def main():
                 need(not os.path.lexists(current), 'feed target appeared concurrently')
                 os.rename(feed_stage, current)
             published = True
-            verify_serving(feed_bytes, signature, feed)
+            verify_serving(feed_bytes, signature, feed, a.download_scope)
             health_after = health_idle()
         except BaseException:
             if published:
@@ -459,12 +507,13 @@ def main():
                 command_checked(['systemctl', 'reload', 'caddy'], backup / 'restore-reload.log')
             raise
         result = {'schema': 'mir2.static-update-deployment.v1', 'sequence': a.sequence,
+                  'downloadScope': a.download_scope,
                   'feedSha256': a.latest_sha256, 'signatureSha256': a.signature_sha256,
                   'archiveSha256': a.archive_sha256, 'caddyBeforeSha256': digest(old), 'caddyAfterSha256': digest(new),
                   'signatureValidation': 'externally-verified-before-SHA256-pinned-upload',
                   'immutableReleases': promotions, 'healthBefore': health_before, 'healthAfter': health_after,
                   'backupDirectory': str(backup), 'retainedStageDirectory': str(stage),
-                  'latestUrl': 'https://' + HOST + '/client-updates/latest.json'}
+                  'latestUrl': 'https://' + HOST + public_path + 'latest.json'}
         (backup / 'DEPLOYMENT.json').write_text(json.dumps(result, indent=2) + '\n')
         print(json.dumps(result))
 

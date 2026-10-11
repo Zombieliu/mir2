@@ -612,6 +612,7 @@ impl ZoneManager {
             let mut transferred_owned_pet_clock = None;
             let mut transferred_owned_human_poisons = None;
             let mut transferred_purification = None;
+            let mut transferred_five_class = None;
             let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
             let retain_online = online_map_transfer && self.online_identities.owner(&session_id)
                 .is_some_and(|owner|owner.matches_join(&join));
@@ -629,6 +630,8 @@ impl ZoneManager {
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
                 if retain_online {
                     if let Some(zone)=self.zones.get_mut(&previous_key) { zone.prepare_player_online_pet_transfer(&session_id); }
+                    transferred_five_class = self.zones.get_mut(&previous_key)
+                        .and_then(|zone| zone.take_online_five_class_state(&session_id));
                     transferred_purification = self
                         .zones
                         .get_mut(&previous_key)
@@ -686,6 +689,11 @@ impl ZoneManager {
                 // been refreshed, without blessing a new life or bare ID.
                 if let Some(zone) = self.zones.get_mut(&key) {
                     zone.adopt_online_purification_transfer(&session_id, transfer, &mut joined);
+                }
+            }
+            if let Some(transfer) = transferred_five_class {
+                if let Some(zone) = self.zones.get_mut(&key) {
+                    joined.extend(zone.restore_online_five_class_state(&session_id, transfer));
                 }
             }
             outbounds.extend(joined);

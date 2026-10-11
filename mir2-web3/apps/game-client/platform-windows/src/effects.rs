@@ -93,6 +93,16 @@ const FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const FIREBALL_PROJECTILE_STEP_MS: u64 = 30;
 const FIREBALL_TILE_TRAVEL_MS: u64 = 50;
 const GUARD_RANGE_ACTION_FRAME_DELAY_MS: u64 = 400;
+// Crystal Frames.Player: AttackRange1 is eight 100 ms frames. The ordinary
+// arrow starts at frame 5; a server-reported Focus proc begins at frame 6.
+const ARCHER_NORMAL_ARROW_DELAY_MS: u64 = 500;
+const ARCHER_FOCUS_DELAY_MS: u64 = 600;
+const ARCHER_NORMAL_ARROW_SOUND_CUE: &str = "Archer.normalArrow";
+const ARCHER_NORMAL_ARROW_SOUND_FILE: &str = "M121-0.wav";
+const ARCHER_NORMAL_ARROW_IMPACT_SOUND_CUE: &str = "Archer.normalArrow.impact";
+const ARCHER_NORMAL_ARROW_IMPACT_SOUND_FILE: &str = "M121-2.wav";
+const ARCHER_FOCUS_SOUND_CUE: &str = "Focus.proc";
+const ARCHER_FOCUS_SOUND_FILE: &str = "M121-5.wav";
 const FIREBALL_CAST_SOUND_FILE: &str = "M31-0.wav";
 const FIREBALL_PROJECTILE_SOUND_FILE: &str = "M31-1.wav";
 const FIREBALL_IMPACT_SOUND_FILE: &str = "M31-2.wav";
@@ -313,6 +323,62 @@ fn actor_is_assassin(actor: &Value) -> bool {
         .or_else(|| actor.get("class"))
         .and_then(Value::as_str)
         .is_some_and(|class| class.eq_ignore_ascii_case("assassin"))
+}
+
+fn actor_is_archer(actor: &Value) -> bool {
+    actor_is_player(actor)
+        && actor
+            .get("classKey")
+            .or_else(|| actor.get("class"))
+            .and_then(Value::as_str)
+            .is_some_and(|class| class.eq_ignore_ascii_case("archer"))
+}
+
+fn effect_object_id(payload: &Value) -> Option<u32> {
+    payload
+        .get("objectId")
+        .and_then(Value::as_u64)
+        .and_then(|id| u32::try_from(id).ok())
+        .filter(|id| *id != 0)
+}
+
+fn packet_direction(payload: &Value) -> Option<u32> {
+    payload.get("direction").and_then(|direction| {
+        direction
+            .as_u64()
+            .and_then(|value| u32::try_from(value).ok())
+            .filter(|value| *value < 8)
+            .or_else(|| direction.as_str().map(direction_index))
+    })
+}
+
+fn five_class_ranged_spell(spell: &str) -> bool {
+    matches!(
+        spell,
+        "StraightShot"
+            | "DoubleShot"
+            | "ElementalShot"
+            | "Stonetrap"
+            | "BindingShot"
+            | "SummonVampire"
+            | "SummonSnakes"
+            | "VampireShot"
+            | "PoisonShot"
+            | "CrippleShot"
+            | "DelayedExplosion"
+            | "CatTongue"
+    )
+}
+
+fn actor_has_source_buff(actor: &Value, name: &str, source_id: u64) -> Option<bool> {
+    // ObjectPlayer carries Crystal BuffType bytes (VampireShot=16,
+    // PoisonShot=17). The native owner snapshot carries typed buff names.
+    let buffs = actor.get("buffs")?.as_array()?;
+    Some(buffs.iter().any(|buff| {
+        buff.as_u64() == Some(source_id)
+            || buff.as_str() == Some(name)
+            || buff.get("type").and_then(Value::as_str) == Some(name)
+    }))
 }
 
 fn player_library_index(library: &str) -> Option<i32> {
@@ -664,10 +730,37 @@ pub(crate) struct EffectCatalog {
     ground_by_spell: HashMap<String, EffectSpec>,
     map_by_name: HashMap<String, EffectSpec>,
     effect_name_by_number: HashMap<u32, String>,
+    #[cfg(test)]
+    frame_asset_root: std::path::PathBuf,
 }
 
 fn library_dir(library: &str) -> String {
     library.replace(":", "_")
+}
+
+#[cfg(test)]
+fn exported_effect_test_root() -> std::path::PathBuf {
+    // Contract tests consume the actual Source exports in this checkout. A
+    // focused effects fixture need not include every terrain pack required to
+    // start the game; it must never silently read an installed/R2 catalog.
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../web/public")
+}
+
+#[cfg(test)]
+fn exported_effect_test_path(root: &std::path::Path, web_path: &str) -> Option<std::path::PathBuf> {
+    let relative = web_path.trim_start_matches('/');
+    if relative.is_empty() || relative.contains(['\\', ':']) {
+        return None;
+    }
+    let relative = std::path::Path::new(relative);
+    if !relative
+        .components()
+        .all(|component| matches!(component, std::path::Component::Normal(_)))
+    {
+        return None;
+    }
+    let path = root.join(relative);
+    path.is_file().then_some(path)
 }
 
 impl EffectCatalog {
@@ -675,15 +768,20 @@ impl EffectCatalog {
     /// None (non-throwing) when the manifest/libraries are unavailable, so the
     /// native client never panics on a missing asset bundle.
     pub(crate) fn load() -> Option<EffectCatalog> {
-        let manifest_path = assets::asset_path("original-effects/effects.generated.json")?;
+        #[cfg(not(test))]
+        let asset_path = assets::asset_path;
+        #[cfg(test)]
+        let frame_asset_root = exported_effect_test_root();
+        #[cfg(test)]
+        let asset_path = |web_path: &str| exported_effect_test_path(&frame_asset_root, web_path);
+        let manifest_path = asset_path("original-effects/effects.generated.json")?;
         let bytes = fs::read(&manifest_path).ok()?;
         let manifest: EffectsManifest = serde_json::from_slice(&bytes).ok()?;
 
         let mut libraries = HashMap::new();
         for library in &manifest.available {
             let dir = library_dir(library);
-            let Some(meta_path) = assets::asset_path(&format!("original-effects/{dir}/meta.json"))
-            else {
+            let Some(meta_path) = asset_path(&format!("original-effects/{dir}/meta.json")) else {
                 continue;
             };
             if let Ok(bytes) = fs::read(&meta_path) {
@@ -744,6 +842,8 @@ impl EffectCatalog {
             ground_by_spell,
             map_by_name,
             effect_name_by_number,
+            #[cfg(test)]
+            frame_asset_root,
         })
     }
 
@@ -759,7 +859,12 @@ impl EffectCatalog {
             let Some(frame) = meta.frames.get(&(base + index).to_string()) else {
                 return Vec::new();
             };
-            if !crate::frame_png_exists(&frame.path) {
+            #[cfg(not(test))]
+            let frame_exists = crate::frame_png_exists(&frame.path);
+            #[cfg(test)]
+            let frame_exists =
+                exported_effect_test_path(&self.frame_asset_root, &frame.path).is_some();
+            if !frame_exists {
                 return Vec::new();
             }
             frames.push(frame.clone());
@@ -956,6 +1061,10 @@ impl EffectCatalog {
         self.resolve_animation(entry, 0, value)
     }
 
+    fn client_direction_animation(&self, name: &str, direction: u32) -> Option<Animation> {
+        self.resolve_animation(self.map_by_name.get(name)?, direction, 0)
+    }
+
     pub(crate) fn map_animation_by_number(&self, effect: u32, value: u32) -> Option<Animation> {
         let name = self.effect_name_for_number(effect)?;
         self.map_animation(&name, value)
@@ -981,6 +1090,48 @@ impl EffectCatalog {
             && animation.frames.len() == 6
             && animation.interval == FIREBALL_PROJECTILE_STEP_MS
             && animation.duration_ms == 180
+            && animation.blend
+            && (animation.opacity - 1.0).abs() < f32::EPSILON
+            && animation.light == Some(6)
+            && !animation.repeat)
+            .then_some(animation)
+    }
+
+    fn archer_normal_arrow_animation(&self, direction: u32) -> Option<Animation> {
+        // PlayerObject.CreateProjectile(1030, Magic3, true, 5, 30, 5).
+        // These are source frame indices, not a replacement image fallback.
+        let entry = self.map_by_name.get("ArcherNormalArrow")?;
+        if entry.library != "Magic3"
+            || entry.base != 1030
+            || entry.count != 5
+            || entry.interval != 30
+            || entry.direction_count != Some(16)
+            || entry.direction_stride != Some(10)
+        {
+            return None;
+        }
+        let animation = self.resolve_animation(entry, direction, 0)?;
+        (animation.kind == "projectile"
+            && animation.blend
+            && (animation.opacity - 1.0).abs() < f32::EPSILON
+            && animation.light == Some(6)
+            && !animation.repeat)
+            .then_some(animation)
+    }
+
+    fn archer_focus_proc_animation(&self) -> Option<Animation> {
+        // PlayerObject adds ten Magic3 frames for Frame.Count * FrameInterval:
+        // eight actor frames * 100 ms, hence an 80 ms effect-frame interval.
+        let entry = self.map_by_name.get("ArcherFocusProc")?;
+        if entry.library != "Magic3"
+            || entry.base != 2730
+            || entry.count != 10
+            || entry.interval != 80
+        {
+            return None;
+        }
+        let animation = self.resolve_animation(entry, 0, 0)?;
+        (animation.kind == "attackOverlay"
             && animation.blend
             && (animation.opacity - 1.0).abs() < f32::EPSILON
             && animation.light == Some(6)
@@ -1223,6 +1374,50 @@ struct LocalProjectileTarget {
     target_id: Option<u32>,
     fallback: (i32, i32),
     resolved_at_launch: bool,
+    /// Crystal's target-free normal arrow keeps extending its destination
+    /// until it is outside Globals.DataRange. A vanished bound target instead
+    /// retains its last known location through Missile's strong reference.
+    unbound_archer_arrow: bool,
+    unbound_archer_arrow_process_at: Option<u64>,
+}
+
+/// Separate from the classic spell callbacks: these arrows are launched at
+/// actual Archer body-frame boundaries, and a Vampire return is a stationary
+/// caster effect after target completion, not a missile travelling backwards.
+#[derive(Debug, Clone)]
+struct FiveClassProjectile {
+    spell: String,
+    source_id: u32,
+    target_id: Option<u32>,
+    fallback: (i32, i32),
+    launched: bool,
+    target_bound_at_launch: bool,
+    process_interval_ms: u64,
+    last_process_at: Option<u64>,
+    explode_at_ground: bool,
+    arrow_index: usize,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct NativeElementState {
+    enabled: bool,
+    casted: bool,
+    owner: bool,
+}
+
+#[derive(Debug, Clone)]
+struct NativeEffectLoopControl {
+    generation: u64,
+    sequence: u64,
+    file_name: Option<&'static str>,
+}
+
+#[derive(Debug, Clone)]
+struct DoubleSlashBodyEffect {
+    object_id: u32,
+    source_sequence: u64,
+    keys: [String; 2],
+    started_at: Option<u64>,
 }
 
 /// Crystal PlayerObject Spell-completion talismans. Unlike targeted bolts,
@@ -1314,6 +1509,18 @@ pub(crate) struct NativeEffects {
     /// target disappears during wind-up and binds a target that appears before
     /// launch.
     local_projectile_targets: HashMap<String, LocalProjectileTarget>,
+    five_class_projectiles: HashMap<String, FiveClassProjectile>,
+    five_class_actor_contexts: HashMap<u32, Value>,
+    elemental_state: HashMap<u32, NativeElementState>,
+    elemental_orb_thresholds: HashMap<(u32, u32), u32>,
+    elemental_loop_owner: Option<(u32, u32)>,
+    concentration_paused_at: HashMap<u32, u64>,
+    hidden_five_class_effect_keys: HashSet<String>,
+    delayed_explosion_stages: HashMap<u32, u32>,
+    elemental_barrier_objects: HashSet<u32>,
+    elemental_barrier_down_objects: HashSet<u32>,
+    ready_element_loop_controls: Vec<NativeEffectLoopControl>,
+    double_slash_body_effects: Vec<DoubleSlashBodyEffect>,
     /// Targets whose shared presentation clock is currently in Crystal's
     /// terminal `Dead` action. A plain `dead` packet flag is insufficient:
     /// FireBall-family impacts remain visible throughout the `Die` action.
@@ -1367,6 +1574,18 @@ impl Default for NativeEffects {
             zone_tiles: HashMap::new(),
             local_projectile_dedupe: HashMap::new(),
             local_projectile_targets: HashMap::new(),
+            five_class_projectiles: HashMap::new(),
+            five_class_actor_contexts: HashMap::new(),
+            elemental_state: HashMap::new(),
+            elemental_orb_thresholds: HashMap::new(),
+            elemental_loop_owner: None,
+            concentration_paused_at: HashMap::new(),
+            hidden_five_class_effect_keys: HashSet::new(),
+            delayed_explosion_stages: HashMap::new(),
+            elemental_barrier_objects: HashSet::new(),
+            elemental_barrier_down_objects: HashSet::new(),
+            ready_element_loop_controls: Vec::new(),
+            double_slash_body_effects: Vec::new(),
             dead_action_object_ids: HashSet::new(),
             ready_sounds: Vec::new(),
             pending_sounds: Vec::new(),
@@ -1396,7 +1615,1172 @@ impl Default for NativeEffects {
 }
 
 impl NativeEffects {
+    fn clear_effect_key(&mut self, key: &str) {
+        self.active.retain(|instance| instance.key != key);
+        self.anchor_object_ids.remove(key);
+        self.source_object_ids.remove(key);
+        self.prestart_source_object_ids.remove(key);
+        self.anchor_player_keys.remove(key);
+        self.local_projectile_targets.remove(key);
+        self.five_class_projectiles.remove(key);
+        self.pending_sounds.retain(|pending| pending.key != key);
+        self.hidden_five_class_effect_keys.remove(key);
+    }
+
+    fn push_actor_animation(
+        &mut self,
+        key: String,
+        object_id: u32,
+        animation: Animation,
+        start_at: u64,
+        provenance: &EffectProvenance,
+    ) -> bool {
+        let Some((tile_x, tile_y)) = self.zone_tiles.get(&object_id).copied() else {
+            return false;
+        };
+        self.anchor_object_ids.insert(key.clone(), object_id);
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::SceneForeground,
+            tile_x,
+            tile_y,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+        true
+    }
+
+    fn queue_five_class_sound(
+        &mut self,
+        key: &str,
+        due_at_ms: u64,
+        cue: &str,
+        file: &str,
+        provenance: &EffectProvenance,
+    ) {
+        self.pending_sounds.push(PendingEffectSound {
+            key: key.to_owned(),
+            due_at_ms,
+            requires_active_effect: true,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: cue.to_owned(),
+                file_name: file.to_owned(),
+            },
+        });
+    }
+
+    fn apply_double_slash_overlay(
+        &mut self,
+        payload: &Value,
+        provenance: &EffectProvenance,
+    ) -> bool {
+        let double_slash = payload.get("spell").is_some_and(|spell| {
+            spell.as_str() == Some("DoubleSlash") || spell.as_u64() == Some(92)
+        });
+        if !double_slash {
+            return false;
+        }
+        let Some(id) = effect_object_id(payload) else {
+            return true;
+        };
+        let Some(actor) = self.five_class_actor_contexts.get(&id) else {
+            return true;
+        };
+        if !actor_is_player(actor)
+            || !actor_is_assassin(actor)
+            || actor.get("ridingMount").and_then(Value::as_bool) == Some(true)
+        {
+            return true;
+        }
+        let (Some(direction), Some(catalog)) = (packet_direction(payload), effect_catalog()) else {
+            return true;
+        };
+        let (Some(first), Some(second)) = (
+            catalog.client_direction_animation("AssassinDoubleSlashAttack1", direction),
+            catalog.client_direction_animation("AssassinDoubleSlashAttack4", direction),
+        ) else {
+            return true;
+        };
+        if [first.clone(), second.clone()].iter().any(|animation| {
+            animation.frames.len() != 6
+                || animation.interval != 46
+                || animation.kind != "attackOverlay"
+                || !animation.blend
+                || (animation.opacity - 0.7).abs() > f32::EPSILON
+        }) {
+            return true;
+        }
+        let body_sequence = actor
+            .get("_nativeAnimationSequence")
+            .and_then(Value::as_u64);
+        let first_key = self.next_key("double-slash-first");
+        let second_key = self.next_key("double-slash-second");
+        // A real body hint owns the action start. A queued attack must not
+        // flash its overlay or play its second strike during locomotion.
+        let first_at = if body_sequence.is_some() {
+            u64::MAX
+        } else {
+            self.now_ms
+        };
+        let second_at = first_at.saturating_add(first.duration_ms);
+        if self.push_actor_animation(first_key.clone(), id, first, first_at, provenance) {
+            self.queue_five_class_sound(
+                &first_key,
+                first_at,
+                "DoubleSlash.attack1",
+                "M92-0.wav",
+                provenance,
+            );
+        }
+        if self.push_actor_animation(second_key.clone(), id, second, second_at, provenance) {
+            self.queue_five_class_sound(
+                &second_key,
+                second_at,
+                "DoubleSlash.attack4",
+                "M92-1.wav",
+                provenance,
+            );
+        }
+        if let Some(source_sequence) = body_sequence {
+            self.double_slash_body_effects.push(DoubleSlashBodyEffect {
+                object_id: id,
+                source_sequence,
+                keys: [first_key, second_key],
+                started_at: None,
+            });
+            while self.double_slash_body_effects.len() > MAX_ACTIVE_EFFECTS / 2 {
+                let removed = self.double_slash_body_effects.remove(0);
+                for key in removed.keys {
+                    self.clear_effect_key(&key);
+                }
+            }
+        }
+        true
+    }
+
+    fn reconcile_double_slash_body_clocks(
+        &mut self,
+        presentation: &crate::entity_presentation::NativeEntityPresentation,
+    ) {
+        use crate::entity_presentation::NativeDoubleSlashBodyClock;
+        let mut retired = Vec::new();
+        for effect in &mut self.double_slash_body_effects {
+            match presentation.double_slash_body_clock(effect.object_id, effect.source_sequence) {
+                NativeDoubleSlashBodyClock::Pending => {}
+                NativeDoubleSlashBodyClock::Retired => retired.extend(effect.keys.clone()),
+                NativeDoubleSlashBodyClock::Started(started_at) => {
+                    if effect.started_at == Some(started_at) {
+                        continue;
+                    }
+                    effect.started_at = Some(started_at);
+                    for (index, key) in effect.keys.iter().enumerate() {
+                        let start_at = started_at.saturating_add(index as u64 * 276);
+                        if let Some(instance) =
+                            self.active.iter_mut().find(|instance| &instance.key == key)
+                        {
+                            instance.start_at = start_at;
+                        }
+                        for sound in self
+                            .pending_sounds
+                            .iter_mut()
+                            .filter(|sound| &sound.key == key)
+                        {
+                            sound.due_at_ms = start_at;
+                        }
+                    }
+                }
+            }
+        }
+        for key in retired {
+            self.clear_effect_key(&key);
+        }
+        let active = &self.active;
+        self.double_slash_body_effects.retain(|effect| {
+            effect
+                .keys
+                .iter()
+                .any(|key| active.iter().any(|instance| &instance.key == key))
+        });
+    }
+
+    fn five_class_projectile_animation(
+        catalog: &EffectCatalog,
+        spell: &str,
+        direction: u32,
+    ) -> Option<Animation> {
+        match spell {
+            "DelayedExplosion" => {
+                catalog.client_direction_animation("ArcherDelayedExplosionArrow", direction)
+            }
+            "ElementalShot" => {
+                catalog.client_direction_animation("ArcherElementalShotArrow", direction)
+            }
+            _ => catalog.spell_projectile_animation(spell, direction),
+        }
+    }
+
+    fn apply_five_class_ranged_magic(
+        &mut self,
+        payload: &Value,
+        catalog: &EffectCatalog,
+        provenance: &EffectProvenance,
+        spell: &str,
+    ) -> bool {
+        if !five_class_ranged_spell(spell) {
+            return false;
+        }
+        let Some(source_id) = effect_object_id(payload) else {
+            return true;
+        };
+        let Some(actor) = self.five_class_actor_contexts.get(&source_id) else {
+            return true;
+        };
+        if if spell == "CatTongue" {
+            !actor_is_player(actor) || !actor_is_assassin(actor)
+        } else {
+            !actor_is_archer(actor)
+        } {
+            return true;
+        }
+        if matches!(spell, "StraightShot" | "CatTongue")
+            && payload.get("cast").and_then(Value::as_bool) != Some(true)
+        {
+            return true;
+        }
+        if spell == "ElementalShot" {
+            if !self
+                .elemental_state
+                .get(&source_id)
+                .is_some_and(|state| state.enabled && (!state.casted || state.owner))
+            {
+                return true;
+            }
+            if let Some(animation) = catalog.map_animation("ArcherElementalShotCast", 0) {
+                let key = self.next_key("elemental-shot-cast");
+                let start_at = self.now_ms.saturating_add(100);
+                if self.push_actor_animation(
+                    key.clone(),
+                    source_id,
+                    animation,
+                    start_at,
+                    provenance,
+                ) {
+                    self.queue_five_class_sound(
+                        &key,
+                        start_at,
+                        "ElementalShot.cast",
+                        "M128-0.wav",
+                        provenance,
+                    );
+                }
+            }
+        }
+        let (Some(from_x), Some(from_y), Some(to_x), Some(to_y)) = (
+            value_f32(payload, "location", "x").map(|x| x as i32),
+            value_f32(payload, "location", "y").map(|y| y as i32),
+            value_f32(payload, "target", "x").map(|x| x as i32),
+            value_f32(payload, "target", "y").map(|y| y as i32),
+        ) else {
+            return true;
+        };
+        let target_id = payload
+            .get("targetId")
+            .and_then(Value::as_u64)
+            .and_then(|id| u32::try_from(id).ok())
+            .filter(|id| *id != 0);
+        let launch_offsets: &[u64] = match spell {
+            "StraightShot" => &[800],
+            "CatTongue" => &[600],
+            "DoubleShot" => &[500, 700],
+            "DelayedExplosion" => &[500],
+            _ => &[700],
+        };
+        for (index, delay) in launch_offsets.iter().enumerate() {
+            let Some(mut animation) = Self::five_class_projectile_animation(
+                catalog,
+                spell,
+                projectile_direction16((from_x, from_y), (to_x, to_y)),
+            ) else {
+                continue;
+            };
+            let process_interval_ms = match spell {
+                "Stonetrap" => 20,
+                "VampireShot" | "PoisonShot" | "CrippleShot" | "BindingShot" | "SummonVampire"
+                | "SummonSnakes" => 10,
+                _ => 30,
+            };
+            let (duration, interval) = crystal_projectile_clock(
+                max_tile_distance((from_x, from_y), (to_x, to_y)),
+                process_interval_ms,
+            );
+            animation.duration_ms = duration;
+            animation.interval = interval;
+            let key = self.next_key("five-class-arrow");
+            let start_at = self.now_ms.saturating_add(*delay);
+            self.source_object_ids.insert(key.clone(), source_id);
+            self.five_class_projectiles.insert(
+                key.clone(),
+                FiveClassProjectile {
+                    spell: spell.to_owned(),
+                    source_id,
+                    target_id,
+                    fallback: (to_x, to_y),
+                    launched: false,
+                    target_bound_at_launch: false,
+                    process_interval_ms,
+                    last_process_at: None,
+                    explode_at_ground: spell == "Stonetrap",
+                    arrow_index: index,
+                },
+            );
+            // Each DoubleShot arrow owns a distinct cue under the same packet
+            // sequence, otherwise the bounded audio queue drops the second.
+            let (cue, file) = match spell {
+                "StraightShot" => ("StraightShot.launch".to_owned(), "M122-0.wav"),
+                "CrippleShot" => ("CrippleShot.launch".to_owned(), "M136-0.wav"),
+                "CatTongue" => ("CatTongue.launch".to_owned(), "M107-0.wav"),
+                "ElementalShot" => (String::new(), ""),
+                _ => (format!("{spell}.launch{index}"), "M121-0.wav"),
+            };
+            // Source M107 WAVs are absent. Never substitute another skill.
+            if !file.is_empty() && !file.starts_with("M107-") {
+                self.queue_five_class_sound(&key, start_at, &cue, file, provenance);
+            }
+            let mut arrow_provenance = provenance.clone();
+            arrow_provenance.spell = spell.to_owned();
+            self.active.push(EffectInstance {
+                key,
+                kind: EffectKindTag::Projectile,
+                tile_x: to_x,
+                tile_y: to_y,
+                from_x: Some(from_x as f32),
+                from_y: Some(from_y as f32),
+                current: Some(animation),
+                queued: None,
+                return_queued: None,
+                started_at: self.now_ms,
+                start_at,
+                persistent_object_id: None,
+                provenance: arrow_provenance,
+            });
+        }
+        true
+    }
+
+    fn refresh_five_class_projectiles(&mut self, now_ms: u64) {
+        let Some(catalog) = effect_catalog() else {
+            return;
+        };
+        let mut completed = Vec::new();
+        let mut canceled = Vec::new();
+        for instance in &mut self.active {
+            let Some(state) = self.five_class_projectiles.get_mut(&instance.key) else {
+                continue;
+            };
+            if now_ms < instance.start_at || state.last_process_at == Some(now_ms) {
+                continue;
+            }
+            state.last_process_at = Some(now_ms);
+            let Some((source_x, source_y)) = self.zone_tiles.get(&state.source_id).copied() else {
+                canceled.push(instance.key.clone());
+                continue;
+            };
+            if !state.launched {
+                let target_tile = state
+                    .target_id
+                    .and_then(|id| self.zone_tiles.get(&id).copied());
+                state.target_bound_at_launch = target_tile.is_some();
+                if let Some(target) = target_tile {
+                    state.fallback = target;
+                } else {
+                    state.target_id = None;
+                }
+                let Some(animation) = Self::five_class_projectile_animation(
+                    catalog,
+                    &state.spell,
+                    projectile_direction16((source_x, source_y), state.fallback),
+                ) else {
+                    canceled.push(instance.key.clone());
+                    continue;
+                };
+                instance.current = Some(animation);
+                instance.from_x = Some(source_x as f32);
+                instance.from_y = Some(source_y as f32);
+                state.launched = true;
+            }
+            if let Some(target_tile) = state
+                .target_id
+                .and_then(|id| self.zone_tiles.get(&id).copied())
+            {
+                state.fallback = target_tile;
+            } else if !state.target_bound_at_launch && !state.explode_at_ground {
+                let source = (
+                    instance.from_x.unwrap_or(source_x as f32) as i32,
+                    instance.from_y.unwrap_or(source_y as f32) as i32,
+                );
+                if max_tile_distance((source_x, source_y), state.fallback) < 16 {
+                    state.fallback = (
+                        state
+                            .fallback
+                            .0
+                            .saturating_add(state.fallback.0.saturating_sub(source.0)),
+                        state
+                            .fallback
+                            .1
+                            .saturating_add(state.fallback.1.saturating_sub(source.1)),
+                    );
+                }
+            }
+            instance.tile_x = state.fallback.0;
+            instance.tile_y = state.fallback.1;
+            let Some(animation) = instance.current.as_mut() else {
+                continue;
+            };
+            let from = (
+                instance.from_x.unwrap_or(source_x as f32) as i32,
+                instance.from_y.unwrap_or(source_y as f32) as i32,
+            );
+            let (duration, interval) = crystal_projectile_clock(
+                max_tile_distance(from, state.fallback),
+                state.process_interval_ms,
+            );
+            animation.duration_ms = duration;
+            animation.interval = interval;
+            if now_ms >= instance.start_at.saturating_add(duration) {
+                completed.push((
+                    instance.key.clone(),
+                    state.clone(),
+                    instance.provenance.clone(),
+                ));
+            }
+        }
+        for key in canceled {
+            self.clear_effect_key(&key);
+        }
+        for (key, state, provenance) in completed {
+            // Deliver pending launch first when a sparse render tick crosses
+            // both boundaries. Clearing the arrow must not discard that cue.
+            let mut pending_due = Vec::new();
+            self.pending_sounds.retain(|sound| {
+                if sound.key == key && now_ms >= sound.due_at_ms {
+                    pending_due.push(sound.event.clone());
+                    false
+                } else {
+                    true
+                }
+            });
+            self.ready_sounds.extend(pending_due);
+            let impact_at =
+                self.active
+                    .iter()
+                    .find(|instance| instance.key == key)
+                    .and_then(|instance| {
+                        instance.current.as_ref().map(|animation| {
+                            instance.start_at.saturating_add(animation.duration_ms)
+                        })
+                    })
+                    .unwrap_or(now_ms);
+            self.clear_effect_key(&key);
+            self.complete_five_class_projectile(&state, impact_at, &provenance, catalog);
+        }
+    }
+
+    fn complete_five_class_projectile(
+        &mut self,
+        state: &FiveClassProjectile,
+        impact_at: u64,
+        provenance: &EffectProvenance,
+        catalog: &EffectCatalog,
+    ) {
+        let spell = state.spell.as_str();
+        let target = state
+            .target_id
+            .filter(|id| self.zone_tiles.contains_key(id));
+        let bound = state.target_bound_at_launch;
+        let dead = target.is_some_and(|id| self.dead_action_object_ids.contains(&id));
+        let (impact, sound, returns) = match spell {
+            "StraightShot" if !dead => (
+                catalog.spell_impact_animation(spell),
+                Some("M122-2.wav"),
+                false,
+            ),
+            "CatTongue" if !dead => (catalog.spell_impact_animation(spell), None, false),
+            "VampireShot" => (
+                catalog.spell_impact_animation(spell),
+                Some("M133-2.wav"),
+                true,
+            ),
+            "PoisonShot" => (
+                catalog.spell_impact_animation(spell),
+                Some("M135-2.wav"),
+                false,
+            ),
+            "CrippleShot" => {
+                let Some(actor) = self.five_class_actor_contexts.get(&state.source_id) else {
+                    return;
+                };
+                let (Some(poison), Some(vampire)) = (
+                    actor_has_source_buff(actor, "PoisonShot", 17),
+                    actor_has_source_buff(actor, "VampireShot", 16),
+                ) else {
+                    return;
+                };
+                if poison {
+                    (
+                        catalog.map_animation("ArcherCripplePoisonImpact", 0),
+                        Some("M136-6.wav"),
+                        false,
+                    )
+                } else if vampire {
+                    (
+                        catalog.map_animation("ArcherCrippleVampireImpact", 0),
+                        Some("M136-7.wav"),
+                        true,
+                    )
+                } else {
+                    (
+                        catalog.spell_impact_animation(spell),
+                        Some("M136-5.wav"),
+                        false,
+                    )
+                }
+            }
+            "Stonetrap" => (None, Some("M130-7.wav"), false),
+            "ElementalShot" => (None, Some("M128-2.wav"), false),
+            "SummonVampire" => (None, Some("M132-7.wav"), false),
+            "DoubleShot" | "DelayedExplosion" => (None, Some("M121-2.wav"), false),
+            // M137-7 and M140-7 are absent in the actual source Sound tree.
+            _ => (None, None, false),
+        };
+        if !bound && !state.explode_at_ground {
+            return;
+        }
+        if let Some(file) = sound {
+            self.queue_immediate_sound(
+                provenance,
+                &format!("{spell}.impact{}", state.arrow_index),
+                file,
+            );
+        }
+        let (Some(target), Some(impact)) = (target, impact) else {
+            return;
+        };
+        let return_at = impact_at.saturating_add(impact.duration_ms);
+        let key = self.next_key("five-class-impact");
+        if !self.push_actor_animation(key, target, impact, impact_at, provenance) {
+            return;
+        }
+        if returns {
+            if let Some(mut animation) = catalog.map_animation("ArcherVampireReturn", 0) {
+                // PlayerObject adds this Effect to the caster; it does not
+                // return by traversing a reverse projectile path.
+                animation.kind = "target".to_owned();
+                let key = self.next_key("archer-vampire-return");
+                if self.push_actor_animation(
+                    key.clone(),
+                    state.source_id,
+                    animation,
+                    return_at,
+                    provenance,
+                ) {
+                    self.queue_five_class_sound(
+                        &key,
+                        return_at,
+                        "VampireShot.return",
+                        "M45-2.wav",
+                        provenance,
+                    );
+                }
+            }
+        }
+    }
+
+    fn queue_element_loop(
+        &mut self,
+        file_name: Option<&'static str>,
+        provenance: &EffectProvenance,
+    ) {
+        if file_name.is_none() {
+            self.elemental_loop_owner = None;
+        }
+        // One source audio channel replaces the previous orb sound. The
+        // protocol sequence is reused because this is a control for that
+        // same authoritative SetElemental event, not a synthetic timer event.
+        self.ready_element_loop_controls
+            .push(NativeEffectLoopControl {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                file_name,
+            });
+        if self.ready_element_loop_controls.len() > 32 {
+            self.ready_element_loop_controls.remove(0);
+        }
+    }
+
+    fn apply_concentration(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(id) = effect_object_id(payload) else {
+            return;
+        };
+        if !self
+            .five_class_actor_contexts
+            .get(&id)
+            .is_some_and(actor_is_player)
+        {
+            return;
+        }
+        let (Some(enabled), Some(interrupted)) = (
+            payload.get("enabled").and_then(Value::as_bool),
+            payload.get("interrupted").and_then(Value::as_bool),
+        ) else {
+            return;
+        };
+        let key = format!("archer-concentration-{id}");
+        if !enabled {
+            self.clear_effect_key(&key);
+            self.concentration_paused_at.remove(&id);
+            return;
+        }
+        if interrupted {
+            if self.active.iter().any(|instance| instance.key == key) {
+                self.concentration_paused_at
+                    .entry(id)
+                    .or_insert(self.now_ms);
+                self.hidden_five_class_effect_keys.insert(key);
+            }
+            return;
+        }
+        if let Some(paused_at) = self.concentration_paused_at.remove(&id) {
+            if let Some(instance) = self.active.iter_mut().find(|instance| instance.key == key) {
+                instance.start_at = instance
+                    .start_at
+                    .saturating_add(self.now_ms.saturating_sub(paused_at));
+            }
+            self.hidden_five_class_effect_keys.remove(&key);
+        }
+        if self.active.iter().any(|instance| instance.key == key) {
+            return;
+        }
+        if let Some(animation) =
+            effect_catalog().as_ref().and_then(|catalog| catalog.map_animation("ArcherConcentration", 0))
+        {
+            if self.push_actor_animation(key.clone(), id, animation, self.now_ms, provenance) {
+                self.queue_five_class_sound(
+                    &key,
+                    self.now_ms,
+                    "Concentration.start",
+                    "M129-0.wav",
+                    provenance,
+                );
+            }
+        }
+    }
+
+    fn apply_elemental(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(id) = effect_object_id(payload) else {
+            return;
+        };
+        let Some(actor) = self.five_class_actor_contexts.get(&id) else {
+            return;
+        };
+        if !actor_is_player(actor) {
+            return;
+        }
+        let (Some(enabled), Some(casted), Some(level), Some(element_type), Some(exp_last)) = (
+            payload.get("enabled").and_then(Value::as_bool),
+            payload.get("casted").and_then(Value::as_bool),
+            payload
+                .get("value")
+                .and_then(Value::as_u64)
+                .and_then(|value| u32::try_from(value).ok()),
+            payload
+                .get("elementType")
+                .and_then(Value::as_u64)
+                .and_then(|value| u32::try_from(value).ok()),
+            payload
+                .get("expLast")
+                .and_then(Value::as_u64)
+                .and_then(|value| u32::try_from(value).ok()),
+        ) else {
+            return;
+        };
+        let owner = actor.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+            || actor.get("_nativeSelf").and_then(Value::as_bool) == Some(true);
+        self.elemental_state.insert(
+            id,
+            NativeElementState {
+                enabled,
+                casted,
+                owner,
+            },
+        );
+        let remove = self
+            .elemental_orb_thresholds
+            .iter()
+            .filter_map(|(&(owner_id, ty), &threshold)| {
+                (owner_id == id && (!enabled || (ty < 4 && level >= threshold)))
+                    .then_some((owner_id, ty))
+            })
+            .collect::<Vec<_>>();
+        for (owner_id, ty) in remove {
+            self.clear_effect_key(&format!("archer-element-{owner_id}-{ty}"));
+            self.elemental_orb_thresholds.remove(&(owner_id, ty));
+            if self.elemental_loop_owner == Some((owner_id, ty)) {
+                self.queue_element_loop(None, provenance);
+            }
+        }
+        if !enabled {
+            if self
+                .elemental_loop_owner
+                .is_some_and(|(owner_id, _)| owner_id == id)
+            {
+                self.queue_element_loop(None, provenance);
+            }
+            return;
+        }
+        let (name, file) = match element_type {
+            1 => ("ArcherElementGreen", "M126-5.wav"),
+            2 => ("ArcherElementBlue", "M126-6.wav"),
+            3 => ("ArcherElementRed", "M126-7.wav"),
+            4 => ("ArcherElementMixed", "M126-8.wav"),
+            _ => return,
+        };
+        let key = format!("archer-element-{id}-{element_type}");
+        self.clear_effect_key(&key);
+        let Some(animation) = effect_catalog().as_ref().and_then(|catalog| catalog.map_animation(name, 0))
+        else {
+            return;
+        };
+        if self.push_actor_animation(key.clone(), id, animation, self.now_ms, provenance) {
+            self.elemental_orb_thresholds
+                .insert((id, element_type), exp_last);
+            if owner && matches!(element_type, 3 | 4) {
+                self.elemental_loop_owner = Some((id, element_type));
+                self.queue_element_loop(Some(file), provenance);
+            } else {
+                self.queue_element_loop(None, provenance);
+                self.queue_five_class_sound(
+                    &key,
+                    self.now_ms,
+                    &format!("Meditation.element{element_type}"),
+                    file,
+                    provenance,
+                );
+            }
+        }
+    }
+
+    fn apply_binding_shot(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(id) = effect_object_id(payload) else {
+            return;
+        };
+        let key = format!("archer-binding-{id}");
+        if payload.get("enabled").and_then(Value::as_bool) == Some(false) {
+            self.clear_effect_key(&key);
+            return;
+        }
+        if !self
+            .five_class_actor_contexts
+            .get(&id)
+            .is_some_and(|actor| actor.get("kind").and_then(Value::as_str) == Some("monster"))
+        {
+            return;
+        }
+        let Some(value) = payload
+            .get("value")
+            .and_then(Value::as_i64)
+            .and_then(|value| u64::try_from(value).ok())
+        else {
+            return;
+        };
+        let (Some(catalog), Some((tile_x, tile_y))) =
+            (effect_catalog(), self.zone_tiles.get(&id).copied())
+        else {
+            return;
+        };
+        let (Some(drop), Some(mut down), Some(fall)) = (
+            catalog.map_animation("ArcherBindingDrop", 0),
+            catalog.map_animation("ArcherBindingDown", 0),
+            catalog.map_animation("ArcherBindingFall", 0),
+        ) else {
+            return;
+        };
+        // Source RepeatUntil is relative to receipt, not to the end of Drop.
+        let down_until = self.now_ms.saturating_add(value.saturating_sub(1_500));
+        let down_start = self.now_ms.saturating_add(drop.duration_ms);
+        down.duration_ms = down_until.saturating_sub(down_start).max(1);
+        down.interval = down.duration_ms;
+        down.repeat = false;
+        self.clear_effect_key(&key);
+        self.anchor_object_ids.insert(key.clone(), id);
+        self.active.push(EffectInstance {
+            key: key.clone(),
+            kind: EffectKindTag::SceneForeground,
+            tile_x,
+            tile_y,
+            from_x: None,
+            from_y: None,
+            current: Some(drop),
+            queued: Some(down),
+            return_queued: Some(fall),
+            started_at: self.now_ms,
+            start_at: self.now_ms,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+        self.queue_five_class_sound(
+            &key,
+            down_start,
+            "BindingShot.drop",
+            "M130-5.wav",
+            provenance,
+        );
+        self.queue_five_class_sound(
+            &key,
+            down_until.max(down_start.saturating_add(1)),
+            "BindingShot.fall",
+            "M130-6.wav",
+            provenance,
+        );
+    }
+
+    fn apply_elemental_barrier_struck(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(id) = effect_object_id(payload)
+            .or_else(|| payload.get("_nativeTarget").and_then(effect_object_id))
+        else {
+            return;
+        };
+        if !self.elemental_barrier_objects.contains(&id) {
+            return;
+        }
+        let (Some(catalog), Some((tile_x, tile_y))) =
+            (effect_catalog(), self.zone_tiles.get(&id).copied())
+        else {
+            return;
+        };
+        let (Some(struck), Some(loop_animation)) = (
+            catalog.map_animation("ArcherBarrierStruck", 0),
+            catalog.map_animation("ArcherBarrierPersistent16", 0),
+        ) else {
+            return;
+        };
+        let key = format!("archer-barrier-{id}");
+        self.clear_effect_key(&key);
+        self.anchor_object_ids.insert(key.clone(), id);
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::SceneForeground,
+            tile_x,
+            tile_y,
+            from_x: None,
+            from_y: None,
+            current: Some(struck),
+            queued: Some(loop_animation),
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at: self.now_ms,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+    }
+
+    fn apply_five_class_object_effect(
+        &mut self,
+        effect: u32,
+        object_id: u32,
+        payload: &Value,
+        catalog: &EffectCatalog,
+        provenance: &EffectProvenance,
+    ) -> bool {
+        if !matches!(effect, 1 | 13 | 14 | 15 | 16 | 17 | 18) {
+            return false;
+        }
+        if matches!(effect, 13 | 14) {
+            if !self
+                .five_class_actor_contexts
+                .get(&object_id)
+                .is_some_and(actor_is_player)
+            {
+                return true;
+            }
+            let key = format!("archer-barrier-{object_id}");
+            self.clear_effect_key(&key);
+            if effect == 14 {
+                self.elemental_barrier_objects.remove(&object_id);
+                self.elemental_barrier_down_objects.insert(object_id);
+                if let Some(animation) = catalog.map_animation("ElementalBarrierDown", 0) {
+                    let key = self.next_key("archer-barrier-down");
+                    if self.push_actor_animation(
+                        key.clone(),
+                        object_id,
+                        animation,
+                        self.now_ms,
+                        provenance,
+                    ) {
+                        self.queue_five_class_sound(
+                            &key,
+                            self.now_ms,
+                            "ElementalBarrier.down",
+                            "M131-5.wav",
+                            provenance,
+                        );
+                    }
+                }
+            } else {
+                self.elemental_barrier_objects.insert(object_id);
+                self.elemental_barrier_down_objects.remove(&object_id);
+                if let Some(animation) = catalog.map_animation("ElementalBarrierUp", 0) {
+                    self.push_actor_animation(key, object_id, animation, self.now_ms, provenance);
+                }
+            }
+            return true;
+        }
+        if effect == 15 {
+            let Some(stage @ 0..=2) = payload
+                .get("effectType")
+                .and_then(Value::as_u64)
+                .and_then(|stage| u32::try_from(stage).ok())
+            else {
+                return true;
+            };
+            let key = format!("delayed-explosion-{object_id}");
+            let current = self
+                .delayed_explosion_stages
+                .get(&object_id)
+                .copied()
+                .filter(|_| self.active.iter().any(|instance| instance.key == key));
+            if current.is_some_and(|current| stage <= current) {
+                return true;
+            }
+            // Crystal's first packet creates stage zero even when EffectType
+            // arrives above zero; only an existing effect advances its stage.
+            let stage = current.map_or(0, |_| stage);
+            let Some(animation) =
+                catalog.map_animation(&format!("ArcherDelayedExplosionStage{stage}"), 0)
+            else {
+                return true;
+            };
+            self.clear_effect_key(&key);
+            if self.push_actor_animation(key.clone(), object_id, animation, self.now_ms, provenance)
+            {
+                self.delayed_explosion_stages.insert(object_id, stage);
+                let file = match stage {
+                    1 => Some("M125-0.wav"),
+                    2 => Some("M125-5.wav"),
+                    _ => None,
+                };
+                if let Some(file) = file {
+                    self.queue_five_class_sound(
+                        &key,
+                        self.now_ms,
+                        &format!("DelayedExplosion.stage{stage}"),
+                        file,
+                        provenance,
+                    );
+                }
+            }
+            return true;
+        }
+        let name = match effect {
+            1 => "FatalSword",
+            16 => "MPEater",
+            17 => "Hemorrhage",
+            _ => "Bleeding",
+        };
+        if let Some(animation) = catalog.map_animation(name, 0) {
+            let key = self.next_key("five-class-object");
+            if self.push_actor_animation(key.clone(), object_id, animation, self.now_ms, provenance)
+            {
+                let file = match effect {
+                    1 | 16 => Some("M91-0.wav"),
+                    17 => Some("M104-0.wav"),
+                    _ => None,
+                };
+                if let Some(file) = file {
+                    self.queue_five_class_sound(
+                        &key,
+                        self.now_ms,
+                        &format!("{name}.target"),
+                        file,
+                        provenance,
+                    );
+                }
+            }
+        }
+        if effect == 16 {
+            if let Some(owner_id) = payload
+                .get("effectType")
+                .and_then(Value::as_u64)
+                .and_then(|id| u32::try_from(id).ok())
+            {
+                if let Some(animation) = catalog.map_animation("MPEaterSecondary", 0) {
+                    let key = self.next_key("mp-eater-owner");
+                    self.push_actor_animation(key, owner_id, animation, self.now_ms, provenance);
+                }
+            }
+        }
+        if effect == 17 {
+            for name in ["HemorrhageLayer2", "HemorrhageLayer3"] {
+                if let Some(animation) = catalog.map_animation(name, 0) {
+                    let key = self.next_key("hemorrhage-layer");
+                    self.push_actor_animation(key, object_id, animation, self.now_ms, provenance);
+                }
+            }
+        }
+        true
+    }
+
+    fn apply_dark_body_disappear(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let (Some(x), Some(y)) = (
+            value_f32(payload, "location", "x"),
+            value_f32(payload, "location", "y"),
+        ) else {
+            return;
+        };
+        self.queue_immediate_sound(provenance, "DarkBody.disappear", "M103-1.wav");
+        let Some(animation) = effect_catalog().as_ref()
+            .and_then(|catalog| catalog.map_animation("AssassinDarkBodyDisappear", 0))
+        else {
+            return;
+        };
+        let key = self.next_key("dark-body-disappear");
+        // Source adds the smoke to MapControl before removing the actor. It
+        // remains at that tile and must not be deleted by the actor tombstone.
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::SceneForeground,
+            tile_x: x as i32,
+            tile_y: y as i32,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at: self.now_ms,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+    }
+
+    fn apply_back_step_sound(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(actor) = payload
+            .get("_nativeAttacker")
+            .filter(|actor| actor_is_archer(actor))
+        else {
+            return;
+        };
+        let Some(id) = effect_object_id(actor) else {
+            return;
+        };
+        let key = format!("back-step-sound-{id}");
+        self.pending_sounds.retain(|sound| sound.key != key);
+        for (delay, cue, file) in [
+            (
+                100,
+                "BackStep.jump",
+                if actor_is_female(actor) {
+                    "M127-6.wav"
+                } else {
+                    "M127-5.wav"
+                },
+            ),
+            (700, "BackStep.land", "M127-7.wav"),
+        ] {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: self.now_ms.saturating_add(delay),
+                requires_active_effect: false,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: cue.to_owned(),
+                    file_name: file.to_owned(),
+                },
+            });
+        }
+    }
+
+    fn apply_five_class_monster_death(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(actor) = payload.get("_nativeTarget") else {
+            return;
+        };
+        if actor.get("kind").and_then(Value::as_str) != Some("monster") {
+            return;
+        }
+        let (Some(id), Some(image)) = (
+            effect_object_id(actor),
+            actor.get("image").and_then(Value::as_u64),
+        ) else {
+            return;
+        };
+        self.clear_effect_key(&format!("snake-totem-aura-{id}"));
+        let name = match image {
+            359 => "ArcherVampireSpiderDeath",
+            362 => "ArcherCharmedSnakeDeath",
+            _ => return,
+        };
+        if let Some(animation) = effect_catalog().as_ref().and_then(|catalog| catalog.map_animation(name, 0))
+        {
+            let key = self.next_key("archer-summon-death");
+            self.push_actor_animation(key, id, animation, self.now_ms, provenance);
+        }
+    }
+
+    fn apply_trap_rock_range(&mut self, payload: &Value, provenance: &EffectProvenance) -> bool {
+        let Some(actor) = payload.get("_nativeAttacker") else {
+            return false;
+        };
+        if actor.get("kind").and_then(Value::as_str) != Some("monster")
+            || actor.get("image").and_then(Value::as_u64) != Some(130)
+        {
+            return false;
+        }
+        let Some(target_id) = payload
+            .get("targetId")
+            .and_then(Value::as_u64)
+            .and_then(|id| u32::try_from(id).ok())
+        else {
+            return true;
+        };
+        if let Some(animation) =
+            effect_catalog().as_ref().and_then(|catalog| catalog.map_animation("ArcherTrapRockImpact", 0))
+        {
+            let key = self.next_key("trap-rock-impact");
+            let start_at = self.now_ms.saturating_add(400);
+            if self.push_actor_animation(key.clone(), target_id, animation, start_at, provenance) {
+                if let Some(source_id) = effect_object_id(actor) {
+                    self.prestart_source_object_ids
+                        .insert(key.clone(), source_id);
+                }
+                self.queue_five_class_sound(
+                    &key,
+                    start_at,
+                    "Stonetrap.rockImpact",
+                    "130-6.wav",
+                    provenance,
+                );
+            }
+        }
+        true
+    }
+
     pub(crate) fn observe_render_payload(&mut self, payload: &Value) {
+        self.five_class_actor_contexts = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|actor| Some((effect_object_id(actor)?, actor.clone())))
+            .collect();
         self.post_world_depth_bounds = Some(crate::atlas::post_world_depth_bounds(payload));
         let map_file_name = payload
             .get("mapFileName")
@@ -1432,6 +2816,8 @@ impl NativeEffects {
             .filter_map(|object_id| u32::try_from(object_id).ok())
             .collect::<HashSet<_>>();
         self.magic_shield_down_object_ids
+            .retain(|object_id| current_actor_object_ids.contains(object_id));
+        self.elemental_barrier_down_objects
             .retain(|object_id| current_actor_object_ids.contains(object_id));
         self.render_magic_shield_object_ids = payload
             .get("entities")
@@ -1472,6 +2858,9 @@ impl NativeEffects {
             .active
             .iter()
             .filter_map(|instance| {
+                if self.hidden_five_class_effect_keys.contains(&instance.key) {
+                    return None;
+                }
                 if !instance_still_active(instance, now_ms) {
                     return None;
                 }
@@ -1754,6 +3143,8 @@ impl NativeEffects {
         self.scene_audio_terminated = scene_audio_terminated && !self.render_scene_changed;
         self.render_scene_changed = false;
         self.reconcile_magic_shield_render_state(zone_tiles);
+        self.reconcile_elemental_barrier_render_state(zone_tiles);
+        self.reconcile_elemental_orbs_render_state();
         while self.active.len() > MAX_ACTIVE_EFFECTS {
             self.active.remove(0);
         }
@@ -1838,6 +3229,15 @@ impl NativeEffects {
     }
 
     fn clear_active_effects(&mut self) {
+        self.queue_element_loop(
+            None,
+            &EffectProvenance {
+                generation: self.last_generation,
+                sequence: self.last_effect_sequence,
+                packet: "boundary".to_owned(),
+                spell: String::new(),
+            },
+        );
         self.active.clear();
         self.anchor_object_ids.clear();
         self.source_object_ids.clear();
@@ -1846,6 +3246,16 @@ impl NativeEffects {
         self.anchor_player_keys.clear();
         self.local_projectile_dedupe.clear();
         self.local_projectile_targets.clear();
+        self.five_class_projectiles.clear();
+        self.elemental_state.clear();
+        self.elemental_orb_thresholds.clear();
+        self.elemental_loop_owner = None;
+        self.concentration_paused_at.clear();
+        self.hidden_five_class_effect_keys.clear();
+        self.delayed_explosion_stages.clear();
+        self.double_slash_body_effects.clear();
+        self.elemental_barrier_objects.clear();
+        self.elemental_barrier_down_objects.clear();
         self.ready_sounds.clear();
         self.pending_sounds.clear();
         self.dead_player_sound_keys.clear();
@@ -1856,6 +3266,59 @@ impl NativeEffects {
 
     fn replace_dead_action_object_ids(&mut self, object_ids: HashSet<u32>) {
         self.dead_action_object_ids = object_ids;
+    }
+
+    fn reconcile_snake_totem_auras(&mut self, ready_object_ids: &HashSet<u32>) {
+        let ready = ready_object_ids
+            .iter()
+            .copied()
+            .filter(|id| {
+                !self.scene_audio_terminated
+                    && self.zone_tiles.contains_key(id)
+                    && self.five_class_actor_contexts.get(id).is_some_and(|actor| {
+                        actor.get("kind").and_then(Value::as_str) == Some("monster")
+                            && actor.get("image").and_then(Value::as_u64) == Some(361)
+                            && actor.get("dead").and_then(Value::as_bool) != Some(true)
+                    })
+            })
+            .collect::<HashSet<_>>();
+        let remove = self
+            .active
+            .iter()
+            .filter_map(|instance| {
+                let id = instance
+                    .key
+                    .strip_prefix("snake-totem-aura-")?
+                    .parse::<u32>()
+                    .ok()?;
+                (!ready.contains(&id)).then_some(instance.key.clone())
+            })
+            .collect::<Vec<_>>();
+        for key in remove {
+            self.clear_effect_key(&key);
+        }
+        for id in ready {
+            let key = format!("snake-totem-aura-{id}");
+            if self.active.iter().any(|instance| instance.key == key) {
+                continue;
+            }
+            if let Some(animation) = effect_catalog().as_ref()
+                .and_then(|catalog| catalog.map_animation("ArcherSnakeTotemAura", 0))
+            {
+                self.push_actor_animation(
+                    key,
+                    id,
+                    animation,
+                    self.now_ms,
+                    &EffectProvenance {
+                        generation: self.last_generation,
+                        sequence: 0,
+                        packet: "StandingCycle".to_owned(),
+                        spell: "SummonSnakes".to_owned(),
+                    },
+                );
+            }
+        }
     }
 
     /// Crystal checks the target's current action in the missile completion
@@ -1904,6 +3367,7 @@ impl NativeEffects {
 
     fn refresh_anchor_tiles(&mut self) {
         let now_ms = self.now_ms;
+        self.refresh_five_class_projectiles(now_ms);
         let zone_tiles = self.zone_tiles.clone();
         let hidden_left_guard_tiles = self.hidden_left_guard_tiles.clone();
         let left_guard_keys = self
@@ -2002,6 +3466,13 @@ impl NativeEffects {
                     )),
                 ),
                 "LeftGuardRangeProjectile" => ("LeftGuardRangeProjectile", None),
+                "ArcherNormalArrow" => (
+                    "ArcherNormalArrow",
+                    Some((
+                        ARCHER_NORMAL_ARROW_IMPACT_SOUND_CUE,
+                        ARCHER_NORMAL_ARROW_IMPACT_SOUND_FILE,
+                    )),
+                ),
                 spell if ground_talisman(spell).is_some() => {
                     let (spell, _) = ground_talisman(spell).expect("checked talisman");
                     (spell, None)
@@ -2019,7 +3490,7 @@ impl NativeEffects {
                 continue;
             };
             let source = (from_x as i32, from_y as i32);
-            let source = if ground_talisman(spell).is_some() {
+            let source = if ground_talisman(spell).is_some() || spell == "ArcherNormalArrow" {
                 self.source_object_ids
                     .get(&instance.key)
                     .and_then(|id| resolve_tile(&instance.key, *id))
@@ -2027,7 +3498,7 @@ impl NativeEffects {
             } else {
                 source
             };
-            if ground_talisman(spell).is_some() {
+            if ground_talisman(spell).is_some() || spell == "ArcherNormalArrow" {
                 instance.from_x = Some(source.0 as f32);
                 instance.from_y = Some(source.1 as f32);
             }
@@ -2035,6 +3506,8 @@ impl NativeEffects {
             let launch_animation = effect_catalog().as_ref().and_then(|catalog| {
                 if spell == "LeftGuardRangeProjectile" {
                     catalog.left_guard_range_projectile_animation(direction)
+                } else if spell == "ArcherNormalArrow" {
+                    catalog.archer_normal_arrow_animation(direction)
                 } else {
                     catalog.spell_projectile_animation(spell, direction)
                 }
@@ -2053,7 +3526,7 @@ impl NativeEffects {
             *projectile = launch_animation;
             instance.tile_x = destination.0;
             instance.tile_y = destination.1;
-            instance.queued = if spell == "LeftGuardRangeProjectile" {
+            instance.queued = if matches!(spell, "LeftGuardRangeProjectile" | "ArcherNormalArrow") {
                 None
             } else {
                 bound_target
@@ -2065,12 +3538,16 @@ impl NativeEffects {
                     })
             };
             target_state.resolved_at_launch = true;
+            target_state.unbound_archer_arrow =
+                spell == "ArcherNormalArrow" && bound_target.is_none();
             if let Some(target_id) = target_state.target_id.filter(|_| bound_target.is_some()) {
                 anchors_to_insert.push((instance.key.clone(), target_id));
             }
-            if let Some((impact_sound_cue, impact_sound_file)) = impact_sound
-                .filter(|_| instance.queued.is_some() || ground_talisman(spell).is_some())
-            {
+            if let Some((impact_sound_cue, impact_sound_file)) = impact_sound.filter(|_| {
+                instance.queued.is_some()
+                    || ground_talisman(spell).is_some()
+                    || (spell == "ArcherNormalArrow" && bound_target.is_some())
+            }) {
                 launch_impact_sounds.push(PendingEffectSound {
                     key: instance.key.clone(),
                     due_at_ms: instance.start_at.saturating_add(duration_ms),
@@ -2088,6 +3565,52 @@ impl NativeEffects {
             self.anchor_object_ids.insert(key, object_id);
         }
         self.pending_sounds.extend(launch_impact_sounds);
+
+        for instance in &mut self.active {
+            let Some(target) = self.local_projectile_targets.get_mut(&instance.key) else {
+                continue;
+            };
+            if !target.resolved_at_launch
+                || !target.unbound_archer_arrow
+                || target.unbound_archer_arrow_process_at == Some(now_ms)
+            {
+                continue;
+            }
+            target.unbound_archer_arrow_process_at = Some(now_ms);
+            let (Some(from_x), Some(from_y), Some(projectile)) =
+                (instance.from_x, instance.from_y, instance.current.as_mut())
+            else {
+                continue;
+            };
+            let source = (from_x as i32, from_y as i32);
+            let owner_tile = self
+                .source_object_ids
+                .get(&instance.key)
+                .and_then(|id| resolve_tile(&instance.key, *id))
+                .unwrap_or(source);
+            // Missile.Process extends a target-free arrow once per processing
+            // pass while its destination is inside Globals.DataRange (16).
+            if max_tile_distance(owner_tile, target.fallback) < 16 {
+                target.fallback = (
+                    target
+                        .fallback
+                        .0
+                        .saturating_add(target.fallback.0.saturating_sub(source.0)),
+                    target
+                        .fallback
+                        .1
+                        .saturating_add(target.fallback.1.saturating_sub(source.1)),
+                );
+            }
+            instance.tile_x = target.fallback.0;
+            instance.tile_y = target.fallback.1;
+            let (duration, interval) = crystal_projectile_clock(
+                max_tile_distance(source, target.fallback),
+                FIREBALL_PROJECTILE_STEP_MS,
+            );
+            projectile.duration_ms = duration;
+            projectile.interval = interval;
+        }
 
         let anchors = &self.anchor_object_ids;
         let mut missing = missing_prestart_sources;
@@ -2122,6 +3645,7 @@ impl NativeEffects {
                         "SoulFireBall" => (true, Some(SOUL_FIREBALL_IMPACT_SOUND_CUE)),
                         "Hallucination" => (true, Some(HALLUCINATION_IMPACT_SOUND_CUE)),
                         "LeftGuardRangeProjectile" => (true, None),
+                        "ArcherNormalArrow" => (true, Some(ARCHER_NORMAL_ARROW_IMPACT_SOUND_CUE)),
                         spell if ground_talisman(spell).is_some() => (true, None),
                         _ => (false, None),
                     };
@@ -2152,6 +3676,7 @@ impl NativeEffects {
                     }
                 };
             } else if (instance.provenance.spell == "LeftGuardRangeProjectile"
+                || instance.provenance.spell == "ArcherNormalArrow"
                 || ground_talisman(&instance.provenance.spell).is_some())
                 && now_ms > instance.start_at
                 && self
@@ -2181,27 +3706,29 @@ impl NativeEffects {
                 }
             }
         }
-        // The missile completes into an independent point effect. Release the
-        // caster/target attachment and deliver arrival-only sounds before the
-        // renderer prunes PoisonCloud's bitmap-free completion.
-        let completed_talismans = self
+        // Talismans complete into independent point effects. Normal arrows
+        // have no completion bitmap. Deliver their due arrival sounds before
+        // the renderer prunes those completed source-owned instances.
+        let completed_projectiles = self
             .active
             .iter()
             .filter(|instance| {
-                ground_talisman(&instance.provenance.spell).is_some()
+                !missing.contains(&instance.key)
+                    && (ground_talisman(&instance.provenance.spell).is_some()
+                        || instance.provenance.spell == "ArcherNormalArrow")
                     && instance.current.as_ref().is_some_and(|animation| {
                         now_ms >= instance.start_at.saturating_add(animation.duration_ms)
                     })
             })
             .map(|instance| instance.key.clone())
             .collect::<HashSet<_>>();
-        for key in &completed_talismans {
+        for key in &completed_projectiles {
             self.anchor_object_ids.remove(key);
             self.source_object_ids.remove(key);
         }
         let mut completed_sounds = Vec::new();
         self.pending_sounds.retain(|sound| {
-            if completed_talismans.contains(&sound.key) && now_ms >= sound.due_at_ms {
+            if completed_projectiles.contains(&sound.key) && now_ms >= sound.due_at_ms {
                 completed_sounds.push(sound.event.clone());
                 false
             } else {
@@ -2248,6 +3775,7 @@ impl NativeEffects {
         &mut self,
         now_ms: u64,
     ) -> Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent> {
+        self.refresh_five_class_projectiles(now_ms);
         self.suppress_dead_target_impacts_at_completion(now_ms);
         let active_keys = self
             .active
@@ -2276,6 +3804,16 @@ impl NativeEffects {
         provenance: &EffectProvenance,
         suppress_duplicate_scarecrow_struck: bool,
     ) {
+        for key in ["_nativeAttacker", "_nativeTarget"] {
+            if let Some(actor) = payload.get(key).filter(|actor| {
+                actor_is_player(actor)
+                    || actor.get("kind").and_then(Value::as_str) == Some("monster")
+            }) {
+                if let Some(id) = effect_object_id(actor) {
+                    self.five_class_actor_contexts.insert(id, actor.clone());
+                }
+            }
+        }
         self.cancel_pet_prestart(packet, payload);
         match packet {
             "MapChanged" | "LogOutSuccess" => self.clear_active_effects(),
@@ -2284,10 +3822,24 @@ impl NativeEffects {
                     self.apply_scarecrow_struck_sound(payload, provenance);
                 }
                 self.apply_player_struck_sound(payload, provenance);
+                self.apply_elemental_barrier_struck(payload, provenance);
             }
             "Death" | "ObjectDied" => {
+                if packet == "ObjectDied" && payload.get("kind").and_then(Value::as_u64) == Some(2)
+                {
+                    self.apply_dark_body_disappear(payload, provenance);
+                    self.apply_object_remove(payload, false);
+                    return;
+                }
                 self.apply_player_death_sound(payload, provenance);
                 self.apply_scarecrow_death_sound(payload, provenance);
+                self.apply_five_class_monster_death(payload, provenance);
+                if let Some(id) = effect_object_id(payload)
+                    .or_else(|| payload.get("_nativeTarget").and_then(effect_object_id))
+                {
+                    self.clear_effect_key(&format!("delayed-explosion-{id}"));
+                    self.delayed_explosion_stages.remove(&id);
+                }
             }
             "IntelligentCreaturePickup" => self.apply_pet_pickup_sound(payload, provenance),
             "ObjectAttack" => self.apply_object_attack(payload, provenance),
@@ -2297,6 +3849,16 @@ impl NativeEffects {
             "ObjectEffect" => self.apply_object_effect(payload, zone_tiles, provenance),
             "MapEffect" => self.apply_map_effect(payload, provenance),
             "ObjectSpell" => self.apply_object_spell(payload, zone_tiles, provenance),
+            "SetConcentration" => self.apply_concentration(payload, provenance),
+            "SetElemental" => self.apply_elemental(payload, provenance),
+            "SetBindingShot" => self.apply_binding_shot(payload, provenance),
+            "RemoveDelayedExplosion" => {
+                if let Some(id) = effect_object_id(payload) {
+                    self.clear_effect_key(&format!("delayed-explosion-{id}"));
+                    self.delayed_explosion_stages.remove(&id);
+                }
+            }
+            "UserBackStep" | "ObjectBackStep" => self.apply_back_step_sound(payload, provenance),
             "Revived" => self.apply_player_revived(payload, zone_tiles, provenance, true),
             "ObjectRevived" => self.apply_player_revived(payload, zone_tiles, provenance, false),
             "ObjectRemove" => self.apply_object_remove(payload, false),
@@ -2392,6 +3954,9 @@ impl NativeEffects {
     fn apply_object_attack(&mut self, payload: &Value, provenance: &EffectProvenance) {
         self.apply_pet_attack_effects(payload, provenance);
         self.apply_scarecrow_attack_sound(payload, provenance);
+        if self.apply_double_slash_overlay(payload, provenance) {
+            return;
+        }
         let spell = payload.get("spell").and_then(|value| {
             value.as_str().or_else(|| {
                 value.as_u64().and_then(|id| match id {
@@ -2757,6 +4322,8 @@ impl NativeEffects {
                 target_id,
                 fallback: destination,
                 resolved_at_launch: false,
+                unbound_archer_arrow: false,
+                unbound_archer_arrow_process_at: None,
             },
         );
         if let Some((projectile_sound_cue, projectile_sound_file)) = projectile_sound {
@@ -2812,6 +4379,26 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
+        if self.apply_five_class_ranged_magic(payload, catalog, provenance, spell) {
+            return;
+        }
+        if spell == "ElementalBarrier" {
+            let Some(id) = effect_object_id(payload) else {
+                return;
+            };
+            if !self
+                .elemental_state
+                .get(&id)
+                .is_some_and(|state| state.enabled)
+                || self.elemental_barrier_objects.contains(&id)
+            {
+                return;
+            }
+        }
+        if spell == "ExplosiveTrap" {
+            self.queue_immediate_sound(provenance, "ExplosiveTrap.lay", "M124-0.wav");
+            return;
+        }
         if let Some((spell, launch_sound)) = ground_talisman(spell) {
             self.schedule_local_projectile_from_object_magic(
                 payload,
@@ -2914,6 +4501,56 @@ impl NativeEffects {
             now
         };
         let key = self.next_key("cast");
+        if let Some(id) = effect_object_id(payload) {
+            let five_class_cast = match spell {
+                "Haste" => Some("M93-0.wav"),
+                "LightBody" => Some("M95-0.wav"),
+                "HeavenlySword" => Some("M96-0.wav"),
+                "FireBurst" => Some("M97-0.wav"),
+                "Trap" => Some("M98-0.wav"),
+                "PoisonSword" => Some("M99-0.wav"),
+                "MoonLight" => Some("M100-0.wav"),
+                "SwiftFeet" => Some("M102-0.wav"),
+                "DarkBody" => Some("M103-0.wav"),
+                "ElementalBarrier" => Some("M131-0.wav"),
+                "CrescentSlash" => self.five_class_actor_contexts.get(&id).map(|actor| {
+                    if actor_is_female(actor) {
+                        "M105-1.wav"
+                    } else {
+                        "M105-0.wav"
+                    }
+                }),
+                _ => None,
+            };
+            if let Some(file) = five_class_cast {
+                self.anchor_object_ids.insert(key.clone(), id);
+                self.queue_five_class_sound(&key, now, &format!("{spell}.cast"), file, provenance);
+                if payload.get("cast").and_then(Value::as_bool) == Some(true) {
+                    let completion_file = match spell {
+                        "CrescentSlash" => Some("M105-2.wav"),
+                        "Trap"
+                            if payload
+                                .get("targetId")
+                                .and_then(Value::as_u64)
+                                .and_then(|id| u32::try_from(id).ok())
+                                .is_some_and(|id| self.zone_tiles.contains_key(&id)) =>
+                        {
+                            Some("M98-1.wav")
+                        }
+                        _ => None,
+                    };
+                    if let Some(file) = completion_file {
+                        self.queue_five_class_sound(
+                            &key,
+                            now.saturating_add(600),
+                            &format!("{spell}.complete"),
+                            file,
+                            provenance,
+                        );
+                    }
+                }
+            }
+        }
         if spell == "FireBall" {
             self.pending_sounds.push(PendingEffectSound {
                 key: key.clone(),
@@ -3174,6 +4811,7 @@ impl NativeEffects {
         // legacy initial player-to-target supplement below, then consume later
         // monster-to-monster packets as authoritative bounce hops.
         if matches!(spell, "SoulFireBall" | "GreatFireBall" | "Hallucination")
+            || five_class_ranged_spell(spell)
             || ground_talisman(spell).is_some()
         {
             return;
@@ -3349,6 +4987,8 @@ impl NativeEffects {
                 target_id: Some(destination_id),
                 fallback: destination,
                 resolved_at_launch: true,
+                unbound_archer_arrow: false,
+                unbound_archer_arrow_process_at: None,
             },
         );
     }
@@ -3382,6 +5022,9 @@ impl NativeEffects {
         if effect == MAGIC_SHIELD_DOWN_EFFECT {
             self.magic_shield_down_object_ids.insert(object_id);
             self.clear_magic_shield_effect(object_id);
+            return;
+        }
+        if self.apply_five_class_object_effect(effect, object_id, payload, catalog, provenance) {
             return;
         }
         let Some((tile_x, tile_y)) = zone_tiles.get(&object_id).copied() else {
@@ -3482,15 +5125,156 @@ impl NativeEffects {
         }
     }
 
+    fn reconcile_elemental_barrier_render_state(&mut self, zone_tiles: &HashMap<u32, (i32, i32)>) {
+        if self.scene_audio_terminated {
+            return;
+        }
+        let missing = self
+            .five_class_actor_contexts
+            .iter()
+            .filter(|(id, actor)| {
+                actor_is_player(actor)
+                    && actor.get("effect").and_then(Value::as_u64) == Some(13)
+                    && actor.get("dead").and_then(Value::as_bool) != Some(true)
+                    && !self.elemental_barrier_down_objects.contains(id)
+                    && !self
+                        .active
+                        .iter()
+                        .any(|instance| instance.key == format!("archer-barrier-{id}"))
+            })
+            .map(|(id, _)| *id)
+            .collect::<Vec<_>>();
+        for object_id in missing {
+            if !zone_tiles.contains_key(&object_id) {
+                continue;
+            }
+            let Some(animation) = effect_catalog().as_ref()
+                .and_then(|catalog| catalog.map_animation("ArcherBarrierPersistent16", 0))
+            else {
+                continue;
+            };
+            self.elemental_barrier_objects.insert(object_id);
+            self.push_actor_animation(
+                format!("archer-barrier-{object_id}"),
+                object_id,
+                animation,
+                self.now_ms,
+                &EffectProvenance {
+                    generation: self.last_generation,
+                    sequence: self.last_effect_sequence,
+                    packet: "ObjectPlayer".to_owned(),
+                    spell: "effect".to_owned(),
+                },
+            );
+        }
+    }
+
+    fn reconcile_elemental_orbs_render_state(&mut self) {
+        if self.scene_audio_terminated {
+            return;
+        }
+        let loaded = self
+            .five_class_actor_contexts
+            .iter()
+            .filter_map(|(&id, actor)| {
+                if !actor_is_player(actor)
+                    || self.elemental_state.contains_key(&id)
+                    || !self.zone_tiles.contains_key(&id)
+                    || actor.get("dead").and_then(Value::as_bool) == Some(true)
+                {
+                    return None;
+                }
+                let effect = actor.get("elementOrbEffect")?.as_u64()?;
+                let level = u32::try_from(actor.get("elementOrbLevel")?.as_u64()?).ok()?;
+                let max = u32::try_from(actor.get("elementOrbMax")?.as_u64()?).ok()?;
+                (effect > 0 && effect <= 4).then_some((
+                    id,
+                    effect as u32,
+                    level,
+                    max,
+                    actor.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || actor.get("_nativeSelf").and_then(Value::as_bool) == Some(true),
+                ))
+            })
+            .collect::<Vec<_>>();
+        for (id, effect, level, max, owner) in loaded {
+            self.elemental_state.insert(
+                id,
+                NativeElementState {
+                    enabled: true,
+                    casted: false,
+                    owner,
+                },
+            );
+            let types = if effect == 4 {
+                vec![4]
+            } else {
+                (1..=effect).collect()
+            };
+            let mut last_sound = None;
+            let provenance = EffectProvenance {
+                generation: self.last_generation,
+                sequence: self.last_effect_sequence,
+                packet: "ObjectPlayer".to_owned(),
+                spell: "Meditation".to_owned(),
+            };
+            for ty in types {
+                // Source first-load orbs do not loop their sound. Each new
+                // color stops the preceding channel, leaving the last color.
+                if ty < 4 && level >= max {
+                    continue;
+                }
+                let (name, file) = match ty {
+                    1 => ("ArcherElementGreen", "M126-5.wav"),
+                    2 => ("ArcherElementBlue", "M126-6.wav"),
+                    3 => ("ArcherElementRed", "M126-7.wav"),
+                    _ => ("ArcherElementMixed", "M126-8.wav"),
+                };
+                if let Some(animation) =
+                    effect_catalog().as_ref().and_then(|catalog| catalog.map_animation(name, 0))
+                {
+                    let key = format!("archer-element-{id}-{ty}");
+                    if self.push_actor_animation(
+                        key.clone(),
+                        id,
+                        animation,
+                        self.now_ms,
+                        &provenance,
+                    ) {
+                        self.elemental_orb_thresholds.insert((id, ty), max);
+                        last_sound = Some((key, ty, file));
+                    }
+                }
+            }
+            if let Some((key, ty, file)) = last_sound {
+                self.queue_element_loop(None, &provenance);
+                self.queue_five_class_sound(
+                    &key,
+                    self.now_ms,
+                    &format!("Meditation.element{ty}"),
+                    file,
+                    &provenance,
+                );
+            }
+        }
+    }
+
     fn apply_object_range_attack(
         &mut self,
         payload: &Value,
         zone_tiles: &HashMap<u32, (i32, i32)>,
         provenance: &EffectProvenance,
     ) {
+        if self.apply_trap_rock_range(payload, provenance) {
+            return;
+        }
         let Some(attacker) = payload.get("_nativeAttacker") else {
             return;
         };
+        if actor_is_archer(attacker) {
+            self.apply_archer_normal_range_attack(payload, zone_tiles, provenance);
+            return;
+        }
         let Some(body_library) = actor_sprite_library(attacker, "bodyLibrary") else {
             return;
         };
@@ -3536,6 +5320,150 @@ impl NativeEffects {
             }
             _ => {}
         }
+    }
+
+    fn apply_archer_normal_range_attack(
+        &mut self,
+        payload: &Value,
+        zone_tiles: &HashMap<u32, (i32, i32)>,
+        provenance: &EffectProvenance,
+    ) {
+        let Some(source_id) = payload
+            .get("objectId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+            .filter(|id| zone_tiles.contains_key(id))
+        else {
+            return;
+        };
+        if payload
+            .get("_nativeAttacker")
+            .and_then(|actor| actor.get("objectId"))
+            .and_then(Value::as_u64)
+            != Some(u64::from(source_id))
+        {
+            return;
+        }
+        let point = |field: &str| -> Option<(i32, i32)> {
+            Some((
+                i32::try_from(payload.get(field)?.get("x")?.as_i64()?).ok()?,
+                i32::try_from(payload.get(field)?.get("y")?.as_i64()?).ok()?,
+            ))
+        };
+        let (Some(source), Some(fallback)) = (point("location"), point("target")) else {
+            return;
+        };
+        let target_id = payload
+            .get("targetId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+            .filter(|id| *id != 0);
+        let destination = target_id
+            .and_then(|id| zone_tiles.get(&id).copied())
+            .unwrap_or(fallback);
+        let direction = projectile_direction16(source, destination);
+        let Some(mut arrow) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.archer_normal_arrow_animation(direction))
+        else {
+            return;
+        };
+        let (duration, interval) = crystal_projectile_clock(
+            max_tile_distance(source, destination),
+            FIREBALL_PROJECTILE_STEP_MS,
+        );
+        arrow.duration_ms = duration;
+        arrow.interval = interval;
+        let key = self.next_key("archer-normal-arrow");
+        let start_at = self.now_ms.saturating_add(ARCHER_NORMAL_ARROW_DELAY_MS);
+        let mut arrow_provenance = provenance.clone();
+        arrow_provenance.spell = "ArcherNormalArrow".to_owned();
+        self.active.push(EffectInstance {
+            key: key.clone(),
+            kind: EffectKindTag::Projectile,
+            tile_x: destination.0,
+            tile_y: destination.1,
+            from_x: Some(source.0 as f32),
+            from_y: Some(source.1 as f32),
+            current: Some(arrow),
+            queued: None,
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at,
+            persistent_object_id: None,
+            provenance: arrow_provenance,
+        });
+        self.source_object_ids.insert(key.clone(), source_id);
+        self.local_projectile_targets.insert(
+            key.clone(),
+            LocalProjectileTarget {
+                target_id,
+                fallback,
+                resolved_at_launch: false,
+                unbound_archer_arrow: false,
+                unbound_archer_arrow_process_at: None,
+            },
+        );
+        self.pending_sounds.push(PendingEffectSound {
+            key,
+            due_at_ms: start_at,
+            requires_active_effect: true,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: ARCHER_NORMAL_ARROW_SOUND_CUE.to_owned(),
+                file_name: ARCHER_NORMAL_ARROW_SOUND_FILE.to_owned(),
+            },
+        });
+        if payload.get("spell").map(spell_number_u32) == Some(121) {
+            self.apply_archer_focus_proc(source_id, source, provenance);
+        }
+    }
+
+    fn apply_archer_focus_proc(
+        &mut self,
+        source_id: u32,
+        source: (i32, i32),
+        provenance: &EffectProvenance,
+    ) {
+        let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(EffectCatalog::archer_focus_proc_animation)
+        else {
+            return;
+        };
+        let key = self.next_key("archer-focus-proc");
+        let start_at = self.now_ms.saturating_add(ARCHER_FOCUS_DELAY_MS);
+        let mut focus_provenance = provenance.clone();
+        focus_provenance.spell = "ArcherFocusProc".to_owned();
+        self.active.push(EffectInstance {
+            key: key.clone(),
+            kind: EffectKindTag::AttackOverlay,
+            tile_x: source.0,
+            tile_y: source.1,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at,
+            persistent_object_id: None,
+            provenance: focus_provenance,
+        });
+        self.source_object_ids.insert(key.clone(), source_id);
+        self.anchor_object_ids.insert(key.clone(), source_id);
+        self.pending_sounds.push(PendingEffectSound {
+            key,
+            due_at_ms: start_at,
+            requires_active_effect: true,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: ARCHER_FOCUS_SOUND_CUE.to_owned(),
+                file_name: ARCHER_FOCUS_SOUND_FILE.to_owned(),
+            },
+        });
     }
 
     fn apply_right_guard_range_hit(
@@ -3641,6 +5569,8 @@ impl NativeEffects {
                 target_id: Some(target_id),
                 fallback: destination,
                 resolved_at_launch: false,
+                unbound_archer_arrow: false,
+                unbound_archer_arrow_process_at: None,
             },
         );
     }
@@ -3759,17 +5689,31 @@ impl NativeEffects {
             .map(direction_index)
             .unwrap_or(4);
         let param = payload.get("param").map(spell_number_u32).unwrap_or(0);
-        let Some(mut anim) = catalog.spell_world_animation(&spell_name, direction, param) else {
+        let detonating = spell_name == "ExplosiveTrap"
+            && (payload.get("param").and_then(Value::as_bool) == Some(true) || param != 0);
+        let animation = if detonating {
+            catalog.map_animation("ArcherExplosiveTrapDetonation", 0)
+        } else {
+            catalog.spell_world_animation(&spell_name, direction, param)
+        };
+        let Some(mut anim) = animation else {
             return;
         };
         // Persistent world spell loops until it is removed by ObjectRemove.
-        anim.repeat = true;
+        anim.repeat = !detonating;
         let now = self.now_ms;
         let key = format!("spell-{object_id}");
-        self.active.retain(|instance| instance.key != key);
+        self.clear_effect_key(&key);
+        if detonating {
+            self.queue_immediate_sound(provenance, "ExplosiveTrap.detonate", "M124-5.wav");
+        }
         self.active.push(EffectInstance {
             key,
-            kind: EffectKindTag::Persistent,
+            kind: if detonating {
+                EffectKindTag::Ground
+            } else {
+                EffectKindTag::Persistent
+            },
             tile_x: x as i32,
             tile_y: y as i32,
             from_x: None,
@@ -3792,6 +5736,33 @@ impl NativeEffects {
         else {
             return;
         };
+        self.five_class_actor_contexts.remove(&object_id);
+        self.elemental_state.remove(&object_id);
+        if self
+            .elemental_loop_owner
+            .is_some_and(|(id, _)| id == object_id)
+        {
+            self.queue_element_loop(
+                None,
+                &EffectProvenance {
+                    generation: self.last_generation,
+                    sequence: self.last_effect_sequence,
+                    packet: "ObjectRemove".to_owned(),
+                    spell: "Meditation".to_owned(),
+                },
+            );
+        }
+        self.elemental_orb_thresholds
+            .retain(|(id, _), _| *id != object_id);
+        self.concentration_paused_at.remove(&object_id);
+        self.delayed_explosion_stages.remove(&object_id);
+        self.elemental_barrier_objects.remove(&object_id);
+        self.elemental_barrier_down_objects.remove(&object_id);
+        for projectile in self.five_class_projectiles.values_mut() {
+            if projectile.target_id == Some(object_id) {
+                projectile.target_id = None;
+            }
+        }
         self.clear_magic_shield_effect(object_id);
         self.magic_shield_down_object_ids.remove(&object_id);
         self.render_actor_object_ids.remove(&object_id);
@@ -3831,7 +5802,8 @@ impl NativeEffects {
                             .is_some_and(|start_at| self.now_ms > *start_at)
                             || self.active.iter().any(|instance| {
                                 instance.key == *key
-                                    && ground_talisman(&instance.provenance.spell).is_some()
+                                    && (ground_talisman(&instance.provenance.spell).is_some()
+                                        || instance.provenance.spell == "ArcherNormalArrow")
                                     && self.now_ms >= instance.start_at
                             })))
                     .then_some(key.clone())
@@ -3882,6 +5854,10 @@ impl NativeEffects {
             .retain(|pending| !removed_keys.contains(&pending.key));
         self.local_projectile_targets
             .retain(|key, _| !removed_keys.contains(key));
+        self.five_class_projectiles
+            .retain(|key, _| !removed_keys.contains(key));
+        self.hidden_five_class_effect_keys
+            .retain(|key| !removed_keys.contains(key));
         for key in detached_target_keys {
             if let Some(target) = self.local_projectile_targets.get_mut(&key) {
                 target.target_id = None;
@@ -3908,11 +5884,13 @@ impl NativeEffects {
         let _ = effect_catalog();
         self.refresh_anchor_tiles();
         self.suppress_dead_target_impacts_at_completion(now_ms);
+        let hidden_five_class_effect_keys = &self.hidden_five_class_effect_keys;
 
         let rendered = self
             .active
             .iter_mut()
             .filter_map(|instance| {
+                if hidden_five_class_effect_keys.contains(&instance.key) { return None; }
                 let (animation, started_at) = advance_instance(instance, now_ms)?;
                 let elapsed = now_ms.saturating_sub(started_at);
                 let frame = animation.frame_at(elapsed)?;
@@ -4032,6 +6010,10 @@ impl NativeEffects {
             .retain(|key| live_keys.contains(&key.as_str()));
         self.local_projectile_targets
             .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.five_class_projectiles
+            .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.hidden_five_class_effect_keys
+            .retain(|key| live_keys.contains(&key.as_str()));
         self.pending_sounds.retain(|pending| {
             !pending.requires_active_effect || live_keys.contains(&pending.key.as_str())
         });
@@ -4244,9 +6226,19 @@ pub(crate) fn tick_native_effects(
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     effects.replace_dead_action_object_ids(presentation.dead_action_object_ids());
+    effects.reconcile_double_slash_body_clocks(&presentation);
+    effects.reconcile_snake_totem_auras(&presentation.snake_totem_aura_ready_object_ids());
     if let Some(queue) = gameplay_audio.as_deref_mut() {
         for event in effects.take_due_sound_events(now_ms) {
             queue.push(event);
+        }
+        for control in std::mem::take(&mut effects.ready_element_loop_controls) {
+            queue.set_loop(
+                control.generation,
+                control.sequence,
+                "Elemental.orbs",
+                control.file_name,
+            );
         }
     }
     let effect_visible = player_ui
@@ -4278,6 +6270,1014 @@ mod tests {
     use crate::gameplay_bridge::{NativeEffectEvent, NativeGameplayAdapter};
     use crate::native_protocol::PacketEvent;
     use serde_json::json;
+
+    fn five_class_test_actor(class: &str) -> Value {
+        json!({"objectId": 1, "kind": "selfPlayer", "classKey": class,
+            "genderKey": "male", "x": 10, "y": 10, "direction": "right",
+            "dead": false, "buffs": [], "ridingMount": false,
+            "sprite": {"bodyLibrary": if class == "Archer" { "ARArmour/00" } else { "AArmour/00" }}})
+    }
+
+    fn five_class_test_event(sequence: u64, packet: &str, payload: Value) -> NativeEffectEvent {
+        NativeEffectEvent {
+            generation: 77,
+            sequence,
+            packet: packet.to_owned(),
+            payload,
+        }
+    }
+
+    fn five_class_test_magic(sequence: u64, spell: &str, class: &str) -> NativeEffectEvent {
+        five_class_test_event(
+            sequence,
+            "ObjectMagic",
+            json!({
+                "objectId": 1, "spell": spell, "cast": true, "direction": "right",
+                "location": {"x": 10, "y": 10}, "target": {"x": 16, "y": 10}, "targetId": 2,
+                "_nativeAttacker": five_class_test_actor(class),
+                "_nativeTarget": {"objectId": 2, "kind": "monster", "image": 5,
+                    "x": 16, "y": 10, "dead": false, "sprite": {"bodyLibrary": "Monster/005"}}
+            }),
+        )
+    }
+
+    fn five_class_test_fx(class: &str) -> NativeEffects {
+        effect_catalog()
+            .as_ref()
+            .expect("five-class tests require the real exported effects manifest and metadata");
+        let mut fx = NativeEffects::default();
+        fx.observe_render_payload(&json!({"mapIndex": 1, "entities": [
+            five_class_test_actor(class), {"objectId": 2, "kind": "monster", "image": 5,
+                "x": 16, "y": 10, "dead": false, "sprite": {"bodyLibrary": "Monster/005"}}
+        ]}));
+        fx
+    }
+
+    #[test]
+    fn five_class_effect_catalog_requires_the_complete_real_source_frame_union() {
+        let catalog = EffectCatalog::load().expect("real worktree effect exports must be present");
+        assert_eq!(catalog.frame_asset_root, exported_effect_test_root());
+        let requirements_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../web/scripts/asset-pipeline/five-class-skill-requirements.json");
+        let requirements: Value = serde_json::from_slice(
+            &fs::read(requirements_path).expect("source-bound five-class skill requirements"),
+        )
+        .expect("valid source-bound skill requirements JSON");
+        assert_eq!(requirements["profileId"], "platinum_fiveclass");
+        assert_eq!(requirements["skills"].as_array().unwrap().len(), 34);
+        for library in requirements["effects"]
+            .as_array()
+            .expect("effect frame union")
+        {
+            let name = library["library"].as_str().expect("source library name");
+            for required in library["frames"].as_array().expect("required source frames") {
+                let index = required["index"].as_i64().expect("source frame index");
+                let frames = catalog.resolve_frames(name, index, 1);
+                assert_eq!(frames.len(), 1, "missing real {name} frame {index}");
+                let frame = &frames[0];
+                let png_path = exported_effect_test_path(&catalog.frame_asset_root, &frame.path)
+                    .expect("source frame PNG must exist in this checkout");
+                let png = fs::read(png_path).expect("read actual source PNG");
+                assert!(png.len() >= 24, "truncated source PNG {name}/{index}");
+                assert_eq!(
+                    &png[..8],
+                    b"\x89PNG\r\n\x1a\n",
+                    "{name}/{index} PNG signature"
+                );
+                assert_eq!(&png[12..16], b"IHDR", "{name}/{index} PNG dimensions");
+                let width = u32::from_be_bytes(png[16..20].try_into().unwrap());
+                let height = u32::from_be_bytes(png[20..24].try_into().unwrap());
+                assert!(width > 0 && height > 0, "empty source PNG {name}/{index}");
+                assert_eq!(frame.width, width as f32, "{name}/{index} metadata width");
+                assert_eq!(frame.height, height as f32, "{name}/{index} metadata height");
+            }
+        }
+    }
+
+    #[test]
+    fn five_class_effect_fixture_rejects_missing_png_and_path_escape_without_fallback() {
+        let root = exported_effect_test_root();
+        for invalid in [
+            "",
+            "../effects.generated.json",
+            "/original-effects/../Magic2/1980.png",
+            "C:/original-effects/Magic2/1980.png",
+            "original-effects\\Magic2\\1980.png",
+        ] {
+            assert!(
+                exported_effect_test_path(&root, invalid).is_none(),
+                "{invalid}"
+            );
+        }
+        let missing = "/original-effects/Magic2/__missing_five_class_source_fixture__.png";
+        assert!(exported_effect_test_path(&root, missing).is_none());
+        let mut catalog = EffectCatalog::load().expect("real source fixture");
+        assert_eq!(catalog.resolve_frames("Magic2", 1980, 1).len(), 1);
+        catalog
+            .libraries
+            .get_mut("Magic2")
+            .unwrap()
+            .frames
+            .get_mut("1980")
+            .unwrap()
+            .path = missing.to_owned();
+        assert!(catalog.resolve_frames("Magic2", 1980, 1).is_empty());
+    }
+
+    #[test]
+    fn five_class_double_slash_uses_two_source_overlays_and_cancels_removed_actor() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let event = five_class_test_event(
+            1,
+            "ObjectAttack",
+            json!({
+                "objectId": 1, "spell": "DoubleSlash", "direction": "right",
+                "_nativeAttacker": five_class_test_actor("Assassin")
+            }),
+        );
+        let mut fx = five_class_test_fx("Assassin");
+        fx.observe(0, 10, 10, &[event.clone()], &zone);
+        assert_eq!(fx.active.len(), 2);
+        assert_eq!((fx.active[0].start_at, fx.active[1].start_at), (0, 276));
+        let first = fx.active[0].current.as_ref().unwrap();
+        let second = fx.active[1].current.as_ref().unwrap();
+        assert_eq!(
+            (first.frames.len(), first.interval, first.duration_ms),
+            (6, 46, 276)
+        );
+        assert!(first.frames[0].path.ends_with("/Magic2/1980.png"));
+        assert!(second.frames[0].path.ends_with("/Magic2/2070.png"));
+        assert_eq!(fx.take_due_sound_events(0)[0].file_name, "M92-0.wav");
+        fx.observe(1, 10, 10, &[event], &zone);
+        assert!(fx.take_due_sound_events(275).is_empty());
+        assert_eq!(fx.take_due_sound_events(276)[0].file_name, "M92-1.wav");
+        assert!(fx.take_due_sound_events(277).is_empty());
+        let mut rejected = five_class_test_fx("Warrior");
+        rejected.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "ObjectAttack",
+                json!({
+                    "objectId": 1, "spell": 92, "direction": "right",
+                    "_nativeAttacker": five_class_test_actor("Warrior")
+                }),
+            )],
+            &zone,
+        );
+        assert!(rejected.active.is_empty());
+        assert!(rejected.take_due_sound_events(1_000).is_empty());
+        fx.observe(
+            278,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "ObjectRemove",
+                json!({"objectId": 1}),
+            )],
+            &HashMap::from([(2, (16, 10))]),
+        );
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn five_class_double_slash_overlay_waits_for_matching_body_fifo_and_revival_cancels() {
+        use crate::entity_presentation::NativeEntityPresentation;
+        let zone = HashMap::from([(1, (10, 10))]);
+        let mut actor = five_class_test_actor("Assassin");
+        actor["_nativeAnimationAction"] = json!("walking");
+        actor["_nativeAnimationSequence"] = json!(1);
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.observe_packet_payload(json!({"entities": [actor.clone()]}), 0);
+        actor["_nativeAnimationAction"] = json!("attack1");
+        actor["_nativeAnimationSequence"] = json!(2);
+        actor["_nativeAnimationSpell"] = json!("DoubleSlash");
+        let snapshot = json!({"entities": [actor.clone()]});
+        presentation.observe_packet_payload(snapshot.clone(), 10);
+        let mut fx = five_class_test_fx("Assassin");
+        fx.observe(10, 10, 10, &[five_class_test_event(1, "ObjectAttack", json!({
+            "objectId": 1, "spell": "DoubleSlash", "direction": "right", "_nativeAttacker": actor
+        }))], &zone);
+        fx.reconcile_double_slash_body_clocks(&presentation);
+        assert!(fx
+            .active
+            .iter()
+            .all(|instance| instance.start_at == u64::MAX));
+        assert!(fx.take_due_sound_events(599).is_empty());
+        presentation.observe_packet_payload(snapshot.clone(), 600);
+        fx.reconcile_double_slash_body_clocks(&presentation);
+        assert_eq!((fx.active[0].start_at, fx.active[1].start_at), (600, 876));
+        assert_eq!(fx.take_due_sound_events(600)[0].file_name, "M92-0.wav");
+        presentation.observe_packet_payload(snapshot, 875);
+        fx.reconcile_double_slash_body_clocks(&presentation);
+        assert!(fx.take_due_sound_events(875).is_empty());
+        // An actual revival is a life barrier, not the queued second slash.
+        let mut revived = five_class_test_actor("Assassin");
+        revived["_nativeAnimationAction"] = json!("revive");
+        revived["_nativeAnimationSequence"] = json!(3);
+        presentation.observe_packet_payload(json!({"entities": [revived]}), 875);
+        fx.reconcile_double_slash_body_clocks(&presentation);
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(876).is_empty());
+    }
+
+    #[test]
+    fn five_class_straight_and_double_shots_use_source_launch_clocks_and_no_compat_duplicate() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut straight = five_class_test_fx("Archer");
+        straight.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_magic(1, "StraightShot", "Archer")],
+            &zone,
+        );
+        assert_eq!(straight.active.len(), 1);
+        assert_eq!(straight.active[0].start_at, 800);
+        assert!(straight.take_due_sound_events(799).is_empty());
+        assert_eq!(
+            straight.take_due_sound_events(800)[0].file_name,
+            "M122-0.wav"
+        );
+        assert!(straight.take_due_sound_events(1_099).is_empty());
+        assert_eq!(
+            straight.take_due_sound_events(1_100)[0].file_name,
+            "M122-2.wav"
+        );
+        assert_eq!(straight.active.len(), 1);
+        assert!(straight.active[0].current.as_ref().unwrap().frames[0]
+            .path
+            .ends_with("/Magic3/1370.png"));
+        let mut double = five_class_test_fx("Archer");
+        double.observe(
+            0,
+            10,
+            10,
+            &[
+                five_class_test_magic(1, "DoubleShot", "Archer"),
+                five_class_test_event(
+                    2,
+                    "ObjectProjectile",
+                    json!({"spell": "DoubleShot",
+                "sourceId": 1, "destinationId": 2, "source": {"x": 10, "y": 10},
+                "destination": {"x": 16, "y": 10}}),
+                ),
+            ],
+            &zone,
+        );
+        assert_eq!(double.active.len(), 2);
+        assert_eq!(
+            (double.active[0].start_at, double.active[1].start_at),
+            (500, 700)
+        );
+        assert!(double.take_due_sound_events(499).is_empty());
+        let first = double.take_due_sound_events(500);
+        let second = double.take_due_sound_events(700);
+        assert_eq!(
+            (first[0].file_name.as_str(), second[0].file_name.as_str()),
+            ("M121-0.wav", "M121-0.wav")
+        );
+        assert_ne!(first[0].cue, second[0].cue);
+        assert_eq!(double.take_due_sound_events(800)[0].file_name, "M121-2.wav");
+        assert_eq!(
+            double.take_due_sound_events(1_000)[0].file_name,
+            "M121-2.wav"
+        );
+        assert!(double.take_due_sound_events(1_001).is_empty());
+    }
+
+    #[test]
+    fn five_class_failed_or_wrong_class_shots_and_dead_straight_impact_fail_closed() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        for (spell, class, cast) in [
+            ("StraightShot", "Archer", false),
+            ("StraightShot", "Warrior", true),
+            ("CatTongue", "Archer", true),
+        ] {
+            let mut fx = five_class_test_fx(class);
+            let mut event = five_class_test_magic(1, spell, class);
+            event.payload["cast"] = json!(cast);
+            fx.observe(0, 10, 10, &[event], &zone);
+            assert!(fx.active.is_empty(), "{spell}/{class}/{cast}");
+            assert!(fx.take_due_sound_events(10_000).is_empty());
+        }
+        let mut fx = five_class_test_fx("Archer");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_magic(1, "StraightShot", "Archer")],
+            &zone,
+        );
+        let _ = fx.take_due_sound_events(800);
+        fx.replace_dead_action_object_ids(HashSet::from([2]));
+        assert!(fx.take_due_sound_events(1_100).is_empty());
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn five_class_vampire_return_is_caster_attached_after_target_impact() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut fx = five_class_test_fx("Archer");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_magic(1, "VampireShot", "Archer")],
+            &zone,
+        );
+        assert_eq!(fx.take_due_sound_events(700)[0].file_name, "M121-0.wav");
+        assert_eq!(fx.take_due_sound_events(1_000)[0].file_name, "M133-2.wav");
+        let impact = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-five-class-impact-"))
+            .unwrap();
+        let return_at = 1_000 + impact.current.as_ref().unwrap().duration_ms;
+        let returning = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-archer-vampire-return-"))
+            .unwrap();
+        assert_eq!(returning.start_at, return_at);
+        assert_eq!(fx.anchor_object_ids[&returning.key], 1);
+        assert!(returning.from_x.is_none() && returning.from_y.is_none());
+        assert_eq!(returning.current.as_ref().unwrap().kind, "target");
+        assert!(fx.take_due_sound_events(return_at - 1).is_empty());
+        assert_eq!(
+            fx.take_due_sound_events(return_at)[0].file_name,
+            "M45-2.wav"
+        );
+        let moved_zone = HashMap::from([(1, (11, 11)), (2, (16, 10))]);
+        fx.observe(return_at, 11, 11, &[], &moved_zone);
+        let returning = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-archer-vampire-return-"))
+            .unwrap();
+        assert_eq!((returning.tile_x, returning.tile_y), (11, 11));
+    }
+
+    #[test]
+    fn five_class_cripple_uses_current_real_poison_buff_before_vampire() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        for (buffs, expected_frame, expected_sound, returns) in [
+            (Some(json!([])), Some(2490), Some("M136-5.wav"), false),
+            (Some(json!([16])), Some(2510), Some("M136-7.wav"), true),
+            (Some(json!([16, 17])), Some(2500), Some("M136-6.wav"), false),
+            (None, None, None, false),
+        ] {
+            let mut fx = five_class_test_fx("Archer");
+            fx.observe(
+                0,
+                10,
+                10,
+                &[five_class_test_magic(1, "CrippleShot", "Archer")],
+                &zone,
+            );
+            let _ = fx.take_due_sound_events(700);
+            let actor = fx
+                .five_class_actor_contexts
+                .get_mut(&1)
+                .unwrap()
+                .as_object_mut()
+                .unwrap();
+            if let Some(buffs) = buffs {
+                actor.insert("buffs".to_owned(), buffs);
+            } else {
+                actor.remove("buffs");
+            }
+            let sounds = fx.take_due_sound_events(1_000);
+            if let Some(frame) = expected_frame {
+                let impact = fx
+                    .active
+                    .iter()
+                    .find(|instance| instance.key.starts_with("fx-five-class-impact-"))
+                    .unwrap();
+                assert!(impact.current.as_ref().unwrap().frames[0]
+                    .path
+                    .ends_with(&format!("/Magic3/{frame}.png")));
+                assert_eq!(sounds[0].file_name, expected_sound.unwrap());
+            } else {
+                assert!(fx.active.is_empty() && sounds.is_empty());
+            }
+            assert_eq!(
+                fx.active
+                    .iter()
+                    .any(|instance| instance.key.starts_with("fx-archer-vampire-return-")),
+                returns
+            );
+        }
+    }
+
+    #[test]
+    fn five_class_target_effects_preserve_three_hemorrhage_layers_and_mp_owner() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut fx = five_class_test_fx("Assassin");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[
+                five_class_test_event(
+                    1,
+                    "ObjectEffect",
+                    json!({"objectId": 2, "effect": 17, "effectType": 0, "delayTime": 500}),
+                ),
+                five_class_test_event(
+                    2,
+                    "ObjectEffect",
+                    json!({"objectId": 2, "effect": 16, "effectType": 1, "delayTime": 500}),
+                ),
+            ],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 5);
+        let mut starts = fx
+            .active
+            .iter()
+            .flat_map(|instance| instance.current.as_ref())
+            .map(|animation| (animation.frames[0].path.clone(), animation.duration_ms))
+            .collect::<Vec<_>>();
+        starts.sort();
+        for (library, frame, duration) in [
+            ("Magic3", 0, 400),
+            ("Magic3", 28, 600),
+            ("Magic3", 46, 800),
+            ("Magic2", 2400, 900),
+            ("Magic2", 2411, 1_900),
+        ] {
+            assert!(starts.iter().any(|(path, time)| path
+                .ends_with(&format!("/{library}/{frame}.png"))
+                && *time == duration));
+        }
+        let owner = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-mp-eater-owner-"))
+            .unwrap();
+        assert_eq!(fx.anchor_object_ids[&owner.key], 1);
+        assert!(fx.active.iter().all(|instance| instance.start_at == 0));
+        let sounds = fx.take_due_sound_events(0);
+        assert_eq!(
+            sounds
+                .iter()
+                .map(|sound| sound.file_name.as_str())
+                .collect::<HashSet<_>>(),
+            HashSet::from(["M104-0.wav", "M91-0.wav"])
+        );
+    }
+
+    #[test]
+    fn five_class_concentration_pauses_hides_and_resumes_without_restarting_sound() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut fx = five_class_test_fx("Archer");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "SetConcentration",
+                json!({
+            "objectId": 1, "enabled": true, "interrupted": false}),
+            )],
+            &zone,
+        );
+        assert_eq!(fx.take_due_sound_events(0)[0].file_name, "M129-0.wav");
+        fx.observe(
+            350,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "SetConcentration",
+                json!({
+            "objectId": 1, "enabled": true, "interrupted": true}),
+            )],
+            &zone,
+        );
+        assert!(fx
+            .hidden_five_class_effect_keys
+            .contains("archer-concentration-1"));
+        assert!(fx.current_light_snapshots(700).is_empty());
+        fx.observe(
+            800,
+            10,
+            10,
+            &[five_class_test_event(
+                3,
+                "SetConcentration",
+                json!({
+            "objectId": 1, "enabled": true, "interrupted": false}),
+            )],
+            &zone,
+        );
+        assert!(fx.hidden_five_class_effect_keys.is_empty());
+        assert_eq!(fx.active[0].start_at, 450);
+        assert!(fx.take_due_sound_events(800).is_empty());
+        fx.observe(
+            900,
+            10,
+            10,
+            &[five_class_test_event(
+                4,
+                "SetConcentration",
+                json!({
+            "objectId": 1, "enabled": false, "interrupted": false}),
+            )],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn five_class_elemental_arrow_requires_typed_state_and_owner_loop_stops_at_boundary() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut absent = five_class_test_fx("Archer");
+        absent.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_magic(1, "ElementalShot", "Archer")],
+            &zone,
+        );
+        assert!(absent.active.is_empty());
+        let mut fx = five_class_test_fx("Archer");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "SetElemental",
+                json!({
+                    "objectId": 1, "enabled": true, "casted": true, "value": 1,
+                    "elementType": 3, "expLast": 3
+                }),
+            )],
+            &zone,
+        );
+        assert_eq!(
+            fx.ready_element_loop_controls.last().unwrap().file_name,
+            Some("M126-7.wav")
+        );
+        // Crystal ignores Casted only for the actual local owner.
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_magic(2, "ElementalShot", "Archer")],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 3);
+        assert!(fx.take_due_sound_events(99).is_empty());
+        assert_eq!(fx.take_due_sound_events(100)[0].file_name, "M128-0.wav");
+        fx.observe(
+            200,
+            10,
+            10,
+            &[five_class_test_event(3, "MapChanged", json!({}))],
+            &HashMap::new(),
+        );
+        assert!(fx.active.is_empty());
+        assert_eq!(
+            fx.ready_element_loop_controls.last().unwrap().file_name,
+            None
+        );
+        assert!(fx.take_due_sound_events(1_000).is_empty());
+        assert!(fx.elemental_state.is_empty());
+    }
+
+    #[test]
+    fn five_class_binding_uses_receipt_deadline_and_three_source_phases() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut fx = five_class_test_fx("Archer");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "SetBindingShot",
+                json!({
+            "objectId": 2, "enabled": true, "value": 6_000}),
+            )],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1);
+        let instance = &fx.active[0];
+        assert_eq!(instance.current.as_ref().unwrap().duration_ms, 696);
+        assert!(advance_instance(instance, 695).unwrap().0.frames[0]
+            .path
+            .ends_with("/MagicC/0.png"));
+        assert!(advance_instance(instance, 696).unwrap().0.frames[0]
+            .path
+            .ends_with("/MagicC/7.png"));
+        assert!(advance_instance(instance, 4_500).unwrap().0.frames[0]
+            .path
+            .ends_with("/MagicC/8.png"));
+        assert!(advance_instance(instance, 5_196).is_none());
+        assert!(fx.take_due_sound_events(695).is_empty());
+        assert_eq!(fx.take_due_sound_events(696)[0].file_name, "M130-5.wav");
+        assert!(fx.take_due_sound_events(4_499).is_empty());
+        assert_eq!(fx.take_due_sound_events(4_500)[0].file_name, "M130-6.wav");
+        fx.observe(
+            4_501,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "ObjectRemove",
+                json!({"objectId": 2}),
+            )],
+            &HashMap::from([(1, (10, 10))]),
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(6_000).is_empty());
+    }
+
+    #[test]
+    fn five_class_delayed_explosion_stages_are_monotonic_and_removed_explicitly() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10))]);
+        let mut fx = five_class_test_fx("Archer");
+        for (sequence, at, requested, expected) in
+            [(1, 0, 2, 0), (2, 100, 1, 1), (3, 200, 0, 1), (4, 300, 2, 2)]
+        {
+            fx.observe(
+                at,
+                10,
+                10,
+                &[five_class_test_event(
+                    sequence,
+                    "ObjectEffect",
+                    json!({"objectId": 2, "effect": 15, "effectType": requested}),
+                )],
+                &zone,
+            );
+            assert_eq!(fx.delayed_explosion_stages[&2], expected);
+            let animation = fx
+                .active
+                .iter()
+                .find(|instance| instance.key == "delayed-explosion-2")
+                .unwrap()
+                .current
+                .as_ref()
+                .unwrap();
+            assert_eq!(animation.repeat, expected != 2);
+            assert!(animation.frames[0]
+                .path
+                .ends_with(&format!("/Magic3/{}.png", 1590 + expected * 10)));
+        }
+        fx.observe(
+            400,
+            10,
+            10,
+            &[five_class_test_event(
+                5,
+                "RemoveDelayedExplosion",
+                json!({"objectId": 2}),
+            )],
+            &zone,
+        );
+        assert!(fx.active.is_empty() && fx.delayed_explosion_stages.is_empty());
+        assert!(fx.take_due_sound_events(5_000).is_empty());
+    }
+
+    #[test]
+    fn five_class_explosive_trap_boolean_detonation_is_ground_nonrepeat_and_finite() {
+        let mut fx = NativeEffects::default();
+        let armed = five_class_test_event(
+            1,
+            "ObjectSpell",
+            json!({"objectId": 99, "spell": 124,
+            "location": {"x": 15, "y": 10}, "direction": "right", "param": false}),
+        );
+        fx.observe(0, 10, 10, &[armed], &HashMap::new());
+        assert_eq!(fx.active.len(), 1);
+        assert!(fx.active[0].current.as_ref().unwrap().repeat);
+        fx.observe(
+            10,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "ObjectSpell",
+                json!({
+            "objectId": 99, "spell": 124, "location": {"x": 15, "y": 10},
+            "direction": "right", "param": true}),
+            )],
+            &HashMap::new(),
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].kind, EffectKindTag::Ground);
+        let animation = fx.active[0].current.as_ref().unwrap();
+        assert_eq!(
+            (
+                animation.frames.len(),
+                animation.duration_ms,
+                animation.repeat
+            ),
+            (9, 900, false)
+        );
+        assert!(animation.frames[0].path.ends_with("/Magic3/1570.png"));
+        assert_eq!(fx.take_due_sound_events(10)[0].file_name, "M124-5.wav");
+        assert!(instance_still_active(&fx.active[0], 909));
+        assert!(!instance_still_active(&fx.active[0], 910));
+    }
+
+    #[test]
+    fn five_class_dark_body_smoke_survives_actor_remove_and_back_step_gender_clocks() {
+        let zone = HashMap::from([(1, (10, 10))]);
+        let mut smoke = five_class_test_fx("Assassin");
+        smoke.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "ObjectDied",
+                json!({
+            "objectId": 1, "kind": 2, "location": {"x": 10, "y": 10},
+            "_nativeTarget": five_class_test_actor("Assassin")}),
+            )],
+            &zone,
+        );
+        assert_eq!(smoke.active.len(), 1);
+        assert!(smoke.anchor_object_ids.is_empty() && smoke.source_object_ids.is_empty());
+        let animation = smoke.active[0].current.as_ref().unwrap();
+        assert_eq!((animation.frames.len(), animation.duration_ms), (10, 1_200));
+        assert!(animation.frames[0].path.ends_with("/Magic2/2600.png"));
+        assert_eq!(smoke.take_due_sound_events(0)[0].file_name, "M103-1.wav");
+        assert!(smoke.five_class_actor_contexts.get(&1).is_none());
+        for (gender, expected) in [("male", "M127-5.wav"), ("female", "M127-6.wav")] {
+            let mut fx = five_class_test_fx("Archer");
+            let mut actor = five_class_test_actor("Archer");
+            actor["genderKey"] = json!(gender);
+            fx.observe(
+                0,
+                10,
+                10,
+                &[five_class_test_event(
+                    1,
+                    "ObjectBackStep",
+                    json!({"objectId": 1, "_nativeAttacker": actor}),
+                )],
+                &zone,
+            );
+            assert!(fx.active.is_empty());
+            assert!(fx.take_due_sound_events(99).is_empty());
+            assert_eq!(fx.take_due_sound_events(100)[0].file_name, expected);
+            assert!(fx.take_due_sound_events(699).is_empty());
+            assert_eq!(fx.take_due_sound_events(700)[0].file_name, "M127-7.wav");
+            assert!(fx.take_due_sound_events(800).is_empty());
+        }
+    }
+
+    #[test]
+    fn five_class_barrier_aoi_recovery_struck_and_down_do_not_replay_stale_up() {
+        let zone = HashMap::from([(1, (10, 10))]);
+        let mut fx = NativeEffects::default();
+        let mut actor = five_class_test_actor("Archer");
+        actor["effect"] = json!(13);
+        let snapshot = json!({"mapIndex": 1, "entities": [actor]});
+        fx.observe_render_payload(&snapshot);
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "ObjectPlayer",
+                json!({"objectId": 1}),
+            )],
+            &zone,
+        );
+        assert_eq!(fx.active[0].current.as_ref().unwrap().frames.len(), 16);
+        assert!(fx.elemental_barrier_objects.contains(&1));
+        fx.observe(
+            1,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "ObjectStruck",
+                json!({"objectId": 1}),
+            )],
+            &zone,
+        );
+        let barrier = fx
+            .active
+            .iter()
+            .find(|instance| instance.key == "archer-barrier-1")
+            .unwrap();
+        assert_eq!(
+            (
+                barrier.current.as_ref().unwrap().frames.len(),
+                barrier.current.as_ref().unwrap().duration_ms
+            ),
+            (5, 600)
+        );
+        assert_eq!(
+            (
+                barrier.queued.as_ref().unwrap().frames.len(),
+                barrier.queued.as_ref().unwrap().duration_ms
+            ),
+            (16, 3_200)
+        );
+        fx.observe(
+            2,
+            10,
+            10,
+            &[five_class_test_event(
+                3,
+                "ObjectEffect",
+                json!({"objectId": 1, "effect": 14}),
+            )],
+            &zone,
+        );
+        assert!(!fx.elemental_barrier_objects.contains(&1));
+        fx.observe_render_payload(&snapshot);
+        fx.observe(3, 10, 10, &[], &zone);
+        assert!(!fx
+            .active
+            .iter()
+            .any(|instance| instance.key == "archer-barrier-1"));
+        assert!(fx.elemental_barrier_down_objects.contains(&1));
+        fx.observe(
+            4,
+            10,
+            10,
+            &[five_class_test_event(
+                4,
+                "ObjectEffect",
+                json!({"objectId": 1, "effect": 13}),
+            )],
+            &zone,
+        );
+        assert!(fx.elemental_barrier_objects.contains(&1));
+        assert!(!fx.elemental_barrier_down_objects.contains(&1));
+    }
+
+    #[test]
+    fn five_class_summon_effects_require_real_actor_and_actual_standing_cycle() {
+        let zone = HashMap::from([(1, (10, 10)), (2, (16, 10)), (3, (11, 11))]);
+        let mut fx = five_class_test_fx("Archer");
+        let actor = json!({"objectId": 3, "kind": "monster", "image": 361, "dead": false,
+            "x": 11, "y": 11, "sprite": {"bodyLibrary": "Monster/361"}});
+        fx.observe_render_payload(
+            &json!({"mapIndex": 1, "entities": [five_class_test_actor("Archer"), actor]}),
+        );
+        fx.observe(0, 10, 10, &[], &zone);
+        fx.reconcile_snake_totem_auras(&HashSet::new());
+        assert!(fx.active.is_empty());
+        fx.reconcile_snake_totem_auras(&HashSet::from([3]));
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "snake-totem-aura-3");
+        assert!(fx.active[0].current.as_ref().unwrap().repeat);
+        assert!(fx.active[0].current.as_ref().unwrap().frames[0]
+            .path
+            .ends_with("/Monster/361/2.png"));
+        fx.reconcile_snake_totem_auras(&HashSet::from([3]));
+        assert_eq!(fx.active.len(), 1);
+        fx.reconcile_snake_totem_auras(&HashSet::new());
+        assert!(fx.active.is_empty());
+        for (image, library, frame, duration) in [
+            (359, "Monster/359", 296, 1_000),
+            (362, "Monster/362", 40, 800),
+        ] {
+            fx.observe(
+                0,
+                10,
+                10,
+                &[five_class_test_event(
+                    image,
+                    "ObjectDied",
+                    json!({
+                "objectId": 3, "kind": 0, "_nativeTarget": {"objectId": 3, "kind": "monster",
+                    "image": image, "dead": true, "sprite": {"bodyLibrary": library}}}),
+                )],
+                &zone,
+            );
+            let animation = fx.active.last().unwrap().current.as_ref().unwrap();
+            assert_eq!(animation.duration_ms, duration);
+            assert!(animation.frames[0]
+                .path
+                .ends_with(&format!("/{library}/{frame}.png")));
+        }
+        let mut rock = five_class_test_fx("Archer");
+        rock.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "ObjectRangeAttack",
+                json!({
+            "objectId": 3, "targetId": 1, "_nativeAttacker": {"objectId": 3,
+                "kind": "monster", "image": 130, "sprite": {"bodyLibrary": "Monster/130"}}}),
+            )],
+            &zone,
+        );
+        assert_eq!(rock.active.len(), 1);
+        assert_eq!(rock.active[0].start_at, 400);
+        assert!(rock.active[0].current.as_ref().unwrap().frames[0]
+            .path
+            .ends_with("/Monster/130/26.png"));
+        assert!(rock.take_due_sound_events(399).is_empty());
+        assert_eq!(rock.take_due_sound_events(400)[0].file_name, "130-6.wav");
+    }
+
+    #[test]
+    fn five_class_aoi_orbs_restore_true_colors_and_disabled_state_beats_stale_snapshot() {
+        let zone = HashMap::from([(1, (10, 10))]);
+        let mut actor = five_class_test_actor("Archer");
+        actor["elementOrbEffect"] = json!(3);
+        actor["elementOrbLevel"] = json!(1);
+        actor["elementOrbMax"] = json!(3);
+        let snapshot = json!({"mapIndex": 1, "entities": [actor.clone()]});
+        let mut fx = NativeEffects::default();
+        fx.observe_render_payload(&snapshot);
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(1, "ObjectPlayer", actor)],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 3);
+        assert!(fx.elemental_state[&1].enabled);
+        assert!(fx
+            .active
+            .iter()
+            .all(|instance| instance.current.as_ref().unwrap().repeat));
+        assert!(!fx
+            .ready_element_loop_controls
+            .iter()
+            .any(|control| control.file_name.is_some()));
+        assert_eq!(fx.take_due_sound_events(0)[0].file_name, "M126-7.wav");
+        fx.observe(
+            100,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "SetElemental",
+                json!({
+            "objectId": 1, "enabled": false, "casted": false, "value": 3,
+            "elementType": 0, "expLast": 3}),
+            )],
+            &zone,
+        );
+        fx.observe_render_payload(&snapshot);
+        fx.observe(101, 10, 10, &[], &zone);
+        assert!(!fx.elemental_state[&1].enabled);
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(101).is_empty());
+    }
+
+    #[test]
+    fn five_class_source_orb_threshold_stops_only_its_current_loop() {
+        let zone = HashMap::from([(1, (10, 10))]);
+        let mut fx = five_class_test_fx("Archer");
+        fx.observe(
+            0,
+            10,
+            10,
+            &[five_class_test_event(
+                1,
+                "SetElemental",
+                json!({
+            "objectId": 1, "enabled": true, "casted": false, "value": 1,
+            "elementType": 3, "expLast": 3}),
+            )],
+            &zone,
+        );
+        assert_eq!(fx.elemental_loop_owner, Some((1, 3)));
+        fx.observe(
+            100,
+            10,
+            10,
+            &[five_class_test_event(
+                2,
+                "SetElemental",
+                json!({
+            "objectId": 1, "enabled": true, "casted": false, "value": 3,
+            "elementType": 0, "expLast": 3}),
+            )],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert_eq!(fx.elemental_loop_owner, None);
+        assert_eq!(
+            fx.ready_element_loop_controls.last().unwrap().file_name,
+            None
+        );
+        assert!(fx.elemental_state[&1].enabled);
+    }
 
     fn mining_map_event(generation: u64, sequence: u64) -> NativeEffectEvent {
         NativeEffectEvent {
@@ -6714,6 +9714,7 @@ mod tests {
             ground_by_spell: HashMap::new(),
             map_by_name: HashMap::new(),
             effect_name_by_number: HashMap::new(),
+            frame_asset_root: exported_effect_test_root(),
         };
         assert!(empty.spell_cast_animation("FireBall", 4).is_none());
         assert!(empty.map_animation_by_number(12, 7).is_none());
@@ -9600,6 +12601,283 @@ mod tests {
             generation: 17,
             packet: packet.to_owned(),
             payload: object_id.map_or_else(|| json!({}), |id| json!({"objectId": id})),
+        }
+    }
+
+    fn archer_normal_range_event(sequence: u64, spell: u32) -> NativeEffectEvent {
+        let mut event = right_guard_range_event(sequence, 371, 2001, "ARArmour/00");
+        event.payload["_nativeAttacker"] = player_actor(
+            371,
+            "male",
+            "archer",
+            "ARArmour/00",
+            Some("ARWeapon/00"),
+            None,
+        );
+        event.payload["target"] = json!({"x": 293, "y": 616});
+        event.payload["spell"] = json!(spell);
+        event
+    }
+
+    #[test]
+    fn archer_normal_arrow_and_focus_catalog_follow_exact_source_frames() {
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        for direction in 0..16 {
+            let arrow = catalog
+                .archer_normal_arrow_animation(direction)
+                .expect("all eighty source normal-arrow frames are required");
+            assert_eq!(arrow.kind, "projectile");
+            assert_eq!(arrow.frames.len(), 5);
+            assert_eq!(arrow.interval, 30);
+            assert_eq!(arrow.duration_ms, 150);
+            assert_eq!(arrow.light, Some(6));
+            assert!(arrow.blend && !arrow.repeat);
+            for (frame, offset) in arrow.frames.iter().zip(0..5) {
+                assert!(frame
+                    .path
+                    .ends_with(&format!("/Magic3/{}.png", 1030 + direction * 10 + offset)));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        assert!(catalog.archer_normal_arrow_animation(16).is_none());
+        let focus = catalog
+            .archer_focus_proc_animation()
+            .expect("ten source Focus frames");
+        assert_eq!(focus.frames.len(), 10);
+        assert_eq!(focus.interval, 80);
+        assert_eq!(focus.duration_ms, 800);
+        assert_eq!(focus.light, Some(6));
+        assert!(focus.blend && !focus.repeat);
+        for (frame, index) in focus.frames.iter().zip(2730..2740) {
+            assert!(frame.path.ends_with(&format!("/Magic3/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+    }
+
+    #[test]
+    fn archer_catalog_fails_closed_on_missing_frames_or_changed_direction_contract() {
+        let mut catalog = EffectCatalog::load().expect("production effect catalog");
+        let original = catalog.map_by_name["ArcherNormalArrow"].clone();
+        catalog
+            .map_by_name
+            .get_mut("ArcherNormalArrow")
+            .unwrap()
+            .direction_stride = Some(12);
+        assert!(catalog.archer_normal_arrow_animation(4).is_none());
+        catalog
+            .map_by_name
+            .insert("ArcherNormalArrow".to_owned(), original);
+        catalog
+            .libraries
+            .get_mut("Magic3")
+            .unwrap()
+            .frames
+            .remove("1072");
+        assert!(catalog.archer_normal_arrow_animation(4).is_none());
+        assert!(catalog.archer_normal_arrow_animation(5).is_some());
+        catalog
+            .libraries
+            .get_mut("Magic3")
+            .unwrap()
+            .frames
+            .remove("2732");
+        assert!(catalog.archer_focus_proc_animation().is_none());
+    }
+
+    #[test]
+    fn archer_normal_arrow_waits_frame_five_and_delivers_each_sound_once() {
+        let zone = HashMap::from([(371, (287, 616)), (2001, (293, 616))]);
+        let event = archer_normal_range_event(1, 0);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 287, 616, &[event.clone()], &zone);
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].start_at, 500);
+        let before: Value = serde_json::from_str(&fx.tick(499).unwrap()).unwrap();
+        assert_eq!(before["effects"], json!([]));
+        assert!(fx.take_due_sound_events(499).is_empty());
+        let launch: Value = serde_json::from_str(&fx.tick(500).unwrap()).unwrap();
+        assert_eq!(launch["effects"].as_array().map(Vec::len), Some(1));
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .unwrap()
+            .ends_with("/Magic3/1070.png"));
+        let sounds = fx.take_due_sound_events(500);
+        assert_eq!(sounds.len(), 1);
+        assert_eq!(sounds[0].file_name, "M121-0.wav");
+        assert_eq!(sounds[0].generation, 17);
+        assert_eq!(sounds[0].sequence, 1);
+        fx.observe(501, 287, 616, &[event], &zone);
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "a duplicate packet cannot mint another arrow"
+        );
+        assert!(fx.take_due_sound_events(501).is_empty());
+        fx.tick(650);
+        let light = fx.current_light_snapshots(650);
+        assert_eq!(light.len(), 1);
+        assert_eq!(light[0].light, 6);
+        assert!((light[0].tile_x - 290.0).abs() < f32::EPSILON);
+        let arrival: Value = serde_json::from_str(&fx.tick(800).unwrap()).unwrap();
+        assert_eq!(arrival["effects"], json!([]));
+        let sounds = fx.take_due_sound_events(800);
+        assert_eq!(sounds.len(), 1);
+        assert_eq!(sounds[0].file_name, "M121-2.wav");
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+        assert!(fx.active.is_empty() && fx.local_projectile_targets.is_empty());
+    }
+
+    #[test]
+    fn archer_normal_arrow_binds_at_launch_then_tracks_without_rotating() {
+        let mut zone = HashMap::from([(371, (287, 616)), (2001, (293, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 287, 616, &[archer_normal_range_event(1, 0)], &zone);
+        zone.insert(371, (288, 616));
+        zone.insert(2001, (288, 622));
+        fx.observe(499, 288, 616, &[], &zone);
+        let launch: Value = serde_json::from_str(&fx.tick(500).unwrap()).unwrap();
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .unwrap()
+            .ends_with("/Magic3/1110.png"));
+        assert_eq!(fx.active[0].from_x, Some(288.0));
+        assert_eq!(fx.take_due_sound_events(500)[0].file_name, "M121-0.wav");
+        zone.insert(2001, (288, 625));
+        fx.observe(600, 288, 616, &[], &zone);
+        let flight: Value = serde_json::from_str(&fx.tick(600).unwrap()).unwrap();
+        assert!(flight["effects"][0]["imageUrl"]
+            .as_str()
+            .unwrap()
+            .ends_with("/Magic3/1113.png"));
+        assert_eq!(fx.active[0].current.as_ref().unwrap().duration_ms, 450);
+        zone.remove(&2001);
+        fx.observe(
+            601,
+            288,
+            616,
+            &[lifecycle_effect_event(2, "ObjectRemove", Some(2001))],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "a launched arrow retains its last bound target point"
+        );
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (288, 625));
+        assert!(!fx.local_projectile_targets[&fx.active[0].key].unbound_archer_arrow);
+        fx.tick(950);
+        assert_eq!(fx.take_due_sound_events(950)[0].file_name, "M121-2.wav");
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn archer_focus_proc_requires_the_authoritative_focus_spell_byte() {
+        let zone = HashMap::from([(371, (287, 616)), (2001, (293, 616))]);
+        let mut normal = NativeEffects::default();
+        normal.observe(0, 287, 616, &[archer_normal_range_event(1, 0)], &zone);
+        assert_eq!(normal.active.len(), 1);
+        let mut focus = NativeEffects::default();
+        focus.observe(0, 287, 616, &[archer_normal_range_event(1, 121)], &zone);
+        assert_eq!(focus.active.len(), 2);
+        assert_eq!(focus.active[1].start_at, 600);
+        focus.tick(500);
+        assert_eq!(focus.take_due_sound_events(500)[0].file_name, "M121-0.wav");
+        let proc: Value = serde_json::from_str(&focus.tick(600).unwrap()).unwrap();
+        assert!(proc["effects"].as_array().unwrap().iter().any(|effect| {
+            effect["imageUrl"]
+                .as_str()
+                .unwrap()
+                .ends_with("/Magic3/2730.png")
+        }));
+        let sounds = focus.take_due_sound_events(600);
+        assert_eq!(sounds.len(), 1);
+        assert_eq!(sounds[0].file_name, "M121-5.wav");
+        focus.tick(800);
+        assert_eq!(focus.take_due_sound_events(800)[0].file_name, "M121-2.wav");
+        let remaining: Value = serde_json::from_str(&focus.tick(1320).unwrap()).unwrap();
+        assert!(remaining["effects"][0]["imageUrl"]
+            .as_str()
+            .unwrap()
+            .ends_with("/Magic3/2739.png"));
+        focus.tick(1400);
+        assert!(focus.active.is_empty());
+        assert!(focus.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn archer_ground_arrow_extends_outside_source_data_range_without_target_sound() {
+        let zone = HashMap::from([(371, (287, 616))]);
+        let mut event = archer_normal_range_event(1, 0);
+        event.payload["targetId"] = json!(0);
+        event.payload["target"] = json!({"x": 289, "y": 616});
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 287, 616, &[event], &zone);
+        fx.tick(500);
+        assert_eq!(fx.active[0].tile_x, 291);
+        assert_eq!(fx.take_due_sound_events(500)[0].file_name, "M121-0.wav");
+        fx.tick(500);
+        assert_eq!(
+            fx.active[0].tile_x, 291,
+            "one clock instant processes the arrow once"
+        );
+        fx.tick(501);
+        assert_eq!(fx.active[0].tile_x, 295);
+        fx.tick(502);
+        assert_eq!(fx.active[0].tile_x, 303);
+        fx.tick(503);
+        assert_eq!(fx.active[0].tile_x, 303);
+        fx.tick(1300);
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn archer_normal_arrow_rejects_unknown_actor_and_clears_at_lifecycle_boundaries() {
+        let zone = HashMap::from([(371, (287, 616)), (2001, (293, 616))]);
+        for mutation in [
+            "missingActor",
+            "otherClass",
+            "monster",
+            "wrongOwner",
+            "fractionalPoint",
+        ] {
+            let mut event = archer_normal_range_event(1, 121);
+            match mutation {
+                "missingActor" => {
+                    event
+                        .payload
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("_nativeAttacker");
+                }
+                "otherClass" => event.payload["_nativeAttacker"]["classKey"] = json!("warrior"),
+                "monster" => event.payload["_nativeAttacker"]["kind"] = json!("monster"),
+                "wrongOwner" => event.payload["_nativeAttacker"]["objectId"] = json!(372),
+                "fractionalPoint" => event.payload["location"]["x"] = json!(287.5),
+                _ => unreachable!(),
+            }
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 287, 616, &[event], &zone);
+            assert!(fx.active.is_empty(), "{mutation}");
+            assert!(fx.take_due_sound_events(10_000).is_empty(), "{mutation}");
+        }
+        for (packet, object_id) in [
+            ("MapChanged", None),
+            ("LogOutSuccess", None),
+            ("ObjectRemove", Some(371)),
+        ] {
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 287, 616, &[archer_normal_range_event(1, 121)], &zone);
+            fx.observe(
+                499,
+                287,
+                616,
+                &[lifecycle_effect_event(2, packet, object_id)],
+                &zone,
+            );
+            assert!(fx.active.is_empty(), "{packet}");
+            assert!(fx.take_due_sound_events(10_000).is_empty(), "{packet}");
+            assert!(fx.local_projectile_targets.is_empty(), "{packet}");
         }
     }
 

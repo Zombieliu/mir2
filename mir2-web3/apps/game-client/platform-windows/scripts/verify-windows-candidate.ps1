@@ -2,15 +2,19 @@
 [CmdletBinding()]
 param(
     [string]$PackageRoot = '',
+    [ValidateSet('platinum_176_v27', 'platinum_176', 'platinum_fiveclass')][string]$ContentProfile = 'platinum_176_v27',
     [string]$TrustedSignerThumbprint = '',
     [switch]$Launch,
     [int]$LaunchTimeoutMs = 45000,
     [switch]$AllowDirtyWorktree,
-    [switch]$SelfTest
+    [switch]$SelfTest,
+    [string]$ReportPath = '',
+    [switch]$RequireCurrentSource
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ContentProfile = $ContentProfile.ToLowerInvariant()
 $PetSoundNames = @('pet_pig.wav','pet_chick.wav','pet_kitty.wav','pet_skeleton.wav','pet_pigman.wav','pet_weman.wav','pet_blackdragon.wav','pet_olympicmascot.wav','pet_frog.wav','pet_monkey.wav','pet_pickup.wav')
 $PlayerCombatSoundNames = @('70.wav','71.wav','72.wav','73.wav','80.wav','81.wav','82.wav','83.wav','138.wav','139.wav','144.wav','145.wav','tiger_struck_1.wav','tiger_struck_2.wav','wolf_struck1.wav')
 $MonsterCombatSoundNames = @('005-1.wav','005-2.wav','005-3.wav','60.wav','61.wav','62.wav','63.wav','64.wav','65.wav')
@@ -23,10 +27,15 @@ if (-not (Test-Path -LiteralPath $PlayerSpriteClosureScript -PathType Leaf)) { t
 $ReleaseProfileScript = Join-Path (Split-Path -Parent $PSCommandPath) 'candidate-release-profile.ps1'
 if (-not (Test-Path -LiteralPath $ReleaseProfileScript -PathType Leaf)) { throw 'Candidate release profile validator missing' }
 . $ReleaseProfileScript
+if ($ContentProfile -ceq 'platinum_fiveclass') {
+    $script:CandidateContentProfilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../../packages/game-data/data/content_profiles/platinum_fiveclass.json'))
+    . (Join-Path $PSScriptRoot 'five-class-asset-closure.ps1')
+}
 $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guild-asset-closure.ps1'
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
 . $PetGuildClosureScript
 $PlayerSpriteFamilyNames = @('CArmour','CHair','CWeapon','ARArmour','ARHair','ARWeapon','AArmour','AHair','AWeapon','Mount')
+$FiveClassPackageSoundPolicy = $null
 
 function Write-Utf8NoBom { param([string]$Path, [string]$Text); [IO.File]::WriteAllText($Path, $Text, [Text.UTF8Encoding]::new($false)) }
 function Get-TextSha256 { param([string]$Text); return ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($Text)))).Replace('-', '') }
@@ -236,6 +245,9 @@ function Test-PackageRelativeFileAllowed {
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
     $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','OFL-NotoSans.txt','OFL-NotoSansArabic.txt','OFL-NotoSansDevanagari.txt','OFL-NotoSansThai.txt','MULTILINGUAL-SOURCES.json','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
+    if ($null -ne $FiveClassPackageSoundPolicy -and
+        ($RelativePath -ceq $FiveClassPackageSoundPolicy.soundIndexPackagePath -or
+         $FiveClassPackageSoundPolicy.packagePaths -ccontains $RelativePath)) { return $true }
     if($RelativePath.StartsWith('mir2-assets/original-ui/Items/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}
     if(@('mir2-assets/original-ui/Sound/005-1.wav','mir2-assets/original-ui/Sound/005-2.wav','mir2-assets/original-ui/Sound/005-3.wav','mir2-assets/original-ui/Sound/60.wav','mir2-assets/original-ui/Sound/61.wav','mir2-assets/original-ui/Sound/62.wav','mir2-assets/original-ui/Sound/63.wav','mir2-assets/original-ui/Sound/64.wav','mir2-assets/original-ui/Sound/65.wav') -ccontains $RelativePath){return $true}
     if($RelativePath -ceq 'mir2-assets/original-ui/Sound/91.wav'){return $true}
@@ -279,6 +291,116 @@ function Get-WorktreeState {
         $recordArray = $records.ToArray(); [Array]::Sort($recordArray, [StringComparer]::Ordinal); $scope = 'git-status-z+diff+all-untracked-content-v2'; $canonical = "SCOPE`n$scope`nREVISION`n$revision`nSTATUS-Z`n$($statusBytes.Length)`n$(Get-ByteSha256 $statusBytes)`nINDEX-DIFF`n$($indexDiffBytes.Length)`n$(Get-ByteSha256 $indexDiffBytes)`nWORKTREE-DIFF`n$($worktreeDiffBytes.Length)`n$(Get-ByteSha256 $worktreeDiffBytes)`nUNTRACKED`n$($recordArray.Count)`n" + ($recordArray -join "`n") + "`n"
         return [ordered]@{ revision = $revision; dirty = ($statusBytes.Length -gt 0); statusLineCount = @(ConvertFrom-NulUtf8 -Bytes $statusBytes).Count; statusScope = $scope; statusSha256 = Get-TextSha256 -Text $canonical }
     } finally { Pop-Location }
+}
+
+function Resolve-FreshCandidateVerificationReportPath {
+    param([Parameter(Mandatory = $true)][string]$Path,
+          [Parameter(Mandatory = $true)][string]$PackageRoot)
+    if (-not [IO.Path]::IsPathFullyQualified($Path) -or $Path.StartsWith('\\')) {
+        throw 'ReportPath must be a fully qualified local path'
+    }
+    $full = [IO.Path]::GetFullPath($Path)
+    $rootLength = [IO.Path]::GetPathRoot($full).Length
+    $leaf = [IO.Path]::GetFileName($full)
+    if ($full.Substring($rootLength).Contains(':') -or [string]::IsNullOrWhiteSpace($leaf) -or
+        $leaf.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0 -or
+        $leaf.EndsWith('.') -or $leaf.EndsWith(' ') -or
+        $leaf -match '^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)') {
+        throw 'ReportPath must name an ordinary report file'
+    }
+    if (Test-PathWithin -Path $full -Root $PackageRoot -AllowRoot) {
+        throw 'ReportPath must not be inside the Candidate'
+    }
+    Assert-NoReparseAncestors -Path $full
+    if (Test-Path -LiteralPath $full) { throw 'ReportPath must be fresh; overwrite rejected' }
+    $parent = Split-Path -Parent $full
+    if (-not (Test-Path -LiteralPath $parent -PathType Container)) {
+        throw 'ReportPath parent must already exist'
+    }
+    return $full
+}
+
+function Write-FreshCandidateVerificationReport {
+    param([Parameter(Mandatory = $true)][string]$Path,
+          [Parameter(Mandatory = $true)][string]$PackageRoot,
+          [Parameter(Mandatory = $true)][string]$Text)
+    $full = Resolve-FreshCandidateVerificationReportPath -Path $Path -PackageRoot $PackageRoot
+    $bytes = [Text.UTF8Encoding]::new($false).GetBytes($Text)
+    $stream = [IO.File]::Open($full, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+    try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+}
+
+function Assert-CurrentCandidateSourceState {
+    param([Parameter(Mandatory = $true)][object]$Attestation,
+          [Parameter(Mandatory = $true)][object]$Worktree,
+          [switch]$RequireClean)
+    if ($Attestation.worktreeDirty -isnot [bool] -or $Worktree.dirty -isnot [bool] -or
+        [string]$Worktree.revision -cnotmatch '^[0-9a-f]{40}$' -or
+        [string]$Worktree.statusSha256 -cnotmatch '^[0-9A-F]{64}$' -or
+        [int]$Worktree.statusLineCount -lt 0 -or
+        $Worktree.statusScope -cne 'git-status-z+diff+all-untracked-content-v2') {
+        throw 'Current repository state is invalid'
+    }
+    if ($Attestation.gitRevision.ToLowerInvariant() -cne $Worktree.revision -or
+        $Attestation.worktreeDirty -ne $Worktree.dirty -or
+        $Attestation.worktreeStatusScope -cne $Worktree.statusScope -or
+        [int]$Attestation.worktreeStatusLineCount -ne [int]$Worktree.statusLineCount -or
+        $Attestation.worktreeStatusSha256.ToUpperInvariant() -cne $Worktree.statusSha256) {
+        throw 'attestation does not match current repository state'
+    }
+    if ($RequireClean -and ($Worktree.dirty -or [int]$Worktree.statusLineCount -ne 0)) {
+        throw 'RequireCurrentSource requires a clean current repository'
+    }
+    return [pscustomobject]@{ revision = $Worktree.revision; clean = (-not $Worktree.dirty)
+        statusScope = $Worktree.statusScope; statusLineCount = [int]$Worktree.statusLineCount
+        statusSha256 = $Worktree.statusSha256 }
+}
+
+function Invoke-FiveClassCandidateClosureEvidence {
+    param([Parameter(Mandatory = $true)][string]$ProjectRoot,
+          [Parameter(Mandatory = $true)][string]$PackageRoot,
+          [Parameter(Mandatory = $true)][string]$ProfilePath,
+          [Parameter(Mandatory = $true)][object]$SoundPolicy)
+    $profile = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $ProfilePath -Raw)
+    if ($profile.profileId -cne 'platinum_fiveclass') { throw 'Actual five-class profile required' }
+    $profileHash = (Get-FileHash -LiteralPath $ProfilePath -Algorithm SHA256).Hash
+    $sourceRoot = [IO.Path]::GetFullPath((Join-Path $ProjectRoot 'apps/web/public'))
+    $stagedRoot = [IO.Path]::GetFullPath((Join-Path $PackageRoot 'mir2-assets'))
+    if ($sourceRoot.Equals($stagedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Five-class Source and staged assets must be distinct'
+    }
+    $requirements = @()
+    foreach ($kind in @('sprite','skill')) {
+        $path = Join-Path $ProjectRoot "apps/web/scripts/asset-pipeline/five-class-$kind-requirements.json"
+        $requirements += [pscustomobject]@{ kind = $kind; sha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash }
+    }
+    $sourceIndex = Assert-FiveClassPackageSoundAssets -AssetRoot $sourceRoot -Policy $SoundPolicy
+    $stagedIndex = Assert-FiveClassPackageSoundAssets -AssetRoot $stagedRoot -Policy $SoundPolicy
+    if ($sourceIndex.bytes -ne $stagedIndex.bytes -or $sourceIndex.sha256 -cne $stagedIndex.sha256) {
+        throw 'Five-class packaged sound index is not an exact copy of its Source export'
+    }
+    Assert-FiveClassAssetClosure -ProjectRoot $ProjectRoot -AssetRoot $sourceRoot -ProfilePath $ProfilePath | Out-Host
+    Assert-FiveClassAssetClosure -ProjectRoot $ProjectRoot -AssetRoot $stagedRoot -ProfilePath $ProfilePath | Out-Host
+    if ((Get-FileHash -LiteralPath $ProfilePath -Algorithm SHA256).Hash -cne $profileHash) {
+        throw 'Five-class profile changed during closure verification'
+    }
+    foreach ($item in $requirements) {
+        $path = Join-Path $ProjectRoot "apps/web/scripts/asset-pipeline/five-class-$($item.kind)-requirements.json"
+        if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -cne $item.sha256) {
+            throw 'Five-class requirements changed during closure verification'
+        }
+    }
+    # These success fields are returned only after both real sound and both
+    # real sprite/skill validators completed; requested options are not proof.
+    return [pscustomobject]@{ schema = 'mir2.windows.five-class-closure-evidence.v1'
+        profileId = $profile.profileId; profileSha256 = $profileHash
+        sourceAssetRoot = $sourceRoot; stagedAssetRoot = $stagedRoot
+        sourceSoundValidated = $true; stagedSoundValidated = $true; soundIndexExactCopy = $true
+        sourceSpriteAndSkillValidated = $true; stagedSpriteAndSkillValidated = $true
+        soundIndexRelativePath = $SoundPolicy.soundIndexRelativePath
+        soundIndexSha256 = $sourceIndex.sha256; soundIndexBytes = [int64]$sourceIndex.bytes
+        availableSoundCount = @($SoundPolicy.available).Count; absentSoundCount = @($SoundPolicy.absent).Count
+        requirements = $requirements }
 }
 
 function Read-PeInfo {
@@ -565,6 +687,11 @@ function Get-RequiredCandidateFiles {
     foreach ($library in @((Get-CandidateActorLibraryNames)) + @('MapLinkIcon')) { $required += ('mir2-assets/original-ui/' + $library + '/meta.json').Replace('/', '\') }
     foreach ($mapName in Get-CandidateRequiredMapNames) { $required += "mir2-assets\crystal-map-pack\$mapName.map.gz" }
     $required += 'mir2-assets\generated\native-map-keyed\coverage-audit.json'
+    if ($null -ne $FiveClassPackageSoundPolicy) {
+        foreach ($relative in @($FiveClassPackageSoundPolicy.soundIndexPackagePath) + @($FiveClassPackageSoundPolicy.packagePaths)) {
+            $required += $relative.Replace('/', '\')
+        }
+    }
     return $required
 }
 
@@ -579,6 +706,92 @@ function Test-FileIdentity {
     $item = Get-Item -LiteralPath $Path
     return [int64]$item.Length -eq $ExpectedSize -and
         (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant() -ceq $ExpectedSha256
+}
+
+function Get-FiveClassPackageSoundPolicy {
+    param([Parameter(Mandatory = $true)][string]$RequirementsPath,
+          [Parameter(Mandatory = $true)][string]$ProfilePath)
+    $requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
+    $profile = Get-Content -LiteralPath $ProfilePath -Raw | ConvertFrom-Json
+    if ($requirements.schemaVersion -ne 1 -or $requirements.kind -cne 'mir2-five-class-skill-closure' -or
+        $requirements.profileId -cne 'platinum_fiveclass' -or $profile.profileId -cne 'platinum_fiveclass' -or
+        $requirements.profileSha256 -cne (Get-FileHash -LiteralPath $ProfilePath -Algorithm SHA256).Hash.ToLowerInvariant()) {
+        throw 'Five-class sound policy requires the exact audited skill/profile requirements'
+    }
+    $available = [Collections.Generic.List[object]]::new()
+    $absent = [Collections.Generic.List[object]]::new()
+    $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $ids = [Collections.Generic.HashSet[int]]::new()
+    foreach ($sound in @($requirements.sounds)) {
+        if ($sound.fileName -isnot [string] -or $sound.fileName -cnotmatch '\A[A-Za-z0-9_-]+\.wav\z' -or
+            $sound.id -le 0 -or $sound.expectedSourceAbsent -isnot [bool] -or
+            -not $names.Add($sound.fileName) -or -not $ids.Add([int]$sound.id) -or
+            $sound.sourcePath -cne ('Sound/' + $sound.fileName)) {
+            throw 'Five-class sound requirements contain an invalid or duplicate source identity'
+        }
+        if ($sound.expectedSourceAbsent) {
+            if ($null -ne $sound.path -or $null -ne $sound.sha256 -or $sound.bytes -ne 0) {
+                throw "Absent Source sound must not acquire a replacement: $($sound.fileName)"
+            }
+            $absent.Add($sound)
+        } else {
+            if ($sound.path -cne ('/original-ui/Sound/' + $sound.fileName) -or $sound.bytes -le 0 -or
+                $sound.sha256 -isnot [string] -or $sound.sha256 -cnotmatch '\A[a-f0-9]{64}\z') {
+                throw "Five-class sound is missing its exact source bytes/hash: $($sound.fileName)"
+            }
+            $available.Add($sound)
+        }
+    }
+    if ($available.Count -ne 51 -or $absent.Count -ne 6) { throw 'Five-class sound denominator changed; re-audit its Source closure' }
+    return [pscustomobject]@{
+        profileId = 'platinum_fiveclass'; available = $available.ToArray(); absent = $absent.ToArray()
+        soundIndexRelativePath = 'original-ui/sound-index.generated.json'
+        soundIndexPackagePath = 'mir2-assets/original-ui/sound-index.generated.json'
+        packagePaths = @($available | ForEach-Object { 'mir2-assets' + $_.path })
+    }
+}
+
+function Assert-FiveClassPackageSoundAssets {
+    param([Parameter(Mandatory = $true)][string]$AssetRoot,
+          [Parameter(Mandatory = $true)][object]$Policy)
+    foreach ($sound in $Policy.available) {
+        $soundPath = Join-Path $AssetRoot $sound.path.TrimStart('/')
+        Assert-NoReparseTree -Path $soundPath
+        Assert-NoAlternateDataStreams -Path $soundPath
+        if (-not (Test-FileIdentity -Path $soundPath -ExpectedSize ([int64]$sound.bytes) -ExpectedSha256 $sound.sha256.ToUpperInvariant())) {
+            throw "Five-class WAV source identity mismatch: $($sound.fileName)"
+        }
+    }
+    foreach ($sound in $Policy.absent) {
+        if (Test-Path -LiteralPath (Join-Path $AssetRoot ('original-ui/Sound/' + $sound.fileName))) {
+            throw "Five-class package contains an unverified absent-Source sound: $($sound.fileName)"
+        }
+    }
+    $indexPath = Join-Path $AssetRoot $Policy.soundIndexRelativePath
+    Assert-NoReparseTree -Path $indexPath
+    Assert-NoAlternateDataStreams -Path $indexPath
+    $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+    foreach ($sound in @($Policy.available) + @($Policy.absent)) {
+        $property = $index.sounds.PSObject.Properties[[string]$sound.id]
+        if ($null -eq $property) { throw "Five-class sound index omits Source ID $($sound.id)" }
+        $entry = $property.Value
+        $exists = -not $sound.expectedSourceAbsent
+        if ($entry.fileName -cne $sound.fileName -or $entry.path -cne $sound.path -or
+            $entry.fallback -isnot [bool] -or $entry.sourceExists -isnot [bool] -or $entry.exactSourceExists -isnot [bool] -or
+            $entry.fallback -ne $false -or $entry.sourceExists -ne $exists -or
+            $entry.exactSourceExists -ne $exists -or $entry.sourceBytes -ne $sound.bytes) {
+            throw "Five-class sound index has an invalid Source contract: $($sound.fileName)"
+        }
+    }
+    return [pscustomobject]@{
+        bytes = [int64](Get-Item -LiteralPath $indexPath).Length
+        sha256 = (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash
+    }
+}
+
+if ($ContentProfile -ceq 'platinum_fiveclass') {
+    $fiveClassProjectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))
+    $FiveClassPackageSoundPolicy = Get-FiveClassPackageSoundPolicy -RequirementsPath (Join-Path $fiveClassProjectRoot 'apps/web/scripts/asset-pipeline/five-class-skill-requirements.json') -ProfilePath $script:CandidateContentProfilePath
 }
 
 if ($SelfTest) {
@@ -949,6 +1162,23 @@ if ($SelfTest) {
 if ([string]::IsNullOrWhiteSpace($PackageRoot)) { throw 'PackageRoot is mandatory; default stale packages are forbidden' }
 if ((Normalize-Thumbprint -Thumbprint $TrustedSignerThumbprint) -notmatch '^[0-9A-F]{40}$') { throw 'TrustedSignerThumbprint is mandatory and must be supplied out-of-band' }
 $ScriptDir = Split-Path -Parent $PSCommandPath; $RepoRoot = Find-RepoRoot -StartPath $ScriptDir; $PackageRoot = Resolve-FullPath -Path $PackageRoot; $EvidenceDir = Join-Path $RepoRoot 'docs\generated\player-qa\windows-package-preflight'; $ExeName = 'mir2-platform-windows.exe'; $Failures = New-Object System.Collections.Generic.List[string]
+$explicitReportPath = ''
+if ($ReportPath -cne '') {
+    $explicitReportPath = Resolve-FreshCandidateVerificationReportPath -Path $ReportPath -PackageRoot $PackageRoot
+    $EvidenceDir = Split-Path -Parent $explicitReportPath
+}
+if ($RequireCurrentSource -and $AllowDirtyWorktree) { throw 'RequireCurrentSource cannot allow a dirty worktree' }
+$actualContentProfileId = ''; $actualContentProfileSha256 = ''; $contentProfileSourceAvailable = $false
+if (Test-Path -LiteralPath $script:CandidateContentProfilePath -PathType Leaf) {
+    Assert-NoReparseAncestors -Path $script:CandidateContentProfilePath
+    $actualProfile = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $script:CandidateContentProfilePath -Raw)
+    $expectedProfileId = if ($ContentProfile -ceq 'platinum_fiveclass') { 'platinum_fiveclass' } else { 'platinum_176' }
+    if ($actualProfile.profileId -cne $expectedProfileId) { Fail 'Selected Source content profile identity mismatch' }
+    $actualContentProfileId = [string]$actualProfile.profileId
+    $actualContentProfileSha256 = (Get-FileHash -LiteralPath $script:CandidateContentProfilePath -Algorithm SHA256).Hash
+    $contentProfileSourceAvailable = $true
+} elseif ($ContentProfile -ceq 'platinum_fiveclass') { Fail 'Actual five-class Source content profile missing' }
+$fiveClassClosureEvidence = $null
 try { Assert-NoReparseTree -Path $PackageRoot; Assert-NoAlternateDataStreams -Path $PackageRoot } catch { Fail $_.Exception.Message; Write-Host 'verify-windows-candidate FAILED during pre-manifest filesystem inspection'; exit 1 }
 $allFiles = @(Get-OrdinalPackageFiles -Root $PackageRoot)
 try { Assert-PackageAllowlist -Root $PackageRoot -ExeName $ExeName } catch { Fail $_.Exception.Message }
@@ -1007,6 +1237,12 @@ $candidateSoundIdentities = @(
     [pscustomobject]@{ name='M79-1.wav'; size=[int64]484496; sha256='9098F96106FB880720711FB829B9CCDFEB8DB1883132BC680629FCD0360EA83D' }
 )
 foreach ($identity in $candidateSoundIdentities) { $soundPath = Join-Path $PackageRoot ('mir2-assets\original-ui\Sound\' + $identity.name); if ((Test-Path -LiteralPath $soundPath -PathType Leaf) -and -not (Test-FileIdentity -Path $soundPath -ExpectedSize $identity.size -ExpectedSha256 $identity.sha256)) { Fail "$($identity.name) identity mismatch" } }
+if ($null -ne $FiveClassPackageSoundPolicy) {
+    try {
+        $fiveClassClosureEvidence = Invoke-FiveClassCandidateClosureEvidence -ProjectRoot $RepoRoot -PackageRoot $PackageRoot -ProfilePath $script:CandidateContentProfilePath -SoundPolicy $FiveClassPackageSoundPolicy
+        Write-Host "fiveClassSoundClosure=sourcePresent:$($FiveClassPackageSoundPolicy.available.Count),sourceAbsent:$($FiveClassPackageSoundPolicy.absent.Count),exactIndex:true"
+    } catch { Fail "five-class Source/staged closure failed: $($_.Exception.Message)" }
+}
 try {
     $petGuildClosure = Assert-PetGuildAssetClosure -OriginalUiRoot (Join-Path $PackageRoot 'mir2-assets\original-ui')
     Write-Host "petGuildClosure=libraries:$($petGuildClosure.libraries),png:$($petGuildClosure.png),sounds:$($petGuildClosure.sounds)"
@@ -1070,7 +1306,7 @@ if (Test-Path -LiteralPath $exePath -PathType Leaf) {
     try { Assert-NoBuildPathStrings -ExePath $exePath -PeInfo $pe } catch { Fail $_.Exception.Message }
 } else { Fail 'client EXE unavailable for PE verification' }
 
-$attestationPath = Join-Path $PackageRoot 'BUILD-ATTESTATION.json'; $attestation = $null; $attestationHash = ''; $attestationShapeValid = $false; $buildCompleted = [DateTime]::MinValue
+$attestationPath = Join-Path $PackageRoot 'BUILD-ATTESTATION.json'; $attestation = $null; $attestationHash = ''; $attestationShapeValid = $false; $attestationShapeValid = $false; $buildCompleted = [DateTime]::MinValue
 if (Test-Path -LiteralPath $attestationPath -PathType Leaf) {
     $attestationHash = (Get-FileHash -LiteralPath $attestationPath -Algorithm SHA256).Hash.ToUpperInvariant()
     try { $attestation = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $attestationPath -Raw) } catch { Fail 'BUILD-ATTESTATION.json invalid JSON' }
@@ -1137,14 +1373,37 @@ if($attestationShapeValid -and $manifestShapeValid -and $versionShapeValid -and 
     }catch{Fail "release statement/signature validation failed closed: $($_.Exception.Message)"}
 }else{Fail 'release statement/signature cannot be validated without valid attestation, manifest, and VERSION'}
 
-$sourceRepoCheck = 'unavailable'; $currentHead = ''
-if (Test-PathWithin -Path $PackageRoot -Root $RepoRoot) {
-    if($attestationShapeValid){$sourceRepoCheck='checked';$worktree=Get-WorktreeState -Root $RepoRoot;$currentHead=$worktree.revision;if($attestation.gitRevision.ToLowerInvariant() -ne $worktree.revision -or [bool]$attestation.worktreeDirty -ne [bool]$worktree.dirty -or $attestation.worktreeStatusScope -ne $worktree.statusScope -or [int]$attestation.worktreeStatusLineCount -ne [int]$worktree.statusLineCount -or $attestation.worktreeStatusSha256.ToUpperInvariant() -ne $worktree.statusSha256){Fail 'attestation does not match current repository state'};$cargoVersion=(& cargo +1.95.0 --version 2>$null).Trim();$rustcVersion=(& rustc +1.95.0 --version 2>$null).Trim();if($attestation.cargoVersion -ne $cargoVersion -or $attestation.rustcVersion -ne $rustcVersion){Fail 'attestation toolchain differs from current pinned toolchain'}}else{$sourceRepoCheck='blocked-invalid-attestation'}
+$sourceRepoCheck = 'unavailable'; $currentHead = ''; $currentSourceValidated = $false; $currentSourceProof = $null
+if ($RequireCurrentSource -or (Test-PathWithin -Path $PackageRoot -Root $RepoRoot)) {
+    if ($attestationShapeValid) {
+        try {
+            $sourceRepoCheck = 'checked'
+            $worktree = Get-WorktreeState -Root $RepoRoot
+            $currentHead = $worktree.revision
+            $currentSourceProof = Assert-CurrentCandidateSourceState -Attestation $attestation -Worktree $worktree -RequireClean:$RequireCurrentSource
+            $cargoVersion = (& cargo +1.95.0 --version 2>$null).Trim()
+            if ($LASTEXITCODE -ne 0) { throw 'Current pinned Cargo metadata unavailable' }
+            $rustcVersion = (& rustc +1.95.0 --version 2>$null).Trim()
+            if ($LASTEXITCODE -ne 0) { throw 'Current pinned rustc metadata unavailable' }
+            if ($attestation.cargoVersion -cne $cargoVersion -or $attestation.rustcVersion -cne $rustcVersion) {
+                throw 'attestation toolchain differs from current pinned toolchain'
+            }
+            $currentSourceValidated = $true
+        } catch { Fail $_.Exception.Message }
+    } else { $sourceRepoCheck = 'blocked-invalid-attestation'; if ($RequireCurrentSource) { Fail 'Current Source validation requires a valid attestation' } }
+}
+if ($contentProfileSourceAvailable -and
+    (Get-FileHash -LiteralPath $script:CandidateContentProfilePath -Algorithm SHA256).Hash -cne $actualContentProfileSha256) {
+    Fail 'Selected Source content profile changed during verification'
 }
 
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null; $candidateName = if ($versionShapeValid) { [string]$version.candidate } else { 'unknown' }
-$verification = [ordered]@{ schema = 'mir2.windows.package-verification.v4'; packageRoot = $PackageRoot; nonvisual = (-not $Launch); launchRequested = [bool]$Launch; sourceRepoCheck = $sourceRepoCheck; currentSourceRevision = $currentHead; attestationPresent = ($null -ne $attestation); attestationSha256 = $attestationHash; packageManifestPresent = ($null -ne $manifest); packageManifestSha256=$manifestHash; packageManifestAggregateSha256 = $computedAggregate; trustedSignerThumbprint=(Normalize-Thumbprint $TrustedSignerThumbprint); detachedSignatureValid=[bool]$signatureValid; exeSha256 = $exeHash; peValid = [bool]$pe.valid; peImports = @($pe.imports); peDelayImports = @($pe.delayImports); packageFileCount = $allFiles.Count; failures = @($Failures); passed = ($Failures.Count -eq 0); visualAccepted = $false }
-Write-Utf8NoBom -Path (Join-Path $EvidenceDir ($candidateName + '-verification.json')) -Text ($verification | ConvertTo-Json -Depth 8)
+$verification = [ordered]@{ schema = 'mir2.windows.package-verification.v4'; candidate = $candidateName; packageRoot = $PackageRoot; contentProfile = $ContentProfile; contentProfileId = $actualContentProfileId; contentProfileSha256 = $actualContentProfileSha256; contentProfileSourceAvailable = $contentProfileSourceAvailable; fiveClassClosure = $fiveClassClosureEvidence; requireCurrentSource = [bool]$RequireCurrentSource; currentSourceValidated = $currentSourceValidated; currentSourceProof = $currentSourceProof; verifierSha256 = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash; nonvisual = (-not $Launch); launchRequested = [bool]$Launch; sourceRepoCheck = $sourceRepoCheck; currentSourceRevision = $currentHead; currentSourceRoot = $RepoRoot; attestationPresent = ($null -ne $attestation); attestationSha256 = $attestationHash; packageManifestPresent = ($null -ne $manifest); packageManifestSha256=$manifestHash; packageManifestAggregateSha256 = $computedAggregate; trustedSignerThumbprint=(Normalize-Thumbprint $TrustedSignerThumbprint); detachedSignatureValid=[bool]$signatureValid; exeSha256 = $exeHash; peValid = [bool]$pe.valid; peImports = @($pe.imports); peDelayImports = @($pe.delayImports); packageFileCount = $allFiles.Count; failures = @($Failures); passed = ($Failures.Count -eq 0); visualAccepted = $false }
+if ($explicitReportPath) {
+    Write-FreshCandidateVerificationReport -Path $explicitReportPath -PackageRoot $PackageRoot -Text ($verification | ConvertTo-Json -Depth 10)
+} else {
+    Write-Utf8NoBom -Path (Join-Path $EvidenceDir ($candidateName + '-verification.json')) -Text ($verification | ConvertTo-Json -Depth 10)
+}
 
 if ($Launch -and $Failures.Count -eq 0) {
     $tempBase = [IO.Path]::GetTempPath().TrimEnd('\', '/'); Assert-NoReparseAncestors -Path $tempBase; $tempRoot = Join-Path $tempBase ('mir2-windows-candidate-launch-' + [guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $tempRoot | Out-Null

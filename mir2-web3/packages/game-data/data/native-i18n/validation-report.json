@@ -6,16 +6,16 @@
     "pt-BR"
   ],
   "counts": {
-    "common.json": 2417,
+    "common.json": 2436,
     "content.json": 3913,
-    "shell.json": 165,
-    "quest.json": 398,
+    "shell.json": 167,
+    "quest.json": 404,
     "game.json": 282,
     "help.json": 124,
     "npc-menus.json": 607,
     "npc-prose.json": 1479
   },
-  "totalEntries": 9385,
+  "totalEntries": 9412,
   "errors": [],
   "equivalentAliasCount": 1612,
   "aliasConflicts": [
@@ -32907,11 +32907,11 @@
   ],
   "pendingFiles": [],
   "sha256": {
-    "common.json": "cf8fa0dfa4fd81797316a83c35646873bf0ae3cf5db1641af826b1841cb8e171",
+    "common.json": "fb5488ecf461cb732c1a606c28e9b8b0d503cff2b3dc02e8ec0c82fcb8afa8d1",
     "content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
-    "shell.json": "d1a5255c3f265a3b36490d40c26eb43a9e603698f47c8ef29619cb099904cc31",
-    "quest.json": "e524756ea4067a835a49002f5e4e98e279020933d28dfc536792f72826c25821",
-    "game.json": "28de1c1dc52ca46ac764d71e95db3f2f56c38c9860b021056c0ece71f9463945",
+    "shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
+    "quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
+    "game.json": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557",
     "help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
     "npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
     "npc-prose.json": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0"

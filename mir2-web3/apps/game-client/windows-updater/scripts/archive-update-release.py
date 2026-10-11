@@ -25,9 +25,10 @@ from typing import BinaryIO
 
 MAX_TOTAL = 4 * 1024**3
 MAX_FILE = 512 * 1024**2
-MAX_META = 32 * 1024**2
-MAX_FILES = 200_064
-MAX_ENTRIES = 400_128
+MAX_META = 64 * 1024**2
+MAX_MANIFEST_FILES = 300_000
+MAX_FILES = MAX_MANIFEST_FILES + 64
+MAX_ENTRIES = 2 * MAX_FILES
 META = (
     "PACKAGE-MANIFEST.json", "VERSION.json", "RELEASE-STATEMENT.json",
     "RELEASE-STATEMENT.p7s",
@@ -298,7 +299,7 @@ def validate_candidate(files: dict[str, Entry]) -> dict:
     require(isinstance(coverage, dict) and set(coverage) == {"excludes", "rule"}
             and coverage["excludes"] == list(META) and isinstance(coverage["rule"], str)
             and bool(coverage["rule"]), "manifest metadata coverage mismatch")
-    count = uint(manifest["fileCount"], 200_000, "manifest file count", positive=True)
+    count = uint(manifest["fileCount"], MAX_MANIFEST_FILES, "manifest file count", positive=True)
     require(isinstance(manifest["files"], list) and len(manifest["files"]) == count, "manifest count mismatch")
     declared: dict[str, dict] = {}
     case_paths = set()

@@ -4,14 +4,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const profileId = process.argv.find((arg) => arg.startsWith("--profile="))?.slice(10) ?? "platinum_176";
+if (!["platinum_176", "platinum_fiveclass"].includes(profileId)) throw new Error("Unsupported content profile");
 const outputPath = path.resolve(
   repoRoot,
   process.env.MIR2_PROFILE_BUNDLE_OUT ??
-    "packages/game-data/data/generated/platinum_176_bundle.json",
+    `packages/game-data/data/generated/${profileId}_bundle.json`,
 );
 const checkMode = process.argv.includes("--check");
 const dependencyPaths = [
-  "packages/game-data/data/content_profiles/platinum_176.json",
+  `packages/game-data/data/content_profiles/${profileId}.json`,
+  ...(profileId === "platinum_fiveclass" ? ["packages/game-data/data/content_profiles/platinum_176.json"] : []),
   "packages/game-data/data/generated/crystal_respawn_manifest.json",
   "packages/game-data/data/generated/crystal_mining_manifest.json",
   "packages/game-data/data/generated/crystal_monster_manifest.json",

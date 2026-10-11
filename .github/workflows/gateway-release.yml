@@ -122,6 +122,26 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-simulation --lib online_epoch_exhaustion -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-gateway --lib npc_population_binding::tests -- --test-threads=1
 
+      - name: Set up Node for five-class resource checks
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: mir2-web3/.nvmrc
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+
+      - name: Install locked resource-check dependencies
+        working-directory: mir2-web3/apps/web
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify bounded five-class profile and authoritative combat
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.89.0 test --locked -p mir2-game-data --lib fiveclass -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib five_class -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --lib five_class -- --test-threads=1
+          node --test apps/web/scripts/asset-pipeline/five-class-skill-closure.test.mjs apps/web/scripts/asset-pipeline/five-class-sprite-closure.test.mjs
+
       - name: Package Gateway
         working-directory: mir2-web3
         env:

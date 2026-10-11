@@ -846,6 +846,17 @@ pub(super) fn render_supplies(
             if supplies.needs_taoist_material_guidance {
                 line(card, "火符/召唤装备符；施毒可用携带毒粉。", PANEL_TEXT);
             }
+            if let Some(readiness) = supplies.assassin_poison_readiness {
+                line(
+                    card,
+                    readiness.guidance(),
+                    if readiness == crate::quest_supplies::AssassinPoisonReadiness::NeedsEquipment {
+                        FEEDBACK_ERR
+                    } else {
+                        PANEL_TEXT
+                    },
+                );
+            }
             for vendor in crate::quest_supplies::SupplyVendor::ALL {
                 if state.supply_vendor.is_some() {
                     break;

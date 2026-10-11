@@ -11,8 +11,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
 use bevy::window::PrimaryWindow;
 use mir2_bevy_runtime::entity_animation::{
-    AnimationAction, AnimationCatalog, AnimationEvent, AnimationWorld, Direction, EntityKind,
-    QueueDisposition, TransitionReason,
+    ActionTransition, AnimationAction, AnimationCatalog, AnimationError, AnimationEvent,
+    AnimationWorld, Direction, EntityKind, QueueDisposition, TransitionReason,
 };
 use serde_json::Value;
 
@@ -120,8 +120,16 @@ struct ObservedEntity {
     mounted: bool,
     direction: Direction,
     action: Option<(u64, AnimationAction)>,
+    double_slash: bool,
     initially_dead: bool,
     initially_skeleton: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum NativeDoubleSlashBodyClock {
+    Pending,
+    Started(u64),
+    Retired,
 }
 
 #[derive(Resource, Debug)]
@@ -136,6 +144,8 @@ pub struct NativeEntityPresentation {
     last_libraries: HashMap<String, String>,
     last_frames: HashMap<String, (i64, AnimationAction)>,
     hidden_after_hide: HashSet<String>,
+    snake_totem_aura_ready: HashSet<String>,
+    double_slash_packet_sequences: HashMap<(String, u64), u64>,
     last_effect_visible: Option<bool>,
     hover_cursor_stage: Option<(f32, f32)>,
     highlight_target: bool,
@@ -171,6 +181,8 @@ impl Default for NativeEntityPresentation {
             last_libraries: HashMap::new(),
             last_frames: HashMap::new(),
             hidden_after_hide: HashSet::new(),
+            snake_totem_aura_ready: HashSet::new(),
+            double_slash_packet_sequences: HashMap::new(),
             last_effect_visible: None,
             hover_cursor_stage: None,
             highlight_target: true,
@@ -211,6 +223,67 @@ impl NativeEntityPresentation {
 
     pub(crate) fn self_hovered(&self) -> bool {
         self.self_hovered
+    }
+
+    pub(crate) fn snake_totem_aura_ready_object_ids(&self) -> HashSet<u32> {
+        self.snake_totem_aura_ready
+            .iter()
+            .filter_map(|object_id| object_id.parse().ok())
+            .collect()
+    }
+
+    pub(crate) fn double_slash_body_clock(
+        &self,
+        object_id: u32,
+        source_sequence: u64,
+    ) -> NativeDoubleSlashBodyClock {
+        let object_id = object_id.to_string();
+        let Some(((_, applied_sequence), _)) = self
+            .double_slash_packet_sequences
+            .iter()
+            .find(|((id, _), raw)| id == &object_id && **raw == source_sequence)
+        else {
+            return if self
+                .last_source_sequence
+                .get(&object_id)
+                .is_none_or(|sequence| *sequence < source_sequence)
+            {
+                NativeDoubleSlashBodyClock::Pending
+            } else {
+                NativeDoubleSlashBodyClock::Retired
+            };
+        };
+        let Some(state) = self.world.active_state(&object_id) else {
+            return NativeDoubleSlashBodyClock::Retired;
+        };
+        let pose = state.pose();
+        if pose.last_started_event_sequence == Some(*applied_sequence)
+            && state.current_descriptor().frame_interval_ms == 46
+            && matches!(
+                pose.action,
+                AnimationAction::Attack1 | AnimationAction::Attack4
+            )
+        {
+            let phase_start = pose
+                .next_motion_at_ms
+                .unwrap_or(0)
+                .saturating_sub(46 * u64::from(pose.logical_frame_index + 1));
+            return NativeDoubleSlashBodyClock::Started(
+                if pose.action == AnimationAction::Attack4 {
+                    phase_start.saturating_sub(276)
+                } else {
+                    phase_start
+                },
+            );
+        }
+        if state
+            .queued_actions()
+            .any(|event| event.sequence == *applied_sequence)
+        {
+            NativeDoubleSlashBodyClock::Pending
+        } else {
+            NativeDoubleSlashBodyClock::Retired
+        }
     }
 
     pub(crate) fn hovered_grid_position(&self) -> Option<(i32, i32)> {
@@ -802,12 +875,30 @@ impl NativeEntityPresentation {
             .collect::<HashSet<_>>();
         self.hidden_after_hide
             .retain(|object_id| observed_ids.contains(object_id));
+        self.snake_totem_aura_ready
+            .retain(|object_id| observed_ids.contains(object_id));
         for entity in &observed {
-            if entity
-                .action
-                .is_some_and(|(_, action)| action == AnimationAction::Show)
-            {
+            if entity.action.is_some_and(|(_, action)| {
+                matches!(action, AnimationAction::Show | AnimationAction::Revive)
+            }) {
                 self.hidden_after_hide.remove(&entity.object_id);
+            }
+            if entity.kind == EntityKind::Monster
+                && source_monster_library(&entity.body_library) == "Monster/362"
+                && (entity
+                    .action
+                    .is_some_and(|(_, action)| action == AnimationAction::Dead)
+                    || (entity.action.is_none() && entity.initially_dead))
+            {
+                self.hidden_after_hide.insert(entity.object_id.clone());
+            }
+            if entity.action.is_some_and(|(_, action)| {
+                matches!(
+                    action,
+                    AnimationAction::Die | AnimationAction::Dead | AnimationAction::Revive
+                )
+            }) {
+                self.snake_totem_aura_ready.remove(&entity.object_id);
             }
         }
         let visible = observed
@@ -829,6 +920,9 @@ impl NativeEntityPresentation {
             self.last_applied_sequence.remove(&key.object_id);
             self.last_libraries.remove(&key.object_id);
             self.last_frames.remove(&key.object_id);
+            self.snake_totem_aura_ready.remove(&key.object_id);
+            self.double_slash_packet_sequences
+                .retain(|(id, _), _| id != &key.object_id);
         }
 
         for entity in observed {
@@ -851,6 +945,9 @@ impl NativeEntityPresentation {
                 self.last_source_sequence.remove(&entity.object_id);
                 self.last_applied_sequence.remove(&entity.object_id);
                 self.last_frames.remove(&entity.object_id);
+                self.snake_totem_aura_ready.remove(&entity.object_id);
+                self.double_slash_packet_sequences
+                    .retain(|(id, _), _| id != &entity.object_id);
             }
             let update = self.world.observe_snapshot(
                 entity.object_id.clone(),
@@ -864,6 +961,7 @@ impl NativeEntityPresentation {
             };
             self.last_libraries
                 .insert(entity.object_id.clone(), catalog_key);
+            self.handle_source_transitions(&update.transitions);
 
             let action = entity
                 .action
@@ -915,15 +1013,12 @@ impl NativeEntityPresentation {
                         )
                     }));
             if revival_barrier {
-                if self
-                    .world
-                    .apply_revival_event(
-                        &update.key,
-                        AnimationEvent::new(sequence, action, entity.direction),
-                        animation_now_ms,
-                    )
-                    .is_ok()
-                {
+                if let Ok(update) = self.world.apply_revival_event(
+                    &update.key,
+                    AnimationEvent::new(sequence, action, entity.direction),
+                    animation_now_ms,
+                ) {
+                    self.handle_source_transitions(&update.transitions);
                     self.retire_source_action(&entity.object_id, source_sequence, sequence, action);
                 }
                 continue;
@@ -964,11 +1059,28 @@ impl NativeEntityPresentation {
                 }
                 continue;
             }
-            if let Ok(update) = self.world.apply_event(
-                &update.key,
-                AnimationEvent::new(sequence, action, entity.direction),
-                animation_now_ms,
-            ) {
+            let event = AnimationEvent::new(sequence, action, entity.direction);
+            let action_update = if entity.double_slash {
+                match self
+                    .world
+                    .apply_double_slash_event(&update.key, event, animation_now_ms)
+                {
+                    Err(AnimationError::UnsupportedAction { .. }) => {
+                        // Retain the real body action when the source frame set
+                        // has no Attack4; never manufacture missing frames.
+                        self.world.apply_event(&update.key, event, animation_now_ms)
+                    }
+                    result => result,
+                }
+            } else {
+                self.world.apply_event(&update.key, event, animation_now_ms)
+            };
+            if let Ok(update) = action_update {
+                self.handle_source_transitions(&update.transitions);
+                if entity.double_slash {
+                    self.double_slash_packet_sequences
+                        .insert((entity.object_id.clone(), sequence), source_sequence);
+                }
                 if update.disposition == QueueDisposition::Coalesced
                     && self.self_object_id.as_deref() == Some(entity.object_id.as_str())
                 {
@@ -999,7 +1111,10 @@ impl NativeEntityPresentation {
             .insert(object_id.to_owned(), source_sequence);
         self.last_applied_sequence
             .insert(object_id.to_owned(), animation_sequence);
-        if matches!(action, AnimationAction::Walking | AnimationAction::Running) {
+        if matches!(
+            action,
+            AnimationAction::Walking | AnimationAction::Running | AnimationAction::Jump
+        ) {
             if let Some(window) = self.motion_windows.get_mut(object_id) {
                 // The packet's raw number is not an AnimationWorld number
                 // once a prediction has occupied that number in the feed.
@@ -1075,6 +1190,8 @@ impl NativeEntityPresentation {
                 .get_mut(&object_id)
                 .filter(|window| {
                     window.locally_predicted
+                        && native_packet_movement(entity)
+                            .is_none_or(|(action, _, _)| action != AnimationAction::Jump)
                         && (stale_self_source_echo_applied
                             || (window.to_x == x as f32 && window.to_y == y as f32))
                 })
@@ -1143,8 +1260,14 @@ impl NativeEntityPresentation {
                     {
                         let phase_count = native_motion_phase_count(entity, action);
                         let fallback_duration_ms = u64::from(phase_count) * CRYSTAL_MOVE_PHASE_MS;
-                        let (started_ms, expires_ms) = native_packet_motion_window(entity, now_ms)
-                            .unwrap_or((now_ms, now_ms.saturating_add(fallback_duration_ms)));
+                        // A real BackStep is a client-owned eight-frame Jump,
+                        // independent of the server's movement ready clock.
+                        let (started_ms, expires_ms) = if action == AnimationAction::Jump {
+                            (now_ms, now_ms.saturating_add(fallback_duration_ms))
+                        } else {
+                            native_packet_motion_window(entity, now_ms)
+                                .unwrap_or((now_ms, now_ms.saturating_add(fallback_duration_ms)))
+                        };
                         let window = NativeMotionWindow {
                             from_x: motion_from_x,
                             from_y: motion_from_y,
@@ -1299,6 +1422,44 @@ impl NativeEntityPresentation {
         )
     }
 
+    fn handle_source_transitions(&mut self, transitions: &[ActionTransition]) {
+        for transition in transitions {
+            let object_id = &transition.key.object_id;
+            if matches!(
+                transition.to,
+                AnimationAction::Die | AnimationAction::Dead | AnimationAction::Revive
+            ) {
+                self.snake_totem_aura_ready.remove(object_id);
+            }
+            if transition.reason == TransitionReason::HideCompleted
+                && self
+                    .last_libraries
+                    .get(object_id)
+                    .is_some_and(|library| hide_removes_rendered_entity(library))
+            {
+                self.payload_dirty |= self.hidden_after_hide.insert(object_id.clone());
+            }
+            let library = self
+                .last_libraries
+                .get(object_id)
+                .map(|library| source_monster_library(library));
+            if transition.reason == TransitionReason::DeathCompleted
+                && library.as_deref() == Some("Monster/362")
+            {
+                // Crystal removes CharmedSnake in Dead. The source body ends
+                // at frame 51; its absent corpse frames are not manufactured.
+                self.payload_dirty |= self.hidden_after_hide.insert(object_id.clone());
+            }
+            if transition.reason == TransitionReason::IdleCycle
+                && transition.from == AnimationAction::Standing
+                && transition.to == AnimationAction::Standing
+                && library.as_deref() == Some("Monster/361")
+            {
+                self.snake_totem_aura_ready.insert(object_id.clone());
+            }
+        }
+    }
+
     fn render_state_if_changed_at_clocks(
         &mut self,
         animation_now_ms: u64,
@@ -1341,21 +1502,29 @@ impl NativeEntityPresentation {
         // the retained payload on the local clock so depth always settles on
         // the destination without waiting for another packet.
         self.expire_native_motion_windows(motion_now_ms);
-        let payload = self.latest_payload.as_ref()?;
         let effect_visibility_changed =
             self.last_effect_visible.replace(effect_visible) != Some(effect_visible);
         let transitions = self.world.tick(animation_now_ms).ok()?;
-        for transition in transitions {
-            if transition.reason == TransitionReason::HideCompleted
-                && self
-                    .last_libraries
-                    .get(&transition.key.object_id)
-                    .is_some_and(|library| hide_removes_rendered_entity(library))
-            {
-                self.hidden_after_hide
-                    .insert(transition.key.object_id.clone());
-            }
-        }
+        self.handle_source_transitions(&transitions);
+        self.snake_totem_aura_ready.retain(|object_id| {
+            self.world.active_state(object_id).is_some_and(|state| {
+                !matches!(
+                    state.pose().action,
+                    AnimationAction::Die | AnimationAction::Dead | AnimationAction::Revive
+                )
+            })
+        });
+        self.double_slash_packet_sequences
+            .retain(|(object_id, sequence), _| {
+                self.world.active_state(object_id).is_some_and(|state| {
+                    (state.pose().last_started_event_sequence == Some(*sequence)
+                        && state.current_descriptor().frame_interval_ms == 46)
+                        || state
+                            .queued_actions()
+                            .any(|event| event.sequence == *sequence)
+                })
+            });
+        let payload = self.latest_payload.as_ref()?;
         let frames = self
             .world
             .active_states()
@@ -1364,7 +1533,7 @@ impl NativeEntityPresentation {
                 let movement_pose = if state.kind == EntityKind::Player
                     && matches!(
                         pose.action,
-                        AnimationAction::Walking | AnimationAction::Running
+                        AnimationAction::Walking | AnimationAction::Running | AnimationAction::Jump
                     ) {
                     self.motion_windows
                         .get(object_id)
@@ -1619,6 +1788,17 @@ fn parse_observed_entity(entity: &Value) -> Option<ObservedEntity> {
             .unwrap_or(AnimationAction::Standing),
     );
     let mounted = resolved_sprite.mounted();
+    let double_slash = kind == EntityKind::Player
+        && !mounted
+        && action.is_some_and(|(_, action)| action == AnimationAction::Attack1)
+        && entity
+            .get("classKey")
+            .or_else(|| entity.get("class"))
+            .and_then(Value::as_str)
+            .is_some_and(|class| class.eq_ignore_ascii_case("assassin"))
+        && entity.get("_nativeAnimationSpell").is_some_and(|spell| {
+            spell.as_str() == Some("DoubleSlash") || spell.as_u64() == Some(92)
+        });
     Some(ObservedEntity {
         object_id,
         kind,
@@ -1626,6 +1806,7 @@ fn parse_observed_entity(entity: &Value) -> Option<ObservedEntity> {
         mounted,
         direction,
         action,
+        double_slash,
         initially_dead: entity.get("dead").and_then(Value::as_bool) == Some(true),
         initially_skeleton: entity.get("skeleton").and_then(Value::as_bool) == Some(true),
     })
@@ -1665,6 +1846,7 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
         "hide" => Some(AnimationAction::Hide),
         "walking" => Some(AnimationAction::Walking),
         "running" => Some(AnimationAction::Running),
+        "jump" => Some(AnimationAction::Jump),
         "attack1" => Some(AnimationAction::Attack1),
         "attack2" => Some(AnimationAction::Attack2),
         "mine" => Some(AnimationAction::Attack2),
@@ -1687,6 +1869,7 @@ fn movement_action_name(action: AnimationAction) -> &'static str {
     match action {
         AnimationAction::Walking => "walking",
         AnimationAction::Running => "running",
+        AnimationAction::Jump => "jump",
         _ => "standing",
     }
 }
@@ -1696,7 +1879,12 @@ fn native_packet_movement(entity: &Value) -> Option<(AnimationAction, u64, Direc
         .get("_nativeAnimationAction")
         .and_then(Value::as_str)
         .and_then(parse_action)
-        .filter(|action| matches!(action, AnimationAction::Walking | AnimationAction::Running))?;
+        .filter(|action| {
+            matches!(
+                action,
+                AnimationAction::Walking | AnimationAction::Running | AnimationAction::Jump
+            )
+        })?;
     let sequence = entity
         .get("_nativeAnimationSequence")
         .and_then(Value::as_u64)?;
@@ -1710,6 +1898,9 @@ fn native_packet_movement(entity: &Value) -> Option<(AnimationAction, u64, Direc
 }
 
 fn native_motion_phase_count(entity: &Value, action: AnimationAction) -> u16 {
+    if action == AnimationAction::Jump {
+        return 8;
+    }
     if let Some(explicit) = entity
         .get("movementFrameCount")
         .and_then(json_millis)
@@ -1862,6 +2053,10 @@ fn crystal_even_pixel(value: f32) -> f32 {
 }
 
 fn hide_removes_rendered_entity(catalog_key: &str) -> bool {
+    source_monster_library(catalog_key) == "Monster/010"
+}
+
+fn source_monster_library(catalog_key: &str) -> String {
     let library = catalog_key
         .split_once("#mounted=")
         .map_or(catalog_key, |(library, _)| library)
@@ -1871,7 +2066,7 @@ fn hide_removes_rendered_entity(catalog_key: &str) -> bool {
         .trim_matches('/')
         .strip_prefix("original-ui/")
         .unwrap_or_else(|| library.trim_matches('/'));
-    library == "Monster/010"
+    library.to_owned()
 }
 
 fn normalize_action(kind: EntityKind, action: AnimationAction) -> Option<AnimationAction> {
@@ -1914,6 +2109,204 @@ mod tests {
                 }
             }]
         })
+    }
+
+    #[test]
+    fn five_class_back_step_moves_backwards_without_reversing_source_facing() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut payload = player_payload(1);
+        payload["entities"][0]["classKey"] = json!("Archer");
+        payload["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload_with_clocks(0, 1_000, |_, _, _| {
+            AnimationCatalog::crystal_player()
+        });
+        payload["entities"][0]["x"] = json!(7);
+        payload["entities"][0]["direction"] = json!("right");
+        payload["entities"][0]["_nativeAnimationAction"] = json!("jump");
+        payload["entities"][0]["_nativeAnimationSequence"] = json!(2);
+        payload["entities"][0]["movementFrameCount"] = json!(6);
+        payload["entities"][0]["movementStartedAt"] = json!(1_000);
+        payload["entities"][0]["movementUntil"] = json!(1_500);
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload_with_clocks(0, 1_000, |_, _, _| {
+            AnimationCatalog::crystal_player()
+        });
+        let window = presentation.motion_windows["1"];
+        assert_eq!(
+            (
+                window.action,
+                window.direction,
+                window.phase_count,
+                window.expires_ms
+            ),
+            (AnimationAction::Jump, Direction::Right, 8, 1_800)
+        );
+        assert_eq!((window.from_x, window.to_x, window.sort_x), (10.0, 7.0, 10));
+        assert_eq!(native_motion_direction(window), Some(Direction::Left));
+        assert_eq!(native_motion_offset(&window, 1_000), (126.0, 0.0));
+        assert_eq!(native_motion_offset(&window, 1_700), (0.0, 0.0));
+        presentation.world.tick(799).unwrap();
+        let pose = presentation.world.active_state("1").unwrap().pose();
+        assert_eq!(
+            (pose.action, pose.direction, pose.draw_frame_index),
+            (AnimationAction::Jump, Direction::Right, 311)
+        );
+    }
+
+    #[test]
+    fn five_class_summon_aura_and_snake_removal_follow_actual_action_completion() {
+        let mut presentation = NativeEntityPresentation::default();
+        let payload = json!({"entities": [
+            {"objectId": 361, "kind": "monster", "x": 10, "y": 10,
+             "direction": "down", "image": 361, "sprite": {"bodyLibrary": "Monster/361"}},
+            {"objectId": 362, "kind": "monster", "x": 11, "y": 10,
+             "direction": "down", "image": 362, "_nativeAnimationAction": "die",
+             "_nativeAnimationSequence": 1, "sprite": {"bodyLibrary": "Monster/362"}}
+        ]});
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload_with(0, |kind, _, _| {
+            assert_eq!(kind, EntityKind::Monster);
+            let mut catalog = AnimationCatalog::new();
+            for (action, descriptor) in [
+                (
+                    AnimationAction::Standing,
+                    FrameDescriptor::from_crystal(0, 2, -2, 500, false),
+                ),
+                (
+                    AnimationAction::Die,
+                    FrameDescriptor::from_crystal(52, 8, 0, 100, false),
+                ),
+                (
+                    AnimationAction::Dead,
+                    FrameDescriptor::from_crystal(59, 1, 0, 1_000, false),
+                ),
+            ] {
+                catalog.insert(action, descriptor).unwrap();
+            }
+            catalog
+        });
+        // Normalize to a deterministic source Standing phase for this receipt.
+        let key = presentation.world.active_state("361").unwrap().key.clone();
+        presentation
+            .world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Standing, Direction::Down),
+                0,
+            )
+            .unwrap();
+        presentation.render_state_if_changed_with(499, true, |_, _, _| Some(json!({})));
+        assert!(presentation.snake_totem_aura_ready_object_ids().is_empty());
+        presentation.render_state_if_changed_with(799, true, |_, _, _| Some(json!({})));
+        assert!(!presentation.hidden_after_hide.contains("362"));
+        // Continuous network snapshots also advance AnimationWorld. Those
+        // completion transitions must not be lost before the render tick.
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload_with(800, |_, _, _| {
+            let mut catalog = AnimationCatalog::new();
+            for (action, descriptor) in [
+                (
+                    AnimationAction::Standing,
+                    FrameDescriptor::from_crystal(0, 2, -2, 500, false),
+                ),
+                (
+                    AnimationAction::Die,
+                    FrameDescriptor::from_crystal(52, 8, 0, 100, false),
+                ),
+                (
+                    AnimationAction::Dead,
+                    FrameDescriptor::from_crystal(59, 1, 0, 1_000, false),
+                ),
+            ] {
+                catalog.insert(action, descriptor).unwrap();
+            }
+            catalog
+        });
+        presentation.render_state_if_changed_with(800, true, |_, _, _| Some(json!({})));
+        assert!(presentation.hidden_after_hide.contains("362"));
+        presentation.render_state_if_changed_with(999, true, |_, _, _| Some(json!({})));
+        assert!(presentation.snake_totem_aura_ready_object_ids().is_empty());
+        presentation.replace_payload(payload);
+        presentation
+            .sync_pending_payload_with(1_000, |_, _, _| AnimationCatalog::crystal_monster());
+        presentation.render_state_if_changed_with(1_000, true, |_, _, _| Some(json!({})));
+        assert_eq!(
+            presentation.snake_totem_aura_ready_object_ids(),
+            HashSet::from([361])
+        );
+    }
+
+    #[test]
+    fn double_slash_body_uses_typed_assassin_spell_for_two_parts_only() {
+        for class in ["Assassin", "Warrior", "Wizard", "Taoist", "Archer"] {
+            let mut presentation = NativeEntityPresentation::default();
+            let mut payload = player_payload(4);
+            payload["entities"][0]["classKey"] = json!(class);
+            payload["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+            payload["entities"][0]["_nativeAnimationSpell"] = json!("DoubleSlash");
+            presentation.replace_payload(payload.clone());
+            presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+            presentation.world.tick(276).unwrap();
+            let state = presentation.world.active_state("1").unwrap();
+            assert_eq!(
+                state.pose().action,
+                if class == "Assassin" {
+                    AnimationAction::Attack4
+                } else {
+                    AnimationAction::Attack1
+                },
+                "{class}"
+            );
+            assert_eq!(
+                state.current_descriptor().frame_interval_ms,
+                if class == "Assassin" { 46 } else { 100 }
+            );
+            // A repeated snapshot is not a second attack.
+            presentation.replace_payload(payload);
+            presentation
+                .sync_pending_payload_with(300, |_, _, _| AnimationCatalog::crystal_player());
+            assert_eq!(
+                presentation.world.active_state("1").unwrap().queue_depth(),
+                0
+            );
+        }
+    }
+
+    #[test]
+    fn double_slash_body_does_not_infer_from_class_or_missing_body_action() {
+        let mut payload = player_payload(4);
+        payload["entities"][0]["classKey"] = json!("Assassin");
+        payload["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        assert!(
+            !parse_observed_entity(&payload["entities"][0])
+                .unwrap()
+                .double_slash
+        );
+        payload["entities"][0]["_nativeAnimationSpell"] = json!(92);
+        assert!(
+            parse_observed_entity(&payload["entities"][0])
+                .unwrap()
+                .double_slash
+        );
+        let mut catalog = AnimationCatalog::new();
+        for action in [AnimationAction::Standing, AnimationAction::Attack1] {
+            catalog
+                .insert(
+                    action,
+                    *AnimationCatalog::crystal_player()
+                        .descriptor(action)
+                        .unwrap(),
+                )
+                .unwrap();
+        }
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(payload);
+        presentation.sync_pending_payload_with(0, |_, _, _| catalog.clone());
+        presentation.world.tick(276).unwrap();
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Attack1);
+        assert_eq!(state.current_descriptor().frame_interval_ms, 100);
     }
 
     #[test]

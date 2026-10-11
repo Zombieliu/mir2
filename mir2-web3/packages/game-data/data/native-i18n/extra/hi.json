@@ -9402,5 +9402,13 @@
   "monthly.CodeExpired": "कोड समाप्त हो चुका है। संचालक से संपर्क करें।",
   "monthly.LoginRequired": "मासिक पास के लिए फिर लॉग इन करें।",
   "monthly.Banned": "खाता अवरुद्ध है। संचालक से संपर्क करें।",
-  "monthly.Unavailable": "मासिक पास सेवा उपलब्ध नहीं है। बाद में कोशिश करें।"
+  "monthly.Unavailable": "मासिक पास सेवा उपलब्ध नहीं है। बाद में कोशिश करें।",
+  "shell.assassin_description": "हत्यारे दो तलवारों और छिपकर हमला करते हैं।\nतेज़ हमले और सावधानी से चलना उनकी ताकत हैं।",
+  "shell.archer_description": "तीरंदाज़ धनुष और विशेष तीरों से दूर से हमला करते हैं।\nदूरी बनाए रखें और सही जगह चुनें।",
+  "quest.practice.class.learn": "{skill} सीखें।",
+  "quest.practice.class.normal_hit": "{skill} सीखने के बाद राक्षस पर सामान्य हमला लगाएँ।",
+  "quest.practice.class.toggle_hit": "{skill} चालू करें, फिर सामान्य हमले से राक्षस को नुकसान पहुँचाएँ।",
+  "quest.practice.class.spell_hit": "{skill} से राक्षस को नुकसान पहुँचाएँ; चूके हुए वार नहीं गिने जाएँगे।",
+  "quest.supply.assassinPoisonEquip": "विष तलवार: लाल या हरा विष चूर्ण सुसज्जित करें; प्रति प्रयोग 1।",
+  "quest.supply.assassinPoisonEquipped": "विष तलवार: विष चूर्ण सुसज्जित है; प्रति प्रयोग 1।"
 }

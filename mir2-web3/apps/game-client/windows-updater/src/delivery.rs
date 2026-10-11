@@ -23,7 +23,7 @@ use std::{
 
 pub const MAX_COMPRESSED: u64 = 128 * 1024 * 1024;
 pub const MAX_BUNDLE_OUTPUT: u64 = 512 * 1024 * 1024;
-pub const MAX_ENTRIES: usize = 200_000;
+pub const MAX_ENTRIES: usize = MAX_MANIFEST_FILES;
 pub const MAX_OPERATIONS: u32 = 65_536;
 pub const BUNDLE_MAGIC: &[u8; 8] = b"MIR2PK01";
 pub const DELTA_MAGIC: &[u8; 8] = b"MIR2DP01";

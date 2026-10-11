@@ -7,6 +7,13 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
 import {
+  FIVE_CLASS_ADDITIONAL_CLIENT_EFFECTS,
+  FIVE_CLASS_ADDITIONAL_OBJECT_EFFECTS,
+  FIVE_CLASS_ADDITIONAL_SPELL_EFFECTS,
+  FIVE_CLASS_ADDITIONAL_WORLD_EFFECTS,
+  FIVE_CLASS_POISON_SHOT_PHASES,
+} from "./asset-pipeline/five-class-skill-source.mjs";
+import {
   allPresentFrameIndices,
   decodeFrameRgba,
   decodeMaskFrameRgba,
@@ -259,7 +266,7 @@ export const SPELL_EFFECTS = [
   spell("MeteorStrike", "Magic2", 1590, 10, 60),
   spell("HeavenlySword", "Magic2", 2230, 8, 100, "cast", 10),
   spell("ElementalBarrier", "Magic3", 1880, 8, 75),
-  spell("PoisonShot", "Magic3", 2300, 8, 125),
+  withPhases(spell("PoisonShot", "Magic3", 2300, 8, 125), FIVE_CLASS_POISON_SHOT_PHASES),
   spell("OneWithNature", "Magic3", 2710, 8, 150, "ground"),
   withPhases(spell("FireBounce", "Magic", 400, 10, 60), {
     projectile: phase("Magic", 410, 6, 30, "projectile", {
@@ -291,6 +298,7 @@ export const SPELL_EFFECTS = [
   groundTalisman("Curse", phase("Magic2", 950, 24, 83, "ground")),
   groundTalisman("Plague", phase("Magic3", 110, 10, 120, "ground")),
   groundTalisman("PoisonCloud"),
+  ...FIVE_CLASS_ADDITIONAL_SPELL_EFFECTS,
 ];
 
 const worldSpell = (name, library, base, count, interval, extra = {}) => ({
@@ -328,6 +336,7 @@ export const WORLD_SPELL_EFFECTS = [
   }),
   worldSpell("Reincarnation", "Magic2", 1680, 10, 100, { light: 1 }),
   worldSpell("HealingCircle", "Magic3", 630, 11, 80, { light: 3 }),
+  ...FIVE_CLASS_ADDITIONAL_WORLD_EFFECTS,
 ];
 
 const packetEffect = (effect, library, base, count, interval, source, extra = {}) => ({
@@ -380,6 +389,17 @@ export const CLIENT_EFFECTS = [
     },
   )),
   clientEffect("ImmortalSkinSecondary", "Magic3", 570, 5, 120, PLAYER_SPELL_SOURCE),
+  // PlayerObject.AttackRange1 launches at body frame 5. Focus procs at
+  // body frame 6; Frames.cs defines the eight-frame, 100ms bow action.
+  clientEffect("ArcherNormalArrow", "Magic3", 1030, 5, 30,
+    "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1", {
+      kind: "projectile", rate: 1,
+      ...direction16(1030, 5, 10),
+    }),
+  clientEffect("ArcherFocusProc", "Magic3", 2730, 10, 80,
+    "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1", {
+      kind: "attackOverlay", rate: 1,
+    }),
   clientEffect("LeftGuardRangeProjectile", "Magic", 10, 6, 30, LEFT_GUARD_RANGE_PROJECTILE_SOURCE, {
     kind: "projectile",
     ...direction16(10, 6, 10),
@@ -389,6 +409,7 @@ export const CLIENT_EFFECTS = [
   }),
   clientEffect("PlayerRevive", "Magic2", 1220, 20, 100, PLAYER_REVIVE_SOURCE),
   clientEffect("RightGuardRangeHit", "Magic2", 10, 5, 60, RIGHT_GUARD_RANGE_HIT_SOURCE, { kind: "impact" }),
+  ...FIVE_CLASS_ADDITIONAL_CLIENT_EFFECTS,
 ];
 
 // Single-layer ObjectEffect cases whose frame selection is fully determined by the packet effect.
@@ -404,6 +425,7 @@ export const OBJECT_EFFECTS = [
   packetEffect("Bleeding", "Magic3", 60, 3, 133, OBJECT_EFFECT_SOURCE),
   packetEffect("StormEscape", "Magic3", 610, 10, 60, OBJECT_EFFECT_SOURCE),
   packetEffect("MoonMist", "Magic3", 705, 10, 80, OBJECT_EFFECT_SOURCE),
+  ...FIVE_CLASS_ADDITIONAL_OBJECT_EFFECTS,
 ];
 
 export const MAP_EFFECTS = [

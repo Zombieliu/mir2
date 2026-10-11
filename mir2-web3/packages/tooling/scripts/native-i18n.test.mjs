@@ -26,8 +26,30 @@ test("six additional locales preserve gameplay numbers, opaque arguments and dis
 test("every additional native locale has the exact source key closure and safe substitutions", () => {
   const report = verifyExpansionFiles();
   assert.deepEqual(report.locales, ["ru", "hi", "id", "vi", "th", "ar"]);
-  assert.equal(report.entriesPerLocale, 9385);
+  assert.equal(report.entriesPerLocale, 9412);
   assert.deepEqual(report.errors, []);
+});
+
+test("five-class powder guidance retains the real skill name and one-use count in all nine locales", () => {
+  const quest = read("packages/game-data/data/native-i18n/quest.json").entries;
+  const skill = read("packages/game-data/data/native-i18n/content.json").entries.find(entry => entry.key === "content.magic.PoisonSword.name");
+  const keys = ["quest.supply.assassinPoisonEquip", "quest.supply.assassinPoisonEquipped"];
+  for (const key of keys) {
+    const entry = quest.find(entry => entry.key === key);
+    assert.ok(entry, key);
+    assert.deepEqual(placeholders(entry.en), []);
+    for (const locale of ["en", "zh-TW", "pt-BR"]) {
+      assert.ok(entry[locale].includes(skill[locale]), `${key}/${locale}: skill name differs from the skill panel`);
+      assert.match(entry[locale], /1/, `${key}/${locale}: Source GetPoison(1) count missing`);
+    }
+    for (const locale of ["ru", "hi", "id", "vi", "th", "ar"]) {
+      const overlay = read(`packages/game-data/data/native-i18n/extra/${locale}.json`);
+      assert.deepEqual(validateValue(entry, locale, overlay[key]), [], `${key}/${locale}`);
+      assert.ok(overlay[key].includes(overlay["content.magic.PoisonSword.name"]), `${key}/${locale}: skill name differs from the skill panel`);
+    }
+  }
+  assert.match(quest.find(entry => entry.key === keys[0]).en, /equipped red or green powder/);
+  assert.match(quest.find(entry => entry.key === keys[1]).en, /powder equipped/);
 });
 
 test("three-language validation preserves named/numbered parameters and rejects dropped/repeated parameters", () => {

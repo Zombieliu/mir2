@@ -7,7 +7,12 @@
     "Effect",
     "Magic",
     "Magic2",
-    "Magic3"
+    "Magic3",
+    "MagicC",
+    "Monster/130",
+    "Monster/359",
+    "Monster/361",
+    "Monster/362"
   ],
   "spell_effect_enum": [
     "None",
@@ -210,6 +215,208 @@
       }
     },
     {
+      "spell": "BindingShot",
+      "spellId": 140,
+      "library": "Magic3",
+      "base": 2750,
+      "count": 5,
+      "interval": 10,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2750,
+          "end": 2754
+        },
+        {
+          "direction": 1,
+          "base": 2760,
+          "end": 2764
+        },
+        {
+          "direction": 2,
+          "base": 2770,
+          "end": 2774
+        },
+        {
+          "direction": 3,
+          "base": 2780,
+          "end": 2784
+        },
+        {
+          "direction": 4,
+          "base": 2790,
+          "end": 2794
+        },
+        {
+          "direction": 5,
+          "base": 2800,
+          "end": 2804
+        },
+        {
+          "direction": 6,
+          "base": 2810,
+          "end": 2814
+        },
+        {
+          "direction": 7,
+          "base": 2820,
+          "end": 2824
+        },
+        {
+          "direction": 8,
+          "base": 2830,
+          "end": 2834
+        },
+        {
+          "direction": 9,
+          "base": 2840,
+          "end": 2844
+        },
+        {
+          "direction": 10,
+          "base": 2850,
+          "end": 2854
+        },
+        {
+          "direction": 11,
+          "base": 2860,
+          "end": 2864
+        },
+        {
+          "direction": 12,
+          "base": 2870,
+          "end": 2874
+        },
+        {
+          "direction": 13,
+          "base": 2880,
+          "end": 2884
+        },
+        {
+          "direction": 14,
+          "base": 2890,
+          "end": 2894
+        },
+        {
+          "direction": 15,
+          "base": 2900,
+          "end": 2904
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 2750,
+        "count": 5,
+        "interval": 10,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 2750,
+            "end": 2754
+          },
+          {
+            "direction": 1,
+            "base": 2760,
+            "end": 2764
+          },
+          {
+            "direction": 2,
+            "base": 2770,
+            "end": 2774
+          },
+          {
+            "direction": 3,
+            "base": 2780,
+            "end": 2784
+          },
+          {
+            "direction": 4,
+            "base": 2790,
+            "end": 2794
+          },
+          {
+            "direction": 5,
+            "base": 2800,
+            "end": 2804
+          },
+          {
+            "direction": 6,
+            "base": 2810,
+            "end": 2814
+          },
+          {
+            "direction": 7,
+            "base": 2820,
+            "end": 2824
+          },
+          {
+            "direction": 8,
+            "base": 2830,
+            "end": 2834
+          },
+          {
+            "direction": 9,
+            "base": 2840,
+            "end": 2844
+          },
+          {
+            "direction": 10,
+            "base": 2850,
+            "end": 2854
+          },
+          {
+            "direction": 11,
+            "base": 2860,
+            "end": 2864
+          },
+          {
+            "direction": 12,
+            "base": 2870,
+            "end": 2874
+          },
+          {
+            "direction": 13,
+            "base": 2880,
+            "end": 2884
+          },
+          {
+            "direction": 14,
+            "base": 2890,
+            "end": 2894
+          },
+          {
+            "direction": 15,
+            "base": 2900,
+            "end": 2904
+          }
+        ]
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.BindingShot"
+      }
+    },
+    {
       "spell": "BladeAvalanche",
       "spellId": 11,
       "library": "Magic2",
@@ -348,6 +555,222 @@
       }
     },
     {
+      "spell": "CatTongue",
+      "spellId": 107,
+      "library": "Magic3",
+      "base": 260,
+      "count": 6,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 260,
+          "end": 265
+        },
+        {
+          "direction": 1,
+          "base": 270,
+          "end": 275
+        },
+        {
+          "direction": 2,
+          "base": 280,
+          "end": 285
+        },
+        {
+          "direction": 3,
+          "base": 290,
+          "end": 295
+        },
+        {
+          "direction": 4,
+          "base": 300,
+          "end": 305
+        },
+        {
+          "direction": 5,
+          "base": 310,
+          "end": 315
+        },
+        {
+          "direction": 6,
+          "base": 320,
+          "end": 325
+        },
+        {
+          "direction": 7,
+          "base": 330,
+          "end": 335
+        },
+        {
+          "direction": 8,
+          "base": 340,
+          "end": 345
+        },
+        {
+          "direction": 9,
+          "base": 350,
+          "end": 355
+        },
+        {
+          "direction": 10,
+          "base": 360,
+          "end": 365
+        },
+        {
+          "direction": 11,
+          "base": 370,
+          "end": 375
+        },
+        {
+          "direction": 12,
+          "base": 380,
+          "end": 385
+        },
+        {
+          "direction": 13,
+          "base": 390,
+          "end": 395
+        },
+        {
+          "direction": 14,
+          "base": 400,
+          "end": 405
+        },
+        {
+          "direction": 15,
+          "base": 410,
+          "end": 415
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 260,
+        "count": 6,
+        "interval": 30,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 260,
+            "end": 265
+          },
+          {
+            "direction": 1,
+            "base": 270,
+            "end": 275
+          },
+          {
+            "direction": 2,
+            "base": 280,
+            "end": 285
+          },
+          {
+            "direction": 3,
+            "base": 290,
+            "end": 295
+          },
+          {
+            "direction": 4,
+            "base": 300,
+            "end": 305
+          },
+          {
+            "direction": 5,
+            "base": 310,
+            "end": 315
+          },
+          {
+            "direction": 6,
+            "base": 320,
+            "end": 325
+          },
+          {
+            "direction": 7,
+            "base": 330,
+            "end": 335
+          },
+          {
+            "direction": 8,
+            "base": 340,
+            "end": 345
+          },
+          {
+            "direction": 9,
+            "base": 350,
+            "end": 355
+          },
+          {
+            "direction": 10,
+            "base": 360,
+            "end": 365
+          },
+          {
+            "direction": 11,
+            "base": 370,
+            "end": 375
+          },
+          {
+            "direction": 12,
+            "base": 380,
+            "end": 385
+          },
+          {
+            "direction": 13,
+            "base": 390,
+            "end": 395
+          },
+          {
+            "direction": 14,
+            "base": 400,
+            "end": 405
+          },
+          {
+            "direction": 15,
+            "base": 410,
+            "end": 415
+          }
+        ]
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 420,
+        "count": 8,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell/Complete",
+        "symbol": "Spell.CatTongue"
+      }
+    },
+    {
       "spell": "CounterAttack",
       "spellId": 14,
       "library": "Magic",
@@ -476,6 +899,222 @@
       }
     },
     {
+      "spell": "CrippleShot",
+      "spellId": 136,
+      "library": "Magic3",
+      "base": 2330,
+      "count": 5,
+      "interval": 10,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2330,
+          "end": 2334
+        },
+        {
+          "direction": 1,
+          "base": 2340,
+          "end": 2344
+        },
+        {
+          "direction": 2,
+          "base": 2350,
+          "end": 2354
+        },
+        {
+          "direction": 3,
+          "base": 2360,
+          "end": 2364
+        },
+        {
+          "direction": 4,
+          "base": 2370,
+          "end": 2374
+        },
+        {
+          "direction": 5,
+          "base": 2380,
+          "end": 2384
+        },
+        {
+          "direction": 6,
+          "base": 2390,
+          "end": 2394
+        },
+        {
+          "direction": 7,
+          "base": 2400,
+          "end": 2404
+        },
+        {
+          "direction": 8,
+          "base": 2410,
+          "end": 2414
+        },
+        {
+          "direction": 9,
+          "base": 2420,
+          "end": 2424
+        },
+        {
+          "direction": 10,
+          "base": 2430,
+          "end": 2434
+        },
+        {
+          "direction": 11,
+          "base": 2440,
+          "end": 2444
+        },
+        {
+          "direction": 12,
+          "base": 2450,
+          "end": 2454
+        },
+        {
+          "direction": 13,
+          "base": 2460,
+          "end": 2464
+        },
+        {
+          "direction": 14,
+          "base": 2470,
+          "end": 2474
+        },
+        {
+          "direction": 15,
+          "base": 2480,
+          "end": 2484
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 2330,
+        "count": 5,
+        "interval": 10,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 2330,
+            "end": 2334
+          },
+          {
+            "direction": 1,
+            "base": 2340,
+            "end": 2344
+          },
+          {
+            "direction": 2,
+            "base": 2350,
+            "end": 2354
+          },
+          {
+            "direction": 3,
+            "base": 2360,
+            "end": 2364
+          },
+          {
+            "direction": 4,
+            "base": 2370,
+            "end": 2374
+          },
+          {
+            "direction": 5,
+            "base": 2380,
+            "end": 2384
+          },
+          {
+            "direction": 6,
+            "base": 2390,
+            "end": 2394
+          },
+          {
+            "direction": 7,
+            "base": 2400,
+            "end": 2404
+          },
+          {
+            "direction": 8,
+            "base": 2410,
+            "end": 2414
+          },
+          {
+            "direction": 9,
+            "base": 2420,
+            "end": 2424
+          },
+          {
+            "direction": 10,
+            "base": 2430,
+            "end": 2434
+          },
+          {
+            "direction": 11,
+            "base": 2440,
+            "end": 2444
+          },
+          {
+            "direction": 12,
+            "base": 2450,
+            "end": 2454
+          },
+          {
+            "direction": 13,
+            "base": 2460,
+            "end": 2464
+          },
+          {
+            "direction": 14,
+            "base": 2470,
+            "end": 2474
+          },
+          {
+            "direction": 15,
+            "base": 2480,
+            "end": 2484
+          }
+        ]
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 2490,
+        "count": 7,
+        "interval": 142,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.CrippleShot"
+      }
+    },
+    {
       "spell": "Curse",
       "spellId": 81,
       "library": "Magic",
@@ -527,6 +1166,212 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.DarkBody"
+      }
+    },
+    {
+      "spell": "DoubleShot",
+      "spellId": 123,
+      "library": "Magic3",
+      "base": 1030,
+      "count": 5,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1030,
+          "end": 1034
+        },
+        {
+          "direction": 1,
+          "base": 1040,
+          "end": 1044
+        },
+        {
+          "direction": 2,
+          "base": 1050,
+          "end": 1054
+        },
+        {
+          "direction": 3,
+          "base": 1060,
+          "end": 1064
+        },
+        {
+          "direction": 4,
+          "base": 1070,
+          "end": 1074
+        },
+        {
+          "direction": 5,
+          "base": 1080,
+          "end": 1084
+        },
+        {
+          "direction": 6,
+          "base": 1090,
+          "end": 1094
+        },
+        {
+          "direction": 7,
+          "base": 1100,
+          "end": 1104
+        },
+        {
+          "direction": 8,
+          "base": 1110,
+          "end": 1114
+        },
+        {
+          "direction": 9,
+          "base": 1120,
+          "end": 1124
+        },
+        {
+          "direction": 10,
+          "base": 1130,
+          "end": 1134
+        },
+        {
+          "direction": 11,
+          "base": 1140,
+          "end": 1144
+        },
+        {
+          "direction": 12,
+          "base": 1150,
+          "end": 1154
+        },
+        {
+          "direction": 13,
+          "base": 1160,
+          "end": 1164
+        },
+        {
+          "direction": 14,
+          "base": 1170,
+          "end": 1174
+        },
+        {
+          "direction": 15,
+          "base": 1180,
+          "end": 1184
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 1030,
+        "count": 5,
+        "interval": 30,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 1030,
+            "end": 1034
+          },
+          {
+            "direction": 1,
+            "base": 1040,
+            "end": 1044
+          },
+          {
+            "direction": 2,
+            "base": 1050,
+            "end": 1054
+          },
+          {
+            "direction": 3,
+            "base": 1060,
+            "end": 1064
+          },
+          {
+            "direction": 4,
+            "base": 1070,
+            "end": 1074
+          },
+          {
+            "direction": 5,
+            "base": 1080,
+            "end": 1084
+          },
+          {
+            "direction": 6,
+            "base": 1090,
+            "end": 1094
+          },
+          {
+            "direction": 7,
+            "base": 1100,
+            "end": 1104
+          },
+          {
+            "direction": 8,
+            "base": 1110,
+            "end": 1114
+          },
+          {
+            "direction": 9,
+            "base": 1120,
+            "end": 1124
+          },
+          {
+            "direction": 10,
+            "base": 1130,
+            "end": 1134
+          },
+          {
+            "direction": 11,
+            "base": 1140,
+            "end": 1144
+          },
+          {
+            "direction": 12,
+            "base": 1150,
+            "end": 1154
+          },
+          {
+            "direction": 13,
+            "base": 1160,
+            "end": 1164
+          },
+          {
+            "direction": 14,
+            "base": 1170,
+            "end": 1174
+          },
+          {
+            "direction": 15,
+            "base": 1180,
+            "end": 1184
+          }
+        ]
+      },
+      "launchFrames": [
+        5,
+        7
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.DoubleShot"
       }
     },
     {
@@ -2302,6 +3147,118 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.PoisonShot"
+      },
+      "projectile": {
+        "library": "Magic3",
+        "base": 2130,
+        "count": 5,
+        "interval": 10,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 2130,
+            "end": 2134
+          },
+          {
+            "direction": 1,
+            "base": 2140,
+            "end": 2144
+          },
+          {
+            "direction": 2,
+            "base": 2150,
+            "end": 2154
+          },
+          {
+            "direction": 3,
+            "base": 2160,
+            "end": 2164
+          },
+          {
+            "direction": 4,
+            "base": 2170,
+            "end": 2174
+          },
+          {
+            "direction": 5,
+            "base": 2180,
+            "end": 2184
+          },
+          {
+            "direction": 6,
+            "base": 2190,
+            "end": 2194
+          },
+          {
+            "direction": 7,
+            "base": 2200,
+            "end": 2204
+          },
+          {
+            "direction": 8,
+            "base": 2210,
+            "end": 2214
+          },
+          {
+            "direction": 9,
+            "base": 2220,
+            "end": 2224
+          },
+          {
+            "direction": 10,
+            "base": 2230,
+            "end": 2234
+          },
+          {
+            "direction": 11,
+            "base": 2240,
+            "end": 2244
+          },
+          {
+            "direction": 12,
+            "base": 2250,
+            "end": 2254
+          },
+          {
+            "direction": 13,
+            "base": 2260,
+            "end": 2264
+          },
+          {
+            "direction": 14,
+            "base": 2270,
+            "end": 2274
+          },
+          {
+            "direction": 15,
+            "base": 2280,
+            "end": 2284
+          }
+        ]
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 2290,
+        "count": 6,
+        "interval": 166,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -2811,6 +3768,209 @@
       }
     },
     {
+      "spell": "Stonetrap",
+      "spellId": 130,
+      "library": "Magic3",
+      "base": 2750,
+      "count": 5,
+      "interval": 20,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2750,
+          "end": 2754
+        },
+        {
+          "direction": 1,
+          "base": 2760,
+          "end": 2764
+        },
+        {
+          "direction": 2,
+          "base": 2770,
+          "end": 2774
+        },
+        {
+          "direction": 3,
+          "base": 2780,
+          "end": 2784
+        },
+        {
+          "direction": 4,
+          "base": 2790,
+          "end": 2794
+        },
+        {
+          "direction": 5,
+          "base": 2800,
+          "end": 2804
+        },
+        {
+          "direction": 6,
+          "base": 2810,
+          "end": 2814
+        },
+        {
+          "direction": 7,
+          "base": 2820,
+          "end": 2824
+        },
+        {
+          "direction": 8,
+          "base": 2830,
+          "end": 2834
+        },
+        {
+          "direction": 9,
+          "base": 2840,
+          "end": 2844
+        },
+        {
+          "direction": 10,
+          "base": 2850,
+          "end": 2854
+        },
+        {
+          "direction": 11,
+          "base": 2860,
+          "end": 2864
+        },
+        {
+          "direction": 12,
+          "base": 2870,
+          "end": 2874
+        },
+        {
+          "direction": 13,
+          "base": 2880,
+          "end": 2884
+        },
+        {
+          "direction": 14,
+          "base": 2890,
+          "end": 2894
+        },
+        {
+          "direction": 15,
+          "base": 2900,
+          "end": 2904
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 2750,
+        "count": 5,
+        "interval": 20,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 2750,
+            "end": 2754
+          },
+          {
+            "direction": 1,
+            "base": 2760,
+            "end": 2764
+          },
+          {
+            "direction": 2,
+            "base": 2770,
+            "end": 2774
+          },
+          {
+            "direction": 3,
+            "base": 2780,
+            "end": 2784
+          },
+          {
+            "direction": 4,
+            "base": 2790,
+            "end": 2794
+          },
+          {
+            "direction": 5,
+            "base": 2800,
+            "end": 2804
+          },
+          {
+            "direction": 6,
+            "base": 2810,
+            "end": 2814
+          },
+          {
+            "direction": 7,
+            "base": 2820,
+            "end": 2824
+          },
+          {
+            "direction": 8,
+            "base": 2830,
+            "end": 2834
+          },
+          {
+            "direction": 9,
+            "base": 2840,
+            "end": 2844
+          },
+          {
+            "direction": 10,
+            "base": 2850,
+            "end": 2854
+          },
+          {
+            "direction": 11,
+            "base": 2860,
+            "end": 2864
+          },
+          {
+            "direction": 12,
+            "base": 2870,
+            "end": 2874
+          },
+          {
+            "direction": 13,
+            "base": 2880,
+            "end": 2884
+          },
+          {
+            "direction": 14,
+            "base": 2890,
+            "end": 2894
+          },
+          {
+            "direction": 15,
+            "base": 2900,
+            "end": 2904
+          }
+        ]
+      },
+      "explodeAtGround": true,
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.Stonetrap"
+      }
+    },
+    {
       "spell": "StormEscape",
       "spellId": 55,
       "library": "Magic3",
@@ -2828,6 +3988,222 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.StormEscape"
+      }
+    },
+    {
+      "spell": "StraightShot",
+      "spellId": 122,
+      "library": "Magic3",
+      "base": 1210,
+      "count": 5,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1210,
+          "end": 1214
+        },
+        {
+          "direction": 1,
+          "base": 1220,
+          "end": 1224
+        },
+        {
+          "direction": 2,
+          "base": 1230,
+          "end": 1234
+        },
+        {
+          "direction": 3,
+          "base": 1240,
+          "end": 1244
+        },
+        {
+          "direction": 4,
+          "base": 1250,
+          "end": 1254
+        },
+        {
+          "direction": 5,
+          "base": 1260,
+          "end": 1264
+        },
+        {
+          "direction": 6,
+          "base": 1270,
+          "end": 1274
+        },
+        {
+          "direction": 7,
+          "base": 1280,
+          "end": 1284
+        },
+        {
+          "direction": 8,
+          "base": 1290,
+          "end": 1294
+        },
+        {
+          "direction": 9,
+          "base": 1300,
+          "end": 1304
+        },
+        {
+          "direction": 10,
+          "base": 1310,
+          "end": 1314
+        },
+        {
+          "direction": 11,
+          "base": 1320,
+          "end": 1324
+        },
+        {
+          "direction": 12,
+          "base": 1330,
+          "end": 1334
+        },
+        {
+          "direction": 13,
+          "base": 1340,
+          "end": 1344
+        },
+        {
+          "direction": 14,
+          "base": 1350,
+          "end": 1354
+        },
+        {
+          "direction": 15,
+          "base": 1360,
+          "end": 1364
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 1210,
+        "count": 5,
+        "interval": 30,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 1210,
+            "end": 1214
+          },
+          {
+            "direction": 1,
+            "base": 1220,
+            "end": 1224
+          },
+          {
+            "direction": 2,
+            "base": 1230,
+            "end": 1234
+          },
+          {
+            "direction": 3,
+            "base": 1240,
+            "end": 1244
+          },
+          {
+            "direction": 4,
+            "base": 1250,
+            "end": 1254
+          },
+          {
+            "direction": 5,
+            "base": 1260,
+            "end": 1264
+          },
+          {
+            "direction": 6,
+            "base": 1270,
+            "end": 1274
+          },
+          {
+            "direction": 7,
+            "base": 1280,
+            "end": 1284
+          },
+          {
+            "direction": 8,
+            "base": 1290,
+            "end": 1294
+          },
+          {
+            "direction": 9,
+            "base": 1300,
+            "end": 1304
+          },
+          {
+            "direction": 10,
+            "base": 1310,
+            "end": 1314
+          },
+          {
+            "direction": 11,
+            "base": 1320,
+            "end": 1324
+          },
+          {
+            "direction": 12,
+            "base": 1330,
+            "end": 1334
+          },
+          {
+            "direction": 13,
+            "base": 1340,
+            "end": 1344
+          },
+          {
+            "direction": 14,
+            "base": 1350,
+            "end": 1354
+          },
+          {
+            "direction": 15,
+            "base": 1360,
+            "end": 1364
+          }
+        ]
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 1370,
+        "count": 7,
+        "interval": 85,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.StraightShot"
       }
     },
     {
@@ -2888,6 +4264,410 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.SummonSkeleton"
+      }
+    },
+    {
+      "spell": "SummonSnakes",
+      "spellId": 137,
+      "library": "Magic3",
+      "base": 2750,
+      "count": 5,
+      "interval": 10,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2750,
+          "end": 2754
+        },
+        {
+          "direction": 1,
+          "base": 2760,
+          "end": 2764
+        },
+        {
+          "direction": 2,
+          "base": 2770,
+          "end": 2774
+        },
+        {
+          "direction": 3,
+          "base": 2780,
+          "end": 2784
+        },
+        {
+          "direction": 4,
+          "base": 2790,
+          "end": 2794
+        },
+        {
+          "direction": 5,
+          "base": 2800,
+          "end": 2804
+        },
+        {
+          "direction": 6,
+          "base": 2810,
+          "end": 2814
+        },
+        {
+          "direction": 7,
+          "base": 2820,
+          "end": 2824
+        },
+        {
+          "direction": 8,
+          "base": 2830,
+          "end": 2834
+        },
+        {
+          "direction": 9,
+          "base": 2840,
+          "end": 2844
+        },
+        {
+          "direction": 10,
+          "base": 2850,
+          "end": 2854
+        },
+        {
+          "direction": 11,
+          "base": 2860,
+          "end": 2864
+        },
+        {
+          "direction": 12,
+          "base": 2870,
+          "end": 2874
+        },
+        {
+          "direction": 13,
+          "base": 2880,
+          "end": 2884
+        },
+        {
+          "direction": 14,
+          "base": 2890,
+          "end": 2894
+        },
+        {
+          "direction": 15,
+          "base": 2900,
+          "end": 2904
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 2750,
+        "count": 5,
+        "interval": 10,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 2750,
+            "end": 2754
+          },
+          {
+            "direction": 1,
+            "base": 2760,
+            "end": 2764
+          },
+          {
+            "direction": 2,
+            "base": 2770,
+            "end": 2774
+          },
+          {
+            "direction": 3,
+            "base": 2780,
+            "end": 2784
+          },
+          {
+            "direction": 4,
+            "base": 2790,
+            "end": 2794
+          },
+          {
+            "direction": 5,
+            "base": 2800,
+            "end": 2804
+          },
+          {
+            "direction": 6,
+            "base": 2810,
+            "end": 2814
+          },
+          {
+            "direction": 7,
+            "base": 2820,
+            "end": 2824
+          },
+          {
+            "direction": 8,
+            "base": 2830,
+            "end": 2834
+          },
+          {
+            "direction": 9,
+            "base": 2840,
+            "end": 2844
+          },
+          {
+            "direction": 10,
+            "base": 2850,
+            "end": 2854
+          },
+          {
+            "direction": 11,
+            "base": 2860,
+            "end": 2864
+          },
+          {
+            "direction": 12,
+            "base": 2870,
+            "end": 2874
+          },
+          {
+            "direction": 13,
+            "base": 2880,
+            "end": 2884
+          },
+          {
+            "direction": 14,
+            "base": 2890,
+            "end": 2894
+          },
+          {
+            "direction": 15,
+            "base": 2900,
+            "end": 2904
+          }
+        ]
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.SummonSnakes"
+      }
+    },
+    {
+      "spell": "SummonVampire",
+      "spellId": 132,
+      "library": "Magic3",
+      "base": 2750,
+      "count": 5,
+      "interval": 10,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2750,
+          "end": 2754
+        },
+        {
+          "direction": 1,
+          "base": 2760,
+          "end": 2764
+        },
+        {
+          "direction": 2,
+          "base": 2770,
+          "end": 2774
+        },
+        {
+          "direction": 3,
+          "base": 2780,
+          "end": 2784
+        },
+        {
+          "direction": 4,
+          "base": 2790,
+          "end": 2794
+        },
+        {
+          "direction": 5,
+          "base": 2800,
+          "end": 2804
+        },
+        {
+          "direction": 6,
+          "base": 2810,
+          "end": 2814
+        },
+        {
+          "direction": 7,
+          "base": 2820,
+          "end": 2824
+        },
+        {
+          "direction": 8,
+          "base": 2830,
+          "end": 2834
+        },
+        {
+          "direction": 9,
+          "base": 2840,
+          "end": 2844
+        },
+        {
+          "direction": 10,
+          "base": 2850,
+          "end": 2854
+        },
+        {
+          "direction": 11,
+          "base": 2860,
+          "end": 2864
+        },
+        {
+          "direction": 12,
+          "base": 2870,
+          "end": 2874
+        },
+        {
+          "direction": 13,
+          "base": 2880,
+          "end": 2884
+        },
+        {
+          "direction": 14,
+          "base": 2890,
+          "end": 2894
+        },
+        {
+          "direction": 15,
+          "base": 2900,
+          "end": 2904
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 2750,
+        "count": 5,
+        "interval": 10,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 2750,
+            "end": 2754
+          },
+          {
+            "direction": 1,
+            "base": 2760,
+            "end": 2764
+          },
+          {
+            "direction": 2,
+            "base": 2770,
+            "end": 2774
+          },
+          {
+            "direction": 3,
+            "base": 2780,
+            "end": 2784
+          },
+          {
+            "direction": 4,
+            "base": 2790,
+            "end": 2794
+          },
+          {
+            "direction": 5,
+            "base": 2800,
+            "end": 2804
+          },
+          {
+            "direction": 6,
+            "base": 2810,
+            "end": 2814
+          },
+          {
+            "direction": 7,
+            "base": 2820,
+            "end": 2824
+          },
+          {
+            "direction": 8,
+            "base": 2830,
+            "end": 2834
+          },
+          {
+            "direction": 9,
+            "base": 2840,
+            "end": 2844
+          },
+          {
+            "direction": 10,
+            "base": 2850,
+            "end": 2854
+          },
+          {
+            "direction": 11,
+            "base": 2860,
+            "end": 2864
+          },
+          {
+            "direction": 12,
+            "base": 2870,
+            "end": 2874
+          },
+          {
+            "direction": 13,
+            "base": 2880,
+            "end": 2884
+          },
+          {
+            "direction": 14,
+            "base": 2890,
+            "end": 2894
+          },
+          {
+            "direction": 15,
+            "base": 2900,
+            "end": 2904
+          }
+        ]
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.SummonVampire"
       }
     },
     {
@@ -3113,6 +4893,236 @@
       }
     },
     {
+      "spell": "VampireShot",
+      "spellId": 133,
+      "library": "Magic3",
+      "base": 1930,
+      "count": 5,
+      "interval": 10,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1930,
+          "end": 1934
+        },
+        {
+          "direction": 1,
+          "base": 1940,
+          "end": 1944
+        },
+        {
+          "direction": 2,
+          "base": 1950,
+          "end": 1954
+        },
+        {
+          "direction": 3,
+          "base": 1960,
+          "end": 1964
+        },
+        {
+          "direction": 4,
+          "base": 1970,
+          "end": 1974
+        },
+        {
+          "direction": 5,
+          "base": 1980,
+          "end": 1984
+        },
+        {
+          "direction": 6,
+          "base": 1990,
+          "end": 1994
+        },
+        {
+          "direction": 7,
+          "base": 2000,
+          "end": 2004
+        },
+        {
+          "direction": 8,
+          "base": 2010,
+          "end": 2014
+        },
+        {
+          "direction": 9,
+          "base": 2020,
+          "end": 2024
+        },
+        {
+          "direction": 10,
+          "base": 2030,
+          "end": 2034
+        },
+        {
+          "direction": 11,
+          "base": 2040,
+          "end": 2044
+        },
+        {
+          "direction": 12,
+          "base": 2050,
+          "end": 2054
+        },
+        {
+          "direction": 13,
+          "base": 2060,
+          "end": 2064
+        },
+        {
+          "direction": 14,
+          "base": 2070,
+          "end": 2074
+        },
+        {
+          "direction": 15,
+          "base": 2080,
+          "end": 2084
+        }
+      ],
+      "projectile": {
+        "library": "Magic3",
+        "base": 1930,
+        "count": 5,
+        "interval": 10,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 1930,
+            "end": 1934
+          },
+          {
+            "direction": 1,
+            "base": 1940,
+            "end": 1944
+          },
+          {
+            "direction": 2,
+            "base": 1950,
+            "end": 1954
+          },
+          {
+            "direction": 3,
+            "base": 1960,
+            "end": 1964
+          },
+          {
+            "direction": 4,
+            "base": 1970,
+            "end": 1974
+          },
+          {
+            "direction": 5,
+            "base": 1980,
+            "end": 1984
+          },
+          {
+            "direction": 6,
+            "base": 1990,
+            "end": 1994
+          },
+          {
+            "direction": 7,
+            "base": 2000,
+            "end": 2004
+          },
+          {
+            "direction": 8,
+            "base": 2010,
+            "end": 2014
+          },
+          {
+            "direction": 9,
+            "base": 2020,
+            "end": 2024
+          },
+          {
+            "direction": 10,
+            "base": 2030,
+            "end": 2034
+          },
+          {
+            "direction": 11,
+            "base": 2040,
+            "end": 2044
+          },
+          {
+            "direction": 12,
+            "base": 2050,
+            "end": 2054
+          },
+          {
+            "direction": 13,
+            "base": 2060,
+            "end": 2064
+          },
+          {
+            "direction": 14,
+            "base": 2070,
+            "end": 2074
+          },
+          {
+            "direction": 15,
+            "base": 2080,
+            "end": 2084
+          }
+        ]
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 2090,
+        "count": 6,
+        "interval": 166,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "returnEffect": {
+        "library": "Magic3",
+        "base": 2100,
+        "count": 8,
+        "interval": 125,
+        "kind": "return",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2",
+        "symbol": "Spell.VampireShot"
+      }
+    },
+    {
       "spell": "Vampirism",
       "spellId": 45,
       "library": "Magic2",
@@ -3180,6 +5190,27 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
         "symbol": "Spell.Blizzard"
+      }
+    },
+    {
+      "spell": "ExplosiveTrap",
+      "spellId": 124,
+      "library": "Magic3",
+      "base": 1560,
+      "count": 10,
+      "interval": 100,
+      "kind": "ground",
+      "blend": true,
+      "light": 0,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.8,
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.ExplosiveTrap"
       }
     },
     {
@@ -3491,6 +5522,27 @@
       }
     },
     {
+      "spell": "Trap",
+      "spellId": 98,
+      "library": "Magic2",
+      "base": 2360,
+      "count": 8,
+      "interval": 100,
+      "kind": "ground",
+      "blend": true,
+      "light": 0,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.8,
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.Trap"
+      }
+    },
+    {
       "spell": "TrapHexagon",
       "spellId": 73,
       "library": "Magic",
@@ -3513,6 +5565,940 @@
     }
   ],
   "client_effects": [
+    {
+      "effect": "ArcherBarrierPersistent16",
+      "library": "Magic3",
+      "base": 1890,
+      "count": 16,
+      "interval": 200,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::ElementalBarrier/CurrentEffect",
+        "symbol": "ArcherBarrierPersistent16"
+      }
+    },
+    {
+      "effect": "ArcherBarrierStruck",
+      "library": "Magic3",
+      "base": 1910,
+      "count": 5,
+      "interval": 120,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::ElementalBarrier/MirAction.Struck",
+        "symbol": "ArcherBarrierStruck"
+      }
+    },
+    {
+      "effect": "ArcherBindingDown",
+      "library": "MagicC",
+      "base": 7,
+      "count": 1,
+      "interval": 1000,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetBindingShot",
+        "symbol": "ArcherBindingDown"
+      }
+    },
+    {
+      "effect": "ArcherBindingDrop",
+      "library": "MagicC",
+      "base": 0,
+      "count": 8,
+      "interval": 87,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetBindingShot",
+        "symbol": "ArcherBindingDrop"
+      }
+    },
+    {
+      "effect": "ArcherBindingFall",
+      "library": "MagicC",
+      "base": 8,
+      "count": 8,
+      "interval": 87,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetBindingShot",
+        "symbol": "ArcherBindingFall"
+      }
+    },
+    {
+      "effect": "ArcherCharmedSnakeDeath",
+      "library": "Monster/362",
+      "base": 40,
+      "count": 8,
+      "interval": 100,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/MonsterObject.cs::MirAction.Die/Monster.CharmedSnake",
+        "symbol": "ArcherCharmedSnakeDeath"
+      }
+    },
+    {
+      "effect": "ArcherConcentration",
+      "library": "Magic3",
+      "base": 1860,
+      "count": 8,
+      "interval": 100,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetConcentration",
+        "symbol": "ArcherConcentration"
+      }
+    },
+    {
+      "effect": "ArcherCripplePoisonImpact",
+      "library": "Magic3",
+      "base": 2500,
+      "count": 7,
+      "interval": 142,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2/Spell.CrippleShot",
+        "symbol": "ArcherCripplePoisonImpact"
+      }
+    },
+    {
+      "effect": "ArcherCrippleVampireImpact",
+      "library": "Magic3",
+      "base": 2510,
+      "count": 7,
+      "interval": 142,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2/Spell.CrippleShot",
+        "symbol": "ArcherCrippleVampireImpact"
+      }
+    },
+    {
+      "effect": "ArcherDelayedExplosionArrow",
+      "library": "Magic3",
+      "base": 1030,
+      "count": 5,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1030,
+          "end": 1034
+        },
+        {
+          "direction": 1,
+          "base": 1040,
+          "end": 1044
+        },
+        {
+          "direction": 2,
+          "base": 1050,
+          "end": 1054
+        },
+        {
+          "direction": 3,
+          "base": 1060,
+          "end": 1064
+        },
+        {
+          "direction": 4,
+          "base": 1070,
+          "end": 1074
+        },
+        {
+          "direction": 5,
+          "base": 1080,
+          "end": 1084
+        },
+        {
+          "direction": 6,
+          "base": 1090,
+          "end": 1094
+        },
+        {
+          "direction": 7,
+          "base": 1100,
+          "end": 1104
+        },
+        {
+          "direction": 8,
+          "base": 1110,
+          "end": 1114
+        },
+        {
+          "direction": 9,
+          "base": 1120,
+          "end": 1124
+        },
+        {
+          "direction": 10,
+          "base": 1130,
+          "end": 1134
+        },
+        {
+          "direction": 11,
+          "base": 1140,
+          "end": 1144
+        },
+        {
+          "direction": 12,
+          "base": 1150,
+          "end": 1154
+        },
+        {
+          "direction": 13,
+          "base": 1160,
+          "end": 1164
+        },
+        {
+          "direction": 14,
+          "base": 1170,
+          "end": 1174
+        },
+        {
+          "direction": 15,
+          "base": 1180,
+          "end": 1184
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2/Spell.DelayedExplosion",
+        "symbol": "ArcherDelayedExplosionArrow"
+      }
+    },
+    {
+      "effect": "ArcherDelayedExplosionStage0",
+      "library": "Magic3",
+      "base": 1590,
+      "count": 8,
+      "interval": 150,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/SpellEffect.DelayedExplosion",
+        "symbol": "ArcherDelayedExplosionStage0"
+      }
+    },
+    {
+      "effect": "ArcherDelayedExplosionStage1",
+      "library": "Magic3",
+      "base": 1600,
+      "count": 8,
+      "interval": 150,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/SpellEffect.DelayedExplosion",
+        "symbol": "ArcherDelayedExplosionStage1"
+      }
+    },
+    {
+      "effect": "ArcherDelayedExplosionStage2",
+      "library": "Magic3",
+      "base": 1610,
+      "count": 8,
+      "interval": 150,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/SpellEffect.DelayedExplosion",
+        "symbol": "ArcherDelayedExplosionStage2"
+      }
+    },
+    {
+      "effect": "ArcherElementalShotArrow",
+      "library": "Magic3",
+      "base": 1690,
+      "count": 6,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1690,
+          "end": 1695
+        },
+        {
+          "direction": 1,
+          "base": 1700,
+          "end": 1705
+        },
+        {
+          "direction": 2,
+          "base": 1710,
+          "end": 1715
+        },
+        {
+          "direction": 3,
+          "base": 1720,
+          "end": 1725
+        },
+        {
+          "direction": 4,
+          "base": 1730,
+          "end": 1735
+        },
+        {
+          "direction": 5,
+          "base": 1740,
+          "end": 1745
+        },
+        {
+          "direction": 6,
+          "base": 1750,
+          "end": 1755
+        },
+        {
+          "direction": 7,
+          "base": 1760,
+          "end": 1765
+        },
+        {
+          "direction": 8,
+          "base": 1770,
+          "end": 1775
+        },
+        {
+          "direction": 9,
+          "base": 1780,
+          "end": 1785
+        },
+        {
+          "direction": 10,
+          "base": 1790,
+          "end": 1795
+        },
+        {
+          "direction": 11,
+          "base": 1800,
+          "end": 1805
+        },
+        {
+          "direction": 12,
+          "base": 1810,
+          "end": 1815
+        },
+        {
+          "direction": 13,
+          "base": 1820,
+          "end": 1825
+        },
+        {
+          "direction": 14,
+          "base": 1830,
+          "end": 1835
+        },
+        {
+          "direction": 15,
+          "base": 1840,
+          "end": 1845
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2/Spell.ElementalShot",
+        "symbol": "ArcherElementalShotArrow"
+      }
+    },
+    {
+      "effect": "ArcherElementalShotCast",
+      "library": "Magic3",
+      "base": 1681,
+      "count": 5,
+      "interval": 160,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2/Spell.ElementalShot",
+        "symbol": "ArcherElementalShotCast"
+      }
+    },
+    {
+      "effect": "ArcherElementBlue",
+      "library": "Magic3",
+      "base": 1640,
+      "count": 10,
+      "interval": 100,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetElemental",
+        "symbol": "ArcherElementBlue"
+      }
+    },
+    {
+      "effect": "ArcherElementGreen",
+      "library": "Magic3",
+      "base": 1630,
+      "count": 10,
+      "interval": 100,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetElemental",
+        "symbol": "ArcherElementGreen"
+      }
+    },
+    {
+      "effect": "ArcherElementMixed",
+      "library": "Magic3",
+      "base": 1660,
+      "count": 10,
+      "interval": 100,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetElemental",
+        "symbol": "ArcherElementMixed"
+      }
+    },
+    {
+      "effect": "ArcherElementRed",
+      "library": "Magic3",
+      "base": 1650,
+      "count": 10,
+      "interval": 100,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::SetElemental",
+        "symbol": "ArcherElementRed"
+      }
+    },
+    {
+      "effect": "ArcherExplosiveTrapDetonation",
+      "library": "Magic3",
+      "base": 1570,
+      "count": 9,
+      "interval": 100,
+      "kind": "ground",
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.8,
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load/Spell.ExplosiveTrap/info.Param",
+        "symbol": "ArcherExplosiveTrapDetonation"
+      }
+    },
+    {
+      "effect": "ArcherFocusProc",
+      "kind": "attackOverlay",
+      "library": "Magic3",
+      "base": 2730,
+      "count": 10,
+      "interval": 80,
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 1,
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1",
+        "symbol": "ArcherFocusProc"
+      }
+    },
+    {
+      "effect": "ArcherNormalArrow",
+      "kind": "projectile",
+      "library": "Magic3",
+      "base": 1030,
+      "count": 5,
+      "interval": 30,
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 1,
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1030,
+          "end": 1034
+        },
+        {
+          "direction": 1,
+          "base": 1040,
+          "end": 1044
+        },
+        {
+          "direction": 2,
+          "base": 1050,
+          "end": 1054
+        },
+        {
+          "direction": 3,
+          "base": 1060,
+          "end": 1064
+        },
+        {
+          "direction": 4,
+          "base": 1070,
+          "end": 1074
+        },
+        {
+          "direction": 5,
+          "base": 1080,
+          "end": 1084
+        },
+        {
+          "direction": 6,
+          "base": 1090,
+          "end": 1094
+        },
+        {
+          "direction": 7,
+          "base": 1100,
+          "end": 1104
+        },
+        {
+          "direction": 8,
+          "base": 1110,
+          "end": 1114
+        },
+        {
+          "direction": 9,
+          "base": 1120,
+          "end": 1124
+        },
+        {
+          "direction": 10,
+          "base": 1130,
+          "end": 1134
+        },
+        {
+          "direction": 11,
+          "base": 1140,
+          "end": 1144
+        },
+        {
+          "direction": 12,
+          "base": 1150,
+          "end": 1154
+        },
+        {
+          "direction": 13,
+          "base": 1160,
+          "end": 1164
+        },
+        {
+          "direction": 14,
+          "base": 1170,
+          "end": 1174
+        },
+        {
+          "direction": 15,
+          "base": 1180,
+          "end": 1184
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1",
+        "symbol": "ArcherNormalArrow"
+      }
+    },
+    {
+      "effect": "ArcherSnakeTotemAura",
+      "library": "Monster/361",
+      "base": 2,
+      "count": 10,
+      "interval": 150,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/MonsterObject.cs::MirAction.Standing/Monster.SnakeTotem",
+        "symbol": "ArcherSnakeTotemAura"
+      }
+    },
+    {
+      "effect": "ArcherTrapRockImpact",
+      "library": "Monster/130",
+      "base": 26,
+      "count": 10,
+      "interval": 60,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/MonsterObject.cs::ProcessFrames/Monster.TrapRock",
+        "symbol": "ArcherTrapRockImpact"
+      }
+    },
+    {
+      "effect": "ArcherVampireReturn",
+      "library": "Magic3",
+      "base": 2100,
+      "count": 8,
+      "interval": 125,
+      "kind": "return",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange2/Complete",
+        "symbol": "ArcherVampireReturn"
+      }
+    },
+    {
+      "effect": "ArcherVampireSpiderDeath",
+      "library": "Monster/359",
+      "base": 296,
+      "count": 5,
+      "interval": 200,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/MonsterObject.cs::MirAction.Die/Monster.VampireSpider",
+        "symbol": "ArcherVampireSpiderDeath"
+      }
+    },
+    {
+      "effect": "AssassinDarkBodyDisappear",
+      "library": "Magic2",
+      "base": 2600,
+      "count": 10,
+      "interval": 120,
+      "kind": "ground",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectDied/Type=2",
+        "symbol": "AssassinDarkBodyDisappear"
+      }
+    },
+    {
+      "effect": "AssassinDoubleSlashAttack1",
+      "library": "Magic2",
+      "base": 1960,
+      "count": 6,
+      "interval": 46,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1960,
+          "end": 1965
+        },
+        {
+          "direction": 1,
+          "base": 1970,
+          "end": 1975
+        },
+        {
+          "direction": 2,
+          "base": 1980,
+          "end": 1985
+        },
+        {
+          "direction": 3,
+          "base": 1990,
+          "end": 1995
+        },
+        {
+          "direction": 4,
+          "base": 2000,
+          "end": 2005
+        },
+        {
+          "direction": 5,
+          "base": 2010,
+          "end": 2015
+        },
+        {
+          "direction": 6,
+          "base": 2020,
+          "end": 2025
+        },
+        {
+          "direction": 7,
+          "base": 2030,
+          "end": 2035
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "AssassinDoubleSlashAttack1"
+      }
+    },
+    {
+      "effect": "AssassinDoubleSlashAttack4",
+      "library": "Magic2",
+      "base": 2050,
+      "count": 6,
+      "interval": 46,
+      "kind": "attackOverlay",
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2050,
+          "end": 2055
+        },
+        {
+          "direction": 1,
+          "base": 2060,
+          "end": 2065
+        },
+        {
+          "direction": 2,
+          "base": 2070,
+          "end": 2075
+        },
+        {
+          "direction": 3,
+          "base": 2080,
+          "end": 2085
+        },
+        {
+          "direction": 4,
+          "base": 2090,
+          "end": 2095
+        },
+        {
+          "direction": 5,
+          "base": 2100,
+          "end": 2105
+        },
+        {
+          "direction": 6,
+          "base": 2110,
+          "end": 2115
+        },
+        {
+          "direction": 7,
+          "base": 2120,
+          "end": 2125
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack4",
+        "symbol": "AssassinDoubleSlashAttack4"
+      }
+    },
+    {
+      "effect": "HemorrhageLayer2",
+      "library": "Magic3",
+      "base": 28,
+      "count": 6,
+      "interval": 100,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/SpellEffect.Hemorrhage",
+        "symbol": "HemorrhageLayer2"
+      }
+    },
+    {
+      "effect": "HemorrhageLayer3",
+      "library": "Magic3",
+      "base": 46,
+      "count": 8,
+      "interval": 100,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/SpellEffect.Hemorrhage",
+        "symbol": "HemorrhageLayer3"
+      }
+    },
     {
       "effect": "ImmortalSkinSecondary",
       "kind": "target",
@@ -3633,6 +6619,25 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/MonsterObject.cs::LeftGuard/AttackRange1/FrameIndex4/CreateProjectile",
         "symbol": "LeftGuardRangeProjectile"
+      }
+    },
+    {
+      "effect": "MPEaterSecondary",
+      "library": "Magic2",
+      "base": 2411,
+      "count": 19,
+      "interval": 100,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/SpellEffect.MPEater",
+        "symbol": "MPEaterSecondary"
       }
     },
     {
@@ -4184,6 +7189,26 @@
       "provenance": {
         "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect",
         "symbol": "SpellEffect.Healing"
+      }
+    },
+    {
+      "effect": "Hemorrhage",
+      "effectId": 17,
+      "library": "Magic3",
+      "base": 0,
+      "count": 4,
+      "interval": 100,
+      "kind": "target",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect",
+        "symbol": "SpellEffect.Hemorrhage"
       }
     },
     {

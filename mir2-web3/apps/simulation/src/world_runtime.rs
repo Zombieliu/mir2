@@ -859,6 +859,10 @@ impl InProcessWorldRuntime {
         self.session.zone_player_combat_stats()
     }
 
+    pub fn commit_zone_focus_attack(&mut self) -> Vec<ServerPacket> {
+        self.session.commit_zone_focus_attack()
+    }
+
     pub fn force_authoritative_player_transform(
         &mut self,
         position: Point,
@@ -918,6 +922,12 @@ impl InProcessWorldRuntime {
     pub fn apply_zone_player_magic_spend(&mut self, spell: Spell, mp_cost: i32, cooldown_ms: u64) {
         self.session
             .apply_zone_player_magic_spend(spell, mp_cost, cooldown_ms);
+    }
+
+    pub fn commit_zone_five_class_practice(
+        &mut self, receipt: &crate::ZoneFiveClassPracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        self.session.commit_zone_five_class_practice(receipt)
     }
 
     pub fn commit_zone_magic_practice(

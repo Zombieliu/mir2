@@ -8,12 +8,12 @@
     "th",
     "ar"
   ],
-  "entriesPerLocale": 9385,
+  "entriesPerLocale": 9412,
   "sourceSha256": {
-    "common.json": "cf8fa0dfa4fd81797316a83c35646873bf0ae3cf5db1641af826b1841cb8e171",
+    "common.json": "fb5488ecf461cb732c1a606c28e9b8b0d503cff2b3dc02e8ec0c82fcb8afa8d1",
     "content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
-    "shell.json": "a2d9ca9278b6fb8b69960ab06ec985fc7b125e4b14256f3d12325fdf0a2143aa",
-    "quest.json": "f7d53600e97f31b8305198bdd07bf24752b142a5ed392dead9859cd39a97fa34",
+    "shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
+    "quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
     "game.json": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557",
     "help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
     "npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
@@ -2610,15 +2610,37 @@
     "ar": "1f5d24641f7597da1616caf8b632119abfd5d93c2e127ec2bf4ebb863966f66f"
   },
   "outputSha256": {
-    "ru": "601e7ed35b8f155732d50f5254454392a37abdae3cb1c0659783f34dbd224984",
-    "hi": "ae02158e4f2f5231385a53cc4a5320d04614c4a2b70ee52b92cb190f129904cb",
-    "id": "25bfb3a0f23e11e3c6e548affc83494634d6ad4f44808a40408e91037a60fac1",
-    "vi": "b0a5b25f5b47e5bdd008433f2693d418f49562b13cd0174255db63c6dfc71054",
-    "th": "033fc1e2f26e67b1f0160eb33074f8d4bcb53a7d6fceee23f61ca25beadcb68b",
-    "ar": "3bbac613cdf002267ec1bf2715c8a1f97e7574901ada29c4c80fa0150a76b482"
+    "ru": "5af1dd4377887789a7ef2855398bd87513b06d127c1e2c23599776fcd1aa826e",
+    "hi": "5c5e761247c5a96737eefb3728defbaa0b25e1e1451a004fe8fe3bc0983e1f53",
+    "id": "bb01e80a99d574800b9c0c55b95054ccd496b3a736b41057d7d227d8ba03e717",
+    "vi": "cdc1ec0657e0575f4d8aaebf917caa674d5cb9bb2f9adb879ee808aa37629ca5",
+    "th": "1120e924d271cdb13c4006a6b5c877984b627270f2f93245b2c1fb61e7cc4b99",
+    "ar": "d5f6e32b32bcef6bbaf5a4cecdadd5bdeb792b609c1cc967bb3266fa459b47b2"
   },
   "review": "Keyed overrides were authored/reviewed by the development team. Remaining prose uses offline translation drafts and requires native-speaker acceptance; no full linguistic acceptance is claimed.",
   "textHashNormalization": "UTF-8, CRLF normalized to LF for source and reviewed JSON",
   "identicalNeedsReview": [],
-  "nameDraftSha256": "87f0be6598da217f3dfa1c09cdacf89234ab0fad5ac881b3f220938f65b6a994"
+  "nameDraftSha256": "87f0be6598da217f3dfa1c09cdacf89234ab0fad5ac881b3f220938f65b6a994",
+  "extensions": [
+    {
+      "scope": "published baseline catalogue reconciliation",
+      "existingAdditionalEntries": 19,
+      "note": "Existing source/overlay values retained from HEAD; old 9385 counter was stale, actual baseline had 9404 keys."
+    },
+    {
+      "scope": "five-class creation and actionable practice guides",
+      "newEntries": 6,
+      "authoring": "keyed translations in all nine locales; placeholder and exact legacy-value comparison checked; native-speaker acceptance still pending"
+    },
+    {
+      "scope": "five-class supplies: carried stock versus equipped PoisonSword material",
+      "newEntries": 2,
+      "keys": [
+        "quest.supply.assassinPoisonEquip",
+        "quest.supply.assassinPoisonEquipped"
+      ],
+      "source": "Crystal HumanObject.PoisonSword/GetPoison(1), equipment Amulet shapes 1/2; existing Source skill names retained",
+      "authoring": "keyed translations in all nine locales; original translations unchanged; native-speaker and native layout acceptance pending"
+    }
+  ]
 }

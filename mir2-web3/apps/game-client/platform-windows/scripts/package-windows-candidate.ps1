@@ -5,6 +5,7 @@ param(
     [string]$ReleaseExe = '',
     [string]$BuildAttestation = '',
     [string]$CandidateVersion = '',
+    [ValidateSet('platinum_176', 'platinum_fiveclass')][string]$ContentProfile = 'platinum_176',
     [string]$SourceRevision = '',
     [string]$SignerThumbprint = '',
     [switch]$PublicRelease,
@@ -32,10 +33,15 @@ if (-not (Test-Path -LiteralPath $PlayerSpriteClosureScript -PathType Leaf)) { t
 $ReleaseProfileScript = Join-Path (Split-Path -Parent $PSCommandPath) 'candidate-release-profile.ps1'
 if (-not (Test-Path -LiteralPath $ReleaseProfileScript -PathType Leaf)) { throw 'Candidate release profile validator missing' }
 . $ReleaseProfileScript
+if ($ContentProfile -ceq 'platinum_fiveclass') {
+    $script:CandidateContentProfilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../../packages/game-data/data/content_profiles/platinum_fiveclass.json'))
+}
+. (Join-Path $PSScriptRoot 'five-class-asset-closure.ps1')
 $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guild-asset-closure.ps1'
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
 . $PetGuildClosureScript
 $PlayerSpriteFamilyNames = @('CArmour','CHair','CWeapon','ARArmour','ARHair','ARWeapon','AArmour','AHair','AWeapon','Mount')
+$FiveClassPackageSoundPolicy = $null
 
 function Write-Utf8NoBom {
     param([Parameter(Mandatory = $true)][string]$Path, [Parameter(Mandatory = $true)][string]$Text)
@@ -580,6 +586,107 @@ function Test-FileIdentity {
         (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant() -ceq $ExpectedSha256
 }
 
+function Get-FiveClassPackageSoundPolicy {
+    param([Parameter(Mandatory = $true)][string]$RequirementsPath,
+          [Parameter(Mandatory = $true)][string]$ProfilePath)
+    $requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
+    $profile = Get-Content -LiteralPath $ProfilePath -Raw | ConvertFrom-Json
+    if ($requirements.schemaVersion -ne 1 -or $requirements.kind -cne 'mir2-five-class-skill-closure' -or
+        $requirements.profileId -cne 'platinum_fiveclass' -or $profile.profileId -cne 'platinum_fiveclass' -or
+        $requirements.profileSha256 -cne (Get-FileHash -LiteralPath $ProfilePath -Algorithm SHA256).Hash.ToLowerInvariant()) {
+        throw 'Five-class sound policy requires the exact audited skill/profile requirements'
+    }
+    $available = [Collections.Generic.List[object]]::new()
+    $absent = [Collections.Generic.List[object]]::new()
+    $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $ids = [Collections.Generic.HashSet[int]]::new()
+    foreach ($sound in @($requirements.sounds)) {
+        if ($sound.fileName -isnot [string] -or $sound.fileName -cnotmatch '\A[A-Za-z0-9_-]+\.wav\z' -or
+            $sound.id -le 0 -or $sound.expectedSourceAbsent -isnot [bool] -or
+            -not $names.Add($sound.fileName) -or -not $ids.Add([int]$sound.id) -or
+            $sound.sourcePath -cne ('Sound/' + $sound.fileName)) {
+            throw 'Five-class sound requirements contain an invalid or duplicate source identity'
+        }
+        if ($sound.expectedSourceAbsent) {
+            if ($null -ne $sound.path -or $null -ne $sound.sha256 -or $sound.bytes -ne 0) {
+                throw "Absent Source sound must not acquire a replacement: $($sound.fileName)"
+            }
+            $absent.Add($sound)
+        } else {
+            if ($sound.path -cne ('/original-ui/Sound/' + $sound.fileName) -or $sound.bytes -le 0 -or
+                $sound.sha256 -isnot [string] -or $sound.sha256 -cnotmatch '\A[a-f0-9]{64}\z') {
+                throw "Five-class sound is missing its exact source bytes/hash: $($sound.fileName)"
+            }
+            $available.Add($sound)
+        }
+    }
+    if ($available.Count -ne 51 -or $absent.Count -ne 6) { throw 'Five-class sound denominator changed; re-audit its Source closure' }
+    return [pscustomobject]@{
+        profileId = 'platinum_fiveclass'; available = $available.ToArray(); absent = $absent.ToArray()
+        soundIndexRelativePath = 'original-ui/sound-index.generated.json'
+        soundIndexPackagePath = 'mir2-assets/original-ui/sound-index.generated.json'
+        packagePaths = @($available | ForEach-Object { 'mir2-assets' + $_.path })
+    }
+}
+
+function Assert-FiveClassPackageSoundAssets {
+    param([Parameter(Mandatory = $true)][string]$AssetRoot,
+          [Parameter(Mandatory = $true)][object]$Policy)
+    foreach ($sound in $Policy.available) {
+        $soundPath = Join-Path $AssetRoot $sound.path.TrimStart('/')
+        Assert-NoReparseTree -Path $soundPath
+        Assert-NoAlternateDataStreams -Path $soundPath
+        if (-not (Test-FileIdentity -Path $soundPath -ExpectedSize ([int64]$sound.bytes) -ExpectedSha256 $sound.sha256.ToUpperInvariant())) {
+            throw "Five-class WAV source identity mismatch: $($sound.fileName)"
+        }
+    }
+    foreach ($sound in $Policy.absent) {
+        if (Test-Path -LiteralPath (Join-Path $AssetRoot ('original-ui/Sound/' + $sound.fileName))) {
+            throw "Five-class package contains an unverified absent-Source sound: $($sound.fileName)"
+        }
+    }
+    $indexPath = Join-Path $AssetRoot $Policy.soundIndexRelativePath
+    Assert-NoReparseTree -Path $indexPath
+    Assert-NoAlternateDataStreams -Path $indexPath
+    $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+    foreach ($sound in @($Policy.available) + @($Policy.absent)) {
+        $property = $index.sounds.PSObject.Properties[[string]$sound.id]
+        if ($null -eq $property) { throw "Five-class sound index omits Source ID $($sound.id)" }
+        $entry = $property.Value
+        $exists = -not $sound.expectedSourceAbsent
+        if ($entry.fileName -cne $sound.fileName -or $entry.path -cne $sound.path -or
+            $entry.fallback -isnot [bool] -or $entry.sourceExists -isnot [bool] -or $entry.exactSourceExists -isnot [bool] -or
+            $entry.fallback -ne $false -or $entry.sourceExists -ne $exists -or
+            $entry.exactSourceExists -ne $exists -or $entry.sourceBytes -ne $sound.bytes) {
+            throw "Five-class sound index has an invalid Source contract: $($sound.fileName)"
+        }
+    }
+    return [pscustomobject]@{
+        bytes = [int64](Get-Item -LiteralPath $indexPath).Length
+        sha256 = (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash
+    }
+}
+
+function Copy-FiveClassPackageSoundAssets {
+    param([Parameter(Mandatory = $true)][string]$SourceAssetRoot,
+          [Parameter(Mandatory = $true)][string]$DestinationAssetRoot,
+          [Parameter(Mandatory = $true)][object]$Policy,
+          [Parameter(Mandatory = $true)][object]$SourceIndexIdentity)
+    # Copy only the audited existing Source WAVs. Absent sources remain absent.
+    foreach ($sound in $Policy.available) {
+        $relative = $sound.path.TrimStart('/')
+        Copy-CandidateAssetFile -Source (Join-Path $SourceAssetRoot $relative) -Destination (Join-Path $DestinationAssetRoot $relative)
+    }
+    $sourceIndex = Join-Path $SourceAssetRoot $Policy.soundIndexRelativePath
+    $destinationIndex = Join-Path $DestinationAssetRoot $Policy.soundIndexRelativePath
+    Copy-CandidateAssetFile -Source $sourceIndex -Destination $destinationIndex
+    $stagedIdentity = Assert-FiveClassPackageSoundAssets -AssetRoot $DestinationAssetRoot -Policy $Policy
+    if (-not (Test-FileIdentity -Path $sourceIndex -ExpectedSize $SourceIndexIdentity.bytes -ExpectedSha256 $SourceIndexIdentity.sha256) -or
+        $stagedIdentity.bytes -ne $SourceIndexIdentity.bytes -or $stagedIdentity.sha256 -cne $SourceIndexIdentity.sha256) {
+        throw 'Five-class sound index changed between source validation and staging'
+    }
+}
+
 function Test-PathContainsDangerousDotToken {
     param([string]$RelativePath)
     $dangerous = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -601,6 +708,9 @@ function Test-PackageRelativeFileAllowed {
     $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'NotoSansTC-OFL.txt', 'OFL-NotoSans.txt', 'OFL-NotoSansArabic.txt', 'OFL-NotoSansDevanagari.txt', 'OFL-NotoSansThai.txt', 'MULTILINGUAL-SOURCES.json', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
     if ($rootFiles -ccontains $RelativePath) { return $true }
     if ($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json') { return $true }
+    if ($null -ne $FiveClassPackageSoundPolicy -and
+        ($RelativePath -ceq $FiveClassPackageSoundPolicy.soundIndexPackagePath -or
+         $FiveClassPackageSoundPolicy.packagePaths -ccontains $RelativePath)) { return $true }
     if ($RelativePath.StartsWith('mir2-assets/original-ui/Items/', [StringComparison]::Ordinal)) {
         return $RelativePath.EndsWith('.json', [StringComparison]::OrdinalIgnoreCase) -or $RelativePath.EndsWith('.png', [StringComparison]::OrdinalIgnoreCase)
     }
@@ -762,6 +872,9 @@ Assert-CandidateClientConfiguration -Text $candidateToml | Out-Null
 $ScriptDir = Split-Path -Parent $PSCommandPath
 $RepoRoot = Find-RepoRoot -StartPath $ScriptDir
 $PublicRoot = Join-Path $RepoRoot 'apps\web\public'
+if ($ContentProfile -ceq 'platinum_fiveclass') {
+    $FiveClassPackageSoundPolicy = Get-FiveClassPackageSoundPolicy -RequirementsPath (Join-Path $RepoRoot 'apps/web/scripts/asset-pipeline/five-class-skill-requirements.json') -ProfilePath $script:CandidateContentProfilePath
+}
 if ([string]::IsNullOrWhiteSpace($FullCrystalPackRoot)) { $FullCrystalPackRoot = Join-Path $PublicRoot 'generated\crystal-packs\full' }
 $FullCrystalPackRoot = Resolve-FullPath -Path $FullCrystalPackRoot
 Assert-NoReparseTree -Path $FullCrystalPackRoot
@@ -917,6 +1030,10 @@ $candidateSoundIdentities = @(
     [pscustomobject]@{ name='M79-1.wav'; size=[int64]484496; sha256='9098F96106FB880720711FB829B9CCDFEB8DB1883132BC680629FCD0360EA83D' }
 )
 foreach ($identity in $candidateSoundIdentities) { $soundPath = Join-Path $PublicRoot ('original-ui\Sound\' + $identity.name); if (-not (Test-FileIdentity -Path $soundPath -ExpectedSize $identity.size -ExpectedSha256 $identity.sha256)) { throw "$($identity.name) source identity mismatch" } }
+$fiveClassSourceSoundIndexIdentity = $null
+if ($null -ne $FiveClassPackageSoundPolicy) {
+    $fiveClassSourceSoundIndexIdentity = Assert-FiveClassPackageSoundAssets -AssetRoot $PublicRoot -Policy $FiveClassPackageSoundPolicy
+}
 $requiredSourceTrees = @((Join-Path $PublicRoot 'bevy-entity-atlases'), (Join-Path $PublicRoot 'generated\map-atlas'), $nativeKeyedMapRoot, $MapPackRoot, (Join-Path $PublicRoot 'original-effects'), (Join-Path $PublicRoot 'original-ui\ChrSel'), (Join-Path $PublicRoot 'original-ui\Cursors'), (Join-Path $PublicRoot 'original-ui\Help'), (Join-Path $PublicRoot 'original-ui\DNItems'), (Join-Path $PublicRoot 'original-ui\Items'), (Join-Path $PublicRoot 'original-ui\MMap'), (Join-Path $PublicRoot 'original-ui\Prguse'), (Join-Path $PublicRoot 'original-ui\Prguse2'), (Join-Path $PublicRoot 'original-ui\StateItem'), (Join-Path $PublicRoot 'original-ui\UI_32bit'), (Join-Path $PublicRoot 'original-ui\Title'), (Join-Path $PublicRoot 'original-ui\Monster'), (Join-Path $PublicRoot 'original-ui\NPC'), (Join-Path $PublicRoot 'original-ui\Gate'), (Join-Path $PublicRoot 'original-ui\MapLinkIcon'))
 foreach ($familyName in $PlayerSpriteFamilyNames) { $requiredSourceTrees += (Join-Path $PublicRoot "original-ui\$familyName") }
 foreach ($sourceTree in $requiredSourceTrees) { if (-not (Test-Path -LiteralPath $sourceTree -PathType Container)) { throw "required source tree missing: $sourceTree" }; Assert-NoReparseTree -Path $sourceTree; Assert-NoAlternateDataStreams -Path $sourceTree }
@@ -928,6 +1045,9 @@ foreach ($soundName in @('Login2.wav','Select2.wav','103.wav','M8-1.wav','M31-0.
  $entityAtlasClosure = Assert-EntityAtlasClosure -ManifestPath (Join-Path $PublicRoot 'bevy-entity-atlases\manifest.json') -AssetRoot $PublicRoot
  Write-Host "entityAtlasClosure=atlases:$($entityAtlasClosure.atlasCount),pages:$($entityAtlasClosure.pageCount)"
  $playerSpriteClosure = Assert-PlayerSpriteClosure -OriginalUiRoot (Join-Path $PublicRoot 'original-ui') -FamilyNames $PlayerSpriteFamilyNames
+ if ($ContentProfile -ceq 'platinum_fiveclass') {
+     Assert-FiveClassAssetClosure -ProjectRoot ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))) -AssetRoot $PublicRoot -ProfilePath $script:CandidateContentProfilePath
+ }
  Write-Host "playerSpriteClosure=families:$($playerSpriteClosure.familyCount),libraries:$($playerSpriteClosure.libraryCount),frames:$($playerSpriteClosure.frameCount)"
  $itemIconClosure = Assert-ItemIconClosure -OriginalUiRoot (Join-Path $PublicRoot 'original-ui')
  Write-Host "itemIconClosure=files:$($itemIconClosure.fileCount),png:$($itemIconClosure.pngCount)"
@@ -1008,6 +1128,9 @@ try {
     $soundDest = Join-Path $assetDest 'original-ui\Sound'; New-Item -ItemType Directory -Path $soundDest | Out-Null
     foreach ($sound in @('Login2.wav', 'Select2.wav', '103.wav', 'M8-1.wav', 'M31-0.wav', 'M31-1.wav', 'M31-2.wav', 'M34-0.wav', 'M34-1.wav', 'M34-2.wav', 'M39-0.wav', 'M39-1.wav', 'M40-0.wav', 'M61-0.wav', 'M61-1.wav', 'M64-0.wav', 'M64-1.wav', 'M64-2.wav', 'M79-1.wav') + $PetSoundNames + $playerCombatSoundNames + $monsterCombatSoundNames + $frostCrunchSoundNames + $hallucinationSoundNames + $blessedArmourSoundNames + $miningSoundNames) { Copy-FileDefaultDataOnly -Source (Join-Path $PublicRoot ('original-ui\Sound\' + $sound)) -Destination (Join-Path $soundDest $sound) }
     foreach ($sound in @('100.wav', '104.wav', '105.wav')) { Copy-FileDefaultDataOnly -Source (Join-Path $PublicRoot ('original-ui\Sound\' + $sound)) -Destination (Join-Path $soundDest $sound) }
+    if ($null -ne $FiveClassPackageSoundPolicy) {
+        Copy-FiveClassPackageSoundAssets -SourceAssetRoot $PublicRoot -DestinationAssetRoot $assetDest -Policy $FiveClassPackageSoundPolicy -SourceIndexIdentity $fiveClassSourceSoundIndexIdentity
+    }
     Assert-NoReparseTree -Path $soundSource
     Assert-NoReparseTree -Path $soundDest
     Assert-NoReparseTree -Path $releaseExeFull
@@ -1045,6 +1168,9 @@ try {
     Assert-NoReparseTree -Path $staging
     Assert-NoAlternateDataStreams -Path $staging
     $stagedPlayerSpriteClosure = Assert-PlayerSpriteClosure -OriginalUiRoot (Join-Path $assetDest 'original-ui') -FamilyNames $PlayerSpriteFamilyNames
+    if ($ContentProfile -ceq 'platinum_fiveclass') {
+        Assert-FiveClassAssetClosure -ProjectRoot ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))) -AssetRoot $assetDest -ProfilePath $script:CandidateContentProfilePath
+    }
     Write-Host "stagedPlayerSpriteClosure=families:$($stagedPlayerSpriteClosure.familyCount),libraries:$($stagedPlayerSpriteClosure.libraryCount),frames:$($stagedPlayerSpriteClosure.frameCount)"
     $stagedItemIconClosure = Assert-ItemIconClosure -OriginalUiRoot (Join-Path $assetDest 'original-ui')
     Write-Host "stagedItemIconClosure=files:$($stagedItemIconClosure.fileCount),png:$($stagedItemIconClosure.pngCount)"
@@ -1069,7 +1195,7 @@ try {
     Assert-NoAlternateDataStreams -Path $staging
     Assert-PackageAllowlist -Root $staging -ExeName $ExeName
 
-    $verifyArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $ScriptDir 'verify-windows-candidate.ps1'), '-PackageRoot', $staging, '-TrustedSignerThumbprint', (Normalize-Thumbprint -Thumbprint $SignerThumbprint))
+    $verifyArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $ScriptDir 'verify-windows-candidate.ps1'), '-PackageRoot', $staging, '-ContentProfile', $ContentProfile, '-TrustedSignerThumbprint', (Normalize-Thumbprint -Thumbprint $SignerThumbprint))
     if ($AllowDirtyWorktree) { $verifyArgs += '-AllowDirtyWorktree' }
     & powershell @verifyArgs
     if ($LASTEXITCODE -ne 0) { throw "nonvisual staged-package verification failed: exit $LASTEXITCODE" }

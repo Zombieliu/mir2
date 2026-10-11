@@ -103,6 +103,58 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     // Original SoundList.lst 20710: BlessedArmour launch.
     "M69-0.wav",
     "M79-1.wav",
+    // Verified original five-class source sound closure (no absent source files).
+    "130-6.wav",
+    "M100-0.wav",
+    "M102-0.wav",
+    "M103-0.wav",
+    "M103-1.wav",
+    "M104-0.wav",
+    "M105-0.wav",
+    "M105-1.wav",
+    "M105-2.wav",
+    "M121-0.wav",
+    "M121-2.wav",
+    "M121-5.wav",
+    "M122-0.wav",
+    "M122-2.wav",
+    "M124-0.wav",
+    "M124-5.wav",
+    "M125-0.wav",
+    "M125-5.wav",
+    "M126-5.wav",
+    "M126-6.wav",
+    "M126-7.wav",
+    "M126-8.wav",
+    "M127-5.wav",
+    "M127-6.wav",
+    "M127-7.wav",
+    "M128-0.wav",
+    "M128-2.wav",
+    "M129-0.wav",
+    "M130-5.wav",
+    "M130-6.wav",
+    "M130-7.wav",
+    "M131-0.wav",
+    "M131-5.wav",
+    "M132-7.wav",
+    "M133-2.wav",
+    "M135-2.wav",
+    "M136-0.wav",
+    "M136-5.wav",
+    "M136-6.wav",
+    "M136-7.wav",
+    "M45-2.wav",
+    "M91-0.wav",
+    "M92-0.wav",
+    "M92-1.wav",
+    "M93-0.wav",
+    "M95-0.wav",
+    "M96-0.wav",
+    "M97-0.wav",
+    "M98-0.wav",
+    "M98-1.wav",
+    "M99-0.wav",
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -168,17 +220,48 @@ pub struct NativeGameplayAudioQueue {
     generation: Option<u64>,
     last_sequence_by_cue: HashMap<String, u64>,
     events: VecDeque<NativeGameplaySoundEvent>,
+    loops: VecDeque<NativeGameplayLoopEvent>,
+    last_loop_sequence_by_cue: HashMap<String, u64>,
+    reset_loops: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct NativeGameplayLoopEvent {
+    cue: String,
+    file_name: Option<String>,
+}
+
+#[derive(Component)]
+pub struct NativeGameplayLoopTrack {
+    cue: String,
+}
+
+#[derive(Component)]
+pub struct NativeElementalSoundTrack;
+
+fn is_elemental_source_file(file: &str) -> bool {
+    matches!(
+        file,
+        "M126-5.wav" | "M126-6.wav" | "M126-7.wav" | "M126-8.wav"
+    )
 }
 
 impl NativeGameplayAudioQueue {
     pub fn push(&mut self, event: NativeGameplaySoundEvent) -> bool {
-        if !NATIVE_GAMEPLAY_SOUND_FILES.contains(&event.file_name.as_str()) {
+        if self
+            .generation
+            .is_some_and(|generation| event.generation < generation)
+            || !NATIVE_GAMEPLAY_SOUND_FILES.contains(&event.file_name.as_str())
+        {
             return false;
         }
         if self.generation != Some(event.generation) {
             self.generation = Some(event.generation);
             self.last_sequence_by_cue.clear();
             self.events.clear();
+            self.loops.clear();
+            self.last_loop_sequence_by_cue.clear();
+            self.reset_loops = true;
         }
         if self
             .last_sequence_by_cue
@@ -196,6 +279,70 @@ impl NativeGameplayAudioQueue {
         true
     }
 
+    /// Typed effects own loop lifetimes. Network text never supplies asset paths.
+    /// A newer generation revokes every old loop before admitting the new state.
+    pub fn set_loop(
+        &mut self,
+        generation: u64,
+        sequence: u64,
+        cue: &str,
+        file_name: Option<&str>,
+    ) -> bool {
+        if self.generation.is_some_and(|current| generation < current)
+            || cue.is_empty()
+            || cue.len() > 96
+            || (sequence == 0 && file_name.is_some())
+            || file_name.is_some_and(|file| !NATIVE_GAMEPLAY_SOUND_FILES.contains(&file))
+        {
+            return false;
+        }
+        if self.generation != Some(generation) {
+            self.generation = Some(generation);
+            self.events.clear();
+            self.last_sequence_by_cue.clear();
+            self.loops.clear();
+            self.last_loop_sequence_by_cue.clear();
+            self.reset_loops = true;
+        }
+        // A new connection reset may precede its first packet (sequence=0).
+        // It revokes old loops without consuming the real sequence=1 state.
+        if sequence == 0 {
+            return self.reset_loops && self.last_loop_sequence_by_cue.is_empty();
+        }
+        if self
+            .last_loop_sequence_by_cue
+            .get(cue)
+            .is_some_and(|old| sequence <= *old)
+        {
+            return false;
+        }
+        if cue == "Elemental.orbs" {
+            self.events.retain(|event| {
+                !is_elemental_source_file(&event.file_name)
+                    || event.generation > generation
+                    || (event.generation == generation && event.sequence >= sequence)
+            });
+        }
+        // Bound cue metadata as well as pending commands; a remote stream must
+        // not grow the dedupe map indefinitely with distinct object names.
+        if !self.last_loop_sequence_by_cue.contains_key(cue)
+            && self.last_loop_sequence_by_cue.len() >= 32
+        {
+            return false;
+        }
+        self.last_loop_sequence_by_cue
+            .insert(cue.to_owned(), sequence);
+        self.loops.retain(|event| event.cue != cue);
+        if self.loops.len() >= MAX_PENDING_GAMEPLAY_SOUND_EVENTS {
+            self.loops.pop_front();
+        }
+        self.loops.push_back(NativeGameplayLoopEvent {
+            cue: cue.to_owned(),
+            file_name: file_name.map(str::to_owned),
+        });
+        true
+    }
+
     fn drain_bounded(&mut self, max: usize) -> Vec<NativeGameplaySoundEvent> {
         let count = max.min(self.events.len());
         self.events.drain(..count).collect()
@@ -203,6 +350,8 @@ impl NativeGameplayAudioQueue {
 
     fn clear_pending(&mut self) {
         self.events.clear();
+        self.loops.clear();
+        self.reset_loops = true;
     }
 
     #[cfg(test)]
@@ -386,26 +535,92 @@ pub fn sync_native_gameplay_audio(
     runtime: Res<NativeAudioRuntime>,
     mut queue: ResMut<NativeGameplayAudioQueue>,
     sound_entities: Query<Entity, bevy::ecs::query::With<NativeGameplaySoundEffectTrack>>,
+    loop_entities: Query<(Entity, &NativeGameplayLoopTrack)>,
+    elemental_entities: Query<Entity, bevy::ecs::query::With<NativeElementalSoundTrack>>,
 ) {
     if !options.audio.sound_enabled || options.audio.sound_volume == 0 {
         queue.clear_pending();
         for entity in sound_entities.iter() {
             commands.entity(entity).despawn();
         }
+        for (entity, _) in loop_entities.iter() {
+            commands.entity(entity).despawn();
+        }
         return;
+    }
+
+    let reset = std::mem::take(&mut queue.reset_loops);
+    if reset {
+        for (entity, _) in loop_entities.iter() {
+            commands.entity(entity).despawn();
+        }
+    }
+    let loops = std::mem::take(&mut queue.loops);
+    let stop_elements = reset || loops.iter().any(|event| event.cue == "Elemental.orbs");
+    if stop_elements {
+        // ElementsEffect.StopSounds stops every original orb sound, including
+        // a prior one-shot. Other spells and UI audio keep their own channels.
+        for entity in elemental_entities.iter() {
+            commands.entity(entity).despawn();
+        }
+    }
+    let mut loop_count = if reset {
+        0
+    } else {
+        loop_entities.iter().count()
+    };
+    for event in loops {
+        if !reset {
+            for (entity, track) in loop_entities
+                .iter()
+                .filter(|(_, track)| track.cue == event.cue)
+            {
+                let _ = track;
+                commands.entity(entity).despawn();
+                loop_count = loop_count.saturating_sub(1);
+            }
+        }
+        if let Some(source) = event
+            .file_name
+            .as_ref()
+            .and_then(|file| runtime.gameplay_sources.get(file))
+            .cloned()
+        {
+            if loop_count < MAX_PENDING_SOUND_ENTITIES {
+                commands.spawn((
+                    NativeGameplayLoopTrack { cue: event.cue },
+                    AudioPlayer::new(source),
+                    PlaybackSettings::LOOP.with_volume(sound_volume(options.audio.sound_volume)),
+                ));
+                loop_count += 1;
+            }
+        }
     }
 
     let trigger_sources = queue
         .drain_bounded(MAX_PENDING_SOUND_ENTITIES)
         .into_iter()
-        .filter_map(|event| runtime.gameplay_sources.get(&event.file_name).cloned())
+        .filter_map(|event| {
+            runtime
+                .gameplay_sources
+                .get(&event.file_name)
+                .cloned()
+                .map(|source| (source, is_elemental_source_file(&event.file_name)))
+        })
         .collect::<Vec<_>>();
     let trigger_count = trigger_sources.len();
-    for entity in sound_entities.iter().take(trigger_count) {
+    for entity in sound_entities
+        .iter()
+        .filter(|entity| !stop_elements || !elemental_entities.contains(*entity))
+        .take(trigger_count)
+    {
         commands.entity(entity).despawn();
     }
-    for source in trigger_sources {
-        spawn_gameplay_sound_effect(&mut commands, source, options.audio.sound_volume);
+    for (source, elemental) in trigger_sources {
+        let entity = spawn_gameplay_sound_effect(&mut commands, source, options.audio.sound_volume);
+        if elemental {
+            commands.entity(entity).insert(NativeElementalSoundTrack);
+        }
     }
 }
 
@@ -502,13 +717,15 @@ fn spawn_gameplay_sound_effect(
     commands: &mut Commands,
     source: bevy::asset::Handle<AudioSource>,
     volume: u8,
-) {
-    commands.spawn((
-        NativeSoundEffectTrack,
-        NativeGameplaySoundEffectTrack,
-        AudioPlayer::new(source),
-        PlaybackSettings::DESPAWN.with_volume(sound_volume(volume)),
-    ));
+) -> Entity {
+    commands
+        .spawn((
+            NativeSoundEffectTrack,
+            NativeGameplaySoundEffectTrack,
+            AudioPlayer::new(source),
+            PlaybackSettings::DESPAWN.with_volume(sound_volume(volume)),
+        ))
+        .id()
 }
 
 fn spawn_ui_sound_effect(
@@ -1716,6 +1933,59 @@ mod tests {
         assert_eq!(count_sound_entities(&mut app), 0);
     }
 
+    #[test]
+    fn five_class_orb_stop_retires_only_the_original_orb_channel() {
+        let mut app = app();
+        {
+            let audio = &mut app.world_mut().resource_mut::<OptionsRuntime>().audio;
+            audio.sound_enabled = true;
+            audio.sound_volume = 50;
+        }
+        for file in ["M126-5.wav", "M40-0.wav"] {
+            app.world_mut()
+                .resource_mut::<NativeAudioRuntime>()
+                .gameplay_sources
+                .insert(file.into(), bevy::asset::Handle::<AudioSource>::default());
+        }
+        for (sequence, cue, file) in [
+            (1, "Elemental.arrive", "M126-5.wav"),
+            (2, "Lightning.complete", "M40-0.wav"),
+        ] {
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativeGameplayAudioQueue>()
+                .push(NativeGameplaySoundEvent {
+                    generation: 1,
+                    sequence,
+                    cue: cue.into(),
+                    file_name: file.into()
+                }));
+        }
+        app.update();
+        let old_orb = app
+            .world_mut()
+            .query_filtered::<Entity, bevy::ecs::query::With<NativeElementalSoundTrack>>()
+            .iter(app.world())
+            .next()
+            .unwrap();
+        let lightning = app
+            .world_mut()
+            .query_filtered::<Entity, (
+                bevy::ecs::query::With<NativeGameplaySoundEffectTrack>,
+                bevy::ecs::query::Without<NativeElementalSoundTrack>,
+            )>()
+            .iter(app.world())
+            .next()
+            .unwrap();
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .set_loop(1, 3, "Elemental.orbs", None));
+        app.update();
+        assert!(app.world().get_entity(old_orb).is_err());
+        assert!(app.world().get_entity(lightning).is_ok());
+    }
+
     fn count_music_entities(app: &mut App) -> usize {
         app.world_mut()
             .query::<&NativeMusicTrack>()
@@ -1728,5 +1998,74 @@ mod tests {
             .query::<&NativeSoundEffectTrack>()
             .iter(app.world())
             .count()
+    }
+}
+
+#[cfg(test)]
+mod five_class_loop_tests {
+    use super::*;
+    #[test]
+    fn connection_reset_does_not_consume_the_first_real_orb_sequence() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        assert!(queue.set_loop(1, 8, "Elemental.orbs", Some("M126-7.wav")));
+        assert!(queue.set_loop(2, 0, "Elemental.orbs", None));
+        assert!(queue.loops.is_empty());
+        assert!(queue.last_loop_sequence_by_cue.is_empty());
+        assert!(queue.set_loop(2, 1, "Elemental.orbs", Some("M126-8.wav")));
+        assert!(!queue.set_loop(2, 0, "Elemental.orbs", None));
+        assert!(!queue.set_loop(1, 9, "Elemental.orbs", None));
+        assert_eq!(queue.loops[0].file_name.as_deref(), Some("M126-8.wav"));
+    }
+
+    #[test]
+    fn same_packet_orb_replacement_keeps_new_arrival_and_rejects_old_generation() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        for (sequence, file) in [(1, "M126-5.wav"), (2, "M40-0.wav"), (3, "M126-6.wav")] {
+            assert!(queue.push(NativeGameplaySoundEvent {
+                generation: 1,
+                sequence,
+                cue: format!("arrival:{sequence}"),
+                file_name: file.into()
+            }));
+        }
+        assert!(queue.set_loop(1, 3, "Elemental.orbs", None));
+        assert_eq!(
+            queue
+                .events
+                .iter()
+                .map(|e| e.file_name.as_str())
+                .collect::<Vec<_>>(),
+            vec!["M40-0.wav", "M126-6.wav"]
+        );
+        assert!(queue.set_loop(2, 0, "Elemental.orbs", None));
+        assert!(queue.events.is_empty());
+        assert!(!queue.push(NativeGameplaySoundEvent {
+            generation: 1,
+            sequence: 4,
+            cue: "stale-orb".into(),
+            file_name: "M126-7.wav".into()
+        }));
+    }
+
+    #[test]
+    fn genuine_loop_controls_are_allowlisted_ordered_generation_fenced_and_bounded() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        assert!(!queue.set_loop(1, 1, "orbs:1", Some("../secret.wav")));
+        assert!(!queue.set_loop(1, 1, "orbs:1", Some("M94-0.wav"))); // absent original source
+        assert!(queue.set_loop(1, 1, "orbs:1", Some("M121-0.wav")));
+        assert!(!queue.set_loop(1, 1, "orbs:1", None));
+        assert!(queue.set_loop(1, 2, "orbs:1", None));
+        assert_eq!(queue.loops.len(), 1);
+        assert!(queue.loops[0].file_name.is_none());
+        assert!(queue.set_loop(2, 1, "orbs:1", Some("M121-0.wav")));
+        assert_eq!(queue.last_loop_sequence_by_cue.len(), 1);
+        for id in 2..=100 {
+            queue.set_loop(2, 1, &format!("orbs:{id}"), None);
+        }
+        assert_eq!(queue.last_loop_sequence_by_cue.len(), 32);
+        assert!(queue.loops.len() <= MAX_PENDING_GAMEPLAY_SOUND_EVENTS);
+        queue.clear_pending();
+        assert!(queue.reset_loops);
+        assert!(queue.loops.is_empty());
     }
 }

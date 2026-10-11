@@ -2723,6 +2723,44 @@ impl ZoneRuntime {
             });
     }
 
+    /// Immediate internal settlement of a five-class impact whose defence was
+    /// already resolved. Rebuild current authority rather than enqueueing raw
+    /// damage into the pet queue and rolling defence a second time.
+    pub(super) fn settle_five_class_owned_monster_hit(
+        &mut self,
+        hit: PendingNativeMonsterHit,
+        now: u64,
+    ) -> Vec<ZoneOutbound> {
+        if hit.damage <= 0 || hit.ready_at_ms > now {
+            return Vec::new();
+        }
+        let Some(attacker) = self
+            .owned_pet_owner(&hit.session_id)
+            .filter(|owner| owner.online.object_id == hit.attacker_object_id)
+        else {
+            return Vec::new();
+        };
+        if !self.players.get(&hit.session_id).is_some_and(|player| {
+            !player.dead
+                && player.hp > 0
+                && matches!(player.class, MirClass::Assassin | MirClass::Archer)
+        }) {
+            return Vec::new();
+        }
+        let Some(victim) = self.owned_pet_life(hit.object_id) else {
+            return Vec::new();
+        };
+        let authority = OwnedPetHumanAuthority {
+            attacker,
+            victim,
+            raw_damage: hit.damage,
+        };
+        if !self.owned_pet_human_impact_is_current(&authority, &hit, now) {
+            return Vec::new();
+        }
+        self.resolve_pending_native_monster_hit_authorized(hit, now, Some(&authority))
+    }
+
     pub(super) fn owned_pet_human_impact_is_current(
         &self,
         authority: &OwnedPetHumanAuthority,
@@ -3341,22 +3379,39 @@ impl ZoneRuntime {
                     now,
                 ));
             } else {
-                let damage =
-                    zone_player_native_incoming_damage(&target, hit.damage.max(0), true, now);
-                if let Some((packets, settlements)) = self.apply_native_player_pvp_damage(
-                    &target.session_id,
-                    source.object_id,
-                    damage,
-                    1,
-                    now,
-                ) {
-                    out.extend(settlements);
-                    out.push(ZoneOutbound::ToMany {
-                        session_ids: self
-                            .player_status_recipients(target.object_id, &target.position),
-                        packets,
-                    });
-                }
+                let damage = if five_class_incoming::is_new_profession(&target) {
+                    if let Some(target_ref) = self.five_class_target(target.object_id) {
+                        let (settled, effects) = self.five_class_hit_with_resolution(
+                            &hit.caster,
+                            &target_ref,
+                            hit.damage.max(0),
+                            EntityDefence::MAC,
+                            now,
+                        );
+                        out.extend(effects);
+                        settled.resolved_damage
+                    } else {
+                        0
+                    }
+                } else {
+                    let damage =
+                        zone_player_native_incoming_damage(&target, hit.damage.max(0), true, now);
+                    if let Some((packets, settlements)) = self.apply_native_player_pvp_damage(
+                        &target.session_id,
+                        source.object_id,
+                        damage,
+                        1,
+                        now,
+                    ) {
+                        out.extend(settlements);
+                        out.push(ZoneOutbound::ToMany {
+                            session_ids: self
+                                .player_status_recipients(target.object_id, &target.position),
+                            packets,
+                        });
+                    }
+                    damage
+                };
                 if hit.spell == Spell::Vampirism && damage > 0 {
                     // HumanObject:6010 captures a ushort amount after real
                     // MAC damage. ProcessRegen:619 releases at most 10 HP,
@@ -3588,6 +3643,87 @@ impl ZoneRuntime {
         }]
     }
 
+    // Only the new Assassin Trap calls these after its current hostile target
+    // gate. Match the real owned-pet incarnation and lease before changing clocks.
+    pub(super) fn five_class_owned_trap_shock_until(
+        &self,
+        target: &ZoneCombatEntityRef,
+    ) -> Option<u64> {
+        if !self.entity_ref_exists(target, false)
+            || self.owned_pet_life(target.object_id()).is_none()
+        {
+            return None;
+        }
+        self.owned_monster_clock(target.object_id())
+            .map(|c| c.shock_until_ms)
+    }
+
+    pub(super) fn apply_five_class_prevalidated_owned_trap_shock(
+        &mut self,
+        target: &ZoneCombatEntityRef,
+        until: u64,
+        now: u64,
+    ) -> Vec<ZoneOutbound> {
+        if !self.entity_ref_exists(target, false)
+            || self.owned_pet_life(target.object_id()).is_none()
+            || until <= now
+        {
+            return Vec::new();
+        }
+        self.shock_owned_monster(target.object_id(), until, now)
+    }
+
+    pub(super) fn release_five_class_owned_trap_shock(
+        &mut self,
+        target: &ZoneCombatEntityRef,
+        installed_until: u64,
+        previous_until: u64,
+        now: u64,
+    ) -> Vec<ZoneOutbound> {
+        if !self.entity_ref_exists(target, false)
+            || self.owned_pet_life(target.object_id()).is_none()
+            || !self
+                .owned_monster_clock(target.object_id())
+                .is_some_and(|c| c.shock_until_ms == installed_until)
+        {
+            return Vec::new();
+        }
+        let id = target.object_id();
+        self.owned_monster_clock_mut(id).unwrap().shock_until_ms = previous_until;
+        self.refresh_owned_monster_control_packet(id, now)
+    }
+
+    /// Cold restore has already revoked online owners. Clear only a persisted
+    /// Assassin Trap clock for the same retained Monster incarnation and lease;
+    /// ordinary ElectricShock, BindingShot, rage and pet growth are untouched.
+    pub(super) fn clear_cold_five_class_owned_trap_shock(&mut self, id: u32, deadline: u64) {
+        if deadline == 0
+            || !self
+                .owned_monster_clock(id)
+                .is_some_and(|clock| clock.shock_until_ms == deadline)
+        {
+            return;
+        }
+        let now = self.owned_pet_state().map_or(0, |state| state.last_now_ms);
+        let Some(clock) = self.owned_monster_clock_mut(id) else {
+            return;
+        };
+        clock.shock_until_ms = 0;
+        // Restore retained visual state without sending packets during recovery.
+        let _ = self.refresh_owned_monster_control_packet(id, now);
+    }
+
+    #[cfg(test)]
+    pub(super) fn owned_human_vampirism_amount_for_test(&self, session: &SessionId) -> u32 {
+        self.owned_pet_state().map_or(0, |s| {
+            s.vampirism
+                .iter()
+                .filter(|v| &v.caster.online.session_id == session)
+                .map(|v| u32::from(v.amount))
+                .sum()
+        })
+    }
+
     fn shock_owned_monster(&mut self, id: u32, until: u64, now: u64) -> Vec<ZoneOutbound> {
         let Some(clock) = self.owned_monster_clock_mut(id) else {
             return Vec::new();
@@ -3744,6 +3880,11 @@ impl ZoneRuntime {
                             value: duration as i64,
                         }],
                     });
+                    out.extend(self.five_class_practice(
+                        &cast.caster.online.session_id,
+                        Spell::BindingShot,
+                        now,
+                    ));
                 }
             } else if cast.spell == Spell::ElectricShock {
                 if self
@@ -4006,6 +4147,67 @@ impl ZoneRuntime {
         out
     }
 
+    /// Source Human.ApplyPoison: application can brown a caster even when
+    /// the eventual tick deals no damage. Never assigns a damage LastHitter.
+    pub(super) fn apply_owned_human_poison_application_brown(
+        &mut self,
+        source: &ZonePlayer,
+        victim: &ZonePlayer,
+        now: u64,
+    ) {
+        if !self.players.get(&source.session_id).is_some_and(|p| {
+            p.object_id == source.object_id && p.life_generation == source.life_generation
+        }) || !self.players.get(&victim.session_id).is_some_and(|p| {
+            p.object_id == victim.object_id && p.life_generation == victim.life_generation
+        }) {
+            return;
+        }
+        let Some(online) = self
+            .online_presence
+            .get(&source.session_id)
+            .map(|p| p.owner.clone())
+        else {
+            return;
+        };
+        let ordinary_war = source
+            .chat_profile
+            .guild_name
+            .as_ref()
+            .zip(victim.chat_profile.guild_name.as_ref())
+            .is_some_and(|(g, _)| {
+                victim
+                    .chat_profile
+                    .active_guild_wars
+                    .iter()
+                    .any(|w| w.eq_ignore_ascii_case(g))
+            });
+        if victim.chat_profile.pk_points < 200
+            && now > self.owned_pet_brown_until(victim)
+            && !ordinary_war
+            && !self.conquest_player_is_in_war_region(source, now)
+        {
+            let clock = self
+                .owned_pet_state_mut()
+                .players
+                .entry(online.session_id.clone())
+                .or_insert_with(|| OwnedPetPlayerClock {
+                    online: online.clone(),
+                    last_hitter: None,
+                    last_hit_until_ms: 0,
+                    brown_until_ms: 0,
+                });
+            if clock.online != online {
+                *clock = OwnedPetPlayerClock {
+                    online,
+                    last_hitter: None,
+                    last_hit_until_ms: 0,
+                    brown_until_ms: 0,
+                };
+            }
+            clock.brown_until_ms = now.saturating_add(BROWN_MS);
+        }
+    }
+
     pub(super) fn apply_owned_human_poison(
         &mut self,
         caster: &OwnedPetOwner,
@@ -4037,24 +4239,16 @@ impl ZoneRuntime {
                 else {
                     return Vec::new();
                 };
+                // Trusted personal projection already includes all equipped
+                // and buff stats; mirror ClientBuff metadata is not additive.
                 let armour = zone_roll_stat_range(
-                    victim
-                        .combat_stats
-                        .min_mac
-                        .saturating_add(zone_player_buff_stat_total(victim, 2)),
-                    victim
-                        .combat_stats
-                        .max_mac
-                        .saturating_add(zone_player_buff_stat_total(victim, 3)),
+                    victim.combat_stats.min_mac,
+                    victim.combat_stats.max_mac,
                     now,
                     victim.object_id,
                     0xD07,
                 );
-                let recovery = victim
-                    .combat_stats
-                    .poison_recovery
-                    .saturating_add(zone_player_buff_stat_total(victim, 34))
-                    .max(0);
+                let recovery = victim.combat_stats.poison_recovery.max(0);
                 (online, None, victim.position.clone(), armour, recovery)
             }
             ZoneCombatEntityRef::Monster { object_id, .. } => {
@@ -4106,38 +4300,9 @@ impl ZoneRuntime {
                 }
             }
             ZoneCombatEntityRef::Player { session_id, .. } => {
-                let victim = &self.players[session_id];
-                let source = &self.players[&caster.online.session_id];
-                let ordinary_war = source
-                    .chat_profile
-                    .guild_name
-                    .as_ref()
-                    .zip(victim.chat_profile.guild_name.as_ref())
-                    .is_some_and(|(g, _)| {
-                        victim
-                            .chat_profile
-                            .active_guild_wars
-                            .iter()
-                            .any(|w| w.eq_ignore_ascii_case(g))
-                    });
-                if victim.chat_profile.pk_points < 200
-                    && now > self.owned_pet_brown_until(victim)
-                    && !ordinary_war
-                    && !self.conquest_player_is_in_war_region(source, now)
-                {
-                    let online = caster.online.clone();
-                    let clock = self
-                        .owned_pet_state_mut()
-                        .players
-                        .entry(online.session_id.clone())
-                        .or_insert_with(|| OwnedPetPlayerClock {
-                            online: online.clone(),
-                            last_hitter: None,
-                            last_hit_until_ms: 0,
-                            brown_until_ms: 0,
-                        });
-                    clock.brown_until_ms = now.saturating_add(BROWN_MS);
-                }
+                let victim = self.players[session_id].clone();
+                let source = self.players[&caster.online.session_id].clone();
+                self.apply_owned_human_poison_application_brown(&source, &victim, now);
             }
         }
         ticks = ticks.saturating_sub(recovery as u64);
@@ -4286,10 +4451,7 @@ impl ZoneRuntime {
         }]
     }
 
-    pub(super) fn clear_owned_human_player_poison_leases(
-        &mut self,
-        target: &ZoneCombatEntityRef,
-    ) {
+    pub(super) fn clear_owned_human_player_poison_leases(&mut self, target: &ZoneCombatEntityRef) {
         if !matches!(target, ZoneCombatEntityRef::Player { .. }) {
             return;
         }
@@ -5178,3 +5340,23 @@ mod tests;
 #[cfg(test)]
 #[path = "owned_pet_immediate_master_tests.rs"]
 mod owned_pet_immediate_master_tests;
+
+impl ZoneRuntime {
+    pub(super) fn clear_cold_detached_five_class_state(
+        &mut self,
+        protected_bleeding: &BTreeSet<u32>,
+    ) {
+        if let Some(state) = self
+            .entity_combat
+            .as_mut()
+            .and_then(|s| s.owned_pet.as_mut())
+        {
+            for master in state.detached_masters.values_mut() {
+                super::five_class_recovery::clear_cold_player_state(
+                    master,
+                    protected_bleeding.contains(&master.object_id),
+                );
+            }
+        }
+    }
+}

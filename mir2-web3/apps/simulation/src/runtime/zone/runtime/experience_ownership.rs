@@ -105,6 +105,7 @@ impl ZoneRuntime {
             stored.drop.ownership_remaining_ticks = None;
         }
         self.local_online_identities = OnlineIdentityBook::default();
+        self.clear_cold_five_class_state();
     }
     fn player_claimant(&self, player: &ZonePlayer, now_ms: u64) -> Option<ZoneExperienceOwner> {
         let owner = self.online_presence.get(&player.session_id)

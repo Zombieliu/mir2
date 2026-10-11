@@ -66,6 +66,7 @@ impl From<ZoneReplayCombatStats> for ZonePlayerCombatStats {
             poison_recovery: value.poison_recovery,
             magic_resist: value.magic_resist,
             gm_never_die: value.gm_never_die,
+            ..Self::default()
         }
     }
 }

@@ -121,7 +121,7 @@ function Get-CandidateResourceOnlyMapNames {
         if ($raw.Count -gt 1 -or @($raw | Where-Object { $_ -isnot [string] -or $_ -cne 'D71653' }).Count -gt 0) { throw 'Only the canonical named original resource room D71653 may be declared' }
         $names = @($raw | ForEach-Object { $_.ToLowerInvariant() })
     }
-    if ($names.Count -gt 0 -and $Profile.profileId -cne 'platinum_176') { throw 'Resource-only room requires platinum_176' }
+    if ($names.Count -gt 0 -and @('platinum_176','platinum_fiveclass') -cnotcontains $Profile.profileId) { throw 'Resource-only room requires an identified classic-world profile' }
     $runtime = @($Profile.mapWhitelist | ForEach-Object { ([string]$_.fileName).ToLowerInvariant() })
     foreach ($name in $names) { if ($runtime -ccontains $name) { throw 'Resource-only room must not be runtime-admitted' } }
     return $names
@@ -172,10 +172,10 @@ function Get-CandidateTopologyEvidence {
 function Resolve-CandidateMapScope {
     param([string[]]$MapNames = @(), [string]$ProfilePath = $script:CandidateContentProfilePath)
     $profile = Get-Content -LiteralPath $ProfilePath -Raw | ConvertFrom-Json
-    if ($null -eq $profile.PSObject.Properties['profileId'] -or [string]$profile.profileId -cne 'platinum_176' -or
+    if ($null -eq $profile.PSObject.Properties['profileId'] -or @('platinum_176','platinum_fiveclass') -cnotcontains [string]$profile.profileId -or
         $null -eq $profile.PSObject.Properties['version'] -or $profile.version -is [string] -or
         [decimal]$profile.version -ne [int64]$profile.version -or [int64]$profile.version -lt 1 -or
-        $null -eq $profile.PSObject.Properties['mapWhitelist']) { throw 'Candidate map scope requires the identified platinum_176 content profile' }
+        $null -eq $profile.PSObject.Properties['mapWhitelist']) { throw 'Candidate map scope requires an identified classic-world content profile' }
     $rawNames = @($profile.mapWhitelist | ForEach-Object { [string]$_.fileName })
     $profileNames = @(Resolve-CandidateMapNames -MapNames $rawNames)
     if ($profileNames.Count -ne $rawNames.Count) { throw 'Candidate content profile contains duplicate map identities' }

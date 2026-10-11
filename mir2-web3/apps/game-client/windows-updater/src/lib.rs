@@ -1,4 +1,6 @@
 //! Signed per-file native updating; no commands or URLs are taken from the game server.
+#[cfg(test)]
+mod five_class_manifest_tests;
 pub mod fs_safe;
 mod local_io;
 pub mod model;
@@ -11,8 +13,11 @@ pub mod update;
 
 pub const BOOTSTRAP_VERSION: u32 = 1;
 pub const ENGINE_VERSION: u32 = 1;
-pub const FEED_URL: &str = "https://165.154.65.136.sslip.io/client-updates/latest.json";
-pub const CDN_FEED_URL: &str = "https://assets.mir2.obelisk.build/client-updates/latest.json";
+// The original directory remains a signed, old-engine-readable upgrade bridge.
+// This engine reads its separate channel after normal verified activation.
+pub const FEED_URL: &str = "https://165.154.65.136.sslip.io/client-updates/five-class/latest.json";
+pub const CDN_FEED_URL: &str =
+    "https://assets.mir2.obelisk.build/client-updates/five-class/latest.json";
 /// SHA256 of the RSA public-key DER (not a mutable certificate thumbprint).
 pub const SIGNING_KEY: &str = "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E";
 

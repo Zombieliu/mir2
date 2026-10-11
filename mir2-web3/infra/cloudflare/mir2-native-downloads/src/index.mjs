@@ -2,8 +2,12 @@
 export const PUBLIC_BASE = "https://assets.mir2.obelisk.build/client-updates/";
 export const OBJECT_PREFIX = "mir2/native/windows-invited/";
 export const POINTER_KEY = OBJECT_PREFIX + "channels/invited.json";
+export const FIVE_CLASS_PUBLIC_BASE = PUBLIC_BASE + "five-class/";
+export const FIVE_CLASS_OBJECT_PREFIX = OBJECT_PREFIX + "five-class/";
+export const FIVE_CLASS_POINTER_KEY = FIVE_CLASS_OBJECT_PREFIX + "channels/invited.json";
 export const MAX_ARTIFACT = 128 * 1024 * 1024;
 export const MAX_METADATA = 32 * 1024 * 1024;
+export const MAX_FIVE_CLASS_METADATA = 64 * 1024 * 1024;
 export const MAX_POINTER = 4096;
 const IMMUTABLE = "public, max-age=31536000, immutable";
 const POINTER_SCHEMA = "mir2.windows.r2-channel.v1";
@@ -26,18 +30,32 @@ export function feedDirectory(pointer) {
   return "feeds/s" + pointer.sequence + "-" + pointer.feedSha256 + "/";
 }
 
-export function relativePath(url) {
+export function channelPath(url) {
   if (url.protocol !== "https:" || url.host !== "assets.mir2.obelisk.build" ||
       url.href.includes("?") || url.href.includes("#") || !url.pathname.startsWith("/client-updates/")) return null;
-  const raw = url.pathname.slice("/client-updates/".length);
+  let raw = url.pathname.slice("/client-updates/".length);
+  const fiveClass = raw.startsWith("five-class/");
+  if (fiveClass) raw = raw.slice("five-class/".length);
   // Separators must be literal. Decode exactly once; any residual '%' is invalid.
   if (/%(?:2f|5c)/i.test(raw)) return null;
   let path;
   try { path = decodeURIComponent(raw); } catch { return null; }
-  if (!path || !/^[A-Za-z0-9._/-]+$/.test(path) ||
-      path.split("/").some((s) => !s || s === "." || s === ".." || s.startsWith("."))) return null;
-  if (ALIASES.has(path)) return path;
-  return /^(releases|feeds|installers)\/[^/]/.test(path) ? path : null;
+  const safeCharacters = fiveClass ? /^[A-Za-z0-9._ /-]+$/ : /^[A-Za-z0-9._/-]+$/;
+  if (!path || !safeCharacters.test(path) ||
+      path.split("/").some((s) => !s || s === "." || s === ".." || s.startsWith(".") ||
+        (fiveClass && (s.endsWith(" ") || s.endsWith("."))))) return null;
+  if (!ALIASES.has(path) && !/^(releases|feeds|installers)\/[^/]/.test(path)) return null;
+  return {
+    path,
+    publicBase: fiveClass ? FIVE_CLASS_PUBLIC_BASE : PUBLIC_BASE,
+    objectPrefix: fiveClass ? FIVE_CLASS_OBJECT_PREFIX : OBJECT_PREFIX,
+    pointerKey: fiveClass ? FIVE_CLASS_POINTER_KEY : POINTER_KEY,
+    metadataMaximum: fiveClass ? MAX_FIVE_CLASS_METADATA : MAX_METADATA,
+  };
+}
+
+export function relativePath(url) {
+  return channelPath(url)?.path ?? null;
 }
 
 function commonHeaders(cacheControl) {
@@ -56,8 +74,8 @@ function errorResponse(code, status, extra = {}) {
   return new Response(JSON.stringify({ error: code }), { status, headers });
 }
 
-function metadataLimit(path) {
-  return /\.(json|p7s|sig|txt)$/i.test(path) ? MAX_METADATA : MAX_ARTIFACT;
+function metadataLimit(path, maximum = MAX_METADATA) {
+  return /\.(json|p7s|sig|txt)$/i.test(path) ? maximum : MAX_ARTIFACT;
 }
 
 function validateObject(object, path, limit = metadataLimit(path)) {
@@ -89,9 +107,9 @@ async function readBounded(body, maximum, expected) {
   return bytes;
 }
 
-async function loadPointer(bucket) {
+async function loadPointer(bucket, channel) {
   // One R2 get returns body + metadata from one atomic pointer version.
-  const object = await bucket.get(POINTER_KEY);
+  const object = await bucket.get(channel.pointerKey);
   if (!object) throw new Error("pointer_unavailable");
   validateObject(object, "channels/invited.json", MAX_POINTER);
   let text, value;
@@ -170,14 +188,15 @@ function notModified(headers) {
 async function serve(request, env, ctx, cache) {
   if (request.method !== "GET" && request.method !== "HEAD") return errorResponse("method_not_allowed", 405, { allow: "GET, HEAD" });
   const url = new URL(request.url);
-  const path = relativePath(url);
-  if (path === null) return errorResponse("not_found", 404);
+  const channel = channelPath(url);
+  if (channel === null) return errorResponse("not_found", 404);
+  const { path } = channel;
   const alias = ALIASES.has(path);
   try {
-    const pointer = alias ? await loadPointer(env.MIR2_ASSETS) : null;
+    const pointer = alias ? await loadPointer(env.MIR2_ASSETS, channel) : null;
     const resolved = alias ? feedDirectory(pointer) + path : path;
-    const key = OBJECT_PREFIX + resolved;
-    const cacheKey = new Request(PUBLIC_BASE + resolved, { method: "GET" });
+    const key = channel.objectPrefix + resolved;
+    const cacheKey = new Request(channel.publicBase + resolved, { method: "GET" });
     const rangeHeader = request.method === "GET" ? request.headers.get("range") : null;
     if (!alias && !rangeHeader && cache) {
       const cached = await cache.match(cacheKey);
@@ -192,7 +211,7 @@ async function serve(request, env, ctx, cache) {
     }
     const object = await env.MIR2_ASSETS.head(key);
     if (!object) return errorResponse("not_found", 404);
-    validateObject(object, resolved);
+    validateObject(object, resolved, metadataLimit(resolved, channel.metadataMaximum));
     const expectedHash = pointer && (path === "latest.json" ? pointer.feedSha256 : pointer.signatureSha256);
     if (expectedHash && object.customMetadata?.sha256 && object.customMetadata.sha256 !== expectedHash) throw new Error("invalid_storage_hash");
     let headers = objectHeaders(object, resolved, alias, pointer, null, alias || rangeHeader ? "BYPASS" : "MISS");
@@ -206,7 +225,7 @@ async function serve(request, env, ctx, cache) {
     if (request.method === "HEAD") return new Response(null, { status: 200, headers });
     const data = await env.MIR2_ASSETS.get(key, range ? { range } : undefined);
     if (!data) return errorResponse("not_found", 404);
-    validateObject(data, resolved);
+    validateObject(data, resolved, metadataLimit(resolved, channel.metadataMaximum));
     if (data.size !== object.size || data.httpEtag !== object.httpEtag ||
         (range && (!data.range || data.range.offset !== range.offset || data.range.length !== range.length))) throw new Error("inconsistent_storage_object");
     const response = new Response(data.body, { status: range ? 206 : 200, headers });

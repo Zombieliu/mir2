@@ -1,5 +1,25 @@
 # Backend 1:1 Progress
 
+> Five-class integration follow-up, 2026-10-11: actual public R24/feed19 uses
+> Source87fd85a0d5a819e5b38c90d192421f9239f65678. Preserve all its shop/mail/
+> month-card/billing/owner-health fixes before building the five-class release.
+> Current green five-class evidence precedes that merge; fresh merged checks,
+> genuine binaries and publication remain open. Updater81 passes/4 original
+> ignores; focused7 overlaps. No public switch or native acceptance occurred.
+> [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+> Current five-class round, 2026-10-11: Assassin/Archer level 1–50 normal
+> content and authoritative shared-zone combat pass simulation118/Gateway12;
+> adjacent entity22/player-combat7 and native animation28/audio26/supplies21/
+> Windows bridge32 pass. Original failed logs remain; overlapping filters are
+> not summed. Real Source pixels and selected-profile asset closure pass.
+> Commit/Linux/attested EXE/updater compatibility/package/deploy/native human
+> gates remain open. Old 200,000-file/32 MiB update bounds need a finite,
+> backward-compatible engine upgrade before the larger resource release.
+> [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
+> Candidate round, not all-level five-class or whole-project 100% acceptance.
+> Root owns common/production files; explorers are read-only. No new Goal.
+
 > Current Source terrain round, 2026-10-10 local: normal collision now shares
 > the Source decoder and corrects three format discrepancies. Final library32
 > pass/1 original benchmark ignored; all463 Server Maps preparations/collisions

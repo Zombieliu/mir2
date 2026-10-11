@@ -1,3 +1,5 @@
+#[path = "routing/five_class.rs"]
+mod five_class;
 #[path = "shared_guilds.rs"]
 mod shared_guilds;
 #[path="routing/shared_conquest.rs"]
@@ -2500,6 +2502,12 @@ const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
 #[serde(untagged)]
 enum QueuedZoneVitalDelta {
     Legacy(i32),
+    Mana {
+        mana_settlement: mir2_simulation::ZoneManaSettlement,
+    },
+    FiveClassPractice {
+        five_class_practice: mir2_simulation::ZoneFiveClassPracticeReceipt,
+    },
     Settled {
         delta: i32,
         settlement: ZoneVitalSettlement,
@@ -2525,6 +2533,7 @@ impl QueuedZoneVitalDelta {
     fn signed_delta(&self) -> i32 {
         match self {
             Self::Legacy(delta) | Self::Settled { delta, .. } => *delta,
+            Self::Mana { .. } | Self::FiveClassPractice { .. } => 0,
         }
     }
     fn new(
@@ -2547,6 +2556,10 @@ impl QueuedZoneVitalDelta {
 struct ZoneVitalReceiptProgress {
     object_id: u32,
     highest_sequence: u64,
+    #[serde(default)]
+    highest_mana_sequence: u64,
+    #[serde(default)]
+    highest_five_class_practice_sequence: u64,
     // Death acknowledgement is independent from the delta high-water mark:
     // a delayed old-life death must still be penalized after a newer heal.
     penalized_death_generations: BTreeSet<u64>,
@@ -4689,6 +4702,20 @@ impl SharedInProcessZoneState {
                     }) {
                         pending.push(receipt);
                     }
+                }
+                ZoneOutbound::FiveClassMagicPractice { receipt } => {
+                    let Some(key) = self.zone_session_keys.get(&receipt.session_id).cloned() else { continue; };
+                    if self.teardown_fenced(&key) || !self.five_class_practice_owner_is_current(&key, &receipt) { continue; }
+                    let delta = QueuedZoneVitalDelta::FiveClassPractice { five_class_practice: receipt };
+                    if current_key == Some(&key) { current_player_damages.push(delta); }
+                    else { self.queue_zone_player_vital_delta(key, delta); }
+                }
+                ZoneOutbound::PlayerManaChanged { session_id, settlement } => {
+                    let Some(key) = self.zone_session_keys.get(&session_id).cloned() else { continue; };
+                    if self.teardown_fenced(&key) && !(allow_fenced_current && current_key == Some(&key)) { continue; }
+                    let delta = QueuedZoneVitalDelta::Mana { mana_settlement: settlement };
+                    if current_key == Some(&key) { current_player_damages.push(delta); }
+                    else { self.queue_zone_player_vital_delta(key, delta); }
                 }
                 ZoneOutbound::PlayerDamaged {
                     session_id,
@@ -7639,10 +7666,11 @@ fn zone_magic_launch_accepted(packets: &[ServerPacket], spell: Spell, object_id:
                 target_id,
                 cast: true,
                 ..
-            } if *packet_spell == spell && *target_id == object_id
+            } if *packet_spell == spell && (*target_id == object_id
+                || (spell == Spell::ElementalShot && *target_id == 0))
         ) || matches!(packet,
-            ServerPacket::MagicCast { spell: Spell::ShoulderDash }
-                if spell == Spell::ShoulderDash)
+            ServerPacket::MagicCast { spell: accepted @ (Spell::ShoulderDash | Spell::BackStep | Spell::FlashDash) }
+                if *accepted == spell)
     })
 }
 
@@ -8055,6 +8083,11 @@ fn packet_belongs_to_world_viewport(packet: &ServerPacket) -> bool {
                 | ServerPacket::ObjectShow { .. }
                 | ServerPacket::ObjectSpell { .. }
                 | ServerPacket::ObjectEffect { .. }
+                | ServerPacket::UserBackStep { .. }
+                | ServerPacket::SetConcentration { .. }
+                | ServerPacket::SetElemental { .. }
+                | ServerPacket::SetBindingShot { .. }
+                | ServerPacket::RemoveDelayedExplosion { .. }
                 | ServerPacket::MapEffect { .. }
         )
 }
@@ -8261,6 +8294,10 @@ fn owner_zone_state_packets(
             ServerPacket::AddBuff { buff } => buff.object_id == owner_local_object_id,
             ServerPacket::RemoveBuff { object_id, .. }
             | ServerPacket::PauseBuff { object_id, .. }
+            | ServerPacket::SetConcentration { object_id, .. }
+            | ServerPacket::SetElemental { object_id, .. }
+            | ServerPacket::SetBindingShot { object_id, .. }
+            | ServerPacket::RemoveDelayedExplosion { object_id }
             | ServerPacket::PlayerUpdate { object_id, .. }
             | ServerPacket::ObjectColourChanged { object_id, .. }
             | ServerPacket::ObjectGuildNameChanged { object_id, .. }
@@ -10485,7 +10522,16 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_transform(pending_transform);
         self.apply_zone_shout_consume(shout_consume);
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
-        packets.extend(self.apply_zone_player_damages(player_damages));
+        let (practice, vitals): (Vec<_>, Vec<_>) = player_damages.into_iter()
+            .partition(|delta| matches!(delta, QueuedZoneVitalDelta::FiveClassPractice { .. }));
+        // This batch was taken under the same lock that established the fence.
+        // Its typed owner/life/learned/sequence checks remain mandatory.
+        for delta in practice {
+            if let QueuedZoneVitalDelta::FiveClassPractice { five_class_practice } = delta {
+                packets.extend(self.apply_captured_five_class_practice_receipt(five_class_practice, true));
+            }
+        }
+        packets.extend(self.apply_zone_player_damages(vitals));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
@@ -10727,6 +10773,12 @@ impl SharedInProcessZoneSessionRuntime {
         let mut saw_stamped = false;
         for damage in damages {
             match damage.into() {
+                QueuedZoneVitalDelta::Mana { mana_settlement } => {
+                    saw_stamped |= self.apply_five_class_mana_receipt(mana_settlement);
+                }
+                QueuedZoneVitalDelta::FiveClassPractice { five_class_practice } => {
+                    packets.extend(self.apply_five_class_practice_receipt(five_class_practice));
+                }
                 QueuedZoneVitalDelta::Legacy(damage) => {
                     // Legacy checkpoints cannot prove a generation or receipt.
                     // Preserve their old signed-delta / first-local-death behavior.
@@ -12506,6 +12558,7 @@ impl SharedInProcessZoneSessionRuntime {
             }
         }
         let mut accepted_magic_spend = None;
+        let focus_to_commit = matches!(&attack.kind, ZoneNativePlayerAttackKind::Range { spell: Spell::Focus, .. });
         let melee_spell_to_commit = match &attack.kind {
             ZoneNativePlayerAttackKind::Melee { spell, .. } => Spell::try_from(*spell).ok(),
             _ => None,
@@ -12603,6 +12656,10 @@ impl SharedInProcessZoneSessionRuntime {
             }
         };
         let mut dispatched = self.dispatch_zone_player_command(command, false);
+        if focus_to_commit && dispatched.iter().any(|packet| matches!(packet,
+            ServerPacket::RangeAttack { spell: Spell::Focus, .. })) {
+            dispatched.extend(self.inner.commit_zone_focus_attack());
+        }
         if let Some(spell) = melee_spell_to_commit {
             // Dispatch still carries Zone IDs here; wire-owner remapping runs
             // later. Compare the exact authenticated presence, not the target.
@@ -12620,7 +12677,7 @@ impl SharedInProcessZoneSessionRuntime {
             });
             if accepted {
                 dispatched.extend(self.inner.commit_zone_melee_attack_spell_with_primary(spell, primary_target_present));
-                if spell == Spell::TwinDrakeBlade {
+                if matches!(spell, Spell::TwinDrakeBlade | Spell::DoubleSlash) {
                     // The Zone already charged the accepted swing atomically.
                     // Refresh only mana: a queued hit/death must never be
                     // overwritten with this personal session's older HP.
@@ -16063,6 +16120,8 @@ mod tests {
     mod map_transfer_poison_tests;
     #[path = "zone_melee_passive_progression_tests.rs"]
     mod zone_melee_passive_progression_tests;
+    #[path = "five_class_receipt_tests.rs"]
+    mod five_class_receipt_tests;
     #[path = "zone_soulfire_practice_tests.rs"]
     mod zone_soulfire_practice_tests;
     #[path = "zone_journey_event_bridge_tests.rs"]

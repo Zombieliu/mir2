@@ -266,12 +266,13 @@ mod tests {
         let (mut zone, source, _) = fixture();
         let session = SessionId::new("owner");
         let old = zone.native_entity_player_ref(&session).unwrap();
-        for hp in [0, 100] {
-            zone.handle(ZoneCommand::SyncPlayerVitals {
+        for (hp, dead) in [(0, true), (100, false)] {
+            zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
                 session_id: session.clone(),
                 hp,
                 max_hp: 100,
                 mp: 100,
+                dead,
             });
         }
         assert_ne!(old, zone.native_entity_player_ref(&session).unwrap());
@@ -643,9 +644,7 @@ mod tests {
                 ))
             })
             .collect::<Vec<_>>();
-        targets.sort_by_key(|(id, position, distance)| {
-            (*distance, position.y, position.x, *id)
-        });
+        targets.sort_by_key(|(id, position, distance)| (*distance, position.y, position.x, *id));
         targets.into_iter().map(|(id, _, _)| id).collect()
     }
 
@@ -855,12 +854,13 @@ mod tests {
             .native_entity_player_ref(&SessionId::new("owner"))
             .unwrap();
         assert!(zone.set_native_entity_target(source.object_id(), &player, 601));
-        for hp in [0, 100] {
-            zone.handle(ZoneCommand::SyncPlayerVitals {
+        for (hp, dead) in [(0, true), (100, false)] {
+            zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
                 session_id: SessionId::new("owner"),
                 hp,
                 max_hp: 100,
                 mp: 100,
+                dead,
             });
         }
         assert!(zone
@@ -970,6 +970,9 @@ mod tests {
                 .unwrap()
                 .next_ai_ready_at_ms = u64::MAX;
             zone.apply_native_entity_hell_poison(&source, &target, bit, 0, 5, 1000, 550);
+            // Establish a real threat to the pet; hostility alone does not
+            // admit a target under the original owned-pet attack rules.
+            assert!(zone.set_native_entity_target(9001, &target, 551));
             zone.resolve_native_monster_environment_struck(&source, 20000, false, 560);
             let start = zone.native_monsters[&pet].position.clone();
             for now in [600, 2000, 3001, 4002] {
@@ -1294,7 +1297,11 @@ impl ZoneRuntime {
         })
     }
 
-    pub(super) fn entity_ref_exists(&self, reference: &ZoneCombatEntityRef, allow_dead: bool) -> bool {
+    pub(super) fn entity_ref_exists(
+        &self,
+        reference: &ZoneCombatEntityRef,
+        allow_dead: bool,
+    ) -> bool {
         match reference {
             ZoneCombatEntityRef::Player {
                 session_id,
@@ -1339,7 +1346,9 @@ impl ZoneRuntime {
         let source_monster = &self.native_monsters[source_id];
         // Do not invent pet-versus-pet aggro or turn passive NPCs into attackers.
         if source_monster.owner_session_id.is_some()
-            || (!source_monster.hostile_to_player && !self.owned_monster_rage_active(*source_id,now)) {
+            || (!source_monster.hostile_to_player
+                && !self.owned_monster_rage_active(*source_id, now))
+        {
             return false;
         }
         match target {
@@ -1378,7 +1387,8 @@ impl ZoneRuntime {
             ZoneCombatEntityRef::Monster { object_id, .. } => {
                 let m = &self.native_monsters[object_id];
                 if m.owner_session_id.is_none() {
-                    return monster_visibility_is_attackable(m) && self.owned_monster_rage_active(*source_id,now);
+                    return monster_visibility_is_attackable(m)
+                        && self.owned_monster_rage_active(*source_id, now);
                 }
                 let Some(owner_session) = m.owner_session_id.as_ref() else {
                     return false;
@@ -1423,7 +1433,11 @@ impl ZoneRuntime {
         }
     }
 
-    pub(super) fn entity_cool_eye_sees(&self, source: &ZoneNativeMonster, target_level: u16) -> bool {
+    pub(super) fn entity_cool_eye_sees(
+        &self,
+        source: &ZoneNativeMonster,
+        target_level: u16,
+    ) -> bool {
         source.level >= target_level
             && crystal_monster_by_name(&source.name).is_some_and(|t| {
                 u64::from(t.cool_eye)
@@ -1634,10 +1648,19 @@ impl ZoneRuntime {
         }
     }
 
-    pub(super) fn entity_source_targets(&self, source_id: u32, target: &ZoneCombatEntityRef) -> bool {
-        self.entity_combat.as_ref().and_then(|s| s.targets.get(&source_id))
-            .is_some_and(|r| r.target == *target && self.entity_ref_exists(&r.source, false)
-                && self.entity_ref_exists(&r.target, false))
+    pub(super) fn entity_source_targets(
+        &self,
+        source_id: u32,
+        target: &ZoneCombatEntityRef,
+    ) -> bool {
+        self.entity_combat
+            .as_ref()
+            .and_then(|s| s.targets.get(&source_id))
+            .is_some_and(|r| {
+                r.target == *target
+                    && self.entity_ref_exists(&r.source, false)
+                    && self.entity_ref_exists(&r.target, false)
+            })
     }
 
     pub(super) fn selected_native_entity_target(
@@ -1703,8 +1726,10 @@ impl ZoneRuntime {
         now: u64,
     ) -> Option<Vec<ZoneOutbound>> {
         let m = self.native_monsters.get(&object_id)?.clone();
-        if (m.ai != 0 && !self.owned_monster_rage_active(object_id,now)) || m.owner_session_id.is_some()
-            || (!m.hostile_to_player && !self.owned_monster_rage_active(object_id,now)) {
+        if (m.ai != 0 && !self.owned_monster_rage_active(object_id, now))
+            || m.owner_session_id.is_some()
+            || (!m.hostile_to_player && !self.owned_monster_rage_active(object_id, now))
+        {
             return None;
         }
         let view = crystal_monster_by_name(&m.name)
@@ -1785,7 +1810,10 @@ impl ZoneRuntime {
         now: u64,
     ) -> Option<Vec<ZoneOutbound>> {
         let m = self.native_monsters.get(&object_id)?.clone();
-        if m.dead || m.owner_session_id.is_some() || (!m.hostile_to_player && !self.owned_monster_rage_active(object_id,now)) {
+        if m.dead
+            || m.owner_session_id.is_some()
+            || (!m.hostile_to_player && !self.owned_monster_rage_active(object_id, now))
+        {
             return None;
         }
         if now < m.next_ai_ready_at_ms
@@ -1807,7 +1835,7 @@ impl ZoneRuntime {
             );
         if !ranged && !native_monster_adjacent_to(&m.position, &target.position) {
             if !monster_visibility_can_move(&m)
-                || self.owned_monster_shock_blocks_move(object_id,now)
+                || self.owned_monster_shock_blocks_move(object_id, now)
                 || !sleep_monster_can_move(&m)
                 || !great_fox_can_move(&m)
                 || !great_fox_movement_ready(&m, now)
@@ -1991,6 +2019,37 @@ impl ZoneRuntime {
             ..
         } = target
         {
+            if five_class_incoming::is_new_profession(&self.players[session_id]) {
+                let hit = PendingNativePlayerHit {
+                    ready_at_ms: now,
+                    attacker_object_id: if struck { 0 } else { source_id },
+                    attacker_ai: source_monster.ai,
+                    target_session_id: session_id.clone(),
+                    target_object_id: *object_id,
+                    damage: raw_damage,
+                    magic,
+                };
+                let unmitigated = matches!(defence, EntityDefence::Agility | EntityDefence::None);
+                let (settled, out) = if struck {
+                    self.resolve_native_player_environment_struck_with_resolution(
+                        hit,
+                        now,
+                        unmitigated,
+                    )
+                } else {
+                    self.resolve_native_player_damage_kind_with_resolution(
+                        hit,
+                        now,
+                        unmitigated,
+                        true,
+                        false,
+                        false,
+                    )
+                };
+                // Source Attacked returns final defended damage, not net HP
+                // after EnergyShield or the victim's smaller remaining HP.
+                return (settled.resolved_damage, out);
+            }
             let before = self.players[session_id].hp;
             let out = self.resolve_native_player_damage(
                 PendingNativePlayerHit {
@@ -2062,7 +2121,12 @@ impl ZoneRuntime {
             Some(if struck { 0 } else { source_id }),
             now,
         );
-        if actual>0 && !struck {out.extend(self.release_owned_monster_shock(object_id,now));}
+        if actual > 0 && !struck {
+            out.extend(self.release_owned_monster_shock(object_id, now));
+        }
+        if actual > 0 && !struck {
+            out.extend(self.five_class_release_trap_on_direct_hit(object_id, now));
+        }
         if !struck {
             out.extend(self.snow_wolf_attacked(object_id, actual, false, now));
         }
@@ -2129,8 +2193,12 @@ impl ZoneRuntime {
             .map(|p| {
                 vec![ZoneOutbound::ToMany {
                     session_ids: match target {
-                        ZoneCombatEntityRef::Player { .. } => self.player_status_recipients(target.object_id(), &p),
-                        ZoneCombatEntityRef::Monster { .. } => self.native_monster_visible_recipients(target.object_id(), &p),
+                        ZoneCombatEntityRef::Player { .. } => {
+                            self.player_status_recipients(target.object_id(), &p)
+                        }
+                        ZoneCombatEntityRef::Monster { .. } => {
+                            self.native_monster_visible_recipients(target.object_id(), &p)
+                        }
                     },
                     packets: vec![ServerPacket::DamageIndicator {
                         damage: 0,
@@ -2150,7 +2218,8 @@ impl ZoneRuntime {
         struck_attacker: Option<u32>,
         now: u64,
     ) -> (i32, Vec<ZoneOutbound>) {
-        let (damage, percent, killed, name, experience, position, direction, owner, drops, audit) = result;
+        let (damage, percent, killed, name, experience, position, direction, owner, drops, audit) =
+            result;
         let mut packets = Vec::new();
         if let Some(attacker_id) = struck_attacker {
             packets.push(ServerPacket::ObjectStruck {
@@ -2198,7 +2267,8 @@ impl ZoneRuntime {
                 &position,
                 ZoneMonsterKillAward {
                     source_receipt_key: None,
-                    mentor_bank: None, experience_selection: None,
+                    mentor_bank: None,
+                    experience_selection: None,
                     monster_object_id: object_id,
                     killed_at_ms: now,
                     monster_name: name,
@@ -2407,6 +2477,27 @@ impl ZoneRuntime {
         {
             return Vec::new();
         }
+        self.apply_prevalidated_entity_slow(source, target, duration, tick_speed_ms, now, true)
+    }
+
+    /// Human skill callers have already checked the captured owner, target
+    /// incarnation and PK relationship. They retain the same Source slowdown
+    /// lease and restoration clock, with the caller's original resist policy.
+    pub(super) fn apply_prevalidated_entity_slow(
+        &mut self,
+        source: &ZoneCombatEntityRef,
+        target: &ZoneCombatEntityRef,
+        duration: u64,
+        tick_speed_ms: u64,
+        now: u64,
+        resist_human: bool,
+    ) -> Vec<ZoneOutbound> {
+        if duration == 0
+            || !self.entity_ref_exists(source, true)
+            || !self.entity_ref_exists(target, false)
+        {
+            return Vec::new();
+        }
         if self
             .entity_combat
             .as_ref()
@@ -2427,12 +2518,13 @@ impl ZoneRuntime {
             ZoneCombatEntityRef::Player { session_id, .. } => {
                 if zone_player_active_status(&self.players[session_id], now) & CRYSTAL_POISON_SLOW
                     != 0
-                    || crate::runtime::combat::crystal_accuracy_roll(
-                        now,
-                        source.object_id(),
-                        target.object_id().wrapping_add(0x5100),
-                        10,
-                    ) < self.native_entity_poison_resist(target) as u64
+                    || (resist_human
+                        && crate::runtime::combat::crystal_accuracy_roll(
+                            now,
+                            source.object_id(),
+                            target.object_id().wrapping_add(0x5100),
+                            10,
+                        ) < self.native_entity_poison_resist(target) as u64)
                 {
                     return Vec::new();
                 }
@@ -2805,5 +2897,25 @@ impl ZoneRuntime {
             out.extend(events);
         }
         out
+    }
+}
+
+impl ZoneRuntime {
+    /// Preserve committed original monster/pet bleeding leases across cold
+    /// recovery. A replicated bit alone is not a poison lease.
+    pub(super) fn cold_entity_poison_lease_targets(&self, poison: u16) -> BTreeSet<u32> {
+        self.entity_combat
+            .as_ref()
+            .map(|state| {
+                state
+                    .poisons
+                    .iter()
+                    .filter(|lease| {
+                        lease.poison == poison && self.entity_ref_exists(&lease.target, true)
+                    })
+                    .map(|lease| lease.target.object_id())
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 }

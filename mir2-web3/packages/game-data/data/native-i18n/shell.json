@@ -1330,6 +1330,20 @@
       "zh-TW": "暴擊",
       "pt-BR": "Crítico",
       "aliases": []
+    },
+    {
+      "key": "shell.assassin_description",
+      "en": "Assassins strike with paired blades and stealth.\nThey favor quick attacks and careful movement.",
+      "zh-TW": "刺客以雙刃與潛行出擊。\n擅長快速攻擊，並需靈活走位。",
+      "pt-BR": "Assassinos atacam com duas lâminas e furtividade.\nPreferem golpes rápidos e movimento cuidadoso.",
+      "aliases": []
+    },
+    {
+      "key": "shell.archer_description",
+      "en": "Archers attack from range with bows and special shots.\nKeep your distance and watch your positioning.",
+      "zh-TW": "弓手以弓箭和特殊射擊遠攻。\n保持距離，留意站位。",
+      "pt-BR": "Arqueiros atacam à distância com arcos e tiros especiais.\nMantenha distância e cuide da posição.",
+      "aliases": []
     }
   ]
 }
