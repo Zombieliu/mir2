@@ -1965,16 +1965,34 @@ mod tests {
             payload["entities"][0]["_nativeAnimationAction"] = json!(name);
             presentation.replace_payload(payload);
             presentation.sync_pending_payload_with(0, |_, _, _| catalog.clone());
-            assert_eq!(presentation.world.active_state("1").unwrap().current_action, action);
-            assert!(presentation.self_combat_action_blocks_movement("1"), "{name}");
+            assert_eq!(
+                presentation.world.active_state("1").unwrap().current_action,
+                action
+            );
+            assert!(
+                presentation.self_combat_action_blocks_movement("1"),
+                "{name}"
+            );
 
             presentation.world.tick(duration - 1).unwrap();
-            assert!(presentation.self_combat_action_blocks_movement("1"), "{name} before last frame");
+            assert!(
+                presentation.self_combat_action_blocks_movement("1"),
+                "{name} before last frame"
+            );
             presentation.world.tick(duration).unwrap();
-            assert_eq!(presentation.world.active_state("1").unwrap().current_action, AnimationAction::Standing);
-            assert!(!presentation.self_combat_action_blocks_movement("1"), "{name} completed");
-            assert_eq!(presentation.overlay_payload().unwrap()["entities"][0]["_nativeAnimationAction"], name,
-                "the retained packet action is deliberately stale after the real frame clock ends");
+            assert_eq!(
+                presentation.world.active_state("1").unwrap().current_action,
+                AnimationAction::Standing
+            );
+            assert!(
+                !presentation.self_combat_action_blocks_movement("1"),
+                "{name} completed"
+            );
+            assert_eq!(
+                presentation.overlay_payload().unwrap()["entities"][0]["_nativeAnimationAction"],
+                name,
+                "the retained packet action is deliberately stale after the real frame clock ends"
+            );
         }
     }
 
@@ -1993,16 +2011,28 @@ mod tests {
         presentation.sync_pending_payload_with(1, |_, _, _| AnimationCatalog::crystal_player());
         let state = presentation.world.active_state("1").unwrap();
         assert_eq!(state.current_action, AnimationAction::Struck);
-        let before = (state.frame_index, state.last_update_at_ms,
-            state.queued_actions().copied().collect::<Vec<_>>());
+        let before = (
+            state.frame_index,
+            state.last_update_at_ms,
+            state.queued_actions().copied().collect::<Vec<_>>(),
+        );
         assert!(presentation.self_combat_action_blocks_movement("1"));
         assert!(presentation.self_combat_action_blocks_movement("1"));
         let state = presentation.world.active_state("1").unwrap();
-        assert_eq!((state.frame_index, state.last_update_at_ms,
-            state.queued_actions().copied().collect::<Vec<_>>()), before);
+        assert_eq!(
+            (
+                state.frame_index,
+                state.last_update_at_ms,
+                state.queued_actions().copied().collect::<Vec<_>>()
+            ),
+            before
+        );
 
         presentation.world.tick(300).unwrap();
-        assert_eq!(presentation.world.active_state("1").unwrap().current_action, AnimationAction::Attack1);
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().current_action,
+            AnimationAction::Attack1
+        );
         assert!(presentation.self_combat_action_blocks_movement("1"));
         presentation.world.tick(900).unwrap();
         assert!(!presentation.self_combat_action_blocks_movement("1"));
@@ -2018,12 +2048,21 @@ mod tests {
         presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
         assert!(presentation.self_combat_action_blocks_movement("1"));
         presentation.world.tick(400).unwrap();
-        assert_eq!(presentation.world.active_state("1").unwrap().current_action, AnimationAction::Dead);
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().current_action,
+            AnimationAction::Dead
+        );
         assert!(presentation.self_combat_action_blocks_movement("1"));
 
         let key = presentation.world.active_state("1").unwrap().key.clone();
-        presentation.world.apply_revival_event(&key,
-            AnimationEvent::new(2, AnimationAction::Revive, Direction::Down), 500).unwrap();
+        presentation
+            .world
+            .apply_revival_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Revive, Direction::Down),
+                500,
+            )
+            .unwrap();
         assert!(presentation.self_combat_action_blocks_movement("1"));
         presentation.world.tick(900).unwrap();
         assert!(!presentation.self_combat_action_blocks_movement("1"));
@@ -2042,7 +2081,10 @@ mod tests {
             payload["entities"].as_array_mut().unwrap().push(observer);
             presentation.replace_payload(payload);
             presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
-            assert!(!presentation.self_combat_action_blocks_movement("1"), "{name}");
+            assert!(
+                !presentation.self_combat_action_blocks_movement("1"),
+                "{name}"
+            );
             assert!(presentation.self_combat_action_blocks_movement("2"));
             assert!(!presentation.self_combat_action_blocks_movement("missing"));
         }

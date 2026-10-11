@@ -88,3 +88,26 @@ ordinary paired checks before publication. Strict real three-class seven-monster
 held-right escape, continued attack, no drift and native/human screenshots are
 still required. FullP1-P7/Mentor remains open; the expired heartbeat stays paused
 and the blocked Goal is not marked complete.
+
+
+## Release formatting preparation, 2026-10-11
+
+The original behavior Candidate is committed and pushed as
+`f2082841d4e79b29ffc6933ace349b572d1b3c21`. Its raw evidence above remains
+immutable. The subsequent full native `cargo +1.95.0 fmt -- --check` failed
+only `input.rs` and `entity_presentation.rs`; standard Rustfmt 1.95, edition2021,
+with `skip_children=true` formatted exactly those two owned files. The full
+native formatting check now passes. No separate implementation, permission,
+clock, assertion or failure-policy change was made in this formatting round.
+
+The first stage-gate wrapper invocation rejected an empty mandatory filter
+before launching Cargo; its original stderr/supervisor receipt remains. The
+correct all-module `::` filter then ran all918 native component cases, with
+the same exact911 passing names,0failed and the same7 original ignored cases.
+Peak observed private memory was240,447,488bytes; no process was stopped. This
+does not add911 new tests or qualify ignored native/network/human acceptance.
+
+[Formatting source, original gate failure and actual final check](generated/player-qa/client-escape-20261011/formatting-01/EVIDENCE.json)
+bind this formatted source separately. A clean attested Windows Release,
+qualified package, signed update publication and actual dense-combat/native
+acceptance are still required. Server1e own Linux qualification is separate.

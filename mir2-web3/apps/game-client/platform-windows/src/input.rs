@@ -1452,7 +1452,12 @@ fn plan_crystal_pointer_move(
     let requested_mode = movement.permitted_run_mode(requested_mode, now_ms, None);
     movement.prune_blocked_steps(now_ms);
     retain_current_blocked_steps(
-        movement, entities, presentation, self_object_id, map_file_name, run_distance,
+        movement,
+        entities,
+        presentation,
+        self_object_id,
+        map_file_name,
+        run_distance,
     );
     if !movement_step_blocked(
         movement,
@@ -2164,7 +2169,11 @@ pub fn mouse_world_interaction_system(
             }
             let predicted = movement.pending.back().map(|pending| pending.to);
             let outcome = reconcile_ack_with_current_collision(
-                &mut movement, &ack, now_ms, &entities, presentation,
+                &mut movement,
+                &ack,
+                now_ms,
+                &entities,
+                presentation,
             );
             push_movement_shadow_authoritative(now_ms, &ack, predicted, outcome);
             if movement.auto_path_destination == Some((ack.x, ack.y)) {
@@ -2207,7 +2216,11 @@ pub fn mouse_world_interaction_system(
             direction: entity_direction.clone(),
         };
         let outcome = reconcile_ack_with_current_collision(
-            &mut movement, &snapshot, now_ms, &entities, presentation,
+            &mut movement,
+            &snapshot,
+            now_ms,
+            &entities,
+            presentation,
         );
         push_movement_shadow_authoritative(now_ms, &snapshot, predicted, outcome);
         if movement.auto_path_destination == Some(entity_position) {
@@ -3209,8 +3222,7 @@ pub fn mouse_world_interaction_system(
             movement.stop_auto_path(now_ms, "archerOutOfRange");
             return;
         }
-        if !movement.can_send(now_ms)
-            || presentation.self_combat_action_blocks_movement(&object_id)
+        if !movement.can_send(now_ms) || presentation.self_combat_action_blocks_movement(&object_id)
         {
             return;
         }
@@ -3351,9 +3363,7 @@ pub fn mouse_world_interaction_system(
     {
         return;
     }
-    if !movement.can_send(now_ms)
-        || presentation.self_combat_action_blocks_movement(&object_id)
-    {
+    if !movement.can_send(now_ms) || presentation.self_combat_action_blocks_movement(&object_id) {
         return;
     }
     let origin = movement.planning_origin(entity_position);
@@ -3630,9 +3640,7 @@ pub fn keyboard_movement_system(
             entity_direction.as_str(),
         );
     }
-    if !movement.can_send(now_ms)
-        || presentation.self_combat_action_blocks_movement(&object_id)
-    {
+    if !movement.can_send(now_ms) || presentation.self_combat_action_blocks_movement(&object_id) {
         return;
     }
     let origin = movement.planning_origin(entity_position);
@@ -6703,7 +6711,8 @@ mod tests {
     }
 
     fn finish_escape_animation_for_sender(app: &mut bevy::prelude::App, deadline_ms: u64) {
-        app.world_mut().resource_mut::<NativeEntityPresentation>()
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
             .advance_animation_for_test(deadline_ms);
         let started = std::time::Instant::now();
         loop {
@@ -6711,17 +6720,24 @@ mod tests {
             if now_ms >= deadline_ms {
                 break;
             }
-            assert!(started.elapsed() < std::time::Duration::from_secs(2),
-                "actual native clock did not reach the unchanged animation deadline");
+            assert!(
+                started.elapsed() < std::time::Duration::from_secs(2),
+                "actual native clock did not reach the unchanged animation deadline"
+            );
             std::thread::sleep(std::time::Duration::from_millis(
-                deadline_ms.saturating_sub(now_ms).min(10)));
+                deadline_ms.saturating_sub(now_ms).min(10),
+            ));
         }
     }
 
     fn assert_escape_prediction_started(app: &bevy::prelude::App) {
-        assert!(app.world().resource::<NativeEntityPresentation>().self_motion_remaining_ms(
-            crate::entity_presentation::native_motion_clock_ms()) > 0,
-            "the real sender must start a motion window, not swallow TimeWentBackwards");
+        assert!(
+            app.world()
+                .resource::<NativeEntityPresentation>()
+                .self_motion_remaining_ms(crate::entity_presentation::native_motion_clock_ms())
+                > 0,
+            "the real sender must start a motion window, not swallow TimeWentBackwards"
+        );
     }
 
     fn click_adjacent_escape_test_monster(app: &mut bevy::prelude::App) {
@@ -6735,11 +6751,14 @@ mod tests {
             presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
             presentation.set_hovered_object_id_for_test(Some("2001"));
         }
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
     }
 
     fn hold_escape_right(app: &mut bevy::prelude::App) {
-        app.world_mut().resource_mut::<NativeEntityPresentation>()
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
             .set_hovered_object_id_for_test(None);
         let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
         mouse.clear_just_pressed(MouseButton::Left);
@@ -6753,37 +6772,56 @@ mod tests {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
             click_adjacent_escape_test_monster(&mut app);
             app.update();
-            assert_eq!(drain_world_intents(&mut app),
-                vec![QuestUiIntent::AttackTarget { object_id: 2001 }]);
-            let next_attack = crystal_attack_request_interval_ms(Some(app.world().resource::<UiReadModel>()));
+            assert_eq!(
+                drain_world_intents(&mut app),
+                vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+            );
+            let next_attack =
+                crystal_attack_request_interval_ms(Some(app.world().resource::<UiReadModel>()));
             assert!(next_attack > 600.0);
             let state = app.world().resource::<WorldPointerMovementState>();
             assert_eq!(state.next_attack_request_at_ms, next_attack);
-            assert_eq!(state.next_move_send_at_ms, 0.0,
-                "UI FIFO acceptance is not a movement action deadline");
+            assert_eq!(
+                state.next_move_send_at_ms, 0.0,
+                "UI FIFO acceptance is not a movement action deadline"
+            );
 
             let animation_origin = observe_escape_self_action(&mut app, "attack1", 1, 0);
             hold_escape_right(&mut app);
             advance_movement_clock(&mut app, 1);
             app.update();
             assert!(receiver.try_recv().is_err(), "Attack1 is still playing");
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().active,
-                Some(WorldPointerMovementMode::Run));
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_target,
+                None
+            );
+            assert_eq!(
+                app.world().resource::<WorldPointerMovementState>().active,
+                Some(WorldPointerMovementMode::Run)
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
                 .clear_just_pressed(MouseButton::Right);
-            app.world_mut().resource_mut::<NativeEntityPresentation>()
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
                 .advance_animation_for_test(animation_origin + 599);
             advance_movement_clock(&mut app, 598);
             app.update();
-            assert!(receiver.try_recv().is_err(), "preserve the last real attack frame");
+            assert!(
+                receiver.try_recv().is_err(),
+                "preserve the last real attack frame"
+            );
 
             finish_escape_animation_for_sender(&mut app, animation_origin + 600);
             advance_movement_clock(&mut app, 1);
             app.update();
-            assert!(matches!(receiver.try_recv(),
+            assert!(
+                matches!(receiver.try_recv(),
                 Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
-                "same right hold must escape before next-hit cooldown: NewMove={new_move}");
+                "same right hold must escape before next-hit cooldown: NewMove={new_move}"
+            );
             assert_escape_prediction_started(&app);
             let state = app.world().resource::<WorldPointerMovementState>();
             assert_eq!(state.next_attack_request_at_ms, next_attack);
@@ -6800,61 +6838,118 @@ mod tests {
             let (mut app, receiver) = crowded_escape_input_app(false);
             app.insert_resource(movement_entities());
             let animation_origin = observe_escape_self_action(&mut app, action, 1, 0);
-            app.world_mut().resource_mut::<WorldPointerMovementState>().next_attack_request_at_ms = 10_000.0;
-            app.add_systems(bevy::prelude::Update,
-                keyboard_movement_system.after(mouse_world_interaction_system));
-            app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::ArrowRight);
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .next_attack_request_at_ms = 10_000.0;
+            app.add_systems(
+                bevy::prelude::Update,
+                keyboard_movement_system.after(mouse_world_interaction_system),
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::ArrowRight);
             app.update();
             assert!(receiver.try_recv().is_err(), "{action} is playing");
-            app.world_mut().resource_mut::<NativeEntityPresentation>()
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
                 .advance_animation_for_test(animation_origin + duration - 1);
             advance_movement_clock(&mut app, duration - 1);
             app.update();
-            assert!(receiver.try_recv().is_err(), "{action} still owns its last frame");
+            assert!(
+                receiver.try_recv().is_err(),
+                "{action} still owns its last frame"
+            );
             finish_escape_animation_for_sender(&mut app, animation_origin + duration);
             advance_movement_clock(&mut app, 1);
             app.update();
             assert!(matches!(receiver.try_recv(),
                 Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
             assert_escape_prediction_started(&app);
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().next_attack_request_at_ms, 10_000.0);
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .next_attack_request_at_ms,
+                10_000.0
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .pending
+                    .len(),
+                1
+            );
         }
     }
 
     #[test]
     fn sender_rejected_ui_attack_leaves_no_false_movement_action_deadline() {
         let (mut control, control_receiver) = crowded_escape_input_app(true);
-        control.add_systems(bevy::prelude::Update,
-            crate::gameplay_bridge::forward_quest_ui_intents.after(mouse_world_interaction_system));
+        control.add_systems(
+            bevy::prelude::Update,
+            crate::gameplay_bridge::forward_quest_ui_intents.after(mouse_world_interaction_system),
+        );
         click_adjacent_escape_test_monster(&mut control);
         control.update();
-        assert!(matches!(control_receiver.try_recv(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 2001 }))),
-            "the identical normal producer must really reach the Attack sender");
+        assert!(
+            matches!(
+                control_receiver.try_recv(),
+                Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                    object_id: 2001
+                }))
+            ),
+            "the identical normal producer must really reach the Attack sender"
+        );
 
         let (mut app, failed_receiver) = crowded_escape_input_app(true);
         drop(failed_receiver);
-        app.add_systems(bevy::prelude::Update,
-            crate::gameplay_bridge::forward_quest_ui_intents.after(mouse_world_interaction_system));
+        app.add_systems(
+            bevy::prelude::Update,
+            crate::gameplay_bridge::forward_quest_ui_intents.after(mouse_world_interaction_system),
+        );
         click_adjacent_escape_test_monster(&mut app);
         app.update();
-        assert!(drain_world_intents(&mut app).is_empty(),
-            "the real failed forward must retire this attack without retry");
-        let next_attack = app.world().resource::<WorldPointerMovementState>().next_attack_request_at_ms;
-        assert!(next_attack > 600.0, "ordinary next-hit pacing remains intact");
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().next_move_send_at_ms, 0.0);
+        assert!(
+            drain_world_intents(&mut app).is_empty(),
+            "the real failed forward must retire this attack without retry"
+        );
+        let next_attack = app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .next_attack_request_at_ms;
+        assert!(
+            next_attack > 600.0,
+            "ordinary next-hit pacing remains intact"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .next_move_send_at_ms,
+            0.0
+        );
 
         let (sender, receiver) = std::sync::mpsc::channel();
         app.insert_resource(GatewayCommands::new(sender));
         hold_escape_right(&mut app);
         advance_movement_clock(&mut app, 1);
         app.update();
-        assert!(matches!(receiver.try_recv(),
+        assert!(
+            matches!(receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
-            "failed Attack send cannot pretend an admitted attack is playing");
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().next_attack_request_at_ms, next_attack);
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
+            "failed Attack send cannot pretend an admitted attack is playing"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .next_attack_request_at_ms,
+            next_attack
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .len(),
+            1
+        );
         assert!(receiver.try_recv().is_err());
     }
 
@@ -6863,9 +6958,12 @@ mod tests {
         for new_move in [false, true] {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
             app.insert_resource(movement_entities());
-            app.world_mut().resource_mut::<NativeEntityPresentation>()
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
                 .set_hover_grid_context_for_test((10, 10), (672., 352.));
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Right);
             app.update();
             assert!(matches!(receiver.try_recv(),
                 Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
@@ -6877,23 +6975,41 @@ mod tests {
             advance_movement_clock(&mut app, 600);
             click_adjacent_escape_test_monster(&mut app);
             app.update();
-            assert_eq!(drain_world_intents(&mut app),
-                vec![QuestUiIntent::AttackTarget { object_id: 2001 }]);
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().next_move_send_at_ms, 600.0);
+            assert_eq!(
+                drain_world_intents(&mut app),
+                vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .next_move_send_at_ms,
+                600.0
+            );
             hold_escape_right(&mut app);
             app.update();
-            assert!(receiver.try_recv().is_err(), "the real old move still owns the slot");
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear_just_pressed(MouseButton::Right);
+            assert!(
+                receiver.try_recv().is_err(),
+                "the real old move still owns the slot"
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
             advance_movement_clock(&mut app, 2_001);
             app.update();
-            assert!(receiver.try_recv().is_err(), "elapsed cooldown cannot revoke an unconfirmed move");
+            assert!(
+                receiver.try_recv().is_err(),
+                "elapsed cooldown cannot revoke an unconfirmed move"
+            );
             let state = app.world().resource::<WorldPointerMovementState>();
             assert_eq!(state.pending.len(), 1);
             assert_eq!(state.pending.front().unwrap().sent_at_ms, 0.0);
 
             push_test_movement_ack(&app, 11, 10, "right");
             app.update();
-            assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))));
+            assert!(matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))
+            ));
             let state = app.world().resource::<WorldPointerMovementState>();
             assert_eq!(state.authoritative_position, Some((11, 10)));
             assert_eq!(state.pending.len(), 1);
@@ -6908,13 +7024,18 @@ mod tests {
         for new_move in [false, true] {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
             app.insert_resource(movement_entities());
-            app.world_mut().resource_mut::<NativeEntityPresentation>()
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
                 .set_hover_grid_context_for_test((10, 10), (672., 352.));
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Right);
             app.update();
             assert!(matches!(receiver.try_recv(),
                 Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear_just_pressed(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
             push_test_movement_ack(&app, 10, 10, "right");
             advance_movement_clock(&mut app, 100);
             app.update();
@@ -6923,17 +7044,31 @@ mod tests {
             assert_eq!(state.authoritative_position, Some((10, 10)));
             assert_eq!(state.run_primed_until_ms, 0.0);
             assert_eq!(state.input_blocked_until_ms, 500.0);
-            assert!(state.blocked_steps.is_empty(), "an unchanged position is not collision evidence");
+            assert!(
+                state.blocked_steps.is_empty(),
+                "an unchanged position is not collision evidence"
+            );
             assert!(receiver.try_recv().is_err());
             advance_movement_clock(&mut app, 399);
             app.update();
-            assert!(receiver.try_recv().is_err(), "preserve all 400 ms of correction protection");
+            assert!(
+                receiver.try_recv().is_err(),
+                "preserve all 400 ms of correction protection"
+            );
             advance_movement_clock(&mut app, 1);
             app.update();
-            assert!(matches!(receiver.try_recv(),
+            assert!(
+                matches!(receiver.try_recv(),
                 Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
-                "the current clear exit must not inherit a 3-second blacklist");
-            assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
+                "the current clear exit must not inherit a 3-second blacklist"
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .pending
+                    .len(),
+                1
+            );
         }
     }
 
@@ -6941,13 +7076,18 @@ mod tests {
     fn real_collision_hint_disappears_when_monster_vacates_before_hint_ttl() {
         let (mut app, receiver) = crowded_escape_input_app(true);
         app.insert_resource(movement_entities());
-        app.world_mut().resource_mut::<NativeEntityPresentation>()
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
             .set_hover_grid_context_for_test((10, 10), (672., 352.));
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
         app.update();
         assert!(matches!(receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
         {
             let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
             entities.entities[2].x = 11;
@@ -6965,8 +7105,15 @@ mod tests {
         app.insert_resource(movement_entities());
         advance_movement_clock(&mut app, 399);
         app.update();
-        assert!(app.world().resource::<WorldPointerMovementState>().blocked_steps.is_empty());
-        assert!(receiver.try_recv().is_err(), "vacated occupancy cannot shorten correction guard");
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .blocked_steps
+            .is_empty());
+        assert!(
+            receiver.try_recv().is_err(),
+            "vacated occupancy cannot shorten correction guard"
+        );
         advance_movement_clock(&mut app, 1);
         app.update();
         assert!(matches!(receiver.try_recv(),
@@ -6978,27 +7125,42 @@ mod tests {
     fn combat_discarded_step_keeps_real_action_barrier_then_allows_same_hold_exit() {
         let (mut app, receiver) = crowded_escape_input_app(true);
         app.insert_resource(movement_entities());
-        app.world_mut().resource_mut::<NativeEntityPresentation>()
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
             .set_hover_grid_context_for_test((10, 10), (672., 352.));
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
         app.update();
         assert!(matches!(receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
         let animation_origin = observe_escape_self_action(&mut app, "attack1", 1, 0);
         push_test_movement_ack(&app, 10, 10, "right");
         advance_movement_clock(&mut app, 100);
         app.update();
         let state = app.world().resource::<WorldPointerMovementState>();
-        assert!(state.pending.is_empty(), "a real correction retires the sent old step");
-        assert!(state.blocked_steps.is_empty(), "a combat barrier is not a blocked road");
+        assert!(
+            state.pending.is_empty(),
+            "a real correction retires the sent old step"
+        );
+        assert!(
+            state.blocked_steps.is_empty(),
+            "a combat barrier is not a blocked road"
+        );
         assert_eq!(state.input_blocked_until_ms, 500.0);
         assert!(receiver.try_recv().is_err());
-        app.world_mut().resource_mut::<NativeEntityPresentation>()
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
             .advance_animation_for_test(animation_origin + 500);
         advance_movement_clock(&mut app, 400);
         app.update();
-        assert!(receiver.try_recv().is_err(), "the real Attack1 still plays after the guard expires");
+        assert!(
+            receiver.try_recv().is_err(),
+            "the real Attack1 still plays after the guard expires"
+        );
         finish_escape_animation_for_sender(&mut app, animation_origin + 600);
         advance_movement_clock(&mut app, 100);
         app.update();
