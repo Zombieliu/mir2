@@ -16,7 +16,7 @@ use super::resources::{BuffResource, PlayerRuntimeResource, PotionRecoveryResour
 mod buff_duration;
 pub(super) use buff_duration::RealTimeBuffDuration;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct BuffState {
     pub(super) key: String,
     pub(super) name: String,

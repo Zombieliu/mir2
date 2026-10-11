@@ -3719,7 +3719,7 @@ impl SimulationSession {
     }
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        let before = match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(object_id).is_some()) {
+        let before = match self.begin_npc_dialog_source_command(false) {
             Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
         };
         let packets = self.interact_impl(object_id);
@@ -3728,7 +3728,7 @@ impl SimulationSession {
     }
 
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
-        let before = match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(npc.object_id).is_some()) {
+        let before = match self.begin_npc_dialog_source_command(false) {
             Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
         };
         let packets = self.interact_shared_npc_snapshot_impl(npc);
@@ -3741,7 +3741,7 @@ impl SimulationSession {
         npc: &WorldEntitySnapshot,
         key: &str,
     ) -> Vec<ServerPacket> {
-        let before=match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(npc.object_id).is_some()) {
+        let before=match self.begin_npc_dialog_source_command(false) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
@@ -3750,7 +3750,7 @@ impl SimulationSession {
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
-        let before=match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(object_id).is_some()) {
+        let before=match self.begin_npc_dialog_source_command(false) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.call_npc_impl(object_id, key);
@@ -3761,9 +3761,7 @@ impl SimulationSession {
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
         let object_id = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
             .map(|dialog| dialog.npc_object_id);
-        let force=object_id.is_some_and(|id|mir2_game_data::periodic_quests::npc(id).is_some())
-            || super::quests::periodic_quests::target_is_periodic(target);
-        let before=match self.begin_npc_dialog_source_command(force) {
+        let before=match self.begin_npc_dialog_source_command(false) {
             Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
         };
         let packets = self.select_npc_dialog_target_impl(target);
@@ -3799,7 +3797,7 @@ impl SimulationSession {
         page_name: &str,
         value: &str,
     ) -> Vec<ServerPacket> {
-        let before = match self.begin_npc_dialog_source_command(mir2_game_data::periodic_quests::npc(npc_id).is_some()) {
+        let before = match self.begin_npc_dialog_source_command(false) {
             Ok(before) => before, Err(_) => return Self::periodic_save_failure_packets(),
         };
         let packets = self.confirm_npc_input_impl(npc_id, page_name, value);
@@ -4014,6 +4012,9 @@ impl SimulationSession {
             }
             if input_link {
                 super::npc_input::request(self.app.world_mut(), target);
+                return Vec::new();
+            }
+            if !super::npc_input::permits_menu_target(self.app.world_mut(), target) {
                 return Vec::new();
             }
         }
