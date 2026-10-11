@@ -71,3 +71,18 @@ claimed here. The full P1–P7/Mentor backlog, especially ordinary NPC invocatio
 binding and Source world population/event-outbox qualification, remains open.
 The expired heartbeat stays paused and the blocked old Goal is not marked
 complete. Root is the sole source/docs/Git/production writer.
+
+## Retained first actual stage failure and dependency repair
+
+The actual stage workflow38144814677 at publisher5772 failed its unchanged R22
+offline preparation gate because the historical origin generator/template
+dependency was omitted from the bounded integration closure. It never reached
+Worker deployment, R2 staging or promotion. The failure log and artifact
+11704665675 remain retained. The same failure reproduced locally.
+
+Seven exact tracked predecessor Git blobs restore that historical dependency;
+no test, assertion, authentication, workflow gate or current pointer changes.
+All five original R20/R22/R23/R24/R25 preparation suites pass locally afterward
+(26+9+16+16+16 executions). The corrected exact source still requires its own
+whole Linux workflow and stage/promotion. Generated test diagnostics are kept
+with scoped ignore rules, not published as application artifacts.
