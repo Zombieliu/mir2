@@ -1,0 +1,44 @@
+{
+  "owner": "Root",
+  "recordedAtUtc": "2026-10-11 20:40:42 UTC",
+  "kind": "Source73 first C strict build succeeds but cannot satisfy accepted portable NFT boundary",
+  "actualStrictBuildProof": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-actual01.json",
+    "bytes": 2466,
+    "sha256": "91c0bc30112f158cbe0687dfe9ecaad74afa976eae02aa8d564d44f677b71a48"
+  },
+  "rawNextManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-output-manifest01.json",
+    "bytes": 1437892,
+    "sha256": "1cd3e013b42ab142253c3d7ceb0c5f1341e23b4296682428709d8d6952e918ec"
+  },
+  "actualStrictCompilationPassed": true,
+  "actualNextExitCode": 0,
+  "nftFiles": 61,
+  "rawReferences": 170798,
+  "priorNormalRawReferences": 130518,
+  "normalInternalUniqueTargets": 39332,
+  "malformedDriveUniquePerNamespace": 5035,
+  "malformedRawOccurrences": 40280,
+  "affectedTopRoutes": 4,
+  "affectedStandaloneMirrors": 4,
+  "rawExternalTargetsNotRead": true,
+  "ordinaryStandaloneDependencyRestore": {
+    "leaves": 13261,
+    "bytes": 334077695,
+    "rawNext2450Preserved": true,
+    "publicAndCompiledMetadataNotOverwritten": true
+  },
+  "standaloneDataCopiesRequireFreshSource73Bytes": {
+    "generated": 1770,
+    "public": 16816
+  },
+  "physicalClosureFullyAccepted": false,
+  "portablePackageAccepted": false,
+  "nextAttempt": "Unchanged original strict builder in a fresh input mirror, existing public CRYSTAL_CLIENT_ROOT set to an ordinary empty source directory",
+  "noNftRewrite": true,
+  "noRawSourceCopy": true,
+  "noPrivateReads": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

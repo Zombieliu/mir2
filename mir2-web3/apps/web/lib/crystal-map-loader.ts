@@ -32,12 +32,9 @@ const PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH = path.join(
 );
 const GENERATED_DATA_DIR = path.join(WORKSPACE_ROOT, "lib", "generated");
 const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
-const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
 const CRYSTAL_CLIENT_ROOT = process.env.CRYSTAL_CLIENT_ROOT
   ? path.resolve(process.env.CRYSTAL_CLIENT_ROOT)
-  : existsSync(LOCAL_CRYSTAL_CLIENT_ROOT)
-    ? LOCAL_CRYSTAL_CLIENT_ROOT
-    : DEFAULT_CRYSTAL_CLIENT_ROOT;
+  : LOCAL_CRYSTAL_CLIENT_ROOT;
 const MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Map");
 const DATA_MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Data", "Map");
 const RESPAWN_MANIFEST_PATH = path.join(

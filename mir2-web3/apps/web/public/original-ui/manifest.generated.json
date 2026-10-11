@@ -1,6 +1,6 @@
 {
   "sourceKind": "external-crystal-client-data",
-  "exportedAt": "2026-09-21T10:09:27.288Z",
+  "exportedAt": "2026-10-11T20:03:08.968Z",
   "libraries": {
     "CArmour/00": {
       "version": 2,
@@ -390445,6 +390445,70 @@
           "rgbaSha256": "e3e7cbf0fb65e10b8ab4d92fb4ad27481fde0d7fa579ddc2883dc1135a2f713e",
           "pngSha256": "fe5a67f44d738da1f7a9e44d01f0f6040d492c76e1474cc73442a7c6bbfb4cb1",
           "path": "/original-ui/Title/739.png",
+          "maskPath": null
+        },
+        {
+          "index": 743,
+          "width": 72,
+          "height": 23,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "rgbaSha256": "628d39dcc1f371cfe14322dcc221ff0f393572e84ff4e4a43940ae2a38f72937",
+          "pngSha256": "0af770b4e2f2af6a2f9d60e7bd98f5c5fa6081aa8165027cee05418a436efa72",
+          "path": "/original-ui/Title/743.png",
+          "maskPath": null
+        },
+        {
+          "index": 744,
+          "width": 72,
+          "height": 23,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "rgbaSha256": "f4165e5d971a06f9b6fb5983559914746c908283ad4df7818d76b3d17c35b242",
+          "pngSha256": "f23598018c5d592d1c3e654cb6044ffaaeb27d736b3fad92702476953e0f1196",
+          "path": "/original-ui/Title/744.png",
+          "maskPath": null
+        },
+        {
+          "index": 745,
+          "width": 72,
+          "height": 23,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "rgbaSha256": "57a928afb24d56d134c4547e3e93a0d4c172ba51d4c08c826dab0488e2762d79",
+          "pngSha256": "ab5669753587e3f37396ddb8a4d7307b5447abf39c7dec37a6bbf76bc67ced41",
+          "path": "/original-ui/Title/745.png",
+          "maskPath": null
+        },
+        {
+          "index": 746,
+          "width": 72,
+          "height": 23,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "rgbaSha256": "5c82a7ec75d5fb43f52121ae903be0348be9f0fc4fc59cafbaa166982ff2a8ee",
+          "pngSha256": "3cf6104ac32fdbe4d28e4300d9856365fd330b6c61b826bbf037f46ca7588222",
+          "path": "/original-ui/Title/746.png",
           "maskPath": null
         },
         {

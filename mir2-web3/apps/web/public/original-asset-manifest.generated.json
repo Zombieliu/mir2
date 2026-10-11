@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "kind": "mir2-original-asset-manifest",
-  "generatedAt": "2026-10-11T14:54:42.666Z",
+  "generatedAt": "2026-10-11T20:12:11.376Z",
   "collectionMode": "filesystem",
-  "assetHash": "004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0",
+  "assetHash": "aa18de0a2ce261cbac61ea32393a8741e17523151ed94e52c0faec6d7ae28920",
   "stats": {
-    "assetCount": 41248,
+    "assetCount": 41261,
     "originalMapPngCount": 12131,
-    "originalUiPngCount": 29117,
-    "totalBytes": 191865107
+    "originalUiPngCount": 29130,
+    "totalBytes": 192007242
   },
   "assets": {
     "/original-map/ShandaMir2/Objects/1101.png": {
@@ -203176,6 +203176,11 @@
       "source": "original-ui",
       "sha256": "5ab2c6008529dda84dcb29d9e1ff1ad0868009a6f5033d66fb64dcaf365a6983"
     },
+    "/original-ui/Prguse/2443.png": {
+      "size": 61812,
+      "source": "original-ui",
+      "sha256": "53715fce027146d34a46da83ee4671b2a2eb1b0ce394fc84f688483300c0437c"
+    },
     "/original-ui/Prguse/340.png": {
       "size": 62307,
       "source": "original-ui",
@@ -203555,6 +203560,11 @@
       "size": 521,
       "source": "original-ui",
       "sha256": "569bea23d5946a0ecfdf6f88bf1f2279d8d19c0eda440288345fde973a86d939"
+    },
+    "/original-ui/Prguse/586.png": {
+      "size": 61324,
+      "source": "original-ui",
+      "sha256": "af68c4fb8aa9208749cef451a6519a8b3147a221e2113142dc5e6356c7dd02be"
     },
     "/original-ui/Prguse/6.png": {
       "size": 10938,
@@ -205141,6 +205151,11 @@
       "source": "original-ui",
       "sha256": "83d162eba6a30d5dfe46375e8fbe706c30fcb455c26e1cf70afb261eaa0f73cf"
     },
+    "/original-ui/Title/0.png": {
+      "size": 840,
+      "source": "original-ui",
+      "sha256": "3a09e29c731a7a01fc7c66e458f3030a220c8d0e426d2abc6f026a043d10647f"
+    },
     "/original-ui/Title/100.png": {
       "size": 2516,
       "source": "original-ui",
@@ -205205,6 +205220,21 @@
       "size": 1836,
       "source": "original-ui",
       "sha256": "1b4f354d0c870011439040f73e7d0ad2bef20c2187185124484bf4e9ef42cb8d"
+    },
+    "/original-ui/Title/113.png": {
+      "size": 1547,
+      "source": "original-ui",
+      "sha256": "e1a0b22610144a0a2f1e4dfda6c8198abdef21c1a04aa7eb02b1adb4b5016b48"
+    },
+    "/original-ui/Title/114.png": {
+      "size": 1970,
+      "source": "original-ui",
+      "sha256": "55161a08bff2314daee55472407ec1cc26dd94629f3b72630133054d9e0c6fb3"
+    },
+    "/original-ui/Title/115.png": {
+      "size": 1520,
+      "source": "original-ui",
+      "sha256": "dd3ea4dfe347586d2541cf89f9355bf6c2ff5235f36100a6098a445ae4a3717a"
     },
     "/original-ui/Title/130.png": {
       "size": 2247,
@@ -205721,6 +205751,21 @@
       "source": "original-ui",
       "sha256": "7400071f091be5e5ee8114d560fb54c49eab29317144a1150c32a3427f012f4c"
     },
+    "/original-ui/Title/483.png": {
+      "size": 1593,
+      "source": "original-ui",
+      "sha256": "5aa40ec0ad805dfc25231ba052e936c7c434c75d6a2af76c0bc4c4963e154fbf"
+    },
+    "/original-ui/Title/484.png": {
+      "size": 2021,
+      "source": "original-ui",
+      "sha256": "6aacce00217a8d5e4a5e479b0e5cd5b5a30016cd8707d1a96ff59997abfe0e94"
+    },
+    "/original-ui/Title/485.png": {
+      "size": 1567,
+      "source": "original-ui",
+      "sha256": "d409c51360c6d7208e852aad677a44edb4dff0a8d30708fb75ceb9920aefdbce"
+    },
     "/original-ui/Title/5.png": {
       "size": 681,
       "source": "original-ui",
@@ -205945,6 +205990,26 @@
       "size": 1286,
       "source": "original-ui",
       "sha256": "fe5a67f44d738da1f7a9e44d01f0f6040d492c76e1474cc73442a7c6bbfb4cb1"
+    },
+    "/original-ui/Title/743.png": {
+      "size": 2677,
+      "source": "original-ui",
+      "sha256": "0af770b4e2f2af6a2f9d60e7bd98f5c5fa6081aa8165027cee05418a436efa72"
+    },
+    "/original-ui/Title/744.png": {
+      "size": 1280,
+      "source": "original-ui",
+      "sha256": "f23598018c5d592d1c3e654cb6044ffaaeb27d736b3fad92702476953e0f1196"
+    },
+    "/original-ui/Title/745.png": {
+      "size": 2673,
+      "source": "original-ui",
+      "sha256": "ab5669753587e3f37396ddb8a4d7307b5447abf39c7dec37a6bbf76bc67ced41"
+    },
+    "/original-ui/Title/746.png": {
+      "size": 1311,
+      "source": "original-ui",
+      "sha256": "3cf6104ac32fdbe4d28e4300d9856365fd330b6c61b826bbf037f46ca7588222"
     },
     "/original-ui/Title/749.png": {
       "size": 50580,

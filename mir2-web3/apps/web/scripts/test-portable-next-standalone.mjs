@@ -245,8 +245,11 @@ test("NFT dependency copy materializes only the verified physical closure, inclu
 });
 
 test("installed Sharp target package is a full physical native closure", async () => {
-  const sourceApp = path.resolve(import.meta.dirname,
-    "../.next-web-input-routing/standalone/mir2-web3/apps/web");
+  const distDirectory = process.env.MIR2_NEXT_DIST_DIR ?? ".next-web-input-routing";
+  assert.match(distDirectory, /^[A-Za-z0-9._-]+$/, "configured Next dist is a safe single directory");
+  assert.notEqual(distDirectory, ".");
+  assert.notEqual(distDirectory, "..");
+  const sourceApp = path.resolve(import.meta.dirname, "..", distDirectory, "standalone/mir2-web3/apps/web");
   const root = await fs.realpath(path.join(sourceApp, "node_modules"));
   const closure = await collectSharpNativePackages(root);
   assert.equal(closure.targetPlatform, nativePlatform);
@@ -364,7 +367,8 @@ test("actual current atlas closure selects only declared pages and validates the
   assert.equal(closure.files.has("generated/map-atlas/manifest.json"), true);
   for (const page of manifest.pages) assert.equal(closure.files.has(page.u.slice(1)), true);
   const historic = (await fs.readdir(path.join(publicRoot, "generated/map-atlas")))
-    .find((name) => name.startsWith("manifest.") && name.endsWith(".json"));
+    .find((name) => name !== "manifest.json" && name.startsWith("manifest.") && name.endsWith(".json"));
+  assert.ok(historic, "an actual historical manifest exists");
   assert.equal(closure.files.has(`generated/map-atlas/${historic}`), false);
   const selected = (relative, isDirectory) => selectThinPublicEntry(relative, isDirectory, {
     runtimeVersion, runtimeFiles: new Set([runtimeFile]), mapAtlasFiles: closure.files,
@@ -771,3 +775,79 @@ test("local map custody rejects file, ancestor, manifest, input and public-root 
 });
 
 console.log(`portable fixture retained at ${fixtureRoot}`);
+
+async function warehouseSkinReference73() {
+  const sourcePath = path.resolve(import.meta.dirname,
+    "../../game-client/client-bevy/src/crystal_ui/storage_paint.rs");
+  const stat = await fs.lstat(sourcePath);
+  assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "canonical warehouse painter is ordinary");
+  const source = await fs.readFile(sourcePath, "utf8");
+  const declaration = source.match(/pub const STORAGE_REQUIRED_SKINS:\s*&\[&str\]\s*=\s*&\[([\s\S]*?)\];/);
+  assert.ok(declaration, "canonical warehouse static skin declaration exists");
+  const skins = [...declaration[1].matchAll(/"(original-ui\/[^"\r\n]+\.png)"/g)].map(match => match[1]);
+  assert.equal(skins.length, 16, "bounded canonical warehouse static art closure");
+  assert.equal(new Set(skins).size, skins.length, "canonical skin paths are unique");
+  return skins;
+}
+
+test("canonical warehouse static skins are local while adjacent media and old remote roots stay remote", async () => {
+  const skins = await warehouseSkinReference73();
+  for (const skin of skins) assert.equal(selectPublic(skin, false), true, skin);
+  for (const skin of ["original-ui/Prguse/2092.png", "original-ui/Prguse/2094.png",
+    "original-ui/Prguse/2095.png"]) assert.equal(selectPublic(skin, false), true, skin);
+  for (const remote of ["original-ui/Title/742.png", "original-ui/Title/747.png",
+    "original-ui/Title/113.mask.png", "original-ui/Prguse/585.png", "original-ui/Prguse2/359.png",
+    "original-ui/Items/2.png", "original-ui/ChrSel/0.png", "original-ui/Sound/1.wav"])
+    assert.equal(selectPublic(remote, false), false, remote);
+});
+
+test("actual public copy retains exact warehouse bytes, legacy art and metadata without whole-library selection", async () => {
+  const skins = await warehouseSkinReference73();
+  const base = path.join(fixtureRoot, "warehouse-skins-copy");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  const legacy = ["original-ui/Prguse/2092.png", "original-ui/Prguse/2094.png", "original-ui/Prguse/2095.png"];
+  const bodies = new Map([...skins, ...legacy].map(skin => [skin, Buffer.from("exact source bytes: " + skin)]));
+  for (const [skin, bytes] of bodies) await write(path.join(source, skin), bytes);
+  const meta = { frames: skins.map(skin => ({ path: "/" + skin })) };
+  await write(path.join(source, "original-ui/Title/meta.json"), JSON.stringify(meta, null, 2));
+  await write(path.join(source, "original-ui/Title/742.png"), "remote neighbor");
+  const copy = await copySelectedPublic({ sourceRoot: source, destinationRoot: destination, selection: selectPublic });
+  assert.equal(copy.files, bodies.size + 1);
+  for (const [skin, bytes] of bodies) {
+    assert.deepEqual(await fs.readFile(path.join(destination, skin)), bytes, skin);
+    assert.deepEqual(await fs.readFile(path.join(source, skin)), bytes, "source retained: " + skin);
+  }
+  assert.deepEqual(JSON.parse(await fs.readFile(path.join(destination, "original-ui/Title/meta.json"), "utf8")), meta);
+  assert.equal(await exists(path.join(destination, "original-ui/Title/742.png")), false);
+  assert.equal((await auditPortableTree(destination)).links, 0);
+});
+
+test("absent warehouse skin stays absent after actual copy and is never replaced by a neighboring frame", async () => {
+  const skins = await warehouseSkinReference73(), missing = "original-ui/Title/743.png";
+  assert.ok(skins.includes(missing));
+  const base = path.join(fixtureRoot, "warehouse-skin-missing");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  for (const skin of skins.filter(skin => skin !== missing)) await write(path.join(source, skin), skin);
+  await write(path.join(source, "original-ui/Title/742.png"), "different adjacent frame");
+  const copy = await copySelectedPublic({ sourceRoot: source, destinationRoot: destination, selection: selectPublic });
+  assert.equal(copy.files, skins.length - 1);
+  assert.equal(await exists(path.join(source, missing)), false);
+  assert.equal(await exists(path.join(destination, missing)), false);
+  await assert.rejects(fs.readFile(path.join(destination, missing)), error => error.code === "ENOENT");
+  assert.equal(await exists(path.join(destination, "original-ui/Title/742.png")), false);
+  for (const skin of skins.filter(skin => skin !== missing))
+    assert.equal(await fs.readFile(path.join(destination, skin), "utf8"), skin, skin);
+});
+
+test("warehouse local skin copy retains fatal differing-source collision checks", async () => {
+  const skins = await warehouseSkinReference73(), skin = "original-ui/Title/113.png";
+  assert.ok(skins.includes(skin));
+  const base = path.join(fixtureRoot, "warehouse-skin-collision");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  await write(path.join(source, skin), "exact source warehouse password art");
+  await write(path.join(destination, skin), "different previously copied art");
+  await assert.rejects(copySelectedPublic({ sourceRoot: source, destinationRoot: destination,
+    selection: selectPublic }), /collision differs/);
+  assert.equal(await fs.readFile(path.join(source, skin), "utf8"), "exact source warehouse password art");
+  assert.equal(await fs.readFile(path.join(destination, skin), "utf8"), "different previously copied art");
+});

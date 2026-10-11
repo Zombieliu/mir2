@@ -1,0 +1,42 @@
+{
+  "owner": "Root",
+  "kind": "Source73 final full strict03 independent DATA acceptance",
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/standalone-preparation03/full-source-snapshot01.json",
+    "bytes": 75824066,
+    "sha256": "3e51721c2b684acbb4cfb6a608f135b997ba51094c1adaf77c6ac4cfc4806b52"
+  },
+  "root": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\strict-next-input03\\mir2-web3",
+  "counts": {
+    "inputs": 71034,
+    "internalFiles": 71032,
+    "externalReferences": 2,
+    "directoriesIncludingRoot": 6014,
+    "strictInputs": 36737,
+    "actualNextOutputs": 21036,
+    "ordinaryDependencySupplement": 13261,
+    "supplementBytes": 334077695,
+    "topDependencies": 15209,
+    "standaloneDependencies": 15209,
+    "NFTs": 61,
+    "rawReferences": 130518,
+    "physicalTargets": 39332
+  },
+  "knownUnionMatched": 71034,
+  "hashCompared": 71034,
+  "hashDifferences": 0,
+  "physicalFiles": 71032,
+  "physicalDirectoriesIncludingRoot": 6014,
+  "physicalMemberDifferences": 0,
+  "linksOrSpecialFiles": 0,
+  "actualNextOutputFilesPreserved": 21036,
+  "nftClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-nft-closure03.json",
+    "bytes": 14192284,
+    "sha256": "6e7662efc04c04a9769ffb7d594fb78315e05708c83508abc9de2476b980cfae"
+  },
+  "productExecuted": false,
+  "accepted": true,
+  "goalComplete": false,
+  "candidateAccepted": false
+}

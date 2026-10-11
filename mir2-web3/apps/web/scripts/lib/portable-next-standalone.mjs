@@ -10,6 +10,23 @@ const ROOT_PUBLIC_FILES = new Set([
 ]);
 const LOCAL_UI_FALLBACKS = new Set([
   "original-ui/Prguse/2092.png", "original-ui/Prguse/2094.png", "original-ui/Prguse/2095.png",
+  // Exact static art from Crystal STORAGE_REQUIRED_SKINS; all other remote media stays remote.
+  "original-ui/Prguse/586.png",
+  "original-ui/Title/0.png",
+  "original-ui/Title/743.png",
+  "original-ui/Title/744.png",
+  "original-ui/Title/745.png",
+  "original-ui/Title/746.png",
+  "original-ui/Prguse2/360.png",
+  "original-ui/Prguse2/361.png",
+  "original-ui/Prguse2/362.png",
+  "original-ui/Prguse/2443.png",
+  "original-ui/Title/483.png",
+  "original-ui/Title/484.png",
+  "original-ui/Title/485.png",
+  "original-ui/Title/113.png",
+  "original-ui/Title/114.png",
+  "original-ui/Title/115.png",
 ]);
 const LOCAL_DEBUG_FILES = new Set([
   "debug/map-samples/smtile-72.png", "debug/map-samples/smtile-80.png",
