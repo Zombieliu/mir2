@@ -1,5 +1,15 @@
 # Live health, billing and movement integration — 2026-10-11
 
+## Follow-up: renderer-neutral mail feature boundary
+
+The actual first complete client run38114465530 at4006 failed Android compilation and Shared Rust unit-test compilation: renderer-neutral mail referenced optional native_i18n and game-data. The original decoded failed-job logs are retained. Native-specific localization and fallback templates now compile only with native-ui; default hosts preserve supplied names, icons, tooltip metadata, attachment UIDs and normalized literal mail text without enabling native UI or game-data. Original native branches and assertions reconstruct exactly after removing the reviewed feature attributes/additions.
+
+Actual local default mail11/11 and native mail13/13 pass, including all nine language purchase/gift templates; these are24 executions,15 unique function names with9 overlapping across features. Two new default regressions verify opaque authoritative mail and missing-date display. Both feature-specific native tests and default tests execute, with0 ignored. Full Bevy formatting and renderer-neutral runtime compilation pass. Initial formatting output and both original CI compilation failures remain. This is not a whole-source Windows build or player acceptance.
+
+The real monthly run38114406092 and Stripe/gift run38114406100 at4006 completed successfully, including actual isolated PostgreSQL competing writers, restart, renewal and gift delivery. Production payment tests were not performed. The follow-up changes only mail.rs and documentation/evidence; server source and resources remain unchanged. Any reused Linux artifact keeps its actual4006 source identity; no artifact is relabeled. A corrected complete client workflow and fresh signed delivery remain pending.
+
+[Original failures, source reconstruction and both feature checks](generated/player-qa/live-health-billing-movement-integration-20261011/mail-feature-boundary-01/EVIDENCE.json).
+
 The actual public Gateway source `01a8c48a425aecfad6adf49ff721b0aa14ce4d44` is merged into the owned movement/escape source `9c71a90396a2615177c7b2f8c2366f9c6e6598f1`. Both histories remain parents; no reset, force push, authentication bypass or production collision weakening is used. Source CanMove/Fishing, real Zone buff duration, admitted-animation escape and the current live owner-health FIFO, rounded-zero health, monthly card, billing, gifting and mail behavior are preserved together.
 
 | Actual local gate | Passed | Existing ignored |

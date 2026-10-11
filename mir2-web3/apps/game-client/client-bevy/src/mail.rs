@@ -4,7 +4,9 @@
 //! Windows Mail panel shows the same inbox as the browser. UI selection is kept
 //! alongside the authoritative list but is not overwritten by the server.
 
-use crate::inventory::{CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel};
+use crate::inventory::CrystalItemTooltipSourceModel;
+#[cfg(feature = "native-ui")]
+use crate::inventory::{CrystalItemInfoModel, CrystalUserItemModel};
 use bevy::prelude::Resource;
 use serde::de::{self, SeqAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -116,6 +118,7 @@ pub struct MailAttachment {
 }
 
 impl MailAttachment {
+    #[cfg(feature = "native-ui")]
     pub fn is_monthly_card(&self) -> bool {
         // Identity comes from the reserved index/key, never a player's free
         // text that happens to resemble a shop item name.
@@ -123,6 +126,15 @@ impl MailAttachment {
             || (self.item_index.is_none() && self.key.as_deref() == Some("crystal-item-1000001"))
     }
 
+    #[cfg(not(feature = "native-ui"))]
+    pub fn image_index(&self) -> Option<u16> {
+        self.tooltip_source
+            .as_ref()
+            .map(|source| source.user_item_image(u32::from(self.count)))
+            .or_else(|| self.image.and_then(|image| u16::try_from(image).ok()))
+    }
+
+    #[cfg(feature = "native-ui")]
     pub fn image_index(&self) -> Option<u16> {
         self.tooltip_source
             .as_ref()
@@ -134,6 +146,12 @@ impl MailAttachment {
             })
     }
 
+    #[cfg(not(feature = "native-ui"))]
+    pub fn display_tooltip_source(&self) -> Option<CrystalItemTooltipSourceModel> {
+        self.tooltip_source.clone()
+    }
+
+    #[cfg(feature = "native-ui")]
     pub fn display_tooltip_source(&self) -> Option<CrystalItemTooltipSourceModel> {
         self.tooltip_source.clone().or_else(|| {
             if !self.is_monthly_card() {
@@ -164,6 +182,7 @@ impl MailAttachment {
     }
 
     pub fn label(&self) -> String {
+        #[cfg(feature = "native-ui")]
         if self.is_monthly_card() {
             return crate::native_i18n::for_locale(
                 crate::native_i18n::locale(),
@@ -227,10 +246,17 @@ pub struct MailMessage {
 }
 
 impl MailMessage {
+    #[cfg(not(feature = "native-ui"))]
+    pub fn display_body(&self) -> String {
+        self.body.replace("\\r\\n", "\r\n")
+    }
+
+    #[cfg(feature = "native-ui")]
     pub fn display_body(&self) -> String {
         self.display_body_for_locale(crate::native_i18n::locale())
     }
 
+    #[cfg(feature = "native-ui")]
     fn display_body_for_locale(&self, language: crate::native_i18n::Locale) -> String {
         let body = self.body.replace("\\r\\n", "\r\n");
         let quantity: u32 = self
@@ -433,6 +459,17 @@ pub fn mail_attachment_label(item: &MailAttachment) -> String {
 }
 
 /// Crystal DateTime.FromBinary display; unknown/invalid dates remain blank.
+#[cfg(not(feature = "native-ui"))]
+pub fn mail_date_display_label(binary: i64) -> String {
+    let label = mail_date_label(binary);
+    if label.is_empty() {
+        "Not recorded".to_owned()
+    } else {
+        label
+    }
+}
+
+#[cfg(feature = "native-ui")]
 pub fn mail_date_display_label(binary: i64) -> String {
     let label = mail_date_label(binary);
     if label.is_empty() {
@@ -482,6 +519,55 @@ pub fn mail_delete_enabled(msg: &MailMessage) -> bool {
 mod tests {
     use super::*;
 
+    #[cfg(not(feature = "native-ui"))]
+    #[test]
+    fn renderer_neutral_mail_keeps_shop_metadata_and_opaque_text() {
+        let mail: MailMessage = serde_json::from_value(serde_json::json!({
+            "sender": "Gameshop",
+            "body": "Game shop purchase\\r\\nMonthlyCard30Days x 1 was sent from the game shop.",
+            "items": [{
+                "itemIndex": 1000001,
+                "uniqueId": 71,
+                "count": 1,
+                "name": "MonthlyCard30Days",
+                "image": 1813,
+                "tooltipSource": {"info": {"item_index": 1000001, "name": "MonthlyCard30Days"}}
+            }]
+        }))
+        .unwrap();
+        let original = mail.clone();
+        assert_eq!(
+            mail.display_body(),
+            "Game shop purchase\r\nMonthlyCard30Days x 1 was sent from the game shop."
+        );
+        assert_eq!(mail.items[0].label(), "MonthlyCard30Days");
+        assert_eq!(mail.items[0].unique_id, Some(71));
+        assert_eq!(
+            mail.items[0].display_tooltip_source(),
+            mail.items[0].tooltip_source
+        );
+        let supplied_icon = MailAttachment {
+            image: Some(1813),
+            ..Default::default()
+        };
+        assert_eq!(supplied_icon.image_index(), Some(1813));
+        assert_eq!(mail, original, "display cannot mutate authoritative mail");
+    }
+
+    #[cfg(not(feature = "native-ui"))]
+    #[test]
+    fn renderer_neutral_unknown_mail_date_has_placeholder_without_timestamp() {
+        assert_eq!(mail_date_label(0), "");
+        assert_eq!(mail_date_display_label(0), "Not recorded");
+        let timestamp = 621_355_968_000_000_000;
+        assert_eq!(
+            mail_date_display_label(timestamp),
+            mail_date_label(timestamp)
+        );
+        assert_eq!(mail_date_display_label(-1), "Not recorded");
+    }
+
+    #[cfg(feature = "native-ui")]
     #[test]
     fn monthly_card_mail_display_uses_exact_identity_and_does_not_rewrite_letters() {
         let attachment = MailAttachment {
@@ -530,6 +616,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "native-ui")]
     #[test]
     fn monthly_card_mail_localizes_actual_source_purchase_and_gift_templates_in_all_languages() {
         use crate::native_i18n::{for_locale, format_for, Locale};
@@ -588,6 +675,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "native-ui")]
     #[test]
     fn monthly_card_mail_keeps_wrong_quantity_and_opaque_shop_text_unchanged() {
         let mut mail = MailMessage {
@@ -631,6 +719,7 @@ mod tests {
         assert_eq!(mail.display_body(), mail.body);
     }
 
+    #[cfg(feature = "native-ui")]
     #[test]
     fn missing_mail_date_has_a_visible_placeholder_without_inventing_a_timestamp() {
         assert_eq!(mail_date_label(0), "");
