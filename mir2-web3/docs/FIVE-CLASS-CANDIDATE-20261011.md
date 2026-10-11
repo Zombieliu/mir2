@@ -47,10 +47,58 @@ verified and staged for local packaging but are not recursively added to Git.
 The normal package still checks genuine full-pack identities, fonts, native
 maps and the complete selected-profile asset closure.
 
+## First full merged Windows run — retained failure
+
+The real full01 result is912 pass/75 fail/7 original external ignores. Its
+[original source, command, result and logs](../artifacts/qa-evidence/five-class-candidate-20261011/d917-native-red01.json)
+are retained, with no release acceptance. The checkout lacked its normally
+generated native keyed-map index, so asset_root failed and local frames/maps
+were unavailable to many tests. The original Node builder now generates
+map0 with7432 real entries, missing241 under the unchanged2969 source budget.
+The old, retained compiled binary passes a single asset-root diagnostic; this
+does not qualify current repaired Source.
+
+Two newly authored DoubleSlash tests expected idle100ms. The original Crystal
+Player Standing descriptor and unchanged Native catalog are500ms; only those
+two values are corrected. Active two-phase timings, queue/sequence, movement,
+held input and camera assertions remain unchanged. Current-source full02
+and newest NPC history integration precede any release build/publication.
+
+## Second actual R25 merge — 2026-10-12 checkpoint
+
+The actual d917 merge retains Source CanMove consumption, Turn delay, all
+shared-buff real millisecond/pause clocks, bounded terrain loading, map
+availability, lightweight outcome tick, ordered health, Native queue
+ownership, mail feature isolation and eleven real Source pet WAV inputs.
+
+Selected tests pass simulation124 and Gateway18, plus CanMove9, shared buff
+clocks5, owner health16/32, zero-health7, outcome3, transfer4 and default-feature
+monthly8. The latter includes both new classes buying the real card SKU,
+claiming its mail, consuming its permanent UID and retaining one debit and
+one expiry across normal logout/relogin. Two original billing fault-injection
+cases require test-support and are not counted in the local eight-case run.
+The unchanged original Linux workflow still executes them before release.
+
+[Exact results and original logs](../artifacts/qa-evidence/five-class-candidate-20261011/d917-backend-checks01.json)
+retain the initial120/4 failure. Three strict cold BoneFamiliar fixtures now
+use genuine map0 terrain with equivalent geometry; their root/HP/control/
+visibility/idempotence assertions are unchanged. The old Taoist Hiding tick
+assumption is explicitly superseded by R25 real-ms projection and now also
+checks real serialization and expiry. Production recovery is unchanged.
+
+Native movement waits for both DoubleSlash phases and complete committed
+BackStep Jump, including a Jump queued after Struck. New local prediction
+cannot replace its camera window while that Source action is pending. Five
+typed-packet combination tests are written; actual Native execution, fresh
+clean-source builds, signed delivery and paired publication remain pending.
+The original266 Native Rust file formatting check failed and is retained;
+eight formatter-only files were corrected and the identical check now passes.
+
 ## First actual R24 merge — 2026-10-12 checkpoint
 
-The first working merge retains the R24 schema8, owner HP/MP/death, monthly
-card and commercial mail code. Normal no-target/direction casts use shared
+The first working merge retains the R24 owner HP/MP/death, monthly card
+and commercial mail code. The former schema8 label was incorrect: actual
+Zone canonical/runtime versions remain7/7 and Gateway/factory versions3/2. Normal no-target/direction casts use shared
 Zone admission. Six Source material-free spells no longer attempt an empty
 economic consume; PoisonSword still requires genuine powder. A real Focus
 shot uses the viewport/health FIFO, so queue saturation cannot bypass ordering

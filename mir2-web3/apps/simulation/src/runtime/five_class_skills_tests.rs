@@ -479,7 +479,7 @@ fn assassin_stealth_half_second_lifetime_is_precise_persisted_and_expires_withou
 }
 
 #[test]
-fn shared_assassin_stealth_mirror_keeps_subtick_duration_and_legacy_hiding_layout() {
+fn shared_assassin_and_taoist_mirrors_keep_subtick_duration_and_serialized_clock() {
     let (mut session, _, _) = assassin_session();
     for (buff_type, key) in [(13, "moon-light"), (14, "dark-body"), (2, "hiding")] {
         session.apply_zone_player_buff_packets(
@@ -506,17 +506,20 @@ fn shared_assassin_stealth_mirror_keeps_subtick_duration_and_legacy_hiding_layou
             .iter()
             .find(|buff| buff.key == key)
             .unwrap();
-        if buff_type == 2 {
-            assert!(
-                buff.real_time_duration.is_none(),
-                "original Taoist hiding layout is unchanged"
-            );
-        } else {
-            assert!(buff.real_time_duration.is_some());
-            assert!(!buff.infinite());
-            assert!(buff.remaining_ms(tick) <= 7500);
-            let saved = serde_json::to_value(buff).unwrap();
-            assert!(saved["real_time_duration"].as_u64().unwrap() <= 7500);
-        }
+        // R25 projects every shared finite buff with its real millisecond
+        // lifetime, including original Taoist Hiding. Personal tick count must
+        // not retire any of these three leases early.
+        assert!(buff.real_time_duration.is_some());
+        assert!(!buff.infinite());
+        assert!(!buff.real_time_duration.as_ref().unwrap().is_paused());
+        assert!(buff.remaining_ms(tick) > 0 && buff.remaining_ms(tick) <= 7500);
+        let saved = serde_json::to_value(buff).unwrap();
+        let remaining = saved["real_time_duration"].as_u64().unwrap();
+        assert!(remaining > 0 && remaining <= 7500);
+        let mut restored: BuffState = serde_json::from_value(saved).unwrap();
+        assert!(restored.real_time_duration.is_some());
+        assert!(!restored.expired(tick));
+        restored.real_time_duration.as_mut().unwrap().elapse_for_test(7500);
+        assert!(restored.expired(tick));
     }
 }

@@ -1,0 +1,993 @@
+{
+  "utc": "2026-10-11T01:09:39.093910+00:00",
+  "parent": "9d0839306641831a2a7982c9b1ae04a72626ed63",
+  "sourceSha256": {
+    ".github/workflows/gateway-release.yml": "24912ca3a6c2f6b69160170c0214bfb512177dff35460774359f7cf3352282df",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs": "2de9d570ad0dde4c4202f067f4b957422fad5102a4a1e3bd58ff37ca549a1f1a",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime/source_can_move_tests.rs": "49ad1b3e838fa91e79f84c43d5cd69cc078cd21aa6cb398b70925392ade3b9ca",
+    "mir2-web3/apps/simulation/src/runtime/session.rs": "b934bb5c16b622ea94718c74a7708156926c53f82f6d8aa474165dd0b8bbdaac",
+    "mir2-web3/apps/simulation/src/runtime/session_zone_buff_clock_tests.rs": "17b1434fde76b3b581a84ce510654430dde42962849fcfaca724645b7356c590",
+    "mir2-web3/apps/gateway/tests/shared_purification_map_transfer.rs": "8efa0e7bf7fcb778bd37c7432ca4b1e41615bd38fb606f7258ccc3e2a160dcca"
+  },
+  "checks": [
+    {
+      "stem": "check-11-original-optimized-gateway-with-real-clock-fix",
+      "command": [
+        "cargo",
+        "+1.89.0",
+        "test",
+        "--locked",
+        "--release",
+        "-j",
+        "1",
+        "-p",
+        "mir2-gateway",
+        "--test",
+        "shared_purification_map_transfer",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "passed": 5,
+      "testNames": [
+        "mir2-gateway:shared_purification_map_transfer:normal_gateway_hostile_player_poisoning_consumes_backpack_powder_once_and_rejects_cooldown",
+        "mir2-gateway:shared_purification_map_transfer:normal_gateway_poisoning_refuses_safe_friend_stale_point_range_and_mp_without_powder_debit",
+        "mir2-gateway:shared_purification_map_transfer:normal_gateway_poisoning_refuses_the_actual_native_dead_player_without_powder_debit",
+        "mir2-gateway:shared_purification_map_transfer:normal_gateway_private_ticks_cannot_expire_authoritative_curse",
+        "mir2-gateway:shared_purification_map_transfer:normal_gateway_purification_survives_real_town_scroll_map_changes_in_both_actor_orders"
+      ],
+      "selectedBeforeAfterHashesEqual": true,
+      "utcStarted": "2026-10-10T15:53:19.0055346Z",
+      "utcFinished": "2026-10-10T16:15:59.8191659Z"
+    },
+    {
+      "stem": "check-12-final-simulation-action-buff-collision",
+      "command": [
+        "cargo",
+        "+1.89.0",
+        "test",
+        "--locked",
+        "-j",
+        "1",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "source_can_move_tests::",
+        "session_zone_buff_clock_tests::",
+        "buff_duration::tests::",
+        "player_action_cadence_tests::",
+        "player_magic_cooldown_tests::",
+        "movement_deadline_tests::",
+        "map_transfer_availability_tests::",
+        "unavailable_collision_tests::",
+        "zone::collision::tests"
+      ],
+      "passed": 47,
+      "testNames": [
+        "mir2-simulation:lib:runtime::buffs::buff_duration::tests::creature_duration_clone_preserves_anchor_and_monotonic_expiry",
+        "mir2-simulation:lib:runtime::buffs::buff_duration::tests::creature_duration_serialization_preserves_remaining_and_legacy_absence",
+        "mir2-simulation:lib:runtime::buffs::buff_duration::tests::source_infinite_expire_time_is_metadata_and_cold_round_trip_cannot_start_a_countdown",
+        "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::gzip_only_destination_uses_real_bounds_and_base_terrain",
+        "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::manifest_destination_checks_world_bounds_and_base_terrain",
+        "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::manifest_destination_keeps_real_closed_door_landing_cell",
+        "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::manifest_destination_rejects_missing_terrain",
+        "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::finite_projection_keeps_existing_scalar_save_duration_layout",
+        "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::finite_zone_projection_does_not_expire_from_personal_tick_count",
+        "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::finite_zone_projection_still_expires_once_on_real_time",
+        "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::native_zone_removal_clears_projection_without_waiting_for_its_deadline",
+        "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::paused_projection_resumes_only_on_a_matching_owner_packet",
+        "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::explicit_unbounded_keeps_original_serialized_checkpoint_shape",
+        "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::missing_terrain_blocks_transfer_exception_and_door_changes",
+        "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::missing_terrain_cannot_share_the_explicit_unbounded_state_root_input",
+        "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::missing_terrain_clone_retains_closed_authority",
+        "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::empty_movement_cancellation_acknowledges_owner_without_mutating_action_state",
+        "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::movement_deadline_301_to_901_and_repeated_steps_do_not_accumulate_tick_cost",
+        "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::movement_deadline_cancel_leave_and_frozen_poison_do_not_leave_due_work",
+        "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::movement_deadline_late_wake_does_not_replay_steps_or_shorten_next_cooldown",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::accepted_cast_blocks_melee_until_the_600ms_action_boundary",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flame_field_retains_its_longer_crystal_global_delay",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flame_preparation_and_expiry_are_isolated_to_the_correct_owner",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flame_transfer_clock_never_crosses_account_character_or_object_identity",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_and_action_clocks_survive_same_and_cross_map_join_but_not_logout",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_consumption_retains_exact_deadline_and_charges_once",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_expiry_is_checked_without_a_maintenance_tick",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_mana_death_and_rejected_melee_do_not_consume_charge",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_never_enters_the_active_magic_damage_or_spend_path",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::melee_blocks_cast_until_550ms_without_extending_the_swing_cooldown",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::movement_blocks_cast_until_600ms_and_the_public_getter_agrees",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::new_movement_after_cast_waits_for_action_lock_then_runs_once",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::taoist_uses_the_later_of_global_delay_and_own_skill_delay",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::warrior_shoulder_dash_cannot_repeat_or_move_before_its_action_lock",
+        "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::wizard_cannot_alternate_spells_to_bypass_crystal_global_delay",
+        "mir2-simulation:lib:runtime::zone::runtime::player_magic_cooldown_tests::accepted_soulfire_uses_zone_clock_until_exact_spell_ready_time",
+        "mir2-simulation:lib:runtime::zone::runtime::player_magic_cooldown_tests::cooldown_getter_includes_global_gate_without_cross_owner_leakage",
+        "mir2-simulation:lib:runtime::zone::runtime::player_magic_cooldown_tests::uncast_and_rejected_magic_do_not_create_or_extend_cooldown",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::accepted_same_direction_turn_still_checks_the_current_coordinate",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::dead_players_only_receive_correction_for_turn_walk_and_run_without_clock_changes",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::movement_poison_expiring_exactly_at_consume_time_uses_the_base_turn_delay",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::non_movement_poisons_and_missing_combat_admission_do_not_block_source_can_move",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::not_ready_status_does_not_consume_or_change_the_latest_pending_step",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::queued_actions_revalidate_fishing_from_both_trusted_projections_without_replay",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::queued_same_direction_turn_uses_slow_added_after_arrival",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::queued_turn_walk_and_run_revalidate_new_control_poisons_then_retire",
+        "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::slow_expiring_before_consume_uses_350_without_rewriting_an_accepted_700_deadline"
+      ],
+      "selectedBeforeAfterHashesEqual": true,
+      "utcStarted": "2026-10-10T16:26:24.6743650Z",
+      "utcFinished": "2026-10-10T16:26:27.7908479Z"
+    },
+    {
+      "stem": "check-13-final-crowded-pet-status-integrations",
+      "command": [
+        "cargo",
+        "+1.89.0",
+        "test",
+        "--locked",
+        "--features",
+        "test-support",
+        "--no-fail-fast",
+        "-j",
+        "1",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_crowded_escape",
+        "--test",
+        "shared_pet_pvp",
+        "--test",
+        "shared_purification_map_transfer",
+        "--test",
+        "shared_snake_master_lifecycle",
+        "--test",
+        "shared_missing_map_collision",
+        "--",
+        "--test-threads=1"
+      ],
+      "passed": 76,
+      "testNames": [
+        "mir2-simulation:shared_crowded_escape:completely_surrounded_player_cannot_cross_live_monster_but_can_escape_after_kill",
+        "mir2-simulation:shared_crowded_escape:crystal_cast_status_mask_keeps_lr_paralysis_out_and_preparation_neutral",
+        "mir2-simulation:shared_crowded_escape:crystal_dazed_allows_escape_but_rejects_physical_attack_and_actual_magic",
+        "mir2-simulation:shared_crowded_escape:crystal_stun_allows_manual_walk_and_run_through_empty_corridor",
+        "mir2-simulation:shared_crowded_escape:crystal_stun_allows_physical_attack_but_never_bypasses_melee_action_cadence",
+        "mir2-simulation:shared_crowded_escape:crystal_stun_rejects_actual_cast_without_mana_cooldown_or_target_damage",
+        "mir2-simulation:shared_crowded_escape:dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch",
+        "mir2-simulation:shared_crowded_escape:frozen_expiry_releases_movement_even_when_independent_stun_remains_active",
+        "mir2-simulation:shared_crowded_escape:living_struck_clock_is_optional_in_checkpoints_and_cleared_on_life_transition",
+        "mir2-simulation:shared_crowded_escape:ordinary_struck_admission_is_strictly_after_the_shared_five_hundred_ms_deadline",
+        "mir2-simulation:shared_crowded_escape:paralysis_frozen_and_lr_paralysis_keep_real_block_until_deadline_then_new_held_move_works",
+        "mir2-simulation:shared_crowded_escape:pending_escape_keeps_finite_player_action_deadline_despite_dense_incoming_hits",
+        "mir2-simulation:shared_crowded_escape:seven_same_tick_monster_hits_damage_each_time_but_present_one_shared_flinch",
+        "mir2-simulation:shared_crowded_escape:staggered_dense_hits_share_five_hundred_ms_window_without_dropping_damage",
+        "mir2-simulation:shared_missing_map_collision:missing_map_stays_closed_after_ordinary_checkpoint_restore",
+        "mir2-simulation:shared_missing_map_collision:normal_missing_map_run_corrects_owner_without_broadcast_or_later_drift",
+        "mir2-simulation:shared_missing_map_collision:normal_missing_map_walk_corrects_owner_without_broadcast_or_later_drift",
+        "mir2-simulation:shared_missing_map_collision:strict_restore_does_not_turn_missing_terrain_into_an_explicit_open_arena",
+        "mir2-simulation:shared_missing_map_collision:trusted_explicit_unbounded_arena_retains_normal_walk_and_run",
+        "mir2-simulation:shared_pet_pvp:shared_human_binding_shot_reaches_actual_owned_monster_and_releases_neighbours_on_hit",
+        "mir2-simulation:shared_pet_pvp:shared_human_electric_shock_is_delayed_and_its_source_colour_expires_exactly",
+        "mir2-simulation:shared_pet_pvp:shared_human_electric_shock_really_tames_source_monster_and_releases_at_one_hour",
+        "mir2-simulation:shared_pet_pvp:shared_human_ground_one_shot_keeps_future_action_and_hits_ordinary_wild_once",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_brown_starts_on_real_damage_and_expires_at_exact_deadline",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_delayed_hit_rechecks_friends_safe_and_online_life",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_fire_bounce_first_leg_and_wild_to_pet_chain_keep_cast_authority",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_fire_bounce_old_wild_leg_cannot_mint_rejoined_source_authority",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_ground_spell_has_real_delay_and_rechecks_safe_or_cold_source",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_real_melee_obeys_source_mode_group_guild_enemy_and_safe_matrix",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_real_spell_and_range_hits_use_typed_damage",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_red_brown_permission_uses_real_master_damage_and_strict_expiry",
+        "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_same_master_requires_all_and_early_safe_exception",
+        "mir2-simulation:shared_pet_pvp:shared_human_poison_cloud_hits_real_player_and_owned_pet_then_owned_dot",
+        "mir2-simulation:shared_pet_pvp:shared_human_poison_death_retains_global_node_across_maps_and_revokes_real_new_lives",
+        "mir2-simulation:shared_pet_pvp:shared_human_poisoning_applies_after_500ms_ticks_strictly_and_issues_deferred_pk",
+        "mir2-simulation:shared_pet_pvp:shared_human_projectile_death_is_born_at_real_deferred_impact_and_rechecks_lives",
+        "mir2-simulation:shared_pet_pvp:shared_human_real_native_fatal_attack_issues_source_receipt_for_all_three_classes",
+        "mir2-simulation:shared_pet_pvp:shared_human_vampirism_heals_source_after_strict_delay_in_ten_hp_chunks",
+        "mir2-simulation:shared_pet_pvp:shared_owned_custom_vampire_and_toad_pause_modes_retain_real_assigned_target_for_focus_resume",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirror_once",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_enemy_guild_mode_does_not_attack_player_after_provocation",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_focus_on_missed_owner_attack_can_causally_kill_once",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_issued_death_receipt_survives_online_map_handoff_and_ack_is_exact",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_committed_current_lives",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_cleans_all_maps",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_manager_normal_map_transfer_preserves_source_modes_and_real_master",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_none_is_quiet_and_both_restores_guard",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_owner_death_emits_real_pet_death_and_cancels_hit",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_protects_owner_with_delayed_real_damage_and_pet_struck_id",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_queued_hit_cannot_cross_victim_revive_or_reconnect",
+        "mir2-simulation:shared_pet_pvp:shared_owned_pet_redirects_to_real_enemy_pet_without_damaging_owner_proxy",
+        "mir2-simulation:shared_pet_pvp:shared_owned_shinsu_guard_uses_real_player_breath_and_550ms_delay",
+        "mir2-simulation:shared_pet_pvp:shared_owned_skeleton_and_shinsu_wait_for_a_real_owner_attack_on_non_threat_wild",
+        "mir2-simulation:shared_pet_pvp:shared_owned_summon_cast_cannot_cross_owner_death_revive_or_rejoin",
+        "mir2-simulation:shared_pet_pvp:shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_flight_lives",
+        "mir2-simulation:shared_pet_pvp:shared_owned_vampire_public_fatal_hit_releases_master_before_safe_owner_death_and_never_bills_pk",
+        "mir2-simulation:shared_pet_pvp:shared_owned_vampire_real_summon_bites_immediately_mac_and_heals_on_strict_source_clock",
+        "mir2-simulation:shared_purification_map_transfer:normal_map_buffs_expire_at_the_source_absolute_deadline_without_renewal",
+        "mir2-simulation:shared_purification_map_transfer:normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry",
+        "mir2-simulation:shared_purification_map_transfer:normal_map_join_preserves_source_buffs_and_their_absolute_expiry",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_both_map_transfers_preserve_original_actors_and_500_deadline",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_cold_manager_restore_never_rebinds_old_pending_actions",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_destination_object_id_conflict_never_retags_the_original_actor",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_destination_uses_current_friendship_at_completion",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_logout_relogin_and_nonretained_join_never_adopt_old_actions",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_map_handoff_rejects_current_actor_death_or_new_life",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_one_actor_or_different_destination_cannot_complete",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_repeated_map_hops_keep_one_original_deadline_and_destination_audience",
+        "mir2-simulation:shared_purification_map_transfer:normal_purification_target_arriving_after_completion_cannot_resurrect_the_action",
+        "mir2-simulation:shared_purification_map_transfer:normal_self_purification_follows_its_single_live_actor_to_the_destination",
+        "mir2-simulation:shared_purification_map_transfer:normal_walk_and_run_cannot_shortcut_the_original_600ms_cast_action_clock",
+        "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_master_birth_delayed_mac_hit_and_paralysis",
+        "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_parent_projection_cannot_forge_native_death_and_real_removal_revokes",
+        "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_pending_hit_is_revoked_on_logout_and_cold_restore",
+        "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_pending_hit_rejects_actual_parent_hp_zero",
+        "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_pending_hit_rejects_real_victim_id_reuse"
+      ],
+      "selectedBeforeAfterHashesEqual": true,
+      "utcStarted": "2026-10-10T16:26:28.1455030Z",
+      "utcFinished": "2026-10-10T16:27:27.3779589Z"
+    },
+    {
+      "stem": "check-14-final-gateway-owner-order-action-clocks",
+      "command": [
+        "cargo",
+        "+1.89.0",
+        "test",
+        "--locked",
+        "-j",
+        "1",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "owner_location_order_tests::",
+        "movement_deadline_tests::",
+        "shared_session_hot_path_tests::",
+        "outcome_tick_tests::",
+        "typed_game_shop_outcome",
+        "owner_attack_animation_tests::",
+        "map_transfer_availability_tests::"
+      ],
+      "passed": 30,
+      "testNames": [
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::missing_source_run_does_not_transfer_or_save_another_map",
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::missing_source_turn_does_not_transfer_or_save_another_map",
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::missing_source_walk_does_not_transfer_or_save_another_map",
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::transfer_observation_rejects_missing_reverse_session_index",
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::transfer_observation_rejects_presence_and_cached_map_mismatch",
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::transfer_observation_rejects_teardown_fence",
+        "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::trusted_same_name_open_arena_keeps_configured_transfer",
+        "mir2-gateway:lib:routing::tests::movement_deadline_tests::movement_deadline_gateway_dispatches_due_move_without_maintenance_and_freeze_suppresses_wake",
+        "mir2-gateway:lib:routing::tests::movement_deadline_tests::movement_deadline_maintenance_cost_does_not_drift_and_late_ticks_skip_burst",
+        "mir2-gateway:lib:routing::tests::movement_deadline_tests::movement_deadline_owner_wakes_without_maintenance_even_with_pending_inputs",
+        "mir2-gateway:lib:routing::tests::outcome_tick_tests::ordinary_item_outcome_retains_tick_state_and_packets_for_all_three_classes",
+        "mir2-gateway:lib:routing::tests::outcome_tick_tests::shared_current_tick_reads_the_personal_clock_without_the_zone_snapshot_lock",
+        "mir2-gateway:lib:routing::tests::outcome_tick_tests::shared_projection_keeps_existing_movement_skip_and_rejects_unauthenticated_start",
+        "mir2-gateway:lib:routing::tests::owner_attack_animation_tests::public_melee_attack_uses_local_actor_for_owner_and_zone_actor_for_observer",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_bootstrap_discards_old_location_but_retains_personal_receipt_and_new_ack",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_fast_ingress_bookkeeping_uses_real_ack_even_when_return_vec_is_empty",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_old_direct_walk_cannot_overwrite_new_live_run",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_old_live_walk_cannot_overwrite_new_direct_run",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_open_priority_slot_cannot_bypass_older_pending_ack",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_registered_cancel_keeps_actual_ack_grace_and_correction_fifo",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_registered_pending_ack_does_not_escape_via_personal_flush",
+        "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_same_map_registration_refreshes_only_an_existing_old_ack",
+        "mir2-gateway:lib:routing::tests::shared_in_process_runtime_delegates_typed_game_shop_outcome",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::activating_live_registration_retries_a_location_queued_during_the_registration_gap",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::client_version_keeps_world_state_and_returns_the_protocol_response_without_outcome_snapshot",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::owner_location_uses_its_priority_channel_when_observer_backlog_is_full",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::pending_packet_overflow_never_discards_the_latest_owner_location",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::saturated_live_outbound_retries_latest_owner_location_before_observer_motion",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::shared_map_layer_gate_keeps_world_mutations_and_skips_owner_only_packets",
+        "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::tick_motion_gate_detects_only_packets_the_suppression_can_remove"
+      ],
+      "selectedBeforeAfterHashesEqual": true,
+      "utcStarted": "2026-10-10T16:27:27.8021353Z",
+      "utcFinished": "2026-10-10T16:28:58.9155082Z"
+    }
+  ],
+  "passedRustDistinct": 158,
+  "testNames": [
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::missing_source_run_does_not_transfer_or_save_another_map",
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::missing_source_turn_does_not_transfer_or_save_another_map",
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::missing_source_walk_does_not_transfer_or_save_another_map",
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::transfer_observation_rejects_missing_reverse_session_index",
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::transfer_observation_rejects_presence_and_cached_map_mismatch",
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::transfer_observation_rejects_teardown_fence",
+    "mir2-gateway:lib:routing::tests::map_transfer_availability_tests::trusted_same_name_open_arena_keeps_configured_transfer",
+    "mir2-gateway:lib:routing::tests::movement_deadline_tests::movement_deadline_gateway_dispatches_due_move_without_maintenance_and_freeze_suppresses_wake",
+    "mir2-gateway:lib:routing::tests::movement_deadline_tests::movement_deadline_maintenance_cost_does_not_drift_and_late_ticks_skip_burst",
+    "mir2-gateway:lib:routing::tests::movement_deadline_tests::movement_deadline_owner_wakes_without_maintenance_even_with_pending_inputs",
+    "mir2-gateway:lib:routing::tests::outcome_tick_tests::ordinary_item_outcome_retains_tick_state_and_packets_for_all_three_classes",
+    "mir2-gateway:lib:routing::tests::outcome_tick_tests::shared_current_tick_reads_the_personal_clock_without_the_zone_snapshot_lock",
+    "mir2-gateway:lib:routing::tests::outcome_tick_tests::shared_projection_keeps_existing_movement_skip_and_rejects_unauthenticated_start",
+    "mir2-gateway:lib:routing::tests::owner_attack_animation_tests::public_melee_attack_uses_local_actor_for_owner_and_zone_actor_for_observer",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_bootstrap_discards_old_location_but_retains_personal_receipt_and_new_ack",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_fast_ingress_bookkeeping_uses_real_ack_even_when_return_vec_is_empty",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_old_direct_walk_cannot_overwrite_new_live_run",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_old_live_walk_cannot_overwrite_new_direct_run",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_open_priority_slot_cannot_bypass_older_pending_ack",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_registered_cancel_keeps_actual_ack_grace_and_correction_fifo",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_registered_pending_ack_does_not_escape_via_personal_flush",
+    "mir2-gateway:lib:routing::tests::owner_location_order_tests::owner_ack_order_same_map_registration_refreshes_only_an_existing_old_ack",
+    "mir2-gateway:lib:routing::tests::shared_in_process_runtime_delegates_typed_game_shop_outcome",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::activating_live_registration_retries_a_location_queued_during_the_registration_gap",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::client_version_keeps_world_state_and_returns_the_protocol_response_without_outcome_snapshot",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::owner_location_uses_its_priority_channel_when_observer_backlog_is_full",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::pending_packet_overflow_never_discards_the_latest_owner_location",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::saturated_live_outbound_retries_latest_owner_location_before_observer_motion",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::shared_map_layer_gate_keeps_world_mutations_and_skips_owner_only_packets",
+    "mir2-gateway:lib:routing::tests::shared_session_hot_path_tests::tick_motion_gate_detects_only_packets_the_suppression_can_remove",
+    "mir2-gateway:shared_purification_map_transfer:normal_gateway_hostile_player_poisoning_consumes_backpack_powder_once_and_rejects_cooldown",
+    "mir2-gateway:shared_purification_map_transfer:normal_gateway_poisoning_refuses_safe_friend_stale_point_range_and_mp_without_powder_debit",
+    "mir2-gateway:shared_purification_map_transfer:normal_gateway_poisoning_refuses_the_actual_native_dead_player_without_powder_debit",
+    "mir2-gateway:shared_purification_map_transfer:normal_gateway_private_ticks_cannot_expire_authoritative_curse",
+    "mir2-gateway:shared_purification_map_transfer:normal_gateway_purification_survives_real_town_scroll_map_changes_in_both_actor_orders",
+    "mir2-simulation:lib:runtime::buffs::buff_duration::tests::creature_duration_clone_preserves_anchor_and_monotonic_expiry",
+    "mir2-simulation:lib:runtime::buffs::buff_duration::tests::creature_duration_serialization_preserves_remaining_and_legacy_absence",
+    "mir2-simulation:lib:runtime::buffs::buff_duration::tests::source_infinite_expire_time_is_metadata_and_cold_round_trip_cannot_start_a_countdown",
+    "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::gzip_only_destination_uses_real_bounds_and_base_terrain",
+    "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::manifest_destination_checks_world_bounds_and_base_terrain",
+    "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::manifest_destination_keeps_real_closed_door_landing_cell",
+    "mir2-simulation:lib:runtime::map::map_transfer_availability_tests::manifest_destination_rejects_missing_terrain",
+    "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::finite_projection_keeps_existing_scalar_save_duration_layout",
+    "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::finite_zone_projection_does_not_expire_from_personal_tick_count",
+    "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::finite_zone_projection_still_expires_once_on_real_time",
+    "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::native_zone_removal_clears_projection_without_waiting_for_its_deadline",
+    "mir2-simulation:lib:runtime::session::session_zone_buff_clock_tests::paused_projection_resumes_only_on_a_matching_owner_packet",
+    "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::explicit_unbounded_keeps_original_serialized_checkpoint_shape",
+    "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::missing_terrain_blocks_transfer_exception_and_door_changes",
+    "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::missing_terrain_cannot_share_the_explicit_unbounded_state_root_input",
+    "mir2-simulation:lib:runtime::zone::collision::unavailable_collision_tests::missing_terrain_clone_retains_closed_authority",
+    "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::empty_movement_cancellation_acknowledges_owner_without_mutating_action_state",
+    "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::movement_deadline_301_to_901_and_repeated_steps_do_not_accumulate_tick_cost",
+    "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::movement_deadline_cancel_leave_and_frozen_poison_do_not_leave_due_work",
+    "mir2-simulation:lib:runtime::zone::runtime::movement_deadline_tests::movement_deadline_late_wake_does_not_replay_steps_or_shorten_next_cooldown",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::accepted_cast_blocks_melee_until_the_600ms_action_boundary",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flame_field_retains_its_longer_crystal_global_delay",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flame_preparation_and_expiry_are_isolated_to_the_correct_owner",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flame_transfer_clock_never_crosses_account_character_or_object_identity",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_and_action_clocks_survive_same_and_cross_map_join_but_not_logout",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_consumption_retains_exact_deadline_and_charges_once",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_expiry_is_checked_without_a_maintenance_tick",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_mana_death_and_rejected_melee_do_not_consume_charge",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::flaming_sword_never_enters_the_active_magic_damage_or_spend_path",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::melee_blocks_cast_until_550ms_without_extending_the_swing_cooldown",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::movement_blocks_cast_until_600ms_and_the_public_getter_agrees",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::new_movement_after_cast_waits_for_action_lock_then_runs_once",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::taoist_uses_the_later_of_global_delay_and_own_skill_delay",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::warrior_shoulder_dash_cannot_repeat_or_move_before_its_action_lock",
+    "mir2-simulation:lib:runtime::zone::runtime::player_action_cadence_tests::wizard_cannot_alternate_spells_to_bypass_crystal_global_delay",
+    "mir2-simulation:lib:runtime::zone::runtime::player_magic_cooldown_tests::accepted_soulfire_uses_zone_clock_until_exact_spell_ready_time",
+    "mir2-simulation:lib:runtime::zone::runtime::player_magic_cooldown_tests::cooldown_getter_includes_global_gate_without_cross_owner_leakage",
+    "mir2-simulation:lib:runtime::zone::runtime::player_magic_cooldown_tests::uncast_and_rejected_magic_do_not_create_or_extend_cooldown",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::accepted_same_direction_turn_still_checks_the_current_coordinate",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::dead_players_only_receive_correction_for_turn_walk_and_run_without_clock_changes",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::movement_poison_expiring_exactly_at_consume_time_uses_the_base_turn_delay",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::non_movement_poisons_and_missing_combat_admission_do_not_block_source_can_move",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::not_ready_status_does_not_consume_or_change_the_latest_pending_step",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::queued_actions_revalidate_fishing_from_both_trusted_projections_without_replay",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::queued_same_direction_turn_uses_slow_added_after_arrival",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::queued_turn_walk_and_run_revalidate_new_control_poisons_then_retire",
+    "mir2-simulation:lib:runtime::zone::runtime::source_can_move_tests::slow_expiring_before_consume_uses_350_without_rewriting_an_accepted_700_deadline",
+    "mir2-simulation:shared_crowded_escape:completely_surrounded_player_cannot_cross_live_monster_but_can_escape_after_kill",
+    "mir2-simulation:shared_crowded_escape:crystal_cast_status_mask_keeps_lr_paralysis_out_and_preparation_neutral",
+    "mir2-simulation:shared_crowded_escape:crystal_dazed_allows_escape_but_rejects_physical_attack_and_actual_magic",
+    "mir2-simulation:shared_crowded_escape:crystal_stun_allows_manual_walk_and_run_through_empty_corridor",
+    "mir2-simulation:shared_crowded_escape:crystal_stun_allows_physical_attack_but_never_bypasses_melee_action_cadence",
+    "mir2-simulation:shared_crowded_escape:crystal_stun_rejects_actual_cast_without_mana_cooldown_or_target_damage",
+    "mir2-simulation:shared_crowded_escape:dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch",
+    "mir2-simulation:shared_crowded_escape:frozen_expiry_releases_movement_even_when_independent_stun_remains_active",
+    "mir2-simulation:shared_crowded_escape:living_struck_clock_is_optional_in_checkpoints_and_cleared_on_life_transition",
+    "mir2-simulation:shared_crowded_escape:ordinary_struck_admission_is_strictly_after_the_shared_five_hundred_ms_deadline",
+    "mir2-simulation:shared_crowded_escape:paralysis_frozen_and_lr_paralysis_keep_real_block_until_deadline_then_new_held_move_works",
+    "mir2-simulation:shared_crowded_escape:pending_escape_keeps_finite_player_action_deadline_despite_dense_incoming_hits",
+    "mir2-simulation:shared_crowded_escape:seven_same_tick_monster_hits_damage_each_time_but_present_one_shared_flinch",
+    "mir2-simulation:shared_crowded_escape:staggered_dense_hits_share_five_hundred_ms_window_without_dropping_damage",
+    "mir2-simulation:shared_missing_map_collision:missing_map_stays_closed_after_ordinary_checkpoint_restore",
+    "mir2-simulation:shared_missing_map_collision:normal_missing_map_run_corrects_owner_without_broadcast_or_later_drift",
+    "mir2-simulation:shared_missing_map_collision:normal_missing_map_walk_corrects_owner_without_broadcast_or_later_drift",
+    "mir2-simulation:shared_missing_map_collision:strict_restore_does_not_turn_missing_terrain_into_an_explicit_open_arena",
+    "mir2-simulation:shared_missing_map_collision:trusted_explicit_unbounded_arena_retains_normal_walk_and_run",
+    "mir2-simulation:shared_pet_pvp:shared_human_binding_shot_reaches_actual_owned_monster_and_releases_neighbours_on_hit",
+    "mir2-simulation:shared_pet_pvp:shared_human_electric_shock_is_delayed_and_its_source_colour_expires_exactly",
+    "mir2-simulation:shared_pet_pvp:shared_human_electric_shock_really_tames_source_monster_and_releases_at_one_hour",
+    "mir2-simulation:shared_pet_pvp:shared_human_ground_one_shot_keeps_future_action_and_hits_ordinary_wild_once",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_brown_starts_on_real_damage_and_expires_at_exact_deadline",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_delayed_hit_rechecks_friends_safe_and_online_life",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_fire_bounce_first_leg_and_wild_to_pet_chain_keep_cast_authority",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_fire_bounce_old_wild_leg_cannot_mint_rejoined_source_authority",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_ground_spell_has_real_delay_and_rechecks_safe_or_cold_source",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_real_melee_obeys_source_mode_group_guild_enemy_and_safe_matrix",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_real_spell_and_range_hits_use_typed_damage",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_red_brown_permission_uses_real_master_damage_and_strict_expiry",
+    "mir2-simulation:shared_pet_pvp:shared_human_owned_pet_same_master_requires_all_and_early_safe_exception",
+    "mir2-simulation:shared_pet_pvp:shared_human_poison_cloud_hits_real_player_and_owned_pet_then_owned_dot",
+    "mir2-simulation:shared_pet_pvp:shared_human_poison_death_retains_global_node_across_maps_and_revokes_real_new_lives",
+    "mir2-simulation:shared_pet_pvp:shared_human_poisoning_applies_after_500ms_ticks_strictly_and_issues_deferred_pk",
+    "mir2-simulation:shared_pet_pvp:shared_human_projectile_death_is_born_at_real_deferred_impact_and_rechecks_lives",
+    "mir2-simulation:shared_pet_pvp:shared_human_real_native_fatal_attack_issues_source_receipt_for_all_three_classes",
+    "mir2-simulation:shared_pet_pvp:shared_human_vampirism_heals_source_after_strict_delay_in_ten_hp_chunks",
+    "mir2-simulation:shared_pet_pvp:shared_owned_custom_vampire_and_toad_pause_modes_retain_real_assigned_target_for_focus_resume",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirror_once",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_enemy_guild_mode_does_not_attack_player_after_provocation",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_focus_on_missed_owner_attack_can_causally_kill_once",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_issued_death_receipt_survives_online_map_handoff_and_ack_is_exact",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_committed_current_lives",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_cleans_all_maps",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_manager_normal_map_transfer_preserves_source_modes_and_real_master",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_none_is_quiet_and_both_restores_guard",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_owner_death_emits_real_pet_death_and_cancels_hit",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_protects_owner_with_delayed_real_damage_and_pet_struck_id",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_queued_hit_cannot_cross_victim_revive_or_reconnect",
+    "mir2-simulation:shared_pet_pvp:shared_owned_pet_redirects_to_real_enemy_pet_without_damaging_owner_proxy",
+    "mir2-simulation:shared_pet_pvp:shared_owned_shinsu_guard_uses_real_player_breath_and_550ms_delay",
+    "mir2-simulation:shared_pet_pvp:shared_owned_skeleton_and_shinsu_wait_for_a_real_owner_attack_on_non_threat_wild",
+    "mir2-simulation:shared_pet_pvp:shared_owned_summon_cast_cannot_cross_owner_death_revive_or_rejoin",
+    "mir2-simulation:shared_pet_pvp:shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_flight_lives",
+    "mir2-simulation:shared_pet_pvp:shared_owned_vampire_public_fatal_hit_releases_master_before_safe_owner_death_and_never_bills_pk",
+    "mir2-simulation:shared_pet_pvp:shared_owned_vampire_real_summon_bites_immediately_mac_and_heals_on_strict_source_clock",
+    "mir2-simulation:shared_purification_map_transfer:normal_map_buffs_expire_at_the_source_absolute_deadline_without_renewal",
+    "mir2-simulation:shared_purification_map_transfer:normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry",
+    "mir2-simulation:shared_purification_map_transfer:normal_map_join_preserves_source_buffs_and_their_absolute_expiry",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_both_map_transfers_preserve_original_actors_and_500_deadline",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_cold_manager_restore_never_rebinds_old_pending_actions",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_destination_object_id_conflict_never_retags_the_original_actor",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_destination_uses_current_friendship_at_completion",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_logout_relogin_and_nonretained_join_never_adopt_old_actions",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_map_handoff_rejects_current_actor_death_or_new_life",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_one_actor_or_different_destination_cannot_complete",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_repeated_map_hops_keep_one_original_deadline_and_destination_audience",
+    "mir2-simulation:shared_purification_map_transfer:normal_purification_target_arriving_after_completion_cannot_resurrect_the_action",
+    "mir2-simulation:shared_purification_map_transfer:normal_self_purification_follows_its_single_live_actor_to_the_destination",
+    "mir2-simulation:shared_purification_map_transfer:normal_walk_and_run_cannot_shortcut_the_original_600ms_cast_action_clock",
+    "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_master_birth_delayed_mac_hit_and_paralysis",
+    "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_parent_projection_cannot_forge_native_death_and_real_removal_revokes",
+    "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_pending_hit_is_revoked_on_logout_and_cold_restore",
+    "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_pending_hit_rejects_actual_parent_hp_zero",
+    "mir2-simulation:shared_snake_master_lifecycle:ordinary_snake_pending_hit_rejects_real_victim_id_reuse"
+  ],
+  "newTests": 15,
+  "allSelectedFinalChecksPass": true,
+  "originalStrict500msFailureRetained": true,
+  "actualBaselinePrivateTicks": 40,
+  "actualBaselineElapsedMs": 19,
+  "actualBaselineEarlyRemovals": 1,
+  "originalCompileAndPreparationFailuresRetained": true,
+  "originalWorkflowGatesPreserved": true,
+  "newSourcePushed": false,
+  "newSourceLinuxQualified": false,
+  "newGatewayPublished": false,
+  "nativeClientQualified": false,
+  "nativeHumanAcceptance": false,
+  "fullP1P7Claimed": false,
+  "archive": {
+    "bytes": 750607,
+    "sha256": "dd359c933418c95aa8f7b5c1fcdd81dd4da428e7a1aa449e59cc19dc9a17a6dd",
+    "entries": 104
+  },
+  "entries": [
+    {
+      "path": "candidate-source/.github/workflows/gateway-release.yml",
+      "bytes": 11856,
+      "sha256": "78406b1ad41e54384aa436bf9aba869044425ea4a7c22e77b0f66277d28d800e"
+    },
+    {
+      "path": "candidate-source/mir2-web3/apps/simulation/src/runtime/zone/runtime/source_can_move_tests.rs",
+      "bytes": 19389,
+      "sha256": "49ad1b3e838fa91e79f84c43d5cd69cc078cd21aa6cb398b70925392ade3b9ca"
+    },
+    {
+      "path": "candidate-source/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 700085,
+      "sha256": "2de9d570ad0dde4c4202f067f4b957422fad5102a4a1e3bd58ff37ca549a1f1a"
+    },
+    {
+      "path": "candidate-source-02/.github/workflows/gateway-release.yml",
+      "bytes": 11971,
+      "sha256": "24912ca3a6c2f6b69160170c0214bfb512177dff35460774359f7cf3352282df"
+    },
+    {
+      "path": "candidate-source-02/mir2-web3/apps/gateway/tests/shared_purification_map_transfer.rs",
+      "bytes": 28784,
+      "sha256": "8efa0e7bf7fcb778bd37c7432ca4b1e41615bd38fb606f7258ccc3e2a160dcca"
+    },
+    {
+      "path": "candidate-source-02/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 95732,
+      "sha256": "b934bb5c16b622ea94718c74a7708156926c53f82f6d8aa474165dd0b8bbdaac"
+    },
+    {
+      "path": "candidate-source-02/mir2-web3/apps/simulation/src/runtime/session_zone_buff_clock_tests.rs",
+      "bytes": 7438,
+      "sha256": "17b1434fde76b3b581a84ce510654430dde42962849fcfaca724645b7356c590"
+    },
+    {
+      "path": "candidate-source-02/mir2-web3/apps/simulation/src/runtime/zone/runtime/source_can_move_tests.rs",
+      "bytes": 19389,
+      "sha256": "49ad1b3e838fa91e79f84c43d5cd69cc078cd21aa6cb398b70925392ade3b9ca"
+    },
+    {
+      "path": "candidate-source-02/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 700085,
+      "sha256": "2de9d570ad0dde4c4202f067f4b957422fad5102a4a1e3bd58ff37ca549a1f1a"
+    },
+    {
+      "path": "check-01-source-can-move-after.json",
+      "bytes": 12922,
+      "sha256": "3d8180b8b605979d2a98193632db370daff44b3196a70b58edb54a181cc01984"
+    },
+    {
+      "path": "check-01-source-can-move-before.json",
+      "bytes": 12923,
+      "sha256": "776cd205aab3eb01c5957347aa94106797cd80bb8c9ba2e7c18e50ab0095ebf4"
+    },
+    {
+      "path": "check-01-source-can-move-result.json",
+      "bytes": 215,
+      "sha256": "aa5ea59281a4d879b636b47634507942f9e68d5cb08ff4d6cc665b26bf1e4b61"
+    },
+    {
+      "path": "check-01-source-can-move.log",
+      "bytes": 42433,
+      "sha256": "68f372402602fb13204450a2f5a3e92cff329c3c3001d71752159c9b92482f31"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision-after.json",
+      "bytes": 13111,
+      "sha256": "3b27738cfe63edc92a189019327b1d863996498635b35457ecb7673b901a46d2"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision-before.json",
+      "bytes": 13112,
+      "sha256": "2c472a5c2bb662bffb3b2b62384afd2901a6d09f6e1b822edda6319d48a2720b"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision-result.json",
+      "bytes": 236,
+      "sha256": "737af0090639453cf3299a17287fefcff41e9cd6c9a6effc46e06c9ebfda5160"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision-wrapper.json",
+      "bytes": 539,
+      "sha256": "c5d39062b69303f61f2d386ea09045c7c9517567539f7be14ab1e5c879608cca"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision-wrapper.stdout.log",
+      "bytes": 4405,
+      "sha256": "9cee12f61c65307fa726e257f56eb1e84e7ef5b45458d2271430c421d7650131"
+    },
+    {
+      "path": "check-02-original-simulation-action-collision.log",
+      "bytes": 44965,
+      "sha256": "8509fb3094d6e0eb12fbd757ddc62a08e564f19b9bd83d95ee7e90fa7d186287"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations-after.json",
+      "bytes": 13183,
+      "sha256": "0dfffc1b3ddb4f3e5093ddb2fd7e683f73ba8fc73cd5fbabc4756023d46872eb"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations-before.json",
+      "bytes": 13184,
+      "sha256": "4a8b7da05b20dcf420c3a230f94065e5c2ed15813058cb874ab959c4f06e447c"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations-result.json",
+      "bytes": 240,
+      "sha256": "df010362150c2b54b2d286775c1ed386e3c2226268b7102ce74cfe580b24b124"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations-wrapper.json",
+      "bytes": 611,
+      "sha256": "7277191ff5e78296df84017bddb8101c2a75e852ffc88a44fff1988d2a67a199"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations-wrapper.stdout.log",
+      "bytes": 3038,
+      "sha256": "c67a773385c79a65d35e8e18befedd30aedc903b39761e8008fcea55bc80198e"
+    },
+    {
+      "path": "check-03-original-crowded-pet-status-integrations.log",
+      "bytes": 53632,
+      "sha256": "e30da3718f584f2ba470dec11b90074db1bf38c0aee13aa4ee3f602ccd176a19"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks-after.json",
+      "bytes": 13140,
+      "sha256": "60c07630bd8acf231e1a825a552375ed9f24ded9c7370da75c8c60db779cf274"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks-before.json",
+      "bytes": 13141,
+      "sha256": "6381121a830033cbaf57e3afcba3791ec91f1c057ec687edb7c9bdc837deba8e"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks-result.json",
+      "bytes": 242,
+      "sha256": "67ab57e33a14f28a38e6028e001eb2fb8b000c450d414a888a9c1f3a7b962f8e"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks-wrapper.json",
+      "bytes": 568,
+      "sha256": "fcc314a50ffdbf212df75afb01454de9de2562829a1121159181de9b733be1f1"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks-wrapper.stdout.log",
+      "bytes": 4386,
+      "sha256": "a278760d97c0c6fa58e9b2a051a8d89dd0d62a3154a10be1077b412e11b340a6"
+    },
+    {
+      "path": "check-04-original-gateway-owner-order-action-clocks.log",
+      "bytes": 50427,
+      "sha256": "90a4a797ef38e9e083f7468d04f9917bfea195ff0c42529671ebece9e33f5fae"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll-after.json",
+      "bytes": 12947,
+      "sha256": "c218f776cecb0be3356c5909c4d8b1a644521d9ba8720c61a516a6f43aff4e07"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll-before.json",
+      "bytes": 12948,
+      "sha256": "66d5fe6545bbdbd4eace51c21d46c966f44c3b41da96e2f95f3123ccaf070860"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll-result.json",
+      "bytes": 242,
+      "sha256": "bc399ba0a22d821f669ada9fd5345fdf1f4674107c1cdf02c56a2dd7b8cbc320"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll-wrapper.json",
+      "bytes": 375,
+      "sha256": "05b8971e68b38f6a1dbb3870f482037f5e4f2eb7e07835b7ab26ff2dc298858a"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll-wrapper.stdout.log",
+      "bytes": 2924,
+      "sha256": "8cc1fcdea704e5516c29aa193a1905b88fd52838b99ee56133c6e5b6f8ef5e1f"
+    },
+    {
+      "path": "check-05-original-optimized-gateway-strict-scroll.log",
+      "bytes": 52097,
+      "sha256": "33dae49a72036978096538f7a79ccc899ff79d36c66aee1a808cb0b1c94b041a"
+    },
+    {
+      "path": "check-06-shared-zone-buff-clock-baseline-after.json",
+      "bytes": 13666,
+      "sha256": "3e657d6836bb20d0d3c3f02c6decb141705289118a67f4a44160c592011746a2"
+    },
+    {
+      "path": "check-06-shared-zone-buff-clock-baseline-before.json",
+      "bytes": 13667,
+      "sha256": "12d081f1e152d42a1343c84a7cd32c0a10a9c672710b657405487c2d5c5eadea"
+    },
+    {
+      "path": "check-06-shared-zone-buff-clock-baseline-result.json",
+      "bytes": 233,
+      "sha256": "1b0bc75e43c11badfb95cc8bba85bf7e5766a3d3ecf19ab2ff93af8711779b9e"
+    },
+    {
+      "path": "check-06-shared-zone-buff-clock-baseline.log",
+      "bytes": 4441,
+      "sha256": "2516832e1ab810729e025cbc060c63793be5119fd2904ae44ed9214a9d4eea38"
+    },
+    {
+      "path": "check-07-shared-zone-buff-clock-baseline-after.json",
+      "bytes": 13666,
+      "sha256": "3c71651e52f1558d30b535ba007a7221d75dd6ae3b09de90a07163194781ee4b"
+    },
+    {
+      "path": "check-07-shared-zone-buff-clock-baseline-before.json",
+      "bytes": 13667,
+      "sha256": "6d78bf77de26d4865c86a8feaff717399f5c8cc5e5bd9c16805fee1dc2c28933"
+    },
+    {
+      "path": "check-07-shared-zone-buff-clock-baseline-result.json",
+      "bytes": 233,
+      "sha256": "7ac042d5cc76ca7923c0aba6fc4520c9196b4eaf2969a718b661caeff27b9975"
+    },
+    {
+      "path": "check-07-shared-zone-buff-clock-baseline.log",
+      "bytes": 42046,
+      "sha256": "ca13885c91f81ac7d0f9e5095da586eec7a10ed5ae60addd628dbb664dbc0a0d"
+    },
+    {
+      "path": "check-08-shared-zone-buff-clock-fixed-after.json",
+      "bytes": 13666,
+      "sha256": "71aa42a25f3c6c3f20ba3f9474b4b818de0c7fe0b9981c327343e01c9fce1c17"
+    },
+    {
+      "path": "check-08-shared-zone-buff-clock-fixed-before.json",
+      "bytes": 13667,
+      "sha256": "68cdc169345799ea150e9495f1379ceb651332d24aeb1628bda76495b7a80725"
+    },
+    {
+      "path": "check-08-shared-zone-buff-clock-fixed-result.json",
+      "bytes": 230,
+      "sha256": "04451d6bfa19fb919efe969e37bd574c263df7e038b103ceb0d0fb5832d675cb"
+    },
+    {
+      "path": "check-08-shared-zone-buff-clock-fixed.log",
+      "bytes": 41923,
+      "sha256": "75c225997a11fd76338139037171a2a98fe418dc10bb527cad3c87abf4a4a099"
+    },
+    {
+      "path": "check-09-shared-zone-buff-clock-fixed-after.json",
+      "bytes": 13666,
+      "sha256": "f181fc76708f7a724d91aadcac8983b038d477993f2d8d12719f806dee84a298"
+    },
+    {
+      "path": "check-09-shared-zone-buff-clock-fixed-before.json",
+      "bytes": 13667,
+      "sha256": "4e99836f813c48ba9176960570ffc30d95a6a978ae44387ea2575da8634da246"
+    },
+    {
+      "path": "check-09-shared-zone-buff-clock-fixed-result.json",
+      "bytes": 228,
+      "sha256": "20a1d792a64a03cd09d7116c82e5990651035ede5731879159175eaca29044bc"
+    },
+    {
+      "path": "check-09-shared-zone-buff-clock-fixed.log",
+      "bytes": 41430,
+      "sha256": "d33edc0c38182d7f8de8ee395771192adf46b171dd4c1fc3236bb9cb1a1638b5"
+    },
+    {
+      "path": "check-10-shared-zone-buff-clock-lifecycle-after.json",
+      "bytes": 13666,
+      "sha256": "684574c6b4b5a749347c9d29c5057f8b6154c6b5139f2ab15d5f6e7ba4009199"
+    },
+    {
+      "path": "check-10-shared-zone-buff-clock-lifecycle-before.json",
+      "bytes": 13667,
+      "sha256": "9f6445a80b4f9ec61a1b1041561512ebe7c50fc0661d279a66f59c8f96ef01a5"
+    },
+    {
+      "path": "check-10-shared-zone-buff-clock-lifecycle-result.json",
+      "bytes": 232,
+      "sha256": "4c0c7d7d445127175bb2f66afd109f68b1872c6ac6222e090d16204c3dc5b537"
+    },
+    {
+      "path": "check-10-shared-zone-buff-clock-lifecycle.log",
+      "bytes": 41924,
+      "sha256": "ea1b5c6591ed210b7b970d87821184d83b1c590317a4c1029621dd694528d79f"
+    },
+    {
+      "path": "check-11-original-optimized-gateway-with-real-clock-fix-after.json",
+      "bytes": 13683,
+      "sha256": "89097d176a79570d74603c1845d9b8f8c9f402619029c9539ba36faea4686c24"
+    },
+    {
+      "path": "check-11-original-optimized-gateway-with-real-clock-fix-before.json",
+      "bytes": 13684,
+      "sha256": "c4d13374cf5ee9b836f13885f13a7c9acc84ef822621cbbdaa8646148ef4077b"
+    },
+    {
+      "path": "check-11-original-optimized-gateway-with-real-clock-fix-result.json",
+      "bytes": 246,
+      "sha256": "5479a5b2e336d46565d29d9ff6f25a3028aadd2d09d33627283170a79c43520e"
+    },
+    {
+      "path": "check-11-original-optimized-gateway-with-real-clock-fix.log",
+      "bytes": 57551,
+      "sha256": "3e5e7dae8d671b030649772eaba1d69fdd240214ffe81d16d3057d1f35634507"
+    },
+    {
+      "path": "check-12-final-simulation-action-buff-collision-after.json",
+      "bytes": 13930,
+      "sha256": "3f2fa215997b90bd42fb43040e4ce65c080aa53637bec5787334fc8ffda410a2"
+    },
+    {
+      "path": "check-12-final-simulation-action-buff-collision-before.json",
+      "bytes": 13931,
+      "sha256": "12de5fb425d16a61d899ed16bc9e17b2ff8054e53a625a8721a8df8f78616ee7"
+    },
+    {
+      "path": "check-12-final-simulation-action-buff-collision-result.json",
+      "bytes": 238,
+      "sha256": "1f9617bfb7bafc8a310371465a36d6f6a1b4c0256d671f74d2a52d3cee56c40e"
+    },
+    {
+      "path": "check-12-final-simulation-action-buff-collision-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-12-final-simulation-action-buff-collision-wrapper.stdout.log",
+      "bytes": 5180,
+      "sha256": "819dacd15f360642667cfa5113f2b0dfdaa6dd3925363d9e6b4a0ab9dc9208b6"
+    },
+    {
+      "path": "check-12-final-simulation-action-buff-collision.log",
+      "bytes": 47147,
+      "sha256": "b503682f076c8e252c9a7da040a01b64f10fc3eea99ed4d01b617e61ee3830db"
+    },
+    {
+      "path": "check-13-final-crowded-pet-status-integrations-after.json",
+      "bytes": 13899,
+      "sha256": "a89d8b9e32fee003b8dffd7f8e4fddc8b029177af903815dfd9bfaaec9ac8943"
+    },
+    {
+      "path": "check-13-final-crowded-pet-status-integrations-before.json",
+      "bytes": 13900,
+      "sha256": "58a3fffef7fe05b03bb5de9997dfc5b9d0242b8e2d7a99d7106c8ecb018d06cb"
+    },
+    {
+      "path": "check-13-final-crowded-pet-status-integrations-result.json",
+      "bytes": 237,
+      "sha256": "f40cf0835e320fcf4fa911ef718b2e00f3f9555f68719c7ac785fd86c5cdeee4"
+    },
+    {
+      "path": "check-13-final-crowded-pet-status-integrations-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-13-final-crowded-pet-status-integrations-wrapper.stdout.log",
+      "bytes": 3038,
+      "sha256": "09d3cc7e933609a7a4dbd079f96d05e7fb0952703179e28de505730a8adc49f4"
+    },
+    {
+      "path": "check-13-final-crowded-pet-status-integrations.log",
+      "bytes": 53632,
+      "sha256": "9ed37720e392654c9e7fbebb639ab1b47f8d3cb0cda60c74bb387f7f8aee13d3"
+    },
+    {
+      "path": "check-14-final-gateway-owner-order-action-clocks-after.json",
+      "bytes": 13856,
+      "sha256": "393e1ea02ae38ac773111733322a41d00974354d2edee69d63d4e280988886aa"
+    },
+    {
+      "path": "check-14-final-gateway-owner-order-action-clocks-before.json",
+      "bytes": 13857,
+      "sha256": "c8c80531396b842c299c628b1901e54771b4dcbda89113b54b62d6c624781cc3"
+    },
+    {
+      "path": "check-14-final-gateway-owner-order-action-clocks-result.json",
+      "bytes": 239,
+      "sha256": "4349cf228996afcdcd9170b4ea93dc663561bbd102c3a5fa658bdba35e9621ae"
+    },
+    {
+      "path": "check-14-final-gateway-owner-order-action-clocks-wrapper.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-14-final-gateway-owner-order-action-clocks-wrapper.stdout.log",
+      "bytes": 4386,
+      "sha256": "3d5dea4aece7c0589d9d17c3b2da8940ebb3ae2712363f04de9bc146dc4c02d5"
+    },
+    {
+      "path": "check-14-final-gateway-owner-order-action-clocks.log",
+      "bytes": 50427,
+      "sha256": "5c9dcf0a30f526d6c82ef36ed5a851295cd80cd5c1bff08792938e08b4cd7823"
+    },
+    {
+      "path": "NORMAL-GATEWAY-BUFF-CLOCK-PREPARED.json",
+      "bytes": 613,
+      "sha256": "ae7ad27107882e416c7e99217d35055b687953a98cc1c45a6abc6d5f782b10ec"
+    },
+    {
+      "path": "parent-runtime.rs",
+      "bytes": 699237,
+      "sha256": "0d5a8e3d791a16888505c64543d6d9542ed868c85230475c7dd464e5b9c8b025"
+    },
+    {
+      "path": "parent-workflow.yml",
+      "bytes": 11600,
+      "sha256": "8d285962a450f1840b29ba79dcdc235268a6defaace734ca4a33308ff86a9fae"
+    },
+    {
+      "path": "scratch-base-original.json",
+      "bytes": 557,
+      "sha256": "ba8c38f4847369a1dd52f07d829b78becd4ff23fbe12c673da2ad78be99c527d"
+    },
+    {
+      "path": "scratch-runtime-original.rs",
+      "bytes": 700085,
+      "sha256": "2de9d570ad0dde4c4202f067f4b957422fad5102a4a1e3bd58ff37ca549a1f1a"
+    },
+    {
+      "path": "scratch-tests-original.rs",
+      "bytes": 19389,
+      "sha256": "49ad1b3e838fa91e79f84c43d5cd69cc078cd21aa6cb398b70925392ade3b9ca"
+    },
+    {
+      "path": "session-before-zone-buff-clock.rs",
+      "bytes": 94380,
+      "sha256": "8352ee9dce6e9e954328ed7353b6bd78ca15edcea221ef47f542ea74cf449184"
+    },
+    {
+      "path": "SOURCE-FROZEN-01.json",
+      "bytes": 1205,
+      "sha256": "16205c706ca1f858c83ea999a84a6b98211a38c782b37b92ebd4e59a440dee43"
+    },
+    {
+      "path": "SOURCE-FROZEN-02.json",
+      "bytes": 2064,
+      "sha256": "1d9422cbaeccffc95431046d439184e613eb254f8b47e574b504a8d2802d9d4c"
+    },
+    {
+      "path": "strict-failed-original-test.rs",
+      "bytes": 26378,
+      "sha256": "7a2a513d43f9874fb0a4530e7b36269b3bad1cf677b9531d97e966a849f2f4f7"
+    },
+    {
+      "path": "STRICT-FAILURE-05.json",
+      "bytes": 1172,
+      "sha256": "fbb3e2cc63e182c1199b9f80930b910f74f36c9875095696610efb49ff6df0ce"
+    },
+    {
+      "path": "ZONE-BUFF-BASELINE-PREPARED.json",
+      "bytes": 532,
+      "sha256": "47f18f1e042a7580304e8e486c52a5d1ba7d2c4395b62866f90f76ebd7667731"
+    },
+    {
+      "path": "zone-buff-clock-baseline-test.rs",
+      "bytes": 3121,
+      "sha256": "ef4066212ebfcffafb34ce25b8ea9c77cc7f50f85581a182cdd016a535964614"
+    },
+    {
+      "path": "ZONE-BUFF-CLOCK-FIX-PREPARED.json",
+      "bytes": 660,
+      "sha256": "4d2e530862116e88aaa17914b43acb67af267e3b285fc79fe5832e97b988c83b"
+    },
+    {
+      "path": "ZONE-BUFF-CLOCK-PREPARATION-FAILURE-01.json",
+      "bytes": 414,
+      "sha256": "80aabbf4b82fde61a2445d1a1e691a87f7f6d4c7c9a4e90f44d6f10e2b5eb1fa"
+    },
+    {
+      "path": "helpers/Run-SharedZoneBuffClockQualification.ps1",
+      "bytes": 4695,
+      "sha256": "4bf511e41dfe25f1ddd2cf1b28ba44a92d6c5a9cc52d1f10a22c9d59c02fbe51"
+    },
+    {
+      "path": "helpers/Run-SourceCanMoveBuffClockFinal.py",
+      "bytes": 1700,
+      "sha256": "9fd3003443d0f305a803df8d0777ba9db33dab04fb1aa579aa96419366c7b9bf"
+    },
+    {
+      "path": "helpers/Fix-SharedZoneBuffClock.py",
+      "bytes": 4222,
+      "sha256": "850b13a1707d07351f0726f13fc01d3b01d0dad471f86bc6572765e401e64235"
+    },
+    {
+      "path": "helpers/Add-NormalGatewayBuffClockRegression.py",
+      "bytes": 4258,
+      "sha256": "27093cca9b71aa0b02d841d0b4c683677f41206a742089b681e059c10f78462b"
+    },
+    {
+      "path": "helpers/Freeze-SourceCanMoveBuffClock02.py",
+      "bytes": 2569,
+      "sha256": "282f6375ae93f6fdd43222803888669ee04d38916e38d9a835e4d91c30d388e4"
+    },
+    {
+      "path": "helpers/Archive-SourceCanMoveBuffClockCandidate.py",
+      "bytes": 5104,
+      "sha256": "fa922fe3030346b1dadab079775d35789a61ec4deccd32fc771ed41551689f3a"
+    }
+  ]
+}

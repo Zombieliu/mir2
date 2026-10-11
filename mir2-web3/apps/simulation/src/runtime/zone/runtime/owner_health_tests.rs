@@ -346,7 +346,12 @@ fn owner_health_generic_sync_is_silent_explicit_personal_commit_preserves_hp_the
 
 #[test]
 fn owner_health_transaction_fork_carries_fifo_but_checkpoint_never_replays_it() {
-    let (mut zone, session) = fixture(40, 100, 20);
+    // Use the same ordinary collision identity before and after cold recovery.
+    // Owner pool/FIFO behavior does not depend on an open movement arena.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map("owner-health"));
+    let player = join("owner", 1, MirClass::Warrior, 40, 100, 20);
+    let session = player.session_id.clone();
+    zone.handle(ZoneCommand::Join(player));
     zone.players.get_mut(&session).unwrap().change_owner_mp(-1);
     let mut rejected_fork = zone.transaction_fork();
     rejected_fork

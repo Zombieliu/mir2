@@ -546,7 +546,11 @@ mod tests {
         }));
     }
     fn fixture() -> (ZoneRuntime, SessionId, SessionId) {
-        let mut zone = ZoneRuntime::new(ZoneKey::for_map("five-class-pvp"));
+        // Explicit component terrain; do not reopen missing ordinary maps.
+        let mut zone = ZoneRuntime::new_with_collision(
+            ZoneKey::for_map("five-class-pvp"),
+            super::super::super::ZoneCollision::unbounded(),
+        );
         let owner = SessionId::new("archer");
         let victim = SessionId::new("victim");
         join(&mut zone, &owner, 101, MirClass::Archer, 20);

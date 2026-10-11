@@ -1,5 +1,28 @@
 # Windows 原生可玩闭环验收清单
 
+> Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
+> with912 pass/75 fail/7 original external ignores; this is not a green gate.
+> The missing generated keyed-map index was rebuilt by the original Node
+> producer, and two new DoubleSlash idle assertions now match original500ms
+> Standing. Production animation/clocks and all other assertions are unchanged.
+> A retained old-binary asset-root diagnostic passes; current-source full02,
+> newest NPC integration, clean builds and paired publication remain pending.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Current five-class/R25 merge, 2026-10-12: actual second-merge checks pass
+> simulation124/Gateway18, consumption-time CanMove9, real buff clocks5,
+> owner health16/32, zero-health7, outcome3, map transfer4 and monthly8.
+> Counts overlap; two original test-support billing cases are not executed
+> locally here and remain in the unchanged Linux workflow. Original Sim120/4
+> failure and fixture preparation failures are retained. Native BackStep/queued
+> Jump input guards and five combination tests are now written; their actual
+> Windows checks, clean Git/Linux/build/package/paired rollout remain pending.
+> Source schema is 7/7 (Zone), 3/2 (Gateway/factory), not schema8.
+> Public R25/feed20 is unchanged. No game switch or human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
 > Five-class integration checkpoint, 2026-10-12: the actual first R24 working
 > merge passes simulation124/Gateway18, Native bridge32/health20, nine-locale
 > validation13 and game-data75 (67 library + 5/3 integration). Original failed,
@@ -29,6 +52,59 @@
 > [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
 > Candidate round, not all-level five-class or whole-project 100% acceptance.
 > Root owns common/production files; explorers are read-only. No new Goal.
+
+> Windows CI qualification repair and Gateway publication, 2026-10-11:
+> actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
+> that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and
+> verified before cargo. Nine fixtures exclusively own the global native queue;
+> controlled real LogOutSuccess reproduces both original failures without
+> changing assertions. Original four CI commands remain and stop on any failed
+> native exit. Actual corrected default-parallel Native941/0/7, focused13 (subset),
+> Node25, six exit-control cases and formatting pass. [Original evidence](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Linux4006 is truly live with normal backup/stops/cold restart, monthly price1000
+> and original production PID/config preserved. Original44 ordinary +18 resume
+> public protocol checks pass,14 normal logouts; fresh08:22/08:48 UTC reads are
+> empty/unchanged. First failed preflight, dead owned fixture and recovery
+> diagnostic remain failed. This is not alive crowd/native/human acceptance.
+> Fresh clean client CI/build, signed R25 client/feed and fullP1-P7/Mentor remain
+> open; client stays R24/feed19. Root is sole writer; expired heartbeat paused.
+
+
+> Follow-up client build repair, 2026-10-11: the first complete4006 client CI
+> exposed optional native mail dependencies in default Android/Shared builds.
+> Mail now respects native-ui; original native behavior/assertions remain exact.
+> Actual default11 and Native13 mail checks pass (24 executions/15 functions,
+> 9 overlapping); no tests ignored. Format and neutral runtime compile pass.
+> Real monthly/Stripe PostgreSQL gates at4006 passed. [Evidence and scope](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Corrected full client CI, signed delivery, safe paired publication and native
+> dense-combat/human acceptance remain open. Server and resources are unchanged;
+> artifacts retain their actual source identity. FullP1–P7/Mentor remains open.
+
+> Integrated live health/billing with Source movement and Windows escape, 2026-10-11:
+> the public01a8 and owned9c histories are both retained. Actual local checks:
+> 317 distinct server names and941 Native names pass; one PostgreSQL external
+> and seven Native external checks remain ignored. Original failures and the
+> read-only correction of the Native name collector912→941 are retained.
+> [Scope, original evidence and limits](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> New two-parent Git publication, matching Linux/Windows builds, safe paired
+> publication, dense native combat and human acceptance remain pending here.
+> Old1e/9c artifacts are separate; existing workflow gates and live commerce
+> are preserved. Root is the sole writer. FullP1–P7/Mentor is open; expired
+> heartbeat remains paused. Older progress below is historical.
+
+> Continued Windows round, 2026-10-11: an enqueued attack paces only the next
+> hit; escape reads the actual admitted animation. Correction keeps400ms and
+> real pending ACKs, with blocked-path hints tied to current collision. Native
+> component stage gate911 passes/7 original native-external ignored; focused11
+> and adjacent340 overlap. [Original failures, source and actual checks](CLASSIC-CLIENT-ESCAPE-ACTION-CLOCK-20261011.md).
+> Foreign-cache compilation and incomplete large-memory fixture run remain;
+> fixture-only absolute-clock repair preserves product clocks/assertions and
+> now checks actual motion prediction. Server1e is pushed; own Linux38102609192
+> is separate. New Windows package/feed, paired publication, opaque action
+> receipt and actual dense-combat/native/human acceptance remain open. Last
+> public01:59 UTC64b6/R23/feed18 had no sessions; recheck before stage/apply.
+> Root owns all files. FullP1-P7/Mentor stays open; expired heartbeat stays paused.
+
 
 > 2026-10-09 target/movement lifecycle Candidate: temporary blocked pursuit now
 > keeps a live target and caches only failed routes against the exact shared

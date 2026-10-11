@@ -562,6 +562,30 @@ impl NativeEntityPresentation {
             .map_or(0, |window| window.expires_ms.saturating_sub(now_ms))
     }
 
+    /// Read the existing action clock without advancing or changing its feed.
+    /// A new movement prediction must wait for admitted combat/life actions
+    /// and the complete eight-frame BackStep Jump,
+    /// including those still behind a movement or hit reaction. Struck alone
+    /// remains replaceable by the existing latest-locomotion reducer.
+    pub(crate) fn self_combat_action_blocks_movement(&self, object_id: &str) -> bool {
+        self.world.active_state(object_id).is_some_and(|state| {
+            std::iter::once(state.current_action)
+                .chain(state.queued_actions().map(|event| event.action))
+                .any(|action| {
+                    is_attack_action(action)
+                        || matches!(
+                            action,
+                            AnimationAction::Jump
+                                | AnimationAction::Spell
+                                | AnimationAction::Die
+                                | AnimationAction::Dead
+                                | AnimationAction::Skeleton
+                                | AnimationAction::Revive
+                        )
+                })
+        })
+    }
+
     pub(crate) fn has_active_non_self_motion(&self, now_ms: u64) -> bool {
         self.motion_windows.iter().any(|(object_id, window)| {
             self.self_object_id.as_deref() != Some(object_id.as_str()) && now_ms < window.expires_ms
@@ -601,7 +625,9 @@ impl NativeEntityPresentation {
         animation_now_ms: u64,
         motion_now_ms: u64,
     ) -> bool {
-        if from == to {
+        // Source consumes new locomotion after a committed action completes.
+        // Do not create a camera window for a movement that would only queue.
+        if from == to || self.self_combat_action_blocks_movement(object_id) {
             return false;
         }
         let action = if running {
@@ -763,6 +789,13 @@ impl NativeEntityPresentation {
     #[cfg(test)]
     pub(crate) fn set_hovered_object_id_for_test(&mut self, object_id: Option<&str>) {
         self.hovered_object_id = object_id.map(ToOwned::to_owned);
+    }
+
+    #[cfg(test)]
+    pub(crate) fn advance_animation_for_test(&mut self, now_ms: u64) {
+        self.world
+            .tick(now_ms)
+            .expect("advance the unchanged Crystal animation clock");
     }
 
     #[cfg(test)]
@@ -2307,6 +2340,336 @@ mod tests {
         let state = presentation.world.active_state("1").unwrap();
         assert_eq!(state.pose().action, AnimationAction::Attack1);
         assert_eq!(state.current_descriptor().frame_interval_ms, 100);
+    }
+
+    #[test]
+    fn native_double_slash_movement_gate_follows_both_typed_source_phases() {
+        let mut payload = json!({
+            "playerObjectId": 1,
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "entities": [{
+                "objectId": 1, "kind": "selfPlayer", "class": "Assassin",
+                "x": 10, "y": 10, "direction": "Right", "dead": false,
+                "sprite": {"bodyLibrary": "CArmour/00", "directionStride": 4, "frameBaseOffset": 0}
+            }]
+        });
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&payload);
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".into(),
+            payload: json!({
+                "objectId": 1, "spell": 92, "level": 0, "direction": "Right",
+                "location": {"x": 10, "y": 10}
+            }),
+        }));
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"][0]["_nativeAnimationSpell"], 92);
+        let source_sequence = payload["entities"][0]["_nativeAnimationSequence"]
+            .as_u64()
+            .unwrap();
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+        let admitted_sequence = presentation
+            .world
+            .active_state("1")
+            .unwrap()
+            .pose()
+            .last_started_event_sequence;
+        assert!(admitted_sequence.is_some());
+
+        for (at_ms, action, frame, blocked) in [
+            (275, AnimationAction::Attack1, 5, true),
+            (276, AnimationAction::Attack4, 0, true),
+            (551, AnimationAction::Attack4, 5, true),
+            (552, AnimationAction::Standing, 0, false),
+        ] {
+            presentation.world.tick(at_ms).unwrap();
+            let state = presentation.world.active_state("1").unwrap();
+            assert_eq!(
+                (state.pose().action, state.pose().logical_frame_index),
+                (action, frame)
+            );
+            assert_eq!(
+                presentation.self_combat_action_blocks_movement("1"),
+                blocked
+            );
+            if blocked {
+                assert_eq!(state.current_descriptor().frame_interval_ms, 46);
+                assert_eq!(state.pose().last_started_event_sequence, admitted_sequence);
+                assert_eq!(
+                    presentation.double_slash_body_clock(1, source_sequence),
+                    NativeDoubleSlashBodyClock::Started(0)
+                );
+            } else {
+                assert_eq!(state.current_descriptor().frame_interval_ms, 500);
+                assert_eq!(
+                    presentation.double_slash_body_clock(1, source_sequence),
+                    NativeDoubleSlashBodyClock::Retired
+                );
+            }
+        }
+        assert_eq!(
+            presentation.overlay_payload().unwrap()["entities"][0]["_nativeAnimationAction"],
+            "attack1",
+            "the retained packet hint is stale after the real two-part action completes"
+        );
+        presentation.replace_payload(payload);
+        presentation.sync_pending_payload_with(600, |_, _, _| AnimationCatalog::crystal_player());
+        assert!(!presentation.self_combat_action_blocks_movement("1"));
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().queue_depth(),
+            0
+        );
+    }
+
+    #[test]
+    fn native_double_slash_movement_gate_keeps_struck_and_chained_source_fifo_finite() {
+        let mut payload = json!({
+            "playerObjectId": 1,
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "entities": [{
+                "objectId": 1, "kind": "selfPlayer", "class": "Assassin",
+                "x": 10, "y": 10, "direction": "Right", "dead": false,
+                "sprite": {"bodyLibrary": "CArmour/00", "directionStride": 4, "frameBaseOffset": 0}
+            }]
+        });
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&payload);
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectStruck".into(),
+            payload: json!({"objectId": 1, "direction": "Right", "attackerId": 9}),
+        }));
+        adapter.apply_authoritative_overlay(&mut payload);
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().pose().action,
+            AnimationAction::Struck
+        );
+        assert!(!presentation.self_combat_action_blocks_movement("1"));
+
+        let mut raw_sequences = Vec::new();
+        for at_ms in [1, 2] {
+            assert!(adapter.observe_packet(&PacketEvent::Other {
+                packet: "ObjectAttack".into(),
+                payload: json!({
+                    "objectId": 1, "spell": 92, "level": 0, "direction": "Right",
+                    "location": {"x": 10, "y": 10}
+                }),
+            }));
+            adapter.apply_authoritative_overlay(&mut payload);
+            raw_sequences.push(
+                payload["entities"][0]["_nativeAnimationSequence"]
+                    .as_u64()
+                    .unwrap(),
+            );
+            presentation.replace_payload(payload.clone());
+            presentation
+                .sync_pending_payload_with(at_ms, |_, _, _| AnimationCatalog::crystal_player());
+        }
+        assert!(raw_sequences[1] > raw_sequences[0]);
+        let state = presentation.world.active_state("1").unwrap();
+        let queued = state.queued_actions().copied().collect::<Vec<_>>();
+        assert_eq!(queued.len(), 2);
+        assert!(queued
+            .iter()
+            .all(|event| event.action == AnimationAction::Attack1));
+        let before = (state.frame_index, state.last_update_at_ms, queued.clone());
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(
+            (
+                state.frame_index,
+                state.last_update_at_ms,
+                state.queued_actions().copied().collect::<Vec<_>>()
+            ),
+            before,
+            "reading queued combat barriers cannot consume the struck or either combo"
+        );
+
+        for (at_ms, sequence, action) in [
+            (300, queued[0].sequence, AnimationAction::Attack1),
+            (575, queued[0].sequence, AnimationAction::Attack1),
+            (576, queued[0].sequence, AnimationAction::Attack4),
+            (851, queued[0].sequence, AnimationAction::Attack4),
+            (852, queued[1].sequence, AnimationAction::Attack1),
+            (1_127, queued[1].sequence, AnimationAction::Attack1),
+            (1_128, queued[1].sequence, AnimationAction::Attack4),
+            (1_403, queued[1].sequence, AnimationAction::Attack4),
+        ] {
+            presentation.world.tick(at_ms).unwrap();
+            let state = presentation.world.active_state("1").unwrap();
+            assert_eq!(state.pose().action, action);
+            assert_eq!(state.pose().last_started_event_sequence, Some(sequence));
+            assert_eq!(state.current_descriptor().frame_interval_ms, 46);
+            assert!(presentation.self_combat_action_blocks_movement("1"));
+        }
+        assert_eq!(
+            presentation.double_slash_body_clock(1, raw_sequences[0]),
+            NativeDoubleSlashBodyClock::Retired
+        );
+        assert_eq!(
+            presentation.double_slash_body_clock(1, raw_sequences[1]),
+            NativeDoubleSlashBodyClock::Started(852)
+        );
+        presentation.world.tick(1_404).unwrap();
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Standing);
+        assert_eq!(state.current_descriptor().frame_interval_ms, 500);
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(
+            state.last_enqueued_event_sequence(),
+            Some(queued[1].sequence)
+        );
+        assert!(!presentation.self_combat_action_blocks_movement("1"));
+    }
+
+    #[test]
+    fn self_combat_movement_gate_uses_each_real_crystal_action_length() {
+        for (name, action) in [
+            ("attack1", AnimationAction::Attack1),
+            ("attack2", AnimationAction::Attack2),
+            ("attack3", AnimationAction::Attack3),
+            ("attack4", AnimationAction::Attack4),
+            ("attackRange1", AnimationAction::AttackRange1),
+            ("attackRange2", AnimationAction::AttackRange2),
+            ("dashAttack", AnimationAction::DashAttack),
+            ("spell", AnimationAction::Spell),
+        ] {
+            let catalog = AnimationCatalog::crystal_player();
+            let descriptor = catalog.descriptor(action).unwrap();
+            let duration = u64::from(descriptor.frame_count) * descriptor.frame_interval_ms;
+            let mut presentation = NativeEntityPresentation::default();
+            let mut payload = player_payload(1);
+            payload["entities"][0]["_nativeAnimationAction"] = json!(name);
+            presentation.replace_payload(payload);
+            presentation.sync_pending_payload_with(0, |_, _, _| catalog.clone());
+            assert_eq!(
+                presentation.world.active_state("1").unwrap().current_action,
+                action
+            );
+            assert!(
+                presentation.self_combat_action_blocks_movement("1"),
+                "{name}"
+            );
+
+            presentation.world.tick(duration - 1).unwrap();
+            assert!(
+                presentation.self_combat_action_blocks_movement("1"),
+                "{name} before last frame"
+            );
+            presentation.world.tick(duration).unwrap();
+            assert_eq!(
+                presentation.world.active_state("1").unwrap().current_action,
+                AnimationAction::Standing
+            );
+            assert!(
+                !presentation.self_combat_action_blocks_movement("1"),
+                "{name} completed"
+            );
+            assert_eq!(
+                presentation.overlay_payload().unwrap()["entities"][0]["_nativeAnimationAction"],
+                name,
+                "the retained packet action is deliberately stale after the real frame clock ends"
+            );
+        }
+    }
+
+    #[test]
+    fn self_combat_movement_gate_reads_queued_barriers_without_mutating_feed() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut struck = player_payload(1);
+        struck["entities"][0]["_nativeAnimationAction"] = json!("struck");
+        presentation.replace_payload(struck);
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+        assert!(!presentation.self_combat_action_blocks_movement("1"));
+
+        let mut attack = player_payload(2);
+        attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        presentation.replace_payload(attack);
+        presentation.sync_pending_payload_with(1, |_, _, _| AnimationCatalog::crystal_player());
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.current_action, AnimationAction::Struck);
+        let before = (
+            state.frame_index,
+            state.last_update_at_ms,
+            state.queued_actions().copied().collect::<Vec<_>>(),
+        );
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(
+            (
+                state.frame_index,
+                state.last_update_at_ms,
+                state.queued_actions().copied().collect::<Vec<_>>()
+            ),
+            before
+        );
+
+        presentation.world.tick(300).unwrap();
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().current_action,
+            AnimationAction::Attack1
+        );
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        presentation.world.tick(900).unwrap();
+        assert!(!presentation.self_combat_action_blocks_movement("1"));
+    }
+
+    #[test]
+    fn self_combat_movement_gate_keeps_death_and_revival_barriers() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut dying = player_payload(1);
+        dying["entities"][0]["dead"] = json!(true);
+        dying["entities"][0]["_nativeAnimationAction"] = json!("die");
+        presentation.replace_payload(dying);
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        presentation.world.tick(400).unwrap();
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().current_action,
+            AnimationAction::Dead
+        );
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+
+        let key = presentation.world.active_state("1").unwrap().key.clone();
+        presentation
+            .world
+            .apply_revival_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Revive, Direction::Down),
+                500,
+            )
+            .unwrap();
+        assert!(presentation.self_combat_action_blocks_movement("1"));
+        presentation.world.tick(900).unwrap();
+        assert!(!presentation.self_combat_action_blocks_movement("1"));
+    }
+
+    #[test]
+    fn self_combat_movement_gate_does_not_add_struck_or_locomotion_locks() {
+        for name in ["standing", "walking", "running", "struck"] {
+            let mut presentation = NativeEntityPresentation::default();
+            let mut payload = player_payload(1);
+            payload["entities"][0]["_nativeAnimationAction"] = json!(name);
+            let mut observer = payload["entities"][0].clone();
+            observer["objectId"] = json!(2);
+            observer["kind"] = json!("player");
+            observer["_nativeAnimationAction"] = json!("spell");
+            payload["entities"].as_array_mut().unwrap().push(observer);
+            presentation.replace_payload(payload);
+            presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+            assert!(
+                !presentation.self_combat_action_blocks_movement("1"),
+                "{name}"
+            );
+            assert!(presentation.self_combat_action_blocks_movement("2"));
+            assert!(!presentation.self_combat_action_blocks_movement("missing"));
+        }
     }
 
     #[test]

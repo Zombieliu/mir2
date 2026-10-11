@@ -94,7 +94,42 @@ mod tests {
     }
 
     fn fixture_in_map(class: MirClass, map: &str) -> (ZoneRuntime, SessionId) {
-        let mut zone = ZoneRuntime::new(ZoneKey::for_map(map));
+        // This private skill arena tests combat mechanics, not map loading.
+        // Unknown ordinary maps remain unavailable in production.
+        let mut zone = ZoneRuntime::new_with_collision(
+            ZoneKey::for_map(map),
+            super::super::super::ZoneCollision::unbounded(),
+        );
+        fixture_with_zone(class, map, zone, Point { x: 20, y: 20 })
+    }
+
+    fn cold_fixture() -> (ZoneRuntime, SessionId) {
+        // Cold restore reconstructs ordinary terrain before verifying its root.
+        // Keep the original relative actor/summon geometry on real map 0.
+        let zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+        assert!(
+            zone.has_available_collision(),
+            "cold fixture requires real terrain"
+        );
+        for point in [
+            Point { x: 322, y: 299 },
+            Point { x: 323, y: 299 },
+            Point { x: 323, y: 298 },
+        ] {
+            assert!(
+                !zone.collision.is_blocked(&point),
+                "ordinary cold-fixture cell must be open"
+            );
+        }
+        fixture_with_zone(MirClass::Assassin, "0", zone, Point { x: 322, y: 299 })
+    }
+
+    fn fixture_with_zone(
+        class: MirClass,
+        map: &str,
+        mut zone: ZoneRuntime,
+        position: Point,
+    ) -> (ZoneRuntime, SessionId) {
         let session = SessionId::new("native-owner");
         zone.handle(ZoneCommand::Join(ZoneJoin {
             session_id: session.clone(),
@@ -109,7 +144,7 @@ mod tests {
             max_hp: 500,
             mp: 500,
             map_file_name: map.into(),
-            position: Point { x: 20, y: 20 },
+            position,
             direction: MirDirection::Right,
             chat_profile: ZoneChatProfile {
                 attack_mode: 5,
@@ -172,6 +207,7 @@ mod tests {
     }
 
     fn victim_class(zone: &mut ZoneRuntime, hp: i32, class: MirClass) -> SessionId {
+        let position = offset_point(&zone.players[&SessionId::new("native-owner")].position, MirDirection::Right, 1);
         let session = SessionId::new("native-victim");
         zone.handle(ZoneCommand::Join(ZoneJoin {
             session_id: session.clone(),
@@ -186,7 +222,7 @@ mod tests {
             max_hp: 500,
             mp: 500,
             map_file_name: zone.key.map_file_name.clone(),
-            position: Point { x: 21, y: 20 },
+            position,
             direction: MirDirection::Left,
             chat_profile: ZoneChatProfile {
                 attack_mode: 5,
@@ -1165,7 +1201,7 @@ mod tests {
 
     fn real_owned_bone_familiar(zone: &mut ZoneRuntime, master: &SessionId) -> u32 {
         assert_eq!(zone.players[master].class, MirClass::Taoist);
-        let target = Point { x: 21, y: 19 };
+        let target = offset_point(&zone.players[master].position, MirDirection::Up, 1);
         let launched = zone.handle(ZoneCommand::PlayerCastMagic {
             session_id: master.clone(),
             object_id: 0,
@@ -1386,7 +1422,7 @@ mod tests {
 
     #[test]
     fn cold_real_owned_bone_trap_clears_only_orphan_control_and_retained_visual_state() {
-        let (mut zone, session) = fixture(MirClass::Assassin);
+        let (mut zone, session) = cold_fixture();
         let master = victim_class(&mut zone, 500, MirClass::Taoist);
         let pet = real_owned_bone_familiar(&mut zone, &master);
         let base_colour = match &zone.objects[&pet].packet {
@@ -1434,7 +1470,7 @@ mod tests {
 
     #[test]
     fn cold_real_owned_bone_trap_preserves_a_newer_typed_shock_replacement() {
-        let (mut zone, session) = fixture(MirClass::Assassin);
+        let (mut zone, session) = cold_fixture();
         let master = victim_class(&mut zone, 500, MirClass::Taoist);
         let pet = real_owned_bone_familiar(&mut zone, &master);
         let target = zone.five_class_target(pet).unwrap();
@@ -1461,7 +1497,7 @@ mod tests {
 
     #[test]
     fn cold_real_owned_bone_without_assassin_marker_preserves_typed_control() {
-        let (mut zone, _) = fixture(MirClass::Assassin);
+        let (mut zone, _) = cold_fixture();
         let master = victim_class(&mut zone, 500, MirClass::Taoist);
         let pet = real_owned_bone_familiar(&mut zone, &master);
         let target = zone.five_class_target(pet).unwrap();

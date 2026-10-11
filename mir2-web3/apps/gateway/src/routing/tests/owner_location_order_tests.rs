@@ -21,6 +21,13 @@ impl Owner {
         };
         let session = SessionId::new("owner-order-fixture");
         let map = "owner-order-fixture".to_string();
+        // This packet-order fixture intentionally has no terrain files. Make
+        // its open arena explicit; ordinary missing maps remain unavailable.
+        assert!(state.zone_manager.install_empty_zone(
+            mir2_simulation::ZoneRuntime::new_with_collision(
+                ZoneKey::for_map(&map), mir2_simulation::ZoneCollision::unbounded(),
+            ),
+        ));
         let object_id = state.upsert_player(
             key.clone(),
             "OwnerOrder",

@@ -103,3 +103,10 @@ retained. The original gates are unchanged. Overall Linux success, genuine
 artifact verification and rollout are still separate pending checks. The newer
 Source terrain changes require their own exact-source CI; this run cannot qualify
 them. Public c704/R23/feed18 and all real saves remain untouched.
+
+The subsequent final readback confirms run 37993166469 completed successfully
+with both original jobs. Its genuine artifact ZIP, source/clean metadata,
+archive/checksum, ELF binaries and every original CI gate/log were verified.
+The first Docker infrastructure failure remains retained. The actual qualified
+receipt is linked from the Source terrain Git/Linux follow-up above. Public
+preflight still has 1 WS connection, so this is qualified, not deployed.

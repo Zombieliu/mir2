@@ -58,6 +58,7 @@ mod onchain;
 mod packets;
 mod pathfind;
 mod quests;
+mod source_map_io;
 pub(crate) mod source_map_loading;
 #[cfg(test)]
 mod storage_rental_tests;

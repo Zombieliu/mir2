@@ -1094,19 +1094,22 @@ mod tests {
     #[test]
     fn billing_keys_cover_nine_locales_and_preserve_placeholders() {
         let slots = |text: &str| {
-            let mut names: Vec<String> = template_parts(text).into_iter().filter_map(|part| {
-                match part {
+            let mut names: Vec<String> = template_parts(text)
+                .into_iter()
+                .filter_map(|part| match part {
                     Part::Slot(name) => Some(name.to_owned()),
                     Part::Literal(_) => None,
-                }
-            }).collect();
+                })
+                .collect();
             names.sort();
             names
         };
         let mut keys = HashSet::new();
         for (key, values) in BILLING_TRANSLATIONS {
             assert!(
-                ["billing.", "game.mail.", "game.shop."].iter().any(|prefix| key.starts_with(prefix)),
+                ["billing.", "game.mail.", "game.shop."]
+                    .iter()
+                    .any(|prefix| key.starts_with(prefix)),
                 "unsupported shop/mail/billing vocabulary key: {key}"
             );
             assert!(keys.insert(*key));
@@ -1115,7 +1118,11 @@ mod tests {
                 assert!(!value.is_empty());
                 assert_ne!(value, key);
                 assert_eq!(translate(language, key), *value);
-                assert_eq!(slots(&values[0]), slots(value), "{key} {language:?} named slots");
+                assert_eq!(
+                    slots(&values[0]),
+                    slots(value),
+                    "{key} {language:?} named slots"
+                );
                 for placeholder in ["{0}", "{1}"] {
                     assert_eq!(
                         values[0].matches(placeholder).count(),

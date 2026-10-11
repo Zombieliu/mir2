@@ -124,7 +124,9 @@ fn health_zero_does_not_supersede_death_before_spawn() {
 
 #[test]
 fn health_zero_live_fork_preserves_state_without_death_authority() {
-    let mut zone = zone();
+    // Cold recovery selects the ordinary terrain by this same ZoneKey. A
+    // missing map is unavailable, rather than an explicitly open live arena.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map("health-zero"));
     zone.apply_zone_object_packets(&[spawn(), health(0)], 100);
     let before = zone.checkpoint_bytes().unwrap();
     let mut fork = zone.transaction_fork();

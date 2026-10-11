@@ -9733,30 +9733,41 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn current_zone_transfer_key(&self) -> Option<String> {
-        let (normalized_map, key, cached_map_transfers) = {
-            let session_state = self
-                .movement_ingress
-                .session_state
-                .lock()
-                .expect("shared zone movement session mutex should not be poisoned");
-            (
-                normalize_gateway_map_file_name(session_state.cached_map_file_name.as_deref()?),
-                session_state.presence_key.clone()?,
-                session_state.cached_map_transfers.clone(),
-            )
-        };
-        let position = self
+        // Observe the current installed Zone and its route/cache together, in
+        // the same Zone -> movement lock order as movement execution. Re-reading
+        // terrain by filename would incorrectly reject trusted open arenas.
+        let zone_state = self
             .zone_state
             .lock()
-            .expect("shared zone presence mutex should not be poisoned")
-            .players
-            .get(&key)
-            .map(|presence| Point {
-                x: presence.entity.x,
-                y: presence.entity.y,
-            })?;
+            .expect("shared zone presence mutex should not be poisoned");
+        let session_state = self
+            .movement_ingress
+            .session_state
+            .lock()
+            .expect("shared zone movement session mutex should not be poisoned");
+        let normalized_map = normalize_gateway_map_file_name(
+            session_state.cached_map_file_name.as_deref()?,
+        );
+        let key = session_state.presence_key.as_ref()?;
+        if zone_state.teardown_fenced(key) {
+            return None;
+        }
+        let session_id = zone_state.zone_sessions.get(key)?;
+        if zone_state.zone_session_keys.get(session_id) != Some(key) {
+            return None;
+        }
+        let presence = zone_state.players.get(key)?;
+        let zone_key = zone_state.zone_manager.zone_key_for_session(session_id)?;
+        let zone = zone_state.zone_manager.zone(&zone_key)?;
+        if normalize_gateway_map_file_name(&presence.map_file_name) != normalized_map
+            || normalize_gateway_map_file_name(&zone_key.map_file_name) != normalized_map
+            || !zone.has_available_collision()
+        {
+            return None;
+        }
+        let position = Point { x: presence.entity.x, y: presence.entity.y };
 
-        cached_map_transfers
+        session_state.cached_map_transfers
             .iter()
             .find(|transfer| {
                 normalize_gateway_map_file_name(&transfer.map_file_name) == normalized_map
@@ -15746,7 +15757,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 snapshot_tick: if skips_snapshot {
                     0
                 } else {
-                    self.world_snapshot().tick
+                    self.current_tick()
                 },
                 active_identity: self.active_identity(),
             },
@@ -15756,6 +15767,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         self.inner.supports_typed_game_shop_purchase_outcome()
+    }
+
+    fn current_tick(&self) -> u64 {
+        // Shared AOI/vitals overlays do not change the personal snapshot tick.
+        // Avoid composing that full snapshot just to read its clock.
+        self.inner.current_tick()
     }
 
     fn supports_native_game_shop_gifts(&self) -> bool {
@@ -16389,6 +16406,8 @@ mod tests {
     mod private_monster_snapshot_tests;
     #[path = "map_transfer_poison_tests.rs"]
     mod map_transfer_poison_tests;
+    #[path = "map_transfer_availability_tests.rs"]
+    mod map_transfer_availability_tests;
     #[path = "zone_melee_passive_progression_tests.rs"]
     mod zone_melee_passive_progression_tests;
     #[path = "five_class_receipt_tests.rs"]
@@ -16401,6 +16420,8 @@ mod tests {
     mod zone_skill_cadence_tests;
     #[path = "shared_session_hot_path_tests.rs"]
     mod shared_session_hot_path_tests;
+    #[path = "outcome_tick_tests.rs"]
+    mod outcome_tick_tests;
     #[path = "predrain_performance_tests.rs"]
     mod predrain_performance_tests;
     #[path = "live_chat_tests.rs"]

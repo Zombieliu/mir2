@@ -41,7 +41,9 @@ fn shared_map_layer_gate_keeps_world_mutations_and_skips_owner_only_packets() {
 
     assert!(!packets_may_commit_shared_death_drops(&[owner_only]));
     assert!(!packets_may_commit_shared_death_drops(&[live_health]));
-    assert!(packets_may_commit_shared_death_drops(&[death_health]));
+    // A rounded zero-percent display does not authorize death settlement.
+    // Retain the actual ObjectDied positive control below.
+    assert!(!packets_may_commit_shared_death_drops(&[death_health]));
     assert!(packets_may_commit_shared_death_drops(&[death]));
 }
 

@@ -1,5 +1,6 @@
 //! Trusted health presentation cannot sign death, erase movement or settle loot.
 use super::*;
+use super::super::owner_health::PendingOwnerPresentation;
 use crate::routing::death_drop_anchors;
 
 const ID: u32 = 8_010_001;
@@ -198,10 +199,24 @@ fn health_zero_registered_owner_full_channel_keeps_global_attack_until_one_wire_
     assert!(
         matches!(first, ServerPacket::ObjectHealth { info } if info.object_id == 1000 && info.percent == 0)
     );
-    assert_eq!(
-        shared.lock().unwrap().pending_zone_packets[&key],
-        original[1..]
-    );
+    // A registered owner's health and actions now share the ordered live
+    // presentation FIFO. Inspect that actual queue, retaining the global ID
+    // until the one normal wire rebase instead of expecting the legacy queue.
+    let (pending_count, pending_packets, legacy_empty) = {
+        let state = shared.lock().unwrap();
+        let pending = state.pending_zone_owner_health.get(&key);
+        (
+            pending.map_or(0, Vec::len),
+            pending.into_iter().flatten().filter_map(|entry| match entry {
+                PendingOwnerPresentation::Packet(packet) => Some(packet.clone()),
+                PendingOwnerPresentation::Health(_) => None,
+            }).collect::<Vec<_>>(),
+            !state.pending_zone_packets.contains_key(&key),
+        )
+    };
+    assert_eq!(pending_count, 1);
+    assert_eq!(pending_packets, original[1..]);
+    assert!(legacy_empty);
     shared
         .lock()
         .unwrap()
@@ -221,6 +236,7 @@ fn health_zero_registered_owner_full_channel_keeps_global_attack_until_one_wire_
         .unwrap()
         .pending_zone_packets
         .contains_key(&key));
+    assert!(!shared.lock().unwrap().pending_zone_owner_health.contains_key(&key));
 }
 
 mod ordinary_transport {
@@ -245,7 +261,12 @@ mod ordinary_transport {
         MaybeTlsStream, WebSocketStream,
     };
 
-    const MAP: &str = "health-zero-source-transport";
+    const MAP: &str = "D024";
+    // Preserve both players' adjacency and one-tile walks on real bundled
+    // terrain. An unavailable synthetic map must correctly reject movement.
+    fn fixture_point(x: i32, y: i32) -> Point {
+        Point { x: x + 20, y: y + 42 }
+    }
     const PASSWORD: &str = "isolated-health-zero-password";
     type WebClient = WebSocketStream<MaybeTlsStream<TcpStream>>;
 
@@ -320,15 +341,15 @@ mod ordinary_transport {
         config.monster_spawn_source = MonsterSpawnSource::StarterScenario;
         config.map.file_name = MAP.into();
         config.map.title = "Isolated health source fixture".into();
-        config.spawn = Point { x: 10, y: 10 };
+        config.spawn = fixture_point(10, 10);
         config.map_collision.map_file_name = MAP.into();
-        config.map_collision.map_width = 40;
-        config.map_collision.map_height = 40;
+        config.map_collision.map_width = 100;
+        config.map_collision.map_height = 100;
         config.map_collision.play_bounds = mir2_game_data::MapBounds {
             min_x: 0,
-            max_x: 39,
+            max_x: 99,
             min_y: 0,
-            max_y: 39,
+            max_y: 99,
         };
         config.map_collision.region_bounds = config.map_collision.play_bounds.clone();
         config.map_collision.blocked_cells.clear();
@@ -355,7 +376,7 @@ mod ordinary_transport {
             let save = record.saves.get_mut(&index).unwrap();
             save.map_file_name = MAP.into();
             save.map_title = config.map.title.clone();
-            save.position = Point { x: 10, y };
+            save.position = fixture_point(10, y);
             // Level30 Warrior's real Source max HP is419. Only prepared current HP is1.
             save.hp = 1;
             save.max_hp = 419;
@@ -579,17 +600,17 @@ mod ordinary_transport {
             },
         )
         .await;
-        tcp_until(&mut tcp, |p| matches!(p, ServerPacket::UserLocation { location } if location.position == (Point { x: 11, y: 10 }))).await;
+        tcp_until(&mut tcp, |p| matches!(p, ServerPacket::UserLocation { location } if location.position == fixture_point(11, 10))).await;
         web_until(&mut web, |e| {
             named(e, "ObjectWalk") && e["payload"]["objectId"] == owner_id
         })
         .await;
         web_send(&mut web, json!({"type":"walk","direction":"Right"})).await;
         web_until(&mut web, |e| {
-            named(e, "UserLocation") && e["payload"]["x"] == 11 && e["payload"]["y"] == 11
+            named(e, "UserLocation") && e["payload"]["x"] == 31 && e["payload"]["y"] == 53
         })
         .await;
-        tcp_until(&mut tcp, |p| matches!(p, ServerPacket::ObjectWalk { movement } if movement.object_id == peer_id && movement.position == (Point { x: 11, y: 11 }))).await;
+        tcp_until(&mut tcp, |p| matches!(p, ServerPacket::ObjectWalk { movement } if movement.object_id == peer_id && movement.position == fixture_point(11, 11))).await;
         {
             let resources = factory.resources_for_zone(&ZoneId::primary());
             let state = resources.zone_state.lock().unwrap();

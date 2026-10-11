@@ -72,6 +72,18 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 # The full Crystal sound export is published through R2; keep only files
 # that are already intentionally tracked as local baselines.
 /mir2-web3/apps/web/public/original-ui/Sound/*.wav
+# These Source-pinned pet sounds are required by the native build/test closure.
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_blackdragon.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_chick.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_frog.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_kitty.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_monkey.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_olympicmascot.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_pickup.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_pig.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_pigman.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_skeleton.wav
+!/mir2-web3/apps/web/public/original-ui/Sound/pet_weman.wav
 
 # Editors
 **/.idea/

@@ -3174,7 +3174,10 @@ mod tests {
             "ARHair/02"
         );
         assert_eq!(jump.body_base_offset, 352);
-        assert_eq!(jump.weapon_library.as_deref(), Some("/original-ui/CWeapon/01"));
+        assert_eq!(
+            jump.weapon_library.as_deref(),
+            Some("/original-ui/CWeapon/01")
+        );
         assert_eq!(jump.weapon_frame_offset, Some(416));
         let walk =
             resolved_native_sprite_with_availability(&entity, AnimationAction::Walking, &available);

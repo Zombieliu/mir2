@@ -3,10 +3,34 @@
 //! from accepted native spell commands, never from edited checkpoints.
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
-    SessionId, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager, ZoneOutbound,
+    SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager, ZoneOutbound,
     ZoneRuntime,
 };
 use serde_json::Value;
+
+// Distinct ordinary bundled maps, with the same logical actor spacing on each.
+const MAP_A: &str = "D024";
+const MAP_B: &str = "D022";
+const MAP_C: &str = "D023";
+
+fn map_point(map: &str, x: i32, y: i32) -> Point {
+    let (dx, dy) = match map {
+        MAP_A => (17, 41),
+        MAP_B => (221, 183),
+        MAP_C => (196, 158),
+        _ => panic!("unknown prepared map"),
+    };
+    Point {
+        x: x + dx,
+        y: y + dy,
+    }
+}
+
+fn ordinary_zone(map: &str) -> ZoneRuntime {
+    let zone = ZoneRuntime::new(ZoneKey::for_map(map));
+    assert!(zone.has_available_collision(), "ordinary terrain {map}");
+    zone
+}
 
 fn sid(name: &str) -> SessionId {
     SessionId::new(name)
@@ -33,7 +57,7 @@ fn actor(name: &str, map: &str) -> ZoneJoin {
         max_hp: 1_000,
         mp: 1_000,
         map_file_name: map.into(),
-        position: Point { x, y: 10 },
+        position: map_point(map, x, 10),
         direction: MirDirection::Right,
         chat_profile: Default::default(),
         combat_stats: Default::default(),
@@ -80,7 +104,8 @@ fn spell(
     kind: Spell,
     now: u64,
 ) -> Vec<ZoneOutbound> {
-    let target = actor(target, "purification-map-a");
+    let map = manager.zone_key_for_session(&sid(target)).unwrap();
+    let target = actor(target, &map.map_file_name);
     manager.handle(ZoneCommand::PlayerCastMagic {
         session_id: sid(caster),
         object_id: if kind == Spell::Curse {
@@ -106,18 +131,11 @@ fn source_fixture() -> (ZoneManager, u64) {
 
 fn source_fixture_with_revived_actors(revive: bool) -> (ZoneManager, u64) {
     let mut manager = ZoneManager::new();
-    for map in [
-        "purification-map-a",
-        "purification-map-b",
-        "purification-map-c",
-    ] {
-        assert!(manager.install_empty_zone(ZoneRuntime::new_with_collision(
-            ZoneKey::for_map(map),
-            ZoneCollision::unbounded(),
-        )));
+    for map in [MAP_A, MAP_B, MAP_C] {
+        assert!(manager.install_empty_zone(ordinary_zone(map)));
     }
     for name in ["healer", "friend", "enemy"] {
-        manager.join(actor(name, "purification-map-a"));
+        manager.join(actor(name, MAP_A));
         if revive {
             change_life(&mut manager, name, true);
         }
@@ -136,7 +154,7 @@ fn source_fixture_with_revived_actors(revive: bool) -> (ZoneManager, u64) {
         object_id: 102,
         spell: Spell::Poisoning,
         direction: MirDirection::Left,
-        target: Point { x: 12, y: 10 },
+        target: map_point(MAP_A, 12, 10),
         cast: true,
         level: 3,
         damage: 10,
@@ -163,12 +181,12 @@ fn source_fixture_with_revived_actors(revive: bool) -> (ZoneManager, u64) {
             "{cast:?}"
         );
         manager.tick_all(now + 500);
-        if player(&manager, "purification-map-a", "friend")["buffs"]
+        if player(&manager, MAP_A, "friend")["buffs"]
             .get("12")
             .is_some()
         {
             assert_ne!(
-                player(&manager, "purification-map-a", "friend")["poison"],
+                player(&manager, MAP_A, "friend")["poison"],
                 0
             );
             return (manager, now + 520);
@@ -251,21 +269,18 @@ fn assert_cleared_once(manager: &mut ZoneManager, map: &str, now: u64) {
 fn normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry() {
     for kind in [Spell::Hiding, Spell::MassHiding] {
         let mut manager = ZoneManager::new();
-        for map in ["purification-map-a", "purification-map-b"] {
-            assert!(manager.install_empty_zone(ZoneRuntime::new_with_collision(
-                ZoneKey::for_map(map),
-                ZoneCollision::unbounded(),
-            )));
+        for map in [MAP_A, MAP_B] {
+            assert!(manager.install_empty_zone(ordinary_zone(map)));
         }
-        manager.join(actor("healer", "purification-map-a"));
-        manager.join(actor("witness", "purification-map-b"));
+        manager.join(actor("healer", MAP_A));
+        manager.join(actor("witness", MAP_B));
         let accepted = spell(&mut manager, "healer", "healer", kind, 10);
         assert!(packets(&accepted, "healer").iter().any(|packet| matches!(
             packet,
             ServerPacket::Magic { spell, cast: true, .. } if *spell == kind
         )));
         manager.tick_all(510);
-        let before = player(&manager, "purification-map-a", "healer");
+        let before = player(&manager, MAP_A, "healer");
         assert_eq!(
             before["hidden"], true,
             "{kind:?} did not actually hide the actor"
@@ -275,11 +290,11 @@ fn normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry() {
             .online_owner_proof_for_session(&sid("healer"))
             .unwrap();
         let vitals = manager.player_vitals(&sid("healer")).unwrap();
-        let mut join = actor("healer", "purification-map-b");
+        let mut join = actor("healer", MAP_B);
         join.hp = vitals.0;
         join.mp = vitals.2;
         let moved = manager.join(join);
-        let after = player(&manager, "purification-map-b", "healer");
+        let after = player(&manager, MAP_B, "healer");
         assert_eq!(
             after["hidden"], true,
             "live map Join lost the actual {kind:?} flag"
@@ -301,15 +316,15 @@ fn normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry() {
         );
         manager.tick_all(expiry - 1);
         assert_eq!(
-            player(&manager, "purification-map-b", "healer")["hidden"],
+            player(&manager, MAP_B, "healer")["hidden"],
             true
         );
         let expired = manager.tick_all(expiry);
         assert_eq!(
-            player(&manager, "purification-map-b", "healer")["hidden"],
+            player(&manager, MAP_B, "healer")["hidden"],
             false
         );
-        assert!(player(&manager, "purification-map-b", "healer")["buffs"]
+        assert!(player(&manager, MAP_B, "healer")["buffs"]
             .get("2")
             .is_none());
         assert_eq!(
@@ -341,11 +356,11 @@ fn normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry() {
 #[test]
 fn normal_map_join_preserves_source_buffs_and_their_absolute_expiry() {
     let (mut manager, _) = source_fixture();
-    let before = player(&manager, "purification-map-a", "friend")["buffs"].clone();
+    let before = player(&manager, MAP_A, "friend")["buffs"].clone();
     let proof = manager
         .online_owner_proof_for_session(&sid("friend"))
         .unwrap();
-    transfer(&mut manager, "friend", "purification-map-b");
+    transfer(&mut manager, "friend", MAP_B);
     assert_eq!(
         manager
             .online_owner_proof_for_session(&sid("friend"))
@@ -353,7 +368,7 @@ fn normal_map_join_preserves_source_buffs_and_their_absolute_expiry() {
         Some(&proof)
     );
     assert_eq!(
-        player(&manager, "purification-map-b", "friend")["buffs"],
+        player(&manager, MAP_B, "friend")["buffs"],
         before,
         "normal same-Node map Join must carry actual buff state, never renew its expiry"
     );
@@ -372,7 +387,7 @@ fn normal_purification_both_map_transfers_preserve_original_actors_and_500_deadl
         let lives = order.map(|name| manager.player_life_generation(&sid(name)).unwrap());
         cast(&mut manager, "healer", now);
         for name in order {
-            transfer(&mut manager, name, "purification-map-b");
+            transfer(&mut manager, name, MAP_B);
         }
         for (index, name) in order.into_iter().enumerate() {
             assert_eq!(
@@ -385,8 +400,8 @@ fn normal_purification_both_map_transfers_preserve_original_actors_and_500_deadl
             );
         }
         manager.tick_all(now + 499);
-        assert_curse_and_poison(&manager, "purification-map-b");
-        assert_cleared_once(&mut manager, "purification-map-b", now);
+        assert_curse_and_poison(&manager, MAP_B);
+        assert_cleared_once(&mut manager, MAP_B, now);
     }
 }
 
@@ -429,10 +444,10 @@ fn no_purification_completion(out: &[ZoneOutbound]) {
 fn normal_self_purification_follows_its_single_live_actor_to_the_destination() {
     let (mut manager, now) = source_fixture();
     cast(&mut manager, "friend", now);
-    transfer(&mut manager, "friend", "purification-map-b");
+    transfer(&mut manager, "friend", MAP_B);
     manager.tick_all(now + 499);
-    assert_curse_and_poison(&manager, "purification-map-b");
-    assert_cleared_once(&mut manager, "purification-map-b", now);
+    assert_curse_and_poison(&manager, MAP_B);
+    assert_cleared_once(&mut manager, MAP_B, now);
 }
 
 #[test]
@@ -440,15 +455,15 @@ fn normal_purification_repeated_map_hops_keep_one_original_deadline_and_destinat
     let (mut manager, now) = source_fixture();
     cast(&mut manager, "healer", now);
     for name in ["healer", "friend"] {
-        transfer(&mut manager, name, "purification-map-b");
+        transfer(&mut manager, name, MAP_B);
     }
     manager.tick_all(now + 200);
-    manager.join(actor("witness", "purification-map-c"));
+    manager.join(actor("witness", MAP_C));
     for name in ["friend", "healer"] {
-        transfer(&mut manager, name, "purification-map-c");
+        transfer(&mut manager, name, MAP_C);
     }
     manager.tick_all(now + 499);
-    assert_curse_and_poison(&manager, "purification-map-c");
+    assert_curse_and_poison(&manager, MAP_C);
     let out = manager.tick_all(now + 500);
     assert_eq!(
         packets(&out, "witness")
@@ -471,7 +486,7 @@ fn normal_purification_repeated_map_hops_keep_one_original_deadline_and_destinat
                 poison: 0
             }
     )));
-    assert!(player(&manager, "purification-map-c", "friend")["buffs"]
+    assert!(player(&manager, MAP_C, "friend")["buffs"]
         .get("12")
         .is_none());
     no_purification_completion(&manager.tick_all(now + 501));
@@ -480,16 +495,16 @@ fn normal_purification_repeated_map_hops_keep_one_original_deadline_and_destinat
 #[test]
 fn normal_map_buffs_expire_at_the_source_absolute_deadline_without_renewal() {
     let (mut manager, _) = source_fixture();
-    let deadline = player(&manager, "purification-map-a", "friend")["buffs"]["12"]["expires_at_ms"]
+    let deadline = player(&manager, MAP_A, "friend")["buffs"]["12"]["expires_at_ms"]
         .as_u64()
         .unwrap();
-    transfer(&mut manager, "friend", "purification-map-b");
+    transfer(&mut manager, "friend", MAP_B);
     manager.tick_all(deadline - 1);
-    assert!(player(&manager, "purification-map-b", "friend")["buffs"]
+    assert!(player(&manager, MAP_B, "friend")["buffs"]
         .get("12")
         .is_some());
     let expired = manager.tick_all(deadline);
-    assert!(player(&manager, "purification-map-b", "friend")["buffs"]
+    assert!(player(&manager, MAP_B, "friend")["buffs"]
         .get("12")
         .is_none());
     assert_eq!(
@@ -513,26 +528,26 @@ fn normal_purification_one_actor_or_different_destination_cannot_complete() {
         let (mut manager, now) = source_fixture();
         cast(&mut manager, "healer", now);
         if case != "target_only" {
-            transfer(&mut manager, "healer", "purification-map-b");
+            transfer(&mut manager, "healer", MAP_B);
         }
         if case != "caster_only" {
             transfer(
                 &mut manager,
                 "friend",
                 if case == "different_destinations" {
-                    "purification-map-c"
+                    MAP_C
                 } else {
-                    "purification-map-b"
+                    MAP_B
                 },
             );
         }
         no_purification_completion(&manager.tick_all(now + 500));
         let target_map = if case == "caster_only" {
-            "purification-map-a"
+            MAP_A
         } else if case == "different_destinations" {
-            "purification-map-c"
+            MAP_C
         } else {
-            "purification-map-b"
+            MAP_B
         };
         assert_curse_and_poison(&manager, target_map);
     }
@@ -542,11 +557,11 @@ fn normal_purification_one_actor_or_different_destination_cannot_complete() {
 fn normal_purification_target_arriving_after_completion_cannot_resurrect_the_action() {
     let (mut manager, now) = source_fixture();
     cast(&mut manager, "healer", now);
-    transfer(&mut manager, "healer", "purification-map-b");
+    transfer(&mut manager, "healer", MAP_B);
     no_purification_completion(&manager.tick_all(now + 500));
-    transfer(&mut manager, "friend", "purification-map-b");
+    transfer(&mut manager, "friend", MAP_B);
     no_purification_completion(&manager.tick_all(now + 501));
-    assert_curse_and_poison(&manager, "purification-map-b");
+    assert_curse_and_poison(&manager, MAP_B);
 }
 
 #[test]
@@ -561,7 +576,7 @@ fn normal_purification_map_handoff_rejects_current_actor_death_or_new_life() {
                     change_life(&mut manager, name, revive);
                 }
                 for actor in ["healer", "friend"] {
-                    transfer(&mut manager, actor, "purification-map-b");
+                    transfer(&mut manager, actor, MAP_B);
                 }
                 if !before_transfer {
                     change_life(&mut manager, name, revive);
@@ -571,7 +586,7 @@ fn normal_purification_map_handoff_rejects_current_actor_death_or_new_life() {
                     assert!(manager.player_life_generation(&sid(name)).unwrap() > old_life);
                 }
                 if name == "healer" {
-                    assert_curse_and_poison(&manager, "purification-map-b");
+                    assert_curse_and_poison(&manager, MAP_B);
                 }
             }
         }
@@ -589,21 +604,21 @@ fn normal_purification_logout_relogin_and_nonretained_join_never_adopt_old_actio
                 manager.handle(ZoneCommand::Leave {
                     session_id: sid(name),
                 });
-                manager.join(actor(name, "purification-map-b"));
+                manager.join(actor(name, MAP_B));
             } else {
                 // Same-map Join is a new admission, never an online transfer.
-                manager.join(actor(name, "purification-map-a"));
-                transfer(&mut manager, name, "purification-map-b");
+                manager.join(actor(name, MAP_A));
+                transfer(&mut manager, name, MAP_B);
             }
             transfer(
                 &mut manager,
                 if name == "healer" { "friend" } else { "healer" },
-                "purification-map-b",
+                MAP_B,
             );
             assert!(!manager.online_owner_proof_is_current(&old_proof));
             no_purification_completion(&manager.tick_all(now + 500));
             if name == "healer" {
-                assert_curse_and_poison(&manager, "purification-map-b");
+                assert_curse_and_poison(&manager, MAP_B);
             }
         }
     }
@@ -614,7 +629,7 @@ fn normal_purification_cold_manager_restore_never_rebinds_old_pending_actions() 
     let (mut manager, now) = source_fixture();
     cast(&mut manager, "healer", now);
     for name in ["healer", "friend"] {
-        transfer(&mut manager, name, "purification-map-b");
+        transfer(&mut manager, name, MAP_B);
     }
     let old_proof = manager
         .online_owner_proof_for_session(&sid("healer"))
@@ -623,11 +638,11 @@ fn normal_purification_cold_manager_restore_never_rebinds_old_pending_actions() 
     let mut cold = ZoneManager::restore_checkpoint(&checkpoint).unwrap();
     assert!(!cold.online_owner_proof_is_current(&old_proof));
     no_purification_completion(&cold.tick_all(now + 500));
-    assert!(player(&cold, "purification-map-b", "friend")["buffs"]
+    assert!(player(&cold, MAP_B, "friend")["buffs"]
         .get("12")
         .is_some());
     for name in ["healer", "friend"] {
-        cold.join(actor(name, "purification-map-b"));
+        cold.join(actor(name, MAP_B));
     }
     no_purification_completion(&cold.tick_all(now + 501));
 }
@@ -636,18 +651,18 @@ fn normal_purification_cold_manager_restore_never_rebinds_old_pending_actions() 
 fn normal_purification_destination_object_id_conflict_never_retags_the_original_actor() {
     let (mut manager, now) = source_fixture();
     cast(&mut manager, "healer", now);
-    let mut conflict = actor("witness", "purification-map-b");
+    let mut conflict = actor("witness", MAP_B);
     conflict.object_id = 101;
     manager.join(conflict);
     for name in ["healer", "friend"] {
-        transfer(&mut manager, name, "purification-map-b");
+        transfer(&mut manager, name, MAP_B);
     }
     assert_ne!(
-        player(&manager, "purification-map-b", "healer")["object_id"],
+        player(&manager, MAP_B, "healer")["object_id"],
         101
     );
     no_purification_completion(&manager.tick_all(now + 500));
-    assert_curse_and_poison(&manager, "purification-map-b");
+    assert_curse_and_poison(&manager, MAP_B);
 }
 
 #[test]
@@ -656,9 +671,9 @@ fn normal_purification_destination_uses_current_friendship_at_completion() {
         let (mut manager, now) = source_fixture();
         cast(&mut manager, "healer", now);
         for name in ["healer", "friend"] {
-            transfer(&mut manager, name, "purification-map-b");
+            transfer(&mut manager, name, MAP_B);
         }
-        let mut hostile = actor("healer", "purification-map-b").chat_profile;
+        let mut hostile = actor("healer", MAP_B).chat_profile;
         hostile.attack_mode = 5;
         manager.handle(ZoneCommand::UpdateChatProfile {
             session_id: sid("healer"),
@@ -667,12 +682,12 @@ fn normal_purification_destination_uses_current_friendship_at_completion() {
         if friendly_at_completion {
             manager.handle(ZoneCommand::UpdateChatProfile {
                 session_id: sid("healer"),
-                profile: actor("healer", "purification-map-b").chat_profile,
+                profile: actor("healer", MAP_B).chat_profile,
             });
-            assert_cleared_once(&mut manager, "purification-map-b", now);
+            assert_cleared_once(&mut manager, MAP_B, now);
         } else {
             no_purification_completion(&manager.tick_all(now + 500));
-            assert_curse_and_poison(&manager, "purification-map-b");
+            assert_curse_and_poison(&manager, MAP_B);
         }
     }
 }
@@ -704,10 +719,10 @@ fn normal_walk_and_run_cannot_shortcut_the_original_600ms_cast_action_clock() {
             manager.player_transform(&sid("healer")),
             Some(before.clone())
         );
-        assert_cleared_once(&mut manager, "purification-map-a", now);
+        assert_cleared_once(&mut manager, MAP_A, now);
         assert_eq!(manager.player_transform(&sid("healer")), Some(before));
         assert_eq!(
-            player(&manager, "purification-map-a", "healer")["movement_ready_at_ms"],
+            player(&manager, MAP_A, "healer")["movement_ready_at_ms"],
             now + 600
         );
     }

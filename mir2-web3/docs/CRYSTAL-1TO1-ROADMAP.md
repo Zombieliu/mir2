@@ -1,5 +1,28 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
+> with912 pass/75 fail/7 original external ignores; this is not a green gate.
+> The missing generated keyed-map index was rebuilt by the original Node
+> producer, and two new DoubleSlash idle assertions now match original500ms
+> Standing. Production animation/clocks and all other assertions are unchanged.
+> A retained old-binary asset-root diagnostic passes; current-source full02,
+> newest NPC integration, clean builds and paired publication remain pending.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Current five-class/R25 merge, 2026-10-12: actual second-merge checks pass
+> simulation124/Gateway18, consumption-time CanMove9, real buff clocks5,
+> owner health16/32, zero-health7, outcome3, map transfer4 and monthly8.
+> Counts overlap; two original test-support billing cases are not executed
+> locally here and remain in the unchanged Linux workflow. Original Sim120/4
+> failure and fixture preparation failures are retained. Native BackStep/queued
+> Jump input guards and five combination tests are now written; their actual
+> Windows checks, clean Git/Linux/build/package/paired rollout remain pending.
+> Source schema is 7/7 (Zone), 3/2 (Gateway/factory), not schema8.
+> Public R25/feed20 is unchanged. No game switch or human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
 > Five-class integration checkpoint, 2026-10-12: the actual first R24 working
 > merge passes simulation124/Gateway18, Native bridge32/health20, nine-locale
 > validation13 and game-data75 (67 library + 5/3 integration). Original failed,
@@ -29,6 +52,144 @@
 > [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
 > Candidate round, not all-level five-class or whole-project 100% acceptance.
 > Root owns common/production files; explorers are read-only. No new Goal.
+
+> Windows CI qualification repair and Gateway publication, 2026-10-11:
+> actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
+> that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and
+> verified before cargo. Nine fixtures exclusively own the global native queue;
+> controlled real LogOutSuccess reproduces both original failures without
+> changing assertions. Original four CI commands remain and stop on any failed
+> native exit. Actual corrected default-parallel Native941/0/7, focused13 (subset),
+> Node25, six exit-control cases and formatting pass. [Original evidence](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Linux4006 is truly live with normal backup/stops/cold restart, monthly price1000
+> and original production PID/config preserved. Original44 ordinary +18 resume
+> public protocol checks pass,14 normal logouts; fresh08:22/08:48 UTC reads are
+> empty/unchanged. First failed preflight, dead owned fixture and recovery
+> diagnostic remain failed. This is not alive crowd/native/human acceptance.
+> Fresh clean client CI/build, signed R25 client/feed and fullP1-P7/Mentor remain
+> open; client stays R24/feed19. Root is sole writer; expired heartbeat paused.
+
+
+> Follow-up client build repair, 2026-10-11: the first complete4006 client CI
+> exposed optional native mail dependencies in default Android/Shared builds.
+> Mail now respects native-ui; original native behavior/assertions remain exact.
+> Actual default11 and Native13 mail checks pass (24 executions/15 functions,
+> 9 overlapping); no tests ignored. Format and neutral runtime compile pass.
+> Real monthly/Stripe PostgreSQL gates at4006 passed. [Evidence and scope](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Corrected full client CI, signed delivery, safe paired publication and native
+> dense-combat/human acceptance remain open. Server and resources are unchanged;
+> artifacts retain their actual source identity. FullP1–P7/Mentor remains open.
+
+> Integrated live health/billing with Source movement and Windows escape, 2026-10-11:
+> the public01a8 and owned9c histories are both retained. Actual local checks:
+> 317 distinct server names and941 Native names pass; one PostgreSQL external
+> and seven Native external checks remain ignored. Original failures and the
+> read-only correction of the Native name collector912→941 are retained.
+> [Scope, original evidence and limits](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> New two-parent Git publication, matching Linux/Windows builds, safe paired
+> publication, dense native combat and human acceptance remain pending here.
+> Old1e/9c artifacts are separate; existing workflow gates and live commerce
+> are preserved. Root is the sole writer. FullP1–P7/Mentor is open; expired
+> heartbeat remains paused. Older progress below is historical.
+
+> Continued Windows round, 2026-10-11: an enqueued attack paces only the next
+> hit; escape reads the actual admitted animation. Correction keeps400ms and
+> real pending ACKs, with blocked-path hints tied to current collision. Native
+> component stage gate911 passes/7 original native-external ignored; focused11
+> and adjacent340 overlap. [Original failures, source and actual checks](CLASSIC-CLIENT-ESCAPE-ACTION-CLOCK-20261011.md).
+> Foreign-cache compilation and incomplete large-memory fixture run remain;
+> fixture-only absolute-clock repair preserves product clocks/assertions and
+> now checks actual motion prediction. Server1e is pushed; own Linux38102609192
+> is separate. New Windows package/feed, paired publication, opaque action
+> receipt and actual dense-combat/native/human acceptance remain open. Last
+> public01:59 UTC64b6/R23/feed18 had no sessions; recheck before stage/apply.
+> Root owns all files. FullP1-P7/Mentor stays open; expired heartbeat stays paused.
+
+
+> Continued server round, 2026-10-11: ready movement consumes and rechecks Source
+> CanMove/Fishing; Turn retains350/activeSlow700ms. Forty normal private ticks
+> reproduced early removal of a21-second Zone Curse in19ms; the existing real
+> duration projection fixes it. Final158 distinct selected Rust checks pass,
+> including original optimized real500ms scroll plus one normal Gateway clock
+> regression. Original strict/compile/preparation failures remain; no relaxed
+> auth/collision/clocks/assertions. [Scope and evidence](CLASSIC-SOURCE-CANMOVE-BUFF-CLOCK-20261011.md).
+> Parent9d has genuine own Linux/artifact qualification; changed source needs
+> exact new Git/Linux/drained publication. Windows escape is unqualified: its
+> isolated build succeeded but focused tests did not finish before reboot.
+> Root owns all returned source/common files. FullP1-P7/Mentor/native/human
+> remains open; expired heartbeat stays paused, no blocked Goal completion.
+
+
+> Continued hot-path round, 2026-10-10: actual6153 Linux38043237500 failed the
+> unchanged strict500ms scroll story by6ms; siege passed, no deploy. Outcome
+> tick projection now avoids full snapshots; one rebuild reuses exact respawn
+> rectangle/collision counts. Final137 distinct Rust checks pass (15 new),
+> including the original optimized scroll and adjacent movement/spawn/owned
+> pet/Purification checks. Initial added fixture failure is retained; only its
+> arrival-protected viewport was corrected. Clocks, assertions, auth and all
+> original CI gates remain. [Scope/raw evidence](CLASSIC-OUTCOME-RESPAWN-PERFORMANCE-20261010.md).
+> Root owns all returned files; new exact Git/Linux/package/drained publication
+> and native/human remain separate. Last11:33 UTC public64b6 had0 sessions;
+> R23/feed18 stays current. CanMove/receipt/world outbox and fullP1-P7/Mentor
+> remain open; expired heartbeat stays paused, no blocked Goal completion.
+
+
+> Continued fixture recovery, 2026-10-10: actual transfer348 Linux38019332713
+> failed its original Snake cold-root check; siege passed, no deploy. Eight
+> retained fixtures now use bundled ordinary terrain and equivalent geometry.
+> Production collision/recovery/permissions/clocks and the full workflow stay
+> canonically unchanged. 544 Rust+6 Node tests passed at least once;
+> one original benchmark is excluded. Strict500ms scroll failed once by31ms,
+> then passed one identical diagnostic repeat; it is not claimed fixed or green.
+> Original RED, compiler allocation failure
+> and mixed-EOL scope correction are retained. Root is sole writer; next review
+> explores the isolated movement receipt read-only. Exact new Git/Linux/package,
+> fresh drained public rollout and native/human acceptance remain separate.
+> [Scope, original evidence and remaining gates](CLASSIC-TERRAIN-FIXTURE-RECOVERY-20261010.md).
+> Public64b6/R23/feed18 stays current at closure. FullP1-P7/Mentor remains open;
+> the expired heartbeat stays paused, with no blocked Goal completion claim.
+
+
+> Continued transfer round, 2026-10-10: installed unavailable terrain and stale
+> session/map bindings cannot trigger configured portals. Crystal movement
+> destinations use raw/gzip collision and reject missing/blocked/out-of-bounds
+> terrain; trusted explicit arenas and valid closed-door landings stay valid.
+> Final146 distinct local checks pass (11 new,135 retained;1 benchmark ignored).
+> Actual431520 Linux38013314930 failed five synthetic owner-order cases; only
+> seven explicit arena setup lines fix that fixture, with original clocks and
+> assertions unchanged. Io9fe7 own Linux38006259110 genuinely passed.
+> New exact Git/Linux/publication remain separate; public64b6/R23/feed18 stays
+> current. Root is sole writer. [Scope/evidence and open action-receipt gates](CLASSIC-MAP-TRANSFER-AVAILABILITY-20261010.md).
+> FullP1-P7/Mentor/native/human remains open; expired heartbeat stays paused.
+
+
+> Continued collision round, 2026-10-10: unavailable ordinary terrain now
+> rejects walking/running before door/transfer-cell exceptions and cannot mint
+> mineable walls. Final73 distinct local checks pass, including strict cold
+> recovery, original movement/security/mining and optimized Gateway500ms flow.
+> Original red baselines and fixture-only repairs are retained. Root is the
+> sole writer; read-only review reports no blocker. New exact Git/Linux/publication
+> are separate. [Scope and original evidence](CLASSIC-UNAVAILABLE-MAP-COLLISION-20261010.md).
+> Earlier terrain64b6 is now truly Linux-qualified and published from drained
+> c704 with private backups, normal/cold stops and62 public protocol checks.
+> This publishes neither source-I/O9fe7 nor the new unavailable-collision fix.
+> Io9fe7 is actually pushed; its Linux38006259110 is still separately tracked.
+> Source Map.Load/population, current-foot transfer/Join rejection, Source-CAS
+> world outbox and fullP1-P7/Mentor/native/human remain open. Expired heartbeat
+> stays paused and the blocked Goal is not marked complete. Older entries are history.
+
+> Current bounded map I/O round, 2026-10-10 local: raw/gzip map byte reads now
+> stop at preparation limits, validate the complete first gzip footer and retain
+> typed ordinary fallback behavior. Final 59 library + 4 original optimized
+> Gateway tests pass (63 distinct; one original benchmark ignored). Actual463
+> raw files and1,620 gzip maps keep identical bytes/hashes; corpora overlap.
+> [Scope and original evidence](CLASSIC-SOURCE-MAP-IO-20261010.md).
+> Root owns all files; bounded worker returned ownership and review is read-only.
+> Source64b6 is pushed, but its Linux38001876065 remains incomplete. New I/O
+> Candidate needs its own Git/Linux qualification. Last observed publicc704/
+> R23/feed18 had1 undrained WS; no staging/switch/kick or real-save changes.
+> Source Map.Load/population, Source-CAS world outbox and fullP1–P7/Mentor/native/
+> human remain open. Expired heartbeat stays paused; no Goal completion claim.
 
 > Current Source terrain round, 2026-10-10 local: normal collision now shares
 > the Source decoder and corrects three format discrepancies. Final library32

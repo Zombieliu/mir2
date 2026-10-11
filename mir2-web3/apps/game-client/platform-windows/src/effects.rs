@@ -2269,8 +2269,9 @@ impl NativeEffects {
         if self.active.iter().any(|instance| instance.key == key) {
             return;
         }
-        if let Some(animation) =
-            effect_catalog().as_ref().and_then(|catalog| catalog.map_animation("ArcherConcentration", 0))
+        if let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation("ArcherConcentration", 0))
         {
             if self.push_actor_animation(key.clone(), id, animation, self.now_ms, provenance) {
                 self.queue_five_class_sound(
@@ -2355,7 +2356,9 @@ impl NativeEffects {
         };
         let key = format!("archer-element-{id}-{element_type}");
         self.clear_effect_key(&key);
-        let Some(animation) = effect_catalog().as_ref().and_then(|catalog| catalog.map_animation(name, 0))
+        let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation(name, 0))
         else {
             return;
         };
@@ -2646,7 +2649,8 @@ impl NativeEffects {
             return;
         };
         self.queue_immediate_sound(provenance, "DarkBody.disappear", "M103-1.wav");
-        let Some(animation) = effect_catalog().as_ref()
+        let Some(animation) = effect_catalog()
+            .as_ref()
             .and_then(|catalog| catalog.map_animation("AssassinDarkBodyDisappear", 0))
         else {
             return;
@@ -2728,7 +2732,9 @@ impl NativeEffects {
             362 => "ArcherCharmedSnakeDeath",
             _ => return,
         };
-        if let Some(animation) = effect_catalog().as_ref().and_then(|catalog| catalog.map_animation(name, 0))
+        if let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation(name, 0))
         {
             let key = self.next_key("archer-summon-death");
             self.push_actor_animation(key, id, animation, self.now_ms, provenance);
@@ -2751,8 +2757,9 @@ impl NativeEffects {
         else {
             return true;
         };
-        if let Some(animation) =
-            effect_catalog().as_ref().and_then(|catalog| catalog.map_animation("ArcherTrapRockImpact", 0))
+        if let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation("ArcherTrapRockImpact", 0))
         {
             let key = self.next_key("trap-rock-impact");
             let start_at = self.now_ms.saturating_add(400);
@@ -3302,7 +3309,8 @@ impl NativeEffects {
             if self.active.iter().any(|instance| instance.key == key) {
                 continue;
             }
-            if let Some(animation) = effect_catalog().as_ref()
+            if let Some(animation) = effect_catalog()
+                .as_ref()
                 .and_then(|catalog| catalog.map_animation("ArcherSnakeTotemAura", 0))
             {
                 self.push_actor_animation(
@@ -5148,7 +5156,8 @@ impl NativeEffects {
             if !zone_tiles.contains_key(&object_id) {
                 continue;
             }
-            let Some(animation) = effect_catalog().as_ref()
+            let Some(animation) = effect_catalog()
+                .as_ref()
                 .and_then(|catalog| catalog.map_animation("ArcherBarrierPersistent16", 0))
             else {
                 continue;
@@ -5230,8 +5239,9 @@ impl NativeEffects {
                     3 => ("ArcherElementRed", "M126-7.wav"),
                     _ => ("ArcherElementMixed", "M126-8.wav"),
                 };
-                if let Some(animation) =
-                    effect_catalog().as_ref().and_then(|catalog| catalog.map_animation(name, 0))
+                if let Some(animation) = effect_catalog()
+                    .as_ref()
+                    .and_then(|catalog| catalog.map_animation(name, 0))
                 {
                     let key = format!("archer-element-{id}-{ty}");
                     if self.push_actor_animation(
@@ -6330,7 +6340,10 @@ mod tests {
             .expect("effect frame union")
         {
             let name = library["library"].as_str().expect("source library name");
-            for required in library["frames"].as_array().expect("required source frames") {
+            for required in library["frames"]
+                .as_array()
+                .expect("required source frames")
+            {
                 let index = required["index"].as_i64().expect("source frame index");
                 let frames = catalog.resolve_frames(name, index, 1);
                 assert_eq!(frames.len(), 1, "missing real {name} frame {index}");
@@ -6349,7 +6362,10 @@ mod tests {
                 let height = u32::from_be_bytes(png[20..24].try_into().unwrap());
                 assert!(width > 0 && height > 0, "empty source PNG {name}/{index}");
                 assert_eq!(frame.width, width as f32, "{name}/{index} metadata width");
-                assert_eq!(frame.height, height as f32, "{name}/{index} metadata height");
+                assert_eq!(
+                    frame.height, height as f32,
+                    "{name}/{index} metadata height"
+                );
             }
         }
     }

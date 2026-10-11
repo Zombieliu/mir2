@@ -26,7 +26,7 @@ use sha2::{Digest, Sha256};
 // Preparation resource bounds, not original Map.Load success/failure rules.
 const MAX_TERRAIN_SIDE: i32 = 4096;
 const MAX_TERRAIN_CELLS: usize = 4 * 1024 * 1024;
-const MAX_TERRAIN_BYTES: usize = 128 * 1024 * 1024;
+pub(super) const MAX_TERRAIN_BYTES: usize = 128 * 1024 * 1024;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum SourceTerrainCellAttribute {

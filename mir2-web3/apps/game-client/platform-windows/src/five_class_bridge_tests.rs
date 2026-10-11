@@ -130,7 +130,8 @@ fn native_backstep_uses_real_jump_actor_and_preserves_source_facing() {
             .authoritative_player_transform
             .as_ref()
             .unwrap()
-            .direction.as_deref(),
+            .direction
+            .as_deref(),
         Some("Right")
     );
 }
