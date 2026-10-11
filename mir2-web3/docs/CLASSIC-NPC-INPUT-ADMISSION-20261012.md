@@ -3,7 +3,9 @@
 This round fixes ordinary script-input admission in the personal simulation.
 It does not complete P7 shared-world invocation, CHECKHUM, delayed GOTO,
 Source CAS/world outbox, full P1–P7/Mentor, or native/human acceptance.
-R25/feed20 is already public; this new backend change is not yet published.
+Backend75c5 is now published with an empty, normally stopped realm and full
+original Linux gates. R25 appd917/engineb439/feed20 are preserved.
+[Immutable delivery receipt and original evidence](generated/player-qa/npc-input-admission-20261012/DELIVERY-VERIFIED.json).
 
 ## Result
 
@@ -99,11 +101,32 @@ after this known failure; it is not qualified or promoted.
 
 ## Publication and remaining scope
 
-Implementation and local regression are complete for this bounded candidate.
-Exact-source Linux CI/package qualification and a normal drained Gateway
-switch still remain. There is no client wire/schema change or new installer
-requirement. Current public delivery remains app d917/engine b439/feed20 and
-Gateway4006; the existing running player session is not forcibly disconnected.
+Implementation, local regression, exact-source Linux qualification and the
+normal drained Gateway switch are complete for this bounded candidate. Genuine
+run38159622183 qualified both Linux and siege jobs, all original release gates,
+all24 added input names and focused29, and the whole authenticated artifact ZIP,
+tar members, ELF sizes/hashes and original logs. Package/archive SHA256 is
+`b1097301ef92ab1e174ec57467cb0b10f28006f3dcc5b83636277074ee899bb3`;
+Gateway ELF is84,812,336 bytes with SHA256
+`22bee6075c24a5cf25d86f6fcf51a02d9f07c5d4208da2eed40d0072fa6be449`.
+
+The actual target is75c5b2e1f65816e062d2032c9b941bb725152f7c, PID3397094.
+All six live capacity counters, TCP7200 and spectator viewers were empty before
+staging and again at the operator's normal switch checks. The realm was backed
+up at `/var/backups/mir2-playtest-before-75c5b2e1f65816e062d2032c9b941bb725152f7c`.
+Original44 ordinary +18 resume public checks pass over verified production WSS,
+using existing owned characters and normal logouts. Final protected readback
+is empty and verifies the running inode/ELF, unchanged private environment,
+pre-existing Stripe **test** configuration and optional monthly price1000,
+unchanged Caddy/feed20, and untouched original realm PID3855184. These are
+protocol checks, not native UI, real crowd, full menu-input or human acceptance.
+
+There is no client wire/schema change or new installer requirement. Application
+d917, updaterb439 and signed feed20 remain public. The original local failures,
+parent-byte restoration proof, c6 cancelled run and full qualified Linux logs
+are retained in [the immutable original evidence ZIP](generated/player-qa/npc-input-admission-20261012/original-evidence.zip).
+There was no forced disconnection, database rollback, clock relaxation, ignored
+new check, or change to the original admission/assertion gates.
 
 The wire format has no prompt nonce. A delayed confirmation after the server
 legitimately issues a new identical prompt cannot be distinguished by this
@@ -111,3 +134,14 @@ local mechanism. General copied-menu navigation, trusted shared Join/life/
 population capture, ordered/deferred invocation, and world-effect publication
 remain separate work. Native dense-combat/laptop/player and full-game human
 acceptance remain open. The expired 12-hour heartbeat remains paused.
+
+## Next bounded round
+
+Read-only review of the actual75c5 source confirms ordinary non-input links
+still use cloneable UI without a private menu seal. Extend local trusted-display
+qualification to those clicks while preserving legitimate same-page retry and
+server-generated menus without scripts. A declared but unresolved canonical
+script must fail closed. This is separate from trusted delayed GOTO/CALL,
+original cached branch/Buttons, ordered world interpretation, CHECKHUM and
+same-Source-CAS durable world outbox/recovery. No implementation or acceptance
+of that next round is implied by this receipt.
