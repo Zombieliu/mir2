@@ -439,6 +439,7 @@ pub(super) fn apply_settled_damage_to_current_player(
 
     let died = was_alive && updated_vitals.hp <= 0;
     if died {
+        super::npc_input::invalidate(world);
         // Crystal `Die()` enqueues `S.Death` to self before broadcasting `S.ObjectDied`
         // (PlayerObject.cs:649-650); the self packet drives the client revive prompt.
         if let Some(packet) = self_death_packet(world, player) {

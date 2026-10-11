@@ -325,6 +325,7 @@ pub(super) fn dispatch_source_packets(world: &mut World, packets: &mut Vec<Serve
 pub(super) fn observe_life(world: &mut World) -> Result<(), String> {
     if !is_in_world(world) { return Ok(()); }
     let dead = super::components::current_player_is_dead(world);
+    if dead { super::npc_input::invalidate(world); }
     world.init_resource::<DefaultNpcEventQueue>();
     let previous = world.resource::<DefaultNpcEventQueue>().snapshot.observed_dead;
     if dead && !previous { enqueue(world,DefaultNpcEvent::Die)?; }

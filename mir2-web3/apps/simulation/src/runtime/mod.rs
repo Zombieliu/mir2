@@ -41,12 +41,15 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
+mod npc_input;
 mod npc_population;
 pub(crate) mod source_map_loading;
 mod source_map_io;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_script;
+#[cfg(test)]
+mod npc_dialog_admission_tests;
 mod npc_world_plan;
 #[cfg(test)]
 mod npc_source_guard_tests;

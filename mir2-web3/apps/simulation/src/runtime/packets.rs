@@ -9063,6 +9063,7 @@ impl SimulationSession {
             refresh_quest_recurrence(self.app.world_mut())
         };
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
+            super::npc_input::invalidate(self.app.world_mut());
             if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 return Err(error);

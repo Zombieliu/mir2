@@ -373,6 +373,7 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
         runtime.player_vitals = revived_vitals;
         runtime.player_dead = false;
     }
+    super::npc_input::invalidate(world);
 
     let changes_map = normalize_map_file_name(&current_map_file_name)
         != normalize_map_file_name(&bind_map.file_name);

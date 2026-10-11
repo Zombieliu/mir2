@@ -27833,6 +27833,7 @@ fn npc_confirm_input_packet_runs_input_label_with_submitted_value() {
 
     let _ = session.interact(4987);
     let _ = session.select_npc_dialog_target("@summon");
+    let _ = session.select_npc_dialog_target("@agitonerecall");
     let _ = session.select_npc_dialog_target("@@summontest");
     let input_dialog = session
         .world_snapshot()
@@ -27875,6 +27876,7 @@ fn npc_confirm_input_packet_rejects_wrong_active_npc() {
 
     let _ = session.interact(4987);
     let _ = session.select_npc_dialog_target("@summon");
+    let _ = session.select_npc_dialog_target("@agitonerecall");
     let _ = session.select_npc_dialog_target("@@summontest");
     let packets = session.handle_packet(ClientPacket::NpcConfirmInput {
         npc_id: 4988,
@@ -28631,6 +28633,10 @@ fn crystal_npc_buy_item_dead_player_is_silent_and_preserves_state() {
         )
     };
     set_current_player_hp(&mut session, 0);
+    // Settle the already-observed death hook before testing the merchant's
+    // silent rejection. Its independent DefaultNPC packets are not a buy.
+    assert!(session.try_handle_packet(ClientPacket::KeepAlive { time: 0 }).unwrap()
+        .iter().any(|packet| matches!(packet, ServerPacket::KeepAlive { .. })));
 
     let buy_packets = session.handle_packet(ClientPacket::BuyItem {
         item_index,
@@ -30349,7 +30355,7 @@ fn crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execut
     for line in [
         r#"LINEMESSAGE "Forged" Hint"#,
         r#"GLOBALMESSAGE "Sabuk changed" Announcement"#,
-        "GIVEBUFF PRISON 3600",
+        "GIVEBUFF Prison 3600 TRUE",
         "CHANGEHAIR 4",
         "CHANGELEVEL 22",
         "ADDNAMELIST ../NameLists/Rebirth1.txt",

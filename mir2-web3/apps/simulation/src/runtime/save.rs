@@ -2761,6 +2761,7 @@ fn apply_character_save_with_timing(
         npc_state.active_npc_dialog = None;
         npc_state.active_npc_service = None;
     }
+    super::npc_input::invalidate(world);
     world
         .resource_mut::<RuntimeQueueResource>()
         .pending_combat_actions = Vec::new();
@@ -2881,6 +2882,7 @@ fn apply_character_save_with_timing(
         npc_state.active_npc_dialog = None;
         npc_state.active_npc_service = None;
     }
+    super::npc_input::invalidate(world);
     {
         let mut queue = world.resource_mut::<RuntimeQueueResource>();
         queue.pending_combat_actions = Vec::new();
@@ -3900,6 +3902,7 @@ impl SimulationSession {
                         .world_mut()
                         .resource_mut::<NpcStateResource>()
                         .active_npc_dialog = None;
+                    super::npc_input::invalidate(self.app.world_mut());
                     let mut inventory = self.app.world_mut().resource_mut::<InventoryResource>();
                     inventory.storage_unlocked =
                         !inventory.storage_has_password || !config.require_storage_password;

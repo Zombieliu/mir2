@@ -249,6 +249,7 @@ impl SimulationSession {
         self.app.world_mut().resource_mut::<crate::runtime::resources::PlayerRuntimeResource>().player_dead = snapshot.player_dead;
         *self.app.world_mut().resource_mut::<BuffResource>() = snapshot.buffs.clone();
         *self.app.world_mut().resource_mut::<NpcStateResource>() = snapshot.npc.clone();
+        crate::runtime::npc_input::invalidate(self.app.world_mut());
         *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = snapshot.queue.clone();
         crate::runtime::npc_shared_guild_actions::restore(self.app.world_mut(), snapshot.npc_guild_actions.clone());
         crate::runtime::shared_pet_progress::restore(self.app.world_mut(), snapshot.pet_progress.clone());

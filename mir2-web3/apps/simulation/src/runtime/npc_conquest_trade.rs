@@ -405,6 +405,7 @@ impl TradeRollback {
         *world.resource_mut::<InventoryResource>() = self.inventory;
         *world.resource_mut::<PlayerRuntimeResource>() = self.player;
         *world.resource_mut::<NpcStateResource>() = self.npc;
+        super::npc_input::invalidate(world);
         world.remove_resource::<CastlePurchasePrice>();
     }
 }

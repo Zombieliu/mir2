@@ -480,6 +480,7 @@ impl SimulationSession {
                 // saved remaining duration alone would extend real-time buffs.
                 *self.app.world_mut().resource_mut::<BuffResource>() = before.buffs;
                 *self.app.world_mut().resource_mut::<NpcStateResource>() = before.npc;
+                super::npc_input::invalidate(self.app.world_mut());
                 *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = before.queue;
                 set_runtime_tick(self.app.world_mut(), before.tick);
                 super::hero_ai::hero_transient::restore(self.app.world_mut(), &before.hero)?;
