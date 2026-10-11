@@ -779,7 +779,7 @@ test("Source71 actual host status failures and enabled handoff preserve their or
   for (const [extra, reason] of [
     [{ runGeneration: 0 }, "statusUnavailable"],
     [{ connectionGeneration: 77 }, "identityMismatch"],
-    [{ ready: false, error: "private raw error" }, "controlsNotReady"],
+    [{ ready: false, error: "private raw error" }, "rendererError"],
     [{ error: "private raw error" }, "rendererError"],
     [{ frame: 0 }, "frameUnavailable"],
     [{ appliedRevision: 0 }, "appliedRevisionMismatch"],
@@ -888,4 +888,71 @@ test("Source71 actual main diagnostic attribute serializes only owner phase and 
   assert.deepEqual(Object.keys(JSON.parse(output)).sort(), ["owner", "phase", "reason"]);
   assert.equal(/account|token|UID|raw error|Revision|Generation|uniqueId|session|frame|error/.test(output), false);
   assert.equal(f.host.pointerContext(), null); assert.equal(f.intents.length, 0);
+});
+
+// Source72 classifies the already-read renderer error without changing readiness admission.
+function rendererReadyFailureFixture72(error) {
+  const f = fixture(), calls = [], states = [];
+  for (const [key, label] of [
+    ["getMir2StorageUiCapabilities", "capabilities"], ["getMir2StorageUiStatus", "status"],
+    ["setMir2StorageUiSnapshot", "snapshot"], ["setMir2StorageUiIntentSink", "sink"],
+    ["clearMir2StorageUiIntentSink", "clear"], ["setMir2StorageUiPointerEdge", "pointer"],
+    ["withdrawMir2StorageUiSnapshot", "withdraw"],
+  ]) {
+    const original = f.runtime[key];
+    f.runtime[key] = function (...args) { calls.push(label); return original.apply(f.runtime, args); };
+  }
+  const host = new storage.BevyStorageHost({
+    runtime: f.runtime,
+    read() { calls.push("reader"); return f.input; },
+    now() { calls.push("now"); return 100; },
+    onOwner(owner, runGeneration, ownerRevision) {
+      calls.push("owner"); f.owners.push({ owner, runGeneration, ownerRevision }); f.input.ownerRevision = ownerRevision;
+    },
+    onState(next) { states.push(next); },
+    onIntent(intent) { calls.push("intent"); f.intents.push(intent); return false; },
+  });
+  calls.length = 0; host.tick();
+  f.echo({ ready: false, error });
+  calls.length = 0;
+  const stateCountBefore = states.length;
+  host.tick();
+  return { f, host, calls, states, state: states.at(-1), stateUpdates: states.length - stateCountBefore };
+}
+function assertRendererReadyFailure72(error, reason) {
+  const control = rendererReadyFailureFixture72(null), candidate = rendererReadyFailureFixture72(error);
+  assert.deepEqual(control.state.diagnostic, { owner: "react", phase: "prepare", reason: "controlsNotReady" });
+  assert.deepEqual(candidate.state.diagnostic, { owner: "react", phase: "prepare", reason });
+  assert.deepEqual(control.calls, ["capabilities", "reader", "status", "now"]);
+  assert.deepEqual(candidate.calls, control.calls, "classification adds no reader, clock or runtime calls");
+  assert.equal(candidate.stateUpdates, control.stateUpdates, "the original fallback publication count is unchanged");
+  assert.equal(candidate.state.error, control.state.error, "raw renderer errors do not replace the original state message");
+  for (const result of [control, candidate]) {
+    assert.equal(result.state.active, false); assert.equal(result.state.transitioning, false);
+    assert.equal(result.state.ownerRevision, 0); assert.deepEqual(result.f.owners, []);
+    assert.equal(result.f.snapshots.length, 1); assert.equal(result.f.snapshots[0].inputEnabled, false);
+    assert.equal("diagnostic" in result.f.snapshots[0], false); assert.equal("error" in result.f.snapshots[0], false);
+    assert.equal(result.host.pointerContext(), null);
+    const intent = result.f.intent();
+    assert.equal(result.f.emit(intent), false); assert.equal(result.host.allows(intent), false); assert.equal(result.host.claim(intent), false);
+    assert.equal(result.f.intents.length, 0); assert.equal(result.f.edges.length, 0); assert.equal(result.f.withdrawals.length, 0);
+    assert.deepEqual(result.calls, ["capabilities", "reader", "status", "now"], "refused input remains on the same short circuit");
+  }
+  assert.equal(JSON.stringify(candidate.states).includes(error), false, "renderer detail never enters state or diagnostics");
+}
+
+test("Source72 ready false classifies the exact asset failure while keeping React ownership and calls", () => {
+  assertRendererReadyFailure72("storage assets failed to load", "rendererAssetsFailed");
+});
+
+test("Source72 ready false classifies the exact presentation mismatch without changing admission", () => {
+  assertRendererReadyFailure72("storage presentation does not match window", "rendererPresentationMismatch");
+});
+
+test("Source72 ready false classifies missing icon metadata without an ownership handoff", () => {
+  assertRendererReadyFailure72("storage item icon metadata unavailable", "rendererIconMetadataUnavailable");
+});
+
+test("Source72 ready false emits only a finite reason for unknown renderer detail", () => {
+  assertRendererReadyFailure72("private raw error: Source72 unknown diagnostic fixture", "rendererError");
 });

@@ -1012,7 +1012,7 @@ export function InventoryWindow({
 	              setDeleteFeedback(
 	                firstStorageItem ? `${t("ui.takeBackItem", [], "Take Back")}: ${firstStorageItem.name}` : null,
 	              );
-	              onTabChange("quest");
+	              onTabChange(activeTab === "bag2" ? "bag2" : "bag1");
 	            }}
 	          >
 	            {t("ui.takeBack", [], "Take Back")}

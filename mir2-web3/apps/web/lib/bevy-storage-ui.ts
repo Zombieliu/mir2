@@ -46,6 +46,7 @@ export type StorageRejectReason =
   | "abiUnavailable" | "inputIneligible" | "connectionInvalid" | "sessionInvalid" | "serviceInvalid"
   | "presentationInvalid" | "modelInvalid" | "snapshotRejected" | "hostRetired"
   | "statusUnavailable" | "publicationUnavailable" | "identityMismatch" | "controlsNotReady"
+  | "rendererAssetsFailed" | "rendererPresentationMismatch" | "rendererIconMetadataUnavailable"
   | "rendererError" | "frameUnavailable" | "frameRegressed" | "frameStale"
   | "appliedRevisionMismatch" | "inputStateMismatch" | "inputRegionsUnavailable" | "handoffExpired" | "hostException";
 export type StorageDiagnostic = { owner: "react" | "transition" | "bevy";
@@ -135,6 +136,16 @@ export function readStorageStatus(runtime: StorageRuntime): StorageStatus | null
         && Number(r.width) > 0 && Number(r.height) > 0)) return null;
     return v as StorageStatus;
   } catch { return null; }
+}
+
+function storageReadyFailureReason(error: string | null): StorageRejectReason {
+  if (!error) return "controlsNotReady";
+  switch (error) {
+    case "storage assets failed to load": return "rendererAssetsFailed";
+    case "storage presentation does not match window": return "rendererPresentationMismatch";
+    case "storage item icon metadata unavailable": return "rendererIconMetadataUnavailable";
+    default: return "rendererError";
+  }
 }
 
 function registry(): WeakMap<StorageRuntime, BevyStorageHost> {
@@ -228,7 +239,7 @@ export class BevyStorageHost {
     if (!this.gate(this.owns(), "hostRetired") || !this.gate(Boolean(v), "statusUnavailable")
       || !this.gate(Boolean(s), "publicationUnavailable") || !this.gate(sameStorageIdentity(v!, s!), "identityMismatch")) return null;
     if (v!.frame > this.lastFrame) { this.lastFrame = v!.frame; this.lastFrameAt = this.options.now(); }
-    return this.gate(v!.ready, "controlsNotReady") && this.gate(!v!.error, "rendererError")
+    return this.gate(v!.ready, storageReadyFailureReason(v!.error)) && this.gate(!v!.error, "rendererError")
       && this.gate(v!.frame > 0, "frameUnavailable") && this.gate(v!.frame >= this.lastFrame, "frameRegressed")
       && this.gate(this.options.now() - this.lastFrameAt <= 2000, "frameStale") ? v : null;
   }
