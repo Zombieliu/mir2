@@ -1,5 +1,10 @@
 # R24 shop/mail publication preparation
 
+> Publication completed 2026-10-11. This document retains preparation history;
+> [the R24 publication record](SHOP-MAIL-PUBLISHED-R24-20261011.md) contains the
+> actual current feed, Gateway, price/route amendments and acceptance limits.
+
+
 This is preparation evidence, not a public promotion or human visual acceptance.
 The actual public predecessor remains R23/feed18 and Gateway64b6 until the
 qualified deployment and both channel compare-and-swap operations succeed.

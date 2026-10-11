@@ -1,0 +1,37 @@
+{
+  "schema": "mir2.r24.retained-failure-history.v1",
+  "retained": true,
+  "excludedFromFinalPassCounts": true,
+  "attempts": [
+    {
+      "scope": "origin stage01",
+      "reason": "Incorrect predecessor directory binding; no public append or pointer write"
+    },
+    {
+      "scope": "origin stage02",
+      "reason": "Stale historical Caddy digest; no public append or pointer write"
+    },
+    {
+      "scope": "Cloudflare CI38106252236",
+      "reason": "Expired GitHub deployment credential; no promotion. Connected-account deployment preserves R2 and existing secret bindings."
+    },
+    {
+      "scope": "native-resume-public-01",
+      "reason": "Full owner snapshot arrived after36.13s, beyond the20s bootstrap wait. Only bootstrap snapshot wait changed to60s; all18 assertions retained."
+    },
+    {
+      "scope": "commercial-public-01",
+      "reason": "Public monthly shop price absent: GiftUnavailable. Authorized price1000 enabled through a normally stopped, fresh privately backed-up config amendment."
+    },
+    {
+      "scope": "commercial-public-02",
+      "reason": "Existing Caddy whitelist made styled return endpoint404. The exact route was subsequently added after origin promotion; all16 assertions retained."
+    },
+    {
+      "scope": "billing-return-route-01",
+      "reason": "Caddy parser needs its existing service environment for a header matcher. Validation failed before public config write. Fresh route02 validated with the running service environment used only in memory."
+    }
+  ],
+  "privateCredentialsOrLedgerBodiesCommitted": false,
+  "unsafeForceDisconnects": false
+}

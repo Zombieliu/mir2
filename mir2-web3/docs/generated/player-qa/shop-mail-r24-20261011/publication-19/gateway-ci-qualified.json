@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.gateway.shop-mail-linux-ci.v1",
+  "createdUtc": "2026-10-11T02:50:25.543272+00:00",
+  "runId": "38102448215",
+  "url": "https://github.com/Zombieliu/mir2/actions/runs/38102448215",
+  "revision": "01a8c48a425aecfad6adf49ff721b0aa14ce4d44",
+  "runConclusion": "success",
+  "jobs": [
+    {
+      "name": "build-linux-x64",
+      "conclusion": "success",
+      "databaseId": 114361002369
+    },
+    {
+      "name": "siege-acceptance / siege-linux",
+      "conclusion": "success",
+      "databaseId": 114361002564
+    }
+  ],
+  "githubArtifactDigest": "sha256:f7748d2a26734d941d4ba9ad0e1351ac9d95bdb2e31108b93d6d39ce03633c8d",
+  "githubArtifactBytes": 34548752,
+  "archiveSha256": "459fa9e24a47563e1d3b842c7f6dc5d516d27254859c8817e64f13d58d7dd5a2",
+  "archiveBytes": 34975771,
+  "binarySha256": "d3d4ac6a35c74860e2d8f9653c4bb194e9ccd3cb8f6af4f1f768e8fb76ebcca4",
+  "binaryBytes": 84802480,
+  "zoneHostBinarySha256": "45d8e1f5fffdbd30cfd48336fe8dc938e3093588ea56818f010641f45ef1272a",
+  "manifestSha256": "7efbe029eb022889ffca6659882120fe25e3cbdb781379d073adf19740b0b018",
+  "logSha256": "392cec995aad5d065340db96305d3b9754b70e5404a6a114e4b21d303ef3b45f",
+  "publicR2Upload": false,
+  "serverSwitched": false
+}

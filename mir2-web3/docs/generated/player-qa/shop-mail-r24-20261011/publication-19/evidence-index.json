@@ -1,0 +1,72 @@
+{
+  "schema": "mir2.r24.public-safe-evidence-index.v1",
+  "files": [
+    {
+      "path": "PUBLICATION-RECEIPT.json",
+      "size": 3358,
+      "sha256": "3faddd3b506565d6b010a9b174687dd7e5b50e161bc6c6d942f23da05c808b61"
+    },
+    {
+      "path": "cdn-promotion-verified.json",
+      "size": 1968,
+      "sha256": "8a5bace766bd28cf4409c891bf34a6b43ee34a79384970808d8dd48ba27c84d5"
+    },
+    {
+      "path": "cdn-stage-verified.json",
+      "size": 1379,
+      "sha256": "24ce99d2537f66630af5eaec273fa67982d1de0ca57b67e485d2cf7f64e281a9"
+    },
+    {
+      "path": "commercial-public-result.json",
+      "size": 3890,
+      "sha256": "bae25c9e3e98cefe7c7f97200477ff5a051a312eed71a13bb11e58b342e620cf"
+    },
+    {
+      "path": "failures-preserved.json",
+      "size": 1618,
+      "sha256": "0860e586d9dfbe6b8c11da97ea5c3df24a13299d4ab3773f703ce1c050d05691"
+    },
+    {
+      "path": "gateway-ci-qualified.json",
+      "size": 1224,
+      "sha256": "e9635311f01ec5ec06a1d2695ac23df5cfba7a5f906f4ba05f4e354aa3eda43d"
+    },
+    {
+      "path": "gateway-deployment.json",
+      "size": 2383,
+      "sha256": "97f7907304d3bc70d5f029a10b458195007f3428e9a122d625f542e992c533b7"
+    },
+    {
+      "path": "gateway-shop-price.json",
+      "size": 2026,
+      "sha256": "0c76b24c3a7072326168c4d3987f09a7fc2de90262f5383993836528926c0992"
+    },
+    {
+      "path": "native-https-cms-result.json",
+      "size": 823,
+      "sha256": "d7d518f742b95f4a1038ff8b687cd09bdcaf83d4060a5977eb53cc11fcc7191e"
+    },
+    {
+      "path": "native-resume-public-result.json",
+      "size": 3811,
+      "sha256": "6c07f38ddfab662001f81933325a37f63957789a25f5954d16b44f5f05c3c28d"
+    },
+    {
+      "path": "ordinary-public-result.json",
+      "size": 12632,
+      "sha256": "5e4f624a9ea9ca4fc9880b56e94669a1c908736b3baac3159b62e93cca8ddae4"
+    },
+    {
+      "path": "origin-promotion.json",
+      "size": 1066,
+      "sha256": "5b35ed37ef3c87e1edf28425c178856babbf32dc5db0ff7ce42ef29b0fc999d2"
+    },
+    {
+      "path": "public-return-route.json",
+      "size": 905,
+      "sha256": "12515543d477808eb5506c99978a1c980097a4650c0a9225786baf2b1ace1b74"
+    }
+  ],
+  "rawSocketCredentialsAndPrivateFilesExcluded": true,
+  "largeBinaryPayloadsExcluded": true
+}

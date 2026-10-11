@@ -1,0 +1,45 @@
+{
+  "schema": "mir2.r24.promote-root-receipt-verified.v1",
+  "passed": true,
+  "runId": "38111604812",
+  "runUrl": "https://github.com/Zombieliu/mir2/actions/runs/38111604812",
+  "sourceCommit": "52bd55f0b0145a4daa9e31d527212c9d689735e7",
+  "sourceDriverSha256": "7313bec4ac9d974f4ff6aa953b1d993c04553d0b1530f495e7de926e630989af",
+  "stageRunId": "38108094398",
+  "stageReceiptSha256": "6d43295285f3d681e965a20a9f697b17f853e5a949489b671fdee7fe8599ad85",
+  "stageByteIdentical": true,
+  "stageFullObjectVerificationPassed": true,
+  "receiptSha256": "ce93d6d8ba1d0978bcb5e93b8b7de6de606b9a4a8856ff26f0d792c349ae96db",
+  "candidate": {
+    "channel": "invited",
+    "feedSha256": "a97dbb60c48a19e7f3daf28a9b9ea42c9dbfea42bb8566f160c47475516f6d62",
+    "platform": "windows-x64",
+    "schema": "mir2.windows.r2-channel.v1",
+    "sequence": 19,
+    "signatureSha256": "01ac444bc13bd822ba8283db4be7f30a36562e84c651c9bb6553b10921285d43",
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f"
+  },
+  "observedCurrent": {
+    "channel": "invited",
+    "feedSha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2",
+    "platform": "windows-x64",
+    "schema": "mir2.windows.r2-channel.v1",
+    "sequence": 18,
+    "signatureSha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4",
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f"
+  },
+  "pointerChanged": true,
+  "pointerOutcomeUnknown": false,
+  "aliasesVerified": true,
+  "publicBase": "https://assets.mir2.obelisk.build/client-updates/",
+  "stageRunMetadata": {
+    "conclusion": "success",
+    "event": "workflow_dispatch",
+    "head_branch": "codex/shop-mail-publication-20261010",
+    "head_sha": "52bd55f0b0145a4daa9e31d527212c9d689735e7",
+    "workflow_id": 284517107
+  },
+  "cmsReverifiedByPromoteDriver": false,
+  "cmsVerifiedByActualWindowsProbe": "native-https19-01/RESULT.json",
+  "gameSourceRevision": "87fd85a0d5a819e5b38c90d192421f9239f65678"
+}

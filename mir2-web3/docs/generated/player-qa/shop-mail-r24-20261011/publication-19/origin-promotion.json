@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.native.current-origin-feed19.v1",
+  "passed": true,
+  "createdUnix": 1791692618,
+  "sequence": 19,
+  "gameSource": "87fd85a0d5a819e5b38c90d192421f9239f65678",
+  "engineSource": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "rootProofSha256": "eef5e2a95d6b45ec6572df6eb27a4d45daef9a591da2a70439840cd38109a1a9",
+  "completeSourceObjectCountChecked": 31,
+  "oldFeed18BytesAndFingerprintsPreserved": true,
+  "oldFeedPrivateBackup": "/srv/.mir2-origin-r24-s19-20261011-03/feed19-ready",
+  "allServicePidsPreserved": true,
+  "caddyReloaded": false,
+  "gatewayRestarted": false,
+  "checks": [
+    {
+      "name": "latest.json",
+      "status": 200,
+      "bytes": 1159,
+      "sha256": "a97dbb60c48a19e7f3daf28a9b9ea42c9dbfea42bb8566f160c47475516f6d62",
+      "tlsVerified": true,
+      "cacheControl": "no-store"
+    },
+    {
+      "name": "latest.p7s",
+      "status": 200,
+      "bytes": 1614,
+      "sha256": "01ac444bc13bd822ba8283db4be7f30a36562e84c651c9bb6553b10921285d43",
+      "tlsVerified": true,
+      "cacheControl": "no-store"
+    }
+  ]
+}

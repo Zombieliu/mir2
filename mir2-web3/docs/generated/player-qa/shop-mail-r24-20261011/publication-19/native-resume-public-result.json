@@ -1,0 +1,180 @@
+{
+  "schema": "mir2.disconnect.native-resume-public.v1",
+  "passed": true,
+  "sourceRevision": "01a8c48a425aecfad6adf49ff721b0aa14ce4d44",
+  "endpoint": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "tlsVerified": true,
+  "checks": [
+    {
+      "name": "cycle1.ordinaryLoginAndStep",
+      "status": "passed",
+      "evidence": {
+        "characterIndex": 26,
+        "receipt": 664,
+        "position": {
+          "x": 289,
+          "y": 626
+        }
+      }
+    },
+    {
+      "name": "cycle1.uncleanTransportLoss",
+      "status": "passed",
+      "evidence": {
+        "closed": true,
+        "logoutSent": false
+      }
+    },
+    {
+      "name": "cycle1.nativeResumeAndState",
+      "status": "passed",
+      "evidence": {
+        "receipt": 9,
+        "snapshotReceipt": 10,
+        "generation": 2,
+        "exactState": true
+      }
+    },
+    {
+      "name": "cycle1.replayRejected",
+      "status": "passed",
+      "evidence": {
+        "code": "unavailable",
+        "receipt": 9
+      }
+    },
+    {
+      "name": "cycle1.resumedOwnerLive",
+      "status": "passed",
+      "evidence": {
+        "receipt": 19,
+        "direction": "Up"
+      }
+    },
+    {
+      "name": "cycle1.logoutAndFreshLogin",
+      "status": "passed",
+      "evidence": {
+        "normalLogouts": 2,
+        "exactState": true
+      }
+    },
+    {
+      "name": "cycle2.ordinaryLoginAndStep",
+      "status": "passed",
+      "evidence": {
+        "characterIndex": 26,
+        "receipt": 661,
+        "position": {
+          "x": 289,
+          "y": 627
+        }
+      }
+    },
+    {
+      "name": "cycle2.uncleanTransportLoss",
+      "status": "passed",
+      "evidence": {
+        "closed": true,
+        "logoutSent": false
+      }
+    },
+    {
+      "name": "cycle2.nativeResumeAndState",
+      "status": "passed",
+      "evidence": {
+        "receipt": 9,
+        "snapshotReceipt": 10,
+        "generation": 2,
+        "exactState": true
+      }
+    },
+    {
+      "name": "cycle2.replayRejected",
+      "status": "passed",
+      "evidence": {
+        "code": "unavailable",
+        "receipt": 9
+      }
+    },
+    {
+      "name": "cycle2.resumedOwnerLive",
+      "status": "passed",
+      "evidence": {
+        "receipt": 26,
+        "direction": "Up"
+      }
+    },
+    {
+      "name": "cycle2.logoutAndFreshLogin",
+      "status": "passed",
+      "evidence": {
+        "normalLogouts": 2,
+        "exactState": true
+      }
+    },
+    {
+      "name": "cycle3.ordinaryLoginAndStep",
+      "status": "passed",
+      "evidence": {
+        "characterIndex": 26,
+        "receipt": 682,
+        "position": {
+          "x": 290,
+          "y": 627
+        }
+      }
+    },
+    {
+      "name": "cycle3.uncleanTransportLoss",
+      "status": "passed",
+      "evidence": {
+        "closed": true,
+        "logoutSent": false
+      }
+    },
+    {
+      "name": "cycle3.nativeResumeAndState",
+      "status": "passed",
+      "evidence": {
+        "receipt": 9,
+        "snapshotReceipt": 10,
+        "generation": 2,
+        "exactState": true
+      }
+    },
+    {
+      "name": "cycle3.replayRejected",
+      "status": "passed",
+      "evidence": {
+        "code": "unavailable",
+        "receipt": 9
+      }
+    },
+    {
+      "name": "cycle3.resumedOwnerLive",
+      "status": "passed",
+      "evidence": {
+        "receipt": 27,
+        "direction": "Up"
+      }
+    },
+    {
+      "name": "cycle3.logoutAndFreshLogin",
+      "status": "passed",
+      "evidence": {
+        "normalLogouts": 2,
+        "exactState": true
+      }
+    }
+  ],
+  "failure": null,
+  "cycles": 3,
+  "newAccountRegistrations": 0,
+  "newCharacterCreations": 0,
+  "privateCredentialCopiesCreated": "[redacted]",
+  "adminCommands": false,
+  "qaStatePreparation": false,
+  "nativeRenderAcceptance": false,
+  "fullQueuePressureTested": false
+}

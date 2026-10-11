@@ -1,0 +1,160 @@
+{
+  "schema": "mir2.r24.normal-public-commercial-smoke.v1",
+  "passed": true,
+  "sourceRevision": "01a8c48a425aecfad6adf49ff721b0aa14ce4d44",
+  "endpoint": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "tlsVerified": true,
+  "checks": [
+    {
+      "name": "ordinaryAuthenticatedBootstrap",
+      "status": "passed",
+      "evidence": {
+        "level": 1,
+        "credit": 0,
+        "gold": 0
+      }
+    },
+    {
+      "name": "ordinaryReleasedCatalogue",
+      "status": "passed",
+      "evidence": {
+        "gIndex": 1,
+        "creditPrice": 220
+      }
+    },
+    {
+      "name": "publicMonthlyCardCatalogue",
+      "status": "passed",
+      "evidence": {
+        "gIndex": 1000001,
+        "creditPrice": 1000,
+        "currency": "Credits",
+        "goldPurchase": false
+      }
+    },
+    {
+      "name": "r24-public-buy-no-currency-03",
+      "status": "passed",
+      "evidence": {
+        "code": "insufficientCurrency",
+        "protocol": "nativeGameShopReceiptV1",
+        "receipt": 657
+      }
+    },
+    {
+      "name": "r24-public-monthly-buy-no-currency-03",
+      "status": "passed",
+      "evidence": {
+        "code": "insufficientCurrency",
+        "protocol": "nativeGameShopReceiptV1",
+        "receipt": 663
+      }
+    },
+    {
+      "name": "r24-public-gift-no-currency-03",
+      "status": "passed",
+      "evidence": {
+        "code": "insufficientCurrency",
+        "protocol": "nativeGameShopGiftReceiptV1",
+        "receipt": 667
+      }
+    },
+    {
+      "name": "r24-public-monthly-gift-no-currency-03",
+      "status": "passed",
+      "evidence": {
+        "code": "insufficientCurrency",
+        "protocol": "nativeGameShopGiftReceiptV1",
+        "receipt": 671
+      }
+    },
+    {
+      "name": "r24-public-gift-self-03",
+      "status": "passed",
+      "evidence": {
+        "code": "selfGiftUnavailable",
+        "protocol": "nativeGameShopGiftReceiptV1",
+        "receipt": 675
+      }
+    },
+    {
+      "name": "r24-public-gift-missing-03",
+      "status": "passed",
+      "evidence": {
+        "code": "recipientUnavailable",
+        "protocol": "nativeGameShopGiftReceiptV1",
+        "receipt": 683
+      }
+    },
+    {
+      "name": "r24-public-gift-old-capability-03",
+      "status": "passed",
+      "evidence": {
+        "code": "giftUnavailable",
+        "protocol": "nativeGameShopGiftReceiptV1",
+        "receipt": 686
+      }
+    },
+    {
+      "name": "r24-public-buy-after-gifts-03",
+      "status": "passed",
+      "evidence": {
+        "code": "insufficientCurrency",
+        "protocol": "nativeGameShopReceiptV1",
+        "receipt": 691
+      }
+    },
+    {
+      "name": "publicStripeBoundary",
+      "status": "passed",
+      "evidence": {
+        "checkoutEnabled": false,
+        "credit": 0,
+        "monthlyCardCreditPrice": 1000
+      }
+    },
+    {
+      "name": "exactEconomyPreserved",
+      "status": "passed",
+      "evidence": {
+        "noCreditsMinted": true,
+        "noGoldSpent": true,
+        "noItemGranted": true
+      }
+    },
+    {
+      "name": "ownerRemainsResponsive",
+      "status": "passed",
+      "evidence": {
+        "direction": "Up"
+      }
+    },
+    {
+      "name": "styledPublicReturnPage",
+      "status": "passed",
+      "evidence": {
+        "sourceMatches": true,
+        "tlsVerified": true,
+        "unverifiedPaidQueryDoesNotCredit": true
+      }
+    },
+    {
+      "name": "normalLogout",
+      "status": "passed",
+      "evidence": {
+        "confirmed": true
+      }
+    }
+  ],
+  "failure": null,
+  "normalLogout": true,
+  "actualSuccessfulPurchaseCoveredByPostgresCi": "38061006701",
+  "actualPublicPurchaseWithFundedAccountTested": false,
+  "creditsMinted": false,
+  "publicStripeConfigured": false,
+  "publicMonthlyCardPriceConfigured": true,
+  "nativeVisualAcceptance": false,
+  "newAccountsCreated": 0,
+  "privateCredentialCopiesCreated": false,
+  "adminCommands": false
+}

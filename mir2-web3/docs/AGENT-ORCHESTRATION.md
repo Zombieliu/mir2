@@ -1,5 +1,20 @@
 # Agent Orchestration
 
+> 2026-10-11 R24 shop/mail is actually published: native source 87fd85a0,
+> signed feed 19 and paired Gateway 01a8c48a. Exact Linux CI 38102448215,
+> PostgreSQL commerce CI 38061006701, full 31-object CDN stage 38108094398 and
+> separate same-head promotion 38111604812 pass. Actual Windows updater
+> HTTPS/CMS/206 discovery and 78 public checks / 15 normal logouts pass.
+> The authorized 1000-Credits / 30-day monthly card and gifting are enabled;
+> the styled return page is publicly routed. Stripe checkout and mandatory
+> monthly entry remain disabled. Original realm/config/resources are preserved;
+> only the explicit shop price and cosmetic route were separately amended.
+> Existing Launcher needs no reinstall. Original failed attempts remain
+> retained and excluded. Native human/laptop and full P1-P7/Mentor acceptance
+> remain open; the expired heartbeat stays paused. Earlier entries are history.
+> [Current release and exact evidence](SHOP-MAIL-PUBLISHED-R24-20261011.md).
+
+
 > 2026-10-09 R23/sourcefaef and signed18 are actually published, with the paired
 > playtest Gateway on the same source. Exact Linux37880146450/Windows37880146228,
 > full40-object CDN stage37899098919 and separate same-head promote37904194682

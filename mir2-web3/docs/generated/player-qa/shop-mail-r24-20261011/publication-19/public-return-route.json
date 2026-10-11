@@ -1,0 +1,22 @@
+{
+  "allServicePidsPreserved": true,
+  "cacheControl": "no-store",
+  "gatewayRestarted": false,
+  "mandatoryMonthlyEntry": false,
+  "newCaddySha256": "139d2f48a77e2af9f1ff0b0baec81aef47c6d084c1ce95f6df32c23889dda5d1",
+  "oldCaddySha256": "df63f51c991fe1f74c3c9415dd19f794e19ec00a9c46a1021cb9e02dfc9d161d",
+  "onlyRouteAdded": "/playtest/v1/billing/return",
+  "otherRoutesAndFeedBytesPreserved": true,
+  "passed": true,
+  "privateBackup": "/var/backups/mir2-caddy-r24-billing-return-02",
+  "publicQueriesDoNotCredit": true,
+  "qualifiedHtmlBytes": 37978,
+  "qualifiedHtmlSha256": "b3476392d221966a03ac09a6bebd02b33c44b3a10cce991f9cb7b99e1196fc94",
+  "referrerPolicy": "no-referrer",
+  "schema": "mir2.r24.cosmetic-public-return-route.v1",
+  "sourceRevision": "01a8c48a425aecfad6adf49ff721b0aa14ce4d44",
+  "statusAfter": 200,
+  "statusBefore": 404,
+  "stripeCheckoutEnabled": false,
+  "tlsVerified": true
+}
