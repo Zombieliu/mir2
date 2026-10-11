@@ -2786,7 +2786,7 @@ const bagBeltGeometryModule = loadTypeScriptModule(new URL("../lib/bag-belt-gest
 const parityPageUrl = new URL("../app/page.tsx", import.meta.url);
 const parityPageText = readFileSync(parityPageUrl, "utf8");
 const parityPageAst = ts.createSourceFile(fileURLToPath(parityPageUrl), parityPageText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const parityPageNames = ["currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
+const parityPageNames = ["recordNpcPurchaseAction", "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
   "currentHeroModel", "parityItemMutationAllowed", "heroProofCurrent", "heroInputAllowed", "otherPlayerUiBlocksInput", "heroUiBlocksGameplay", "heroBasisWindows",
   "referenceWindowsBlockGameplay", "heroUiLeaseCurrent", "advanceHeroWindowEpochs", "changeHeroWindows", "syncHeroWindowActor", "scheduleHeroRestock", "syncObservePreference", "currentCreatureSource", "currentCashGameShopSource",
   "currentQuestWorldIdentity", "currentCombatModeOwner", "sameCombatModeOwner", "nextCombatModeRevision",
@@ -2830,6 +2830,12 @@ visitParityPage(parityPageAst);
 for (const name of parityPageNames) assert.ok(parityDeclarations.has(name), "actual Page function " + name);
 assert.ok(paritySendRawNode && parityReceiptNode && parityReceiveGuard);
 const paritySendStatements = paritySendRawNode.body.statements;
+// Preserve the actual sendRaw-local diagnostic closure inside each extracted
+// command scope. Its return value remains the production false rejection.
+const paritySendDiagnostics = paritySendStatements.filter(statement => ts.isVariableStatement(statement)
+  && statement.declarationList.declarations.some(declaration => declaration.name.getText(parityPageAst) === "rejectNpcPurchaseSendGate"));
+assert.equal(paritySendDiagnostics.length,1,"sole actual send gate diagnostic closure");
+const paritySendDiagnosticText = paritySendDiagnostics[0].getText(parityPageAst);
 const parityFinalStart = paritySendStatements.findIndex(statement => ts.isIfStatement(statement)
   && statement.expression.getText(parityPageAst) === "options?.guildBuffProof"
   && statement.thenStatement.getText(parityPageAst).includes(".claim("));
@@ -2869,8 +2875,10 @@ const parityPageJs = ts.transpileModule([...parityDeclarations.values()].join("\
   + "\nfunction captureOwnedItemTooltipReaders(presentationWorld){"+ownedTooltipCaptureText+"\n}"
   + "\nfunction commitOwnedItemTooltipReaders(ownedItemTooltipReaders)"+ownedTooltipCommit.getText(parityPageAst)
   + "\nfunction parityIngress(command, options) {\n"
+  + paritySendDiagnosticText + "\n"
   + paritySendStatements.slice(parityPreflightStart, parityPreflightEnd).map(n => n.getText(parityPageAst)).join("\n")
   + "\nreturn true;}\nfunction parityFinal(command, options, socket, beforeFinal) {\n"
+  + paritySendDiagnosticText + "\n"
   + paritySendStatements.slice(paritySerializeIndex, paritySerializeIndex + 2).map(n=>n.getText(parityPageAst)).join("\n")
   // Fake synchronous mir2:action listener, before all actual final DTO/claim checks.
   + "\nif (beforeFinal) beforeFinal();\n"
@@ -2894,7 +2902,7 @@ function parityPageFixture(owner, world = {}) {
     socialReplyWindowsRef:ref({group:false,bonds:false}), socialRosterWindowsRef:ref({friends:false}), rankingWindowRef:ref(false),
     marketOpenRef:ref(false), conquestOpenRef:ref(false), buffsOpenRef:ref(false), mailUiOpenRef:ref(false), worldMapOpenRef:ref(false),
     chatSettingsOpenRef:ref(false), tutorialOpenRef:ref(false), npcShopServiceRef:ref(null), npcRepairServiceRef:ref(null),
-    storageServiceActiveRef:ref(false), npcShopUiIngressRef:ref(null), npcRepairAuthorityRef:ref({invalidateInventory:()=>{}}), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
+    storageServiceActiveRef:ref(false), storageServiceRevisionRef:ref(0), npcShopUiIngressRef:ref(null), npcRepairAuthorityRef:ref({invalidateInventory:()=>{}}), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
     skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()), heroProofHighWaterRef:ref(new WeakMap()),
     heroSharedUiIngressRef:ref(null),heroSharedProofsRef:ref(new WeakMap()),heroProofRendererTokensRef:ref(new WeakMap()),
     heroRendererTokenRef:ref("hero-react:0"),heroActionBasisMatches:heroUi.heroActionBasisMatches,
@@ -2930,6 +2938,10 @@ function parityPageFixture(owner, world = {}) {
     makeCashGameShopSource:cashShopUi.makeCashGameShopSource, emptyCashGameShopCatalog:cashShopUi.emptyCashGameShopCatalog,
     upsertCashGameShopInfo:cashShopUi.upsertCashGameShopInfo, applyCashGameShopStock:cashShopUi.applyCashGameShopStock,
     parseMailList:extendedPackets.parseMailList,
+    // Ordinary parity fixtures have no active NPC purchase diagnostic action.
+    // Actual reject/record consumers still run; an unexpected state write fails.
+    npcPurchaseActionRef:ref(null),npcPurchaseSendActionRef:ref(null),
+    setNpcPurchaseActionStatus:()=>assert.fail("inactive NPC action must not publish diagnostic state"),
     ownedTooltipReaderRef:ref(null), ownedTooltipEpochRef:ref({bag:1,character:1}), activeCharacterTabRef:ref("char"),
     runtimeRef:ref(null), readSharedItemTooltip:sharedTooltip.readSharedItemTooltip, readSharedItemCatalogInfo:sharedTooltip.readSharedItemCatalogInfo,
     ...socialItems, socialCatalogRef:ref(new Map()), guildStorageRawRef:ref(null), guildPermissionsRef:ref(null),
@@ -5632,8 +5644,8 @@ assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+4,paritySocketIn
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
-const bagBeltPageJs=ts.transpileModule([...bagBeltPageDeclarations.values()].join("\n")+
-  "\nfunction bagBeltSocketEntry(command,options,socket,beforeFinal){"+
+const bagBeltPageJs=ts.transpileModule([...bagBeltPageDeclarations.values(),parityDeclarations.get("recordNpcPurchaseAction")].join("\n")+
+  "\nfunction bagBeltSocketEntry(command,options,socket,beforeFinal){"+paritySendDiagnosticText+"\n"+
   paritySendStatements.slice(paritySerializeIndex,paritySerializeIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+
   paritySendStatements.slice(parityDtoIndex,parityDtoIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
@@ -6136,7 +6148,7 @@ const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableS
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
 assert.equal(fishingPreflightGuards.length,2,"actual raw fishing cast requires its opaque source proof");
-const fishingPageJs=ts.transpileModule([...fishingPageDeclarations.values()].join("\n")+"\nfunction fishingSocketEntry(command,options,socket,beforeFinal){"+
+const fishingPageJs=ts.transpileModule([...fishingPageDeclarations.values(),parityDeclarations.get("recordNpcPurchaseAction")].join("\n")+"\nfunction fishingSocketEntry(command,options,socket,beforeFinal){"+paritySendDiagnosticText+"\n"+
   fishingPreflightGuards.map(node=>node.getText(fishingPageAst)).join("\n")+"\n"+fishingSendStatements.slice(fishingSerializeIndex,fishingSerializeIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+fishingSendStatements.slice(fishingDtoIndex,fishingDtoIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
   "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingFollowingPearlEntry.getText(fishingPageAst)+"\n"+fishingFollowingRankingInspectEntry.getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
@@ -6753,7 +6765,7 @@ check("Pearl PUI bad fixed outputs fail closed and valid shared denial fields re
 // Source24 real NPC DOM declarations evaluated only as memory element records.
 const pearlShopDomSource=readFileSync(new URL("../app/components/original-client-game-shop.tsx",import.meta.url),"utf8");
 const pearlShopDomAst=ts.createSourceFile("pearl-npc-shop-dom.tsx",pearlShopDomSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
-const pearlShopDomNames=new Set(["NpcShopWindow","npcShopTabLabel","formatGold","confirmEnabledFor","NPC_SHOP_GRADE_COLOUR","shopStyle"]);
+const pearlShopDomNames=new Set(["NpcShopWindow","npcShopTabLabel","formatGold","npcShopBuyBlockedTitle","confirmEnabledFor","NPC_SHOP_GRADE_COLOUR","shopStyle"]);
 const pearlShopDomDeclarations=new Map();
 for(const node of pearlShopDomAst.statements){
   const name=ts.isFunctionDeclaration(node)?node.name?.text:ts.isVariableStatement(node)&&node.declarationList.declarations.length===1
@@ -7332,9 +7344,9 @@ assert.equal(rankingPageFunctions.size,6);assert(rankingPlayerInspectCase);
 const rankingRawGuard=paritySendStatements.find(node=>ts.isIfStatement(node)&&node.expression.getText(parityPageAst).includes('command.type === "inspect"'));
 const rankingFinalGuard=paritySendStatements.find(node=>ts.isIfStatement(node)&&node.expression.getText(parityPageAst).includes('wireCommand.type === "inspect"'));
 assert(rankingRawGuard&&rankingFinalGuard);
-const rankingPageFixtureJs=ts.transpileModule([...rankingPageFunctions.values()].map(node=>node.getText(parityPageAst)).join("\n")+
+const rankingPageFixtureJs=ts.transpileModule([...rankingPageFunctions.values()].map(node=>node.getText(parityPageAst)).concat(parityDeclarations.get("recordNpcPurchaseAction")).join("\n")+
   "\nfunction receiveInspect(payload){switch('PlayerInspect'){"+rankingPlayerInspectCase.getText(parityPageAst)+"}}\n"+
-  "function finalRawSend(command,options){"+rankingRawGuard.getText(parityPageAst)+
+  "function finalRawSend(command,options){"+paritySendDiagnosticText+"\n"+rankingRawGuard.getText(parityPageAst)+
   "\nconst socket=socketRef.current,serialized=JSON.stringify(command),wireCommand=JSON.parse(serialized);beforeFinal?.();\n"+
   rankingFinalGuard.getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}"+
   "\nreturn {currentRankingInspectSource,inspectRankingPlayer,closeRankingInspect,readRankingInspectTooltip,applyRankingPacket,receiveInspect,finalRawSend};",
@@ -7346,6 +7358,8 @@ function rankingPageFixture() {
   const query={rankType:0,rankIndex:0,onlineOnly:false},page=f.read().page,world={rankings:{"0:false":page},playerObjectId:17,
     entities:[{objectId:17,level:33,classKey:"Wizard",genderKey:"Male"}],playerCrystalStats:[{stat:4,value:7}],playerWeights:[1,2,3],currentWeight:2,maxWeight:9};
   const scope={rankingInspectRequestsRef:ref(f.controller),rankingInspectBindingRef:ref(null),rankingInspectOpenRef:ref(false),
+    npcPurchaseActionRef:ref(null),npcPurchaseSendActionRef:ref(null),
+    setNpcPurchaseActionStatus:()=>assert.fail("inactive NPC action must not publish diagnostic state"),
     questCoreRuntimeRef:ref(core),rankingQueriesRef:ref({desired:query,pending:false,receive(type,actualOwner){received.push({type,owner:actualOwner});return query;},wantsAnother:()=>false}),
     rankingWindowRef:ref(true),worldRef:ref(world),socketRef:ref(socket),WebSocket:{OPEN:1},document:{visibilityState:"visible"},performance:{now:()=>clock},
     isSpectatorBrowserMode:()=>spectator,currentSocialReplyOwner:()=>owner,currentSocialReceiveOwner:()=>owner,
@@ -8559,6 +8573,157 @@ check("Hero shared AutoPotItem HP MP selection and clear settle only with exact 
       },
     });
   }
+});
+
+
+// Source68: actual Page and storage-card consumers share the existing formatter.
+// This data-only ABI port supplies a formatter document; it does not calculate
+// durability in JavaScript or start a renderer, runtime, gateway or socket.
+const storageTooltipDocument68={sections:[{kind:"name",lines:[
+  {text:"Candle",colour:"white"},{text:"Durability: 8/8",colour:"white"}]}],broken:false,sourceComplete:true};
+function storageTooltipPageFixture68(slot=80) {
+  const owner=npcRepairOwner(),user={...heroItemFixture(9000,722),current_dura:8000,max_dura:8000};
+  const raw={...heroWorldRowFixture(user,slot,"storage",heroInfoFixture(722,{name:"Candle",item_type:12,image:130,durability:8000})),
+    authoritativeUniqueId:9000,key:"Candle",durabilityCurrent:8000,durabilityMax:8000};
+  raw.tooltipSource.socketInfos=[];raw.tooltipSource.realSocketInfos=[];
+  const page=parityPageFixture(owner,{inventoryItems:[],beltItems:[],equipmentItems:[],storageItems:[raw],
+    hasExpandedStorage:true,storageSessionUnlocked:true,entities:[{objectId:owner.playerObjectId,level:2,classKey:"Warrior",genderKey:"Male"}]});
+  page.scope.bagOpenRef.current=true;page.scope.storageServiceActiveRef.current=true;
+  page.scope.storageServiceRevisionRef.current=41;page.scope.equipmentBagOwnerRef.current.owner="react";
+  const requests=[];let during=null,formatterReads=0;
+  const presentation={item_tooltip_abi_version:()=>1,item_tooltip_document(json,clock){formatterReads++;
+    assert.equal(clock,"621355968010000000");
+    return JSON.stringify({version:1,ok:true,document:storageTooltipDocument68});}};
+  page.scope.questCoreRuntimeRef.current={readItemTooltip(item,viewer){requests.push({item,viewer});during?.();
+    return presentationRuntime.readSharedPresentationItemTooltip(presentation,item,viewer,1000);}};
+  const readers=page.api.captureOwnedItemTooltipReaders(page.scope.worldRef.current);
+  const cleanup=page.api.commitOwnedItemTooltipReaders(readers);
+  return {page,raw,readers,requests,cleanup,presentation,setDuring(fn){during=fn;},get formatterReads(){return formatterReads;}};
+}
+check("Source68 actual compatibility Storage reader preserves raw Candle carrier and shared formatter document",()=>{
+  const f=storageTooltipPageFixture68(),before=JSON.stringify(f.raw);
+  assert.equal(f.page.scope.equipmentBagOwnerRef.current.owner,"react","normal compatible warehouse needs no shared takeover");
+  assert.deepEqual(f.readers.readItem(f.raw),storageTooltipDocument68);
+  assert.equal(f.requests.length,1);assert.equal(f.formatterReads,1);assert.equal(f.page.sent.length,0);
+  const request=f.requests[0].item;
+  assert.equal(request.uniqueId,9000);assert.equal(request.itemIndex,722);assert.equal(request.count,1);
+  assert.deepEqual(request.tooltipSource,f.raw.tooltipSource);assert.notStrictEqual(request.tooltipSource,f.raw.tooltipSource);
+  assert.equal(request.tooltipSource.userItem.current_dura,8000);assert.equal(request.tooltipSource.userItem.max_dura,8000);
+  assert.equal(request.legacy.durabilityCurrent,8000);assert.equal(request.legacy.durabilityMax,8000);
+  assert.equal(Object.hasOwn(request,"container"),false);assert.equal(Object.hasOwn(request,"slot"),false,"physical location stays on the Page admission side");
+  assert.equal(JSON.stringify(f.raw),before);assert.equal(f.readers.readItem({...f.raw}),null);assert.equal(f.readers.readEquipment(f.raw),null);
+  f.page.scope.activeInventoryTabRef.current="quest";
+  assert.deepEqual(f.readers.readItem(f.raw),storageTooltipDocument68,"storage belongs to its service, independent of the Bag tab");
+  delete f.presentation.item_tooltip_document;
+  assert.equal(f.readers.readItem(f.raw),null,"an unavailable real formatter remains unavailable");
+  assert.equal(f.page.sent.length,0);
+});
+check("Source68 actual Storage reader rejects changed service source and physical owner before and after Core",()=>{
+  const changes={
+    service:f=>{f.page.scope.storageServiceActiveRef.current=false;},revision:f=>{f.page.scope.storageServiceRevisionRef.current++;},
+    bagClosed:f=>{f.page.scope.bagOpenRef.current=false;},bagEpoch:f=>{f.page.scope.ownedTooltipEpochRef.current.bag++;},
+    socket:f=>{f.page.scope.socketRef.current={readyState:1};},connection:f=>{f.page.scope.equipmentConnectionGenerationRef.current++;},
+    session:f=>{f.page.scope.equipmentSessionGenerationRef.current++;},player:f=>{f.page.scope.worldRef.current.playerObjectId++;},
+    scene:f=>{f.page.scope.socialSceneRevisionRef.current++;},map:f=>{f.page.scope.worldRef.current.mapFileName="other";},
+    hidden:f=>{f.page.scope.document.visibilityState="hidden";},suspend:f=>{f.page.scope.equipmentHostSuspendReasonRef.current="blur";},
+    core:f=>{f.page.scope.questCoreRuntimeRef.current={readItemTooltip:()=>storageTooltipDocument68};},
+    owner:f=>{f.page.scope.equipmentBagOwnerRef.current.ownerRevision++;},committed:f=>{f.page.scope.ownedTooltipReaderRef.current={};},
+    rawCount:f=>{f.raw.quantity++;},rawDura:f=>{f.raw.durabilityCurrent--;},rawSource:f=>{f.raw.tooltipSource.userItem.current_dura--;},
+    rawSlot:f=>{f.raw.slot=79;},container:f=>{f.raw.container="bag1";},replacement:f=>{f.page.scope.worldRef.current.storageItems=[{...f.raw}];},
+  };
+  for(const timing of ["before","during"])for(const [label,change]of Object.entries(changes)){
+    const f=storageTooltipPageFixture68();if(timing==="before")change(f);else f.setDuring(()=>change(f));
+    assert.equal(f.readers.readItem(f.raw),null,label+" "+timing);
+    assert.equal(f.requests.length,timing==="before"?0:1,label+" preserves exact Core entry count");assert.equal(f.page.sent.length,0);
+  }
+});
+check("Source68 actual Storage slots and UID identity remain unique across all four containers",()=>{
+  for(const collection of ["inventoryItems","beltItems","equipmentItems","storageItems"]){
+    const f=storageTooltipPageFixture68(),collision={...f.raw,slot:collection==="equipmentItems"?"weapon":0,
+      container:collection==="beltItems"?"belt":collection==="storageItems"?"storage":"bag1"};
+    if(collection==="equipmentItems")delete collision.container;
+    f.page.scope.worldRef.current[collection].push(collision);
+    assert.equal(f.readers.readItem(f.raw),null,collection+" UID collision");assert.equal(f.requests.length,0);assert.equal(f.page.sent.length,0);
+  }
+  const duplicate=storageTooltipPageFixture68();
+  duplicate.page.scope.worldRef.current.storageItems.push({...duplicate.raw,uniqueId:9001,authoritativeUniqueId:9001});
+  assert.equal(duplicate.readers.readItem(duplicate.raw),null,"absolute storage slot must be unique");assert.equal(duplicate.requests.length,0);
+  for(const slot of [-1,160,0.5,NaN]){const f=storageTooltipPageFixture68(slot);
+    assert.equal(f.readers.readItem(f.raw),null,"invalid absolute slot");assert.equal(f.requests.length,0);}
+  const f=storageTooltipPageFixture68(),bag={...heroWorldRowFixture(heroItemFixture(9000,722),2),authoritativeUniqueId:9000};
+  f.page.scope.worldRef.current.inventoryItems.push(bag);
+  const readers=f.page.api.captureOwnedItemTooltipReaders(f.page.scope.worldRef.current);f.page.api.commitOwnedItemTooltipReaders(readers);
+  assert.equal(readers.readItem(bag),null,"Bag cannot format an ambiguous UID that also appears in Storage");assert.equal(f.requests.length,0);
+});
+check("Source68 actual Storage close and reopen never revive an old service reader",()=>{
+  const f=storageTooltipPageFixture68();assert.deepEqual(f.readers.readItem(f.raw),storageTooltipDocument68);
+  f.page.scope.storageServiceActiveRef.current=false;assert.equal(f.readers.readItem(f.raw),null);
+  f.page.scope.storageServiceActiveRef.current=true;f.page.scope.storageServiceRevisionRef.current++;
+  assert.equal(f.readers.readItem(f.raw),null,"new service cannot reuse an earlier callback");
+  const next=f.page.api.captureOwnedItemTooltipReaders(f.page.scope.worldRef.current),cleanup=f.page.api.commitOwnedItemTooltipReaders(next);
+  f.cleanup();assert.strictEqual(f.page.scope.ownedTooltipReaderRef.current,next);
+  assert.deepEqual(next.readItem(f.raw),storageTooltipDocument68);assert.equal(f.readers.readItem(f.raw),null);
+  cleanup();assert.equal(next.readItem(f.raw),null);assert.equal(f.page.sent.length,0);
+});
+
+const storageTooltipAst68=ts.createSourceFile("actual-storage-tooltip.tsx",readFileSync(new URL("../app/components/original-client-inventory-window.tsx",import.meta.url),"utf8"),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const storageTooltipCalls68=[],storageTooltipHooks68=[];
+(function visit(node){
+  if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)
+    &&node.expression.expression.getText(storageTooltipAst68)==="visibleStorageItems"&&node.expression.name.text==="map")storageTooltipCalls68.push(node);
+  if(ts.isVariableDeclaration(node)&&node.name.getText(storageTooltipAst68)==="storageTooltip")storageTooltipHooks68.push(node);
+  ts.forEachChild(node,visit);
+})(storageTooltipAst68);
+assert.equal(storageTooltipCalls68.length,1);assert.equal(storageTooltipHooks68.length,1);
+const storageTooltipHook68=ts.transpileModule("const storageTooltip="+storageTooltipHooks68[0].initializer.getText(storageTooltipAst68)+";",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const storageTooltipCards68=ts.transpileModule("const cards="+storageTooltipCalls68[0].getText(storageTooltipAst68)+";",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None,jsx:ts.JsxEmit.React,jsxFactory:"element"}}).outputText;
+check("Source68 actual Storage card hover focus and document use the shared hook without selecting or sending",()=>{
+  const f=storageTooltipPageFixture68(),slots=[],effects=[],pending=[],timers=new Map(),windowHandlers=new Map(),documentHandlers=new Map();
+  let cursor=0,nextTimer=0,shown=true,locked=false,items=[f.raw],nowApi,selectionCalls=0;
+  const node={isConnected:true,matches:()=>false};
+  const hookScope={
+    useRef(initial){const index=cursor++;return slots[index]??(slots[index]={current:initial});},
+    useState(initial){const index=cursor++;if(!(index in slots))slots[index]=initial;return[slots[index],value=>{slots[index]=typeof value==="function"?value(slots[index]):value;}];},
+    useEffect(callback,deps){const index=cursor++,old=effects[index];if(!old||deps.some((value,i)=>!Object.is(value,old.deps[i])))pending.push({index,callback,deps});},
+    window:{setInterval(fn,delay){assert.equal(delay,1000);const id=++nextTimer;timers.set(id,fn);return id;},clearInterval:id=>timers.delete(id),
+      addEventListener:(name,fn)=>windowHandlers.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(windowHandlers.get(name),fn);windowHandlers.delete(name);}},
+    document:{visibilityState:"visible",activeElement:null,addEventListener:(name,fn)=>documentHandlers.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(documentHandlers.get(name),fn);documentHandlers.delete(name);}},
+  };
+  const hook=new Function(...Object.keys(hookScope),tooltipHookJs+"\nreturn useActiveItemTooltip;")(...Object.values(hookScope));
+  const reader=f.readers.readItem;
+  function render(){cursor=0;nowApi=new Function("useActiveItemTooltip","visibleStorageItems","onReadItemTooltip","showStorageWindow","storagePageLocked",
+    storageTooltipHook68+"\nreturn storageTooltip;")(hook,items,reader,shown,locked);
+    for(const effect of pending.splice(0)){effects[effect.index]?.cleanup?.();effects[effect.index]={deps:effect.deps,cleanup:effect.callback()};}
+    const scope={visibleStorageItems:items,storagePageStart:80,storageTooltip:nowApi,
+      ORIGINAL_UI:{storage:{slots:[{x:40,y:50}]}},element:(tag,props,...children)=>({tag,props:props??{},children}),
+      OriginalCrystalItemTooltip:"OriginalCrystalItemTooltip",OriginalItemTooltip:"OriginalItemTooltip",
+      pendingMoveItem:null,storageLocked:false,storagePageLocked:locked,storageMode:"takeBack",document:hookScope.document,
+      setPendingMoveItem:()=>selectionCalls++,setPendingSplitItem:()=>selectionCalls++,setDeleteFeedback:()=>selectionCalls++,setSplitCount:()=>selectionCalls++,
+      t:(_key,_args,fallback)=>fallback,originalItemIconPath:()=>"/bounded-icon",applyOriginalItemIconFallback:()=>{}};
+    return new Function(...Object.keys(scope),storageTooltipCards68+"\nreturn cards;")(...Object.values(scope))[0];
+  }
+  function tooltipNode(card,tag){const found=[];(function visit(value){if(Array.isArray(value))value.forEach(visit);else if(value&&typeof value==="object"){if(value.tag===tag)found.push(value);value.children?.forEach(visit);}})(card);return found;}
+  let card=render();assert.equal(tooltipNode(card,"OriginalCrystalItemTooltip").length,0);assert.equal(tooltipNode(card,"OriginalItemTooltip").length,1);
+  const event={pointerType:"mouse",currentTarget:node};
+  card.props.onPointerEnter({...event,pointerType:"touch"});card=render();assert.equal(f.requests.length,0);
+  card.props.onPointerEnter(event);card=render();assert.equal(f.requests.length,1);
+  assert.deepEqual(tooltipNode(card,"OriginalCrystalItemTooltip")[0].props.document,storageTooltipDocument68);
+  assert.equal(tooltipNode(card,"OriginalItemTooltip").length,0);assert.equal(timers.size,1);assert.equal(selectionCalls,0);assert.equal(f.page.sent.length,0);
+  const staleTimer=[...timers.values()][0];staleTimer();card=render();assert.equal(f.requests.length,2);
+  hookScope.document.activeElement=node;card.props.onPointerLeave(event);card=render();assert.ok(nowApi.document(f.raw));
+  card.props.onFocus(event);card=render();assert.equal(timers.size,1);
+  hookScope.document.activeElement=null;card.props.onBlur(event);card=render();assert.equal(nowApi.document(f.raw),null);assert.equal(timers.size,0);
+  card.props.onFocus(event);card=render();card.props.onPointerCancel(event);card=render();assert.equal(nowApi.document(f.raw),null);
+  for(const terminal of ["page","close","locked"]){
+    card.props.onFocus(event);card=render();const oldTimer=[...timers.values()][0],before=f.requests.length;
+    if(terminal==="page")items=[];if(terminal==="close")shown=false;if(terminal==="locked")locked=true;
+    card=render();assert.equal(nowApi.document(f.raw),null,terminal);assert.equal(timers.size,0);assert.equal(windowHandlers.size,0);assert.equal(documentHandlers.size,0);
+    oldTimer();render();assert.equal(f.requests.length,before,terminal+" retired timer has no formatter call");
+    items=[f.raw];shown=true;locked=false;card=render();assert.equal(nowApi.document(f.raw),null,"returning page does not reactivate itself");
+  }
+  assert.equal(selectionCalls,0);assert.equal(f.page.sent.length,0,"all ordinary tooltip edges are read only");
+  card.props.onClick();assert.equal(selectionCalls,3,"existing ordinary take-back selection handler remains intact");assert.equal(f.page.sent.length,0);
+  for(const effect of effects)effect?.cleanup?.();assert.equal(timers.size,0);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

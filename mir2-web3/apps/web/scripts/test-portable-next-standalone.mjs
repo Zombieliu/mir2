@@ -8,7 +8,7 @@ import { test } from "node:test";
 import {
   auditPortableTree, classifyPortableStandalonePath, copyPortableStandalone,
   copySelectedPublic, copyVerifiedRequiredServerFiles, materializeStandaloneDependencies,
-  selectThinPublicEntry, selectMapAtlasClosure, compactJsonWhitespace, collectSharpNativePackages,
+  selectThinPublicEntry, selectMapAtlasClosure, selectLocalMapClosure, compactJsonWhitespace, collectSharpNativePackages,
 } from "./lib/portable-next-standalone.mjs";
 
 const fixtureParent = process.env.MIR2_PORTABLE_TEST_ROOT ?? os.tmpdir();
@@ -584,6 +584,190 @@ test("exact scene cache and copied NFT metadata are excluded without hiding dist
     "lib/generated/map.json", ".next/cache/other/a.json"]) {
     assert.equal(classifyPortableStandalonePath(`${app}/${relative}`, app, false, selectPublic).copy, true);
   }
+});
+
+
+// Local map delivery is opt-in and bounded by the pinned finite request. These
+// fixtures exercise actual custody/selection/copy helpers, not a renderer.
+const localMapFrames69 = {
+  "WemadeMir2/Objects2": [2704,2705,2706,2707,2708,2709,2710,2711,2712,2713,2716,2717,2718,2719,2720,2721,2722,2723,2724,2725,2728,2729,2730,2731,2732,2733,2734,2735,2736,2737,2740,2741,2742,2743,2744,2745,2746,2747,2748,2749,2752,2753,2754,2755,2757,2758,2759,2760,2761,2764,2765,2766,2767,2768,2769,2770,2771,2772,2773,2776,2777,2778,2779,2780,2781,2782,2783,2785,2788,2789,2790,2791,2792,2793,2794,2795,2796,2797,2800,2801,2802,2803,2804,2805,2806,2807,2808,2809,4301,4302,4303,4304,4305,4306,4313,4314,4315,4316,4382,4383,4384,4385,4386,4387,4388],
+  "WemadeMir2/Objects3": [3981,3982,3983,3984,3985,3986,3987,3988,3989,8005,8006],
+};
+async function localMapFixture69(name, wholeWarehouse = false) {
+  const base = path.join(fixtureRoot, name), root = path.join(base, "public"), inputPath = path.join(base, "finite.json");
+  const missingAssets = Object.entries(localMapFrames69).flatMap(([libraryKey, frames]) => frames.map(frameIndex => ({
+    libraryKey, frameIndex, publicPath: `/original-map/${libraryKey}/${frameIndex}.png`,
+  })));
+  const rows = wholeWarehouse ? missingAssets : [missingAssets[0], missingAssets.at(-1)];
+  const assets = {}, bodies = new Map();
+  for (const row of rows) {
+    const body = Buffer.from("finite map bytes:" + row.publicPath);
+    await write(path.join(root, row.publicPath.slice(1)), body);
+    bodies.set(row.publicPath, body);
+    assets[row.publicPath] = { source: "original-map", size: body.length,
+      sha256: createHash("sha256").update(body).digest("hex") };
+  }
+  const oldPath = "/original-map/WemadeMir2/Objects2/2703.png", oldBody = Buffer.from("old remote map");
+  assets[oldPath] = { source: "original-map", size: oldBody.length,
+    sha256: createHash("sha256").update(oldBody).digest("hex") };
+  assets["/original-ui/Items/1.png"] = { source: "original-ui", size: 8, sha256: "a".repeat(64) };
+  await write(path.join(root, oldPath.slice(1)), oldBody);
+  const manifest = { schemaVersion: 1, kind: "mir2-original-asset-manifest", assetHash: "b".repeat(64), assets };
+  const manifestPath = path.join(root, "original-asset-manifest.generated.json");
+  const request = { mapFileName: "0140.map", missingAssets: rows };
+  async function pin(value = request) {
+    const bytes = JSON.stringify(value);
+    await write(inputPath, bytes);
+    return { sourcePath: inputPath, sourceSha256: createHash("sha256").update(bytes).digest("hex") };
+  }
+  const options = await pin();
+  const manifestBytes = JSON.stringify(manifest, null, 2) + "\n";
+  await write(manifestPath, manifestBytes);
+  return { base, root, inputPath, request, manifest, manifestPath, manifestBytes, bodies, oldPath, options, pin };
+}
+
+test("local map closure leaves every old default selection unchanged and admits only exact ancestors", async () => {
+  const absent = await selectLocalMapClosure(path.join(fixtureRoot, "no-map-request"));
+  assert.equal(absent.files.size, 0); assert.deepEqual(absent.frames, []); assert.equal(absent.bytes, 0);
+  const f = await localMapFixture69("local-map-selection");
+  const closure = await selectLocalMapClosure(f.root, f.options);
+  const selected = (relative, directory) => selectThinPublicEntry(relative, directory, {
+    runtimeVersion, runtimeFiles: new Set([runtimeFile]), coreVersion, coreFiles, localMapFiles: closure.files,
+  });
+  for (const row of f.request.missingAssets) {
+    assert.equal(selectPublic(row.publicPath.slice(1), false), false);
+    assert.equal(selected(row.publicPath.slice(1), false), true);
+    const parts = row.publicPath.slice(1).split("/");
+    for (let depth = 1; depth < parts.length; depth++) assert.equal(selected(parts.slice(0, depth).join("/"), true), true);
+  }
+  for (const relative of [f.oldPath.slice(1), "original-map/WemadeMir2/Objects2/meta.json",
+    "original-map/WemadeMir2/Objects3/8005.png", "original-map/WemadeMir2/Objects27/1.png"]) {
+    assert.equal(selected(relative, false), false);
+  }
+  for (const relative of ["original-map/ShandaMir2", "original-map/WemadeMir2/Objects27"]) {
+    assert.equal(selected(relative, true), false);
+  }
+  for (const [relative, directory] of [["original-map", true], ["original-map/WemadeMir2", true],
+    ["original-map/WemadeMir2/Objects2", true], [f.oldPath.slice(1), false]]) assert.equal(selectPublic(relative, directory), false);
+  for (const [relative, directory] of [
+    [runtimeFile,false],[[...coreFiles][0],false],["original-ui/Items/1.png",false],
+    ["original-ui/Items/meta.json",false],["generated/map-atlas/old.png",false],["pwa",true]]) {
+    assert.equal(selected(relative, directory), selectPublic(relative, directory), relative);
+  }
+});
+
+test("finite Warehouse request copies precisely 116 verified PNG leaves and retains the full manifest", async () => {
+  const f = await localMapFixture69("local-map-warehouse-copy", true);
+  const closure = await selectLocalMapClosure(f.root, f.options);
+  assert.equal(closure.files.size, 116);
+  assert.deepEqual([...closure.files].sort(), f.request.missingAssets.map(row => row.publicPath.slice(1)).sort());
+  assert.equal(closure.sourceSha256, f.options.sourceSha256);
+  const selected = (relative, directory) => selectThinPublicEntry(relative, directory, {
+    runtimeVersion, runtimeFiles: new Set([runtimeFile]), localMapFiles: closure.files,
+  });
+  const destination = path.join(f.base, "package");
+  const result = await copySelectedPublic({ sourceRoot: f.root, destinationRoot: destination, selection: selected });
+  assert.equal(result.files, 117); // 116 exact leaves and the complete root inventory.
+  assert.equal(await exists(path.join(destination, f.oldPath.slice(1))), false);
+  const copied = await selectLocalMapClosure(destination, f.options);
+  assert.deepEqual(copied.frames, closure.frames);
+  assert.equal(copied.bytes, [...f.bodies.values()].reduce((sum, body) => sum + body.length, 0));
+  const copiedManifest = JSON.parse(await fs.readFile(path.join(destination, "original-asset-manifest.generated.json"), "utf8"));
+  assert.deepEqual(copiedManifest, f.manifest);
+  assert.equal(Object.hasOwn(copiedManifest.assets, f.oldPath), true);
+  assert.equal(Object.hasOwn(copiedManifest.assets, "/original-ui/Items/1.png"), true);
+  assert.equal((await auditPortableTree(destination)).links, 0);
+  for (const [publicPath, body] of f.bodies) {
+    assert.deepEqual(await fs.readFile(path.join(destination, publicPath.slice(1))), body);
+    assert.deepEqual(await fs.readFile(path.join(f.root, publicPath.slice(1))), body);
+  }
+  assert.equal(await fs.readFile(f.manifestPath, "utf8"), f.manifestBytes);
+  await fs.writeFile(path.join(destination, f.request.missingAssets[0].publicPath.slice(1)), "copy changed");
+  await assert.rejects(selectLocalMapClosure(destination, f.options), /size\/SHA256/);
+});
+
+test("local map custody rejects missing bytes, changed bytes and invalid full-manifest size/hash records", async () => {
+  const f = await localMapFixture69("local-map-records"), row = f.request.missingAssets[0];
+  const file = path.join(f.root, row.publicPath.slice(1)), body = f.bodies.get(row.publicPath);
+  await fs.rename(file, file + ".retained");
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /ENOENT/);
+  await fs.rename(file + ".retained", file);
+  const changed = Buffer.from(body); changed[0] ^= 1;
+  await fs.writeFile(file, changed);
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /size\/SHA256/);
+  await fs.writeFile(file, Buffer.concat([body, Buffer.from([0])]));
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /size\/SHA256/);
+  await fs.writeFile(file, body);
+  for (const change of [
+    entry => { entry.size += 1; }, entry => { entry.sha256 = "0".repeat(64); },
+    entry => { entry.size = 0; }, entry => { entry.size = 0.5; },
+    entry => { entry.sha256 = "invalid"; }, entry => { delete entry.sha256; },
+    entry => { entry.source = "original-ui"; },
+  ]) {
+    const manifest = structuredClone(f.manifest); change(manifest.assets[row.publicPath]);
+    await fs.writeFile(f.manifestPath, JSON.stringify(manifest));
+    await assert.rejects(selectLocalMapClosure(f.root, f.options), /manifest/);
+  }
+  const missing = structuredClone(f.manifest); delete missing.assets[row.publicPath];
+  await fs.writeFile(f.manifestPath, JSON.stringify(missing));
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /manifest/);
+  await fs.writeFile(f.manifestPath, '{"schemaVersion":1,"kind":"wrong","assets":{}}');
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /manifest/);
+  await fs.writeFile(f.manifestPath, f.manifestBytes);
+  assert.equal((await selectLocalMapClosure(f.root, f.options)).files.size, 2);
+});
+
+test("local map request pin rejects incomplete input, duplicate/escaped paths and inconsistent frame identity", async () => {
+  const f = await localMapFixture69("local-map-request"), row = f.request.missingAssets[0];
+  await assert.rejects(selectLocalMapClosure(f.root, { sourcePath: f.inputPath }), /requires/);
+  await assert.rejects(selectLocalMapClosure(f.root, { sourceSha256: f.options.sourceSha256 }), /requires/);
+  await assert.rejects(selectLocalMapClosure(f.root, { ...f.options, sourcePath: "finite.json" }), /requires/);
+  await assert.rejects(selectLocalMapClosure(f.root, { ...f.options, sourceSha256: "0".repeat(64) }), /pin/);
+  await fs.writeFile(f.inputPath, '{}');
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /pin/);
+  const requests = [
+    { missingAssets: [] }, { missingAssets: new Array(117).fill(row) },
+    { missingAssets: [row, row] },
+    { missingAssets: [{ ...row, publicPath: "/original-map/../outside.png" }] },
+    { missingAssets: [{ ...row, libraryKey: "../outside", publicPath: "/original-map/../outside/2704.png" }] },
+    { missingAssets: [{ ...row, publicPath: "/original-ui/Items/2704.png" }] },
+    { missingAssets: [{ ...row, publicPath: row.publicPath.replace("2704", "2705") }] },
+    { missingAssets: [{ ...row, frameIndex: -1 }] },
+    { missingAssets: [{ ...row, frameIndex: 0.5 }] },
+  ];
+  for (const request of requests) await assert.rejects(selectLocalMapClosure(f.root, await f.pin(request)),
+    /explicit frames|Duplicate|Unsafe/);
+  const malformed = "{";
+  await fs.writeFile(f.inputPath, malformed);
+  await assert.rejects(selectLocalMapClosure(f.root, { sourcePath: f.inputPath,
+    sourceSha256: createHash("sha256").update(malformed).digest("hex") }), SyntaxError);
+  await assert.rejects(selectLocalMapClosure("relative-public", await f.pin()), /absolute real directory/);
+});
+
+test("local map custody rejects file, ancestor, manifest, input and public-root symlinks", async () => {
+  const f = await localMapFixture69("local-map-links"), row = f.request.missingAssets[0];
+  const file = path.join(f.root, row.publicPath.slice(1)), outside = path.join(f.base, "outside.png");
+  await write(outside, f.bodies.get(row.publicPath));
+  await fs.rename(file, file + ".retained");
+  await fs.symlink(outside, file, "file");
+  await assert.rejects(selectLocalMapClosure(f.root, f.options), /not a regular path/);
+  const manifestFixture = await localMapFixture69("local-map-manifest-link");
+  const retainedManifest = manifestFixture.manifestPath + ".retained";
+  await fs.rename(manifestFixture.manifestPath, retainedManifest);
+  await fs.symlink(retainedManifest, manifestFixture.manifestPath, "file");
+  await assert.rejects(selectLocalMapClosure(manifestFixture.root, manifestFixture.options), /not a regular path/);
+  const inputFixture = await localMapFixture69("local-map-input-link");
+  await fs.rename(inputFixture.inputPath, inputFixture.inputPath + ".retained");
+  await fs.symlink(inputFixture.inputPath + ".retained", inputFixture.inputPath, "file");
+  await assert.rejects(selectLocalMapClosure(inputFixture.root, inputFixture.options), /not a regular path/);
+  const ancestorFixture = await localMapFixture69("local-map-ancestor-link");
+  const directory = path.join(ancestorFixture.root, "original-map/WemadeMir2/Objects2");
+  await fs.rename(directory, directory + "-retained");
+  await fs.symlink(directory + "-retained", directory, process.platform === "win32" ? "junction" : "dir");
+  await assert.rejects(selectLocalMapClosure(ancestorFixture.root, ancestorFixture.options), /not a regular path/);
+  const rootFixture = await localMapFixture69("local-map-root-link"), rootLink = path.join(rootFixture.base, "linked-public");
+  await fs.symlink(rootFixture.root, rootLink, process.platform === "win32" ? "junction" : "dir");
+  await assert.rejects(selectLocalMapClosure(rootLink, rootFixture.options), /absolute real directory/);
 });
 
 console.log(`portable fixture retained at ${fixtureRoot}`);

@@ -60,7 +60,7 @@ function isSensitivePath(candidate) {
   });
 }
 
-export function selectThinPublicEntry(relativePath, isDirectory, { runtimeVersion, runtimeFiles, mapAtlasFiles = null, coreVersion = null, coreFiles = new Set() }) {
+export function selectThinPublicEntry(relativePath, isDirectory, { runtimeVersion, runtimeFiles, mapAtlasFiles = null, localMapFiles = new Set(), coreVersion = null, coreFiles = new Set() }) {
   const segments = segmentsOf(relativePath);
   if (segments.length === 0) return isDirectory;
   const normalized = segments.join("/");
@@ -86,6 +86,11 @@ export function selectThinPublicEntry(relativePath, isDirectory, { runtimeVersio
         : mapAtlasFiles.has(normalized);
     }
     return MAP_PUBLIC_ROOTS.has(second) && (isDirectory || segments.length > 2);
+  }
+  if (root === "original-map") {
+    return isDirectory
+      ? [...localMapFiles].some((file) => file.startsWith(`${normalized}/`))
+      : localMapFiles.has(normalized);
   }
   if (root === "original-ui") {
     if (isDirectory) return true;
@@ -309,6 +314,63 @@ export async function selectMapAtlasClosure(publicRoot, { pinnedManifestPath = "
     }
   }
   return { files, manifests, pages: files.size - manifests.length };
+}
+
+
+// An explicit finite scene diagnostic is a local delivery request, not a
+// replacement for the complete original-asset inventory or remote release.
+export async function selectLocalMapClosure(publicRoot, { sourcePath = "", sourceSha256 = "" } = {}) {
+  const empty = { files: new Set(), frames: [], bytes: 0, sourceSha256: null };
+  if (sourcePath === "" && sourceSha256 === "") return empty;
+  if (typeof sourcePath !== "string" || !path.isAbsolute(sourcePath) ||
+      typeof sourceSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(sourceSha256)) {
+    throw new Error("Local map closure requires an absolute input path and SHA256 pin");
+  }
+  if (!path.isAbsolute(publicRoot) || (await fs.lstat(publicRoot)).isSymbolicLink() ||
+      !(await fs.lstat(publicRoot)).isDirectory()) {
+    throw new Error("Local map public root must be an absolute real directory");
+  }
+  const input = await readRegularPublicFile(path.dirname(sourcePath), path.basename(sourcePath));
+  const inputHash = createHash("sha256").update(input).digest("hex");
+  if (inputHash !== sourceSha256.toLowerCase()) throw new Error("Local map closure input bytes do not match pin");
+  const request = JSON.parse(input.toString("utf8"));
+  if (!Array.isArray(request?.missingAssets) || request.missingAssets.length === 0 ||
+      request.missingAssets.length > 116) {
+    throw new Error("Local map closure requires 1 to 116 explicit frames");
+  }
+  const manifest = JSON.parse((await readRegularPublicFile(publicRoot,
+    "original-asset-manifest.generated.json")).toString("utf8"));
+  if (manifest?.schemaVersion !== 1 || manifest.kind !== "mir2-original-asset-manifest" ||
+      !manifest.assets || typeof manifest.assets !== "object" || Array.isArray(manifest.assets)) {
+    throw new Error("Invalid complete original-asset manifest for local map closure");
+  }
+  const files = new Set(), frames = [];
+  let bytes = 0;
+  for (const frame of request.missingAssets) {
+    if (!frame || typeof frame.libraryKey !== "string" ||
+        !/^(?:[A-Za-z0-9_-]+\/)+[A-Za-z0-9_-]+$/.test(frame.libraryKey) ||
+        !Number.isSafeInteger(frame.frameIndex) || frame.frameIndex < 0 ||
+        frame.publicPath !== `/original-map/${frame.libraryKey}/${frame.frameIndex}.png`) {
+      throw new Error("Unsafe or inconsistent local map frame path");
+    }
+    const relative = frame.publicPath.slice(1);
+    segmentsOf(relative);
+    if (files.has(relative)) throw new Error("Duplicate local map frame");
+    const entry = Object.hasOwn(manifest.assets, frame.publicPath) ? manifest.assets[frame.publicPath] : null;
+    if (!entry || entry.source !== "original-map" || !Number.isSafeInteger(entry.size) || entry.size <= 0 ||
+        typeof entry.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(entry.sha256)) {
+      throw new Error("Local map frame is missing a valid complete-manifest record");
+    }
+    const png = await readRegularPublicFile(publicRoot, relative);
+    if (png.length !== entry.size || createHash("sha256").update(png).digest("hex") !== entry.sha256.toLowerCase()) {
+      throw new Error("Local map frame bytes do not match complete-manifest size/SHA256");
+    }
+    files.add(relative);
+    frames.push({ path: relative, bytes: png.length, sha256: entry.sha256.toLowerCase() });
+    bytes += png.length;
+  }
+  frames.sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
+  return { files, frames, bytes, sourceSha256: inputHash };
 }
 
 async function readRegularPublicFile(root, relative, readBytes = true) {

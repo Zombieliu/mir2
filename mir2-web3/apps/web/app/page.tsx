@@ -11050,8 +11050,9 @@ export default function HomePage() {
   const ownedTooltipCharacterEpoch = ownedTooltipEpochRef.current.character;
   const ownedItemTooltipReaders = useMemo(() => {
     const inventory = presentationWorld.inventoryItems, belt = presentationWorld.beltItems, equipment = presentationWorld.equipmentItems;
+    const storage = presentationWorld.storageItems ?? [], storageRevision = storageServiceRevisionRef.current;
     const signatures = new Map<WorldItem | EquipmentItem, string>();
-    for (const raw of [...inventory, ...belt, ...equipment]) {
+    for (const raw of [...inventory, ...belt, ...equipment, ...storage]) {
       try { const signature = JSON.stringify(raw); if (signature.length <= 262144) signatures.set(raw, signature); }
       catch { /* An ambiguous source keeps its basic display. */ }
     }
@@ -11073,17 +11074,21 @@ export default function HomePage() {
         if (live.equipmentItems.filter(row => row.slot === raw.slot).length !== 1) return false;
       } else {
         if (!("container" in raw)) return false;
-        const rows = raw.container === "belt" ? live.beltItems : live.inventoryItems;
+        const rows = raw.container === "storage" ? live.storageItems ?? [] : raw.container === "belt" ? live.beltItems : live.inventoryItems;
         if (!rows.includes(raw) || rows.filter(row => row.container === raw.container && row.slot === raw.slot).length !== 1) return false;
-        if (raw.container !== "belt" && (ownedTooltipEpochRef.current.bag !== ownedTooltipBagEpoch
+        if (raw.container === "storage") {
+          if (!storageServiceActiveRef.current || storageServiceRevisionRef.current !== storageRevision
+            || ownedTooltipEpochRef.current.bag !== ownedTooltipBagEpoch || !bagOpenRef.current
+            || !Number.isSafeInteger(raw.slot) || raw.slot < 0 || raw.slot >= 160) return false;
+        } else if (raw.container !== "belt" && (ownedTooltipEpochRef.current.bag !== ownedTooltipBagEpoch
           || !bagOpenRef.current || activeInventoryTabRef.current !== raw.container)) return false;
       }
-      const own = [...live.inventoryItems, ...live.beltItems, ...live.equipmentItems];
+      const own = [...live.inventoryItems, ...live.beltItems, ...live.equipmentItems, ...(live.storageItems ?? [])];
       return own.filter(row => row.authoritativeUniqueId === raw.authoritativeUniqueId).length === 1
         && signatures.get(raw) === JSON.stringify(raw);
     }
     function read(item: Readonly<DisplayItem> | Readonly<DisplayEquipmentItem>, equipped: boolean): CrystalTooltipDocument | null {
-      const raw = (equipped ? equipment : [...inventory, ...belt]).find(row => row === item);
+      const raw = (equipped ? equipment : [...inventory, ...belt, ...storage]).find(row => row === item);
       if (!raw) return null;
       try {
         if (!current(raw, equipped)) return null;
@@ -11098,8 +11103,8 @@ export default function HomePage() {
     return binding;
     // Movement does not retire an unchanged item. Source/physical-owner changes do.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presentationWorld.inventoryItems, presentationWorld.beltItems, presentationWorld.equipmentItems,
-    ownedTooltipOwner?.socket, ownedTooltipOwner?.connectionGeneration, ownedTooltipOwner?.sessionGeneration,
+  }, [presentationWorld.inventoryItems, presentationWorld.beltItems, presentationWorld.equipmentItems, presentationWorld.storageItems,
+    storageServiceActive, storageServiceOpenVersion, ownedTooltipOwner?.socket, ownedTooltipOwner?.connectionGeneration, ownedTooltipOwner?.sessionGeneration,
     ownedTooltipOwner?.playerObjectId, ownedTooltipOwner?.sceneRevision, ownedTooltipOwner?.mapFileName,
     ownedTooltipCore, ownedTooltipOwnerRevision, ownedTooltipBagEpoch, ownedTooltipCharacterEpoch,
     showInventory, activeInventoryTab, showCharacter, activeCharacterTab]);

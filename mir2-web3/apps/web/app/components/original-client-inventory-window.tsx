@@ -133,6 +133,7 @@ export function InventoryWindow({
     ? []
     : world.storageItems.filter((item) => item.slot >= storagePageStart && item.slot < storagePageEnd);
   const showStorageWindow = storageMode !== null && !repairMode;
+  const storageTooltip = useActiveItemTooltip(visibleStorageItems, onReadItemTooltip, showStorageWindow && !storagePageLocked);
   const [pendingDeleteItem, setPendingDeleteItem] = useState<DisplayItem | null>(null);
   const [pendingSellItem, setPendingSellItem] = useState<DisplayItem | null>(null);
   const [deleteFeedback, setDeleteFeedback] = useState<string | null>(null);
@@ -1159,6 +1160,7 @@ export function InventoryWindow({
             {visibleStorageItems.map((item) => {
               const slot = ORIGINAL_UI.storage.slots[item.slot - storagePageStart];
               if (!slot) return null;
+              const tooltipDocument = storageTooltip.document(item);
 
               return (
 	                      <button
@@ -1171,6 +1173,11 @@ export function InventoryWindow({
                   }`}
                   style={{ left: slot.x, top: slot.y }}
                   aria-label={item.name}
+                  onPointerEnter={event => { if (event.pointerType !== "touch") storageTooltip.activate(item, event.currentTarget); }}
+                  onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) storageTooltip.release(item, event.currentTarget); }}
+                  onFocus={event => storageTooltip.activate(item, event.currentTarget)}
+                  onBlur={event => { if (!event.currentTarget.matches(":hover")) storageTooltip.release(item, event.currentTarget); }}
+                  onPointerCancel={event => storageTooltip.release(item, event.currentTarget)}
 	                  onClick={() => {
 	                    if (storageLocked || storagePageLocked) {
 	                      return;
@@ -1221,6 +1228,7 @@ export function InventoryWindow({
                   {item.quantity > 1 ? (
                     <span className="item-stack-count storage-item-count">{item.quantity}</span>
                   ) : null}
+                  {tooltipDocument ? <OriginalCrystalItemTooltip document={tooltipDocument} align={slot.x > 270 ? "left" : "right"} /> : (
                   <OriginalItemTooltip
                     t={t}
                     name={item.name}
@@ -1230,6 +1238,7 @@ export function InventoryWindow({
                     durabilityMax={item.durabilityMax}
                     align={slot.x > 270 ? "left" : "right"}
                   />
+                  )}
                 </button>
               );
             })}

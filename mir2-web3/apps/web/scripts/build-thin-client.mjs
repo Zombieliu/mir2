@@ -10,7 +10,7 @@ import { assertCompiledBevyRuntimeManifest, resolveNextBuildDistDirectory } from
 import {
   auditPortableTree, copyPortableStandalone, copySelectedPublic, copyVerifiedRequiredServerFiles,
   materializeStandaloneDependencies,
-  selectThinPublicEntry, selectMapAtlasClosure,
+  selectThinPublicEntry, selectMapAtlasClosure, selectLocalMapClosure,
 } from "./lib/portable-next-standalone.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -61,13 +61,16 @@ const mapAtlasClosure = await selectMapAtlasClosure(publicRoot, {
   pinnedContentHash: compiledEnv.MIR2_PINNED_MAP_ATLAS_CONTENT_HASH ?? "",
   pinnedEnabled: compiledEnv.MIR2_PINNED_MAP_ATLAS_ENABLED === "1",
 });
+const localMapClosure = await selectLocalMapClosure(publicRoot, {
+  sourcePath: args.localMapClosure ?? "", sourceSha256: args.localMapClosureSha256 ?? "",
+});
 const runtimeReleasePrefix = `bevy-runtime-releases/${runtimeManifest.version}`;
 const runtimeFilePaths = new Set(runtimeManifest.files.map((entry) =>
   entry.path.replace(/^public\/bevy-runtime/, runtimeReleasePrefix)));
 runtimeFilePaths.add(`${runtimeReleasePrefix}/runtime-manifest.json`);
 const publicSelection = (relative, isDirectory) => selectThinPublicEntry(relative, isDirectory, {
   runtimeVersion: runtimeManifest.version, runtimeFiles: runtimeFilePaths,
-  mapAtlasFiles: mapAtlasClosure.files,
+  mapAtlasFiles: mapAtlasClosure.files, localMapFiles: localMapClosure.files,
   coreVersion: pinnedCore.manifest.version, coreFiles: coreFilePaths,
 });
 
@@ -88,6 +91,7 @@ let dependencyStats = null;
 let publicCopyStats = null;
 let jsonCompaction = null;
 let packagedCoreClosure = null;
+let packagedLocalMapClosure = null;
 
 if (!reportOnly) {
   const standaloneRoot = path.join(nextRoot, "standalone");
@@ -130,6 +134,17 @@ if (!reportOnly) {
   publicCopyStats = await copySelectedPublic({
     sourceRoot: publicRoot, destinationRoot: path.join(appRoot, "public"), selection: publicSelection,
   });
+  if (localMapClosure.files.size) {
+    const copiedMap = await selectLocalMapClosure(path.join(appRoot, "public"), {
+      sourcePath: args.localMapClosure, sourceSha256: args.localMapClosureSha256,
+    });
+    if (copiedMap.sourceSha256 !== localMapClosure.sourceSha256 ||
+        JSON.stringify(copiedMap.frames) !== JSON.stringify(localMapClosure.frames)) {
+      throw new Error("Packaged local map closure changed during copy");
+    }
+    packagedLocalMapClosure = { frames: copiedMap.frames, bytes: copiedMap.bytes,
+      sourceSha256: copiedMap.sourceSha256 };
+  }
   const packagedCore = readClientCoreRelease({ webRoot: appRoot,
     manifest: compiledCoreManifest, requireExactClosure: true });
   // Reject a Core publication that raced the copy; the compiled closure must stay exact.
@@ -206,6 +221,10 @@ const report = {
   publicCopyStats,
   mapAtlasSelection: { manifests: mapAtlasClosure.manifests, pages: mapAtlasClosure.pages,
     selectedPaths: mapAtlasClosure.files.size },
+  ...(localMapClosure.files.size ? { localMapSelection: {
+    sourceSha256: localMapClosure.sourceSha256, selectedPaths: localMapClosure.frames,
+    bytes: localMapClosure.bytes, packagedClosure: packagedLocalMapClosure,
+  } } : {}),
   jsonCompaction,
   coreSelection: { compiledManifest: compiledCoreManifest, selectedPaths: [...coreFilePaths],
     packagedClosure: packagedCoreClosure },

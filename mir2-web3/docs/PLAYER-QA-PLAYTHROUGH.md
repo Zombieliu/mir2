@@ -1,5 +1,18 @@
 # Player-QA playthrough loop
 
+## Source68–69：仓库耐久提示通过，地图资源补齐后发现旧场景缓存（2026-10-11）
+
+Source68 让兼容仓库使用现有 Core tooltip 格式化器。正常 hover 和键盘 focus 均实际显示 Candle 耐久8/8；锁页、失焦和关闭清除 tooltip，完整被动区间没有发送仓庫物品操作。正常 Store/Take Back 后保存退出并重登，背包5件、仓库0件、金币180读回。此处是 React 兼容仓库证据，sharedStorageOwner 未接管。原 Node 第三轮257项全部通过、0跳过，Stage5自定义506组独立记录；前两轮缺夹具失败保持。严格Next实际退出0（60838ms，TypeScript20s，13页，stderr0）；原Thin为4066文件/513目录（含根）/0链接/284883997B。
+
+Source69 以显式有限资源闭包补齐 Warehouse0140 原Lib中的116张PNG（204399B），保留旧41132项，资源清单增至41248项，assetHash=004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0。它是已核验选择范围，未称主public的全量或远端完整库存。原导出、原清单生成及21项portable Node测试均退出0、无跳过，原16条测试正文保持。新原Thin实际退出0（38226ms）：4182普通文件/517目录（含根）/0链接/285106825B≤377487360B；59项依赖警告完整保存，归一化集合与Source68一致。仅116PNG与完整清单改变打包叶，4065旧叶、6个Core叶、编译页面均保持。Source69未执行新Next，条件携带Source68严格Next并仅在新隔离目录叠加数据。
+
+本地入口仍为 http://127.0.0.1:19205/，运行Source69包；旧Source68在正常保存退出后仅停止已核验自有进程，原caller关闭并完成源后校验，网关保持Source65。新包正常Login/Start Game和新manifest指纹均实测，但仓库视觉尚未通过：完整未截断区间中Scene0140响应200、fromDiskCache=true、340cells/0sprites/116missing，实际黑区/棋盘仍在。原因链包括无资源版本的force-cache场景URL；Source70已排入资源版本请求、清单新鲜读取和异步覆盖防护，尚未执行或验收。没有清理浏览器缓存来冒充闭环。
+
+下一项为Source70正常浏览器仓库画面与保存重登，随后继续共享仓库/商店/角色面板及移动端复用。sharedStorageOwner、其他面板变体、移动真机、完整多端1:1和人类Accepted保持开放；本轮不新增后端候选结论，overallPercentage=null、Candidate100=false、goal active。局部资源选项为`--localMapClosure`与`--localMapClosureSha256`配对使用，有限控制文件见下方证据（SHA256=891e6e66b283c7da142af1b1644e45b341245548cec625ec9bff9274011fb66f），默认行为保持。
+
+证据：[Source68回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-node-actual03.json)、[耐久及存取重登闭环](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-storage-tooltip-closure01.json)、[实际tooltip截图](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-storage-tooltip-hover01.png)、[Source69回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-portable-node-actual01.json)、[原PNG导出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-original-png-export02.json)、[有限控制文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-map-local-closure01.json)、[实际清单](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-manifest-actual01.json)、[实际Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-thin-actual01.json)、[完整体积报告](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-thin-size-report01.json)、[实际运行](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-runtime-start-actual01.json)、[旧场景缓存实证](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-scene-stale01.json)。
+
+
 ## Source61–67：正常购买与仓库存取两次保存重登均通过（2026-10-11）
 
 当前本地入口 http://127.0.0.1:19205/。Source61 的普通 GoldenPendant 装备/卸下在兼容角色面板通过；Source62 修复权威物品 tooltip wire 投影，3 项实际回归通过；Source63–64 修复 NPC 商店能力来源及完整购买回执，Source65 将完整 owner snapshot 排在本次普通经济包之后，避免金币显示重复扣减。Source65 18 项实际网关回归通过，原调用者构建并启动的新网关已用于正常 UI 购买：Scott 单次购买1个 Candle，金币190→180，实际只扣10；保存退出并重登读回180金币、背包5件（3个Candle及GoldenPendant/CopperRing）、2级与HP24/24。此商店与角色证据为 React 兼容界面，不称共享面板接管。
