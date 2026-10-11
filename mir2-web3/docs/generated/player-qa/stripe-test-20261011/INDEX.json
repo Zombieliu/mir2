@@ -1,0 +1,65 @@
+{
+  "schema": "mir2.public-stripe-test.evidence-index.v1",
+  "sourceRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "files": [
+    {
+      "path": "executed-finish-public-test-evidence.py",
+      "bytes": 8774,
+      "sha256": "cee4420cba5f7205d8b501b2c1c905c2a3e7fb9f169529ee50706c4dc2be7b2e"
+    },
+    {
+      "path": "executed-public-test-player.py",
+      "bytes": 14969,
+      "sha256": "065d7d60ec1fecb01851586f1bc0f53b98d3ecb397bcb5b94a6dacca1067c788"
+    },
+    {
+      "path": "executed-verify-public-test-order.py",
+      "bytes": 8973,
+      "sha256": "d8a0f4b80b7a30f25711dcb31a0597803a868da573249f5a3ff1cbac8076a35b"
+    },
+    {
+      "path": "GATEWAY-APPLIED.json",
+      "bytes": 2766,
+      "sha256": "7d5869aa92e76debe4839e6d6dfbea176403898a05c3dc31902d31baa1a5e214"
+    },
+    {
+      "path": "ORDINARY-WS-REDACTED.json",
+      "bytes": 55005,
+      "sha256": "4c90f1fb24e080da57af3658af0b4b6fad1cd3a36004cd8fa8ec941baef0f694"
+    },
+    {
+      "path": "POSTFLIGHT.json",
+      "bytes": 5621,
+      "sha256": "c03ccccc5ff1fa475f11a260815d81a5f523136cdc20576eb661c0166e109ea1"
+    },
+    {
+      "path": "PROVIDER-PAID-READBACK.json",
+      "bytes": 2230,
+      "sha256": "414e262bbab2987d43498f1c09d76e2bc468f931b617abe1de2da6591fa67627"
+    },
+    {
+      "path": "provider-provision-01.json",
+      "bytes": 1624,
+      "sha256": "3c11e4f3c831ad5d7b336bfdf91e5d4a1b722c805b68b23055e43d1016d3e330"
+    },
+    {
+      "path": "PUBLIC-RETURN.jpg",
+      "bytes": 50148,
+      "sha256": "ac5d93f4e8053de995c99bfd3785544e138db0b736adf4abde0f149947d9854a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2208,
+      "sha256": "3a78f1e8394861c5898920af0fb4a89d2cb3e19a70a29772e48d7f7d640a5bc2"
+    },
+    {
+      "path": "RETAINED-FAILURES.json",
+      "bytes": 2118,
+      "sha256": "282b1c670f9c36407e00fb7be44a2a4a90d6f22b7b11aeb38254fc7744f35624"
+    }
+  ],
+  "noSecretValues": true,
+  "testModeOnly": true,
+  "nativeHumanAcceptance": false,
+  "priorFailedAttemptsRetained": true
+}

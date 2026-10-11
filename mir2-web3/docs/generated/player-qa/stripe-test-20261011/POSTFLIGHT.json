@@ -1,0 +1,182 @@
+{
+  "schema": "mir2.public-stripe-test.postflight.v1",
+  "passed": true,
+  "observedAtUtc": "2026-10-11T13:56:56.387372+00:00",
+  "sourceRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "tlsVerified": true,
+  "signedFeedSequence": 19,
+  "services": {
+    "binaryBytes": 84778528,
+    "binarySha256": "fc530898d8cbf563389fe708ac3a279846d28b56ae97e340af3ed7d100ad8202",
+    "files": {
+      "/etc/mir2-playtest/gateway.env": {
+        "bytes": 4746,
+        "sha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0"
+      },
+      "/etc/systemd/system/mir2-playtest.service": {
+        "bytes": 2188,
+        "sha256": "9bf1b374db39732ad7b59e6d468086eea8c4563fbfb3185ef3bf9dfd714551a9"
+      },
+      "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf": {
+        "bytes": 224,
+        "sha256": "5f5f8a4770fee45035d9b8c9c25b4a45a6d85c06ceea3f3b1204235d8bce7a51"
+      },
+      "/etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf": {
+        "bytes": 594,
+        "sha256": "d136270aad3a230fd882443afc26c17e49134ba2449e5beab67b7acc45ecd1a4"
+      }
+    },
+    "ok": true,
+    "original": {
+      "ok": true,
+      "pids": [
+        "3855184"
+      ],
+      "release": "/opt/mir2/gateway/releases/79ba815c0-checkpoint-base64",
+      "revision": null
+    },
+    "remoteZoneConfigured": false,
+    "tcp7200": 0,
+    "test": {
+      "ai_live": {
+        "discordDeadLettersTotal": 0,
+        "discordFailureTotal": 0,
+        "discordSuccessTotal": 0,
+        "distributionDeadLettersTotal": 0,
+        "distributionFailureTotal": 0,
+        "distributionSuccessTotal": 0,
+        "enabled": false,
+        "generatedSegmentsTotal": 0,
+        "mode": "shadow",
+        "modelFailureTotal": 0,
+        "modelSuccessTotal": 0,
+        "persistedSegmentsTotal": 0,
+        "persistenceErrorsTotal": 0,
+        "processedFramesTotal": 0,
+        "queuedDiscordDeliveries": 0,
+        "queuedDistributionDeliveries": 0,
+        "running": false,
+        "scoredHighlightsTotal": 0,
+        "ttsFailureTotal": 0,
+        "ttsSuccessTotal": 0
+      },
+      "capacity": {
+        "currentActiveSessions": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentReconnectLeases": 0,
+        "currentStartGameInFlight": 0,
+        "currentWsConnections": 0,
+        "maxActiveSessions": 51,
+        "maxLoginInFlight": 2,
+        "maxNewCharacterInFlight": 1,
+        "maxReconnectLeases": 51,
+        "maxStartGameInFlight": 2,
+        "maxWsConnections": 66
+      },
+      "channel_identity": {
+        "accountCount": 0,
+        "backend": "postgres",
+        "durable": true,
+        "identityCount": 0
+      },
+      "gameplay_events": {
+        "accepted": 0,
+        "configured": false,
+        "dropped": 0,
+        "failed": 0,
+        "lastError": null,
+        "published": 0,
+        "sink": "none",
+        "topic": null
+      },
+      "gate15": null,
+      "http": "ready",
+      "identity_backend": "postgres",
+      "ok": true,
+      "revision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+      "session_cache": {
+        "backend": "redis",
+        "configured": true,
+        "healthy": true,
+        "lastError": null,
+        "recordCount": 0,
+        "routeLeaseCount": 0,
+        "staleRecordCount": 0,
+        "ttlSeconds": 30
+      },
+      "spectator": {
+        "activeMaps": 1,
+        "activeViewers": 0,
+        "bufferedFrames": 30,
+        "dataDir": ".mir2-data/spectator",
+        "droppedFramesTotal": 0,
+        "persistedFramesTotal": 0,
+        "publishedFramesTotal": 30,
+        "recordingEnabled": false,
+        "recordingErrorsTotal": 0
+      },
+      "tcp_stub": "ready",
+      "ws": "ready"
+    },
+    "unit": {
+      "DropInPaths": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf /etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf",
+      "ExecMainStatus": "0",
+      "MainPID": "3369030",
+      "NRestarts": "0",
+      "Result": "success"
+    }
+  },
+  "publicChecks": [
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+      "status": 200,
+      "sha256": "a97dbb60c48a19e7f3daf28a9b9ea42c9dbfea42bb8566f160c47475516f6d62",
+      "bytes": 1159
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.p7s",
+      "status": 200,
+      "sha256": "01ac444bc13bd822ba8283db4be7f30a36562e84c651c9bb6553b10921285d43",
+      "bytes": 1614
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "status": 200,
+      "sha256": "a97dbb60c48a19e7f3daf28a9b9ea42c9dbfea42bb8566f160c47475516f6d62",
+      "bytes": 1159
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.p7s",
+      "status": 200,
+      "sha256": "01ac444bc13bd822ba8283db4be7f30a36562e84c651c9bb6553b10921285d43",
+      "bytes": 1614
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/v1/billing/status",
+      "status": 404
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/v1/billing/checkout",
+      "status": 404
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/admin/billing",
+      "status": 404
+    },
+    {
+      "kind": "unsignedCallback",
+      "status": 400,
+      "error": "billingWebhookSignatureInvalid",
+      "cacheControl": "no-store"
+    },
+    {
+      "kind": "styledReturn",
+      "status": 200,
+      "sha256": "b3476392d221966a03ac09a6bebd02b33c44b3a10cce991f9cb7b99e1196fc94",
+      "bytes": 37978,
+      "cacheControl": "no-store",
+      "unverifiedQueryCannotAwardCredits": true
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "mir2.public-stripe-test.provider-provision.v1",
+  "passed": true,
+  "mode": "test",
+  "apiVersion": "2026-09-30.endive",
+  "url": "https://165.154.65.136.sslip.io/playtest/v1/billing/stripe/webhook",
+  "events": [
+    "checkout.session.completed",
+    "checkout.session.async_payment_succeeded",
+    "charge.refunded",
+    "charge.dispute.created",
+    "charge.dispute.updated",
+    "charge.dispute.closed",
+    "charge.dispute.funds_reinstated",
+    "charge.dispute.funds_withdrawn"
+  ],
+  "endpointId": "we_1UPLaYHhOAsKtqzmd2hX4hp5",
+  "authenticatedReads": [
+    {
+      "resource": "checkout/sessions",
+      "httpStatus": 200
+    },
+    {
+      "resource": "payment_intents",
+      "httpStatus": 200
+    },
+    {
+      "resource": "charges",
+      "httpStatus": 200
+    },
+    {
+      "resource": "webhook_endpoints",
+      "httpStatus": 200
+    }
+  ],
+  "providerReadbackVerified": true,
+  "privateConfigPrepared": true,
+  "offers": [
+    {
+      "id": "usd1",
+      "label": "100 Credits",
+      "currency": "usd",
+      "amountMinor": 100,
+      "credits": 100
+    },
+    {
+      "id": "usd5",
+      "label": "500 Credits",
+      "currency": "usd",
+      "amountMinor": 500,
+      "credits": 500
+    },
+    {
+      "id": "usd10",
+      "label": "1000 Credits",
+      "currency": "usd",
+      "amountMinor": 1000,
+      "credits": 1000
+    },
+    {
+      "id": "usd20",
+      "label": "2000 Credits",
+      "currency": "usd",
+      "amountMinor": 2000,
+      "credits": 2000
+    }
+  ],
+  "monthlyCardPrice": 1000,
+  "monthlyCardDays": 30,
+  "realChargesCreated": false,
+  "gameCreditsGranted": false
+}

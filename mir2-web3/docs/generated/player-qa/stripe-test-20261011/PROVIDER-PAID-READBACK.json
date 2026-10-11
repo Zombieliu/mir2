@@ -1,0 +1,74 @@
+{
+  "schema": "mir2.public-stripe-test.provider-verification.v1",
+  "passed": true,
+  "verifiedAtUtc": "2026-10-11T13:44:52.741194+00:00",
+  "sourceRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "apiVersion": "2026-09-30.endive",
+  "livemode": false,
+  "realMoneyTransferred": false,
+  "providerReads": 6,
+  "checkout": {
+    "idSha256": "99163dc88da9e1ba7299734dd903e1f7c65627e3a20cd49856f83d4b3a1a7517",
+    "status": "complete",
+    "paymentStatus": "paid",
+    "amountTotal": 1000,
+    "currency": "usd",
+    "frozenOwnerTupleMatches": true
+  },
+  "paymentIntent": {
+    "idSha256": "634dbba4e857d0af2a2a38df26d3530cdcbc9c3c8e4fa5a8f062f89f62699d64",
+    "status": "succeeded",
+    "amount": 1000,
+    "amountReceived": 1000,
+    "currency": "usd",
+    "frozenOwnerTupleMatches": true
+  },
+  "providerEvent": {
+    "idSha256": "4a52430171df8823ad9b7efcd1798706891e169e3d7b6a3cc7773690e4c5e7d4",
+    "type": "checkout.session.completed",
+    "pendingWebhooks": 0,
+    "retrievedEventApiVersion": "2025-01-27.acacia",
+    "endpointApiVersion": "2026-09-30.endive",
+    "officialCliSha256": "8e504b941ce1fb49c9275d563143ceb0ea4261d368ae78be298e95b770a38797"
+  },
+  "publicCallbackOutcomes": [
+    {
+      "kind": "invalidSignature",
+      "httpStatus": 400,
+      "error": "billingWebhookRejected",
+      "cacheControl": "no-store"
+    },
+    {
+      "kind": "wrongLiveMode",
+      "httpStatus": 400,
+      "error": "billingWebhookRejected",
+      "cacheControl": "no-store"
+    },
+    {
+      "kind": "providerActualCompletedResend",
+      "number": 1,
+      "officialCliExitCode": 0,
+      "sameEventIdentity": true,
+      "endpointApiVersion": "2026-09-30.endive"
+    },
+    {
+      "kind": "providerActualCompletedResend",
+      "number": 2,
+      "officialCliExitCode": 0,
+      "sameEventIdentity": true,
+      "endpointApiVersion": "2026-09-30.endive"
+    }
+  ],
+  "monthlyCard": {
+    "priceCredits": 1000,
+    "durationMs": 2592000000,
+    "ordinaryNativeShopParcelClaimAndUse": true,
+    "expiresAtMs": 1794316965557
+  },
+  "scopeLimits": [
+    "No live money",
+    "Native visual human acceptance remains open",
+    "No actual refund/dispute trial",
+    "No Gateway cold restart after financial trial"
+  ]
+}

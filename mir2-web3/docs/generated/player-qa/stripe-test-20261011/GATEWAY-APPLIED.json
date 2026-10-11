@@ -1,0 +1,94 @@
+{
+  "afterPid": "3369030",
+  "allCurrentCountersZero": true,
+  "applied": true,
+  "beforePid": "3347791",
+  "binarySha256": "fc530898d8cbf563389fe708ac3a279846d28b56ae97e340af3ed7d100ad8202",
+  "caddySha256Unchanged": "efbd0eaee9952dd38148c9b634f47889e99a9ddff632c5f2befebb6ce8339b28",
+  "capacity": {
+    "currentActiveSessions": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentReconnectLeases": 0,
+    "currentStartGameInFlight": 0,
+    "currentWsConnections": 0,
+    "maxActiveSessions": 51,
+    "maxLoginInFlight": 2,
+    "maxNewCharacterInFlight": 1,
+    "maxReconnectLeases": 51,
+    "maxStartGameInFlight": 2,
+    "maxWsConnections": 66
+  },
+  "checkoutEnabled": true,
+  "credentialsVerifiedInMemory": true,
+  "databaseDumpSha256": "e7b4f573f43466a0b10152892a9dcc6ac337aa87da5aeef6cd85054c87ee5dbf",
+  "liveMode": false,
+  "mandatoryMonthlyEntry": false,
+  "mode": "test",
+  "monthlyCardDays": 30,
+  "monthlyCardPrice": 1000,
+  "newPrivateEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+  "normalStop": {
+    "ExecMainCode": "1",
+    "ExecMainStatus": "0",
+    "MainPID": "0",
+    "NRestarts": "0",
+    "Result": "success"
+  },
+  "offers": [
+    {
+      "amountMinor": 100,
+      "credits": 100,
+      "currency": "usd",
+      "id": "usd1",
+      "label": "100 Credits"
+    },
+    {
+      "amountMinor": 500,
+      "credits": 500,
+      "currency": "usd",
+      "id": "usd5",
+      "label": "500 Credits"
+    },
+    {
+      "amountMinor": 1000,
+      "credits": 1000,
+      "currency": "usd",
+      "id": "usd10",
+      "label": "1000 Credits"
+    },
+    {
+      "amountMinor": 2000,
+      "credits": 2000,
+      "currency": "usd",
+      "id": "usd20",
+      "label": "2000 Credits"
+    }
+  ],
+  "oldPrivateEnvSha256": "77f12d974ca32103673181669803c89283c68cf34a952c0a177b721c1d013729",
+  "originalPid": "3855184",
+  "passed": true,
+  "privateBackup": "/var/backups/mir2-playtest-stripe-test-20261011-01",
+  "realChargesCreated": false,
+  "resourceLimits": {
+    "AllowedCPUs": "",
+    "CPUAffinity": "",
+    "CPUQuotaPerSecUSec": "infinity",
+    "CPUQuotaPeriodUSec": "infinity",
+    "CPUWeight": "25",
+    "DropInPaths": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf /etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf",
+    "EffectiveCPUs": "",
+    "LimitNOFILE": "4096",
+    "MemoryHigh": "1468006400",
+    "MemoryLow": "0",
+    "MemoryMax": "1677721600",
+    "MemoryMin": "0",
+    "MemorySwapMax": "0",
+    "TasksMax": "9483"
+  },
+  "schema": "mir2.public-stripe-test.gateway-configuration.v1",
+  "sourceBackend": "postgres-SourceOfTruth",
+  "sourceRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "spectatorsZero": true,
+  "tcpZero": true
+}

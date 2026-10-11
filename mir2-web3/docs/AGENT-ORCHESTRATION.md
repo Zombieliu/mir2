@@ -1,5 +1,19 @@
 # Agent Orchestration
 
+> 2026-10-11 latest instruction enables **Stripe TEST mode**, replacing the
+> live-activation request. Actual test credentials and a permanent Endive
+> callback are configured on unchanged Gateway4006d988 after zero counters,
+> normal exit0 and fresh private PostgreSQL/state backups. Public Hosted Checkout
+> pays1000 cents USD with the official test card; ordinary WSS applies1000
+> Credits, native GameShop mails the1000-Credit monthly item, claim/use adds30days.
+> Consumed-UID replay, two official provider event resends and relogin preserve
+> wallet0/time. No real money. Nine public postflight checks preserve signed19,
+> original realm, Caddy, protected installations and resource/capacity limits.
+> Failed QA assumptions and transport attempts are retained/excluded. R24 needs
+> no reinstall. Native human acceptance and broader P1-P7/Mentor stay open;
+> expired heartbeat stays paused. Earlier entries are historical.
+> [Actual test activation and receipts](STRIPE-TEST-ACTIVATION-20261011.md).
+
 > 2026-10-11 live Stripe activation requested: the exact signed-callback route
 > is now public and rejects unsigned requests400; forged requests receive503
 > while billing is disabled. Caddy-only reload preserves all service PIDs,

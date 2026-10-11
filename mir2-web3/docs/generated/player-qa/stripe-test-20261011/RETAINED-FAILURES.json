@@ -1,0 +1,45 @@
+{
+  "excludedFromPassingAcceptance": true,
+  "failures": [
+    {
+      "stage": "privateKeyReadBeforeProvision",
+      "cause": "Operator cleared the live file; test mode correctly uses stripe-test.env. No API call/create at failure."
+    },
+    {
+      "stage": "initialQaInterpreter",
+      "cause": "websockets absent; installed pinned15.0.1 in this task-only dependency directory, no financial request yet."
+    },
+    {
+      "stage": "WebMcpFill",
+      "cause": "Browser fill call timed out after completing fields; observed actual form and submitted once with the normal button."
+    },
+    {
+      "stage": "firstMonthly",
+      "cause": "Test incorrectly assumed completed BUY envelopes retain a nonce like Gift; repeat correctly refused for insufficient Credits. Confirmed existing parcel resumed; no new BUY."
+    },
+    {
+      "stage": "intermediateStatus",
+      "cause": "Test expected1000 despite the confirmed native1000 debit; corrected the test to account for that debit."
+    },
+    {
+      "stage": "firstMonthlyResume",
+      "cause": "Missing ordinary2s application heartbeat caused connection closure during bootstrap. Existing parcel preserved; correct transport heartbeat resumes it."
+    },
+    {
+      "stage": "initialProviderReadback",
+      "cause": "Retrieved Event keeps account creation-time2025-01-27.acacia, while endpoint uses2026-09-30.endive. Actual official CLI resend used without relabeling the API snapshot."
+    },
+    {
+      "stage": "initialBadSignatureAssertion",
+      "cause": "Actual gateway intentionally exposes error=billingWebhookRejected for supplied invalid signature; corrected assertion against source and actual response."
+    },
+    {
+      "stage": "initialDeliveryCompletion",
+      "cause": "Stripe resend queues async delivery; bounded later read confirms pending_webhooks=0. Existing receipts reused, no repeated resend."
+    },
+    {
+      "stage": "firstPostflight",
+      "cause": "Test guessed latest.json.p7s instead of the previous observed latest.p7s. Actual manifest SHA remained unchanged; corrected exact known signature alias."
+    }
+  ]
+}

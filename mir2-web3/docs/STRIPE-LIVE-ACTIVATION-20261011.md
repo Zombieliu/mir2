@@ -1,5 +1,10 @@
 # Stripe live activation — 2026-10-11
 
+> Superseded by the user’s later instruction to use TEST mode. Public test
+> activation and the paid sandbox/monthly trial now pass; live money remains
+> off. This earlier live-readiness record is historical.
+> [Current configuration and acceptance](STRIPE-TEST-ACTIVATION-20261011.md).
+
 **Live Stripe payments are not enabled yet.** The operator explicitly
 requested activation and filled the new private file, but its value is still
 a test-mode server key. The verifier rejects it before contacting Stripe;

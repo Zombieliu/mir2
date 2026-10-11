@@ -1,0 +1,1896 @@
+{
+  "version": 1,
+  "runs": [
+    {
+      "phase": "checkout",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791722668022,
+            "expiresAtMs": 1791765868022,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110001,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791722668685,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "boundedRead",
+          "label": "checkout",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "checkout",
+          "requestId": 110002,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "checkoutUrl",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "checkoutBound"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791722669406,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": true,
+          "replayed": null
+        },
+        {
+          "kind": "checkoutPrepared",
+          "orderIdSha256": "f898bb24c098ca76c82c3198ce6f07fe60a08b5a5676b42b56f51b467c675317",
+          "state": "checkoutBound",
+          "financialIntentReused": true,
+          "urlSaved": true
+        },
+        {
+          "kind": "boundedRead",
+          "label": "SelectionLogoutBarrier",
+          "frameKinds": {
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "selectionLogout",
+          "sourceReplyIsSilent": true,
+          "barrierConfirmed": true
+        }
+      ],
+      "ok": true
+    },
+    {
+      "phase": "status",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791723692377,
+            "expiresAtMs": 1791766892377,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110003,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 1000,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791723693123,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "explicitSettlementStatus",
+          "orderIdSha256": "f898bb24c098ca76c82c3198ce6f07fe60a08b5a5676b42b56f51b467c675317",
+          "state": "applied",
+          "credit": 1000,
+          "pendingCredit": 0,
+          "sourceApplied": true,
+          "expectedCreditAfterApplication": 1000,
+          "monthlyDebitReceiptUnconfirmed": false
+        },
+        {
+          "kind": "boundedRead",
+          "label": "SelectionLogoutBarrier",
+          "frameKinds": {
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "selectionLogout",
+          "sourceReplyIsSilent": true,
+          "barrierConfirmed": true
+        }
+      ],
+      "ok": true,
+      "finalStatus": {
+        "enabled": true,
+        "checkoutEnabled": true,
+        "credit": 1000,
+        "pendingCredit": 0,
+        "monthlyCardCreditPrice": 1000,
+        "ownedMonthlyCards": [],
+        "offers": [
+          {
+            "id": "usd1",
+            "label": "100 Credits",
+            "currency": "usd",
+            "amountMinor": 100,
+            "amountLabel": "USD 1.00",
+            "credits": 100
+          },
+          {
+            "id": "usd5",
+            "label": "500 Credits",
+            "currency": "usd",
+            "amountMinor": 500,
+            "amountLabel": "USD 5.00",
+            "credits": 500
+          },
+          {
+            "id": "usd10",
+            "label": "1000 Credits",
+            "currency": "usd",
+            "amountMinor": 1000,
+            "amountLabel": "USD 10.00",
+            "credits": 1000
+          },
+          {
+            "id": "usd20",
+            "label": "2000 Credits",
+            "currency": "usd",
+            "amountMinor": 2000,
+            "amountLabel": "USD 20.00",
+            "credits": 2000
+          }
+        ],
+        "orders": [
+          {
+            "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+            "state": "applied"
+          }
+        ],
+        "monthlyCard": {
+          "required": false,
+          "active": false,
+          "expiresAtMs": null,
+          "serverNowMs": 1791723693123,
+          "remainingMs": 0,
+          "canEnterGame": true
+        }
+      }
+    },
+    {
+      "phase": "monthly",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791723804924,
+            "expiresAtMs": 1791767004924,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110004,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 1000,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791723808732,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "explicitSettlementStatus",
+          "orderIdSha256": "f898bb24c098ca76c82c3198ce6f07fe60a08b5a5676b42b56f51b467c675317",
+          "state": "applied",
+          "credit": 1000,
+          "pendingCredit": 0,
+          "sourceApplied": true,
+          "expectedCreditAfterApplication": 1000,
+          "monthlyDebitReceiptUnconfirmed": false
+        },
+        {
+          "kind": "boundedRead",
+          "label": "StartGame",
+          "frameKinds": {
+            "packet:StartGame": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "PublicShopBootstrapBarrier",
+          "frameKinds": {
+            "packet:Chat": 1,
+            "packet:UpdateNotice": 1,
+            "packet:NewItemInfo": 144,
+            "packet:MapInformation": 1,
+            "packet:UserInformation": 1,
+            "packet:NewQuestInfo": 200,
+            "packet:NewRecipeInfo": 79,
+            "packet:CompleteQuest": 1,
+            "packet:FriendUpdate": 1,
+            "packet:GameShopInfo": 106,
+            "packet:BaseStatsInfo": 1,
+            "packet:ObjectMonster": 52,
+            "packet:ObjectNpc": 28,
+            "packet:ObjectSpell": 52,
+            "packet:ObjectHealth": 17,
+            "packet:TimeOfDay": 1,
+            "packet:ChangeAMode": 1,
+            "packet:ChangePMode": 1,
+            "packet:SwitchGroup": 2,
+            "packet:DefaultNPC": 1,
+            "packet:GuildBuffList": 2,
+            "packet:NPCUpdate": 4,
+            "packet:NPCResponse": 4,
+            "packet:MentorUpdate": 1,
+            "packet:LoverUpdate": 1,
+            "packet:GuildStatus": 1,
+            "packet:GuildMemberChange": 1,
+            "packet:ObjectGuildNameChanged": 1,
+            "packet:DeleteGroup": 1,
+            "worldSnapshot:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "NativeMonthlyShopReceipt",
+          "frameKinds": {
+            "monthlyCard:": 1,
+            "packet:LoseCredit": 1,
+            "packet:Chat": 1,
+            "packet:MentorUpdate": 1,
+            "packet:GuildStatus": 1,
+            "packet:GuildMemberChange": 1,
+            "packet:GuildBuffList": 1,
+            "worldSnapshot:": 1,
+            "gameShopReceipt:": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "PurchaseMailBarrier",
+          "frameKinds": {
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110005,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [
+              {
+                "uniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246"
+              }
+            ],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791723823140,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "nativeMonthlyPurchased",
+          "mailId": 3,
+          "credit": 0,
+          "itemUniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246",
+          "realParcelItemPresent": true,
+          "activatedOnPurchase": false
+        },
+        {
+          "kind": "boundedRead",
+          "label": "NativeMonthlyPurchaseReplay",
+          "frameKinds": {
+            "packet:Chat": 1,
+            "worldSnapshot:": 1,
+            "gameShopReceipt:": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LogOutSuccess",
+          "frameKinds": {
+            "packet:LogOutSuccess": 1
+          }
+        },
+        {
+          "kind": "ordinaryLogout",
+          "packet": "LogOutSuccess"
+        }
+      ],
+      "ok": false,
+      "error": "shopPurchaseReplayReceiptChanged"
+    },
+    {
+      "phase": "status",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791724100378,
+            "expiresAtMs": 1791767300378,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110006,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [
+              {
+                "uniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246"
+              }
+            ],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791724100714,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "boundedRead",
+          "label": "SelectionLogoutBarrier",
+          "frameKinds": {
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "selectionLogout",
+          "sourceReplyIsSilent": true,
+          "barrierConfirmed": true
+        }
+      ],
+      "ok": false,
+      "error": "appliedCheckoutCreditOrPendingMismatch"
+    },
+    {
+      "phase": "shop-replay",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791724185731,
+            "expiresAtMs": 1791767385731,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "StartGame",
+          "frameKinds": {
+            "packet:StartGame": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "DiagnosticSameShopIntent",
+          "frameKinds": {
+            "packet:Chat": 2,
+            "packet:UpdateNotice": 1,
+            "packet:NewItemInfo": 144,
+            "packet:MapInformation": 1,
+            "packet:UserInformation": 1,
+            "packet:NewQuestInfo": 200,
+            "packet:NewRecipeInfo": 79,
+            "packet:CompleteQuest": 1,
+            "packet:FriendUpdate": 1,
+            "packet:GameShopInfo": 106,
+            "packet:BaseStatsInfo": 1,
+            "packet:ObjectNpc": 28,
+            "packet:ObjectMonster": 18,
+            "packet:ObjectSpell": 52,
+            "packet:ObjectHealth": 17,
+            "packet:TimeOfDay": 1,
+            "packet:ChangeAMode": 1,
+            "packet:ChangePMode": 1,
+            "packet:SwitchGroup": 2,
+            "packet:DefaultNPC": 1,
+            "packet:GuildBuffList": 3,
+            "packet:NPCUpdate": 4,
+            "packet:NPCResponse": 4,
+            "packet:MentorUpdate": 2,
+            "packet:LoverUpdate": 1,
+            "packet:GuildStatus": 2,
+            "packet:GuildMemberChange": 2,
+            "packet:ObjectGuildNameChanged": 1,
+            "packet:DeleteGroup": 1,
+            "worldSnapshot:": 2,
+            "monthlyCard:": 1,
+            "gameShopReceipt:": 1
+          }
+        },
+        {
+          "kind": "diagnosticNativeReplay",
+          "expected": {
+            "gIndex": 1000001,
+            "mailId": 3,
+            "priceType": 0,
+            "protocol": "nativeGameShopReceiptV1",
+            "quantity": 1,
+            "requestId": "public-stripe-test-monthly-20261011-01",
+            "success": true,
+            "type": "gameShopReceipt"
+          },
+          "observed": {
+            "code": "insufficientCurrency",
+            "gIndex": 1000001,
+            "priceType": 0,
+            "protocol": "nativeGameShopReceiptV1",
+            "quantity": 1,
+            "requestId": "public-stripe-test-monthly-20261011-01",
+            "success": false,
+            "type": "gameShopReceipt"
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LogOutSuccess",
+          "frameKinds": {
+            "packet:LogOutSuccess": 1
+          }
+        },
+        {
+          "kind": "ordinaryLogout",
+          "packet": "LogOutSuccess"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "phase": "monthly",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791724685768,
+            "expiresAtMs": 1791767885768,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110007,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [
+              {
+                "uniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246"
+              }
+            ],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791724692185,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "explicitNativeSettlementStatus",
+          "sourceApplied": true,
+          "credit": 0,
+          "pendingCredit": 0
+        },
+        {
+          "kind": "boundedRead",
+          "label": "StartGame",
+          "frameKinds": {
+            "packet:StartGame": 1
+          }
+        }
+      ],
+      "ok": false,
+      "error": "ConnectionClosedError"
+    },
+    {
+      "phase": "monthly",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791724954500,
+            "expiresAtMs": 1791768154500,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110008,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [
+              {
+                "uniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246"
+              }
+            ],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791724955139,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "explicitNativeSettlementStatus",
+          "sourceApplied": true,
+          "credit": 0,
+          "pendingCredit": 0
+        },
+        {
+          "kind": "boundedRead",
+          "label": "StartGame",
+          "frameKinds": {
+            "packet:KeepAlive": 2,
+            "packet:StartGame": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "PublicShopBootstrapBarrier",
+          "frameKinds": {
+            "packet:Chat": 1,
+            "packet:UpdateNotice": 1,
+            "packet:NewItemInfo": 144,
+            "packet:MapInformation": 1,
+            "packet:UserInformation": 1,
+            "packet:NewQuestInfo": 200,
+            "packet:NewRecipeInfo": 79,
+            "packet:CompleteQuest": 1,
+            "packet:FriendUpdate": 1,
+            "packet:GameShopInfo": 106,
+            "packet:BaseStatsInfo": 1,
+            "packet:ObjectNpc": 28,
+            "packet:ObjectMonster": 18,
+            "packet:ObjectSpell": 52,
+            "packet:ObjectHealth": 17,
+            "packet:TimeOfDay": 1,
+            "packet:ChangeAMode": 1,
+            "packet:ChangePMode": 1,
+            "packet:SwitchGroup": 2,
+            "packet:DefaultNPC": 1,
+            "packet:GuildBuffList": 2,
+            "packet:NPCUpdate": 4,
+            "packet:NPCResponse": 4,
+            "packet:MentorUpdate": 1,
+            "packet:LoverUpdate": 1,
+            "packet:GuildStatus": 1,
+            "packet:GuildMemberChange": 1,
+            "packet:ObjectGuildNameChanged": 1,
+            "packet:DeleteGroup": 1,
+            "worldSnapshot:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "PurchaseMailBarrier",
+          "frameKinds": {
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 4
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "packet:MentorUpdate": 1,
+            "packet:GuildStatus": 1,
+            "packet:GuildMemberChange": 1,
+            "packet:GuildBuffList": 1,
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110009,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [
+              {
+                "uniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246"
+              }
+            ],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791724964877,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "nativeMonthlyPurchased",
+          "mailId": 3,
+          "credit": 0,
+          "itemUniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246",
+          "realParcelItemPresent": true,
+          "activatedOnPurchase": false
+        },
+        {
+          "kind": "confirmedBuyResumedFromExistingParcel",
+          "noAutomaticResend": true
+        },
+        {
+          "kind": "boundedRead",
+          "label": "ParcelCollected",
+          "frameKinds": {
+            "packet:GainedItem": 1,
+            "packet:ParcelCollected": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "ParcelClaimBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110010,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [
+              {
+                "uniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246"
+              }
+            ],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": false,
+              "expiresAtMs": null,
+              "serverNowMs": 1791724965471,
+              "remainingMs": 0,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "boundedRead",
+          "label": "OrdinaryMonthlyUseItem",
+          "frameKinds": {
+            "packet:KeepAlive": 1,
+            "packet:UseItem": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110011,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": true,
+              "expiresAtMs": 1794316965557,
+              "serverNowMs": 1791724965769,
+              "remainingMs": 2591999788,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "boundedRead",
+          "label": "activateMonthlyCard",
+          "frameKinds": {
+            "packet:UseItem": 1,
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "activateMonthlyCard",
+          "requestId": 110012,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": true,
+              "expiresAtMs": 1794316965557,
+              "serverNowMs": 1791724966275,
+              "remainingMs": 2591999282,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "nativeMonthlyLifecycleConfirmed",
+          "credit": 0,
+          "itemUniqueIdSha256": "40da851c8106c29b7649e5acdfd9c54c9d4868e9d6d96a7bdae9898905fd7246",
+          "expiresAtMs": 1794316965557,
+          "durationMs": 2592000000,
+          "confirmedBuyResumedWithoutResend": true,
+          "consumedUidReplayPreserved": true,
+          "nativeVisualAcceptance": false
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LogOutSuccess",
+          "frameKinds": {
+            "packet:LogOutSuccess": 1
+          }
+        },
+        {
+          "kind": "ordinaryLogout",
+          "packet": "LogOutSuccess"
+        }
+      ],
+      "ok": true,
+      "finalStatus": {
+        "enabled": true,
+        "checkoutEnabled": true,
+        "credit": 0,
+        "pendingCredit": 0,
+        "monthlyCardCreditPrice": 1000,
+        "ownedMonthlyCards": [],
+        "offers": [
+          {
+            "id": "usd1",
+            "label": "100 Credits",
+            "currency": "usd",
+            "amountMinor": 100,
+            "amountLabel": "USD 1.00",
+            "credits": 100
+          },
+          {
+            "id": "usd5",
+            "label": "500 Credits",
+            "currency": "usd",
+            "amountMinor": 500,
+            "amountLabel": "USD 5.00",
+            "credits": 500
+          },
+          {
+            "id": "usd10",
+            "label": "1000 Credits",
+            "currency": "usd",
+            "amountMinor": 1000,
+            "amountLabel": "USD 10.00",
+            "credits": 1000
+          },
+          {
+            "id": "usd20",
+            "label": "2000 Credits",
+            "currency": "usd",
+            "amountMinor": 2000,
+            "amountLabel": "USD 20.00",
+            "credits": 2000
+          }
+        ],
+        "orders": [
+          {
+            "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+            "state": "applied"
+          }
+        ],
+        "monthlyCard": {
+          "required": false,
+          "active": true,
+          "expiresAtMs": 1794316965557,
+          "serverNowMs": 1791724966275,
+          "remainingMs": 2591999282,
+          "canEnterGame": true
+        }
+      }
+    },
+    {
+      "phase": "status",
+      "endpoint": "ws://127.0.0.1:7121/ws",
+      "events": [
+        {
+          "kind": "boundedRead",
+          "label": "Login",
+          "frameKinds": {
+            "realmInfo:": 1,
+            "packet:Connected": 1,
+            "worldSnapshot:": 2,
+            "packet:ClientVersion": 1,
+            "identitySession:": 1,
+            "packet:LoginSuccess": 1
+          }
+        },
+        {
+          "kind": "boundedRead",
+          "label": "LoginIdentityBarrier",
+          "frameKinds": {
+            "worldSnapshot:": 1,
+            "monthlyCard:": 1,
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "passwordLogin",
+          "identity": {
+            "accountIdSha256": "76c4128bedc39d2eaca1563ff3bc1aeddd84a536a8dd3732cda4c071572235d6",
+            "authMethod": "password",
+            "issuedAtMs": 1791726399543,
+            "expiresAtMs": 1791769599543,
+            "revokedAtMs": null
+          },
+          "characterCount": 1
+        },
+        {
+          "kind": "boundedRead",
+          "label": "status",
+          "frameKinds": {
+            "billing:": 1
+          }
+        },
+        {
+          "kind": "billingReply",
+          "operation": "status",
+          "requestId": 110013,
+          "characterIndex": 26,
+          "replyFields": [
+            "characterIndex",
+            "operation",
+            "requestId",
+            "status"
+          ],
+          "status": {
+            "enabled": true,
+            "checkoutEnabled": true,
+            "credit": 0,
+            "pendingCredit": 0,
+            "monthlyCardCreditPrice": 1000,
+            "ownedMonthlyCards": [],
+            "offers": [
+              {
+                "id": "usd1",
+                "label": "100 Credits",
+                "currency": "usd",
+                "amountMinor": 100,
+                "amountLabel": "USD 1.00",
+                "credits": 100
+              },
+              {
+                "id": "usd5",
+                "label": "500 Credits",
+                "currency": "usd",
+                "amountMinor": 500,
+                "amountLabel": "USD 5.00",
+                "credits": 500
+              },
+              {
+                "id": "usd10",
+                "label": "1000 Credits",
+                "currency": "usd",
+                "amountMinor": 1000,
+                "amountLabel": "USD 10.00",
+                "credits": 1000
+              },
+              {
+                "id": "usd20",
+                "label": "2000 Credits",
+                "currency": "usd",
+                "amountMinor": 2000,
+                "amountLabel": "USD 20.00",
+                "credits": 2000
+              }
+            ],
+            "orders": [
+              {
+                "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+                "state": "applied"
+              }
+            ],
+            "monthlyCard": {
+              "required": false,
+              "active": true,
+              "expiresAtMs": 1794316965557,
+              "serverNowMs": 1791726399732,
+              "remainingMs": 2590565825,
+              "canEnterGame": true
+            }
+          },
+          "checkoutUrlPresent": false,
+          "replayed": null
+        },
+        {
+          "kind": "reloginPreservedMonthlyWalletAndOrder",
+          "confirmed": true
+        },
+        {
+          "kind": "boundedRead",
+          "label": "SelectionLogoutBarrier",
+          "frameKinds": {
+            "packet:KeepAlive": 1
+          }
+        },
+        {
+          "kind": "selectionLogout",
+          "sourceReplyIsSilent": true,
+          "barrierConfirmed": true
+        }
+      ],
+      "ok": true,
+      "finalStatus": {
+        "enabled": true,
+        "checkoutEnabled": true,
+        "credit": 0,
+        "pendingCredit": 0,
+        "monthlyCardCreditPrice": 1000,
+        "ownedMonthlyCards": [],
+        "offers": [
+          {
+            "id": "usd1",
+            "label": "100 Credits",
+            "currency": "usd",
+            "amountMinor": 100,
+            "amountLabel": "USD 1.00",
+            "credits": 100
+          },
+          {
+            "id": "usd5",
+            "label": "500 Credits",
+            "currency": "usd",
+            "amountMinor": 500,
+            "amountLabel": "USD 5.00",
+            "credits": 500
+          },
+          {
+            "id": "usd10",
+            "label": "1000 Credits",
+            "currency": "usd",
+            "amountMinor": 1000,
+            "amountLabel": "USD 10.00",
+            "credits": 1000
+          },
+          {
+            "id": "usd20",
+            "label": "2000 Credits",
+            "currency": "usd",
+            "amountMinor": 2000,
+            "amountLabel": "USD 20.00",
+            "credits": 2000
+          }
+        ],
+        "orders": [
+          {
+            "id": "rch_b2e2f174ab7641226a2cc804b163157fb450353a1a5839e503039c7690ad51c6",
+            "state": "applied"
+          }
+        ],
+        "monthlyCard": {
+          "required": false,
+          "active": true,
+          "expiresAtMs": 1794316965557,
+          "serverNowMs": 1791726399732,
+          "remainingMs": 2590565825,
+          "canEnterGame": true
+        }
+      }
+    }
+  ]
+}
