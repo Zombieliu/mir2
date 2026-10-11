@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "websiteCredit": "100",
+  "onlineNoticeVisible": true,
+  "orderCount": 2,
+  "passwordCleared": true,
+  "websiteSignOutHttpStatus": 200,
+  "websiteSignOutReceipt": {
+    "accepted": true,
+    "affected": 1
+  }
+}

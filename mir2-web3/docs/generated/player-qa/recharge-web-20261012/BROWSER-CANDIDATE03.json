@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.recharge-web.browser.v1",
+  "site": "https://165.154.65.136.sslip.io/recharge/",
+  "passed": true,
+  "sandboxVisible": true,
+  "paidUsdMinor": 100,
+  "creditBefore": 0,
+  "creditAfter": 100,
+  "reloginCredit": 100,
+  "newOrderApplied": true,
+  "sameOfferRetrySameCheckout": true,
+  "monthlyExpiryPreserved": true,
+  "latestVersionLoginCredit": 100,
+  "passwordClearedAfterLogin": true,
+  "signOutMemoryCleared": true,
+  "signOutHttpStatus": 200,
+  "signOutReceipt": {
+    "accepted": true,
+    "affected": 1
+  }
+}

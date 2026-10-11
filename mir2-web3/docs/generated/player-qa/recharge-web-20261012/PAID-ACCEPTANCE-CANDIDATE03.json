@@ -1,0 +1,140 @@
+{
+  "schema": "mir2.recharge-web.acceptance.v1",
+  "passed": true,
+  "verifiedAtUtc": "2026-10-11T21:02:17.803500+00:00",
+  "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+  "site": "https://165.154.65.136.sslip.io/recharge/",
+  "tlsVerified": true,
+  "provider": {
+    "livemode": false,
+    "checkoutSha256": "18b15a6a645cdacea8514b1f132ea1657ef948002ebb620364bacc85fd015161",
+    "paymentIntentSha256": "24fec54a7de11c3181fb65ba4187385aa282d15f95252eb8d68af5e528a8ecee",
+    "orderSha256": "033f41f4b509b290792a89e0116c68dee5929dd655afb2db7fa93a20329a3dab",
+    "sessionStatus": "complete",
+    "paymentStatus": "paid",
+    "paymentIntentStatus": "succeeded",
+    "currency": "usd",
+    "amountTotal": 100,
+    "amountReceived": 100,
+    "ownerTupleMatches": true,
+    "browserCreditBefore": 0,
+    "browserCreditAfter": 100,
+    "sameOfferRetrySameCheckout": true,
+    "monthlyExpiryPreserved": true,
+    "providerReplayUsed": false
+  },
+  "public": {
+    "files": [
+      {
+        "path": "/recharge/index.html",
+        "status": 200,
+        "sha256": "0a235bc1a6ea12e16e9edbcd6f8d750f89ecb90efb6514ea929595a4d37ac788",
+        "bytes": 6738,
+        "privateHeaders": true
+      },
+      {
+        "path": "/recharge/styles.css",
+        "status": 200,
+        "sha256": "8a3d14c670ebbc6098eba74d79f6e7fbb7063feb8f59f6693f2398c1cbd08f88",
+        "bytes": 10149,
+        "privateHeaders": true
+      },
+      {
+        "path": "/recharge/mark.svg",
+        "status": 200,
+        "sha256": "1dc84c131b561ec5915123219d47b31a5c82f5b1ddb712b9c2238d19a33b3cc5",
+        "bytes": 244,
+        "privateHeaders": true
+      },
+      {
+        "path": "/recharge/app.js",
+        "status": 200,
+        "sha256": "3acd468de11b2fd3829855dc822c2cc898ede73e5f2dd2867d1ee003000dbdb2",
+        "bytes": 11344,
+        "privateHeaders": true
+      },
+      {
+        "path": "/recharge/core.js",
+        "status": 200,
+        "sha256": "aa25418cd3049d75b9208f0ebcb23c3d4ebd989e4da196f5e0325a15d8d2daac",
+        "bytes": 14268,
+        "privateHeaders": true
+      },
+      {
+        "path": "/recharge/locales.js",
+        "status": 200,
+        "sha256": "f061a7e15147201c7e6ba45b42822651684b2f1c8c64d2252bee3509b7b9c5f7",
+        "bytes": 32140,
+        "privateHeaders": true
+      },
+      {
+        "path": "/recharge/release.json",
+        "status": 200,
+        "sha256": "a77085d222b5a877b46876ce0371e2a04ecaf9e1aebf51151681cee1c3266a29",
+        "bytes": 947,
+        "privateHeaders": true
+      }
+    ],
+    "releaseSha256": "a77085d222b5a877b46876ce0371e2a04ecaf9e1aebf51151681cee1c3266a29",
+    "canonicalRedirect": 308,
+    "missingFile": 404,
+    "anonymousStatus": 401,
+    "forgedToken": 401,
+    "anonymousCheckout": 401,
+    "clientQuotedAmount": 422,
+    "unsignedWebhook": 400,
+    "anonymousSessionRevoke": 401,
+    "privateNeighbors": [
+      {
+        "path": "/playtest/admin",
+        "status": 404
+      },
+      {
+        "path": "/playtest/v1/identity/session",
+        "status": 404
+      },
+      {
+        "path": "/playtest/v1/billing/buyMonthlyCard",
+        "status": 404
+      },
+      {
+        "path": "/playtest/v1/billing/activateMonthlyCard",
+        "status": 404
+      }
+    ]
+  },
+  "ownership": {
+    "foreignStatus": 503,
+    "foreignCheckout": 503,
+    "noFinancialStateChange": true,
+    "disconnectedToken": 401
+  },
+  "game": [
+    {
+      "round": 1,
+      "passwordLogin": true,
+      "sourceCredit": 100,
+      "userInformationCredit": 100,
+      "ordinaryStartGame": true,
+      "ordinaryLogout": true,
+      "orderApplied": true,
+      "monthlyExpiryPreserved": true
+    },
+    {
+      "round": 2,
+      "passwordLogin": true,
+      "sourceCredit": 100,
+      "userInformationCredit": 100,
+      "ordinaryStartGame": true,
+      "ordinaryLogout": true,
+      "orderApplied": true,
+      "monthlyExpiryPreserved": true
+    }
+  ],
+  "scopeLimits": [
+    "Stripe TEST only; no real money",
+    "No live refund/dispute trial",
+    "No game binary or Gateway rollout",
+    "No native visual human acceptance claim"
+  ]
+}

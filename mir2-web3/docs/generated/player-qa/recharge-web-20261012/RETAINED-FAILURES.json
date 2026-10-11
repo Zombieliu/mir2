@@ -1,0 +1,44 @@
+{
+  "excludedFromAcceptance": true,
+  "noPaymentResubmissionForCorrections": true,
+  "attempts": [
+    {
+      "case": "Native fetch receiver",
+      "correction": "Use explicit global fetch wrapper; regression test passes"
+    },
+    {
+      "case": "Bare-path canonical redirect returned empty 200",
+      "correction": "Explicit Caddy * matcher; actual public 308 verified"
+    },
+    {
+      "case": "Crystal Disconnect mistaken for identity revocation",
+      "correction": "Authenticated own-session revocation; old bearer now 401"
+    },
+    {
+      "case": "Provider form-tool and before-proof schema assumptions",
+      "correction": "Use supported browser form actions and actual owned proof schema; only one test payment submitted"
+    },
+    {
+      "case": "Stale native feed19 pins",
+      "correction": "Read explicit current feed20 origin/CDN hashes; no native feed writes"
+    },
+    {
+      "case": "Online helper exited on premature stdin EOF",
+      "originalReportSha256": "fa11da8e8891416b0189ba50186a3f20729b83b3e3081d7e63d62d73f85c35fe",
+      "originalReportedPassed": true,
+      "excluded": true,
+      "reason": "No qualified overlap with website actions"
+    },
+    {
+      "case": "Online helper short deadline and concurrent socket reader teardown",
+      "excluded": true,
+      "correction": "Explicit stop request, bounded 900-second drain, cancel reader before ordinary logout; final qualified run passes"
+    },
+    {
+      "case": "Arabic full-page screenshot clipped while actual viewport was correct",
+      "excluded": true,
+      "originalScreenshotSha256": "e50a0f2d221f73c42b8569fe7110c48a09e5387453966b2b6b0c595d70a93338",
+      "correction": "Inspect and capture actual mobile viewport; verify all nine language control bounds explicitly"
+    }
+  ]
+}

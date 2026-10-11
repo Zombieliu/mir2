@@ -1,0 +1,1133 @@
+{
+  "passed": true,
+  "releaseSha256": "b78c2dd84a5e1323b04428986c3d20df9b60087208b4dd07f1c090fc4df73538",
+  "viewportScreenshotUsed": true,
+  "rtlFullPageCaptureExcluded": true,
+  "results": [
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "zh-Hant",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "en",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "pt-BR",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "ru",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "hi",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "id",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "vi",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 177.03125,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "language",
+          "width": 123,
+          "x": 230
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "ltr",
+      "disabledOffers": 4,
+      "locale": "th",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    },
+    {
+      "bounds": [
+        {
+          "right": 375,
+          "selector": "site-header",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "brand",
+          "width": 155.03125,
+          "x": 197.96875
+        },
+        {
+          "right": 145,
+          "selector": "language",
+          "width": 123,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "MAIN",
+          "width": 375,
+          "x": 0
+        },
+        {
+          "right": 353,
+          "selector": "hero",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "portal-grid",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 353,
+          "selector": "account-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "account",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "password",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "login",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "recharge-panel panel",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 328,
+          "selector": "offers",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 192.5
+        },
+        {
+          "right": 182.5,
+          "selector": "offer",
+          "width": 135.5,
+          "x": 47
+        },
+        {
+          "right": 328,
+          "selector": "monthly-note",
+          "width": 281,
+          "x": 47
+        },
+        {
+          "right": 353,
+          "selector": "how-it-works",
+          "width": 331,
+          "x": 22
+        },
+        {
+          "right": 375,
+          "selector": "FOOTER",
+          "width": 375,
+          "x": 0
+        }
+      ],
+      "dir": "rtl",
+      "disabledOffers": 4,
+      "locale": "ar",
+      "offers": 4,
+      "scrollWidth": 375,
+      "width": 375,
+      "withinViewport": true
+    }
+  ]
+}

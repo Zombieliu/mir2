@@ -1,0 +1,181 @@
+{
+  "scope": "Static website only; unchanged game Gateway and original realm",
+  "receipts": [
+    {
+      "after": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "applied": true,
+      "backup": "/var/backups/mir2-recharge-20261011-194111",
+      "before": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "bytes": 73565,
+      "caddyAfterSha256": "4d5e5789a0aa015af510afbf2249c2111c8043c86e69d1d75d5df2461f0a1059",
+      "caddyBeforeSha256": "efbd0eaee9952dd38148c9b634f47889e99a9ddff632c5f2befebb6ce8339b28",
+      "files": 6,
+      "ok": true,
+      "releaseSha256": "1f58abdc238e1e6063ab554146f57ee3362d90cade03f54aba3dd5eb2cc56ff6"
+    },
+    {
+      "after": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "applied": true,
+      "backup": "/var/backups/mir2-recharge-20261011-195313",
+      "before": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "bytes": 73587,
+      "caddyAfterSha256": "4d5e5789a0aa015af510afbf2249c2111c8043c86e69d1d75d5df2461f0a1059",
+      "caddyBeforeSha256": "4d5e5789a0aa015af510afbf2249c2111c8043c86e69d1d75d5df2461f0a1059",
+      "files": 6,
+      "ok": true,
+      "releaseSha256": "75ee141c6076cbe9bc75c5f62fff57084a44897656bf477c3f956b2ae252d7ab"
+    },
+    {
+      "after": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "applied": true,
+      "backup": "/var/backups/mir2-recharge-20261011-210013",
+      "before": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "bytes": 74883,
+      "caddyAfterSha256": "b19f0c1911042fafe37fd0adc6e396a45c8b98f2f195d81b6969644cd061ad8a",
+      "caddyBeforeSha256": "a4ed47f7bdc52c406d8dd567c262febdca6a5b15c0d4f032c6df35b5d34db357",
+      "files": 6,
+      "ok": true,
+      "releaseSha256": "a77085d222b5a877b46876ce0371e2a04ecaf9e1aebf51151681cee1c3266a29"
+    },
+    {
+      "after": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "applied": true,
+      "backup": "/var/backups/mir2-recharge-20261011-212342",
+      "before": {
+        "caddy": {
+          "MainPID": "2107428",
+          "NRestarts": "0",
+          "Result": "success"
+        },
+        "gatewayEnvSha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0",
+        "gatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "originalPids": [
+          "3855184"
+        ],
+        "playtest": {
+          "MainPID": "3397094",
+          "NRestarts": "0",
+          "Result": "success"
+        }
+      },
+      "bytes": 75186,
+      "caddyAfterSha256": "b19f0c1911042fafe37fd0adc6e396a45c8b98f2f195d81b6969644cd061ad8a",
+      "caddyBeforeSha256": "b19f0c1911042fafe37fd0adc6e396a45c8b98f2f195d81b6969644cd061ad8a",
+      "files": 6,
+      "ok": true,
+      "releaseSha256": "b78c2dd84a5e1323b04428986c3d20df9b60087208b4dd07f1c090fc4df73538"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: payment links cannot change provider, protocol, port or authority
+ok 1 - payment links cannot change provider, protocol, port or authority
+  ---
+  duration_ms: 0.9484
+  type: 'test'
+  ...
+# Subtest: catalogue rejects mixed order states, duplicate offers and invalid balances
+ok 2 - catalogue rejects mixed order states, duplicate offers and invalid balances
+  ---
+  duration_ms: 0.4976
+  type: 'test'
+  ...
+# Subtest: only the current authenticated character can become an order recipient
+ok 3 - only the current authenticated character can become an order recipient
+  ---
+  duration_ms: 11.9327
+  type: 'test'
+  ...
+# Subtest: checkout sends identifiers only, never client price, identity or paid claims
+ok 4 - checkout sends identifiers only, never client price, identity or paid claims
+  ---
+  duration_ms: 0.566
+  type: 'test'
+  ...
+# Subtest: lost reply and reload keep the same nonce and isolate accounts, characters and offers
+ok 5 - lost reply and reload keep the same nonce and isolate accounts, characters and offers
+  ---
+  duration_ms: 3.8182
+  type: 'test'
+  ...
+# Subtest: unavailable or corrupt storage stops financial requests
+ok 6 - unavailable or corrupt storage stops financial requests
+  ---
+  duration_ms: 0.1563
+  type: 'test'
+  ...
+# Subtest: HTTP billing uses a memory bearer, no cookies, redirects or cached personal data
+ok 7 - HTTP billing uses a memory bearer, no cookies, redirects or cached personal data
+  ---
+  duration_ms: 0.4115
+  type: 'test'
+  ...
+# Subtest: a reply received after sign-out cannot revive the old account
+ok 8 - a reply received after sign-out cannot revive the old account
+  ---
+  duration_ms: 0.2075
+  type: 'test'
+  ...
+# Subtest: native browser fetch keeps its Window receiver when called through the session
+ok 9 - native browser fetch keeps its Window receiver when called through the session
+  ---
+  duration_ms: 0.3519
+  type: 'test'
+  ...
+# Subtest: website sign-out clears memory immediately and revokes only its own grant before closing
+ok 10 - website sign-out clears memory immediately and revokes only its own grant before closing
+  ---
+  duration_ms: 0.3876
+  type: 'test'
+  ...
+# Subtest: nine languages cover every visible text and include RTL and locale normalization
+ok 11 - nine languages cover every visible text and include RTL and locale normalization
+  ---
+  duration_ms: 2.6696
+  type: 'test'
+  ...
+# Subtest: the page never treats a return query as payment authority or renders remote HTML
+ok 12 - the page never treats a return query as payment authority or renders remote HTML
+  ---
+  duration_ms: 0.4559
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 87.9967

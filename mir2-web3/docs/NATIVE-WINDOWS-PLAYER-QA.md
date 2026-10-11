@@ -1,5 +1,17 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-12 independent recharge website is actually live at `/recharge/`,
+> sharing invited game accounts and the existing Stripe TEST ledger. Browser
+> USD1 payment issues100 Credits; website relogin and two ordinary game cycles
+> preserve the wallet/monthly expiry. Latest simultaneous game/website sign-out,
+> foreign-character/session denial,12 focused tests and nine mobile locales pass.
+> Current Gateway75c5b2/PID3397094 and original realm stay unchanged; the final
+> static release needs no Caddy reload or Windows reinstall. Final reads observe
+> matching native R25/feed20 on origin/CDN; older feed19 assertions are historical.
+> Public auth routes remain bearer protected. No live money or broader P1-P7/
+> Mentor/native human completion; expired heartbeat remains paused.
+> [Website, exact scope and retained evidence](RECHARGE-WEBSITE-20261012.md).
+
 > 2026-10-07 NPC 高亮/GO TO普通寻路与武器商店滚动 Candidate 已修复。
 > Bevy37+20、Windows23+9和显式GPU1通过；原始截图显示选中Smith与货单末页矿镐。
 > 已核验鼠标松手、地图/NPC身份、旧自动奔跑、公告阻挡和缩放。

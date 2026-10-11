@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "application": "numeron-recharge-web",
+  "files": [
+    {
+      "name": "index.html",
+      "bytes": 6738,
+      "sha256": "0a235bc1a6ea12e16e9edbcd6f8d750f89ecb90efb6514ea929595a4d37ac788"
+    },
+    {
+      "name": "styles.css",
+      "bytes": 10149,
+      "sha256": "8a3d14c670ebbc6098eba74d79f6e7fbb7063feb8f59f6693f2398c1cbd08f88"
+    },
+    {
+      "name": "mark.svg",
+      "bytes": 244,
+      "sha256": "1dc84c131b561ec5915123219d47b31a5c82f5b1ddb712b9c2238d19a33b3cc5"
+    },
+    {
+      "name": "app.js",
+      "bytes": 11647,
+      "sha256": "d20f1303c1a173e370785b78e7efc4031bb76aec02d54ce8152ab760e230be27"
+    },
+    {
+      "name": "core.js",
+      "bytes": 14268,
+      "sha256": "aa25418cd3049d75b9208f0ebcb23c3d4ebd989e4da196f5e0325a15d8d2daac"
+    },
+    {
+      "name": "locales.js",
+      "bytes": 32140,
+      "sha256": "f061a7e15147201c7e6ba45b42822651684b2f1c8c64d2252bee3509b7b9c5f7"
+    }
+  ]
+}

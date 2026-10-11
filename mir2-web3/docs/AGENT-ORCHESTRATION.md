@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-12 independent recharge website is actually live at `/recharge/`,
+> sharing invited game accounts and the existing Stripe TEST ledger. Browser
+> USD1 payment issues100 Credits; website relogin and two ordinary game cycles
+> preserve the wallet/monthly expiry. Latest simultaneous game/website sign-out,
+> foreign-character/session denial,12 focused tests and nine mobile locales pass.
+> Current Gateway75c5b2/PID3397094 and original realm stay unchanged; the final
+> static release needs no Caddy reload or Windows reinstall. Final reads observe
+> matching native R25/feed20 on origin/CDN; older feed19 assertions are historical.
+> Public auth routes remain bearer protected. No live money or broader P1-P7/
+> Mentor/native human completion; expired heartbeat remains paused.
+> [Website, exact scope and retained evidence](RECHARGE-WEBSITE-20261012.md).
+
 > 2026-10-11 latest instruction enables **Stripe TEST mode**, replacing the
 > live-activation request. Actual test credentials and a permanent Endive
 > callback are configured on unchanged Gateway4006d988 after zero counters,

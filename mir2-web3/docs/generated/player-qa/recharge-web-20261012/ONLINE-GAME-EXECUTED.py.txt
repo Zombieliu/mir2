@@ -1,0 +1,68 @@
+"""Hold one owned ordinary game session for simultaneous website QA."""
+import asyncio, importlib.util, json, sys
+import time
+from pathlib import Path
+sys.path.insert(0, 'C:/mir2-build/stripe-live-20261011/py-deps')
+source=Path('C:/Users/Administrator/.codex/worktrees/classic-publication-20261008/mir2-player-journey/mir2-web3/apps/recharge-web/scripts/acceptance.py')
+spec=importlib.util.spec_from_file_location('portalqa',source)
+qa=importlib.util.module_from_spec(spec);spec.loader.exec_module(qa)
+async def main():
+    from websockets import connect
+    account=qa.read('C:/mir2-playtest-releases/20261007-remote-player-r21/public-wss-03/private/accounts.json')['cohort'][0]
+    player=qa.Player(account)
+    async with connect(qa.ORIGIN.replace('https:','wss:')+'/playtest/ws',origin=qa.ORIGIN,
+                       proxy=None,max_size=8*1024*1024,max_queue=64,open_timeout=15,close_timeout=5) as socket:
+        player.socket=socket
+        async def heartbeat():
+            while True:
+                await asyncio.sleep(2)
+                await player.send({'type':'keepAlive','time':__import__('time').time_ns()//1000000})
+        task=asyncio.create_task(heartbeat())
+        reader=None
+        try:
+            await player.login()
+            await player.send({'type':'startGame','characterIndex':account['characterIndex']})
+            entered=await player.until(lambda e:e.get('packet')=='StartGame','onlineStartGameTimeout')
+            player.active=entered['payload']['result']==4
+            qa.need(player.active,'onlineOwnedStartRejected')
+            await player.barrier()
+            info=[e['payload'] for e in player.raw if e.get('packet')=='UserInformation'][-1]
+            qa.need(info['credit']==100,'onlineCreditMismatch')
+            stop=Path('C:/mir2-build/recharge-web-20261012/online-game-stop-04b.request')
+            qa.need(not stop.exists(),'oldStopRequestRefused')
+            print(json.dumps({'ready':True,'ordinaryGameActive':True,'credit':100}),flush=True)
+            async def drain():
+                async for frame in socket:
+                    event=json.loads(frame)
+                    qa.need(event.get('packet') not in ('Disconnect','ReturnToLogin','LogOutSuccess'),
+                            'gameDepartedDuringWebsiteTrial')
+                raise qa.Stop('gameClosedDuringWebsiteTrial')
+            reader=asyncio.create_task(drain())
+            deadline=time.monotonic()+900
+            while not stop.exists():
+                if reader.done(): await reader
+                qa.need(time.monotonic()<deadline,'websiteTrialStopDeadline')
+                await asyncio.sleep(1)
+            reader.cancel()
+            try: await reader
+            except asyncio.CancelledError: pass
+            reader=None
+            await player.barrier()
+            await player.logout()
+            result={'passed':True,'gameRemainedConnectedAfterWebsiteSignOut':True,'ordinaryLogoutSaved':True}
+            Path('C:/mir2-build/recharge-web-20261012/ONLINE-GAME.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+            print(json.dumps(result),flush=True)
+        finally:
+            if reader is not None:
+                reader.cancel()
+                try: await reader
+                except (asyncio.CancelledError,Exception): pass
+            if player.active: await player.logout()
+            task.cancel()
+            try: await task
+            except asyncio.CancelledError: pass
+if __name__=='__main__':
+    try: asyncio.run(main())
+    except Exception as error:
+        print(json.dumps({'passed':False,'error':type(error).__name__}),flush=True)
+        raise SystemExit(1)

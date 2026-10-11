@@ -1,0 +1,214 @@
+{
+  "schema": "mir2.recharge-web.evidence.v1",
+  "site": "https://165.154.65.136.sslip.io/recharge/",
+  "stripeMode": "test",
+  "finalReleaseSha256": "b78c2dd84a5e1323b04428986c3d20df9b60087208b4dd07f1c090fc4df73538",
+  "paidCandidate03ReleaseSha256": "a77085d222b5a877b46876ce0371e2a04ecaf9e1aebf51151681cee1c3266a29",
+  "currentGatewayRevision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+  "observedNativeFeedSequence": 20,
+  "tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "finalSourceFiles": [
+    {
+      "name": "index.html",
+      "bytes": 6738,
+      "sha256": "0a235bc1a6ea12e16e9edbcd6f8d750f89ecb90efb6514ea929595a4d37ac788"
+    },
+    {
+      "name": "styles.css",
+      "bytes": 10149,
+      "sha256": "8a3d14c670ebbc6098eba74d79f6e7fbb7063feb8f59f6693f2398c1cbd08f88"
+    },
+    {
+      "name": "mark.svg",
+      "bytes": 244,
+      "sha256": "1dc84c131b561ec5915123219d47b31a5c82f5b1ddb712b9c2238d19a33b3cc5"
+    },
+    {
+      "name": "app.js",
+      "bytes": 11647,
+      "sha256": "d20f1303c1a173e370785b78e7efc4031bb76aec02d54ce8152ab760e230be27"
+    },
+    {
+      "name": "core.js",
+      "bytes": 14268,
+      "sha256": "aa25418cd3049d75b9208f0ebcb23c3d4ebd989e4da196f5e0325a15d8d2daac"
+    },
+    {
+      "name": "locales.js",
+      "bytes": 32140,
+      "sha256": "f061a7e15147201c7e6ba45b42822651684b2f1c8c64d2252bee3509b7b9c5f7"
+    }
+  ],
+  "files": [
+    {
+      "name": "BROWSER-CANDIDATE03.json",
+      "bytes": 534,
+      "sha256": "0fccd70d4f7c2d18ae184ea7df80e436625deb21ef481ed131f2864b47793661"
+    },
+    {
+      "name": "MOBILE-AR-OFFERS.png",
+      "bytes": 26017,
+      "sha256": "c4b2c7aaad9f3af58a3381e81ac00c01d4f660e7d5457be2ae0004b9652bb394"
+    },
+    {
+      "name": "MOBILE-AR.png",
+      "bytes": 26919,
+      "sha256": "610027fbd2b2bdcabd3c8336c8c599e4903250cdbcea6b25b7bca92625520315"
+    },
+    {
+      "name": "ONLINE-GAME-EXECUTED.py.txt",
+      "bytes": 3671,
+      "sha256": "8b7c50850d95c9706f4c2c79c7502cc5a9facff94ebec20ad81ab71bc6de2f5c"
+    },
+    {
+      "name": "ONLINE-GAME-FINAL.json",
+      "bytes": 104,
+      "sha256": "9fcaac4b8638ea9783cd82eac74de679707e32b4ca2929dd2adff2623bbc1f3a"
+    },
+    {
+      "name": "ONLINE-WEB-FINAL.json",
+      "bytes": 233,
+      "sha256": "24812219a9946c32d68996fdcf7d712a96692224a214fbfd835f0d80e1f2653b"
+    },
+    {
+      "name": "OWNERSHIP.json",
+      "bytes": 284,
+      "sha256": "d7d55d95ff775e75e2ea8b46b8d4738d7f56383aca8f80012182e9760ac36a72"
+    },
+    {
+      "name": "PAID-ACCEPTANCE-CANDIDATE03.json",
+      "bytes": 4083,
+      "sha256": "365ab700e321d81fc850f7e0fd974b699f846f941ec03fd9546e01882cf674a0"
+    },
+    {
+      "name": "POSTFLIGHT-FINAL.json",
+      "bytes": 6344,
+      "sha256": "232976737dfe96773aedb81ab0365f8af816ed9455ff8bcdab65688f8d52429b"
+    },
+    {
+      "name": "PUBLIC-FINAL.json",
+      "bytes": 2301,
+      "sha256": "47c79a42c2394009e7a19f0bd3d3317f5333816112c896a2b3491b959864657d"
+    },
+    {
+      "name": "PUBLIC-RECHARGE.jpg",
+      "bytes": 108566,
+      "sha256": "f73c4b2f1c146398013f7b64669ccde253e08391f7f9a47d222d8a89257c9690"
+    },
+    {
+      "name": "README.md",
+      "bytes": 2430,
+      "sha256": "a067e1d3bb7eae3cd3b33b61f6717b205392210ac1cdb24a9e0235df2f01c436"
+    },
+    {
+      "name": "RETAINED-FAILURES.json",
+      "bytes": 1796,
+      "sha256": "be2c029445334c31ed40cd42c4b2272a91a5304c61f4a97f60cf96bb41ca2a84"
+    },
+    {
+      "name": "SITE-ACTIVATIONS.json",
+      "bytes": 5780,
+      "sha256": "25d9e83521bd793c9f03deb83ae7e6aeea140ab628bb91f12a40733d5acf5166"
+    },
+    {
+      "name": "SITE-APPLY-FINAL.json",
+      "bytes": 1052,
+      "sha256": "36d85b41598705d6b8124d239ce24da2f8032da5992cd27d9665a1945029a08a"
+    },
+    {
+      "name": "UI-MOBILE-FINAL.json",
+      "bytes": 23022,
+      "sha256": "914e1ee57cef43ded9ec7a48136deef5feea4b57c14b32470d313adbf151d91f"
+    },
+    {
+      "name": "UNIT-TESTS.tap",
+      "bytes": 2736,
+      "sha256": "0e69c1e9a8264b9e8c4e0e5136a560e03f9483e1a3487141b5a28344ee713c45"
+    },
+    {
+      "name": "release.json",
+      "bytes": 947,
+      "sha256": "b78c2dd84a5e1323b04428986c3d20df9b60087208b4dd07f1c090fc4df73538"
+    }
+  ],
+  "originalCaptureHashes": [
+    {
+      "name": "BROWSER-CANDIDATE03.json",
+      "bytes": 534,
+      "sha256": "0fccd70d4f7c2d18ae184ea7df80e436625deb21ef481ed131f2864b47793661"
+    },
+    {
+      "name": "MOBILE-AR-OFFERS.png",
+      "bytes": 26017,
+      "sha256": "c4b2c7aaad9f3af58a3381e81ac00c01d4f660e7d5457be2ae0004b9652bb394"
+    },
+    {
+      "name": "MOBILE-AR.png",
+      "bytes": 26919,
+      "sha256": "610027fbd2b2bdcabd3c8336c8c599e4903250cdbcea6b25b7bca92625520315"
+    },
+    {
+      "name": "ONLINE-GAME-EXECUTED.py.txt",
+      "bytes": 3671,
+      "sha256": "8b7c50850d95c9706f4c2c79c7502cc5a9facff94ebec20ad81ab71bc6de2f5c"
+    },
+    {
+      "name": "ONLINE-GAME-FINAL.json",
+      "bytes": 109,
+      "sha256": "fa11da8e8891416b0189ba50186a3f20729b83b3e3081d7e63d62d73f85c35fe"
+    },
+    {
+      "name": "ONLINE-WEB-FINAL.json",
+      "bytes": 233,
+      "sha256": "24812219a9946c32d68996fdcf7d712a96692224a214fbfd835f0d80e1f2653b"
+    },
+    {
+      "name": "OWNERSHIP.json",
+      "bytes": 298,
+      "sha256": "991a3124e9f1d9817802cc908412eaf9f2f8ec2bdb4102f3b35bac79205e2034"
+    },
+    {
+      "name": "PAID-ACCEPTANCE-CANDIDATE03.json",
+      "bytes": 4083,
+      "sha256": "365ab700e321d81fc850f7e0fd974b699f846f941ec03fd9546e01882cf674a0"
+    },
+    {
+      "name": "POSTFLIGHT-FINAL.json",
+      "bytes": 6344,
+      "sha256": "232976737dfe96773aedb81ab0365f8af816ed9455ff8bcdab65688f8d52429b"
+    },
+    {
+      "name": "PUBLIC-FINAL.json",
+      "bytes": 2384,
+      "sha256": "c19ff11e9753f5fa58768e578dd243bebdae69fda24a5c991610579f1d220612"
+    },
+    {
+      "name": "PUBLIC-RECHARGE.jpg",
+      "bytes": 108566,
+      "sha256": "f73c4b2f1c146398013f7b64669ccde253e08391f7f9a47d222d8a89257c9690"
+    },
+    {
+      "name": "SITE-APPLY-FINAL.json",
+      "bytes": 1052,
+      "sha256": "36d85b41598705d6b8124d239ce24da2f8032da5992cd27d9665a1945029a08a"
+    },
+    {
+      "name": "UI-MOBILE-FINAL.json",
+      "bytes": 23022,
+      "sha256": "914e1ee57cef43ded9ec7a48136deef5feea4b57c14b32470d313adbf151d91f"
+    },
+    {
+      "name": "UNIT-TESTS.tap",
+      "bytes": 2736,
+      "sha256": "0e69c1e9a8264b9e8c4e0e5136a560e03f9483e1a3487141b5a28344ee713c45"
+    },
+    {
+      "name": "release.json",
+      "bytes": 947,
+      "sha256": "b78c2dd84a5e1323b04428986c3d20df9b60087208b4dd07f1c090fc4df73538"
+    }
+  ]
+}

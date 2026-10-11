@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "ownership": {
+    "foreignStatus": 503,
+    "foreignCheckout": 503,
+    "noFinancialStateChange": true,
+    "foreignSessionRevoke": {
+      "accepted": false,
+      "affected": 0
+    },
+    "otherAccountGrantPreserved": true,
+    "disconnectedToken": 401
+  }
+}
