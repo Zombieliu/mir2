@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> Five-class Windows regression, 2026-10-12: the complete actual merged
+> Native host run passes 987 tests, with 7 original external checks ignored.
+> All five typed DoubleSlash/BackStep combinations pass, including committed
+> Jump behind Struck, continued held escape and unchanged attack cooldown.
+> Source has no drift; the original failed formatting log is retained.
+> Real Release binaries, complete signed delivery, full Linux Gateway qualification
+> and drained paired publication remain pending; this is not human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
 > Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
 > with912 pass/75 fail/7 original external ignores; this is not a green gate.
 > The missing generated keyed-map index was rebuilt by the original Node

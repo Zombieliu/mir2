@@ -104,3 +104,10 @@ Desktop.ini
 .claude/worktrees/
 .vercel
 .env*
+
+# Generated R25 publication test receipts; retained as external evidence.
+mir2-web3/scripts/fixtures/native-r25-s20/qa-runs/
+mir2-web3/scripts/fixtures/native-r20-s16/qa-runs/
+mir2-web3/scripts/fixtures/native-r22-s17/qa-runs/
+mir2-web3/scripts/fixtures/native-r23-s18/qa-runs/
+mir2-web3/scripts/fixtures/native-r24-s19/qa-runs/

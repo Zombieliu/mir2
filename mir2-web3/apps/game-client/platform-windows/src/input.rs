@@ -6771,6 +6771,7 @@ mod tests {
         after_struck: bool,
     ) -> (
         u64,
+        u64,
         crate::gameplay_bridge::NativeGameplayAdapter,
         serde_json::Value,
     ) {
@@ -6826,6 +6827,18 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativeEntityPresentation>()
             .observe_packet_payload(payload.clone(), animation_origin);
+        let presentation = app.world().resource::<NativeEntityPresentation>();
+        let motion = presentation.overlay_payload().unwrap()["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"].as_u64() == Some(1000))
+            .expect("the real Jump overlay must retain the self actor");
+        let motion_origin = motion["motionStartedMs"]
+            .as_u64()
+            .expect("the admitted Jump must expose its actual motion clock");
+        assert_eq!(motion["motionDurationMs"].as_u64(), Some(800));
+        assert!(motion_origin >= animation_origin);
         let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
         let player = entities
             .entities
@@ -6835,19 +6848,19 @@ mod tests {
         player.x = 7;
         player.y = 10;
         player.direction = Some("right".into());
-        (animation_origin, adapter, payload)
+        (animation_origin, motion_origin, adapter, payload)
     }
 
     #[test]
     fn native_back_step_held_escape_preserves_jump_until_all_eight_source_frames_finish() {
         for new_move in [false, true] {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
-            let (animation_origin, mut adapter, mut payload) =
+            let (animation_origin, motion_origin, mut adapter, mut payload) =
                 typed_back_step_escape_fixture(&mut app, false);
             assert_eq!(
                 app.world()
                     .resource::<NativeEntityPresentation>()
-                    .self_motion_remaining_ms(animation_origin),
+                    .self_motion_remaining_ms(motion_origin),
                 800
             );
             hold_escape_right(&mut app);
@@ -6867,18 +6880,18 @@ mod tests {
             let source_camera_tail = app
                 .world()
                 .resource::<NativeEntityPresentation>()
-                .camera_screen_offset(animation_origin + 799);
+                .camera_screen_offset(motion_origin + 799);
             app.update();
             assert!(receiver.try_recv().is_err());
             let presentation = app.world().resource::<NativeEntityPresentation>();
             assert!(presentation.self_combat_action_blocks_movement("1000"));
             assert_eq!(presentation.self_equipment_pose("1000").unwrap().0, false);
             assert_eq!(
-                presentation.self_motion_remaining_ms(animation_origin + 799),
+                presentation.self_motion_remaining_ms(motion_origin + 799),
                 1
             );
             assert_eq!(
-                presentation.camera_screen_offset(animation_origin + 799),
+                presentation.camera_screen_offset(motion_origin + 799),
                 source_camera_tail,
                 "normal prediction cannot replace the source Jump camera window"
             );
@@ -6888,7 +6901,15 @@ mod tests {
                 .pending
                 .is_empty());
 
-            finish_escape_animation_for_sender(&mut app, animation_origin + 800);
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .advance_animation_for_test(animation_origin + 800);
+            assert!(!app
+                .world()
+                .resource::<NativeEntityPresentation>()
+                .self_combat_action_blocks_movement("1000"));
+            let sender_deadline = (animation_origin + 800).max(motion_origin + 800);
+            finish_escape_animation_for_sender(&mut app, sender_deadline);
             assert!(
                 !adapter.observe_packet(&crate::native_protocol::PacketEvent::Other {
                     packet: "UserBackStep".into(),
@@ -6900,11 +6921,11 @@ mod tests {
             adapter.apply_authoritative_overlay(&mut payload);
             app.world_mut()
                 .resource_mut::<NativeEntityPresentation>()
-                .observe_packet_payload(payload, animation_origin + 800);
+                .observe_packet_payload(payload, sender_deadline);
             let presentation = app.world().resource::<NativeEntityPresentation>();
             assert!(!presentation.self_combat_action_blocks_movement("1000"));
             assert_eq!(
-                presentation.self_motion_remaining_ms(animation_origin + 800),
+                presentation.self_motion_remaining_ms(motion_origin + 800),
                 0
             );
             assert_eq!(presentation.self_equipment_pose("1000").unwrap().0, true);
@@ -6929,12 +6950,12 @@ mod tests {
     fn native_back_step_queued_after_struck_blocks_held_escape_and_early_local_camera() {
         for new_move in [false, true] {
             let (mut app, receiver) = crowded_escape_input_app(new_move);
-            let (animation_origin, _adapter, _payload) =
+            let (animation_origin, motion_origin, _adapter, _payload) =
                 typed_back_step_escape_fixture(&mut app, true);
             {
                 let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
                 assert!(presentation.self_combat_action_blocks_movement("1000"));
-                let source_camera = presentation.camera_screen_offset(animation_origin);
+                let source_camera = presentation.camera_screen_offset(motion_origin);
                 assert!(!presentation.begin_local_self_motion(
                     "1000",
                     (7, 10),
@@ -6942,11 +6963,11 @@ mod tests {
                     "right",
                     false,
                     animation_origin,
-                    animation_origin,
+                    motion_origin,
                 ));
-                assert_eq!(presentation.self_motion_remaining_ms(animation_origin), 800);
+                assert_eq!(presentation.self_motion_remaining_ms(motion_origin), 800);
                 assert_eq!(
-                    presentation.camera_screen_offset(animation_origin),
+                    presentation.camera_screen_offset(motion_origin),
                     source_camera
                 );
             }
@@ -6967,7 +6988,7 @@ mod tests {
                 let presentation = app.world().resource::<NativeEntityPresentation>();
                 assert!(presentation.self_combat_action_blocks_movement("1000"));
                 assert_eq!(
-                    presentation.self_motion_remaining_ms(animation_origin + at_ms),
+                    presentation.self_motion_remaining_ms(motion_origin + at_ms),
                     800u64.saturating_sub(at_ms)
                 );
                 app.update();
@@ -6981,7 +7002,8 @@ mod tests {
                     .pending
                     .is_empty());
             }
-            finish_escape_animation_for_sender(&mut app, animation_origin + 1_100);
+            let sender_deadline = (animation_origin + 1_100).max(motion_origin + 800);
+            finish_escape_animation_for_sender(&mut app, sender_deadline);
             let presentation = app.world().resource::<NativeEntityPresentation>();
             assert!(!presentation.self_combat_action_blocks_movement("1000"));
             assert_eq!(presentation.self_equipment_pose("1000").unwrap().0, true);

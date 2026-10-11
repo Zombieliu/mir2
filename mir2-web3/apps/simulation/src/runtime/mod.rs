@@ -41,6 +41,9 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
+mod npc_input;
+#[cfg(test)]
+mod npc_dialog_admission_tests;
 #[cfg(test)]
 mod npc_buff_action_tests;
 #[cfg(test)]

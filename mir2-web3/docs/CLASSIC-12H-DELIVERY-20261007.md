@@ -1,5 +1,20 @@
 # Classic gameplay delivery — 12-hour resumed work
 
+> Local NPC input candidate, 2026-10-12: undisplayed targets, skipped prompts,
+> added arguments and copied link/input pages cannot obtain input permission.
+> Private non-Clone menu/pending slots bind actual local identity, Entity and
+> imported script bodies, and invalidate on life/load/map/rollback/teardown.
+> Final318 distinct local Rust checks pass (24 new); focused29 are a subset.
+> All original result assertions remain. Exact parent reproduces3 old fixture
+> failures; Source-valid preparation fixes them. Original red/compile/review
+> failures and exact owned-file restoration proof remain. [Evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
+> New exact-source Linux CI/package and a drained Gateway switch remain open;
+> current public app d917/engine b439/feed20/Gateway4006 are unchanged. This is
+> deliberate local input hardening, not complete Source/Zone invocation,
+> CHECKHUM/world outbox, fullP1-P7/Mentor or native/human acceptance. Root is
+> the sole writer; expired heartbeat remains paused.
+
+
 > Windows CI qualification repair and Gateway publication, 2026-10-11:
 > actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
 > that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and

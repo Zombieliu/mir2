@@ -2727,6 +2727,7 @@ pub(super) fn revive_current_player_from_resurrection_scroll(
         runtime.player_vitals = revived_vitals;
         runtime.player_dead = false;
     }
+    super::npc_input::invalidate(world);
 
     let mut packets = Vec::new();
     if let Some(info) = object_revived_info_for_entity(world, player, true) {

@@ -1,5 +1,15 @@
 # Windows 原生可玩闭环验收清单
 
+> Five-class Windows regression, 2026-10-12: the complete actual merged
+> Native host run passes 987 tests, with 7 original external checks ignored.
+> All five typed DoubleSlash/BackStep combinations pass, including committed
+> Jump behind Struck, continued held escape and unchanged attack cooldown.
+> Source has no drift; the original failed formatting log is retained.
+> Real Release binaries, complete signed delivery, full Linux Gateway qualification
+> and drained paired publication remain pending; this is not human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
 > Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
 > with912 pass/75 fail/7 original external ignores; this is not a green gate.
 > The missing generated keyed-map index was rebuilt by the original Node
@@ -52,6 +62,15 @@
 > [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
 > Candidate round, not all-level five-class or whole-project 100% acceptance.
 > Root owns common/production files; explorers are read-only. No new Goal.
+
+
+> R25/feed20 actually public, 2026-10-11: d917 CI subject, complete40-file CDN
+> stage38147308719, same-source CAS promotion38149850915 and actual Windows
+> production HTTPS/CMS/HTTP206 proof pass. [Exact receipts and limits](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> Existing launchers can update without a new installer. Native dense-combat
+> escape, continuous attacking, laptop pacing, fresh screenshots and human
+> acceptance remain open. Gateway4006 continues running; no Gateway switch.
+
 
 > Windows CI qualification repair and Gateway publication, 2026-10-11:
 > actual8d96 CI reported success but its unchanged Native tests failed938/3/7;

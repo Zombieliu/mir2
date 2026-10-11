@@ -160,6 +160,20 @@ pub(super) fn crystal_npc_labels_match(section_label: &str, requested_label: &st
     !section_base.is_empty() && section_base.eq_ignore_ascii_case(&requested_base)
 }
 
+pub(super) fn crystal_npc_dialog_targets_match(displayed: &str, requested: &str) -> bool {
+    fn complete_target(target: &str) -> String {
+        let unwrapped = unwrap_crystal_npc_label_brackets(target);
+        match unwrapped.split_once('(') {
+            Some((head, suffix)) => format!("{}({suffix}", normalize_crystal_npc_label(head)),
+            None => normalize_crystal_npc_label(unwrapped),
+        }
+    }
+    // Section lookup may match a base label; menu authorization must preserve
+    // the entire argument suffix. Unwrap outer [] before handling a target;
+    // do not use the argument parser, which discards empty/whitespace values.
+    complete_target(displayed).eq_ignore_ascii_case(&complete_target(requested))
+}
+
 pub(super) fn crystal_npc_label_base(label: &str) -> String {
     label
         .trim()
@@ -243,13 +257,17 @@ fn next_crystal_npc_markup(line: &str) -> Option<(usize, usize, &str, bool)> {
     }
 }
 
-pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
+fn unwrap_crystal_npc_label_brackets(label: &str) -> &str {
     let trimmed = label.trim();
-    let trimmed = trimmed
+    trimmed
         .strip_prefix('[')
         .and_then(|value| value.strip_suffix(']'))
         .map(str::trim)
-        .unwrap_or(trimmed);
+        .unwrap_or(trimmed)
+}
+
+pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
+    let trimmed = unwrap_crystal_npc_label_brackets(label);
     if trimmed.starts_with('@') {
         trimmed.to_string()
     } else {
@@ -258,7 +276,9 @@ pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
 }
 
 pub(super) fn parse_crystal_label_target(target: &str) -> (String, Vec<String>) {
-    let trimmed = target.trim();
+    // Accept both [@page](args) and [@page(args)] while retaining the
+    // existing argument parser. Authorization compares the unparsed target.
+    let trimmed = unwrap_crystal_npc_label_brackets(target);
     let Some(open_paren) = trimmed.find('(') else {
         return (normalize_crystal_npc_label(trimmed), Vec::new());
     };
@@ -3951,6 +3971,7 @@ impl SimulationSession {
         input_value: Option<String>,
     ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) || super::components::current_player_is_dead(self.app.world()) {
+            super::npc_input::invalidate(self.app.world_mut());
             return Vec::new();
         }
 
@@ -3961,6 +3982,7 @@ impl SimulationSession {
             .active_npc_dialog
             .clone()
         else {
+            super::npc_input::invalidate(self.app.world_mut());
             return Vec::new();
         };
 
@@ -3976,40 +3998,24 @@ impl SimulationSession {
         }
 
         let input_link = normalized_target.starts_with("@@");
-        if input_link && input_value.is_none() {
-            let prompt = crystal_npc_input_prompt(&active_dialog, target);
-            set_dialog(
-                self.app.world_mut(),
-                ActiveNpcDialogState {
-                    npc_object_id: active_dialog.npc_object_id,
-                    npc_name: active_dialog.npc_name.clone(),
-                    npc_name_key: active_dialog.npc_name_key.clone(),
-                    stage: None,
-                    current: 0,
-                    required: 0,
-                    title: active_dialog.npc_name.clone(),
-                    body: vec![prompt.clone()],
-                    footer: active_dialog.npc_name.clone(),
-                    links: Vec::new(),
-                    input: Some(NpcDialogInputState {
-                        target: normalized_target,
-                        prompt,
-                    }),
-                },
-            );
-            return Vec::new();
-        }
-
-        if !active_dialog
-            .links
-            .iter()
-            .any(|link| crystal_npc_labels_match(&link.target, &normalized_target))
-            && active_dialog
-                .input
-                .as_ref()
-                .is_none_or(|input| !crystal_npc_labels_match(&input.target, &normalized_target))
-        {
-            return Vec::new();
+        if input_value.is_some() {
+            if !input_link
+                || active_dialog.input.as_ref().is_none_or(|input|
+                    !crystal_npc_dialog_targets_match(&input.target, target))
+                || !super::npc_input::consume(self.app.world_mut(), active_dialog.npc_object_id, target)
+            {
+                return Vec::new();
+            }
+        } else {
+            if !active_dialog.links.iter().any(|link|
+                crystal_npc_dialog_targets_match(&link.target, target))
+            {
+                return Vec::new();
+            }
+            if input_link {
+                super::npc_input::request(self.app.world_mut(), target);
+                return Vec::new();
+            }
         }
 
         if normalized_target.eq_ignore_ascii_case("@CREATEGUILD") {
@@ -4175,12 +4181,10 @@ impl SimulationSession {
             };
             input.target.clone()
         } else {
-            let trimmed = page_name.trim();
-            if trimmed.starts_with('@') {
-                trimmed.to_string()
-            } else {
-                format!("@{trimmed}")
-            }
+            // Preserve the argument suffix and both legacy bracket forms.
+            // Admission compares the complete target, then the parser
+            // normalizes only the label head after authorization succeeds.
+            page_name.trim().to_string()
         };
 
         self.select_npc_dialog_target_with_input_impl(&target, Some(value.to_string()))

@@ -8023,6 +8023,11 @@ mod tests {
                 "dead": true
             }),
         }));
+        // Admission is retained in the bounded event history. The normal
+        // renderer consumes by sequence rather than draining this buffer.
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectPlayer");
+        let admission_sequence = adapter.effect_events[0].sequence;
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "ObjectRevived".to_owned(),
             payload: json!({"objectId": 2001, "effect": false}),
@@ -8030,9 +8035,16 @@ mod tests {
         let remote = adapter.zone_entities.get(&2001).expect("remote player");
         assert_eq!(remote.get("dead"), Some(&json!(false)));
         assert_eq!(remote.get("_nativeAnimationAction"), Some(&json!("revive")));
-        assert_eq!(adapter.effect_events.len(), 1);
-        assert_eq!(adapter.effect_events[0].packet, "ObjectRevived");
-        assert_eq!(adapter.effect_events[0].payload["effect"], false);
+        let revived_events = adapter
+            .effect_events
+            .iter()
+            .filter(|event| event.sequence > admission_sequence)
+            .collect::<Vec<_>>();
+        assert_eq!(revived_events.len(), 1);
+        assert_eq!(revived_events[0].packet, "ObjectRevived");
+        assert_eq!(revived_events[0].payload["effect"], false);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectPlayer");
+        assert_eq!(adapter.effect_events[0].sequence, admission_sequence);
     }
 
     #[test]
@@ -8188,7 +8200,7 @@ mod tests {
                 "objectId": 2010,
                 "location": {"x": 286, "y": 615},
                 "direction": "Right",
-                "kind": 2
+                "kind": 0
             }),
         }));
         adapter.apply_authoritative_overlay(&mut payload);
@@ -8203,7 +8215,7 @@ mod tests {
         assert_eq!(plant["x"], json!(286));
         assert_eq!(plant["y"], json!(615));
         assert_eq!(plant["direction"], json!("Right"));
-        assert_eq!(plant["deathKind"], json!(2));
+        assert_eq!(plant["deathKind"], json!(0));
     }
 
     #[test]

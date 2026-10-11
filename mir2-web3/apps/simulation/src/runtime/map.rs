@@ -743,6 +743,7 @@ pub(super) fn relocate_player_to_map(
         player_runtime.player_position = position.clone();
         player_runtime.player_direction = direction;
     }
+    super::npc_input::invalidate(world);
     world.resource_mut::<NpcStateResource>().active_npc_dialog = None;
     world
         .resource_mut::<RuntimeQueueResource>()
@@ -1657,6 +1658,7 @@ pub(super) fn full_map_collision_walkable(
 }
 
 pub(super) fn rebuild_world(world: &mut World) {
+    super::npc_input::invalidate(world);
     clear_world_entities(world);
 
     let player_runtime = world.resource::<PlayerRuntimeResource>().clone();

@@ -1,5 +1,28 @@
 # Crystal Server Parity
 
+> Five-class Windows regression, 2026-10-12: the complete actual merged
+> Native host run passes 987 tests, with 7 original external checks ignored.
+> All five typed DoubleSlash/BackStep combinations pass, including committed
+> Jump behind Struck, continued held escape and unchanged attack cooldown.
+> Source has no drift; the original failed formatting log is retained.
+> Real Release binaries, complete signed delivery, full Linux Gateway qualification
+> and drained paired publication remain pending; this is not human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Five-class/NPC merged server regression, 2026-10-12: ten real guarded checks
+> pass491 distinct names (523 executions with overlaps). This includes25 NPC
+> input cases,125 five-class simulation cases,18 Gateway skill/receipt cases,
+> 279 NPC regressions, CanMove9, health16/32, transfer4, zero-health7 and monthly8.
+> The new matrix creates all five classes through Login/NewCharacter/StartGame,
+> then confirms one canonical local input and rejects replay. Its GA10 script
+> admission is explicitly local fixture preparation; production whitelist and
+> all24 original tests are unchanged. Public GA10 is not accepted by this test.
+> Native full04, clean exact-source CI/build/package/paired publication remain
+> pending. PublicR25/feed20/Gateway75 is unchanged; no human acceptance.
+> [Exact evidence and retained failures](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
 > Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
 > with912 pass/75 fail/7 original external ignores; this is not a green gate.
 > The missing generated keyed-map index was rebuilt by the original Node
@@ -52,6 +75,35 @@
 > [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
 > Candidate round, not all-level five-class or whole-project 100% acceptance.
 > Root owns common/production files; explorers are read-only. No new Goal.
+
+> Local NPC input candidate, 2026-10-12: undisplayed targets, skipped prompts,
+> added arguments and copied link/input pages cannot obtain input permission.
+> Private non-Clone menu/pending slots bind actual local identity, Entity and
+> imported script bodies, and invalidate on life/load/map/rollback/teardown.
+> Final318 distinct local Rust checks pass (24 new); focused29 are a subset.
+> All original result assertions remain. Exact parent reproduces3 old fixture
+> failures; Source-valid preparation fixes them. Original red/compile/review
+> failures and exact owned-file restoration proof remain. [Evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
+> New exact-source Linux CI/package and a drained Gateway switch remain open;
+> current public app d917/engine b439/feed20/Gateway4006 are unchanged. This is
+> deliberate local input hardening, not complete Source/Zone invocation,
+> CHECKHUM/world outbox, fullP1-P7/Mentor or native/human acceptance. Root is
+> the sole writer; expired heartbeat remains paused.
+
+
+> R25/feed20 actually published, 2026-10-11: genuine d917 Windows subject;
+> same-source98c whole Linux staging38147308719 verified40 complete CDN files/
+> 1,052,847,868 bytes. Separate CAS promotion38149850915 and actual Windows
+> production HTTPS/CMS/HTTP206 proof pass. [Original receipts and limits](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> Existing launchers update without a new installer. Applicationd917, engine
+> b439 and publisher98c stay distinct. Gateway4006/PID3369030 and pre-existing
+> Stripe test config are preserved, with unchanged nonbilling bytes and Caddy.
+> One session remained running; this is client-feed publication, not a drained
+> Gateway switch. Earlier missing-dependency, expired-token and local reader
+> assumption failures remain retained. Native crowd/laptop/human and fullP1-P7/
+> Mentor remain open; expired heartbeat paused. Root is the sole writer.
+
+
 
 > Windows CI qualification repair and Gateway publication, 2026-10-11:
 > actual8d96 CI reported success but its unchanged Native tests failed938/3/7;

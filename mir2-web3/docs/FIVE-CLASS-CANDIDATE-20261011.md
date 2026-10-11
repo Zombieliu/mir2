@@ -64,6 +64,51 @@ two values are corrected. Active two-phase timings, queue/sequence, movement,
 held input and camera assertions remain unchanged. Current-source full02
 and newest NPC history integration precede any release build/publication.
 
+## Third actual NPC history merge — 2026-10-12
+
+The newest public Gateway75 history is merged locally without reverting the
+R25 health, movement, monthly billing or mail work. Ten actual guarded server
+checks pass491 distinct function names (523 executions, counts overlap):
+NPC input25, five-class simulation125, Gateway five-class18, broad NPC279,
+CanMove9, simulation/Gateway health16/32, map transfer4, zero-health7 and
+default-feature monthly8. Two original test-support billing cases remain
+required by the unchanged full Linux workflow.
+
+The new input matrix normally creates each of the five classes and starts it
+at level1. Its independent local test config explicitly admits only the real
+GA10 input script, because none of the authored public five-class NPC scripts
+contains a Source input page. Actual player/NPC coordinates, visibility and
+data range are strictly checked. Healthy vital projection preserves the
+issued prompt, the canonical MOV receives the exact input once, and replay
+does not mutate it. This does not open public GA10 or certify GTRECALL world
+population, public NPC input availability, or a native buying interaction.
+
+[Actual commands, frozen source and original receipts](../artifacts/qa-evidence/five-class-candidate-20261011/npc75-backend-checks01.json)
+retain the original24-pass/1-fail result. Its first Warrior failed because the
+local fixture had not admitted the real script; the remaining four classes
+had not yet executed in that red run. Only test preparation was repaired;
+the original24-test prefix and the matrix's confirm/replay body remain exact.
+All five classes actually complete the repaired green matrix.
+
+Native full04 and new clean exact-source Linux/Windows qualification,
+immutable signed delivery and drained paired publication remain pending.
+The latest read-only public check isR25/feed20/Gateway75 with six counters0;
+it is not deployment authorization evidence for a future switch by itself.
+
+## Actual merged Windows regression — 2026-10-12
+
+The full Windows host run passes 987 tests, with 7 original external
+checks ignored. Its five real typed DoubleSlash/BackStep tests all pass,
+including retained held input, both Source phases, a Jump queued behind Struck
+and prevention of early local camera replacement. Existing tests run too;
+no filter-only result substitutes for the full run and no source drift exists.
+
+[Exact command, counts and original receipts](../artifacts/qa-evidence/five-class-candidate-20261011/d917-native-checks01.json)
+preserve the source review and original formatter failure. This proves
+component regressions, not a launched game or human frontend acceptance.
+The newest public NPC admission server changes still need actual history
+integration before clean-source builds and paired publication.
+
 ## Second actual R25 merge — 2026-10-12 checkpoint
 
 The actual d917 merge retains Source CanMove consumption, Turn delay, all
