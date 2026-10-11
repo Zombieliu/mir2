@@ -1404,6 +1404,20 @@ impl SimulationSession {
             {
                 self.apply_zone_player_remove_buff(*buff_type);
             }
+            ServerPacket::PauseBuff { object_id, buff_type, paused }
+                if local_player_object_id.is_some_and(|local_object_id| {
+                    *object_id == local_object_id || *object_id == zone_object_id
+                }) =>
+            {
+                if let Some(key) = super::buffs::crystal_buff_key_for_type(*buff_type) {
+                    if let Some(duration) = self.app.world_mut().resource_mut::<BuffResource>()
+                        .buffs.iter_mut().find(|buff| buff.key == key)
+                        .and_then(|buff| buff.real_time_duration.as_mut())
+                    {
+                        duration.set_paused(*paused);
+                    }
+                }
+            }
             ServerPacket::SpellToggle {
                 object_id,
                 spell: Spell::CounterAttack,
@@ -1437,9 +1451,20 @@ impl SimulationSession {
         super::buffs::apply_or_refresh_buff(
             world,
             super::buffs::BuffState {
-                real_time_duration: buff.infinite.then(|| super::buffs::RealTimeBuffDuration::new_infinite(
-                    u64::try_from(buff.expire_time.max(0)).unwrap_or_default(),
-                )),
+                // This is a projection of the shared Zone's actual duration.
+                // Private RuntimeClock ticks can be called more often than a
+                // second and must never expire it ahead of the authoritative
+                // wall deadline, then echo a premature RemoveBuff to the Zone.
+                real_time_duration: Some({
+                    let duration_ms = u64::try_from(buff.expire_time.max(0)).unwrap_or_default();
+                    let mut duration = if buff.infinite {
+                        super::buffs::RealTimeBuffDuration::new_infinite(duration_ms)
+                    } else {
+                        super::buffs::RealTimeBuffDuration::new(duration_ms.max(1))
+                    };
+                    duration.set_paused(buff.paused);
+                    duration
+                }),
                 key: key.to_string(),
                 name,
                 description,
@@ -2423,3 +2448,7 @@ mod tests;
 #[cfg(test)]
 #[path = "session_active_monster_ids_tests.rs"]
 mod active_monster_ids_tests;
+
+#[cfg(test)]
+#[path = "session_zone_buff_clock_tests.rs"]
+mod session_zone_buff_clock_tests;

@@ -1,5 +1,19 @@
 # Classic gameplay delivery — 12-hour resumed work
 
+> Continued server round, 2026-10-11: ready movement consumes and rechecks Source
+> CanMove/Fishing; Turn retains350/activeSlow700ms. Forty normal private ticks
+> reproduced early removal of a21-second Zone Curse in19ms; the existing real
+> duration projection fixes it. Final158 distinct selected Rust checks pass,
+> including original optimized real500ms scroll plus one normal Gateway clock
+> regression. Original strict/compile/preparation failures remain; no relaxed
+> auth/collision/clocks/assertions. [Scope and evidence](CLASSIC-SOURCE-CANMOVE-BUFF-CLOCK-20261011.md).
+> Parent9d has genuine own Linux/artifact qualification; changed source needs
+> exact new Git/Linux/drained publication. Windows escape is unqualified: its
+> isolated build succeeded but focused tests did not finish before reboot.
+> Root owns all returned source/common files. FullP1-P7/Mentor/native/human
+> remains open; expired heartbeat stays paused, no blocked Goal completion.
+
+
 > Continued hot-path round, 2026-10-10: actual6153 Linux38043237500 failed the
 > unchanged strict500ms scroll story by6ms; siege passed, no deploy. Outcome
 > tick projection now avoids full snapshots; one rebuild reuses exact respawn

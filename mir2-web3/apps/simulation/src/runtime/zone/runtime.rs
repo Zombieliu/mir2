@@ -2977,7 +2977,7 @@ impl ZoneRuntime {
                 .expect("action owner should still exist");
             (
                 player.position.clone(),
-                !player.dead && !zone_player_status_blocks_movement(player, now_ms),
+                zone_player_source_can_move(player, now_ms),
                 !player.dead
                     && player.run_step_until_ms != 0
                     && (player.run_step_until_ms >= now_ms
@@ -2985,7 +2985,7 @@ impl ZoneRuntime {
             )
         };
         if !can_move {
-            return self.correct_player_location(session_id, now_ms);
+            return self.owner_location_correction(session_id);
         }
 
         let effective_running = running && can_run;
@@ -3127,15 +3127,15 @@ impl ZoneRuntime {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
-        if player.dead {
-            return vec![ZoneOutbound::ToSession {
-                session_id: session_id.clone(),
-                packets: vec![user_location_packet(player)],
-            }];
+        // Crystal Turn clears its step counter even when CanMove rejects it.
+        // This happens only after the queued action is ready and consumed.
+        player.run_step_until_ms = 0;
+        if !zone_player_source_can_move(player, now_ms) {
+            return self.owner_location_correction(session_id);
         }
         player.direction = action.direction;
-        player.movement_ready_at_ms = now_ms.saturating_add(ZONE_TURN_DELAY_MS);
-        player.run_step_until_ms = 0;
+        player.movement_ready_at_ms =
+            now_ms.saturating_add(zone_player_turn_delay_ms(player, now_ms));
         let (position, level, pk_points) = {
             let player = self
                 .players
@@ -16103,6 +16103,15 @@ fn zone_deterministic_roll(
         % modulo
 }
 
+/// Crystal HumanObject.CanMove plus PlayerObject's Fishing guard. Validate at
+/// consumption, not in queue readiness: a rejected ready intent must retire.
+fn zone_player_source_can_move(player: &ZonePlayer, now_ms: u64) -> bool {
+    !player.dead
+        && now_ms >= player.movement_ready_at_ms
+        && !player.fishing
+        && !zone_player_status_blocks_movement(player, now_ms)
+}
+
 fn zone_player_status_blocks_movement(player: &ZonePlayer, now_ms: u64) -> bool {
     zone_player_active_status(player, now_ms)
         & (CRYSTAL_POISON_PARALYSIS
@@ -16170,6 +16179,15 @@ fn zone_player_harvest_admitted(player: &ZonePlayer, now_ms: u64) -> bool {
 
 fn zone_player_slowed(player: &ZonePlayer, now_ms: u64) -> bool {
     zone_player_active_status(player, now_ms) & CRYSTAL_POISON_SLOW != 0
+}
+
+/// Crystal Turn uses GetDelayTime(TurnDelay), including active Slow's doubling.
+fn zone_player_turn_delay_ms(player: &ZonePlayer, now_ms: u64) -> u64 {
+    if zone_player_slowed(player, now_ms) {
+        ZONE_TURN_DELAY_MS.saturating_mul(2)
+    } else {
+        ZONE_TURN_DELAY_MS
+    }
 }
 
 /// Per-step movement delay for a zone player. Crystal uses the same 600ms
@@ -18392,3 +18410,7 @@ mod player_magic_cooldown_tests;
 
 #[cfg(test)]
 mod player_action_cadence_tests;
+
+#[cfg(test)]
+#[path = "runtime/source_can_move_tests.rs"]
+mod source_can_move_tests;
