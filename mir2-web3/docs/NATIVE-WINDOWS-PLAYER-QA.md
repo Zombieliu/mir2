@@ -1,5 +1,12 @@
 # Windows 原生可玩闭环验收清单
 
+> R25 Candidate, 2026-10-11: actual d917 Windows CI and full package/CMS/
+> delivery reconstruction pass. [Exact source, checks and release gates](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> This does not close native dense-combat escape, continuous attacking, laptop
+> frame pacing, fresh screenshots or human acceptance. Public feed remains
+> R24/s19 until the original immutable stage and separate promotion succeed.
+
+
 > Windows CI qualification repair and Gateway publication, 2026-10-11:
 > actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
 > that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and

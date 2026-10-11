@@ -1,5 +1,20 @@
 # Agent Orchestration
 
+> R25 client publication preparation, 2026-10-11: actual clean d917 Windows
+> CI38128601107 passed all eight original jobs (Native941/0/7 original ignored).
+> Full package, byte reconstruction and CMS gates passed. The real R24 EXE
+> patch is25,653,268 bytes; publication closure is40 objects/1,052,847,868 bytes.
+> Owned publisher checks: Python16+76+1, one unchanged Linux-only skip;
+> all eight original Node suites1104/1104; Wrangler dry run only. These are
+> delivery checks, not fresh gameplay/pixel/human acceptance. [Actual evidence
+> and remaining gates](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> Gateway4006 is live; client remains R24/s19 pending complete immutable stage
+> and separate CAS promotion. Existing engine/auth/config/routes are preserved;
+> the actual Caddy metadata is independently compared. FullP1–P7/Mentor/native/
+> human remains open. Root sole writer; expired heartbeat paused.
+
+
+
 > Windows CI qualification repair and Gateway publication, 2026-10-11:
 > actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
 > that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and

@@ -1,0 +1,52 @@
+{
+  "schema": "mir2.r23.s18.preparation-only.v1",
+  "gameSourceRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+  "gameCandidate": "WN-CANDIDATE-20261009-invited-23",
+  "templateCommit": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "engineSourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "predecessorSequence": 17,
+  "sequence": 18,
+  "offlineContractTests": {
+    "firstRun": {
+      "run": 16,
+      "pass": 15,
+      "fail": 1,
+      "retained": true,
+      "failureCause": "Test mutation retained the original exact substring; corrected only that UNIT input"
+    },
+    "secondRun": {
+      "run": 16,
+      "pass": 16,
+      "fail": 0
+    }
+  },
+  "files": [
+    {
+      "path": "scripts/prepare_native_r23_s18_fixed.py",
+      "bytes": 32384,
+      "sha256": "f39abd5c10ed568bee58eddfdc6be9f04d242e3d77737ae9a30eef29c23f1510"
+    },
+    {
+      "path": "scripts/test_prepare_native_r23_s18_offline.py",
+      "bytes": 16072,
+      "sha256": "3995fb3cc461350e86aae257b77e78c5ab350bcb5c3743970a5678811ae24b5e"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/qa-runs/PREPARATION-OFFLINE-01.log",
+      "bytes": 3350,
+      "sha256": "c37bbba59b81f5b838e6ff59ab5ecbdbadb7919bf78cd1f7b0f31aa6b851eb5d"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/qa-runs/PREPARATION-OFFLINE-02.log",
+      "bytes": 2588,
+      "sha256": "e6425cf4ca50efb5e9711b037d0714d3638ffb74d179343a1e84436ab1ea8b56"
+    }
+  ],
+  "actualGenerationRun": false,
+  "signed18InputsProvided": false,
+  "workerAdmissionGenerated": false,
+  "cmsReverified": false,
+  "cloudWrites": false,
+  "originalR22FilesModified": false,
+  "retainedUnitFixturesArePublicationProof": false
+}
