@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Root owned Source71 finite warehouse handoff diagnostic and persistence (2026-10-12 Beijing)
+
+- Scope: five owned Web leaves expose only storage owner/phase/finite first-refusal reason through the existing tick/state path; no extra runtime getter, sender, timer, now call or changed ownership/admission gate.
+- Actual Node01 caller preparation failure is preserved: output parent was absent; product exit/counts unknown. Same frozen inputs in Node02 passed 274/274 (Storage39, Scene10), zero failures/skips/cancels; 506 custom groups are separate. Original caller closed0 and post-exit guard passed.
+- Actual strict Next original caller closed0/postguard, 13 pages, strict compiler preserved; no typecheck bypass or main tsconfig change.
+- Actual Thin original caller closed0/postguard: 4,182 files/517 directories/0 links/285,116,711B within original inclusive377,487,360B cap; all116 local warehouse frames and six selected Core leaves verified. All59 dependency warnings retained and match Source70 normalized multiset.
+- Original runtime copy/start accepted all4,182 leaves; local Web19205 and unchanged Gateway19100/19110. No privatecfg restore/read, live product logs, Cargo execution or product/WASM global reads. Source71 startup caller remains open; its final exit/postguard remain pending.
+- Before any React storage button/slot/key, first open and settled storage diagnostic both showed react/prepare/controlsNotReady. First-open screenshot shows shared Canvas Drag/Cancel/Close and grid behind the React panels; shared Bag ownership does not establish Storage ownership.
+- Normal Store Item changed diagnostic to react/inactive/compatibility. Candle deposit changed Bag5→4 and Warehouse0→1; ordinary Take Back still selected Quest and required manual Bag1, then withdrawal restored Bag5/Warehouse0.
+- Normal Alt+x save/logout, ordinary cache-retaining reload, credentials Login, Start Game and Anthony Access preserved Bag5/Warehouse0/gold180. Relogin storage remained react/prepare/controlsNotReady.
+- Open queue: distinguish the actual failed ready gate (current ready check precedes renderer error), clear incomplete shared paint, validate shared pointer handoff, and verify the single-line Source72 Take Back candidate in its own actual build/live QA. Disabled prepare input is not a proven ready loop.
+- Evidence: [Node actual02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-node-actual02.json), [strict Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-next-actual01.json), [Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-thin-actual01.json), [normal live storage proof](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-storage-live-proof01.json).
+- This is finite Web QA, not whole media closure/1:1 completion, shared Storage acceptance, 100% Candidate or final human acceptance. Goal and queue remain active.
+
+
 ## Source70：仓库地图恢复，存取及保存重登通过（2026-10-12）
 
 游戏入口新鲜读取资源清单，活动场景以 assetRelease 区分缓存，并防止旧异步任务覆盖新加载。保留浏览器缓存的正常 Login/Start Game 实测中，Warehouse0140 恢复地板与墙面：340 cells、116 sprite 字典项、missingAssets 0；旧 Source69 响应曾为0 sprites/116 missing。7244ms完整被动区间实际观察115个独立PNG路径、120个响应，均200；其中4306.png未在区间观察到，116张打包PNG均已独立核验。背景地图0的独立未版本化请求及地图边界fallback不属于本项通过范围。

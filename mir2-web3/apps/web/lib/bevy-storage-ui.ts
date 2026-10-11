@@ -38,8 +38,21 @@ export type StorageSnapshot = StorageIdentity & {
   inventory: BevyInventoryModel; storage: BevyStorageModel; player: BevyBagPlayer;
   blockedUniqueIds: number[]; pendingCells: StorageTarget[]; language: Mir2Language;
 };
+export type StorageRejectReason =
+  | "sharedNotRequested" | "serviceInactive" | "compatibility" | "runtimeUnavailable"
+  | "backendUnavailable" | "notGame" | "disconnected" | "playerUnavailable" | "sceneAssetsPending"
+  | "hostSuspended" | "equipmentNotReady" | "pendingReadUnavailable" | "modalBlocked"
+  | "passwordSetupRequired" | "documentHidden" | "documentUnfocused" | "bagClosed"
+  | "abiUnavailable" | "inputIneligible" | "connectionInvalid" | "sessionInvalid" | "serviceInvalid"
+  | "presentationInvalid" | "modelInvalid" | "snapshotRejected" | "hostRetired"
+  | "statusUnavailable" | "publicationUnavailable" | "identityMismatch" | "controlsNotReady"
+  | "rendererError" | "frameUnavailable" | "frameRegressed" | "frameStale"
+  | "appliedRevisionMismatch" | "inputStateMismatch" | "inputRegionsUnavailable" | "handoffExpired" | "hostException";
+export type StorageDiagnostic = { owner: "react" | "transition" | "bevy";
+  phase: "inactive" | "prepare" | "arming" | "active"; reason: StorageRejectReason | null };
 export type StorageHostInput = Omit<StorageSnapshot, "runGeneration" | "revision" | "modelRevision" | "presentationRevision" | "inputEnabled" | "inventory" | "storage"> & {
-  eligible: boolean; inventory: BevyInventoryModel | null; storage: BevyStorageModel | null;
+  eligible: boolean; eligibilityReason?: StorageRejectReason | null; openReason?: StorageRejectReason | null;
+  inventory: BevyInventoryModel | null; storage: BevyStorageModel | null;
 };
 export type StorageRuntime = {
   getMir2StorageUiCapabilities?: () => string;
@@ -50,7 +63,7 @@ export type StorageRuntime = {
   setMir2StorageUiPointerEdge?: (json: string) => boolean;
   withdrawMir2StorageUiSnapshot?: (identityJson: string) => boolean;
 };
-export type StorageHostState = { active: boolean; transitioning: boolean; ownerRevision: number; error: string | null };
+export type StorageHostState = { active: boolean; transitioning: boolean; ownerRevision: number; error: string | null; diagnostic: StorageDiagnostic };
 export type StorageHostOptions = {
   runtime: StorageRuntime; read: () => StorageHostInput; now: () => number;
   onOwner: (owner: BagOwner, run: number, ownerRevision: number) => void;
@@ -149,6 +162,9 @@ export class BevyStorageHost {
   private sequence = 0; private proof: StorageIntent | null = null; private stopped = false;
   private attached = false;
   private pointerLease: StoragePointerEdge | null = null;
+  private diagnosing = false; private firstFailure: StorageRejectReason | null = null;
+  private lastStateError: string | null = null;
+  private lastDiagnostic: StorageDiagnostic | null = null;
   constructor(private readonly options: StorageHostOptions) {
     this.ownerRevision = options.read().ownerRevision;
     this.lastFrameAt = options.now();
@@ -163,13 +179,24 @@ export class BevyStorageHost {
   private owns() { return !this.stopped && registry().get(this.options.runtime) === this; }
   private modelFingerprint(i: StorageHostInput) { return JSON.stringify([i.inventory, i.storage, i.player]); }
   private presentationFingerprint(i: StorageHostInput) { return JSON.stringify([i.connectionGeneration, i.sessionGeneration, i.serviceRevision, i.open, i.presentation, i.language]); }
+  // Record only gates actually evaluated by tick; pointer/proof reads never change diagnostics.
+  private gate(allowed: boolean, reason: StorageRejectReason): boolean {
+    if (!allowed && this.diagnosing && this.firstFailure === null) this.firstFailure = reason;
+    return allowed;
+  }
   private eligible(i: StorageHostInput) {
-    return i.eligible && i.open && safe(i.connectionGeneration) && i.connectionGeneration > 0
-      && safe(i.sessionGeneration) && i.sessionGeneration > 0 && safe(i.serviceRevision) && i.serviceRevision > 0
-      && fitsStorage(i.presentation) && validStorageModel(i.inventory, i.storage);
+    return this.gate(i.eligible, i.eligibilityReason ?? "inputIneligible") && this.gate(i.open, i.openReason ?? "bagClosed")
+      && this.gate(safe(i.connectionGeneration), "connectionInvalid") && this.gate(i.connectionGeneration > 0, "connectionInvalid")
+      && this.gate(safe(i.sessionGeneration), "sessionInvalid") && this.gate(i.sessionGeneration > 0, "sessionInvalid")
+      && this.gate(safe(i.serviceRevision), "serviceInvalid") && this.gate(i.serviceRevision > 0, "serviceInvalid")
+      && this.gate(fitsStorage(i.presentation), "presentationInvalid") && this.gate(validStorageModel(i.inventory, i.storage), "modelInvalid");
   }
   private state(error: string | null = null) {
-    this.options.onState({ active: this.phase === "active", transitioning: this.phase === "arming", ownerRevision: this.ownerRevision, error });
+    this.lastStateError = error;
+    this.lastDiagnostic = { owner: this.phase === "active" ? "bevy" : this.phase === "arming" ? "transition" : "react",
+      phase: this.phase, reason: this.firstFailure };
+    this.options.onState({ active: this.phase === "active", transitioning: this.phase === "arming", ownerRevision: this.ownerRevision, error,
+      diagnostic: this.lastDiagnostic });
   }
   private changeOwner(owner: BagOwner) {
     this.ownerRevision = Math.max(this.ownerRevision, this.options.read().ownerRevision) + 1;
@@ -183,31 +210,39 @@ export class BevyStorageHost {
   }
   private publish(i: StorageHostInput, enabled: boolean) {
     if (!this.owns()) return;
-    if (!i.inventory || !i.storage || !validStorageModel(i.inventory, i.storage)) { this.withdraw(); return; }
-    const { eligible: _eligible, ...input } = i;
+    if (!i.inventory || !i.storage || !validStorageModel(i.inventory, i.storage)) { this.gate(false, "modelInvalid"); this.withdraw(); return; }
+    const { eligible: _eligible, eligibilityReason: _eligibilityReason, openReason: _openReason, ...input } = i;
     const snapshot = { ...input, inventory: i.inventory, storage: i.storage,
       ...identity({ ...i, runGeneration: this.runGeneration, ownerRevision: this.ownerRevision }),
       open: this.eligible(i), inputEnabled: enabled && this.eligible(i), modelRevision: this.modelRevision, presentationRevision: this.presentationRevision };
     const key = JSON.stringify(snapshot);
     if (key === this.sentKey) return;
     const sent = { ...snapshot, revision: ++this.revision };
-    if (!this.options.runtime.setMir2StorageUiSnapshot?.(JSON.stringify(sent))) throw new Error("Shared storage rejected the snapshot");
+    if (!this.options.runtime.setMir2StorageUiSnapshot?.(JSON.stringify(sent))) {
+      this.gate(false, "snapshotRejected"); throw new Error("Shared storage rejected the snapshot");
+    }
     this.sent = sent; this.sentKey = key;
   }
   private status(): StorageStatus | null {
     const v = readStorageStatus(this.options.runtime), s = this.sent;
-    if (!this.owns() || !v || !s || !sameStorageIdentity(v, s)) return null;
-    if (v.frame > this.lastFrame) { this.lastFrame = v.frame; this.lastFrameAt = this.options.now(); }
-    return v.ready && !v.error && v.frame > 0 && v.frame >= this.lastFrame && this.options.now() - this.lastFrameAt <= 2000 ? v : null;
+    if (!this.gate(this.owns(), "hostRetired") || !this.gate(Boolean(v), "statusUnavailable")
+      || !this.gate(Boolean(s), "publicationUnavailable") || !this.gate(sameStorageIdentity(v!, s!), "identityMismatch")) return null;
+    if (v!.frame > this.lastFrame) { this.lastFrame = v!.frame; this.lastFrameAt = this.options.now(); }
+    return this.gate(v!.ready, "controlsNotReady") && this.gate(!v!.error, "rendererError")
+      && this.gate(v!.frame > 0, "frameUnavailable") && this.gate(v!.frame >= this.lastFrame, "frameRegressed")
+      && this.gate(this.options.now() - this.lastFrameAt <= 2000, "frameStale") ? v : null;
   }
   private exact(v: StorageStatus) {
     const s = this.sent;
-    return Boolean(s && v.appliedRevision === s.revision && v.appliedModelRevision === s.modelRevision
-      && v.appliedPresentationRevision === s.presentationRevision && v.appliedServiceRevision === s.serviceRevision);
+    return this.gate(Boolean(s && v.appliedRevision === s.revision && v.appliedModelRevision === s.modelRevision
+      && v.appliedPresentationRevision === s.presentationRevision && v.appliedServiceRevision === s.serviceRevision), "appliedRevisionMismatch");
   }
   tick() {
     if (!this.owns()) return;
-    if (!supportsStorage(this.options.runtime)) { this.withdraw(); this.state("Shared storage ABI 1 is unavailable"); return; }
+    this.firstFailure = null; this.diagnosing = true;
+    if (!supportsStorage(this.options.runtime)) {
+      this.gate(false, "abiUnavailable"); this.withdraw(); this.state("Shared storage ABI 1 is unavailable"); this.diagnosing = false; return;
+    }
     try {
       this.attach();
       const i = this.options.read(), mk = this.modelFingerprint(i), pk = this.presentationFingerprint(i);
@@ -220,16 +255,21 @@ export class BevyStorageHost {
         if (this.phase === "arming" && this.options.now() - this.armingAt <= 2000 && !readStorageStatus(this.options.runtime)?.error) return;
         this.fallback("Shared storage is waiting for its painted controls"); this.publish(i, false); return;
       }
-      if (this.phase === "prepare" && this.exact(v) && !v.inputEnabled && v.inputRegions.length > 0) {
+      if (this.phase === "prepare" && this.exact(v) && this.gate(!v.inputEnabled, "inputStateMismatch") && this.gate(v.inputRegions.length > 0, "inputRegionsUnavailable")) {
         this.changeOwner("transition"); this.phase = "arming"; this.armingAt = this.options.now(); this.state(); this.publish(i, true);
-      } else if (this.phase === "arming" && this.exact(v) && v.inputEnabled && v.inputRegions.length > 0) {
+      } else if (this.phase === "arming" && this.exact(v) && this.gate(v.inputEnabled, "inputStateMismatch") && this.gate(v.inputRegions.length > 0, "inputRegionsUnavailable")) {
         this.phase = "active"; this.options.onOwner("bevy", this.runGeneration, this.ownerRevision); this.state();
       } else if (this.phase === "arming" && this.options.now() - this.armingAt > 2000
         || this.phase === "active" && (!v.inputEnabled || v.appliedPresentationRevision !== this.presentationRevision || v.appliedServiceRevision !== i.serviceRevision)) {
-        this.fallback("Shared storage input handoff expired"); this.publish(i, false);
+        this.gate(false, "handoffExpired"); this.fallback("Shared storage input handoff expired"); this.publish(i, false);
       }
     } catch (e) {
-      this.withdraw(); this.state(e instanceof Error ? e.message : "Shared storage unavailable");
+      this.gate(false, "hostException"); this.withdraw(); this.state(e instanceof Error ? e.message : "Shared storage unavailable");
+    } finally {
+      this.diagnosing = false;
+      // Publish the last evaluated gate even when prepare/arming simply waits.
+      if (this.owns() && (!this.lastDiagnostic || this.lastDiagnostic.phase !== this.phase || this.lastDiagnostic.reason !== this.firstFailure))
+        this.state(this.lastStateError);
     }
   }
   pointerContext(): StoragePointerContext | null {
@@ -283,6 +323,7 @@ export class BevyStorageHost {
   }
   withdraw() {
     if (!this.owns()) return;
+    if (!this.diagnosing) this.firstFailure = null;
     const s = this.sent; this.fallback(null); this.sent = null; this.sentKey = ""; this.pointerLease = null;
     if (s) try { this.options.runtime.withdrawMir2StorageUiSnapshot?.(JSON.stringify(identity(s))); } catch { /* Retired renderer. */ }
   }

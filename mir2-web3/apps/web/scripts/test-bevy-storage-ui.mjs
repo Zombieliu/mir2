@@ -666,3 +666,226 @@ test("Source67 actual leased storage page changes preserve ownership and avoid a
   const sharedStorage = pageStorageOwnershipFixture({ ingress: false });
   sharedStorage.api.openInventory("bag1"); assert.deepEqual(sharedStorage.trace, ["hud:openBag", "tab:bag1"]);
 });
+
+
+// Source71 diagnostics consume the actual Page reader, host, hook and JSX.
+// Only the ordinary data ports below are supplied; no renderer/Core/socket runs.
+const storageReader71Source = "const actualStorageRead71 = (" + storageOption("read").getText(storagePageAst) + ");";
+const storageReader71JavaScript = ts.transpileModule(storageReader71Source,
+  { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+function pageStorageReadFixture71() {
+  const trace = [], current = { ...world(), connected: true, playerObjectId: 12,
+    entities: [{ objectId: 12, name: "Player", classKey: "warrior", genderKey: "male", level: 1 }],
+    playerHp: 10, playerMaxHp: 10, playerMp: 4, playerMaxMp: 4, credit: 0,
+    requireStoragePassword: false, activeNpcDialog: null };
+  const scope = {
+    worldRef: { current }, projectBevyStorageModel: value => { trace.push("project"); return projection.projectBevyStorageModel(value); },
+    equipmentControllerRef: { current: { status() { trace.push("ledger"); return { ready: true }; },
+      hasPendingInstance() { trace.push("pending"); return { ok: true, reserved: false }; } } },
+    mailParcelRef: { current: null }, pendingStorageRequestsRef: { current: new Map() },
+    equipmentConnectionGenerationRef: { current: 3 }, equipmentSessionGenerationRef: { current: 5 },
+    equipmentBagOwnerRef: { current: { ownerRevision: 0 } }, storageServiceRevisionRef: { current: 11 },
+    storageServiceActiveRef: { current: true }, bagOpenRef: { current: true }, storageCompatibilityRef: { current: false },
+    bevyQuestUiRequested: true, bevyRuntimeBackend: "webgpu", webGl2SharedCanvasPrototype: false,
+    sharedCanvasUsesWebGl2() { trace.push("backend"); return false; }, screenRef: { current: "game" },
+    initialSceneAssetsReadyRef: { current: true }, equipmentHostSuspendReasonRef: { current: null },
+    bevyQuestReactModalOpen: false, showQuestLog: false, showCharacter: false, heroManagementPage: null,
+    cashShopOpenRef: { current: false }, showHeroPet: false, showGuild: false, showGroup: false,
+    showFriends: false, showBonds: false, showRanking: false, showMarket: false, showConquest: false,
+    showTrade: false, showBuffs: false, showMail: false, showWorldMap: false, showChatSettings: false,
+    npcShopService: null, npcRepairService: null, referenceWindowsBlockGameplay() { trace.push("referenceModal"); return false; },
+    document: { visibilityState: "visible", hasFocus() { trace.push("focus"); return true; },
+      querySelector() { trace.push("query"); return null; } },
+    readBevyQuestPresentation() { trace.push("presentation"); return presentation; },
+    sharedUiCanvasId: () => "shared-ui", clientProfile: { input: "keyboardMouse" }, language: "en",
+  };
+  return { scope, current, trace, read() {
+    return new Function(...Object.keys(scope), storageReader71JavaScript + "\nreturn actualStorageRead71();")(...Object.values(scope));
+  } };
+}
+
+test("Source71 actual Page reader records the first eligible gate without evaluating later gates", () => {
+  const cases = [
+    ["sharedNotRequested", f => { f.scope.bevyQuestUiRequested = false; f.scope.bevyRuntimeBackend = "webgl2"; }, "backend"],
+    ["backendUnavailable", f => { f.scope.bevyRuntimeBackend = "webgl2"; }, "screen"],
+    ["notGame", f => { f.scope.screenRef.current = "login"; f.current.connected = false; }, "focus"],
+    ["disconnected", f => { f.current.connected = false; f.current.entities = []; }, "focus"],
+    ["playerUnavailable", f => { f.current.entities = []; f.scope.initialSceneAssetsReadyRef.current = false; }, "focus"],
+    ["sceneAssetsPending", f => { f.scope.initialSceneAssetsReadyRef.current = false; }, "focus"],
+    ["hostSuspended", f => { f.scope.equipmentHostSuspendReasonRef.current = "suspended"; }, "focus"],
+    ["equipmentNotReady", f => { f.scope.equipmentControllerRef.current.status = () => ({ ready: false }); }, "focus"],
+    ["pendingReadUnavailable", f => { f.scope.equipmentControllerRef.current.hasPendingInstance = () => ({ ok: false }); }, "focus"],
+    ["modalBlocked", f => { f.scope.showMail = true; }, "focus"],
+    ["passwordSetupRequired", f => { f.current.requireStoragePassword = true; }, "focus"],
+    ["documentHidden", f => { f.scope.document.visibilityState = "hidden"; }, "focus"],
+    ["documentUnfocused", f => { f.scope.document.hasFocus = () => { f.trace.push("focus"); return false; }; }, null],
+  ];
+  for (const [reason, arrange, later] of cases) {
+    const f = pageStorageReadFixture71(); arrange(f);
+    if (reason === "backendUnavailable") Object.defineProperty(f.scope.screenRef, "current", {
+      get() { f.trace.push("screen"); return "game"; } });
+    const input = f.read(); assert.equal(input.eligible, false); assert.equal(input.eligibilityReason, reason);
+    if (later) assert.equal(f.trace.includes(later), false, "later eligible gate was not evaluated: " + reason);
+    assert.equal(f.trace.filter(x => x === "presentation").length, 1, "existing presentation read retained");
+  }
+  const f = pageStorageReadFixture71(), input = f.read();
+  assert.equal(input.eligible, true); assert.equal(input.eligibilityReason, null);
+  assert.deepEqual(f.trace, ["project", "ledger", "pending", "pending", "referenceModal", "focus", "query", "query", "presentation"]);
+  for (const [arrange, reason] of [
+    [g => { g.scope.storageServiceActiveRef.current = false; g.scope.bagOpenRef.current = false; }, "serviceInactive"],
+    [g => { g.scope.bagOpenRef.current = false; g.scope.storageCompatibilityRef.current = true; }, "bagClosed"],
+    [g => { g.scope.storageCompatibilityRef.current = true; }, "compatibility"],
+  ]) { const g = pageStorageReadFixture71(); arrange(g); const v = g.read(); assert.equal(v.open, false); assert.equal(v.openReason, reason); }
+});
+
+test("Source71 actual tick ABI refusal precedes its reader and adds no runtime diagnostic reads", () => {
+  const calls = []; let denied = false, state;
+  const f = fixture({ getMir2StorageUiCapabilities() { calls.push("capabilities"); return JSON.stringify({ ...capabilities, compiled: !denied }); },
+    getMir2StorageUiStatus() { calls.push("status"); return "null"; } });
+  const host = new storage.BevyStorageHost({ runtime: f.runtime, read() { calls.push("reader"); return f.input; }, now: () => 100,
+    onOwner() {}, onState(next) { state = next; }, onIntent: () => false });
+  assert.equal(calls.filter(x => x === "reader").length, 1, "original constructor reader retained");
+  calls.length = 0; denied = true; host.tick();
+  assert.deepEqual(calls, ["capabilities"]);
+  assert.deepEqual(state.diagnostic, { owner: "react", phase: "prepare", reason: "abiUnavailable" });
+  assert.equal(f.snapshots.length, 0); assert.equal(host.pointerContext(), null);
+});
+
+test("Source71 actual host input failures retain the first reason and exclude diagnostics from the wire snapshot", () => {
+  for (const [patch, reason] of [
+    [{ eligible: false, eligibilityReason: "sceneAssetsPending", connectionGeneration: 0 }, "sceneAssetsPending"],
+    [{ open: false, openReason: "compatibility", connectionGeneration: 0 }, "compatibility"],
+    [{ connectionGeneration: 0, sessionGeneration: 0 }, "connectionInvalid"],
+    [{ sessionGeneration: 0, serviceRevision: 0 }, "sessionInvalid"],
+    [{ serviceRevision: 0, presentation: null }, "serviceInvalid"],
+    [{ presentation: null }, "presentationInvalid"],
+    [{ storage: null }, "modelInvalid"],
+  ]) {
+    let statusCalls = 0;
+    const f = fixture({ getMir2StorageUiStatus() { statusCalls++; return "null"; } });
+    f.input = { ...f.input, ...patch }; f.host.tick();
+    assert.equal(f.state.diagnostic.reason, reason); assert.equal(f.state.active, false); assert.equal(statusCalls, 0);
+    assert.equal(f.host.pointerContext(), null); assert.equal(f.intents.length, 0);
+    for (const s of f.snapshots) { assert.equal(s.inputEnabled, false); assert.equal(s.open, false);
+      assert.equal("eligibilityReason" in s, false); assert.equal("openReason" in s, false); }
+  }
+  const f = fixture(); f.input = { ...f.input, eligibilityReason: null, openReason: null }; f.host.tick();
+  const s = f.snapshots.at(-1);
+  assert.equal("eligibilityReason" in s, false); assert.equal("openReason" in s, false);
+  assert.equal(f.state.diagnostic.reason, "statusUnavailable");
+});
+
+test("Source71 actual host status failures and enabled handoff preserve their original admission gates", () => {
+  for (const [extra, reason] of [
+    [{ runGeneration: 0 }, "statusUnavailable"],
+    [{ connectionGeneration: 77 }, "identityMismatch"],
+    [{ ready: false, error: "private raw error" }, "controlsNotReady"],
+    [{ error: "private raw error" }, "rendererError"],
+    [{ frame: 0 }, "frameUnavailable"],
+    [{ appliedRevision: 0 }, "appliedRevisionMismatch"],
+    [{ inputEnabled: true }, "inputStateMismatch"],
+    [{ inputRegions: [] }, "inputRegionsUnavailable"],
+  ]) {
+    const f = fixture(); f.host.tick(); f.echo(extra); f.host.tick();
+    assert.equal(f.state.diagnostic.reason, reason); assert.equal(f.state.active, false);
+    assert.equal(f.host.pointerContext(), null); assert.equal(f.intents.length, 0);
+  }
+  const f = fixture(); f.host.tick(); assert.equal(f.snapshots.at(-1).inputEnabled, false);
+  f.echo(); f.host.tick(); assert.deepEqual(f.state.diagnostic, { owner: "transition", phase: "arming", reason: null });
+  assert.equal(f.host.pointerContext(), null); assert.equal(f.snapshots.at(-1).inputEnabled, true);
+  f.echo(); f.host.tick(); assert.deepEqual(f.state.diagnostic, { owner: "bevy", phase: "active", reason: null });
+  assert.notEqual(f.host.pointerContext(), null);
+  const i = f.intent(); assert.equal(f.emit(i), false); assert.equal(f.host.allows(i), true);
+  assert.equal(f.host.claim(i), true); assert.equal(f.host.claim(i), false);
+  const stale = fixture(); stale.activate(); stale.time(2101); stale.host.tick();
+  assert.equal(stale.state.diagnostic.reason, "frameStale"); assert.equal(stale.host.pointerContext(), null);
+  const regressed = fixture(); regressed.activate(); regressed.echo({ frame: 1 }); regressed.host.tick();
+  assert.equal(regressed.state.diagnostic.reason, "frameRegressed"); assert.equal(regressed.host.pointerContext(), null);
+  const denied = fixture({ setMir2StorageUiSnapshot() { return false; } }); denied.host.tick();
+  assert.equal(denied.state.diagnostic.reason, "snapshotRejected"); assert.equal(denied.state.active, false);
+});
+
+const storageHook71Source = readFileSync(new URL("../lib/use-bevy-storage-ui.ts", import.meta.url), "utf8");
+const storageHook71Ast = ts.createSourceFile("storage-hook71.ts", storageHook71Source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+const storageHook71Functions = storageHook71Ast.statements.filter(n => ts.isFunctionDeclaration(n) && n.name?.text === "useBevyStorageUi");
+assert.equal(storageHook71Functions.length, 1);
+const storageHook71JavaScript = ts.transpileModule(storageHook71Functions[0].getText(storageHook71Ast).replace(/^export /, ""),
+  { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+function hookFixture71() {
+  const port = fixture(), refs = [], states = [], effects = [], intervals = new Map(), listeners = new Map();
+  let refIndex = 0, stateIndex = 0, effectIndex = 0, intervalId = 0, mutations = 0;
+  const useRef = value => refs[refIndex++] ?? (refs[refIndex - 1] = { current: value });
+  const useState = initial => { const index = stateIndex++; states[index] ??= initial;
+    return [states[index], next => { const value = typeof next === "function" ? next(states[index]) : next;
+      if (value !== states[index]) { states[index] = value; mutations++; } }]; };
+  const useEffect = (body, dependencies) => { const index = effectIndex++, previous = effects[index];
+    if (!previous || dependencies.some((v, i) => v !== previous.dependencies[i])) {
+      previous?.cleanup?.(); const effect = { body, dependencies, cleanup: null }; effects[index] = effect;
+    } };
+  function addEventListener(name, fn) { if (!listeners.has(name)) listeners.set(name, new Set()); listeners.get(name).add(fn); }
+  function removeEventListener(name, fn) { listeners.get(name)?.delete(fn); }
+  const windowPort = { setInterval(fn, ms) { assert.equal(ms, 50); intervals.set(++intervalId, fn); return intervalId; },
+    clearInterval(id) { intervals.delete(id); }, addEventListener, removeEventListener };
+  const actualHook = new Function("useRef", "useState", "useEffect", "BevyStorageHost", "performance", "window", "document",
+    storageHook71JavaScript + "\nreturn useBevyStorageUi;")(useRef, useState, useEffect, storage.BevyStorageHost,
+      { now: () => 100 }, windowPort, { addEventListener, removeEventListener });
+  const options = { requested: true, inactiveReason: null, runtimeGeneration: 1, runtimeRef: { current: port.runtime },
+    read: () => port.input, onOwner(owner, run, revision) { port.input.ownerRevision = revision; }, onIntent: () => false };
+  function render() { refIndex = stateIndex = effectIndex = 0; return actualHook(options); }
+  function flush() { for (const e of effects) if (e.body) { const body = e.body; e.body = null; e.cleanup = body(); } }
+  return { port, refs, states, effects, options, intervals, listeners, render, flush, get mutations() { return mutations; } };
+}
+
+test("Source71 actual hook deduplicates diagnostic state and compatibility retires the prepare reason", () => {
+  const f = hookFixture71(); f.render(); f.flush();
+  assert.equal(f.render().diagnostic.reason, "statusUnavailable");
+  const before = f.mutations; [...f.intervals.values()][0]();
+  assert.equal(f.mutations, before, "same actual failure does not update React state again");
+  f.options.requested = false; f.options.inactiveReason = "compatibility";
+  const inactive = f.render(); assert.deepEqual(inactive.diagnostic, { owner: "react", phase: "inactive", reason: "compatibility" }); f.flush();
+  assert.equal(f.intervals.size, 0); assert.equal([...f.listeners.values()].every(s => s.size === 0), true);
+  f.options.requested = true; f.options.inactiveReason = null; f.options.runtimeGeneration++;
+  assert.deepEqual(f.render().diagnostic, { owner: "react", phase: "inactive", reason: null }); f.flush(); f.port.echo(); [...f.intervals.values()][0](); f.port.echo(); [...f.intervals.values()][0]();
+  assert.deepEqual(f.render().diagnostic, { owner: "bevy", phase: "active", reason: null });
+});
+
+test("Source71 actual hook ignores retired callbacks and cleanup cannot overwrite the replacement state", () => {
+  const f = hookFixture71(); f.render(); f.flush();
+  const oldCleanup = f.effects[0].cleanup, oldHost = f.refs[1].current, oldCallback = oldHost.options.onState;
+  f.options.runtimeGeneration++;
+  assert.deepEqual(f.render().diagnostic, { owner: "react", phase: "inactive", reason: null }); f.flush();
+  f.port.echo(); [...f.intervals.values()][0](); f.port.echo(); [...f.intervals.values()][0]();
+  const active = f.render(), mutations = f.mutations;
+  oldCallback({ active: false, transitioning: false, ownerRevision: 999, error: "private old error",
+    diagnostic: { owner: "react", phase: "prepare", reason: "rendererError" } });
+  assert.equal(f.mutations, mutations); assert.deepEqual(f.render().diagnostic, active.diagnostic);
+  // Browser clear/remove are idempotent; a repeated old cleanup must not remove
+  // the replacement interval/listeners or notify its state/owner.
+  const withdrawals = f.port.withdrawals.length; oldCleanup(); oldHost.tick(); oldHost.stop();
+  assert.equal(f.port.withdrawals.length, withdrawals); assert.equal(f.mutations, mutations);
+  assert.equal(f.intervals.size, 1); assert.equal([...f.listeners.values()].every(s => s.size === 1), true);
+  assert.deepEqual(f.render().diagnostic, active.diagnostic);
+  f.options.requested = false; f.options.inactiveReason = "serviceInactive";
+  assert.deepEqual(f.render().diagnostic, { owner: "react", phase: "inactive", reason: "serviceInactive" }); f.flush();
+});
+
+test("Source71 actual main diagnostic attribute serializes only owner phase and finite reason", () => {
+  const shellText = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
+  const shellAst = ts.createSourceFile("storage-shell71.tsx", shellText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const attrs = [], pageProps = [];
+  (function visit(n) { if (ts.isJsxAttribute(n) && n.name.getText(shellAst) === "data-storage-ui-status") attrs.push(n);
+    ts.forEachChild(n, visit); })(shellAst);
+  (function visit(n) { if (ts.isJsxAttribute(n) && n.name.getText(storagePageAst) === "storageUiDiagnostics") pageProps.push(n);
+    ts.forEachChild(n, visit); })(storagePageAst);
+  assert.equal(attrs.length, 1); assert.equal(pageProps.length, 1);
+  const propText = pageProps[0].initializer.expression.getText(storagePageAst);
+  const attrText = attrs[0].initializer.expression.getText(shellAst);
+  const evaluate = new Function("bevyStorageUi", "return (" + propText + ");");
+  const consume = new Function("storageUiDiagnostics", "return (" + attrText + ");");
+  const f = fixture(); f.host.tick(); f.echo({ ready: true, error: "account token UID raw error should stay private" }); f.host.tick();
+  const output = consume(evaluate(f.state));
+  assert.deepEqual(JSON.parse(output), { owner: "react", phase: "prepare", reason: "rendererError" });
+  assert.deepEqual(Object.keys(JSON.parse(output)).sort(), ["owner", "phase", "reason"]);
+  assert.equal(/account|token|UID|raw error|Revision|Generation|uniqueId|session|frame|error/.test(output), false);
+  assert.equal(f.host.pointerContext(), null); assert.equal(f.intents.length, 0);
+});

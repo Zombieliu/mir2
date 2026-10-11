@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source71 original strict Next actual closed production build",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01\\next-build01-config.json",
+    "bytes": 5411,
+    "sha256": "28fcdde2e4a1da58382f0a3fc19267df4547b24805f17c53ede13394e951db23"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01\\source71-final-source-snapshot01.json",
+    "bytes": 21041113,
+    "sha256": "2fb133cc718308cde419f063e8d5b1ff6559cd4ae72ca2d8521b53c6a2a3b96a"
+  },
+  "nodeActual": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source71-node-actual02.json",
+    "bytes": 3182,
+    "sha256": "3b42d3a1f24e2b6d70d7bf857679704038f8e65588af8644eacf0eeee64124bc"
+  },
+  "outer": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source71-storage-first-refusal-20261012-01/next-build01/outer.json",
+    "bytes": 537,
+    "sha256": "453c1f1e651bf08858812264f8d033944cc0689253bcc9ec6172e34e38aa63d2"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source71-storage-first-refusal-20261012-01/next-build01/stdout.log",
+    "bytes": 2026,
+    "sha256": "5b46ef16e35f647144412dda7d3536835dd411c5ee5b0b9ae79a0b30f6fc3ba0"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source71-storage-first-refusal-20261012-01/next-build01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualExit": 0,
+  "builderPid": 86824,
+  "elapsedMs": 86512,
+  "exited": true,
+  "disposed": true,
+  "callerReturnedExit0": true,
+  "originalPostExitSourceAndToolGuardPassed": true,
+  "compiledSeconds": 30.5,
+  "strictTypescriptSeconds": 26.4,
+  "generatedPages": 13,
+  "stderrBytes": 0,
+  "compilerFlagsUnchanged": true,
+  "outputManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01\\next-output-manifest01.json",
+    "bytes": 7497957,
+    "sha256": "38351eece7289c25acff77cdbb5337a5afae32a1b4ff38ebc06477b55ee4cd63"
+  },
+  "outputFileCount": 21036,
+  "outputDirCountIncludingRoot": 631,
+  "newPageClient": {
+    "path": "E:/mir2-player-journey/work/web-source71-storage-first-refusal-next01/mir2-web3/apps/web/.next-web-windows-catchup-source71-20261012-01/static/chunks/app/page-22759b205cfb4b39.js",
+    "bytes": 2595819,
+    "sha256": "d6b9ea3a6b8b00403873467ccdd8e866738e285914246b3971d45ad559f15819"
+  },
+  "mainTypeUnchanged": true,
+  "wasmBuilt": false,
+  "sharedStorageOwnerAccepted": false,
+  "candidateAccepted": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

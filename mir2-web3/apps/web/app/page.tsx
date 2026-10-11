@@ -136,6 +136,7 @@ import { bagBeltGeometryIsCurrent, bagBeltReleasePointIsCurrent, sameBagBeltGeom
 import { BagBeltMoveDispatcher, type BagBeltMoveOwner, type BagBeltMoveReservation,
   type BagBeltMoveCommand } from "../lib/bag-belt-move-dispatcher";
 import { useBevyStorageUi } from "../lib/use-bevy-storage-ui";
+import type { StorageRejectReason } from "../lib/bevy-storage-ui";
 import { useBevyNpcShopUi } from "../lib/use-bevy-npc-shop-ui";
 import type { NpcShopRuntime, NpcShopHostInput, NpcShopIntent, NpcShopStatus } from "../lib/bevy-npc-shop-ui";
 type NpcShopSendProof = Readonly<{ intent: NpcShopIntent; currentJson: string; sourceJson: string;
@@ -19610,6 +19611,8 @@ export default function HomePage() {
 
   const bevyStorageUi = useBevyStorageUi({
     requested: bevyQuestUiRequested && storageServiceActive && !storageCompatibility,
+    inactiveReason: !bevyQuestUiRequested ? "sharedNotRequested" : !storageServiceActive ? "serviceInactive"
+      : storageCompatibility ? "compatibility" : null,
     runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
     read: () => {
       const current = worldRef.current, player = current.entities.find(e => e.objectId === current.playerObjectId);
@@ -19631,14 +19634,25 @@ export default function HomePage() {
       const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
         || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
         || referenceWindowsBlockGameplay() || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+      let eligibilityReason: StorageRejectReason | null = null;
+      const rejectEligibility = (reason: StorageRejectReason) => { eligibilityReason = reason; return false; };
       return { connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
         ownerRevision: equipmentBagOwnerRef.current.ownerRevision, serviceRevision: storageServiceRevisionRef.current,
         open: storageServiceActiveRef.current && bagOpenRef.current && !storageCompatibilityRef.current,
-        eligible: bevyQuestUiRequested && (bevyRuntimeBackend === "webgpu" || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend))
-          && screenRef.current === "game" && current.connected && Boolean(player) && initialSceneAssetsReadyRef.current
-          && equipmentHostSuspendReasonRef.current === null && Boolean(ledger?.ready) && readable && !otherModal
-          && !(current.requireStoragePassword && !current.hasStoragePassword)
-          && document.visibilityState === "visible" && document.hasFocus(),
+        eligible: (bevyQuestUiRequested || rejectEligibility("sharedNotRequested"))
+          && ((bevyRuntimeBackend === "webgpu" || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend)) || rejectEligibility("backendUnavailable"))
+          && (screenRef.current === "game" || rejectEligibility("notGame"))
+          && (current.connected || rejectEligibility("disconnected")) && (Boolean(player) || rejectEligibility("playerUnavailable"))
+          && (initialSceneAssetsReadyRef.current || rejectEligibility("sceneAssetsPending"))
+          && (equipmentHostSuspendReasonRef.current === null || rejectEligibility("hostSuspended"))
+          && (Boolean(ledger?.ready) || rejectEligibility("equipmentNotReady")) && (readable || rejectEligibility("pendingReadUnavailable"))
+          && (!otherModal || rejectEligibility("modalBlocked"))
+          && (!(current.requireStoragePassword && !current.hasStoragePassword) || rejectEligibility("passwordSetupRequired"))
+          && (document.visibilityState === "visible" || rejectEligibility("documentHidden"))
+          && (document.hasFocus() || rejectEligibility("documentUnfocused")),
+        eligibilityReason,
+        openReason: !storageServiceActiveRef.current ? "serviceInactive" : !bagOpenRef.current ? "bagClosed"
+          : storageCompatibilityRef.current ? "compatibility" : null,
         presentation: readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
           document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch"),
         inventory: projection.ok ? projection.inventory : null, storage: projection.ok ? projection.storage : null,
@@ -20001,6 +20015,7 @@ export default function HomePage() {
     <OriginalClientShell
       language={language}
       screen={screen}
+      storageUiDiagnostics={JSON.stringify(bevyStorageUi.diagnostic)}
       npcPurchaseActionDiagnostics={JSON.stringify(npcPurchaseActionStatus)}
       npcShopInputDiagnostics={npcShopService?.supportsBuy ? JSON.stringify({
         source: npcGoldBuySourceFailureRef.current,

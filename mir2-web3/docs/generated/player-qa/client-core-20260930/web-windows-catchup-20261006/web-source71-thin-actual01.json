@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source71 actual original Thin closed execution and finite package acceptance",
+  "actual": {
+    "originalCallerSession": 38822,
+    "callerClosed": true,
+    "callerExitCode": 0,
+    "postExitGuardPassed": true,
+    "builderPid": 83460,
+    "elapsedMs": 41666,
+    "exited": true,
+    "disposed": true
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01/thin01-config.json",
+    "bytes": 6444,
+    "sha256": "913bd7c31f94197cf2ecdb787abd67cd0c8cf56785249be0f21d69c829c4eed8"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01/thin-source-review01.json",
+    "bytes": 16041,
+    "sha256": "cb0bc8bf2cbbf29494c178d5c40a180659d409711c4ea14497121f2f5b74df94"
+  },
+  "actualNodeProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source71-node-actual02.json",
+    "bytes": 3182,
+    "sha256": "3b42d3a1f24e2b6d70d7bf857679704038f8e65588af8644eacf0eeee64124bc"
+  },
+  "actualNextProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source71-next-actual01.json",
+    "bytes": 2853,
+    "sha256": "4c443a9e1c3201960b7bbdaadcdc2d2fb708a7ead1468da8c12891e3e5cdc3df"
+  },
+  "packageManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01/thin-package-manifest01.json",
+    "bytes": 908065,
+    "sha256": "983712f3fedbf547e339aa44b0636fd5bca4c8a6f319c5da956abe4458e0119f"
+  },
+  "sizeReport": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-thin-size-report01.json",
+    "bytes": 81429,
+    "sha256": "021a31cc625a510cd0827813e2543882ca6f9805fd4a64325576196cbf4eb68e"
+  },
+  "package": {
+    "exists": true,
+    "bytes": 285116711,
+    "files": 4182,
+    "directories": 517,
+    "links": 0
+  },
+  "inclusiveBudgetBytes": 377487360,
+  "finiteLocalMap": {
+    "frames": 116,
+    "bytes": 204399,
+    "sourceSha256": "891e6e66b283c7da142af1b1644e45b341245548cec625ec9bff9274011fb66f"
+  },
+  "coreLeaves": 6,
+  "newPage": {
+    "path": "E:/mir2-player-journey/work/web-source71-storage-first-refusal-next01/mir2-web3/apps/web/.next-web-windows-catchup-source71-20261012-01/static/chunks/app/page-22759b205cfb4b39.js",
+    "bytes": 2595819,
+    "sha256": "d6b9ea3a6b8b00403873467ccdd8e866738e285914246b3971d45ad559f15819"
+  },
+  "dependencyWarnings": {
+    "count": 59,
+    "stderrBytes": 0,
+    "detailsPreservedInSizeReport": true,
+    "sameNormalizedMultisetAsSource70": true,
+    "normalization": "only slash/root/Next directory substitution; codes and all message characters retained"
+  },
+  "runtimeStarted": false,
+  "sharedStorageHandoffAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}
