@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "scope": "Source54 original full Next after portable UI schedule initialization fix",
+  "runtimeVersion": "bevy-201eff554f63b9a8",
+  "actualResult": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 22432,
+    "kind": "Source54 original full Next with validated renderer schedule fix",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 97122,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "strictTypescriptPassed": true,
+  "staticPageCount": 13,
+  "declaredInputCount": 19567,
+  "originalCallerPreAndPostInputHashesMatched": true,
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01/full-snapshot.json",
+    "bytes": 6767713,
+    "sha256": "15f72b9f1d4e2cc7b51937db1295c209c932d641fcbf92e19bce47d402a23ae5"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01/config.json",
+    "bytes": 4366,
+    "sha256": "793628a0bdedae86db95d11b95c85109881df822809f4926e155cc9a8cea781e"
+  },
+  "mainTsconfigPreserved": {
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "actualBuildOutputDirectory": "E:\\mir2-player-journey\\mir2-web3\\apps\\web/.next-web-windows-catchup-source54-20261011-01",
+  "rawEvidence": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01/config.json",
+      "bytes": 4366,
+      "sha256": "793628a0bdedae86db95d11b95c85109881df822809f4926e155cc9a8cea781e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01/full-snapshot.json",
+      "bytes": 6767713,
+      "sha256": "15f72b9f1d4e2cc7b51937db1295c209c932d641fcbf92e19bce47d402a23ae5"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01\\outer.json",
+      "bytes": 507,
+      "sha256": "b0ab85df119d4e38f7ca5540163d95ad2946fd27e7e4576c38a40b4b5c5a3d3d"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\next-build01\\stdout.log",
+      "bytes": 2024,
+      "sha256": "172394a2868f0e790e0045bd8f7ada92f8778fb680f7f81ee4f82ec8db51f63d"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.source54-build01.json",
+      "bytes": 5071,
+      "sha256": "5046a68b72ae703cc0bfd1d9bd6be0a987ca235ab9c6a94076f8a80f56fda119"
+    }
+  ],
+  "scopeLimit": "Build flags in original outer describe this finite build call only. Prior browser/network/local gameplay work occurred and is separately recorded. This build result does not establish actual combat, quest reward, save/relogin, mobile device acceptance, Candidate100 or human acceptance.",
+  "thinBuildVerified": false,
+  "gameplayVerified": false,
+  "candidate100": false,
+  "accepted": false
+}

@@ -12,7 +12,7 @@ use crate::npc_shop_ui::{ordinary_gold_surface, action_retires_preentry, NpcShop
     NpcShopUiState, NpcShopUiAction, NpcShopUiStamp, NpcShopUiView, NpcShopUiEffect, NPC_SHOP_VISIBLE_ROWS};
 use crate::crystal_ui::shop_paint::{paint_npc_gold_shop, ShopPaintOptions, ShopPaintLabels,
     ShopPaintPanel, ShopPaintFeedback, ShopPaintControl, ShopPaintGoodCell, SHOP_REQUIRED_SKINS};
-use crate::crystal_ui::item_image::layout_original_item_images;
+use crate::crystal_ui::item_image::{install_original_item_image_layout, OriginalItemImageLayoutSet};
 use crate::portable_quest_ui::{QuestUiFont, QuestUiTargetCamera};
 use crate::pending_operations::PendingLifecycleSet;
 
@@ -371,12 +371,13 @@ fn rect_same(a:bevy::math::Rect,b:bevy::math::Rect) -> bool {
 pub struct Mir2PortableNpcShopUiPlugin;
 impl Plugin for Mir2PortableNpcShopUiPlugin {
     fn build(&self,app:&mut App) {
+        install_original_item_image_layout(app);
         app.init_resource::<NpcShopSurfaceContext>().init_resource::<NpcShopSurfaceReadModel>()
             .init_resource::<NpcShopSurfaceState>().init_resource::<NpcShopSurfacePointerEdges>()
             .init_resource::<NpcShopSurfaceIntentQueue>()
             .add_systems(Startup,spawn_root)
-            .add_systems(Update,(apply_context,process_pointer,render_shop,layout_original_item_images)
-                .chain().after(PendingLifecycleSet::Ingest));
+            .add_systems(Update,(apply_context,process_pointer,render_shop)
+                .chain().after(PendingLifecycleSet::Ingest).before(OriginalItemImageLayoutSet));
     }
 }
 fn spawn_root(mut commands:Commands,camera:Option<Res<QuestUiTargetCamera>>) {

@@ -1,0 +1,122 @@
+{
+  "owner": "Root",
+  "kind": "Actual original Source53 isolated servers HTTP cache behavior before Source54 renderer repair",
+  "observedDate": "2026-10-11",
+  "http": {
+    "playHttpNegative53": [
+      {
+        "url": "http://127.0.0.1:19205/original-ui/Title/30.png",
+        "status": 404,
+        "cacheControl": "no-store",
+        "assetDiagnostic": "original-ui"
+      },
+      {
+        "url": "http://127.0.0.1:19205/api/r2-proxy/original-ui/Title/30.png",
+        "status": 404,
+        "cacheControl": "no-store",
+        "assetDiagnostic": ""
+      },
+      {
+        "url": "http://127.0.0.1:19205/original-map/Source53KnownMissing.png",
+        "status": 404,
+        "cacheControl": "no-store",
+        "assetDiagnostic": "original-map"
+      },
+      {
+        "url": "http://127.0.0.1:19205/generated/original-map-blend/Source53KnownMissing.png",
+        "status": 404,
+        "cacheControl": "no-store",
+        "assetDiagnostic": "original-map-blend"
+      },
+      {
+        "url": "http://127.0.0.1:19205/generated/crystal-packs/full/Source53KnownMissing.png",
+        "status": 404,
+        "cacheControl": "no-store",
+        "assetDiagnostic": "crystal-full-pack"
+      }
+    ],
+    "playHttpUnreachable53": [
+      {
+        "url": "http://127.0.0.1:19205/original-ui/Title/30.png",
+        "status": 502,
+        "cacheControl": "no-store"
+      },
+      {
+        "url": "http://127.0.0.1:19205/api/r2-proxy/original-ui/Title/30.png",
+        "status": 502,
+        "cacheControl": "no-store"
+      }
+    ],
+    "playHttpValid53": [
+      {
+        "url": "http://127.0.0.1:19205/original-ui/Title/30.png",
+        "status": 200,
+        "cacheControl": "public, max-age=31536000, immutable",
+        "contentType": "image/png",
+        "bytes": 1124,
+        "sha256": "e6258cf390c740adb59d109c10009303ff2cd6dbdd19ed23cc3796ed1d14d1b6"
+      },
+      {
+        "url": "http://127.0.0.1:19205/api/r2-proxy/original-ui/Title/30.png",
+        "status": 200,
+        "cacheControl": "public, max-age=31536000, immutable",
+        "contentType": "image/png",
+        "bytes": 1124,
+        "sha256": "e6258cf390c740adb59d109c10009303ff2cd6dbdd19ed23cc3796ed1d14d1b6"
+      },
+      {
+        "url": "http://127.0.0.1:19205/original-ui/Prguse/1084.png",
+        "status": 200,
+        "cacheControl": "public, max-age=31536000, immutable",
+        "contentType": "image/png",
+        "bytes": 27659,
+        "sha256": "34dda8c3f5742a6eaee576267b345818b3c4b380c9a8ff923dedfbbf112fed8a"
+      },
+      {
+        "url": "http://127.0.0.1:19205/original-ui/CArmour/01/13.png",
+        "status": 200,
+        "cacheControl": "public, max-age=31536000, immutable",
+        "contentType": "image/png",
+        "bytes": 3027,
+        "sha256": "6be1930596e1da5a7470ba92007b17015747ff7548584b6669f1785d72d82207"
+      },
+      {
+        "url": "http://127.0.0.1:19205/original-ui/Source53KnownMissing.png",
+        "status": 404,
+        "cacheControl": "no-store",
+        "contentType": "",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "url": "http://127.0.0.1:19205/original-ui/Prguse/2092.png",
+        "status": 200,
+        "cacheControl": "public, max-age=0",
+        "contentType": "image/png",
+        "bytes": 824,
+        "sha256": "1992e747e5bf7ca161c337fcc551dea70ed8d8544065f26d114b268f88e3728e"
+      }
+    ]
+  },
+  "browserNormalRecovery": {
+    "tested": true,
+    "cacheOverrideUsed": false,
+    "serviceWorkerBypassUsed": false,
+    "ordinaryReloadRecoveredTitleAndPrguse": true,
+    "loginAndStartGamePassed": true
+  },
+  "runtimeGameplay": {
+    "version": "bevy-9f53fb80070d4173",
+    "bevyUpdatePanicked": true,
+    "panic": "SystemTypeSetAmbiguity: same system ordered with multiple registrations",
+    "monsterClicked": {
+      "objectId": 206644,
+      "hp": "20/20",
+      "distance": 4
+    },
+    "combatPassed": false,
+    "quest2RewardReceived": false,
+    "candidateAccepted": false
+  },
+  "finalBuildStillPending": true
+}

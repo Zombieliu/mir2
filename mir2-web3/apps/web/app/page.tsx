@@ -62,7 +62,7 @@ import type { ItemActionRef, DisplayItem, DisplayEquipmentItem } from "./compone
 import type { MailPresentation } from "./components/original-client-mail-window";
 import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
 import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
-import type { SpellsRuntime, SpellsIntent, SpellsProof, SpellsOutcome, SpellsOwner, SpellsRawSnapshot } from "../lib/bevy-spells-ui";
+import { sameSpellsOwner, type SpellsRuntime, type SpellsIntent, type SpellsProof, type SpellsOutcome, type SpellsOwner, type SpellsRawSnapshot } from "../lib/bevy-spells-ui";
 import { projectCharacterModel } from "../lib/bevy-character-model";
 import { type CharacterRuntime, type CharacterIntent, type CharacterCommandProof, type EquipmentOwnerProof as SharedEquipmentOwnerProof } from "../lib/bevy-character-ui";
 import { projectSelfAppearance, sameSelfAppearance, type SelfAppearance } from "../lib/world-model/character-appearance";
@@ -2234,6 +2234,10 @@ export default function HomePage() {
   const combatIngressRef=useRef<ReturnType<typeof useBevyCombatInput>|null>(null);
   const combatApproachIntentRef = useRef<QueuedMoveIntent | null>(null);
   const combatRawRef=useRef<{snapshot:Pick<GatewayWorldSnapshot,"playerObjectId"|"knownSkills"|"entities"|"mapFileName">;owner:CombatOwner}|null>(null);
+  // Authoritative learned data belongs to a physical delivery, independently
+  // of the bag/storage UI epoch that happens to exist when it arrives.
+  const combatBaselineSourceRef=useRef<{socket:WebSocket;session:object;connectionGeneration:number;sessionGeneration:number;
+    sceneRevision:number;snapshotVersion:number;snapshot:Pick<GatewayWorldSnapshot,"playerObjectId"|"knownSkills"|"entities"|"mapFileName">}|null>(null);
   const combatPointerRef=useRef<{cursor:[number,number]|null;hovered:string|null;lock:boolean}>({cursor:null,hovered:null,lock:false});
   const combatModePhysicalRef = useRef<{ socket: WebSocket; connectionGeneration: number; sessionGeneration: number; generation: number } | null>(null);
   const combatModeRawRef = useRef<{ owner: CombatModeOwner; revision: number; attackMode: number | null; petMode: number | null } | null>(null);
@@ -6181,7 +6185,7 @@ export default function HomePage() {
     // cells and receipts cannot own the next character; request IDs stay spent.
     pendingStorageRequestsRef.current.clear();
     setMailboxOpen(false);mailRawRef.current=null;
-    combatIngressRef.current?.withdraw();combatRawRef.current=null;combatMastersRef.current.clear();combatPointerRef.current={cursor:null,hovered:null,lock:false};
+    combatIngressRef.current?.withdraw();combatRawRef.current=null;combatBaselineSourceRef.current=null;combatMastersRef.current.clear();combatPointerRef.current={cursor:null,hovered:null,lock:false};
     spellsIngressRef.current?.withdraw();
     spellsRawSnapshotRef.current=null;
     equipmentHostSuspendReasonRef.current = "connectionUnavailable";
@@ -13094,6 +13098,18 @@ export default function HomePage() {
     return {connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration,
       ownerRevision:equipmentBagOwnerRef.current.ownerRevision,playerObjectId};
   }
+  function readCurrentCombatBaseline() {
+    const source=combatBaselineSourceRef.current,session=equipmentStartGameRef.current,current=worldRef.current;
+    const owner=currentSpellsOwner(Number(current.playerObjectId));
+    if(!source||!session||!owner||source.socket!==socketRef.current||source.socket.readyState!==WebSocket.OPEN
+      ||source.session!==session||source.connectionGeneration!==owner.connectionGeneration||source.sessionGeneration!==owner.sessionGeneration
+      ||source.sceneRevision!==questSceneRevisionRef.current||source.snapshotVersion!==worldSnapshotVersionRef.current
+      ||source.snapshotVersion<=session.afterSnapshotVersion||!current.connected
+      ||source.snapshot.playerObjectId!==owner.playerObjectId||!current.mapFileName||source.snapshot.mapFileName!==current.mapFileName)return null;
+    // This adopts an authenticated physical source into the current controller;
+    // it does not rename the older owner-qualified cache or replay input edges.
+    return {snapshot:{playerObjectId:source.snapshot.playerObjectId,knownSkills:source.snapshot.knownSkills},owner};
+  }
   function currentHeroRawPhysical(): HeroPhysical | null {
     const socket = socketRef.current, session = equipmentStartGameRef.current;
     return socket && socket.readyState === WebSocket.OPEN && session
@@ -13169,6 +13185,9 @@ export default function HomePage() {
     if (event.type === "packet" && event.packet === "NewMagic" && event.payload?.hero !== true) {
       questSkillsBaselineCurrentRef.current = false;
     }
+    if(event.type==="packet"&&["NewMagic","RemoveMagic","MagicLeveled"].includes(event.packet??"")&&event.payload?.hero!==true){
+      combatBaselineSourceRef.current=null;combatIngressRef.current?.withdraw();
+    }
     if(event.type==="packet"&&event.packet){
       const owner=currentSpellsOwner(combatRawRef.current?.snapshot.playerObjectId??Number(worldRef.current.playerObjectId)),payload=event.payload??{};
       if(owner&&["ObjectMonster","NewMonsterInfo"].includes(event.packet)&&Number.isInteger(payload.objectId)&&Number(payload.objectId)>0&&Number.isInteger(payload.masterObjectId)&&Number(payload.masterObjectId)>=0&&Number(payload.masterObjectId)<=0xffffffff){
@@ -13177,6 +13196,7 @@ export default function HomePage() {
       if(["ObjectRemove","ObjectHide"].includes(event.packet))combatMastersRef.current.delete(String(payload.objectId));
     }
     if(event.type==="worldSnapshot") {
+      combatBaselineSourceRef.current=null;
       const snapshot=event.payload as GatewayWorldSnapshot,owner=currentSpellsOwner(snapshot.playerObjectId);
       // Raw spells may observe a snapshot before world/equipment projection.
       // Grant Quest's complete-world proof only after that projection succeeds.
@@ -13188,10 +13208,6 @@ export default function HomePage() {
         const captured=JSON.parse(JSON.stringify(raw)) as SpellsRawSnapshot;
         spellsRawSnapshotRef.current={snapshot:captured,owner:{...owner}};
         spellsIngressRef.current?.observeSnapshot(captured,owner);
-        if(worldRef.current.playerObjectId===String(snapshot.playerObjectId)){
-          combatRawRef.current={snapshot:JSON.parse(JSON.stringify({playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills,entities:snapshot.entities,mapFileName:snapshot.mapFileName})),owner:{...owner}};
-          combatIngressRef.current?.observeSnapshot({playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills},owner);
-        }
       }
     } else if(event.type==="packet"&&event.packet&&["Magic","MagicCast","MagicDelay"].includes(event.packet)) {
       questSkillsBaselineCurrentRef.current = false;
@@ -13275,6 +13291,9 @@ export default function HomePage() {
 
   function applyNpcGoldBuyGatewaySnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number, fullEconomy = false, qualifiedDisplay = false) {
     const beforeInventorySnapshot = equipmentSnapshotRef.current;
+    const combatSocket=socketRef.current,combatSession=equipmentStartGameRef.current;
+    const combatScene=questSceneRevisionRef.current,combatVersion=worldSnapshotVersionRef.current;
+    combatBaselineSourceRef.current=null;
     const stage = npcGoldBuyInventoryRef.current.begin(currentSpellsOwner(snapshot.playerObjectId));
     let complete = false;
     let inventory: ReturnType<typeof projectBevyBagModel> | null = null;
@@ -13297,6 +13316,19 @@ export default function HomePage() {
             sessionGeneration: owner.sessionGeneration, sceneRevision: questSceneRevisionRef.current,
             playerObjectId: owner.playerObjectId, mapFileName };
           questSkillsBaselineCurrentRef.current = Array.isArray(snapshot.knownSkills);
+          if(combatSocket&&combatSocket===socketRef.current&&combatSocket.readyState===WebSocket.OPEN
+            &&combatSession&&combatSession===equipmentStartGameRef.current
+            &&combatSession.connectionGeneration===connectionGeneration&&combatSession.sessionGeneration===owner.sessionGeneration
+            &&session?.connectionGeneration===connectionGeneration&&session?.sessionGeneration===owner.sessionGeneration
+            &&combatScene===questSceneRevisionRef.current&&combatVersion===worldSnapshotVersionRef.current
+            &&combatVersion>combatSession.afterSnapshotVersion&&snapshot.mapFileName===worldRef.current.mapFileName){
+            const captured=JSON.parse(JSON.stringify({playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills,
+              entities:snapshot.entities,mapFileName:snapshot.mapFileName}));
+            combatBaselineSourceRef.current={socket:combatSocket,session:combatSession,connectionGeneration,
+              sessionGeneration:owner.sessionGeneration,sceneRevision:combatScene,snapshotVersion:combatVersion,snapshot:captured};
+            combatRawRef.current={snapshot:captured,owner:{...owner}};
+            combatIngressRef.current?.observeSnapshot({playerObjectId:captured.playerObjectId,knownSkills:captured.knownSkills},owner);
+          }
         }
       }
     } finally {
@@ -19626,17 +19658,28 @@ export default function HomePage() {
   const mailPresentation=currentMailCompatibility??{key:`mail-fallback-${mailRenderOwner?.connectionGeneration}-${mailRenderOwner?.sessionGeneration}-${mailRenderOwner?.ownerRevision}-${mailSceneRevisionRef.current}`,
     view:"inbox" as const,selectedId:null,contentKey:null,recipient:"",readDispatched:false};
   const bevyCombatInput=useBevyCombatInput({runtimeGeneration:bevyRuntimeGeneration,runtimeRef,
-    readBaseline:()=>combatRawRef.current?{snapshot:{playerObjectId:combatRawRef.current.snapshot.playerObjectId,knownSkills:combatRawRef.current.snapshot.knownSkills},owner:combatRawRef.current.owner}:null,
+    readBaseline:readCurrentCombatBaseline,
     read:()=>{
       const current=worldRef.current,raw=combatRawRef.current,owner=currentSpellsOwner(Number(current.playerObjectId)),self=currentAuthoritativeSelf(current);
-      if(!owner||!self||!raw||Number(current.playerObjectId)!==owner.playerObjectId||!current.mapFileName||current.mapFileName!==raw.snapshot.mapFileName)return {owner,facts:null};
+      if(!readCurrentCombatBaseline()||!owner||!self||!raw||Number(current.playerObjectId)!==owner.playerObjectId||!current.mapFileName||current.mapFileName!==raw.snapshot.mapFileName)return {owner,facts:null};
       const sources=new Map(raw.snapshot.entities.map(e=>[String(e.objectId),e as unknown as Record<string,unknown>]));
       const actor=(e:WorldEntity):CombatActor=>{const source=sources.get(e.objectId),master=combatMastersRef.current.get(e.objectId);return {objectId:e.objectId,kind:e.kind,x:e.x,y:e.y,direction:e.direction??null,dead:e.dead===true,ai:e.ai??0,masterObjectId:master&&master.owner.connectionGeneration===owner.connectionGeneration&&master.owner.sessionGeneration===owner.sessionGeneration&&master.owner.ownerRevision===owner.ownerRevision&&master.owner.playerObjectId===owner.playerObjectId?master.master:Number.isInteger(source?.masterObjectId)?Number(source!.masterObjectId):0};};
       const source=sources.get(self.objectId),flag=(key:string)=>typeof source?.[key]==="boolean"?source[key] as boolean:null;
       const active=document.activeElement,editing=active instanceof HTMLElement&&(active.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
       const modal=heroUiBlocksGameplay()||skillBarPointerHeldRef.current||otherPlayerUiBlocksInput()||combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
-      // The GPU/lean backend draws its scene on the existing map canvas, independently of shared UI.
-      const visible=Array.from(document.querySelectorAll<HTMLElement>(webGl2SharedCanvasPrototype?".game-world-composite":"#mir2-web3-canvas, .webgl2-map-atlas-canvas")).some(surface=>{const rect=surface.getBoundingClientRect(),style=getComputedStyle(surface);return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden"&&Number(style.opacity)>0;});
+      // Shared UI and the DOM map fallback can hide the main canvas while the world remains visible.
+      const surfaceVisible=(surface:HTMLElement)=>{
+        const rect=surface.getBoundingClientRect();
+        if(rect.width<=0||rect.height<=0)return false;
+        for(let ancestor:HTMLElement|null=surface;ancestor;ancestor=ancestor.parentElement){
+          const style=getComputedStyle(ancestor);
+          if(style.display==="none"||style.visibility==="hidden"||style.visibility==="collapse"||Number(style.opacity)<=0)return false;
+        }
+        return true;
+      };
+      const visible=Array.from(document.querySelectorAll<HTMLElement>(webGl2SharedCanvasPrototype?".game-world-composite":"#mir2-web3-canvas, .webgl2-map-atlas-canvas")).some(surfaceVisible)
+        ||Array.from(document.querySelectorAll<HTMLImageElement>('.game-world-composite[aria-hidden="false"] img.scene-backdrop-sprite, .game-world-composite[aria-hidden="false"] img.scene-map-object-sprite'))
+          .some(image=>image.complete&&image.naturalWidth>0&&image.naturalHeight>0&&surfaceVisible(image));
       const target=current.entities.find(e=>e.objectId===current.selectedObjectId);
       const routeKey=JSON.stringify({map:current.mapFileName,source:[self.x,self.y],target:target?[target.objectId,target.x,target.y]:null,occupancy:current.entities.map(e=>[e.objectId,e.x,e.y,e.dead]),blocked:movementBlockedStepsRef.current});
       let cache=combatRouteCacheRef.current,neighbours:CombatFacts["neighbours"]=cache?.key===routeKey&&cache.region===current.originalMapRegion?cache.rows:[];
@@ -19820,6 +19863,9 @@ export default function HomePage() {
     <OriginalClientShell
       language={language}
       screen={screen}
+            combatInputDiagnostics={JSON.stringify({...bevyCombatInput.diagnostics(),baseline:{sourcePresent:combatBaselineSourceRef.current!==null,
+              sourceCurrent:readCurrentCombatBaseline()!==null,cachedOwnerMatches:Boolean(combatRawRef.current&&sameSpellsOwner(combatRawRef.current.owner,currentSpellsOwner(Number(worldRef.current.playerObjectId))??{} as CombatOwner)),
+              skillsArray:Array.isArray(combatBaselineSourceRef.current?.snapshot.knownSkills)}})}
       runtimePhase={runtimePhase}
       runtimeMessage={runtimeMessage}
       wsState={wsState}

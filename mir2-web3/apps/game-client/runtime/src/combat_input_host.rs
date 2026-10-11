@@ -1,5 +1,39 @@
 //! Independent ordinary combat input host; installed on every renderer backend.
 use mir2_client_bevy::combat_input::{CombatController, CombatEdge, CombatOutput, CombatSnapshot};
+#[cfg(any(target_arch = "wasm32", test))]
+#[derive(Clone, Copy, Default, PartialEq, Debug)]
+struct CombatHostClock {
+    base_ms: u64,
+    frame_ms: f64,
+}
+#[cfg(any(target_arch = "wasm32", test))]
+impl CombatHostClock {
+    fn now(self, frame_ms: f64) -> u64 {
+        let delta = (frame_ms - self.frame_ms).max(0.);
+        self.base_ms
+            .saturating_add(delta.min(u64::MAX as f64) as u64)
+    }
+    fn reanchor(&mut self, incoming_ms: u64, frame_ms: f64) {
+        // A JS snapshot may arrive between Bevy frames. Replacing the frame anchor
+        // must not undo time already delivered to the controller by the last frame.
+        self.base_ms = incoming_ms.max(self.now(frame_ms));
+        self.frame_ms = frame_ms;
+    }
+}
+#[cfg(any(target_arch = "wasm32", test))]
+fn ingest_combat_snapshot(
+    state: &mut CombatController,
+    clock: &mut CombatHostClock,
+    snapshot: CombatSnapshot,
+    frame_ms: f64,
+) -> bool {
+    let incoming_ms = snapshot.now_ms;
+    let accepted = state.ingest(snapshot);
+    if accepted {
+        clock.reanchor(incoming_ms, frame_ms);
+    }
+    accepted
+}
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
@@ -12,13 +46,11 @@ mod web {
      static SINK:RefCell<Option<Function>>=const{RefCell::new(None)};
      static STARTED:Cell<bool>=const{Cell::new(false)};
      static FRAME:Cell<u64>=const{Cell::new(0)};
-     static ANCHOR:Cell<(u64,f64)>=const{Cell::new((0,0.))};
+     static ANCHOR:Cell<CombatHostClock>=const{Cell::new(CombatHostClock{base_ms:0,frame_ms:0.})};
      static TIME:Cell<f64>=const{Cell::new(0.)};
     }
     fn now() -> u64 {
-        let (base, at) = ANCHOR.with(Cell::get);
-        let delta = (TIME.with(Cell::get) - at).max(0.);
-        base.saturating_add(delta.min(u64::MAX as f64) as u64)
+        ANCHOR.with(Cell::get).now(TIME.with(Cell::get))
     }
     fn publish(outputs: Vec<CombatOutput>) {
         // Release every Rust mutable borrow before invoking JS. JS may capture a new snapshot.
@@ -90,10 +122,13 @@ mod web {
             }
             return false;
         };
-        let at = snapshot.now_ms;
-        let accepted = STATE.with(|s| s.borrow_mut().ingest(snapshot));
+        let mut clock = ANCHOR.with(Cell::get);
+        let frame_ms = TIME.with(Cell::get);
+        let accepted = STATE.with(|s| {
+            ingest_combat_snapshot(&mut s.borrow_mut(), &mut clock, snapshot, frame_ms)
+        });
         if accepted {
-            ANCHOR.with(|a| a.set((at, TIME.with(Cell::get))));
+            ANCHOR.with(|a| a.set(clock));
         }
         accepted
     }

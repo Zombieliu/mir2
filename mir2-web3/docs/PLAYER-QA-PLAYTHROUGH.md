@@ -1,5 +1,33 @@
 # Player-QA playthrough loop
 
+## Source60：Web 实际持续战斗、背包拖动与保存重登通过（2026-10-11）
+
+当前本地试玩入口为 http://127.0.0.1:19205/，运行 Source60 独立包。普通账号登录/StartGame 后，仅一次正常点击稻草人，HP 20→17→0、倒下及 SunPotion 掉落成立；正常拾取收到 You gained an item，角色从1级升到2级。共享画布聚焦的 I/Q 与背包 X 均正常。共享 Bevy Ready 背包内 Candle 从第4格移到第二行第1格（0-based 3→8）；(HP)DrugSmall x2 从背包移到快捷栏第2格，正常键2使用后剩1。用药时满血，只证明消耗，不称验证治疗。
+
+正常 Alt+X 保存退出、重新登录并 StartGame 后，实际读回2级、HP24/24、200金币、292,614、Candle 新格位及 Torch 8/8 提示，快捷栏 SunPotion2 与 (HP)DrugSmall1；原任务 GoldenPendant/CopperRing 的实际提示和两项已完成任务也读回。全过程使用正常界面输入，无 QA/admin 指令、直接游戏/WASM 内部 API 或焦点覆盖；本次刷新后的浏览器 error 为0。Source57的正常任务交付与奖励闭环为历史独立证据，本轮没有重新提交同一已完成任务。
+
+修复覆盖资源代理失败缓存、四类物品 UI 重复 Bevy layout 注册、共享画布世界目标命中、战斗原始来源更新、宿主时钟重锚倒退、Winit 前的键盘准入，以及 Bag wire identity 和 Bag→Belt 仲裁。Source59背包关闭已通过而同背包拖动失败；Source60只改非 Belt 释放的 Up/Cancel 判定，保留 Belt 拒绝、owner/geometry/callback、proof 与未知发送结果门槛。原 Node70/70（0失败/0跳过）、严格 Next实际106998ms（TypeScript12.0s/13页）、原 Thin实际20512ms全部exit0/exited/disposed。Next19582、Thin55329声明输入由原调用者前后校验；新包7331普通文件/778目录/0链接、374002944B≤原377487360B，运行副本全量0差异。Source54与Source58已执行且未变的 Rust/renderer 证据仅限定承接，本轮没有新 Rust 或 Native 编译。
+
+Source59首轮 Next 的编译exit0但调用者因生成 next-env 漂移exit1，明确保留为未接受；修正生成路径副本后的第二轮通过。既有失败、旧产物及用户4932B主tsconfig保留，外来simulation/Cargo/后端/文档正文不纳入本轮提交。尚未穷尽商店、仓库、装备等操作与各面板变体，移动真机、多端完整1:1及人类前端 Accepted 仍开放；overallPercentage=null、Candidate100=false、goal active。下一项继续普通 NPC 商店/仓库与装备实测及移动端输入复用。
+
+证据：[Source60实际试玩](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-ui-actual01.json)、[重登物品](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-relogin-inventory01.png)、[持续击杀](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-sustained-kill01.png)、[70项回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-node-actual01.json)、[Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-next-actual01.json)、[独立包](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-thin-actual01.json)。本轮 Git 推送以随后 publication 实际记录为准，下方旧 pending/未实测描述仅为历史。
+
+## Source57：Web 实际任务、领奖、保存重登闭环通过（2026-10-11）
+
+Root 在获准的本地独立 Web 包（19205）通过普通登录/StartGame、两只稻草人击杀、SunPotion 地面拾取、服务器 GingerTea 获取提示、助理 Jane 正常交付 The CraftLady's Request。实际收到 Quest completed、EXP 30、Gold 200、GoldenPendant x1、CopperRing x1。Alt+X 正常退出后重新登录并 StartGame；原位置 284,607、200 金币和两件奖励的实际 tooltip 均读回。全过程没有 QA/admin 指令或直接调用游戏/WASM 内部 API。
+
+当前 Source57 原 Node 53 项、严格 Next 和 Thin 构建通过；共享背包 Ready 正常显示。持续攻击实测仍只命中一次，需再次正常点击；Source58 正在修复宿主时钟帧间重锚倒退，尚未以新产物证明单次选择持续击杀。整体百分比仍不声明，Candidate100 和人类前端 Accepted 尚未达到。
+
+证据：[Source57 实际闭环](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-ui-actual01.json)、[重登奖励](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-relogin-reward01.png)、[重登戒指](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-relogin-ring01.png)。下方旧“未操作/待授权/构建中”均仅为历史。
+
+## Source54：已恢复本地实测，战斗启动崩溃修复待新包验证（2026-10-11）
+
+用户已授权启动本地网关/Web及浏览器操作。Source53 普通刷新恢复资源、登录、进入地图及读回既有装备/任务通过；Source51 首次任务与普通保存退出重登有实际结果。当前稻草人保持20/20，Bevy Update 因重复布局系统及函数排序崩溃，打怪和第二任务领奖未通过。
+
+Source54 已统一 item image layout 注册；组合24种安装顺序、4种单独安装及原几何检查5项通过，相邻界面130项通过、2项原默认跳过。原三 renderer 构建进行中，后续路线为新 Next/独立包→正常登录→稻草人战斗→姜茶任务领奖→正常保存退出重登。不使用QA发物品或调试传送完成玩法验证；移动真机和人类验收仍开放。
+
+证据：[实际资源与浏览器检查](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source53-local-cache-actual01.json)、[实际 Rust 回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source54-schedule-rust-actual01.json)。以下旧“暂不操作界面”是历史指令，已被最新授权取代。
+
 ## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
 
 最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。

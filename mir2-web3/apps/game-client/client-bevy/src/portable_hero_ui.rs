@@ -7,7 +7,7 @@ use crate::{hero_ingress::HeroScope, hero_model::HeroModel, inventory::{Inventor
 use crate::crystal_ui::{
     amount_input::CrystalAmountInput, bag_paint::{self, BagCellPolicy, BagPaintAction, BagPaintOptions},
     character_materials::CrystalCharacterWingMaterials, hero_dialog::{self, geometry::HeroWindow, render::HeroAction, HeroDialogModel, HeroPage},
-    item_image::layout_original_item_images, shared_hud::absolute_node, spec::CrystalRect,
+    item_image::{install_original_item_image_layout, OriginalItemImageLayoutSet}, shared_hud::absolute_node, spec::CrystalRect,
 };
 use mir2_protocol::{ClientPacket, MirGridType};
 const MAX_SAFE: u64 = 9_007_199_254_740_991;
@@ -366,9 +366,9 @@ fn button_visuals(state:Res<HeroUiState>,assets:Option<Res<AssetServer>>,mut but
     if let Some(assets)=assets{for(button,mut image)in &mut buttons{image.image=assets.load(button.image_path(&state.ui));}}
 }
 pub struct Mir2PortableHeroUiPlugin;
-impl Plugin for Mir2PortableHeroUiPlugin{fn build(&self,app:&mut App){app.init_resource::<HeroUiContext>().init_resource::<HeroUiReadModel>().init_resource::<HeroUiState>()
+impl Plugin for Mir2PortableHeroUiPlugin{fn build(&self,app:&mut App){install_original_item_image_layout(app);app.init_resource::<HeroUiContext>().init_resource::<HeroUiReadModel>().init_resource::<HeroUiState>()
     .init_resource::<HeroInputQueue>().init_resource::<HeroIntentQueue>().add_systems(Update,(reduce,render,button_visuals).chain().in_set(HeroPaintSet)
-        .after(crate::pending_operations::PendingLifecycleSet::Ingest).before(layout_original_item_images));}}
+        .after(crate::pending_operations::PendingLifecycleSet::Ingest).before(OriginalItemImageLayoutSet));}}
 
 #[cfg(test)]
 mod tests {

@@ -15,7 +15,7 @@ use crate::crystal_ui::bag_paint::{
     paint_crystal_inventory_with_layout, BagCellPolicy, BagPaintAction, BagPaintCell,
     BagPaintGridViewport, BagPaintLayout, BagPaintOptions,
 };
-use crate::crystal_ui::item_image::{layout_original_item_images, OriginalItemImage};
+use crate::crystal_ui::item_image::{install_original_item_image_layout, OriginalItemImage, OriginalItemImageLayoutSet};
 use crate::crystal_ui::item_tooltip::{CrystalItemTooltipDocument, CrystalItemTooltipLine, CrystalItemTooltipSection};
 use crate::crystal_ui::widget::{spawn_crystal_item_hint_document, CrystalItemHint,
     CrystalItemHintOverlayText, CRYSTAL_HINT_Z_INDEX};
@@ -819,6 +819,7 @@ pub struct Mir2PortableBagUiPlugin;
 
 impl Plugin for Mir2PortableBagUiPlugin {
     fn build(&self, app: &mut App) {
+        install_original_item_image_layout(app);
         app.init_resource::<BagUiHostContext>()
             .init_resource::<BagUiReadModel>()
             .init_resource::<BagUiState>()
@@ -828,9 +829,9 @@ impl Plugin for Mir2PortableBagUiPlugin {
             .add_systems(Startup, spawn_bag_root)
             .add_systems(
                 Update,
-                (apply_bag_context, process_bag_pointer_edges, render_bag_ui,
-                    layout_original_item_images)
-                    .chain().after(PendingLifecycleSet::Ingest),
+                (apply_bag_context, process_bag_pointer_edges, render_bag_ui)
+                    .chain().after(PendingLifecycleSet::Ingest)
+                    .before(OriginalItemImageLayoutSet),
             );
     }
 }

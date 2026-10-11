@@ -194,6 +194,7 @@ type HeldScenePointer = {
   dispatched: boolean;
   tileX?: number;
   tileY?: number;
+  worldTarget?: { kind: "entity" | "drop"; objectId: string };
   fishingGesture?: WorldFishingGesture;
 };
 
@@ -700,9 +701,11 @@ export function OriginalClientShell({
   onSubmitNpcInput,
   onSelectCharacter,
   onEnterWorld,
+  combatInputDiagnostics,
   targetDistance,
   entityKindClassName,
 }: OriginalClientShellProps & {onCombatUiHeld?: (channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",token:object,held:boolean)=>void;
+  combatInputDiagnostics?: string;
   bevyMailPageReady?:boolean;getBevyMailPointerContext?:()=>MailPointerContext|null;onBevyMailPointer?:(edge:MailPointerEdge)=>boolean;
   bevyMailComposeReady?:boolean;bevyMailComposePending?:boolean;bevyMailTextContext?:ReturnType<MailComposeHost['textContext']>;
   getBevyMailComposeBusy?:()=>number;
@@ -1581,8 +1584,10 @@ export function OriginalClientShell({
       });
     }
 
-    window.addEventListener("keydown", handleShortcutKey);
-    return () => { window.removeEventListener("keydown", handleShortcutKey); };
+    // Winit cancels the canvas target's browser default. Route the existing
+    // owned shortcut before that target listener, retaining every gameplay gate.
+    window.addEventListener("keydown", handleShortcutKey, true);
+    return () => { window.removeEventListener("keydown", handleShortcutKey, true); };
   }, [
     screen,
     selectedEntity,
@@ -3550,6 +3555,32 @@ export function OriginalClientShell({
     };
   }
 
+  function sceneWorldObjectTarget(clientX: number, clientY: number): HeldScenePointer["worldTarget"] {
+    const frame = stageFrameRef.current;
+    if (!frame || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
+    const layers = document.elementsFromPoint(clientX, clientY);
+    // The shared canvas owns the physical pointer. Inspect its visible world
+    // underlay only after the existing surface router has admitted a world hold.
+    if (layers[0]?.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)) return;
+    for (const layer of layers.slice(1)) {
+      if (!frame.contains(layer)) continue;
+      if (layer.closest(".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar")) return;
+      const hit = layer.closest<HTMLElement>(".ground-drop-marker, .entity-nameplate, .entity-sprite-hit");
+      if (!hit || !frame.contains(hit)) continue;
+      const target = hit.classList.contains("entity-sprite-hit")
+        ? hit.closest<HTMLElement>(".entity-sprite-stack[data-ui-interactive='true'][data-object-id]")
+        : hit;
+      if (!target || !frame.contains(target) || !target.dataset.objectId) continue;
+      if (hit.classList.contains("ground-drop-marker")) return { kind: "drop", objectId: target.dataset.objectId };
+      if (target.dataset.uiInteractive === "true") return { kind: "entity", objectId: target.dataset.objectId };
+    }
+  }
+
+  function retainSceneWorldObjectTarget(event: { clientX: number; clientY: number }, before: HeldScenePointer | null) {
+    const held = heldScenePointerRef.current;
+    if (held && held !== before) held.worldTarget = sceneWorldObjectTarget(event.clientX, event.clientY);
+  }
+
   function committedViewportPlayerPosition() {
     const stage = stageFrameRef.current;
     if (!stage) return null;
@@ -3736,6 +3767,7 @@ export function OriginalClientShell({
     if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") return;
     if (!sceneInteractionReady) return;
+    if (pointer.worldTarget) return;
     const tile = tileFromScenePoint(pointer.sceneX, pointer.sceneY);
     if (!tile) return;
 
@@ -3751,6 +3783,11 @@ export function OriginalClientShell({
     if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") return;
     if (!sceneInteractionReady) return;
+    if (pointer.worldTarget) {
+      if (pointer.worldTarget.kind === "drop") onPickGroundDrop(pointer.worldTarget.objectId);
+      else onActivateEntity(pointer.worldTarget.objectId);
+      return;
+    }
     const tile =
       pointer.tileX !== undefined && pointer.tileY !== undefined
         ? { x: pointer.tileX, y: pointer.tileY }
@@ -4019,6 +4056,13 @@ export function OriginalClientShell({
     const current = phase === "up" && event.timeStamp >= lease.startedAt && event.pointerType === lease.pointerType
       && sameBagBeltGeometry(lease.geometry, geometry) && lease.geometry.revision === geometry?.revision
       && lease.node.isConnected && lease.sourceRect.every((n, i) => n === bagBeltRect(lease.node)[i]) && bagBeltCallbacksMatch(lease);
+    // A non-Belt release belongs to the original Bag Up route. Measured Belt
+    // endpoints still cancel when their actual button hit or proof is rejected.
+    const releaseInBelt = Boolean(current && geometry && distance >= 4 && geometry.targets.some(t =>
+      event.clientX >= geometry.stageRect[0] + t.left * geometry.scale
+      && event.clientX < geometry.stageRect[0] + (t.left + t.width) * geometry.scale
+      && event.clientY >= geometry.stageRect[1] + t.top * geometry.scale
+      && event.clientY < geometry.stageRect[1] + (t.top + t.height) * geometry.scale));
     const target = current && geometry && distance >= 4 ? bagBeltTargetAtClientPoint(geometry, event.clientX, event.clientY) : null;
     let armed = false;
     try {
@@ -4028,7 +4072,7 @@ export function OriginalClientShell({
         armed = armed && !bagBeltPointerRef.current && !bagBeltArmedSharedRef.current
           && sameBagBeltGeometry(geometry, refreshBagBeltGeometry()) && bagBeltCallbacksMatch(lease);
       }
-      if (lease.owner === "bevy" && (!current || distance >= 4 && !armed)) bagBeltRejectedTerminalRef.current = { pointerId: lease.pointerId, startedAt: lease.startedAt };
+      if (phase === "up" && lease.owner === "bevy" && (!current || releaseInBelt && !armed)) bagBeltRejectedTerminalRef.current = { pointerId: lease.pointerId, startedAt: lease.startedAt };
       if (armed && lease.owner === "bevy") bagBeltArmedSharedRef.current = lease;
       else if (armed && lease.source && geometry && target) lease.callbacks.onBagToBeltMove?.(lease.source, target, lease.proof, geometry);
       else if (current && lease.owner === "react" && distance < 4 && event.clientX >= lease.sourceRect[0] && event.clientX < lease.sourceRect[0] + lease.sourceRect[2]
@@ -4767,6 +4811,7 @@ export function OriginalClientShell({
       if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
       const held = heldScenePointerRef.current;
       if (!held) return;
+      if (held.worldTarget) return;
       if (!held.dispatched && Date.now() - held.startedAt < CRYSTAL_MOVE_INPUT_INTERVAL_MS) {
         return;
       }
@@ -4869,6 +4914,7 @@ export function OriginalClientShell({
     <main
       className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
       data-layout-profile={clientProfile.layout}
+      data-combat-input-status={combatInputDiagnostics}
       data-input-profile={clientProfile.input}
       data-shared-touch-quest-open={
         screen === "game" && clientProfile.input === "touch" && bevyQuestUiReady && bevyQuestUiCapturesPointer
@@ -4915,7 +4961,8 @@ export function OriginalClientShell({
           data-weight-bar-owner={weightDrawPlanOwner ? "canvas2d" : weightBarOwner ? "bevy" : "react"}
           data-bag-owner-revision={bevyBagOwnerRevision}
           onPointerDownCapture={(event: ReactPointerEvent<HTMLDivElement>) => {
-             const before = heldScenePointerRef.current; handleSharedUiPointer(event, "down"); handleSceneWorldPointerDown(event, before);
+             const before = heldScenePointerRef.current; handleSharedUiPointer(event, "down");
+             retainSceneWorldObjectTarget(event, before); handleSceneWorldPointerDown(event, before);
            }}
           onPointerMoveCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "move")}
           onLostPointerCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "cancel")}

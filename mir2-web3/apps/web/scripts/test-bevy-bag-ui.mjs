@@ -11,7 +11,8 @@ function load(path, requireLocal = () => { throw new Error("unexpected import");
   return module.exports;
 }
 const identity = load("../lib/world-model/item-identity.ts");
-const bag = load("../lib/bevy-bag-ui.ts", () => identity);
+const bagBelt = load("../lib/bag-belt-gesture.ts");
+const bag = load("../lib/bevy-bag-ui.ts", path => path === "./bag-belt-gesture" ? bagBelt : identity);
 const model = () => ({ capacity: 46, gold: 200, items: [{ container: 0, slot: 0, uniqueId: 0 }] });
 const presentation = { logicalWidth: 1024, logicalHeight: 768, stageCssScale: 1, touch: false };
 
@@ -180,6 +181,50 @@ test("pointer down origin survives crossing the bag, including same-frame pulse"
   assert.equal(router.edge("up", 1, 720, 90).origin, "world");
   const down = router.down(context, 1, 2, 400, 450), up = router.edge("up", 1, 400, 450);
   assert.equal(down.origin, "world"); assert.equal(up.origin, "world"); assert.ok(up.sequence > down.sequence);
+});
+
+test("Belt-capable production router sends only strict pointer fields and retains local drop geometry", () => {
+  const wireFields = ["runGeneration", "connectionGeneration", "sessionGeneration", "ownerRevision",
+    "presentationRevision", "sequence", "pointerId", "phase", "origin", "x", "y", "button"].sort();
+  const wire = [];
+  const f = fixture({ setMir2BagUiPointerEdge(json) {
+    const edge = JSON.parse(json);
+    assert.deepEqual(Object.keys(edge).sort(), wireFields);
+    wire.push(edge);
+    return true;
+  } });
+  const geometry = { revision: 7, targets: Array.from({ length: 6 }, (_, slot) => ({
+    slot, uniqueId: null, left: 50 + slot * 40, top: 650, width: 32, height: 32,
+  })) };
+  assert.equal(bagBelt.validBagBeltDropGeometry(geometry), true);
+  f.input = { ...f.input, beltDropGeometry: geometry };
+  for (let i = 0; i < 4; i++) {
+    f.host.tick();
+    f.echo({ supportsBagToBelt: true, appliedBeltGeometryRevision: geometry.revision });
+  }
+  assert.equal(f.state.active, true);
+  const context = f.host.pointerContext(), router = new bag.BagPointerRouter();
+  assert.ok(context);
+  assert.equal(context.beltDropGeometry, geometry);
+  const target = context.beltDropGeometry.targets[2];
+  const x = target.left + target.width / 2, y = target.top + target.height / 2;
+  const edges = [router.down(context, 1, 0, 720, 90),
+    router.edge("move", 1, x, y), router.edge("up", 1, x, y)];
+  for (const edge of edges) assert.equal(f.host.pointer(edge), true);
+  assert.deepEqual(wire.map(edge => edge.phase), ["down", "move", "up"]);
+  assert.ok(wire.every(edge => edge.origin === "bag" && edge.runGeneration === context.runGeneration
+    && edge.connectionGeneration === context.connectionGeneration && edge.sessionGeneration === context.sessionGeneration
+    && edge.ownerRevision === context.ownerRevision && edge.presentationRevision === context.presentationRevision));
+  assert.ok(wire[0].sequence < wire[1].sequence && wire[1].sequence < wire[2].sequence);
+  assert.deepEqual([wire[2].x, wire[2].y], [x, y]);
+  assert.equal(router.held, null);
+  for (const terminal of ["cancel", "blur"]) {
+    assert.equal(f.host.pointer(router.down(context, 1, 0, 720, 90)), true);
+    assert.equal(f.host.pointer(router.cancel(terminal)), true);
+    assert.equal(f.host.pointer(router.edge("up", 1, x, y)), true);
+  }
+  assert.equal(context.beltDropGeometry, geometry, "wire filtering cannot retire the local Belt drop geometry");
+  assert.equal(context.beltDropGeometry.targets[2], target);
 });
 
 test("blur or owner handoff permits a fresh reused pointerId even when the old up never arrives", () => {

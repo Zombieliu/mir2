@@ -3,6 +3,27 @@
 
 use bevy::prelude::*;
 
+/// All item painters finish before the single shared image-layout pass.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct OriginalItemImageLayoutSet;
+
+pub(crate) fn install_original_item_image_layout(app: &mut App) {
+    if !app.is_plugin_added::<OriginalItemImageLayoutPlugin>() {
+        app.add_plugins(OriginalItemImageLayoutPlugin);
+    }
+}
+
+struct OriginalItemImageLayoutPlugin;
+
+impl Plugin for OriginalItemImageLayoutPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            layout_original_item_images.in_set(OriginalItemImageLayoutSet),
+        );
+    }
+}
+
 /// Source cell bounds, independent of the full image's dimensions and alpha
 /// origin. Also used by the persistent HUD belt, not only rebuilt dialogs.
 #[derive(Component)]
@@ -191,6 +212,63 @@ pub(super) fn crystal_true_size_rgba8(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+    fn add_portable_item_surface(app: &mut App, index: usize) {
+        match index {
+            0 => { app.add_plugins(crate::portable_bag_ui::Mir2PortableBagUiPlugin); }
+            1 => { app.add_plugins(crate::portable_hero_ui::Mir2PortableHeroUiPlugin); }
+            2 => { app.add_plugins(crate::portable_storage_ui::Mir2PortableStorageUiPlugin); }
+            3 => { app.add_plugins(crate::portable_npc_shop_ui::Mir2PortableNpcShopUiPlugin); }
+            _ => unreachable!(),
+        }
+    }
+
+    #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+    fn assert_single_layout_schedule(app: &mut App) {
+        app.world_mut().schedule_scope(Update, |world, schedule| {
+            schedule.initialize(world).expect("portable item surfaces must start together");
+            assert_eq!(
+                schedule.graph().systems_in_set(OriginalItemImageLayoutSet.intern())
+                    .expect("shared item layout must be installed").len(),
+                1,
+                "all item surfaces must share one layout pass",
+            );
+        });
+    }
+
+    #[test]
+    #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+    fn portable_item_surfaces_initialize_together_in_any_install_order() {
+        // The Web host installs Bag, Hero, Storage and Shop together. Individual
+        // surface tests missed duplicate function-set ordering in this schedule.
+        for a in 0..4 {
+            for b in 0..4 {
+                for c in 0..4 {
+                    for d in 0..4 {
+                        if a == b || a == c || a == d || b == c || b == d || c == d {
+                            continue;
+                        }
+                        let mut app = App::new();
+                        for index in [a, b, c, d] {
+                            add_portable_item_surface(&mut app, index);
+                        }
+                        assert_single_layout_schedule(&mut app);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+    fn each_portable_item_surface_installs_its_layout_when_used_alone() {
+        for index in 0..4 {
+            let mut app = App::new();
+            add_portable_item_surface(&mut app, index);
+            assert_single_layout_schedule(&mut app);
+        }
+    }
 
     #[test]
     fn bag_paint_scale_changes_icon_pixels_without_changing_default_item_geometry() {

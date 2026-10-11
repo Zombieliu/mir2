@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "observedAtUtc": "2026-10-11T03:09:12.989Z",
+  "kind": "Source57 actual ordinary local browser flow in progress",
+  "url": "http://127.0.0.1:19205/",
+  "normalRefresh": true,
+  "actualLogin": true,
+  "actualStartGame": true,
+  "mapEntered": true,
+  "originalBevyStartupPanicResolved": true,
+  "normalNameplateSelection": true,
+  "combatBaseline": {
+    "rawPresent": true,
+    "snapshotPresent": true,
+    "ownerMatched": true,
+    "accepted": true,
+    "ready": true,
+    "sourceCurrent": true,
+    "cachedOwnerMatchesInitiallyFalse": true
+  },
+  "manualCombatActualPassed": true,
+  "firstTargetObservedHp": [
+    20,
+    16,
+    12,
+    8,
+    4,
+    0
+  ],
+  "firstKill": true,
+  "groundPickupSunPotion": true,
+  "secondTargetObservedHp": [
+    20,
+    16,
+    12,
+    8,
+    4,
+    0
+  ],
+  "secondKill": true,
+  "gingerTeaActualServerNotice": true,
+  "normalAttackApproachDistance": [
+    6,
+    1
+  ],
+  "continuousAutoAttackPassed": false,
+  "quest2RewardPassed": true,
+  "normalLogoutReloginThisRoundPassed": true,
+  "currentNewConsoleErrors": 0,
+  "uiOperated": true,
+  "runtimeLaunched": true,
+  "networkUsed": true,
+  "scope": "Actual compiled renderer through ordinary authorized local browser login, nameplate selection, combat, pickup, quest completion, logout and relogin. No direct agent calls to WASM exports, app globals, debug packets, QA/admin commands or server fixtures.",
+  "screenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-combat-damage01.png",
+    "bytes": 255671,
+    "sha256": "2fd50ad05cb8f7cda7f6ca179f70fc1e8b7cd4f84fa1020db07f9d41538a2e0a"
+  },
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false,
+  "quest2ActualReward": {
+    "serverNotice": "Quest completed.",
+    "experience": 30,
+    "gold": 200,
+    "items": [
+      "GoldenPendant x1",
+      "CopperRing x1"
+    ],
+    "source": "normal NPC Complete The CraftLady's Request[Quest] action"
+  },
+  "normalLogout": {
+    "key": "Alt+X",
+    "loginScreenObserved": true,
+    "reloadUsed": false,
+    "disconnectSubstituteUsed": false
+  },
+  "reloginReadback": {
+    "normalLogin": true,
+    "normalStartGame": true,
+    "position": [
+      284,
+      607
+    ],
+    "gold": 200,
+    "GoldenPendantTooltipObserved": true,
+    "CopperRingTooltipObserved": true,
+    "potionRetained": true,
+    "screenshots": [
+      "web-source57-relogin-reward01.png",
+      "web-source57-relogin-ring01.png"
+    ]
+  }
+}

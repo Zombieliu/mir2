@@ -426,7 +426,8 @@ export class BagPointerRouter {
     // even when blur/owner loss prevented its terminal edge from arriving.
     this.quarantine.delete(pointerId);
     const origin = context.inputRegions.some((r) => x >= r.left && y >= r.top && x < r.left + r.width && y < r.top + r.height) ? "bag" : "world";
-    const { inputRegions: _regions, presentation: _presentation, ...identity } = context;
+    const { runGeneration, connectionGeneration, sessionGeneration, ownerRevision, presentationRevision } = context;
+    const identity = { runGeneration, connectionGeneration, sessionGeneration, ownerRevision, presentationRevision };
     return this.lease = { ...identity, pointerId, button, origin, x, y, phase: "down", sequence: ++this.sequence };
   }
   edge(phase: "move" | "up" | "cancel", pointerId: number, x: number, y: number): BagPointerEdge | null {

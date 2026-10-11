@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source55 actual original Thin package and byte-matched local copy",
+  "observedAtUtc": "2026-10-11T02:24:26.568Z",
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 54184,
+    "kind": "Source55 original full Thin after current matched original complete Next",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 20902,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/thin-build01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "completeInputs": 55315,
+  "callerPrePostHashMatch": true,
+  "originalCapBytes": 377487360,
+  "package": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-source55-20261011-01",
+    "files": 7331,
+    "dirs": 778,
+    "links": 0,
+    "bytes": 374007904,
+    "marginBytes": 3479456
+  },
+  "copy": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/web-runtime01",
+    "all7331FilesByteMatched": true,
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/thin-build01/runtime-copy-snapshot.json",
+      "bytes": 2230979,
+      "sha256": "b3f6022e98247b6c9410423123eb5eac4f113cf23b844cd59d91c3b1985e2afe"
+    }
+  },
+  "dependencies": {
+    "warnings": 59,
+    "installed": false
+  },
+  "jsonCompaction": {
+    "files": 231,
+    "sourceBytes": 100349931,
+    "outputBytes": 68042309,
+    "savedBytes": 32307622,
+    "detailsPath": "C:\\mir2-cross-platform-storage-20261002\\web-source55-world-click-20261011-01\\thin-build01\\size-report.json-compaction-details.json"
+  },
+  "renderer": "bevy-201eff554f63b9a8",
+  "server": {
+    "url": "http://127.0.0.1:19205/",
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source55-world-click-20261011-01/web-start01/config.json",
+      "bytes": 2144,
+      "sha256": "205575348526392c49fce98c5196a0d1c85a05218831c0821d14c898a9fcfe0c"
+    },
+    "running": true,
+    "closed": false
+  },
+  "priorSource54Server": {
+    "pid": 56276,
+    "intentionallyStopped": true,
+    "actualExitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "all7331PostHashesMatched": true
+  },
+  "scope": "Build-only flags describe finite build calls. Browser game executes under prior local UI authorization; actual gameplay record separate.",
+  "combatVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

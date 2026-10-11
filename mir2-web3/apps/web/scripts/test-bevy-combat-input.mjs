@@ -3,7 +3,146 @@ const nativeKeyboardDefaults=JSON.parse(readFileSync(new URL('../../game-client/
 const cache=new Map();function load(name){if(cache.has(name))return cache.get(name);const m={exports:{}};cache.set(name,m.exports);new Function('exports','module','require',ts.transpileModule(readFileSync(new URL(`../lib/${name}.ts`,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,n=>n==='../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json'?{default:nativeKeyboardDefaults}:load(n.replace('./','')));return m.exports;}
 const {CombatHost,supportsCombat,parseCombatProof}=load('bevy-combat-input');
 const {defaultCrystalKeyBindings}=load('player-ui-preferences');
+test('actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates',()=>{
+ const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8');
+ const ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let effect,editable;
+ function visit(n){
+  if(ts.isCallExpression(n)&&n.expression.getText(ast)==='useEffect'&&n.arguments[0]?.getText(ast).includes('function handleShortcutKey'))effect=n.arguments[0];
+  if(ts.isFunctionDeclaration(n)&&n.name?.text==='keyboardInputTargetIsEditable')editable=n;
+  ts.forEachChild(n,visit);
+ }visit(ast);assert.ok(effect);assert.ok(editable);
+ const listeners=[],calls=[];
+ class HTMLElement{isContentEditable=false;}class HTMLInputElement extends HTMLElement{}class HTMLTextAreaElement extends HTMLElement{}class HTMLSelectElement extends HTMLElement{}
+ const flags={capture:false,focus:true,modal:false};
+ const scope={HTMLElement,HTMLInputElement,HTMLTextAreaElement,HTMLSelectElement,screen:'game',selectedEntity:null,
+  world:{beltItems:[],knownSkills:[]},window:{addEventListener:(type,fn,capture)=>listeners.push({type,fn,capture:capture===true}),
+   removeEventListener:(type,fn,capture)=>{const i=listeners.findIndex(x=>x.type===type&&x.fn===fn&&x.capture===(capture===true));assert.ok(i>=0);listeners.splice(i,1);}},
+  document:{visibilityState:'visible',hasFocus:()=>flags.focus},getKeybindCaptureActive:()=>flags.capture,
+  npcShopBlocksWorldInput:()=>false,stopNpcShopWorldInput:()=>{},bevyStorageUiActive:false,bevyStorageUiTransitioning:false,
+  bevyMailComposeReady:false,bevyMailComposePending:false,spellsPointerCallbacksRef:{current:{getBevySpellsPointerContext:()=>({modal:flags.modal})}},
+  bevyQuestUiCapturesPointer:false,heroPointerCallbacksRef:{current:{onBevyHeroKey:()=>false}},heroBlocksWorldInput:()=>false,
+  crystalKeyBindings:defaultCrystalKeyBindings(),combatTildeRef:{current:false},
+  ...load('crystal-shortcut-actions'),...load('player-ui-preferences'),...load('shared-combat-mode-keys'),
+  onCrystalWindowShortcut:action=>calls.push(action),onCrystalGameplayShortcut:()=>false,onCombatKey:()=>({supported:true,handled:false}),
+  isKeyboardMoveKey:()=>false,onPrimaryTargetAction:()=>{},revealDropView:()=>{}};
+ const js=ts.transpileModule(editable.getText(ast)+'\nreturn ('+effect.getText(ast)+')();',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ const cleanup=new Function('scope','with(scope){'+js+'}')(scope);
+ function key(target=new HTMLElement(),options={}){const e={target,key:'i',code:'KeyI',altKey:false,ctrlKey:false,shiftKey:false,metaKey:false,repeat:false,
+   defaultPrevented:false,preventDefault(){this.defaultPrevented=true;},...options};
+  for(const l of listeners.filter(l=>l.type==='keydown'&&l.capture))l.fn(e);
+  e.preventDefault(); // Original Winit canvas target listener, after window capture.
+  for(const l of listeners.filter(l=>l.type==='keydown'&&!l.capture))l.fn(e);return e;}
+ key();assert.equal(calls.length,1,'canvas focus must retain the original Inventory2 shortcut');calls.length=0;
+ key(new HTMLElement(),{key:'q',code:'KeyQ'});assert.equal(calls.length,1);calls.length=0;
+ for(const gate of ['capture','focus','modal']){flags[gate]=gate!=='focus';key();assert.equal(calls.length,0,gate+' gate remains');flags[gate]=gate==='focus';}
+ key(new HTMLInputElement());key(new HTMLTextAreaElement());key(new HTMLSelectElement());assert.equal(calls.length,0);
+ key(new HTMLElement(),{defaultPrevented:true});key(new HTMLElement(),{repeat:true});assert.equal(calls.length,0);
+ scope.document.visibilityState='hidden';key();assert.equal(calls.length,0);
+ cleanup();assert.equal(listeners.length,0,'capture listener is removed with the same phase');
+});
 const caps={schemaVersion:1,combatInputAbiVersion:1,combatIntentAbiVersion:1,compiled:true,startup:true};
+function mountActualCombatHook(options){
+ const source=readFileSync(new URL('../lib/use-bevy-combat-input.ts',import.meta.url),'utf8');
+ const ast=ts.createSourceFile('hook.ts',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
+ const fn=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='useBevyCombatInput');assert.ok(fn);
+ const js=ts.transpileModule(fn.getText(ast),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+ let interval=null,cleanup=null;const effects=[],exports={};
+ const window={setInterval:fn=>{interval=fn;return 1;},clearInterval:()=>{interval=null;},addEventListener(){},removeEventListener(){}};
+ const hook=new Function('exports','useRef','useState','useEffect','CombatHost','supportsCombat','window','document','performance',js+';return exports.useBevyCombatInput;')(
+  exports,value=>({current:value}),()=>[false,()=>{}],fn=>effects.push(fn),CombatHost,supportsCombat,window,{addEventListener(){},removeEventListener(){}},{now:()=>10});
+ const api=hook(options);for(const effect of effects)cleanup=effect();
+ return{api,tick:()=>{assert.ok(interval);interval();},stop:()=>cleanup(),get interval(){return interval;}};
+}
+test('actual hook ingests a late current baseline once, retains proof gates and never replays a select',()=>{
+ const f=fixture();let baseline=null;
+ const h=mountActualCombatHook({runtimeGeneration:1,runtimeRef:{current:f.runtime},read:()=>f.input,readBaseline:()=>baseline,onWire:()=>{throw Error('unexpected wire');},onApproach:()=>{},onClear:()=>{}});
+ assert.equal(h.api.diagnostics().rawPresent,false);const initial=f.captures.length;
+ baseline={snapshot:f.raw,owner:{...f.input.owner,sessionGeneration:9}};h.tick();assert.equal(h.api.diagnostics().rawPresent,false);
+ baseline={snapshot:f.raw,owner:{...f.input.owner}};h.tick();assert.equal(h.api.diagnostics().rawPresent,true);assert.equal(h.api.diagnostics().snapshotPresent,true);assert.equal(f.captures.length,initial+1);
+ h.tick();assert.equal(f.captures.length,initial+1);assert.equal(f.edges.length,0);assert.equal(f.calls.length,0);
+ const run=f.sent.identity.controllerRun;f.input.owner={...f.input.owner,sessionGeneration:10};h.tick();assert.equal(h.api.diagnostics().snapshotPresent,false);
+ baseline={snapshot:f.raw,owner:{...f.input.owner}};h.tick();assert.equal(h.api.diagnostics().snapshotPresent,true);assert.ok(f.sent.identity.controllerRun>run);assert.equal(f.edges.length,0);
+ h.stop();assert.equal(h.interval,null);
+});
+function combatSourceFixture(){
+ const source=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('page.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+ const names=['readCurrentCombatBaseline','applyNpcGoldBuyGatewaySnapshot','captureSpellsGatewayEvent'],decl=[];let provider;
+ function visit(n){if(ts.isFunctionDeclaration(n)&&n.name&&names.includes(n.name.text))decl.push(n.getText(ast));
+  if(ts.isCallExpression(n)&&n.expression.getText(ast)==='useBevyCombatInput')provider=n.arguments[0].properties.find(p=>p.name?.getText(ast)==='readBaseline').initializer.getText(ast);
+  ts.forEachChild(n,visit);}
+ visit(ast);assert.equal(decl.length,names.length);assert.equal(provider,'readCurrentCombatBaseline');
+ const f=fixture(),session={connectionGeneration:1,sessionGeneration:2,afterSnapshotVersion:0},socket={readyState:1};
+ const scope={combatBaselineSourceRef:{current:null},combatRawRef:{current:null},worldRef:{current:{connected:true,playerObjectId:'3',mapFileName:'D001'}},
+  equipmentStartGameRef:{current:session},socketRef:{current:socket},equipmentSnapshotRef:{current:null},
+  equipmentConnectionGenerationRef:{current:1},equipmentSessionGenerationRef:{current:2},questSceneRevisionRef:{current:1},worldSnapshotVersionRef:{current:1},
+  questCapturedWorldRef:{current:null},questSkillsBaselineCurrentRef:{current:false},combatIngressRef:{current:f.host},
+  spellsRawSnapshotRef:{current:null},spellsIngressRef:{current:null},combatMastersRef:{current:new Map()},
+  currentSpellsOwner:()=>f.input.owner,WebSocket:{OPEN:1},normalizeQuestMapFileName:x=>x,
+  npcGoldBuyInventoryRef:{current:{begin:()=>({}),finish:()=>{}}},projectBevyBagModel:()=>({ok:true,model:{}}),captureParitySnapshot:()=>{},
+  observeBagBeltInventorySnapshot:()=>{},observeNpcPearlWallet:()=>{},readNpcRepairOwner:()=>null,
+  npcRepairAuthorityRef:{current:{observeSnapshot:()=>{},invalidateInventory:()=>{}}},captureNpcRepairDialog:()=>{},npcBuyDispatcherRef:{current:null},
+  applyGatewayWorldSnapshot:snapshot=>{scope.equipmentSnapshotRef.current={connectionGeneration:1,sessionGeneration:2};
+   scope.worldRef.current={...scope.worldRef.current,playerObjectId:String(snapshot.playerObjectId),mapFileName:snapshot.mapFileName};scope.duringProjection?.();}};
+ const js=ts.transpileModule(decl.join('\n')+'\nreturn {'+names.join(',')+'};',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ const api=new Function('scope','with(scope){'+js+'}')(scope);
+ const snapshot={playerObjectId:3,mapFileName:'D001',knownSkills:f.raw.knownSkills,entities:[]};
+ return{f,scope,api,session,socket,snapshot,commit:()=>api.applyNpcGoldBuyGatewaySnapshot(snapshot,1),read:()=>api.readCurrentCombatBaseline()};
+}
+test('actual Page provider authenticates physical source across a late UI owner change without renaming old cache or replaying edges',()=>{
+ const x=combatSourceFixture();assert.equal(x.read(),null);x.commit();assert.ok(x.read());
+ assert.notEqual(x.read().snapshot.knownSkills,x.snapshot.knownSkills,'original learned data is detached at actual projection commit');
+ const cachedOwner=x.scope.combatRawRef.current.owner,source=x.scope.combatBaselineSourceRef.current,run=x.f.sent.identity.controllerRun;
+ x.f.input.owner={...x.f.input.owner,ownerRevision:1};assert.equal(x.read().owner.ownerRevision,1);assert.equal(cachedOwner.ownerRevision,0);
+ const h=mountActualCombatHook({runtimeGeneration:1,runtimeRef:{current:x.f.runtime},read:()=>x.f.input,readBaseline:x.read,onWire:()=>{throw Error('unexpected wire');},onApproach:()=>{},onClear:()=>{}});
+ assert.ok(h.api.diagnostics().snapshotPresent);assert.ok(x.f.sent.identity.controllerRun>run);assert.equal(x.f.edges.length,0);assert.equal(x.f.calls.length,0);
+ assert.equal(x.scope.combatBaselineSourceRef.current,source);assert.equal(x.scope.combatRawRef.current.owner,cachedOwner);h.stop();
+ for(const key of ['connectionGeneration','sessionGeneration','playerObjectId']){const old=x.f.input.owner;x.f.input.owner={...old,[key]:old[key]+1};assert.equal(x.read(),null,key);x.f.input.owner=old;}
+ x.scope.worldRef.current.mapFileName='D002';assert.equal(x.read(),null);x.scope.worldRef.current.mapFileName='D001';
+ x.scope.questSceneRevisionRef.current++;assert.equal(x.read(),null,'map round trip cannot recover an old scene source');x.scope.questSceneRevisionRef.current--;
+ x.scope.equipmentStartGameRef.current={...x.session};assert.equal(x.read(),null,'same numeric epochs do not authenticate a new session object');x.scope.equipmentStartGameRef.current=x.session;
+ x.scope.socketRef.current={readyState:1};assert.equal(x.read(),null,'same numeric epochs do not authenticate a replacement socket');x.scope.socketRef.current=x.socket;
+ x.socket.readyState=3;assert.equal(x.read(),null);x.socket.readyState=1;x.scope.worldSnapshotVersionRef.current++;assert.equal(x.read(),null,'superseded source is never reused');
+});
+test('actual Page commit rejects changed physical custody during projection and invalid latest skills cannot restore older valid data',()=>{
+ for(const change of ['session','socket','scene','version','map','inventory']){
+  const x=combatSourceFixture();x.commit();const prior=x.scope.combatBaselineSourceRef.current;
+  x.scope.duringProjection=()=>{if(change==='session')x.scope.equipmentStartGameRef.current={...x.session};if(change==='socket')x.scope.socketRef.current={readyState:1};
+   if(change==='scene')x.scope.questSceneRevisionRef.current++;if(change==='version')x.scope.worldSnapshotVersionRef.current++;
+   if(change==='map')x.scope.worldRef.current.mapFileName='D002';if(change==='inventory')x.scope.projectBevyBagModel=()=>({ok:false});};
+  x.commit();assert.equal(x.scope.combatBaselineSourceRef.current,null,change);assert.equal(x.read(),null,change);assert.notEqual(x.scope.combatBaselineSourceRef.current,prior);
+ }
+ for(const skills of [null,Array.from({length:513},()=>({})),[null]]){
+  const x=combatSourceFixture();x.commit();x.snapshot.knownSkills=skills;x.scope.worldSnapshotVersionRef.current++;x.commit();
+  assert.deepEqual(x.read().snapshot.knownSkills,skills,'invalid authoritative rows retain their real value');assert.equal(x.f.host.diagnostics().snapshotPresent,false);assert.equal(x.f.host.diagnostics().rawPresent,false);
+ }
+ const x=combatSourceFixture();x.commit();x.snapshot.knownSkills=[{id:44,spell:'FireBall',hotkey:2}];x.scope.worldSnapshotVersionRef.current++;x.commit();
+ assert.deepEqual(x.f.sent.learned,x.snapshot.knownSkills,'a fresh snapshot updates learned slots even under the same UI owner');
+ x.snapshot.knownSkills=[{invalid:1n}];x.scope.worldSnapshotVersionRef.current++;assert.throws(x.commit);assert.equal(x.read(),null,'serialization failure never restores the prior valid source');
+});
+test('actual learned-skill packets retire the physical combat source while cast timing preserves it',()=>{
+ for(const packet of ['NewMagic','RemoveMagic','MagicLeveled']){const x=combatSourceFixture();x.commit();
+  x.api.captureSpellsGatewayEvent({type:'packet',packet,payload:{hero:true}},1);assert.ok(x.read(),'Hero skills do not retire player learned data');
+  x.api.captureSpellsGatewayEvent({type:'packet',packet,payload:{}},1);assert.equal(x.read(),null);assert.equal(x.f.host.diagnostics().snapshotPresent,false);}
+ const x=combatSourceFixture();x.commit();const physical=x.scope.combatBaselineSourceRef.current;
+ x.api.captureSpellsGatewayEvent({type:'packet',packet:'MagicCast',payload:{spell:'FireBall'}},1);assert.equal(x.scope.combatBaselineSourceRef.current,physical);
+});
+test('cached combat diagnostics never poll, send, withdraw or consume a proof',()=>{
+ const f=fixture();let reads=0,writes=0,withdrawals=0;
+ for(const key of ['getMir2CombatInputStatus','setMir2CombatInputSnapshot','setMir2CombatInputEdge','withdrawMir2CombatInputSnapshot']){
+  const original=f.runtime[key];f.runtime[key]=(...args)=>{if(key==='getMir2CombatInputStatus')reads++;else if(key==='withdrawMir2CombatInputSnapshot')withdrawals++;else writes++;return original(...args);};
+ }
+ const sent=f.sent,first=f.host.diagnostics();assert.equal(first.snapshotAccepted,true);assert.equal(first.statusReady,true);
+ for(let i=0;i<10;i++)assert.deepEqual(f.host.diagnostics(),first);
+ assert.deepEqual([reads,writes,withdrawals],[0,0,0]);assert.equal(f.sent,sent);assert.equal(f.calls.length,0);
+ assert.equal(f.emit().outcome,'confirmedSend');assert.equal(f.calls.length,1);
+ assert.ok(f.host.edge({type:'select',objectId:4}));assert.equal(f.host.diagnostics().edgeAccepted,true);
+});
+test('diagnostics record disabled facts and a real rejected snapshot without bypassing either gate',()=>{
+ const f=fixture();f.input.facts.enabled=false;f.host.tick();assert.equal(f.ready,false);
+ assert.deepEqual(f.host.diagnostics().input,{factsPresent:true,enabled:false,ownerMatched:true});assert.equal(f.host.diagnostics().snapshotPresent,false);
+ f.input.facts.enabled=true;f.runtime.setMir2CombatInputSnapshot=()=>false;f.host.tick();
+ assert.equal(f.host.diagnostics().snapshotAccepted,false);assert.equal(f.host.diagnostics().snapshotPresent,false);assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.calls.length,0);
+});
 function fixture(existing){let sent=null,sink=null,now=10,frame=1,current=true,ready=false,clear=0,hook=null,clearWork=0;const calls=[],captures=[],edges=[];
  const runtime=existing??{getMir2CombatInputCapabilities:()=>JSON.stringify(caps),setMir2CombatInputSnapshot:json=>{captures.push(json);sent=JSON.parse(json);return true;},setMir2CombatInputEdge:json=>{edges.push(json);return '{"handled":true}';},getMir2CombatInputStatus:()=>JSON.stringify({version:1,frame:frame++,ready:Boolean(sent?.enabled),identity:sent?.identity??null,modelRevision:sent?.modelRevision??null,revision:sent?.revision??null,map:sent?.map??null}),setMir2CombatInputIntentSink:fn=>{sink=fn;},clearMir2CombatInputIntentSink:()=>{clear++;sink=null;},withdrawMir2CombatInputSnapshot:()=>{sent=null;}};
  const actor=(id,kind,x)=>({objectId:String(id),kind,x,y:10,direction:'up',dead:false,masterObjectId:0,ai:0});
@@ -284,8 +423,9 @@ for(const kind of ['cancel','clear'])test('synchronous '+kind+' retires in-fligh
 });
 test('enabled false synchronously withdraws proof and held work, with valid re-enable and no replay',()=>{const f=fixture();f.hook=(p,b)=>{f.input.facts.enabled=false;f.host.tick();assert.equal(f.ready,false);assert.ok(f.clearWork>0);return f.host.claim(p,b)?'confirmedSend':'definitelyUnsent';};assert.equal(f.emit().outcome,'definitelyUnsent');f.now=60;f.host.tick();assert.equal(f.ready,false);assert.equal(f.emit().outcome,'definitelyUnsent');f.input.facts.enabled=true;f.host.tick();f.hook=null;assert.equal(f.emit(f.proof({sequence:f.host.run*2**22+2,edgeSequence:0})).outcome,'confirmedSend');});
 test('actual Page HP overlay callback and combat producer block immediately before React render',()=>{
- const source=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('page.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let callback=null,read=null,wired=false;const guardNames=['otherPlayerUiBlocksInput','referenceWindowsBlockGameplay'],guardDeclarations=new Map();
- function visit(n){if(ts.isFunctionDeclaration(n)&&n.name&&guardNames.includes(n.name.text)){assert.equal(guardDeclarations.has(n.name.text),false);guardDeclarations.set(n.name.text,n.getText(ast));}
+ const source=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('page.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let callback=null,read=null,wired=false;const guardNames=['otherPlayerUiBlocksInput','referenceWindowsBlockGameplay','heroUiBlocksGameplay'],guardDeclarations=new Map();
+ const heroPageRefNames=['heroSharedUiIngressRef','heroManagementOpenRef'],heroPageRefInitializers=new Map();
+ function visit(n){if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&heroPageRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');heroPageRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}if(ts.isFunctionDeclaration(n)&&n.name&&guardNames.includes(n.name.text)){assert.equal(guardDeclarations.has(n.name.text),false);guardDeclarations.set(n.name.text,n.getText(ast));}
   if(ts.isVariableDeclaration(n)&&n.name.getText(ast)==='handleHpOrbLocalOverlayChange')callback=n.initializer;
   if(ts.isCallExpression(n)&&n.expression.getText(ast)==='useBevyCombatInput'){const props=n.arguments[0].properties;read=props.find(p=>p.name?.getText(ast)==='read').initializer;}
   if(ts.isJsxAttribute(n)&&n.name.getText(ast)==='onHpOrbLocalOverlayChange')wired=n.initializer?.expression?.getText(ast)==='handleHpOrbLocalOverlayChange';ts.forEachChild(n,visit);}
@@ -294,8 +434,11 @@ test('actual Page HP overlay callback and combat producer block immediately befo
  const f=fixture(),overlay={current:false},state=[],events=[],ingress={current:{withdraw:()=>{events.push('withdraw');f.host.withdraw();}}};
  const onOverlay=extracted(callback,{bevyHpLocalOverlayOpenRef:overlay,combatIngressRef:ingress,mailIngressRef:{current:null},mailDispatcherRef:{current:null},setBevyHpLocalOverlayOpen:v=>{events.push('state');state.push(v);}});
  const current={...f.input.facts,playerObjectId:3,mapFileName:'D001',connected:true,entities:f.input.facts.actors,selectedObjectId:null,playerHp:10,playerMaxHp:10,playerMp:10};
- let worldVisible=true;const selectors=[];
- const deps={worldRef:{current},combatRawRef:{current:{snapshot:{entities:[],mapFileName:'D001'},owner:f.input.owner}},currentSpellsOwner:()=>f.input.owner,currentAuthoritativeSelf:()=>current.entities[0],combatMastersRef:{current:new Map()},document:{activeElement:null,visibilityState:'visible',hasFocus:()=>true,querySelectorAll:selector=>{selectors.push(selector);return [{hidden:selector.includes('quest-ui-canvas')||selector==='.game-world-composite'&&!worldVisible,getBoundingClientRect:()=>({width:10,height:10})}];}},HTMLElement:class{},getComputedStyle:surface=>({display:'block',visibility:surface.hidden?'hidden':'visible',opacity:'1'}),webGl2SharedCanvasPrototype:false,bevyHpLocalOverlayOpenRef:overlay,combatIngressRef:{current:{hasUiHeld:()=>f.host.hasUiHeld()}},npcShopService:null,npcRepairService:null,spellsIngressRef:{current:null},combatRouteCacheRef:{current:null},movementBlockedStepsRef:{current:[]},movementPlanRef:{current:null},nextMoveSendAtRef:{current:0},screenRef:{current:'game'},initialSceneAssetsReadyRef:{current:true},equipmentHostSuspendReasonRef:{current:null},combatPointerRef:{current:{hovered:null,cursor:null,lock:false}},crystalKeyBindingsRef:{current:defaultCrystalKeyBindings()},isMovementBusy:()=>false,crystalMovementWalkRoute:()=>{throw Error('unexpected route');}};
+ let worldVisible=true,canvasVisible=true,domPresent=false,domLoaded=true;const selectors=[];
+ const stage={display:'block',opacity:'1',parentElement:null};
+ const composite={get hidden(){return !worldVisible;},parentElement:stage};
+ const mapImage={get complete(){return domLoaded;},get naturalWidth(){return domLoaded?48:0;},get naturalHeight(){return domLoaded?32:0;},parentElement:composite,getBoundingClientRect:()=>({width:48,height:32})};
+ const deps={worldRef:{current},combatRawRef:{current:{snapshot:{entities:[],mapFileName:'D001'},owner:f.input.owner}},readCurrentCombatBaseline:()=>({snapshot:f.raw,owner:f.input.owner}),currentSpellsOwner:()=>f.input.owner,currentAuthoritativeSelf:()=>current.entities[0],combatMastersRef:{current:new Map()},document:{activeElement:null,visibilityState:'visible',hasFocus:()=>true,querySelectorAll:selector=>{selectors.push(selector);if(selector.includes('img.scene-backdrop-sprite'))return domPresent?[mapImage]:[];return [{hidden:selector.includes('quest-ui-canvas')||(selector==='.game-world-composite'?!worldVisible:!canvasVisible),parentElement:stage,getBoundingClientRect:()=>({width:10,height:10})}];}},HTMLElement:class{},getComputedStyle:surface=>({display:surface.display??'block',visibility:surface.hidden?'hidden':'visible',opacity:surface.opacity??'1'}),webGl2SharedCanvasPrototype:false,bevyHpLocalOverlayOpenRef:overlay,combatIngressRef:{current:{hasUiHeld:()=>f.host.hasUiHeld()}},npcShopService:null,npcRepairService:null,spellsIngressRef:{current:null},combatRouteCacheRef:{current:null},movementBlockedStepsRef:{current:[]},movementPlanRef:{current:null},nextMoveSendAtRef:{current:0},screenRef:{current:'game'},initialSceneAssetsReadyRef:{current:true},equipmentHostSuspendReasonRef:{current:null},combatPointerRef:{current:{hovered:null,cursor:null,lock:false}},crystalKeyBindingsRef:{current:defaultCrystalKeyBindings()},isMovementBusy:()=>false,crystalMovementWalkRoute:()=>{throw Error('unexpected route');}};
  for(const key of ['bevyQuestReactModalOpen','showQuestLog','showCharacter','showHeroPet','showGuild','showGroup','showFriends','showBonds','showRanking','showMarket','showConquest','showTrade','showBuffs','showMail','showWorldMap','showHelp','showHotkeys','showChatSettings'])deps[key]=false;
  Object.assign(deps,{heroManagementPage:null,cashShopOpenRef:{current:false},heroManagementOpenRef:{current:false},skillBarPointerHeldRef:{current:false},
   playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},
@@ -304,14 +447,38 @@ test('actual Page HP overlay callback and combat producer block immediately befo
  for(const key of ['questReactModalOpenRef','bagOpenRef','characterOpenRef','questLogOpenRef','heroPetOpenRef','rankingWindowRef','marketOpenRef','conquestOpenRef',
   'buffsOpenRef','mailUiOpenRef','worldMapOpenRef','chatSettingsOpenRef','tutorialOpenRef','storageServiceActiveRef','rankingInspectOpenRef'])deps[key]={current:false};
  assert.equal(deps.crystalKeyBindingsRef.current.length,96);assert.deepEqual(deps.crystalKeyBindingsRef.current,nativeKeyboardDefaults);
+ for(const name of heroPageRefNames)assert.ok(heroPageRefInitializers.has(name),'actual Page Hero ref initializer '+name);
+ const heroPageRefsJs=ts.transpileModule([...heroPageRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ Object.assign(deps,new Function(heroPageRefsJs+'\nreturn {'+heroPageRefNames.join(',')+'};')());
   const readFacts=extracted(read,deps);assert.equal(readFacts().facts.enabled,true);
   assert.equal(readFacts().facts.spellLockKey,nativeKeyboardDefaults.find(binding=>binding.function==='TargetSpellLockOn').key);
   assert.deepEqual(readFacts().facts.bindings,nativeKeyboardDefaults.filter(binding=>/^Bar[12]Skill[1-8]$/.test(binding.function)));
  for(const key of ['heroManagementOpenRef','skillBarPointerHeldRef','questReactModalOpenRef','bagOpenRef','rankingInspectOpenRef']){deps[key].current=true;assert.equal(readFacts().facts.enabled,false,'actual synchronous live fence '+key);deps[key].current=false;assert.equal(readFacts().facts.enabled,true);}
+ let heroSharedOwner=true,heroWorldBlocked=true;
+ deps.heroSharedUiIngressRef.current={isSharedOwner:()=>heroSharedOwner,blocksWorld:()=>heroWorldBlocked};
+ assert.equal(readFacts().facts.enabled,false,'actual shared Hero world fence blocks combat');
+ heroWorldBlocked=false;assert.equal(readFacts().facts.enabled,true,'nonblocking shared Hero owner permits combat');
+ deps.heroManagementOpenRef.current=true;assert.equal(readFacts().facts.enabled,true,'shared Hero owns the live world fence instead of the React window');
+ heroSharedOwner=false;assert.equal(readFacts().facts.enabled,false,'React Hero window resumes its fence when shared ownership ends');
+ deps.heroManagementOpenRef.current=false;deps.heroSharedUiIngressRef.current=null;
  const readSharedFacts=extracted(read,{...deps,webGl2SharedCanvasPrototype:true});
  assert.equal(readSharedFacts().facts.enabled,true,'hidden stage UI cannot hide a visible DOM world');
  assert.equal(selectors.at(-1),'.game-world-composite');
  worldVisible=false;assert.equal(readSharedFacts().facts.enabled,false,'hidden DOM world suspends combat');worldVisible=true;
+ canvasVisible=false;domPresent=true;
+ assert.equal(readFacts().facts.enabled,true,'loaded DOM map allows combat while all GPU canvases are hidden');
+ domPresent=false;assert.equal(readFacts().facts.enabled,false,'an empty visible composite cannot replace a painted world');domPresent=true;
+ domLoaded=false;assert.equal(readFacts().facts.enabled,false,'unloaded map images cannot enable combat');domLoaded=true;
+ worldVisible=false;assert.equal(readFacts().facts.enabled,false,'hidden composite ancestor blocks loaded DOM map');worldVisible=true;
+ stage.display='none';assert.equal(readFacts().facts.enabled,false,'hidden stage ancestor blocks loaded DOM map');stage.display='block';
+ stage.opacity='0';assert.equal(readFacts().facts.enabled,false,'transparent stage ancestor blocks loaded DOM map');stage.opacity='1';
+ deps.initialSceneAssetsReadyRef.current=false;assert.equal(readFacts().facts.enabled,false,'DOM map still requires scene interaction readiness');deps.initialSceneAssetsReadyRef.current=true;
+ deps.document.hasFocus=()=>false;assert.equal(readFacts().facts.enabled,false,'DOM compatibility does not bypass page focus');deps.document.hasFocus=()=>true;
+ deps.document.visibilityState='hidden';assert.equal(readFacts().facts.enabled,false,'DOM compatibility does not bypass page visibility');deps.document.visibilityState='visible';
+ deps.document.activeElement=new deps.HTMLElement();deps.document.activeElement.tagName='INPUT';assert.equal(readFacts().facts.enabled,false,'editing still blocks combat on a DOM map');deps.document.activeElement=null;
+ current.mapFileName='D002';assert.equal(readFacts().facts,null,'DOM map still requires the current authoritative map');current.mapFileName='D001';
+ assert.equal(readFacts().facts.enabled,true,'DOM map recovers when every existing input fence is valid');
+ canvasVisible=true;domPresent=false;
  f.hook=(p,b)=>{assert.ok(f.host.allows(p));onOverlay(true);assert.equal(overlay.current,true);assert.deepEqual(events,['withdraw','state']);assert.equal(readFacts().facts.enabled,false);assert.equal(f.host.allows(p),false);return f.host.claim(p,b)?'confirmedSend':'definitelyUnsent';};
  assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.emit().outcome,'definitelyUnsent');f.now=60;f.input.facts.enabled=readFacts().facts.enabled;f.host.tick();assert.equal(f.ready,false);
  onOverlay(false);assert.equal(readFacts().facts.enabled,true);f.input.facts.enabled=true;f.host.tick();f.hook=null;assert.equal(f.emit(f.proof({sequence:f.host.run*2**22+2,edgeSequence:0})).outcome,'confirmedSend');assert.deepEqual(state,[true,false]);const token={};f.host.setUiHeld('bag',token,true);assert.equal(readFacts().facts.enabled,false);f.host.setUiHeld('bag',token,false);assert.equal(readFacts().facts.enabled,true);
@@ -320,8 +487,9 @@ test('actual Page HP overlay callback and combat producer block immediately befo
 test('UI hold withdraws synchronous proof and blocks every 50ms publish; channels and tokens release independently',()=>{const f=fixture(),bag={},hud={};const replay=f.proof();f.hook=(p,b)=>{assert.ok(f.host.setUiHeld('bag',bag,true));assert.ok(f.host.setUiHeld('hud',hud,true));return f.host.claim(p,b)?'confirmedSend':'definitelyUnsent';};assert.equal(f.emit().outcome,'definitelyUnsent');const captures=f.captures.length;f.now=60;f.host.tick();assert.equal(f.ready,false);assert.equal(f.captures.length,captures);assert.equal(f.emit(replay).outcome,'definitelyUnsent');assert.equal(f.host.setUiHeld('bag',{},false),false);assert.ok(f.host.setUiHeld('bag',bag,false));f.now=110;f.host.tick();assert.equal(f.ready,false);assert.ok(f.host.hasUiHeld());assert.ok(f.host.setUiHeld('hud',hud,false));f.host.tick();assert.ok(f.ready);f.hook=null;assert.equal(f.emit(f.proof({sequence:f.host.run*2**22+2,edgeSequence:0})).outcome,'confirmedSend');});
 test('UI hold retired owner/runtime and stale release cannot unblock a new token',()=>{const f=fixture(),old={},next={};f.host.setUiHeld('bag',old,true);f.input.owner={...f.input.owner,ownerRevision:1};f.host.observeSnapshot(f.raw,f.input.owner);assert.equal(f.host.hasUiHeld(),false);assert.ok(f.host.setUiHeld('bag',next,true));assert.equal(f.host.setUiHeld('bag',old,false),false);assert.ok(f.host.hasUiHeld());f.host.clearUiHeld();assert.equal(f.host.hasUiHeld(),false);f.host.tick();assert.ok(f.ready);f.host.setUiHeld('bag',next,true);f.host.stop();assert.equal(f.host.hasUiHeld(),false);assert.equal(f.host.setUiHeld('bag',old,true),false);});
 function shellRoutingFixture(channel,configure=()=>{}){
- const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),names=['retireWorldFishingPhysical','cancelWorldFishingHeldPointer','worldFishingStageGeometry','worldFishingPointCurrent','worldFishingPhysicalCurrent','attachWorldFishingPhysical','finishWorldFishingPhysical','npcShopBlocksWorldInput','stopNpcShopWorldInput','cancelSharedNpcShopPointer','handleSharedNpcShopPointer','cancelSharedComposePointer','handleSharedComposePointer','cancelSharedMailPointer','handleSharedMailPointer','beginCombatUiHold','endCombatUiHold','cancelSharedBagPointer','cancelSharedCharacterPointer','cancelSharedHudPointer','cancelSharedSpellsPointer','handleSharedBagPointer','handleSharedCharacterPointer','handleSharedHudPointer','handleSharedSpellsPointer','cancelSharedStoragePointer','handleSharedStoragePointer','handleSharedQuestWorldPointer','handleSharedUiPointer','isSharedBagCompatibilityMouse','handleScenePointerAction','stopHeldScenePointer','repairGeometry','cancelNpcRepairPointer','beginNpcRepairPointer','handleNpcRepairPointer','npcRepairControlTarget','rememberNpcRepairControlClick','fenceNpcRepairClick','changeNpcRepairTarget','confirmNpcRepairTarget','openNpcRepairBagPage','rememberBagBeltClick','fenceBagBeltMouse','cancelBagBeltPointer','refreshBagBeltGeometry','bagBeltCallbacksMatch','beginBagBeltPointer','beginCompatBagBeltPointer','finishBagBeltPointer','handleBagBeltPointer'],decl=[];
+ const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8'),ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),names=['retireWorldFishingPhysical','cancelWorldFishingHeldPointer','worldFishingStageGeometry','worldFishingPointCurrent','worldFishingPhysicalCurrent','attachWorldFishingPhysical','finishWorldFishingPhysical','npcShopBlocksWorldInput','stopNpcShopWorldInput','cancelSharedNpcShopPointer','handleSharedNpcShopPointer','cancelSharedComposePointer','handleSharedComposePointer','cancelSharedMailPointer','handleSharedMailPointer','beginCombatUiHold','endCombatUiHold','cancelSharedBagPointer','cancelSharedCharacterPointer','cancelSharedHudPointer','cancelSharedSpellsPointer','handleSharedBagPointer','handleSharedCharacterPointer','handleSharedHudPointer','handleSharedSpellsPointer','cancelSharedStoragePointer','handleSharedStoragePointer','handleSharedQuestWorldPointer','handleSharedUiPointer','isSharedBagCompatibilityMouse','handleScenePointerAction','stopHeldScenePointer','repairGeometry','cancelNpcRepairPointer','beginNpcRepairPointer','handleNpcRepairPointer','npcRepairControlTarget','rememberNpcRepairControlClick','fenceNpcRepairClick','changeNpcRepairTarget','confirmNpcRepairTarget','openNpcRepairBagPage','rememberBagBeltClick','fenceBagBeltMouse','cancelBagBeltPointer','refreshBagBeltGeometry','bagBeltCallbacksMatch','beginBagBeltPointer','beginCompatBagBeltPointer','finishBagBeltPointer','handleBagBeltPointer','heroBlocksWorldInput','cancelSharedHeroPointer','handleSharedHeroPointer'],decl=[];
  function visit(n){if(ts.isFunctionDeclaration(n)&&n.name&&names.includes(n.name.text))decl.push(n.getText(ast));ts.forEachChild(n,visit);}visit(ast);assert.equal(decl.length,names.length);
+ const heroRefNames=['heroPointerLeaseRef','heroHoverContextRef','heroPointerCallbacksRef'],heroRefInitializers=new Map();
  const repairRefNames=['npcRepairTargetRef','npcRepairQuarantineRef','npcRepairClickFenceRef','npcRepairPointerRef','npcRepairVisibleTargetRef'],repairRefInitializers=new Map();let repairRegistration=null;
  // The current Shell world-input paths call real Fishing cancellation. Extract
  // its closed physical-pointer declarations and actual dormant useRef initializers.
@@ -329,6 +497,7 @@ function shellRoutingFixture(channel,configure=()=>{}){
  const bagBeltRefNames=['bagBeltButtonsRef','bagBeltGeometryRef','bagBeltGeometryRevisionRef','bagBeltCallbacksRef','bagBeltContextRef','bagBeltPointerRef','bagBeltArmedSharedRef','bagBeltQuarantineRef','bagBeltRejectedTerminalRef','bagBeltClickFenceRef'],bagBeltRefInitializers=new Map();let bagBeltRectInitializer;
  function visitRepairBindings(n){
   if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)){
+   if(heroRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');heroRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
    if(fishingRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');fishingRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
    if(repairRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');repairRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
    if(bagBeltRefNames.includes(n.name.text)){assert.ok(n.initializer&&ts.isCallExpression(n.initializer)&&n.initializer.expression.getText(ast)==='useRef');bagBeltRefInitializers.set(n.name.text,n.initializer.arguments[0].getText(ast));}
@@ -337,7 +506,7 @@ function shellRoutingFixture(channel,configure=()=>{}){
   }
   ts.forEachChild(n,visitRepairBindings);
  }
- visitRepairBindings(ast);for(const name of repairRefNames)assert.ok(repairRefInitializers.has(name),'actual Shell repair ref initializer '+name);assert.ok(repairRegistration,'actual Shell repair target registration');
+ visitRepairBindings(ast);for(const name of heroRefNames)assert.ok(heroRefInitializers.has(name),'actual Shell Hero ref initializer '+name);for(const name of repairRefNames)assert.ok(repairRefInitializers.has(name),'actual Shell repair ref initializer '+name);assert.ok(repairRegistration,'actual Shell repair target registration');
  for(const name of fishingRefNames)assert.ok(fishingRefInitializers.has(name),'actual Shell Fishing inactive ref initializer '+name);
  for(const name of bagBeltRefNames)assert.ok(bagBeltRefInitializers.has(name),'actual Shell Bag/Belt inactive ref initializer '+name);assert.ok(bagBeltRectInitializer,'actual Shell Bag/Belt rectangle reader');
 
@@ -352,6 +521,10 @@ function shellRoutingFixture(channel,configure=()=>{}){
  scope.stagePresentation={virtualWidth:1024,virtualHeight:768,scale:1};scope.Element=Element;scope.Node=Element;
  scope.onBeginNpcRepairDrag=undefined;scope.onCancelNpcRepairDrag=undefined;scope.onDropNpcRepairDrag=undefined;scope.onConfirmNpcRepair=undefined;
  scope.setNpcRepairTargetSelection=selection=>{scope.npcRepairTargetSelection=selection;};scope.onOpenInventoryTab=tab=>{scope.activeInventoryTab=tab;};
+ scope.getBevyHeroInputBlocked=undefined;scope.getBevyHeroPointerContext=undefined;scope.onBevyHeroPointer=undefined;scope.onBevyHeroKey=undefined;
+ const heroRefsJs=ts.transpileModule([...heroRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ Object.assign(scope,new Function(...['getBevyHeroInputBlocked','getBevyHeroPointerContext','onBevyHeroPointer','onBevyHeroKey'],heroRefsJs+'\nreturn {'+heroRefNames.join(',')+'};')(...['getBevyHeroInputBlocked','getBevyHeroPointerContext','onBevyHeroPointer','onBevyHeroKey'].map(name=>scope[name])));
+ assert.equal(scope.heroPointerLeaseRef.current,null);assert.equal(scope.heroHoverContextRef.current,null);
  const fishingRefsJs=ts.transpileModule([...fishingRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
  Object.assign(scope,new Function(fishingRefsJs+'\nreturn {'+fishingRefNames.join(',')+'};')());
  assert.equal(scope.worldFishingPhysicalRef.current,null);assert.equal(scope.worldFishingTerminalRef.current,null);
@@ -372,6 +545,99 @@ function shellRoutingFixture(channel,configure=()=>{}){
  scope.sharedBagPointerHandlerRef.current=api.handleSharedUiPointer;
  return{f,scope,api,listeners,event:(x=110,y=110,id=7)=>({target:new Element(),currentTarget:scope.stageFrameRef.current,pointerId:id,pointerType:'mouse',isPrimary:true,button:0,timeStamp:10,detail:1,clientX:x,clientY:y,prevented:false,preventDefault(){this.prevented=true;},stopPropagation(){},stopImmediatePropagation(){}})};
 }
+function bagBeltRoutingFixture(){
+ const wire=[],begun=[],arms=[],canceled=[],captured=new Set(),flags={arm:true,occluded:false,rejectUp:false};
+ const stageRect={left:160,top:20,width:512,height:384},scale=0.5;let canvas,buttons,context;
+ const routing=shellRoutingFixture('bag',(scope,bagContext)=>{
+  context=bagContext;context.inputRegions=[{left:100,top:100,width:140,height:60}];
+  scope.stagePresentation.scale=scale;
+  canvas=new scope.HTMLElement();Object.assign(canvas,{isConnected:true,getBoundingClientRect:()=>({...stageRect}),
+   setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)});
+  buttons=Array.from({length:6},(_,slot)=>{const button=new scope.HTMLElement();
+   button.rect={left:stageRect.left+(50+slot*40)*scale,top:stageRect.top+650*scale,width:32*scale,height:32*scale};
+   Object.assign(button,{isConnected:true,disabled:false,hidden:false,getBoundingClientRect:()=>({...button.rect}),contains:node=>node===button});return button;});
+  Object.assign(scope.stageFrameRef.current,{isConnected:true,getBoundingClientRect:()=>({...stageRect}),contains:node=>node===canvas||buttons.includes(node)});
+  scope.scenePointFromMouseEvent=e=>({sceneX:(e.clientX-stageRect.left)/scale,sceneY:(e.clientY-stageRect.top)/scale});
+  scope.bagBeltContextRef.current={page:'bag1',open:true,screen:'game',repair:false,virtualWidth:1024,virtualHeight:768,scale};
+  scope.bagBeltButtonsRef.current=buttons.map((node,slot)=>({node,slot,item:null}));
+  scope.bagBeltCallbacksRef.current={onBagBeltDropGeometry:geometry=>{context.beltDropGeometry=geometry;},
+   onBeginBagToBeltGesture:(source,geometry,owner)=>{assert.equal(source,null);assert.equal(owner,'bevy');assert.equal(geometry,context.beltDropGeometry);
+    const proof=Object.freeze({token:Object.freeze({})});begun.push(proof);return proof;},
+   onArmBagToBeltGesture:(proof,geometry,target,point)=>{arms.push({proof,geometry,target,point});return flags.arm;},
+   onCancelBagToBeltGesture:proof=>canceled.push(proof)};
+  scope.document.elementFromPoint=(x,y)=>flags.occluded?canvas:buttons.find(b=>x>=b.rect.left&&x<b.rect.left+b.rect.width&&y>=b.rect.top&&y<b.rect.top+b.rect.height)??canvas;
+  scope.window.getComputedStyle=()=>({display:'block',visibility:'visible',pointerEvents:'auto',opacity:'1'});
+  // Bind the real DOM-aware endpoint functions to this fixture's browser;
+  // cached module functions otherwise close over Node's missing DOM globals.
+  const module={exports:{}};
+  new Function('exports','module','document','window',ts.transpileModule(readFileSync(new URL('../lib/bag-belt-gesture.ts',import.meta.url),'utf8'),
+   {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(module.exports,module,scope.document,scope.window);
+  Object.assign(scope,module.exports);
+  scope.bagPointerCallbacksRef.current.onBevyBagPointer=edge=>{
+   assert.deepEqual(Object.keys(edge).sort(),['runGeneration','connectionGeneration','sessionGeneration','ownerRevision','presentationRevision','sequence','pointerId','phase','origin','x','y','button'].sort());
+   wire.push({...edge});return edge.phase!=='up'||!flags.rejectUp;};
+ });
+ const geometry=routing.api.refreshBagBeltGeometry();assert.ok(geometry);assert.equal(context.beltDropGeometry,geometry);
+ return{...routing,wire,begun,arms,canceled,captured,flags,buttons,context,
+  event:(x=110,y=110,id=7,timeStamp=10)=>({...routing.event(stageRect.left+x*scale,stageRect.top+y*scale,id),target:canvas,timeStamp})};
+}
+test('actual Shell Belt-capable same-Bag drag retains original Up and retires only its unused Belt proof',()=>{
+ const x=bagBeltRoutingFixture(),cleanup=x.api.mountPointerLifecycle();x.api.handleSharedUiPointer(x.event(),'down');
+ assert.equal(x.scope.bagBeltPointerRef.current.proof,x.begun[0],'real Bag down acquired the Belt lease');assert.ok(x.f.host.hasUiHeld());assert.ok(x.captured.has(7));
+ x.api.handleSharedUiPointer(x.event(200,110,7,15),'move');x.listeners.get('pointerup')(x.event(200,110,7,20));
+ assert.deepEqual(x.wire.map(e=>e.phase),['down','move','up']);assert.deepEqual([x.wire[2].x,x.wire[2].y],[200,110]);
+ assert.ok(x.wire.every(e=>e.origin==='bag'&&e.ownerRevision===x.context.ownerRevision));assert.ok(x.wire[0].sequence<x.wire[1].sequence&&x.wire[1].sequence<x.wire[2].sequence);
+ assert.equal(x.arms.length,0);assert.deepEqual(x.canceled,[x.begun[0]]);assert.equal(x.scope.bagBeltArmedSharedRef.current,null);
+ assert.equal(x.scope.bagBeltRejectedTerminalRef.current,null);assert.equal(x.scope.bagPointerRouterRef.current.held,null);assert.equal(x.f.host.hasUiHeld(),false);assert.equal(x.captured.size,0);
+ x.api.handleSharedUiPointer(x.event(200,110,7,20),'up');assert.equal(x.wire.length,3);assert.equal(x.canceled.length,1);
+ x.api.handleSharedUiPointer(x.event(110,110,7,30),'down');const held=x.scope.bagPointerRouterRef.current.held,hold=x.scope.combatUiHoldRef.current.get('bag');
+ x.api.handleSharedUiPointer(x.event(200,110,7,20),'up');assert.equal(x.scope.bagPointerRouterRef.current.held,held);assert.equal(x.scope.combatUiHoldRef.current.get('bag'),hold);
+ x.api.handleSharedUiPointer(x.event(200,110,7,40),'up');assert.equal(x.wire.at(-1).phase,'up');assert.equal(x.f.host.hasUiHeld(),false);assert.deepEqual(x.canceled,x.begun);
+ cleanup();assert.equal(x.listeners.size,0);
+});
+test('actual Shell Belt release preserves an accepted proof and cancels rejected, occluded or disabled endpoints',()=>{
+ for(const mode of ['accepted','armRejected','occluded','disabled','wireRejected']){
+  const x=bagBeltRoutingFixture();x.api.handleSharedUiPointer(x.event(),'down');assert.equal(x.begun.length,1);
+  if(mode==='armRejected')x.flags.arm=false;if(mode==='occluded')x.flags.occluded=true;if(mode==='disabled')x.buttons[2].disabled=true;if(mode==='wireRejected')x.flags.rejectUp=true;
+  x.api.handleSharedUiPointer(x.event(146,666,7,15),'move');x.api.handleSharedUiPointer(x.event(146,666,7,20),'up');
+  assert.deepEqual(x.wire.map(e=>e.phase),['down','move',['accepted','wireRejected'].includes(mode)?'up':'cancel'],mode);
+  assert.equal(x.arms.length,['occluded','disabled'].includes(mode)?0:1,mode);assert.equal(x.scope.bagPointerRouterRef.current.held,null);assert.equal(x.f.host.hasUiHeld(),false);assert.equal(x.captured.size,0);
+  if(mode==='accepted'){
+   assert.equal(x.scope.bagBeltArmedSharedRef.current.proof,x.begun[0]);assert.equal(x.canceled.length,0);
+   assert.deepEqual(x.arms[0].target,{slot:2,uniqueId:null});assert.equal(x.arms[0].geometry,x.context.beltDropGeometry);
+   x.api.handleSharedUiPointer(x.event(146,666,7,20),'up');assert.equal(x.arms.length,1);assert.equal(x.wire.length,3);
+   x.api.cancelBagBeltPointer(x.scope.bagBeltArmedSharedRef.current);
+  }
+  assert.equal(x.scope.bagBeltArmedSharedRef.current,null);assert.deepEqual(x.canceled,[x.begun[0]],mode+' never reuses or replaces the proof');
+ }
+});
+test('actual Shell changed Bag owner, Belt geometry, callbacks or physical source cancel an old drag',()=>{
+ for(const change of ['owner','geometry','callback','source','pointerType']){
+  const x=bagBeltRoutingFixture();x.api.handleSharedUiPointer(x.event(),'down');
+  if(change==='owner')x.context.ownerRevision++;if(change==='geometry')x.buttons[0].rect.left++;
+  if(change==='callback')x.scope.bagBeltCallbacksRef.current={...x.scope.bagBeltCallbacksRef.current,onArmBagToBeltGesture:()=>{throw Error('replacement callback must not acquire the old proof');}};
+  if(change==='source')x.scope.bagBeltPointerRef.current.node.isConnected=false;
+  const release=x.event(200,110,7,20);if(change==='pointerType')release.pointerType='touch';x.api.handleSharedUiPointer(release,'up');
+  assert.ok(x.wire.some(e=>e.phase==='cancel'),change);assert.equal(x.arms.length,0);assert.deepEqual(x.canceled,[x.begun[0]]);
+  assert.equal(x.scope.bagBeltPointerRef.current,null);assert.equal(x.scope.bagBeltArmedSharedRef.current,null);assert.equal(x.scope.bagPointerRouterRef.current.held,null);assert.equal(x.f.host.hasUiHeld(),false);assert.equal(x.captured.size,0);
+  if(change==='owner')assert.ok(x.wire.every(e=>e.ownerRevision===0),'retirement cannot rename old edges into the new owner');
+  x.api.handleSharedUiPointer(release,'up');assert.equal(x.arms.length,0);assert.equal(x.canceled.length,1);
+ }
+});
+test('actual Shell Belt lease cancel, blur and cleanup do not leak old terminals into a fresh gesture',()=>{
+ for(const terminal of ['cancel','blur','cleanup']){
+  const x=bagBeltRoutingFixture(),cleanup=x.api.mountPointerLifecycle();x.api.handleSharedUiPointer(x.event(),'down');
+  if(terminal==='cancel')x.api.handleSharedUiPointer(x.event(200,110,7,20),'cancel');else if(terminal==='blur')x.listeners.get('blur')();else cleanup();
+  assert.ok(x.wire.some(e=>e.phase===(terminal==='cleanup'?'cancel':terminal)));
+  assert.equal(x.arms.length,0);assert.deepEqual(x.canceled,[x.begun[0]]);assert.equal(x.scope.bagBeltPointerRef.current,null);assert.equal(x.scope.bagBeltArmedSharedRef.current,null);
+  assert.equal(x.scope.bagPointerRouterRef.current.held,null);assert.equal(x.scope.bagBeltRejectedTerminalRef.current,null);assert.equal(x.f.host.hasUiHeld(),false);assert.equal(x.captured.size,0);
+  if(terminal==='cleanup'){assert.equal(x.listeners.size,0);continue;}
+  const id=terminal==='cancel'?7:8;x.api.handleSharedUiPointer(x.event(110,110,id,30),'down');const held=x.scope.bagPointerRouterRef.current.held,hold=x.scope.combatUiHoldRef.current.get('bag');assert.ok(held);assert.ok(hold);
+  x.api.handleSharedUiPointer(x.event(200,110,7,20),'up');assert.equal(x.scope.bagPointerRouterRef.current.held,held);assert.equal(x.scope.combatUiHoldRef.current.get('bag'),hold);
+  x.api.handleSharedUiPointer(x.event(200,110,id,40),'up');assert.equal(x.wire.at(-1).phase,'up');assert.equal(x.wire.at(-1).pointerId,id);assert.equal(x.f.host.hasUiHeld(),false);assert.deepEqual(x.canceled,x.begun);
+  cleanup();assert.equal(x.listeners.size,0);
+ }
+});
 for(const channel of ['bag','character','hud','spells'])test('actual Shell '+channel+' UI-origin lease blocks timer; terminal and cleanup restore fresh input',()=>{for(const terminal of ['up','cancel','blur']){const {f,api,event}=shellRoutingFixture(channel);api.handleSharedUiPointer(event(),'move');assert.equal(f.host.hasUiHeld(),false,'passive hover never blocks');api.handleSharedUiPointer(event(),'down');assert.ok(f.host.hasUiHeld());const captures=f.captures.length;f.now=60;f.host.tick();assert.equal(f.ready,false);assert.equal(f.captures.length,captures);if(terminal==='blur')api['cancelShared'+channel[0].toUpperCase()+channel.slice(1)+'Pointer']();else api.handleSharedUiPointer(event(),terminal);assert.equal(f.host.hasUiHeld(),false);f.host.tick();assert.ok(f.ready);assert.equal(f.emit(f.proof({edgeSequence:0})).outcome,'confirmedSend');}});
 test('actual Shell world-origin Bag/HUD crossing stays world; old token cleanup cannot release new hold',()=>{for(const channel of ['bag','hud']){const {f,api,event,scope}=shellRoutingFixture(channel);api.handleSharedUiPointer(event(50,50),'down');assert.equal(f.host.hasUiHeld(),false);api.handleSharedUiPointer(event(),'move');assert.equal(f.host.hasUiHeld(),false);api.handleSharedUiPointer(event(),'up');assert.equal(f.host.hasUiHeld(),false);api.beginCombatUiHold(channel,7);const old=scope.combatUiHoldRef.current.get(channel);api.beginCombatUiHold(channel,7);api.endCombatUiHold(channel,old);assert.ok(f.host.hasUiHeld());api.endCombatUiHold(channel,scope.combatUiHoldRef.current.get(channel));assert.equal(f.host.hasUiHeld(),false);}});
 
@@ -473,4 +739,84 @@ test('actual Shell window blur, resize and cleanup clear captured Quest gestures
   if(terminal!=='cleanup')cleanup();
   assert.equal(listeners.size,0,'the real cleanup removes the registered window listeners');
  }
+});
+
+function sharedCanvasWorldTargetFixture(){
+ const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8');
+ const ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+ const names=['sceneWorldObjectTarget','retainSceneWorldObjectTarget','scenePointFromMouseEvent','handleSharedHudPointer','cancelSharedHudPointer','beginCombatUiHold','endCombatUiHold','dispatchSceneClickInput','dispatchSceneMoveInput','stopHeldScenePointer','handleSceneWorldPointerDown'];
+ const declarations=[];let capture,tick;
+ function visit(n){
+  if(ts.isFunctionDeclaration(n)&&n.name&&names.includes(n.name.text))declarations.push(n.getText(ast));
+  if(ts.isJsxAttribute(n)&&n.name.getText(ast)==='onPointerDownCapture'&&n.initializer&&ts.isJsxExpression(n.initializer)&&n.initializer.expression?.getText(ast).includes('retainSceneWorldObjectTarget'))capture=n.initializer.expression.getText(ast);
+  if(ts.isCallExpression(n)&&n.expression.getText(ast)==='window.setInterval'&&n.arguments[0]?.getText(ast).includes('dispatchSceneMoveInput(held)'))tick=n.arguments[0].getText(ast);
+  ts.forEachChild(n,visit);
+ }
+ visit(ast);assert.equal(declarations.length,names.length);assert.ok(capture);assert.ok(tick);
+ class DomElement{
+  constructor(classes='',dataset={},parent=null,id=''){this.classes=new Set(classes.split(' ').filter(Boolean));this.dataset=dataset;this.parent=parent;this.id=id;this.classList={contains:x=>this.classes.has(x)};}
+  closest(selector){for(let node=this;node;node=node.parent){if(selector.split(',').some(part=>[...part.matchAll(/\.([\w-]+)/g)].every(m=>node.classes.has(m[1]))&&[...part.matchAll(/\[data-([\w-]+)(?:=['"]([^'"]*)['"])?\]/g)].every(m=>{const key=m[1].replace(/-([a-z])/g,(_,c)=>c.toUpperCase());return Object.hasOwn(node.dataset,key)&&(m[2]===undefined||node.dataset[key]===m[2]);})))return node;}return null;}
+  contains(target){for(let node=target;node;node=node.parent)if(node===this)return true;return false;}
+  focus(){}setPointerCapture(){}
+  getBoundingClientRect(){return{left:160,top:0,width:960,height:720};}
+ }
+ const frame=new DomElement('client-stage-frame'),canvas=new DomElement('',{},frame,'mir2-quest-ui-canvas');
+ const name=new DomElement('entity-nameplate',{objectId:'206644',uiInteractive:'true'},frame);
+ const label=new DomElement('',{},name),sprite=new DomElement('entity-sprite-stack',{objectId:'206644',uiInteractive:'true'},frame),body=new DomElement('entity-sprite-hit',{},sprite);
+ const drop=new DomElement('ground-drop-marker',{objectId:'300001'},frame),calls=[],hitReads=[];
+ const scope={stageFrameRef:{current:frame},stagePresentation:{virtualWidth:1024,virtualHeight:768},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:()=>canvas.id,
+  document:{elementsFromPoint:(x,y)=>{hitReads.push([x,y]);return scope.layers;}},layers:[canvas,label,name,body,frame],HTMLElement:DomElement,
+  hudPointerRouterRef:{current:new (load('bevy-hud-ui').HudPointerRouter)()},bevyHudUiReady:true,sceneInteractionReady:true,bagPointerRouterRef:{current:{held:null}},
+  characterPointerCallbacksRef:{current:{}},spellsPointerCallbacksRef:{current:{}},bagPointerCallbacksRef:{current:{}},questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
+  status:{ready:true,generation:1,revision:1,characterStatsReady:false,modal:false,foregroundRects:[],plan:{main:{left:0,top:672,width:1024,height:96},buttons:[]}},
+  readBevyHudStatus:()=>scope.status,heldScenePointerRef:{current:null},combatUiHoldRef:{current:new Map()},onCombatUiHeld:undefined,
+  cancelWorldFishingHeldPointer:()=>{},onViewportDirectionStop:()=>{},dispatchBevyHudNavigation:action=>calls.push(['hud',action]),
+  latestMoveInputRef:{current:{screen:'game'}},tileFromScenePoint:()=>({x:99,y:88}),npcShopBlocksWorldInput:()=>scope.shopBlocked??false,
+  stopNpcShopWorldInput:()=>{scope.heldScenePointerRef.current=null;},playerUiPreferences:{newMove:false},
+  onViewportTileClick:(x,y)=>calls.push(['tile',x,y]),onViewportTileSecondaryAction:(x,y)=>calls.push(['secondary',x,y]),onViewportDirectionStep:(x,y,mode)=>calls.push(['step',x,y,mode]),
+  onActivateEntity:id=>calls.push(['entity',id]),onPickGroundDrop:id=>calls.push(['drop',id]),worldFishingPhysicalRef:{current:null},worldFishingPointersRef:{current:new Map()},
+  handleSharedUiPointer:(event,phase)=>api.handleSharedHudPointer(event,phase)};
+ const js=ts.transpileModule(declarations.join('\n')+'\nconst capture='+capture+';const tick='+tick+';\nreturn {'+names.join(',')+',capture,tick};',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ const api=new Function('scope','with(scope){'+js+'}')(scope);
+ const event=(x=632.5,y=348.75)=>({target:canvas,clientX:x,clientY:y,pointerId:7,pointerType:'mouse',button:0,timeStamp:1,preventDefault(){}});
+ return{api,event,scope,calls,hitReads,frame,canvas,name,label,body,drop,DomElement};
+}
+
+test('actual shared HUD canvas preserves nameplate and body identity without walking to their offset tile',()=>{
+ for(const kind of ['name','body']){
+  const f=sharedCanvasWorldTargetFixture();if(kind==='body')f.scope.layers=[f.canvas,f.body,f.frame];
+  const down=f.event();f.api.capture(down);const held=f.scope.heldScenePointerRef.current;
+  assert.deepEqual(held.worldTarget,{kind:'entity',objectId:'206644'});assert.deepEqual(f.hitReads,[[632.5,348.75]]);
+  f.api.tick();f.api.dispatchSceneMoveInput(held);assert.equal(held.dispatched,false);assert.deepEqual(f.calls,[],'holding an entity never queues offset-tile movement');
+  f.scope.layers=[f.canvas,f.drop,f.frame];f.api.handleSharedHudPointer(f.event(),'up');
+  assert.deepEqual(f.calls,[['entity','206644']],'the down target survives crossing to another object before release');
+  assert.equal(f.scope.heldScenePointerRef.current,null);assert.equal(f.scope.hudPointerRouterRef.current.held,null);
+ }
+});
+
+test('actual shared canvas routes drop labels to pickup and empty world to original tile action',()=>{
+ const f=sharedCanvasWorldTargetFixture();f.scope.layers=[f.canvas,f.drop,f.frame];f.api.capture(f.event());f.api.handleSharedHudPointer(f.event(),'up');
+ assert.deepEqual(f.calls,[['drop','300001']]);f.calls.length=0;f.scope.layers=[f.canvas,f.frame];f.api.capture(f.event());f.api.handleSharedHudPointer(f.event(),'up');
+ assert.deepEqual(f.calls,[['tile',99,88]]);
+});
+
+test('actual surface router refuses world-target lookup under HUD, modal and foreground owners',()=>{
+ for(const blocked of ['hud','modal','foreground']){
+  const f=sharedCanvasWorldTargetFixture();let down=f.event();
+  if(blocked==='hud'){down=f.event(632.5,680);f.scope.status.plan.buttons=[{action:'character',rect:{left:480,top:672,width:100,height:96}}];}
+  if(blocked==='modal')f.scope.status.modal=true;
+  if(blocked==='foreground')f.scope.status.foregroundRects=[{left:0,top:0,width:1024,height:672}];
+  f.api.capture(down);assert.equal(f.scope.heldScenePointerRef.current,null);assert.deepEqual(f.hitReads,[]);f.api.handleSharedHudPointer(down,'up');
+  assert.equal(f.calls.some(([kind])=>kind==='entity'||kind==='drop'||kind==='tile'),false);
+ }
+});
+
+test('actual target resolver rejects foreign stage, DOM UI and noninteractive objects; cancellation retires the target',()=>{
+ const f=sharedCanvasWorldTargetFixture();
+ f.scope.layers=[f.canvas,new f.DomElement('entity-nameplate',{objectId:'other',uiInteractive:'true'},new f.DomElement()),f.frame];assert.equal(f.api.sceneWorldObjectTarget(10,20),undefined);
+ f.scope.layers=[f.canvas,new f.DomElement('game-ui-scene',{},f.frame),f.name,f.frame];assert.equal(f.api.sceneWorldObjectTarget(10,20),undefined);
+ f.name.dataset.uiInteractive='false';f.scope.layers=[f.canvas,f.name,f.frame];assert.equal(f.api.sceneWorldObjectTarget(10,20),undefined);f.name.dataset.uiInteractive='true';
+ f.scope.layers=[f.label,f.name,f.frame];assert.equal(f.api.sceneWorldObjectTarget(10,20),undefined,'ordinary DOM target uses its existing handler');
+ f.scope.layers=[f.canvas,f.name,f.frame];f.api.capture(f.event());f.api.handleSharedHudPointer(f.event(),'cancel');f.api.handleSharedHudPointer(f.event(),'up');
+ assert.deepEqual(f.calls,[]);assert.equal(f.scope.heldScenePointerRef.current,null);
 });

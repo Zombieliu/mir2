@@ -169,6 +169,8 @@ if (!reportOnly) {
       `Start: node ${serverEntry}`,
       "Build-time environment: NEXT_PUBLIC_MIR2_ASSET_BASE_URL and MIR2_ASSET_VERSION",
       "Runtime environment: MIR2_R2_PROXY_BASE serves same-origin original-ui misses; MIR2_ASSET_BASE_URL separately describes asset-manifest/browser delivery.",
+      "Configure MIR2_R2_PROXY_BASE to an immutable asset origin before starting the server; the proxy reads it when its server module loads.",
+      "Omitted Title, Prguse, Prguse2, ChrSel, Sound, Items and other original-ui media must be fetched from that asset origin, including login, character selection and regular UI images and sound effects.",
       "Original-ui Mount, Pet and Gate media is omitted; configure MIR2_R2_PROXY_BASE to serve every omitted path from an immutable asset origin.",
       "The audited source original-asset-manifest has Mount entries but no Pet or Gate entries; that manifest alone is not a complete remote inventory.",
       "This package does not prove riding, pet or door gameplay, public release coverage or device acceptance.",

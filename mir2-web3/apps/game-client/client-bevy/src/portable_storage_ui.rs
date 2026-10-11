@@ -16,7 +16,7 @@ use crate::crystal_ui::storage_paint::{
     paint_storage_with_layout, StoragePaintAction, StoragePaintOptions,
     StoragePaintLayout, StoragePaintLabels, StoragePaintCell, STORAGE_REQUIRED_SKINS,
 };
-use crate::crystal_ui::item_image::layout_original_item_images;
+use crate::crystal_ui::item_image::{install_original_item_image_layout, OriginalItemImageLayoutSet};
 use crate::crystal_ui::panel_layouts::INVENTORY_PANEL_SIZE;
 use crate::portable_quest_ui::{QuestUiFont, QuestUiTargetCamera};
 use crate::pending_operations::PendingLifecycleSet;
@@ -287,12 +287,13 @@ pub fn clipped_rect(mut entity:Entity,mut rect:bevy::math::Rect,
 pub struct Mir2PortableStorageUiPlugin;
 impl Plugin for Mir2PortableStorageUiPlugin {
     fn build(&self,app:&mut App){
+        install_original_item_image_layout(app);
         app.init_resource::<StorageUiContext>().init_resource::<StorageUiReadModel>()
             .init_resource::<StorageUiState>().init_resource::<StorageUiIntentQueue>()
             .init_resource::<StoragePointerEdges>()
             .add_systems(Startup,spawn_root)
-            .add_systems(Update,(apply_context,process_pointer,render_storage,update_readonly_locks,layout_original_item_images)
-                .chain().after(PendingLifecycleSet::Ingest));
+            .add_systems(Update,(apply_context,process_pointer,render_storage,update_readonly_locks)
+                .chain().after(PendingLifecycleSet::Ingest).before(OriginalItemImageLayoutSet));
     }
 }
 fn spawn_root(mut commands:Commands,camera:Option<Res<QuestUiTargetCamera>>){

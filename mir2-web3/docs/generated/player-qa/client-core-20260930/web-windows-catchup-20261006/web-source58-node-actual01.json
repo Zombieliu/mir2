@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source58 actual original Node regressions",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 53284,
+    "kind": "Source58 actual original Node combat and canvas shortcut regressions",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4671,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/node-tests01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "declaredInputs": 19569,
+  "tests": {
+    "passed": 54,
+    "failed": 0,
+    "skipped": 0
+  },
+  "newTest": "Actual Shell capture phase precedes Winit canvas cancellation; original capture/modal/editable/focus/repeat/defaultPrevented gates and same-phase cleanup preserved",
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/node-tests01/source-snapshot.json",
+    "bytes": 4870786,
+    "sha256": "c5cf881eb8ec60e4e8cb44fa1d020ace53898a96164a69ce43d2fc956c74e399"
+  },
+  "scope": "Matched current Page/Shell original tests before new renderer promotion; no actual browser shortcut or continuous-attack acceptance inferred",
+  "candidate100": false,
+  "goalComplete": false
+}

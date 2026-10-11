@@ -70,9 +70,6 @@ const productionAssetRelease = isVercelProduction
       };
     }
   : null;
-const immutableGameAssetCache = isDevelopment
-  ? "public, max-age=0, must-revalidate"
-  : "public, max-age=31536000, immutable";
 const bootstrapAssetCache = isDevelopment
   ? "public, max-age=0, must-revalidate"
   : "public, max-age=86400, stale-while-revalidate=604800";
@@ -236,10 +233,12 @@ const nextConfig: NextConfig = {
           clearAltSvcHeader,
         ],
       },
+      // Missing game assets may fall back to /api/r2-proxy. Leave Cache-Control
+      // to the response so proxy failures keep no-store and successes immutable;
+      // a path-wide header here overrides even a rewritten handler's error policy.
       {
         source: "/original-ui/:path*",
         headers: [
-          { key: "Cache-Control", value: immutableGameAssetCache },
           { key: "X-Mir2-Asset-Cache", value: "original-ui" },
           clearAltSvcHeader,
         ],
@@ -247,7 +246,6 @@ const nextConfig: NextConfig = {
       {
         source: "/original-map/:path*",
         headers: [
-          { key: "Cache-Control", value: immutableGameAssetCache },
           { key: "X-Mir2-Asset-Cache", value: "original-map" },
           clearAltSvcHeader,
         ],
@@ -255,7 +253,6 @@ const nextConfig: NextConfig = {
       {
         source: "/generated/original-map-blend/:path*",
         headers: [
-          { key: "Cache-Control", value: immutableGameAssetCache },
           { key: "X-Mir2-Asset-Cache", value: "original-map-blend" },
           clearAltSvcHeader,
         ],
@@ -263,7 +260,6 @@ const nextConfig: NextConfig = {
       {
         source: "/generated/crystal-packs/full/:path*",
         headers: [
-          { key: "Cache-Control", value: immutableGameAssetCache },
           { key: "X-Mir2-Asset-Cache", value: "crystal-full-pack" },
           clearAltSvcHeader,
         ],
