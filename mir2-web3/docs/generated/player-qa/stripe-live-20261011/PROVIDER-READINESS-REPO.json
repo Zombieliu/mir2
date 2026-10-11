@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.stripe-live.provider-readiness.v1",
+  "checkedAtUtc": "2026-10-11T08:11:07.840419+00:00",
+  "apiVersion": "2026-09-30.endive",
+  "ready": false,
+  "checks": [],
+  "chargesCreated": false,
+  "providerObjectsChanged": false,
+  "blocked": "test-key-cannot-enable-real-payments"
+}

@@ -1,0 +1,17 @@
+{
+  "allServicePidsPreserved": true,
+  "applied": true,
+  "forgedWhileDisabledStatus": 503,
+  "gatewayRestarted": false,
+  "keysCopied": false,
+  "newCaddySha256": "efbd0eaee9952dd38148c9b634f47889e99a9ddff632c5f2befebb6ce8339b28",
+  "oldCaddySha256": "139d2f48a77e2af9f1ff0b0baec81aef47c6d084c1ce95f6df32c23889dda5d1",
+  "onlyRouteAdded": "/playtest/v1/billing/stripe/webhook",
+  "passed": true,
+  "privateBackup": "/var/backups/mir2-caddy-stripe-live-20261011-01",
+  "providerStillDisabled": true,
+  "schema": "mir2.stripe-live.webhook-route.v1",
+  "signedFeedsPreserved": true,
+  "sourceRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "unsignedStatus": 400
+}

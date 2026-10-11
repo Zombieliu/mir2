@@ -1,0 +1,8 @@
+{
+  "schema": "mir2.stripe-live.route-preparation.v1",
+  "helperSha256": "ac02448896c07fe9ba28c5d7943f382ec37b882193320cc7d7d5492d9c6384b0",
+  "bodySha256": "c0ee888376d16c99b0ee61004f452937c4ae3e48ff4e1480da39da1cd650d082",
+  "authorization": "Explicit user request to enable live Stripe payments",
+  "onlyRouteAdded": "/playtest/v1/billing/stripe/webhook",
+  "keysIncluded": false
+}

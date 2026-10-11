@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> 2026-10-11 live Stripe activation requested: the exact signed-callback route
+> is now public and rejects unsigned requests400; forged requests receive503
+> while billing is disabled. Caddy-only reload preserves all service PIDs,
+> Gateway4006d988, original realm, saves, installed clients and signed feed19.
+> Five billing files match qualified01a8 byte-for-byte. The newly filled private
+> live file still contains a test key, so provider activation stays blocked
+> before any Stripe call or credential upload. No live-money acceptance is
+> claimed. Monthly1000 pricing stays enabled; mandatory monthly entry stays off.
+> Root owns this configuration/doc lane; no gameplay or P1-P7/Mentor completion,
+> new deadline or expired heartbeat restart.
+> [Exact activation state and receipts](STRIPE-LIVE-ACTIVATION-20261011.md).
+
+
 > 2026-10-11 R24 shop/mail is actually published: native source 87fd85a0,
 > signed feed 19 and paired Gateway 01a8c48a. Exact Linux CI 38102448215,
 > PostgreSQL commerce CI 38061006701, full 31-object CDN stage 38108094398 and

@@ -1,0 +1,20 @@
+[
+  {
+    "request": "unsigned",
+    "httpStatus": 400,
+    "body": {
+      "error": "billingWebhookSignatureInvalid"
+    },
+    "cacheControl": "no-store",
+    "tlsVerified": true
+  },
+  {
+    "request": "forged",
+    "httpStatus": 503,
+    "body": {
+      "error": "billingUnavailable"
+    },
+    "cacheControl": "no-store",
+    "tlsVerified": true
+  }
+]

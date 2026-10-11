@@ -1,0 +1,62 @@
+{
+  "schema": "mir2.stripe-live.readiness-evidence.v1",
+  "livePaymentsEnabled": false,
+  "permanentStripeEndpointCreated": false,
+  "gatewayRevision": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "signedFeedSequence": 19,
+  "files": [
+    {
+      "name": "WEBHOOK-ROUTE-APPLIED.json",
+      "bytes": 671,
+      "sha256": "5907d140928a169c99635e9dc824b4209526cb3c77d27c7e041839365c7c467d"
+    },
+    {
+      "name": "PUBLIC-CALLBACK-CHECKS.json",
+      "bytes": 357,
+      "sha256": "23274d7111ec1431a64bdafdd19f15c8a8bbd60065cd70cae8cef3b8540b8ab8"
+    },
+    {
+      "name": "BILLING-SOURCE-READBACK.json",
+      "bytes": 807,
+      "sha256": "92c03855bab95007587de2b3503d19bea11e34e6d36c4bbd38b777ee13e853b7"
+    },
+    {
+      "name": "PROVIDER-READINESS.json",
+      "bytes": 297,
+      "sha256": "15a2b3a0399644da0d616ca1e6879e0a6d1f174b0870977783fed9484738b127"
+    },
+    {
+      "name": "ROUTE-PREPARATION.json",
+      "bytes": 385,
+      "sha256": "7259d3c8fb93b8f819bfd3139c242c4963477c71f10402e00c4ab95a6071c0b8"
+    },
+    {
+      "name": "caddy-webhook-route.py",
+      "bytes": 7218,
+      "sha256": "c0ee888376d16c99b0ee61004f452937c4ae3e48ff4e1480da39da1cd650d082"
+    },
+    {
+      "name": "PROVIDER-READINESS-REPO.json",
+      "bytes": 297,
+      "sha256": "ff6aebd37bc4714029185eb9d85d09c2da04ff902d645c9ac48c4f7d4c6edec1"
+    }
+  ],
+  "retainedOriginalAttempts": {
+    "localInitialEncodingError": "utf8-sig was rejected before credential reading; corrected utf-8-sig audit retained",
+    "initialSourcePathError": "Git tree lookup omitted mir2-web3/ prefix; original unavailable results retained outside Git and excluded",
+    "preparation01": "Read-only preparatory receipt retained; additional process environment/drop-in checks added before sole route apply02"
+  },
+  "credentialValuesIncluded": false,
+  "productionCredentialsCopied": false,
+  "readinessScript": {
+    "path": "scripts/verify-stripe-live-readiness.py",
+    "sha256": "e4204ada644990f46f6e4e724830a3ca083027bea97375ad7cfb4c39a231b82c",
+    "privateKeyPathRequired": true,
+    "actualTestKeyRejectedBeforeRequests": true
+  },
+  "providerRepoReceiptTransport": {
+    "originalBytes": 307,
+    "originalSha256": "358e97797b0c7b81912c4f73e9c154bb540851cea73b4284a9089b50bc6c1916",
+    "normalization": "CRLF to LF before publication; original outside-Git receipt retained"
+  }
+}
