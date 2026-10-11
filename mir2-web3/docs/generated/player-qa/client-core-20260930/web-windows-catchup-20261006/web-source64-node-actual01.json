@@ -1,0 +1,77 @@
+{
+  "owner": "root",
+  "source": 64,
+  "observedAt": "2026-10-11T07:46:15.432Z",
+  "kind": "Actual original Node two Shop regressions",
+  "sourceCount": 19585,
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/preparation/source64-source-snapshot01.json",
+    "bytes": 6768964,
+    "sha256": "52215cd0b76389d8326e7e52c4f4118fd7c9754a5cd0cb19b1d4e8814606f435"
+  },
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/source64-source-review01.json",
+    "bytes": 9513,
+    "sha256": "91618c9b0baabe90a0341a4a9931b29f8d491d69681dbf8d1f1c565c377742ac"
+  },
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "unchanged": true
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/node-tests01-config.json",
+    "bytes": 4752,
+    "sha256": "a46d2d2d7cdd67a313a1e472743431c4613a756e730baa77a88b841fea604829"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 62816,
+    "kind": "Source64 pending original Node two existing Shop regressions",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 12796,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "summary": {
+    "tests": 203,
+    "pass": 203,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "newCapabilityConsumerGroupsPassed": 4,
+  "oldTestsRetained": 199,
+  "fullSourceVerifiedBeforeAfter": true,
+  "originalControlPinsVerifiedBeforeAfter": true,
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/node-tests01/stdout.log",
+    "bytes": 52495,
+    "sha256": "ce09d3a7d8df1a166763cef9cf3d928c9bfd4b05a8d030caa3fd7191e98d95f9"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/node-tests01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/node-tests01/outer.json",
+    "bytes": 520,
+    "sha256": "c776713f4ba2f0260ff85738f031fe046ad34b9ab78d68c4fc6da5fcd07270e7"
+  },
+  "limits": [
+    "Focused actual consumer tests; not real browser/server purchase success",
+    "No new Rust or native build; current Source62 Gateway remains unchanged"
+  ],
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -684,6 +684,32 @@ function formatGold(value: number) {
   return Math.max(0, Math.trunc(value)).toLocaleString("en-US");
 }
 
+function npcShopBuyBlockedTitle(t: TranslateFn, quote: NpcGoldBuyQuote | null | undefined,
+  usesPearls: boolean, pearlsKnown: boolean): string {
+  // Only an explicit authoritative denial identifies a funds/capacity failure.
+  // A missing quote or invalid source must not look like insufficient currency.
+  if (quote?.blockReason === "localPending") {
+    return t("ui.questActionPending", [], "Your request is being processed. Please wait.");
+  }
+  const total = usesPearls ? quote?.totalPearls : quote?.totalGold;
+  if (!quote || total === null || total === undefined
+    || usesPearls && (!pearlsKnown || quote.currency !== "pearls")
+    || !usesPearls && quote.currency === "pearls") {
+    return t("client.Unavailable", [], "Unavailable");
+  }
+  switch (quote.blockReason) {
+    case "insufficientGold":
+      return usesPearls ? t("client.Unavailable", [], "Unavailable") : t("client.LowGold", [], "Not enough gold.");
+    case "pearls":
+      return usesPearls ? t("client.NotEnoughPearls", [], "You do not have enough Pearls.") : t("client.Unavailable", [], "Unavailable");
+    case "inventoryFull":
+    case "bagFull":
+      return t("client.NoBagSpace", [], "No bag space.");
+    default:
+      return t("client.Unavailable", [], "Unavailable");
+  }
+}
+
 export function NpcShopWindow({
   t,
   npcName,
@@ -712,6 +738,7 @@ export function NpcShopWindow({
   const [selectedId, setSelectedId] = useState<number | string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [repairSelection, setRepairSelection] = useState<NpcRepairSelection | null>(null);
+  const [buyClickStatus, setBuyClickStatus] = useState<"idle" | "requested" | "inputBlocked" | "selectionUnavailable" | "selectionDisabled" | "freshQuoteRejected" | "freshInputBlocked" | "callbackInvoked" | "callbackUnavailable">("idle");
   const repairTab = tab === "repair" || tab === "special";
   const repairSelectionCurrent = repairSelection !== null && repairSelection.stamp === repairView?.stamp
     && repairSelection.uniqueId === selectedId;
@@ -760,11 +787,16 @@ export function NpcShopWindow({
     ? quoteCanBuy(buyQuote, true) : !goldKnown || tab !== "buy" || total !== null && total <= gold!;
 
   function confirm() {
-    if (blocked() || !selected || selected.disabled) return;
+    const ordinaryBuy = tab === "buy" && !showBuyBack;
+    if (ordinaryBuy) setBuyClickStatus("requested");
+    if (blocked()) { if (ordinaryBuy) setBuyClickStatus("inputBlocked"); return; }
+    if (!selected) { if (ordinaryBuy) setBuyClickStatus("selectionUnavailable"); return; }
+    if (selected.disabled) { if (ordinaryBuy) setBuyClickStatus("selectionDisabled"); return; }
     // Render quotes describe the controls. Only a fresh quote can authorize this edge.
     if (sharedBuy || pearlBuy) {
       const currentQuote = onQuoteBuy?.(selected.id, effectiveQuantity);
-      if (!quoteCanBuy(currentQuote, pearlBuy) || blocked()) return;
+      if (!quoteCanBuy(currentQuote, pearlBuy)) { if (ordinaryBuy) setBuyClickStatus("freshQuoteRejected"); return; }
+      if (blocked()) { if (ordinaryBuy) setBuyClickStatus("freshInputBlocked"); return; }
     }
     if (repairTab) {
       if (!selected.disabled && repairSelectionCurrent && repairSelection && selectedRepairQuote?.affordable) {
@@ -775,7 +807,10 @@ export function NpcShopWindow({
     switch (tab) {
       case "buy":
         if (showBuyBack) onBuyBack?.(selected.id, effectiveQuantity);
-        else onBuy?.(selected.id, effectiveQuantity);
+        else {
+          setBuyClickStatus(onBuy ? "callbackInvoked" : "callbackUnavailable");
+          onBuy?.(selected.id, effectiveQuantity);
+        }
         break;
       case "sell":
         onSell?.(selected.id, effectiveQuantity);
@@ -803,6 +838,10 @@ export function NpcShopWindow({
           : t("ui.shopSpecialRepair", [], "Special Repair");
   const confirmEnabled = !blocked() && Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable
     && (!(sharedBuy || pearlBuy) || quoteCanBuy(buyQuote, pearlBuy)) && (!repairTab || repairSelectionCurrent);
+  const confirmTitle = confirmEnabled || !selected ? undefined
+    : blocked() || !actionHandler || selected.disabled ? t("client.Unavailable", [], "Unavailable")
+    : sharedBuy || pearlBuy ? npcShopBuyBlockedTitle(t, buyQuote, pearlBuy, pearlsKnown)
+    : !affordable ? t("client.LowGold", [], "Not enough gold.") : t("client.Unavailable", [], "Unavailable");
 
   if (repairTab) {
     const targetSelection = repairTargetSelection?.stamp === repairView?.stamp ? repairTargetSelection : null;
@@ -1040,9 +1079,9 @@ export function NpcShopWindow({
           className="npc-shop-confirm"
           style={{ ...shopStyle.confirmButton, ...(!confirmEnabled ? shopStyle.confirmDisabled : null) }}
           disabled={!confirmEnabled}
-          title={!affordable ? pearlBuy
-            ? t("ui.shopLowPearls", [], "Not enough pearls, or the pearl balance is unavailable.")
-            : t("client.LowGold", [], "Not enough gold.") : undefined}
+          title={confirmTitle}
+          data-npc-buy-click-status={buyClickStatus}
+          data-npc-buy-quote-reason={buyQuote?.blockReason ?? ((sharedBuy || pearlBuy) && !buyQuote ? "unavailable" : undefined)}
           onClick={confirm}
         >
           {actionLabel}

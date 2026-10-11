@@ -1,0 +1,53 @@
+{
+  "owner": "Root",
+  "kind": "Source63 actual local standalone Web cutover",
+  "oldWeb": {
+    "pid": 53188,
+    "parentPid": 53684,
+    "exactIdentityVerifiedBeforeStop": true,
+    "stoppedOnlyOwnedProcess": true,
+    "exitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source61-npc-shop-readiness-20261011-01/web-start01/outer.json",
+      "bytes": 498,
+      "sha256": "e6e5d0d6b11d02a8501a1ee802be6e5160f705c4fa932df5d3cd9fd206971819"
+    }
+  },
+  "newWeb": {
+    "pid": 56584,
+    "parentPid": 58712,
+    "exactCommand": "\"C:/Program Files/nodejs/node.exe\" C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/web-runtime01/mir2-web3/apps/web/server.js",
+    "localAddress": "127.0.0.1",
+    "port": 19205,
+    "identityVerified": true,
+    "running": true,
+    "exited": false
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/web-start01-config.json",
+    "bytes": 2584,
+    "sha256": "859754fe69c2530a54070cbc205f339ad0711ad0ec41a3307609424ae134978e"
+  },
+  "fullRuntimeSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/runtime-snapshot01.json",
+    "bytes": 2982395,
+    "sha256": "aa599cfeb0ec40dc1bceb6264e06832322666627456edb0177049b8ce0d9e0c0"
+  },
+  "copy": {
+    "files": 7331,
+    "directoriesIncludingRoot": 778,
+    "links": 0,
+    "bytes": 374017544,
+    "hashDifferences": 0,
+    "directoryMembershipDifferences": 0
+  },
+  "budgetBytes": 377487360,
+  "privateConfigRead": false,
+  "protectedProcessesQueried": false,
+  "ordinaryLoginStarted": true,
+  "purchaseAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

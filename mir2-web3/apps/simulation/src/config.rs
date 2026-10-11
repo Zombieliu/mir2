@@ -6385,10 +6385,10 @@ pub struct WorldItemTooltipSource {
     /// Direct socket `ItemInfo` values in the same positional order as
     /// `user_item.slots`. Crystal renders each socket's FriendlyName and also
     /// folds its base stats into the parent tooltip.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub socket_infos: Vec<Option<CrystalItemTemplate>>,
     /// Viewer-resolved rows corresponding positionally to `socket_infos`.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub real_socket_infos: Vec<Option<CrystalItemTemplate>>,
 }
 

@@ -22,6 +22,129 @@ function actualFunctions(ast, names, scope) {
   const code = ts.transpileModule(input, { compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 } }).outputText;
   return new Function(...Object.keys(scope), code + "\nreturn {" + names.join(",") + "};")(...Object.values(scope));
 }
+
+// Execute the actual compatibility component with inert hooks and a data-only
+// JSX factory. Quotes are external responses; this fixture invents no pricing,
+// Core readiness, DOM, React runtime or purchase transport.
+const shopTree = tree(source("../app/components/original-client-game-shop.tsx"), "actual-game-shop.tsx");
+function compatibilityShopFixture(overrides = {}) {
+  const item = { id:0, name:"Candle", price:10, icon:1, requiresGoldBuyPlan:true };
+  const quote = { maxQuantity:99, totalGold:10, canBuy:true, blockReason:null,
+    command:{type:"buyItem",itemIndex:0,count:1,panelType:0} };
+  const buys = [], reads = [], translations = [], states = ["buy",false,0,1,null];
+  let hook = 0, blocked = false, answer = quote;
+  const props = { gold:200, buyItems:[item], availableTabs:["buy"], onClose:()=>{},
+    t:(key,args,fallback)=>{translations.push(key);return fallback ?? key;},
+    getInputBlocked:()=>blocked,
+    onQuoteBuy:(id,quantity)=>{reads.push([id,quantity]);return typeof answer === "function" ? answer() : answer;},
+    onBuy:(id,quantity)=>buys.push([id,quantity]), ...overrides };
+  const scope = {
+    useState(initial){const index=hook++;if(!(index in states))states[index]=initial;
+      return [states[index],value=>{states[index]=typeof value==="function"?value(states[index]):value;}];},
+    useMemo:fn=>fn(), useEffect:()=>{}, useLayoutEffect:()=>{}, useRef:()=>({current:null}),
+    element:(tag,props,...children)=>({tag,props:props ?? {},children}),
+    ORIGINAL_UI:{inventory:{closeButton:{}}}, shopStyle:{}, NPC_SHOP_GRADE_COLOUR:{}, SpriteButton:"SpriteButton",
+    originalItemIconPath:()=>"/bounded-icon", originalAssetPath:path=>path,
+  };
+  const names=["NpcShopWindow","npcShopBuyBlockedTitle","npcShopTabLabel","formatGold","confirmEnabledFor"];
+  const input=names.map(name=>declaration(shopTree,name).getText(shopTree).replace(/^export\s+/,"")).join("\n");
+  const code=ts.transpileModule(input,{compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022,
+    jsx:ts.JsxEmit.React,jsxFactory:"element"}}).outputText;
+  const component=new Function(...Object.keys(scope),code+"\nreturn NpcShopWindow;")(...Object.values(scope));
+  let rendered;
+  function render(){hook=0;rendered=component(props);return rendered;}
+  function find(predicate){const matches=[];function visit(node){if(Array.isArray(node)){node.forEach(visit);return;}
+    if(!node||typeof node!=="object")return;if(predicate(node))matches.push(node);node.children?.forEach(visit);}
+    visit(rendered);assert.equal(matches.length,1,"sole actual rendered control");return matches[0];}
+  render();
+  return {props,item,quote,buys,reads,translations,render,find,
+    button:()=>find(node=>node.props.className==="npc-shop-confirm"),
+    row:()=>find(node=>node.props.className==="npc-shop-row"),
+    get blocked(){return blocked;},set blocked(value){blocked=value;},
+    get answer(){return answer;},set answer(value){answer=value;},
+    select(value){states[2]=value;render();},
+    text(){const text=[];function visit(node){if(Array.isArray(node))node.forEach(visit);
+      else if(typeof node==="string"||typeof node==="number")text.push(String(node));else node?.children?.forEach(visit);}
+      visit(rendered);return text;},
+  };
+}
+
+test("actual compatibility shop missing quote or total reports unavailable and never invents a total or sends",()=>{
+  for(const quote of [null,{maxQuantity:1,totalGold:null,canBuy:false,blockReason:null,command:null}]){
+    const f=compatibilityShopFixture();f.answer=quote;f.render();
+    assert.equal(f.button().props.disabled,true);assert.equal(f.button().props.title,"Unavailable");
+    assert(f.text().includes("—"),"missing authoritative total stays unknown");
+    assert(!f.translations.includes("client.LowGold"),"Candle 10 / Gold 200 does not imply insufficient funds");
+    f.button().props.onClick();assert.deepEqual(f.buys,[]);
+  }
+  const f=compatibilityShopFixture();f.blocked=true;f.reads.length=0;f.render();
+  assert.equal(f.button().props.title,"Unavailable");assert.equal(f.button().props.disabled,true);
+  f.button().props.onClick();assert.deepEqual(f.reads,[]);assert.deepEqual(f.buys,[]);
+});
+
+test("actual compatibility shop labels only explicit gold denial as insufficient funds",()=>{
+  const f=compatibilityShopFixture();f.answer={...f.quote,totalGold:300,canBuy:false,blockReason:"insufficientGold",command:null};f.render();
+  assert.equal(f.button().props.disabled,true);assert.equal(f.button().props.title,"Not enough gold.");
+  assert(f.translations.includes("client.LowGold"));f.button().props.onClick();assert.deepEqual(f.buys,[]);
+  for(const reason of ["invalidSource","invalidCatalog","invalidRate","invalidPrice","invalidQuantity","invalidInventory","serviceUnavailable"]){
+    f.answer={...f.quote,totalGold:reason==="invalidInventory"?10:null,canBuy:false,blockReason:reason,command:null};f.render();
+    assert.equal(f.button().props.title,"Unavailable",reason);assert.equal(f.button().props.disabled,true,reason);
+    f.button().props.onClick();assert.deepEqual(f.buys,[],reason);
+  }
+});
+
+test("actual compatibility shop preserves full inventory and pending reasons for both currencies",()=>{
+  for(const currency of ["gold","pearls"]){
+    const f=compatibilityShopFixture({currency,pearlBalance:200});
+    const quote={...f.quote,...(currency==="pearls"?{currency,totalGold:null,totalPearls:10}:{}),canBuy:false,command:null};
+    for(const [reason,title] of [[currency==="pearls"?"bagFull":"inventoryFull","No bag space."],
+      ["localPending","Your request is being processed. Please wait."]]){
+      f.answer={...quote,blockReason:reason};f.render();assert.equal(f.button().props.title,title,currency+" "+reason);
+      assert.equal(f.button().props.disabled,true);f.button().props.onClick();assert.deepEqual(f.buys,[]);
+    }
+  }
+});
+
+test("actual compatibility pearl shop distinguishes insufficient pearls from missing wallet or wrong quote currency",()=>{
+  const f=compatibilityShopFixture({currency:"pearls",pearlBalance:2});
+  const pearl={...f.quote,currency:"pearls",totalGold:null,totalPearls:10};
+  f.answer={...pearl,canBuy:false,blockReason:"pearls",command:null};f.render();
+  assert.equal(f.button().props.title,"You do not have enough Pearls.");assert.equal(f.button().props.disabled,true);
+  assert(f.translations.includes("client.NotEnoughPearls"));f.button().props.onClick();assert.deepEqual(f.buys,[]);
+  f.props.pearlBalance=null;
+  for(const quote of [{...pearl,canBuy:false,blockReason:"unknownWallet",command:null},pearl,f.quote]){
+    f.answer=quote;f.render();assert.equal(f.button().props.title,"Unavailable");assert.equal(f.button().props.disabled,true);
+    f.button().props.onClick();assert.deepEqual(f.buys,[]);
+  }
+});
+
+test("actual compatibility Buy accepts a successful quote and rechecks authority on confirm and double click",()=>{
+  const positive=compatibilityShopFixture();assert.equal(positive.button().props.disabled,false);assert.equal(positive.button().props.title,undefined);
+  positive.reads.length=0;positive.button().props.onClick();assert.deepEqual(positive.reads,[[0,1]]);assert.deepEqual(positive.buys,[[0,1]]);
+  const double=compatibilityShopFixture();double.reads.length=0;double.row().props.onDoubleClick();
+  assert.deepEqual(double.reads,[[0,1]]);assert.deepEqual(double.buys,[[0,1]]);
+  const pearl=compatibilityShopFixture({currency:"pearls",pearlBalance:200});
+  pearl.answer={...pearl.quote,currency:"pearls",totalGold:null,totalPearls:10};pearl.render();
+  assert.equal(pearl.button().props.disabled,false);assert.equal(pearl.button().props.title,undefined);
+  pearl.reads.length=0;pearl.button().props.onClick();assert.deepEqual(pearl.reads,[[0,1]]);assert.deepEqual(pearl.buys,[[0,1]]);
+  for(const edge of ["confirm","doubleClick"]){
+    for(const change of [f=>{f.answer=null;},f=>{f.answer={...f.quote,canBuy:false,blockReason:"localPending",command:null};},
+      f=>{f.answer=()=>{f.blocked=true;return f.quote;};}]){
+      const f=compatibilityShopFixture();change(f);f.reads.length=0;
+      if(edge==="confirm")f.button().props.onClick();else f.row().props.onDoubleClick();
+      assert.deepEqual(f.reads,[[0,1]],edge+" reads a fresh quote");assert.deepEqual(f.buys,[],edge+" refuses fresh invalidation");
+    }
+  }
+});
+
+test("actual compatibility shop without a selected current row has no insufficient-funds feedback or purchase",()=>{
+  for(const change of [f=>f.select(null),f=>{f.props.buyItems=[];f.render();}]){
+    const f=compatibilityShopFixture();change(f);f.reads.length=0;
+    assert.equal(f.button().props.disabled,true);assert.equal(f.button().props.title,undefined);
+    f.button().props.onClick();assert.deepEqual(f.buys,[]);assert.deepEqual(f.reads,[]);
+  }
+});
+
 const modules = new Map(), pureFiles = { spells:"../lib/bevy-spells-ui.ts", combat:"../lib/bevy-combat-input.ts", npcBuy:"../lib/bevy-npc-shop-buy.ts",
   modeKeys:"../lib/shared-combat-mode-keys.ts", hero:"../lib/hero-player-ui.ts", operations:"../lib/social-window-operations.ts", equipment:"../lib/equipment-gateway-adapter.ts",
   parcel:"../lib/mail-parcel-gateway-adapter.ts", storage:"../lib/storage-gateway-adapter.ts",
@@ -88,7 +211,7 @@ pureFiles.bagBelt="../lib/bag-belt-gesture.ts";pureRequires.bagBelt={};
 pureFiles.bagBeltMove="../lib/bag-belt-move-dispatcher.ts";pureRequires.bagBeltMove={"./mail-parcel-gateway-adapter":"parcel"};
 const npcAuthSelectors=actualFunctions(tree(source("../lib/client-login-runtime.ts"),"actual-login-runtime.ts"),
   ["preauthCommandKind","isSensitiveGatewayCommand"],{});
-const pageNames=["npcGoldBuyCurrent","readNpcGoldBuyCurrent","currentNpcShopTab","setNpcShopCompatibilityTab",
+const pageNames=["recordNpcPurchaseAction","sendNpcPurchaseAction","npcGoldBuyCurrent","readNpcGoldBuyCurrent","currentNpcShopTab","setNpcShopCompatibilityTab",
   "readNpcShopUiInput","npcShopIntentMatchesStatus","npcShopIntentMatchesCommand","npcShopUiSendCurrent",
   "dispatchBevyNpcShopIntent","retireNpcShopService","sendRaw","itemCommandRequiresOwner",
   "invalidateNpcGoldBuyGatewayPacket","applyNpcGoldBuyGatewaySnapshot","npcPurchaseSessionKey","applyNpcPurchaseOrdinarySnapshot","socialItemMutationAllowed", "parityItemMutationAllowed",
@@ -141,7 +264,7 @@ function pageFixture() {
   const inventoryReadiness = new NpcGoldBuyInventoryReadiness();
   const inventoryOwner = { connectionGeneration:1, sessionGeneration:2, playerObjectId:1 };
   inventoryReadiness.finish(inventoryReadiness.begin(inventoryOwner), inventoryOwner, true, bagProjection(world).model);
-  const scope={projectBevyBagModel:bagProjection,npcGoldBuyInventoryMutationPacket,
+  const scope={npcPurchaseActionRef:{current:null},npcPurchaseSendActionRef:{current:null},setNpcPurchaseActionStatus:()=>{},projectBevyBagModel:bagProjection,npcGoldBuyInventoryMutationPacket,
     playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},rankingInspectOpenRef:{current:false},
     npcPurchaseUnavailableRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
     npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},
@@ -157,8 +280,12 @@ function pageFixture() {
     npcRepairAuthorityRef:{current:{prepareSnapshot:()=>{},invalidateInventory:()=>{},observeSnapshot:()=>{}}},
     observeBootstrapRef:{current:null},observePreferenceRef:{current:null},
     combatModePhysicalRef:{current:null},combatModeRawRef:{current:null},combatModeRevisionRef:{current:0},
+    // Combat capture is inactive in this NPC fixture; inventory staging below
+    // still runs the actual current-owner readiness and reentrancy barriers.
+    combatBaselineSourceRef:{current:null},combatRawRef:{current:null},
     nextCombatModePhysicalGeneration:loadPure("modeKeys").nextCombatModePhysicalGeneration,
     npcGoldBuyInventoryRef:{current:inventoryReadiness},
+    npcGoldBuySourceFailureRef:{current:null},
     equipmentSnapshotRef:{current:{connectionGeneration:1,sessionGeneration:2}},
     normalizeQuestMapFileName:loadPure("questWorld").normalizeQuestMapFileName,
     questCapturedWorldRef:{current:null},questSceneRevisionRef:{current:1},questSkillsBaselineCurrentRef:{current:false},
@@ -650,4 +777,39 @@ test("actual ordinary unqualified snapshot delegates readiness while stale physi
     assert.deepEqual(x.scope.worldRef.current,before,boundary);
     assert.deepEqual(x.trace,trace,boundary);
   }
+});
+
+
+test("ordinary compatibility click diagnostic distinguishes existing local refusal from Page callback",()=>{
+  for(const [reason,change] of [
+    ["inputBlocked",f=>{f.blocked=true;}], ["selectionUnavailable",f=>f.select(null)],
+    ["selectionDisabled",f=>{f.item.disabled=true;f.render();}],
+    ["freshQuoteRejected",f=>{f.answer=null;}],
+    ["freshInputBlocked",f=>{f.answer=()=>{f.blocked=true;return f.quote;};}],
+  ]) {
+    const f=compatibilityShopFixture();change(f);f.button().props.onClick();f.render();
+    assert.equal(f.button().props["data-npc-buy-click-status"],reason); assert.deepEqual(f.buys,[]);
+  }
+  const f=compatibilityShopFixture();assert.equal(f.button().props["data-npc-buy-click-status"],"idle");
+  assert.deepEqual(f.reads,[[0,1],[0,1]],"initial render reads first and effective quotes");
+  f.reads.length=0;f.button().props.onClick();
+  assert.deepEqual(f.reads,[[0,1]],"click reads only its existing fresh quote");
+  assert.deepEqual(f.buys,[[0,1]]);
+  f.reads.length=0;f.render();assert.equal(f.button().props["data-npc-buy-click-status"],"callbackInvoked");
+  assert.deepEqual(f.reads,[[0,1],[0,1]],"diagnostic rerender retains both existing render quote reads");
+  assert.deepEqual(f.buys,[[0,1]],"rerender does not repeat the purchase callback");
+});
+
+test("main exposes retained action state independently of preview with no raw source fields",()=>{
+  const attrs=nodes(shellTree,n=>ts.isJsxAttribute(n)&&n.name.getText(shellTree)==="data-npc-purchase-action-status");
+  assert.equal(attrs.length,1);assert.equal(attrs[0].initializer.expression.getText(shellTree),"npcPurchaseActionDiagnostics");
+  const prop=nodes(pageTree,n=>ts.isJsxAttribute(n)&&n.name.getText(pageTree)==="npcPurchaseActionDiagnostics");
+  assert.equal(prop.length,1);assert.equal(prop[0].initializer.expression.getText(pageTree),"JSON.stringify(npcPurchaseActionStatus)");
+  const writes=[];const ref={current:null};
+  const api=actualFunctions(pageTree,["recordNpcPurchaseAction"],{npcPurchaseActionRef:ref,setNpcPurchaseActionStatus:v=>writes.push(v)});
+  const action={route:"durable",stage:"requested",reason:null};ref.current=action;
+  api.recordNpcPurchaseAction(action,"rejected","catalogSourceUnavailable");
+  api.recordNpcPurchaseAction(action,"quoteSent");
+  assert.deepEqual(writes,[{route:"durable",stage:"rejected",reason:"catalogSourceUnavailable"}]);
+  assert.deepEqual(Object.keys(writes[0]).sort(),["reason","route","stage"]);
 });

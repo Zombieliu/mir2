@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "sourceRound": "Source66",
+  "purpose": "Warehouse visible NPC interaction strict Web build",
+  "rootAccepted": true,
+  "actualExitCode": 0,
+  "childPid": 61092,
+  "elapsedMs": 33698,
+  "childExited": true,
+  "childDisposed": true,
+  "originalCallerExitCode": 0,
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "command": "node node_modules/next/dist/bin/next build --webpack",
+  "cwd": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/preparation/mir2-web3/apps/web",
+  "nextVersion": "16.2.11",
+  "compiled": true,
+  "strictTypeScriptPassed": true,
+  "compileSeconds": 9.5,
+  "typeScriptSeconds": 11.9,
+  "staticPages": 13,
+  "ignoredBuildErrors": false,
+  "prePostSourcePinsMatched": true,
+  "sourceInputCount": 19585,
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/preparation/source66-isolated-source-snapshot01.json",
+    "bytes": 13615874,
+    "sha256": "4412c6bd4c7c2094ea10858458f9875e5cb8203d9ab7c7103f89b1f70c4d7126"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/source-review01.json",
+    "bytes": 6225,
+    "sha256": "609d3f2c0da58b602d1e3d894a9e7368682c81a34359987ec1a1819a6b83fd92"
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/next-build01-config.json",
+    "bytes": 5159,
+    "sha256": "d8776f40deb2c50141aeb03c01f5d9b9e77cdeb299af9ba9df18353eaf9ae6ac"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/next-build01/stdout.log",
+    "bytes": 2023,
+    "sha256": "974b92d61a0a0739c049021c2db056089de1dd328d2215dbded312582e90fbb6"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/next-build01/stderr.log",
+    "bytes": 3318,
+    "sha256": "cd2ad4510443ee857bace78ea2582c6d0f03d237fa6982d3a46f53bc7f0f4dd0"
+  },
+  "warningCount": 4,
+  "warningKind": "Next standalone trace copy ENOENT for original Windows asset paths; preserved stderr. Complete Thin/runtime acceptance remains pending.",
+  "legacyAssetRowsBefore": 8,
+  "legacyAssetRowsAfter": 8,
+  "removedAssetRows": 0,
+  "distBasename": ".next-web-windows-catchup-source64-20261011-01",
+  "mainTsconfigPreserved": true,
+  "isolatedNextEnvPreserved": true,
+  "testCounts": {
+    "passed": 208,
+    "failed": 0
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "storageLiveAccepted": false,
+  "candidate100": false,
+  "humanFrontendAccepted": false,
+  "goalComplete": false
+}

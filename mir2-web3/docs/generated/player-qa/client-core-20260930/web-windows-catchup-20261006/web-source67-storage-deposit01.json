@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "kind": "normal UI warehouse deposit actual",
+  "capturedAt": "2026-10-11T12:06:45.426Z",
+  "runtimeEvidence": "web-source67-runtime-start-actual01.json",
+  "localURL": "http://127.0.0.1:19205/",
+  "normalActions": [
+    "login existing local account",
+    "Start Game button",
+    "InnKeeper Anthony nameplate",
+    "Access",
+    "Store Item",
+    "first visible Candle card",
+    "first empty warehouse slot",
+    "Close inventory",
+    "Alt+x"
+  ],
+  "layout": {
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "storeButtonCenterHitsOwnButton": true,
+    "hitTag": "BUTTON",
+    "buttonDisabled": false,
+    "bag": {
+      "x": 533,
+      "y": 148,
+      "width": 316,
+      "height": 236
+    },
+    "warehouse": {
+      "x": 144,
+      "y": 148,
+      "width": 384,
+      "height": 344
+    },
+    "windowGapPixels": 5
+  },
+  "before": {
+    "gold": 180,
+    "bagItems": 5,
+    "bagCandles": 3,
+    "storageItems": 0
+  },
+  "after": {
+    "gold": 180,
+    "bagItems": 4,
+    "bagCandles": 2,
+    "storageItems": 1,
+    "storageCandles": 1
+  },
+  "passiveCapture": {
+    "methods": [
+      "Network.webSocketFrameSent",
+      "Network.webSocketFrameReceived"
+    ],
+    "truncated": false,
+    "hasMore": false,
+    "frames": [
+      {
+        "sequence": 1077138,
+        "direction": "out",
+        "type": "storeItemV2"
+      },
+      {
+        "sequence": 1077140,
+        "direction": "in",
+        "type": "packet",
+        "packet": "StoreItemV2",
+        "success": true
+      }
+    ],
+    "requestAndItemIdentityFieldsOmitted": true
+  },
+  "screenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-storage-deposit01.png",
+    "bytes": 114890,
+    "sha256": "1ea9667063d51979e0551c7441f688f55041e24910e146586686be0406ebc669"
+  },
+  "knownVisualGaps": [
+    "Warehouse map renders fallback tiles with black areas",
+    "Warehouse Candle tooltip displays raw 8000/8000 durability"
+  ],
+  "acceptance": {
+    "depositUiPassed": true,
+    "normalSaveLogoutCommandSubmitted": true,
+    "depositReloginPassed": false,
+    "withdrawalReloginPassed": false,
+    "sharedStorageOwnerClaimed": false,
+    "mobileDeviceAccepted": false,
+    "candidate100": false,
+    "humanFrontendAccepted": false,
+    "goalComplete": false
+  }
+}

@@ -3654,8 +3654,10 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 }
 
 .storage-window {
-  top: 82px;
-  left: 16px;
+  /* This dialog is nested in the bag; place it beside that bag. */
+  top: 0;
+  left: auto;
+  right: calc(100% + 5px);
   width: 384px;
   height: 344px;
   border: 1px solid rgba(190, 157, 99, 0.5);
@@ -3748,6 +3750,12 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 .storage-grid {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+.storage-grid > .storage-slot,
+.storage-grid > .storage-item-card {
+  pointer-events: auto;
 }
 
 .inventory-slot,
@@ -4057,10 +4065,12 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 
 .storage-window-page-tabs {
   inset: 0;
+  pointer-events: none;
 }
 
 .storage-page-tab {
   position: absolute;
+  pointer-events: auto;
   min-width: 64px;
   height: 22px;
   border: 1px solid rgba(190, 157, 99, 0.52);

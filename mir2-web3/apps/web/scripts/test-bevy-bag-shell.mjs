@@ -26,7 +26,12 @@ const names = ["handleSharedUiPointer","handleSharedMailPointer","cancelSharedMa
   "isSharedBagCompatibilityMouse", "handleScenePointerAction", "handleScenePointerMove", "stopHeldScenePointer",
   "dispatchSceneMoveInput", "dispatchSceneClickInput", "handleSharedQuestWorldPointer", "updateSceneCombatPointer",
   "npcShopBlocksWorldInput", "stopNpcShopWorldInput", "cancelSharedNpcShopPointer", "handleSharedNpcShopPointer",
-  "cancelSharedStoragePointer", "handleSharedStoragePointer", "cancelSharedComposePointer", "handleSharedComposePointer"];
+  "cancelSharedStoragePointer", "handleSharedStoragePointer", "cancelSharedComposePointer", "handleSharedComposePointer",
+  // Current Shell pre-routing/cleanup consumers use real idle ownership refs.
+  "heroBlocksWorldInput", "cancelSharedHeroPointer", "handleSharedHeroPointer",
+  "cancelBagBeltPointer", "handleBagBeltPointer", "rememberBagBeltClick", "fenceBagBeltMouse",
+  "cancelNpcRepairPointer", "handleNpcRepairPointer", "npcRepairControlTarget", "rememberNpcRepairControlClick", "fenceNpcRepairClick",
+  "retireWorldFishingPhysical", "cancelWorldFishingHeldPointer"];
 const found = new Map();
 function visit(node) {
   if (ts.isFunctionDeclaration(node) && names.includes(node.name?.text)) found.set(node.name.text, node.getText(ast));
@@ -69,9 +74,35 @@ function fixture(webGl2SharedCanvasPrototype = false,channel="bag") {
     getBoundingClientRect() { return { left: 30, top: 20, width: 512, height: 384 }; }
   }
   const frame = new Element(), canvas = new Element(sharedUiCanvasId(webGl2SharedCanvasPrototype));
-  const listeners = new Map();
+  const listeners = new Map(), listenerCapture = new Map();
+  let pointerTime = 0;
+  function listenerTarget(prefix) {
+    return {
+      addEventListener(name, callback, options = false) {
+        const key = prefix + name, capture = typeof options === "boolean" ? options : options.capture === true;
+        assert.equal(listeners.has(key), false, "one fixture consumer per event target/type");
+        listeners.set(key, callback); listenerCapture.set(key, capture);
+      },
+      removeEventListener(name, callback, options = false) {
+        const key = prefix + name, capture = typeof options === "boolean" ? options : options.capture === true;
+        assert.equal(listeners.get(key), callback, "cleanup removes its original callback");
+        assert.equal(listenerCapture.get(key), capture, "cleanup preserves the DOM capture flag");
+        listeners.delete(key); listenerCapture.delete(key);
+      },
+    };
+  }
   const scope = {
     parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, playerUiPreferences:undefined,
+    // These independent features have no admitted physical lease in the old
+    // Bag/Mail/Spells/Character scenarios; actual Shell arbitration still runs.
+    heroPointerLeaseRef:{current:null},heroHoverContextRef:{current:null},
+    heroPointerCallbacksRef:{current:{getBevyHeroInputBlocked:()=>false,getBevyHeroPointerContext:()=>null}},
+    bagBeltPointerRef:{current:null},bagBeltArmedSharedRef:{current:null},bagBeltRejectedTerminalRef:{current:null},
+    bagBeltQuarantineRef:{current:new Map()},bagBeltClickFenceRef:{current:new Map()},
+    bagBeltButtonsRef:{current:null},bagBeltGeometryRef:{current:null},bagBeltCallbacksRef:{current:{}},
+    npcRepairPointerRef:{current:null},npcRepairTargetRef:{current:null},
+    npcRepairQuarantineRef:{current:new Map()},npcRepairClickFenceRef:{current:new Map()},
+    worldFishingPhysicalRef:{current:null},worldFishingTerminalRef:{current:null},worldFishingPointersRef:{current:new Map()},
     sceneHoveredObjectIdRef:{current:null},setSceneHoveredObjectId:()=>{},
     HTMLElement: Element, Element, onCombatPointer:undefined, onCombatUiHeld:undefined, combatUiHoldRef:{current:new Map()},
     npcShopPointerRouterRef:{current:new NpcShopPointerRouter()},
@@ -80,7 +111,8 @@ function fixture(webGl2SharedCanvasPrototype = false,channel="bag") {
     storagePointerRouterRef:{current:new StoragePointerRouter()},storagePointerCallbacksRef:{current:{getBevyStoragePointerContext:()=>null}},
     bevyStorageUiActive:false,bevyStorageUiTransitioning:false,bevyNpcShopUiActive:false,bevyNpcShopUiTransitioning:false,
     bevyMailComposeReady:false,bevyMailComposePending:false,bevyMailTextContext:null,
-    heldComposePointerRef:{current:null},mailComposePointerCallbacksRef:{current:{}},document:{getElementById:()=>null},
+    heldComposePointerRef:{current:null},mailComposePointerCallbacksRef:{current:{}},
+    document:{...listenerTarget("document:"),getElementById:()=>null,visibilityState:"visible",hasFocus:()=>true},
     characterPointerRouterRef:{current:new CharacterPointerRouter()},characterPointerCallbacksRef:{current:{getBevyCharacterPointerContext:()=>channel==="character"?{...context,ledgerRunGeneration:1,hudGeneration:1,modelRevision:1}:null,onBevyCharacterPointer:edge=>{edges.push({...edge,channel:"character"});return true;}}},
     hudPointerRouterRef:{current:{held:null,cancel:()=>null}},mailPointerRouterRef:{current:new MailPointerRouter()},
     mailPointerCallbacksRef:{current:{getBevyMailPointerContext:()=>channel==="mail"?{...context,run:1,sceneRevision:1,hudGeneration:1,playerObjectId:6,modelRevision:1,renderRevision:1,modal:false}:null,onBevyMailPointer:edge=>{edges.push({...edge,channel:"mail"});return true;}}},
@@ -92,7 +124,7 @@ function fixture(webGl2SharedCanvasPrototype = false,channel="bag") {
     heldQuestControlPointersRef:{current:new Set()},questControls:null,questBlockers:null,
     readBevyQuestWorldControls:()=>scope.questControls,readBevyQuestWorldControlBlockers:()=>scope.questBlockers,questWorldControlAt,
     sharedBagPointerHandlerRef:{current:null},
-    window:{addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(listeners.get(name),fn);listeners.delete(name);}},
+    window:listenerTarget(""),
     bagPointerCallbacksRef: { current: { getBevyBagPointerContext: () => channel==="bag"?context:null,
       onBevyBagPointer: (edge) => { edges.push(edge); return true; } } },
     onViewportDirectionStop: () => stops++, onBevyBagTouchFallback: () => fallback++,
@@ -110,6 +142,7 @@ function fixture(webGl2SharedCanvasPrototype = false,channel="bag") {
     // enumerable object fields. This catches object-spread coordinate loss.
     const proto = { get clientX() { return x * .5 + 30; }, get clientY() { return y * .5 + 20; } };
     return Object.assign(Object.create(proto), { target: canvas, currentTarget: frame, pointerId, pointerType, button,
+      timeStamp: ++pointerTime, isPrimary: true,
       preventDefault() { this.defaultPrevented = true; } });
   }
   return { ...api, scope, canvas, clicks, moves, edges, event, listeners,
@@ -282,6 +315,9 @@ test("actual Page compatibility interaction stays latched across tabs, resets on
     const scope = {
       sharedHudNavigationRef:{current:{ready:false}},hudProjectionRef:{current:false},fallbackHudNavigationRevisionRef:{current:0},nextHudNavigationRevision:()=>1,navigateSharedHud:()=>false,
       bevyBagUiRequested: requested, bagOpenRef: { current: false }, bagCompatibilityModeRef: { current: null },
+      storageServiceActiveRef: { current: false }, storageCompatibilityRef: { current: false },
+      storageUiIngressRef: { current: null }, setStorageCompatibility: () => assert.fail("inactive storage must not change compatibility"),
+      npcRepairServiceRef: { current: null }, ownedTooltipEpochRef: { current: { bag: {} } },
       bagYieldRef: { current: () => state.yields++ },
       setShowInventoryState: (value) => { state.open = value; },
       setBagCompatibilityMode: (value) => { state.mode = value; },

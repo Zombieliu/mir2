@@ -702,10 +702,14 @@ export function OriginalClientShell({
   onSelectCharacter,
   onEnterWorld,
   combatInputDiagnostics,
+  npcShopInputDiagnostics,
+  npcPurchaseActionDiagnostics,
   targetDistance,
   entityKindClassName,
 }: OriginalClientShellProps & {onCombatUiHeld?: (channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",token:object,held:boolean)=>void;
   combatInputDiagnostics?: string;
+  npcShopInputDiagnostics?: string;
+  npcPurchaseActionDiagnostics?: string;
   bevyMailPageReady?:boolean;getBevyMailPointerContext?:()=>MailPointerContext|null;onBevyMailPointer?:(edge:MailPointerEdge)=>boolean;
   bevyMailComposeReady?:boolean;bevyMailComposePending?:boolean;bevyMailTextContext?:ReturnType<MailComposeHost['textContext']>;
   getBevyMailComposeBusy?:()=>number;
@@ -4915,6 +4919,8 @@ export function OriginalClientShell({
       className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
       data-layout-profile={clientProfile.layout}
       data-combat-input-status={combatInputDiagnostics}
+      data-npc-shop-input-status={npcShopInputDiagnostics}
+      data-npc-purchase-action-status={npcPurchaseActionDiagnostics}
       data-input-profile={clientProfile.input}
       data-shared-touch-quest-open={
         screen === "game" && clientProfile.input === "touch" && bevyQuestUiReady && bevyQuestUiCapturesPointer

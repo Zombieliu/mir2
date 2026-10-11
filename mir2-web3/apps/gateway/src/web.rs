@@ -5680,15 +5680,8 @@ async fn handle_socket_work(
                             return;
                         }
                     };
-                    let encoded = match mir2_client_wire::encode_server_frame(&dispatch.frame) {
-                        Ok(encoded) => encoded,
-                        Err(_) => return,
-                    };
-                    if sender.lock().await.send(Message::Text(encoded.into())).await.is_err() {
+                    if send_npc_purchase_dispatch(sender.as_ref(), &dispatch).await.is_err() {
                         return;
-                    }
-                    for packet in dispatch.packets {
-                        if send_server_packet(&sender, &packet).await.is_err() { return; }
                     }
                     continue;
                 }
@@ -8914,6 +8907,31 @@ fn realm_info_event(config: &GatewayConfig) -> Value {
             })),
         }
     })
+}
+
+/// Publish only this owner turn: its ordinary deltas precede a complete
+/// snapshot/authority pair. A receipt without that pair keeps the original
+/// frame-first order; neither path rereads Session or changes packet contents.
+async fn send_npc_purchase_dispatch<S>(
+    sender: &AsyncMutex<S>,
+    dispatch: &crate::npc_purchase_browser::BrowserNpcPurchaseDispatch,
+) -> Result<(), String>
+where
+    S: futures_util::Sink<Message> + Unpin,
+    S::Error: std::fmt::Display,
+{
+    // Complete encoding must succeed before any ordinary packet is published.
+    let encoded = mir2_client_wire::encode_server_frame(&dispatch.frame)
+        .map_err(|error| error.to_string())?;
+    let owner = Message::Text(encoded.into());
+    let complete_pair = dispatch.frame.snapshot.is_some() && dispatch.frame.authority.is_some();
+    let (before, after) = if complete_pair { (None, Some(owner)) } else { (Some(owner), None) };
+    let packets = dispatch.packets.iter().map(|packet|
+        Message::Text(server_packet_to_event(packet).to_string().into()));
+    for message in before.into_iter().chain(packets).chain(after) {
+        sender.lock().await.send(message).await.map_err(|error| error.to_string())?;
+    }
+    Ok(())
 }
 
 async fn send_server_packet(
@@ -12749,6 +12767,261 @@ mod tests {
 
     fn test_packet(event: &Value, packet: &str) -> bool {
         event["type"] == "packet" && event["packet"] == packet
+    }
+
+    mod npc_purchase_dispatch_tests {
+        use super::*;
+        use crate::npc_purchase_browser::{BrowserNpcPurchaseConnection,
+            BrowserNpcPurchaseDispatch, execute_browser_npc_purchase};
+        use crate::routing::{InMemoryZoneOwnerLeaseAuthority, ZoneId, ZoneOwnerLeaseAuthority};
+        use mir2_client_wire::{Action, ClientRequest, FailureState, Operation, ServerFrame, ServerReply, U64};
+        use mir2_simulation::{InProcessWorldRuntime, VisibleNpcRecord};
+        use std::pin::Pin;
+        use std::task::{Context, Poll};
+
+        #[derive(Default)]
+        struct RecordingSink {
+            messages: Vec<axum::extract::ws::Message>,
+            attempts: usize,
+            fail_at: Option<usize>,
+        }
+        impl futures_util::Sink<axum::extract::ws::Message> for RecordingSink {
+            type Error = std::io::Error;
+            fn poll_ready(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+                Poll::Ready(Ok(()))
+            }
+            fn start_send(mut self: Pin<&mut Self>, message: axum::extract::ws::Message) -> Result<(), Self::Error> {
+                let attempt = self.attempts;
+                self.attempts += 1;
+                if self.fail_at == Some(attempt) {
+                    return Err(std::io::Error::other("injected NPC dispatch send failure"));
+                }
+                self.messages.push(message);
+                Ok(())
+            }
+            fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+                Poll::Ready(Ok(()))
+            }
+            fn poll_close(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+                Poll::Ready(Ok(()))
+            }
+        }
+        fn events(sink: &RecordingSink) -> Vec<Value> {
+            sink.messages.iter().map(|message| {
+                let axum::extract::ws::Message::Text(text) = message else { panic!("text dispatch only") };
+                serde_json::from_str(text.as_str()).unwrap()
+            }).collect()
+        }
+        fn external(id: u64, action: Action) -> ClientRequest {
+            let request = ClientRequest::new(U64::new(id), action).unwrap();
+            mir2_client_wire::parse_client_request(&mir2_client_wire::encode_client_request(&request).unwrap()).unwrap()
+        }
+        // Real owner receipts and projections from an isolated File authority,
+        // using the checked-in Scott script and actual Candle catalog price.
+        // No active/private account file, environment mutation or listener.
+        fn actual_candle_purchase() -> (BrowserNpcPurchaseDispatch, BrowserNpcPurchaseDispatch, Vec<BrowserNpcPurchaseDispatch>) {
+            use std::io::Write;
+            static SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+            let temporary = std::env::temp_dir().canonicalize().expect("guarded TEMP exists");
+            let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+            let sequence = SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let directory = temporary.join(format!("mir2-npc-dispatch-order-{timestamp}-{sequence}"));
+            assert!(directory.starts_with(&temporary));
+            std::fs::create_dir(&directory).expect("fresh owned test directory");
+            let path = directory.join("accounts.json");
+            let mut config = SimulationConfig::default();
+            assert!(config.account_store_path.is_none() && config.account_store_database_url.is_none());
+            config.save_recovery_dir = None;
+            config.visible_monsters.clear();
+            config.map_hazards.clear();
+            config.visible_npcs.clear();
+            config.visible_npcs.push(VisibleNpcRecord { object_id: 4991, name: "Merchant_Scott".into(),
+                image: 3, colour_argb: -1, position: Point { x: config.spawn.x + 1, y: config.spawn.y },
+                direction: MirDirection::Left, quest_ids: vec![],
+                script_key: Some("BichonProvince/BorderVillage/Pedlar".into()) });
+            {
+                let mut store = config.account_store.lock().unwrap();
+                let save = store.accounts.get_mut("demo").unwrap().saves.get_mut(&0).unwrap();
+                save.position = config.spawn.clone();
+                save.gold = 200;
+                save.inventory_capacity = 86;
+                save.inventory_items_json.clear();
+                save.belt_items_json.clear();
+                save.equipment_items_json.clear();
+                save.equipment_items_explicit_empty = true;
+            }
+            let bytes = serde_json::to_vec(&*config.account_store.lock().unwrap()).unwrap();
+            let mut file = std::fs::OpenOptions::new().write(true).create_new(true).open(&path).unwrap();
+            file.write_all(&bytes).unwrap();
+            drop(file);
+            config = config.with_account_store_path(&path);
+            // As in the File-owner route fixture, bootstrap the personal runtime
+            // before wrapping it in the owner seam. This constructor has no
+            // routing context for GatewaySession's standard-login recovery.
+            let mut runtime: mir2_simulation::ZoneRuntimeHandle = Box::new(InProcessWorldRuntime::new(config));
+            let login = runtime.execute(mir2_simulation::WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".into(), password: "demo".into(),
+            })).unwrap();
+            assert!(login.iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+            runtime.execute(mir2_simulation::WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 })).unwrap();
+            assert_eq!(runtime.active_identity().unwrap().character_index, 0);
+            runtime.execute(mir2_simulation::WorldCommand::Interact { object_id: 4991 }).unwrap();
+            let goods = runtime.execute(mir2_simulation::WorldCommand::SelectNpcDialog { target: "@BuySell".into() }).unwrap();
+            let selector = goods.iter().find_map(|packet| match packet {
+                ServerPacket::NPCGoods { list, .. } => list.iter().find(|item| item.item_index == 722)
+                    .map(|item| item.unique_id),
+                _ => None,
+            }).expect("actual Scott Candle selector");
+            runtime.save_active_character().unwrap();
+            let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+            let zone = ZoneId::primary();
+            let lease = authority.owner_lease(&zone);
+            let mut session = crate::GatewaySession::with_routed_world_runtime_and_owner_authority(
+                zone, lease, Some(authority), runtime);
+            assert_eq!(session.world_snapshot().gold, 200);
+            let mut state = BrowserNpcPurchaseConnection::default();
+            state.set_opted_in(true);
+            let began = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+                &external(1, Action::Begin)).unwrap();
+            let ServerReply::Producer { producer } = &began.frame.reply else { panic!("actual Begin") };
+            let quoted = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+                &external(2, Action::Quote { request: mir2_client_wire::PurchaseRequest::new(U64::new(selector), 1, 0).unwrap() })).unwrap();
+            let ServerReply::Quote { intent } = &quoted.frame.reply else { panic!("actual Quote") };
+            let operation = Operation { actor: producer.actor, request_scope: producer.producer_scope,
+                sequence: U64::new(1), intent: intent.clone() };
+            let absent = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+                &external(3, Action::Query { operation: operation.clone() })).unwrap();
+            assert_eq!(absent.frame.reply, ServerReply::Recovery { receipt: None });
+            let request = external(4, Action::Purchase { operation: operation.clone() });
+            let purchased = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true, &request).unwrap();
+            purchased.frame.validate_for_request(&request).unwrap();
+            let ServerReply::Purchase { receipt, replayed: false } = &purchased.frame.reply else { panic!("genuine committed purchase") };
+            assert!(matches!(&receipt.entry.outcome, mir2_client_wire::Outcome::Committed {
+                charged: 10, admitted_count: 1, currency: mir2_client_wire::Currency::Gold,
+                source: mir2_client_wire::Source::Trade, .. }));
+            assert_eq!(purchased.frame.snapshot.as_ref().unwrap()["gold"], 190);
+            assert_eq!(purchased.packets.iter().filter(|packet| matches!(packet, ServerPacket::LoseGold { gold: 10 })).count(), 1);
+            assert!(purchased.packets.iter().any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+            let saved = std::fs::read(&path).unwrap();
+            let replay = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+                &external(5, Action::Purchase { operation: operation.clone() })).unwrap();
+            assert_eq!(replay.frame.reply, ServerReply::Purchase { receipt: receipt.clone(), replayed: true });
+            let recovered = execute_browser_npc_purchase(&mut session, &mut state, Some("demo"), true,
+                &external(6, Action::Query { operation })).unwrap();
+            assert_eq!(recovered.frame.reply, ServerReply::Recovery { receipt: Some(receipt.clone()) });
+            assert_eq!(std::fs::read(&path).unwrap(), saved);
+            (purchased, replay, vec![began, quoted, absent, recovered])
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_complete_owner_pair_finishes_actual_gold_once() {
+            let (dispatch, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            let sender = super::super::AsyncMutex::new(RecordingSink::default());
+            super::super::send_npc_purchase_dispatch(&sender, &dispatch).await.unwrap();
+            let sink = sender.lock().await;
+            let observed = events(&sink);
+            let packets: Vec<_> = dispatch.packets.iter().map(super::super::server_packet_to_event).collect();
+            assert_eq!(&observed[..packets.len()], packets.as_slice(), "all original packets retain content and order");
+            let encoded = mir2_client_wire::encode_server_frame(&dispatch.frame).unwrap();
+            let axum::extract::ws::Message::Text(last) = sink.messages.last().unwrap() else { panic!("owner text frame") };
+            assert!(last.as_str() == encoded, "original owner frame finishes dispatch");
+            assert_eq!(observed.len(), packets.len() + 1);
+            assert!(observed.iter().any(|event| test_packet(event, "GainedItem")));
+            let mut displayed_gold = 200;
+            for event in &observed {
+                if test_packet(event, "LoseGold") {
+                    displayed_gold -= event["payload"]["gold"].as_u64().unwrap();
+                } else if event["type"] == "npcPurchaseOwner" {
+                    displayed_gold = event["snapshot"]["gold"].as_u64().unwrap();
+                }
+            }
+            assert_eq!(displayed_gold, 190, "delta followed by its authoritative projection charges once");
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_missing_pair_keeps_failure_and_receipt_first() {
+            let (original, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            let receipt = original.frame.reply.receipt().unwrap().clone();
+            for state in [FailureState::BeforeExecution, FailureState::Unknown, FailureState::PostCommit] {
+                let known = (state == FailureState::PostCommit).then(|| receipt.clone());
+                let dispatch = BrowserNpcPurchaseDispatch {
+                    frame: ServerFrame::new(original.frame.request_id,
+                        ServerReply::Failure { state, receipt: known }, None, None).unwrap(),
+                    packets: original.packets.clone(),
+                };
+                let sender = super::super::AsyncMutex::new(RecordingSink::default());
+                super::super::send_npc_purchase_dispatch(&sender, &dispatch).await.unwrap();
+                let sink = sender.lock().await;
+                let observed = events(&sink);
+                assert!(observed[0] == serde_json::to_value(&dispatch.frame).unwrap(), "original failure frame precedes packets");
+                assert!(observed[0]["snapshot"].is_null() && observed[0]["authority"].is_null());
+                let packets: Vec<_> = dispatch.packets.iter().map(super::super::server_packet_to_event).collect();
+                assert_eq!(&observed[1..], packets.as_slice());
+                assert_eq!(observed.len(), packets.len() + 1);
+            }
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_packet_free_control_and_replay_emit_only_original_frame() {
+            let (_, replay, mut controls) = tokio::task::block_in_place(actual_candle_purchase);
+            controls.push(replay);
+            for dispatch in controls {
+                assert!(dispatch.packets.is_empty());
+                let sender = super::super::AsyncMutex::new(RecordingSink::default());
+                super::super::send_npc_purchase_dispatch(&sender, &dispatch).await.unwrap();
+                let sink = sender.lock().await;
+                assert_eq!(sink.attempts, 1);
+                assert!(events(&sink) == vec![serde_json::to_value(&dispatch.frame).unwrap()], "packet-free dispatch preserves original owner frame");
+            }
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_encode_failure_publishes_nothing() {
+            let (original, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            for malformed in 0..3 {
+                let mut dispatch = BrowserNpcPurchaseDispatch { frame: original.frame.clone(), packets: original.packets.clone() };
+                match malformed {
+                    0 => dispatch.frame.request_id = U64::new(0),
+                    1 => dispatch.frame.authority = None,
+                    _ => { dispatch.frame.snapshot.as_mut().unwrap()["mapTitle"] = Value::String("x".repeat(mir2_client_wire::MAX_SERVER_FRAME_BYTES)); }
+                }
+                assert!(mir2_client_wire::encode_server_frame(&dispatch.frame).is_err());
+                let sender = super::super::AsyncMutex::new(RecordingSink::default());
+                assert!(super::super::send_npc_purchase_dispatch(&sender, &dispatch).await.is_err());
+                let sink = sender.lock().await;
+                assert_eq!(sink.attempts, 0);
+                assert!(sink.messages.is_empty());
+            }
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_send_failure_stops_before_later_messages() {
+            let (dispatch, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            let packets: Vec<_> = dispatch.packets.iter().map(super::super::server_packet_to_event).collect();
+            assert!(!packets.is_empty());
+            for fail_at in 0..=packets.len() {
+                let sender = super::super::AsyncMutex::new(RecordingSink { fail_at: Some(fail_at), ..Default::default() });
+                assert!(super::super::send_npc_purchase_dispatch(&sender, &dispatch).await.is_err());
+                let sink = sender.lock().await;
+                assert_eq!(sink.attempts, fail_at + 1);
+                assert_eq!(events(&sink).as_slice(), &packets[..fail_at]);
+                assert!(!events(&sink).iter().any(|event| event["type"] == "npcPurchaseOwner"));
+            }
+            let missing = BrowserNpcPurchaseDispatch {
+                frame: ServerFrame::new(dispatch.frame.request_id, ServerReply::Failure {
+                    state: FailureState::PostCommit, receipt: dispatch.frame.reply.receipt().cloned() }, None, None).unwrap(),
+                packets: dispatch.packets,
+            };
+            let mut frame_first = vec![serde_json::to_value(&missing.frame).unwrap()];
+            frame_first.extend(packets);
+            for fail_at in 0..frame_first.len() {
+                let sender = super::super::AsyncMutex::new(RecordingSink { fail_at: Some(fail_at), ..Default::default() });
+                assert!(super::super::send_npc_purchase_dispatch(&sender, &missing).await.is_err());
+                let sink = sender.lock().await;
+                assert_eq!(sink.attempts, fail_at + 1);
+                assert!(events(&sink).as_slice() == &frame_first[..fail_at], "frame-first send failure preserves original prefix");
+            }
+        }
     }
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]

@@ -506,3 +506,163 @@ test("actual Shell old cancel or up cannot clear a synchronously established rep
     assert.equal(s.stops, stopsAfterFresh, "old terminal cannot stop the replacement gesture");
   }
 });
+
+
+// Source67: extract actual Page ownership consumers and their existing storage
+// request/open/onOwner wiring. The runtime below is the original data-only host
+// fixture; no React renderer, Core, browser, socket or gateway is initialized.
+const storagePageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+const storagePageAst = ts.createSourceFile("storage-ownership-page.tsx", storagePageSource,
+  ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const storagePageNames = ["retainReactBagInteraction", "requestBagCompatibility", "endStorageService", "openInventory"];
+const storagePageDeclarations = new Map(), storagePageCases = [], storagePageOptions = [];
+(function visit(node) {
+  if (ts.isFunctionDeclaration(node) && storagePageNames.includes(node.name?.text)) {
+    assert(!storagePageDeclarations.has(node.name.text), "sole actual storage ownership consumer");
+    storagePageDeclarations.set(node.name.text, node.getText(storagePageAst));
+  }
+  if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression) && node.expression.text === "NPCStorage")
+    storagePageCases.push(node.getText(storagePageAst));
+  if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "useBevyStorageUi")
+    storagePageOptions.push(node.arguments[0]);
+  ts.forEachChild(node, visit);
+})(storagePageAst);
+assert.deepEqual([...storagePageDeclarations.keys()].sort(), [...storagePageNames].sort());
+assert.equal(storagePageCases.length, 1); assert.equal(storagePageOptions.length, 1);
+function storageOption(name) {
+  const found = storagePageOptions[0].properties.filter(node => ts.isPropertyAssignment(node)
+    && node.name.getText(storagePageAst) === name);
+  assert.equal(found.length, 1); return found[0].initializer;
+}
+const storageOpenExpressions = [];
+(function visit(node) {
+  if (ts.isPropertyAssignment(node) && node.name.getText(storagePageAst) === "open")
+    storageOpenExpressions.push(node.initializer.getText(storagePageAst));
+  ts.forEachChild(node, visit);
+})(storageOption("read"));
+assert.equal(storageOpenExpressions.length, 1);
+const actualStorageRequested = new Function("bevyQuestUiRequested", "storageServiceActive", "storageCompatibility",
+  "return (" + storageOption("requested").getText(storagePageAst) + ");");
+const storageOwnershipJavaScript = ts.transpileModule(storagePageNames.map(name => storagePageDeclarations.get(name)).join("\n")
+  + '\nfunction receiveActualNpcStorage(){switch("NPCStorage"){' + storagePageCases[0] + '}}'
+  + '\nfunction actualStorageOpen(){return (' + storageOpenExpressions[0] + ');}'
+  + '\nconst actualStorageOwner=' + storageOption("onOwner").getText(storagePageAst) + ';',
+  { compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 } }).outputText;
+function pageStorageOwnershipFixture({ serviceActive = true, bagRequested = true, bagOpen = true,
+  bagMode = null, ingress = true, sharedRequested = true } = {}) {
+  const port = fixture(), trace = [], ownerRevisions = [];
+  port.host.stop(); let host = null, hostState = null, service = serviceActive, compatibility = false, openVersion = 1;
+  const reservations = new Map(), reserved = { proof: { source: { slot: 0 }, target: { slot: 7 } }, enteredSocket: true };
+  reservations.set("existing", reserved);
+  const scope = {
+    bevyBagUiRequested: bagRequested, bagOpenRef: { current: bagOpen },
+    bagCompatibilityModeRef: { current: bagMode }, bagYieldRef: { current: () => trace.push("bagYield") },
+    storageServiceActiveRef: { current: serviceActive }, storageCompatibilityRef: { current: false },
+    storageServiceRevisionRef: { current: 11 }, storageUiIngressRef: { current: null },
+    equipmentBagOwnerRef: { current: { owner: "react", ownerRevision: 0 } },
+    equipmentConnectionGenerationRef: { current: 3 }, equipmentSessionGenerationRef: { current: 5 },
+    equipmentControllerRef: { current: { setOwnerRevision: revision => ownerRevisions.push(revision) } },
+    renderBagOwner: revision => trace.push("owner:" + scope.equipmentBagOwnerRef.current.owner),
+    pendingStorageRequestsRef: { current: reservations },
+    storageRentalRef: { current: { retire: () => trace.push("retireRental") } },
+    setStorageRentalPrompt: () => {}, setStoragePasswordOpenVersion: () => {},
+    setBagCompatibilityMode: value => trace.push("bagMode:" + value),
+    setStorageCompatibility: value => { compatibility = value; trace.push("storageCompatibility:" + value); },
+    setStorageServiceActive: value => { service = value; },
+    setStorageServiceOpenVersion: value => { openVersion = typeof value === "function" ? value(openVersion) : value; },
+    retireNpcShopService: () => {}, updateWorld: () => {},
+    npcRepairServiceRef: { current: null }, closeNpcRepairService: () => trace.push("closeRepair"),
+    sharedHudNavigationRef: { current: { ready: true } },
+    navigateSharedHud: action => { trace.push("hud:" + action.type); return true; },
+    setActiveInventoryTab: tab => trace.push("tab:" + tab),
+    setShowInventory: value => { scope.bagOpenRef.current = value; trace.push("bagOpen:" + value); },
+    closeTouchSecondaryWindows: () => trace.push("touchClose"),
+  };
+  const api = new Function(...Object.keys(scope), storageOwnershipJavaScript + "\nreturn {"
+    + storagePageNames.join(",") + ",receiveActualNpcStorage,actualStorageOpen,actualStorageOwner};")(...Object.values(scope));
+  function attach() {
+    host?.stop();
+    host = new storage.BevyStorageHost({ runtime: port.runtime, now: () => 100,
+      read: () => ({ ...port.input, serviceRevision: scope.storageServiceRevisionRef.current,
+        ownerRevision: scope.equipmentBagOwnerRef.current.ownerRevision, open: api.actualStorageOpen() }),
+      onOwner: api.actualStorageOwner, onState: state => { hostState = state; }, onIntent: () => false,
+    });
+    scope.storageUiIngressRef.current = { withdraw() { trace.push("withdraw"); host.withdraw(); } };
+  }
+  if (ingress) attach();
+  return { scope, api, trace, ownerRevisions, port, reserved, reservations, attach,
+    get host() { return host; }, get hostState() { return hostState; }, get openVersion() { return openVersion; },
+    requested: () => actualStorageRequested(sharedRequested, service, compatibility),
+    activate() { host.tick(); port.echo(); host.tick(); port.echo(); host.tick(); assert.equal(hostState.active, true); },
+  };
+}
+
+test("Source67 actual compatibility interaction withdraws shared storage before retaining its React owner", () => {
+  const f = pageStorageOwnershipFixture(); f.activate();
+  const intent = f.port.intent(); assert.equal(f.port.emit(intent), false); assert.equal(f.host.allows(intent), true);
+  f.trace.length = 0; f.api.retainReactBagInteraction();
+  assert.deepEqual(f.trace, ["withdraw", "owner:react", "storageCompatibility:true", "bagYield", "bagMode:fullInventory"]);
+  assert.equal(f.scope.equipmentBagOwnerRef.current.owner, "react");
+  assert.equal(f.scope.storageCompatibilityRef.current, true); assert.equal(f.requested(), false);
+  assert.equal(f.api.actualStorageOpen(), false); assert.equal(f.hostState.active, false);
+  assert.equal(f.host.allows(intent), false); assert.equal(f.host.claim(intent), false);
+  for (let i = 0; i < 3; i++) { f.host.tick(); f.port.echo(); f.host.tick(); }
+  assert.equal(f.hostState.active, false); assert.equal(f.hostState.transitioning, false);
+  assert.equal(f.port.snapshots.at(-1).open, false); assert.equal(f.port.snapshots.at(-1).inputEnabled, false);
+  assert.equal(f.reservations.get("existing"), f.reserved); assert.equal(f.reserved.enteredSocket, true);
+});
+
+test("Source67 repeated actual storage compatibility interaction is idempotent with or without a requested host", () => {
+  for (const requested of [true, false]) {
+    const f = pageStorageOwnershipFixture({ ingress: requested, sharedRequested: requested });
+    f.trace.length = 0; f.api.retainReactBagInteraction(); const first = [...f.trace];
+    f.api.retainReactBagInteraction(); f.api.retainReactBagInteraction();
+    assert.deepEqual(f.trace, first); assert.equal(f.scope.storageCompatibilityRef.current, true);
+    assert.equal(f.scope.bagCompatibilityModeRef.current, "fullInventory");
+    assert.equal(f.requested(), false); assert.equal(f.api.actualStorageOpen(), false);
+    assert.equal(f.trace.filter(value => value === "withdraw").length, requested ? 1 : 0);
+    assert.equal(f.reservations.get("existing"), f.reserved);
+  }
+});
+
+test("Source67 actual pure Bag interaction keeps the original requested/open/compatibility gates", () => {
+  for (const [bagRequested, bagOpen, bagMode, yields] of [
+    [true, true, null, 1], [false, true, null, 0], [true, false, null, 0], [true, true, "delete", 0],
+  ]) {
+    const f = pageStorageOwnershipFixture({ serviceActive: false, ingress: false, bagRequested, bagOpen, bagMode });
+    f.api.retainReactBagInteraction();
+    assert.equal(f.trace.filter(value => value === "bagYield").length, yields);
+    assert.equal(f.scope.bagCompatibilityModeRef.current, yields ? "fullInventory" : bagMode);
+    assert.equal(f.scope.storageCompatibilityRef.current, false); assert.equal(f.trace.includes("withdraw"), false);
+    assert.equal(f.requested(), false);
+  }
+});
+
+test("Source67 actual service close and NPCStorage reopen restore a fresh shared handoff without reusing proof", () => {
+  const f = pageStorageOwnershipFixture(); f.activate();
+  const oldIntent = f.port.intent(); f.port.emit(oldIntent);
+  f.api.retainReactBagInteraction(); f.api.endStorageService();
+  assert.equal(f.scope.storageServiceActiveRef.current, false); assert.equal(f.scope.storageCompatibilityRef.current, false);
+  assert.equal(f.openVersion, 0); assert.equal(f.requested(), false);
+  f.api.receiveActualNpcStorage();
+  assert.equal(f.scope.storageServiceActiveRef.current, true); assert.equal(f.scope.storageCompatibilityRef.current, false);
+  assert.equal(f.scope.storageServiceRevisionRef.current, 12); assert.equal(f.openVersion, 1);
+  assert.equal(f.requested(), true); assert.equal(f.api.actualStorageOpen(), true);
+  f.attach(); f.activate(); assert.equal(f.scope.equipmentBagOwnerRef.current.owner, "bevy");
+  assert.equal(f.host.allows(oldIntent), false); assert.equal(f.host.claim(oldIntent), false);
+  const freshIntent = f.port.intent(); assert.equal(f.port.emit(freshIntent), false);
+  assert.equal(f.host.allows(freshIntent), true); assert.equal(f.host.claim(freshIntent), true);
+  assert.equal(f.reservations.get("existing"), f.reserved, "UI close/reopen never retires an entered transport reservation");
+});
+
+test("Source67 actual leased storage page changes preserve ownership and avoid another shared openBag", () => {
+  const f = pageStorageOwnershipFixture(); f.api.retainReactBagInteraction(); f.trace.length = 0;
+  for (const page of ["bag1", "quest", "bag2"]) f.api.openInventory(page);
+  assert.deepEqual(f.trace, ["tab:bag1", "tab:quest", "tab:bag2"]);
+  assert.equal(f.scope.storageCompatibilityRef.current, true); assert.equal(f.openVersion, 1);
+  assert.equal(f.scope.bagOpenRef.current, true); assert.equal(f.scope.bagCompatibilityModeRef.current, "fullInventory");
+  const pureBag = pageStorageOwnershipFixture({ serviceActive: false, ingress: false });
+  pureBag.api.openInventory("bag2"); assert.deepEqual(pureBag.trace, ["hud:openBag", "tab:bag2"]);
+  const sharedStorage = pageStorageOwnershipFixture({ ingress: false });
+  sharedStorage.api.openInventory("bag1"); assert.deepEqual(sharedStorage.trace, ["hud:openBag", "tab:bag1"]);
+});

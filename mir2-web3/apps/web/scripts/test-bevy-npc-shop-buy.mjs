@@ -168,6 +168,87 @@ function fixture() {
     } };
 }
 
+test("preview diagnostics identify existing admission gates and repeated reads have no Core or planner effects", () => {
+  const cases = [
+    ["slotUnavailable", f => { f.slot = null; }, f => f.live],
+    ["attachRejected", f => { f.slot = { ...f.slot, attachProducer: () => false }; }, f => f.live],
+    ["socketUnavailable", f => { f.isOpen = false; }, f => f.live],
+    ["captureUnavailable", () => {}, () => null],
+    ["captureUnavailable", f => { f.live = null; }, () => current()],
+    ["liveBlocked", f => { f.live.blocked = true; }, f => f.live],
+    ["inputBlocked", () => {}, f => ({ ...copy(f.live), blocked: true })],
+    ["requestMismatch", () => {}, f => { const input = copy(f.live); input.inventory.gold--; return input; }],
+    ["contextMismatch", () => {}, f => { const input = copy(f.live); input.owner.ownerRevision++; return input; }],
+    ["plannerUnavailable", f => { delete f.runtime.getMir2NpcGoldBuyPlan; }, f => f.live],
+    ["quoteUnavailable", f => { f.answer = () => "not json"; }, f => f.live],
+  ];
+  for (const [reason, change, input] of cases) {
+    const f = fixture(); assert.equal(f.api.lastPreviewFailure(), null); change(f);
+    assert.equal(f.api.preview(input(f), 2), null, reason);
+    const before = { core: f.protocol.attempts.length, planner: f.calls.length };
+    for (let read = 0; read < 3; read++) assert.equal(f.api.lastPreviewFailure(), reason);
+    assert.deepEqual({ core: f.protocol.attempts.length, planner: f.calls.length }, before, reason + " getter is inert");
+    assert.deepEqual(f.sent, []);
+  }
+});
+
+test("preview diagnostics classify actual live and post-quote failures while preserving original short circuit calls", () => {
+  const cases = [
+    ["authorityObserveRejected", f => { f.protocol.set("observe", decision(null, { matched: false })); }],
+    ["availabilityRejected", f => { f.api.observe(); f.protocol.set("availability", decision(null, { matched: false, canReserve: false })); }],
+    ["sourceChanged", f => { let reads = 0; f.beforeRead = () => { if (++reads === 2) f.live.inventory.gold--; }; }],
+    ["postQuoteChanged", f => { f.answer = request => { f.live.inventory.gold--; return accepted(request); }; }],
+    ["statusUnavailable", f => { f.protocol.set("status", { ok: false, error: "fixed protocol refusal" }); }],
+    ["connectionChanged", f => { f.protocol.set("status", () => { f.socket = {}; return decision(); }); }],
+  ];
+  for (const [reason, change] of cases) {
+    const f = fixture(); change(f); const initialStatuses = f.protocol.inputs("status").length;
+    assert.equal(f.api.preview(f.live, 2), null, reason);
+    assert.equal(f.api.lastPreviewFailure(), reason); assert.deepEqual(f.sent, []);
+    if (["authorityObserveRejected", "availabilityRejected", "sourceChanged"].includes(reason)) {
+      assert.equal(f.calls.length, 0, reason + " prevents the original planner edge");
+      assert.equal(f.protocol.inputs("status").length, initialStatuses, reason + " does not add a status probe");
+    } else assert.equal(f.calls.length, 1);
+    const attempts = f.protocol.attempts.length;
+    assert.equal(f.api.lastPreviewFailure(), reason); assert.equal(f.protocol.attempts.length, attempts);
+    assert.equal(f.protocol.inputs("reserve").length, 0); assert.equal(f.protocol.inputs("enter").length, 0);
+  }
+});
+
+test("preview diagnostics clear on original success and denial quotes but never release retained economic flights", () => {
+  const f = fixture(); f.answer = () => "not json";
+  assert.equal(f.api.preview(f.live, 2), null); assert.equal(f.api.lastPreviewFailure(), "quoteUnavailable");
+  f.answer = accepted;
+  assert.deepEqual(f.api.preview(f.live, 2), accepted({ shop: f.live.shop, quantity: 2 }));
+  assert.equal(f.api.lastPreviewFailure(), null);
+  const denial = { maxQuantity: 4, totalGold: null, canBuy: false, blockReason: "invalidSource", command: null };
+  f.answer = () => denial; assert.deepEqual(f.api.preview(f.live, 2), denial);
+  assert.equal(f.api.lastPreviewFailure(), null); assert.equal(f.prepare(), null); assert.deepEqual(f.sent, []);
+  const retained = fixture(), prepared = retained.prepare(); assert(prepared); assert(retained.send(prepared));
+  retained.api.transportResult(prepared.proof, "unknown"); retained.protocol.hold("unknown");
+  assert.deepEqual(retained.api.preview(retained.live, 2), { maxQuantity: 17, totalGold: 37,
+    canBuy: false, blockReason: "localPending", command: null });
+  assert.equal(retained.api.lastPreviewFailure(), null);
+  const attempts = retained.protocol.attempts.length;
+  for (let read = 0; read < 3; read++) assert.equal(retained.api.lastPreviewFailure(), null);
+  assert.equal(retained.protocol.attempts.length, attempts);
+  assert.equal(retained.prepare(), null); assert.equal(retained.send(prepared), false); assert.equal(retained.sent.length, 1);
+});
+
+test("preview diagnostics preserve inactive and synchronous busy rejection without changing the outer successful quote", () => {
+  const inactive = fixture(), initialAttempts = inactive.protocol.attempts.length; inactive.api.dispose();
+  assert.equal(inactive.api.preview(inactive.live, 2), null); assert.equal(inactive.api.lastPreviewFailure(), "inactive");
+  assert.equal(inactive.prepare(), null); assert.equal(inactive.protocol.attempts.length, initialAttempts); assert.equal(inactive.calls.length, 0);
+  const f = fixture(); f.answer = request => {
+    const attempts = f.protocol.attempts.length;
+    assert.equal(f.api.preview(f.live, 2), null); assert.equal(f.api.lastPreviewFailure(), "busy");
+    assert.equal(f.protocol.attempts.length, attempts); assert.equal(f.prepare(), null);
+    return accepted(request);
+  };
+  assert.deepEqual(f.api.preview(f.live, 2), accepted({ shop: f.live.shop, quantity: 2 }));
+  assert.equal(f.api.lastPreviewFailure(), null); assert.equal(f.calls.length, 1); assert.deepEqual(f.sent, []);
+});
+
 test("quote calls the actual runtime hook with exact full request and preserves Rust values", () => {
   const f = fixture();
   const quote = quoteNpcGoldBuy(f.runtime, f.live, 2);
@@ -447,13 +528,13 @@ const actualPageSource = readFileSync(new URL("../app/page.tsx", import.meta.url
 const actualPageAst = ts.createSourceFile("actual-npc-buy-page.tsx", actualPageSource,
   ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcShopItem",
-  "legacyNpcBuyAllowed", "buyNpcShopItem", "retireNpcShopService", "send", "sendRaw",
+  "recordNpcPurchaseAction", "sendNpcPurchaseAction", "legacyNpcBuyAllowed", "buyNpcShopItem", "retireNpcShopService", "send", "sendRaw",
   "itemCommandRequiresOwner", "socialItemMutationAllowed", "parityItemMutationAllowed",
   "npcPearlBuyCurrent", "readNpcPearlBuyCurrent", "readNpcBuyCurrent", "npcPearlSendCurrent",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner", "observeNpcPearlWallet",
   "npcPurchaseFullEconomyCurrent", "npcPurchaseDisplayFingerprint", "npcPurchaseSnapshotEconomics", "receiveNpcPurchaseGatewayFrame", "applyNpcPurchaseOrdinarySnapshot", "npcPurchaseSessionKey",
   "npcPurchaseShopMatches", "applyNpcPurchaseShopSnapshot", "applyNpcShopCatalogPacket", "dispatchDurableNpcPurchase", "currentNpcShopTab",
-  "observeNpcPurchaseSocket", "retireNpcPurchaseClient",
+  "sendClientCapabilities", "observeNpcPurchaseSocket", "retireNpcPurchaseClient",
   "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors"];
 const npcPageDeclarations = new Map();
 const npcPageDispatcherCreations = [];
@@ -517,7 +598,7 @@ function legacyPageCatalogue(fixture) {
   }
 }
 
-function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreVersion = "core-test-v1", socket: sharedSocket = null } = {}) {
+function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreVersion = "core-test-v1", socket: sharedSocket = null, spectatorMode = () => false } = {}) {
   const sent = [], attempts = [], calls = [], trace = [], proofs = [], legacyProofs = [], retired = [];
   let listener = null, answer = accepted, socketThrows = false, runtimeThrows = false;
   const world = npcPageWorld(), service = npcPageService();
@@ -536,8 +617,11 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   const legacyMap = new WeakMap(), realSet = legacyMap.set.bind(legacyMap);
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
+    npcPurchaseActionRef:{current:null},npcPurchaseSendActionRef:{current:null},
+    setNpcPurchaseActionStatus:()=>{},
     npcPurchaseUnavailableRef:{current:false},npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
     npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},heroVerifiedDeliveryRef:{current:null},
+    cashReceiptSocketRef:{current:null},
     npcPurchaseCatalogSourceRef:{current:new WeakMap()},npcPurchaseClientRef:{current:null},
     NpcPurchaseClient:actualDurableNpc.NpcPurchaseClient,worldSnapshotVersionRef:{current:0},
     captureQuestMapGatewayEvent:()=>{},captureSpellsGatewayEvent:()=>{},mergeMailList:value=>value,
@@ -591,6 +675,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
     worldFishingActiveGestureRef:{current:null},worldFishingQueuedRef:{current:null},
     NpcGoldBuyDispatcher, projectBevyBagModel: npcPureBag.projectBevyBagModel,
     npcGoldBuyInventoryRef: { current: new module.exports.NpcGoldBuyInventoryReadiness() },
+    npcGoldBuySourceFailureRef: { current: null },
     mailMutationAllowed: npcPureParcel.mailMutationAllowed,
     isMailItemMutation: npcPureParcel.isMailItemMutation,
     storageMutationAllowed: npcPureStorage.storageMutationAllowed,
@@ -621,7 +706,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
     syncMailParcel: () => { throw Error("unexpected Mail projection in idle NPC fixture"); },
     lastCommandRef: { current: null }, movementPredictionBlockedUntilRef: { current: 0 },
     movementDiagnosticsRef: { current: null }, MOVEMENT_ACTION_PREDICTION_BLOCK_MS: 0,
-    isSpectatorBrowserMode: () => false,
+    isSpectatorBrowserMode: spectatorMode,
     isMovementPredictionBlockingCommand: () => false, isMovementCommand: () => false,
     isMovementConsoleCommand: () => false, isCombatResolutionCommand: () => false,
     recordDebugEvent: () => {}, appendLog: () => {}, t: key => key,
@@ -2421,7 +2506,10 @@ test("Source30 actual Page branches raw owner before generic decoder and complet
   assert(actualPageSource.includes("mergedGroundDropsForWorld = packetRuntimeRefresh && !fullEconomy"));
   assert(actualPageSource.includes("applyNpcGoldBuyGatewaySnapshot(snapshot, generation, true)"));
   assert(actualPageSource.includes("npcPurchaseEconomicSourceRef.current = Object.freeze({ socket, session, rawFrame, snapshot: rawSnapshot })"));
-  assert(actualPageSource.includes("clientCapabilities\", capabilities: [\"durableNpcPurchaseOwnerV1"));
+  assert.equal(capabilitySocketOpenCallbacks().length,1);
+  const capability=pageCapabilityFixture();capability.page.observeNpcPurchaseSocket(capability.page.socket);
+  assert.deepEqual(capability.declarations(),[["durableNpcPurchaseOwnerV1"]]);
+  assert.equal(capability.page.scope.npcPurchaseOptInSocketsRef.current.has(capability.page.socket),true);
 });
 test("Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors",()=>{
   const f=installPearlPage(npcPageHarness()),physical=f.currentSocialReceiveOwner();
@@ -3025,5 +3113,274 @@ test("Source35 exact storage ABI preserves signed i64 text and rejects unsafe nu
     const p=storage.projectBevyStorageModel(input);
     assert.equal(p.ok,false,String(expiry));assert.equal(p.error.field,"storage");
     assert.equal(input.expandedStorageExpiryTimeBinaryDatetime,expiry);
+  }
+});
+
+
+test("ordinary Page purchase diagnostics retain first refusal and exact transport stage", () => {
+  const blocked=npcPageHarness(); blocked.scope.npcShopUiIngressRef.current={blocksInput:()=>true};
+  blocked.buyNpcShopItem(77,2,0);
+  assert.deepEqual(blocked.scope.npcPurchaseActionRef.current,{route:"none",stage:"rejected",reason:"inputBlocked"});
+  assert.equal(blocked.calls.length,0); assert.equal(blocked.attempts.length,0);
+  const changed=npcPageHarness(); changed.scope.npcShopServiceRef.current={...changed.scope.npcShopService};
+  changed.buyNpcShopItem(77,2,0); assert.equal(changed.scope.npcPurchaseActionRef.current.reason,"renderServiceChanged");
+  assert.equal(changed.calls.length,0);
+  const sent=npcPageHarness(); sent.buyNpcShopItem(77,2,0);
+  assert.deepEqual(sent.scope.npcPurchaseActionRef.current,{route:"gold",stage:"transportReturned",reason:null});
+  assert.deepEqual(sent.sent,[baseWire]);
+  const stale=npcPageHarness(); stale.onAction(()=>{stale.scope.socketRef.current={readyState:0};});
+  stale.buyNpcShopItem(77,2,0);
+  assert.equal(stale.scope.npcPurchaseActionRef.current.reason,"finalSocketChanged"); assert.equal(stale.attempts.length,0);
+  const action=stale.scope.npcPurchaseActionRef.current;
+  stale.recordNpcPurchaseAction(action,"rejected","sendRejected"); assert.equal(action.reason,"finalSocketChanged");
+  stale.scope.npcPurchaseActionRef.current={route:"none",stage:"requested",reason:null};
+  stale.recordNpcPurchaseAction(action,"quoteSent"); assert.equal(stale.scope.npcPurchaseActionRef.current.stage,"requested");
+});
+
+test("ordinary durable Page purchase reports missing adapter and catalog before quote or fallback", () => {
+  const f=npcPageHarness(); f.scope.npcPurchaseOptInSocketsRef.current.add(f.socket);
+  f.buyNpcShopItem(77,1,0);
+  assert.deepEqual(f.scope.npcPurchaseActionRef.current,{route:"durable",stage:"rejected",reason:"adapterUnavailable"});
+  assert.equal(f.calls.length,0); assert.equal(f.attempts.length,0);
+  const g=npcPageHarness(); g.scope.npcPurchaseOptInSocketsRef.current.add(g.socket);
+  g.scope.npcPurchaseClientRef.current={socket:g.socket,client:{purchase:()=>assert.fail("catalog must precede purchase")}};
+  // Unobserved Core custody is deliberately fail-closed. Establish the actual
+  // idle dispatcher before testing the later, independently absent catalog.
+  g.scope.npcBuySelectedRef.current=77; g.dispatcher.observe();
+  assert.equal(g.dispatcher.status()?.flight,null);
+  assert.equal(g.dispatcher.hasRetainedAttempt(),false);
+  g.buyNpcShopItem(77,1,0); assert.equal(g.scope.npcPurchaseActionRef.current.reason,"catalogSourceUnavailable");
+  assert.equal(g.calls.length,0); assert.equal(g.attempts.length,0);
+});
+
+test("actual durable client passive getter classifies first synchronous refusal without host reads", () => {
+  const unbound=s30Harness(); assert.equal(unbound.client.purchase(s30Intent.request,"gold",()=>true),false);
+  assert.equal(unbound.client.lastPurchaseFailure(),"bindingUnavailable"); assert.equal(unbound.inputs.length,0);
+  for(const [reason,change,current] of [
+    ["requestInvalid",()=>{},()=>true], ["gestureChanged",()=>{},()=>false],
+    ["oldAttemptBlocked",f=>{f.state.old=true;},()=>true],
+    ["purchasePending",f=>{f.state.pending={operation:f.state.operation,minimumRevision:"1",phase:"queued"};},()=>true],
+    ["statusRejected",f=>{f.state.mutate=(i,r)=>i.op==="status"?{ok:false}:r;},()=>true],
+    ["bindingChanged",f=>{f.state.mutate=(i,r)=>i.op==="status"?{...r,binding:{...r.binding,beginId:"999"}}:r;},()=>true],
+    ["dispatchRejected",f=>{f.state.mutate=(i,r)=>i.op==="quote"?{ok:false}:r;},()=>true],
+    ["dispatchChanged",f=>{f.state.mutate=(i,r)=>{if(i.op==="quote")f.state.current=false;return r;};},()=>true],
+    ["sessionUnavailable",f=>{f.state.mutate=(i,r)=>{if(i.op==="status")f.state.session=null;return r;};},()=>true],
+  ]) {
+    const f=s30Harness(); f.begin(); change(f); const before=f.sent.length;
+    assert.equal(f.client.purchase(reason==="requestInvalid"?{...s30Intent.request,count:0}:s30Intent.request,"gold",current),false,reason);
+    assert.equal(f.client.lastPurchaseFailure(),reason); const reads=f.inputs.length;
+    for(let i=0;i<3;i++)assert.equal(f.client.lastPurchaseFailure(),reason);
+    assert.equal(f.inputs.length,reads); assert.equal(f.sent.length,before);
+  }
+  const success=s30Harness(); success.begin();
+  assert(success.client.purchase(s30Intent.request,"gold",()=>success.state.gesture));
+  assert.equal(success.client.lastPurchaseFailure(),null); const reads=success.inputs.length;
+  assert.equal(success.client.lastPurchaseFailure(),null); assert.equal(success.inputs.length,reads);
+  assert.equal(success.client.purchase(s30Intent.request,"gold",()=>true),false);
+  assert.equal(success.client.lastPurchaseFailure(),"quotePending");
+  success.state.gesture=false; success.quote(); assert.equal(success.ops("reserve").length,0);
+  assert.equal(success.sent.filter(w=>w.action.kind==="purchase").length,0);
+});
+
+
+// Execute the actual socket-open consumer and NPC observer with their existing
+// data-only Core/socket ports. No gateway, UI, WASM or capability authority is
+// fabricated here; the only observable transport is the captured JSON body.
+function capabilitySocketOpenCallbacks() {
+  const callbacks=[];
+  function visit(node) {
+    if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)
+      &&node.expression.expression.getText(actualPageAst)==="socket"&&node.expression.name.text==="addEventListener"
+      &&ts.isStringLiteral(node.arguments[0])&&node.arguments[0].text==="open")callbacks.push(node.arguments[1]);
+    ts.forEachChild(node,visit);
+  }
+  visit(actualPageAst);return callbacks;
+}
+function pageCapabilityFixture(coreEarly=true) {
+  let spectator=false;
+  const page=npcPageHarness({spectatorMode:()=>spectator}),abi=s30Harness(),controls=[],attempts=[];let failCapability=null;
+  const core={...page.scope.questCoreRuntimeRef.current,getNpcPurchaseReceiptHost:()=>abi.host};
+  page.scope.questCoreRuntimeRef.current=coreEarly?core:null;
+  const originalSend=page.socket.send.bind(page.socket);
+  page.socket.send=body=>{
+    const value=JSON.parse(body);attempts.push(value);
+    if(value.type==="clientCapabilities"&&value.capabilities.includes(failCapability))throw Error("controlled capability send exception");
+    originalSend(body);
+  };
+  const callbacks=capabilitySocketOpenCallbacks();assert.equal(callbacks.length,1);
+  const source="const actualOpen="+callbacks[0].getText(actualPageAst)+";";
+  const code=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+  function openFor(socket=page.socket) {
+    const scope={...page.scope,observeNpcPurchaseSocket:page.observeNpcPurchaseSocket,sendClientCapabilities:page.sendClientCapabilities,
+      socket,connectionGeneration:page.scope.equipmentConnectionGenerationRef.current,
+      observeMailSocketOpen:()=>controls.push("mailOpen"),setWsState:value=>controls.push(value),markMir2CacheMilestone:()=>{},
+    };
+    new Function(...Object.keys(scope),code+"\nreturn actualOpen;")(...Object.values(scope))();
+  }
+  return {page,abi,core,openFor,attempts,controls,
+    declarations:()=>page.sent.filter(value=>value.type==="clientCapabilities").map(value=>value.capabilities),
+    setCore(){page.scope.questCoreRuntimeRef.current=core;},
+    fail(capability){failCapability=capability;},setSpectator(value){spectator=value;},
+  };
+}
+
+test("Source64 actual capability consumers preserve both declarations with Core early or late",()=>{
+  for(const early of [true,false]) {
+    const f=pageCapabilityFixture(early);f.openFor();
+    if(!early){assert.deepEqual(f.declarations(),[["nativeGameShopReceiptV1"]]);f.setCore();f.page.observeNpcPurchaseSocket(f.page.socket);}
+    assert.deepEqual(f.declarations(),early
+      ?[["durableNpcPurchaseOwnerV1"],["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]]
+      :[["nativeGameShopReceiptV1"],["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]]);
+    assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(f.page.socket),true);
+    assert.equal(f.page.scope.cashReceiptSocketRef.current,f.page.socket);
+    assert.deepEqual(f.controls,["mailOpen","open"]);
+    assert.equal(f.page.sent.filter(value=>value.type==="npcPurchaseOwner"&&value.action.kind==="begin").length,1);
+  }
+});
+
+test("Source64 same socket append keeps the other capability and replacement socket inherits neither",()=>{
+  const f=pageCapabilityFixture();f.openFor();const count=f.declarations().length;
+  f.page.observeNpcPurchaseSocket(f.page.socket);assert.equal(f.declarations().length,count,"already declared NPC sends no duplicate proposal");
+  for(const capability of ["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]) {
+    f.page.sendClientCapabilities(f.page.socket,capability);
+    assert.deepEqual(f.declarations().at(-1),["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]);
+    const sent=[],next={readyState:1,send:body=>sent.push(JSON.parse(body))};
+    f.page.sendClientCapabilities(next,capability);
+    assert.deepEqual(sent,[{type:"clientCapabilities",capabilities:[capability]}]);
+    assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(next),false);
+    assert.equal(f.page.scope.cashReceiptSocketRef.current,f.page.socket);
+  }
+});
+
+test("Source64 actual consumers mark capabilities only after successful sends",()=>{
+  const npc=pageCapabilityFixture();npc.fail("durableNpcPurchaseOwnerV1");npc.page.observeNpcPurchaseSocket(npc.page.socket);
+  assert.equal(npc.page.scope.npcPurchaseOptInSocketsRef.current.has(npc.page.socket),false);
+  assert.equal(npc.page.scope.npcPurchaseUnavailableRef.current,true);assert.equal(npc.page.scope.npcPurchaseClientRef.current,null);
+  assert.equal(npc.declarations().length,0);assert.equal(npc.page.sent.filter(value=>value.type==="npcPurchaseOwner").length,0);
+  npc.fail(null);npc.page.observeNpcPurchaseSocket(npc.page.socket);
+  assert.deepEqual(npc.declarations(),[["durableNpcPurchaseOwnerV1"]]);
+  const cash=pageCapabilityFixture(false);cash.fail("nativeGameShopReceiptV1");cash.openFor();
+  assert.equal(cash.page.scope.cashReceiptSocketRef.current,null);assert.equal(cash.declarations().length,0);
+  assert.equal(cash.page.scope.npcPurchaseOptInSocketsRef.current.has(cash.page.socket),false);
+  cash.fail(null);cash.setCore();cash.page.observeNpcPurchaseSocket(cash.page.socket);
+  assert.deepEqual(cash.declarations(),[["durableNpcPurchaseOwnerV1"]],"failed cash declaration is never carried into NPC proposal");
+});
+
+test("Source64 actual socket and observer blockers preserve capability send gates",()=>{
+  for(const edge of ["stale","closed","spectator"]) {
+    const f=pageCapabilityFixture();
+    if(edge==="stale")f.page.scope.socketRef.current={readyState:1};
+    if(edge==="closed")f.page.socket.readyState=0;
+    if(edge==="spectator")f.setSpectator(true);
+    f.openFor();assert.deepEqual(f.declarations(),[],edge);
+    assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(f.page.socket),false,edge);
+    assert.equal(f.page.scope.cashReceiptSocketRef.current,null,edge);
+  }
+});
+
+
+// Source66: execute complete Page activation and interaction consumers with
+// captured ordinary transport and movement ports, never a renderer or Core.
+const npcActivationDeclarations = new Map();
+(function visit(node) {
+  if (ts.isFunctionDeclaration(node) && ["activateEntity", "interactTarget"].includes(node.name?.text)) {
+    assert(!npcActivationDeclarations.has(node.name.text), "sole actual NPC activation consumer");
+    npcActivationDeclarations.set(node.name.text, node.getText(actualPageAst));
+  }
+  ts.forEachChild(node, visit);
+})(actualPageAst);
+assert.deepEqual([...npcActivationDeclarations.keys()].sort(), ["activateEntity", "interactTarget"]);
+const npcActivationJavaScript = ts.transpileModule([...npcActivationDeclarations.values()].join("\n"), {
+  compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+function pageNpcActivationFixture() {
+  const self = { objectId: "1", kind: "player", x: 6, y: 10, hp: 24, dead: false };
+  const npc = { objectId: "450", kind: "npc", x: 8, y: 9, hp: 1, dead: false };
+  const initial = { playerObjectId: self.objectId, selectedObjectId: null, entities: [self, npc], activeNpcDialog: null };
+  const sent = [], moves = [], trace = [], attacks = []; let now = 1000;
+  const scope = {
+    self, world: initial, worldRef: { current: initial },
+    pendingNpcInteractRef: { current: null }, npcCallGuardRef: { current: null },
+    queuedMoveIntentRef: { current: null }, movementPlanRef: { current: null },
+    stopOnchainMining: () => trace.push("stopMining"),
+    cancelLockedMonsterAttack: () => trace.push("cancelMonster"),
+    lockMonsterAttack: objectId => { attacks.push(objectId); trace.push("lockMonster"); },
+    updateWorld: update => { scope.worldRef.current = update(scope.worldRef.current); trace.push("select"); },
+    send: command => { sent.push(command); trace.push("send"); return true; },
+    Date: { now: () => now },
+    tileDistance: (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)),
+    // The Warehouse approach cell (7,9) is blocked. If the consumer asks for
+    // a route, capture it rather than simulating movement or a successful path.
+    approachDestination: () => { trace.push("approach"); return { x: 7, y: 9 }; },
+    moveToTile: (...args) => { moves.push(args); trace.push("move"); },
+  };
+  const actual = new Function(...Object.keys(scope), npcActivationJavaScript + "\nreturn {activateEntity,interactTarget};")(...Object.values(scope));
+  return { ...actual, scope, self, npc, sent, moves, trace, attacks, setNow(value) { now = value; } };
+}
+
+test("Source66 actual NPC activation sends once across distance two without the blocked approach", () => {
+  const f = pageNpcActivationFixture();
+  assert.equal(f.scope.tileDistance(f.self, f.npc), 2);
+  f.activateEntity("450");
+  assert.deepEqual(f.sent, [{ type: "interact", objectId: 450 }]);
+  assert.deepEqual(f.moves, []); assert(!f.trace.includes("approach"));
+  assert.deepEqual(f.trace, ["stopMining", "select", "cancelMonster", "send"]);
+  assert.equal(f.scope.worldRef.current.selectedObjectId, "450");
+  assert.deepEqual(f.scope.npcCallGuardRef.current, { objectId: "450", until: 1650 });
+  assert.equal(f.scope.pendingNpcInteractRef.current, null);
+});
+
+test("Source66 actual NPC repeat and same-dialog guards retain their original boundaries", () => {
+  const f = pageNpcActivationFixture(); f.activateEntity("450");
+  f.setNow(1650); f.activateEntity("450"); assert.equal(f.sent.length, 1, "inclusive repeat deadline");
+  f.setNow(1651); f.scope.world.activeNpcDialog = { npcObjectId: "450" };
+  f.activateEntity("450"); assert.equal(f.sent.length, 1, "same visible dialog remains protected after deadline");
+  f.scope.world.activeNpcDialog = { npcObjectId: "451" };
+  f.activateEntity("450"); assert.equal(f.sent.length, 2, "other dialog permits expired repeat");
+  assert.deepEqual(f.moves, []);
+  const other = { ...f.npc, objectId: "451" }; f.scope.worldRef.current.entities.push(other);
+  f.activateEntity("451"); assert.equal(f.sent.length, 3, "another NPC is not denied by prior NPC repeat");
+  assert.deepEqual(f.sent.at(-1), { type: "interact", objectId: 451 });
+});
+
+test("Source66 actual invalid and dead entity branches stop before interaction or attack", () => {
+  for (const kind of ["missing", "dead", "zeroHp"]) {
+    const f = pageNpcActivationFixture();
+    if (kind === "missing") f.scope.worldRef.current.entities = [f.self];
+    if (kind === "dead") f.npc.dead = true;
+    if (kind === "zeroHp") f.npc.hp = 0;
+    f.activateEntity("450");
+    assert.deepEqual(f.trace, ["stopMining", "select", "cancelMonster"], kind);
+    assert.deepEqual(f.sent, [], kind); assert.deepEqual(f.attacks, [], kind); assert.deepEqual(f.moves, [], kind);
+    assert.equal(f.scope.npcCallGuardRef.current, null, kind);
+  }
+});
+
+test("Source66 actual monster activation keeps the existing attack path and non-NPC selection", () => {
+  const monster = pageNpcActivationFixture(); monster.npc.kind = "monster";
+  monster.activateEntity("450");
+  assert.deepEqual(monster.trace, ["stopMining", "select", "lockMonster"]);
+  assert.deepEqual(monster.attacks, ["450"]); assert.deepEqual(monster.sent, []); assert.deepEqual(monster.moves, []);
+  const player = pageNpcActivationFixture(); player.npc.kind = "player";
+  player.activateEntity("450");
+  assert.deepEqual(player.trace, ["stopMining", "select", "cancelMonster"]);
+  assert.deepEqual(player.attacks, []); assert.deepEqual(player.sent, []); assert.deepEqual(player.moves, []);
+});
+
+
+test("Source66 direct NPC activation retires old arrival intent without cancelling unrelated movement", () => {
+  for (const guarded of [false, true]) {
+    const f = pageNpcActivationFixture();
+    const queued = { kind: "target", targetX: 5, targetY: 11, requestedMode: "walk" };
+    const plan = { targetX: 5, targetY: 11 };
+    f.scope.pendingNpcInteractRef.current = "451";
+    f.scope.queuedMoveIntentRef.current = queued; f.scope.movementPlanRef.current = plan;
+    if (guarded) f.scope.npcCallGuardRef.current = { objectId: "450", until: 2000 };
+    f.activateEntity("450");
+    assert.equal(f.scope.pendingNpcInteractRef.current, null, "no old arrival hook can call a second NPC");
+    assert.equal(f.scope.queuedMoveIntentRef.current, queued, "unowned manual move keeps its identity");
+    assert.equal(f.scope.movementPlanRef.current, plan, "existing movement plan stays unchanged");
+    assert.deepEqual(f.sent, guarded ? [] : [{ type: "interact", objectId: 450 }]);
+    assert.deepEqual(f.moves, []);
   }
 });

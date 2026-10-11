@@ -385,6 +385,9 @@ export function completeNpcPurchaseSnapshot(v: unknown): v is Data {
 }
 
 type Gesture = { request: NpcPurchaseRequest; currency: "gold" | "pearls"; current(): boolean };
+export type NpcPurchaseFailure = "requestInvalid" | "bindingUnavailable" | "quotePending" | "gestureChanged" | "oldAttemptBlocked"
+  | "statusRejected" | "purchasePending" | "bindingChanged" | "sessionUnavailable" | "connectionChanged"
+  | "controlLimit" | "dispatchRejected" | "dispatchChanged" | "purchaseException" | "sendUnknown";
 type Control = { action: Data; epoch: number; session: string; gesture?: Gesture };
 export type NpcPurchaseClientOptions = {
   host: NpcPurchaseReceiptRuntime; socket: object;
@@ -405,6 +408,10 @@ export class NpcPurchaseClient {
   private readonly controls = new Map<string, Control>();
   private readonly sent = new Set<string>();
   private quoting = false;
+  private purchaseFailure: NpcPurchaseFailure | null = null;
+  /** Passive diagnostic: no host, socket, source or status reads. */
+  lastPurchaseFailure(): NpcPurchaseFailure | null { return this.purchaseFailure; }
+  private rejectPurchase(reason: NpcPurchaseFailure): false { this.purchaseFailure ??= reason; return false; }
   constructor(private readonly options: NpcPurchaseClientOptions) {}
   open(): boolean {
     const o = this.options;
@@ -454,25 +461,30 @@ export class NpcPurchaseClient {
     this.withdraw();
   }
   private dispatch(op: string, input: Data, action: Data, gesture?: Gesture): boolean {
-    let attempted = false, sent = false;
+    let attempted = false, sent = false, sending = false;
+    const reject = (reason: NpcPurchaseFailure): false => gesture ? this.rejectPurchase(reason) : false;
     try {
       const session = this.options.session(), epoch = this.epoch;
-      if (!session || !this.current(session) || this.controls.size >= 64) return false;
+      if (!session) return reject("sessionUnavailable");
+      if (!this.current(session)) return reject("connectionChanged");
+      if (this.controls.size >= 64) return reject("controlLimit");
       attempted = op === "enter";
       const result = this.call({ op, ...input });
       if (!fields(result, ["ok", "request", "body"]) || typeof result.body !== "string"
         || !fields(result.request, ["type", "protocolVersion", "requestId", "action"])
         || result.request.type !== "npcPurchaseOwner" || result.request.protocolVersion !== 1
         || !nonzero(result.request.requestId) || !same(result.request.action, action)
-        || !same(parseNpcPurchaseJson(result.body), result.request) || this.sent.has(result.request.requestId)) return false;
-      if (!this.current(session, epoch) || gesture && (!gesture.current() || this.options.oldAttemptBlocked())) return false;
-      if (!this.current(session, epoch)) return false;
+        || !same(parseNpcPurchaseJson(result.body), result.request) || this.sent.has(result.request.requestId)) return reject("dispatchRejected");
+      if (!this.current(session, epoch)) return reject("dispatchChanged");
+      if (gesture && !gesture.current()) return reject("gestureChanged");
+      if (gesture && this.options.oldAttemptBlocked()) return reject("oldAttemptBlocked");
+      if (!this.current(session, epoch)) return reject("dispatchChanged");
       const requestId = result.request.requestId;
       this.sent.add(requestId); this.controls.set(requestId, { action: result.request.action as Data, epoch, session, gesture });
       // Enter has already changed Core custody. A send exception is Unknown,
       // never definitely-unsent and never a legacy fallback/retry.
-      this.options.send(result.body); sent = true; return true;
-    } catch { return false; }
+      sending = true; this.options.send(result.body); sent = true; return true;
+    } catch { return reject(sending ? "sendUnknown" : "purchaseException"); }
     finally {
       if (op === "enter" && !sent && bindingValid(input.binding) && operationValid(input.operation)) {
         this.preserveFailedEntry(input.binding, input.operation, attempted);
@@ -486,16 +498,23 @@ export class NpcPurchaseClient {
     try { return this.dispatch("begin", {}, { kind: "begin" }); } catch { return false; }
   }
   purchase(request: NpcPurchaseRequest, currency: "gold" | "pearls", current: () => boolean): boolean {
-    if (!requestValid(request) || !this.binding || this.quoting || !current() || this.options.oldAttemptBlocked()) return false;
+    this.purchaseFailure = null;
+    if (!requestValid(request)) return this.rejectPurchase("requestInvalid");
+    if (!this.binding) return this.rejectPurchase("bindingUnavailable");
+    if (this.quoting) return this.rejectPurchase("quotePending");
+    if (!current()) return this.rejectPurchase("gestureChanged");
+    if (this.options.oldAttemptBlocked()) return this.rejectPurchase("oldAttemptBlocked");
     const binding = this.binding, gesture: Gesture = { request: Object.freeze({ ...request }), currency, current };
     try {
       const status = this.call({ op: "status" });
-      if (!statusValid(status) || status.pending !== null || !same(status.binding, binding)) return false;
+      if (!statusValid(status)) return this.rejectPurchase("statusRejected");
+      if (status.pending !== null) return this.rejectPurchase("purchasePending");
+      if (!same(status.binding, binding)) return this.rejectPurchase("bindingChanged");
       this.quoting = true;
       const sent = this.dispatch("quote", { binding, request: gesture.request }, { kind: "quote", request: gesture.request }, gesture);
       if (!sent) this.quoting = false;
       return sent;
-    } catch { this.quoting = false; return false; }
+    } catch { this.quoting = false; return this.rejectPurchase("purchaseException"); }
   }
   receive(raw: string): void {
     if (!this.active || !this.options.current()) return;

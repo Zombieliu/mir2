@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "status": "actual-passed",
+  "originalCaller": {
+    "utf8Bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 67476,
+    "kind": "Source67 generation02 actual original Node four-script regression",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 13419,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/node-tests02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "tests": {
+    "tests": 256,
+    "pass": 256,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "scripts": [
+    {
+      "path": "scripts/test-npc-shop-surface-integration.mjs",
+      "executedInActualBatch": true
+    },
+    {
+      "path": "scripts/test-bevy-npc-shop-buy.mjs",
+      "executedInActualBatch": true
+    },
+    {
+      "path": "scripts/test-bevy-storage-ui.mjs",
+      "executedInActualBatch": true
+    },
+    {
+      "path": "scripts/test-bevy-bag-shell.mjs",
+      "executedInActualBatch": true
+    }
+  ],
+  "inputs": {
+    "sources": 36369,
+    "internal": 36368,
+    "ancestors": 7446,
+    "rootFreshTargetDifferences": 0,
+    "rootFreshCopyDifferences": 0,
+    "membershipDifferences": 0,
+    "controls": 19,
+    "controlDifferences": 0,
+    "onlyGeneration02Difference": "Bag fixture dependencies; original16 test bodies and assertions unchanged."
+  },
+  "pins": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/node-tests02-config.json",
+      "bytes": 5227,
+      "sha256": "0c9311b2ff15eee260471bab35125ceb19e070d613b9dc63905e4fa16aa8d439"
+    },
+    "review": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/source-review02.json",
+      "bytes": 8172,
+      "sha256": "145b5b68c902c316b5049641e46de6d9407304287ff220d17da0a5a833b50373"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source67-storage-ownership-20261011-01\\preparation02\\source67-isolated-source-snapshot02.json",
+      "bytes": 22419208,
+      "sha256": "4bcf28318c6dc5ed7ed2c42c8fde648df31f49f25f66d3da817c15554fb8545c"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/node-tests02/outer.json",
+      "bytes": 526,
+      "sha256": "5fa53a75935b7f53a23c573ce967ff0effbc744c38ed6fe624c4452cd42113fb"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/node-tests02/stdout.log",
+      "bytes": 65992,
+      "sha256": "a00a032b878d0864e66f2254043cdbc4995e08449dff3320bbe667a51435d8ef"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/node-tests02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "previousFailure": "web-source67-node-failed01.json",
+  "strictNextPassed": false,
+  "storageNormalUiPassed": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "perScriptCountsClaimed": false,
+  "actualCountsScope": "The original four-script batch:256 passed,0 failed,0 skipped; no per-script allocation is inferred."
+}

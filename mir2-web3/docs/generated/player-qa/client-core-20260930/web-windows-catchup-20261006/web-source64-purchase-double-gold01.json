@@ -1,0 +1,49 @@
+{
+  "source": "Source64",
+  "test": "normal Scott Candle purchase single confirm",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "capabilityFrames": [
+    [
+      "durableNpcPurchaseOwnerV1"
+    ],
+    [
+      "durableNpcPurchaseOwnerV1",
+      "nativeGameShopReceiptV1"
+    ]
+  ],
+  "sameConnection": true,
+  "truncated": false,
+  "begin": {
+    "producer": true,
+    "snapshotPresent": true,
+    "authorityPresent": true
+  },
+  "purchase": {
+    "quoteTotal": 10,
+    "quantity": 1,
+    "goldBefore": 200,
+    "charged": 10,
+    "admittedCount": 1,
+    "currency": "gold",
+    "source": "trade",
+    "replayed": false,
+    "purchaseSnapshotGold": 190,
+    "followingLoseGold": 10,
+    "followingGainedItem": true,
+    "uiGoldAfter": 180
+  },
+  "renderPath": "React compatibility; host.active=false; source=inventoryNotReady",
+  "conclusion": "Authoritative purchase committed once; owner full snapshot followed by identical ordinary delta duplicates Web balance projection. Save/relogin and correction still pending.",
+  "screenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source64-purchase-double-gold01.png",
+    "bytes": 290035,
+    "sha256": "f6b53dd0d08379f44a6d8ca30812eb922ed9d0f8d1ad28a71982c1731d49806f"
+  },
+  "rawAuthOrAuthorityStored": false,
+  "productionAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

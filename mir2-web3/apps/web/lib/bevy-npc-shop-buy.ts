@@ -231,6 +231,12 @@ type Lease = {
  token: string; authorityRevision: string; ticket: NpcGoldBuyTransportTicket; consumed: boolean;
 };
 
+type PreviewFailure = 'busy'|'inactive'|'slotUnavailable'|'attachRejected'|'socketUnavailable'
+ |'captureUnavailable'|'authorityObserveRejected'|'availabilityRejected'|'sourceChanged'
+ |'inputBlocked'|'liveBlocked'|'requestMismatch'|'contextMismatch'|'plannerUnavailable'
+ |'quoteUnavailable'|'postQuoteChanged'|'statusUnavailable'|'connectionChanged';
+type PreviewDiagnostic = (failure: PreviewFailure) => void;
+
 /** Gesture proofs bind a shared Core flight to the actual current socket. */
 export class NpcGoldBuyDispatcher {
  private readonly proofs = new WeakMap<NpcGoldBuyProof | NpcPearlBuyProof, Lease>();
@@ -238,7 +244,11 @@ export class NpcGoldBuyDispatcher {
  private active = true;
  private producer: object = Object.freeze({});
  private slot: NpcGoldBuyAttemptSlotRuntime | null = null;
+ private previewFailure: PreviewFailure | null = null;
  constructor(private readonly options: NpcGoldBuyDispatcherOptions) {}
+
+ /** Last completed preview's fixed failure category; no host/Core reads. */
+ lastPreviewFailure(): string | null { return this.previewFailure; }
 
  /** A StrictMode effect restart uses a fresh host identity, never a fresh Core. */
  activate(): void { if (!this.active) { this.producer = Object.freeze({}); this.active = true; } this.observe(); }
@@ -282,39 +292,59 @@ export class NpcGoldBuyDispatcher {
   this.busy = true;
   try { this.live(1); } catch { this.withdraw(); } finally { this.busy = false; }
  }
- private currentSlot(): NpcGoldBuyAttemptSlotRuntime | null {
-  if (!this.active) return null;
+ private currentSlot(diagnose?: PreviewDiagnostic): NpcGoldBuyAttemptSlotRuntime | null {
+  let failure: PreviewFailure = 'slotUnavailable';
+  try {
+  if (!this.active) { diagnose?.('inactive'); return null; }
   const candidate = this.options.getAttemptSlot();
   if (candidate !== this.slot) {
    if (this.slot) { this.slot.withdrawProducer(this.producer); this.producer = Object.freeze({}); }
    this.slot = candidate;
   }
-  return candidate?.attachProducer(this.producer) ? candidate : null;
+  failure = 'attachRejected';
+  const attached = candidate?.attachProducer(this.producer);
+  if (!attached) diagnose?.(candidate ? 'attachRejected' : 'slotUnavailable');
+  return attached ? candidate : null;
+  } catch (error) { diagnose?.(failure); throw error; }
  }
- private live(quantity: number): LiveCapture | null {
-  const slot = this.currentSlot(), producer = this.producer;
+ private live(quantity: number, diagnose?: PreviewDiagnostic): LiveCapture | null {
+  const slot = this.currentSlot(diagnose), producer = this.producer;
   if (!slot) return null;
   // Only the actual current OPEN socket establishes the trusted connection,
   // before authority/availability can admit a reservation on that connection.
-  const binding = this.socketBinding(slot);
+  const binding = this.socketBinding(slot, diagnose);
   if (!binding) return null;
   let input: Capture | null = null;
   try { input = capture(this.options.read(), quantity); } catch { /* Withdraw pre-entry work. */ }
-  if (!this.bindingCurrent(slot, producer, binding)) return null;
-  if (!input) { this.withdraw(); return null; }
-  const observed = slot.transact(producer, { op: 'observe', authority: input.authorityJson });
-  if (!this.captureCurrent(slot, producer, binding, input)) return null;
-  if (!observed.ok || !observed.matched) { this.withdraw(); return null; }
-  const available = slot.transact(producer, { op: 'availability', available: !input.blocked });
-  return available.ok && available.matched && this.captureCurrent(slot, producer, binding, input)
-   ? { ...input, ...binding } : null;
+  let connectionCurrent: boolean;
+  try { connectionCurrent = this.bindingCurrent(slot, producer, binding); }
+  catch (error) { diagnose?.('connectionChanged'); throw error; }
+  if (!connectionCurrent) { diagnose?.('connectionChanged'); return null; }
+  if (!input) { diagnose?.('captureUnavailable'); this.withdraw(); return null; }
+  let observed: ReturnType<NpcGoldBuyAttemptSlotRuntime['transact']>;
+  try { observed = slot.transact(producer, { op: 'observe', authority: input.authorityJson }); }
+  catch (error) { diagnose?.('authorityObserveRejected'); throw error; }
+  if (!this.captureCurrent(slot, producer, binding, input, diagnose)) return null;
+  if (!observed.ok || !observed.matched) { diagnose?.('authorityObserveRejected'); this.withdraw(); return null; }
+  let available: ReturnType<NpcGoldBuyAttemptSlotRuntime['transact']>;
+  try { available = slot.transact(producer, { op: 'availability', available: !input.blocked }); }
+  catch (error) { diagnose?.('availabilityRejected'); throw error; }
+  if (!available.ok || !available.matched) { diagnose?.('availabilityRejected'); return null; }
+  return this.captureCurrent(slot, producer, binding, input, diagnose) ? { ...input, ...binding } : null;
  }
- private socketBinding(slot: NpcGoldBuyAttemptSlotRuntime): SocketBinding | null {
+ private socketBinding(slot: NpcGoldBuyAttemptSlotRuntime, diagnose?: PreviewDiagnostic): SocketBinding | null {
+  let failure: PreviewFailure = 'socketUnavailable';
+  try {
   const producer = this.producer, source = this.options.readSocket();
-  if (!source || !source.isOpen || !this.active || this.slot !== slot || this.producer !== producer) return null;
+  if (!source || !source.isOpen) { diagnose?.('socketUnavailable'); return null; }
+  if (!this.active || this.slot !== slot || this.producer !== producer) { diagnose?.('connectionChanged'); return null; }
   const transport = slot.transportFor(producer, source.socket, source.socket, source.isOpen);
   const binding = transport ? { socket: source.socket, transport } : null;
-  return binding && this.bindingCurrent(slot, producer, binding) ? binding : null;
+  if (!binding) { diagnose?.('socketUnavailable'); return null; }
+  failure = 'connectionChanged';
+  if (!this.bindingCurrent(slot, producer, binding)) { diagnose?.('connectionChanged'); return null; }
+  return binding;
+  } catch (error) { diagnose?.(failure); throw error; }
  }
  /** No connection observation or Core call: old proofs cannot advance a socket. */
  private bindingCurrent(slot: NpcGoldBuyAttemptSlotRuntime, producer: object, binding: Readonly<{ socket: object }>): boolean {
@@ -322,11 +352,18 @@ export class NpcGoldBuyDispatcher {
   return !!current && current.isOpen && current.socket === binding.socket
    && this.active && this.slot === slot && this.producer === producer;
  }
- private captureCurrent(slot: NpcGoldBuyAttemptSlotRuntime, producer: object, binding: SocketBinding, input: Capture): boolean {
+ private captureCurrent(slot: NpcGoldBuyAttemptSlotRuntime, producer: object, binding: SocketBinding, input: Capture,
+  diagnose?: PreviewDiagnostic): boolean {
+  let failure: PreviewFailure = 'sourceChanged';
+  try {
   const current = capture(this.options.read(), input.quantity);
-  return current !== null && current.requestJson === input.requestJson
-   && current.contextJson === input.contextJson && current.blocked === input.blocked
-   && this.bindingCurrent(slot, producer, binding);
+  if (current === null || current.requestJson !== input.requestJson
+   || current.contextJson !== input.contextJson || current.blocked !== input.blocked) { diagnose?.('sourceChanged'); return false; }
+  failure = 'connectionChanged';
+  const connected = this.bindingCurrent(slot, producer, binding);
+  if (!connected) diagnose?.('connectionChanged');
+  return connected;
+  } catch (error) { diagnose?.(failure); throw error; }
  }
  private sameLive(value: LiveCapture | null, input: Capture, binding: SocketBinding): boolean {
   return sameCapture(value, input) && value !== null
@@ -343,19 +380,37 @@ export class NpcGoldBuyDispatcher {
    return this.previewFor("pearls",current,quantity) as NpcPearlBuyQuote | null;
   }
   private previewFor(currency: "gold" | "pearls", current: NpcBuyCurrent | null, quantity: number): NpcGoldBuyQuote | null {
-  if (this.busy || !this.active) return null;
+  if (this.busy || !this.active) { this.previewFailure = this.busy ? 'busy' : 'inactive'; return null; }
   this.busy = true;
+  let failure: PreviewFailure | null = null, stage: PreviewFailure = 'captureUnavailable';
+  const diagnose: PreviewDiagnostic = reason => { failure ??= reason; };
   try {
-   const input = capture(current, quantity), live = this.live(quantity), slot = this.slot;
+   const input = capture(current, quantity);
+   stage = 'sourceChanged';
+   const live = this.live(quantity, diagnose), slot = this.slot;
+   stage = 'plannerUnavailable';
    const planner = input ? this.planner(input) : undefined;
-   if (!slot || !input || input.currency !== currency || !sameCapture(live, input) || typeof planner !== 'function') return null;
+   if (!slot) { diagnose('slotUnavailable'); return null; }
+   if (!input || input.currency !== currency) { diagnose('captureUnavailable'); return null; }
+   if (!live || live.currency !== input.currency) { diagnose('sourceChanged'); return null; }
+   if (live.blocked) { diagnose('liveBlocked'); return null; }
+   if (input.blocked) { diagnose('inputBlocked'); return null; }
+   if (live.requestJson !== input.requestJson) { diagnose('requestMismatch'); return null; }
+   if (live.contextJson !== input.contextJson) { diagnose('contextMismatch'); return null; }
+   if (typeof planner !== 'function') { diagnose('plannerUnavailable'); return null; }
+   stage = 'quoteUnavailable';
    const quote = invoke(this.options.runtime, planner, input);
-   if (!quote || !live || !this.sameLive(this.live(quantity), input, live) || this.slot !== slot) return null;
+   if (!quote) { diagnose('quoteUnavailable'); return null; }
+   stage = 'postQuoteChanged';
+   if (!this.sameLive(this.live(quantity, diagnose), input, live) || this.slot !== slot) { diagnose('postQuoteChanged'); return null; }
+   stage = 'statusUnavailable';
    const producer = this.producer, status = slot.transact(producer, { op: 'status' });
-   if (!status.ok || !this.bindingCurrent(slot, producer, live)) return null;
+   if (!status.ok) { diagnose('statusUnavailable'); return null; }
+   stage = 'connectionChanged';
+   if (!this.bindingCurrent(slot, producer, live)) { diagnose('connectionChanged'); return null; }
    return status.state.canReserve ? quote : Object.freeze({ ...quote, canBuy: false, command: null, blockReason: 'localPending' });
-  } catch { this.withdraw(); return null; }
-  finally { this.busy = false; }
+  } catch { diagnose(stage); this.withdraw(); return null; }
+  finally { this.previewFailure = failure; this.busy = false; }
  }
 
  prepare(current: NpcGoldBuyCurrent | null, quantity: number): PreparedNpcGoldBuy | null {

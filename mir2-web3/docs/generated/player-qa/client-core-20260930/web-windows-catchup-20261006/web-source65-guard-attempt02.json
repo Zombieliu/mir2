@@ -1,0 +1,14 @@
+{
+  "source": "Source65",
+  "task": "Gateway npc_purchase tests attempt02",
+  "owner": "Root",
+  "callerExitCode": 1,
+  "outerReceiptAvailable": false,
+  "cargoForwarded": false,
+  "testsExecuted": false,
+  "reason": "Same non-string policy metadata refused before Cargo; original caller then failed saving logs because retry output directory was absent. Both data-only setup issues retained; no product tests ran.",
+  "controlTypesCorrect": true,
+  "policyAndGuardUnchanged": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

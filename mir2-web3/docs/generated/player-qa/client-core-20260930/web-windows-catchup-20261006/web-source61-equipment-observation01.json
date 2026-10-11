@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-11T05:37:34.885Z",
+  "origin": "http://127.0.0.1:19205/",
+  "runtimeRound": "Source60",
+  "normalUiOnly": true,
+  "qaAdminUsed": false,
+  "internalGameApiUsed": false,
+  "observations": [
+    "Shared Bag GoldenPendant selected; normal Equip removed it from bag",
+    "Normal C opened character panel; AX Necklace contained GoldenPendant button",
+    "Normal click on equipped GoldenPendant removed it from Necklace; ordinary Bag shows GoldenPendant again"
+  ],
+  "equipVerified": true,
+  "unequipVerified": true,
+  "saveRelogEquipmentNotYetVerified": true,
+  "characterSurface": "React compatibility",
+  "returnedBagSurface": "React compatibility",
+  "newPageErrors": 0,
+  "shopPurchaseVerified": false,
+  "goalComplete": false
+}

@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Source61–67：正常购买与仓库存取两次保存重登均通过（2026-10-11）
+
+当前本地入口 http://127.0.0.1:19205/。Source61 的普通 GoldenPendant 装备/卸下在兼容角色面板通过；Source62 修复权威物品 tooltip wire 投影，3 项实际回归通过；Source63–64 修复 NPC 商店能力来源及完整购买回执，Source65 将完整 owner snapshot 排在本次普通经济包之后，避免金币显示重复扣减。Source65 18 项实际网关回归通过，原调用者构建并启动的新网关已用于正常 UI 购买：Scott 单次购买1个 Candle，金币190→180，实际只扣10；保存退出并重登读回180金币、背包5件（3个Candle及GoldenPendant/CopperRing）、2级与HP24/24。此商店与角色证据为 React 兼容界面，不称共享面板接管。
+
+Source66 取消点击可见 NPC 前必须接近相邻格的客户端限制；实际在 Warehouse 2,10 单次点击6格外的 Anthony 打开对话，Access 收到正常 UserStorage/NPCStorage 并打开仓库。仓库首次操作失败：Store按钮中心实际命中透明 DIV.storage-grid，未点目的格且未完成存取；共享接管风险仅由代码识别，未将它冒充实测已发生的分支。Source67 修复透明网格/页签容器的命中及嵌套仓库相对位置，并让兼容仓库普通操作同步撤回共享 proof、保持已有所有权；切页不再额外发起共享 openBag，新服务重开继续走原准入。锁、UID、pending reservation 与最终发送门槛保持。
+
+Source67 第一轮原 Node 的256项中242通过、14失败（Bag测试夹具缺少dispatch/listener refs）；保留该失败证据，仅补充夹具，原16条Bag测试正文和断言保持。第二轮原Node实际256项全部通过，无跳过；严格Next使用cfg03实际退出0（42337ms，TypeScript12.5s，13页，stderr0，cfg02未执行）。完整原Thin实际退出0（19374ms）：4066普通文件/513目录（含根）/0链接/284883638B≤377487360B，59项依赖警告逐条完整保留。Root已启动该Source67本地包并通过正常仓库闭环：Store Item→Candle→仓库空格后背包5→4、仓库0→1；Alt+x保存退出、正常Login与Start Game后仍为背包4/仓库1；Take Back→Bag 1→重新选择仓库Candle→背包空格，普通TakeBackItemV2回执success=true，背包恢复5/仓库0；再次Alt+x保存退出及重登，实际界面读回背包5/40（3个Candle）、仓库0/80、金币180。存入和取回均已验证持久化，旧deposit/runtime证据中的pending是当时状态，由后续闭环证据补齐。切换Bag 1会清除自动选择，取回前需重新选择物品，此操作细节保持为已知项。
+
+Source66 原 Node208项、严格 Next03（43592ms，TypeScript12.9s，13页，stderr0）与原 Thin04 均实际通过；Thin04的完整 ordinary standalone依赖修复后包为4066文件/513目录（含根）/0链接/284885459B≤377487360B，59项依赖警告完整保留。旧C跨盘NFT、缺79页atlas、Sharp LICENSE/metadata缺失的失败和所有旧产物保留，不合并为通过；Next04未执行。用户主tsconfig4932B原字节、外来simulation/Cargo/原石工坊/生产/文档正文保持。
+
+当前普通商店、仓库和角色测试为兼容界面通过，sharedStorageOwner及共享商店/角色面板全面接管仍开放。Warehouse底图黑区/棋盘fallback、仓库Candle耐久仍显示8000/8000、其他面板变体、移动真机、多端完整1:1及人类前端Accepted尚未完成；overallPercentage=null，Candidate100=false，goal active。下一步优先修复实际地图/tooltip视觉差距，并继续共享面板与移动复用。此处更新仅新增本轮前缀，外来文档正文保持；本轮提交推送以publication实际记录为准。
+
+证据：[购买金币](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source65-purchase-gold-stable01.json)、[购买重登](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source65-purchase-relogin01.json)、[NPC开仓](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-npc-visible-range01.json)、[历史仓库阻断](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-storage-mode-blocked01.json)、[Source67回归256](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-node-actual02.json)、[严格Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-next-actual02.json)、[完整Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-thin-actual01.json)、[实际运行](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-runtime-start-actual01.json)、[仓库完整闭环](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-storage-roundtrip-relogin01.json)、[最终重登截图](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-storage-withdraw-relogin01.png)。
+
+
+
 ## Source60：Web 实际持续战斗、背包拖动与保存重登通过（2026-10-11）
 
 当前本地试玩入口为 http://127.0.0.1:19205/，运行 Source60 独立包。普通账号登录/StartGame 后，仅一次正常点击稻草人，HP 20→17→0、倒下及 SunPotion 掉落成立；正常拾取收到 You gained an item，角色从1级升到2级。共享画布聚焦的 I/Q 与背包 X 均正常。共享 Bevy Ready 背包内 Candle 从第4格移到第二行第1格（0-based 3→8）；(HP)DrugSmall x2 从背包移到快捷栏第2格，正常键2使用后剩1。用药时满血，只证明消耗，不称验证治疗。
