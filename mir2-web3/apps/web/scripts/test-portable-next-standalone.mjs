@@ -851,3 +851,61 @@ test("warehouse local skin copy retains fatal differing-source collision checks"
   assert.equal(await fs.readFile(path.join(source, skin), "utf8"), "exact source warehouse password art");
   assert.equal(await fs.readFile(path.join(destination, skin), "utf8"), "different previously copied art");
 });
+
+async function bagStorageSkinReference74() {
+  const sourcePath = path.resolve(import.meta.dirname,
+    "../../game-client/client-bevy/src/crystal_ui/bag_paint.rs");
+  const stat = await fs.lstat(sourcePath);
+  assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "canonical Bag painter is ordinary");
+  const source = await fs.readFile(sourcePath, "utf8");
+  const declaration = source.match(/pub const PORTABLE_BAG_REQUIRED_SKINS:\s*&\[&str\]\s*=\s*&\[([\s\S]*?)\];/);
+  assert.ok(declaration, "canonical Bag static skin declaration exists");
+  const bag = [...declaration[1].matchAll(/"(original-ui\/[^"\r\n]+\.png)"/g)].map(match => match[1]);
+  assert.equal(bag.length, 17, "bounded canonical Bag static art closure");
+  assert.equal(new Set(bag).size, bag.length, "canonical Bag skin paths are unique");
+  const storage = await warehouseSkinReference73();
+  const skins = [...new Set([...bag, ...storage])];
+  assert.equal(skins.length, 30, "canonical Bag and Storage static art union");
+  return skins;
+}
+
+test("canonical Bag and Storage static skin union is local without expanding adjacent remote media", async () => {
+  const skins = await bagStorageSkinReference74();
+  for (const skin of skins) assert.equal(selectPublic(skin, false), true, skin);
+  for (const remote of ["original-ui/Title/195.png", "original-ui/Title/199.png",
+    "original-ui/Title/736.png", "original-ui/Title/740.png", "original-ui/Prguse/23.png",
+    "original-ui/Prguse2/365.png", "original-ui/Prguse2/369.png", "original-ui/Items/2.png"])
+    assert.equal(selectPublic(remote, false), false, remote);
+  // UI_32bit was already local; its existing neighboring-frame behavior must remain intact.
+  assert.equal(selectPublic("original-ui/UI_32bit/472.png", false), true);
+});
+
+test("actual public copy retains all thirty genuine Bag and Storage PNG bytes", async () => {
+  const skins = await bagStorageSkinReference74();
+  const publicRoot = path.resolve(import.meta.dirname, "../public");
+  const base = path.join(fixtureRoot, "bag-storage-genuine-skins-copy");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  const bodies = new Map();
+  for (const skin of skins) {
+    const original = path.join(publicRoot, ...skin.split("/"));
+    const stat = await fs.lstat(original);
+    assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "genuine source skin is ordinary: " + skin);
+    const bytes = await fs.readFile(original);
+    assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      "genuine source PNG signature: " + skin);
+    bodies.set(skin, bytes);
+    await write(path.join(source, skin), bytes);
+  }
+  const remote = "original-ui/Title/195.png";
+  await write(path.join(source, remote), "unselected adjacent frame");
+  const copy = await copySelectedPublic({ sourceRoot: source, destinationRoot: destination, selection: selectPublic });
+  assert.equal(copy.files, 30);
+  for (const [skin, bytes] of bodies) {
+    assert.deepEqual(await fs.readFile(path.join(destination, skin)), bytes, "packaged original bytes: " + skin);
+    assert.deepEqual(await fs.readFile(path.join(source, skin)), bytes, "fixture source retained: " + skin);
+    assert.deepEqual(await fs.readFile(path.join(publicRoot, ...skin.split("/"))), bytes,
+      "genuine source retained: " + skin);
+  }
+  assert.equal(await exists(path.join(destination, remote)), false);
+  assert.equal((await auditPortableTree(destination)).links, 0);
+});
