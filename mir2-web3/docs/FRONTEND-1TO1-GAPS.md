@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> Integrated live health/billing with Source movement and Windows escape, 2026-10-11:
+> the public01a8 and owned9c histories are both retained. Actual local checks:
+> 317 distinct server names and941 Native names pass; one PostgreSQL external
+> and seven Native external checks remain ignored. Original failures and the
+> read-only correction of the Native name collector912→941 are retained.
+> [Scope, original evidence and limits](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> New two-parent Git publication, matching Linux/Windows builds, safe paired
+> publication, dense native combat and human acceptance remain pending here.
+> Old1e/9c artifacts are separate; existing workflow gates and live commerce
+> are preserved. Root is the sole writer. FullP1–P7/Mentor is open; expired
+> heartbeat remains paused. Older progress below is historical.
+
 > Continued Windows round, 2026-10-11: an enqueued attack paces only the next
 > hit; escape reads the actual admitted animation. Correction keeps400ms and
 > real pending ACKs, with blocked-path hints tied to current collision. Native
@@ -28,6 +40,161 @@
 > Full seven-monster/native-human and P1-P7/Mentor gates remain open.
 > [Scope, original evidence and remaining work](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
 
+
+> 2026-10-10 monthly-mail sandbox switch completed after the user's normal
+> logout and all six admission counters reached zero. Native8aafbb60db and
+> Gateway92912f25c1 are running; first_main_update, healthy connection and
+> unchanged saved accounts/private settings are verified. Existing parcels
+> were not claimed or activated by the agent. Native human acceptance remains
+> open; public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Actual switch and startup receipt](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/MAIL-LOCAL-SWITCH-RECEIPT.json).
+
+> 2026-10-10 monthly parcel presentation Candidate: concrete Stage5
+> itemStatesJson now survives the subsequent native snapshot; reserved monthly
+> item metadata supplies its1813 icon, localized name and activation-on-use
+> hint after claim. Unknown date displays a placeholder without inventing time.
+> Exact shop purchase/gift bodies support nine locales; free text is preserved.
+> Native mail94/Windows projection8 checks and the final Windows build pass.
+> Source concurrency CI38050349344 at1429e70e90 passes actual isolated PG Gift,
+> billing and shared-owner checks. Native human acceptance and public rollout
+> remain open; the active user session is preserved until normal exit.
+> Public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Fix, failure history and proofs](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
+> 2026-10-10 Gift concurrency follow-up: Source Gift15 and Gateway shop35
+> checks pass. A known pre-persistence split-read error may recover only a
+> matching complete durable payer receipt; an orphan recipient unit cannot
+> create another outcome, debit or parcel. One known CAS retry keeps the first
+> resolved recipient identity. Unknown/frozen outcomes remain closed. Actual
+> PostgreSQL CI and the newly observed native monthly-mail icon fix are still
+> pending; public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Evidence and retained failures](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
+> 2026-10-10 local commercial follow-up: GameShop now defaults to Credits;
+> explicit Gold selection is retained and currency/balance failures are visible.
+> GIFT adds a complete recipient name and a separate confirmation, sharing the
+> single purchase transaction slot. Client59 checks and Windows build pass.
+> The return page has nine locales, RTL and narrow-screen layout;54 browser
+> state/layout checks pass. Source28, Gateway shop35/billing39/generic-gift1
+> checks include genuine dual authenticated shared-Zone sockets, mail delivery,
+> exact-UID use and normal new-socket password relogin. Native manual acceptance,
+> real PostgreSQL gift CI and public commercial rollout are still open.
+> This is a project extension; public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+> [Scope, retained failures and proofs](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
+> 2026-10-10 authorized local client switch completes after human normal exit.
+> A sharing violation from the unrelated running DeltaForce application prevents
+> overwriting the old exe; it is retained and backed up. The verified new binary
+> launches under a separate filename with the same config/profile and a copied
+> launcher. The existing test shortcut points to it. Actual startup reaches
+> first_main_update and the preserved Gateway remains healthy. No public
+> service/feed changes or native GameShop human acceptance are claimed.
+> [Actual switch and retained error](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/SWITCH-RECEIPT.json).
+
+> 2026-10-10 monthly-card discoverability Candidate: exact custom item/product
+> 1000001 is first on the ordinary GameShop All first page. Original catalog
+> order and filters remain intact; server1000-Credit pricing, parcel delivery
+> and exact-UID activation are unchanged. Client14 and Source fixture9 tests
+> plus compatible Windows build pass. A local binary is prepared, while the
+> user's running client and public R22/Gatewaya41/feed17 remain unchanged.
+> Native human visual/purchase and commercial rollout gates stay open; this
+> does not close an original Crystal parity gap.
+> [Evidence and manual route](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/README.md).
+
+> 2026-10-08 current public delivery: R22/game7fea, invited Gatewaya41 and
+> signed feed17 are actually live on origin and R2/CDN. Prior normal exit0,
+> strict six-counter/TCP drain, private backup, both normal service stops and
+> Candidate cold restart passed. Original production identity, environment,
+> capacity51/66/51 and resource limits were preserved.
+> Authenticated promote37772462840 advances the pointer and verifies aliases;
+> full40-object/1052247716-byte checks belong to earlier stage37739769708.
+> Promotion did not reverify all object bytes or CMS. Independent HTTPS aliases
+> match the prepared signed17 bytes. Ordinary public WSS passes44 checks across
+> six class/gender variants, eight normal logouts and two actual movement/
+> saved-position/relogin stories. Their observer relation checks total44.
+> R22 native PID187896 was launched for manual login; only startup through
+> first_main_update was observed. No actual native login is claimed.
+> Human shop-wheel/visual acceptance and natural crowded combat remain open.
+> The separate b235 health correction is outside frozen R22 and undeployed.
+> FullP1–P7 and the original missed12-hour deadline remain unfinished.
+> Real-payment recharge is not integrated; monthly cards use operator codes.
+> [Actual rollout and verification limits](generated/player-qa/classic-20261008/delivery-checkpoint-05/README.md).
+
+> Historical 2026-10-08 health follow-up: the personal Session mirror now ignores
+> ObjectHealth for monster life/Harvest authority. Source float percentage and
+> expiry byte-cast order are centralized and checked against independent C#
+> vectors. Focused lifecycle, math, party and genuine transport checks pass.
+> Five adjacent failures reproduce by name/count at unmodified parent937ac636;
+> original assertions/logs and the zero-test selections remain retained.
+> Full recipients, owner HP/MP packets, shared Hero identity, retained healing
+> and Web percentage0-to-HP0 are open. This code is outside frozen R22.
+> At10:23 UTC R20 was observed alive with one Gatewayc6 connection; strict
+> drain, paired rollout, feed promotion and human wheel acceptance are pending.
+> Public R20/feed16/Gatewayc6 and the original missed12-hour deadline remain.
+> P1–P7 is unfinished; real-payment recharge is not integrated.
+> [Bound source and tests](HEALTH-ZERO-AUTHORITY-20261008.md),
+> [original evidence05](generated/player-qa/classic-20261008/health-authority-05/ARCHIVE.json).
+
+> 2026-10-08 stage-only checkpoint: R22/feed17 immutable origin and R2 objects
+> are prepared; CI37739769708 at publisher e7850e9 verifies all40 objects and
+> 1052247716 public bytes. The exact stage receipt is authenticated. Worker
+> code/settings readback passes; public aliases stay R20/feed16 and Gatewayc6.
+> No paired rollout or native acceptance is claimed. The failed Linux tooling
+> run is retained; only portable offline test paths were repaired.
+> Separately, percentage0 no longer manufactures death in Zone/Gateway/native
+> caches. A raw current-map typed live snapshot now retires old alive packet
+> precedence; cached packet replay cannot acknowledge that incarnation. Native
+> authority17, bridge102, display7 and map-ingress5 checks pass. Actual death,
+> revive, drops and PK guards remain; the reproduced sleep-baseline failure,
+> unacknowledged-life ordering and missing-Death corpse animation remain open.
+> This health slice is outside frozen R22/7fea. The user-client R19 was selected
+> incorrectly; verified R20 awaits normal-exit confirmation and wheel acceptance.
+> The original12-hour deadline remains missed; fullP1–P7 is unfinished.
+> [Stage evidence](generated/player-qa/classic-20261008/delivery-checkpoint-03/ARCHIVE.json),
+> [health scope](HEALTH-ZERO-AUTHORITY-20261008.md),
+> [remaining work](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-08 local R22 package is complete and passes the original validation,
+> detached CMS, all154579 payload hashes and additive exact-frozen-source check.
+> The external package verifier's own sourceRepoCheck remains unavailable;
+> the separate original-function source check is recorded explicitly.
+> Fresh delivery-02 build passes after delivery-01 rejected an ADS on D:\;
+> no installation/stream/security gate was changed. Decoded delivery and its
+> separate external CMS check pass; feed17 is signed locally. CDN and paired
+> public rollout remain pending. Public Gatewayc6/feed16
+> and the active R19 user session stay intact; verified R20 is ready for normal
+> exit and the client-only wheel switch. New personal-runtime GIVEPET birth/
+> CHECKHUM parser corrections pass9 focused,24 DefaultNPC and1 ordinary quest
+> checks; adjacent54/2 is reproduced exactly on the original baseline. This
+> additional Source slice is outside frozen R22 and does not implement shared
+> ordered NPC world effects. The12-hour deadline remains missed; fullP1–P7
+> and actual native acceptance are open.
+> [Current evidence](generated/player-qa/classic-20261008/delivery-checkpoint-02/ARCHIVE.json),
+> [remaining work](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-08 03:32 UTC: Windows37712122111/7fea and complete artifact pickup
+> pass. R22 external packaging failed at a stale atlas path; a fresh retry
+> preserves the original validators. No packaged/CMS/public R22 is claimed.
+> User's unscrollable merchant was mistakenly launched D/R19; verified
+> published R20 includes wheel handling and is ready pending normal logout.
+> All154564 assets match the original signed manifest. Actual native wheel,
+> crowd escape/refining and natural progression acceptance remain open;
+> the12-hour checkpoint missed full completion. No human acceptance or
+> overall100% is inferred. [Actual status](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-08 02:56 UTC delivery checkpoint: gameplay/evidence source7fea5cdb
+> is committed and pushed. Native Windows CI37712122111 is GREEN, but local
+> retrieval of its263037676-byte authenticated ZIP is incomplete: no R22
+> EXE/package/CMS or signed17 is claimed. Linux37712122808 hit its45-minute
+> budget after rank17 and terminal3 passed; retry37716453313 retains every
+> gate at a41dfe72 (only the workflow45-to-105-minute budget differs).
+> Current scope audit passes208 runtime/209 resource maps. Two real missing
+> refine PNGs are exported with sourceLib/full-pack/crop/output hash evidence.
+> Public remainsR20/feed16 and Gatewayc6. The requested mining launch usedD/R19;
+> empty login env removal now opens normal publicWSS. father50874 confirms gold.
+> Shop wheel was introduced inR20, absent fromR19: this root launch-version
+> error is retained. VerifiedR20 client-only staging is pending normal exit.
+> [Exact completed work and unfinished gates](CLASSIC-12H-DELIVERY-20261007.md).
 
 > 2026-10-08 classic Candidate integration is active under the user's12-hour
 > scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,

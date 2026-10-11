@@ -1,4 +1,6 @@
 mod big_map;
+mod billing;
+mod billing_monthly_card;
 mod buffs;
 mod combat;
 mod components;
@@ -94,6 +96,7 @@ pub use shared_relationships::{
 mod skills;
 mod social_economy;
 mod stage5;
+mod game_shop_gift;
 mod stats;
 pub mod zone;
 pub use zone::ZoneMentorBankAttribution;
@@ -130,6 +133,7 @@ pub use zone::{
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
+    ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
     ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
     ZoneOwnedPetPlayerKillReceipt, ZoneExperienceProfile, ZoneExperiencePartner,
     ZoneExperienceSelection, ZoneGuildExperienceMembership, ZoneExperienceRateSource,

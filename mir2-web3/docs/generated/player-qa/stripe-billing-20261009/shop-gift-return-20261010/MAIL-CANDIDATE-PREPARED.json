@@ -1,0 +1,28 @@
+{
+  "kind": "prepared-local-monthly-mail-candidate",
+  "native": {
+    "sourceCommit": "8aafbb60dbe6955c943e0a00f10614005bc89a24",
+    "path": "C:\\mir2-build\\stripe-sandbox-20261010\\native\\mir2-platform-windows-shop-mail.next.exe",
+    "sha256": "60bdf6347bed7fa1ef2826c8429b7884f07ead78fad369335afd256163fcdf14",
+    "size": 127696896
+  },
+  "gateway": {
+    "sourceCommit": "92912f25c142ba3533fd7d59a73269d5d0b0db09",
+    "path": "F:\\mir2-build\\stripe-sandbox-20261010\\mir2-gateway-shop-mail.next.exe",
+    "sha256": "f402e44ac637ca36d8db057660b1e0ec941be564a8768c9c323efd2d83f716b1",
+    "size": 115455488
+  },
+  "backendVerification": {
+    "sourceCommit": "1429e70e9032689327c345e884c5ca4d528d0396",
+    "ciRun": 38050349344,
+    "conclusion": "success"
+  },
+  "nativeRegression": {
+    "bevyMailPassed": 94,
+    "windowsMailPassed": 8
+  },
+  "clientConfigSha256": "c18d73c4960dbdb423d9c3824bb2700efbf14f2a4832328d4b6a20dbec7e7d18",
+  "started": false,
+  "waitingForNormalExit": true,
+  "publicPublished": false
+}

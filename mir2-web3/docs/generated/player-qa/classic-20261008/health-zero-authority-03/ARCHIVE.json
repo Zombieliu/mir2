@@ -1,0 +1,209 @@
+{
+  "schema": "mir2.evidence.byte-archive.v1",
+  "files": [
+    {
+      "file": "health-zero-authority-01-simulation-red.log",
+      "bytes": 46397,
+      "sha256": "108cfcbdf7225fe2b56602188fa28724e1f59095e798d12fc96232e5bde37934"
+    },
+    {
+      "file": "health-zero-authority-02-01-native-snapshot-red.log",
+      "bytes": 50374,
+      "sha256": "e88fce77f0cc4057198537cac95b045b3a3a016811fe021c0246afee237dce2d"
+    },
+    {
+      "file": "health-zero-authority-02-02-native-snapshot-green.log",
+      "bytes": 46995,
+      "sha256": "bb884dc1507ce8b431f7355bd08b27b746f028d7e14d9f52f3e9fbd173cc4541"
+    },
+    {
+      "file": "health-zero-authority-02-03-native-bridge-adjacent.log",
+      "bytes": 55611,
+      "sha256": "d28680db2d1fd427a3325cb04060027913caee37d97599a04e28bccfcd081944"
+    },
+    {
+      "file": "health-zero-authority-02-04-native-display-adjacent.log",
+      "bytes": 45984,
+      "sha256": "a25549c444e57fae6fcf78c4ba7739e312b7404096a068e73f327b2e517abf5f"
+    },
+    {
+      "file": "health-zero-authority-02-native-red.log",
+      "bytes": 63588,
+      "sha256": "365654486619f4ed5ed61336d30f28b3a27b4a804314a0803e454eed4276c1c5"
+    },
+    {
+      "file": "health-zero-authority-03-01-native-lifecycle-regression.log",
+      "bytes": 60724,
+      "sha256": "81ef9214e994d868f3bb7e5d654946a74c55d75f5bd7409f478903dc51d14c7e"
+    },
+    {
+      "file": "health-zero-authority-03-gateway-red.log",
+      "bytes": 39023,
+      "sha256": "94109d28c3a615ec144fff5c638c27755628469605469831af153c4e6a29b2dd"
+    },
+    {
+      "file": "health-zero-authority-04-gateway-red.log",
+      "bytes": 33036,
+      "sha256": "92c78ffd783d258d0f026338e5886e85d1a0a7be5c3332d303d53daab47c45f1"
+    },
+    {
+      "file": "health-zero-authority-05-gateway-red.log",
+      "bytes": 36674,
+      "sha256": "923d1c037eecb60159cf1321f9287cd080a0e6a65af0d6450adae263d5faff6e"
+    },
+    {
+      "file": "health-zero-authority-06-network-red.log",
+      "bytes": 33133,
+      "sha256": "3196b2dd28a7bc95c395dba86287c38973a9b3a6b90e546cfe82c3c7316eeae8"
+    },
+    {
+      "file": "health-zero-authority-07-network-red.log",
+      "bytes": 33623,
+      "sha256": "b4b923b00a08f5afba310ba81cdc38996c0437f7e5edc381fdd0cc8bbd7a2615"
+    },
+    {
+      "file": "health-zero-authority-08-simulation-green.log",
+      "bytes": 39229,
+      "sha256": "307a81516fdd66187a89aacdc254f8385876c3b8409341bebf0164c960568d1f"
+    },
+    {
+      "file": "health-zero-authority-09-native-green.log",
+      "bytes": 46605,
+      "sha256": "1716cab455cac1a07e078c959232993d4677dfe856fec22b79d6ccfd55f75712"
+    },
+    {
+      "file": "health-zero-authority-10-gateway-green.log",
+      "bytes": 33591,
+      "sha256": "b38fac1dcdd0daba2eb5eefa586141af43a4c78ddf8485ce948834deaff7fb05"
+    },
+    {
+      "file": "health-zero-authority-11-native-bridge-adjacent.log",
+      "bytes": 56201,
+      "sha256": "a96831427c309966902bb5b8326f834d6c677f462592a14a9b3358a0b40bebd3"
+    },
+    {
+      "file": "health-zero-authority-12-backpressure-diagnosis.log",
+      "bytes": 32686,
+      "sha256": "4a36f208f0219aed8ee938653ac6adba4904afda588b0b2d6fca5fd7514c4ee0"
+    },
+    {
+      "file": "health-zero-authority-13-gateway-final.log",
+      "bytes": 32960,
+      "sha256": "f5f9236ab4ad1c833b5667678c21e8c011ab61dc0f1fb46d25a1d1f4d5375848"
+    },
+    {
+      "file": "health-zero-authority-14-native-bridge-adjacent.log",
+      "bytes": 55952,
+      "sha256": "17c53958981c7b2adbf646cb35eb2e40625e2855a303113c6898e0df5f210d59"
+    },
+    {
+      "file": "health-zero-authority-15-zone-final.log",
+      "bytes": 39069,
+      "sha256": "d33a2de9ecb0e280b7c8b9176b291ecc36e03e2ac69d37e0c3fa2b18c485dd98"
+    },
+    {
+      "file": "health-zero-authority-16-native-focused-final.log",
+      "bytes": 46423,
+      "sha256": "e25ac5646bb6df699832acc56db1a3d0bbdcb088948855c0ed7ac3f47256a397"
+    },
+    {
+      "file": "health-zero-authority-17-native-display-adjacent.log",
+      "bytes": 46270,
+      "sha256": "e6aaec38fa68ff6b60aac0bb0da0a2b63533c774f296db36167e7e93995cfafa"
+    },
+    {
+      "file": "health-zero-authority-18-retained-zone-adjacent.log",
+      "bytes": 32703,
+      "sha256": "c5d1116ff620f82ea4b66101d5eca732091ae53b32ae5159636f078ab98ea64a"
+    },
+    {
+      "file": "health-zero-authority-19-zone-zero-health-public.log",
+      "bytes": 30915,
+      "sha256": "0668efd76124561c79478030a1864b21bd7b30adcba13334d440129d90d47299"
+    },
+    {
+      "file": "health-zero-authority-20-sleep-ai-adjacent.log",
+      "bytes": 35287,
+      "sha256": "b1320642fc593ef1649961e1ddb736edd93d5b62b2691358abbcdea6a21b45f7"
+    },
+    {
+      "file": "health-zero-authority-21-native-display-final.log",
+      "bytes": 46165,
+      "sha256": "ad5cf71235f35d22d2865dfcca9c0487c9ae2d625cf7e128a2239ce7fd434b6d"
+    },
+    {
+      "file": "health-zero-authority-22-sleep-baseline-724e.log",
+      "bytes": 34952,
+      "sha256": "85856ffbd5f9d29e4f640edef87f48559474248bdd3a94e5244c2254ad27ebed"
+    },
+    {
+      "file": "health-zero-authority-23-gateway-cache-drop-adjacent.log",
+      "bytes": 35902,
+      "sha256": "f39be3f43a5fd597f6d78116d9d498926df8a95bca408aec86a6a8406b264cb1"
+    },
+    {
+      "file": "health-zero-authority-24-gateway-owner-death-adjacent.log",
+      "bytes": 32412,
+      "sha256": "0eba0de5922558d7cf82ef508f5abeec52ed52ec79ba5db7ef62b970ff471129"
+    },
+    {
+      "file": "health-zero-authority-25-gateway-owner-death-final.log",
+      "bytes": 31831,
+      "sha256": "1e24b489fc5dcbbb0910bd5d0eea4bfa2f8e92c1dcd5950a241448bce032e1ff"
+    },
+    {
+      "file": "health-zero-authority-26-gateway-real-pk-source.log",
+      "bytes": 32194,
+      "sha256": "30740879e94c58187808657da992eb9b213c5ac9a9161f83dd32a1d72ff14de0"
+    },
+    {
+      "file": "health-zero-authority-27-gateway-real-hp0-death.log",
+      "bytes": 33078,
+      "sha256": "4ec328f104de15e761dd71f57843bffbfa06fead4b88e4da63d6143b487b54e7"
+    },
+    {
+      "file": "health-zero-authority-28-gateway-live-id-adjacent.log",
+      "bytes": 32244,
+      "sha256": "ceff4a2820fa587c2171b824b4ff60e72ca598698f418574b49340bedad634cb"
+    },
+    {
+      "file": "health-zero-authority-29-zone-cold-restore-final.log",
+      "bytes": 39070,
+      "sha256": "f4e1919ec50142f07884e0180f844054c7b7c802cb58375d80f19f10862b25e7"
+    },
+    {
+      "file": "health-zero-authority-final-source-hashes.json",
+      "bytes": 3192,
+      "sha256": "141ee65a1682908192001c935bbfb2611f066bbb8d14fea39f0c8332aa20b63f"
+    },
+    {
+      "file": "health-zero-authority-final-validation-02.json",
+      "bytes": 7684,
+      "sha256": "85797af0d1fd76920c09f0be7a51d910eb75095bdb574eb02e011652d3c80119"
+    },
+    {
+      "file": "health-zero-authority-final-validation.json",
+      "bytes": 5866,
+      "sha256": "e8216be32d61b48b23ca7155c3f0c7d9f74af73e568d4bbc465c5b94120d272b"
+    },
+    {
+      "file": "health-zero-authority-root-hash-diagnostic-01.json",
+      "bytes": 5107,
+      "sha256": "6c50d602717ed1f7a8f4fe720839f625eb4afc2233cccdabb510137bed734fb5"
+    },
+    {
+      "file": "health-zero-authority-30-formula-diagnostic.txt",
+      "bytes": 199,
+      "sha256": "2b426f14fb3d38dda94f3ece51a79e6248b55af8ebc6231afc522740cdc90307"
+    },
+    {
+      "file": "ROOT-REVIEW.json",
+      "bytes": 10200,
+      "sha256": "04179c99e09edd31167d4b8f5f7f8a440490a80b016ee6155b191335d3f86b47"
+    }
+  ],
+  "sourceBytesPreserved": true,
+  "applicationLaunched": false,
+  "serviceChanged": false,
+  "publicAliasesChanged": false
+}

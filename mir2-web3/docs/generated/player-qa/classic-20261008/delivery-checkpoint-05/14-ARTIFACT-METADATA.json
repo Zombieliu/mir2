@@ -1,0 +1,20 @@
+{
+  "id": 11548034036,
+  "node_id": "MDg6QXJ0aWZhY3QxMTU0ODAzNDAzNg==",
+  "name": "native-r17-promote-37772462840",
+  "size_in_bytes": 6839,
+  "url": "https://api.github.com/repos/Zombieliu/mir2/actions/artifacts/11548034036",
+  "archive_download_url": "https://api.github.com/repos/Zombieliu/mir2/actions/artifacts/11548034036/zip",
+  "expired": false,
+  "digest": "sha256:9baa2c67aa176f5e6e2d9b1d9b3ede0142e4e3bfc16751c9d94337a419f6d73c",
+  "created_at": "2026-10-08T11:50:51Z",
+  "updated_at": "2026-10-08T11:50:51Z",
+  "expires_at": "2026-10-15T11:50:50Z",
+  "workflow_run": {
+    "id": 37772462840,
+    "repository_id": 1218375787,
+    "head_repository_id": 1218375787,
+    "head_branch": "codex/classic-r22-publication-20261008",
+    "head_sha": "e7850e9aef9ea038907bee621f331f3286c1ac9b"
+  }
+}

@@ -408,6 +408,7 @@ const OVERLAY_ACTIONS: &[&str] = &[
     "GameShopQuantityDec",
     "GameShopQuantityInc",
     "GameShopBuy",
+    "GameShopGift",
     "ShopQuantityDec",
     "ShopQuantityInc",
     "SelectBagForSell",

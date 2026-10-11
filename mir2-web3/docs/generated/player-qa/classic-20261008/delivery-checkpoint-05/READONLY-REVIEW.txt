@@ -1,0 +1,17 @@
+Root transcript of read-only review /root/health_zero_review_01.
+Received after actual R22 publication. This is not a reviewer-authored disk artifact.
+Reviewer did not operate the client/network or read private account ledgers.
+
+只读复核通过，未发现影响实际 R22 发布结论的新阻断。
+
+- Gateway apply 确认 a41/PID3071035 已激活；旧、新停止均 ExecMainStatus=0，冷重启无 panic，env哈希相同，资源限制及原 production PID3855184保持。
+- Origin promotion 确认精确 feed17、旧16备份和全部服务PID保持。认证 promotion ZIP 的6839字节、SHA9baa2c…及 receipt SHA76460c…均独立吻合。
+- stage 完整核对40对象/1052247716字节；promotion推进pointer并核对两个CDN aliases，verifiedObjectCount=0/publicVerifiedBytes=0/cmsReverified=false。CMS依据保留的 Windows签名验证；Python delivery验证和CI没有重新验证CMS。独立postflight也明确这一点。
+- Public smoke 确有44行、六种class/gender、8次确认正常logout，注册/新角色均0。源码保留完整sprite比较、AOI离开及移动位置保存断言；不构成自然战斗、承载或native视觉验收。
+- PID181324的exit0记录仍在；当前startup日志前15097字节精确匹配旧receipt的f81b…哈希。PID187896当前路径与EXE SHA8ebb…吻合，窗口存在且响应，诊断达到first_main_update；这些仅证明技术启动。自动登录=false，人工wheel/native视觉验收仍开放。
+
+b235健康修复未计入冻结7fea的R22。
+
+Evidence locations are bound by ROOT-FINAL-05.json and this archive inventory.
+The reviewer additionally bound RESULT.json to SHA256
+d34e69caac06be0a5e7f501aac3c6cef5ee58112a89359d79dbe355b0a7769d9.

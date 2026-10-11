@@ -1,4 +1,6 @@
 mod config;
+pub mod billing;
+pub mod crystal_health;
 pub mod monthly_card;
 pub mod conquest;
 pub mod db_projection;
@@ -68,13 +70,14 @@ pub use runtime::{
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
     ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
     ZoneOwnedPetPlayerKillReceipt, ZoneExperienceProfile, ZoneExperiencePartner,
     ZoneExperienceSelection, ZoneGuildExperienceMembership, ZoneExperienceRateSource,
     ZoneExperienceRateBuff, ZoneExperienceRateStat, ZoneSavedPetSnapshot, ZonePetExperienceAdmission,
 };
 pub use world_runtime::{
-    validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest,
+    validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest, NativeGameShopGiftRequest,
     WorldCommand, WorldCommandExecution, WorldCommandKind, WorldCommandOutcome, WorldRuntime,
     ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
 };

@@ -1185,9 +1185,6 @@ pub(crate) fn apply_retained_zone_object_packet(object: &mut ZoneObject, packet:
         }
         ServerPacket::ObjectHealth { info } if info.object_id == object.object_id => {
             object.health = Some(info.clone());
-            if info.percent == 0 {
-                update_retained_dead(&mut object.packet, true);
-            }
         }
         ServerPacket::ObjectMana { info } if info.object_id == object.object_id => {
             object.mana = Some(info.clone());

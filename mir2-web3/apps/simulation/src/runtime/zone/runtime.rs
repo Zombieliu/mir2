@@ -56,6 +56,8 @@ mod experience_profiles;
 mod purification_tests;
 #[cfg(test)]
 mod stat_roll_tests;
+#[cfg(test)]
+mod owner_health_tests;
 mod ground_ownership;
 use super::online_identity::{OnlineIdentityBook, OnlineOwner, OnlinePresence, OnlinePresenceSnapshot};
 use super::types::ZoneGroundDropCustody;
@@ -1272,17 +1274,21 @@ impl ZoneRuntime {
         }
         player.flaming_sword_armed = true;
         player.flaming_sword_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS);
-        player.mp -= cost;
+        player.change_owner_mp(-cost);
+        let object_id = player.object_id;
+        let mana_percent = zone_mana_percent(player.mp);
         out.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
-            packets: vec![
-                ServerPacket::SpellToggle {
-                    object_id: player.object_id, spell: Spell::FlamingSword, can_use: true,
-                },
-                ServerPacket::ObjectMana { info: ObjectManaInfo {
-                    object_id: player.object_id, percent: zone_mana_percent(player.mp),
-                }},
-            ],
+            packets: vec![ServerPacket::SpellToggle {
+                object_id, spell: Spell::FlamingSword, can_use: true,
+            }],
+        });
+        out.extend(self.take_owner_health_through(session_id, u64::MAX));
+        out.push(ZoneOutbound::ToSession {
+            session_id: session_id.clone(),
+            packets: vec![ServerPacket::ObjectMana { info: ObjectManaInfo {
+                object_id, percent: mana_percent,
+            }}],
         });
         out
     }
@@ -1290,7 +1296,7 @@ impl ZoneRuntime {
     pub(super) fn player_vital_clock(
         &self,
         session_id: &SessionId,
-    ) -> Option<(String, i32, u32, u64, u64, bool)> {
+    ) -> Option<(String, i32, u32, u64, u64, bool, u64)> {
         self.players.get(session_id).map(|p| {
             (
                 p.account_id.clone(),
@@ -1299,6 +1305,7 @@ impl ZoneRuntime {
                 p.life_generation,
                 p.vital_receipt_sequence,
                 p.dead,
+                p.owner_health_sequence,
             )
         })
     }
@@ -1306,7 +1313,7 @@ impl ZoneRuntime {
     pub(super) fn restore_player_vital_clock(
         &mut self,
         session_id: &SessionId,
-        clock: (String, i32, u32, u64, u64, bool),
+        clock: (String, i32, u32, u64, u64, bool, u64),
     ) {
         if let Some(p) = self.players.get_mut(session_id) {
             if (p.account_id.as_str(), p.character_index, p.object_id)
@@ -1314,6 +1321,7 @@ impl ZoneRuntime {
             {
                 p.life_generation = clock.3.saturating_add(u64::from(clock.5 && !p.dead));
                 p.vital_receipt_sequence = clock.4;
+                p.owner_health_sequence = clock.6;
             }
         }
     }
@@ -1332,6 +1340,45 @@ impl ZoneRuntime {
         self.players
             .get(session_id)
             .map(|player| (player.hp, player.max_hp, player.mp))
+    }
+
+    pub fn owner_health_cursor(&self, session_id: &SessionId) -> Option<super::ZoneOwnerHealthCursor> {
+        let player = self.players.get(session_id)?;
+        let owner = &self.online_presence.get(session_id)
+            .filter(|presence| presence.owner.matches_player(player))?.owner;
+        Some(super::ZoneOwnerHealthCursor {
+            session_id: session_id.clone(), online_owner: owner.encoded(),
+            object_id: player.object_id, life_generation: player.life_generation,
+            dead: player.dead || player.hp == 0, health_sequence: player.owner_health_sequence,
+        })
+    }
+
+    fn drain_owner_health_changes(&mut self) -> Vec<ZoneOutbound> {
+        let sessions = self.players.keys().cloned().collect::<Vec<_>>();
+        sessions.into_iter().flat_map(|session| self.take_owner_health_through(&session, u64::MAX)).collect()
+    }
+
+    /// Drain operation receipts through the sequence captured at the mutation.
+    /// This keeps shield healing before Death and damage health after Death;
+    /// it never infers a health operation from the final pool or display packet.
+    fn take_owner_health_through(&mut self, session_id: &SessionId, through: u64) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else { return Vec::new(); };
+        let owner = self.online_presence.get(session_id)
+            .filter(|presence| presence.owner.matches_player(player)).map(|p| p.owner.encoded());
+        let (changes, retained): (Vec<_>, Vec<_>) = std::mem::take(&mut player.pending_owner_health_changes)
+            .into_iter().partition(|event| event.health_sequence <= through);
+        player.pending_owner_health_changes = retained;
+        changes.into_iter().filter_map(|event| {
+            Some(ZoneOutbound::OwnerHealthChanged { change: super::ZoneOwnerHealthChange {
+                cursor: super::ZoneOwnerHealthCursor {
+                    session_id: session_id.clone(), online_owner: owner.clone()?,
+                    object_id: player.object_id, life_generation: event.life_generation,
+                    dead: event.dead, health_sequence: event.health_sequence,
+                },
+                hp_before: event.hp_before, mp_before: event.mp_before,
+                hp: event.hp, mp: event.mp,
+            } })
+        }).collect()
     }
 
     /// Integration-fixture access to existing finite status admission. This is
@@ -1568,6 +1615,27 @@ impl ZoneRuntime {
         Vec::new()
     }
 
+    /// Trusted personal operations (drugs, level refresh, equipment break)
+    /// commit under the Gateway's same Zone writer lock. Ordinary mirrors use
+    /// SyncPlayerVitals and stay silent. Preserve Source's HP-then-MP states.
+    pub fn commit_owner_vitals(&mut self, session_id: &SessionId,
+        hp: i32, max_hp: i32, mp: i32, dead: bool) -> Vec<ZoneOutbound> {
+        let Some(before) = self.players.get(session_id).map(|p| (p.hp, p.mp)) else { return Vec::new(); };
+        let mut out = self.sync_player_vitals(session_id, hp, max_hp, mp, Some(dead));
+        if let Some(player) = self.players.get_mut(session_id) {
+            let after_mp = player.mp;
+            player.mp = before.1;
+            if player.hp != before.0 {
+                player.record_owner_health_change(before, false);
+            }
+            let before_mp_change = (player.hp, player.mp);
+            player.mp = after_mp;
+            player.record_owner_health_change(before_mp_change, false);
+        }
+        out.extend(self.drain_owner_health_changes());
+        out
+    }
+
     fn sync_player_combat_state(
         &mut self,
         session_id: &SessionId,
@@ -1664,6 +1732,7 @@ impl ZoneRuntime {
         out.extend(self.sync_native_poison_masks());
         expired.append(&mut out);
         out = expired;
+        out.extend(self.drain_owner_health_changes());
         out
     }
     fn handle_inner(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -2281,6 +2350,7 @@ impl ZoneRuntime {
         outbounds.extend(self.flush_vampire_deaths());
         outbounds.extend(self.expire_zone_objects(now_ms));
         outbounds.extend(self.sync_native_poison_masks());
+        outbounds.extend(self.drain_owner_health_changes());
         outbounds
     }
 
@@ -2573,7 +2643,7 @@ impl ZoneRuntime {
                 return Vec::new();
             }
             let hp_before = player.hp;
-            player.hp = player.hp.saturating_sub(damage).max(0);
+            player.set_owner_hp(player.hp.saturating_sub(damage).max(0));
             player.dead = player.hp == 0;
             if player.dead {
                 player.clear_status_poisons();
@@ -2605,6 +2675,7 @@ impl ZoneRuntime {
                 }],
             });
         }
+        outbounds.extend(self.take_owner_health_through(session_id, u64::MAX));
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -4235,8 +4306,13 @@ impl ZoneRuntime {
         });
         if accepted && mp_cost > 0 {
             if let Some(player) = self.players.get_mut(session_id) {
-                player.mp -= mp_cost;
+                player.change_owner_mp(-mp_cost);
             }
+        }
+        if accepted && mp_cost > 0 {
+            let mut health = self.take_owner_health_through(session_id, u64::MAX);
+            health.append(&mut outbounds);
+            outbounds = health;
         }
         if accepted && consume_flame {
             if let Some(player) = self.players.get_mut(session_id) {
@@ -4652,7 +4728,7 @@ impl ZoneRuntime {
                 resolved_damage.max(0).min(target.hp)
             };
             let hp_before = target.hp;
-            target.hp = target.hp.saturating_sub(applied_damage).max(0);
+            target.set_owner_hp(target.hp.saturating_sub(applied_damage).max(0));
             target.dead = target.hp == 0;
             if target.dead {
                 target.clear_status_poisons();
@@ -4740,6 +4816,7 @@ impl ZoneRuntime {
                 }],
             });
         }
+        outbounds.extend(self.take_owner_health_through(target_session_id, u64::MAX));
         outbounds.push(ZoneOutbound::ToAll { packets });
         if applied_damage > 0 {
             outbounds.push(ZoneOutbound::PlayerDamaged {
@@ -4771,6 +4848,7 @@ impl ZoneRuntime {
         let (
             target,
             shield_heal,
+            owner_health_heal_sequence,
             applied_damage,
             killed,
             health_percent,
@@ -4780,6 +4858,7 @@ impl ZoneRuntime {
             let target = self.players.get_mut(target_session_id)?;
             let hp_before_heal = target.hp;
             let shield_heal = zone_trigger_energy_shield(target, now_ms, attacker_object_id);
+            let owner_health_heal_sequence = target.owner_health_sequence;
             let heal_settlement =
                 (shield_heal > 0).then(|| target.vital_settlement(hp_before_heal));
             let applied_damage = if target.combat_stats.gm_never_die {
@@ -4788,7 +4867,7 @@ impl ZoneRuntime {
                 resolved_damage.max(0).min(target.hp)
             };
             let hp_before_damage = target.hp;
-            target.hp = target.hp.saturating_sub(applied_damage).max(0);
+            target.set_owner_hp(target.hp.saturating_sub(applied_damage).max(0));
             target.dead = target.hp == 0;
             if target.dead {
                 target.clear_status_poisons();
@@ -4799,6 +4878,7 @@ impl ZoneRuntime {
             (
                 target.clone(),
                 shield_heal,
+            owner_health_heal_sequence,
                 applied_damage,
                 target.dead,
                 native_player_health_percent(target.hp, target.max_hp),
@@ -4852,7 +4932,8 @@ impl ZoneRuntime {
                 },
             });
         }
-        let mut outbounds: Vec<_> = death_receipt.into_iter().collect();
+        let mut outbounds = self.take_owner_health_through(target_session_id, owner_health_heal_sequence);
+        outbounds.extend(death_receipt);
         if killed {
             outbounds.push(ZoneOutbound::ToSession {
                 session_id: target_session_id.clone(),
@@ -4862,6 +4943,7 @@ impl ZoneRuntime {
                 }],
             });
         }
+        outbounds.extend(self.take_owner_health_through(target_session_id, u64::MAX));
         if shield_heal > 0 {
             outbounds.push(ZoneOutbound::PlayerHealed {
                 session_id: target_session_id.clone(),
@@ -5375,7 +5457,7 @@ impl ZoneRuntime {
                 return self.correct_player_location(session_id, now_ms);
             }
             if let Some(live_player) = self.players.get_mut(session_id) {
-                live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
+                live_player.change_owner_mp(-mp_cost);
                 live_player.next_spell_ready_at_ms =
                     now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
                 live_player
@@ -5582,10 +5664,11 @@ impl ZoneRuntime {
             &monster.position,
         );
 
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -5646,7 +5729,7 @@ impl ZoneRuntime {
         live_caster.direction = direction;
         if cast {
             let spell_key = spell as u8;
-            live_caster.mp = live_caster.mp.saturating_sub(mp_cost.max(0)).max(0);
+            live_caster.change_owner_mp(-mp_cost.max(0));
             live_caster.next_spell_ready_at_ms =
                 now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_caster
@@ -5704,10 +5787,11 @@ impl ZoneRuntime {
         );
         recipients.sort();
         recipients.dedup();
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -5806,7 +5890,7 @@ impl ZoneRuntime {
         live_attacker.direction = direction;
         if cast {
             let spell_key = spell as u8;
-            live_attacker.mp = live_attacker.mp.saturating_sub(mp_cost.max(0)).max(0);
+            live_attacker.change_owner_mp(-mp_cost.max(0));
             live_attacker.next_spell_ready_at_ms =
                 now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_attacker
@@ -5853,10 +5937,11 @@ impl ZoneRuntime {
             });
         }
 
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if cast && Self::owned_human_spell_delay(spell, zone_tile_distance(&attacker.position, &target.position)).is_some() {
             let delay = Self::owned_human_spell_delay(spell, zone_tile_distance(&attacker.position, &target.position)).unwrap();
             self.queue_owned_human_player_spell(session_id, target_session_id, spell, level,
@@ -5943,7 +6028,7 @@ impl ZoneRuntime {
         if cast {
             let mp_cost = mp_cost.max(0);
             let spell_key = spell as u8;
-            live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
+            live_player.change_owner_mp(-mp_cost);
             live_player.next_spell_ready_at_ms =
                 now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
@@ -6001,10 +6086,11 @@ impl ZoneRuntime {
         self.apply_zone_object_packets(&action_packets, now_ms);
         let recipients =
             self.ground_spell_visible_recipients(session_id, std::slice::from_ref(&target));
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -6063,7 +6149,7 @@ impl ZoneRuntime {
         if let Some(live_player) = self.players.get_mut(session_id) {
             live_player.direction = direction;
             if cast {
-                live_player.mp = live_player.mp.saturating_sub(mp_cost.max(0)).max(0);
+                live_player.change_owner_mp(-mp_cost.max(0));
                 live_player.next_spell_ready_at_ms =
                     now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
                 live_player
@@ -6151,10 +6237,11 @@ impl ZoneRuntime {
             action_packets.extend(buff_packets);
         }
         self.apply_zone_object_packets(&action_packets, now_ms);
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         let recipients = self.player_status_recipients(player.object_id, &player.position);
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
@@ -6206,7 +6293,7 @@ impl ZoneRuntime {
         if cast {
             let mp_cost = mp_cost.max(0);
             let spell_key = spell as u8;
-            live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
+            live_player.change_owner_mp(-mp_cost);
             live_player.next_spell_ready_at_ms =
                 now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
@@ -6355,10 +6442,11 @@ impl ZoneRuntime {
         }
 
         let recipients = self.player_status_recipients(player.object_id, &player.position);
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -6432,7 +6520,7 @@ impl ZoneRuntime {
         if cast {
             let mp_cost = mp_cost.max(0);
             let spell_key = spell as u8;
-            live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
+            live_player.change_owner_mp(-mp_cost);
             live_player.next_spell_ready_at_ms =
                 now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
@@ -6477,10 +6565,11 @@ impl ZoneRuntime {
         self.apply_zone_object_packets(&action_packets, now_ms);
         let recipients =
             self.native_monster_action_recipients(session_id, player.object_id, object_id, &target);
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -6524,7 +6613,7 @@ impl ZoneRuntime {
         if cast {
             let mp_cost = mp_cost.max(0);
             let spell_key = spell as u8;
-            live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
+            live_player.change_owner_mp(-mp_cost);
             live_player.next_spell_ready_at_ms =
                 now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
@@ -6589,10 +6678,11 @@ impl ZoneRuntime {
         }
 
         let recipients = self.player_status_recipients(player.object_id, &player.position);
-        let mut outbounds = vec![ZoneOutbound::ToSession {
+        let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
+        outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: owner_packets,
-        }];
+        });
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -6955,7 +7045,10 @@ impl ZoneRuntime {
                 info: ObjectHealthInfo {
                     object_id,
                     percent: native_player_health_percent(monster.hp, monster.max_hp),
-                    expire: u8::try_from(duration_seconds.clamp(5, 255)).unwrap_or(u8::MAX),
+                    expire: crate::crystal_health::crystal_health_expire(
+                        monster.revelation_until_ms,
+                        now_ms,
+                    ),
                 },
             }];
         }
@@ -8038,8 +8131,8 @@ impl ZoneRuntime {
                 .expect("validated reincarnation target should exist");
             let hp_before = player.hp;
             player.life_generation = player.life_generation.saturating_add(1);
-            player.hp = (player.max_hp / 2).max(1);
             player.dead = false;
+            player.set_owner_hp((player.max_hp / 2).max(1));
             player.clear_status_poisons();
             player.reincarnation_offer = None;
             (
@@ -8078,7 +8171,8 @@ impl ZoneRuntime {
                 },
             },
         ];
-        let mut outbounds = vec![
+        let mut outbounds = self.take_owner_health_through(target_session_id, u64::MAX);
+        outbounds.extend([
             ZoneOutbound::ToSession {
                 session_id: target_session_id.clone(),
                 packets: vec![ServerPacket::Revived],
@@ -8088,7 +8182,7 @@ impl ZoneRuntime {
                 amount: revived_hp,
                 settlement: Some(settlement),
             },
-        ];
+        ]);
         if !recipients.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
                 session_ids: recipients,
@@ -9409,6 +9503,26 @@ impl ZoneRuntime {
             );
             let poison = zone_plague_poison_from_roll(roll, action.spell_param);
             let poison_value = zone_plague_poison_value(poison, action.damage, action.skill_level);
+            // Crystal Map.Plague applies status, then ChangeMP, then Attacked.
+            // In particular, lethal damage must not precede the mana drain or
+            // leave a new poison on the corpse after Die cleared its statuses.
+            if let Some(target) = self.players.get_mut(&target_session_id) {
+                if poison != 0 {
+                    zone_add_player_status_poison(target, poison, duration_ms, now_ms);
+                    packets.push(ServerPacket::ObjectPoisoned {
+                        object_id: target.object_id,
+                        poison: target.poison,
+                    });
+                }
+                target.change_owner_mp(-poison_value.max(0));
+                packets.push(ServerPacket::ObjectMana {
+                    info: ObjectManaInfo {
+                        object_id: target.object_id,
+                        percent: zone_mana_percent(target.mp),
+                    },
+                });
+            }
+            outbounds.extend(self.take_owner_health_through(&target_session_id, u64::MAX));
             let resolved_damage =
                 zone_player_native_incoming_damage(&target, direct_damage, true, now_ms);
             if let Some((damage_packets, damage_outbounds)) = self.apply_native_player_pvp_damage(
@@ -9420,22 +9534,6 @@ impl ZoneRuntime {
             ) {
                 packets.extend(damage_packets);
                 outbounds.extend(damage_outbounds);
-            }
-            if let Some(target) = self.players.get_mut(&target_session_id) {
-                if poison != 0 {
-                    zone_add_player_status_poison(target, poison, duration_ms, now_ms);
-                    packets.push(ServerPacket::ObjectPoisoned {
-                        object_id: target.object_id,
-                        poison: target.poison,
-                    });
-                }
-                target.mp = target.mp.saturating_sub(poison_value.max(0)).max(0);
-                packets.push(ServerPacket::ObjectMana {
-                    info: ObjectManaInfo {
-                        object_id: target.object_id,
-                        percent: zone_mana_percent(target.mp),
-                    },
-                });
             }
         }
 
@@ -10881,6 +10979,7 @@ impl ZoneRuntime {
             position,
             direction,
             shield_heal,
+            owner_health_heal_sequence,
             damage,
             health_percent,
             poison,
@@ -10908,6 +11007,7 @@ impl ZoneRuntime {
             } else {
                 zone_trigger_energy_shield(target, now_ms, hit.attacker_object_id)
             };
+            let owner_health_heal_sequence = target.owner_health_sequence;
             let heal_settlement =
                 (shield_heal > 0).then(|| target.vital_settlement(hp_before_heal));
             let damage = if unmitigated {
@@ -10920,7 +11020,7 @@ impl ZoneRuntime {
                 return Vec::new();
             }
             let hp_before_damage = target.hp;
-            target.hp = target.hp.saturating_sub(damage).max(0);
+            target.set_owner_hp(target.hp.saturating_sub(damage).max(0));
             target.dead = target.hp == 0;
             if damage > 0 {
                 target.last_damaged_at_ms = now_ms;
@@ -10950,6 +11050,7 @@ impl ZoneRuntime {
                 target.position.clone(),
                 target.direction,
                 shield_heal,
+            owner_health_heal_sequence,
                 damage,
                 native_player_health_percent(target.hp, target.max_hp),
                 poison,
@@ -10976,7 +11077,8 @@ impl ZoneRuntime {
         // that real HP mutation even when there is no damage event to emit.
         if damage == 0 {
             let recipients = self.player_status_recipients(target_object_id, &position);
-            return vec![
+            let mut outbounds = self.take_owner_health_through(&hit.target_session_id, u64::MAX);
+            outbounds.extend([
                 ZoneOutbound::ToMany {
                     session_ids: recipients,
                     packets: vec![ServerPacket::ObjectHealth {
@@ -10992,7 +11094,8 @@ impl ZoneRuntime {
                     amount: shield_heal,
                     settlement: heal_settlement,
                 },
-            ];
+            ]);
+            return outbounds;
         }
         let mut packets = Vec::new();
         if show_struck {
@@ -11036,7 +11139,8 @@ impl ZoneRuntime {
         if recipients.is_empty() {
             return death_receipt.into_iter().collect();
         }
-        let mut outbounds: Vec<_> = death_receipt.into_iter().collect();
+        let mut outbounds = self.take_owner_health_through(&hit.target_session_id, owner_health_heal_sequence);
+        outbounds.extend(death_receipt);
         packets.extend(shield_end_packets);
         if killed {
             outbounds.push(ZoneOutbound::ToSession {
@@ -11055,6 +11159,7 @@ impl ZoneRuntime {
                 },
             });
         }
+        outbounds.extend(self.take_owner_health_through(&hit.target_session_id, u64::MAX));
         outbounds.push(ZoneOutbound::ToMany {
             session_ids: recipients,
             packets,
@@ -11207,7 +11312,7 @@ impl ZoneRuntime {
                 return Vec::new();
             }
             let before = player.hp;
-            player.hp = player.hp.saturating_add(amount).min(player.max_hp);
+            player.set_owner_hp(player.hp.saturating_add(amount).min(player.max_hp));
             (
                 player.object_id,
                 player.position.clone(),
@@ -11233,7 +11338,8 @@ impl ZoneRuntime {
         if recipients.is_empty() {
             return Vec::new();
         }
-        vec![
+        let mut outbounds = self.take_owner_health_through(&session_id, u64::MAX);
+        outbounds.extend([
             ZoneOutbound::ToMany {
                 session_ids: recipients,
                 packets: vec![ServerPacket::ObjectHealth {
@@ -11249,7 +11355,8 @@ impl ZoneRuntime {
                 amount: applied,
                 settlement: Some(settlement),
             },
-        ]
+        ]);
+        outbounds
     }
 
     fn apply_native_vampire_spider_master_vampire(
@@ -13746,21 +13853,15 @@ impl ZoneRuntime {
 
     fn apply_zone_object_packets(&mut self, packets: &[ServerPacket], now_ms: u64) {
         for packet in packets {
-            // A DragonStatue sleeps at zero HP without dying. Generic retained
-            // health-zero handling would otherwise poison its AOI/corpse cache.
+            // Preserve the statue's source sleep presentation without letting
+            // a display percentage clear a genuine death/harvest incarnation.
             if let ServerPacket::ObjectHealth { info } = packet {
-                if self
-                    .native_monsters
-                    .get(&info.object_id)
-                    .is_some_and(|m| m.ai == 54 && !m.dead && !sleep_monster_accepts_hp_change(m))
+                if self.native_monsters.get(&info.object_id).is_some_and(|m| {
+                    m.ai == 54 && !m.dead && !sleep_monster_accepts_hp_change(m)
+                }) && !self.dead_object_ids.contains_key(&info.object_id)
                 {
-                    self.dead_object_ids.remove(&info.object_id);
-                    self.harvested_object_ids.remove(&info.object_id);
                     if let Some(object) = self.objects.get_mut(&info.object_id) {
                         object.health = Some(info.clone());
-                        if let ServerPacket::ObjectMonster { info } = &mut object.packet {
-                            info.dead = false;
-                        }
                     }
                     continue;
                 }
@@ -15950,7 +16051,7 @@ fn zone_trigger_energy_shield(
         return 0;
     }
     let before = player.hp;
-    player.hp = player.hp.saturating_add(gain).min(player.max_hp);
+    player.set_owner_hp(player.hp.saturating_add(gain).min(player.max_hp));
     player.hp.saturating_sub(before)
 }
 
@@ -16774,15 +16875,11 @@ fn native_summon_spawn_packet(
 }
 
 fn native_monster_health_percent(hp: i32, max_hp: i32) -> u8 {
-    if max_hp <= 0 || hp <= 0 {
-        return 0;
-    }
-    ((hp.saturating_mul(100) + max_hp - 1) / max_hp).clamp(1, 100) as u8
+    crate::crystal_health::crystal_health_percent(hp, max_hp)
 }
 
 fn native_player_health_percent(hp: i32, max_hp: i32) -> u8 {
-    let max_hp = max_hp.max(1);
-    ((hp.max(0) * 100) / max_hp).clamp(0, 100) as u8
+    crate::crystal_health::crystal_health_percent(hp, max_hp)
 }
 
 fn ground_drop_spawn_packet(drop: &GroundDropSnapshot) -> ServerPacket {
@@ -16935,13 +17032,6 @@ fn retained_zone_object_dead_state(packet: &ServerPacket) -> Option<(u32, ZoneOb
                 direction: Some(info.direction),
             },
         )),
-        ServerPacket::ObjectHealth { info } if info.percent == 0 => Some((
-            info.object_id,
-            ZoneObjectDeadState {
-                position: None,
-                direction: None,
-            },
-        )),
         ServerPacket::ObjectMonster { info } if info.dead => Some((
             info.object_id,
             ZoneObjectDeadState {
@@ -16978,6 +17068,15 @@ fn apply_retained_dead_state(object: &mut ZoneObject, dead_state: &ZoneObjectDea
             },
         );
     } else {
+        // A retained real-death marker may lack its transform in an older
+        // checkpoint. Its life authority comes from the marker, not Percent.
+        match &mut object.packet {
+            ServerPacket::ObjectMonster { info } => info.dead = true,
+            ServerPacket::ObjectPlayer { info } | ServerPacket::ObjectHero { info, .. } => {
+                info.dead = true;
+            }
+            _ => {}
+        }
         apply_retained_zone_object_packet(
             object,
             &ServerPacket::ObjectHealth {
@@ -18414,3 +18513,9 @@ mod player_action_cadence_tests;
 #[cfg(test)]
 #[path = "runtime/source_can_move_tests.rs"]
 mod source_can_move_tests;
+
+#[cfg(test)]
+mod health_zero_authority_tests;
+
+#[cfg(test)]
+mod health_display_source_tests;

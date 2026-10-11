@@ -602,6 +602,24 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 }
             }
         }
+        UiAction::GameShopGift {
+            g_index,
+            quantity,
+            recipient_name,
+        } => {
+            if in_game(state) && state.is_shop_open() {
+                if let Some(request) = next.begin_game_shop_gift(g_index, quantity, recipient_name)
+                {
+                    effects.push(UiEffect::GatewayCommand(GatewayCommand::GameShopGift {
+                        request_id: request.request_id,
+                        g_index: request.g_index,
+                        quantity: request.quantity,
+                        price_type: 0,
+                        recipient_name: request.recipient_name.unwrap(),
+                    }));
+                }
+            }
+        }
         UiAction::StoreItem { from, to } => {
             if in_game(state) {
                 if let Some(request) =
@@ -1196,6 +1214,102 @@ mod tests {
             second.state.game_shop_pending,
             first.state.game_shop_pending
         );
+    }
+
+    #[test]
+    fn game_shop_gift_uses_distinct_command_and_the_same_single_pending_slot() {
+        let mut state = game();
+        state.panel = UiPanel::GameShop;
+        let gift = reduce(
+            &state,
+            UiAction::GameShopGift {
+                g_index: 31,
+                quantity: 1,
+                recipient_name: " Friend_1 ".into(),
+            },
+        );
+        assert_eq!(
+            gift.effects,
+            vec![UiEffect::GatewayCommand(GatewayCommand::GameShopGift {
+                request_id: "gs-0000000000000001".into(),
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+                recipient_name: "Friend_1".into(),
+            })]
+        );
+        assert!(reduce(
+            &gift.state,
+            UiAction::GameShopBuy {
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+            }
+        )
+        .effects
+        .is_empty());
+        assert!(reduce(
+            &gift.state,
+            UiAction::GameShopGift {
+                g_index: 31,
+                quantity: 1,
+                recipient_name: "Friend_2".into(),
+            }
+        )
+        .effects
+        .is_empty());
+        let buy = reduce(
+            &state,
+            UiAction::GameShopBuy {
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+            },
+        );
+        assert!(reduce(
+            &buy.state,
+            UiAction::GameShopGift {
+                g_index: 31,
+                quantity: 1,
+                recipient_name: "Friend_1".into(),
+            }
+        )
+        .effects
+        .is_empty());
+        for name in ["ab", "Friend Name", "CharacterName1234"] {
+            let invalid = reduce(
+                &state,
+                UiAction::GameShopGift {
+                    g_index: 31,
+                    quantity: 1,
+                    recipient_name: name.into(),
+                },
+            );
+            assert!(invalid.effects.is_empty());
+            assert!(invalid.state.game_shop_pending.is_none());
+        }
+        state.panel = UiPanel::NpcShop;
+        assert!(reduce(
+            &state,
+            UiAction::GameShopGift {
+                g_index: 31,
+                quantity: 1,
+                recipient_name: "Friend_1".into(),
+            }
+        )
+        .effects
+        .is_empty());
+        let state = UiState::default();
+        assert!(reduce(
+            &state,
+            UiAction::GameShopGift {
+                g_index: 31,
+                quantity: 1,
+                recipient_name: "Friend_1".into(),
+            }
+        )
+        .effects
+        .is_empty());
     }
 
     #[test]

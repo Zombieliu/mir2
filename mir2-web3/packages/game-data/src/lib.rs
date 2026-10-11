@@ -2863,6 +2863,9 @@ pub fn crystal_drop_table_for_monster_name(monster_name: &str) -> Option<Crystal
 }
 
 pub fn crystal_item_by_name(name: &str) -> Option<CrystalItemTemplate> {
+    if name.eq_ignore_ascii_case(BILLING_MONTHLY_CARD_ITEM_NAME) {
+        return Some(billing_monthly_card_item_template());
+    }
     crystal_item_manifest_ref()
         .items
         .iter()
@@ -2871,11 +2874,59 @@ pub fn crystal_item_by_name(name: &str) -> Option<CrystalItemTemplate> {
 }
 
 pub fn crystal_item_by_index(item_index: i32) -> Option<CrystalItemTemplate> {
+    if item_index == BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return Some(billing_monthly_card_item_template());
+    }
     crystal_item_manifest_ref()
         .items
         .iter()
         .find(|item| item.item_index == item_index)
         .cloned()
+}
+
+/// Application-owned catalogue row. The imported Crystal manifests stay exact.
+pub const BILLING_MONTHLY_CARD_ITEM_INDEX: i32 = 1_000_001;
+pub const BILLING_MONTHLY_CARD_GAME_SHOP_INDEX: i32 = 1_000_001;
+pub const BILLING_MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
+
+pub fn billing_monthly_card_item_template() -> CrystalItemTemplate {
+    CrystalItemTemplate {
+        item_index: BILLING_MONTHLY_CARD_ITEM_INDEX,
+        name: BILLING_MONTHLY_CARD_ITEM_NAME.into(),
+        item_type: 17,
+        grade: 0,
+        required_type: 0,
+        required_class: 31,
+        required_gender: 3,
+        item_set: 0,
+        shape: 1000,
+        weight: 1,
+        light: 0,
+        required_amount: 0,
+        image: 1813,
+        durability: 0,
+        stack_size: 1,
+        price: 0,
+        start_item: false,
+        effect: 0,
+        need_identify: false,
+        show_group_pickup: false,
+        class_based: false,
+        level_based: false,
+        can_mine: false,
+        global_drop_notify: false,
+        // DontDeathdrop/Drop/Sell/Store/Trade/Repair/Upgrade, UnableToRent/Disassemble,
+        // NoMail and NoHero keep the issued unit in its owner's custody.
+        bind: (0x0001u16 | 0x0002 | 0x0004 | 0x0008 | 0x0010 | 0x0020 | 0x0040
+            | 0x1000 | 0x2000 | 0x4000 | 0x8000) as i16,
+        unique: 0,
+        random_stats_id: 0,
+        can_fast_run: false,
+        can_awakening: false,
+        slots: 0,
+        stats: Vec::new(),
+        tooltip: Some("Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.".into()),
+    }
 }
 
 /// Exact data-selection port of Crystal `Functions.GetRealItem`.

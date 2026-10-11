@@ -1,0 +1,100 @@
+{
+  "schema": "mir2.evidence.byte-archive.v1",
+  "files": [
+    {
+      "file": "FINAL-LOCAL-PACKAGE-VERIFICATION-03.json",
+      "bytes": 8152,
+      "sha256": "1ebde286b6adc56849957e6c24c6884b3e579fbd44ad17d95b5160e77856b6bd"
+    },
+    {
+      "file": "FROZEN-SOURCE-ATTESTATION-03.json",
+      "bytes": 2463,
+      "sha256": "0b75452a002a4a74c39ab49f0969822091fb6f501f222032aaa496f5c5d2966b"
+    },
+    {
+      "file": "DELIVERY-SIGNER-ROOT-REVIEW.json",
+      "bytes": 555,
+      "sha256": "76759215f989b3e5d52a4d246fc2a7eda6b7d710689a1f6c707ce4df3bc46a10"
+    },
+    {
+      "file": "BUILD-DELIVERY.json",
+      "bytes": 4423,
+      "sha256": "078a9ae6150718f0304327fd5c16cba805532034aa8df3a62552f860caa1d86f"
+    },
+    {
+      "file": "DELIVERY-VERIFICATION.json",
+      "bytes": 8056,
+      "sha256": "8a266425a75886198636ad3b4925eb3e00248bdf0b987e917df53ff4574ba269"
+    },
+    {
+      "file": "SIGN-DELIVERY.json",
+      "bytes": 600,
+      "sha256": "756e520199f05d4f77e7e76844369708c59463c0058ef2c896b81b52b9c1c0ad"
+    },
+    {
+      "file": "SIGN-FEED.json",
+      "bytes": 599,
+      "sha256": "9ea3646e9fa207d2a45fc48924eb95cb9aa0699ca39ad364a41fc7b7aa7ec15b"
+    },
+    {
+      "file": "41-build-delivery-02.log",
+      "bytes": 1726,
+      "sha256": "596e3d33a7b9b405cf4053601e73d57eeb7dd95a77a939cef1f031eb86444ba9"
+    },
+    {
+      "file": "42-sign-delivery-02.log",
+      "bytes": 674,
+      "sha256": "5c9699f12662baa86a33c740adc10ea0d7d7aac276414b01fa5cba5e6dfaaf09"
+    },
+    {
+      "file": "43-sign-feed-17-01.log",
+      "bytes": 205,
+      "sha256": "3028ae84de77c5096a4ce892b50ca661302b946fca14953ac4c50a67da2cd16b"
+    },
+    {
+      "file": "npc-pet-source-semantics-01.log",
+      "bytes": 3485,
+      "sha256": "11ff3351e07273c10b97f686283a76f5b5723024824c487a0b6209a632c8ed8c"
+    },
+    {
+      "file": "npc-pet-source-semantics-02.log",
+      "bytes": 49083,
+      "sha256": "1f9f5913d707be086c49df0819a5279c16f4e9e01337c9584de43619b58cd701"
+    },
+    {
+      "file": "npc-pet-source-semantics-03.log",
+      "bytes": 44144,
+      "sha256": "98cfb2319957f7079842f6573ccba3319537015b375a58a22a5f87cd77eab38d"
+    },
+    {
+      "file": "npc-pet-source-semantics-04.log",
+      "bytes": 39515,
+      "sha256": "db86cbbd717dad2c4e80ae22d38d5626a55623a4bce06ca81f04d40df992ef6b"
+    },
+    {
+      "file": "npc-pet-source-semantics-05-npc-adjacent.log",
+      "bytes": 44981,
+      "sha256": "202a2a8781e2d624e6fe63b3e9d0f11668a27ddd81f3483b6de536dcc785a591"
+    },
+    {
+      "file": "npc-pet-source-semantics-06-default-hooks-adjacent.log",
+      "bytes": 41063,
+      "sha256": "5c6b1c385cc409acb8c05829c48398e2f668541dfa1a1382f1e73dcbb2e72ea8"
+    },
+    {
+      "file": "npc-pet-source-semantics-07-normal-quest-adjacent.log",
+      "bytes": 31047,
+      "sha256": "ca53954e06a148ab161ecf0a0fa1e1000b7172357b7fb5a699f5723673bdb34e"
+    },
+    {
+      "file": "npc-pet-source-semantics-08-exact-baseline-adjacent.log",
+      "bytes": 44290,
+      "sha256": "e97da1eab2cdd9fd062c67cc479600329bc5d9701466827e1553fc04cb1426b0"
+    },
+    {
+      "file": "npc-pet-source-semantics-09-final-focused.log",
+      "bytes": 39515,
+      "sha256": "80048af332870d653dc0ae1922f2fe3e0e66de27724f24dd90899d0ba102b351"
+    }
+  ]
+}

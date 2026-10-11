@@ -5650,9 +5650,10 @@ fn apply_crystal_revelation_spell(
         return Vec::new();
     }
 
-    let duration = crystal_magic_damage(magic, skill.level)
-        .max(1)
-        .min(i32::from(u8::MAX)) as u8;
+    let duration_ms = u64::try_from(crystal_magic_damage(magic, skill.level).max(1))
+        .unwrap_or(1)
+        .saturating_mul(1_000);
+    let duration = crate::crystal_health::crystal_health_expire(duration_ms, 0);
     if let Some(info) = object_health_info_for_entity(world, target_entity, duration) {
         queue_due_packet(
             world,

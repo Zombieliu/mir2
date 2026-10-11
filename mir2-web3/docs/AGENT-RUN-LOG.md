@@ -1,5 +1,87 @@
 # Agent Run Log
 
+## 2026-10-10 — Actual sandbox payment and ordinary monthly lifecycle
+
+The operator refilled the private test key. Official CLI1.53.1 forwards signed
+Endive events outbound to an independent loopback Gateway at7121; no public
+tunnel or permanent webhook endpoint is created. Ordinary NewAccount/password
+Login/NewCharacter and expired StartGame denial pass. One Hosted Checkout
+payment uses the official fake card, explicitly selects USD10 and disables
+saved information. The signed completed callback returns200 and actual provider
+readback confirms paid Checkout and succeeded PaymentIntent, canonical1000/usd.
+Source applies1000 Credits to the frozen owner/character. A1000-Credit purchase
+and same-ID replay create one exact-UID card. Activation and consumed-UID replay
+produce one30-day term; ordinary StartGame/LogOutSuccess and relogin retain
+credit0 and unchanged expiry. No admin grant, Passkey shortcut or fixture event
+substitutes for this story.
+
+Preserved initial failures: the helper rejected blank email before any socket or
+registration; only its private config/generator changed to a fictional address.
+Stripe initially failed a JS chunk, then recovered after reload; Chrome connector
+was unavailable. A fill call timed out, but observed fields were already filled,
+so it was not repeated. Exactly one simulated payment was submitted. Initial SGD
+display is Adaptive Pricing presentation, not evidence of a canonical tuple bug;
+read-only primary-source review confirms the USD validators should remain strict.
+
+Exact code703ebadb CI37969367117 passes. Compatible nativefd660003 is launched
+with isolated preferences and no autologin; the empty1024×768 login screen is
+observed. Later UI input/minimize is left to the user; no native login or billing
+human acceptance is claimed. Gateway/listener stay running locally; the native
+client later returns normally with exit0 and can be reopened with its isolated
+launcher. No further UI input is performed after user-input detection.
+Observed post-helper health is one anonymous native socket, zero active
+sessions/admissions/reconnect leases and a healthy empty route/session cache.
+Private credentials, hashes/saves and Checkout URLs are not published. Public
+R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+[Redacted actual evidence and remaining gates](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
+
+## 2026-10-10 — Prepare a local Stripe trial; key refill pending
+
+Built compatible native and Gateway binaries for the user's trial request.
+Automatic approval rejected the proposed Quick Tunnel startup with "blocked by
+policy" and no detailed reason; no tunnel ran or was retried through another
+tool. Prepared official Stripe CLI1.53.1 outbound loopback forwarding instead,
+with an explicit test-only HTTP cosmetic return guard. Read-only security review
+and Gateway38/38 pass; root owns all guard edits. The current private key entry
+is empty (earlier provider verification remains retained), so the listener
+helper refuses startup before any request/process. Key refill was requested.
+No Gateway/client/account/Checkout/wallet/monthly activation ran. Test helpers
+and instructions remain outside Git, with independent files and clean child
+environments. Public R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+[Exact hashes, retained logs and remaining acceptance](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
+## 2026-10-10 — Real Stripe sandbox credential verification
+
+Read the operator's private test-mode server key without printing or copying
+it into Git. Four provider GETs return200. Real Checkout initially returns400
+because Endive no longer accepts `payment_method_types`; the supported
+`allowed_payment_method_types` card filter returns200. The unpaid probe is
+expired200. A separate temporary webhook and signing secret are created200
+and the endpoint is deleted200. No charge or game order is created.
+The matching Gateway request and captured-form contract are corrected, with
+all36 billing tests passing. USD1/100 Credits and30-day monthly1000 prices are
+saved only in disabled private configuration; public services/feeds/saves are
+unchanged. A permanent callback, completed payment/refund, live key, fleet
+rollout and native purchase remain open. Original provider failure is retained.
+[Secret-free evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
+## 2026-10-09 — Stripe Credits / monthly consumable Candidate
+
+Implemented the user's one-time Stripe recharge and monthly GameShop item
+request in the existing isolated worktree, led by the coordinator with bounded
+writers/reviewers. No live credentials, payment, service, feed or save was changed.
+Local final simulation44, Gateway billing36/shared4/adjacent4 and native
+host5/model10/URL2 checks pass. The initial compilation/fixture failures remain
+in evidence; the actual socket test now supplies the mandatory fixture MAC key
+and permits the ordinary full bootstrap within its bounded ten-second deadline.
+All financial/identity/packet-order assertions remain. Exact code4a26 is pushed;
+Stripe CI37946216332 passes35 Source/1 actual isolated PG/36 Gateway/4 shared
+tests. Adjacent monthly CI37946216237 passes9 Source/1 PG/4 Gateway checks.
+Real prices/Stripe configuration, paired schema8 rollout and native
+human acceptance remain open; public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+[Feature](STRIPE-CREDITS-MONTHLY-CARD-20261009.md),
+[evidence](generated/player-qa/stripe-billing-20261009/README.md).
+
 > Latest fresh-native visual parity sync: 2026-07-18. Logged the local Crystal
 > QA character into Bichon `0 @ 332,275` through the rebuilt Release Gateway,
 > confirmed Day setting 2 plus Lime/White NPC labels, and captured live r05

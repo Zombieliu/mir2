@@ -32,14 +32,16 @@ pub enum MonthlyCardFocus {
     Code,
     Redeem,
     Refresh,
+    Billing,
     Close,
 }
 impl MonthlyCardFocus {
     pub fn next(self, reverse: bool) -> Self {
         match (self, reverse) {
             (Self::Code, false) | (Self::Refresh, true) => Self::Redeem,
-            (Self::Redeem, false) | (Self::Close, true) => Self::Refresh,
-            (Self::Refresh, false) | (Self::Code, true) => Self::Close,
+            (Self::Redeem, false) | (Self::Billing, true) => Self::Refresh,
+            (Self::Refresh, false) | (Self::Close, true) => Self::Billing,
+            (Self::Billing, false) | (Self::Code, true) => Self::Close,
             _ => Self::Code,
         }
     }
@@ -127,6 +129,23 @@ impl MonthlyCardPanel {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn keyboard_focus_reaches_billing_in_both_directions() {
+        let sequence = [
+            MonthlyCardFocus::Code,
+            MonthlyCardFocus::Redeem,
+            MonthlyCardFocus::Refresh,
+            MonthlyCardFocus::Billing,
+            MonthlyCardFocus::Close,
+        ];
+        for (index, focus) in sequence.iter().enumerate() {
+            assert_eq!(focus.next(false), sequence[(index + 1) % sequence.len()]);
+            assert_eq!(
+                focus.next(true),
+                sequence[(index + sequence.len() - 1) % sequence.len()]
+            );
+        }
+    }
     fn status(active: bool) -> MonthlyCardStatus {
         MonthlyCardStatus {
             required: true,

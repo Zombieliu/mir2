@@ -2995,6 +2995,12 @@ pub(super) fn use_item(
     let Some(item) = item_at_use_location(world.resource::<InventoryResource>(), location) else {
         return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
     };
+    if super::billing_monthly_card::is_card(&item) {
+        // A key selects the next matching item and cannot identify a retry.
+        let Some((uid, grid)) = packet_ack else { return Vec::new(); };
+        return super::billing_monthly_card::use_card_packet(world, uid, grid)
+            .unwrap_or_else(|| prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new()));
+    }
     let mut packets = Vec::new();
     let item_template = crystal_item_template_for_item_key(&item.key);
     let dynamic_item_template = crystal_item_template_for_dynamic_key(&item.key);

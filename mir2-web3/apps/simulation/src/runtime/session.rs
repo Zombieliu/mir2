@@ -113,6 +113,7 @@ pub struct SimulationSession {
     pub(super) app: HeadlessRuntime,
     pub(super) visible_objects: BTreeSet<u32>,
     pub(super) dirty_economy_projection_event_ids: BTreeSet<String>,
+    pub(super) billing_last_recharge_poll: Option<(ActiveSessionIdentity, u64)>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -131,6 +132,7 @@ pub struct LocalPlayerVitalsSnapshot {
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
+    pub player_max_mp: Option<i32>,
     pub player_dead: Option<bool>,
 }
 
@@ -276,6 +278,7 @@ impl SimulationSession {
             app,
             visible_objects: BTreeSet::new(),
             dirty_economy_projection_event_ids: BTreeSet::new(),
+            billing_last_recharge_poll: None,
         }
     }
 
@@ -729,6 +732,7 @@ impl SimulationSession {
             player_hp: player_vitals.map(|vitals| vitals.hp),
             player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
             player_mp: player_vitals.map(|vitals| vitals.mp),
+            player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
             player_dead: player_vitals.map(|_| current_player_is_dead(world)),
         }
     }
@@ -1335,7 +1339,9 @@ impl SimulationSession {
     /// retains only the personal Crystal harvest/drop projection.
     /// Mirroring death prevents the still-live private entity from immediately
     /// respawning a Zone corpse; mirroring explicit revive clears the previous
-    /// incarnation's harvest state.
+    /// incarnation's harvest state. ObjectHealth contains a rounded display
+    /// percentage, so even zero cannot change exact vitals or grant corpse
+    /// harvesting eligibility.
     pub fn apply_shared_monster_lifecycle_packets(&mut self, packets: &[ServerPacket]) {
         if !is_in_world(self.app.world()) {
             return;
@@ -1344,7 +1350,6 @@ impl SimulationSession {
         for packet in packets {
             let object_id = match packet {
                 ServerPacket::ObjectDied { info } => info.object_id,
-                ServerPacket::ObjectHealth { info } if info.percent == 0 => info.object_id,
                 ServerPacket::ObjectRevived { info } => info.object_id,
                 _ => continue,
             };
@@ -1362,9 +1367,6 @@ impl SimulationSession {
                         Some(&info.location),
                         Some(info.direction),
                     );
-                }
-                ServerPacket::ObjectHealth { .. } => {
-                    apply_shared_monster_death_state(world, entity, None, None);
                 }
                 ServerPacket::ObjectRevived { .. } => {
                     apply_shared_monster_revive_state(world, entity);
