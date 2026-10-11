@@ -1,17 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> R25 client publication preparation, 2026-10-11: actual clean d917 Windows
-> CI38128601107 passed all eight original jobs (Native941/0/7 original ignored).
-> Full package, byte reconstruction and CMS gates passed. The real R24 EXE
-> patch is25,653,268 bytes; publication closure is40 objects/1,052,847,868 bytes.
-> Owned publisher checks: Python16+76+1, one unchanged Linux-only skip;
-> all eight original Node suites1104/1104; Wrangler dry run only. These are
-> delivery checks, not fresh gameplay/pixel/human acceptance. [Actual evidence
-> and remaining gates](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
-> Gateway4006 is live; client remains R24/s19 pending complete immutable stage
-> and separate CAS promotion. Existing engine/auth/config/routes are preserved;
-> the actual Caddy metadata is independently compared. FullP1–P7/Mentor/native/
-> human remains open. Root sole writer; expired heartbeat paused.
+> R25/feed20 actually published, 2026-10-11: genuine d917 Windows subject;
+> same-source98c whole Linux staging38147308719 verified40 complete CDN files/
+> 1,052,847,868 bytes. Separate CAS promotion38149850915 and actual Windows
+> production HTTPS/CMS/HTTP206 proof pass. [Original receipts and limits](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> Existing launchers update without a new installer. Applicationd917, engine
+> b439 and publisher98c stay distinct. Gateway4006/PID3369030 and pre-existing
+> Stripe test config are preserved, with unchanged nonbilling bytes and Caddy.
+> One session remained running; this is client-feed publication, not a drained
+> Gateway switch. Earlier missing-dependency, expired-token and local reader
+> assumption failures remain retained. Native crowd/laptop/human and fullP1-P7/
+> Mentor remain open; expired heartbeat paused. Root is the sole writer.
 
 
 

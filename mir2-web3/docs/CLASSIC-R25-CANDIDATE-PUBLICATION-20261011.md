@@ -86,3 +86,55 @@ All five original R20/R22/R23/R24/R25 preparation suites pass locally afterward
 (26+9+16+16+16 executions). The corrected exact source still requires its own
 whole Linux workflow and stage/promotion. Generated test diagnostics are kept
 with scoped ignore rules, not published as application artifacts.
+
+## Actual public delivery completed
+
+R25/feed20 is now public. The application remains the genuine d917 Windows
+subject above; the final publisher is `98c4143b208ebd54eb24f16371cff681529594dc`.
+The separate engine stays b439. These identities are not relabeled as one build.
+
+The second actual workflow38145776705 passed the complete original Linux
+tooling gate but failed deployment because its existing Cloudflare CI token
+was rejected (10000/9109). No stage or pointer write occurred. The authenticated
+installed Cloudflare connector then deployed the exact reviewed823,827-byte
+bundle (SHA256 `90f272a33548edf344a9b5bec10fe00ee904eef17fd4101cfa198450d8ee81c3`).
+Full live module hash, existing R2/secret bindings, compatibility date and
+route were read back; secret values were neither read nor rotated. The next
+workflow uses the existing deployment-off option after this real deployment,
+with all original offline and full-byte staging gates retained.
+
+- Successful [stage38147308719](https://github.com/Zombieliu/mir2/actions/runs/38147308719)
+  verified all40 complete public streams,1,052,847,868 bytes. Original driver
+  validation passes; receipt SHA256
+  `3c63f50b59ca09d286cb62fcdd4ee5b8b69f0d9d7f4860175cc749512e34c6bd`.
+- The reviewed origin operator atomically exchanged the complete feed19 pair
+  for feed20, retained the old pair and fingerprints, and preserved service PIDs.
+- Successful separate [promotion38149850915](https://github.com/Zombieliu/mir2/actions/runs/38149850915)
+  consumed that exact same-source stage, applied ETag CAS and verified both
+  public aliases. Receipt SHA256
+  `8e110406eb0e3cf3e52593415fd032c1c47a91a6a9a2690275837ef24d79a490`.
+- The real Windows ureq2.12.1/pinned updater HTTPS source verified production
+  discovery, feed/engine/release-statement/delivery CMS, full engine hash and
+  HTTP206 original bootstrap bytes. This readonly probe did not launch a game,
+  install files, exercise a laptop or accept native gameplay.
+
+This publication only changes client delivery. An existing online session
+remained running; Gateway4006 and PID3369030 were preserved. The earlier
+zero-session assumption fails and stays failed; it is not a drained Gateway
+rollout. Fresh protected reads independently compare the current pre-existing
+Stripe **test** environment to its authorized deployment receipt and exact
+private backup: nonbilling bytes are identical, price1000/optional monthly
+entry and original realm3855184 are unchanged. Caddy is not reloaded.
+
+The first local promotion receipt reader incorrectly expected an `alias` call
+label; the original driver records public calls as `public`. The corrected
+reader retains all original checks and the failed assumption is preserved.
+The stage root receipt's relative Worker locator is superseded by the verified
+absolute locator in the final aggregate, without rewriting the original.
+
+Final durable aggregate:
+`C:/mir2-build/classic-live01a8-integration-20261011/r25-publication-complete-01/PUBLICATION-COMPLETE-01.json`,
+also copied into the signed release evidence directory. The original stage,
+promotion, native HTTPS and protected before/after receipts are hash-bound there.
+Existing launchers can update without installing a new bootstrap. Native
+crowd gameplay, human acceptance and fullP1–P7/Mentor still remain open.

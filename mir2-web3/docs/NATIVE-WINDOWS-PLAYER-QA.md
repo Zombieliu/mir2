@@ -1,10 +1,11 @@
 # Windows 原生可玩闭环验收清单
 
-> R25 Candidate, 2026-10-11: actual d917 Windows CI and full package/CMS/
-> delivery reconstruction pass. [Exact source, checks and release gates](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
-> This does not close native dense-combat escape, continuous attacking, laptop
-> frame pacing, fresh screenshots or human acceptance. Public feed remains
-> R24/s19 until the original immutable stage and separate promotion succeed.
+> R25/feed20 actually public, 2026-10-11: d917 CI subject, complete40-file CDN
+> stage38147308719, same-source CAS promotion38149850915 and actual Windows
+> production HTTPS/CMS/HTTP206 proof pass. [Exact receipts and limits](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> Existing launchers can update without a new installer. Native dense-combat
+> escape, continuous attacking, laptop pacing, fresh screenshots and human
+> acceptance remain open. Gateway4006 continues running; no Gateway switch.
 
 
 > Windows CI qualification repair and Gateway publication, 2026-10-11:
