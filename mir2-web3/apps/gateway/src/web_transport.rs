@@ -8,6 +8,44 @@ use futures_util::{Sink, SinkExt};
 use tokio::sync::{watch, Mutex, Notify};
 
 pub(super) const WRITE_TIMEOUT: Duration = Duration::from_secs(10);
+pub(super) const MAX_BATCH_MESSAGES: usize = 32;
+pub(super) const MAX_BATCH_BYTES: usize = 64 * 1024;
+
+pub(super) fn low_latency_listener(
+    listener: tokio::net::TcpListener,
+) -> axum::serve::TapIo<tokio::net::TcpListener, fn(&mut tokio::net::TcpStream)> {
+    use axum::serve::ListenerExt;
+    listener.tap_io(configure_accepted_stream as fn(&mut tokio::net::TcpStream))
+}
+
+fn configure_accepted_stream(stream: &mut tokio::net::TcpStream) {
+    if let Err(error) = stream.set_nodelay(true) {
+        eprintln!("[gateway-transport] failed to set accepted TCP_NODELAY: {error}");
+    }
+}
+
+#[derive(Debug, Default)]
+pub(super) struct BatchWriteTimings {
+    pub(super) lock_wait: Duration,
+    pub(super) feed: Duration,
+    pub(super) flush: Duration,
+}
+
+/// Cancellation must fence the socket before releasing its writer lock. A
+/// partially fed batch is never safe for a waiting producer to reuse.
+struct InFlightBatch<'a, S> {
+    sink: tokio::sync::MutexGuard<'a, S>,
+    terminal: &'a TransportSignal,
+    completed: bool,
+}
+
+impl<S> Drop for InFlightBatch<'_, S> {
+    fn drop(&mut self) {
+        if !self.completed {
+            self.terminal.end(TransportEnd::WriteError);
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum TransportEnd {
@@ -124,11 +162,97 @@ where
         }
     }
 
+    pub(super) async fn send_batch(
+        &self,
+        messages: Vec<Message>,
+    ) -> Result<BatchWriteTimings, axum::Error> {
+        if messages.is_empty() {
+            return Ok(BatchWriteTimings::default());
+        }
+        let bytes = messages.iter().map(message_bytes).sum::<usize>();
+        if messages.len() > MAX_BATCH_MESSAGES || (messages.len() > 1 && bytes > MAX_BATCH_BYTES) {
+            return Err(axum::Error::new(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "WebSocket batch exceeds message/byte bound",
+            )));
+        }
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let deadline = tokio::time::Instant::now() + self.timeout;
+        let lock_started = std::time::Instant::now();
+        let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
+            Ok(sink) => sink,
+            Err(_) => {
+                self.terminal.end(TransportEnd::WriteTimeout);
+                return Err(timeout_error());
+            }
+        };
+        let mut timings = BatchWriteTimings {
+            lock_wait: lock_started.elapsed(),
+            ..BatchWriteTimings::default()
+        };
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let mut write = InFlightBatch {
+            sink,
+            terminal: &self.terminal,
+            completed: false,
+        };
+        // The same ten-second deadline covers lock, readiness, feed and final
+        // flush. Every message remains an individual WebSocket frame.
+        let result = tokio::time::timeout_at(deadline, async {
+            let feed_started = std::time::Instant::now();
+            for message in messages {
+                if self.terminal.ended() {
+                    return Err(ended_error());
+                }
+                write.sink.feed(message).await?;
+            }
+            timings.feed = feed_started.elapsed();
+            if self.terminal.ended() {
+                return Err(ended_error());
+            }
+            let flush_started = std::time::Instant::now();
+            write.sink.flush().await?;
+            timings.flush = flush_started.elapsed();
+            Ok(())
+        })
+        .await;
+        match result {
+            Ok(Ok(())) => {
+                write.completed = true;
+                Ok(timings)
+            }
+            Ok(Err(error)) => {
+                self.terminal.end(TransportEnd::WriteError);
+                Err(error)
+            }
+            Err(_) => {
+                self.terminal.end(TransportEnd::WriteTimeout);
+                Err(timeout_error())
+            }
+        }
+    }
+
     #[cfg(test)]
     pub(super) async fn lock_for_test(&self) -> tokio::sync::MutexGuard<'_, S> {
         self.sink.lock().await
     }
 }
+
+fn message_bytes(message: &Message) -> usize {
+    match message {
+        Message::Text(text) => text.len(),
+        Message::Binary(bytes) | Message::Ping(bytes) | Message::Pong(bytes) => bytes.len(),
+        Message::Close(frame) => frame.as_ref().map_or(0, |frame| 2 + frame.reason.len()),
+    }
+}
+
+#[cfg(test)]
+#[path = "web_transport_batch_tests.rs"]
+mod batch_tests;
 
 fn ended_error() -> axum::Error {
     axum::Error::new(io::Error::new(

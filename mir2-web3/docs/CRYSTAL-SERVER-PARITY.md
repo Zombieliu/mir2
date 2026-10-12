@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
+> feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
+> explicit. Partial/cancelled writes fence before unlock. Actual331 distinct
+> adjacent Gateway checks pass; focused25 are a subset,13 are new, no ignores.
+> Original two RED checks and compiler failures remain retained. Linux/public
+> qualification is pending; live stays f574/R25/feed20. The historical37.571s
+> first scene and153ms unchanged retry are retained. Parent flush was78ms;
+> the cold latency cause remains unconfirmed. FullP1-P7/Mentor stays open.
+> [Source-bound evidence and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+
+
 > Ordinary NPC menu backendf574 actually published, 2026-10-12: private
 > trusted-display qualification covers ordinary links and native NPC quests.
 > Periodic Source CAS preserves no-write views/retries, real buff anchors and

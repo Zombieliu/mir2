@@ -83,6 +83,8 @@ type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
 type SharedWebSocketSender = Arc<transport::SocketSender<WebSocketSender>>;
 #[path = "web_transport.rs"]
 mod transport;
+#[path = "web_packet_batch.rs"]
+mod packet_batch;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
 #[path = "web_billing.rs"]
@@ -2775,7 +2777,7 @@ pub async fn serve_web_gateway_with_zone_registry(
     eprintln!("mir2-gateway web listening on http://{addr}");
 
     axum::serve(
-        listener,
+        transport::low_latency_listener(listener),
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
     .await
@@ -6920,11 +6922,9 @@ async fn flush_session_updates(
 
     {
         let _slow_stage = GatewaySlowStage::start("flush.responses");
-        for response in responses {
-            send_server_packet(sender, &response)
-                .await
-                .map_err(|error| error.to_string())?;
-        }
+        packet_batch::send_responses(sender, &responses)
+            .await
+            .map_err(|error| error.to_string())?;
     }
 
     if low_latency_action {
