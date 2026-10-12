@@ -11,6 +11,7 @@ import { createRequire } from 'node:module';
 import { loadCrystalQuestRouteSources, buildMapTravelGraph, findMapTravelRoute } from '../../../web/scripts/quest-agent/route-manifest.mjs';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
+const candidateContentProfiles = new Set(['platinum_176', 'platinum_fiveclass']);
 const requiredJourneyMaps = ['0', '1', '2', '3', '0108', '0109', '0141', 'd001', 'd021', 'd022', 'd401', 'd601', 'd602', 'd605', 'd607'];
 const previousMaps = [...requiredJourneyMaps, '0101', '0102', '0103', '0104', '0105', '0106', '0107', '0125', '0132', '0140', '0122', '0150', '0151', '0152', '0153', '0154', '0155'];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -20,7 +21,7 @@ const topologyPaths = ['packages/game-data/data/generated/crystal_respawn_manife
 export function candidateResourceOnlyNames(profile) {
   const names = profile.nativeResourceOnlyMaps === undefined ? [] : profile.nativeResourceOnlyMaps;
   if (!Array.isArray(names) || names.some(name => name !== 'D71653') || new Set(names).size !== names.length) throw new Error('Only the canonical named original resource room D71653 may be declared');
-  if (names.length && profile.profileId !== 'platinum_176') throw new Error('Resource-only room requires platinum_176');
+  if (names.length && !candidateContentProfiles.has(profile.profileId)) throw new Error('Resource-only room requires platinum_176 or platinum_fiveclass');
   const runtime = new Set(profile.mapWhitelist.map(map => map.fileName.toLowerCase()));
   if (names.some(name => runtime.has(name.toLowerCase()))) throw new Error('Resource-only room must not be runtime-admitted');
   return names.map(name => name.toLowerCase());
@@ -60,7 +61,7 @@ export function normalizeCandidateMapNames(values) {
 }
 
 export function resolveCandidateMapScope({ profile, profileBytes, mode = 'profile', expectedMaps } = {}) {
-  if (profile?.profileId !== 'platinum_176' || !Number.isSafeInteger(profile.version) || profile.version < 1 || !Array.isArray(profile.mapWhitelist)) throw new Error('Map scope requires the identified platinum_176 content profile');
+  if (!candidateContentProfiles.has(profile?.profileId) || !Number.isSafeInteger(profile.version) || profile.version < 1 || !Array.isArray(profile.mapWhitelist)) throw new Error('Map scope requires the identified platinum_176 or platinum_fiveclass content profile');
   if ((!Buffer.isBuffer(profileBytes) && typeof profileBytes !== 'string') || JSON.stringify(JSON.parse(profileBytes.toString())) !== JSON.stringify(profile)) throw new Error('Map scope profile bytes do not match its identity');
   const names = normalizeCandidateMapNames(profile.mapWhitelist.map(map => map.fileName));
   if (names.length !== profile.mapWhitelist.length) throw new Error('Content profile has duplicate map identities');
@@ -124,6 +125,15 @@ export function describeCandidateMapTopology(sources, expectedMaps) {
     conditionalEntries, excludedClassicMaps, sourceOrphanRooms, resourceOnlyRooms, runtimeGameplayAccepted: false };
 }
 
+export async function loadCandidateMapProfileSources(contentProfile) {
+  if (!candidateContentProfiles.has(contentProfile)) throw new Error('Content profile must be platinum_176 or platinum_fiveclass');
+  const profilePath = path.join(project, 'packages/game-data/data/content_profiles', `${contentProfile}.json`);
+  const profileBytes = await readFile(profilePath);
+  const sources = await loadCrystalQuestRouteSources({ contentProfile: pathToFileURL(profilePath) });
+  if (sources.contentProfile.profileId !== contentProfile || JSON.stringify(sources.contentProfile) !== JSON.stringify(JSON.parse(profileBytes))) throw new Error('Selected map profile bytes changed while loading route sources');
+  return { profileBytes, sources };
+}
+
 export async function auditCandidateMapCoverage(args = process.argv.slice(2)) {
 const option = name => args.includes(name) ? args[args.indexOf(name) + 1] : undefined;
 const manifestPath = option('--manifest');
@@ -131,7 +141,7 @@ if (!manifestPath) throw new Error('Provide --manifest <native-map-keyed/manifes
 const json = async file => JSON.parse(await readFile(file, 'utf8'));
 const publicRoot = path.join(project, 'apps/web/public');
 const manifest = await json(manifestPath);
-const profileBytes = await readFile(path.join(project, 'packages/game-data/data/content_profiles/platinum_176.json'));
+const { profileBytes, sources } = await loadCandidateMapProfileSources(args.includes('--contentProfile') ? option('--contentProfile') : 'platinum_176');
 const scope = resolveCandidateMapScope({ profile: JSON.parse(profileBytes), profileBytes,
   mode: option('--scope') ?? 'profile', expectedMaps: option('--expectedMaps')?.split(',') });
 const selection = compareCandidateMapScope(scope, manifest.mapFileNames);
@@ -164,7 +174,6 @@ for (const page of atlas.pages) {
 }
 for (const page of atlas.pages) for (const rect of page.r) suppliedAtlas.add(`${page.l}#${rect[0]}`);
 
-const sources = await loadCrystalQuestRouteSources();
 const scopeRoutes = describeCandidateMapTopology(sources, scope.expectedMaps);
 const graph = buildMapTravelGraph(sources);
 const journey = await json(path.join(project, 'config/quest-guidance/newcomer-journey-v2.json'));

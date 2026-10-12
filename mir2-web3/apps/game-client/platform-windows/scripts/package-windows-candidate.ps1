@@ -928,9 +928,9 @@ try {
     $mapAtlasTemporaryRoot = Join-Path ([IO.Path]::GetTempPath()) ('native-keyed-map-candidate-atlas-' + [guid]::NewGuid().ToString('N'))
     $coverageScript = Join-Path $ScriptDir 'audit-candidate-map-coverage.mjs'
     $generatedMapManifest = Join-Path $nativeKeyedMapRoot 'manifest.json'
-    & node $coverageScript --manifest $generatedMapManifest --scope $candidateMapScope.mode --expectedMaps $mapList --fullPackRoot $FullCrystalPackRoot --completeAtlasRoot $mapAtlasTemporaryRoot
+    & node $coverageScript --manifest $generatedMapManifest --contentProfile $ContentProfile --scope $candidateMapScope.mode --expectedMaps $mapList --fullPackRoot $FullCrystalPackRoot --completeAtlasRoot $mapAtlasTemporaryRoot
     if ($LASTEXITCODE -ne 0) { throw 'Candidate floor atlas completion failed' }
-    & node $coverageScript --manifest $generatedMapManifest --scope $candidateMapScope.mode --expectedMaps $mapList --atlasRoot $mapAtlasTemporaryRoot --fullPackRoot $FullCrystalPackRoot --output (Join-Path $nativeKeyedMapRoot 'coverage-audit.json')
+    & node $coverageScript --manifest $generatedMapManifest --contentProfile $ContentProfile --scope $candidateMapScope.mode --expectedMaps $mapList --atlasRoot $mapAtlasTemporaryRoot --fullPackRoot $FullCrystalPackRoot --output (Join-Path $nativeKeyedMapRoot 'coverage-audit.json')
     if ($LASTEXITCODE -ne 0) { throw 'Candidate has missing drawable map resources' }
     Assert-CandidateMapCoverageReport -NativeMapRoot $nativeKeyedMapRoot -MapAtlasRoot $mapAtlasTemporaryRoot -ExpectedMapNames $NativeMapFileNames -ScopeMode $candidateMapScope.mode | Out-Null
     $generatedMapClosure = Assert-CandidateNativeMapClosure -NativeMapRoot $nativeKeyedMapRoot -ExpectedMapNames $NativeMapFileNames

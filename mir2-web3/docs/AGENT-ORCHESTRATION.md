@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+> Five-class R26 packaging correction, 2026-10-12: the actual package attempt
+> correctly rejected a three-class coverage identity. Two Node invocations now
+> propagate the selected profile; its real bytes and route sources are checked.
+> Original D71653/208+209/resource/CI gates and global default are retained.
+> Actual Node15/0/0 and original PowerShell scope tests pass, including wrong-
+> profile rejection in both directions. Original RED is preserved. New clean
+> Source, genuine V2 build, fresh guarded package and paired publication remain
+> pending; no human acceptance. [Exact evidence](FIVE-CLASS-R26-MAP-PROFILE-20261012.md).
+
+
 > Five-class Windows regression, 2026-10-12: the complete actual merged
 > Native host run passes 987 tests, with 7 original external checks ignored.
 > All five typed DoubleSlash/BackStep combinations pass, including committed
