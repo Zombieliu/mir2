@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> Five-class/live transport merge, 2026-10-12: nine actual guarded Windows
+> checks pass424 distinct names (424 executions), with zero failures or ignores.
+> Fresh563/781-file snapshots include the actual59/74 embedded input occurrences;
+> all169 reviewed source rows and every original50GiB/2000ms/PolicyB receipt bind.
+> Two Archer fixtures now check the real deferred1200/4100ms impact and pre-hit
+> negatives; production damage/clocks and all38 original tests remain intact.
+> The failed9bfa Linux run and missing-feature local compile stay failed and
+> preserved. Actual live28f transport/NPC changes are retained. Clean merged
+> original full Linux CI, signed R26 delivery and paired publication remain open;
+> no human acceptance. [Exact evidence](FIVE-CLASS-LIVE-TRANSPORT-MERGE-20261012.md).
+
+
 > Five-class/live NPC Gateway merge, 2026-10-12: separate server worktree
 > retains all live f574 ordinary-menu/periodic CAS behavior and02457 five-class
 > history. Fourteen real guarded checks pass 779 distinct names
@@ -31,6 +43,34 @@
 > installer or wire/schema change. Full Source/Zone invocation, CHECKHUM/outbox,
 > fullP1-P7/Mentor/native/human remain open. Root is sole writer; expired
 > heartbeat stays paused and no old blocked Goal is marked complete.
+> 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
+> feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
+> explicit. Partial/cancelled writes fence before unlock. Actual331 distinct
+> adjacent Gateway checks pass; focused25 are a subset,13 are new, no ignores.
+> Original two RED checks and compiler failures remain retained. Linux/public
+> qualification is pending; live stays f574/R25/feed20. The historical37.571s
+> first scene and153ms unchanged retry are retained. Parent flush was78ms;
+> the cold latency cause remains unconfirmed. FullP1-P7/Mentor stays open.
+> [Source-bound evidence and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+
+
+> Ordinary NPC menu backendf574 actually published, 2026-10-12: private
+> trusted-display qualification covers ordinary links and native NPC quests.
+> Periodic Source CAS preserves no-write views/retries, real buff anchors and
+> recurrence-before-save. Final405 distinct local checks pass (362 unit +43
+> integration,24 new); one original isolated PostgreSQL check is ignored locally.
+> Actual Linux38176912491 passes all original release/siege gates and the new
+> quest lifecycle gate; authenticated whole artifact/ELF/logs are qualified.
+> A fresh empty realm was backed up and normally switched. Unchanged strict44
+> ordinary +18 resume rechecks pass, with protected final empty readback. The
+> first38-second scene-sync timeout remains retained and unresolved inP1.
+> [Immutable original evidence and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
+> Gatewayf574 is live; R25 appd917/updaterb439/feed20 remain unchanged, no
+> reinstall. The first protected preflight correctly rejected a changed Caddy
+> digest; independent read verified and preserved the actual external config.
+> Original RED/parent/compiler/linker failures remain retained. Full Source/
+> Zone invocation, CHECKHUM/outbox, fullP1-P7/Mentor/native/human remain open.
+> Root is sole writer; expired heartbeat paused, no blocked Goal completion.
 
 
 > NPC input backend75c5 actually published, 2026-10-12: private displayed-menu
