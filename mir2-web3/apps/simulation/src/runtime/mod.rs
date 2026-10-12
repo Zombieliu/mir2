@@ -54,6 +54,8 @@ mod npc_world_plan;
 #[cfg(test)]
 mod npc_source_guard_tests;
 #[cfg(test)]
+mod npc_random_source_guard_tests;
+#[cfg(test)]
 mod npc_parser_omission_tests;
 #[cfg(test)]
 mod npc_buff_action_tests;
