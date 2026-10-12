@@ -1,18 +1,22 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Local ordinary NPC menu candidate, 2026-10-12: private trusted-display
-> permission now covers ordinary links and native NPC quest accept/finish.
-> Generated no-script menus and legitimate same-page retry remain usable.
-> Periodic Source checkpoints no longer force unchanged-page writes; recurrence
-> is captured before CAS, and exact live buff anchors detect actual changes.
-> Final405 distinct local checks pass (362 unit +43 integration,24 new);
-> one original dedicated PostgreSQL periodic fixture remains ignored locally.
-> [Original evidence, fixture changes and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
-> Exact-source Linux CI/package and a fresh drained publication remain open.
-> Public Gateway75c5/R25 appd917/updaterb439/feed20 are unchanged; no client
-> installer or wire/schema change. Full Source/Zone invocation, CHECKHUM/outbox,
-> fullP1-P7/Mentor/native/human remain open. Root is sole writer; expired
-> heartbeat stays paused and no old blocked Goal is marked complete.
+> Ordinary NPC menu backendf574 actually published, 2026-10-12: private
+> trusted-display qualification covers ordinary links and native NPC quests.
+> Periodic Source CAS preserves no-write views/retries, real buff anchors and
+> recurrence-before-save. Final405 distinct local checks pass (362 unit +43
+> integration,24 new); one original isolated PostgreSQL check is ignored locally.
+> Actual Linux38176912491 passes all original release/siege gates and the new
+> quest lifecycle gate; authenticated whole artifact/ELF/logs are qualified.
+> A fresh empty realm was backed up and normally switched. Unchanged strict44
+> ordinary +18 resume rechecks pass, with protected final empty readback. The
+> first38-second scene-sync timeout remains retained and unresolved inP1.
+> [Immutable original evidence and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
+> Gatewayf574 is live; R25 appd917/updaterb439/feed20 remain unchanged, no
+> reinstall. The first protected preflight correctly rejected a changed Caddy
+> digest; independent read verified and preserved the actual external config.
+> Original RED/parent/compiler/linker failures remain retained. Full Source/
+> Zone invocation, CHECKHUM/outbox, fullP1-P7/Mentor/native/human remain open.
+> Root is sole writer; expired heartbeat paused, no blocked Goal completion.
 
 
 > NPC input backend75c5 actually published, 2026-10-12: private displayed-menu

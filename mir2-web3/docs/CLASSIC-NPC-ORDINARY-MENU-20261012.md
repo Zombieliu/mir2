@@ -1,8 +1,8 @@
 # Ordinary NPC menus and periodic Source persistence — 2026-10-12
 
-This is a bounded local backend candidate. The current public backend is still
-75c5; the R25 client, updater b439 and signed feed20 are unchanged. Existing
-launchers need no new installer for this change. The complete P1-P7/Mentor
+This bounded backend candidate is now actually published as sourcef574.
+The R25 applicationd917, updaterb439 and signed feed20 stay unchanged.
+Existing launchers need no new installer for this server-only change. The complete P1-P7/Mentor
 delivery, native frontend acceptance and expired Goal are not marked complete.
 
 ## Implemented behavior
@@ -69,8 +69,51 @@ bind the actual logs, commands, source-before/after hashes and failures.
 
 ## Separate remaining gates
 
-Exact-source genuine Linux CI, complete artifact/log qualification and a fresh
-empty-session, backed-up, normal server switch are still required. There is no
+Genuine Linux run38176912491 at actual source `f574d214a10c7efd62176ec94cea37821095b8fe` passes both
+release/siege jobs, every original gate and the new ordinary native quest gate.
+All original24 input names,21 new ordinary-menu names, three new Source/CAS
+names and43 integration names occur as passing in the genuine logs; focused50
+extend the prior29 and are a subset. The full authenticated artifact ZIP,
+three ZIP members, four tar members, release metadata and both ELFs were checked.
+Gateway ELF is84,818,384 bytes with SHA256 `d78ea9b2e92a3b2c3a892db5187330daf496cbe31d7a95c04ccde8c1ffb78300`;
+archive SHA256 is `c621854158ec3799bb062fa6b0c71f2b214341cfad4cfb3a0ce543fb3032d567`.
+
+The realm was freshly empty at all six capacity counters, TCP7200 and spectator
+checks, backed up and normally stopped/switched. Gateway PID3420651 now
+runs the exact qualified binary. Original44 ordinary +18 resume public checks
+pass, followed by final protected empty readback. Original realm, private
+environment, existing Stripe TEST settings, monthly price1000, client feed20
+and actual observed Caddy configuration are preserved. No player was kicked,
+no database was rolled back and no original timing/assertion gate was relaxed.
+
+The first ordinary public probe authenticated the live level1 warrior at18HP,
+but the first matching Self snapshot arrived37.571 seconds after UserInformation,
+beyond the unchanged20-second wait. Normal logout was acknowledged and a fresh
+read confirmed all six counters/TCP/spectator empty. The entire strict44 ordinary
+story was repeated once with only its evidence folder changed; all timeouts,
+assertions, characters, service and Source were unchanged. It and the original
+18 resume checks passed. The failed first probe and raw local protocol trace
+are retained. The journal reported snapshot.build_and_send144ms; root cause
+is still unconfirmed and this delivery does not claim the initial latency fixed.
+The archive excludes token-bearing raw JSONL; it retains failed/result receipts
+and the bounded nonsecret timing diagnostic.
+
+The first GitHub artifact request also failed with unexpected EOF, and a retry
+first needed its missing local evidence parent. Both preparation/download
+failures are retained. The second authenticated complete artifact/log qualifier
+passes every original check; a separate official-storage transport probe matches
+the same whole GitHub artifact digest without recording a signed URL or token.
+
+The first protected preflight failed on a changed Caddy digest. An independent
+readonly diagnostic verified the actual5535-byte config, unchanged Source/
+private environment and the exact existing signed feed20; a fresh protected
+reader and final readback pin that observed configuration. The original failure
+is retained and is not presented as a passed preflight. This publication did
+not modify Caddy or the signed client feed.
+
+[Immutable publication receipt](generated/player-qa/npc-ordinary-menu-20261012/DELIVERY-VERIFIED.json)
+and [original Linux, rollout and public evidence](generated/player-qa/npc-ordinary-menu-20261012/publication-original-evidence.zip)
+are separate from the unchanged original local archive. There is still no
 native UI, actual crowded play, laptop or human acceptance claim here.
 
 This local permission is not an online/Zone/life receipt, actual CALL script
@@ -78,3 +121,30 @@ cursor or original delayed continuation. Trusted population CHECKHUM, ordered
 world commands, same-Source-CAS durable world outbox and recovery remain open.
 No full P7 or 100% Candidate claim is made. The expired mir2-12 heartbeat stays
 paused; no blocked Goal is falsely completed.
+
+
+## Next bounded invocation work
+
+Readonly review of the exactf574 manifest finds634 scripts,1016 GOTO lines,
+no declared CALL or parameterized GOTO lines. NPC42 TrustMerchant is a genuine
+no-world GOTO scene; NPC34 Lottery_Eddie has genuine @Guess(1..8) links and
+@Guess() with %ARG(0). Parameterized GOTO/CALL coverage must stay explicitly
+synthetic unless verified Source declarations are available. Existing imported
+diagnostic line_number loses blank-line offsets and must not be authenticated
+as an actual raw Source execution site. Canonical raw-text line mapping, private
+invocation/cursor/continuation identity, original ordering and same-Source-CAS
+world outbox remain distinct follow-up work, not completed by this delivery.
+
+Readonly review also finds the independent CrystalNpcRandomState is not yet
+captured by the existing Source checkpoint. Ordinary menu admission passing
+does not attest Lottery fees/RNG failure rollback or frozen-plan restart replay.
+Lottery MOV B3 is transient navigation state and is not serialized by the
+private character save. Its MAIN alone must not be described as a durable B3
+write or forced CAS. The earlier proposed failure plan is retained and corrected.
+The actual NPC1250 VillageChief_Andrew inB354 has a displayed Tmove branch with
+RANDOM2 followed by personal MOVE5; that is a genuine Source mutation scene
+for the next bounded failure test. Personal movement here still does not attest
+a durable authoritative shared Zone/world outbox.
+The next bounded personal repair must restore the exact pre-command RNG on a
+known save failure while preserving unknown-publication fencing; persisted
+random plans and shared-world replay remain separate dependencies.
