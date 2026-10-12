@@ -35,6 +35,7 @@ import { bagBeltTargetAtClientPoint, sameBagBeltGeometry, validBagBeltDropGeomet
 import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry } from "../lib/npc-repair-service";
 import type { WorldFishingGesture, WorldFishingPointer, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { StoragePointerRouter } from "../lib/bevy-storage-ui";
+import { storagePrepareCanvasStyle } from "../lib/bevy-storage-presentation";
 import { NpcShopPointerRouter } from "../lib/bevy-npc-shop-ui";
 import { matchesBevyHpOrbView, matchesBevyMpOrbView, readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
 import { matchesBevyExperienceBarView, readBevyExperienceBarSlot } from "../lib/bevy-experience-bar";
@@ -577,6 +578,7 @@ export function OriginalClientShell({
   npcShopTab, onNpcShopTabChange,
   bevyStorageUiActive = false,
   bevyStorageUiTransitioning = false,
+  bevyStoragePreparePresentation = null,
   bevyStorageOwnerRevision = 0,
   getBevyStoragePointerContext,
   onBevyStoragePointer,
@@ -5137,7 +5139,7 @@ export function OriginalClientShell({
             id="mir2-quest-ui-canvas"
             className={(bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
             data-ui-interactive={bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady ? "true" : undefined}
-            style={{ pointerEvents: (bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
+            style={{ ...storagePrepareCanvasStyle(bevyStoragePreparePresentation, sharedUiCanvasId(webGl2SharedCanvasPrototype)), pointerEvents: (bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
             aria-label="Shared game windows"
             tabIndex={-1}
           />

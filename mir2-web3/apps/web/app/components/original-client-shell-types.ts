@@ -243,6 +243,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onNpcShopTabChange?: (tab: "buy" | "sell") => void;
   bevyStorageUiActive?: boolean;
   bevyStorageUiTransitioning?: boolean;
+  bevyStoragePreparePresentation?: import("../../lib/bevy-storage-ui").StoragePreparePresentation | null;
   bevyStorageOwnerRevision?: number;
   getBevyStoragePointerContext?: () => import("../../lib/bevy-storage-ui").StoragePointerContext | null;
   onBevyStoragePointer?: (edge: import("../../lib/bevy-storage-ui").StoragePointerEdge) => boolean;

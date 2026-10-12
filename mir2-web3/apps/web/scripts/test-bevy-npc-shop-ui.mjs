@@ -9,9 +9,10 @@ const modules = new Map();
 const sources = {
   identity: "../lib/world-model/item-identity.ts",
   bag: "../lib/bevy-bag-ui.ts",
+  belt: "../lib/bag-belt-gesture.ts",
   npc: "../lib/bevy-npc-shop-ui.ts",
 };
-const dependencies = { identity: {}, bag: { "./world-model/item-identity": "identity" },
+const dependencies = { identity: {}, belt: {}, bag: { "./world-model/item-identity": "identity", "./bag-belt-gesture": "belt" },
   npc: { "./bevy-bag-ui": "bag" } };
 function loadPure(name, fresh = false) {
   assert(Object.hasOwn(sources, name), "source outside explicit pure allowlist: " + name);

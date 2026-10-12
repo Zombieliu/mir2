@@ -20107,6 +20107,7 @@ export default function HomePage() {
       }}
       bevyStorageUiActive={bevyStorageUi.active && showInventory}
       bevyStorageUiTransitioning={bevyStorageUi.transitioning && showInventory}
+      bevyStoragePreparePresentation={bevyStorageUi.preparePresentation}
       bevyStorageOwnerRevision={bevyStorageUi.ownerRevision}
       getBevyStoragePointerContext={bevyStorageUi.pointerContext}
       onBevyStoragePointer={bevyStorageUi.pointer}

@@ -5,7 +5,7 @@ import ts from "typescript";
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
-const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "bag-belt-gesture", "npc-purchase-client"]);
+const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "bevy-storage-presentation", "bevy-shared-canvas-mode", "bag-belt-gesture", "npc-purchase-client"]);
 function load(name, fresh = false) {
   assert.ok(pureModules.has(name), "unexpected non-pure import: " + name);
   if (!fresh && cache.has(name)) return cache.get(name);
@@ -955,4 +955,156 @@ test("Source72 ready false classifies missing icon metadata without an ownership
 
 test("Source72 ready false emits only a finite reason for unknown renderer detail", () => {
   assertRendererReadyFailure72("private raw error: Source72 unknown diagnostic fixture", "rendererError");
+});
+
+// Source75 adds only data-only presentation helpers to the explicit graph above.
+const storagePaint75 = load("bevy-storage-presentation");
+const storageCanvas75 = load("bevy-shared-canvas-mode");
+test("Source75 successful disabled prepare projects only presentation and releases at arming active close and withdraw", () => {
+  const f = fixture(); f.host.tick();
+  assert.deepEqual(f.state.preparePresentation, presentation);
+  assert.deepEqual(Object.keys(f.state.preparePresentation).sort(), ["logicalHeight", "logicalWidth", "stageCssScale", "touch"]);
+  assert.equal(f.state.active, false); assert.equal(f.state.transitioning, false); assert.deepEqual(f.owners, []);
+  f.echo(); f.host.tick(); assert.equal(f.state.transitioning, true); assert.equal(f.state.preparePresentation, null);
+  f.echo(); f.host.tick(); assert.equal(f.state.active, true); assert.equal(f.state.preparePresentation, null);
+  f.echo({ ready: false }); f.host.tick();
+  assert.deepEqual(f.state.preparePresentation, presentation, "fallback actually publishes disabled visible controls again");
+  f.host.withdraw(); assert.equal(f.state.preparePresentation, null);
+  f.host.tick(); assert.deepEqual(f.state.preparePresentation, presentation);
+  f.input.open = false; f.host.tick(); assert.equal(f.snapshots.at(-1).open, false); assert.equal(f.state.preparePresentation, null);
+  f.input.open = true; f.host.tick(); assert.deepEqual(f.state.preparePresentation, presentation);
+  f.host.stop(); assert.equal(f.state.preparePresentation, null);
+});
+
+test("Source75 projection follows the last successful snapshot rather than requested geometry or failure reason", () => {
+  const f = fixture(); f.host.tick();
+  f.input = { ...f.input, presentation: { ...presentation, logicalWidth: 1280 } };
+  assert.deepEqual(f.state.preparePresentation, presentation, "unpublished input cannot change the visible projection");
+  f.host.tick(); assert.deepEqual(f.state.preparePresentation, f.snapshots.at(-1).presentation);
+  f.runtime.setMir2StorageUiSnapshot = () => false;
+  f.input = { ...f.input, presentation: { ...presentation, logicalWidth: 1400 } };
+  f.host.tick(); assert.equal(f.state.diagnostic.reason, "snapshotRejected"); assert.equal(f.state.preparePresentation, null);
+  assert.notEqual(f.snapshots.at(-1).presentation.logicalWidth, 1400);
+  for (const arrange of [
+    g => { g.input.open = false; }, g => { g.input.eligible = false; },
+    g => { g.input.presentation = { ...presentation, logicalWidth: 759 }; },
+  ]) { const g = fixture(); arrange(g); g.host.tick(); assert.equal(g.state.preparePresentation, null); }
+  const denied = fixture({ setMir2StorageUiSnapshot() { return false; } }); denied.host.tick();
+  assert.equal(denied.state.preparePresentation, null, "nothing successfully published means nothing to mask");
+});
+
+test("Source75 prepare projection adds no runtime reader clock owner or intent calls", () => {
+  for (const error of [null, "storage assets failed to load", "unmapped renderer error"]) {
+    const f = rendererReadyFailureFixture72(error);
+    assert.deepEqual(f.calls, ["capabilities", "reader", "status", "now"]);
+    assert.deepEqual(f.state.preparePresentation, presentation); assert.deepEqual(f.f.owners, []);
+    assert.equal(f.f.snapshots.length, 1); assert.equal(f.f.intents.length, 0);
+    assert.equal("preparePresentation" in f.f.snapshots[0], false, "presentation remains outside the renderer ABI");
+  }
+});
+
+test("Source75 actual hook deduplicates geometry and retires masks before requested runtime or generation changes", () => {
+  const f = hookFixture71(); f.render(); f.flush();
+  assert.deepEqual(f.render().preparePresentation, presentation);
+  const mutations = f.mutations; [...f.intervals.values()][0](); assert.equal(f.mutations, mutations);
+  f.port.input = { ...f.port.input, presentation: { ...presentation, logicalWidth: 1280 } };
+  [...f.intervals.values()][0](); assert.equal(f.render().preparePresentation.logicalWidth, 1280);
+  const run = f.options.runtimeGeneration, runtime = f.options.runtimeRef.current;
+  f.options.runtimeGeneration++; assert.equal(f.render().preparePresentation, null);
+  f.options.runtimeGeneration = run; f.options.runtimeRef.current = {}; assert.equal(f.render().preparePresentation, null);
+  f.options.runtimeRef.current = null; assert.equal(f.render().preparePresentation, null);
+  f.options.runtimeRef.current = runtime; f.options.requested = false; assert.equal(f.render().preparePresentation, null);
+  f.flush(); assert.equal(f.states[0].preparePresentation, null);
+  f.options.requested = true; f.options.runtimeGeneration++; f.render(); f.flush();
+  assert.deepEqual(f.render().preparePresentation, f.port.input.presentation);
+  for (const pause of f.listeners.get("blur")) pause();
+  assert.equal(f.render().preparePresentation, null, "withdraw publishes the cleared projection even outside tick");
+});
+
+function maskGeometry75(style) {
+  assert.equal(style.maskImage, style.WebkitMaskImage);
+  assert.equal(style.maskSize, "100% 100%"); assert.equal(style.WebkitMaskSize, "100% 100%");
+  assert.equal(style.maskRepeat, "no-repeat"); assert.equal(style.WebkitMaskRepeat, "no-repeat");
+  const encoded = /^url\("data:image\/svg\+xml,(.*)"\)$/.exec(style.maskImage);
+  assert.ok(encoded); const svg = decodeURIComponent(encoded[1]);
+  assert.match(svg, /preserveAspectRatio="none"/); assert.match(svg, /fill="white" fill-rule="evenodd"/);
+  const path = / d="([^"]+)"/.exec(svg); assert.ok(path);
+  const number = "(-?[0-9]+(?:\\.[0-9]+)?)";
+  const rectangles = [...path[1].matchAll(new RegExp("M" + number + " " + number + "H" + number + "V" + number + "H" + number + "Z", "g"))]
+    .map(match => { const [x, y, right, bottom, closeX] = match.slice(1).map(Number); assert.equal(x, closeX); return [x, y, right, bottom]; });
+  assert.equal(rectangles.length, 4);
+  return { svg, rectangles, opaque(x, y) {
+    return rectangles.filter(([left, top, right, bottom]) => x >= left && x < right && y >= top && y < bottom).length % 2 === 1;
+  } };
+}
+
+test("Source75 actual SVG has exactly native desktop header and clipped pane holes while retaining exterior HUD pixels", () => {
+  for (const [width, height, expected] of [
+    [760, 430, [[0, 0, 760, 430], [15, 24, 745, 62], [15, 72, 333, 418], [357, 72, 745, 418]]],
+    [1024, 768, [[0, 0, 1024, 768], [147, 24, 877, 62], [147, 72, 465, 418], [489, 72, 877, 418]]],
+    [1281, 720, [[0, 0, 1281, 720], [275.5, 24, 1005.5, 62], [275.5, 72, 593.5, 418], [617.5, 72, 1005.5, 418]]],
+  ]) {
+    const style = storagePaint75.storagePrepareCanvasStyle({ ...presentation, logicalWidth: width, logicalHeight: height }, storageCanvas75.sharedUiCanvasId(false));
+    assert.ok(style); const geometry = maskGeometry75(style); assert.deepEqual(geometry.rectangles, expected);
+    assert.match(geometry.svg, new RegExp('viewBox="0 0 ' + width + " " + height + '"'));
+    for (const [left, top, right, bottom] of expected.slice(1)) assert.equal(geometry.opaque((left + right) / 2, (top + bottom) / 2), false);
+    assert.equal(geometry.opaque(4, 80), true); assert.equal(geometry.opaque(width - 4, 80), true);
+    assert.equal(geometry.opaque(width / 2, height - 4), true, "HUD below warehouse remains visible");
+    assert.equal(geometry.opaque((expected[2][2] + expected[3][0]) / 2, 100), true, "gap between panes stays visible");
+    assert.deepEqual(Object.keys(style).sort(), ["WebkitMaskImage", "WebkitMaskRepeat", "WebkitMaskSize", "maskImage", "maskRepeat", "maskSize"]);
+  }
+});
+
+test("Source75 touch invalid presentation and every non-UI canvas stay unmasked", () => {
+  for (const p of [null, { ...presentation, touch: true }, { ...presentation, touch: undefined },
+    ...[NaN, Infinity, 759, 16385, 1024.5].map(logicalWidth => ({ ...presentation, logicalWidth })),
+    ...[NaN, Infinity, 429, 16385].map(logicalHeight => ({ ...presentation, logicalHeight })),
+    ...[NaN, Infinity, 0, -1, 17].map(stageCssScale => ({ ...presentation, stageCssScale }))]) {
+    assert.equal(storagePaint75.storagePrepareCanvasStyle(p, "mir2-quest-ui-canvas"), null);
+  }
+  for (const id of ["mir2-web3-canvas", "world-canvas", ""]) assert.equal(storagePaint75.storagePrepareCanvasStyle(presentation, id), null);
+  assert.ok(storagePaint75.storagePrepareCanvasStyle({ ...presentation, stageCssScale: 0.5 }, storageCanvas75.sharedUiCanvasId(true)));
+});
+
+// Extract the real Page prop, Shell canvas style, and existing React InventoryWindow guard.
+const shellText75 = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
+const shellAst75 = ts.createSourceFile("storage-shell75.tsx", shellText75, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+function findNodes75(ast, predicate) { const result = []; (function visit(n) { if (predicate(n)) result.push(n); ts.forEachChild(n, visit); })(ast); return result; }
+const pagePrepareProps75 = findNodes75(storagePageAst, n => ts.isJsxAttribute(n) && n.name.getText(storagePageAst) === "bevyStoragePreparePresentation");
+const storageCanvases75 = findNodes75(shellAst75, n => ts.isJsxSelfClosingElement(n) && n.tagName.getText(shellAst75) === "canvas"
+  && n.attributes.properties.some(p => ts.isJsxAttribute(p) && p.name.getText(shellAst75) === "id" && p.initializer?.text === "mir2-quest-ui-canvas"));
+assert.equal(pagePrepareProps75.length, 1); assert.equal(storageCanvases75.length, 1);
+const actualCanvasStyle75 = storageCanvases75[0].attributes.properties.find(n => ts.isJsxAttribute(n) && n.name.getText(shellAst75) === "style").initializer.expression;
+const shellStorageActive75 = findNodes75(shellAst75, n => ts.isPropertyAssignment(n) && n.name.getText(shellAst75) === "sharedStorageUiActive");
+assert.equal(shellStorageActive75.length, 1);
+const sceneText75 = readFileSync(new URL("../app/components/original-client-game-ui-scene.tsx", import.meta.url), "utf8");
+const sceneAst75 = ts.createSourceFile("storage-react-fallback75.tsx", sceneText75, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const inventoryGuards75 = findNodes75(sceneAst75, n => ts.isConditionalExpression(n)
+  && findNodes75(n.whenTrue, x => ts.isJsxSelfClosingElement(x) && x.tagName.getText(sceneAst75) === "InventoryWindow").length > 0);
+assert.equal(inventoryGuards75.length, 1);
+test("Source75 actual Page and Shell mask only UI canvas pixels while React InventoryWindow remains mounted in prepare", () => {
+  const f = fixture(); f.host.tick();
+  const projectProp = new Function("bevyStorageUi", "return (" + pagePrepareProps75[0].initializer.expression.getText(storagePageAst) + ");");
+  const scope = { storagePrepareCanvasStyle: storagePaint75.storagePrepareCanvasStyle, sharedUiCanvasId: storageCanvas75.sharedUiCanvasId,
+    webGl2SharedCanvasPrototype: false, bevyStoragePreparePresentation: projectProp(f.state),
+    bevyHeroUiActive: false, bevyHeroUiTransitioning: false, bevyMailPageReady: false, bevyCharacterPageReady: false,
+    bevySpellsPageReady: false, bevyQuestUiCapturesPointer: false, bevyQuestWorldUiReady: false, bevyBagUiActive: false,
+    bevyNpcShopUiActive: false, bevyNpcShopUiTransitioning: false, bevyStorageUiActive: false, bevyStorageUiTransitioning: false, bevyHudUiReady: true };
+  const style = () => new Function(...Object.keys(scope), "return (" + actualCanvasStyle75.getText(shellAst75) + ");")(...Object.values(scope));
+  assert.equal(style().pointerEvents, "auto"); assert.ok(style().maskImage);
+  scope.bevyStoragePreparePresentation = null; const ordinary = style();
+  assert.deepEqual(ordinary, { pointerEvents: "auto" }, "all original pointer-event selection stays intact");
+  const storageActive = new Function("bevyStorageUiActive", "bevyStorageUiTransitioning", "return ("
+    + shellStorageActive75[0].initializer.getText(shellAst75) + ");");
+  const showReact = new Function("showInventory", "sharedBagUiActive", "sharedStorageUiActive", "return ("
+    + inventoryGuards75[0].condition.getText(sceneAst75) + ");");
+  assert.equal(showReact(true, false, storageActive(f.state.active, f.state.transitioning)), true);
+  f.echo(); f.host.tick(); assert.equal(projectProp(f.state), null);
+  assert.equal(showReact(true, false, storageActive(f.state.active, f.state.transitioning)), false);
+  scope.bevyStorageUiTransitioning = true; assert.equal(style().maskImage, undefined); assert.equal(style().pointerEvents, "auto");
+  f.echo(); f.host.tick(); assert.equal(projectProp(f.state), null);
+  f.host.withdraw(); assert.equal(projectProp(f.state), null);
+  const spreads = findNodes75(shellAst75, n => ts.isSpreadAssignment(n) && n.expression.getText(shellAst75).startsWith("storagePrepareCanvasStyle("));
+  assert.equal(spreads.length, 1); assert.equal(spreads[0].parent, actualCanvasStyle75, "only the existing UI canvas consumes the style");
+  assert.equal(findNodes75(actualCanvasStyle75, n => ts.isPropertyAssignment(n) && ["clipPath", "visibility", "width", "height"].includes(n.name.getText(shellAst75))).length, 0);
 });

@@ -64,7 +64,8 @@ export type StorageRuntime = {
   setMir2StorageUiPointerEdge?: (json: string) => boolean;
   withdrawMir2StorageUiSnapshot?: (identityJson: string) => boolean;
 };
-export type StorageHostState = { active: boolean; transitioning: boolean; ownerRevision: number; error: string | null; diagnostic: StorageDiagnostic };
+export type StoragePreparePresentation = BevyQuestUiPresentation;
+export type StorageHostState = { preparePresentation: StoragePreparePresentation | null; active: boolean; transitioning: boolean; ownerRevision: number; error: string | null; diagnostic: StorageDiagnostic };
 export type StorageHostOptions = {
   runtime: StorageRuntime; read: () => StorageHostInput; now: () => number;
   onOwner: (owner: BagOwner, run: number, ownerRevision: number) => void;
@@ -176,6 +177,7 @@ export class BevyStorageHost {
   private diagnosing = false; private firstFailure: StorageRejectReason | null = null;
   private lastStateError: string | null = null;
   private lastDiagnostic: StorageDiagnostic | null = null;
+  private lastPreparePresentationKey = "null";
   constructor(private readonly options: StorageHostOptions) {
     this.ownerRevision = options.read().ownerRevision;
     this.lastFrameAt = options.now();
@@ -202,12 +204,21 @@ export class BevyStorageHost {
       && this.gate(safe(i.serviceRevision), "serviceInvalid") && this.gate(i.serviceRevision > 0, "serviceInvalid")
       && this.gate(fitsStorage(i.presentation), "presentationInvalid") && this.gate(validStorageModel(i.inventory, i.storage), "modelInvalid");
   }
+  // Pixels only: project the successful mailbox publication, never current requested input.
+  private preparePresentation(): StoragePreparePresentation | null {
+    const s = this.sent, p = s?.presentation;
+    if (!this.owns() || this.phase !== "prepare" || !s?.open || s.inputEnabled
+      || !p || typeof p.touch !== "boolean" || !fitsStorage(p)) return null;
+    return { logicalWidth: p.logicalWidth, logicalHeight: p.logicalHeight, stageCssScale: p.stageCssScale, touch: p.touch };
+  }
   private state(error: string | null = null) {
+    const preparePresentation = this.preparePresentation();
+    this.lastPreparePresentationKey = JSON.stringify(preparePresentation);
     this.lastStateError = error;
     this.lastDiagnostic = { owner: this.phase === "active" ? "bevy" : this.phase === "arming" ? "transition" : "react",
       phase: this.phase, reason: this.firstFailure };
     this.options.onState({ active: this.phase === "active", transitioning: this.phase === "arming", ownerRevision: this.ownerRevision, error,
-      diagnostic: this.lastDiagnostic });
+      diagnostic: this.lastDiagnostic, preparePresentation });
   }
   private changeOwner(owner: BagOwner) {
     this.ownerRevision = Math.max(this.ownerRevision, this.options.read().ownerRevision) + 1;
@@ -279,7 +290,8 @@ export class BevyStorageHost {
     } finally {
       this.diagnosing = false;
       // Publish the last evaluated gate even when prepare/arming simply waits.
-      if (this.owns() && (!this.lastDiagnostic || this.lastDiagnostic.phase !== this.phase || this.lastDiagnostic.reason !== this.firstFailure))
+      if (this.owns() && (!this.lastDiagnostic || this.lastDiagnostic.phase !== this.phase || this.lastDiagnostic.reason !== this.firstFailure
+        || this.lastPreparePresentationKey !== JSON.stringify(this.preparePresentation())))
         this.state(this.lastStateError);
     }
   }
@@ -335,7 +347,7 @@ export class BevyStorageHost {
   withdraw() {
     if (!this.owns()) return;
     if (!this.diagnosing) this.firstFailure = null;
-    const s = this.sent; this.fallback(null); this.sent = null; this.sentKey = ""; this.pointerLease = null;
+    const s = this.sent; this.sent = null; this.sentKey = ""; this.pointerLease = null; this.fallback(null);
     if (s) try { this.options.runtime.withdrawMir2StorageUiSnapshot?.(JSON.stringify(identity(s))); } catch { /* Retired renderer. */ }
   }
   stop() {

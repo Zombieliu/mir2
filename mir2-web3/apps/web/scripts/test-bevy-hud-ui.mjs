@@ -88,14 +88,23 @@ test("hook ready loss/null/throw/HMR withdraws captured runtime using last valid
 test("actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes", () => {
   const file = ts.createSourceFile("shell.tsx", readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const functions = [];
+  const fishingFunctions = [];
   const visit = node => { if (ts.isFunctionDeclaration(node) && ["handleSharedHudPointer", "cancelSharedHudPointer"].includes(node.name?.text)) functions.push(node.getText(file)); ts.forEachChild(node, visit); };
   visit(file); assert.equal(functions.length, 2);
-  const compiled = ts.transpileModule(functions.join("\n"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  // Keep the real held-pointer cancellation path; this HUD fixture has no fishing lease.
+  const visitFishing = node => {
+    if (ts.isFunctionDeclaration(node) && ["cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"].includes(node.name?.text))
+      fishingFunctions.push(node.getText(file));
+    ts.forEachChild(node, visitFishing);
+  };
+  visitFishing(file); assert.equal(fishingFunctions.length, 2);
+  const compiled = ts.transpileModule([...functions, ...fishingFunctions].join("\n"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   class Element { constructor(id) { this.id = id; } setPointerCapture() {} }
   const router = new hud.HudPointerRouter(), held = { current: null }, bag = { current: { held: null } }, actions = [], moves = [];
   let foreground = [], current = status({ navigation: { ...navigation, bagOpen: true } });
   const scope = { parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, HTMLElement: Element, sharedUiCanvasId: () => "shared", webGl2SharedCanvasPrototype: true, bevyHudUiReady: true,
     hudPointerRouterRef: { current: router }, bagPointerRouterRef: bag, heldScenePointerRef: held,
+    worldFishingPhysicalRef: { current: null }, worldFishingTerminalRef: { current: null },
     characterPointerCallbacksRef: { current: { getBevyCharacterPointerContext: () => null } },
     spellsPointerCallbacksRef: { current: { getBevySpellsPointerContext: () => null } },
     readBevyHudStatus: () => current, stageFrameRef: { current: { focus() {} } }, sceneInteractionReady: true,
@@ -115,6 +124,6 @@ test("actual shell handler keeps uncovered HUD available with Bag/Quest open and
   handler(edge(400, 400), "down"); handler(edge(930, 694), "move"); handler(edge(930, 694), "up");
   assert.equal(moves.length, 1); assert.equal(moves[0].sceneX, 930, "world origin retains the existing world release path");
   handler(edge(400, 400), "down"); current = status({ generation: 8 }); handler(edge(930, 694), "up"); assert.equal(moves.length, 1);
-  assert.match(file.text, /\[bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player\?\.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning,/);
-  assert.match(file.text, /const blur = \(\) => \{ heldQuestControlPointersRef\.current\.clear\(\); cancelSharedNpcShopPointer\("blur"\); cancelSharedStoragePointer\("blur"\); cancelSharedComposePointer\(\);cancelSharedMailPointer\(\);cancelSharedSpellsPointer\(\);cancelSharedCharacterPointer\(\); cancelSharedBagPointer\("blur"\); cancelSharedHudPointer\(\); \}/);
+  assert.match(file.text, /\[bevyHeroUiToken, npcRepairView\?\.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player\?\.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning,/);
+  assert.match(file.text, /const blur = \(\) => \{ cancelSharedHeroPointer\(\); cancelBagBeltPointer\(\); cancelBagBeltPointer\(bagBeltArmedSharedRef\.current\); cancelNpcRepairPointer\(\); heldQuestControlPointersRef\.current\.clear\(\); cancelSharedNpcShopPointer\("blur"\); cancelSharedStoragePointer\("blur"\); cancelSharedComposePointer\(\);cancelSharedMailPointer\(\);cancelSharedSpellsPointer\(\);cancelSharedCharacterPointer\(\); cancelSharedBagPointer\("blur"\); cancelSharedHudPointer\(\); \}/);
 });
