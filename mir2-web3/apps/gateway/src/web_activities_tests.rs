@@ -160,4 +160,3 @@ fn web_state(config: GatewayConfig) -> WebState {
         channel_identity: crate::ChannelIdentityRegistry::in_memory(),
     }
 }
-

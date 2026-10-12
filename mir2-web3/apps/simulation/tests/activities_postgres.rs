@@ -132,8 +132,19 @@ fn newer_source_revision_rejects_an_older_owner(
     let before = durable(observer);
     let mut older = InProcessWorldRuntime::new(open(scoped, policy));
     login_start(&mut older);
+    let older_bootstrap = durable(observer);
     let original = older.active_character_checkpoint().unwrap();
-    assert_eq!(original.revision, before.account.saves[&CHARACTER].revision);
+    // Normal StartGame can commit its bootstrap save. Compare the owner to
+    // that observed durable revision, never the pre-login snapshot.
+    assert_eq!(
+        original.revision,
+        older_bootstrap.account.saves[&CHARACTER].revision
+    );
+    assert!(original.revision >= before.account.saves[&CHARACTER].revision);
+    assert_eq!(
+        older_bootstrap.account.activities,
+        before.account.activities
+    );
     checked(
         older.execute(WorldCommand::ClientPacket(ClientPacket::Turn {
             direction: MirDirection::Left,
@@ -153,15 +164,23 @@ fn newer_source_revision_rejects_an_older_owner(
     assert_eq!(old_unsaved.revision, original.revision);
     assert_eq!(old_unsaved.gold, original.gold - 3);
     assert_eq!(old_unsaved.direction, MirDirection::Left);
-    unchanged(&before, &durable(observer));
+    unchanged(&older_bootstrap, &durable(observer));
 
     // This is another ordinary Source with its own cache, not an administrative
     // SQL rewrite. Its full save genuinely advances the private character fence.
+    let before_newer_bootstrap = durable(observer);
     let mut newer = InProcessWorldRuntime::new(open(scoped, policy));
     login_start(&mut newer);
+    let newer_bootstrap = durable(observer);
+    let newer_original = newer.active_character_checkpoint().unwrap();
     assert_eq!(
-        newer.active_character_checkpoint().unwrap().revision,
-        original.revision
+        newer_original.revision,
+        newer_bootstrap.account.saves[&CHARACTER].revision
+    );
+    assert!(newer_original.revision >= before_newer_bootstrap.account.saves[&CHARACTER].revision);
+    assert_eq!(
+        newer_bootstrap.account.activities,
+        before_newer_bootstrap.account.activities
     );
     checked(
         newer.execute(WorldCommand::ClientPacket(ClientPacket::Turn {
@@ -184,13 +203,17 @@ fn newer_source_revision_rejects_an_older_owner(
     );
     let saved_newer = durable(observer);
     let newer_save = &saved_newer.account.saves[&CHARACTER];
-    assert_eq!(newer_save.revision, original.revision + 1);
+    assert_eq!(newer_save.revision, newer_original.revision + 1);
+    assert!(newer_save.revision > old_unsaved.revision);
     assert_eq!(newer_save.direction, MirDirection::Down);
-    assert_eq!(newer_save.gold, original.gold - 7);
-    assert_eq!(newer_save.credit, original.credit);
-    assert_eq!(saved_newer.account.activities, before.account.activities);
-    assert!(saved_newer.account_version > before.account_version);
-    assert!(saved_newer.save_version > before.save_version);
+    assert_eq!(newer_save.gold, newer_original.gold - 7);
+    assert_eq!(newer_save.credit, newer_original.credit);
+    assert_eq!(
+        saved_newer.account.activities,
+        newer_bootstrap.account.activities
+    );
+    assert!(saved_newer.account_version > newer_bootstrap.account_version);
+    assert!(saved_newer.save_version > newer_bootstrap.save_version);
 
     // No cache refresh in the test: the real full-save path may refresh account
     // metadata, but must retain this old ECS snapshot's original revision.
@@ -226,8 +249,8 @@ fn newer_source_revision_rejects_an_older_owner(
     assert_eq!(preserved.account.activities, saved_newer.account.activities);
     let preserved_save = &preserved.account.saves[&CHARACTER];
     assert_eq!(preserved_save.direction, MirDirection::Down);
-    assert_eq!(preserved_save.gold, original.gold - 7);
-    assert_eq!(preserved_save.credit, original.credit);
+    assert_eq!(preserved_save.gold, newer_original.gold - 7);
+    assert_eq!(preserved_save.credit, newer_original.credit);
     assert!(preserved_save.revision >= newer_save.revision);
 }
 
