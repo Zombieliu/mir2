@@ -1145,19 +1145,16 @@ impl WorldRuntime for InProcessWorldRuntime {
         }
         let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
             |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
-        let force_periodic=match &command {
-            WorldCommand::SelectNpcDialog{target} => crate::runtime::periodic_quest_target(target),
-            WorldCommand::Interact{object_id} => mir2_game_data::periodic_quests::npc(*object_id).is_some(),
-            _ => false,
-        };
+        let periodic_checkpoint = matches!(&command, WorldCommand::SelectNpcDialog { target }
+            if crate::runtime::periodic_quest_target(target));
         let default_source = matches!(&command,WorldCommand::MoveTo{..}|WorldCommand::Attack{..}
             |WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}
             |WorldCommand::CastSkill{..}|WorldCommand::UseItem{..}|WorldCommand::TransferMap{..}
             |WorldCommand::ApplyHandoffTransform{..}|WorldCommand::Stage5Command{..});
-        let before = if matches!(&command, WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}) {
-                self.session.begin_npc_dialog_source_command(force_periodic)?
-            } else if force_periodic { self.session.begin_guild_experience_command(true)? }
-            else if default_source { self.session.begin_default_npc_source_command()? }
+        let before = if periodic_checkpoint
+            || matches!(&command, WorldCommand::Interact{..}|WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}) {
+                self.session.begin_npc_dialog_source_command(false)?
+            } else if default_source { self.session.begin_default_npc_source_command()? }
             else if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
         let mut billing_packets = match &command {
             WorldCommand::Tick => {

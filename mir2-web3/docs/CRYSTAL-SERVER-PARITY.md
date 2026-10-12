@@ -1,5 +1,54 @@
 # Crystal Server Parity
 
+> Five-class/live NPC Gateway merge, 2026-10-12: separate server worktree
+> retains all live f574 ordinary-menu/periodic CAS behavior and02457 five-class
+> history. Fourteen real guarded checks pass 779 distinct names
+> (789 executions with overlap); one original isolated PostgreSQL fixture
+> remains ignored locally. The original02457 Linux291/1 red is retained; two
+> ordinary VIS01 death inputs now match Source Type0, with all assertions and
+> product Type1/2 bytes unchanged. No full Type1 acceptance. The old QA scope
+> loop checked zero rows; the independent actual snapshot binding now verifies
+> the captured Rust rows and receipts, but the VIS01 include_str fixture lacked
+> a historical snapshot row. Complete Gateway compiled-input capture remains
+> unproved and must not be inferred from current hashes. Actual client CI
+> passes all eight build jobs and Native987/0/7. Current merged Linux CI, signed
+> R26 package and fresh drained paired publication remain pending. Client and
+> engine stay on genuine02457; Gateway will retain its own actual commit identity.
+> [Original evidence and limits](FIVE-CLASS-LIVE-NPC-MERGE-20261012.md).
+> No human/native/laptop or whole-project100% acceptance.
+
+
+> Local ordinary NPC menu candidate, 2026-10-12: private trusted-display
+> permission now covers ordinary links and native NPC quest accept/finish.
+> Generated no-script menus and legitimate same-page retry remain usable.
+> Periodic Source checkpoints no longer force unchanged-page writes; recurrence
+> is captured before CAS, and exact live buff anchors detect actual changes.
+> Final405 distinct local checks pass (362 unit +43 integration,24 new);
+> one original dedicated PostgreSQL periodic fixture remains ignored locally.
+> [Original evidence, fixture changes and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
+> Exact-source Linux CI/package and a fresh drained publication remain open.
+> Public Gateway75c5/R25 appd917/updaterb439/feed20 are unchanged; no client
+> installer or wire/schema change. Full Source/Zone invocation, CHECKHUM/outbox,
+> fullP1-P7/Mentor/native/human remain open. Root is sole writer; expired
+> heartbeat stays paused and no old blocked Goal is marked complete.
+
+
+> NPC input backend75c5 actually published, 2026-10-12: private displayed-menu
+> and single-use input slots reject hidden/skipped/copied/argument-added input.
+> Both legacy and whole-target brackets work. Final318 distinct local checks
+> pass (24 new); focused29 are a subset. Genuine same-source Linux38159622183
+> and its complete artifact/log qualification pass all original release/siege
+> gates. A fresh empty realm was backed up and normally switched; original44
+> ordinary +18 resume public protocol checks pass, with final empty readback.
+> [Immutable original evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
+> Gateway75c5/PID3397094 is live; R25 appd917/engineb439/feed20 remain unchanged.
+> Existing launchers need no reinstall. Private environment, pre-existing
+> Stripe test config/monthly price1000, Caddy and original realm are preserved.
+> Original RED/compile/parent failures and cancelled c6 CI remain retained.
+> Ordinary-menu seals, full Source/Zone invocation, CHECKHUM/world outbox,
+> fullP1-P7/Mentor and native/human remain open. Root is the sole writer;
+> expired heartbeat stays paused.
+
 > Five-class Windows regression, 2026-10-12: the complete actual merged
 > Native host run passes 987 tests, with 7 original external checks ignored.
 > All five typed DoubleSlash/BackStep combinations pass, including committed

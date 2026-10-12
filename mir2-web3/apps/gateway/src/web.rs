@@ -20221,7 +20221,7 @@ mod tests {
                     object_id: 2005,
                     location: Point { x: 292, y: 616 },
                     direction: MirDirection::Right,
-                    kind: 2,
+                    kind: 0,
                 },
             },
             ServerPacket::ObjectHarvest {
@@ -20236,7 +20236,7 @@ mod tests {
                     object_id: 2004,
                     location: Point { x: 290, y: 618 },
                     direction: MirDirection::Up,
-                    kind: 1,
+                    kind: 0,
                 },
             },
             ServerPacket::ObjectHarvested {

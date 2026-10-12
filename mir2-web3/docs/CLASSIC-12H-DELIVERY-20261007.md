@@ -1,18 +1,35 @@
 # Classic gameplay delivery — 12-hour resumed work
 
-> Local NPC input candidate, 2026-10-12: undisplayed targets, skipped prompts,
-> added arguments and copied link/input pages cannot obtain input permission.
-> Private non-Clone menu/pending slots bind actual local identity, Entity and
-> imported script bodies, and invalidate on life/load/map/rollback/teardown.
-> Final318 distinct local Rust checks pass (24 new); focused29 are a subset.
-> All original result assertions remain. Exact parent reproduces3 old fixture
-> failures; Source-valid preparation fixes them. Original red/compile/review
-> failures and exact owned-file restoration proof remain. [Evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
-> New exact-source Linux CI/package and a drained Gateway switch remain open;
-> current public app d917/engine b439/feed20/Gateway4006 are unchanged. This is
-> deliberate local input hardening, not complete Source/Zone invocation,
-> CHECKHUM/world outbox, fullP1-P7/Mentor or native/human acceptance. Root is
-> the sole writer; expired heartbeat remains paused.
+> Local ordinary NPC menu candidate, 2026-10-12: private trusted-display
+> permission now covers ordinary links and native NPC quest accept/finish.
+> Generated no-script menus and legitimate same-page retry remain usable.
+> Periodic Source checkpoints no longer force unchanged-page writes; recurrence
+> is captured before CAS, and exact live buff anchors detect actual changes.
+> Final405 distinct local checks pass (362 unit +43 integration,24 new);
+> one original dedicated PostgreSQL periodic fixture remains ignored locally.
+> [Original evidence, fixture changes and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
+> Exact-source Linux CI/package and a fresh drained publication remain open.
+> Public Gateway75c5/R25 appd917/updaterb439/feed20 are unchanged; no client
+> installer or wire/schema change. Full Source/Zone invocation, CHECKHUM/outbox,
+> fullP1-P7/Mentor/native/human remain open. Root is sole writer; expired
+> heartbeat stays paused and no old blocked Goal is marked complete.
+
+
+> NPC input backend75c5 actually published, 2026-10-12: private displayed-menu
+> and single-use input slots reject hidden/skipped/copied/argument-added input.
+> Both legacy and whole-target brackets work. Final318 distinct local checks
+> pass (24 new); focused29 are a subset. Genuine same-source Linux38159622183
+> and its complete artifact/log qualification pass all original release/siege
+> gates. A fresh empty realm was backed up and normally switched; original44
+> ordinary +18 resume public protocol checks pass, with final empty readback.
+> [Immutable original evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
+> Gateway75c5/PID3397094 is live; R25 appd917/engineb439/feed20 remain unchanged.
+> Existing launchers need no reinstall. Private environment, pre-existing
+> Stripe test config/monthly price1000, Caddy and original realm are preserved.
+> Original RED/compile/parent failures and cancelled c6 CI remain retained.
+> Ordinary-menu seals, full Source/Zone invocation, CHECKHUM/world outbox,
+> fullP1-P7/Mentor and native/human remain open. Root is the sole writer;
+> expired heartbeat stays paused.
 
 
 > Windows CI qualification repair and Gateway publication, 2026-10-11:

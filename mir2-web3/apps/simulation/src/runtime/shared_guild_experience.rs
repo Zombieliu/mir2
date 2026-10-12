@@ -221,6 +221,10 @@ pub(crate) struct GuildExperienceCheckpoint {
 /// normalized: the usual save still samples the real remaining duration.
 fn npc_source_comparison_image(mut save: CharacterSaveRecord, refine: &crate::Stage5RefineState)
     -> Result<Vec<u8>, String> {
+    // Serialized timed buffs sample their remaining duration at each capture.
+    // Compare the actual live BuffState/clock anchors separately, so elapsed
+    // time alone cannot create writes while mutations are still detected.
+    save.buff_states_json.clear();
     if let Some(encoded) = save.stage5_systems_json.as_mut() {
         let mut systems: crate::Stage5SystemsState = serde_json::from_str(encoded)
             .map_err(|error| format!("NPC Source systems decode: {error}"))?;
@@ -422,7 +426,7 @@ impl SimulationSession {
                 let after = self.active_character_checkpoint().ok_or("NPC Source postimage missing")?;
                 let old = npc_source_comparison_image(before.save.clone(), &before.refine_source)?;
                 let new = npc_source_comparison_image(after, &self.app.world().resource::<super::resources::Stage5SystemsResource>().stage5_systems.refine)?;
-                Ok(old != new)
+                Ok(old != new || before.buffs.buffs != self.app.world().resource::<BuffResource>().buffs)
             })();
             match result {
                 Ok(changed) => changed,

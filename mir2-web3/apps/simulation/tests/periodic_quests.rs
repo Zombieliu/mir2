@@ -1238,7 +1238,24 @@ fn complete_cadences_award_five_or_ten_levels_across_class_and_band_boundaries()
                 );
                 drop(runtime);
                 let (runtime, _) = login(&fixture);
-                assert_same_save(&runtime.active_character_checkpoint().unwrap(), &committed);
+                // Normal StartGame now commits the real Login hook. Permit
+                // exactly that lifecycle receipt/revision; every other field,
+                // including rewards and claimed periods, must remain exact.
+                let mut after_login = committed.clone();
+                let durable = saved(&fixture);
+                assert_eq!(durable.revision, committed.revision + 1);
+                assert_eq!(durable.default_npc_events.next_sequence,
+                    committed.default_npc_events.next_sequence + 1);
+                assert_eq!(durable.default_npc_events.committed_sequence,
+                    durable.default_npc_events.next_sequence);
+                assert!(durable.default_npc_events.pending.is_empty());
+                assert_eq!(durable.default_npc_events.last_daily_local_date,
+                    committed.default_npc_events.last_daily_local_date);
+                assert_eq!(durable.default_npc_events.observed_dead,
+                    committed.default_npc_events.observed_dead);
+                after_login.revision = durable.revision;
+                after_login.default_npc_events = durable.default_npc_events;
+                assert_same_save(&runtime.active_character_checkpoint().unwrap(), &after_login);
             }
         }
     }
@@ -1611,6 +1628,12 @@ fn stale_full_save_claim_restores_the_durable_winner_without_a_success_ack() {
     );
     let (mut winner, _) = login(&fixture);
     let (mut stale, _) = login(&fixture);
+    // Both normal Login hooks have committed before the competing claims.
+    // Align their starting revision now, so only the first claim makes the
+    // independent second runtime stale, rather than the fixture's second login.
+    let baseline = saved(&fixture);
+    winner.restore_active_character_checkpoint(&baseline).unwrap();
+    stale.restore_active_character_checkpoint(&baseline).unwrap();
     open_offer(&mut winner, BICHON, DAILY, true);
     open_offer(&mut stale, BICHON, DAILY, true);
     assert!(removed(&finish(&mut winner, DAILY), DAILY));
@@ -1810,7 +1833,24 @@ fn file_acceptance_and_reward_are_durable_before_ack_and_survive_reopen() {
     for id in [DAILY, WEEKLY] {
         assert!(!removed(&finish(&mut runtime, id), id));
     }
-    assert_same_save(&saved(&reopened), &committed);
+    // The reopened Source commits one real Login hook before a retry. Its
+    // receipt/revision may advance once; all reward and inventory fields must
+    // still match the pre-restart settlement exactly.
+    let durable = saved(&reopened);
+    assert_eq!(durable.revision, committed.revision + 1);
+    assert_eq!(durable.default_npc_events.next_sequence,
+        committed.default_npc_events.next_sequence + 1);
+    assert_eq!(durable.default_npc_events.committed_sequence,
+        durable.default_npc_events.next_sequence);
+    assert!(durable.default_npc_events.pending.is_empty());
+    assert_eq!(durable.default_npc_events.last_daily_local_date,
+        committed.default_npc_events.last_daily_local_date);
+    assert_eq!(durable.default_npc_events.observed_dead,
+        committed.default_npc_events.observed_dead);
+    let mut after_login = committed.clone();
+    after_login.revision = durable.revision;
+    after_login.default_npc_events = durable.default_npc_events;
+    assert_same_save(&saved(&reopened), &after_login);
     // Keep this small owned fixture for failed-run diagnosis; never remove any
     // user account directory or read a deployment account-store path.
 }

@@ -9,6 +9,29 @@ use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
 
 const NPC: u32 = 2134;
 
+fn ordinary_targets(session: &SimulationSession) -> Vec<String> {
+    session
+        .world_snapshot()
+        .active_npc_dialog
+        .unwrap()
+        .links
+        .into_iter()
+        .map(|link| link.target)
+        .collect()
+}
+
+fn assert_stale_main_is_rejected_then_reopened(session: &mut SimulationSession) {
+    let before = ordinary_targets(session);
+    assert!(before.iter().any(|target| target == "@summon"));
+    call(session, "@summon");
+    assert_eq!(ordinary_targets(session), before);
+    call(session, "@MAIN");
+    call(session, "@summon");
+    assert!(ordinary_targets(session)
+        .iter()
+        .any(|target| target == "@agitonerecall"));
+}
+
 fn fixture() -> SimulationSession {
     let info = mir2_game_data::crystal_npc_info_manifest_ref()
         .npcs
@@ -94,6 +117,496 @@ fn show_input_link(session: &mut SimulationSession) {
         .links
         .iter()
         .any(|link| link.target.eq_ignore_ascii_case("@@summontest")));
+}
+
+#[test]
+fn ordinary_menu_canonical_path_keeps_full_target_and_wrong_npc_checks() {
+    let mut session = fixture();
+    let before = ordinary_targets(&session);
+    call(&mut session, "@summon(injected)");
+    assert_eq!(ordinary_targets(&session), before);
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: NPC + 1,
+        key: "@summon".into(),
+    });
+    assert_eq!(ordinary_targets(&session), before);
+    call(&mut session, "[@SUMMON]");
+    assert!(ordinary_targets(&session)
+        .iter()
+        .any(|target| target == "@agitonerecall"));
+    call(&mut session, "@agitonerecall");
+    assert!(ordinary_targets(&session)
+        .iter()
+        .any(|target| target == "@@summontest"));
+}
+
+#[test]
+fn ordinary_menu_copied_from_another_runtime_cannot_select_a_page() {
+    let mut first = fixture();
+    call(&mut first, "@summon");
+    let display = first.app.world().resource::<NpcStateResource>().clone();
+    let mut second = fixture();
+    second.app.world_mut().insert_resource(display);
+    let before = ordinary_targets(&second);
+    call(&mut second, "@agitonerecall");
+    assert_eq!(ordinary_targets(&second), before);
+    call(&mut first, "@agitonerecall");
+    assert!(ordinary_targets(&first)
+        .iter()
+        .any(|target| target == "@@summontest"));
+}
+
+#[test]
+fn ordinary_menu_dismissal_cannot_be_undone_by_restoring_cloneable_ui() {
+    let mut session = fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    call(&mut session, "@Exit");
+    assert!(session.world_snapshot().active_npc_dialog.is_none());
+    session.app.world_mut().insert_resource(display);
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_replacement_does_not_restore_the_old_page_permission() {
+    let mut session = fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    call(&mut session, "@summon");
+    session.app.world_mut().insert_resource(display);
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_healthy_vital_projection_keeps_legitimate_selection() {
+    let mut session = fixture();
+    session.force_authoritative_player_vitals(None, Some(1));
+    call(&mut session, "@summon");
+    assert!(ordinary_targets(&session)
+        .iter()
+        .any(|target| target == "@agitonerecall"));
+}
+
+#[test]
+fn ordinary_menu_death_and_revive_require_a_new_display() {
+    let mut session = fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    session.force_authoritative_player_vitals(Some(0), None);
+    session.force_authoritative_player_vitals(Some(10), None);
+    session.force_authoritative_player_life(false);
+    session.app.world_mut().insert_resource(display);
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_replacement_npc_entity_cannot_inherit_selection_permission() {
+    let mut session = fixture();
+    let original = entity_by_object_id(session.app.world(), NPC).unwrap();
+    let agent = session
+        .app
+        .world()
+        .entity(original)
+        .get::<NpcAgent>()
+        .unwrap()
+        .clone();
+    assert!(session.app.world_mut().despawn(original));
+    let replacement = session
+        .app
+        .world_mut()
+        .spawn((
+            WorldObject,
+            Npc,
+            ObjectId(NPC),
+            agent,
+            Position(Point { x: 13, y: 27 }),
+        ))
+        .id();
+    assert_ne!(original, replacement);
+    assert!(crystal_npc_object_in_data_range(session.app.world(), NPC));
+    let before = ordinary_targets(&session);
+    call(&mut session, "@summon");
+    assert_eq!(ordinary_targets(&session), before);
+}
+
+#[test]
+fn ordinary_menu_changed_local_map_index_invalidates_the_original_permission() {
+    let mut session = fixture();
+    let index = session
+        .app
+        .world()
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .map_index;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MapRuntimeResource>()
+        .current_map
+        .map_index = index + 1;
+    let before = ordinary_targets(&session);
+    call(&mut session, "@summon");
+    assert_eq!(ordinary_targets(&session), before);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MapRuntimeResource>()
+        .current_map
+        .map_index = index;
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_server_map_round_trip_cannot_restore_old_selection() {
+    let mut session = fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    let original = session
+        .app
+        .world()
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .clone();
+    let other = super::npc_script::crystal_npc_move_map_information(session.app.world(), "GA0");
+    for map in [other, original] {
+        assert!(super::map::relocate_player_to_map(
+            session.app.world_mut(),
+            map,
+            Point { x: 14, y: 27 },
+            MirDirection::Down,
+            None,
+        )
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MapInformation { .. })));
+    }
+    assert!(crystal_npc_object_in_data_range(session.app.world(), NPC));
+    session.app.world_mut().insert_resource(display);
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_logout_and_same_character_reentry_require_a_new_display() {
+    let mut session = fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    assert!(session
+        .try_handle_packet(ClientPacket::LogOut)
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
+    assert!(session
+        .try_handle_packet(ClientPacket::StartGame { character_index: 0 })
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
+    session.app.world_mut().insert_resource(display);
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_disconnect_does_not_keep_a_restored_page_permission() {
+    let mut session = fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    assert!(session
+        .try_handle_packet(ClientPacket::Disconnect)
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Disconnect { .. })));
+    session.app.world_mut().insert_resource(display);
+    let before = ordinary_targets(&session);
+    call(&mut session, "@summon");
+    assert_eq!(ordinary_targets(&session), before);
+}
+
+#[test]
+fn ordinary_menu_failed_logout_save_invalidates_selection_without_losing_character() {
+    let mut session = fixture();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
+    assert!(session.try_handle_packet(ClientPacket::LogOut).is_err());
+    assert!(session.active_identity().is_some());
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_failed_source_save_cannot_restore_selection_authority() {
+    let mut session = fixture();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    let before = session
+        .begin_npc_dialog_source_command(true)
+        .unwrap()
+        .unwrap();
+    let packets = session.select_npc_dialog_target_impl("@summon");
+    assert!(ordinary_targets(&session)
+        .iter()
+        .any(|target| target == "@agitonerecall"));
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
+    assert!(session
+        .finish_guild_experience_command(Some(before), packets)
+        .is_err());
+    assert_stale_main_is_rejected_then_reopened(&mut session);
+}
+
+#[test]
+fn ordinary_menu_cloneable_body_changes_cannot_authorize_selection() {
+    let mut session = fixture();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<NpcStateResource>()
+        .active_npc_dialog
+        .as_mut()
+        .unwrap()
+        .body
+        .push("unpublished display text".into());
+    let before = ordinary_targets(&session);
+    call(&mut session, "@summon");
+    assert_eq!(ordinary_targets(&session), before);
+}
+
+fn publish_synthetic_parcel_page(session: &mut SimulationSession, script_key: Option<String>) {
+    // Explicit synthetic server-generated menu; no imported canonical page
+    // is claimed to provide this link. The normal packet built-in is real.
+    let npc = entity_by_object_id(session.app.world(), NPC).unwrap();
+    session
+        .app
+        .world_mut()
+        .entity_mut(npc)
+        .get_mut::<NpcAgent>()
+        .unwrap()
+        .script_key = script_key;
+    let mut display = session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap()
+        .clone();
+    display.links = vec![super::npc::NpcDialogLinkState {
+        text: "Send parcel".into(),
+        target: "@SENDPARCEL".into(),
+    }];
+    super::npc::set_dialog(session.app.world_mut(), display);
+}
+
+#[test]
+fn ordinary_menu_synthetic_no_script_page_supports_repeated_legitimate_selection() {
+    let mut session = fixture();
+    publish_synthetic_parcel_page(&mut session, None);
+    for _ in 0..2 {
+        assert!(session
+            .handle_packet(ClientPacket::CallNpc {
+                object_id: NPC,
+                key: "@SENDPARCEL".into(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+    }
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    call(&mut session, "@Exit");
+    session.app.world_mut().insert_resource(display);
+    assert!(!session
+        .handle_packet(ClientPacket::CallNpc {
+            object_id: NPC,
+            key: "@SENDPARCEL".into(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+}
+
+#[test]
+fn ordinary_menu_synthetic_declared_missing_script_cannot_downgrade_to_generated_permission() {
+    let mut session = fixture();
+    publish_synthetic_parcel_page(&mut session, Some("missing/canonical/script".into()));
+    assert!(!session
+        .handle_packet(ClientPacket::CallNpc {
+            object_id: NPC,
+            key: "@SENDPARCEL".into(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+}
+
+#[test]
+fn ordinary_menu_synthetic_canonical_parcel_page_keeps_same_page_retry() {
+    let mut session = fixture();
+    publish_synthetic_parcel_page(&mut session, Some("GuildTerritory/GA0/GTAdmin-GA10".into()));
+    for _ in 0..2 {
+        assert!(session
+            .handle_packet(ClientPacket::CallNpc {
+                object_id: NPC,
+                key: "@SENDPARCEL".into(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+    }
+}
+
+#[test]
+fn ordinary_menu_synthetic_exact_empty_script_key_keeps_generated_menu_retry() {
+    let mut session = fixture();
+    publish_synthetic_parcel_page(&mut session, Some(String::new()));
+    for _ in 0..2 {
+        assert!(session
+            .handle_packet(ClientPacket::CallNpc {
+                object_id: NPC,
+                key: "@SENDPARCEL".into(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+    }
+}
+
+#[test]
+fn ordinary_menu_synthetic_script_option_change_invalidates_a_generated_display() {
+    let mut session = fixture();
+    publish_synthetic_parcel_page(&mut session, None);
+    let npc = entity_by_object_id(session.app.world(), NPC).unwrap();
+    session
+        .app
+        .world_mut()
+        .entity_mut(npc)
+        .get_mut::<NpcAgent>()
+        .unwrap()
+        .script_key = Some(String::new());
+    assert!(!session
+        .handle_packet(ClientPacket::CallNpc {
+            object_id: NPC,
+            key: "@SENDPARCEL".into(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+    publish_synthetic_parcel_page(&mut session, Some(String::new()));
+    assert!(session
+        .handle_packet(ClientPacket::CallNpc {
+            object_id: NPC,
+            key: "@SENDPARCEL".into(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSendRequest)));
+}
+
+fn original_quest_one_fixture() -> SimulationSession {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_world_runtime());
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    assert!(session
+        .handle_packet(ClientPacket::StartGame { character_index: 0 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
+    session.force_authoritative_player_transform(Point { x: 283, y: 606 }, MirDirection::Down);
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 3,
+        key: "@MAIN".into(),
+    });
+    assert!(ordinary_targets(&session)
+        .iter()
+        .any(|target| target == "@quest:accept:1"));
+    session
+}
+
+#[test]
+fn ordinary_menu_native_accept_rejects_restored_original_quest_page() {
+    let mut session = original_quest_one_fixture();
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 3,
+        key: "@Exit".into(),
+    });
+    session.app.world_mut().insert_resource(display);
+    let request = ClientPacket::AcceptQuest {
+        npc_index: 3,
+        quest_index: 1,
+    };
+    assert!(!session
+        .handle_packet(request.clone())
+        .iter()
+        .any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 1,
+                taken: true,
+                ..
+            }
+        )));
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 3,
+        key: "@MAIN".into(),
+    });
+    assert!(session.handle_packet(request).iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 1,
+            taken: true,
+            ..
+        }
+    )));
+}
+
+#[test]
+fn ordinary_menu_native_finish_rejects_restored_original_quest_page_without_rewards() {
+    let mut session = original_quest_one_fixture();
+    assert!(session
+        .handle_packet(ClientPacket::AcceptQuest {
+            npc_index: 3,
+            quest_index: 1
+        })
+        .iter()
+        .any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 1,
+                taken: true,
+                completed: true,
+                ..
+            }
+        )));
+    session.force_authoritative_player_transform(Point { x: 293, y: 619 }, MirDirection::Down);
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 4,
+        key: "@MAIN".into(),
+    });
+    assert!(ordinary_targets(&session)
+        .iter()
+        .any(|target| target == "@quest:finish:1"));
+    let display = session.app.world().resource::<NpcStateResource>().clone();
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 4,
+        key: "@Exit".into(),
+    });
+    session.app.world_mut().insert_resource(display);
+    let before = session.world_snapshot();
+    let request = ClientPacket::FinishQuest {
+        quest_index: 1,
+        selected_item_index: -1,
+    };
+    assert!(!session.handle_packet(request.clone()).iter().any(|packet| matches!(
+        packet, ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
+    )));
+    let after = session.world_snapshot();
+    assert_eq!(
+        (after.gold, after.player_experience),
+        (before.gold, before.player_experience)
+    );
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 4,
+        key: "@MAIN".into(),
+    });
+    assert!(session.handle_packet(request).iter().any(|packet| matches!(
+        packet, ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
+    )));
 }
 
 fn request_input(session: &mut SimulationSession) {

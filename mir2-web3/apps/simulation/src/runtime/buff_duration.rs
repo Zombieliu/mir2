@@ -13,7 +13,7 @@ fn next_duration_instance()->u64 {
         .expect("buff duration instance counter exhausted")
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(in super::super) struct RealTimeBuffDuration {
     remaining_at_anchor_ms: u64,
     anchor: Instant,

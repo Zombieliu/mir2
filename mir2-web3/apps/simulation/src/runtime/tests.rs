@@ -4145,11 +4145,9 @@ fn npc_dialog_target_npc_without_script_rejects_without_runtime_chat_and_dismiss
     let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    session
-        .app
-        .world_mut()
-        .resource_mut::<NpcStateResource>()
-        .active_npc_dialog = Some(super::ActiveNpcDialogState {
+    // This synthetic server page must be published; directly copied UI has
+    // no menu authority and cannot reach the no-script dispatch branch.
+    crate::runtime::npc::set_dialog(session.app.world_mut(), super::ActiveNpcDialogState {
         npc_object_id: 4999,
         npc_name: "Quiet Trader".to_string(),
         npc_name_key: None,

@@ -3595,6 +3595,7 @@ fn active_npc_allows_quest_request(
     let npc_object_id = active_dialog.npc_object_id;
     if !active_dialog.links.iter().any(|link| {
         quest_dialog_link_allows_operation(&link.target, quest_id, finish, selected_item_index)
+            && super::npc_input::has_menu_target(world, &link.target)
     }) {
         return false;
     }
@@ -3699,12 +3700,11 @@ fn quest_dialog_link_allows_operation(
 
 #[cfg(test)]
 mod quest_dialog_operation_link_tests {
-    use bevy_ecs::prelude::World;
-    use mir2_protocol::Point;
+    use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
 
-    use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
-    use super::super::npc::{ActiveNpcDialogState, NpcDialogLinkState};
-    use super::super::resources::{NpcStateResource, SessionResource};
+    use super::super::components::{entity_by_object_id, player_entity, Position};
+    use super::super::npc::{set_dialog, ActiveNpcDialogState, NpcDialogLinkState};
+    use super::super::resources::NpcStateResource;
     use super::{
         active_npc_allows_quest_request, quest_dialog_link_allows_operation, GUIDE_NPC_ID,
         GUIDE_QUEST_ID,
@@ -3758,20 +3758,17 @@ mod quest_dialog_operation_link_tests {
 
     #[test]
     fn quest_packets_require_the_exact_active_dialog_inside_crystal_data_range() {
-        let mut world = World::new();
-        world.insert_resource(NpcStateResource::new());
-        let config = crate::config::SimulationConfig::default();
-        let mut session = SessionResource::new(&config);
-        session.selected_character = Some(config.default_character.clone());
-        world.insert_resource(session);
-        let player = world
-            .spawn((SelfPlayer, ObjectId(1), Position(Point { x: 10, y: 10 })))
-            .id();
-        world.spawn((
-            Npc,
-            ObjectId(GUIDE_NPC_ID),
-            Position(Point { x: 11, y: 10 }),
-        ));
+        let mut session = crate::SimulationSession::new(crate::config::SimulationConfig::default());
+        assert!(session.handle_packet(ClientPacket::Login {
+            account_id: "demo".into(), password: "demo".into(),
+        }).iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        assert!(session.handle_packet(ClientPacket::StartGame { character_index: 0 }).iter()
+            .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
+        session.force_authoritative_player_transform(Point { x: 10, y: 10 }, MirDirection::Down);
+        let world = session.app.world_mut();
+        let player = player_entity(world).unwrap();
+        let npc = entity_by_object_id(world, GUIDE_NPC_ID).unwrap();
+        world.entity_mut(npc).get_mut::<Position>().unwrap().0 = Point { x: 11, y: 10 };
 
         assert!(!active_npc_allows_quest_request(
             &world,
@@ -3795,7 +3792,8 @@ mod quest_dialog_operation_link_tests {
             None,
         ));
 
-        world.resource_mut::<NpcStateResource>().active_npc_dialog = Some(ActiveNpcDialogState {
+        // Publish this synthetic test page through the trusted server path.
+        set_dialog(world, ActiveNpcDialogState {
             npc_object_id: GUIDE_NPC_ID,
             npc_name: "Village Guide".to_string(),
             npc_name_key: None,
@@ -3823,15 +3821,17 @@ mod quest_dialog_operation_link_tests {
             None,
         ));
 
-        world
-            .resource_mut::<NpcStateResource>()
+        let mut finish_display = world
+            .resource::<NpcStateResource>()
             .active_npc_dialog
-            .as_mut()
+            .as_ref()
             .expect("active quest dialog")
-            .links = vec![NpcDialogLinkState {
+            .clone();
+        finish_display.links = vec![NpcDialogLinkState {
             text: "Complete".to_string(),
             target: format!("@FinishQuest:{GUIDE_QUEST_ID}"),
         }];
+        set_dialog(world, finish_display);
         assert!(active_npc_allows_quest_request(
             &world,
             GUIDE_QUEST_ID,
@@ -9057,13 +9057,10 @@ impl SimulationSession {
                 return self.submit_shared_guild_name(name);
             }
         }
-        let mut recurrence_packets = if matches!(packet, ClientPacket::StartGame { .. }) {
-            Vec::new()
-        } else {
-            refresh_quest_recurrence(self.app.world_mut())
-        };
+        let mut recurrence_packets = Vec::new();
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
             super::npc_input::invalidate(self.app.world_mut());
+            recurrence_packets = refresh_quest_recurrence(self.app.world_mut());
             if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 return Err(error);
@@ -9108,17 +9105,26 @@ impl SimulationSession {
                 || super::default_npc_events::daily_due(self.app.world()) || xp_source
                 || matches!(&packet, ClientPacket::UseItem{..}|ClientPacket::Walk{..}|ClientPacket::Run{..}
                     |ClientPacket::AcceptQuest{..}|ClientPacket::Chat{..}));
-        let force_periodic=super::quests::periodic_quests::packet_requires_checkpoint(&packet)
-            || matches!(&packet, ClientPacket::DepositRefineItem{..}
+        let periodic_checkpoint=super::quests::periodic_quests::packet_requires_checkpoint(&packet);
+        let force_save=matches!(&packet, ClientPacket::DepositRefineItem{..}
                 |ClientPacket::RetrieveRefineItem{..}|ClientPacket::RefineCancel
                 |ClientPacket::RefineItem{..}|ClientPacket::CheckRefine{..})
             || matches!(&packet, ClientPacket::CallNpc{key,..}
                 if key.trim_start_matches('@').eq_ignore_ascii_case("REFINECOLLECT"));
-        let before = if matches!(&packet, ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}) {
-                self.begin_npc_dialog_source_command(force_periodic)?
-            } else if force_periodic { self.begin_guild_experience_command(true)? }
+        // Periodic requests need the full Source checkpoint, including native
+        // accept/finish/abandon. Views, rejections and retries must not force a
+        // write; the actual full postimage and successful claim decide that.
+        let before = if periodic_checkpoint
+            || matches!(&packet, ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}) {
+                self.begin_npc_dialog_source_command(force_save)?
+            } else if force_save { self.begin_guild_experience_command(true)? }
             else if default_source { self.begin_default_npc_source_command()? }
             else if xp_source { self.begin_guild_experience_command(false)? } else { None };
+        // Capture before recurrence can clear a completed periodic row or
+        // advance its high-watermark. Its response is subject to the same CAS.
+        if !matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
+            recurrence_packets.extend(refresh_quest_recurrence(self.app.world_mut()));
+        }
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
         let mut packets = self.handle_packet_impl(packet);
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
