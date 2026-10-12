@@ -1,5 +1,17 @@
 # Agent Run Log
 
+## 2026-10-12 — Gateway catalogue transport actually published
+
+Source28f1 exact Linux38189025721 and whole artifact/log/ELF qualification pass.
+The fresh empty realm was backed up and normally switched; unchanged strict44
+ordinary +18 resume checks and protected final empty readback pass. Eight actual
+owner scenes retain526 catalogue packets each: first1.182s, maximum8.763s.
+Fourteen server writes measure16.920–44.451ms. Parent38s failure remains retained;
+root cause/long-term/native/human acceptance are not claimed. R25/feed20 stays
+unchanged. RNG source8fee is pushed and its Linux38193711006 is still pending.
+[Actual delivery evidence](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+
+
 ## 2026-10-12 — Genuine NPC random Source rollback Candidate
 
 Root remains sole code, common-doc and Git writer in the lifecycle lane. Genuine

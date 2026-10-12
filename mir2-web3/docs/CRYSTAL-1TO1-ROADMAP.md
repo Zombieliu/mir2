@@ -7,20 +7,26 @@
 > stays no-write. Actual532 distinct local checks pass (395unit+137integration),
 > six new checks included; one original PostgreSQL check is ignored locally.
 > Original RED/compiler failures are retained. Linux explicit gate added;
-> release/publication pending. Live stays f574/R25/feed20. Shared Source/Zone
+> RNG Linux38193711006/publication pending. Parent28f1/R25/feed20 is live.
+> Shared Source/Zone
 > invocation/outbox and fullP1–P7/Mentor/native/human remain open.
 > [Source-bound evidence and limits](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
 
 
-> 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
-> feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
-> explicit. Partial/cancelled writes fence before unlock. Actual331 distinct
-> adjacent Gateway checks pass; focused25 are a subset,13 are new, no ignores.
-> Original two RED checks and compiler failures remain retained. Linux/public
-> qualification is pending; live stays f574/R25/feed20. The historical37.571s
-> first scene and153ms unchanged retry are retained. Parent flush was78ms;
-> the cold latency cause remains unconfirmed. FullP1-P7/Mentor stays open.
-> [Source-bound evidence and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+> Gateway catalogue transport backend28f1 actually published, 2026-10-12:
+> bounded32-frame/64-KiB batches retain original frame order; accepted sockets
+> use TCP_NODELAY and partial/cancelled writes fence before unlocking. Local331
+> Gateway checks pass (13new), exact Linux38189025721 passes all release/siege
+> gates, whole authenticated archive/ELF/logs are qualified. Fresh empty realm
+> was backed up and normally switched; strict44 ordinary+18 resume checks pass,
+> with protected final empty readback. Actual eight owner-scene observations
+> retain526 catalogue packets each: first1.182s, maximum8.763s under original20s.
+> Fourteen server batch writes measured16.920–44.451ms. Original37.571s failure
+> and153ms unchanged retry remain retained; root cause and long-term latency
+> guarantee remain unconfirmed. R25/appd917/updaterb439/feed20 is preserved;
+> no reinstall. RNG source8fee is pushed and Linux38193711006 remains pending.
+> FullP1–P7/Mentor, durable shared world outbox and native/human stay open.
+> [Actual delivery and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
 
 
 > Ordinary NPC menu backendf574 actually published, 2026-10-12: private
