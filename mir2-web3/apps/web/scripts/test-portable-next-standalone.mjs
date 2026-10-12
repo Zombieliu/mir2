@@ -909,3 +909,229 @@ test("actual public copy retains all thirty genuine Bag and Storage PNG bytes", 
   assert.equal(await exists(path.join(destination, remote)), false);
   assert.equal((await auditPortableTree(destination)).links, 0);
 });
+
+async function shopSkinReference76() {
+  const sourcePath = path.resolve(import.meta.dirname,
+    "../../game-client/client-bevy/src/crystal_ui/shop_paint.rs");
+  const stat = await fs.lstat(sourcePath);
+  assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "canonical Shop painter is ordinary");
+  const source = await fs.readFile(sourcePath, "utf8");
+  const declaration = source.match(/pub const SHOP_REQUIRED_SKINS:\s*&\[&str\]\s*=\s*&\[([\s\S]*?)\];/);
+  assert.ok(declaration, "canonical Shop static skin declaration exists");
+  const skins = [...declaration[1].matchAll(/"(original-ui\/[^"\r\n]+\.png)"/g)].map(match => match[1]);
+  assert.equal(skins.length, 15, "bounded canonical Shop static art closure");
+  assert.equal(new Set(skins).size, skins.length, "canonical Shop skin paths are unique");
+  return skins;
+}
+
+test("canonical Shop static skins join Bag and Storage without selecting neighboring or dynamic media", async () => {
+  const shop = await shopSkinReference76(), bagStorage = await bagStorageSkinReference74();
+  assert.equal(shop.filter(skin => !bagStorage.includes(skin)).length, 12, "exact missing Shop skin addition");
+  const skins = [...new Set([...bagStorage, ...shop])];
+  assert.equal(skins.length, 42, "canonical Bag Storage and Shop static union");
+  for (const skin of skins) assert.equal(selectPublic(skin, false), true, skin);
+  for (const remote of ["original-ui/Prguse/999.png", "original-ui/Prguse/1001.png",
+    "original-ui/Prguse/549.png", "original-ui/Prguse/551.png",
+    "original-ui/Prguse2/196.png", "original-ui/Prguse2/200.png",
+    "original-ui/Prguse2/204.png", "original-ui/Prguse2/206.png", "original-ui/Prguse2/210.png",
+    "original-ui/Title/311.png", "original-ui/Title/315.png", "original-ui/Title/312.mask.png",
+    "original-ui/Items/2.png", "original-ui/StateItem/2.png", "original-ui/ChrSel/0.png", "original-ui/Sound/1.wav"])
+    assert.equal(selectPublic(remote, false), false, remote);
+});
+
+test("actual public copy retains all forty-two genuine Bag Storage and Shop PNGs with missing and collision safeguards", async () => {
+  const shop = await shopSkinReference76(), bagStorage = await bagStorageSkinReference74();
+  const skins = [...new Set([...bagStorage, ...shop])];
+  const publicRoot = path.resolve(import.meta.dirname, "../public");
+  const base = path.join(fixtureRoot, "bag-storage-shop-genuine-skins-copy");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  const bodies = new Map();
+  for (const skin of skins) {
+    const original = path.join(publicRoot, ...skin.split("/"));
+    const stat = await fs.lstat(original);
+    assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "genuine source skin is ordinary: " + skin);
+    const bytes = await fs.readFile(original);
+    assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      "genuine source PNG signature: " + skin);
+    bodies.set(skin, bytes);
+    await write(path.join(source, skin), bytes);
+  }
+  assert.equal(shop.filter(skin => !bagStorage.includes(skin)).reduce((bytes, skin) => bytes + bodies.get(skin).length, 0),
+    31495, "exact twelve genuine newly selected Shop bytes");
+  const copy = await copySelectedPublic({ sourceRoot: source, destinationRoot: destination, selection: selectPublic });
+  assert.equal(copy.files, 42);
+  for (const [skin, bytes] of bodies) {
+    assert.deepEqual(await fs.readFile(path.join(destination, skin)), bytes, "packaged original bytes: " + skin);
+    assert.deepEqual(await fs.readFile(path.join(source, skin)), bytes, "fixture source retained: " + skin);
+    assert.deepEqual(await fs.readFile(path.join(publicRoot, ...skin.split("/"))), bytes, "genuine source retained: " + skin);
+  }
+  assert.equal((await auditPortableTree(destination)).links, 0);
+  const missing = "original-ui/Prguse/1000.png";
+  assert.ok(shop.includes(missing));
+  const missingSource = path.join(base, "missing-source"), missingDestination = path.join(base, "missing-package");
+  for (const [skin, bytes] of bodies) if (skin !== missing) await write(path.join(missingSource, skin), bytes);
+  const incomplete = await copySelectedPublic({ sourceRoot: missingSource, destinationRoot: missingDestination, selection: selectPublic });
+  assert.equal(incomplete.files, 41);
+  assert.equal(await exists(path.join(missingSource, missing)), false);
+  assert.equal(await exists(path.join(missingDestination, missing)), false);
+  await assert.rejects(fs.readFile(path.join(missingDestination, missing)), error => error.code === "ENOENT");
+  const collisionSource = path.join(base, "collision-source"), collisionDestination = path.join(base, "collision-package");
+  const different = bodies.get("original-ui/Prguse/550.png");
+  assert.notDeepEqual(different, bodies.get(missing), "two genuine source skins are not substitutes");
+  await write(path.join(collisionSource, missing), bodies.get(missing));
+  await write(path.join(collisionDestination, missing), different);
+  await assert.rejects(copySelectedPublic({ sourceRoot: collisionSource, destinationRoot: collisionDestination,
+    selection: selectPublic }), /collision differs/);
+  assert.deepEqual(await fs.readFile(path.join(collisionSource, missing)), bodies.get(missing));
+  assert.deepEqual(await fs.readFile(path.join(collisionDestination, missing)), different);
+});
+
+// These finite alternatives are derived from actual Rust contracts, never the selector's own list.
+async function canonicalRust76(relative) {
+  const file = path.resolve(import.meta.dirname, "../../game-client", relative);
+  const stat = await fs.lstat(file);
+  assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "canonical Rust source is ordinary: " + relative);
+  return fs.readFile(file, "utf8");
+}
+function rustFunction76(source, name) {
+  const signature = new RegExp("\\bfn\\s+" + name + "\\s*\\(").exec(source);
+  assert.ok(signature, "canonical function exists: " + name);
+  const start = source.indexOf("{", signature.index);
+  let depth = 1, end = start + 1;
+  for (; end < source.length && depth; end++) {
+    if (source[end] === "{") depth++;
+    else if (source[end] === "}") depth--;
+  }
+  assert.equal(depth, 0, "canonical function has complete body: " + name);
+  return source.slice(start + 1, end - 1);
+}
+const literalAssets76 = text => [...text.matchAll(/"(original-ui\/[^"{}\r\n]+\.png)"/g)].map(match => match[1]);
+const integerRange76 = (first, last) => Array.from({ length: last - first + 1 }, (_, i) => first + i);
+async function characterSpellsSkinReference76() {
+  const character = rustFunction76(await canonicalRust76("client-bevy/src/portable_character_ui.rs"), "required_assets");
+  const stats = rustFunction76(await canonicalRust76("client-bevy/src/crystal_ui/character_stats_portable.rs"), "required_assets");
+  const spells = rustFunction76(await canonicalRust76("runtime/src/spells_ui_host.rs"), "required_assets");
+  const appearance = await canonicalRust76("client-bevy/src/crystal_ui/character_page.rs");
+  const classes = rustFunction76(await canonicalRust76("client-bevy/src/crystal_ui/character_stats.rs"), "class_image_index");
+  const materials = await canonicalRust76("client-bevy/src/crystal_ui/character_materials.rs");
+  assert.match(character, /crystal_character_page_index/); assert.match(character, /class_image_index/);
+  assert.match(character, /crystal_character_paper_doll_layers/); assert.match(character, /user_item_image_index/);
+  const classNames = /\[([^\]]+)\]\s*\.iter\(\)/.exec(classes);
+  assert.ok(classNames);
+  const classBase = /\.map\(\|index\|\s*(\d+)\s*\+\s*index as u16\)/.exec(classes);
+  assert.ok(classBase);
+  const classFrames = [...classNames[1].matchAll(/"([^"]+)"/g)].map((_, i) => Number(classBase[1]) + i);
+  const statsRange = /\.chain\(\((\d+)\.\.=(\d+)\)\.map\(\|i\|\s*format!\("original-ui\/Prguse\/\{i\}\.png"\)\)\)/.exec(stats);
+  assert.ok(statsRange);
+  assert.deepEqual(integerRange76(Number(statsRange[1]), Number(statsRange[2])), classFrames);
+  const paths = [...literalAssets76(character), ...literalAssets76(stats),
+    ...classFrames.map(index => "original-ui/Prguse/" + index + ".png")];
+  assert.match(spells, /character_stats_portable::required_assets\(\)/);
+  const staticLoops = [...spells.matchAll(/for i in \[([\d,\s]+)\]\s*\{\s*p\.push\(format!\("original-ui\/([^/"]+)\/\{i\}\.png"\)\);\s*\}/g)];
+  assert.equal(staticLoops.length, 2, "only literal static Title and Prguse loops");
+  for (const [, values, library] of staticLoops)
+    paths.push(...values.split(",").map(v => v.trim()).filter(Boolean).map(index => "original-ui/" + library + "/" + Number(index) + ".png"));
+  const spellsRange = /for i in (\d+)\.\.=(\d+)\s*\{\s*p\.push\(format!\("original-ui\/([^/"]+)\/\{i\}\.png"\)\);\s*\}/.exec(spells);
+  assert.ok(spellsRange);
+  paths.push(...integerRange76(Number(spellsRange[1]), Number(spellsRange[2])).map(index => "original-ui/" + spellsRange[3] + "/" + index + ".png"));
+  const genders = [...rustFunction76(appearance, "crystal_character_gender_offset").matchAll(/Some\((\d+)\)/g)].map(m => Number(m[1]));
+  assert.deepEqual(genders, [0, 1]);
+  const pageBase = /(\d+)\s*\+\s*crystal_character_gender_offset/.exec(rustFunction76(appearance, "crystal_character_page_index"));
+  assert.ok(pageBase);
+  paths.push(...genders.map(offset => "original-ui/Prguse/" + (Number(pageBase[1]) + offset) + ".png"));
+  const core = [...new Set(paths)];
+  assert.equal(core.length, 69, "canonical general Character Stats and Spells static alternatives");
+  const hair = rustFunction76(appearance, "crystal_character_hair_frame");
+  assert.match(hair, /hair >= CRYSTAL_MALE_HAIR_RECTS\.len\(\)/);
+  assert.match(hair, /CrystalFrameSpec::new\("Prguse", base \+ hair as u16, rect\)/);
+  const hairBranches = [...hair.matchAll(/\((\d+),\s*(true|false)\)\s*=>\s*\((\d+),\s*([A-Z_]+)\[hair\]\)/g)];
+  assert.equal(hairBranches.length, 4, "all authored gender/Assassin alternatives");
+  const hairPaths = [];
+  for (const [, , , base, rects] of hairBranches) {
+    const declaration = new RegExp("const " + rects + ":\\s*\\[CrystalRect;\\s*(\\d+)\\]\\s*=\\s*\\[([\\s\\S]*?)\\];").exec(appearance);
+    assert.ok(declaration);
+    const count = Number(declaration[1]);
+    assert.equal([...declaration[2].matchAll(/CrystalRect::new\(/g)].length, count, "actual authored hair rect count");
+    assert.equal(count, 9);
+    hairPaths.push(...integerRange76(Number(base), Number(base) + count - 1).map(index => "original-ui/Prguse/" + index + ".png"));
+  }
+  assert.equal(new Set(hairPaths).size, 36);
+  const wings = rustFunction76(appearance, "crystal_character_wing_frame");
+  const wingBase = /let index = (\d+) \+ wing_offset \+ gender_offset;/.exec(wings);
+  assert.ok(wingBase);
+  const wingOffsets = [...wings.matchAll(/^\s*\d+\s*=>\s*(\d+),/gm)].map(m => Number(m[1]));
+  assert.deepEqual(wingOffsets, [2, 4]);
+  const wingPaths = wingOffsets.flatMap(offset => genders.map(gender => "original-ui/Prguse2/" + (Number(wingBase[1]) + offset + gender) + ".png"));
+  const materialBase = /format!\("original-ui\/Prguse2\/\{\}\.png",\s*(\d+)\s*\+\s*offset\)/.exec(materials);
+  const materialCount = /CrystalCharacterWingMaterials\(pub\(crate\) \[Handle<CrystalAdditiveUiMaterial>;\s*(\d+)\]\)/.exec(materials);
+  assert.ok(materialBase); assert.ok(materialCount);
+  assert.deepEqual(wingPaths, integerRange76(Number(materialBase[1]), Number(materialBase[1]) + Number(materialCount[1]) - 1).map(index => "original-ui/Prguse2/" + index + ".png"));
+  assert.match(spells, /for b in &m\.bindings/); assert.match(spells, /original-ui\/MagIcon2\/\{index\}\.png/);
+  const skins = [...new Set([...core, ...hairPaths, ...wingPaths])];
+  assert.equal(skins.length, 109);
+  assert.equal(skins.some(skin => /\/(?:Items|StateItem|MagIcon2)\//.test(skin)), false, "account-derived frames are not static alternatives");
+  return skins;
+}
+
+test("canonical Character Stats Spells hair and wing alternatives form the exact bounded static selection", async () => {
+  const character = await characterSpellsSkinReference76();
+  const inherited = [...new Set([...await bagStorageSkinReference74(), ...await shopSkinReference76()])];
+  assert.equal(character.filter(skin => !inherited.includes(skin)).length, 106);
+  const skins = [...new Set([...inherited, ...character])];
+  assert.equal(skins.length, 148, "Bag30 plus Shop12 plus Character106");
+  for (const skin of skins) assert.equal(selectPublic(skin, false), true, skin);
+  for (const remote of ["original-ui/Prguse/99.png", "original-ui/Prguse/105.png", "original-ui/Prguse/339.png",
+    "original-ui/Prguse/342.png", "original-ui/Prguse/440.png", "original-ui/Prguse/450.png",
+    "original-ui/Prguse/460.png", "original-ui/Prguse/470.png", "original-ui/Prguse/480.png",
+    "original-ui/Prguse/490.png", "original-ui/Prguse/510.png", "original-ui/Prguse2/1201.png",
+    "original-ui/Prguse2/1206.png", "original-ui/Prguse2/1289.png", "original-ui/Prguse2/1325.png",
+    "original-ui/Title/505.png", "original-ui/Title/509.png", "original-ui/Title/518.png",
+    "original-ui/Items/2.png", "original-ui/StateItem/0.png", "original-ui/MagIcon2/0.png"])
+    assert.equal(selectPublic(remote, false), false, remote);
+});
+
+test("actual complete static union copies genuine PNG and metadata hashes while absent character art stays absent", async () => {
+  const character = await characterSpellsSkinReference76(), bag = await bagStorageSkinReference74(), shop = await shopSkinReference76();
+  const inherited = new Set([...bag, ...shop]), skins = [...new Set([...inherited, ...character])];
+  const publicRoot = path.resolve(import.meta.dirname, "../public");
+  const base = path.join(fixtureRoot, "character-spells-genuine-static-union");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  const bodies = new Map(), metadata = new Map();
+  for (const skin of skins) {
+    const original = path.join(publicRoot, ...skin.split("/")), stat = await fs.lstat(original);
+    assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "genuine static source is ordinary: " + skin);
+    const bytes = await fs.readFile(original);
+    assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), skin);
+    if (character.includes(skin)) {
+      const library = skin.split("/")[1];
+      if (!metadata.has(library)) {
+        const file = path.join(publicRoot, "original-ui", library, "meta.json"), raw = await fs.readFile(file);
+        metadata.set(library, { file, raw, parsed: JSON.parse(raw.toString("utf8")) });
+      }
+      const frames = metadata.get(library).parsed.frames.filter(frame => frame.path === "/" + skin);
+      assert.equal(frames.length, 1, "single canonical exported metadata frame: " + skin);
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), frames[0].pngSha256, "genuine PNG equals export hash: " + skin);
+    }
+    bodies.set(skin, bytes); await write(path.join(source, skin), bytes);
+  }
+  const byteSum = paths => paths.reduce((sum, skin) => sum + bodies.get(skin).length, 0);
+  assert.equal(byteSum(character.filter(skin => !inherited.has(skin))), 503189);
+  assert.equal(byteSum(skins.filter(skin => !bag.includes(skin))), 534684, "exact total118 additions");
+  const copy = await copySelectedPublic({ sourceRoot: source, destinationRoot: destination, selection: selectPublic });
+  assert.equal(copy.files, 148);
+  for (const [skin, bytes] of bodies) {
+    assert.deepEqual(await fs.readFile(path.join(destination, skin)), bytes, "packaged original bytes: " + skin);
+    assert.deepEqual(await fs.readFile(path.join(source, skin)), bytes, "fixture source retained: " + skin);
+    assert.deepEqual(await fs.readFile(path.join(publicRoot, ...skin.split("/"))), bytes, "genuine original retained: " + skin);
+  }
+  for (const { file, raw } of metadata.values()) assert.deepEqual(await fs.readFile(file), raw, "canonical metadata retained byte-for-byte");
+  assert.equal((await auditPortableTree(destination)).links, 0);
+  const missing = "original-ui/Title/504.png";
+  assert.ok(character.includes(missing));
+  const missingSource = path.join(base, "missing-source"), missingDestination = path.join(base, "missing-package");
+  for (const [skin, bytes] of bodies) if (skin !== missing) await write(path.join(missingSource, skin), bytes);
+  assert.equal((await copySelectedPublic({ sourceRoot: missingSource, destinationRoot: missingDestination, selection: selectPublic })).files, 147);
+  assert.equal(await exists(path.join(missingSource, missing)), false);
+  assert.equal(await exists(path.join(missingDestination, missing)), false);
+  await assert.rejects(fs.readFile(path.join(missingDestination, missing)), error => error.code === "ENOENT");
+});

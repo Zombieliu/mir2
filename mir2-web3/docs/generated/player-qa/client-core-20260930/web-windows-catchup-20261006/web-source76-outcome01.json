@@ -1,0 +1,245 @@
+{
+  "owner": "Root",
+  "kind": "Source76 actual static canonical UI closure and ordinary gameplay QA outcome",
+  "sourceBaseCommit": "9b3840a552a8f249092e10e741951e88a3e63b62",
+  "codeFiles": [
+    {
+      "relativePath": "apps/web/scripts/lib/portable-next-standalone.mjs",
+      "sourcePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 40949,
+        "sha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6"
+      },
+      "destinationPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 40949,
+        "sha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs",
+      "sourcePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 76389,
+        "sha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835"
+      },
+      "destinationPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 76389,
+        "sha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835"
+      }
+    }
+  ],
+  "actualTests": {
+    "focusedAndAdjacent": 107,
+    "portable": 31,
+    "total": 138,
+    "failures": 0
+  },
+  "strictNextAccepted": true,
+  "rawNftClosure": {
+    "files": 61,
+    "referenceRows": 130518,
+    "unknown": 0
+  },
+  "thinPackage": {
+    "files": 4551,
+    "bytes": 315967542,
+    "capBytes": 377487360,
+    "links": 0,
+    "compiledNextLeaves": 222,
+    "compiledDifferences": 0,
+    "canonicalPngs": 148,
+    "newPngs": 118,
+    "newPngBytes": 534684,
+    "fontBytes": 16437364,
+    "uiJson229SemanticDifferences": 0,
+    "core6Differences": 0,
+    "map116Differences": 0,
+    "knownWarningCount": 59,
+    "newWarnings": 0
+  },
+  "ordinaryGui": {
+    "Source75LogOutAndSource76ReloginPosition": "Bichon Province 290,611",
+    "gold": 180,
+    "ScottViewOpened": true,
+    "sharedShopHost": {
+      "active": false,
+      "transitioning": false,
+      "blocksInput": false,
+      "errorPresent": true
+    },
+    "sharedShopTakeoverAccepted": false,
+    "purchaseAttempted": false,
+    "Stats1NativeSwitchAndVisibleValues": true,
+    "Stats2NativeSwitchAndVisibleValues": true,
+    "emptySpellsNativeSwitch": true,
+    "characterPageFallback": true,
+    "normalEscapeCloses": true,
+    "minimapOverlapsNativeHeader": true,
+    "minimapNormallyCollapsedForReadableStats": true
+  },
+  "diagnosis": {
+    "staticShopBackgroundNowPainted": true,
+    "dynamicShopCatalogAndEquipmentMediaRemainMissing": "Items/StateItem dynamic same-origin misses are still delegated to configured immutable origin; missing visible shop icons and character fallback are not accepted as complete.",
+    "exactFirstHostErrorNotExposed": true
+  },
+  "MainTsConfigUnchanged": {
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "source65GatewayUnchanged": true,
+  "service": {
+    "exactOwnNodeChild": 74428,
+    "exactOwnParent": 93216,
+    "host": "127.0.0.1",
+    "port": 19205,
+    "originalCallerSession": 57612,
+    "liveLogReads": false
+  },
+  "evidence": [
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-character-before-fix-observations01.json",
+      "bytes": 1035,
+      "sha256": "bea1d9ddda771efadbc9a6a07a540faa78e2964991f60f61383d8a9a1a850e98"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-ordinary-route-and-scott-before-fix01.json",
+      "bytes": 882,
+      "sha256": "c85f0f882653ec96684ab524af0073f938675fd839805b0bc71514e803a828ed"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-shop-before-fix-observations01.json",
+      "bytes": 1188,
+      "sha256": "3ae5fbe8c02f5f9a02b8f0e6d4895a449675523be36e4d5d51e17ee8662de929"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-source75-normal-logout-before-replacement01.json",
+      "bytes": 475,
+      "sha256": "4af14378b850ad4c7b6ff235715466319eed014a6b0cd98dc80df75161a27295"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-source76-character-static-assets-result01.json",
+      "bytes": 878,
+      "sha256": "3fa5d9f92abb90e611a01a7d2e7bc419a39e18f2d1d70bf74344284c2e08f63c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-source76-shop-static-assets-result01.json",
+      "bytes": 696,
+      "sha256": "f8ae9b033f194eb240e0fc33adecab813b16a1e0650a339a12f45251b4af990c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-character-after-static-assets01.png",
+      "bytes": 117368,
+      "sha256": "92c1ca225d2770a33fdbf13c2a7c71014962d3159ab577e8fbbd8f30126e91d0"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-character-before-fix01.png",
+      "bytes": 58094,
+      "sha256": "970b268a6cafddc724a132f10d3bc74f82c2815b22f535ba9ea89845d73a4ebd"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-scott-after-fix01.png",
+      "bytes": 111462,
+      "sha256": "78987ecec8b18f0c8f567008d6729de4890da641f21dbbfaa4e40388c546dd77"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-scott-before-fix01.png",
+      "bytes": 120063,
+      "sha256": "cd098748e0e1daaac3ecd93783b9d21dfae0e596b282559dfc05b475864be527"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-scott-shared-settled01.png",
+      "bytes": 114173,
+      "sha256": "f7739a2bf2ac36c02ca2e401afaa1148025e5149a8c497b9b505d45dcae4881a"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-shop-before-fix01.png",
+      "bytes": 62250,
+      "sha256": "817c1ede9abe646a734b39317a7c7b0d5467d0ba37c2c4cb557151d92c437409"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-spells-after-static-assets01.png",
+      "bytes": 116380,
+      "sha256": "5851123c0c86246c4e1b0de10ebff43a02714bf01bf6b3f99e4d17537071bdb1"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-spells-before-fix01.png",
+      "bytes": 56590,
+      "sha256": "673e7bf6dac2a1d3b2b3b270905f66d4d3de2d8e8f3c7038e3d9aead6a5594fc"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-stats1-after-static-assets01.png",
+      "bytes": 120671,
+      "sha256": "e249cf27e86b8a884046b485b1b500e5f0d9daaf2a2e7dcf98c02a4d5b293002"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-stats1-before-fix01.png",
+      "bytes": 60586,
+      "sha256": "d099f6803b1bc074a3b9bd155f34f478f800a5e62c08e73310df8253989d8660"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-stats1-minimap-closed01.png",
+      "bytes": 119006,
+      "sha256": "3f71028339e1459cb1c956a3ca79b5a3c47f310073aed68ec0899f498a3c9153"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-stats2-after-static-assets01.png",
+      "bytes": 120103,
+      "sha256": "c04e466c1abc6c32a7d46905bd249668e4d2c235d8064c9dd7be4902d23050ca"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-thin-actual01.json",
+      "bytes": 126648,
+      "sha256": "a9c7cfa3b4e6dd6ae248072c67f8f4d5d3f4321b4ef88beef6bcb597ab7610e0"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-node-actual01.json",
+      "bytes": 2292,
+      "sha256": "29683c9066eeda5664bca266df1c687cdf067b85105b58f1a684a5c6d7c76a90"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-portable-actual01.json",
+      "bytes": 2241,
+      "sha256": "1284360d6d52710647477effd7765bf0875cd812aab8228dccb737b0f59df975"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-next-actual01.json",
+      "bytes": 2861,
+      "sha256": "ac7c646f7e941893d5966e8dcea2cb7121836c93f27f678ef1d8eb5fd8d47c68"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-code-review01.json",
+      "bytes": 3167,
+      "sha256": "43151f1815b0e7f1664381ed0516fbd9108a2a672df7a9270eb6ab409642e255"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-final-assets-manifest01.json",
+      "bytes": 26699,
+      "sha256": "ec3023f83b136629688c40a99f82d113e0600412bb90cc4a1849281fb60ed242"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-canonical-character-spells-finite-assets01.json",
+      "bytes": 52891,
+      "sha256": "4d9148489800a3c298cddc8e243b675d02be7e97477e2e137c4a6fdfc954e46b"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-source75-owned-web-closure01.json",
+      "bytes": 2016,
+      "sha256": "e2b29b6bcb4c4ca703db3464308aeabad6d99826d4cd9d5eece7dc35cf2f4101"
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-size-report01.json",
+      "bytes": 82766,
+      "sha256": "122d9154751a4b1be9051ed64a8677f7d758cdd6bcfd91920c1eefec4d472ebe"
+    }
+  ],
+  "packageAcceptedForLocalQa": true,
+  "nonemptySkillsAccepted": false,
+  "mobileAccepted": false,
+  "allCharacterAndShopAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

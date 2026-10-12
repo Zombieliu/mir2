@@ -1,0 +1,69 @@
+{
+  "owner": "Root",
+  "kind": "source76 actual original strict Next01; dependency/NFT closure pending",
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/next-build01-config.json",
+    "bytes": 5187,
+    "sha256": "2a2aad66d6716250766b3012fd26abb47f7fb3708ec2db03525eac2aeba32886"
+  },
+  "strictSnapshotPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-strict-snapshot01.json",
+    "bytes": 19419965,
+    "sha256": "322eaf1f064bb3c68c68563085c94c5df7b2371345e091fa03841a9c92c2a238"
+  },
+  "codeReviewPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-code-review01.json",
+    "bytes": 3167,
+    "sha256": "43151f1815b0e7f1664381ed0516fbd9108a2a672df7a9270eb6ab409642e255"
+  },
+  "actualNodeProofPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-node-actual01.json",
+    "bytes": 2292,
+    "sha256": "29683c9066eeda5664bca266df1c687cdf067b85105b58f1a684a5c6d7c76a90"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 90260,
+    "kind": "Root approved original Source76 strict Next01 after focused/adjacent107",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 76984,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "closedStdoutPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/next-build01/stdout.txt",
+    "bytes": 2026,
+    "sha256": "b08211878c32ae28987f4b776bbed365c305f6981e3c4d41da9cad45f76c21d6"
+  },
+  "closedStderrPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/next-build01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualOutputPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/actual-next-output-snapshot01.json",
+    "bytes": 13777749,
+    "sha256": "290bdf1eae84e40d3bc321ae85b6760b28457da55ea995715031febaf13f68f8"
+  },
+  "actualOutputCounts": {
+    "files": 21036,
+    "directoriesIncludingRoot": 631,
+    "bytes": 673528876,
+    "links": 0
+  },
+  "typeScriptPassed": true,
+  "staticPages": 13,
+  "originalPostGuardReturned": true,
+  "oldOutputCopied": false,
+  "nftClosurePending": true,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}
