@@ -4390,6 +4390,7 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   left: 0;
   width: 264px;
   text-align: center;
+  pointer-events: none;
 }
 
 .character-guild {

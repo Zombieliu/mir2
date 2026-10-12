@@ -445,7 +445,7 @@ function GameUiSceneInner({
       data-chat-expanded={chatExpanded ? "true" : "false"}
     >
       {!sharedQuestWorldUiActive && <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />}
-      {showMinimap && <MiniMapPanel
+      {showMinimap && !(showCharacter && sharedCharacterStatsActive) && <MiniMapPanel
         t={t}
         world={world}
         player={player}

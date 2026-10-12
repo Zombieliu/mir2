@@ -1,0 +1,116 @@
+{
+  "owner": "Root",
+  "kind": "actual original portable first run honest failure evidence",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\portable-tests01-config.json",
+    "bytes": 4403,
+    "sha256": "66489d64f4b041a0ecd1e62af539746ca7763972f71f01e1e6b70234c6fb563a"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-full-snapshot01.json",
+    "bytes": 45640774,
+    "sha256": "90bbb7ec72439ed7235fcb59bf9944becf8b470585036b280abb369736b20a80"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 81668,
+    "kind": "Root approved original Source77 portable34 after independent full NFT closure",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 3378,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/portable-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/portable-tests01/stdout.txt",
+    "bytes": 9641,
+    "sha256": "9a246648aa6a18f72e3689dec288d2595e561fbc4a7d9f60f1a0c0d8838da4ac"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/portable-tests01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "total": 34,
+    "pass": 33,
+    "fail": 1,
+    "skip": 0,
+    "old31Pass": true,
+    "new33And34Pass": true
+  },
+  "failure": {
+    "test": 32,
+    "assertion": "resolved.length",
+    "expected": 128,
+    "actual": 131
+  },
+  "independentPublicDatasetCounts": {
+    "allFirstTradeSections": 131,
+    "validGoodsScripts": 128,
+    "validGoods": 2239,
+    "unresolvedLines": 421,
+    "emptyOrUnresolvedSections": [
+      {
+        "scriptKey": "BichonProvince/BichonWall/Lottery",
+        "rawLineCount": 0,
+        "validGoods": 0,
+        "unresolved": 0,
+        "meaningfulLines": []
+      },
+      {
+        "scriptKey": "WoomyonWoods/Castle-GI/Stones",
+        "rawLineCount": 0,
+        "validGoods": 0,
+        "unresolved": 0,
+        "meaningfulLines": []
+      },
+      {
+        "scriptKey": "GM/GM-Script",
+        "rawLineCount": 29,
+        "validGoods": 0,
+        "unresolved": 29,
+        "meaningfulLines": [
+          "HastePotion(A)",
+          "HastePotion(B)",
+          "HastePotion(C)",
+          "SoulScroll(2)",
+          "SoulScroll(4)",
+          "SoulScroll(6)",
+          "BlessedScroll(2)",
+          "BlessedScroll(4)",
+          "BlessedScroll(6)",
+          "LightScroll(1)",
+          "LightScroll(3)",
+          "LightScroll(5)",
+          "EnhancerScroll(1)",
+          "EnhancerScroll(3)",
+          "EnhancerScroll(5)",
+          "ProtectionScroll(2)",
+          "ProtectionScroll(4)",
+          "ProtectionScroll(6)",
+          "RageScroll(1)",
+          "RageScroll(3)",
+          "RageScroll(5)",
+          "MoonScroll(1)",
+          "MoonScroll(3)",
+          "MoonScroll(5)",
+          "Exp100%(1hr)",
+          "Exp100%(3hr)",
+          "Exp100%(5hr)",
+          "ExtraDrop(1hr)",
+          "ExtraDrop(3hr)"
+        ]
+      }
+    ]
+  },
+  "originalPostGuardReturned": true,
+  "exportOrRuntimeAccepted": false,
+  "goalComplete": false
+}

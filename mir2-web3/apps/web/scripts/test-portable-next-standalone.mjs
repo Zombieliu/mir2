@@ -1135,3 +1135,254 @@ test("actual complete static union copies genuine PNG and metadata hashes while 
   assert.equal(await exists(path.join(missingDestination, missing)), false);
   await assert.rejects(fs.readFile(path.join(missingDestination, missing)), error => error.code === "ENOENT");
 });
+// Read the public declarations and actual shared image/seed rules, not the approved selector list.
+async function canonicalInput77(relative) {
+  const file = path.resolve(import.meta.dirname, "../../..", relative);
+  const stat = await fs.lstat(file);
+  assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "canonical ordinary input: " + relative);
+  return fs.readFile(file, "utf8");
+}
+function concreteImageRule77(source) {
+  const body = rustFunction76(source, "crystal_user_item_image");
+  assert.match(body, /if item_type != 8 \|\| stack_size == 0\s*\{\s*return catalogue_image;/);
+  assert.match(body, /match \(shape, count\)/);
+  assert.match(body, /_\s*=>\s*catalogue_image/);
+  const arms = [...body.matchAll(/\((\d+),\s*(_|\d+\.\.(?:=\d+)?)\)\s*=>\s*(\d+),/g)].map(([, shape, range, image]) => {
+    const bounds = /^(\d+)\.\.(?:=(\d+))?$/.exec(range);
+    return { shape: Number(shape), first: bounds ? Number(bounds[1]) : 0,
+      last: bounds?.[2] ? Number(bounds[2]) : Infinity, image: Number(image), fallback: range === "_" };
+  });
+  assert.equal(arms.length, 11, "all current concrete Amulet/poison match arms");
+  const image = (item, count) => {
+    if (item.item_type !== 8 || item.stack_size === 0) return item.image;
+    return arms.find(arm => arm.shape === item.shape && count >= arm.first && count <= arm.last)?.image ?? item.image;
+  };
+  const counts = item => [...new Set([1, ...arms.filter(arm => arm.shape === item.shape).flatMap(arm =>
+    [arm.first - 1, arm.first, arm.last, arm.last + 1].filter(count => Number.isFinite(count) && count > 0 && count <= 0xffffffff))])];
+  return { image, counts };
+}
+function tradeGood77(line, items) {
+  const text = line.trim();
+  if (!text || text.startsWith("#") || text.startsWith("[")) return null;
+  const split = text.lastIndexOf(" "), suffix = text.slice(split + 1).trim();
+  const parsed = split >= 0 && /^\+?\d+$/.test(suffix) ? Number(suffix) : NaN;
+  const validCount = Number.isInteger(parsed) && parsed >= 0 && parsed <= 0xffff;
+  const name = validCount ? text.slice(0, split).trim() : text;
+  const item = items.find(item => item.name.toLowerCase() === name.toLowerCase());
+  return item ? { item, count: validCount ? Math.max(1, parsed) : 1 } : null;
+}
+let finiteCatalogPromise77;
+function finiteCatalog77() {
+  return finiteCatalogPromise77 ??= (async () => {
+    const [npcRaw, scriptRaw, itemRaw, imageSource, dataSource, npcSource, labelsSource,
+      inventorySource, shopSource, shopHost, equipmentSource, typesSource, appearance] = await Promise.all([
+      canonicalInput77("packages/game-data/data/generated/crystal_npc_info_manifest.json"),
+      canonicalInput77("packages/game-data/data/generated/crystal_npc_manifest.json"),
+      canonicalInput77("packages/game-data/data/generated/crystal_item_manifest.json"),
+      canonicalInput77("packages/protocol/src/item_image.rs"),
+      canonicalInput77("packages/game-data/src/lib.rs"),
+      canonicalInput77("apps/simulation/src/runtime/npc.rs"),
+      canonicalInput77("apps/simulation/src/runtime/npc_script.rs"),
+      canonicalInput77("apps/game-client/client-bevy/src/inventory.rs"),
+      canonicalInput77("apps/game-client/client-bevy/src/shop.rs"),
+      canonicalInput77("apps/game-client/runtime/src/npc_shop_ui_host.rs"),
+      canonicalInput77("apps/simulation/src/runtime/equipment.rs"),
+      canonicalInput77("packages/protocol/src/types.rs"),
+      canonicalInput77("apps/game-client/client-bevy/src/crystal_ui/character_page.rs"),
+    ]);
+    assert.match(rustFunction76(dataSource, "crystal_item_by_name"), /\.find\(\|item\| item\.name\.eq_ignore_ascii_case\(name\)\)/);
+    assert.match(rustFunction76(dataSource, "crystal_npc_script_by_key"), /\.find\(\|script\| script\.script_key == script_key\)/);
+    assert.match(rustFunction76(npcSource, "crystal_npc_trade_goods_for_script"), /crystal_npc_goods_for_script_section\(script, "Trade"\)/);
+    assert.match(rustFunction76(npcSource, "crystal_npc_goods_for_script_section"), /crystal_npc_section\(script, label\)/);
+    assert.match(labelsSource, /fn crystal_npc_section<'a>[\s\S]*?\.find\(\|section\| crystal_npc_labels_match\(&section\.label, label\)\)/);
+    assert.match(rustFunction76(labelsSource, "crystal_npc_labels_match"), /section_label\.eq_ignore_ascii_case\(requested_label\)/);
+    assert.match(rustFunction76(labelsSource, "crystal_npc_label_base"), /\.trim\(\)\s*\.split_once\('\('\)/);
+    const lineRule = rustFunction76(npcSource, "crystal_npc_trade_good_from_line");
+    assert.match(lineRule, /trimmed\.rsplit_once\(' '\)/);
+    assert.match(lineRule, /count\.trim\(\)\.parse::<u16>\(\)/);
+    assert.match(lineRule, /Ok\(parsed\) => \(name\.trim\(\), parsed\.max\(1\)\)/);
+    assert.match(lineRule, /Err\(_\) => \(trimmed, 1\)/);
+    assert.match(lineRule, /trimmed\.starts_with\('#'\) \|\| trimmed\.starts_with\('\['\)/);
+    assert.match(lineRule, /crystal_item_by_name\(item_name\)\?/);
+    assert.match(rustFunction76(inventorySource, "user_item_image"), /mir2_protocol::crystal_user_item_image\(\s*self\.info\.item_type,\s*self\.info\.shape,\s*self\.info\.stack_size,\s*self\.info\.image,\s*count,/);
+    assert.match(rustFunction76(inventorySource, "concrete_item_image_index"), /source\.user_item_image\(count\)/);
+    assert.match(rustFunction76(shopSource, "user_item_image_index"), /concrete_item_image_index\(\s*self\.icon,\s*u32::from\(self\.count\),\s*self\.tooltip_source\.as_ref\(\)/);
+    const hostPaths = rustFunction76(shopHost, "catalog_icon_paths");
+    assert.match(hostPaths, /good\.user_item_image_index\(\)/);
+    assert.match(hostPaths, /format!\("original-ui\/Items\/\{index\}\.png"\)/);
+    const { npcs } = JSON.parse(npcRaw), { scripts } = JSON.parse(scriptRaw), { items } = JSON.parse(itemRaw);
+    const rule = concreteImageRule77(imageSource);
+    const scriptKeys = [...new Set(npcs.map(npc => npc.script_key))];
+    const resolved = [], usableTradeScripts = [], unusableTradeSections = [], goods = [];
+    let omitted = 0;
+    for (const key of scriptKeys) {
+      // Full directory key is authoritative; similarly named scripts elsewhere are not substitutes.
+      const script = scripts.find(script => script.script_key === key);
+      const trade = script?.sections.find(section => section.label.trim().split("(")[0].trim().toLowerCase() === "trade");
+      if (!trade) continue;
+      resolved.push(script);
+      const goodsBefore = goods.length, omittedBefore = omitted;
+      for (const line of trade.lines) {
+        const good = tradeGood77(line, items);
+        if (good) goods.push(good);
+        else if (line.trim() && !line.trim().startsWith("#") && !line.trim().startsWith("[")) omitted++;
+      }
+      if (goods.length > goodsBefore) usableTradeScripts.push(script);
+      else unusableTradeSections.push({ scriptKey: key, lineNumber: trade.line_number,
+        lineCount: trade.lines.length, unresolved: omitted - omittedBefore });
+    }
+    const declared = [...new Set(goods.map(({ item, count }) => "original-ui/Items/" + rule.image(item, count) + ".png"))];
+    const threshold = goods.filter(({ item }) => item.item_type === 8 && item.stack_size !== 0 && [0, 1, 2].includes(item.shape));
+    const itemPaths = [...new Set([...declared, ...threshold.flatMap(({ item }) =>
+      rule.counts(item).map(count => "original-ui/Items/" + rule.image(item, count) + ".png"))])];
+    const enumEntries = name => {
+      const body = new RegExp("pub enum " + name + "\\s*\\{([^}]+)\\}").exec(typesSource);
+      assert.ok(body, name + " canonical enum");
+      return [...body[1].matchAll(/(\w+)\s*=\s*(\d+)/g)].map(([, name, value]) => ({ name, value: Number(value) }));
+    };
+    const classes = enumEntries("MirClass"), genders = enumEntries("MirGender");
+    const seed = rustFunction76(equipmentSource, "seed_equipment_items_for_character");
+    const indices = (field, type, name) => {
+      const body = new RegExp("let " + field + " = match \\w+ \\{([\\s\\S]*?)\\};").exec(seed);
+      assert.ok(body, "canonical seed match: " + field);
+      const arm = new RegExp(type + "::" + name + "\\s*=>\\s*(\\d+)").exec(body[1]) ?? /_\s*=>\s*(\d+)/.exec(body[1]);
+      assert.ok(arm, "canonical seed alternative: " + type + "::" + name);
+      return Number(arm[1]);
+    };
+    assert.match(seed, /crystal_start_equipment\(weapon_index, EquipmentSlot::Weapon\)/);
+    assert.match(seed, /crystal_start_equipment\(armour_index, EquipmentSlot::Armour\)/);
+    assert.match(equipmentSource, /state_image:\s*crystal_item_template_for_item_key\(&self\.key\)\s*\.map\(\|template\| template\.image\)/);
+    assert.match(rustFunction76(appearance, "crystal_character_state_item_frame"), /CrystalFrameSpec::new\(\s*"StateItem",\s*item\.state_image,/);
+    const combinations = [], starter = new Map();
+    for (const classEntry of classes) for (const genderEntry of genders) {
+      const worn = [indices("weapon_index", "MirClass", classEntry.name), indices("armour_index", "MirGender", genderEntry.name)]
+        .map(index => items.find(item => item.item_index === index));
+      for (const item of worn) {
+        assert.ok(item, "canonical seed catalogue item");
+        assert.notEqual(item.required_class & (1 << classEntry.value), 0, item.name + " class allowed");
+        assert.notEqual(item.required_gender & (1 << genderEntry.value), 0, item.name + " gender allowed");
+        starter.set(item.item_index, item);
+      }
+      combinations.push({ class: classEntry.name, gender: genderEntry.name, worn });
+    }
+    const statePaths = [...new Set([...starter.values()].map(item => "original-ui/StateItem/" + item.image + ".png"))];
+    return { npcs, scripts, items, scriptKeys, resolved, usableTradeScripts, unusableTradeSections, goods, omitted, rule, declared, threshold,
+      itemPaths, statePaths, starter, classes, genders, combinations, paths: [...itemPaths, ...statePaths] };
+  })();
+}
+
+test("public directory-specific first Trade goods and shared concrete-stack rules select only the finite Source77 closure", async () => {
+  const catalog = await finiteCatalog77();
+  assert.equal(catalog.npcs.length, 375); assert.equal(catalog.scriptKeys.length, 364);
+  assert.equal(catalog.resolved.length, 131, "all referenced first Trade sections, including unusable sections");
+  assert.equal(catalog.usableTradeScripts.length, 128, "referenced Trade sections with at least one resolved catalogue good");
+  assert.equal(catalog.goods.length, 2239);
+  assert.equal(catalog.omitted, 421, "unresolved nonempty noncomment Trade lines retain production omission semantics");
+  assert.deepEqual(catalog.unusableTradeSections.sort((a, b) => a.scriptKey.localeCompare(b.scriptKey)), [
+    { scriptKey: "BichonProvince/BichonWall/Lottery", lineNumber: 170, lineCount: 0, unresolved: 0 },
+    { scriptKey: "GM/GM-Script", lineNumber: 29, lineCount: 29, unresolved: 29 },
+    { scriptKey: "WoomyonWoods/Castle-GI/Stones", lineNumber: 29, lineCount: 0, unresolved: 0 },
+  ], "two empty Trade sections and one wholly unresolved section add no goods or fallback icons");
+  assert.equal(catalog.declared.length, 696); assert.equal(catalog.threshold.length, 57);
+  assert.equal(catalog.itemPaths.length, 704); assert.equal(catalog.itemPaths.filter(asset => !catalog.declared.includes(asset)).length, 8);
+  const blacksmiths = catalog.scripts.filter(script => script.script_key.endsWith("/Blacksmith"));
+  assert.ok(blacksmiths.length > 1, "same basename exists in different canonical directories");
+  for (const script of blacksmiths)
+    assert.equal(catalog.scripts.find(candidate => candidate.script_key === script.script_key), script);
+  assert.equal(catalog.scripts.find(script => script.script_key === "Blacksmith"), undefined, "basename cannot admit a different directory");
+  const duplicate = catalog.items.find((item, i) => catalog.items.findIndex(first => first.name.toLowerCase() === item.name.toLowerCase()) < i);
+  assert.ok(duplicate, "canonical catalogue has same-name variants");
+  assert.equal(tradeGood77(duplicate.name.toUpperCase(), catalog.items).item,
+    catalog.items.find(item => item.name.toLowerCase() === duplicate.name.toLowerCase()), "first case-insensitive name match, not a later variant");
+  const first = catalog.items.find(item => !item.name.includes(" "));
+  assert.equal(tradeGood77(first.name + " 0", catalog.items).count, 1);
+  assert.equal(tradeGood77(first.name + " 65535", catalog.items).count, 65535);
+  assert.equal(tradeGood77(first.name + " 65536", catalog.items), null, "out-of-u16 suffix is part of the unresolved name");
+  assert.equal(tradeGood77("# " + first.name, catalog.items), null);
+  const rule = catalog.rule.image, amulet = { item_type: 8, shape: 0, stack_size: 500, image: 999 };
+  assert.deepEqual([1, 199, 200, 299, 300].map(count => rule(amulet, count)), [3660, 3660, 3661, 3661, 3662]);
+  for (const [shape, expected] of [[1, [3673, 3674, 2960, 3675]], [2, [3670, 3671, 2961, 3672]]])
+    assert.deepEqual([49, 50, 100, 150].map(count => rule({ ...amulet, shape }, count)), expected);
+  assert.equal(rule({ ...amulet, item_type: 1 }, 300), 999);
+  assert.equal(rule({ ...amulet, stack_size: 0 }, 300), 999);
+  assert.equal(rule({ ...amulet, shape: 3 }, 300), 999);
+  const inherited = [...new Set([...await bagStorageSkinReference74(), ...await shopSkinReference76(), ...await characterSpellsSkinReference76(),
+    "original-ui/Prguse/2092.png", "original-ui/Prguse/2094.png", "original-ui/Prguse/2095.png"])];
+  assert.equal(inherited.length, 151);
+  const expected = [...new Set([...inherited, ...catalog.paths])].sort();
+  assert.equal(expected.length, 860, "151 retained paths plus exact709 public/starter additions");
+  const selector = await fs.readFile(path.join(import.meta.dirname, "lib/portable-next-standalone.mjs"), "utf8");
+  const declaration = /const LOCAL_UI_FALLBACKS = new Set\(\[([\s\S]*?)\]\);/.exec(selector);
+  assert.ok(declaration);
+  assert.deepEqual(literalAssets76(declaration[1]).sort(), expected, "exact finite union, no unrelated dynamic expansion");
+  for (const asset of expected) assert.equal(selectPublic(asset, false), true, asset);
+  const unreferenced = catalog.items.find(item => !catalog.goods.some(good => good.item.item_index === item.item_index) &&
+    !catalog.itemPaths.includes("original-ui/Items/" + item.image + ".png"));
+  assert.ok(unreferenced, "actual unreferenced catalogue art remains outside the closure");
+  for (const remote of ["original-ui/Items/" + unreferenced.image + ".png", "original-ui/Items/999999.png",
+    "original-ui/Items/2.png", "original-ui/StateItem/0.png", "original-ui/StateItem/999999.png", "original-ui/MagIcon2/0.png"])
+    assert.equal(selectPublic(remote, false), false, remote);
+});
+
+test("canonical initial equipment covers all five classes and both genders with only five StateItem frames", async () => {
+  const catalog = await finiteCatalog77();
+  assert.deepEqual(catalog.classes.map(entry => entry.name), ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"]);
+  assert.deepEqual(catalog.genders.map(entry => entry.name), ["Male", "Female"]);
+  assert.equal(catalog.combinations.length, 10);
+  assert.deepEqual([...catalog.starter.keys()].sort((a, b) => a - b), [221, 281, 298, 317, 318]);
+  assert.deepEqual(catalog.statePaths.sort(), [30, 60, 80, 2259, 3390].map(index => "original-ui/StateItem/" + index + ".png").sort());
+  for (const { class: className, gender, worn } of catalog.combinations) {
+    assert.equal(worn.length, 2, className + "/" + gender);
+    for (const item of worn) {
+      assert.equal(selectPublic("original-ui/StateItem/" + item.image + ".png", false), true);
+      assert.ok(catalog.itemPaths.includes("original-ui/Items/" + catalog.rule.image(item, 1) + ".png"), "starter inventory icon already comes from public Trade closure");
+    }
+  }
+  for (const index of [0, 29, 31, 59, 61, 79, 81, 2258, 2260, 3389, 3391])
+    assert.equal(selectPublic("original-ui/StateItem/" + index + ".png", false), false, "neighbor frame remains remote: " + index);
+});
+
+test("actual finite public/starter copy preserves genuine PNG hashes and absent or unreferenced art stays absent", async () => {
+  const { paths } = await finiteCatalog77();
+  assert.equal(paths.length, 709);
+  const publicRoot = path.resolve(import.meta.dirname, "../public"), base = path.join(fixtureRoot, "public-starter-genuine77");
+  const source = path.join(base, "source"), destination = path.join(base, "package");
+  const metadata = new Map(), bodies = new Map();
+  let totalBytes = 0;
+  for (const asset of paths) {
+    const library = asset.split("/")[1];
+    if (!metadata.has(library)) {
+      const file = path.join(publicRoot, "original-ui", library, "meta.json"), raw = await fs.readFile(file);
+      metadata.set(library, { file, raw, frames: JSON.parse(raw.toString("utf8")).frames });
+    }
+    const file = path.join(publicRoot, ...asset.split("/")), stat = await fs.lstat(file);
+    assert.equal(stat.isFile() && !stat.isSymbolicLink(), true, "genuine finite source: " + asset);
+    const bytes = await fs.readFile(file), frames = metadata.get(library).frames.filter(frame => frame.path === "/" + asset);
+    assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    assert.equal(frames.length, 1, asset);
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), frames[0].pngSha256, "canonical export bytes: " + asset);
+    bodies.set(asset, bytes); totalBytes += bytes.length; await write(path.join(source, asset), bytes);
+  }
+  assert.equal(totalBytes, 881070);
+  const remote = "original-ui/Items/2.png", remoteBytes = await fs.readFile(path.join(publicRoot, remote));
+  await write(path.join(source, remote), remoteBytes);
+  assert.equal((await copySelectedPublic({ sourceRoot: source, destinationRoot: destination, selection: selectPublic })).files, 709);
+  assert.equal(await exists(path.join(destination, remote)), false);
+  assert.deepEqual(await fs.readFile(path.join(source, remote)), remoteBytes);
+  for (const [asset, bytes] of bodies) {
+    assert.deepEqual(await fs.readFile(path.join(destination, asset)), bytes, "packaged bytes: " + asset);
+    assert.deepEqual(await fs.readFile(path.join(source, asset)), bytes, "fixture bytes retained: " + asset);
+    assert.deepEqual(await fs.readFile(path.join(publicRoot, ...asset.split("/"))), bytes, "genuine source retained: " + asset);
+  }
+  for (const { file, raw } of metadata.values()) assert.deepEqual(await fs.readFile(file), raw);
+  assert.equal((await auditPortableTree(destination)).links, 0);
+  const missing = "original-ui/StateItem/30.png", present = "original-ui/Items/0.png";
+  assert.ok(bodies.has(missing) && bodies.has(present));
+  const missingSource = path.join(base, "missing-source"), missingDestination = path.join(base, "missing-package");
+  await write(path.join(missingSource, present), bodies.get(present));
+  await write(path.join(missingSource, remote), remoteBytes);
+  assert.equal((await copySelectedPublic({ sourceRoot: missingSource, destinationRoot: missingDestination, selection: selectPublic })).files, 1);
+  assert.equal(await exists(path.join(missingSource, missing)), false);
+  assert.equal(await exists(path.join(missingDestination, missing)), false);
+  await assert.rejects(fs.readFile(path.join(missingDestination, missing)), error => error.code === "ENOENT");
+});
