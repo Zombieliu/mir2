@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{AccountRecord, AccountStore, CharacterSaveRecord, SimulationConfig};
 
-pub const BILLING_SCHEMA_VERSION: u16 = 8;
+pub const BILLING_SCHEMA_VERSION: u16 = 9;
 const MAX_ORDERS_PER_ACCOUNT: usize = 4_096;
 const MAX_REVIEW_EVENTS_PER_ORDER: usize = 128;
 pub(crate) const BILLING_COMMIT_OUTCOME_UNKNOWN: &str = "BILLING_COMMIT_OUTCOME_UNKNOWN";
@@ -232,6 +232,9 @@ impl BillingLedger {
 }
 
 pub(crate) fn validate_account_record(account: &AccountRecord) -> Result<(), String> {
+    if let Some(ledger) = &account.activities {
+        ledger.validate()?;
+    }
     if let Some(ledger) = &account.billing {
         ledger.validate()?;
     }
@@ -294,6 +297,10 @@ pub(crate) fn validate_complete_store(store: &AccountStore) -> Result<(), String
     let mut sessions = BTreeSet::new();
     let mut payments = BTreeSet::new();
     for account in store.accounts.values() {
+        validate_account_record(account)?;
+        if account.activities.is_some() && store.schema_version != BILLING_SCHEMA_VERSION {
+            return Err("activitiesSchemaInvalid".into());
+        }
         if store.schema_version != BILLING_SCHEMA_VERSION
             && account
                 .monthly_card
@@ -474,7 +481,11 @@ impl SimulationConfig {
             ),
             Err(_) => return Err("billingMonthlyCardPriceInvalid".into()),
         };
-        self.with_billing_monthly_card_credit_price(price)
+        let mut config = self.with_billing_monthly_card_credit_price(price)?;
+        // Shared Source hosts and the Gateway read the same trusted campaign
+        // window when loading their account-store environment.
+        config.activity_policy = crate::activities::ActivityPolicy::from_env()?;
+        Ok(config)
     }
     pub fn prepare_recharge_order(
         &self,

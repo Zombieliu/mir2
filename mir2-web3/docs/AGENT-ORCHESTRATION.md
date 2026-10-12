@@ -1,5 +1,28 @@
 # Agent Orchestration
 
+> NPC spawn/P4 task changes integrated with actually published activities, 2026-10-12:
+> original32a7 and livebad3737 histories and account schema9 are both preserved.
+> Merged790 distinct local checks pass (439unit+225integration+97Gateway+29website);
+> thirteen new spawn checks included, seven original cadence checks run separately.
+> Two original isolated PostgreSQL checks are locally ignored, not accepted.
+> Fresh protected preflight rejected stale8fee before any mutation, then independently
+> verified livebad and preserved the complete prior private env plus exact125-byte
+> closed-phase suffix. The first physical Git hash failure was checkout CRLF only;
+> indexed published blobs are exact. Main release adds the unchanged real activities
+> PostgreSQL workflow; all original release/siege/security commands remain.
+> SSH443 published original32a7; merged commit/Linux/drained rollout remain pending.
+> Livebad/R25/feed20 is preserved. Full Source/Zone outbox and P1–P7/Mentor/native/
+> human remain open; root is sole writer and expired heartbeat remains paused.
+> [Merged source-bound receipt and limits](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
+> 2026-10-12 Website activity/player lane is isolated from ongoing game work:
+> backend rights/tests and frontend views have disjoint owners; frontier root
+> reviews security, source-save fences, schema9 and production rollout. Local
+> website29/Source88/Gateway52 checks pass. Actual PostgreSQL inverse-fence rerun
+> and deployment are pending. Do not conflate campaign registration with native
+> delivery or overall Candidate completion. [Checkpoint](ACTIVITIES-PLAYER-PORTAL-20261012.md).
+
 > 2026-10-12 NPC spawn ActList/P4 journey Candidate: original argument defaults,
 > selected ACT returns, same-cell static-valid births and base Spawned clock
 > align in the existing personal executor. Genuine Proceeder displayed @start1

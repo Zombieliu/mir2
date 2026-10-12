@@ -1,0 +1,107 @@
+name: Numeron Activities and Player Portal Acceptance
+
+on:
+  workflow_call:
+  push:
+    branches: ["codex/website-activities-20261012"]
+    paths:
+      - "mir2-web3/apps/simulation/**"
+      - "mir2-web3/apps/gateway/**"
+      - "mir2-web3/apps/recharge-web/**"
+      - ".github/workflows/activities-acceptance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  durable-activities-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mir2_activities_qa_20261012_owned
+          POSTGRES_USER: activities_qa
+          POSTGRES_PASSWORD: ci-only-activities-isolated
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      RUSTUP_TOOLCHAIN: "1.95.0"
+      CARGO_BUILD_JOBS: "2"
+      MIR2_ACTIVITY_PHASE: disabled
+      MIR2_ACTIVITY_TEST_ISOLATED: "1"
+      MIR2_ACTIVITY_TEST_DATABASE_URL: postgres://activities_qa:ci-only-activities-isolated@127.0.0.1:5432/mir2_activities_qa_20261012_owned
+      MIR2_STRIPE_ENABLED: "0"
+    defaults:
+      run:
+        working-directory: mir2-web3
+        shell: bash
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install 1.95.0 --profile minimal
+      - name: Reuse compiler dependency artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            mir2-web3/target
+          key: activities-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            activities-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
+      - name: Bind evidence to exact source
+        run: |
+          mkdir -p activity-evidence
+          git rev-parse HEAD > activity-evidence/source-sha.txt
+          git diff --exit-code
+      - name: Website account and nine-language interaction checks
+        run: node --test apps/recharge-web/tests/*.test.mjs 2>&1 | tee activity-evidence/website.log
+      - name: Account rights, old-schema guards and failed-publication boundaries
+        run: cargo test --locked -p mir2-simulation --features test-support --test activities --test billing_recharge --test billing_monthly_card --test monthly_card --test game_shop_gift -- --test-threads=1 2>&1 | tee activity-evidence/activities.log
+      - name: Real PostgreSQL concurrent registrations and ordinary live Source save
+        run: cargo test --locked -p mir2-simulation --test activities_postgres -- --ignored --test-threads=1 2>&1 | tee activity-evidence/postgres.log
+      - name: Gateway bearer ownership and shared game lifecycle
+        run: |
+          cargo test --locked -p mir2-gateway --lib -- --test-threads=1 web::activities billing game_shop_gift 2>&1 | tee activity-evidence/gateway.log
+          cargo test --locked -p mir2-gateway --test billing_monthly_card -- --test-threads=1 2>&1 | tee activity-evidence/shared-monthly.log
+          cargo test --locked -p mir2-simulation --test security_lifecycle -- --test-threads=1 2>&1 | tee activity-evidence/security.log
+      - name: Preserve the currently published NPC random rollback
+        run: cargo test --locked -p mir2-simulation --features test-support --lib npc_random_source_guard_tests -- --test-threads=1 2>&1 | tee activity-evidence/npc-random-rollback.log
+      - name: Linux release and save-recovery security checks
+        env:
+          MIR2_REQUIRE_LINUX_SECURITY_GATE: "1"
+        run: bash scripts/selftest-gateway-save-recovery.sh 2>&1 | tee activity-evidence/linux-release-security.log
+      - name: Package the tested source
+        env:
+          MIR2_RUST_TOOLCHAIN: "1.95.0"
+        run: |
+          export MIR2_RELEASE_PUBLISHER_UID="$(id -u)"
+          export MIR2_RELEASE_TAG="activities-${GITHUB_SHA::12}"
+          bash scripts/package-gateway-release.sh 2>&1 | tee activity-evidence/release.log
+      - name: Retain source-bound results including failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: activities-evidence-${{ github.sha }}
+          path: mir2-web3/activity-evidence/
+          if-no-files-found: error
+      - name: Retain verified Linux package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: activities-gateway-linux-x64
+          path: |
+            mir2-web3/dist/gateway-releases/*.tar.gz
+            mir2-web3/dist/gateway-releases/*.sha256
+            mir2-web3/dist/gateway-releases/latest-mir2-gateway-release.json
+          if-no-files-found: error

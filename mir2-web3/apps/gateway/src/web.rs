@@ -89,6 +89,8 @@ mod packet_batch;
 mod monthly_card;
 #[path = "web_billing.rs"]
 mod billing;
+#[path = "web_activities.rs"]
+mod activities;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
@@ -2770,6 +2772,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .merge(monthly_card::router())
         .merge(billing::router())
+        .merge(activities::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 

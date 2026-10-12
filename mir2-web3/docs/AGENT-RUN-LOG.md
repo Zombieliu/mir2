@@ -1,5 +1,16 @@
 # Agent Run Log
 
+## 2026-10-12 — preserve actually live activity schema9 with NPC spawn/P4 changes
+
+Merged790 local checks pass; original32a7 and actually publishedbad histories,
+activity rights/save fences and prior failures are preserved. Strict stale-source
+preflight rejected before mutation; independently verified livebad/current env.
+Real isolated activity PostgreSQL workflow is now part of the main release gate.
+Two other original PostgreSQL checks remain locally ignored. Exact merge commit,
+Linux qualification and drained rollout remain pending; R25/feed20 preserved.
+[Source-bound merged evidence](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
 ## 2026-10-12 — NPC spawn declarations and actual Skeleton damage task receipt
 
 621 distinct final local checks pass; thirteen new. Original634-script

@@ -1052,6 +1052,11 @@ fn persist_character_save_inner(
     }
     migrate_legacy_candidate_save_record(&mut save)?;
     validate_character_save_record(&save)?;
+    // A website can update account-only campaign/payment metadata while the
+    // owner keeps an unsaved ECS checkpoint. Refresh repository CAS versions,
+    // without replacing that checkpoint or its original character revision.
+    // apply_full_character_save_mutation still rejects a newer character save.
+    config.refresh_account_store_account(account_id)?;
     let account_id = account_id.to_string();
     let touched_accounts = vec![account_id.clone()];
 

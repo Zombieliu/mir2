@@ -84,7 +84,10 @@ async fn async_main() -> std::io::Result<()> {
     if policy.required && config.account_store_path.is_none() && config.account_store_database_url.is_none() {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "monthly access requires durable account storage"));
     }
-    let config = config.with_monthly_card_policy(policy);
+    let activity_policy = mir2_simulation::activities::ActivityPolicy::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let mut config = config.with_monthly_card_policy(policy);
+    config.activity_policy = activity_policy;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let topology = mir2_gateway::ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;

@@ -352,7 +352,8 @@ impl AccountStore {
         let impossible_monthly_cards = self.schema_version < 7 && self.accounts.values().any(|account| account.monthly_card.is_some());
         let impossible_billing = self.schema_version < 8 && self.accounts.values().any(|account|
             account.billing.is_some() || account.monthly_card.as_ref().is_some_and(|card| !card.item_receipts.is_empty()));
-        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes && !impossible_conquests && !impossible_monthly_cards && !impossible_billing {
+        let impossible_activities = self.schema_version < 9 && self.accounts.values().any(|account| account.activities.is_some());
+        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes && !impossible_conquests && !impossible_monthly_cards && !impossible_billing && !impossible_activities {
             self.schema_version=ACCOUNT_STORE_SCHEMA_VERSION;
         }
         self.normalize_next_character_index();
@@ -641,6 +642,8 @@ impl AccountStoreMutationPlan {
                 != mutation.desired_account.as_ref().and_then(|account| account.billing.as_ref())
                 || mutation.original_account.as_ref().and_then(|account| account.monthly_card.as_ref())
                     != mutation.desired_account.as_ref().and_then(|account| account.monthly_card.as_ref())
+                || mutation.original_account.as_ref().and_then(|account| account.activities.as_ref())
+                    != mutation.desired_account.as_ref().and_then(|account| account.activities.as_ref())
                 || mutation.saves.iter().any(|(index, save)| {
                     let before = mutation.original_account.as_ref()
                         .and_then(|account| account.saves.get(index)).map_or(0, |save| save.credit);
@@ -1624,6 +1627,8 @@ fn replace_file_atomically(
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activities: Option<crate::activities::ActivityLedger>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub billing: Option<crate::billing::BillingLedger>,
     #[serde(rename = "monthlyCard", default, skip_serializing_if = "Option::is_none")]
     pub monthly_card: Option<crate::monthly_card::MonthlyCardLedger>,
@@ -1679,6 +1684,7 @@ impl AccountRecord {
         );
         Self {
             password: default_account_password(),
+            activities: None,
             monthly_card: None,
             billing: None,
             storage_size: default_storage_size(),
@@ -1700,6 +1706,7 @@ impl AccountRecord {
     pub fn empty() -> Self {
         Self {
             password: default_account_password(),
+            activities: None,
             monthly_card: None,
             billing: None,
             storage_size: default_storage_size(),
@@ -3816,6 +3823,7 @@ pub struct SimulationConfig {
     pub crystal_world_experience_rate: f32,
     pub crystal_newbie_guild_name: String,
     pub monthly_card_policy: crate::monthly_card::MonthlyCardPolicy,
+    pub activity_policy: crate::activities::ActivityPolicy,
     /// Disabled unless explicitly configured; paid Credits use the existing wallet.
     pub billing_monthly_card_credit_price: Option<u32>,
     pub map: MapInformation,
@@ -4062,6 +4070,7 @@ impl SimulationConfig {
             map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             monthly_card_policy: crate::monthly_card::MonthlyCardPolicy::default(),
+            activity_policy: crate::activities::ActivityPolicy::default(),
             billing_monthly_card_credit_price: None,
             account_store_path: None,
             account_store_database_url: None,
@@ -4835,6 +4844,16 @@ impl SimulationConfig {
         // They share this publication and its explicit guild scope; there is no
         // nested save/CAS and no window with XP committed but membership stale.
         post(&mut staged_store)?;
+        // Preserve campaign progress alongside the authoritative account/save
+        // commit. HTTP claims touch only this ledger, never an active save.
+        if !matches!(scope, AccountStoreMutationScope::FullRestore) {
+            let activity_now = crate::monthly_card::monthly_card_now_ms();
+            for account_id in xp_accounts {
+                if let Some(account) = staged_store.accounts.get_mut(account_id) {
+                    crate::activities::observe_account(account, &self.activity_policy, activity_now)?;
+                }
+            }
+        }
         if let AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. }
             | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. }
             | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. }

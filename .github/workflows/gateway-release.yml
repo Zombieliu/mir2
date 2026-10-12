@@ -17,6 +17,9 @@ permissions:
   contents: read
 
 jobs:
+  activities-acceptance:
+    uses: ./.github/workflows/activities-acceptance.yml
+
   siege-acceptance:
     uses: ./.github/workflows/sabuk-acceptance.yml
 

@@ -135,7 +135,7 @@ pub(super) fn socket_fence(
         generation,
     }
 }
-async fn http_identity(
+pub(super) async fn http_identity(
     identity: &Arc<IdentityService>,
     headers: &HeaderMap,
 ) -> Result<VerifiedIdentitySession, String> {
@@ -149,7 +149,7 @@ async fn http_identity(
     .await
     .map_err(|_| "billingAuthenticationRequired")?
 }
-fn rate_limit(
+pub(super) fn rate_limit(
     cache: &dyn crate::cache::GatewaySessionCache,
     account: &str,
     operation: &str,
@@ -157,7 +157,7 @@ fn rate_limit(
     let count = cache
         .record_auth_attempt(&format!("billing:{account}:{operation}"), 60)?
         .0;
-    if count > if operation == "status" { 120 } else { 20 } {
+    if count > if matches!(operation, "status" | "activitiesStatus") { 120 } else { 20 } {
         return Err("billingTooManyRequests".into());
     }
     Ok(())
