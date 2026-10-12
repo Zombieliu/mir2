@@ -496,6 +496,7 @@ fn journey_poison_receipt_requires_material_effect_commit() {
 #[test]
 fn journey_summon_receipts_require_real_spawn_and_owned_skeleton_damage() {
     let (mut zone, owner) = joined_zone_with_evidence(MirClass::Taoist, 50, 100, 100, true);
+    admit_combat(&mut zone, &owner, MirClass::Taoist);
     let summon_location = Point { x: 11, y: 10 };
     let launched = zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: owner.clone(),
@@ -534,26 +535,40 @@ fn journey_summon_receipts_require_real_spawn_and_owned_skeleton_damage() {
 
     let target_location = Point { x: 12, y: 10 };
     spawn_target_at(&mut zone, &owner, 9001, target_location.clone(), 500);
-    let launch = zone.launch_native_summon_monster_attack(
-        skeleton_id,
-        &owner,
-        NativeSummonTarget {
-            object_id: 9001,
-            position: target_location.clone(),
-        },
-        MirDirection::Right,
-        600,
-    );
-    assert!(journey_receipts(&launch).is_empty());
-
-    let damage = journey_receipts(&zone.tick(1_200));
+    // A normal owner cast supplies Master.Target; the Source pet must not
+    // damage an unrelated wild target merely because an internal helper ran.
+    // Wait beyond Spawned's real +2000ms activation and use the normal AI tick.
+    assert!(journey_receipts(&zone.tick(600)).is_empty());
+    let owner_cast = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: owner.clone(), object_id: 9001, spell: Spell::SoulFireBall,
+        direction: MirDirection::Right, target: target_location,
+        cast: true, level: 2, damage: 1, mp_cost: 1, cooldown_ms: 1_000,
+        now_ms: 2_600,
+    });
+    assert!(owner_cast.iter().any(|out| matches!(out,
+        ZoneOutbound::ToMany { packets, .. } | ZoneOutbound::ToSession { packets, .. }
+        if packets.iter().any(|packet| matches!(packet,
+            ServerPacket::Magic { spell: Spell::SoulFireBall, cast: true, .. })))));
+    let launched = zone.tick(2_600);
+    assert!(journey_receipts(&launched).is_empty());
+    assert!(launched.iter().any(|out| matches!(out,
+        ZoneOutbound::ToMany { packets, .. } | ZoneOutbound::ToSession { packets, .. }
+        if packets.iter().any(|packet| matches!(packet,
+            ServerPacket::ObjectAttack { info } if info.object_id == skeleton_id)))));
+    assert!(journey_receipts(&zone.tick(2_899)).is_empty());
+    let hp_before_hit = zone.native_monsters[&9001].hp;
+    let damage = journey_receipts(&zone.tick(2_900));
+    let actual_damage = hp_before_hit - zone.native_monsters[&9001].hp;
+    assert!(actual_damage > 0, "the ordinary skeleton hit must change real HP");
     assert!(damage.iter().any(|receipt| {
         receipt.kind == ZoneJourneyEventKind::SummonSkeletonDamage
             && receipt.session_id == owner
             && receipt.source_object_id == skeleton_id
             && receipt.target_object_id == Some(9001)
-            && receipt.damage.is_some_and(|value| value > 0)
-            && receipt.source_action_at_ms == 600
-            && receipt.committed_at_ms == 1_200
-    }));
+            && receipt.damage == Some(actual_damage)
+            && receipt.target_location == Some(Point { x: 12, y: 10 })
+            && receipt.effect_object_id.is_none()
+            && receipt.source_action_at_ms == 2_600
+            && receipt.committed_at_ms == 2_900
+    }), "the receipt must retain the real target and exact committed HP loss: {damage:?}");
 }

@@ -171,7 +171,10 @@ pub(super) const DOTNET_TICKS_AT_UNIX_EPOCH: i64 = 621_355_968_000_000_000;
 pub(super) const DOTNET_DATETIME_KIND_LOCAL: i64 = i64::MIN;
 pub(super) const BASE_STORAGE_SLOTS: u16 = 80;
 pub(super) const EXPANDED_STORAGE_SLOTS: u16 = 160;
-pub(super) const CRYSTAL_NPC_MAX_SECTION_HOPS: usize = 12;
+// Genuine Proceeder challenge menus follow more than twelve selected GOTO
+// pages. Keep a finite per-invocation budget; exhaustion rejects the complete
+// Source command rather than committing a partly executed fee/reward loop.
+pub(super) const CRYSTAL_NPC_MAX_SECTION_HOPS: usize = 64;
 pub(super) const DEFAULT_CRYSTAL_CLIENT_ROOT: &str = r"E:\mir2\Crystal\Build\Client\Debug";
 pub(super) const CRYSTAL_BIND_DONT_DROP: i16 = 0x0002;
 pub(super) const CRYSTAL_BIND_DONT_SELL: i16 = 0x0004;

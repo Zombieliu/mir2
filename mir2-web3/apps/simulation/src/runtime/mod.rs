@@ -48,6 +48,7 @@ mod source_map_io;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_script;
+mod npc_spawn_actions;
 #[cfg(test)]
 mod npc_dialog_admission_tests;
 mod npc_world_plan;
@@ -55,6 +56,8 @@ mod npc_world_plan;
 mod npc_source_guard_tests;
 #[cfg(test)]
 mod npc_random_source_guard_tests;
+#[cfg(test)]
+mod npc_spawn_action_tests;
 #[cfg(test)]
 mod npc_parser_omission_tests;
 #[cfg(test)]

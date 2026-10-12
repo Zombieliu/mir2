@@ -11,7 +11,9 @@ mod death_tests {
     use super::*;
     use mir2_protocol::MirGender;
     fn fixture() -> (ZoneRuntime, SessionId, ZoneMonsterSpawn) {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("vampire-central-death"));
+        // Use a real map/collision identity so a strict checkpoint round trip
+        // reselects the same signed terrain, including the burst's sight line.
+        let mut z = ZoneRuntime::new(ZoneKey::for_map("0"));
         let owner = SessionId::new("owner");
         z.handle(ZoneCommand::Join(ZoneJoin {
             session_id: owner.clone(),
@@ -25,8 +27,8 @@ mod death_tests {
             hp: 100,
             max_hp: 100,
             mp: 0,
-            map_file_name: "vampire-central-death".into(),
-            position: Point { x: 19, y: 20 },
+            map_file_name: "0".into(),
+            position: Point { x: 332, y: 270 },
             direction: MirDirection::Right,
             chat_profile: Default::default(),
             combat_stats: Default::default(),
@@ -46,7 +48,7 @@ mod death_tests {
             move_speed_ms: 300,
             attack_speed_ms: 2500,
             friendly_guild: None,
-            position: Point { x: 20, y: 20 },
+            position: Point { x: 333, y: 270 },
             direction: MirDirection::Right,
             defense: Default::default(),
             respawn: None,
@@ -64,7 +66,7 @@ mod death_tests {
         target.name = "Scarecrow".into();
         target.ai = 0;
         target.disposition = Some(crate::config::WorldEntityDisposition::Hostile);
-        target.position = Point { x: 21, y: 20 };
+        target.position = Point { x: 334, y: 270 };
         target.hp = 100;
         target.max_hp = 100;
         // Prepare an AC-only target so MACAgility deterministically hits

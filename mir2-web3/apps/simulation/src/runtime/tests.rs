@@ -14745,6 +14745,12 @@ fn yimoogi_final_teleport_spawns_white_serpents_at_old_location() {
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
+    // This phase fixture intentionally places its actors beyond Bichon's map.
+    // Declare its terrain instead of relying on the old missing-map fallback.
+    install_isolated_map_fixture(&mut session, mir2_game_data::MapBounds {
+        min_x: 900, max_x: 912, min_y: 895, max_y: 905,
+    });
+
     let player_origin = Point { x: 900, y: 900 };
     let yimoogi_position = Point {
         x: player_origin.x + 5,

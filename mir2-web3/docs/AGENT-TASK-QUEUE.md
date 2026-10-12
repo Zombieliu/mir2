@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-10-12 NPC spawn ActList/P4 journey Candidate: original argument defaults,
+> selected ACT returns, same-cell static-valid births and base Spawned clock
+> align in the existing personal executor. Genuine Proceeder displayed @start1
+> now works beyond12 hops; exhaustion rejects partial Source commits. Real
+> normal Skeleton damage now records target UID and actual HP in task receipts.
+> Final621 distinct local checks pass (439unit+137integration+45Gateway),
+> thirteen new checks included; original cadence checks run separately and one
+> PostgreSQL check is locally ignored. RED/compile/parent/intermediate failures
+> remain retained. Explicit Linux gates added; qualification/publication pending.
+> Live stays8fee/R25/feed20. Full Source/Zone outbox, P1–P7/Mentor/native/human
+> remain open. Root is sole writer; expired heartbeat remains paused.
+> [Source-bound evidence and limits](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
 > NPC random rollback backend8fee actually published, 2026-10-12: genuine
 > VillageChief displayed random MOVE restores RNG on known personal Source
 > save/CAS failure. Prepared-kill checkpoints preserve the same transient state;

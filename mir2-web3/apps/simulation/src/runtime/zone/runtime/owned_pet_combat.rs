@@ -4893,10 +4893,10 @@ impl ZoneRuntime {
                         self.commit_journey_event(
                             draft,
                             now,
-                            Some(actual as u32),
+                            Some(*object_id),
                             Some(monster.position),
                             None,
-                            None,
+                            Some(actual),
                         )
                     }) {
                         out.push(ZoneOutbound::JourneyEvent { receipt });

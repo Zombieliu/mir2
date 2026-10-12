@@ -1,5 +1,15 @@
 # Agent Run Log
 
+## 2026-10-12 — NPC spawn declarations and actual Skeleton damage task receipt
+
+621 distinct final local checks pass; thirteen new. Original634-script
+corpus, RED/parent/intermediate failures and actual normal Skeleton delayed
+HP deduction are retained. One PostgreSQL check is locally ignored; newcomer
+Gateway cadence checks run separately. Linux qualification and publication
+remain pending; live stays8fee/R25/feed20. Full world/native/human remains open.
+[Source-bound evidence](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
 ## 2026-10-12 — NPC random rollback actually published
 
 Source8fee exact Linux38193711006, explicit six RNG checks, original gates and

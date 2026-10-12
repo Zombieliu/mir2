@@ -37,6 +37,7 @@ use super::map::{
     walkable_point_count_in_rect, walkable_points_in_rect, RuntimeMapCollisionData,
 };
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
+use super::movement::{point_in_bounds, tile_key};
 use super::packets::object_movement;
 use super::resources::{
     runtime_tick, MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource,
@@ -1249,6 +1250,29 @@ pub(super) fn spawn_runtime_monster(
         disposition_override,
         activation_delay_ticks,
         false,
+    )
+}
+
+/// The Source script Spawn(Map, Point) uses Map.ValidPoint, so several monsters
+/// may be born on the same valid cell. Walking/ordinary respawn occupancy
+/// remains separate. The compatibility factory does not implement shared NPC
+/// outbox consumption or every Source Spawned override/hook.
+pub(super) fn spawn_runtime_monster_on_source_script_cell(
+    world: &mut World,
+    template: &CrystalRespawnTemplate,
+    position: Point,
+) -> Option<Entity> {
+    let map = world.resource::<MapRuntimeResource>();
+    if !point_in_bounds(&map.map_region_bounds, &position)
+        || map.blocked_cells.contains(&tile_key(&position))
+    {
+        return None;
+    }
+    // MonsterObject.Spawn invokes base Spawned after NPCSegment's +1000;
+    // the final ordinary Source activation time is +2000 milliseconds.
+    spawn_runtime_monster_with_position_policy(
+        world, template, position, MirDirection::Up, None, None, None, None,
+        crystal_speed_to_ticks(2_000), true,
     )
 }
 

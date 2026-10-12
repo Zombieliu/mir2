@@ -147,6 +147,10 @@ jobs:
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_parser_omission_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_buff_action_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_catalog_lookup_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_spawn_action_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 journey_events:: vampire_ai::death_tests:: yimoogi_final_teleport_spawns_white_serpents_at_old_location
+          cargo +1.89.0 test --locked -p mir2-gateway --lib zone_journey_event_bridge_tests:: -- --test-threads=1
+          MIR2_QUEST_CADENCE=newcomer-v2 cargo +1.89.0 test --locked -p mir2-gateway --lib zone_journey_event_bridge_tests:: -- --ignored --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib buff_duration::tests -- --test-threads=1
           # Pure CHECKHUM selection and real Manager census are foundations;
           # this gate does not attest the pending Gateway/Source invocation.

@@ -1028,12 +1028,14 @@ fn run_crystal_npc_script_impl_with_default_keys(
 
     execution_state.section_label = Some(label);
     execution_state.line_number = 0;
+    let exhausted = format!("Crystal NPC script exceeded section hop limit of {CRYSTAL_NPC_MAX_SECTION_HOPS}");
     record_crystal_npc_script_diagnostic(
         world,
         &execution_state,
         "GOTO",
-        format!("Crystal NPC script exceeded section hop limit of {CRYSTAL_NPC_MAX_SECTION_HOPS}"),
+        exhausted.clone(),
     );
+    super::shared_guild_experience::reject_source(world, exhausted);
     Some((CrystalNpcRunResult {
         dialog: None,
         packets,
@@ -1151,6 +1153,7 @@ pub(super) fn execute_crystal_npc_section(
             // Buff actions are parsed before expansion. Source substitutes
             // each parameter independently, without splitting inserted spaces.
             let control = execute_original_npc_buff_action(world, line, &mut outcome.packets, execution_state)
+                .or_else(|| super::npc_spawn_actions::execute(world, line, execution_state))
                 .unwrap_or_else(|| execute_crystal_npc_action_line(
                     world,
                     &resolve_crystal_npc_runtime_tokens(world, line, execution_state),
@@ -2295,6 +2298,9 @@ pub(super) fn execute_crystal_npc_action_line(
     if let Some(control) = execute_original_npc_buff_action(world, line, packets, execution_state) {
         return control;
     }
+    if let Some(control) = super::npc_spawn_actions::execute(world, line, execution_state) {
+        return control;
+    }
     if let Some(label) = parse_crystal_goto_target(line) {
         return CrystalNpcActionControl::Goto(label);
     }
@@ -2410,22 +2416,9 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_clear_pets(world);
             CrystalNpcActionControl::Continue
         }
-        "PARAM1" => {
-            crystal_npc_param1(parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
-        "PARAM2" => {
-            crystal_npc_param2(parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
-        "PARAM3" => {
-            crystal_npc_param3(parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
-        "MONGEN" => {
-            crystal_npc_mongen(world, parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
+        // ASCII-space Source declarations were already parsed above. Tabs or
+        // other whitespace must not create arguments through this fallback.
+        "PARAM1" | "PARAM2" | "PARAM3" | "MONGEN" => CrystalNpcActionControl::Continue,
         "MONCLEAR" => {
             crystal_npc_monclear(world, parts.get(1..).unwrap_or_default());
             CrystalNpcActionControl::Continue
@@ -3078,31 +3071,6 @@ pub(super) fn crystal_npc_remove_pet(world: &mut World, parts: &[&str]) {
     }
 }
 
-pub(super) fn crystal_npc_param1(parts: &[&str], execution_state: &mut CrystalNpcExecutionState) {
-    let [map_file_name, instance @ ..] = parts else {
-        return;
-    };
-    execution_state.map_file_name = Some((*map_file_name).to_string());
-    execution_state.map_instance = instance
-        .first()
-        .and_then(|value| value.parse::<i32>().ok())
-        .unwrap_or(1);
-}
-
-pub(super) fn crystal_npc_param2(parts: &[&str], execution_state: &mut CrystalNpcExecutionState) {
-    let Some(x) = parts.first().and_then(|value| value.parse::<i32>().ok()) else {
-        return;
-    };
-    execution_state.x = x;
-}
-
-pub(super) fn crystal_npc_param3(parts: &[&str], execution_state: &mut CrystalNpcExecutionState) {
-    let Some(y) = parts.first().and_then(|value| value.parse::<i32>().ok()) else {
-        return;
-    };
-    execution_state.y = y;
-}
-
 pub(super) fn crystal_npc_mongen(
     world: &mut World,
     parts: &[&str],
@@ -3134,23 +3102,12 @@ pub(super) fn crystal_npc_mongen(
         return;
     }
 
-    for index in 0..count {
-        let offset = i32::from(index);
+    for _ in 0..count {
         let spawn_position = Point {
-            x: execution_state.x + (offset % 2),
-            y: execution_state.y + (offset / 2),
+            x: execution_state.x,
+            y: execution_state.y,
         };
-        let _ = spawn_runtime_monster(
-            world,
-            &template,
-            spawn_position,
-            MirDirection::Up,
-            None,
-            None,
-            None,
-            None,
-            0,
-        );
+        let _ = spawn_runtime_monster_on_source_script_cell(world, &template, spawn_position);
     }
 }
 
