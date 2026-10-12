@@ -707,6 +707,7 @@ export function OriginalClientShell({
   npcShopInputDiagnostics,
   npcPurchaseActionDiagnostics,
   storageUiDiagnostics,
+  spellsUiDiagnostics,
   targetDistance,
   entityKindClassName,
 }: OriginalClientShellProps & {onCombatUiHeld?: (channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",token:object,held:boolean)=>void;
@@ -714,6 +715,7 @@ export function OriginalClientShell({
   npcShopInputDiagnostics?: string;
   npcPurchaseActionDiagnostics?: string;
   storageUiDiagnostics?: string;
+  spellsUiDiagnostics?: string;
   bevyMailPageReady?:boolean;getBevyMailPointerContext?:()=>MailPointerContext|null;onBevyMailPointer?:(edge:MailPointerEdge)=>boolean;
   bevyMailComposeReady?:boolean;bevyMailComposePending?:boolean;bevyMailTextContext?:ReturnType<MailComposeHost['textContext']>;
   getBevyMailComposeBusy?:()=>number;
@@ -4926,6 +4928,7 @@ export function OriginalClientShell({
       data-npc-shop-input-status={npcShopInputDiagnostics}
       data-npc-purchase-action-status={npcPurchaseActionDiagnostics}
       data-storage-ui-status={storageUiDiagnostics}
+      data-spells-ui-status={spellsUiDiagnostics}
       data-input-profile={clientProfile.input}
       data-shared-touch-quest-open={
         screen === "game" && clientProfile.input === "touch" && bevyQuestUiReady && bevyQuestUiCapturesPointer

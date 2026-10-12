@@ -19,7 +19,11 @@ export type SpellsPointerContext=SpellsIdentity & {modelRevision:number;presenta
 export type SpellsPointerEdge=SpellsIdentity & {sequence:number;modelRevision:number;presentationRevision:number;renderRevision:number;pointerId:number;phase:"down"|"move"|"up"|"cancel";x:number;y:number;button:0};
 export type SpellsRuntime={getMir2SpellsUiCapabilities?:()=>string;setMir2SpellsUiSnapshot?:(json:string)=>boolean;getMir2SpellsUiStatus?:()=>string;
   setMir2SpellsUiIntentSink?:(sink:(json:string)=>string)=>void;clearMir2SpellsUiIntentSink?:()=>void;setMir2SpellsUiPointerEdge?:(json:string)=>boolean};
-export type SpellsInput={owner:SpellsOwner;hudGeneration:number;eligible:boolean;open:boolean;player:HudPlayer|null;presentation:BevyQuestUiPresentation|null;iconMetadata:SpellsIconMetadata|null};
+const spellsIneligibleReasons=["request-disabled","backend-unsupported","not-in-game","disconnected","player-missing","owner-not-current","scene-assets-unready","equipment-suspended","modal-open","hud-unready","hidden","unfocused"] as const;
+export type SpellsIneligibleReason=typeof spellsIneligibleReasons[number];
+export type SpellsDiagnosticReason="retired"|"stopped"|"unsupported-abi"|"invalid-owner"|"player-absent"|"baseline-missing"|"baseline-owner-mismatch"|"overflow"|"closed"|"ineligible"|"geometry"|"snapshot-rejected"|"status-invalid"|"runtime-not-ready"|"input-disabled"|"runtime-error"|"identity-mismatch"|"applied-revision-mismatch"|"stale"|"ready"|"withdrawn"|"host-error";
+export type SpellsDiagnostic={ready:boolean;reason:SpellsDiagnosticReason;inputReason?:SpellsIneligibleReason};
+export type SpellsInput={owner:SpellsOwner;hudGeneration:number;eligible:boolean;ineligibleReason?:SpellsIneligibleReason;open:boolean;player:HudPlayer|null;presentation:BevyQuestUiPresentation|null;iconMetadata:SpellsIconMetadata|null};
 const safe=(v:unknown):v is number=>Number.isSafeInteger(v)&&Number(v)>=0;
 const object=(v:unknown):v is Record<string,unknown>=>Boolean(v)&&typeof v==="object"&&!Array.isArray(v);
 const ownerKeys=["connectionGeneration","sessionGeneration","ownerRevision","playerObjectId"] as const;
@@ -59,15 +63,15 @@ export function supportsSpells(r:SpellsRuntime|null){try{const c=JSON.parse(r?.g
 export function fitsSpells(p:BevyQuestUiPresentation|null){return Boolean(p&&[p.logicalWidth,p.logicalHeight,p.stageCssScale].every(Number.isFinite)&&p.logicalWidth>=1024&&p.logicalWidth<=16384&&p.logicalHeight>=768&&p.logicalHeight<=16384&&p.stageCssScale>0&&p.stageCssScale<=16&&(!p.touch||p.stageCssScale*32>=44&&p.stageCssScale*13>=44&&p.stageCssScale*14>=44));}
 export function parseSpellsIconMetadata(value:unknown):SpellsIconMetadata|null{if(!object(value)||!safe(value.version)||!Array.isArray(value.frames)||value.frames.length>512)return null;const ids=new Set<number>();const frames:SpellsIconMetadata["frames"]=[];for(const raw of value.frames){if(!object(raw)||!safe(raw.index)||raw.index>511||ids.has(raw.index)||![raw.x,raw.y].every(n=>Number.isInteger(n)&&Number(n)>=-2147483648&&Number(n)<=2147483647)||![raw.width,raw.height].every(n=>safe(n)&&n<=65535))return null;ids.add(raw.index);frames.push({index:raw.index,x:Number(raw.x),y:Number(raw.y),width:Number(raw.width),height:Number(raw.height)});}return{version:value.version,frames};}
 export function readSpellsStatus(r:SpellsRuntime):SpellsStatus|null{try{const v:unknown=JSON.parse(r.getMir2SpellsUiStatus?.()??"null");if(!object(v)||!validIdentity(v)||v.version!==1||![v.frame,v.renderRevision,v.appliedRevision,v.appliedModelRevision,v.appliedPresentationRevision].every(safe)||![v.ready,v.inputEnabled,v.modal,v.pending].every(n=>typeof n==="boolean")||!(v.error===null||typeof v.error==="string")||!Array.isArray(v.inputRegions)||!v.inputRegions.every(r=>object(r)&&[r.left,r.top,r.width,r.height].every(n=>typeof n==="number"&&Number.isFinite(n))&&Number(r.width)>0&&Number(r.height)>0))return null;return v as SpellsStatus;}catch{return null;}}
-type Options={runtime:SpellsRuntime;isCurrent:()=>boolean;read:()=>SpellsInput;now:()=>number;onState:(ready:boolean)=>void;onIntent:(intent:SpellsIntent,proof:SpellsProof)=>SpellsOutcome};
+type Options={runtime:SpellsRuntime;isCurrent:()=>boolean;read:()=>SpellsInput;now:()=>number;onState:(ready:boolean)=>void;onDiagnostic?:(diagnostic:SpellsDiagnostic)=>void;onIntent:(intent:SpellsIntent,proof:SpellsProof)=>SpellsOutcome};
 /** Thin transport/ownership mailbox. All skill interaction state remains in Rust. */
 export class SpellsHost {
   readonly run=burnSpellsRun();private stopped=false;private active=false;private revision=0;private modelRevision=0;private presentationRevision=0;
   private sent:SpellsSnapshot|null=null;private owner:SpellsOwner|null=null;private raw:unknown[]|null=null;private rawOwner:SpellsOwner|null=null;
   private receipts:Receipt[]=[];private serial=0;private overflow=false;private modelKey="";private presentationKey="";private frame=-1;private frameAt=0;
   private castSequence=0;private timing=new Map<string,SpellsTiming>();private pending=new Map<number,{intent:SpellsIntent;owner:SpellsOwner}>();
-  private requestCounter=0;
-  constructor(private options:Options){try{if(supportsSpells(options.runtime)){owners().set(options.runtime,this.run);options.runtime.setMir2SpellsUiIntentSink?.(json=>{
+  private requestCounter=0;private setupSupported=false;
+  constructor(private options:Options){try{if(this.setupSupported=supportsSpells(options.runtime)){owners().set(options.runtime,this.run);options.runtime.setMir2SpellsUiIntentSink?.(json=>{
     const i=parseSpellsIntent(json);if(!i||!this.allows(i)||i.requestId%BLOCK<=this.requestCounter||this.pending.has(i.requestId)||this.pending.size>=64)return JSON.stringify({outcome:"definitelyUnsent"});
     this.requestCounter=i.requestId%BLOCK;
     this.pending.set(i.requestId,{intent:i,owner:{...this.owner!}});
@@ -75,9 +79,30 @@ export class SpellsHost {
     if(outcome==="definitelyUnsent")this.pending.delete(i.requestId);
     if(!["confirmedSend","definitelyUnsent","outcomeUnknown"].includes(outcome))outcome="outcomeUnknown";
     return JSON.stringify({outcome});
-  });}}catch{this.stop();}}
+  });}}catch{this.stopWithReason("host-error");}}
   private owns(){return owners().get(this.options.runtime)===this.run;}
   private qualify(status:SpellsStatus|null){const s=this.sent;return Boolean(s&&status&&status.ready&&status.inputEnabled&&status.error===null&&sameIdentity(s,status)&&status.appliedRevision===s.revision&&status.appliedModelRevision===s.modelRevision&&status.appliedPresentationRevision===s.presentationRevision);}
+  // Diagnostics observe captured inputs/status only. They never confer transport authority.
+  private report(reason:SpellsDiagnosticReason,input?:SpellsInput){
+    const diagnostic:SpellsDiagnostic={ready:this.active,reason};
+    const inputReason=input?.ineligibleReason;
+    if(input?.eligible===false&&inputReason!==undefined&&spellsIneligibleReasons.includes(inputReason))diagnostic.inputReason=inputReason;
+    try{this.options.onDiagnostic?.(diagnostic);}catch{/* An observer cannot change ownership or delivery. */}
+  }
+  private statusReason(input:SpellsInput,open:boolean,status:SpellsStatus|null):SpellsDiagnosticReason{
+    if(this.active)return "ready";
+    if(!input.eligible)return "ineligible";
+    if(!input.open)return "closed";
+    if(!open)return "geometry";
+    if(!status)return "status-invalid";
+    if(!status.ready)return "runtime-not-ready";
+    if(!status.inputEnabled)return "input-disabled";
+    if(status.error!==null)return "runtime-error";
+    const s=this.sent!;
+    if(!sameIdentity(s,status))return "identity-mismatch";
+    if(status.appliedRevision!==s.revision||status.appliedModelRevision!==s.modelRevision||status.appliedPresentationRevision!==s.presentationRevision)return "applied-revision-mismatch";
+    return "stale";
+  }
   /** Called before React/movement coalescing, with connection + confirmed session captured by Page. */
   observeSnapshot(snapshot:SpellsRawSnapshot,owner:SpellsOwner){
     if(this.stopped||!this.owns()||!this.options.isCurrent()||!validOwner(owner))return false;
@@ -86,14 +111,14 @@ export class SpellsHost {
     if(!Array.isArray(snapshot.knownSkills)||snapshot.knownSkills.length>512){
       // A current capture failed: old rows cannot regain authority on the next timer tick.
       // Pending receipts and burned request watermarks survive until a complete capture.
-      this.raw=null;this.withdraw();return false;
+      this.raw=null;this.withdrawWithReason("baseline-missing");return false;
     }
     if(this.rawOwner&&!sameSpellsOwner(this.rawOwner,owner)){this.receipts=[];this.timing.clear();this.pending.clear();this.raw=null;this.overflow=false;}
     this.rawOwner={...owner};this.raw=JSON.parse(JSON.stringify(snapshot.knownSkills));
     const a=snapshot.skillKeyAck;
     if(request(a)&&object(a)&&typeof a.accepted==="boolean"&&requestRunOf(a.requestId)===this.run){
       const p=this.pending.get(a.requestId);if(p&&sameSpellsOwner(p.owner,owner)&&requestKeys.every(k=>p.intent[k]===a[k])){
-        if(this.receipts.length>=64){this.overflow=true;this.withdraw();return false;}
+        if(this.receipts.length>=64){this.overflow=true;this.withdrawWithReason("overflow");return false;}
         this.receipts.push({serial:++this.serial,learned:JSON.parse(JSON.stringify(this.raw)),skillKeyAck:{requestId:a.requestId,spell:a.spell,key:a.key,oldKey:a.oldKey,accepted:a.accepted}});this.pending.delete(a.requestId);
       }
     }
@@ -105,7 +130,7 @@ export class SpellsHost {
     if(payload.objectId!==undefined&&Number(payload.objectId)!==owner.playerObjectId)return false;
     const at=Math.floor(this.options.now());if(!safe(at))return false;
     if(packet==="MagicCast"||packet==="Magic"){
-      if(this.castSequence===Number.MAX_SAFE_INTEGER||this.timing.size>=512&&!this.timing.has(spell)){this.overflow=true;this.withdraw();return false;}
+      if(this.castSequence===Number.MAX_SAFE_INTEGER||this.timing.size>=512&&!this.timing.has(spell)){this.overflow=true;this.withdrawWithReason("overflow");return false;}
       const old=this.timing.get(spell);this.timing.set(spell,{spell,sequence:++this.castSequence,observedAtMs:at,delayMs:old?.delayMs??null});
     }else if(packet==="MagicDelay"){
       if(!safe(payload.delay)||payload.delay>0xffffffff)return false;
@@ -114,9 +139,14 @@ export class SpellsHost {
     this.tick();return true;
   }
   tick(){if(this.stopped)return;try{
-    if(!this.owns()||!this.options.isCurrent()){this.stop();return;}
+    if(!this.owns()||!this.options.isCurrent()){this.stopWithReason(this.setupSupported?"retired":"unsupported-abi");return;}
     const input=this.options.read();
-    if(!supportsSpells(this.options.runtime)||!validOwner(input.owner)||!input.player||!this.raw||!this.rawOwner||!sameSpellsOwner(input.owner,this.rawOwner)||this.overflow){this.withdraw();return;}
+    if(!supportsSpells(this.options.runtime)){this.withdrawWithReason("unsupported-abi",input);return;}
+    if(!validOwner(input.owner)){this.withdrawWithReason("invalid-owner",input);return;}
+    if(!input.player){this.withdrawWithReason("player-absent",input);return;}
+    if(!this.raw||!this.rawOwner){this.withdrawWithReason("baseline-missing",input);return;}
+    if(!sameSpellsOwner(input.owner,this.rawOwner)){this.withdrawWithReason("baseline-owner-mismatch",input);return;}
+    if(this.overflow){this.withdrawWithReason("overflow",input);return;}
     const open=input.eligible&&input.open&&fitsSpells(input.presentation);
     const modelKey=JSON.stringify([this.raw,input.player,[...this.timing.values()]]),presentationKey=JSON.stringify([input.owner,input.hudGeneration,input.presentation,input.iconMetadata,open]);
     const status=readSpellsStatus(this.options.runtime);
@@ -127,12 +157,15 @@ export class SpellsHost {
       this.modelKey=modelKey;this.presentationKey=presentationKey;this.owner={...input.owner};
       const s:SpellsSnapshot={...input.owner,requestRun:this.run,hudGeneration:input.hudGeneration,revision:++this.revision,modelRevision:this.modelRevision,presentationRevision:this.presentationRevision,
         open,inputEnabled:open,presentation:input.presentation,player:input.player,learned:this.raw,receipts:this.receipts,timing:[...this.timing.values()],nowMs:Math.floor(this.options.now()),iconMetadata:input.iconMetadata};
-      if(!this.options.runtime.setMir2SpellsUiSnapshot?.(JSON.stringify(s))){this.withdraw();return;}
+      if(!this.options.runtime.setMir2SpellsUiSnapshot?.(JSON.stringify(s))){this.withdrawWithReason("snapshot-rejected",input);return;}
       this.sent=s;this.receipts=[];
     }
-    this.active=this.qualify(readSpellsStatus(this.options.runtime))&&this.options.now()-this.frameAt<=500;
+    const appliedStatus=readSpellsStatus(this.options.runtime);
+    this.active=this.qualify(appliedStatus)&&this.options.now()-this.frameAt<=500;
+    const reason=this.statusReason(input,open,appliedStatus);
     this.options.onState(this.active);
-  }catch{this.withdraw();}}
+    this.report(reason,input);
+  }catch{this.withdrawWithReason("host-error");}}
   allows(i:SpellsProof){if(!this.owns()||!this.options.isCurrent()||this.stopped||!this.active||!this.sent||!this.owner||!sameIdentity(i,this.sent)||i.modelRevision!==this.sent.modelRevision||i.presentationRevision!==this.sent.presentationRevision||requestRunOf(i.requestId)!==this.run)return false;
     const rows=this.raw??[],identified=rows.filter((row,index)=>object(row)&&(Object.hasOwn(row,"id")?row.id:index)===i.skillId);
     if(identified.length!==1||!object(identified[0])||identified[0].spell!==i.spell||rows.filter(row=>object(row)&&row.spell===i.spell).length!==1)return false;
@@ -141,9 +174,11 @@ export class SpellsHost {
   }
   pointerContext():SpellsPointerContext|null{const s=this.sent,status=readSpellsStatus(this.options.runtime),live=this.options.read();if(!s?.presentation||!this.active||!this.qualify(status)||!this.owns()||!this.options.isCurrent()||!live.eligible||!live.open||!this.owner||!sameSpellsOwner(this.owner,live.owner)||this.options.now()-this.frameAt>500)return null;return{...this.identity(s),modelRevision:s.modelRevision,presentationRevision:s.presentationRevision,renderRevision:status!.renderRevision,modal:status!.modal,inputRegions:status!.inputRegions,presentation:s.presentation};}
   private identity(s:SpellsIdentity):SpellsIdentity{return{requestRun:s.requestRun,connectionGeneration:s.connectionGeneration,sessionGeneration:s.sessionGeneration,ownerRevision:s.ownerRevision,hudGeneration:s.hudGeneration,playerObjectId:s.playerObjectId};}
-  pointer(e:SpellsPointerEdge){try{if(e.phase!=="cancel"&&!this.pointerContext())return false;return this.options.runtime.setMir2SpellsUiPointerEdge?.(JSON.stringify(e))===true;}catch{this.withdraw();return false;}}
-  withdraw(){this.active=false;this.options.onState(false);const s=this.sent;this.sent=null;this.owner=null;if(s&&this.owns())try{this.options.runtime.setMir2SpellsUiSnapshot?.(JSON.stringify({...s,revision:++this.revision,open:false,inputEnabled:false,receipts:[]}));}catch{/* Captured runtime has retired. */}}
-  stop(){this.withdraw();this.stopped=true;if(this.owns()){owners().delete(this.options.runtime);try{this.options.runtime.clearMir2SpellsUiIntentSink?.();}catch{/* Retired. */}}}
+  pointer(e:SpellsPointerEdge){try{if(e.phase!=="cancel"&&!this.pointerContext())return false;return this.options.runtime.setMir2SpellsUiPointerEdge?.(JSON.stringify(e))===true;}catch{this.withdrawWithReason("host-error");return false;}}
+  withdraw(){this.withdrawWithReason("withdrawn");}
+  private withdrawWithReason(reason:SpellsDiagnosticReason,input?:SpellsInput){this.active=false;this.options.onState(false);const s=this.sent;this.sent=null;this.owner=null;if(s&&this.owns())try{this.options.runtime.setMir2SpellsUiSnapshot?.(JSON.stringify({...s,revision:++this.revision,open:false,inputEnabled:false,receipts:[]}));}catch{/* Captured runtime has retired. */}this.report(reason,input);}
+  stop(){this.stopWithReason("stopped");}
+  private stopWithReason(reason:SpellsDiagnosticReason){this.withdrawWithReason(reason);this.stopped=true;if(this.owns()){owners().delete(this.options.runtime);try{this.options.runtime.clearMir2SpellsUiIntentSink?.();}catch{/* Retired. */}}}
 }
 export class SpellsPointerRouter {
   held:{context:SpellsPointerContext;pointerId:number;invalid:boolean}|null=null;private sequence=0;

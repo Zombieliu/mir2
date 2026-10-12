@@ -40,3 +40,62 @@ test('bad current capture preserves pending send-time tuple and request highwate
  assert.equal(f.host.observeSnapshot(f.raw,f.input.owner),true);assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.calls.length,1);assert.equal(f.host.pending.size,1);
  const ack={requestId:first.requestId,spell:first.spell,key:first.key,oldKey:first.oldKey,accepted:false};f.host.observeSnapshot({...f.raw,skillKeyAck:ack},f.input.owner);assert.equal(f.host.pending.size,0);assert.equal(f.host.requestCounter,counter);assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.calls.length,1);
 });
+
+function diagnosticFixture({metadata=null,onDiagnostic}={}){
+ let sent=null,sink=null,now=10,current=true,echo=true,frozenFrame=false,frame=1,statusPatch={},invalidStatus=false;
+ const counts={capabilities:0,status:0,snapshot:0,read:0,now:0,install:0,clear:0,intent:0},diagnostics=[],states=[];
+ const input={owner:{connectionGeneration:1,sessionGeneration:2,ownerRevision:0,playerObjectId:3},hudGeneration:4,eligible:true,open:true,
+  player:{name:'Hero',hp:1,maxHp:1,mp:1,maxMp:1,level:1,gold:0,credit:0,experience:0,maxExperience:1,currentWeight:0,currentWeightKnown:false,maxWeight:1},
+  presentation:{logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false},iconMetadata:metadata};
+ const runtime={getMir2SpellsUiCapabilities:()=>{counts.capabilities++;return JSON.stringify(caps);},setMir2SpellsUiSnapshot:json=>{counts.snapshot++;if(!echo)return false;sent=JSON.parse(json);return true;},
+  getMir2SpellsUiStatus:()=>{counts.status++;if(invalidStatus||!sent)return 'null';return JSON.stringify({...sent,version:1,frame:frozenFrame?frame:++frame,ready:sent.open,inputEnabled:sent.inputEnabled,modal:true,pending:false,renderRevision:7,
+   appliedRevision:sent.revision,appliedModelRevision:sent.modelRevision,appliedPresentationRevision:sent.presentationRevision,inputRegions:[{left:322,top:312,width:380,height:144}],error:null,...statusPatch});},
+  setMir2SpellsUiIntentSink:s=>{counts.install++;sink=s;},clearMir2SpellsUiIntentSink:()=>{counts.clear++;sink=null;},setMir2SpellsUiPointerEdge:()=>true};
+ const host=new ui.SpellsHost({runtime,isCurrent:()=>current,read:()=>{counts.read++;return input;},now:()=>{counts.now++;return now;},onState:v=>states.push(v),
+  onDiagnostic:onDiagnostic===false?undefined:d=>{diagnostics.push(d);if(typeof onDiagnostic==='function')onDiagnostic(d);},onIntent:()=>{counts.intent++;return 'confirmedSend';}});
+ return{host,input,runtime,counts,diagnostics,states,get last(){return diagnostics.at(-1);},get sent(){return sent;},capture:()=>host.observeSnapshot({playerObjectId:input.owner.playerObjectId,knownSkills:[]},input.owner),
+  emit:()=>JSON.parse(sink(JSON.stringify({requestRun:host.run,...input.owner,hudGeneration:4,modelRevision:sent.modelRevision,presentationRevision:sent.presentationRevision,renderRevision:7,skillId:0,requestId:host.run*2**22+1,spell:'FireBall',key:16,oldKey:1}))),
+  set now(v){now=v;},set current(v){current=v;},set echo(v){echo=v;},set frozenFrame(v){frozenFrame=v;},set statusPatch(v){statusPatch=v;},set invalidStatus(v){invalidStatus=v;}};
+}
+for(const metadata of [null,{version:1,frames:[]}])test(`real host empty baseline with ${metadata===null?'null':'empty'} metadata requires fresh exact runtime echo`,()=>{
+ const f=diagnosticFixture({metadata});f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'baseline-missing'});assert.equal(f.counts.status,0);assert.equal(f.counts.snapshot,0);
+ f.statusPatch={ready:false};assert.equal(f.capture(),true);assert.deepEqual(f.sent.learned,[]);assert.deepEqual(f.sent.iconMetadata,metadata);assert.deepEqual(f.last,{ready:false,reason:'runtime-not-ready'});
+ f.statusPatch={};f.host.tick();assert.deepEqual(f.last,{ready:true,reason:'ready'});assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.counts.intent,0);assert.equal(f.host.requestCounter,0);assert.equal(f.host.pending.size,0);
+ f.statusPatch={appliedModelRevision:f.sent.modelRevision+1};f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'applied-revision-mismatch'});assert.equal(f.host.pointerContext(),null);assert.equal(f.emit().outcome,'definitelyUnsent');
+ f.statusPatch={};f.host.tick();f.frozenFrame=true;f.host.tick();f.now=510;f.host.tick();assert.deepEqual(f.last,{ready:true,reason:'ready'});f.now=511;f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'stale'});assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.counts.intent,0);
+});
+test('empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging',()=>{
+ const f=diagnosticFixture();assert.equal(f.capture(),true);assert.deepEqual(f.last,{ready:true,reason:'ready'});const oldOwner={...f.input.owner},capturedOwner={...f.host.rawOwner};
+ f.input.owner={...oldOwner,ownerRevision:oldOwner.ownerRevision+1};const before={...f.counts};f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'baseline-owner-mismatch'});assert.deepEqual(f.host.rawOwner,capturedOwner);
+ assert.equal(f.counts.status,before.status);assert.equal(f.counts.snapshot,before.snapshot+1);assert.equal(f.sent.open,false);assert.equal(f.emit().outcome,'definitelyUnsent');
+ assert.equal(f.host.observeSnapshot({playerObjectId:3,knownSkills:[]},oldOwner),false);f.host.tick();assert.equal(f.last.reason,'baseline-owner-mismatch');assert.equal(f.capture(),true);assert.deepEqual(f.last,{ready:true,reason:'ready'});assert.equal(f.counts.intent,0);
+});
+test('finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing',()=>{
+ const a=diagnosticFixture({onDiagnostic:false}),b=diagnosticFixture(),c=diagnosticFixture({onDiagnostic:()=>{throw Error('observer secret');}});
+ for(const f of [a,b,c]){f.capture();f.host.tick();const before={...f.counts};f.host.tick();assert.equal(f.counts.capabilities-before.capabilities,1);assert.equal(f.counts.status-before.status,2);assert.equal(f.counts.read-before.read,1);assert.equal(f.counts.now-before.now,2);assert.equal(f.counts.snapshot-before.snapshot,0);}
+ assert.deepEqual(a.counts,b.counts);assert.deepEqual(b.counts,c.counts);assert.deepEqual(a.states,b.states);assert.deepEqual(b.states,c.states);assert.deepEqual(c.last,{ready:true,reason:'ready'});
+ for(const f of [a,b,c]){f.host.withdraw();assert.equal(f.sent.open,false);f.host.stop();}assert.deepEqual(a.counts,b.counts);assert.deepEqual(b.counts,c.counts);assert.deepEqual(a.states,b.states);assert.deepEqual(b.states,c.states);assert.deepEqual(b.last,{ready:false,reason:'stopped'});
+});
+test('diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim',()=>{
+ const f=fixture(),diagnostics=[];f.host.options.onDiagnostic=d=>{diagnostics.push(d);throw Error('observer failure');};assert.equal(f.emit().outcome,'confirmedSend');const first=f.intent(),counter=f.host.requestCounter,pending=f.host.pending.get(first.requestId);
+ f.host.withdraw();assert.deepEqual(diagnostics.at(-1),{ready:false,reason:'withdrawn'});assert.equal(f.host.pending.get(first.requestId),pending);assert.equal(f.host.requestCounter,counter);f.host.tick();assert.deepEqual(diagnostics.at(-1),{ready:true,reason:'ready'});assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.calls.length,1);
+ f.host.observeSnapshot({...f.raw,skillKeyAck:{requestId:first.requestId,spell:first.spell,key:first.key,oldKey:first.oldKey,accepted:false}},f.input.owner);assert.equal(f.host.pending.size,0);assert.equal(f.host.requestCounter,counter);assert.equal(f.emit().outcome,'definitelyUnsent');f.host.stop();assert.deepEqual(diagnostics.at(-1),{ready:false,reason:'stopped'});assert.equal(f.host.requestCounter,counter);assert.equal(f.calls.length,1);
+});
+test('status diagnostics expose only the first finite refusal and never raw status or error',()=>{
+ const cases=[['status-invalid',null],['runtime-not-ready',{ready:false,inputEnabled:false,error:'private'}],['input-disabled',{inputEnabled:false,error:'private'}],['runtime-error',{error:'private credentials'}],['identity-mismatch',{ownerRevision:99}],['identity-mismatch',{hudGeneration:99}],['identity-mismatch',{requestRun:99}],['applied-revision-mismatch',{appliedRevision:99}],['applied-revision-mismatch',{appliedModelRevision:99}],['applied-revision-mismatch',{appliedPresentationRevision:99}]];
+ for(const [reason,patch]of cases){const f=diagnosticFixture();f.capture();if(patch===null)f.invalidStatus=true;else f.statusPatch=Object.hasOwn(patch,'requestRun')?{...patch,requestRun:f.host.run+1}:patch;f.host.tick();assert.deepEqual(f.last,{ready:false,reason});assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.counts.intent,0);assert.deepEqual(Object.keys(f.last).sort(),['ready','reason']);}
+});
+test('input and lifecycle diagnostics remain observational and sanitize auxiliary reasons',()=>{
+ const reasons=['request-disabled','backend-unsupported','not-in-game','disconnected','player-missing','owner-not-current','scene-assets-unready','equipment-suspended','modal-open','hud-unready','hidden','unfocused'];
+ const f=diagnosticFixture();f.capture();f.input.eligible=false;for(const inputReason of reasons){f.input.ineligibleReason=inputReason;f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'ineligible',inputReason});assert.equal(f.sent.inputEnabled,false);}
+ f.input.ineligibleReason='private account';f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'ineligible'});f.input.eligible=true;f.input.open=false;f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'closed'});
+ f.input.open=true;f.input.presentation={...f.input.presentation,logicalWidth:800};f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'geometry'});f.input.presentation={...f.input.presentation,logicalWidth:1024};f.host.tick();assert.deepEqual(f.last,{ready:true,reason:'ready'});
+ f.host.withdraw();assert.deepEqual(f.last,{ready:false,reason:'withdrawn'});f.host.tick();f.current=false;f.host.tick();assert.deepEqual(f.last,{ready:false,reason:'retired'});const before={...f.counts};f.host.tick();assert.deepEqual(f.counts,before);
+});
+test('early host refusals retain old short circuit runtime calls and withdrawal output',()=>{
+ const cases=[['invalid-owner',f=>{f.input.owner={...f.input.owner,playerObjectId:0};}],['player-absent',f=>{f.input.player=null;}],['baseline-missing',f=>{f.host.rawOwner=null;}],['overflow',f=>{f.host.overflow=true;}],['unsupported-abi',f=>{f.runtime.getMir2SpellsUiCapabilities=()=>{f.counts.capabilities++;return '{}';};}]];
+ for(const [reason,change]of cases){const f=diagnosticFixture();f.capture();change(f);const before={...f.counts};f.host.tick();assert.deepEqual(f.last,{ready:false,reason});assert.equal(f.counts.status,before.status);assert.equal(f.counts.now,before.now);assert.equal(f.counts.snapshot,before.snapshot+1);assert.equal(f.sent.open,false);assert.equal(f.counts.intent,0);}
+ const rejected=diagnosticFixture();rejected.echo=false;rejected.capture();assert.deepEqual(rejected.last,{ready:false,reason:'snapshot-rejected'});assert.equal(rejected.counts.status,1);
+ const error=diagnosticFixture();error.runtime.setMir2SpellsUiSnapshot=()=>{throw Error('private runtime detail');};error.capture();assert.deepEqual(error.last,{ready:false,reason:'host-error'});
+ const unsupported=diagnosticFixture({onDiagnostic:false});unsupported.host.stop();const diagnostics=[];const host=new ui.SpellsHost({runtime:{},isCurrent:()=>true,read:()=>{throw Error('must not read');},now:()=>{throw Error('must not clock');},onState:()=>{},onDiagnostic:d=>diagnostics.push(d),onIntent:()=> 'confirmedSend'});host.tick();assert.deepEqual(diagnostics.at(-1),{ready:false,reason:'unsupported-abi'});
+});

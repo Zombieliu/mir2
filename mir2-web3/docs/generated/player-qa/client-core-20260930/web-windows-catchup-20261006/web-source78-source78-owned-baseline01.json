@@ -1,0 +1,92 @@
+{
+  "owner": "Root",
+  "parent": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "scope": "read-only first-refusal diagnosis; retain all authorization gates and runtime calls",
+  "files": [
+    {
+      "relativePath": "apps/web/lib/bevy-spells-ui.ts",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-spells-ui.ts",
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/lib/bevy-spells-ui.ts"
+    },
+    {
+      "relativePath": "apps/web/lib/use-bevy-spells-ui.ts",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/lib/use-bevy-spells-ui.ts",
+        "bytes": 2823,
+        "sha256": "780e587c8d87bb50cc280e29b90d9a1467e03c723e58cbf4719bf6e1f0dbec94"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/lib/use-bevy-spells-ui.ts"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-spells-ui.mjs",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-spells-ui.mjs",
+        "bytes": 12404,
+        "sha256": "68ef1d3e4304c39eeda5e105517eef8f0a7ff6145043ffe3f17221bf80631a29"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/scripts/test-bevy-spells-ui.mjs"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/scripts/test-use-bevy-spells-ui.mjs",
+        "bytes": 2790,
+        "sha256": "27efb2dd14c35fde07264019ecd22ce7b940b369a3bbc3c4214d57016059edae"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/scripts/test-use-bevy-spells-ui.mjs"
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/app/page.tsx"
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/app/original-client-shell.tsx"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+        "bytes": 18839,
+        "sha256": "b0f78fca5b8dcd9aca096de52c7b6fb9c9ca5f263185d4ef25be2be63c43d070"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/app/components/original-client-shell-types.ts"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-page-gate.mjs",
+      "main": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs",
+        "bytes": 9600,
+        "sha256": "d10cad9061efccc7d55a8e3902cecf763f2fffcd54787fd40e2ac48972921c3e"
+      },
+      "before": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/before/apps/web/scripts/test-spells-page-gate.mjs"
+    }
+  ],
+  "workerOwns": [
+    "apps/web/lib/bevy-spells-ui.ts",
+    "apps/web/lib/use-bevy-spells-ui.ts",
+    "apps/web/scripts/test-bevy-spells-ui.mjs",
+    "apps/web/scripts/test-use-bevy-spells-ui.mjs"
+  ],
+  "rootOwns": [
+    "apps/web/app/page.tsx",
+    "apps/web/app/original-client-shell.tsx",
+    "apps/web/app/components/original-client-shell-types.ts",
+    "apps/web/scripts/test-spells-page-gate.mjs"
+  ],
+  "workerExecAllowed": false
+}

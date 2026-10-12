@@ -13249,6 +13249,13 @@ export default function HomePage() {
     // it does not rename the older owner-qualified cache or replay input edges.
     return {snapshot:{playerObjectId:source.snapshot.playerObjectId,knownSkills:source.snapshot.knownSkills},owner};
   }
+  function readCurrentSpellsBaseline() {
+    const baseline = readCurrentCombatBaseline();
+    // Bootstrap a new controller from the authenticated physical snapshot.
+    // Keep the earlier owner-qualified cache and live ACK delivery unchanged.
+    if (!baseline || !Array.isArray(baseline.snapshot.knownSkills) || baseline.snapshot.knownSkills.length > 512) return null;
+    return baseline;
+  }
   function currentHeroRawPhysical(): HeroPhysical | null {
     const socket = socketRef.current, session = equipmentStartGameRef.current;
     return socket && socket.readyState === WebSocket.OPEN && session
@@ -19762,15 +19769,20 @@ export default function HomePage() {
   bevyCharacterSendGateRef.current = bevyCharacterUi.allows;
   const bevySpellsUi=useBevySpellsUi({
     requested:bevyQuestUiRequested,runtimeGeneration:bevyRuntimeGeneration,runtimeRef,
-    readBaseline:()=>spellsRawSnapshotRef.current,
+    readBaseline:()=>readCurrentSpellsBaseline(),
     read:metadata=>{
       const current=worldRef.current,player=current.entities.find(e=>e.objectId===current.playerObjectId)??null;
       const owner=currentSpellsOwner(spellsRawSnapshotRef.current?.snapshot.playerObjectId??null)??{connectionGeneration:0,sessionGeneration:0,ownerRevision:0,playerObjectId:0};
       const modal=bevyQuestReactModalOpen||showQuestLog||heroManagementPage!==null||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+      const backendSupported=bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend));
+      const ownerCurrent=Boolean(player)&&Number(current.playerObjectId)===owner.playerObjectId;
+      const baseEligible=backendSupported&&screenRef.current==="game"&&current.connected&&ownerCurrent&&initialSceneAssetsReadyRef.current&&equipmentHostSuspendReasonRef.current===null&&!modal;
+      // Preserve the original short-circuit runtime read; diagnostic reasons do not grant ownership.
+      const hudReady=baseEligible&&bevyHudUi.readCurrent()?.ready===true;
+      const visible=hudReady&&document.visibilityState==="visible",focused=visible&&document.hasFocus();
+      const ineligibleReason=!bevyQuestUiRequested?"request-disabled":!backendSupported?"backend-unsupported":screenRef.current!=="game"?"not-in-game":!current.connected?"disconnected":!player?"player-missing":!ownerCurrent?"owner-not-current":!initialSceneAssetsReadyRef.current?"scene-assets-unready":equipmentHostSuspendReasonRef.current!==null?"equipment-suspended":modal?"modal-open":!hudReady?"hud-unready":!visible?"hidden":!focused?"unfocused":undefined;
       return {owner,hudGeneration:bevyQuestGenerationRef.current,open:showCharacter&&activeCharacterTab==="spells",
-        eligible:bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend))
-          &&screenRef.current==="game"&&current.connected&&Boolean(player)&&Number(current.playerObjectId)===owner.playerObjectId&&initialSceneAssetsReadyRef.current&&equipmentHostSuspendReasonRef.current===null&&!modal
-          &&bevyHudUi.readCurrent()?.ready===true&&document.visibilityState==="visible"&&document.hasFocus(),
+        eligible:focused,ineligibleReason,
         player:projectAuthoritativeHudPlayer(current,player),iconMetadata:metadata,
         presentation:readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`),clientProfile.input==="touch")};
     },onIntent:dispatchBevySpellsIntent,
@@ -20016,6 +20028,7 @@ export default function HomePage() {
       language={language}
       screen={screen}
       storageUiDiagnostics={JSON.stringify(bevyStorageUi.diagnostic)}
+      spellsUiDiagnostics={JSON.stringify(bevySpellsUi.diagnostic)}
       npcPurchaseActionDiagnostics={JSON.stringify(npcPurchaseActionStatus)}
       npcShopInputDiagnostics={npcShopService?.supportsBuy ? JSON.stringify({
         source: npcGoldBuySourceFailureRef.current,
