@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-12 Activities/player portal Candidate: same-account activity and player
+> views, level rights registered for public-launch delivery, schema9 ledger and
+> real beta-payment basis. Website29/Source88/Gateway52 local checks pass;
+> independent PostgreSQL save-fence rerun and deployment are pending. Native
+> title/outfit ownership, issuance and public referral/bonus time remain open.
+> [Evidence and limits](ACTIVITIES-PLAYER-PORTAL-20261012.md); no global100% claim.
+
 > 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
 > feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
 > explicit. Partial/cancelled writes fence before unlock. Actual331 distinct

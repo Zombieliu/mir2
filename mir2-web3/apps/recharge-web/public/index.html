@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Numeron · Legend of Rebirth. Register test rewards, check your characters and recharge Credits with your game account.">
+  <title>Player services · Numeron</title>
+  <link rel="icon" href="./mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Numeron"><img src="./mark.svg" width="38" height="44" alt=""><span>NUMERON<small>LEGEND OF REBIRTH</small></span></a>
+    <nav id="portal-nav" aria-label="Player services">
+      <a id="nav-activities" href="#activities" data-activity-i18n="activitiesNav" aria-current="page">Activity center</a>
+      <a id="nav-player" href="#player" data-activity-i18n="playerNav">Player center</a>
+      <a id="nav-recharge" href="#recharge" data-i18n="recharge">Recharge</a>
+    </nav>
+    <label class="language"><span class="sr-only" data-i18n="language">Language</span><select id="language" aria-label="Language">
+      <option value="zh-Hant">繁體中文</option><option value="en">English</option><option value="pt-BR">Português (Brasil)</option><option value="ru">Русский</option><option value="hi">हिन्दी</option><option value="id">Bahasa Indonesia</option><option value="vi">Tiếng Việt</option><option value="th">ภาษาไทย</option><option value="ar">العربية</option>
+    </select></label>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow"><span class="tiny-star">✦</span> <span id="hero-eyebrow">YOUR JOURNEY, REMEMBERED</span></p>
+      <h1 id="hero-headline">Build a legacy.<br>Carry it forward.</h1>
+      <p id="hero-description" class="hero-description">Reach milestones in the test server and register your rewards for public launch.</p>
+      <div class="mode-note"><span class="mode-dot"></span><strong data-i18n="testMode">Test payments</strong><span data-i18n="testDetail">No real money is charged.</span></div>
+      <span class="hero-seal" aria-hidden="true">N</span>
+    </section>
+    <div class="portal-grid">
+      <aside id="account-panel" class="account-panel panel">
+        <div class="section-number">01 <span></span></div>
+        <h2 data-i18n="accountTitle">Your game account</h2>
+        <p class="muted" data-i18n="accountHint">Use the same account as the Windows client on the invited server.</p>
+        <form id="login-form">
+          <label for="account" data-i18n="account">Account</label><input id="account" name="username" type="text" autocomplete="username" maxlength="100" required spellcheck="false" autocapitalize="none" dir="ltr">
+          <label for="password" data-i18n="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="256" required dir="ltr">
+          <button class="primary full-width" id="login" type="submit" data-i18n="login">Sign in</button>
+        </form>
+        <div id="signed-in" hidden>
+          <div class="account-name"><span id="account-name"></span><button id="logout" type="button" class="text-button" data-i18n="logout">Sign out</button></div>
+          <label for="character" data-activity-i18n="selectedCharacter">Selected character</label><select id="character"></select>
+          <p id="empty-characters" class="muted" data-i18n="emptyCharacters" hidden>Create a character in the game first, then sign in here again.</p>
+          <div class="wallet"><span data-i18n="balance">Credits</span><strong id="credit">—</strong><div id="pending-row" hidden><span data-i18n="pending">Awaiting delivery</span><b id="pending"></b></div></div>
+          <div class="monthly-status"><span class="tiny-star">✦</span><div><strong id="monthly-state"></strong><small id="monthly-expiry"></small></div></div>
+          <button id="refresh" class="secondary full-width" type="button" data-activity-i18n="refreshAccount">Refresh my account</button>
+        </div>
+        <p class="account-security"><span aria-hidden="true">◇</span> <span data-i18n="accountSecurity">Your password and sign-in token are never saved by this website.</span></p>
+      </aside>
+      <section id="activities-view" class="panel activities-panel" aria-labelledby="nav-activities"><div id="activity-content"></div></section>
+      <section id="player-view" class="panel player-panel" aria-labelledby="nav-player" hidden><div id="player-content"></div></section>
+      <section id="recharge-view" class="recharge-panel panel" aria-labelledby="nav-recharge" hidden>
+        <div class="section-heading"><div><div class="section-number">02 <span></span></div><h2 data-i18n="rechargeTitle">Choose your Credits</h2></div><span class="stripe-badge" data-i18n="safePayment">Payment with Stripe</span></div>
+        <p class="muted" data-i18n="serverPrices">Prices and Credits are confirmed by the game server.</p>
+        <div id="offers" class="offers" aria-busy="false"><p class="login-placeholder" data-i18n="loginFirst">Sign in to view the available recharge amounts.</p></div>
+        <div id="checkout-panel" class="checkout-panel" hidden>
+          <p id="checkout-message"></p>
+          <a id="checkout-link" class="primary" target="_blank" rel="noopener noreferrer" data-i18n="continuePay" hidden>Continue to Stripe</a>
+          <button id="new-order" type="button" class="text-button" data-i18n="newOrder" hidden>Start another recharge</button>
+        </div>
+        <div class="monthly-note"><div class="card-symbol" aria-hidden="true">30<small>DAYS</small></div><div><strong data-i18n="monthlyTitle">30-day monthly card</strong><p id="monthly-price" data-i18n="monthlyNote">Buy the monthly card with Credits in the game shop. Collect it from mail and use it to activate.</p></div></div>
+      </section>
+    </div>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section id="campaign-rules" class="campaign-rules" aria-label="Campaign rules"></section>
+    <section id="order-section" class="panel order-panel" hidden><div class="section-heading"><h2 data-i18n="history">Recent recharge orders</h2><span class="muted" data-i18n="lastTwenty">Latest 20 for this character</span></div><div id="orders"></div></section>
+    <section id="recharge-help" class="how-it-works" hidden><div><p class="eyebrow">NUMERON · ACCOUNT SERVICES</p><h2 data-i18n="helpTitle">From this page<br>back to your world.</h2></div><ol><li><b>01</b><span data-i18n="help1">Sign in and choose the character that will receive the Credits.</span></li><li><b>02</b><span data-i18n="help2">Choose an amount and complete payment on Stripe. Select USD if another currency is offered.</span></li><li><b>03</b><span data-i18n="help3">Keep this page open and check your balance after payment. Pending Credits are delivered through the game server.</span></li></ol></section>
+  </main>
+  <footer><span>© NUMERON · LEGEND OF REBIRTH</span><span data-activity-i18n="portalFooter">Your activities, characters and recharge records share the same game account.</span></footer>
+  <noscript>This player website requires JavaScript. / 此玩家網站需要啟用 JavaScript。</noscript>
+</body>
+</html>

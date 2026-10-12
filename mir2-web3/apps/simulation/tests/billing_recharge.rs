@@ -1162,7 +1162,7 @@ fn recharge_file_reload_retains_pending_and_applied_receipts_without_regrant() {
     let durable = FileAccountStoreRepository::new(&path)
         .load(config.default_character.clone())
         .unwrap();
-    assert_eq!(durable.schema_version, 8);
+    assert_eq!(durable.schema_version, mir2_simulation::billing::BILLING_SCHEMA_VERSION);
     assert_eq!(
         durable.accounts["demo"].billing.as_ref().unwrap().orders[&order.id].state,
         RechargeOrderState::PaidPending
@@ -1204,7 +1204,7 @@ fn recharge_legacy_schema_upgrades_empty_but_cannot_promote_injected_paid_author
             .load(config.default_character.clone())
             .unwrap()
             .schema_version,
-        8
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION
     );
     paid(&config, "injected-schema", "injected", 100);
     let mut injected = serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap();
@@ -1250,7 +1250,7 @@ fn recharge_schema_seven_cannot_promote_real_monthly_card_item_receipts() {
             .load(config.default_character.clone())
             .unwrap()
             .schema_version,
-        8
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION
     );
     config
         .account_store

@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-12 Activities/player portal Candidate: same-game-account website,
+> closed/beta level30/40/50 registration, durable account-schema9 rights and
+> verified beta payment basis; TEST excluded. Local website29, Source88 and
+> Gateway52 checks pass. Independent PostgreSQL owner-save conflict reproduced
+> and patched; inverse stale-character fence and public rollout remain pending.
+> [Scope and evidence](ACTIVITIES-PLAYER-PORTAL-20261012.md). This does not close
+> native title/cosmetic delivery, public referral rewards or overall parity.
+
 > 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
 > feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
 > explicit. Partial/cancelled writes fence before unlock. Actual331 distinct

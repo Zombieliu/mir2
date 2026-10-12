@@ -407,7 +407,7 @@ fn billing_postgres_independent_writers_restart_and_stale_owner_preserve_cash() 
     drop(binding_writer);
     drop(purchased_store);
     let restarted = open(&scoped);
-    assert_eq!(restarted.account_store.lock().unwrap().schema_version, 8);
+    assert_eq!(restarted.account_store.lock().unwrap().schema_version, mir2_simulation::billing::BILLING_SCHEMA_VERSION);
     assert_eq!(
         checked(
             restarted.recharge_credit_status(ACCOUNT, CHARACTER),

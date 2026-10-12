@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-10-12 Website campaign extension Candidate, separate from Crystal parity:
+> account-owned level registrations and verified beta return basis use Source
+> account CAS/schema9. Local Source88/Gateway52 checks pass. Independent PG
+> concurrency/save-fence completion and rollout pending; titles, cosmetic slots,
+> public settlement and referrals remain open. Current Stripe mode remains TEST.
+> [Protocol and scope](ACTIVITIES-PLAYER-PORTAL-20261012.md).
+
 > 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
 > feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
 > explicit. Partial/cancelled writes fence before unlock. Actual331 distinct

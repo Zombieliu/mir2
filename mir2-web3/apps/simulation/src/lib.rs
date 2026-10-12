@@ -1,4 +1,5 @@
 mod config;
+pub mod activities;
 pub mod billing;
 pub mod crystal_health;
 pub mod monthly_card;

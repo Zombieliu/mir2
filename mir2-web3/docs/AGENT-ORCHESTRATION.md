@@ -1,5 +1,12 @@
 # Agent Orchestration
 
+> 2026-10-12 Website activity/player lane is isolated from ongoing game work:
+> backend rights/tests and frontend views have disjoint owners; frontier root
+> reviews security, source-save fences, schema9 and production rollout. Local
+> website29/Source88/Gateway52 checks pass. Actual PostgreSQL inverse-fence rerun
+> and deployment are pending. Do not conflate campaign registration with native
+> delivery or overall Candidate completion. [Checkpoint](ACTIVITIES-PLAYER-PORTAL-20261012.md).
+
 > 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
 > feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
 > explicit. Partial/cancelled writes fence before unlock. Actual331 distinct

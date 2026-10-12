@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-10-12 Activity rights Candidate: exact bearer-owned status/claim endpoints,
+> five stable reward registrations, server-derived committed levels, immutable
+> recipients and durable schema9 account JSON. Provider TEST proof cannot fund
+> real carryover. Local Source88/Gateway52 checks pass; independent PostgreSQL
+> exposed an owner-cache CAS conflict, now patched without changing the captured
+> character revision. Database rerun/deployment pending; final item/cosmetic
+> delivery is not attested. [Details](ACTIVITIES-PLAYER-PORTAL-20261012.md).
+
 > 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
 > feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
 > explicit. Partial/cancelled writes fence before unlock. Actual331 distinct
