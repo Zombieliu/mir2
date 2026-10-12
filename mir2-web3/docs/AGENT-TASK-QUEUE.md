@@ -1,16 +1,19 @@
 # Agent Task Queue
 
-> 2026-10-12 P7 random rollback Candidate: genuine VillageChief displayed
-> random MOVE now restores its transient RNG on known personal Source failure,
-> including stale CAS; prepared-kill checkpoints preserve the same state.
-> Unknown publication retains advanced state/freeze; Lottery no-write view
-> stays no-write. Actual532 distinct local checks pass (395unit+137integration),
-> six new checks included; one original PostgreSQL check is ignored locally.
-> Original RED/compiler failures are retained. Linux explicit gate added;
-> RNG Linux38193711006/publication pending. Parent28f1/R25/feed20 is live.
-> Shared Source/Zone
-> invocation/outbox and fullP1–P7/Mentor/native/human remain open.
-> [Source-bound evidence and limits](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+> NPC random rollback backend8fee actually published, 2026-10-12: genuine
+> VillageChief displayed random MOVE restores RNG on known personal Source
+> save/CAS failure. Prepared-kill checkpoints preserve the same transient state;
+> unknown publication stays advanced/frozen; pure Lottery view stays no-write.
+> Actual532 distinct local checks pass (395unit+137integration), six new checks
+> included; one original PostgreSQL check is ignored locally. Exact Linux
+> 38193711006 passes all original release/siege and explicit new RNG gates;
+> whole authenticated archive/ELF/logs are qualified. Fresh empty realm was
+> backed up and normally switched; unchanged strict44 ordinary+18 resume checks
+> and protected final empty readback pass. Prior28 transport is included.
+> R25/appd917/updaterb439/feed20 is preserved, no reinstall. Original RED,
+> compiler and interrupted push/preflight evidence remain retained. Full shared
+> Source/Zone invocation/outbox and P1–P7/Mentor/native/human stay open.
+> [Actual delivery and limits](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
 
 
 > Gateway catalogue transport backend28f1 actually published, 2026-10-12:

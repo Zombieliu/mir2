@@ -1,5 +1,16 @@
 # Agent Run Log
 
+## 2026-10-12 — NPC random rollback actually published
+
+Source8fee exact Linux38193711006, explicit six RNG checks, original gates and
+whole archive/log/ELF qualification pass. Fresh empty realm was backed up and
+normally switched; unchanged strict44 ordinary+18 resume and final protected
+empty readback pass. R25/feed20 stays unchanged. Personal known-failure RNG
+rewind, unknown freeze and no-write Lottery are bounded; shared world outbox,
+fullP1–P7/Mentor and native/human remain open. Original failures are retained.
+[Actual delivery evidence](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+
+
 ## 2026-10-12 — Gateway catalogue transport actually published
 
 Source28f1 exact Linux38189025721 and whole artifact/log/ELF qualification pass.
