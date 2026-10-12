@@ -183,6 +183,9 @@ impl SimulationSession {
             dirty_economy: self.dirty_economy_projection_event_ids.clone(),
             buffs: self.app.world().resource::<BuffResource>().clone(),
             npc: self.app.world().resource::<NpcStateResource>().clone(),
+            npc_random: self.app.world()
+                .get_resource::<crate::runtime::npc_script::CrystalNpcRandomState>()
+                .copied(),
             queue: self.app.world().resource::<RuntimeQueueResource>().clone(),
             tick: runtime_tick(self.app.world()),
             hero: crate::runtime::hero_ai::hero_transient::capture(self.app.world()),
@@ -249,6 +252,7 @@ impl SimulationSession {
         self.app.world_mut().resource_mut::<crate::runtime::resources::PlayerRuntimeResource>().player_dead = snapshot.player_dead;
         *self.app.world_mut().resource_mut::<BuffResource>() = snapshot.buffs.clone();
         *self.app.world_mut().resource_mut::<NpcStateResource>() = snapshot.npc.clone();
+        restore_checkpoint_npc_random(self.app.world_mut(), snapshot.npc_random);
         crate::runtime::npc_input::invalidate(self.app.world_mut());
         *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = snapshot.queue.clone();
         crate::runtime::npc_shared_guild_actions::restore(self.app.world_mut(), snapshot.npc_guild_actions.clone());

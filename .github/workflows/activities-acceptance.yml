@@ -75,6 +75,8 @@ jobs:
           cargo test --locked -p mir2-gateway --lib -- --test-threads=1 web::activities billing game_shop_gift 2>&1 | tee activity-evidence/gateway.log
           cargo test --locked -p mir2-gateway --test billing_monthly_card -- --test-threads=1 2>&1 | tee activity-evidence/shared-monthly.log
           cargo test --locked -p mir2-simulation --test security_lifecycle -- --test-threads=1 2>&1 | tee activity-evidence/security.log
+      - name: Preserve the currently published NPC random rollback
+        run: cargo test --locked -p mir2-simulation --features test-support --lib npc_random_source_guard_tests -- --test-threads=1 2>&1 | tee activity-evidence/npc-random-rollback.log
       - name: Linux release and save-recovery security checks
         env:
           MIR2_REQUIRE_LINUX_SECURITY_GATE: "1"

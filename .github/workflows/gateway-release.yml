@@ -142,6 +142,7 @@ jobs:
           set -euo pipefail
           cargo +1.89.0 test --locked -p mir2-simulation --lib -- --test-threads=1 npc_dialog_admission_tests:: crystal_label_compat_tests:: actual_default_accept_quest_short_checkhum_keeps_original_omission crystal_npc_buy_item_dead_player_is_silent_and_preserves_state crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execute
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_source_guard_tests -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --lib npc_random_source_guard_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_world_plan::tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_parser_omission_tests -- --test-threads=1
           cargo +1.89.0 test --locked -p mir2-simulation --lib npc_buff_action_tests -- --test-threads=1

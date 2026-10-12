@@ -1,5 +1,23 @@
 # Agent Run Log
 
+## 2026-10-12 — Genuine NPC random Source rollback Candidate
+
+Root remains sole code, common-doc and Git writer in the lifecycle lane. Genuine
+VillageChief MAIN/displayed Tmove reproduces memory/file save failures that
+restored position but leaked RNG, plus a known newer personal Source CAS reject.
+The command and prepared-kill checkpoints now preserve that transient resource.
+Unknown publication stays frozen without a guessed rewind; Lottery no-write
+views retain their original transient behavior. No RNG algorithm, persisted
+schema, original script, packet or client change is introduced.
+
+Actual final local checks: 532 distinct passes (395 unit +137 integration), with
+six new checks included and one original isolated PostgreSQL check ignored
+locally. Original red and compiler failures are retained. The release workflow
+adds the explicit new module gate. Exact-source Linux package/publication and
+native/human acceptance remain pending; f574/R25/feed20 is still live at freeze.
+[Source-bound evidence and remaining scope](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+Full Source/Zone invocation, durable world outbox and P1–P7/Mentor stay open.
+
 ## 2026-10-10 — Actual sandbox payment and ordinary monthly lifecycle
 
 The operator refilled the private test key. Official CLI1.53.1 forwards signed

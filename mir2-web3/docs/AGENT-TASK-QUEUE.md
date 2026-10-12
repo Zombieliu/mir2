@@ -8,6 +8,18 @@
 > [Scope and evidence](ACTIVITIES-PLAYER-PORTAL-20261012.md). This does not close
 > native title/cosmetic delivery, public referral rewards or overall parity.
 
+> 2026-10-12 P7 random rollback Candidate: genuine VillageChief displayed
+> random MOVE now restores its transient RNG on known personal Source failure,
+> including stale CAS; prepared-kill checkpoints preserve the same state.
+> Unknown publication retains advanced state/freeze; Lottery no-write view
+> stays no-write. Actual532 distinct local checks pass (395unit+137integration),
+> six new checks included; one original PostgreSQL check is ignored locally.
+> Original RED/compiler failures are retained. Linux explicit gate added;
+> release/publication pending. Live stays f574/R25/feed20. Shared Source/Zone
+> invocation/outbox and fullP1–P7/Mentor/native/human remain open.
+> [Source-bound evidence and limits](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+
+
 > 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
 > feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
 > explicit. Partial/cancelled writes fence before unlock. Actual331 distinct

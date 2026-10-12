@@ -206,6 +206,7 @@ pub(crate) struct GuildExperienceCheckpoint {
     dirty_economy: BTreeSet<String>,
     buffs: BuffResource,
     npc: NpcStateResource,
+    npc_random: Option<super::npc_script::CrystalNpcRandomState>,
     queue: RuntimeQueueResource,
     tick: u64,
     hero: super::hero_ai::hero_transient::HeroTransientCheckpoint,
@@ -213,6 +214,17 @@ pub(crate) struct GuildExperienceCheckpoint {
     pet_progress: super::shared_pet_progress::SharedPetProgress,
     default_transient: super::default_npc_events::DefaultNpcTransientState,
     refine_source: crate::Stage5RefineState,
+}
+
+fn restore_checkpoint_npc_random(
+    world: &mut World,
+    random: Option<super::npc_script::CrystalNpcRandomState>,
+) {
+    if let Some(random) = random {
+        world.insert_resource(random);
+    } else {
+        world.remove_resource::<super::npc_script::CrystalNpcRandomState>();
+    }
 }
 
 /// Character snapshots project a copied oven's remaining duration at capture.
@@ -390,6 +402,9 @@ impl SimulationSession {
             dirty_economy: self.dirty_economy_projection_event_ids.clone(),
             buffs: world.resource::<BuffResource>().clone(),
             npc: world.resource::<NpcStateResource>().clone(),
+            npc_random: world
+                .get_resource::<super::npc_script::CrystalNpcRandomState>()
+                .copied(),
             queue: world.resource::<RuntimeQueueResource>().clone(),
             tick: runtime_tick(world),
             hero: super::hero_ai::hero_transient::capture(world),
@@ -499,6 +514,11 @@ impl SimulationSession {
                 self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
                 super::npc_shared_guild_actions::acknowledge(self.app.world_mut());
             }
+            // RNG is separate from the cloneable NPC state and durable image.
+            // A known rejected invocation restores its exact pre-draw state,
+            // including stale CAS that adopts a newer personal source. Unknown
+            // publication already returned above and must never guess a rewind.
+            restore_checkpoint_npc_random(self.app.world_mut(), before.npc_random);
             return Err(error);
         }
         let sequence = snapshot(self.app.world()).next_sequence;
