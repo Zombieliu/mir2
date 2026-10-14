@@ -1,5 +1,11 @@
 # Agent Orchestration
 
+## 三个聊天的代码进度整理（2026-10-14，北京时间）
+
+已核对 Windows、玩法、充值三个聊天及各自工作树/真实远端。NPC/活动合并网关 a045b4327f 与五职业配套网关 ea0d3e3661 已补推；活动部署修复 e09ad2940f 已提交推送，新增 Python20 项、网站 Node29 项全部通过。
+
+详见 [统一代码进度、提交和验证范围](CODE-PROGRESS-20261014.zh-CN.md)。R26 完整签名包与成对发布、活动网页重新发布及玩家验收仍开放；全项目 Candidate100 和整体百分比不据此上调。主工作区原有未提交内容保留。
+
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
 
 - Resolved: the packaged empty Spells page no longer falls back to the React table. The first public refusal was baseline-missing. Source review found that the initial Bag ownership revision can invalidate the earlier owner-qualified Spells cache before the new Host's one-time bootstrap. Page now bootstraps from the existing authenticated physical snapshot witness, preserving socket/session/scene/version/self/map checks and rejecting missing/null/nonarray/oversize learned data. It does not retag old cache, invent an empty list or replay an old ACK; live ACK and send-proof gates are unchanged.
