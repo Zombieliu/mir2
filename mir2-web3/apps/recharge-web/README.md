@@ -46,6 +46,7 @@ Run from the `mir2-web3` repository root:
 
 ```sh
 node --test apps/recharge-web/tests/*.test.mjs
+python -B -m unittest discover -s apps/recharge-web/tests -p test_deploy.py -v
 node apps/recharge-web/scripts/preview.mjs
 ```
 
@@ -68,7 +69,7 @@ have bounded network reads and redact identifiers. See their `--help` output.
 
 ## Deployment
 
-The six public files are served from an immutable release below
+The public files are served from an immutable release below
 `/srv/mir2-recharge/releases/`; `current` switches atomically. `release.json`
 records their exact sizes and hashes. The currently qualified release is
 `b78c2dd84a5e1323b04428986c3d20df9b60087208b4dd07f1c090fc4df73538`.
@@ -83,6 +84,15 @@ invoke the identical arguments plus `--apply`. Later static updates use
 portal to the existing authenticated self-session revocation endpoint.
 `repair_redirect.py` is the historical guarded repair for the initial relative
 redirect ambiguity; it isn't part of routine updates.
+
+The operator publishes the exact manifest and public-file buffers verified
+before Caddy validation. Replacing or removing staging files after verification
+cannot change the release. Incoming Windows CRLF snippets are normalized to LF;
+the existing Caddy bytes, singleton checks, exact route changes and rollback
+witnesses remain intact. The offline Python suite exercises these boundaries
+without starting a service or contacting a server. See
+`docs/RECHARGE-DEPLOYMENT-REGRESSION-20261014.md` for the qualified code scope;
+these tests do not attest a new production rollout.
 
 The proxy exposes exactly the existing bearer-protected status, Checkout and
 session-revocation endpoints, plus the previously public signed callback and
