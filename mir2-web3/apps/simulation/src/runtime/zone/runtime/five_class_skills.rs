@@ -3863,7 +3863,9 @@ impl ZoneRuntime {
                 object_id: id,
                 location: position.clone(),
                 spell: Spell::Trap,
-                direction: player.direction,
+                // Map.cs Trap construction leaves the spell's own Direction
+                // at its enum default; it does not inherit the caster's facing.
+                direction: MirDirection::Up,
                 // Source SpellObject.GetInfo only ExplosiveTrap sets Param.
                 param: false,
             },
