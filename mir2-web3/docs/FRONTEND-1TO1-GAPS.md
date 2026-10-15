@@ -1,5 +1,8 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-15 runtime配置补充：Root默认318通过（原2项忽略），Native economy/shared UI启用521通过（原4项忽略）。28项既有Native正例转至启用配置真实执行，默认拒绝与结构负例保留；CI覆盖两配置及WASM检查。仅修测试配置，产品guard未改，GUI/发布/人类验收仍开放。详见[本轮集成记录](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
+
+
 ## 五分支合并：本地回归完成，玩家验收仍开放（2026-10-15，北京时间）
 
 冲突处理和本地验证完成，冻结输入、共享 Core与发送围栏、Source handoff边界见[本轮集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。Windows1138/原7忽略、Native UI1556/原14忽略、Core196、Web505/Quest24/packaging59、两次本地化21、严格 standalone Next13页及portable31通过。新TaskNpc/MapNpc严格objectId与半径2、Quest内外空间捕获/隐藏/旧按下点与三缩放均回归；NPC、Runtime、WASM静态检查与Gateway11/105分别列收据。Web仍复用已发布且hash匹配的6份WASM/JS，不是新完整发布包。

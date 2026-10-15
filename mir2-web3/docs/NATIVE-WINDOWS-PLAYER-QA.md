@@ -1,5 +1,8 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-15 runtime配置补充：Root默认318通过（原2项忽略），Native economy/shared UI启用521通过（原4项忽略）。28项既有Native正例转至启用配置真实执行，默认拒绝与结构负例保留；CI覆盖两配置及WASM检查。仅修测试配置，产品guard未改，GUI/发布/人类验收仍开放。详见[本轮集成记录](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
+
+
 ## 五分支集成：本地原生回归完成（2026-10-15，北京时间）
 
 冲突处理和本地验证完成。Windows functional03为1138通过/0失败/原7忽略；Native UI native05为1556通过/0失败/原14忽略，Core196与portable metrics/widget/wheel31通过，Windows默认优化配置 `--tests` 类型检查通过。Quest空间命中、隐藏/初帧、旧按下点拖出/释放及三缩放已回归，真实预算/Owned/owner/UID/碰撞门禁保留；旧32失败与资源缺失日志保留。其余 Web、NPC、Runtime、WASM静态检查及 Gateway11/105分组结果见[集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。

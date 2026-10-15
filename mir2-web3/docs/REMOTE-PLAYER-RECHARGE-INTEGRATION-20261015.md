@@ -175,10 +175,25 @@ File handoff/Refine/导师 focused组合已实际17/17通过，见 `simulation-h
 | 后端全测试目标类型检查 | `--tests` check 通过，含新增真 PG opt-in 测试；不等于测试执行 | `backend-check08.txt` |
 | File handoff / Refine / 导师 focused组合 | 17通过，0失败/忽略；handoff5＋Refine clock10＋导师1＋既有finite handoff1 | `simulation-handoff-refine07.txt` |
 | NPC完整选定组 | 456通过，0失败/忽略，含三项 Sabuk交叉回归 | `simulation-npc07.txt` |
-| Runtime shared | 521通过，0失败，原4项忽略保留 | `runtime-shared04.txt` |
+| Runtime default | 318通过，0失败，原2项忽略保留；关闭功能时的拒绝用例继续执行 | `runtime-default05.txt` |
+| Runtime native economy/shared UI | 521通过，0失败，原4项忽略保留；28项正例实际执行 | `runtime-shared06.txt` |
 | WASM静态类型检查 | shared＋native-npc-economy与default两种配置均通过；不是新完整发布包 | `runtime-wasm-shared04-check.txt`、`runtime-wasm-default04-check.txt` |
 | Gateway相邻选定组 | 105通过，0失败/忽略，含真实 Source-R至replica-R完整 baseline | `gateway-integration05.txt` |
 | Gateway handoff选定11组，Root独立重跑 | 11通过，0失败/忽略；Source/完整witness/无额外Login、普通切图、collision清理及RPC正例 | `gateway-handoff09-root.txt` |
+
+默认 runtime 的首次远程执行为318通过、28失败、原2项忽略，原收据保留为
+`ci-shared-rust-failure02.txt`。无 `native-npc-economy` 时，既有生产 `owner_skill_model`
+按契约返回 `Incomplete`；28个要求 Native 完整 bundle 成功的现有测试现仅在该功能启用时执行。
+没有删除、ignore或放宽任何断言/产品 guard，默认拒绝用例与纯结构负例保留。
+Root已分别完整执行上述默认318与启用521；跨平台 CI 也保留默认全测试，并新增启用
+`native-npc-economy,webgl2-shared-ui` 的全测试及两配置 WASM检查，防止丢失正例覆盖。
+
+新PG交接用例首次远程失败来自 starter 第0格合法 UID0与测试非零前提冲突。
+测试只在已注册未入场的自有 fixture中分配非零身份，明确不是 Source mint；仍经真实 Source
+保存，并增加完整有序背包 JSON基线比对，非零/唯一及完整 SQL/账本不变断言保留。
+该真 PostgreSQL交接步骤已在 `c2756f7704256a039696a6d67dce552c6596ace5` 的
+[activities作业](https://github.com/Zombieliu/mir2/actions/runs/38718848107/job/116368117701)
+实际通过；当前最终提交的完整资格继续以 PR和 Actions为准。本地只执行了类型检查。
 
 Web 检查复用了原 manifest 绑定、逐文件 SHA 校验的 6 个已发布 WASM/JS 文件，manifest 未改。
 新完整 Native/WASM 的构建与签名资格仍单独待完成。

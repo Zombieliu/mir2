@@ -1704,6 +1704,7 @@ mod tests {
         (gate, NativeInboundMessage::NpcEconomyBundle(bundle))
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_barrier_prevents_later_typed_models_overtaking() {
         let (gate, bundle) = npc_bundle();
@@ -1903,6 +1904,7 @@ mod tests {
         assert!(!gate.is_current(binding));
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_fresh_hero_source_obeys_bundle_order_and_retirement() {
         use crate::npc_purchase_economy::{
@@ -2023,6 +2025,7 @@ mod tests {
         assert!(!world.contains_resource::<NativeNpcEconomySource>());
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_bundle_is_protected_under_snapshot_and_ack_pressure() {
         let (_, bundle) = npc_bundle();
@@ -2052,6 +2055,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_byte_limit_rejects_whole_bundle_without_ack() {
         let (gate, bundle) = npc_bundle();
@@ -2064,6 +2068,7 @@ mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_reserved_cost_materialization_obeys_exact_byte_cap() {
         let (gate, bundle) = npc_bundle();
@@ -2105,6 +2110,7 @@ mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_data_and_scene_reset_drop_bundle_without_completion() {
         for reset in [
@@ -2128,6 +2134,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_drop_retires_queued_custody_gracefully() {
         let (gate, bundle) = npc_bundle();
@@ -2144,6 +2151,7 @@ mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_queue_later_receipt_reserve_waits_for_barrier() {
         let (_, bundle) = npc_bundle();

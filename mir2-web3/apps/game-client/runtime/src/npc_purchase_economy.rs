@@ -2313,6 +2313,7 @@ pub(crate) mod tests {
             "addedAttack":0,"addedDefence":0,"addedLuck":0,"socketSlots":0,"sealedExpiryTimeBinaryDatetime":0,"sealedNextTimeBinaryDatetime":0})
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains() {
         let (gate, witness, p) = fixture();
@@ -2435,6 +2436,7 @@ pub(crate) mod tests {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_partial_wrong_actor_scope_and_max_rejected() {
         let (gate, w, p) = fixture();
@@ -2472,6 +2474,7 @@ pub(crate) mod tests {
             .is_ok());
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_retirement_fences_prepared_bundle() {
         let (gate, w, p) = fixture();
@@ -2514,6 +2517,7 @@ pub(crate) mod tests {
         );
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_uid_zero_belt_and_equipment_are_complete() {
         let (gate, w, mut p) = fixture();
@@ -2540,6 +2544,7 @@ pub(crate) mod tests {
         );
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_sparse_named_equipment_uses_crystal_slots() {
         let (gate, w, mut p) = fixture();
@@ -2693,6 +2698,7 @@ pub(crate) mod tests {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_item_metadata_mismatch_rejects_before_application() {
         let (gate, w, mut p) = fixture();
@@ -2736,6 +2742,7 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_hero_checkpoint_inventory_identity_and_xp_correspond() {
         let (gate, w, mut p) = fixture();
@@ -2783,6 +2790,7 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond() {
         let (gate, w, mut p) = fixture();
@@ -2826,6 +2834,7 @@ pub(crate) mod tests {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_mail_content_flags_and_concrete_attachment_correspond() {
         let (gate, w, mut p) = fixture();
@@ -3058,6 +3067,7 @@ pub(crate) mod tests {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate() {
         let (gate, w, p) = fixture();
@@ -3090,6 +3100,7 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_bounded_completion_refuses_mutation_when_full() {
         let (gate, w, p) = fixture();
@@ -3123,6 +3134,7 @@ pub(crate) mod tests {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_reset_clears_source_and_retires_old_ack() {
         let (gate, w, p) = fixture();
@@ -3136,6 +3148,7 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_revision_history_survives_reset_and_fresh_binding() {
         let (gate, w, p) = fixture();
@@ -3164,6 +3177,7 @@ pub(crate) mod tests {
         assert!(fresh.try_recv_applied().is_some());
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh() {
         let (gate, w, p) = fixture();
@@ -3214,6 +3228,7 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_hero_epoch_zero_only_inherits_same_current_source_lifetime() {
         let epoch = NativeHeroOwnerEpoch {
@@ -3309,6 +3324,7 @@ pub(crate) mod tests {
         );
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_same_revision_refine_clock_refresh_retains_original_source() {
         let (gate, w, p) = fixture();
@@ -3352,6 +3368,7 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied(), None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_same_revision_changed_gold_conflicts() {
         economic_conflict(|p, owner| {
@@ -3365,6 +3382,7 @@ pub(crate) mod tests {
         });
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_same_revision_changed_inventory_conflicts() {
         economic_conflict(|p, owner| {
@@ -3374,6 +3392,7 @@ pub(crate) mod tests {
         });
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_same_revision_changed_mail_conflicts() {
         economic_conflict(|p, owner| {
@@ -3383,6 +3402,7 @@ pub(crate) mod tests {
         });
     }
 
+    #[cfg(feature = "native-npc-economy")]
     #[test]
     fn native_npc_economy_same_revision_changed_pearls_conflicts() {
         economic_conflict(|_, owner| {
