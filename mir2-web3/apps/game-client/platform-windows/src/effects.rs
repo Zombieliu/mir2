@@ -1455,14 +1455,44 @@ pub(crate) struct NativeEffectLightSnapshot {
     pub light: i32,
 }
 
+#[cfg(not(test))]
 static ACTIVE_EFFECT_LIGHTS: OnceLock<Mutex<Vec<NativeEffectLightSnapshot>>> = OnceLock::new();
 
+#[cfg(not(test))]
 fn active_effect_lights() -> &'static Mutex<Vec<NativeEffectLightSnapshot>> {
     ACTIVE_EFFECT_LIGHTS.get_or_init(|| Mutex::new(Vec::new()))
 }
 
+#[cfg(test)]
+mod effect_light_fixture {
+    use super::NativeEffectLightSnapshot;
+    use std::cell::RefCell;
+    use std::sync::{Arc, Mutex};
+
+    type Store = Arc<Mutex<Vec<NativeEffectLightSnapshot>>>;
+
+    // Every libtest fixture owns its publication target. This intercepts every
+    // publisher, including NativeEffects tick/reset calls made by other modules.
+    // A fixture that publishes on a child thread must explicitly share its store.
+    std::thread_local! {
+        static STORE: RefCell<Store> = RefCell::new(Arc::new(Mutex::new(Vec::new())));
+    }
+
+    pub(super) fn current() -> Store {
+        STORE.with(|store| Arc::clone(&store.borrow()))
+    }
+
+    pub(super) fn inherit(store: Store) {
+        STORE.with(|current| *current.borrow_mut() = store);
+    }
+}
+
 fn publish_effect_lights(snapshots: Vec<NativeEffectLightSnapshot>) {
-    let mut current = active_effect_lights()
+    #[cfg(not(test))]
+    let store = active_effect_lights();
+    #[cfg(test)]
+    let store = effect_light_fixture::current();
+    let mut current = store
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     *current = snapshots;
@@ -1471,10 +1501,15 @@ fn publish_effect_lights(snapshots: Vec<NativeEffectLightSnapshot>) {
 /// Read the latest still-active effect light snapshot for the native lighting
 /// producer. A clone keeps the lock out of the render-state construction path.
 pub(crate) fn native_effect_light_snapshots() -> Vec<NativeEffectLightSnapshot> {
-    active_effect_lights()
+    #[cfg(not(test))]
+    let store = active_effect_lights();
+    #[cfg(test)]
+    let store = effect_light_fixture::current();
+    let snapshots = store
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .clone()
+        .clone();
+    snapshots
 }
 
 /// Bevy resource holding the authoritative effect event buffer and the active
@@ -9406,8 +9441,21 @@ mod tests {
             tile_y: 20.0,
             light: 6,
         };
-        let writer = std::thread::spawn(move || publish_effect_lights(vec![snapshot]));
+        let fixture = effect_light_fixture::current();
+        let writer = std::thread::spawn(move || {
+            effect_light_fixture::inherit(fixture);
+            publish_effect_lights(vec![snapshot]);
+        });
         writer.join().expect("effect light publisher thread");
+        // An unrelated test fixture's actual reset publishes an empty vector.
+        // It must not erase this fixture's completed cross-thread publication.
+        std::thread::spawn(|| {
+            let mut unrelated = NativeEffects::default();
+            unrelated.reset_for_new_connection();
+            assert!(native_effect_light_snapshots().is_empty());
+        })
+        .join()
+        .expect("independent effect light fixture reset");
         let current = native_effect_light_snapshots();
         let published = current
             .iter()
