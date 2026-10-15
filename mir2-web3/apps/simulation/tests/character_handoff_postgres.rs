@@ -131,6 +131,7 @@ struct Actor {
     account_id: String,
     character_name: String,
     character_index: i32,
+    fixture_inventory: Vec<Value>,
 }
 
 struct Durable {
@@ -162,6 +163,11 @@ fn durable(db: &mut Client, actor: &Actor) -> Durable {
         serde_json::from_value(save_raw.clone()).expect("owned handoff character JSON must decode");
     assert_eq!(save.character.index, actor.character_index);
     assert_eq!(save.character.name, actor.character_name);
+    assert_eq!(
+        inventory_image(&save),
+        actor.fixture_inventory,
+        "the complete owned item baseline must survive every SQL publication"
+    );
     assert_eq!(
         serde_json::to_value(&account.saves[&actor.character_index]).unwrap(),
         save_raw,
@@ -213,6 +219,7 @@ fn register_character(scoped: &str) -> Actor {
         account_id: format!("handoff_{}", &nonce[..20]),
         character_name: format!("Hf{}", &nonce[..9]),
         character_index: -1,
+        fixture_inventory: Vec::new(),
     };
     let config = open(scoped);
     let mut provision = InProcessWorldRuntime::new(config.clone());
@@ -258,10 +265,29 @@ fn register_character(scoped: &str) -> Actor {
         assert_eq!(save.default_npc_events.next_sequence, 0);
         save.gold = GOLD;
         save.credit = CREDIT;
+        // Crystal's sidecar-less starter records use grid-scoped slot aliases;
+        // Bag1 slot 0 legitimately resolves to UID 0. This test instead needs an
+        // explicit nonzero preservation baseline. Allocate identities only for
+        // these owned, unadmitted fixture records; this is not a Source mint or
+        // purchase. Keep every other NewCharacter item field and bag ordering.
+        assert!(!save.inventory_items_json.is_empty());
+        assert!(save.inventory_items_json.len() < 256);
+        let fixture_uid_base = (u64::try_from(actor.character_index).unwrap() + 1) * 256;
+        for (ordinal, encoded) in save.inventory_items_json.iter_mut().enumerate() {
+            let mut item: Value = serde_json::from_str(encoded).unwrap();
+            assert_eq!(item["unique_id"].as_u64(), Some(0));
+            item.as_object_mut().unwrap().insert(
+                "unique_id".into(),
+                Value::from(fixture_uid_base + u64::try_from(ordinal).unwrap() + 1),
+            );
+            *encoded = serde_json::to_string(&item).unwrap();
+            actor.fixture_inventory.push(item);
+        }
+        inventory_uids(save);
     }
     checked(
         config.save_account_store_account(&actor.account_id),
-        "owned pre-admission wallet fixture",
+        "owned pre-admission wallet and explicit item-UID fixture",
     );
     actor
 }
@@ -282,14 +308,20 @@ fn start(runtime: &mut InProcessWorldRuntime, actor: &Actor) {
     assert_eq!(identity.character_name, actor.character_name);
 }
 
+fn inventory_image(save: &CharacterSaveRecord) -> Vec<Value> {
+    save.inventory_items_json
+        .iter()
+        .map(|item| serde_json::from_str(item).unwrap())
+        .collect()
+}
+
 fn inventory_uids(save: &CharacterSaveRecord) -> Vec<u64> {
-    let ids = save
-        .inventory_items_json
+    let ids = inventory_image(save)
         .iter()
         .map(|item| {
-            serde_json::from_str::<Value>(item).unwrap()["unique_id"]
+            item["unique_id"]
                 .as_u64()
-                .expect("saved starter item must carry its actual UID")
+                .expect("owned item fixture must carry its explicit persisted UID")
         })
         .collect::<Vec<_>>();
     assert!(!ids.is_empty(), "UID preservation needs a real starter bag");
