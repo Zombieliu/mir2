@@ -908,7 +908,9 @@ fn durable_library_host_dispatch_fences_auth_version_lease_and_records_only_repl
     let ZoneRpcPayload::ReplicationHead { head } = head else {
         panic!("actual host replication head")
     };
-    assert!(head.build_id.starts_with("mir2-zone/npc-checkpoint-v1/"));
+    assert!(head
+        .build_id
+        .starts_with("mir2-zone/npc-handoff-account-v2/"));
     assert_eq!(head.build_id, zone_replication_build_id());
     assert_ne!(
         head.build_id,

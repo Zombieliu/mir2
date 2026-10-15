@@ -2,6 +2,7 @@
 use super::*;
 use crate::routing::{InMemoryZoneOwnerLeaseAuthority, ZoneOwnerLeaseAuthority};
 use mir2_protocol::{ClientPacket, MirDirection, Point};
+use mir2_simulation::WorldRuntime;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 const TOKEN: &str = "owned-character-handoff-token";
@@ -284,12 +285,12 @@ fn handoff_actual_hosted_rpc_binds_saved_source_replays_verified_journal_and_ret
         &source,
         "source",
         &source_lease,
-        // Model the existing passkey admission from its actual Source login,
-        // so credential healing precedes the saved handoff baseline. The
-        // target's continuation must preserve the entire account File.
-        WorldCommand::PasskeyLogin {
+        // An ordinary password admission must remain a password account after
+        // its cross-process continuation and verified standby reconstruction.
+        WorldCommand::ClientPacket(ClientPacket::Login {
             account_id: "demo".into(),
-        },
+            password: "demo".into(),
+        }),
     );
     execute(
         &source,
@@ -327,14 +328,9 @@ fn handoff_actual_hosted_rpc_binds_saved_source_replays_verified_journal_and_ret
         serde_json::to_value(&handoff.durable).unwrap(),
         serde_json::to_value(&store.accounts["demo"].saves[&0]).unwrap()
     );
-    execute(
-        &target,
-        "target",
-        &target_lease,
-        WorldCommand::PasskeyLogin {
-            account_id: "demo".into(),
-        },
-    );
+    target
+        .handle_envelope(envelope("target", &target_zone, ZoneRpcRequest::OnConnect))
+        .unwrap();
     let target_runtime = hosted(&target, "target", &target_zone);
     let presence =
         crate::routing::character_handoff_test_access::hosted_presence(&target_runtime, "demo", 0);
@@ -504,14 +500,13 @@ fn handoff_actual_hosted_rpc_binds_saved_source_replays_verified_journal_and_ret
 
     let fresh = prepared(&source, "source", &source_lease);
     let fresh_bytes = std::fs::read(&path).unwrap();
-    execute(
-        &target,
-        "stale-target",
-        &target_lease,
-        WorldCommand::PasskeyLogin {
-            account_id: "demo".into(),
-        },
-    );
+    target
+        .handle_envelope(envelope(
+            "stale-target",
+            &target_zone,
+            ZoneRpcRequest::OnConnect,
+        ))
+        .unwrap();
     let retired = target
         .sessions
         .lock()
@@ -559,14 +554,13 @@ fn handoff_actual_hosted_rpc_binds_saved_source_replays_verified_journal_and_ret
         ))
         .is_err());
     assert_eq!(std::fs::read(&path).unwrap(), fresh_bytes);
-    execute(
-        &target,
-        "fresh-target",
-        &target_lease,
-        WorldCommand::PasskeyLogin {
-            account_id: "demo".into(),
-        },
-    );
+    target
+        .handle_envelope(envelope(
+            "fresh-target",
+            &target_zone,
+            ZoneRpcRequest::OnConnect,
+        ))
+        .unwrap();
     let resumed = target
         .handle_envelope(envelope(
             "fresh-target",
@@ -582,4 +576,104 @@ fn handoff_actual_hosted_rpc_binds_saved_source_replays_verified_journal_and_ret
     };
     fresh.validate_commitment(&commitment).unwrap();
     assert_eq!(std::fs::read(&path).unwrap(), fresh_bytes);
+    let mut password_relogin = mir2_simulation::InProcessWorldRuntime::new(config);
+    assert!(password_relogin
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        }))
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
+#[test]
+fn handoff_password_account_base_snapshot_restore_does_not_convert_credentials() {
+    let (config, path) = config();
+    let zone = ZoneId::new("map:0");
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let lease = authority.owner_lease(&zone);
+    let source = ZoneHostServer::with_identity_and_factory(
+        "password-base-source",
+        4,
+        config.clone(),
+        authority.clone(),
+        Some(TOKEN.into()),
+        ZoneRpcLimits::default(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::without_background_owner_for_test(&zone)),
+    );
+    execute(
+        &source,
+        "password-session",
+        &lease,
+        WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        }),
+    );
+    execute(
+        &source,
+        "password-session",
+        &lease,
+        WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
+    );
+    let bytes = std::fs::read(&path).unwrap();
+    let account: mir2_simulation::AccountStore = serde_json::from_slice(&bytes).unwrap();
+    let ZoneRpcPayload::BaseSnapshot { snapshot } = source
+        .handle_envelope(envelope(
+            "base-admin",
+            &zone,
+            ZoneRpcRequest::ExportBaseSnapshot,
+        ))
+        .unwrap()
+    else {
+        panic!("actual password-account base snapshot")
+    };
+    let replica = ZoneHostServer::with_identity_and_factory(
+        "password-base-replica",
+        4,
+        config.clone(),
+        authority,
+        Some(TOKEN.into()),
+        ZoneRpcLimits::default(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::without_background_owner_for_test(&zone)),
+    );
+    replica
+        .handle_envelope(envelope(
+            "base-admin",
+            &zone,
+            ZoneRpcRequest::InstallBaseSnapshot { snapshot },
+        ))
+        .unwrap();
+    let restored = crate::routing::character_handoff_test_access::hosted_configuration(&hosted(
+        &replica,
+        "password-session",
+        &zone,
+    ));
+    assert!(restored.account_store_path.is_none() && restored.account_store_database_url.is_none());
+    assert_eq!(
+        restored.account_store.lock().unwrap().accounts["demo"].password,
+        account.accounts["demo"].password
+    );
+    assert_eq!(
+        hosted(&replica, "password-session", &zone)
+            .active_identity()
+            .unwrap(),
+        hosted(&source, "password-session", &zone)
+            .active_identity()
+            .unwrap()
+    );
+    assert!(
+        std::fs::read(&path).unwrap() == bytes,
+        "base restore wrote the live source File"
+    );
+    let mut password_relogin = mir2_simulation::InProcessWorldRuntime::new(config);
+    assert!(password_relogin
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        }))
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
 }

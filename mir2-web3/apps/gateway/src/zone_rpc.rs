@@ -5059,14 +5059,6 @@ impl ZoneHostServer {
                 commitment.active_identity.as_ref(),
                 commitment.active_character_bytes.as_ref(),
             ) {
-                let zone_id = ZoneId::new(&commitment.zone_id);
-                let lease = ZoneOwnerLease::in_process(&zone_id);
-                session.execute_request(ZoneOwnerCommandRequest::direct(
-                    lease,
-                    WorldCommand::PasskeyLogin {
-                        account_id: identity.account_id.clone(),
-                    },
-                ))?;
                 let active_character: CharacterSaveRecord =
                     serde_json::from_slice(active_character_bytes).map_err(|error| {
                         ZoneRpcFault::new(
@@ -5079,7 +5071,7 @@ impl ZoneHostServer {
                     })?;
                 session
                     .hosted
-                    .restore_active_character_checkpoint(&active_character)
+                    .restore_replica_session_checkpoint(identity, &active_character)
                     .map_err(classify_runtime_error)?;
                 let actual_identity = session
                     .hosted
@@ -5563,7 +5555,7 @@ fn zone_replication_build_id() -> String {
     // schema, even when deployment supplied only a reusable version label.
     // Bound the identifier without truncating the source build identity.
     format!(
-        "mir2-zone/npc-checkpoint-v1/{}",
+        "mir2-zone/npc-handoff-account-v2/{}",
         hex_lower_bytes(&Sha256::digest(source_build.as_bytes()))
     )
 }

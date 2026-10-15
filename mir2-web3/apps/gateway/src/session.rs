@@ -1299,6 +1299,9 @@ impl GatewaySession {
             .zone_owner_command_client
             .prepare_character_handoff(&mut self.runtime, &self.zone_owner_lease)
             .map_err(|error| format!("Zone handoff source checkpoint failed: {error}"))?;
+        if handoff.account_id != identity.account_id {
+            return Err("Zone handoff source account does not match the active admission".into());
+        }
         let source_checkpoint = &handoff.runtime;
         let routed = routing
             .registry
@@ -1307,17 +1310,6 @@ impl GatewaySession {
             default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
         let mut target_runtime = routed.runtime;
         let prepare_result = (|| -> Result<(), String> {
-            target_client
-                .execute(
-                    &mut target_runtime,
-                    ZoneOwnerCommandRequest::direct(
-                        routed.owner_lease.clone(),
-                        WorldCommand::PasskeyLogin {
-                            account_id: identity.account_id.clone(),
-                        },
-                    ),
-                )
-                .map_err(|error| format!("target login: {error}"))?;
             let target_commitment = target_client
                 .resume_character_handoff(&mut target_runtime, &routed.owner_lease, &handoff)
                 .map_err(|error| format!("target handoff resume: {error}"))?;

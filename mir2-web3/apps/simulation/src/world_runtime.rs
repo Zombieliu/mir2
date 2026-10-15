@@ -55,6 +55,8 @@ pub struct NativeGameShopGiftRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CharacterHandoffCheckpoint {
+    /// Bound by the source admission; never supplied by a player packet.
+    pub account_id: String,
     pub durable: CharacterSaveRecord,
     pub runtime: CharacterSaveRecord,
     pub source_tick: u64,
@@ -508,6 +510,16 @@ pub trait WorldRuntime: Send + Sync {
         _checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
         Err("world runtime does not support active character checkpoint restore".to_string())
+    }
+
+    /// Verified isolated base-snapshot reconstruction. No credential login or
+    /// player command may invoke this boundary.
+    fn restore_replica_session_checkpoint(
+        &mut self,
+        _identity: &ActiveSessionIdentity,
+        _checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        Err("world runtime does not support verified replica session restore".into())
     }
 
     /// Server-only handoff seams. These have no WorldCommand/client-packet form.
@@ -1736,6 +1748,15 @@ impl WorldRuntime for InProcessWorldRuntime {
         self.session.restore_active_character_checkpoint(checkpoint)
     }
 
+    fn restore_replica_session_checkpoint(
+        &mut self,
+        identity: &ActiveSessionIdentity,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session
+            .restore_replica_session_checkpoint(identity, checkpoint)
+    }
+
     fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
         self.session.prepare_character_handoff()
     }
@@ -1744,14 +1765,16 @@ impl WorldRuntime for InProcessWorldRuntime {
         &mut self,
         checkpoint: &CharacterHandoffCheckpoint,
     ) -> Result<CharacterHandoffCommitment, String> {
-        self.session.resume_character_handoff(checkpoint)
+        self.session
+            .resume_authenticated_character_handoff(checkpoint)
     }
 
     fn apply_character_handoff_replica(
         &mut self,
         checkpoint: &CharacterHandoffCheckpoint,
     ) -> Result<(), String> {
-        self.session.apply_character_handoff_replica(checkpoint)
+        self.session
+            .apply_authenticated_character_handoff_replica(checkpoint)
     }
 
     fn save_active_character(&mut self) -> Result<(), String> {

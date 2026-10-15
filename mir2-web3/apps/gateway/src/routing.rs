@@ -1447,6 +1447,21 @@ impl HostedZoneOwnerCommandClient {
             .restore_active_character_checkpoint(checkpoint)
     }
 
+    pub(crate) fn restore_replica_session_checkpoint(
+        &self,
+        identity: &ActiveSessionIdentity,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+        runtime
+            .as_mut()
+            .ok_or("zone owner hosted runtime was already handed off")?
+            .restore_replica_session_checkpoint(identity, checkpoint)
+    }
+
     pub fn prepare_character_handoff(
         &self,
         lease: &ZoneOwnerLease,
@@ -10333,6 +10348,19 @@ pub(crate) mod character_handoff_test_access {
         }
     }
 
+    pub(crate) fn hosted_configuration(hosted: &HostedZoneOwnerCommandClient) -> GatewayConfig {
+        let runtime = hosted.runtime.lock().unwrap();
+        runtime
+            .as_ref()
+            .unwrap()
+            .as_any()
+            .downcast_ref::<SharedInProcessZoneSessionRuntime>()
+            .expect("actual shared hosted runtime")
+            .inner
+            .shared_mentor_config()
+            .expect("active session configuration")
+    }
+
     pub(crate) fn hosted_presence(
         hosted: &HostedZoneOwnerCommandClient,
         account_id: &str,
@@ -17740,6 +17768,15 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn restore_replica_session_checkpoint(
+        &mut self,
+        identity: &ActiveSessionIdentity,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.inner
+            .restore_replica_session_checkpoint(identity, checkpoint)
+    }
+
     fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
@@ -19515,11 +19552,14 @@ mod tests {
             Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
             Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
         );
-        let mut session =
-            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let config = GatewayConfig::default();
+        let mut session = GatewaySession::new_with_zone_registry(config.clone(), &registry);
         start_new_character(&mut session, "wanderer", "Wanderer");
         assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
         assert_eq!(session.handoff_generation(), 1);
+        let password_before = config.account_store.lock().unwrap().accounts["wanderer"]
+            .password
+            .clone();
 
         // Debug crystal-transfer key relocates the player to map "0102"; mirror
         // the working transfer test (transfer + a step) to commit it.
@@ -19540,6 +19580,21 @@ mod tests {
             "the committed map and bound Zone must move together"
         );
         assert_eq!(session.handoff_generation(), 2);
+        assert_eq!(
+            config.account_store.lock().unwrap().accounts["wanderer"].password,
+            password_before
+        );
+        session.try_handle_packet(ClientPacket::LogOut).unwrap();
+        assert!(session.active_identity().is_none());
+        let mut relogin = GatewaySession::new_with_zone_registry(config, &registry);
+        assert!(relogin
+            .try_handle_packet(ClientPacket::Login {
+                account_id: "wanderer".into(),
+                password: "wanderer".into(),
+            })
+            .unwrap()
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     }
 
     #[test]
@@ -19762,11 +19817,11 @@ mod tests {
     #[test]
     fn failed_target_prepare_rolls_the_source_back_without_rebinding() {
         #[derive(Debug)]
-        struct RejectPasskeyRuntime {
+        struct RejectHandoffRuntime {
             inner: InProcessWorldRuntime,
         }
 
-        impl WorldRuntime for RejectPasskeyRuntime {
+        impl WorldRuntime for RejectHandoffRuntime {
             fn as_any(&self) -> &dyn std::any::Any {
                 self
             }
@@ -19780,10 +19835,14 @@ mod tests {
             }
 
             fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
-                if matches!(&command, WorldCommand::PasskeyLogin { .. }) {
-                    return Err("injected target prepare failure".to_string());
-                }
                 self.inner.execute(command)
+            }
+
+            fn resume_character_handoff(
+                &mut self,
+                _checkpoint: &mir2_simulation::CharacterHandoffCheckpoint,
+            ) -> Result<mir2_simulation::CharacterHandoffCommitment, String> {
+                Err("injected target prepare failure".into())
             }
 
             fn world_snapshot(&self) -> mir2_simulation::WorldSnapshot {
@@ -19811,7 +19870,7 @@ mod tests {
         impl ZoneRuntimeFactory for FailMapOneFactory {
             fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
                 if zone_id == &ZoneId::new("map:1") {
-                    return Box::new(RejectPasskeyRuntime {
+                    return Box::new(RejectHandoffRuntime {
                         inner: InProcessWorldRuntime::new(config),
                     });
                 }

@@ -3,6 +3,7 @@ use super::*;
 use crate::world_runtime::{
     CharacterHandoffCheckpoint, CharacterHandoffClockWitness, CharacterHandoffCommitment,
 };
+use crate::ActiveSessionIdentity;
 
 #[derive(bevy_ecs::prelude::Resource)]
 pub(super) struct LastRestoreClock(pub super::super::refine_oven::RefineClockSample);
@@ -86,6 +87,9 @@ fn stage5_value(save: &CharacterSaveRecord) -> Result<serde_json::Value, String>
 
 impl CharacterHandoffCheckpoint {
     fn validate_source_pair(&self) -> Result<(), String> {
+        if self.account_id.is_empty() || self.account_id.chars().any(char::is_control) {
+            return Err("handoff source account identity is invalid".into());
+        }
         validate_character_save_record(&self.durable)?;
         validate_character_save_record(&self.runtime)?;
         let mut runtime = self.runtime.clone();
@@ -229,6 +233,127 @@ impl CharacterHandoffCheckpoint {
 }
 
 impl SimulationSession {
+    /// The caller is the server's lease-checked handoff seam, not a credential
+    /// login. Selecting a proven source admission never heals a password,
+    /// grants a recovery-journal capability, emits Login, or publishes a save.
+    fn select_continuation_account(
+        &mut self,
+        account_id: &str,
+        account: &crate::config::AccountRecord,
+    ) -> Result<(), String> {
+        let session = self.app.world().resource::<SessionResource>();
+        if session.selected_character.is_some()
+            || session
+                .account_id
+                .as_deref()
+                .is_some_and(|current| current != account_id)
+        {
+            return Err("continuation requires an inactive target for the same account".into());
+        }
+        if account.active_ban(unix_now_ms()).is_some() {
+            return Err("continuation account is banned".into());
+        }
+        crate::runtime::recovery::clear_binding(self.app.world_mut());
+        let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+        session.account_id = Some(account_id.into());
+        session.characters = account.characters.clone();
+        session.selected_character = None;
+        session.clear_active_save_revision();
+        Ok(())
+    }
+
+    pub(crate) fn resume_authenticated_character_handoff(
+        &mut self,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<CharacterHandoffCommitment, String> {
+        checkpoint.validate_source_pair()?;
+        let config = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
+        if config.has_isolated_replica_bootstrap_authority() {
+            return Err("live handoff cannot use replica authority".into());
+        }
+        let account = authority_account(&config, &checkpoint.account_id)?;
+        if !account
+            .characters
+            .iter()
+            .any(|character| character == &checkpoint.durable.character)
+            || !account
+                .saves
+                .get(&checkpoint.durable.character.index)
+                .map(|save| same_record(save, &checkpoint.durable))
+                .transpose()?
+                .unwrap_or(false)
+        {
+            return Err("handoff requires its complete saved authority baseline".into());
+        }
+        self.select_continuation_account(&checkpoint.account_id, &account)?;
+        let previous_tick = runtime_tick(self.app.world());
+        let result = self.resume_character_handoff(checkpoint);
+        if result.is_err() {
+            self.abandon_failed_handoff(config, previous_tick);
+        }
+        result
+    }
+
+    pub(crate) fn apply_authenticated_character_handoff_replica(
+        &mut self,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<(), String> {
+        checkpoint.validate_source_pair()?;
+        let config = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
+        if !config.has_isolated_replica_bootstrap_authority() {
+            return Err("handoff replay requires its bound isolated authority".into());
+        }
+        let account = authority_account(&config, &checkpoint.account_id)?;
+        self.select_continuation_account(&checkpoint.account_id, &account)?;
+        let previous_tick = runtime_tick(self.app.world());
+        let result = self.apply_character_handoff_replica(checkpoint);
+        if result.is_err() {
+            self.abandon_failed_handoff(config, previous_tick);
+        }
+        result
+    }
+
+    pub(crate) fn restore_replica_session_checkpoint(
+        &mut self,
+        identity: &ActiveSessionIdentity,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        let config = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
+        if !config.has_isolated_replica_bootstrap_authority() {
+            return Err("session restore requires its bound isolated replica authority".into());
+        }
+        if identity.character_index != checkpoint.character.index
+            || identity.character_name != checkpoint.character.name
+        {
+            return Err("replica session checkpoint identity mismatch".into());
+        }
+        let account = authority_account(&config, &identity.account_id)?;
+        self.select_continuation_account(&identity.account_id, &account)?;
+        let previous_tick = runtime_tick(self.app.world());
+        // Existing restore enforces the whole frozen baseline, roster, profile,
+        // and private capability before installing any personal runtime state.
+        let result = self.restore_active_character_checkpoint(checkpoint);
+        if result.is_err() {
+            self.abandon_failed_handoff(config, previous_tick);
+        }
+        result
+    }
+
     pub fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
         let config = self
             .app
@@ -297,6 +422,7 @@ impl SimulationSession {
             })
             .collect::<Result<Vec<_>, String>>()?;
         let checkpoint = CharacterHandoffCheckpoint {
+            account_id,
             durable,
             runtime,
             source_tick,
@@ -311,6 +437,9 @@ impl SimulationSession {
     ) -> Result<CharacterHandoffCommitment, String> {
         checkpoint.validate_source_pair()?;
         let account_id = authenticated_select(self.app.world(), &checkpoint.runtime)?;
+        if account_id != checkpoint.account_id {
+            return Err("handoff account differs from its authenticated source admission".into());
+        }
         let config = self
             .app
             .world()
@@ -321,6 +450,9 @@ impl SimulationSession {
             return Err("live handoff cannot use replica authority".into());
         }
         let account = authority_account(&config, &account_id)?;
+        if account.active_ban(unix_now_ms()).is_some() {
+            return Err("handoff source account is banned".into());
+        }
         if !account
             .characters
             .iter()
@@ -338,10 +470,11 @@ impl SimulationSession {
         let result = (|| {
             self.install_handoff_runtime(checkpoint)?;
             let confirmed = authority_account(&config, &account_id)?;
-            if !confirmed
-                .characters
-                .iter()
-                .any(|character| character == &checkpoint.durable.character)
+            if confirmed.active_ban(unix_now_ms()).is_some()
+                || !confirmed
+                    .characters
+                    .iter()
+                    .any(|character| character == &checkpoint.durable.character)
                 || !confirmed
                     .saves
                     .get(&checkpoint.durable.character.index)
@@ -435,6 +568,9 @@ impl SimulationSession {
     ) -> Result<(), String> {
         checkpoint.validate_source_pair()?;
         let account_id = authenticated_select(self.app.world(), &checkpoint.runtime)?;
+        if account_id != checkpoint.account_id {
+            return Err("handoff account differs from its authenticated source admission".into());
+        }
         let config = self
             .app
             .world()
