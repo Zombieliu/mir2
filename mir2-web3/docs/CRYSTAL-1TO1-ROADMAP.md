@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## PR #255 最后功能回归与远端 CI 收据（2026-10-16，北京时间）
+
+Gateway persistence 的普通 starter 与原版 Q1–Q4、掉落/采集、奖励及保存重登完整 target 已实际 **5/5，0 failed / ignored，194.40s**。最后改动仅测试墙钟调度和接受回执观察，生产行为及 80/600/54 原预算保持；前后失败/通过、fixture SHA 和命令见[Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。父提交 `56ee8627` 的 Home、真实 Docker/Compose、四平台 DeveloperEnv、Handoff 完整 Web、跨平台构建及 Stripe/Mining/Activities 真实 PostgreSQL/故障注入收据已通过；Candidate Linux 成功，记录时父提交 Windows 仍在运行。最终新 SHA CI 与合入以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准，父提交结果不转记到新 SHA。
+
+分组证据和仍开放的发布/玩法边界见[最新集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。Core 六叶与源码指纹核验一致，原 41 份差异及 HEAD 未动，测试服 `bad3737` / Stripe TEST 未部署，`Candidate100=false`；下方旧状态保留为历史。
+
+
 ## Followups：认证迁移与本地回归，发布关口保留（2026-10-15，北京时间）
 
 Root 确认 Gateway 认证/真实 RPC 23/23、Simulation 认证/handoff 15/15（含 7 handoff）、Shared Zone 209/209 均为 0 失败/忽略；Rust 1.89 格式检查 exit 0。完整 resource-loading npm 脚本实际重生 115,408 个资源后通过，本机 manifest 按运行前字节恢复。Windows 独立默认并发全 host 为 1138 passed、0 failed、原 7 ignored；仅 cfg(test) effect store 跨线程与 native queue 测试 guard 收束，生产实现、CI 默认并发和原 ignore 不变，旧 4 失败日志保留。

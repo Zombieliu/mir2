@@ -12,7 +12,7 @@ use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::{Mutex, MutexGuard, OnceLock};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::{GatewayConfig, GatewaySession};
 use mir2_protocol::{
@@ -242,6 +242,66 @@ fn tick_after_client_action(session: &mut GatewaySession) -> Vec<ServerPacket> {
         packets.extend(session.tick());
     }
     packets
+}
+
+// Gateway Zone deadlines use the real server clock, unlike a personal
+// SimulationSession's tick counter. Ticking alone cannot finish an action.
+fn wait_for_client_action(session: &mut GatewaySession, delay: Duration) -> Vec<ServerPacket> {
+    let deadline = Instant::now() + delay;
+    let mut packets = Vec::new();
+    loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return packets;
+        }
+        std::thread::sleep(remaining.min(Duration::from_millis(25)));
+        packets.extend(session.tick());
+    }
+}
+
+fn ordinary_walk_delay() -> Duration {
+    // The explicit QA profile changes only Walk/Run's 600ms delay. Turn,
+    // melee and Harvest still need their ordinary server action deadlines.
+    let milliseconds = std::env::var("MIR2_QA_NATURAL_MOVEMENT_DELAY_MS")
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .filter(|value| *value > 0)
+        .map_or(600, |value| value.min(600));
+    Duration::from_millis(milliseconds)
+}
+
+fn accepted_owner_attacks(session: &GatewaySession, packets: &[ServerPacket]) -> usize {
+    let owner = player(session).object_id;
+    packets
+        .iter()
+        .filter(|packet| matches!(packet, ServerPacket::ObjectAttack { info } if info.object_id == owner))
+        .count()
+}
+
+fn combat_diagnostics(
+    session: &GatewaySession,
+    monster_name: &str,
+    packets: &[ServerPacket],
+) -> String {
+    let snapshot = session.world_snapshot();
+    let owner = player(session);
+    let targets = snapshot
+        .entities
+        .iter()
+        .filter(|entity| entity.kind == WorldEntityKind::Monster && entity.name == monster_name)
+        .take(4)
+        .map(|entity| (entity.object_id, entity.hp, entity.dead, entity.x, entity.y))
+        .collect::<Vec<_>>();
+    let quests = snapshot
+        .quest_log
+        .iter()
+        .map(|quest| (quest.quest_id, &quest.stage))
+        .collect::<Vec<_>>();
+    format!(
+        "owner={} hp={:?}/{:?} dead={} position=({}, {}) direction={:?}, targets(id,hp,dead,x,y)={targets:?}, quests={quests:?}, accepted-attacks={}, packets={}",
+        owner.object_id, snapshot.player_hp, snapshot.player_max_hp, owner.dead,
+        owner.x, owner.y, owner.direction, accepted_owner_attacks(session, packets), packets.len()
+    )
 }
 
 fn direction_step(direction: MirDirection) -> (i32, i32) {
@@ -754,7 +814,6 @@ fn attack_monster_until_dead(
         y: monster.y,
     };
     let mut missing_ticks = 0_u8;
-    let mut last_hp = monster.hp.unwrap_or(i32::MAX);
     let mut no_damage_rounds = 0_u8;
 
     for _ in 0..80 {
@@ -820,20 +879,36 @@ fn attack_monster_until_dead(
         if current_monster.dead || current_hp <= 0 {
             return (packets, Some(last_position));
         }
-        if current_hp < last_hp {
-            last_hp = current_hp;
-            no_damage_rounds = 0;
-        } else {
-            no_damage_rounds = no_damage_rounds.saturating_add(1);
-            if no_damage_rounds >= 12 {
-                return (packets, None);
-            }
-        }
-
         if !try_walk_within_with_step_budget(session, &last_position, 1, 64) {
             return (packets, None);
         }
+        packets.extend(wait_for_client_action(session, ordinary_walk_delay()));
+        let Some(current_monster) = session
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.object_id == monster.object_id)
+        else {
+            continue;
+        };
+        last_position = Point {
+            x: current_monster.x,
+            y: current_monster.y,
+        };
+        if current_monster.dead || current_monster.hp.is_some_and(|hp| hp <= 0) {
+            return (packets, Some(last_position));
+        }
         let current = player(session);
+        if tile_distance(
+            &Point {
+                x: current.x,
+                y: current.y,
+            },
+            &last_position,
+        ) > 1
+        {
+            continue;
+        }
         let direction = direction_toward(
             &Point {
                 x: current.x,
@@ -841,11 +916,14 @@ fn attack_monster_until_dead(
             },
             &last_position,
         );
-        packets.extend(session.handle_packet(ClientPacket::Turn { direction }));
+        let hp_before_attack = current_monster.hp;
+        // Attack carries its direction. Sending Turn here would restart the
+        // source 350ms ActionTime immediately before CanAttack checks it.
         let attack = session.handle_packet(ClientPacket::Attack {
             direction,
             spell: Spell::None,
         });
+        let accepted = accepted_owner_attacks(session, &attack) > 0;
         let defeated_position = attack.iter().find_map(|packet| match packet {
             ServerPacket::ObjectDied { info } if info.object_id == monster.object_id => {
                 Some(info.location.clone())
@@ -853,7 +931,10 @@ fn attack_monster_until_dead(
             _ => None,
         });
         packets.extend(attack);
-        let tick_packets = session.tick();
+        // Warrior's ordinary swing is 600ms with a separate 550ms action.
+        // Observe the complete action before walking or charging a miss.
+        let tick_packets = wait_for_client_action(session, Duration::from_millis(600));
+        let accepted = accepted || accepted_owner_attacks(session, &tick_packets) > 0;
         let defeated_position = defeated_position.or_else(|| {
             tick_packets.iter().find_map(|packet| match packet {
                 ServerPacket::ObjectDied { info } if info.object_id == monster.object_id => {
@@ -866,8 +947,31 @@ fn attack_monster_until_dead(
         if let Some(defeated_position) = defeated_position {
             return (packets, Some(defeated_position));
         }
+        let hp_after_attack = session
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.object_id == monster.object_id)
+            .and_then(|entity| entity.hp);
+        if matches!((hp_before_attack, hp_after_attack), (Some(before), Some(after)) if after < before)
+        {
+            no_damage_rounds = 0;
+        } else if accepted {
+            no_damage_rounds = no_damage_rounds.saturating_add(1);
+            if no_damage_rounds >= 12 {
+                eprintln!(
+                    "ordinary Gateway accepted swings stalled: {}",
+                    combat_diagnostics(session, &monster.name, &packets)
+                );
+                return (packets, None);
+            }
+        }
     }
 
+    eprintln!(
+        "ordinary Gateway combat attempt budget exhausted: {}",
+        combat_diagnostics(session, &monster.name, &packets)
+    );
     (packets, None)
 }
 
@@ -889,7 +993,9 @@ fn harvest_corpse(
         },
         &corpse_position,
     );
-    let mut packets = session.handle_packet(ClientPacket::Turn { direction });
+    // Release the last melee/Walk action before skinning. Harvest carries its
+    // own direction and must not be preceded by a new Turn action lock.
+    let mut packets = wait_for_client_action(session, Duration::from_millis(600));
     // Crystal Harvest selects the first eligible corpse in the 3x3 scan
     // around the facing tile; a busy shared field can retain as many as nine
     // corpses in that scan. Deer needs five skinning passes plus one transfer
@@ -898,14 +1004,22 @@ fn harvest_corpse(
     const MAX_HARVEST_SCAN_PASSES: usize = 9 * 6;
     for _ in 0..MAX_HARVEST_SCAN_PASSES {
         let harvest = session.handle_packet(ClientPacket::Harvest { direction });
-        let completed = harvest
+        let mut completed = harvest
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { movement } if movement.object_id == corpse_object_id));
         packets.extend(harvest);
+        // Crystal Server/MirObjects/PlayerObject.cs:113,4353 sets the 350ms
+        // HarvestDelay. Early packets must not burn all 54 scan passes inside
+        // one real action deadline; also retain a completion delivered on Tick.
+        let elapsed = wait_for_client_action(session, Duration::from_millis(350));
+        completed |= elapsed.iter().any(|packet| {
+            matches!(packet,
+            ServerPacket::ObjectHarvested { movement } if movement.object_id == corpse_object_id)
+        });
+        packets.extend(elapsed);
         if completed {
             break;
         }
-        packets.extend(session.tick());
     }
     let harvested_object_ids: Vec<_> = packets
         .iter()
@@ -918,12 +1032,12 @@ fn harvest_corpse(
         packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { movement } if movement.object_id == corpse_object_id)),
-        "ordinary Gateway Harvest must finish the requested shared corpse lifecycle: target-id={corpse_object_id}, player={:?}, corpse={corpse_position:?}, harvested-ids={harvested_object_ids:?}, harvest-passes={}, packets={packets:?}",
-        player(session),
+        "ordinary Gateway Harvest must finish the requested shared corpse lifecycle: target-id={corpse_object_id}, corpse={corpse_position:?}, harvested-ids={harvested_object_ids:?}, harvest-passes={}, {}",
         packets
             .iter()
             .filter(|packet| matches!(packet, ServerPacket::ObjectHarvest { .. }))
-            .count()
+            .count(),
+        combat_diagnostics(session, "Deer", &packets)
     );
     packets
 }
@@ -1354,6 +1468,10 @@ fn gateway_ordinary_bichon_starter_loop_uses_client_packets_and_reloads() {
                 y: wasp.y,
             },
         );
+        combat_packets.extend(wait_for_client_action(&mut first, ordinary_walk_delay()));
+        if player(&first).dead {
+            break;
+        }
         let Some(wasp) = first.world_snapshot().entities.into_iter().find(|entity| {
             entity.object_id == wasp.object_id && !entity.dead && entity.hp.unwrap_or(1) > 0
         }) else {
@@ -1371,12 +1489,16 @@ fn gateway_ordinary_bichon_starter_loop_uses_client_packets_and_reloads() {
                 y: wasp.y,
             },
         );
-        combat_packets.extend(first.handle_packet(ClientPacket::Turn { direction }));
+        // Attack applies its own direction; an extra Turn would add a new
+        // 350ms action lock immediately before this ordinary melee packet.
         combat_packets.extend(first.handle_packet(ClientPacket::Attack {
             direction,
             spell: Spell::None,
         }));
-        combat_packets.extend(tick_after_client_action(&mut first));
+        combat_packets.extend(wait_for_client_action(
+            &mut first,
+            Duration::from_millis(600),
+        ));
         if first
             .world_snapshot()
             .quest_log
@@ -1389,10 +1511,17 @@ fn gateway_ordinary_bichon_starter_loop_uses_client_packets_and_reloads() {
 
     let after_combat = first.world_snapshot();
     assert!(
-        after_combat.quest_log.iter().any(|quest| {
-            quest.quest_id == 1001 && quest.stage == QuestStage::ReadyToTurnIn
-        }),
-        "ordinary Gateway Attack packets must make the starter quest ready; packets={combat_packets:?}"
+        accepted_owner_attacks(&first, &combat_packets) > 0,
+        "ordinary Gateway combat must receive an accepted owner Attack: {}",
+        combat_diagnostics(&first, "Field Wasp", &combat_packets)
+    );
+    assert!(
+        after_combat
+            .quest_log
+            .iter()
+            .any(|quest| { quest.quest_id == 1001 && quest.stage == QuestStage::ReadyToTurnIn }),
+        "ordinary Gateway Attack packets must make the starter quest ready; {}",
+        combat_diagnostics(&first, "Field Wasp", &combat_packets)
     );
     assert!(
         after_combat.inventory_items.iter().any(|item| {
@@ -1776,7 +1905,7 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
     assert_eq!(
         quest_stage(&first, 2),
         Some(QuestStage::ReadyToTurnIn),
-        "ordinary Gateway Scarecrow kills must collect GingerTea: observed death packets={}, revives={}, gained-items={:?}",
+        "ordinary Gateway Scarecrow kills must collect GingerTea: observed death packets={}, revives={}, gained-items={:?}, {}",
         q2_hunt_packets
             .iter()
             .filter(|packet| matches!(packet, ServerPacket::ObjectDied { .. }))
@@ -1791,7 +1920,8 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
                 ServerPacket::GainedItem { item } => Some(item.item_index),
                 _ => None,
             })
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>(),
+        combat_diagnostics(&first, "Scarecrow", &q2_hunt_packets)
     );
     assert!(first.world_snapshot().inventory_items.iter().any(|item| {
         item.container == ItemContainer::Quest && item.name == "GingerTea" && item.quantity >= 1
@@ -1927,7 +2057,7 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
     assert_eq!(
         quest_stage(&first, 4),
         Some(QuestStage::ReadyToTurnIn),
-        "ordinary Gateway Attack and Harvest packets must collect DeerMeat: deaths={}, harvests={}, gained-items={:?}",
+        "ordinary Gateway Attack and Harvest packets must collect DeerMeat: deaths={}, harvests={}, gained-items={:?}, {}",
         q4_hunt_packets
             .iter()
             .filter(|packet| matches!(packet, ServerPacket::ObjectDied { .. }))
@@ -1942,7 +2072,8 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
                 ServerPacket::GainedItem { item } => Some(item.item_index),
                 _ => None,
             })
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>(),
+        combat_diagnostics(&first, "Deer", &q4_hunt_packets)
     );
     assert!(
         first

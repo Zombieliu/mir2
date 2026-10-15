@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+## PR #255 最后功能回归与远端 CI 收据（2026-10-16，北京时间）
+
+Gateway persistence 的普通 starter 与原版 Q1–Q4、掉落/采集、奖励及保存重登完整 target 已实际 **5/5，0 failed / ignored，194.40s**。最后改动仅测试墙钟调度和接受回执观察，生产行为及 80/600/54 原预算保持；前后失败/通过、fixture SHA 和命令见[Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。父提交 `56ee8627` 的 Home、真实 Docker/Compose、四平台 DeveloperEnv、Handoff 完整 Web、跨平台构建及 Stripe/Mining/Activities 真实 PostgreSQL/故障注入收据已通过；Candidate Linux 成功，记录时父提交 Windows 仍在运行。最终新 SHA CI 与合入以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准，父提交结果不转记到新 SHA。
+
+分组证据和仍开放的发布/玩法边界见[最新集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。Core 六叶与源码指纹核验一致，原 41 份差异及 HEAD 未动，测试服 `bad3737` / Stripe TEST 未部署，`Candidate100=false`；下方旧状态保留为历史。
+
+
 ## Followups：认证边界回归与仍开放的时钟差异（2026-10-15，北京时间）
 
 18 处旧 fixture 按 Crystal92b 严格修正命中/出生/既有 regen 前置与观察时序，不代表场景内全部战斗规则已 1:1。Shared Zone 战斗侧产品只把 Trap 方向由 caster 改为 `Up`，既有 `param=false` 保留，相关 fixture 对齐 Map.cs:2079–2089、SpellObject 默认及 Enums Up=0；其余战斗公式未改。Spider 当前自然 regen 3000ms、3%+1 独立区分；Vampire 在 1000ms 计划时刻不结算，下一毫秒才结算一次真实吸血池；Crystal HumanObject.cs:186 的 RegenDelay=10000 与当前 zone/runtime.rs:281–282/2757 存在既有未改差异。

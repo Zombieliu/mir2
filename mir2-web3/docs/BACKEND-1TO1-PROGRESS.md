@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+## PR #255 最后功能回归与远端 CI 收据（2026-10-16，北京时间）
+
+Gateway persistence 的普通 starter 与原版 Q1–Q4、掉落/采集、奖励及保存重登完整 target 已实际 **5/5，0 failed / ignored，194.40s**。最后改动仅测试墙钟调度和接受回执观察，生产行为及 80/600/54 原预算保持；前后失败/通过、fixture SHA 和命令见[Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。父提交 `56ee8627` 的 Home、真实 Docker/Compose、四平台 DeveloperEnv、Handoff 完整 Web、跨平台构建及 Stripe/Mining/Activities 真实 PostgreSQL/故障注入收据已通过；Candidate Linux 成功，记录时父提交 Windows 仍在运行。最终新 SHA CI 与合入以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准，父提交结果不转记到新 SHA。
+
+分组证据和仍开放的发布/玩法边界见[最新集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。Core 六叶与源码指纹核验一致，原 41 份差异及 HEAD 未动，测试服 `bad3737` / Stripe TEST 未部署，`Candidate100=false`；下方旧状态保留为历史。
+
+
 ## Followups：账号绑定 continuation 与冷恢复认证（2026-10-15，北京时间）
 
 Handoff checkpoint 新增必填 `accountId`，以真实 Source D/账号、完整 roster/profile/ban 校验后做纯会话选择；Gateway 删除 handoff/base 重建时内部 Passkey 账号转换，不缓存用户密码、不授 recovery capability、不新增玩家命令。冷恢复认证 preflight 先于 journal 重放；普通密码真 RPC/File 字节、base 实际隔离 session 配置/密码、普通 logout 后密码 relogin 与 Passkey 安全分组均已回归。旧 DTO/旧 build fail closed，gateway/Zone 上线须同新版本成对发布。

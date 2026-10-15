@@ -1,5 +1,30 @@
 # 远程分支、玩家客户端与充值代码集成（2026-10-15，北京时间）
 
+## 最后 Gateway 功能门禁：真实动作时钟与完整任务链（2026-10-16，北京时间）
+
+Gateway persistence 本地完整 target 已为 **5 passed / 0 failed / 0 ignored，194.40s**；此前同配置 baseline 为 3/5，失败在 starter 任务和原版 Q4 鹿肉收集，旧日志保留。修复限定 `apps/gateway/tests/vertical_slice_gateway_persistence.rs`：Attack/Harvest 自带方向，测试移除紧邻它们的 Turn，并以真实墙钟等待 Warrior swing 600ms、独立 action 550ms 与 Harvest 350ms。拒绝包不消耗“12 次接受但无伤”的统计，80/600/54 总尝试预算不变；原 Ready、实物掉落、金币拾取、原版奖励、存档和密码重登强断言保留，新增 owner ObjectAttack 接受收据断言。先行 starter exact 1/1、Rust 1.89 单文件格式检查均通过；生产冷却、伤害、装备及任务实现未改。命令、fixture SHA 和前后日志 SHA 见[持久 Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。
+
+父提交 `56ee8627937387782547df9f1270245c18ba42fc` 的以下 CI 已真实通过，结果保留原 SHA 边界：
+
+| 范围 | 实际 Actions 收据 |
+| --- | --- |
+| Home、真实 Docker/Tunnel、Gate25 policy | [Home 全 workflow](https://github.com/Zombieliu/mir2/actions/runs/38755235951) |
+| 四平台 clean checkout、真实镜像与 Compose | [Developer Environment](https://github.com/Zombieliu/mir2/actions/runs/38755235926) |
+| Windows 完整 npm Web build 与当前 Core 校验 | [Developer Handoff](https://github.com/Zombieliu/mir2/actions/runs/38755235954/job/116491794242) |
+| Shared Rust/WASM、Windows native 与其余跨平台构建 | [Cross-platform 全 workflow](https://github.com/Zombieliu/mir2/actions/runs/38755235612) |
+| Dubhe 四平台 | [Desktop 全 workflow](https://github.com/Zombieliu/mir2/actions/runs/38755235446) |
+| Stripe，含真实 PostgreSQL | [Billing job](https://github.com/Zombieliu/mir2/actions/runs/38755224519/job/116491757816) |
+| Mining，含独立 exact 故障注入真实 1/1 | [Mining job](https://github.com/Zombieliu/mir2/actions/runs/38755223905/job/116491755166) |
+| Activities，含真实 PostgreSQL handoff 1/1 | [Activities job](https://github.com/Zombieliu/mir2/actions/runs/38755748760/job/116493583469) |
+| Candidate Linux | [Linux job](https://github.com/Zombieliu/mir2/actions/runs/38755236139/job/116491806129) |
+
+记录时父提交的 Candidate Windows 尚在运行；新测试修复的精确提交、最终 CI 和合入结果以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) / Actions 为准，不把父提交成功组转记为新 SHA 全绿，也不为动态状态反复产生文档提交。
+
+修后再次验证三份 Core 发布包、六个 JS/WASM 叶和源码指纹，仍与[Core 收据](generated/player-qa/recharge-readiness-20261015/core-release-20261015.json)一致：`46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620`，WASM 250070 / 262089 / 165835B；Gateway 测试不在这些包的源码指纹输入中，未重编 WASM。原工作区 HEAD 和 41 份内容 SHA 于 2026-10-15 16:16:58 UTC 再核对不变。服务器仍为既有 `bad3737` / Stripe TEST，本轮未部署或发布 R2。
+
+同版本 Gateway/Zone 成对发布、活跃 Refine base timer 的 fail-closed 边界、既有自然 regen 差异、durable Sabuk 税款、完整签名包、GUI/移动真机与最终人类验收继续开放，`Candidate100=false`。下方历史中“CI/真 PG 待跑”保留为当时记录。
+
+
 
 ## PR #255 后续门禁收尾（2026-10-15，北京时间）
 
