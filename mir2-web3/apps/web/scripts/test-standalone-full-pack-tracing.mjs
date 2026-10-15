@@ -158,6 +158,8 @@ function configFor(projectDir, nodeEnv, standalone) {
     delete process.env.VERCEL;
     mkdirSync(join(projectDir, "lib/generated"), { recursive: true });
     writeFileSync(join(projectDir, "lib/generated/bevy_runtime_version.json"), "fixture-runtime");
+    writeFileSync(join(projectDir, "lib/generated/client_core_runtime.json"),
+      readFileSync(join(web, "lib/generated/client_core_runtime.json")));
     const dependencies = { "./lib/standalone-full-pack-tracing": { rewriteStandaloneFullPackTrace } };
     return loadSource(configPath, dependencies, pathToFileURL(join(projectDir, "next.config.ts")).href).default;
   } finally {
@@ -176,12 +178,15 @@ test("actual next.config gates hook, serial trace setting and one safe shared st
   assert.equal(ordinary.compiler?.runAfterProductionCompile, undefined);
   assert.equal(ordinary.experimental?.parallelServerBuildTraces, undefined);
   assert.equal(ordinary.outputFileTracingExcludes["next-server"], undefined);
+  assert.equal(ordinary.outputFileTracingIncludes["/*"], undefined);
   assert.equal(development.compiler?.runAfterProductionCompile, undefined);
   assert.equal(development.experimental?.parallelServerBuildTraces, undefined);
   assert.equal(development.outputFileTracingExcludes["next-server"], undefined);
+  assert.equal(development.outputFileTracingIncludes["/*"], undefined);
   assert.equal(production.output, "standalone");
   assert.equal(production.experimental.parallelServerBuildTraces, false);
   assert.deepEqual(production.outputFileTracingExcludes["next-server"], ["**/generated/crystal-packs/full/**"]);
+  assert.deepEqual(production.outputFileTracingIncludes["/*"], ["./node_modules/@img/sharp-*/**/*"]);
   const log = console.log;
   const messages = [];
   console.log = message => messages.push(message);
