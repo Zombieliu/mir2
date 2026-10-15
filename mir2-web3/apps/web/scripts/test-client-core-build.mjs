@@ -6,6 +6,8 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { test } from "node:test";
 
+import { readClientCoreRelease } from "./lib/client-core-release-files.mjs";
+
 const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const webPath = "apps/web";
 const bridgePath = "apps/game-client/platform-web";
@@ -50,14 +52,15 @@ function run(root, overrides = {}) {
 
 test("clean source/package copy supports both prebuilt switches without Rust", (t) => {
   const root = fixture(t);
+  const noToolConfig = { MIR2_CLIENT_CORE_WASM_OPT_BIN: undefined, MIR2_CLIENT_CORE_WASM_OPT_SHA256: undefined };
   for (const overrides of [{}, { MIR2_USE_PREBUILT_CLIENT_CORE: undefined, MIR2_USE_PREBUILT_BEVY_RUNTIME: "1" }]) {
-    const result = run(root, overrides);
+    const result = run(root, { ...noToolConfig, ...overrides });
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /\[client-core\] verified/);
   }
-  const explicitBuild = run(root, { MIR2_USE_PREBUILT_CLIENT_CORE: "0", MIR2_USE_PREBUILT_BEVY_RUNTIME: "1" });
+  const explicitBuild = run(root, { ...noToolConfig, MIR2_USE_PREBUILT_CLIENT_CORE: "0", MIR2_USE_PREBUILT_BEVY_RUNTIME: "1" });
   assert.notEqual(explicitBuild.status, 0);
-  assert.match(explicitBuild.stderr, /requires wasm-bindgen/);
+  assert.equal(explicitBuild.stderr.trim(), "Set MIR2_CLIENT_CORE_WASM_OPT_BIN to an absolute Binaryen131 wasm-opt executable");
 });
 
 test("stale shared source cannot reuse a prebuilt package", (t) => {
@@ -102,8 +105,11 @@ test("artifact hashes cannot bless bytes under the wrong immutable URL", (t) => 
 
 // These are data-only --verify checks: no WASM API or module instantiation.
 test("new builder requires Presentation even though the legacy release reader supports old Core", (t) => {
-  const root = fixture(t); const legacy = { ...manifest }; delete legacy.presentation;
+  const root = fixture(t); const legacy = { ...manifest };
+  delete legacy.presentation; delete legacy.npcPurchase;
   fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
+  const release = readClientCoreRelease({ webRoot: path.join(root, webPath) });
+  assert.deepEqual(release.manifest, legacy); assert.equal(release.files.length, 2);
   const result = run(root);
   assert.notEqual(result.status, 0); assert.match(result.stderr, /requires its Presentation bundle/);
 });

@@ -96,25 +96,23 @@ impl CrystalItemTooltipSection {
     }
     fn push_formatted(
         &mut self,
+        text: String,
         key: &str,
         fallback: &str,
         args: &[(&str, &str)],
         colour: CrystalItemTooltipColour,
     ) {
-        self.push_formatted_with_suffix(key, fallback, args, "", colour);
+        self.push_formatted_with_suffix(text, key, fallback, args, "", colour);
     }
     fn push_formatted_with_suffix(
         &mut self,
+        mut text: String,
         key: &str,
         fallback: &str,
         args: &[(&str, &str)],
         suffix: &str,
         colour: CrystalItemTooltipColour,
     ) {
-        let mut text = fallback.to_owned();
-        for (key, value) in args {
-            text = text.replace(&format!("{{{key}}}"), value);
-        }
         text.push_str(suffix);
         self.lines.push(CrystalItemTooltipLine {
             text,
@@ -534,19 +532,25 @@ fn attack_section(
     if luck != 0 || added_luck != 0 {
         let total = luck + added_luck;
         let percentage = if info.item_type == 36 && info.shape == 28 {
-            Some(("client.BagWeightPercent", "BagWeight + {0}%"))
+            Some((
+                "client.BagWeightPercent",
+                "BagWeight + {0}%",
+                "BagWeight + ",
+            ))
         } else if info.item_type == 13 && info.shape == 4 {
-            Some(("client.ExpPercent", "Exp + {0}%"))
+            Some(("client.ExpPercent", "Exp + {0}%", "Exp + "))
         } else if info.item_type == 13 && info.shape == 5 {
-            Some(("client.DropPercent", "Drop + {0}%"))
+            Some(("client.DropPercent", "Drop + {0}%", "Drop + "))
         } else {
             None
         };
-        if let Some((key, fallback)) = percentage {
+        if let Some((key, fallback, prefix)) = percentage {
+            let value = total.to_string();
             section.push_formatted(
+                format!("{prefix}{value}%"),
                 key,
                 fallback,
-                &[("0", &total.to_string())],
+                &[("0", &value)],
                 added_colour(added_luck),
             );
         } else {
@@ -583,16 +587,13 @@ fn attack_section(
                 added_colour(added_attack_speed),
             );
         } else {
+            let sign = if total < 0 { "" } else { "+" };
+            let value = format!("{total}{}", signed_added_suffix(added_attack_speed));
             section.push_formatted(
+                format!("A.Speed: {sign}{value}"),
                 "client.AttackSpeedValue",
                 "A.Speed: {0}{1}",
-                &[
-                    ("0", if total < 0 { "" } else { "+" }),
-                    (
-                        "1",
-                        &format!("{total}{}", signed_added_suffix(added_attack_speed)),
-                    ),
-                ],
+                &[("0", sign), ("1", &value)],
                 added_colour(added_attack_speed),
             );
         }
@@ -1353,13 +1354,13 @@ fn push_rate_stat(
         } else {
             format!(" ({added:+}%)")
         };
+        let sign = if total >= 0 { "+" } else { "" };
+        let value = total.to_string();
         section.push_formatted_with_suffix(
+            format!("{label}{sign}{value}%"),
             key,
             &format!("{label}{{0}}{{1}}%"),
-            &[
-                ("0", if total >= 0 { "+" } else { "" }),
-                ("1", &total.to_string()),
-            ],
+            &[("0", sign), ("1", &value)],
             &suffix,
             added_colour(added),
         );
@@ -1791,6 +1792,114 @@ mod tests {
                 ..Default::default()
             }),
             ..Default::default()
+        }
+    }
+
+    #[test]
+    fn formatted_stat_lines_match_legacy_replacement_text_and_metadata() {
+        fn legacy_line(
+            key: &str,
+            fallback: &str,
+            args: &[(&str, &str)],
+            suffix: &str,
+            colour: CrystalItemTooltipColour,
+        ) -> CrystalItemTooltipLine {
+            let mut text = fallback.to_owned();
+            for (slot, value) in args {
+                text = text.replace(&format!("{{{slot}}}"), value);
+            }
+            text.push_str(suffix);
+            CrystalItemTooltipLine {
+                text,
+                colour,
+                format: Some(CrystalItemTooltipFormat {
+                    key: key.into(),
+                    fallback: fallback.into(),
+                    args: args
+                        .iter()
+                        .map(|(slot, value)| ((*slot).into(), (*value).into()))
+                        .collect(),
+                    suffix: suffix.into(),
+                }),
+            }
+        }
+
+        for (item_type, shape, key, fallback) in [
+            (36, 28, "client.BagWeightPercent", "BagWeight + {0}%"),
+            (13, 4, "client.ExpPercent", "Exp + {0}%"),
+            (13, 5, "client.DropPercent", "Drop + {0}%"),
+        ] {
+            for (base, added) in [
+                (5, 2),
+                (-5, -2),
+                (1, -1),
+                (-1, 1),
+                (3, 0),
+                (i32::MAX, 0),
+                (i32::MIN, 0),
+                (0, i32::MAX),
+                (0, i32::MIN),
+            ] {
+                let mut item = potion();
+                let source = item.tooltip_source.as_mut().unwrap();
+                source.info.item_type = item_type;
+                source.info.shape = shape;
+                source.info.stats = [15, 14, 100, 101, 102]
+                    .map(|stat| CrystalItemStatModel { stat, value: base })
+                    .into();
+                source.user_item.as_mut().unwrap().added_stats = [15, 14, 100, 101, 102]
+                    .map(|stat| CrystalItemStatModel { stat, value: added })
+                    .into();
+                let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
+                let actual = document
+                    .sections
+                    .iter()
+                    .flat_map(|section| &section.lines)
+                    .filter(|line| line.format.is_some())
+                    .cloned()
+                    .collect::<Vec<_>>();
+                let total = base + added;
+                let value = total.to_string();
+                let sign = if total < 0 { "" } else { "+" };
+                let colour = if added > 0 {
+                    CrystalItemTooltipColour::Cyan
+                } else {
+                    CrystalItemTooltipColour::White
+                };
+                let speed = format!("{total}{}", signed_added_suffix(added));
+                let mut expected = vec![
+                    legacy_line(key, fallback, &[("0", &value)], "", colour),
+                    legacy_line(
+                        "client.AttackSpeedValue",
+                        "A.Speed: {0}{1}",
+                        &[("0", sign), ("1", &speed)],
+                        "",
+                        colour,
+                    ),
+                ];
+                let suffix = if added == 0 {
+                    String::new()
+                } else {
+                    format!(" ({added:+}%)")
+                };
+                for (rate_key, rate_fallback) in [
+                    ("client.ExpRate", "Exp Rate: {0}{1}%"),
+                    ("client.DropRate", "Drop Rate: {0}{1}%"),
+                    ("client.GoldRate", "Gold Rate: {0}{1}%"),
+                ] {
+                    expected.push(legacy_line(
+                        rate_key,
+                        rate_fallback,
+                        &[("0", sign), ("1", &value)],
+                        &suffix,
+                        colour,
+                    ));
+                }
+                assert_eq!(
+                    actual, expected,
+                    "type={item_type} shape={shape} base={base} added={added}"
+                );
+            }
         }
     }
 

@@ -1,5 +1,18 @@
 # Frontend 1:1 Gaps
 
+
+## PR #255 收尾：当前源码的三包 WASM 与严格构建（2026-10-15，北京时间）
+
+[后续集成 PR #255](https://github.com/Zombieliu/mir2/pull/255) 补齐真实构建的 Core / Presentation / NPC Purchase 六份 JS/WASM 与共同 manifest；三个 bundle 均绑定当前源码指纹 `46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620`。原 manifest 引用未跟踪文件、源码指纹落后的问题已在本地修复，最终提交与精确 SHA CI 状态以 PR 为准，本节不宣称已部署。
+
+复用现有 OrderedSet 保存 DoubleSlash 序号、玩家属性 ID 和物品 UID，保留 FIFO、克隆、删除、去重与原输入边界。三处 Tooltip 私有格式化直接生成相同文本，完整 key/fallback/args/suffix 保留；27 组实际输入逐行与旧替换实现比较。Core 私有 Binaryen 131 固定参数为 `-Oz --flatten --rereloop -Oz --converge`；Renderer 仍为 `-O1`，原文件 pin、清理、metadata 与预算门禁保留。
+
+真实重建的 WASM 为 Core **250,070B**、Presentation **262,089B**、NPC Purchase **165,835B**，均严格小于原 262,144B 上限。三份包已实际实例化、执行 ABI 查询，六文件 SHA/组合版本与源码指纹全部一致，见[持久源码/发布文件收据](generated/player-qa/recharge-readiness-20261015/core-release-20261015.json)。Core Rust 197/197、Presentation Rust 92/92、浏览器 Core 186/186、发布 guards 72/72 均通过；完整 Windows 默认并发 host 再跑 1138 passed / 0 failed / 原 7 ignored。
+
+隔离新输出 `.next-deps-core-final04` 严格 TypeScript、13/13 页构建通过，真实 standalone 打包 59/59、tracing 8/8、安全断言 19/19；编译时 manifest 与最终三包 manifest 完整相等。57 个指纹输入、六发布文件与六安全配置构建前后 SHA 一致，tsconfig 仅由 Next 增加本次输出的两个 include。未编辑既有 node_modules，未手补 standalone。早期缺少 fixture/宿主环境前置的失败日志保留，最终干净环境全 186 项通过。
+
+本节是构建与协议边界证据，不替代普通玩家 GUI、移动真机或人类手感验收；服务器仍未部署本轮，Candidate100=false。下方各轮历史保持原边界。
+
 ## 合入后 followups：依赖安全与直接构建验证（2026-10-15，北京时间）
 
 五分支集成已由 [PR #254](https://github.com/Zombieliu/mir2/pull/254) 以 `573c4b8abdfd46b9a73ca6487f783db6165b7ac0` 合入远程 Windows 分支。本节记录后续分支 `codex/recharge-readiness-followups-20261015` 的本地修复；该分支本轮尚未合并、未部署，后续精确 SHA CI 与合入状态以对应 PR/Actions 为准。

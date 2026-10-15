@@ -1,5 +1,23 @@
 # 远程分支、玩家客户端与充值代码集成（2026-10-15，北京时间）
 
+
+## PR #255 后续门禁收尾（2026-10-15，北京时间）
+
+[PR #255](https://github.com/Zombieliu/mir2/pull/255) 的本地修复补齐 Docker 编译期公开配置、真实测试前置及当前源码的三份客户端包；本节为先前记录的追加结果，最终合入及新 SHA CI 以 PR/Actions 为准。未部署服务器或发布 R2。
+
+- Docker 增加 `config/quest-guidance`；静态检查 10 个复制 crate、764 个 Rust 文件的 53 处生产 include / 51 个唯一输入均存在、受跟踪且可进入镜像，同时覆盖 newcomer v1/v2 和 daily/weekly。旧 CI Gate22/25 同因缺少 daily-weekly 配置失败；真实镜像构建仍须新 CI 复验。
+- Gateway 共享注册表 45/45：ShareQuest 按真实邀请接受建立双端 roster；满包交易使用真实物品和非零 UID 强快照回滚；坐骑保持真实角色身份并保存、重登验证。原强断言保留，仅测试夹具变动，提交 `2bd5e57b392d7938a8615384a53273479bfcd4b2`。
+- Pet/PvP 默认配置 37/37，test-support 配置 38/38。故障注入用例仅在 test-support 编译；Mining 工作流除启用该 feature，还用 exact 命令独立执行故障注入函数，没有新增 ignore。
+- Security lifecycle 21/21、ordinary candidate loop 2/2、vertical slice 13/13 均已本机完成；后者耗时 1255.56s。此前类型检查之外，[真实 PostgreSQL fresh-target handoff](https://github.com/Zombieliu/mir2/actions/runs/38742759940/job/116448437284) 已在提交 `47841ddce46166ebe89868f41ae092f5a5812fd7` 执行 **1 passed / 0 failed / 0 ignored**；活动整组、Stripe、月卡及当时跨平台 CI 通过。这些远端结果保留对应源码边界，不转记为新提交全部 CI 通过。
+- 三份客户端 WASM 真实重建并补齐六文件：Core 250,070B、Presentation 262,089B、NPC Purchase 165,835B；原 `<262144B` 预算保留。OrderedSet 与 Tooltip 文本等价收缩、Core 固定优化参数和实际实例化证据见[持久收据](generated/player-qa/recharge-readiness-20261015/core-release-20261015.json)及[前端收尾记录](FRONTEND-1TO1-GAPS.md)。Renderer 参数保持 `-O1`。
+- 最终 Core Rust 197/197、Presentation Rust 92/92、浏览器 Core 186/186、发布 guards 72/72、版本路由 6/6；新严格 standalone 13/13 页、打包 59/59、tracing 8/8、安全断言 19/19。Windows 完整默认并发 host 再次为 1138 passed / 0 failed / 原 7 ignored。
+
+WASM 来源使用 Rust 1.95.0、wasm-bindgen 0.2.118、Binaryen 131，官方 archive SHA 与执行文件 SHA 均核验；三包共同源码指纹为 `46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620`。最终隔离构建没有 Cargo 调用、修改既有 node_modules 或手补 standalone；源码、六叶和六安全配置 SHA 保持。
+
+已知边界保留：活跃 Refine oven 的 base snapshot 可能因 remainingMs 随验证耗时变化而 fail closed，本轮 base 密码回归使用无活跃 oven 的角色；带 Refine 的真实跨 Zone handoff 走完整时钟 witness 并已通过，不能据此宣称所有 timer base snapshot 已通过。Gateway/Zone 新 handoff schema 仍须同版本成对部署，Zone 自然 regen 与 Crystal 的既有时钟差异、Sabuk durable 税款、完整签名发布、普通玩家/移动真机/人类验收仍开放，Candidate100=false。
+
+详细运行日志仍在 ignored `.mir2-player-qa/followups-20261015/`；持久收据只保存源码/文件/实际检查摘要，不代表已发布的完整 QA bundle。测试服既有 `bad3737` / Stripe TEST 流程未由本轮更换。
+
 ## 合入后的 followups：安全依赖、构建与基础设施边界（2026-10-15，北京时间）
 
 五远程输入的集成已由 [PR #254](https://github.com/Zombieliu/mir2/pull/254) 以 [`573c4b8abdfd46b9a73ca6487f783db6165b7ac0`](https://github.com/Zombieliu/mir2/commit/573c4b8abdfd46b9a73ca6487f783db6165b7ac0) 合入远程 `codex/windows-player-journey`。下文原集成历史保留原文。本节新增后续分支 `codex/recharge-readiness-followups-20261015` 的本地验证记录：该分支本轮尚未合并、未部署，未来提交、精确 SHA CI 和合入以对应 PR/Actions 为准。
